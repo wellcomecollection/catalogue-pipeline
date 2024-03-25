@@ -21,44 +21,56 @@ trait MergeCandidateGenerators {
   }
 
   def createSierraPairMergeCandidateFor(
-    w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] =
+    w: Work[WorkState.Identified]
+  ): MergeCandidate[IdState.Identified] =
     createMergeCandidate(
       w,
       IdentifierType.SierraSystemNumber,
-      reason = "Physical/digitised Sierra work")
+      reason = "Physical/digitised Sierra work"
+    )
 
   def createCalmMergeCandidateFor(
-    w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] =
+    w: Work[WorkState.Identified]
+  ): MergeCandidate[IdState.Identified] =
     createMergeCandidate(
       w,
       IdentifierType.CalmRecordIdentifier,
-      reason = "Calm/Sierra harvest")
+      reason = "Calm/Sierra harvest"
+    )
 
   def createCalmMiroMergeCandidateFor(
-    w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] =
+    w: Work[WorkState.Identified]
+  ): MergeCandidate[IdState.Identified] =
     createMergeCandidate(
       w,
       IdentifierType.MiroImageNumber,
-      reason = "CALM/Miro work")
+      reason = "CALM/Miro work"
+    )
 
   def createMiroSierraMergeCandidateFor(
-    w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] =
+    w: Work[WorkState.Identified]
+  ): MergeCandidate[IdState.Identified] =
     createMergeCandidate(
       w,
       IdentifierType.MiroImageNumber,
-      reason = "Miro/Sierra work")
+      reason = "Miro/Sierra work"
+    )
 
   def createMetsMergeCandidateFor(
-    w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] =
+    w: Work[WorkState.Identified]
+  ): MergeCandidate[IdState.Identified] =
     createMergeCandidate(
       w,
       IdentifierType.SierraSystemNumber,
-      reason = "METS work")
+      reason = "METS work"
+    )
 
   def createTeiBnumberMergeCandidateFor(
-    w: Work[WorkState.Identified]): MergeCandidate[IdState.Identified] =
+    w: Work[WorkState.Identified]
+  ): MergeCandidate[IdState.Identified] =
     createMergeCandidate(
       w,
       IdentifierType.SierraSystemNumber,
-      reason = "Bnumber present in TEI file")
+      reason = "Bnumber present in TEI file"
+    )
 }

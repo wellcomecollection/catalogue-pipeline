@@ -367,7 +367,7 @@ class MetsAdapterWorkerServiceTest
             messageSender.getMessages[Version[String, Int]]() shouldBe Seq(
               expectedVersion
             )
-            
+
             store.getLatest(id = externalIdentifier) shouldBe a[Right[_, _]]
           }
       }

@@ -94,8 +94,8 @@ class SourceIdentifierEmbedderTest
           |}
           |""".stripMargin
 
-      SourceIdentifierEmbedder.scan(parse(json).right.get) shouldBe a[
-        Failure[_]]
+      SourceIdentifierEmbedder
+        .scan(parse(json).right.get) shouldBe a[Failure[_]]
 
     }
   }
@@ -119,7 +119,8 @@ class SourceIdentifierEmbedderTest
 
       val identified = SourceIdentifierEmbedder.update(
         json,
-        Map(sourceIdentifier -> canonicalId))
+        Map(sourceIdentifier -> canonicalId)
+      )
 
       identified shouldBe a[Success[_]]
       val updatedJsonString = identified.get.spaces2
@@ -316,7 +317,8 @@ class SourceIdentifierEmbedderTest
     }
 
     it(
-      "fails if it cannot match the identifier to any sourceIdentifier in the json") {
+      "fails if it cannot match the identifier to any sourceIdentifier in the json"
+    ) {
       val sourceIdentifier = createSourceIdentifier
       val jsonString = s"""
         |{

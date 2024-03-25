@@ -121,7 +121,7 @@ class SierraContributorsTest
           contributor.agent.asInstanceOf[AbstractAgent[IdState.Unminted]]
         )
         contributor.agent should have(
-          'label (label),
+          'label(label),
           sourceIdentifier(
             ontologyType = ontologyType,
             identifierType = IdentifierType.LabelDerived,
@@ -155,7 +155,7 @@ class SierraContributorsTest
       )
       val contributors =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
-      all(contributors) should have('roles (Nil))
+      all(contributors) should have('roles(Nil))
       all(contributors.map(_.agent)) shouldBe a[Person[_]]
       val List(c1, c2) = contributors
       c1.agent.label shouldBe "Charles Emmanuel III, King of Sardinia, 1701-1773"
@@ -184,7 +184,7 @@ class SierraContributorsTest
       val List(contributor) = SierraContributors(bibData)
 
       contributor.agent should have(
-        'label ("Shakespeare, William, 1564-1616. Hamlet.")
+        'label("Shakespeare, William, 1564-1616. Hamlet.")
       )
       contributor.agent shouldBe an[Agent[IdState.Identifiable]]
     }
@@ -217,7 +217,7 @@ class SierraContributorsTest
       val contributors =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
 
-      all(contributors) should have('roles (Nil))
+      all(contributors) should have('roles(Nil))
       all(contributors.map(_.agent)) shouldBe a[Person[_]]
       contributors.map(_.agent.label) shouldBe List(name1, name2, name3)
       all(contributors.tail) shouldNot be(primary)
@@ -243,7 +243,7 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent shouldBe a[Person[_]]
-      contributor.agent should have('label (name))
+      contributor.agent should have('label(name))
       contributor shouldBe primary
       contributor should have(
         roles(List(role1, role2))
@@ -325,7 +325,7 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent should have(
-        'label (name),
+        'label(name),
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
           ontologyType = "Person",
@@ -362,7 +362,7 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent should have(
-        'label (name),
+        'label(name),
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
           ontologyType = "Person",
@@ -393,7 +393,7 @@ class SierraContributorsTest
 
       contributor.agent shouldBe a[Person[_]]
       contributor.agent should have(
-        'label (name),
+        'label(name),
         labelDerivedPersonId(name.toLowerCase)
       )
     }
@@ -415,7 +415,7 @@ class SierraContributorsTest
       val contributors =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributors.size shouldBe 2
-      all(contributors) should have('roles (Nil))
+      all(contributors) should have('roles(Nil))
       all(contributors.map(_.agent)) shouldBe a[Person[_]]
       contributors.map(_.agent.label) shouldBe List("George", "Sebastian")
       contributors.head shouldBe primary
@@ -438,7 +438,7 @@ class SierraContributorsTest
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent shouldBe an[Organisation[_]]
       contributor.agent should have(
-        'label (name)
+        'label(name)
       )
     }
 
@@ -469,7 +469,7 @@ class SierraContributorsTest
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent shouldBe an[Organisation[_]]
       contributor.agent should have(
-        'label (
+        'label(
           "IARC Working Group on the Evaluation of the Carcinogenic Risk of Chemicals to Man. Meeting 1972 : Lyon, France"
         )
       )
@@ -502,7 +502,7 @@ class SierraContributorsTest
       val contributors =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
 
-      all(contributors) should have('roles (Nil))
+      all(contributors) should have('roles(Nil))
       all(contributors.map(_.agent)) shouldBe a[Organisation[_]]
       contributors.map(_.agent.label) shouldBe List(name1, name2, name3)
       contributors.head shouldBe primary
@@ -528,7 +528,7 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent shouldBe an[Organisation[_]]
-      contributor.agent should have('label (name))
+      contributor.agent should have('label(name))
       contributor should have(
         roles(List(role1, role2))
       )
@@ -551,7 +551,7 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent should have(
-        'label (name),
+        'label(name),
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
           ontologyType = "Organisation",
@@ -584,7 +584,7 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributor.agent should have(
-        'label (name),
+        'label(name),
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
           ontologyType = "Organisation",
@@ -614,7 +614,7 @@ class SierraContributorsTest
 
       contributor.agent shouldBe an[Organisation[_]]
       contributor.agent should have(
-        'label (name),
+        'label(name),
         labelDerivedOrganisationId(name.toLowerCase)
       )
     }
@@ -635,7 +635,7 @@ class SierraContributorsTest
       val contributors =
         SierraContributors(createSierraBibDataWith(varFields = varFields))
       contributors should have size 2
-      all(contributors) should have('roles (Nil))
+      all(contributors) should have('roles(Nil))
       all(contributors.map(_.agent)) shouldBe a[Organisation[_]]
       contributors.map(_.agent.label) shouldBe List(
         "The organisation",
@@ -658,7 +658,9 @@ class SierraContributorsTest
         )
       )
     )
-    SierraContributors(createSierraBibDataWith(varFields = varFields)) shouldBe Nil
+    SierraContributors(
+      createSierraBibDataWith(varFields = varFields)
+    ) shouldBe Nil
   }
 
   describe("Meeting") {
@@ -669,7 +671,7 @@ class SierraContributorsTest
       )
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
-      contributor.agent should have('label ("Big meeting"))
+      contributor.agent should have('label("Big meeting"))
       contributor.agent shouldBe a[Meeting[_]]
     }
 
@@ -680,7 +682,7 @@ class SierraContributorsTest
       )
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
-      contributor.agent should have('label ("Big meeting"))
+      contributor.agent should have('label("Big meeting"))
       contributor.agent shouldBe a[Meeting[_]]
       contributor shouldNot be(primary)
 
@@ -699,7 +701,7 @@ class SierraContributorsTest
       )
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
-      contributor.agent should have('label ("1 2 3 4"))
+      contributor.agent should have('label("1 2 3 4"))
       contributor shouldBe primary
     }
 
@@ -715,7 +717,7 @@ class SierraContributorsTest
       )
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
-      contributor.agent should have('label ("label"))
+      contributor.agent should have('label("label"))
       contributor should have(
         roles(List("1st role", "2nd role"))
       )
@@ -732,7 +734,7 @@ class SierraContributorsTest
       val List(contributor) =
         SierraContributors(createSierraBibDataWith(varFields = List(varField)))
       contributor.agent should have(
-        'label ("label"),
+        'label("label"),
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
           ontologyType = "Meeting",
@@ -768,12 +770,12 @@ class SierraContributorsTest
     val bibData = createSierraBibDataWith(varFields = varFields)
     val List(contributor) = SierraContributors(bibData)
     contributor should have(
-      'roles (Nil)
+      'roles(Nil)
     )
     contributor.agent shouldBe a[Person[_]]
     contributor shouldBe primary
     contributor.agent should have(
-      'label ("Steele, Richard, Sir, 1672-1729.")
+      'label("Steele, Richard, Sir, 1672-1729.")
     )
 
   }
@@ -798,7 +800,7 @@ class SierraContributorsTest
     val List(contributor) = SierraContributors(bibData)
     contributor shouldNot be(primary)
     contributor.agent should have(
-      'label ("Brewer, George. Essays after the manner of Goldsmith, No. 1-22.")
+      'label("Brewer, George. Essays after the manner of Goldsmith, No. 1-22.")
     )
   }
 
@@ -816,7 +818,10 @@ class SierraContributorsTest
           ),
           Subfield(tag = "l", content = "Latin."),
           Subfield(tag = "f", content = "1561."),
-          Subfield(tag = "0", content = "n  79005643") // This identifier is for Hippocrates only
+          Subfield(
+            tag = "0",
+            content = "n  79005643"
+          ) // This identifier is for Hippocrates only
         )
       )
     )
@@ -929,9 +934,10 @@ class SierraContributorsTest
           // Both subjects should be represented in the output list.  They have different labels, so are different objects.
           contributors.length shouldBe 2
           val commonClass = contributors(1).agent.getClass
-          forAll(contributors) { contributor =>
-            contributor.agent.getClass shouldBe commonClass
-            contributor.agent.id.allSourceIdentifiers.head.ontologyType shouldBe specificType
+          forAll(contributors) {
+            contributor =>
+              contributor.agent.getClass shouldBe commonClass
+              contributor.agent.id.allSourceIdentifiers.head.ontologyType shouldBe specificType
           }
       }
     }
@@ -979,7 +985,11 @@ class SierraContributorsTest
       roles = Nil
     )
     val contributors =
-      List(vagueContributor, specificContributor1, vagueContributor2).harmoniseOntologyTypes
+      List(
+        vagueContributor,
+        specificContributor1,
+        vagueContributor2
+      ).harmoniseOntologyTypes
     // They all had the same label before, so they are no longer unique having harmonised their types
     contributors.length shouldBe 1
 
@@ -1030,16 +1040,21 @@ class SierraContributorsTest
       roles = Nil
     )
     val contributors =
-      List(specificContributor1, specificContributor2, vagueContributor).harmoniseOntologyTypes
+      List(
+        specificContributor1,
+        specificContributor2,
+        vagueContributor
+      ).harmoniseOntologyTypes
 
     contributors.length shouldBe 3
 
-    forAll(contributors) { contributor =>
-      contributor.agent
-        .asInstanceOf[Person[IdState.Identifiable]]
-        .id
-        .sourceIdentifier
-        .ontologyType shouldBe "Person"
+    forAll(contributors) {
+      contributor =>
+        contributor.agent
+          .asInstanceOf[Person[IdState.Identifiable]]
+          .id
+          .sourceIdentifier
+          .ontologyType shouldBe "Person"
     }
   }
 }

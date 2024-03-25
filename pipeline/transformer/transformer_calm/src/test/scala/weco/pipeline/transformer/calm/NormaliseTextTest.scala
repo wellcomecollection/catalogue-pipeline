@@ -36,7 +36,9 @@ class NormaliseTextTest extends AnyFunSpec with Matchers {
 
   it("retains links, stripping all non href attributes") {
     val str = """A <a href="http://example.location" target="_blank">link</a>"""
-    NormaliseText(str) shouldBe """A <a href="http://example.location" rel="nofollow">link</a>"""
+    NormaliseText(
+      str
+    ) shouldBe """A <a href="http://example.location" rel="nofollow">link</a>"""
   }
 
   it("does not escape symbols") {

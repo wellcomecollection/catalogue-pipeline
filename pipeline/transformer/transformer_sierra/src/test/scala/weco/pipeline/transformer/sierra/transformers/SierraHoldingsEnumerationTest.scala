@@ -14,7 +14,7 @@ class SierraHoldingsEnumerationTest
   it("returns an empty list if there are no varFields with 853/863") {
     val varFields = List(
       createVarFieldWith(marcTag = "866"),
-      createVarFieldWith(marcTag = "989"),
+      createVarFieldWith(marcTag = "989")
     )
 
     getEnumerations(varFields) shouldBe List()
@@ -58,7 +58,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "a", content = "1-35"),
           Subfield(tag = "b", content = "1-2"),
-          Subfield(tag = "i", content = "1984-2018"),
+          Subfield(tag = "i", content = "1984-2018")
         )
       ),
       VarField(
@@ -67,13 +67,14 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
-          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "i", content = "(year)")
         )
       )
     )
 
     getEnumerations(varFields) shouldBe List(
-      "v.1:no.1 (1984) - v.35:no.2 (2018)")
+      "v.1:no.1 (1984) - v.35:no.2 (2018)"
+    )
   }
 
   it("handles a duplicated field") {
@@ -117,7 +118,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "i", content = "2004-"),
           Subfield(tag = "j", content = "01-"),
-          Subfield(tag = "k", content = "01-"),
+          Subfield(tag = "k", content = "01-")
         )
       ),
       VarField(
@@ -126,7 +127,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1.2"),
           Subfield(tag = "i", content = "2004-"),
           Subfield(tag = "j", content = "01-"),
-          Subfield(tag = "k", content = "01-"),
+          Subfield(tag = "k", content = "01-")
         )
       ),
       VarField(
@@ -135,7 +136,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "i", content = "(year)"),
           Subfield(tag = "j", content = "(month)"),
-          Subfield(tag = "k", content = "(day)"),
+          Subfield(tag = "k", content = "(day)")
         )
       )
     )
@@ -245,7 +246,8 @@ class SierraHoldingsEnumerationTest
     )
 
     getEnumerations(varFields) shouldBe List(
-      "v.12:no.1 (2009) - v.21:no.1-2 (2018)")
+      "v.12:no.1 (2009) - v.21:no.1-2 (2018)"
+    )
   }
 
   it("removes parentheses from a single date") {
@@ -279,7 +281,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "41-57"),
           Subfield(tag = "b", content = "4-2"),
           Subfield(tag = "i", content = "1992-2008"),
-          Subfield(tag = "j", content = "23-21"),
+          Subfield(tag = "j", content = "23-21")
         )
       ),
       VarField(
@@ -289,7 +291,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "57-59"),
           Subfield(tag = "b", content = "4-1"),
           Subfield(tag = "i", content = "2008-2009"),
-          Subfield(tag = "j", content = "23-24"),
+          Subfield(tag = "j", content = "23-24")
         )
       ),
       VarField(
@@ -299,7 +301,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "60-61"),
           Subfield(tag = "b", content = "3-2"),
           Subfield(tag = "i", content = "2011-2012"),
-          Subfield(tag = "j", content = "22-21"),
+          Subfield(tag = "j", content = "22-21")
         )
       ),
       VarField(
@@ -309,7 +311,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
           Subfield(tag = "i", content = "(year)"),
-          Subfield(tag = "j", content = "(season)"),
+          Subfield(tag = "j", content = "(season)")
         )
       )
     )
@@ -331,7 +333,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "1-3"),
           Subfield(tag = "b", content = "1-2"),
           Subfield(tag = "i", content = "2015-2017"),
-          Subfield(tag = "j", content = "21-22"),
+          Subfield(tag = "j", content = "21-22")
         )
       ),
       VarField(
@@ -341,7 +343,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
           Subfield(tag = "i", content = "(year)"),
-          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "j", content = "(month)")
         )
       )
     )
@@ -361,7 +363,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "7-18"),
           Subfield(tag = "b", content = "1-2"),
           Subfield(tag = "i", content = "2000-2011"),
-          Subfield(tag = "j", content = "04-08"),
+          Subfield(tag = "j", content = "04-08")
         )
       ),
       VarField(
@@ -371,7 +373,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
           Subfield(tag = "i", content = "(year)"),
-          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "j", content = "(month)")
         )
       )
     )
@@ -391,7 +393,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = ""),
           Subfield(tag = "b", content = "1-4"),
           Subfield(tag = "i", content = "2017-2019"),
-          Subfield(tag = "j", content = "-21/22"),
+          Subfield(tag = "j", content = "-21/22")
         )
       ),
       VarField(
@@ -401,7 +403,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
           Subfield(tag = "i", content = "(year)"),
-          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "j", content = "(month)")
         )
       )
     )
@@ -421,7 +423,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "26-47"),
           Subfield(tag = "b", content = "-2"),
           Subfield(tag = "i", content = "1996-2017"),
-          Subfield(tag = "j", content = "24-05"),
+          Subfield(tag = "j", content = "24-05")
         )
       ),
       VarField(
@@ -431,7 +433,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
           Subfield(tag = "i", content = "(year)"),
-          Subfield(tag = "j", content = "(month)"),
+          Subfield(tag = "j", content = "(month)")
         )
       )
     )
@@ -535,13 +537,14 @@ class SierraHoldingsEnumerationTest
         subfields = List(
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "a", content = "v."),
-          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "b", content = "no.")
         )
       )
     )
 
     getEnumerations(varFields) shouldBe List(
-      "v.1:no.1 - v.2:no.2 Current issue on display")
+      "v.1:no.1 - v.2:no.2 Current issue on display"
+    )
   }
 
   it("sorts based on the link/sequence number") {
@@ -559,7 +562,7 @@ class SierraHoldingsEnumerationTest
         subfields = List(
           Subfield(tag = "8", content = "2.1"),
           Subfield(tag = "a", content = "2"),
-          Subfield(tag = "b", content = "1"),
+          Subfield(tag = "b", content = "1")
         )
       ),
       VarField(
@@ -575,7 +578,7 @@ class SierraHoldingsEnumerationTest
         subfields = List(
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "a", content = "v."),
-          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "b", content = "no.")
         )
       ),
       VarField(
@@ -583,7 +586,7 @@ class SierraHoldingsEnumerationTest
         subfields = List(
           Subfield(tag = "8", content = "2"),
           Subfield(tag = "a", content = "v."),
-          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "b", content = "no.")
         )
       )
     )
@@ -607,7 +610,7 @@ class SierraHoldingsEnumerationTest
         subfields = List(
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "a", content = "v"),
-          Subfield(tag = "b", content = "no."),
+          Subfield(tag = "b", content = "no.")
         )
       )
     )
@@ -648,7 +651,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "i", content = "1991-2017"),
           Subfield(tag = "j", content = "02-04"),
-          Subfield(tag = "k", content = "13-17"),
+          Subfield(tag = "k", content = "13-17")
         )
       ),
       VarField(
@@ -657,7 +660,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "i", content = "(year)"),
           Subfield(tag = "j", content = "(month)"),
-          Subfield(tag = "k", content = "(day)"),
+          Subfield(tag = "k", content = "(day)")
         )
       )
     )
@@ -673,7 +676,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "i", content = "2001"),
           Subfield(tag = "j", content = "23"),
-          Subfield(tag = "k", content = "1"),
+          Subfield(tag = "k", content = "1")
         )
       ),
       VarField(
@@ -682,7 +685,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "i", content = "(year)"),
           Subfield(tag = "j", content = "(month)"),
-          Subfield(tag = "k", content = "(day)"),
+          Subfield(tag = "k", content = "(day)")
         )
       )
     )
@@ -698,7 +701,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "i", content = "2001"),
           Subfield(tag = "j", content = "01"),
-          Subfield(tag = "k", content = "01"),
+          Subfield(tag = "k", content = "01")
         )
       ),
       VarField(
@@ -707,7 +710,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "i", content = "(year)"),
           Subfield(tag = "j", content = "(month)"),
-          Subfield(tag = "k", content = "(day)"),
+          Subfield(tag = "k", content = "(day)")
         )
       )
     )
@@ -726,7 +729,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "2.9"),
           Subfield(tag = "a", content = "390"),
           Subfield(tag = "b", content = "10116-10116"),
-          Subfield(tag = "i", content = "2018"),
+          Subfield(tag = "i", content = "2018")
         )
       ),
       VarField(
@@ -735,7 +738,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "2"),
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
-          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "i", content = "(year)")
         )
       )
     )
@@ -775,13 +778,15 @@ class SierraHoldingsEnumerationTest
       getEnumerations(varFields) shouldBe List("vol.1 (1995)")
     }
 
-    it("skips a subfield in field 863 if it doesn't have a corresponding label") {
+    it(
+      "skips a subfield in field 863 if it doesn't have a corresponding label"
+    ) {
       val varFields = List(
         VarField(
           marcTag = "853",
           subfields = List(
             Subfield(tag = "8", content = "10"),
-            Subfield(tag = "a", content = "vol."),
+            Subfield(tag = "a", content = "vol.")
           )
         ),
         VarField(
@@ -797,7 +802,9 @@ class SierraHoldingsEnumerationTest
       getEnumerations(varFields) shouldBe List("vol.1")
     }
 
-    it("skips a field 863 if it can't parse the link/sequence as two integers") {
+    it(
+      "skips a field 863 if it can't parse the link/sequence as two integers"
+    ) {
       val varFields = List(
         VarField(
           marcTag = "853",
@@ -837,7 +844,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "a", content = "4"),
             Subfield(tag = "i", content = "2004")
           )
-        ),
+        )
       )
 
       getEnumerations(varFields) shouldBe List("vol.1 (2001)")
@@ -875,7 +882,7 @@ class SierraHoldingsEnumerationTest
             Subfield(tag = "a", content = "1"),
             Subfield(tag = "i", content = "1995")
           )
-        ),
+        )
       )
 
       getEnumerations(varFields) shouldBe List("vol.1 (1995)")
@@ -945,7 +952,7 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1.1"),
           Subfield(tag = "a", content = "1-35"),
           Subfield(tag = "b", content = "1-2"),
-          Subfield(tag = "i", content = "1984-2018"),
+          Subfield(tag = "i", content = "1984-2018")
         )
       ),
       VarField(
@@ -954,14 +961,15 @@ class SierraHoldingsEnumerationTest
           Subfield(tag = "8", content = "1"),
           Subfield(tag = "a", content = "v."),
           Subfield(tag = "b", content = "no."),
-          Subfield(tag = "i", content = "(year)"),
+          Subfield(tag = "i", content = "(year)")
         )
-      ),
+      )
     )
 
     getEnumerations(varFields) shouldBe List(
       "Vol. 1 (1908-1914)",
-      "v.1:no.1 (1984) - v.35:no.2 (2018)")
+      "v.1:no.1 (1984) - v.35:no.2 (2018)"
+    )
   }
 
   def getEnumerations(varFields: List[VarField]): List[String] =

@@ -6,7 +6,9 @@ import org.scalatest.matchers.should.Matchers
 class LabelDerivedIdentifiersTest extends AnyFunSpec with Matchers {
   val identifiers = new LabelDerivedIdentifiers {}
 
-  it("removes whitespace that's added after we filter out non-ASCII characters") {
+  it(
+    "removes whitespace that's added after we filter out non-ASCII characters"
+  ) {
     // This comes from b16631614
     val label = "Miki\u0107, \u017delimir \u0110."
     val identifier =
@@ -21,7 +23,8 @@ class LabelDerivedIdentifiersTest extends AnyFunSpec with Matchers {
     val identifier =
       identifiers.identifierFromText(
         label = label,
-        ontologyType = "Organisation")
+        ontologyType = "Organisation"
+      )
 
     // truncated at 255 chars
     identifier.sourceIdentifier.value shouldBe "national insurance act, 1911 : explained, annotated and indexed, with appendices consisting of the insurance commissioners' official explanatory leaflets, treasury regulations for the joint committee, tables of reserve values and voluntary contributions,"

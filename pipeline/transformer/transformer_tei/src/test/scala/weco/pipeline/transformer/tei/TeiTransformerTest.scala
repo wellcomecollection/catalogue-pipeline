@@ -56,10 +56,13 @@ class TeiTransformerTest
             SourceIdentifier(
               IdentifierType.Fihrist,
               "Person",
-              "person_97166546"))
+              "person_97166546"
+            )
+          )
         ),
         roles = List(ContributionRole("author"))
-      ))
+      )
+    )
     work.value shouldBe
       Work.Visible[Source](
         version = 1,
@@ -80,18 +83,23 @@ class TeiTransformerTest
                 SourceIdentifier(
                   IdentifierType.LCSubjects,
                   "Subject",
-                  "sh85083116")),
+                  "sh85083116"
+                )
+              ),
               label = "Medicine, Arab",
               concepts = List(Concept(label = "Medicine, Arab"))
-            )),
+            )
+          ),
           notes = List(
             Note(
               contents =
                 "Script: Beautiful Naskh Ink: Black; headings and dividers highlighted in red",
               noteType = NoteType.HandNote
-            )),
+            )
+          ),
           physicalDescription = Some(
-            "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.; Material: chart; 529 ff.; leaf dimensions: width 215mm, height 336mm; written dimensions: width 125mm, height 220mm")
+            "Oriental paper of two colours: 'beige' and 'biscuit' and thickness of 0.10 mm.; Material: chart; 529 ff.; leaf dimensions: width 215mm, height 336mm; written dimensions: width 125mm, height 220mm"
+          )
         ),
         state = Source(
           sourceIdentifier,
@@ -112,7 +120,7 @@ class TeiTransformerTest
                   Note(
                     contents =
                       "فهذا اخر الكلام من الكتاب الثالث وقد استوفينا الكلام منه حسب ما يليق بذلك وعلينا ان نشرع الان فى الكتاب الرابع حامدين لله تعالى",
-                    noteType = NoteType.ColophonNote,
+                    noteType = NoteType.ColophonNote
                   ),
                   Note(
                     contents =
@@ -136,7 +144,8 @@ class TeiTransformerTest
                   )
                 ),
                 collectionPath = Some(
-                  CollectionPath(path = "manuscript_15651/MS_Arabic_1-item1")),
+                  CollectionPath(path = "manuscript_15651/MS_Arabic_1-item1")
+                ),
                 format = Some(Format.ArchivesAndManuscripts),
                 contributors = contributors
               )
@@ -177,7 +186,9 @@ class TeiTransformerTest
     work.value.data.notes should contain(
       Note(
         NoteType.LanguageNote,
-        "Sanskrit, with additional title entries in Persian script."))
+        "Sanskrit, with additional title entries in Persian script."
+      )
+    )
   }
 
   it("extracts msItem inner Works") {
@@ -208,7 +219,9 @@ class TeiTransformerTest
 
     val internalWorkStubs = MS_MSL_112_work.state.internalWorkStubs
     internalWorkStubs should have size 5
-    internalWorkStubs.map(_.workData.title.get) should contain theSameElementsAs List(
+    internalWorkStubs.map(
+      _.workData.title.get
+    ) should contain theSameElementsAs List(
       " Medical Epitome - 3, first part of 6, 4, 5 ",
       "Περὶ θεραπευτικ(ῶν) μεθόδ(ων) βιβλίον πρῶτον",
       "Τοῦ αὐτοῦ περὶ θεραπείας παθῶν καὶ τῶν ἔξωθεν φαρμάκων",
@@ -222,10 +235,12 @@ class TeiTransformerTest
     MS_MSL_112_work.data.notes should contain allOf (
       Note(
         NoteType.OwnershipNote,
-        "Thought to have been newly excecuted when Anthony Askew acquired it"),
+        "Thought to have been newly excecuted when Anthony Askew acquired it"
+      ),
       Note(
         NoteType.OwnershipNote,
-        "Marks of ownership flyleaf IIrEx Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims")
+        "Marks of ownership flyleaf IIrEx Bibliotheca Askeviana / Part ii. Art. 541 / J. Sims"
+      )
     )
   }
   it("extracts acquisition information") {
@@ -234,7 +249,8 @@ class TeiTransformerTest
       Note(
         NoteType.AcquisitionNote,
         "Anthony Askew(1722–74)London; his sale at G. Leigh and J. Sotheby London 15 March 1785 , lot 541. Purchased by James Sims (1741–1820)London, in 1785. Purchased by the London Medical Society in 1802. Purchased by the Wellcome Library in 1984."
-      ))
+      )
+    )
 
   }
 
@@ -249,12 +265,12 @@ class TeiTransformerTest
         Person(
           label = "Paul of Aegina",
           id = Identifiable(
-            SourceIdentifier(
-              IdentifierType.VIAF,
-              "Person",
-              "person_84812936"))),
+            SourceIdentifier(IdentifierType.VIAF, "Person", "person_84812936")
+          )
+        ),
         roles = List(ContributionRole("author"))
-      ))
+      )
+    )
   }
 
   it("extracts hand description information") {

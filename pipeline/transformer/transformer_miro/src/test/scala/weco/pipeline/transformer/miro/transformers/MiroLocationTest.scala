@@ -12,7 +12,8 @@ class MiroLocationTest
     with MiroRecordGenerators {
   val transformer = new MiroLocation {}
   it(
-    "extracts the digital location and finds the credit line for an image-specific contributor code") {
+    "extracts the digital location and finds the credit line for an image-specific contributor code"
+  ) {
     val location = transformer.getLocation(
       miroRecord = createMiroRecordWith(
         sourceCode = Some("FDN"),
@@ -30,7 +31,8 @@ class MiroLocationTest
       accessConditions = List(
         AccessCondition(
           method = AccessMethod.ViewOnline,
-          status = AccessStatus.Open)
+          status = AccessStatus.Open
+        )
       )
     )
   }

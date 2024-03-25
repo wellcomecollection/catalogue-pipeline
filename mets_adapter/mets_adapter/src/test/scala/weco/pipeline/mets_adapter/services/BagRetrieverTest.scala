@@ -113,19 +113,29 @@ class BagRetrieverTest
       )
     )
 
-    withBagRetriever(responses) { retriever =>
-      val future =
-        retriever.getBag(space = "digitised", externalIdentifier = "b16237456")
+    withBagRetriever(responses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b16237456"
+          )
 
-      whenReady(future) { bag =>
-        bag.manifest.files.head shouldBe
-          BagFile(name = "data/b16237456.xml", path = "v3/data/b16237456.xml")
+        whenReady(future) {
+          bag =>
+            bag.manifest.files.head shouldBe
+              BagFile(
+                name = "data/b16237456.xml",
+                path = "v3/data/b16237456.xml"
+              )
 
-        bag.location.bucket shouldBe "wellcomecollection-storage"
-        bag.location.path shouldBe "digitised/b16237456"
+            bag.location.bucket shouldBe "wellcomecollection-storage"
+            bag.location.path shouldBe "digitised/b16237456"
 
-        bag.createdDate shouldBe Instant.parse("2021-05-19T12:32:38.589051Z")
-      }
+            bag.createdDate shouldBe Instant.parse(
+              "2021-05-19T12:32:38.589051Z"
+            )
+        }
     }
   }
 
@@ -137,13 +147,17 @@ class BagRetrieverTest
       )
     )
 
-    withBagRetriever(responses) { retriever =>
-      val future =
-        retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+    withBagRetriever(responses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30246039"
+          )
 
-      whenReady(future.failed) {
-        _.getMessage shouldBe "Bag digitised/b30246039 does not exist in storage service"
-      }
+        whenReady(future.failed) {
+          _.getMessage shouldBe "Bag digitised/b30246039 does not exist in storage service"
+        }
     }
   }
 
@@ -155,14 +169,19 @@ class BagRetrieverTest
       )
     )
 
-    withBagRetriever(responses) { retriever =>
-      val future =
-        retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+    withBagRetriever(responses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30246039"
+          )
 
-      whenReady(future.failed) {
-        _.getMessage should startWith(
-          "Failed to authorize with storage service")
-      }
+        whenReady(future.failed) {
+          _.getMessage should startWith(
+            "Failed to authorize with storage service"
+          )
+        }
     }
   }
 
@@ -174,23 +193,29 @@ class BagRetrieverTest
       )
     )
 
-    withBagRetriever(responses) { retriever =>
-      val future =
-        retriever.getBag(space = "digitised", externalIdentifier = "b30246039")
+    withBagRetriever(responses) {
+      retriever =>
+        val future =
+          retriever.getBag(
+            space = "digitised",
+            externalIdentifier = "b30246039"
+          )
 
-      whenReady(future.failed) {
-        _.getMessage shouldBe "Received error from storage service: 500 Internal Server Error"
-      }
+        whenReady(future.failed) {
+          _.getMessage shouldBe "Received error from storage service: 500 Internal Server Error"
+        }
     }
   }
 
-  def withBagRetriever[R](responses: Seq[(HttpRequest, HttpResponse)])(
-    testWith: TestWith[BagRetriever, R]): R =
-    withActorSystem { implicit actorSystem =>
-      val client = new MemoryHttpClient(responses) with HttpGet {
-        override val baseUri: Uri = Uri("http://storage:1234/bags")
-      }
+  def withBagRetriever[R](
+    responses: Seq[(HttpRequest, HttpResponse)]
+  )(testWith: TestWith[BagRetriever, R]): R =
+    withActorSystem {
+      implicit actorSystem =>
+        val client = new MemoryHttpClient(responses) with HttpGet {
+          override val baseUri: Uri = Uri("http://storage:1234/bags")
+        }
 
-      testWith(new HttpBagRetriever(client))
+        testWith(new HttpBagRetriever(client))
     }
 }

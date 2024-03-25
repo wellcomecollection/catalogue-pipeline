@@ -43,7 +43,8 @@ trait WorkGenerators
     Work.Visible[Source](
       state = Source(
         sourceIdentifier = sourceIdentifier,
-        sourceModifiedTime = sourceModifiedTime),
+        sourceModifiedTime = sourceModifiedTime
+      ),
       data = initData,
       version = createVersion
     )
@@ -242,7 +243,9 @@ trait WorkGenerators
     def holdings(newHoldings: List[Holdings]): Work.Visible[State] =
       work.map(_.copy(holdings = newHoldings))
 
-    def currentFrequency(currentFrequency: Option[String]): Work.Visible[State] =
+    def currentFrequency(
+      currentFrequency: Option[String]
+    ): Work.Visible[State] =
       work.map(_.copy(currentFrequency = currentFrequency))
 
     def formerFrequency(formerFrequency: List[String]): Work.Visible[State] =
@@ -282,18 +285,26 @@ trait WorkGenerators
         _.copy(mergeCandidates = mergeCandidates)
       }
 
-    def internalWorks(internalWorks: List[Work.Visible[Identified]]): Work.Visible[Identified] =
-      work.mapState(state => {
-        state.copy(
-          internalWorkStubs = internalWorks.map(internalWork => (
-            InternalWork.Identified(
-              sourceIdentifier = internalWork.sourceIdentifier,
-              canonicalId = internalWork.state.canonicalId,
-              workData = internalWork.data
-            ),
-            )))
+    def internalWorks(
+      internalWorks: List[Work.Visible[Identified]]
+    ): Work.Visible[Identified] =
+      work.mapState(
+        state => {
+          state.copy(
+            internalWorkStubs = internalWorks.map(
+              internalWork =>
+                (
+                  InternalWork.Identified(
+                    sourceIdentifier = internalWork.sourceIdentifier,
+                    canonicalId = internalWork.state.canonicalId,
+                    workData = internalWork.data
+                  ),
+                )
+            )
+          )
 
-      })
+        }
+      )
   }
 
   trait UpdateState[State <: WorkState] {

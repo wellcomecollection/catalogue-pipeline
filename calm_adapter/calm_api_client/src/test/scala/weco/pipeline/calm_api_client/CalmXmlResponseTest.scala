@@ -26,7 +26,8 @@ class CalmXmlResponseTest extends AnyFunSpec with Matchers {
           </soap:Body>
         </soap:Envelope>
       CalmSearchResponse(xml, cookie).parse shouldBe Right(
-        CalmSession(12, cookie))
+        CalmSession(12, cookie)
+      )
     }
 
     it("errors when num hits is not an integer") {
@@ -124,7 +125,11 @@ class CalmXmlResponseTest extends AnyFunSpec with Matchers {
             </SummaryHeaderResponse>
           </soap:Body>
         </soap:Envelope>
-      CalmSummaryResponse(xml, retrievedAt, Set("Sensitive")).parse shouldBe Right(
+      CalmSummaryResponse(
+        xml,
+        retrievedAt,
+        Set("Sensitive")
+      ).parse shouldBe Right(
         CalmRecord(
           "123",
           Map(

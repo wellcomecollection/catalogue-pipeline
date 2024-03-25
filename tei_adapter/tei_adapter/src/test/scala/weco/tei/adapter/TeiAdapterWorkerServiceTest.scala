@@ -68,14 +68,17 @@ class TeiAdapterWorkerServiceTest
       Map(
         storedVersion -> TeiChangedMetadata(
           S3ObjectLocation("bucket", "key.xml"),
-          storedTime))
+          storedTime
+        )
+      )
     withWorkerService(initialData = storedMap) {
       case (QueuePair(queue, dlq), messageSender, store) =>
         val message =
           TeiIdChangeMessage(
             storedVersion.id,
             S3ObjectLocation("bucket", "anotherkey.xml"),
-            storedTime.plus(2, HOURS))
+            storedTime.plus(2, HOURS)
+          )
 
         sendNotificationToSQS[TeiIdMessage](queue, message)
 
@@ -112,7 +115,8 @@ class TeiAdapterWorkerServiceTest
           TeiIdChangeMessage(
             storedVersion.id,
             messageObjectLocation,
-            messageTime)
+            messageTime
+          )
 
         sendNotificationToSQS[TeiIdMessage](queue, message)
 
@@ -183,7 +187,9 @@ class TeiAdapterWorkerServiceTest
     }
   }
 
-  it("ignores a delete message if the time is equal to the stored change time") {
+  it(
+    "ignores a delete message if the time is equal to the stored change time"
+  ) {
     val storedObjectLocation = S3ObjectLocation("bucket", "key.xml")
     val storedTime = Instant.parse("2021-06-17T11:46:00Z")
     val storedVersion = Version("manuscript_1234", 0)
@@ -261,7 +267,8 @@ class TeiAdapterWorkerServiceTest
   }
 
   it(
-    "if it receives a message changed and a message deleted with the same time, the message deleted takes precedence") {
+    "if it receives a message changed and a message deleted with the same time, the message deleted takes precedence"
+  ) {
     val storedObjectLocation = S3ObjectLocation("bucket", "key.xml")
     val storedTime = Instant.parse("2021-06-17T11:46:00Z")
     val storedVersion = Version("manuscript_1234", 0)
@@ -274,7 +281,8 @@ class TeiAdapterWorkerServiceTest
         val changedMessage = TeiIdChangeMessage(
           storedVersion.id,
           S3ObjectLocation("bucket", "anotherkey.xml"),
-          messageTime)
+          messageTime
+        )
         val deletedMessage = TeiIdDeletedMessage(storedVersion.id, messageTime)
 
         sendNotificationToSQS[TeiIdMessage](queue, deletedMessage)
@@ -285,19 +293,25 @@ class TeiAdapterWorkerServiceTest
             List(Version(changedMessage.id, 1), Version(changedMessage.id, 2))
           val expectedMetadata = TeiChangedMetadata(
             s3Location = changedMessage.s3Location,
-            time = messageTime)
+            time = messageTime
+          )
 
           messageSender
-            .getMessages[TeiSourcePayload] should contain theSameElementsAs expectedVersions
+            .getMessages[
+              TeiSourcePayload
+            ] should contain theSameElementsAs expectedVersions
             .map(
               version =>
                 TeiSourcePayload(
                   version.id,
                   expectedMetadata,
                   version.version
-              ))
+                )
+            )
           messageSender
-            .getMessages[Version[String, Int]]() should contain theSameElementsAs expectedVersions
+            .getMessages[
+              Version[String, Int]
+            ]() should contain theSameElementsAs expectedVersions
 
           isStored(store, Version(changedMessage.id, 2), expectedMetadata)
 
@@ -320,17 +334,21 @@ class TeiAdapterWorkerServiceTest
     }
   }
 
-  private def isStored(store: MemoryVersionedStore[String, TeiMetadata],
-                       expectedVersion: Version[String, Int],
-                       expectedMetadata: TeiMetadata) = {
+  private def isStored(
+    store: MemoryVersionedStore[String, TeiMetadata],
+    expectedVersion: Version[String, Int],
+    expectedMetadata: TeiMetadata
+  ) = {
     val stored = store.getLatest(expectedVersion.id).right.get
     stored.identifiedT shouldBe expectedMetadata
     stored.id shouldBe expectedVersion
   }
 
-  private def isSent(messageSender: MemoryMessageSender,
-                     expectedVersion: Version[String, Int],
-                     expectedMetadata: TeiMetadata) = {
+  private def isSent(
+    messageSender: MemoryMessageSender,
+    expectedVersion: Version[String, Int],
+    expectedMetadata: TeiMetadata
+  ) = {
     messageSender
       .getMessages[TeiSourcePayload] should contain only TeiSourcePayload(
       expectedVersion.id,
@@ -356,21 +374,24 @@ class TeiAdapterWorkerServiceTest
   ): R =
     withLocalSqsQueuePair() {
       case q @ QueuePair(queue, dlq) =>
-        withActorSystem { implicit ac =>
-          implicit val ec = ac.dispatcher
-          withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
-            val store: MemoryVersionedStore[String, TeiMetadata] =
-              MemoryVersionedStore(initialData)
-            val service =
-              new TeiAdapterWorkerService(
-                stream,
-                messageSender,
-                store,
-                10,
-                100 milliseconds)
-            service.run()
-            testWith((q, messageSender, store))
-          }
+        withActorSystem {
+          implicit ac =>
+            implicit val ec = ac.dispatcher
+            withSQSStream(queue) {
+              stream: SQSStream[NotificationMessage] =>
+                val store: MemoryVersionedStore[String, TeiMetadata] =
+                  MemoryVersionedStore(initialData)
+                val service =
+                  new TeiAdapterWorkerService(
+                    stream,
+                    messageSender,
+                    store,
+                    10,
+                    100 milliseconds
+                  )
+                service.run()
+                testWith((q, messageSender, store))
+            }
         }
     }
 }

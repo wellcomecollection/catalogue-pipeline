@@ -31,7 +31,9 @@ class MergerWorkerServiceTest
     with MergeCandidateGenerators
     with MergerFixtures {
 
-  it("reads matcher result messages, retrieves the works and sends on the IDs") {
+  it(
+    "reads matcher result messages, retrieves the works and sends on the IDs"
+  ) {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work1 = identifiedWork()
@@ -64,11 +66,14 @@ class MergerWorkerServiceTest
 
           index shouldBe Map(
             work1.id -> Left(
-              work1.transition[Merged](matcherResult.createdTime)),
+              work1.transition[Merged](matcherResult.createdTime)
+            ),
             work2.id -> Left(
-              work2.transition[Merged](matcherResult.createdTime)),
+              work2.transition[Merged](matcherResult.createdTime)
+            ),
             work3.id -> Left(
-              work3.transition[Merged](matcherResult.createdTime))
+              work3.transition[Merged](matcherResult.createdTime)
+            )
           )
 
           metrics.incrementedCounts.length should be >= 1
@@ -98,7 +103,8 @@ class MergerWorkerServiceTest
           getWorksSent(senders) should contain only work.id
 
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime))
+          )
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -153,7 +159,8 @@ class MergerWorkerServiceTest
           assertQueueEmpty(dlq)
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime))
+          )
         }
     }
   }
@@ -185,7 +192,8 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) should contain only work.id
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](matcherResult.createdTime)))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime))
+          )
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
@@ -194,7 +202,8 @@ class MergerWorkerServiceTest
   }
 
   it(
-    "if it merges two Works, it sends two onward results (one merged, one redirected)") {
+    "if it merges two Works, it sends two onward results (one merged, one redirected)"
+  ) {
     val (digitisedWork, physicalWork) = sierraIdentifiedWorkPair()
 
     val works = List(physicalWork, digitisedWork)
@@ -203,7 +212,8 @@ class MergerWorkerServiceTest
       case (retriever, QueuePair(queue, dlq), senders, _, index) =>
         retriever.index ++= Map(
           physicalWork.id -> physicalWork,
-          digitisedWork.id -> digitisedWork)
+          digitisedWork.id -> digitisedWork
+        )
 
         val matcherResult = createMatcherResultWith(Set(works.toSet))
 
@@ -227,7 +237,8 @@ class MergerWorkerServiceTest
           redirectedWorks.head.sourceIdentifier shouldBe digitisedWork.sourceIdentifier
           redirectedWorks.head.redirectTarget shouldBe IdState.Identified(
             sourceIdentifier = physicalWork.sourceIdentifier,
-            canonicalId = physicalWork.state.canonicalId)
+            canonicalId = physicalWork.state.canonicalId
+          )
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
@@ -247,7 +258,8 @@ class MergerWorkerServiceTest
         retriever.index ++= Map(
           physicalWork.id -> physicalWork,
           digitisedWork.id -> digitisedWork,
-          miroWork.id -> miroWork)
+          miroWork.id -> miroWork
+        )
 
         val matcherResult = createMatcherResultWith(Set(works.toSet))
 
@@ -279,14 +291,19 @@ class MergerWorkerServiceTest
           redirectedWorks.map(_.redirectTarget) should contain only
             IdState.Identified(
               sourceIdentifier = physicalWork.sourceIdentifier,
-              canonicalId = physicalWork.state.canonicalId)
+              canonicalId = physicalWork.state.canonicalId
+            )
 
           mergedWorks should have size 1
           mergedWorks.head.sourceIdentifier shouldBe physicalWork.sourceIdentifier
 
-          CanonicalId(imagesSent.head) shouldBe miroWork.data.imageData.head.id.canonicalId
+          CanonicalId(
+            imagesSent.head
+          ) shouldBe miroWork.data.imageData.head.id.canonicalId
           images should have size 1
-          CanonicalId(images.head.id) shouldBe miroWork.data.imageData.head.id.canonicalId
+          CanonicalId(
+            images.head.id
+          ) shouldBe miroWork.data.imageData.head.id.canonicalId
         }
     }
   }
@@ -418,12 +435,17 @@ class MergerWorkerServiceTest
   case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
-    testWith: TestWith[(MemoryRetriever[Work[Identified]],
-                        QueuePair,
-                        Senders,
-                        MemoryMetrics,
-                        mutable.Map[String, WorkOrImage]),
-                       R]): R =
+    testWith: TestWith[
+      (
+        MemoryRetriever[Work[Identified]],
+        QueuePair,
+        Senders,
+        MemoryMetrics,
+        mutable.Map[String, WorkOrImage]
+      ),
+      R
+    ]
+  ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case queuePair @ QueuePair(queue, _) =>
         val workSender = new MemoryMessageSender()
@@ -440,15 +462,18 @@ class MergerWorkerServiceTest
           workSender,
           imageSender,
           metrics,
-          index) { _ =>
-          testWith(
-            (
-              retriever,
-              queuePair,
-              Senders(workSender, imageSender),
-              metrics,
-              index)
-          )
+          index
+        ) {
+          _ =>
+            testWith(
+              (
+                retriever,
+                queuePair,
+                Senders(workSender, imageSender),
+                metrics,
+                index
+              )
+            )
         }
     }
 

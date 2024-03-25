@@ -16,7 +16,7 @@ class BagTest extends AnyFunSpec with Matchers {
         files = List(
           "data/b30246039.xml" -> "v1/data/b30246039.xml",
           "data/alto/b30246039_0001.xml" -> "v1/data/alto/b30246039_0001.xml",
-          "data/alto/b30246039_0002.xml" -> "v1/data/alto/b30246039_0002.xml",
+          "data/alto/b30246039_0002.xml" -> "v1/data/alto/b30246039_0002.xml"
         )
       )
       bag.metsFile shouldBe Right("v1/data/b30246039.xml")
@@ -28,7 +28,7 @@ class BagTest extends AnyFunSpec with Matchers {
         files = List(
           "data/alto/b30246039_0001.xml" -> "v1/data/alto/b30246039_0001.xml",
           "data/b30246039.xml" -> "v1/data/b30246039.xml",
-          "data/alto/b30246039_0002.xml" -> "v1/data/alto/b30246039_0002.xml",
+          "data/alto/b30246039_0002.xml" -> "v1/data/alto/b30246039_0002.xml"
         )
       )
       bag.metsFile shouldBe Right("v1/data/b30246039.xml")
@@ -82,12 +82,13 @@ class BagTest extends AnyFunSpec with Matchers {
           "data/alto/b30246039_0001.xml" -> "v1/data/alto/b30246039_0001.xml",
           "data/alto/b30246039_0002.xml" -> "v1/data/alto/b30246039_0002.xml",
           "data/b30246039_0001.xml" -> "v1/data/b30246039_0001.xml",
-          "data/b30246039_0002.xml" -> "v1/data/b30246039_0002.xml",
+          "data/b30246039_0002.xml" -> "v1/data/b30246039_0002.xml"
         )
       )
       bag.manifestations shouldBe List(
         "v1/data/b30246039_0001.xml",
-        "v1/data/b30246039_0002.xml")
+        "v1/data/b30246039_0002.xml"
+      )
     }
   }
 
@@ -99,13 +100,14 @@ class BagTest extends AnyFunSpec with Matchers {
         version = "v2",
         files = List(
           "data/b30246039.xml" -> "v1/data/b30246039.xml",
-          "objects/blahbluh.jp2" -> "v1/objects/blahbluh.jp2"),
+          "objects/blahbluh.jp2" -> "v1/objects/blahbluh.jp2"
+        )
       )
       bag.metsSourceData shouldBe Right(
         MetsFileWithImages(
           root = S3ObjectLocationPrefix(
             bucket = "wellcomecollection-example-storage",
-            keyPrefix = "digitised/b1234",
+            keyPrefix = "digitised/b1234"
           ),
           filename = "v1/data/b30246039.xml",
           manifestations = List.empty,
@@ -115,7 +117,9 @@ class BagTest extends AnyFunSpec with Matchers {
       )
     }
 
-    it("marks a METS data as deleted if there are no other assets except METS") {
+    it(
+      "marks a METS data as deleted if there are no other assets except METS"
+    ) {
       val bag = createBag(
         version = "v2",
         files = List("data/b30246039.xml" -> "v1/data/b30246039.xml")
@@ -144,18 +148,21 @@ class BagTest extends AnyFunSpec with Matchers {
     it("fails extracting METS data if the version string is invalid") {
       val bag = createBag(
         version = "oops",
-        files = List("data/b30246039.xml" -> "v1/data/b30246039.xml"),
+        files = List("data/b30246039.xml" -> "v1/data/b30246039.xml")
       )
       bag.metsSourceData shouldBe a[Left[_, _]]
       bag.metsSourceData.left.get.getMessage shouldBe "Couldn't parse version"
     }
   }
 
-  def createBag(s3Path: String = "digitised/b30246039",
-                bucket: String = "bucket",
-                version: String = "v1",
-                files: List[(String, String)] = List(
-                  "data/b30246039.xml" -> "v1/data/b30246039.xml")) =
+  def createBag(
+    s3Path: String = "digitised/b30246039",
+    bucket: String = "bucket",
+    version: String = "v1",
+    files: List[(String, String)] = List(
+      "data/b30246039.xml" -> "v1/data/b30246039.xml"
+    )
+  ) =
     Bag(
       BagInfo("external-identifier"),
       BagManifest(
@@ -163,7 +170,7 @@ class BagTest extends AnyFunSpec with Matchers {
       ),
       BagLocation(
         path = s3Path,
-        bucket = bucket,
+        bucket = bucket
       ),
       version,
       createdDate = Instant.now

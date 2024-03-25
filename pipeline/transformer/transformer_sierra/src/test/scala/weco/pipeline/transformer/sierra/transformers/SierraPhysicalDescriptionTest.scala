@@ -34,7 +34,7 @@ class SierraPhysicalDescriptionTest
           marcTag = "300",
           subfields = List(
             Subfield("b", description),
-            Subfield("d", "The edifying extent of early emus"),
+            Subfield("d", "The edifying extent of early emus")
           )
         )
       )
@@ -60,7 +60,7 @@ class SierraPhysicalDescriptionTest
           marcTag = "300",
           subfields = List(
             Subfield("b", description2),
-            Subfield("d", "Egad!  An early eagle is eating the earwig."),
+            Subfield("d", "Egad!  An early eagle is eating the earwig.")
           )
         )
       )
@@ -77,21 +77,22 @@ class SierraPhysicalDescriptionTest
           marcTag = "300",
           subfields = List(
             Subfield(tag = "a", content = "1 videocassette (VHS) (1 min.) :"),
-            Subfield(tag = "b", content = "sound, color, PAL."),
+            Subfield(tag = "b", content = "sound, color, PAL.")
           )
         ),
         VarField(
           marcTag = "300",
           subfields = List(
             Subfield(tag = "a", content = "1 DVD (1 min.) :"),
-            Subfield(tag = "b", content = "sound, color"),
+            Subfield(tag = "b", content = "sound, color")
           )
         )
       )
     )
 
     SierraPhysicalDescription(bibData) shouldBe Some(
-      "1 videocassette (VHS) (1 min.) : sound, color, PAL.<br/>1 DVD (1 min.) : sound, color")
+      "1 videocassette (VHS) (1 min.) : sound, color, PAL.<br/>1 DVD (1 min.) : sound, color"
+    )
   }
 
   it("uses field 300 ǂa, ǂb and ǂc") {
@@ -107,7 +108,7 @@ class SierraPhysicalDescriptionTest
           subfields = List(
             Subfield(tag = "a", content = descriptionA),
             Subfield(tag = "b", content = descriptionB),
-            Subfield(tag = "c", content = descriptionC),
+            Subfield(tag = "c", content = descriptionC)
           )
         )
       )
@@ -130,13 +131,14 @@ class SierraPhysicalDescriptionTest
             Subfield(tag = "a", content = extent),
             Subfield(tag = "b", content = otherPhysicalDetails),
             Subfield(tag = "c", content = dimensions),
-            Subfield(tag = "e", content = accompanyingMaterial),
+            Subfield(tag = "e", content = accompanyingMaterial)
           )
         )
       )
     )
 
     SierraPhysicalDescription(bibData) shouldBe Some(
-      "1 photograph : photonegative, glass ; glass 10.6 x 8 cm + envelope")
+      "1 photograph : photonegative, glass ; glass 10.6 x 8 cm + envelope"
+    )
   }
 }

@@ -73,7 +73,7 @@ class SierraOrganisationSubjectsTest
     it("creates an Organisation as the concept") {
       val bibData = create610bibDataWith(
         subfields = List(
-          Subfield(tag = "a", content = "Wellcome Trust."),
+          Subfield(tag = "a", content = "Wellcome Trust.")
         )
       )
 
@@ -81,11 +81,12 @@ class SierraOrganisationSubjectsTest
 
       val List(concept) = subject.concepts
       concept should have(
-        'label ("Wellcome Trust"),
+        'label("Wellcome Trust"),
         sourceIdentifier(
           value = "wellcome trust",
           ontologyType = "Organisation",
-          identifierType = IdentifierType.LabelDerived)
+          identifierType = IdentifierType.LabelDerived
+        )
       )
     }
 
@@ -167,13 +168,14 @@ class SierraOrganisationSubjectsTest
     }
 
     it(
-      "creates an Identifiable Organisation if subfield 0 has multiple but unambiguous values") {
+      "creates an Identifiable Organisation if subfield 0 has multiple but unambiguous values"
+    ) {
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
           Subfield(tag = "a", content = "ACME Corp"),
           Subfield(tag = "0", content = "  n1234"),
-          Subfield(tag = "0", content = "n1234"),
+          Subfield(tag = "0", content = "n1234")
         )
       )
 
@@ -241,7 +243,8 @@ class SierraOrganisationSubjectsTest
       caught.getMessage should startWith("Problem in the Sierra data")
       caught.getMessage should include(bibId.withoutCheckDigit)
       caught.getMessage should include(
-        "Not enough information to build a label")
+        "Not enough information to build a label"
+      )
     }
   }
 
@@ -270,16 +273,20 @@ class SierraOrganisationSubjectsTest
     subjects should have size 3
   }
 
-  private def create610bibDataWith(subfields: List[Subfield],
-                                   indicator2: String = ""): SierraBibData =
+  private def create610bibDataWith(
+    subfields: List[Subfield],
+    indicator2: String = ""
+  ): SierraBibData =
     createSierraBibDataWith(
       varFields = List(
         createMarc610VarField(subfields = subfields, indicator2 = indicator2)
       )
     )
 
-  private def createMarc610VarField(subfields: List[Subfield],
-                                    indicator2: String = ""): VarField =
+  private def createMarc610VarField(
+    subfields: List[Subfield],
+    indicator2: String = ""
+  ): VarField =
     VarField(
       marcTag = Some("610"),
       indicator1 = Some(""),
@@ -287,8 +294,9 @@ class SierraOrganisationSubjectsTest
       subfields = subfields
     )
 
-  private def getOrganisationSubjects(bibData: SierraBibData,
-                                      bibId: SierraBibNumber =
-                                        createSierraBibNumber) =
+  private def getOrganisationSubjects(
+    bibData: SierraBibData,
+    bibId: SierraBibNumber = createSierraBibNumber
+  ) =
     SierraOrganisationSubjects(bibId, bibData)
 }

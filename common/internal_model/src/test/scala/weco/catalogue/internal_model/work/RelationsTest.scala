@@ -19,12 +19,14 @@ class RelationsTest extends AnyFunSpec with Matchers {
   }
 
   it(
-    "Shows the total number of known relations even when not all relation lists are populated") {
+    "Shows the total number of known relations even when not all relation lists are populated"
+  ) {
     Relations(
       ancestors = List(
         SeriesRelation("Granny"),
         SeriesRelation("Grandpa"),
-        SeriesRelation("Mum")),
+        SeriesRelation("Mum")
+      ),
       children = List(SeriesRelation("Baby")),
       siblingsPreceding = Nil,
       siblingsSucceeding =

@@ -28,7 +28,8 @@ trait ProductionEventGenerators extends RandomGenerators {
   def createProductionEventList(
     count: Int = 1
   ): List[ProductionEvent[IdState.Minted]] =
-    (1 to count).map { _ =>
-      createProductionEvent
+    (1 to count).map {
+      _ =>
+        createProductionEvent
     }.toList
 }

@@ -20,8 +20,9 @@ class BulkMessageSenderTest
   case class NamedRecord(id: String, name: String)
 
   def createRecords(count: Int = 5): Seq[NamedRecord] =
-    (1 to count).map { _ =>
-      NamedRecord(id = randomAlphanumeric(), name = randomAlphanumeric())
+    (1 to count).map {
+      _ =>
+        NamedRecord(id = randomAlphanumeric(), name = randomAlphanumeric())
     }
 
   it("sends messages for the provided IDs") {
@@ -32,8 +33,9 @@ class BulkMessageSenderTest
 
     val future = bulkMessageSender.send(records, destination = "messages")
 
-    whenReady(future) { _ =>
-      messageSender.getMessages[NamedRecord] shouldBe records
+    whenReady(future) {
+      _ =>
+        messageSender.getMessages[NamedRecord] shouldBe records
     }
   }
 
@@ -47,16 +49,21 @@ class BulkMessageSenderTest
     val future1 = bulkMessageSender.send(records1, destination = "dst1")
     val future2 = bulkMessageSender.send(records2, destination = "dst2")
 
-    whenReady(Future.sequence(Seq(future1, future2))) { _ =>
-      messageSender.messages
-        .filter { _.destination == "dst1" }
-        .map { _.body }
-        .map { fromJson[NamedRecord](_).get } should contain theSameElementsAs records1
+    whenReady(Future.sequence(Seq(future1, future2))) {
+      _ =>
+        messageSender.messages
+          .filter { _.destination == "dst1" }
+          .map { _.body }
+          .map {
+            fromJson[NamedRecord](_).get
+          } should contain theSameElementsAs records1
 
-      messageSender.messages
-        .filter { _.destination == "dst2" }
-        .map { _.body }
-        .map { fromJson[NamedRecord](_).get } should contain theSameElementsAs records2
+        messageSender.messages
+          .filter { _.destination == "dst2" }
+          .map { _.body }
+          .map {
+            fromJson[NamedRecord](_).get
+          } should contain theSameElementsAs records2
     }
   }
 
@@ -64,8 +71,9 @@ class BulkMessageSenderTest
     val exception = new Throwable("BOOM!")
 
     val brokenSender = new MemoryIndividualMessageSender() {
-      override def send(body: String)(subject: String,
-                                      destination: String): Try[Unit] =
+      override def send(
+        body: String
+      )(subject: String, destination: String): Try[Unit] =
         if (messages.size > 5) {
           Failure(exception)
         } else {

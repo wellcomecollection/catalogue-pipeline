@@ -31,9 +31,8 @@ class SierraConceptsTest
     ("2", IdentifierType.MESH)
   )
 
-  private val allSchemes = unsupportedSchemes ++ supportedSchemes.map(
-    scheme => Some(scheme._1)
-  )
+  private val allSchemes =
+    unsupportedSchemes ++ supportedSchemes.map(scheme => Some(scheme._1))
 
   it("extracts identifiers from subfield 0") {
     forAll(
@@ -41,26 +40,27 @@ class SierraConceptsTest
         ("indicator2", "identifierType"),
         supportedSchemes: _*
       )
-    ) { (indicator2: String, identifierType: IdentifierType) =>
-      val maybeIdentifiedConcept = transformer.getIdState(
-        ontologyType = "Concept",
-        varField = createVarFieldWith(
-          marcTag = "CCC",
-          indicator2 = indicator2,
-          subfields = List(
-            Subfield(tag = "a", content = "pilots"),
-            Subfield(tag = "0", content = "sh85102165")
+    ) {
+      (indicator2: String, identifierType: IdentifierType) =>
+        val maybeIdentifiedConcept = transformer.getIdState(
+          ontologyType = "Concept",
+          varField = createVarFieldWith(
+            marcTag = "CCC",
+            indicator2 = indicator2,
+            subfields = List(
+              Subfield(tag = "a", content = "pilots"),
+              Subfield(tag = "0", content = "sh85102165")
+            )
           )
         )
-      )
 
-      val sourceIdentifier = SourceIdentifier(
-        identifierType = identifierType,
-        value = "sh85102165",
-        ontologyType = "Concept"
-      )
+        val sourceIdentifier = SourceIdentifier(
+          identifierType = identifierType,
+          value = "sh85102165",
+          ontologyType = "Concept"
+        )
 
-      maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
+        maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
     }
   }
 
@@ -72,24 +72,25 @@ class SierraConceptsTest
         "indicator2",
         allSchemes: _*
       )
-    ) { indicator2 =>
-      val maybeIdentifiedConcept = transformer.getIdState(
-        ontologyType = "Concept",
-        varField = createVarFieldWith(
-          marcTag = "CCC",
-          indicator2 = indicator2,
-          subfields = List(
-            Subfield(tag = "a", content = "Who Knows")
+    ) {
+      indicator2 =>
+        val maybeIdentifiedConcept = transformer.getIdState(
+          ontologyType = "Concept",
+          varField = createVarFieldWith(
+            marcTag = "CCC",
+            indicator2 = indicator2,
+            subfields = List(
+              Subfield(tag = "a", content = "Who Knows")
+            )
           )
         )
-      )
-      val sourceIdentifier = SourceIdentifier(
-        identifierType = IdentifierType.LabelDerived,
-        value = "who knows",
-        ontologyType = "Concept"
-      )
+        val sourceIdentifier = SourceIdentifier(
+          identifierType = IdentifierType.LabelDerived,
+          value = "who knows",
+          ontologyType = "Concept"
+        )
 
-      maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
+        maybeIdentifiedConcept shouldBe IdState.Identifiable(sourceIdentifier)
     }
   }
 
@@ -157,20 +158,21 @@ class SierraConceptsTest
         "indicator2",
         unsupportedSchemes: _*
       )
-    ) { indicator2 =>
-      val maybeIdentifiedConcept = transformer.getIdState(
-        ontologyType = "Concept",
-        varField = createVarFieldWith(
-          marcTag = "CCC",
-          indicator2 = indicator2,
-          subfields = List(
-            Subfield(tag = "a", content = "hitchhiking"),
-            Subfield(tag = "0", content = "dunno/xxx")
+    ) {
+      indicator2 =>
+        val maybeIdentifiedConcept = transformer.getIdState(
+          ontologyType = "Concept",
+          varField = createVarFieldWith(
+            marcTag = "CCC",
+            indicator2 = indicator2,
+            subfields = List(
+              Subfield(tag = "a", content = "hitchhiking"),
+              Subfield(tag = "0", content = "dunno/xxx")
+            )
           )
         )
-      )
 
-      maybeIdentifiedConcept shouldBe IdState.Unidentifiable
+        maybeIdentifiedConcept shouldBe IdState.Unidentifiable
     }
 
   }

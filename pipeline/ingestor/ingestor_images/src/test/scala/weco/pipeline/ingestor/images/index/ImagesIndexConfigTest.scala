@@ -20,61 +20,64 @@ class ImagesIndexConfigTest
     with IndexFixtures {
 
   it("indexes an image with large image features vectors") {
-    withLocalImagesIndex { implicit index =>
-      assertImageCanBeIndexed(
-        image = createImageData.toAugmentedImage
-      )
+    withLocalImagesIndex {
+      implicit index =>
+        assertImageCanBeIndexed(
+          image = createImageData.toAugmentedImage
+        )
     }
   }
 
   it("cannot index an image with image vectors that are too long") {
-    withLocalImagesIndex { implicit index =>
-      val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-      val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-      val reducedFeatures =
-        (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-      val paletteEmbedding = randomUnitLengthVector(1000).toList
-      val averageColorHex = Some(randomHexString)
-      val aspectRatio = Some(Random.nextFloat())
-      val image = createImageData.toAugmentedImageWith(
-        inferredData = InferredData(
-          features1,
-          features2,
-          reducedFeatures,
-          paletteEmbedding,
-          averageColorHex,
-          aspectRatio
+    withLocalImagesIndex {
+      implicit index =>
+        val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
+        val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
+        val reducedFeatures =
+          (0 until 3000).map(_ => Random.nextFloat() * 100).toList
+        val paletteEmbedding = randomUnitLengthVector(1000).toList
+        val averageColorHex = Some(randomHexString)
+        val aspectRatio = Some(Random.nextFloat())
+        val image = createImageData.toAugmentedImageWith(
+          inferredData = InferredData(
+            features1,
+            features2,
+            reducedFeatures,
+            paletteEmbedding,
+            averageColorHex,
+            aspectRatio
+          )
         )
-      )
 
-      val response = indexImage(id = image.id, image = image)
-      response.isError shouldBe true
-      response.error shouldBe a[ElasticError]
+        val response = indexImage(id = image.id, image = image)
+        response.isError shouldBe true
+        response.error shouldBe a[ElasticError]
     }
   }
 
   it("cannot index an image with image vectors that are too short") {
-    withLocalImagesIndex { implicit index =>
-      val features1 = List(2.0f)
-      val features2 = List(2.0f)
-      val reducedFeatures = List(2.0f)
-      val paletteEmbedding = randomUnitLengthVector(1000).toList
-      val averageColorHex = Some(randomHexString)
-      val aspectRatio = Some(Random.nextFloat())
-      val image = createImageData.toAugmentedImageWith(
-        inferredData = InferredData(
-          features1,
-          features2,
-          reducedFeatures,
-          paletteEmbedding,
-          averageColorHex,
-          aspectRatio
+    withLocalImagesIndex {
+      implicit index =>
+        val features1 = List(2.0f)
+        val features2 = List(2.0f)
+        val reducedFeatures = List(2.0f)
+        val paletteEmbedding = randomUnitLengthVector(1000).toList
+        val averageColorHex = Some(randomHexString)
+        val aspectRatio = Some(Random.nextFloat())
+        val image = createImageData.toAugmentedImageWith(
+          inferredData = InferredData(
+            features1,
+            features2,
+            reducedFeatures,
+            paletteEmbedding,
+            averageColorHex,
+            aspectRatio
+          )
         )
-      )
 
-      val response = indexImage(id = image.id, image = image)
-      response.isError shouldBe true
-      response.error shouldBe a[ElasticError]
+        val response = indexImage(id = image.id, image = image)
+        response.isError shouldBe true
+        response.error shouldBe a[ElasticError]
     }
   }
 
@@ -83,10 +86,12 @@ class ImagesIndexConfigTest
 
     println(str.format("banana", "sausage"))
 
-    withLocalImagesIndex { implicit index =>
-      val response = indexJson(id = "baadf00d", json = """{"hello":"world"}""")
-      response.isError shouldBe true
-      response.error shouldBe a[ElasticError]
+    withLocalImagesIndex {
+      implicit index =>
+        val response =
+          indexJson(id = "baadf00d", json = """{"hello":"world"}""")
+        response.isError shouldBe true
+        response.error shouldBe a[ElasticError]
     }
   }
 
@@ -136,11 +141,14 @@ class ImagesIndexConfigTest
     image: Image[ImageState.Augmented]
   )(implicit index: Index) =
     eventually {
-      whenReady(elasticClient.execute(get(index, id))) { getResponse =>
-        getResponse.result.exists shouldBe true
+      whenReady(elasticClient.execute(get(index, id))) {
+        getResponse =>
+          getResponse.result.exists shouldBe true
 
-        fromJson[IndexedImage](getResponse.result.sourceAsString).get shouldBe imageTransformer
-          .deriveData(image)
+          fromJson[IndexedImage](
+            getResponse.result.sourceAsString
+          ).get shouldBe imageTransformer
+            .deriveData(image)
       }
     }
 }

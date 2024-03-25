@@ -20,7 +20,8 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
   val newerDate: Instant = Instant.parse("2001-01-01T01:01:01Z")
 
   protected def createTitleVarfield(
-    title: String = s"title-${randomAlphanumeric()}"): String =
+    title: String = s"title-${randomAlphanumeric()}"
+  ): String =
     s"""
        |{
        |  "marcTag": "245",
@@ -33,7 +34,8 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
   def createSierraBibRecordWith(
     id: SierraBibNumber = createSierraBibNumber,
     data: String = "",
-    modifiedDate: Instant = olderDate): SierraBibRecord = {
+    modifiedDate: Instant = olderDate
+  ): SierraBibRecord = {
 
     val recordData = if (data == "") {
       s"""
@@ -114,9 +116,11 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
   def createSierraOrderRecord: SierraOrderRecord =
     createSierraOrderRecordWith()
 
-  private def defaultItemData(id: SierraItemNumber,
-                              modifiedDate: Instant,
-                              bibIds: List[SierraBibNumber]): String =
+  private def defaultItemData(
+    id: SierraItemNumber,
+    modifiedDate: Instant,
+    bibIds: List[SierraBibNumber]
+  ): String =
     s"""
        |{
        |  "id": "$id",
@@ -125,9 +129,11 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
        |}
        |""".stripMargin
 
-  private def defaultHoldingsData(id: SierraHoldingsNumber,
-                                  modifiedDate: Instant,
-                                  bibIds: List[SierraBibNumber]): String =
+  private def defaultHoldingsData(
+    id: SierraHoldingsNumber,
+    modifiedDate: Instant,
+    bibIds: List[SierraBibNumber]
+  ): String =
     s"""
        |{
        |  "id": $id,
@@ -136,12 +142,15 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
        |}
        |""".stripMargin
 
-  private def defaultOrderData(id: SierraOrderNumber,
-                               modifiedDate: Instant,
-                               bibIds: List[SierraBibNumber]): String = {
+  private def defaultOrderData(
+    id: SierraOrderNumber,
+    modifiedDate: Instant,
+    bibIds: List[SierraBibNumber]
+  ): String = {
     val urls =
-      bibIds.map { id =>
-        s"https://libsys.wellcomelibrary.org/iii/sierra-api/v6/bibs/$id"
+      bibIds.map {
+        id =>
+          s"https://libsys.wellcomelibrary.org/iii/sierra-api/v6/bibs/$id"
       }
 
     s"""
@@ -165,18 +174,23 @@ trait SierraRecordGenerators extends SierraIdentifierGenerators {
     SierraTransformable(
       sierraId = bibId,
       maybeBibRecord = maybeBibRecord,
-      itemRecords = itemRecords.map { record =>
-        record.id -> record
+      itemRecords = itemRecords.map {
+        record =>
+          record.id -> record
       }.toMap,
-      holdingsRecords = holdingsRecords.map { record =>
-        record.id -> record
+      holdingsRecords = holdingsRecords.map {
+        record =>
+          record.id -> record
       }.toMap,
-      orderRecords = orderRecords.map { record =>
-        record.id -> record
+      orderRecords = orderRecords.map {
+        record =>
+          record.id -> record
       }.toMap,
       modifiedTime = {
         val times =
-          (Seq(maybeBibRecord).flatten ++ itemRecords ++ holdingsRecords ++ orderRecords)
+          (Seq(
+            maybeBibRecord
+          ).flatten ++ itemRecords ++ holdingsRecords ++ orderRecords)
             .map(_.modifiedDate)
 
         times match {
