@@ -20,6 +20,8 @@ steps:
       - "pipeline_storage"
       - "ingestor_common"
       - "transformer_common"
+      - "transformer_marc_common"
+      - "transformer_marc_xml"
       - "calm_api_client"
 
     # This will fail the build if internal model takes more than
@@ -161,9 +163,9 @@ steps:
       commit: "${BUILDKITE_COMMIT}"
       branch: "${BUILDKITE_BRANCH}"
       env:
-        BUILDKITE_PULL_REQUEST:             "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
         BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO:        "${BUILDKITE_PULL_REQUEST_REPO}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
 
   - label: trigger pipeline deployments
     if: build.branch == "main"
@@ -174,6 +176,6 @@ steps:
       commit: "${BUILDKITE_COMMIT}"
       branch: "${BUILDKITE_BRANCH}"
       env:
-        BUILDKITE_PULL_REQUEST:             "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
         BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO:        "${BUILDKITE_PULL_REQUEST_REPO}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
