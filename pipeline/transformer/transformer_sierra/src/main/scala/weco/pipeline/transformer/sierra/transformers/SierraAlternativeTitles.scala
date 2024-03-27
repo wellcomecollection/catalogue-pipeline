@@ -1,8 +1,8 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.sierra.models.SierraQueryOps
+import weco.pipeline.transformer.marc_common.transformers.MarcAlternativeTitles
+import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.sierra.models.data.SierraBibData
-import weco.sierra.models.marc.Subfield
 
 // Populate work:alternativeTitles
 //
@@ -18,25 +18,10 @@ import weco.sierra.models.marc.Subfield
 // should be omitted.
 object SierraAlternativeTitles
     extends SierraDataTransformer
-    with SierraQueryOps {
+    with SierraMarcDataConversions {
 
   type Output = List[String]
 
   def apply(bibData: SierraBibData): List[String] =
-    bibData
-      .varfieldsWithTags("240", "130", "246")
-      .filterNot {
-        varfield =>
-          varfield.marcTag.contains("246") && varfield.indicator2.contains("6")
-      }
-      .flatMap {
-        varfield =>
-          varfield.subfields
-            .filter {
-              case Subfield("5", "UkLW") => false
-              case _                     => true
-            }
-            .contentString(" ")
-      }
-      .distinct
+    MarcAlternativeTitles(bibData).toList
 }

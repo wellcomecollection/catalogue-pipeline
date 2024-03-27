@@ -46,8 +46,21 @@ class MarcXMLRecordTransformerTest
           <datafield tag ="022">
             <subfield code="a">1477-4615</subfield>
           </datafield>
-          <datafield tag ="250">
-            <subfield code="a">Director's cut</subfield>
+          <datafield tag ="130">
+            <subfield code="a">LLyfr Coch</subfield>
+          </datafield>
+          <datafield tag ="240">
+            <subfield code="a">Red Book</subfield>
+          </datafield>
+          <datafield tag ="246">
+            <subfield code="a">Mabinogion</subfield>
+          </datafield>
+          <datafield tag ="310">
+            <subfield code="a">Sizdah Behar on even-numbered years</subfield>
+          </datafield>
+          <datafield tag ="856">
+            <subfield code="y">Hampster Dance</subfield>
+            <subfield code="u">https://example.com/hampsterdance</subfield>
           </datafield>
           <datafield tag ="310">
             <subfield code="a">Sizdah Behar on even-numbered years</subfield>
@@ -60,12 +73,24 @@ class MarcXMLRecordTransformerTest
       )
     )
 
+    it("extracts alternative titles") {
+      work.data.alternativeTitles should contain theSameElementsAs Seq(
+        "LLyfr Coch",
+        "Red Book",
+        "Mabinogion"
+      )
+    }
+
     it("extracts ISBN and ISSN") {
       work.data.otherIdentifiers.map(
         _.value
       ) should contain theSameElementsAs Seq("8601416781396", "1477-4615")
     }
     
+    it("extracts the current frequency") {
+      work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
+    }
+
     it("extracts the current frequency") {
       work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
     }

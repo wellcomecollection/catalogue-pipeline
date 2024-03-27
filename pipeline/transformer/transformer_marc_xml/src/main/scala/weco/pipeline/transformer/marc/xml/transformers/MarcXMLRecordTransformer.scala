@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
+  MarcAlternativeTitles,
   MarcCurrentFrequency,
   MarcEdition,
   MarcElectronicResources,
@@ -50,6 +51,7 @@ object MarcXMLRecordTransformer {
   ): WorkData[DataState.Unidentified] = {
     WorkData[DataState.Unidentified](
       title = MarcTitle(record),
+      alternativeTitles = MarcAlternativeTitles(record).toList,
       otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
       currentFrequency = MarcCurrentFrequency(record),
       edition = MarcEdition(record),
