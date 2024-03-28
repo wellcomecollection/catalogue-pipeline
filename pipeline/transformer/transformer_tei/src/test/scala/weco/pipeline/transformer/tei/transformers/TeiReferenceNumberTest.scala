@@ -69,7 +69,8 @@ class TeiReferenceNumberTest
     )
 
     refNo.left.value.getMessage should startWith(
-      "Multiple instances of <idno type='msID'> found!")
+      "Multiple instances of <idno type='msID'> found!"
+    )
   }
   it("fails if the reference number is empty") {
     val result =

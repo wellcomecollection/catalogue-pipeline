@@ -96,7 +96,9 @@ class ArchiveRelationsCacheTest
     relationsCache(workX) shouldBe Relations.none
   }
 
-  it("Returns no relations when missing parent work (e.g if it is not visible)") {
+  it(
+    "Returns no relations when missing parent work (e.g if it is not visible)"
+  ) {
     val works = List(workA, workD, workE, workF).map(toRelationWork)
     val relationsCache = ArchiveRelationsCache(works)
     relationsCache(workB) shouldBe Relations.none
@@ -134,8 +136,9 @@ class ArchiveRelationsCacheTest
       .resourceToString("/paths.txt", StandardCharsets.UTF_8)
       .split("\n")
 
-    val relations = paths.map { p =>
-      toRelationWork(work(p))
+    val relations = paths.map {
+      p =>
+        toRelationWork(work(p))
     }
 
     val cache = ArchiveRelationsCache(relations)

@@ -16,9 +16,11 @@ case class ValidExampleData(id: SourceIdentifier, title: String)
 case object InvalidExampleData extends ExampleData
 
 class ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
-  override def apply(id: String,
-                     data: ExampleData,
-                     version: Int): Either[Exception, Work.Visible[Source]] =
+  override def apply(
+    id: String,
+    data: ExampleData,
+    version: Int
+  ): Either[Exception, Work.Visible[Source]] =
     data match {
       case ValidExampleData(id, title) =>
         Right(
@@ -36,10 +38,11 @@ class ExampleTransformer extends Transformer[ExampleData] with WorkGenerators {
 }
 
 class ExampleSourcePayloadLookup(
-  sourceStore: VersionedStore[S3ObjectLocation, Int, ExampleData])
-    extends SourceDataRetriever[CalmSourcePayload, ExampleData] {
-  override def lookupSourceData(p: CalmSourcePayload)
-    : Either[ReadError, Identified[Version[String, Int], ExampleData]] =
+  sourceStore: VersionedStore[S3ObjectLocation, Int, ExampleData]
+) extends SourceDataRetriever[CalmSourcePayload, ExampleData] {
+  override def lookupSourceData(
+    p: CalmSourcePayload
+  ): Either[ReadError, Identified[Version[String, Int], ExampleData]] =
     sourceStore
       .getLatest(p.location)
       .map {

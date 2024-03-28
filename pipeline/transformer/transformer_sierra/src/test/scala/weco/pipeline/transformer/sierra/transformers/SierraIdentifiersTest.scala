@@ -39,7 +39,8 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "020",
-            subfields = List(Subfield(tag = "a", content = isbn10)))
+            subfields = List(Subfield(tag = "a", content = isbn10))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -48,7 +49,8 @@ class SierraIdentifiersTest
           identifierType = IdentifierType.ISBN,
           ontologyType = "Work",
           value = isbn10
-        ))
+        )
+      )
     }
 
     it("multiple identifiers") {
@@ -56,10 +58,12 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "020",
-            subfields = List(Subfield(tag = "a", content = isbn10))),
+            subfields = List(Subfield(tag = "a", content = isbn10))
+          ),
           VarField(
             marcTag = "020",
-            subfields = List(Subfield(tag = "a", content = isbn13)))
+            subfields = List(Subfield(tag = "a", content = isbn13))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -68,13 +72,15 @@ class SierraIdentifiersTest
           identifierType = IdentifierType.ISBN,
           ontologyType = "Work",
           value = isbn10
-        ))
+        )
+      )
       otherIdentifiers should contain(
         SourceIdentifier(
           identifierType = IdentifierType.ISBN,
           ontologyType = "Work",
           value = isbn13
-        ))
+        )
+      )
     }
 
     it("deduplicates identifiers") {
@@ -82,10 +88,12 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "020",
-            subfields = List(Subfield(tag = "a", content = isbn10))),
+            subfields = List(Subfield(tag = "a", content = isbn10))
+          ),
           VarField(
             marcTag = "020",
-            subfields = List(Subfield(tag = "a", content = isbn10)))
+            subfields = List(Subfield(tag = "a", content = isbn10))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -110,7 +118,8 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "020",
-            subfields = List(Subfield(tag = "a", content = s" $isbn")))
+            subfields = List(Subfield(tag = "a", content = s" $isbn"))
+          )
         )
       )
 
@@ -126,7 +135,8 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "022",
-            subfields = List(Subfield(tag = "a", content = issn)))
+            subfields = List(Subfield(tag = "a", content = issn))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -135,7 +145,8 @@ class SierraIdentifiersTest
           identifierType = IdentifierType.ISSN,
           ontologyType = "Work",
           value = issn
-        ))
+        )
+      )
     }
 
     it("multiple identifiers") {
@@ -145,10 +156,12 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "022",
-            subfields = List(Subfield(tag = "a", content = issn1))),
+            subfields = List(Subfield(tag = "a", content = issn1))
+          ),
           VarField(
             marcTag = "022",
-            subfields = List(Subfield(tag = "a", content = issn2))),
+            subfields = List(Subfield(tag = "a", content = issn2))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -157,13 +170,15 @@ class SierraIdentifiersTest
           identifierType = IdentifierType.ISSN,
           ontologyType = "Work",
           value = issn1
-        ))
+        )
+      )
       otherIdentifiers should contain(
         SourceIdentifier(
           identifierType = IdentifierType.ISSN,
           ontologyType = "Work",
           value = issn2
-        ))
+        )
+      )
     }
 
     it("deduplicates identifiers") {
@@ -172,10 +187,12 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "022",
-            subfields = List(Subfield(tag = "a", content = issn))),
+            subfields = List(Subfield(tag = "a", content = issn))
+          ),
           VarField(
             marcTag = "022",
-            subfields = List(Subfield(tag = "a", content = issn))),
+            subfields = List(Subfield(tag = "a", content = issn))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -200,7 +217,8 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "022",
-            subfields = List(Subfield(tag = "a", content = s"$issn ")))
+            subfields = List(Subfield(tag = "a", content = s"$issn "))
+          )
         )
       )
 
@@ -216,7 +234,8 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = digcode)))
+            subfields = List(Subfield(tag = "a", content = digcode))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -231,10 +250,12 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = digcode1))),
+            subfields = List(Subfield(tag = "a", content = digcode1))
+          ),
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = digcode2))),
+            subfields = List(Subfield(tag = "a", content = digcode2))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -248,10 +269,12 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = digcode))),
+            subfields = List(Subfield(tag = "a", content = digcode))
+          ),
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = digcode)))
+            subfields = List(Subfield(tag = "a", content = digcode))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -270,11 +293,13 @@ class SierraIdentifiersTest
           // digitisation project!
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = "dig"))),
+            subfields = List(Subfield(tag = "a", content = "dig"))
+          ),
           // digcodes have to start with the special string `dig`
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = "notadigcode"))),
+            subfields = List(Subfield(tag = "a", content = "notadigcode"))
+          )
         )
       )
 
@@ -295,7 +320,8 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = marcDigcode)))
+            subfields = List(Subfield(tag = "a", content = marcDigcode))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -308,11 +334,13 @@ class SierraIdentifiersTest
         varFields = List(
           VarField(
             marcTag = "759",
-            subfields = List(Subfield(tag = "a", content = digcode))),
+            subfields = List(Subfield(tag = "a", content = digcode))
+          ),
           VarField(
             marcTag = "759",
             subfields =
-              List(Subfield(tag = "a", content = s"$digcode(Channel)")))
+              List(Subfield(tag = "a", content = s"$digcode(Channel)"))
+          )
         )
       )
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
@@ -380,7 +408,9 @@ class SierraIdentifiersTest
       )
 
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
-      otherIdentifiers.filter { _.identifierType == IdentifierType.ESTC } shouldBe empty
+      otherIdentifiers.filter {
+        _.identifierType == IdentifierType.ESTC
+      } shouldBe empty
     }
 
     it("skips the identifier if ǂc doesn't look like an ESTC reference") {
@@ -397,7 +427,9 @@ class SierraIdentifiersTest
       )
 
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
-      otherIdentifiers.filter { _.identifierType == IdentifierType.ESTC } shouldBe empty
+      otherIdentifiers.filter {
+        _.identifierType == IdentifierType.ESTC
+      } shouldBe empty
     }
 
     it("skips the identifier if there are multiple values of subfield ǂc") {
@@ -415,7 +447,9 @@ class SierraIdentifiersTest
       )
 
       val otherIdentifiers = SierraIdentifiers(createSierraBibNumber, bibData)
-      otherIdentifiers.filter { _.identifierType == IdentifierType.ESTC } shouldBe empty
+      otherIdentifiers.filter {
+        _.identifierType == IdentifierType.ESTC
+      } shouldBe empty
     }
   }
 }

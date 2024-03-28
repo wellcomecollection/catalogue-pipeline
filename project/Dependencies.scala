@@ -2,8 +2,9 @@ import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
 
-  val defaultVersion = "32.40.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion =
     "32.40.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  "32.40.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -94,19 +95,19 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val apacheCommons = "1.9"
+    val apacheCommons = "1.11.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
-    val fastparse = "2.3.0"
-    val scalatest = "3.2.3"
-    val scalatestplus = "3.1.2.0"
-    val scalacheckShapeless = "1.1.6"
-    val scalacsv = "1.3.5"
-    val scalaGraph = "1.12.5"
-    val enumeratum = "1.6.1"
-    val enumeratumScalacheck = "1.6.1"
-    val jsoup = "1.13.1"
-    val logback = "1.1.8"
+    val fastparse = "2.3.3"
+    val scalatest = "3.2.18"
+    val scalatestplus = "3.1.4.0"
+    val scalacheckShapeless = "1.1.8"
+    val scalacsv = "1.3.10"
+    val scalaGraph = "1.13.1"
+    val enumeratum = "1.7.3"
+    val enumeratumScalacheck = "1.7.3"
+    val jsoup = "1.17.2"
+    val logback = "1.1.11"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"
   }
@@ -125,9 +126,9 @@ object ExternalDependencies {
   )
 
   val mySqlDependencies = Seq(
-    "org.flywaydb" % "flyway-core" % "4.2.0",
-    "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
-    "mysql" % "mysql-connector-java" % "8.0.31"
+    "org.flywaydb" % "flyway-core" % "10.10.0",
+    "org.scalikejdbc" %% "scalikejdbc" % "3.4.2",
+    "mysql" % "mysql-connector-java" % "8.0.33"
   )
 
   val scalacheckDependencies = Seq(
@@ -153,7 +154,7 @@ object ExternalDependencies {
   )
 
   val scalaXmlDependencies = Seq(
-    "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
+    "org.scala-lang.modules" %% "scala-xml" % "1.3.1"
   )
 
   val jsoupDependencies = Seq(

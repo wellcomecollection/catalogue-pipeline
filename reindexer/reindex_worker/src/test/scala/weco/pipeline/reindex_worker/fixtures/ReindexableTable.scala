@@ -9,5 +9,6 @@ trait ReindexableTable extends DynamoFixtures {
     createTableWithHashKey(
       table,
       keyName = "id",
-      keyType = ScalarAttributeType.S)
+      keyType = ScalarAttributeType.S
+    )
 }

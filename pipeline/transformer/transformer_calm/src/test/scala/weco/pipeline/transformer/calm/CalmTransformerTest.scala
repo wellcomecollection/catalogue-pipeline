@@ -148,7 +148,7 @@ class CalmTransformerTest
             ontologyType = "Work"
           ),
           reason = "CALM/Sierra harvest work"
-        ),
+        )
       )
   }
 
@@ -237,7 +237,10 @@ class CalmTransformerTest
       "Subject" -> "<i>anatomy</i>",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.subjects should contain theSameElementsAs List(
+    CalmTransformer(
+      record,
+      version
+    ).right.get.data.subjects should contain theSameElementsAs List(
       Subject("anatomy", List(Concept("anatomy"))),
       Subject("botany", List(Concept("botany")))
     )
@@ -347,7 +350,10 @@ class CalmTransformerTest
       "CreatorName" -> "Rocksteady",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.contributors should contain theSameElementsAs List(
+    CalmTransformer(
+      record,
+      version
+    ).right.get.data.contributors should contain theSameElementsAs List(
       Contributor(
         agent =
           Agent(id = labelDerivedAgentIdentifier("bebop"), label = "Bebop"),
@@ -356,7 +362,8 @@ class CalmTransformerTest
       Contributor(
         agent = Agent(
           id = labelDerivedAgentIdentifier("rocksteady"),
-          label = "Rocksteady"),
+          label = "Rocksteady"
+        ),
         roles = Nil
       )
     )
@@ -373,7 +380,10 @@ class CalmTransformerTest
       "Arrangement" -> "meet at midnight",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.notes should contain theSameElementsAs List(
+    CalmTransformer(
+      record,
+      version
+    ).right.get.data.notes should contain theSameElementsAs List(
       Note(contents = "no copyright", noteType = NoteType.CopyrightNote),
       Note(contents = "meet at midnight", noteType = NoteType.ArrangementNote)
     )
@@ -388,7 +398,10 @@ class CalmTransformerTest
       "Alternative_Title" -> "Original title: Disk 2",
       "CatalogueStatus" -> "Catalogued"
     )
-    CalmTransformer(record, version).right.get.data.alternativeTitles shouldBe List("Original title: Disk 2")
+    CalmTransformer(
+      record,
+      version
+    ).right.get.data.alternativeTitles shouldBe List("Original title: Disk 2")
   }
 
   it("ignores case when transforming workType") {
@@ -485,11 +498,12 @@ class CalmTransformerTest
       (suppressibleRecordB, true)
     )
 
-    forAll(examples) { (record, suppressed) =>
-      CalmTransformer(record, version).right.get match {
-        case _: Work.Deleted[Source] => suppressed shouldBe true
-        case _                       => suppressed shouldBe false
-      }
+    forAll(examples) {
+      (record, suppressed) =>
+        CalmTransformer(record, version).right.get match {
+          case _: Work.Deleted[Source] => suppressed shouldBe true
+          case _                       => suppressed shouldBe false
+        }
     }
   }
 
@@ -510,8 +524,9 @@ class CalmTransformerTest
       "CatalogueStatus" -> "Catalogued"
     )
 
-    List(noTitle, noLevel, noRefNo) map { record =>
-      CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
+    List(noTitle, noLevel, noRefNo) map {
+      record =>
+        CalmTransformer(record, version).right.get shouldBe a[Work.Invisible[_]]
     }
   }
 

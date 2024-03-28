@@ -32,7 +32,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
           val pathId = PathId(
             "Batak/WMS_Batak_1.xml",
             "manuscript_1234",
-            Instant.parse("2021-06-07T10:00:00Z"))
+            Instant.parse("2021-06-07T10:00:00Z")
+          )
 
           manager.handlePathChanged(pathId, blobContents)
 
@@ -46,13 +47,17 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
             bucket,
             "2021-06-07T10:00:00Z",
             blobContents,
-            pathId.id)
+            pathId.id
+          )
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[
+              TeiIdChangeMessage
+            ]() should contain only (TeiIdChangeMessage(
             id = pathId.id,
             s3Location = expectedS3Location,
-            Instant.parse("2021-06-07T10:00:00Z")))
+            Instant.parse("2021-06-07T10:00:00Z")
+          ))
 
       }
     }
@@ -81,19 +86,24 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
             bucket,
             "2021-06-07T12:00:00Z",
             blobContents,
-            updatedPathId.id)
+            updatedPathId.id
+          )
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[
+              TeiIdChangeMessage
+            ]() should contain only (TeiIdChangeMessage(
             id = updatedPathId.id,
             s3Location = expectedS3Location,
-            oldTime.plus(2, ChronoUnit.HOURS)))
+            oldTime.plus(2, ChronoUnit.HOURS)
+          ))
       }
 
     }
 
     it(
-      "ignores a change to previously seen id & path if the timestamp saved is greater than the timestamp in the message") {
+      "ignores a change to previously seen id & path if the timestamp saved is greater than the timestamp in the message"
+    ) {
       withPathIdManager(bucket) {
         case (table, manager, store, messageSender) =>
           implicit val session = AutoSession
@@ -133,7 +143,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
           val updatedPathId = storedPathId.copy(
             timeModified = newTime,
-            path = "Batak/newpath.xml")
+            path = "Batak/newpath.xml"
+          )
 
           manager.handlePathChanged(updatedPathId, blobContents)
 
@@ -147,13 +158,17 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
             bucket,
             "2021-06-07T12:00:00Z",
             blobContents,
-            updatedPathId.id)
+            updatedPathId.id
+          )
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
+            .getMessages[
+              TeiIdChangeMessage
+            ]() should contain only TeiIdChangeMessage(
             id = updatedPathId.id,
             s3Location = expectedS3Location,
-            newTime)
+            newTime
+          )
       }
 
     }
@@ -184,19 +199,24 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
             bucket,
             "2021-06-07T12:00:00Z",
             blobContents,
-            updatedPathId.id)
+            updatedPathId.id
+          )
 
           messageSender
-            .getMessages[TeiIdMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[
+              TeiIdMessage
+            ]() should contain only (TeiIdChangeMessage(
             id = updatedPathId.id,
             s3Location = expectedS3Location,
-            newTime), TeiIdDeletedMessage(id = "manuscript_1234", newTime))
+            newTime
+          ), TeiIdDeletedMessage(id = "manuscript_1234", newTime))
 
       }
     }
 
     it(
-      "ignores messages for a previously seen path if stored time is newer than the message time") {
+      "ignores messages for a previously seen path if stored time is newer than the message time"
+    ) {
       withPathIdManager(bucket) {
         case (table, manager, store, messageSender) =>
           implicit val session = AutoSession
@@ -222,7 +242,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
     }
 
     it(
-      "ignores changes to a saved id if the timeModified in the database is greater") {
+      "ignores changes to a saved id if the timeModified in the database is greater"
+    ) {
       withPathIdManager(bucket) {
         case (table, manager, store, messageSender) =>
           implicit val session = AutoSession
@@ -235,7 +256,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
           val updatedPathId = storedPathId.copy(
             path = "Batak/newpath.xml",
-            timeModified = newTime)
+            timeModified = newTime
+          )
           manager.handlePathChanged(updatedPathId, blobContents)
 
           val maybePathId = withSQL {
@@ -250,7 +272,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
     }
 
     it(
-      "records that a previously seen id has moved into a previously seen path") {
+      "records that a previously seen id has moved into a previously seen path"
+    ) {
 
       withPathIdManager(bucket) {
         case (table, manager, store, messageSender) =>
@@ -282,18 +305,23 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
             bucket,
             "2021-06-07T14:00:00Z",
             blobContents,
-            id2)
+            id2
+          )
 
           messageSender
-            .getMessages[TeiIdMessage]() should contain only (TeiIdChangeMessage(
+            .getMessages[
+              TeiIdMessage
+            ]() should contain only (TeiIdChangeMessage(
             id = id2,
             s3Location = expectedS3Location,
-            newTime), TeiIdDeletedMessage(id = id1, newTime))
+            newTime
+          ), TeiIdDeletedMessage(id = id1, newTime))
 
       }
     }
     it(
-      "ignores changes to previously seen id and  previously seen path if the timestamp in the message is older than the ones in the database") {
+      "ignores changes to previously seen id and  previously seen path if the timestamp in the message is older than the ones in the database"
+    ) {
       withPathIdManager(bucket) {
         case (table, manager, store, messageSender) =>
           implicit val session = AutoSession
@@ -320,7 +348,8 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
 
           listOfpathIds should contain theSameElementsAs List(
             firstPathId,
-            secondPathId)
+            secondPathId
+          )
           store.entries shouldBe empty
           messageSender.getMessages[TeiIdMessage]() shouldBe empty
       }
@@ -347,14 +376,18 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
           }.map(PathId(table.p)).single.apply()
           maybePathId shouldBe None
           messageSender
-            .getMessages[TeiIdDeletedMessage]() should contain only TeiIdDeletedMessage(
+            .getMessages[
+              TeiIdDeletedMessage
+            ]() should contain only TeiIdDeletedMessage(
             id = "manuscript_1234",
-            newTime)
+            newTime
+          )
       }
     }
 
     it(
-      "does not delete a path if the timeModified in the table is greater than the timeDeleted") {
+      "does not delete a path if the timeModified in the table is greater than the timeDeleted"
+    ) {
       withPathIdManager(bucket) {
         case (table, manager, _, messageSender) =>
           implicit val session = AutoSession
@@ -396,11 +429,13 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
     }
   }
 
-  private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String],
-                                bucket: Bucket,
-                                modifiedTime: String,
-                                fileContents: String,
-                                id: String) = {
+  private def checkFileIsStored(
+    store: MemoryStore[S3ObjectLocation, String],
+    bucket: Bucket,
+    modifiedTime: String,
+    fileContents: String,
+    id: String
+  ) = {
     val expectedKey =
       s"tei_files/${id}/${Instant.parse(modifiedTime).getEpochSecond}.xml"
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
@@ -410,15 +445,22 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
   }
 
   def withPathIdManager[R](bucket: Bucket)(
-    testWith: TestWith[(PathIdTable,
-                        PathIdManager[String],
-                        MemoryStore[S3ObjectLocation, String],
-                        MemoryMessageSender),
-                       R]) =
-    withInitializedPathIdTable { table =>
-      val store = new MemoryStore[S3ObjectLocation, String](Map())
-      val messageSender: MemoryMessageSender = new MemoryMessageSender()
-      val manager = new PathIdManager(table, store, messageSender, bucket.name)
-      testWith((table, manager, store, messageSender))
+    testWith: TestWith[
+      (
+        PathIdTable,
+        PathIdManager[String],
+        MemoryStore[S3ObjectLocation, String],
+        MemoryMessageSender
+      ),
+      R
+    ]
+  ) =
+    withInitializedPathIdTable {
+      table =>
+        val store = new MemoryStore[S3ObjectLocation, String](Map())
+        val messageSender: MemoryMessageSender = new MemoryMessageSender()
+        val manager =
+          new PathIdManager(table, store, messageSender, bucket.name)
+        testWith((table, manager, store, messageSender))
     }
 }

@@ -77,12 +77,12 @@ class ManagerInferrerIntegrationTest
               id should be(image.state.canonicalId)
               inside(inferredData) {
                 case InferredData(
-                    features1,
-                    features2,
-                    reducedFeatures,
-                    paletteEmbedding,
-                    Some(averageColorHex),
-                    aspectRatio
+                      features1,
+                      features2,
+                      reducedFeatures,
+                      paletteEmbedding,
+                      Some(averageColorHex),
+                      aspectRatio
                     ) =>
                   // Note for future explorers: if a vector is the wrong length,
                   // make sure that the inferrer is encoding a list of single precision
@@ -109,13 +109,14 @@ class ManagerInferrerIntegrationTest
   val localImageServerPort = 2718
 
   def inferrersAreHealthy: Boolean =
-    localInferrerPorts.values.forall { port =>
-      val source =
-        Source.fromURL(s"http://localhost:$port/healthcheck")
-      try source.mkString.nonEmpty
-      catch {
-        case _: Exception => false
-      } finally source.close()
+    localInferrerPorts.values.forall {
+      port =>
+        val source =
+          Source.fromURL(s"http://localhost:$port/healthcheck")
+        try source.mkString.nonEmpty
+        catch {
+          case _: Exception => false
+        } finally source.close()
     }
 
   def withWorkerServiceFixtures[R](image: Image[Initial])(
@@ -129,44 +130,47 @@ class ManagerInferrerIntegrationTest
       R
     ]
   ): R =
-    withLocalSqsQueuePair() { queuePair =>
-      val messageSender = new MemoryMessageSender()
-      val root = Paths.get("integration-tmp").toFile
-      root.mkdir()
-      withActorSystem { implicit actorSystem =>
-        val augmentedImages = mutable.Map.empty[String, Image[Augmented]]
-        withWorkerService(
-          queuePair.queue,
-          messageSender,
-          augmentedImages = augmentedImages,
-          initialImages = List(image),
-          adapters = Set(
-            new FeatureVectorInferrerAdapter(
-              "localhost",
-              localInferrerPorts("feature")
-            ),
-            new PaletteInferrerAdapter(
-              "localhost",
-              localInferrerPorts("palette")
-            ),
-            new AspectRatioInferrerAdapter(
-              "localhost",
-              localInferrerPorts("aspect_ratio")
-            )
-          ),
-          fileWriter = new DefaultFileWriter(root.getPath),
-          inferrerRequestPool =
-            Http().superPool[((DownloadedImage, InferrerAdapter), Message)](),
-          imageRequestPool =
-            Http().superPool[((Uri, MergedIdentifiedImage), Message)](),
-          fileRoot = root.getPath
-        ) { _ =>
-          try {
-            testWith((queuePair, messageSender, augmentedImages, root))
-          } finally {
-            root.delete()
-          }
+    withLocalSqsQueuePair() {
+      queuePair =>
+        val messageSender = new MemoryMessageSender()
+        val root = Paths.get("integration-tmp").toFile
+        root.mkdir()
+        withActorSystem {
+          implicit actorSystem =>
+            val augmentedImages = mutable.Map.empty[String, Image[Augmented]]
+            withWorkerService(
+              queuePair.queue,
+              messageSender,
+              augmentedImages = augmentedImages,
+              initialImages = List(image),
+              adapters = Set(
+                new FeatureVectorInferrerAdapter(
+                  "localhost",
+                  localInferrerPorts("feature")
+                ),
+                new PaletteInferrerAdapter(
+                  "localhost",
+                  localInferrerPorts("palette")
+                ),
+                new AspectRatioInferrerAdapter(
+                  "localhost",
+                  localInferrerPorts("aspect_ratio")
+                )
+              ),
+              fileWriter = new DefaultFileWriter(root.getPath),
+              inferrerRequestPool = Http()
+                .superPool[((DownloadedImage, InferrerAdapter), Message)](),
+              imageRequestPool =
+                Http().superPool[((Uri, MergedIdentifiedImage), Message)](),
+              fileRoot = root.getPath
+            ) {
+              _ =>
+                try {
+                  testWith((queuePair, messageSender, augmentedImages, root))
+                } finally {
+                  root.delete()
+                }
+            }
         }
-      }
     }
 }

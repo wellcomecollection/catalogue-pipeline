@@ -30,13 +30,11 @@ class BatcherWorkerServiceTest
   /** The following tests use paths representing this tree:
     *
     * A
-    * |
-    * |-------------
-    * |  |         |
-    * B  C         E
-    * |  |------   |---------
-    * |  |  |  |   |  |  |  |
-    * D  X  Y  Z   1  2  3  4
+    * \|
+    * \|-------------
+    * \| | | B C E
+    * \| |------ |---------
+    * \| | | | | | | | D X Y Z 1 2 3 4
     */
   it("processes incoming paths into batches") {
     withWorkerService(visibilityTimeout = 2 seconds) {
@@ -55,7 +53,7 @@ class BatcherWorkerServiceTest
           Children("A"),
           Children("A/E"),
           Descendents("A/B"),
-          Descendents("A/E/1"),
+          Descendents("A/E/1")
         )
     }
   }
@@ -73,7 +71,8 @@ class BatcherWorkerServiceTest
         batches.size shouldBe 2
         batchRoots(batches) shouldBe Set("A", "Other")
         batchWithRoot("A", batches) should contain theSameElementsAs List(
-          Tree("A"))
+          Tree("A")
+        )
         batchWithRoot("Other", batches) should contain theSameElementsAs List(
           Node("Other"),
           Children("Other"),
@@ -105,7 +104,8 @@ class BatcherWorkerServiceTest
     withWorkerService(
       visibilityTimeout = 2 seconds,
       brokenPaths = Set("A/E", "A/B"),
-      flushInterval = 750 milliseconds) {
+      flushInterval = 750 milliseconds
+    ) {
       case (QueuePair(queue, dlq), msgSender) =>
         sendNotificationToSQS(queue = queue, body = "A/E")
         sendNotificationToSQS(queue = queue, body = "A/B")
@@ -121,7 +121,10 @@ class BatcherWorkerServiceTest
         val sentBatches = msgSender.getMessages[Batch]
         sentBatches.size shouldBe 1
         batchRoots(sentBatches) shouldBe Set("Other")
-        batchWithRoot("Other", sentBatches) should contain theSameElementsAs List(
+        batchWithRoot(
+          "Other",
+          sentBatches
+        ) should contain theSameElementsAs List(
           Node("Other"),
           Children("Other"),
           Descendents("Other/Tree")
@@ -135,26 +138,30 @@ class BatcherWorkerServiceTest
   def batchWithRoot(rootPath: String, batches: Seq[Batch]): List[Selector] =
     batches.find(_.rootPath == rootPath).get.selectors
 
-  def withWorkerService[R](visibilityTimeout: Duration = 5 seconds,
-                           maxBatchSize: Int = 10,
-                           brokenPaths: Set[String] = Set.empty,
-                           flushInterval: FiniteDuration = 500 milliseconds)(
-    testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
-    withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) { queuePair =>
-      withActorSystem { implicit actorSystem =>
-        withSQSStream[NotificationMessage, R](queuePair.queue) { msgStream =>
-          val msgSender = new MessageSender(brokenPaths)
-          val workerService = new BatcherWorkerService[String](
-            msgStream = msgStream,
-            msgSender = msgSender,
-            flushInterval = flushInterval,
-            maxProcessedPaths = 1000,
-            maxBatchSize = maxBatchSize
-          )
-          workerService.run()
-          testWith((queuePair, msgSender))
+  def withWorkerService[R](
+    visibilityTimeout: Duration = 5 seconds,
+    maxBatchSize: Int = 10,
+    brokenPaths: Set[String] = Set.empty,
+    flushInterval: FiniteDuration = 500 milliseconds
+  )(testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
+    withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
+      queuePair =>
+        withActorSystem {
+          implicit actorSystem =>
+            withSQSStream[NotificationMessage, R](queuePair.queue) {
+              msgStream =>
+                val msgSender = new MessageSender(brokenPaths)
+                val workerService = new BatcherWorkerService[String](
+                  msgStream = msgStream,
+                  msgSender = msgSender,
+                  flushInterval = flushInterval,
+                  maxProcessedPaths = 1000,
+                  maxBatchSize = maxBatchSize
+                )
+                workerService.run()
+                testWith((queuePair, msgSender))
+            }
         }
-      }
     }
 
   class MessageSender(brokenPaths: Set[String] = Set.empty)

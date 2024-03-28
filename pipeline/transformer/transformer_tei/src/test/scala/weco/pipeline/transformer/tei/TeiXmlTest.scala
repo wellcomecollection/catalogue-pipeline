@@ -63,8 +63,10 @@ class TeiXmlTest
   it("fails if there are more than one title node") {
     val titleString1 = "This is the first title"
     val titleString2 = "This is the second title"
-    val titleStm = { <idno type="msID">{titleString1}</idno>
-      <idno type="msID">{titleString2}</idno> }
+    val titleStm = {
+      <idno type="msID">{titleString1}</idno>
+      <idno type="msID">{titleString2}</idno>
+    }
     val result =
       TeiXml(id, teiXml(id = id, refNo = titleStm).toString()).flatMap(_.parse)
     result shouldBe a[Left[_, _]]
@@ -78,7 +80,8 @@ class TeiXmlTest
       TeiXml(
         id,
         teiXml(id = id, identifiers = Some(sierraIdentifiers(bnumber)))
-          .toString()).flatMap(_.parse).value.bNumber shouldBe Some(bnumber)
+          .toString()
+      ).flatMap(_.parse).value.bNumber shouldBe Some(bnumber)
     }
 
     it("fails if there's more than one b-number in the XML") {
@@ -151,17 +154,40 @@ class TeiXmlTest
     val result = new TeiXml(
       teiXml(
         id,
-        physDesc = Some(physDesc(handNotes = List(
-          handNotes(persNames = List(scribe("Tony Stark"))),
-          handNotes(persNames = List(scribe("Peter Parker"))),
-          handNotes(persNames = List(scribe("Steve Rogers"))))))
-
-      )).parse
+        physDesc = Some(
+          physDesc(handNotes =
+            List(
+              handNotes(persNames = List(scribe("Tony Stark"))),
+              handNotes(persNames = List(scribe("Peter Parker"))),
+              handNotes(persNames = List(scribe("Steve Rogers")))
+            )
+          )
+        )
+      )
+    ).parse
 
     result.value.contributors shouldBe List(
-      Contributor(agent = Person(label = "Tony Stark", id = labelDerivedPersonIdentifier("tony stark")), roles = List(ContributionRole("scribe"))),
-      Contributor(agent = Person(label = "Peter Parker", id = labelDerivedPersonIdentifier("peter parker")), roles = List(ContributionRole("scribe"))),
-      Contributor(agent = Person(label = "Steve Rogers", id = labelDerivedPersonIdentifier("steve rogers")), roles = List(ContributionRole("scribe")))
+      Contributor(
+        agent = Person(
+          label = "Tony Stark",
+          id = labelDerivedPersonIdentifier("tony stark")
+        ),
+        roles = List(ContributionRole("scribe"))
+      ),
+      Contributor(
+        agent = Person(
+          label = "Peter Parker",
+          id = labelDerivedPersonIdentifier("peter parker")
+        ),
+        roles = List(ContributionRole("scribe"))
+      ),
+      Contributor(
+        agent = Person(
+          label = "Steve Rogers",
+          id = labelDerivedPersonIdentifier("steve rogers")
+        ),
+        roles = List(ContributionRole("scribe"))
+      )
     )
   }
 
@@ -169,52 +195,85 @@ class TeiXmlTest
     val result = new TeiXml(
       teiXml(
         id,
-        history = Some(history(origPlace = Some(origPlace(country = Some("India")))))
-      )).parse
+        history =
+          Some(history(origPlace = Some(origPlace(country = Some("India")))))
+      )
+    ).parse
 
     result.value.origin shouldBe List(
       ProductionEvent(
         "India",
         places = List(Place("India")),
         agents = Nil,
-        dates = Nil))
+        dates = Nil
+      )
+    )
   }
 
-  it("extracts material description for the wrapper work"){
+  it("extracts material description for the wrapper work") {
     val result = new TeiXml(
       teiXml(
         id,
-        physDesc = Some(physDesc(objectDesc = Some(objectDesc(None,
-          support = Some(support("Multiple manuscript parts collected in one volume."))))))
-      )).parse
-
-    result.value.physicalDescription shouldBe Some("Multiple manuscript parts collected in one volume.")
-  }
-
-  it("extracts subjects for the wrapper work"){
-    val result = new TeiXml(
-      teiXml(
-        id,
-        profileDesc = Some(profileDesc(keywords = List(keywords(subjects = List(subject("Botany"))))))      )).parse
-
-    result.value.subjects shouldBe List(Subject(
-      id = labelDerivedSubjectIdentifier("botany"),
-      label = "Botany", concepts = List(Concept(label ="Botany"))))
-  }
-
-  it("adds hand notes"){
-    val id = "id"
-    val result = new TeiXml(
-      teiXml(
-        id,
-        physDesc = Some(physDesc(handNotes = List(
-          handNotes(
-            label = "neatly written text"),handNotes(
-            label = "even more neatly written text")))
+        physDesc = Some(
+          physDesc(objectDesc =
+            Some(
+              objectDesc(
+                None,
+                support = Some(
+                  support("Multiple manuscript parts collected in one volume.")
+                )
+              )
+            )
+          )
         )
       )
     ).parse
 
-    result.value.notes shouldBe List(Note(NoteType.HandNote, "neatly written text"), Note(NoteType.HandNote, "even more neatly written text"))
+    result.value.physicalDescription shouldBe Some(
+      "Multiple manuscript parts collected in one volume."
+    )
+  }
+
+  it("extracts subjects for the wrapper work") {
+    val result = new TeiXml(
+      teiXml(
+        id,
+        profileDesc = Some(
+          profileDesc(keywords =
+            List(keywords(subjects = List(subject("Botany"))))
+          )
+        )
+      )
+    ).parse
+
+    result.value.subjects shouldBe List(
+      Subject(
+        id = labelDerivedSubjectIdentifier("botany"),
+        label = "Botany",
+        concepts = List(Concept(label = "Botany"))
+      )
+    )
+  }
+
+  it("adds hand notes") {
+    val id = "id"
+    val result = new TeiXml(
+      teiXml(
+        id,
+        physDesc = Some(
+          physDesc(handNotes =
+            List(
+              handNotes(label = "neatly written text"),
+              handNotes(label = "even more neatly written text")
+            )
+          )
+        )
+      )
+    ).parse
+
+    result.value.notes shouldBe List(
+      Note(NoteType.HandNote, "neatly written text"),
+      Note(NoteType.HandNote, "even more neatly written text")
+    )
   }
 }

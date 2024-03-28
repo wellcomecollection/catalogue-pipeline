@@ -310,8 +310,9 @@ class DisplayWorkTest
         contributorAgentSourceIdentifier,
         contributorOrganisationSourceIdentifier,
         contributorPersonSourceIdentifier
-      ).map { identifier =>
-        Some(List(DisplayIdentifier(identifier)))
+      ).map {
+        identifier =>
+          Some(List(DisplayIdentifier(identifier)))
       }
 
       val agents = displayWork.contributors.map { _.agent }

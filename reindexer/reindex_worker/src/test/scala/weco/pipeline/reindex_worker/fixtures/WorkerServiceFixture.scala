@@ -31,28 +31,31 @@ trait WorkerServiceFixture
   def withWorkerService[R](
     messageSender: MemoryIndividualMessageSender,
     queue: Queue,
-    configMap: Map[String, (Table, Destination, ReindexSource)])(
-    testWith: TestWith[ReindexWorkerService[Destination], R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-        val workerService = new ReindexWorkerService(
-          recordReader = new RecordReader,
-          bulkMessageSender = new BulkMessageSender[Destination](messageSender),
-          sqsStream = sqsStream,
-          reindexJobConfigMap = configMap.map {
-            case (key: String, (table, destination, source)) =>
-              key -> ReindexJobConfig(
-                dynamoConfig = createDynamoConfigWith(table),
-                destinationConfig = destination,
-                source = source
-              )
-          }
-        )
+    configMap: Map[String, (Table, Destination, ReindexSource)]
+  )(testWith: TestWith[ReindexWorkerService[Destination], R]): R =
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue) {
+          sqsStream =>
+            val workerService = new ReindexWorkerService(
+              recordReader = new RecordReader,
+              bulkMessageSender =
+                new BulkMessageSender[Destination](messageSender),
+              sqsStream = sqsStream,
+              reindexJobConfigMap = configMap.map {
+                case (key: String, (table, destination, source)) =>
+                  key -> ReindexJobConfig(
+                    dynamoConfig = createDynamoConfigWith(table),
+                    destinationConfig = destination,
+                    source = source
+                  )
+              }
+            )
 
-        workerService.run()
+            workerService.run()
 
-        testWith(workerService)
-      }
+            testWith(workerService)
+        }
     }
 
   def chooseReindexSource: ReindexSource =
@@ -63,16 +66,18 @@ trait WorkerServiceFixture
       ReindexSource.Sierra
     )
 
-  def withWorkerService[R](messageSender: MemoryIndividualMessageSender,
-                           queue: Queue,
-                           table: Table,
-                           destination: Destination,
-                           source: ReindexSource = chooseReindexSource)(
-    testWith: TestWith[ReindexWorkerService[Destination], R]): R =
+  def withWorkerService[R](
+    messageSender: MemoryIndividualMessageSender,
+    queue: Queue,
+    table: Table,
+    destination: Destination,
+    source: ReindexSource = chooseReindexSource
+  )(testWith: TestWith[ReindexWorkerService[Destination], R]): R =
     withWorkerService(
       messageSender,
       queue,
-      configMap = Map(defaultJobConfigId -> ((table, destination, source)))) {
+      configMap = Map(defaultJobConfigId -> ((table, destination, source)))
+    ) {
       service =>
         testWith(service)
     }
@@ -84,7 +89,8 @@ trait WorkerServiceFixture
 
   def createReindexRequestWith(
     jobConfigId: String = defaultJobConfigId,
-    parameters: ReindexParameters = defaultParameters): ReindexRequest =
+    parameters: ReindexParameters = defaultParameters
+  ): ReindexRequest =
     ReindexRequest(
       jobConfigId = jobConfigId,
       parameters = parameters

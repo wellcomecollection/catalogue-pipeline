@@ -27,7 +27,7 @@ class WorkTypeTest extends AnyFunSpec with Matchers {
     (WorkType.Section, "Section"),
     (WorkType.Series, "Series"),
     (WorkType.Collection, "Collection"),
-    (WorkType.Standard, "Standard"),
+    (WorkType.Standard, "Standard")
   )
 
   def quoted(raw: String): String = s""""$raw""""

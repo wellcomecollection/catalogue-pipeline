@@ -30,17 +30,20 @@ trait PathIdDatabase
       val database: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.database)
       val table: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.tableName)
 
-      val fields = NamedDB('default) readOnly { implicit session =>
-        sql"DESCRIBE $database.$table"
-          .map(
-            rs =>
-              FieldDescription(
-                rs.string("Field"),
-                rs.string("Type"),
-                rs.string("Null"),
-                rs.string("Key")))
-          .list()
-          .apply()
+      val fields = NamedDB('default) readOnly {
+        implicit session =>
+          sql"DESCRIBE $database.$table"
+            .map(
+              rs =>
+                FieldDescription(
+                  rs.string("Field"),
+                  rs.string("Type"),
+                  rs.string("Null"),
+                  rs.string("Key")
+                )
+            )
+            .list()
+            .apply()
       }
 
       fields.sortBy(_.field) shouldBe Seq(
@@ -48,17 +51,20 @@ trait PathIdDatabase
           field = "id",
           dataType = "varchar(255)",
           nullable = "NO",
-          key = "UNI"),
+          key = "UNI"
+        ),
         FieldDescription(
           field = "path",
           dataType = "varchar(255)",
           nullable = "NO",
-          key = "PRI"),
+          key = "PRI"
+        ),
         FieldDescription(
           field = "timeModified",
           dataType = "bigint(20) unsigned",
           nullable = "NO",
-          key = "")
+          key = ""
+        )
       ).sortBy(_.field)
     }
 
@@ -95,8 +101,9 @@ trait PathIdDatabase
 
       testWith(pathIdTableConfig)
     } finally {
-      NamedDB('default) localTx { implicit session =>
-        sql"DROP DATABASE IF EXISTS $pathIdDatabase".execute().apply()
+      NamedDB('default) localTx {
+        implicit session =>
+          sql"DROP DATABASE IF EXISTS $pathIdDatabase".execute().apply()
       }
 
       session.close()
@@ -105,10 +112,12 @@ trait PathIdDatabase
   }
 
   def withPathIdTable[R](
-    testWith: TestWith[(PathIdTableConfig, PathIdTable), R]): R = {
-    withPathIdDatabase { config =>
-      val table = new PathIdTable(config)
-      testWith((config, table))
+    testWith: TestWith[(PathIdTableConfig, PathIdTable), R]
+  ): R = {
+    withPathIdDatabase {
+      config =>
+        val table = new PathIdTable(config)
+        testWith((config, table))
     }
   }
 

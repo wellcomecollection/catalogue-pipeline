@@ -36,17 +36,20 @@ class MatcherWorkerServiceTest
     val expectedWorks =
       Set(
         MatchedIdentifiers(
-          identifiers = Set(WorkIdentifier(work.id, version = work.version)))
+          identifiers = Set(WorkIdentifier(work.id, version = work.version))
+        )
       )
 
     implicit val retriever: MemoryRetriever[WorkStub] =
       new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue() { implicit queue =>
-      withMatcherService(retriever, queue, messageSender) { _ =>
-        processAndAssertMatchedWorkIs(work, expectedWorks = expectedWorks)
-      }
+    withLocalSqsQueue() {
+      implicit queue =>
+        withMatcherService(retriever, queue, messageSender) {
+          _ =>
+            processAndAssertMatchedWorkIs(work, expectedWorks = expectedWorks)
+        }
     }
   }
 
@@ -65,7 +68,7 @@ class MatcherWorkerServiceTest
       Set(
         MatchedIdentifiers(
           identifiers = Set(
-            WorkIdentifier(idA, version = 1),
+            WorkIdentifier(idA, version = 1)
           )
         )
       )
@@ -74,10 +77,15 @@ class MatcherWorkerServiceTest
       new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue() { implicit queue =>
-      withMatcherService(retriever, queue, messageSender) { _ =>
-        processAndAssertMatchedWorkIs(workAv1, expectedWorks = expectedWorks)
-      }
+    withLocalSqsQueue() {
+      implicit queue =>
+        withMatcherService(retriever, queue, messageSender) {
+          _ =>
+            processAndAssertMatchedWorkIs(
+              workAv1,
+              expectedWorks = expectedWorks
+            )
+        }
     }
   }
 
@@ -160,14 +168,16 @@ class MatcherWorkerServiceTest
       new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue() { implicit queue =>
-      withMatcherService(retriever, queue, messageSender) { _ =>
-        processAndAssertMatchedWorkIs(workAv1, expectedWorksAv1)
-        processAndAssertMatchedWorkIs(workBv1, expectedWorksBv1)
-        processAndAssertMatchedWorkIs(workAv2, expectedWorksAv2)
-        processAndAssertMatchedWorkIs(workCv1, expectedWorksCv1)
-        processAndAssertMatchedWorkIs(workBv2, expectedWorksBv2)
-      }
+    withLocalSqsQueue() {
+      implicit queue =>
+        withMatcherService(retriever, queue, messageSender) {
+          _ =>
+            processAndAssertMatchedWorkIs(workAv1, expectedWorksAv1)
+            processAndAssertMatchedWorkIs(workBv1, expectedWorksBv1)
+            processAndAssertMatchedWorkIs(workAv2, expectedWorksAv2)
+            processAndAssertMatchedWorkIs(workCv1, expectedWorksCv1)
+            processAndAssertMatchedWorkIs(workBv2, expectedWorksBv2)
+        }
     }
   }
 
@@ -237,17 +247,21 @@ class MatcherWorkerServiceTest
       new MemoryRetriever[WorkStub]()
     implicit val messageSender: MemoryMessageSender = new MemoryMessageSender()
 
-    withLocalSqsQueue() { implicit queue =>
-      withMatcherService(retriever, queue, messageSender) { _ =>
-        processAndAssertMatchedWorkIs(workAv1, expectedWorksAv1)
-        processAndAssertMatchedWorkIs(workBv1, expectedWorksBv1)
-        processAndAssertMatchedWorkIs(
-          workAv2MatchedToB,
-          expectedWorksAv2MatchedToB)
-        processAndAssertMatchedWorkIs(
-          workAv3WithNoMatchingWorks,
-          expectedWorksAv3)
-      }
+    withLocalSqsQueue() {
+      implicit queue =>
+        withMatcherService(retriever, queue, messageSender) {
+          _ =>
+            processAndAssertMatchedWorkIs(workAv1, expectedWorksAv1)
+            processAndAssertMatchedWorkIs(workBv1, expectedWorksBv1)
+            processAndAssertMatchedWorkIs(
+              workAv2MatchedToB,
+              expectedWorksAv2MatchedToB
+            )
+            processAndAssertMatchedWorkIs(
+              workAv3WithNoMatchingWorks,
+              expectedWorksAv3
+            )
+        }
     }
   }
 
@@ -272,26 +286,27 @@ class MatcherWorkerServiceTest
       case QueuePair(queue, dlq) =>
         implicit val q: SQS.Queue = queue
 
-        withMatcherService(retriever, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(workAv2, expectedWorkAv2)
+        withMatcherService(retriever, queue, messageSender) {
+          _ =>
+            processAndAssertMatchedWorkIs(workAv2, expectedWorkAv2)
 
-          // Work V1 is sent but not matched
-          val workAv1 =
-            createWorkWith(
-              id = idA,
-              version = 1
-            )
+            // Work V1 is sent but not matched
+            val workAv1 =
+              createWorkWith(
+                id = idA,
+                version = 1
+              )
 
-          sendWork(workAv1, retriever, queue)
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+            sendWork(workAv1, retriever, queue)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
 
-            messageSender
-              .getMessages[MatcherResult]
-              .last
-              .works shouldBe expectedWorkAv2
-          }
+              messageSender
+                .getMessages[MatcherResult]
+                .last
+                .works shouldBe expectedWorkAv2
+            }
         }
     }
   }
@@ -317,31 +332,32 @@ class MatcherWorkerServiceTest
       case QueuePair(queue, dlq) =>
         implicit val q: SQS.Queue = queue
 
-        withMatcherService(retriever, queue, messageSender) { _ =>
-          processAndAssertMatchedWorkIs(workAv2, expectedWorkAv2)
+        withMatcherService(retriever, queue, messageSender) {
+          _ =>
+            processAndAssertMatchedWorkIs(workAv2, expectedWorkAv2)
 
-          // Work V1 is sent but not matched
-          val differentWorkAv2 =
-            createWorkWith(
-              id = idA,
-              version = 2,
-              mergeCandidateIds = Set(idB)
-            )
+            // Work V1 is sent but not matched
+            val differentWorkAv2 =
+              createWorkWith(
+                id = idA,
+                version = 2,
+                mergeCandidateIds = Set(idB)
+              )
 
-          sendWork(differentWorkAv2, retriever, queue)
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
-          }
+            sendWork(differentWorkAv2, retriever, queue)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 1)
+            }
         }
     }
   }
 
   private def processAndAssertMatchedWorkIs(
     work: WorkStub,
-    expectedWorks: Set[MatchedIdentifiers])(
-    implicit
-    retriever: MemoryRetriever[WorkStub],
+    expectedWorks: Set[MatchedIdentifiers]
+  )(
+    implicit retriever: MemoryRetriever[WorkStub],
     queue: SQS.Queue,
     messageSender: MemoryMessageSender
   ): Assertion = {

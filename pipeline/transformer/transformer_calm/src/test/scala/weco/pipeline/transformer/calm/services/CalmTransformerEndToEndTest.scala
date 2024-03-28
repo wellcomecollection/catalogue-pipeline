@@ -55,44 +55,50 @@ class CalmTransformerEndToEndTest
   }
 
   def withWorker[R](
-    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
+    workIndexer: MemoryIndexer[Work[Source]] =
+      new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
     store: MemoryTypedStore[S3ObjectLocation, CalmRecord] =
       MemoryTypedStore[S3ObjectLocation, CalmRecord](initialEntries = Map.empty)
   )(
     testWith: TestWith[
-      (TransformerWorker[CalmSourcePayload, CalmSourceData, String],
-       QueuePair,
-       MemoryIndexer[Work[Source]],
-       MemoryMessageSender,
-       MemoryTypedStore[S3ObjectLocation, CalmRecord]),
-      R]
+      (
+        TransformerWorker[CalmSourcePayload, CalmSourceData, String],
+        QueuePair,
+        MemoryIndexer[Work[Source]],
+        MemoryMessageSender,
+        MemoryTypedStore[S3ObjectLocation, CalmRecord]
+      ),
+      R
+    ]
   ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case q @ QueuePair(queue, _) =>
         withPipelineStream[Work[Source], R](
           queue = queue,
           indexer = workIndexer,
-          sender = workKeySender) { pipelineStream =>
-          val retriever =
-            new MemoryRetriever[Work[Source]](index = mutable.Map())
+          sender = workKeySender
+        ) {
+          pipelineStream =>
+            val retriever =
+              new MemoryRetriever[Work[Source]](index = mutable.Map())
 
-          val worker =
-            new TransformerWorker[CalmSourcePayload, CalmSourceData, String](
-              transformer = CalmTransformer,
-              pipelineStream = pipelineStream,
-              retriever = retriever,
-              sourceDataRetriever = new CalmSourceDataRetriever(store)
-            )
-          worker.run()
+            val worker =
+              new TransformerWorker[CalmSourcePayload, CalmSourceData, String](
+                transformer = CalmTransformer,
+                pipelineStream = pipelineStream,
+                retriever = retriever,
+                sourceDataRetriever = new CalmSourceDataRetriever(store)
+              )
+            worker.run()
 
-          testWith((worker, q, workIndexer, workKeySender, store))
+            testWith((worker, q, workIndexer, workKeySender, store))
 
         }
     }
   def createAndStorePayloadWith(id: String, version: Int)(
-    store: MemoryTypedStore[S3ObjectLocation, CalmRecord])
-    : CalmSourcePayload = {
+    store: MemoryTypedStore[S3ObjectLocation, CalmRecord]
+  ): CalmSourcePayload = {
     val record = createCalmRecordWith(
       "Title" -> "abc",
       "Level" -> "Collection",

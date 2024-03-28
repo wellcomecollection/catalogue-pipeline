@@ -13,17 +13,22 @@ class FormatTest
     with ScalaCheckPropertyChecks {
 
   it("serialises Format to JSON") {
-    forAll { format: Format =>
-      val actualJson = toJson(format).get
-      assertJsonStringsAreEqual(actualJson, formatJson(format.id, format.label))
+    forAll {
+      format: Format =>
+        val actualJson = toJson(format).get
+        assertJsonStringsAreEqual(
+          actualJson,
+          formatJson(format.id, format.label)
+        )
     }
   }
 
   it("deserialises JSON as Format") {
-    forAll { format: Format =>
-      val parsedConcept =
-        fromJson[Format](formatJson(format.id, format.label)).get
-      parsedConcept shouldBe format
+    forAll {
+      format: Format =>
+        val parsedConcept =
+          fromJson[Format](formatJson(format.id, format.label)).get
+        parsedConcept shouldBe format
     }
   }
 

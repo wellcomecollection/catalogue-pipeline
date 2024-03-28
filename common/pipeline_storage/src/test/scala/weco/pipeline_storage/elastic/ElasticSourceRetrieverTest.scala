@@ -21,21 +21,25 @@ class ElasticSourceRetrieverTest
 
   import weco.pipeline_storage.generators.SampleDocument._
 
-  override def withContext[R](documents: Seq[SampleDocument])(
-    testWith: TestWith[Index, R]): R =
-    withLocalUnanalysedJsonStore { index =>
-      withElasticIndexer[SampleDocument, R](index) { indexer =>
-        whenReady(indexer(documents)) { _ =>
-          assertElasticsearchEventuallyHas(index, documents: _*)
+  override def withContext[R](
+    documents: Seq[SampleDocument]
+  )(testWith: TestWith[Index, R]): R =
+    withLocalUnanalysedJsonStore {
+      index =>
+        withElasticIndexer[SampleDocument, R](index) {
+          indexer =>
+            whenReady(indexer(documents)) {
+              _ =>
+                assertElasticsearchEventuallyHas(index, documents: _*)
 
-          testWith(index)
+                testWith(index)
+            }
         }
-      }
     }
 
   override def withRetriever[R](
-    testWith: TestWith[Retriever[SampleDocument], R])(
-    implicit index: Index): R =
+    testWith: TestWith[Retriever[SampleDocument], R]
+  )(implicit index: Index): R =
     testWith(
       new ElasticSourceRetriever(elasticClient, index)
     )
@@ -51,22 +55,24 @@ class ElasticSourceRetrieverTest
       id = "sierra-system-number/b1234"
     )
 
-    withContext(documents = Seq(documentWithSlash)) { implicit context =>
-      val future = withRetriever { _.apply(documentWithSlash.id) }
+    withContext(documents = Seq(documentWithSlash)) {
+      implicit context =>
+        val future = withRetriever { _.apply(documentWithSlash.id) }
 
-      whenReady(future) {
-        _ shouldBe documentWithSlash
-      }
+        whenReady(future) {
+          _ shouldBe documentWithSlash
+        }
     }
   }
 
   it("fails if asking for an empty list of ids") {
-    withContext(Seq(createT)) { implicit context =>
-      val future = withRetriever { _.apply(List()) }
+    withContext(Seq(createT)) {
+      implicit context =>
+        val future = withRetriever { _.apply(List()) }
 
-      whenReady(future.failed) {
-        _ shouldBe a[IllegalArgumentException]
-      }
+        whenReady(future.failed) {
+          _ shouldBe a[IllegalArgumentException]
+        }
     }
   }
 }

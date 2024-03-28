@@ -30,11 +30,11 @@ object BuildEnvPlugin extends AutoPlugin {
         .get("env")
         .orElse(sys.env.get("BUILD_ENV"))
         .flatMap {
-          case "prod" => Some(BuildEnv.Production)
+          case "prod"  => Some(BuildEnv.Production)
           case "stage" => Some(BuildEnv.Stage)
-          case "test" => Some(BuildEnv.Test)
-          case "dev" => Some(BuildEnv.Development)
-          case _ => None
+          case "test"  => Some(BuildEnv.Test)
+          case "dev"   => Some(BuildEnv.Development)
+          case _       => None
         }
         .getOrElse(BuildEnv.Development)
     },

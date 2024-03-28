@@ -55,16 +55,18 @@ class SierraLinkerWorkerTest
 
     val messageSender = new MemoryMessageSender
 
-    withLocalSqsQueue() { queue =>
-      withItemWorker(queue, store, messageSender = messageSender) { _ =>
-        sendNotificationToSQS(queue = queue, message = record2)
+    withLocalSqsQueue() {
+      queue =>
+        withItemWorker(queue, store, messageSender = messageSender) {
+          _ =>
+            sendNotificationToSQS(queue = queue, message = record2)
 
-        eventually {
-          messageSender.getMessages[SierraItemRecord] shouldBe Seq(
-            record2.copy(unlinkedBibIds = expectedLink.unlinkedBibIds)
-          )
+            eventually {
+              messageSender.getMessages[SierraItemRecord] shouldBe Seq(
+                record2.copy(unlinkedBibIds = expectedLink.unlinkedBibIds)
+              )
+            }
         }
-      }
     }
   }
 
@@ -80,8 +82,9 @@ class SierraLinkerWorkerTest
       case QueuePair(queue, dlq) =>
         withItemWorker(queue, store = store, messageSender = messageSender) {
           _ =>
-            (1 to 5).foreach { _ =>
-              sendNotificationToSQS(queue = queue, message = record)
+            (1 to 5).foreach {
+              _ =>
+                sendNotificationToSQS(queue = queue, message = record)
             }
 
             eventually {
@@ -89,8 +92,9 @@ class SierraLinkerWorkerTest
               assertQueueEmpty(dlq)
 
               messageSender
-                .getMessages[SierraItemRecord] shouldBe (1 to 5).map { _ =>
-                record
+                .getMessages[SierraItemRecord] shouldBe (1 to 5).map {
+                _ =>
+                  record
               }
             }
         }
@@ -125,15 +129,16 @@ class SierraLinkerWorkerTest
 
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withItemWorker(queue, store, messageSender = messageSender) { _ =>
-          sendNotificationToSQS(queue = queue, message = record1)
+        withItemWorker(queue, store, messageSender = messageSender) {
+          _ =>
+            sendNotificationToSQS(queue = queue, message = record1)
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueEmpty(dlq)
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueEmpty(dlq)
 
-            messageSender.messages shouldBe empty
-          }
+              messageSender.messages shouldBe empty
+            }
         }
     }
   }
@@ -141,20 +146,21 @@ class SierraLinkerWorkerTest
   it("records a failure if it receives an invalid message") {
     withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case QueuePair(queue, dlq) =>
-        withItemWorker(queue) { _ =>
-          val body =
-            """
+        withItemWorker(queue) {
+          _ =>
+            val body =
+              """
                     |{
                     | "something": "something"
                     |}
                   """.stripMargin
 
-          sendNotificationToSQS(queue = queue, body = body)
+            sendNotificationToSQS(queue = queue, body = body)
 
-          eventually {
-            assertQueueEmpty(queue)
-            assertQueueHasSize(dlq, size = 1)
-          }
+            eventually {
+              assertQueueEmpty(queue)
+              assertQueueHasSize(dlq, size = 1)
+            }
         }
     }
   }

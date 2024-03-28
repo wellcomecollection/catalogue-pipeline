@@ -61,8 +61,9 @@ class DefectiveCheckerTest
           val defectiveItems = randomSample(items, size = d)
           val testChecker = new TestDefectiveChecker(defectiveItems)
 
-          whenReady(testChecker.defectiveRecords(items.toSet)) { _ =>
-            testChecker.nTests should be <= testChecker.nTestsUpperBound(n, d)
+          whenReady(testChecker.defectiveRecords(items.toSet)) {
+            _ =>
+              testChecker.nTests should be <= testChecker.nTestsUpperBound(n, d)
           }
       }
     }
@@ -81,8 +82,9 @@ class DefectiveCheckerTest
         }
       }
 
-      whenReady(failingChecker.defectiveRecords(items.toSet).failed) { e =>
-        e shouldBe a[RuntimeException]
+      whenReady(failingChecker.defectiveRecords(items.toSet).failed) {
+        e =>
+          e shouldBe a[RuntimeException]
       }
     }
 
@@ -103,15 +105,17 @@ class DefectiveCheckerTest
       withTestCalmApiClient(
         handleSearch = _ => CalmSession(nRecords, cookie),
         handleAbandon = _ => Done
-      ) { apiClient =>
-        val records = (1 to nRecords).map(_ => calmSourcePayload)
-        val deletionChecker = new ApiDeletionChecker(apiClient)
+      ) {
+        apiClient =>
+          val records = (1 to nRecords).map(_ => calmSourcePayload)
+          val deletionChecker = new ApiDeletionChecker(apiClient)
 
-        whenReady(deletionChecker.defectiveRecords(records.toSet)) { _ =>
-          apiClient.requests.collect {
-            case (req: CalmSearchRequest, _) => req
-          } should have length 1
-        }
+          whenReady(deletionChecker.defectiveRecords(records.toSet)) {
+            _ =>
+              apiClient.requests.collect {
+                case (req: CalmSearchRequest, _) => req
+              } should have length 1
+          }
       }
     }
 
@@ -122,22 +126,24 @@ class DefectiveCheckerTest
           CalmSession(
             1,
             Cookie("name", randomAlphanumeric())
-        ),
+          ),
         handleAbandon = cookie => {
           abandonedCookies.put(cookie, ())
           Done
         }
-      ) { apiClient =>
-        val records = (1 to 10).map(_ => calmSourcePayload)
-        val deletionChecker = new ApiDeletionChecker(apiClient)
+      ) {
+        apiClient =>
+          val records = (1 to 10).map(_ => calmSourcePayload)
+          val deletionChecker = new ApiDeletionChecker(apiClient)
 
-        whenReady(deletionChecker.defectiveRecords(records.toSet)) { _ =>
-          val requestCookies = apiClient.requests.flatMap(_._2)
-          abandonedCookies
-            .keySet()
-            .toArray
-            .toList should contain theSameElementsAs requestCookies
-        }
+          whenReady(deletionChecker.defectiveRecords(records.toSet)) {
+            _ =>
+              val requestCookies = apiClient.requests.flatMap(_._2)
+              abandonedCookies
+                .keySet()
+                .toArray
+                .toList should contain theSameElementsAs requestCookies
+          }
       }
     }
 
@@ -146,13 +152,15 @@ class DefectiveCheckerTest
       withTestCalmApiClient(
         handleSearch = _ => CalmSession(nRecords, cookie),
         handleAbandon = _ => throw new RuntimeException("oops!")
-      ) { apiClient =>
-        val records = (1 to nRecords).map(_ => calmSourcePayload)
-        val deletionChecker = new ApiDeletionChecker(apiClient)
+      ) {
+        apiClient =>
+          val records = (1 to nRecords).map(_ => calmSourcePayload)
+          val deletionChecker = new ApiDeletionChecker(apiClient)
 
-        whenReady(deletionChecker.defectiveRecords(records.toSet)) { result =>
-          result shouldBe a[Set[_]]
-        }
+          whenReady(deletionChecker.defectiveRecords(records.toSet)) {
+            result =>
+              result shouldBe a[Set[_]]
+          }
       }
     }
 
@@ -161,13 +169,15 @@ class DefectiveCheckerTest
       withTestCalmApiClient(
         handleSearch = _ => CalmSession(nRecords + 1, cookie),
         handleAbandon = _ => Done
-      ) { apiClient =>
-        val records = (1 to nRecords).map(_ => calmSourcePayload)
-        val deletionChecker = new ApiDeletionChecker(apiClient)
+      ) {
+        apiClient =>
+          val records = (1 to nRecords).map(_ => calmSourcePayload)
+          val deletionChecker = new ApiDeletionChecker(apiClient)
 
-        whenReady(deletionChecker.defectiveRecords(records.toSet).failed) { e =>
-          e.getMessage should startWith("More results returned")
-        }
+          whenReady(deletionChecker.defectiveRecords(records.toSet).failed) {
+            e =>
+              e.getMessage should startWith("More results returned")
+          }
       }
     }
   }

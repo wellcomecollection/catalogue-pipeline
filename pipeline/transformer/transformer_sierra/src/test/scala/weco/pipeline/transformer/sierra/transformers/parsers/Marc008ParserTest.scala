@@ -25,10 +25,14 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
               range = InstantRange(
                 LocalDate of (1757, 1, 1),
                 LocalDate of (1757, 12, 31),
-                "1757"))),
+                "1757"
+              )
+            )
+          ),
           places = List(Place("England")),
           function = None
-        ))
+        )
+      )
   }
 
   it("parses marc strings to ProductionEvent when empty created date") {
@@ -43,10 +47,14 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
               range = InstantRange(
                 LocalDate of (2003, 1, 1),
                 LocalDate of (2003, 12, 31),
-                "2003"))),
+                "2003"
+              )
+            )
+          ),
           places = List(Place("England")),
           function = None
-        ))
+        )
+      )
   }
 
   it("parses marc strings to ProductionEvent when detailed date") {
@@ -61,10 +69,14 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
               range = InstantRange(
                 LocalDate of (1908, 11, 21),
                 LocalDate of (1908, 11, 21),
-                "1908/11/21"))),
+                "1908/11/21"
+              )
+            )
+          ),
           places = List(Place("Egypt")),
           function = None
-        ))
+        )
+      )
   }
 
   it("parses marc strings to ProductionEvent when place not given") {
@@ -79,10 +91,14 @@ class Marc008ParserTest extends AnyFunSpec with Matchers {
               range = InstantRange(
                 LocalDate of (1600, 1, 1),
                 LocalDate of (1699, 12, 31),
-                "1600-1699"))),
+                "1600-1699"
+              )
+            )
+          ),
           places = Nil,
           function = None
-        ))
+        )
+      )
   }
 
   it("doesnt parse marc strings to ProductionEvent when unknown date") {
