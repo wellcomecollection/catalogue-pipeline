@@ -22,9 +22,6 @@ import weco.sierra.models.data.SierraItemData
   *     would be set in the Catalogue API.
   *   - A note that can be used to distinguish between different items. This
   *     should be copied to the top-level item model.
-  *   - An ItemStatus that returns a simpler "is this available right now". This
-  *     would be returned from the items API with the most up-to-date data from
-  *     Sierra.
   */
 object SierraItemAccess extends SierraQueryOps with Logging {
   def apply(

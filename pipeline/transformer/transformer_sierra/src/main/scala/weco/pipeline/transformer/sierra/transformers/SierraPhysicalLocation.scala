@@ -15,28 +15,18 @@ trait SierraPhysicalLocation {
   ): Option[PhysicalLocation] =
     for {
       sourceLocation <- itemData.location
-
       (locationType, label) <- {
-        val parsedLocationType =
-          SierraPhysicalLocationType.fromName(
+        SierraPhysicalLocationType
+          .fromName(
             id = itemData.id,
             name = sourceLocation.name
           )
-
-        (parsedLocationType, fallbackLocation) match {
-          case (Some(locationType), _) =>
-            val label = locationType match {
-              case LocationType.ClosedStores => LocationType.ClosedStores.label
-              case _                         => sourceLocation.name
-            }
-
-            Some((locationType, label))
-
-          case (_, Some(fallbackLocation)) =>
-            Some(fallbackLocation)
-
-          case _ => None
-        }
+          .map {
+            case locationType @ LocationType.ClosedStores =>
+              (locationType, LocationType.ClosedStores.label)
+            case locationType => (locationType, sourceLocation.name)
+          }
+          .orElse(fallbackLocation)
       }
 
       (accessCondition, _) = SierraItemAccess(
