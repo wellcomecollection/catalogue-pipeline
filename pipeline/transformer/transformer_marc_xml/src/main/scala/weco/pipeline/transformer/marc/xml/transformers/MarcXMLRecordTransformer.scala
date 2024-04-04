@@ -12,6 +12,8 @@ import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
   MarcAlternativeTitles,
   MarcCurrentFrequency,
+  MarcDescription,
+  MarcDesignation,
   MarcEdition,
   MarcElectronicResources,
   MarcInternationalStandardIdentifiers,
@@ -34,7 +36,7 @@ object MarcXMLRecordTransformer {
       //   but we might be able to work something out
       sourceModifiedTime = Instant.now
     )
-    implicit val ctx: LoggingContext = new LoggingContext(
+    implicit val ctx: LoggingContext = LoggingContext(
       state.sourceIdentifier.value
     )
     Work.Visible[Source](
@@ -53,6 +55,8 @@ object MarcXMLRecordTransformer {
       title = MarcTitle(record),
       alternativeTitles = MarcAlternativeTitles(record).toList,
       otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
+      designation = MarcDesignation(record).toList,
+      description = MarcDescription(record),
       currentFrequency = MarcCurrentFrequency(record),
       edition = MarcEdition(record),
       items = MarcElectronicResources(record).toList

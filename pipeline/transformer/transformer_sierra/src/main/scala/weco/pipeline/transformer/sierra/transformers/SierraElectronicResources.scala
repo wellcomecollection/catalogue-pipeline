@@ -59,7 +59,9 @@ object SierraElectronicResources
     getLabel(field) match {
       case "" =>
         Failure(
-          new Exception(s"could not construct a label from 856 field $field")
+          new Exception(
+            ctx(s"could not construct a label from 856 field $field")
+          )
         )
       case label =>
         Success(
@@ -95,7 +97,7 @@ object SierraElectronicResources
     id: TypedSierraRecordNumber,
     varFields: List[VarField]
   ): List[Item[IdState.Unminted]] = {
-    implicit val ctx: LoggingContext = new LoggingContext(id.withCheckDigit)
+    implicit val ctx: LoggingContext = LoggingContext(id.withCheckDigit)
     toItems(varFieldsAsMarcRecord(varFields)).toList
   }
 

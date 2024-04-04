@@ -55,15 +55,17 @@ class MarcXMLRecordTransformerTest
           <datafield tag ="246">
             <subfield code="a">Mabinogion</subfield>
           </datafield>
-          <datafield tag ="310">
-            <subfield code="a">Sizdah Behar on even-numbered years</subfield>
-          </datafield>
-          <datafield tag ="856">
-            <subfield code="y">Hampster Dance</subfield>
-            <subfield code="u">https://example.com/hampsterdance</subfield>
+          <datafield tag ="250">
+            <subfield code="a">Director's cut</subfield>
           </datafield>
           <datafield tag ="310">
             <subfield code="a">Sizdah Behar on even-numbered years</subfield>
+          </datafield>
+          <datafield tag ="362">
+            <subfield code="a">NX-326</subfield>
+          </datafield>
+          <datafield tag ="520">
+            <subfield code="a">Some of them [sc. physicians] I know are ignorant beyond Description.</subfield>
           </datafield>
           <datafield tag ="856">
             <subfield code="y">Hampster Dance</subfield>
@@ -91,12 +93,16 @@ class MarcXMLRecordTransformerTest
       work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
     }
 
-    it("extracts the current frequency") {
-      work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
-    }
-
     it("extracts the edition statement") {
       work.data.edition.get shouldBe "Director's cut"
+    }
+
+    it("extracts the designation") {
+      work.data.designation.loneElement shouldBe "NX-326"
+    }
+
+    it("extracts a description") {
+      work.data.description.get shouldBe "<p>Some of them [sc. physicians] I know are ignorant beyond Description.</p>"
     }
 
     it("extracts an electronic resource") {
