@@ -7,7 +7,7 @@ import weco.pipeline.transformer.sierra.transformers.{
   SierraContributors,
   SierraSubjects
 }
-import weco.pipeline.transformer.sierra.transformers.OntologyTypeOps._
+import weco.pipeline.transformer.marc_common.OntologyTypeOps._
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
 

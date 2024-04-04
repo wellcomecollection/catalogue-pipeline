@@ -25,7 +25,7 @@ class SierraSubjectsTest
     with SierraDataGenerators
     with TableDrivenPropertyChecks
     with Inspectors {
-  import OntologyTypeOps._
+  import weco.pipeline.transformer.marc_common.OntologyTypeOps._
 
   it("deduplicates identical subjects") {
     // This is based on b2506728x.  The different second indicators
@@ -51,13 +51,13 @@ class SierraSubjectsTest
     )
     val List(subject) = SierraSubjects(createSierraBibNumber, bibData)
     subject should have(
-      'label ("Medicine"),
+      'label("Medicine"),
       labelDerivedConceptId("medicine")
     )
     val List(concept) = subject.concepts
 
     concept should have(
-      'label ("Medicine"),
+      'label("Medicine"),
       labelDerivedConceptId("medicine")
     )
   }
@@ -77,7 +77,7 @@ class SierraSubjectsTest
     )
     val List(subject) = SierraSubjects(createSierraBibNumber, bibData)
     subject should have(
-      'label ("Medicine"),
+      'label("Medicine"),
       sourceIdentifier(
         value = "sh85083064",
         ontologyType = "Concept",
@@ -87,7 +87,7 @@ class SierraSubjectsTest
 
     val List(concept) = subject.concepts
     concept should have(
-      'label ("Medicine"),
+      'label("Medicine"),
       sourceIdentifier(
         value = "sh85083064",
         ontologyType = "Concept",
@@ -114,39 +114,41 @@ class SierraSubjectsTest
           // itself "vague"
           ("Concept", "Agent")
         )
-      ) { (vagueType, specificType) =>
-        val vagueSubject = new Subject(
-          label = "Maimonides, in his work on Logic",
-          id = Identifiable(
-            SourceIdentifier(
-              IdentifierType.LCSubjects,
-              vagueType,
-              "sh00000000"
+      ) {
+        (vagueType, specificType) =>
+          val vagueSubject = new Subject(
+            label = "Maimonides, in his work on Logic",
+            id = Identifiable(
+              SourceIdentifier(
+                IdentifierType.LCSubjects,
+                vagueType,
+                "sh00000000"
+              )
             )
           )
-        )
-        val specificSubject = new Subject(
-          label = "Maimonides",
-          id = Identifiable(
-            SourceIdentifier(
-              IdentifierType.LCSubjects,
-              specificType,
-              "sh00000000"
+          val specificSubject = new Subject(
+            label = "Maimonides",
+            id = Identifiable(
+              SourceIdentifier(
+                IdentifierType.LCSubjects,
+                specificType,
+                "sh00000000"
+              )
             )
           )
-        )
-        val subjects =
-          List(specificSubject, vagueSubject).harmoniseOntologyTypes
-        // Both subjects should be represented in the output list.  They have different labels, so are different objects.
-        subjects.length shouldBe 2
+          val subjects =
+            List(specificSubject, vagueSubject).harmoniseOntologyTypes
+          // Both subjects should be represented in the output list.  They have different labels, so are different objects.
+          subjects.length shouldBe 2
 
-        forAll(subjects) { subject =>
-          subject
-            .asInstanceOf[Subject[IdState.Identifiable]]
-            .id
-            .sourceIdentifier
-            .ontologyType shouldBe specificType
-        }
+          forAll(subjects) {
+            subject =>
+              subject
+                .asInstanceOf[Subject[IdState.Identifiable]]
+                .id
+                .sourceIdentifier
+                .ontologyType shouldBe specificType
+          }
       }
     }
 
@@ -182,7 +184,11 @@ class SierraSubjectsTest
         )
       )
       val subjects =
-        List(specificSubject1, specificSubject2, vagueSubject).harmoniseOntologyTypes
+        List(
+          specificSubject1,
+          specificSubject2,
+          vagueSubject
+        ).harmoniseOntologyTypes
       // They all had the same label before, so they are no longer unique having harmoniseOntologyTypesd their types
       subjects.length shouldBe 1
 
@@ -225,16 +231,21 @@ class SierraSubjectsTest
         )
       )
       val subjects =
-        List(specificSubject1, specificSubject2, vagueSubject).harmoniseOntologyTypes
+        List(
+          specificSubject1,
+          specificSubject2,
+          vagueSubject
+        ).harmoniseOntologyTypes
 
       subjects.length shouldBe 3
 
-      forAll(subjects) { subject =>
-        subject
-          .asInstanceOf[Subject[IdState.Identifiable]]
-          .id
-          .sourceIdentifier
-          .ontologyType shouldBe "Person"
+      forAll(subjects) {
+        subject =>
+          subject
+            .asInstanceOf[Subject[IdState.Identifiable]]
+            .id
+            .sourceIdentifier
+            .ontologyType shouldBe "Person"
       }
     }
 
@@ -269,12 +280,13 @@ class SierraSubjectsTest
       val subjects = List(specificSubject, vagueSubject).harmoniseOntologyTypes
       subjects.length shouldBe 2
 
-      forAll(subjects) { subject =>
-        subject.concepts.head
-          .asInstanceOf[Person[IdState.Identifiable]]
-          .id
-          .sourceIdentifier
-          .ontologyType shouldBe "Person"
+      forAll(subjects) {
+        subject =>
+          subject.concepts.head
+            .asInstanceOf[Person[IdState.Identifiable]]
+            .id
+            .sourceIdentifier
+            .ontologyType shouldBe "Person"
       }
     }
 
@@ -331,20 +343,22 @@ class SierraSubjectsTest
 
       subjects.length shouldBe 2
       // The vague subject should be changed to be Person
-      forAll(subjects) { subject =>
-        subject
-          .asInstanceOf[Subject[IdState.Identifiable]]
-          .id
-          .sourceIdentifier
-          .ontologyType shouldBe "Person"
+      forAll(subjects) {
+        subject =>
+          subject
+            .asInstanceOf[Subject[IdState.Identifiable]]
+            .id
+            .sourceIdentifier
+            .ontologyType shouldBe "Person"
       }
       // But the concepts list is left unchanged.
-      forAll(subjects.head.concepts) { concept =>
-        concept
-          .asInstanceOf[Concept[IdState.Identifiable]]
-          .id
-          .sourceIdentifier
-          .ontologyType shouldBe "Concept"
+      forAll(subjects.head.concepts) {
+        concept =>
+          concept
+            .asInstanceOf[Concept[IdState.Identifiable]]
+            .id
+            .sourceIdentifier
+            .ontologyType shouldBe "Concept"
       }
 
     }
