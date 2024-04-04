@@ -1,7 +1,11 @@
 package weco.pipeline.transformer.marc_common.transformers
 
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
+<<<<<<< HEAD
 import weco.pipeline.transformer.marc_common.models.{MarcField, MarcRecord}
+=======
+import weco.pipeline.transformer.marc_common.models.MarcRecord
+>>>>>>> main
 
 /*
  * A MarcDataTransformer finds the appropriate field(s) within a

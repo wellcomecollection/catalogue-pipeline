@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY fetch_vgg.py /
 RUN python ./fetch_vgg.py
 
-COPY gunicorn.conf.py start.sh prestart.py /
+COPY gunicorn.conf.py start.sh /
 COPY app /app
 
 ENV PYTHONPATH=/app
