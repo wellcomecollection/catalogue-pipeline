@@ -36,10 +36,12 @@ trait MarcElectronicResources extends Logging {
   // Return title as Left or linkText as Right
   protected def getTitleOrLinkText(
     field: MarcField
-  ): Try[Either[String, String]] = getLabel(field) match {
+  )(implicit ctx: LoggingContext): Try[Either[String, String]] = getLabel(
+    field
+  ) match {
     case "" =>
       Failure(
-        new Exception(s"could not construct a label from 856 field $field")
+        new Exception(ctx(s"could not construct a label from 856 field $field"))
       )
     case label => Success(Left(label))
   }

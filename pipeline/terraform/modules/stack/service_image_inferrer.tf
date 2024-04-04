@@ -81,9 +81,7 @@ module "image_inferrer" {
       cpu    = local.inferrer_cpu
       memory = local.inferrer_memory
       env_vars = {
-        PORT              = local.feature_inferrer_port
-        MODEL_OBJECT_KEY  = local.inferrer_config.model_key
-        MODEL_DATA_BUCKET = local.inferrer_config.model_bucket
+        PORT = local.feature_inferrer_port
       }
       secret_env_vars = {}
       mount_points = [{
@@ -184,25 +182,6 @@ module "image_inferrer" {
   namespace = local.namespace
 
   shared_logging_secrets = local.monitoring_config.shared_logging_secrets
-}
-
-resource "aws_iam_role_policy" "read_inferrer_data" {
-  role   = module.image_inferrer.task_role_name
-  policy = data.aws_iam_policy_document.allow_inferrer_data_access.json
-}
-
-data "aws_iam_policy_document" "allow_inferrer_data_access" {
-  statement {
-    actions = [
-      "s3:GetObject*",
-      "s3:ListBucket",
-    ]
-
-    resources = [
-      "arn:aws:s3:::${local.inferrer_config.model_bucket}",
-      "arn:aws:s3:::${local.inferrer_config.model_bucket}/*",
-    ]
-  }
 }
 
 module "image_inferrer_output_topic" {

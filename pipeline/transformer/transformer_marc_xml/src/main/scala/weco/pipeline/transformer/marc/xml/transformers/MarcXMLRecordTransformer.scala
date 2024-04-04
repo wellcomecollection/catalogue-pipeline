@@ -12,6 +12,8 @@ import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
   MarcDescription,
   MarcDesignation,
+  MarcAlternativeTitles,
+  MarcCurrentFrequency,
   MarcEdition,
   MarcElectronicResources,
   MarcInternationalStandardIdentifiers,
@@ -51,9 +53,11 @@ object MarcXMLRecordTransformer {
   ): WorkData[DataState.Unidentified] = {
     WorkData[DataState.Unidentified](
       title = MarcTitle(record),
+      alternativeTitles = MarcAlternativeTitles(record).toList,
       otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
       designation = MarcDesignation(record).toList,
       description = MarcDescription(record),
+      currentFrequency = MarcCurrentFrequency(record),
       edition = MarcEdition(record),
       items = MarcElectronicResources(record).toList
     )
