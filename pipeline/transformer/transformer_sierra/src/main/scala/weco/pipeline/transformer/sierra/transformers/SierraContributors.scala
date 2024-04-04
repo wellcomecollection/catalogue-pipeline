@@ -44,7 +44,7 @@ object SierraContributors
     with SierraMarcDataConversions {
 
   type Output = List[Contributor[IdState.Unminted]]
-  
+
   def apply(bibData: SierraBibData): List[Contributor[IdState.Unminted]] = {
     implicit val ctx: LoggingContext = LoggingContext("")
     MarcContributors(bibData).toList
