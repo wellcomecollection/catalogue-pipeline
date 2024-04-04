@@ -101,10 +101,6 @@ class MarcXMLRecordTransformerTest
       work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
     }
 
-    it("extracts the current frequency") {
-      work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
-    }
-
     it("extracts the edition statement") {
       work.data.edition.get shouldBe "Director's cut"
     }
