@@ -10,10 +10,10 @@ import weco.catalogue.internal_model.work.{Work, WorkData}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
-  MarcDescription,
-  MarcDesignation,
   MarcAlternativeTitles,
   MarcCurrentFrequency,
+  MarcDescription,
+  MarcDesignation,
   MarcEdition,
   MarcElectronicResources,
   MarcInternationalStandardIdentifiers,

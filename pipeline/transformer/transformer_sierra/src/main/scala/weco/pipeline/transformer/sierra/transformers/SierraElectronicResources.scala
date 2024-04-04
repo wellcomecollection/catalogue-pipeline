@@ -59,7 +59,9 @@ object SierraElectronicResources
     getLabel(field) match {
       case "" =>
         Failure(
-          new Exception(ctx(s"could not construct a label from 856 field $field"))
+          new Exception(
+            ctx(s"could not construct a label from 856 field $field")
+          )
         )
       case label =>
         Success(
