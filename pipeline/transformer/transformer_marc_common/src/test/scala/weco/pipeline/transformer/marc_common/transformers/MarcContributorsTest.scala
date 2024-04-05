@@ -1,14 +1,20 @@
 package weco.pipeline.transformer.marc_common.transformers
 
-import org.scalatest.Inspectors
+import org.scalatest.{Inspectors, LoneElement}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.work.{Agent, Person}
 import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.models.{MarcField, MarcSubfield}
 
-class MarcContributorsTest extends AnyFunSpec with Matchers with Inspectors {
+class MarcContributorsTest
+    extends AnyFunSpec
+    with Matchers
+    with Inspectors
+    with TableDrivenPropertyChecks
+    with LoneElement {
 
   private implicit val ctx: LoggingContext = LoggingContext("")
   describe(
@@ -164,6 +170,7 @@ class MarcContributorsTest extends AnyFunSpec with Matchers with Inspectors {
           "University of Inverdoon"
         )
       }
+
       it(
         "returns an Agent contributor if a Person field contains subfield t: 'Title of a work'"
       ) {
@@ -239,6 +246,75 @@ class MarcContributorsTest extends AnyFunSpec with Matchers with Inspectors {
         forAll(contributors) {
           contributor =>
             contributor.agent should be(a[Person[_]])
+        }
+      }
+      describe("different agent types") {
+        forAll(
+          Table(
+            ("tag", "agentType"),
+            ("100", "Person"),
+            ("700", "Person"),
+            ("110", "Organisation"),
+            ("710", "Organisation"),
+            ("111", "Meeting"),
+            ("711", "Meeting")
+          )
+        ) {
+          (tag, agent_type) =>
+            it(s"extracts an agent of type $agent_type from field $tag") {
+              MarcContributors(
+                MarcTestRecord(fields =
+                  Seq(
+                    MarcField(
+                      marcTag = tag,
+                      subfields = Seq(
+                        MarcSubfield(tag = "a", content = "Sæmundr fróði"),
+                        MarcSubfield(tag = "e", content = "E"),
+                        MarcSubfield(tag = "j", content = "J")
+                      )
+                    )
+                  )
+                )
+              ).loneElement.agent.getClass.getName
+                .split('.')
+                .last shouldBe agent_type
+            }
+
+        }
+      }
+      describe("contribution roles") {
+        forAll(
+          Table(
+            ("tag", "role_subfields", "expected_roles"),
+            ("100", "e,j", "E J"),
+            ("700", "e,j", "E J"),
+            ("110", "e", "E"),
+            ("710", "e", "E"),
+            ("111", "j", "J"),
+            ("711", "j", "J")
+          )
+        ) {
+          (tag, role_subfields, expected_roles) =>
+            it(
+              s"extracts the contribution role from field $tag from subfield(s) $role_subfields"
+            ) {
+              MarcContributors(
+                MarcTestRecord(fields =
+                  Seq(
+                    MarcField(
+                      marcTag = tag,
+                      subfields = Seq(
+                        MarcSubfield(tag = "a", content = "Sæmundr fróði"),
+                        MarcSubfield(tag = "e", content = "E"),
+                        MarcSubfield(tag = "j", content = "J")
+                      )
+                    )
+                  )
+                )
+              ).loneElement.roles
+                .map(_.label)
+                .mkString(" ") shouldBe expected_roles
+            }
         }
       }
       describe("deduplication") {
@@ -392,7 +468,7 @@ class MarcContributorsTest extends AnyFunSpec with Matchers with Inspectors {
 
           secondary.primary shouldBe false
           secondary.agent.label shouldBe "Snorri Sturluson"
-          
+
         }
       }
     }
