@@ -42,7 +42,7 @@ object MarcContributors
     val primaries = record
       .fieldsWithTags("100", "110", "111")
     val secondaries = record.fieldsWithTags("700", "710", "711")
-    filterSecondaryDuplicates(
+    filterDuplicates(
       (primaries ++ secondaries)
         .flatMap(field => singleContributor(field))
     ).toList.harmoniseOntologyTypes
@@ -59,7 +59,7 @@ object MarcContributors
     *
     * We do not want this duplication in the output.
     */
-  private def filterSecondaryDuplicates(allContributors: Output): Output = {
+  private def filterDuplicates(allContributors: Output): Output = {
     val duplicatedContributors =
       allContributors
         .filter(_.primary == false)
