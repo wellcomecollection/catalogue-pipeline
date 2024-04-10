@@ -64,6 +64,11 @@ object LocationType extends Enum[LocationType] {
     val label = "On order"
   }
 
+  case object Offsite extends PhysicalLocationType {
+    val id = "offsite"
+    val label = "Offsite"
+  }
+
   case object IIIFPresentationAPI extends DigitalLocationType {
     val id = "iiif-presentation"
     val label = "IIIF Presentation API"

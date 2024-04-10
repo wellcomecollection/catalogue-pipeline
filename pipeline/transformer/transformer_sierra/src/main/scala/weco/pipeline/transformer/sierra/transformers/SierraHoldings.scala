@@ -15,6 +15,7 @@ import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.catalogue.source_model.sierra.rules.SierraPhysicalLocationType
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraHoldingsData
+import weco.sierra.models.fields.SierraLocation
 import weco.sierra.models.identifiers.{
   SierraBibNumber,
   SierraHoldingsNumber,
@@ -169,7 +170,10 @@ object SierraHoldings extends SierraQueryOps {
       code <- data.fixedFields.get("40").map { _.value.trim }
       name <- locationTypeMap.get(code)
 
-      locationType <- SierraPhysicalLocationType.fromName(id, name)
+      locationType <- SierraPhysicalLocationType.fromLocation(
+        id,
+        SierraLocation(code, name)
+      )
       label = locationType match {
         case ClosedStores => ClosedStores.label
         case _            => name

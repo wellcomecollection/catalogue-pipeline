@@ -17,13 +17,13 @@ trait SierraPhysicalLocation {
       sourceLocation <- itemData.location
       (locationType, label) <- {
         SierraPhysicalLocationType
-          .fromName(
+          .fromLocation(
             id = itemData.id,
-            name = sourceLocation.name
+            sierraLocation = sourceLocation
           )
           .map {
-            case locationType @ LocationType.ClosedStores =>
-              (locationType, LocationType.ClosedStores.label)
+            case LocationType.ClosedStores =>
+              (LocationType.ClosedStores, LocationType.ClosedStores.label)
             case locationType => (locationType, sourceLocation.name)
           }
           .orElse(fallbackLocation)
@@ -41,4 +41,5 @@ trait SierraPhysicalLocation {
         shelfmark = SierraShelfmark(bibData, itemData)
       )
     } yield physicalLocation
+
 }

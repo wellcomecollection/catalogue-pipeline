@@ -83,7 +83,7 @@ object SierraItems
         }
         .map {
           case (id, loc) =>
-            SierraPhysicalLocationType.fromName(id, loc.name) match {
+            SierraPhysicalLocationType.fromLocation(id, loc) match {
               case Some(LocationType.ClosedStores) =>
                 (
                   Some(LocationType.ClosedStores),
