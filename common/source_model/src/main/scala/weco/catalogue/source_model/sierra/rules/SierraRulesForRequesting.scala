@@ -35,7 +35,8 @@ import weco.sierra.models.data.SierraItemData
   *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
   * This was last checked against Sierra based on a set of rules provided by
-  * Natalie Pollecutt on 8th February 2024
+  * Louise Simon on 20th March 2024
+  * https://wellcome.slack.com/archives/C3TQSF63C/p1710937847843969
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
@@ -279,7 +280,6 @@ object SierraRulesForRequesting {
       //    v|i||79||=|sgmoh||
       //    v|i||79||=|somet||
       //    v|i||79||=|somge||
-      //    v|i||79||=|somja||
       //    v|i||79||=|sompr||
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
@@ -302,7 +302,6 @@ object SierraRulesForRequesting {
               "sgmoh",
               "somet",
               "somge",
-              "somja",
               "sompr",
               "somsy"
             ) =>
