@@ -7,8 +7,8 @@ Since Sierra records can be edited at any time, it is also responsible for keepi
 
 See also:
 
--   [Notes on Sierra IDs](https://github.com/wellcomecollection/catalogue/blob/master/docs/sierra/sierra_ids.md)
--   [Fetching records from Sierra](https://github.com/wellcomecollection/catalogue/blob/master/docs/adapters/fetching_records_from_sierra.md)
+-   [Notes on Sierra IDs](https://github.com/wellcomecollection/catalogue/blob/main/docs/sierra/sierra_ids.md)
+-   [Fetching records from Sierra](https://github.com/wellcomecollection/catalogue/blob/main/docs/adapters/fetching_records_from_sierra.md)
 
 [sierra]: https://www.iii.com/products/sierra-ils/
 
