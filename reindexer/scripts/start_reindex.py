@@ -74,6 +74,18 @@ def specific_reindex_parameters(record_ids):
         yield {"ids": chunk, "type": "SpecificReindexParameters"}
 
 
+def file_reader_reindex_parameters(path):
+    try:
+        with open(path, newline='') as file:
+            trimmed_lines = (line.rstrip() for line in file)
+            # The reindexer can handle up to 100 IDs at a time, so send them in
+            # batches of that size.
+            for chunk in chunked_iterable(trimmed_lines, size=100):
+                yield {"ids": chunk, "type": "SpecificReindexParameters"}
+    except FileNotFoundError:
+        return False
+
+
 def read_from_s3(bucket, key):
     s3 = session.client("s3")
     obj = s3.get_object(Bucket=bucket, Key=key)
@@ -184,12 +196,14 @@ def verify_specific_ids(*, source, specific_ids):
 @click.option(
     "--mode",
     type=click.Choice(["complete", "partial", "specific"]),
-    required=True,
-    prompt="Every record (complete), just a few (partial), or specific records (specific)?",
     help="Should this reindex send every record (complete), just a few (partial), or specific records (specific)?",
 )
+@click.option(
+    "--input-file",
+    help="A path to a file containing IDs to use (implies a specific-records reindex)",
+)
 @click.pass_context
-def start_reindex(ctx, src, dst, mode):
+def start_reindex(ctx, src, dst, mode, input_file):
     if src in ["all", "notmiro"]:
         if mode != "complete":
             sys.exit("All-source reindexes only support --mode=complete")
@@ -227,6 +241,12 @@ def start_reindex(ctx, src, dst, mode):
 
         verify_specific_ids(source=src, specific_ids=specified_records)
         parameters = specific_reindex_parameters(specified_records)
+    elif input_file:
+        parameters = file_reader_reindex_parameters(input_file)
+        if not parameters:
+            return sys.exit("Specified input file does not exist")
+    elif not mode:
+        return sys.exist("You must specify an input file or a mode")
 
     job_config_id = f"{src}--{dst}"
     reindexer_job_config = get_reindexer_job_config(session)
