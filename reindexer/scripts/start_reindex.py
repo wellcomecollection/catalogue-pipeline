@@ -76,7 +76,7 @@ def specific_reindex_parameters(record_ids):
 
 def file_reader_reindex_parameters(path):
     try:
-        with open(path, newline='') as file:
+        with open(path, newline="") as file:
             trimmed_lines = (line.rstrip() for line in file)
             # The reindexer can handle up to 100 IDs at a time, so send them in
             # batches of that size.
