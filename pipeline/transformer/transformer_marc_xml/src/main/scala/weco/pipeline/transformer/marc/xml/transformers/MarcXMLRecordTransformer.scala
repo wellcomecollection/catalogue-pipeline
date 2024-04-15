@@ -11,6 +11,7 @@ import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
   MarcAlternativeTitles,
+  MarcContributors,
   MarcCurrentFrequency,
   MarcDescription,
   MarcDesignation,
@@ -59,7 +60,8 @@ object MarcXMLRecordTransformer {
       description = MarcDescription(record),
       currentFrequency = MarcCurrentFrequency(record),
       edition = MarcEdition(record),
-      items = MarcElectronicResources(record).toList
+      items = MarcElectronicResources(record).toList,
+      contributors = MarcContributors(record).toList
     )
   }
 }

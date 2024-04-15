@@ -14,7 +14,7 @@ import weco.sierra.models.identifiers.SierraBibNumber
 
 object SierraSubjects extends SierraIdentifiedDataTransformer {
   type Output = List[Subject[IdState.Unminted]]
-  import OntologyTypeOps._
+  import weco.pipeline.transformer.marc_common.OntologyTypeOps._
 
   val subjectsTransformers = List(
     SierraConceptSubjects,

@@ -46,6 +46,16 @@ class MarcXMLRecordTransformerTest
           <datafield tag ="022">
             <subfield code="a">1477-4615</subfield>
           </datafield>
+          <datafield tag ="100">
+            <subfield code="a">Nicholas Fallaize</subfield>
+          </datafield>
+          <datafield tag ="110">
+            <subfield code="a">SMERSH</subfield>
+          </datafield>
+          <datafield tag ="111">
+            <subfield code="a">Aristotle and Descartes,</subfield>
+            <subfield code="c">Glubbdubdrib</subfield>
+          </datafield>
           <datafield tag ="130">
             <subfield code="a">LLyfr Coch</subfield>
           </datafield>
@@ -66,6 +76,16 @@ class MarcXMLRecordTransformerTest
           </datafield>
           <datafield tag ="520">
             <subfield code="a">Some of them [sc. physicians] I know are ignorant beyond Description.</subfield>
+          </datafield>
+          <datafield tag ="700">
+            <subfield code="a">Nora Helmer</subfield>
+          </datafield>
+          <datafield tag ="710">
+            <subfield code="a">SPECTRE</subfield>
+          </datafield>
+          <datafield tag ="711">
+            <subfield code="a">James Barry and Florence Nightingale,</subfield>
+            <subfield code="c">waiting for a train</subfield>
           </datafield>
           <datafield tag ="856">
             <subfield code="y">Hampster Dance</subfield>
@@ -88,7 +108,7 @@ class MarcXMLRecordTransformerTest
         _.value
       ) should contain theSameElementsAs Seq("8601416781396", "1477-4615")
     }
-    
+
     it("extracts the current frequency") {
       work.data.currentFrequency.get shouldBe "Sizdah Behar on even-numbered years"
     }
@@ -112,5 +132,19 @@ class MarcXMLRecordTransformerTest
         .asInstanceOf[DigitalLocation]
         .url shouldBe "https://example.com/hampsterdance"
     }
+
+    it("extracts contributors") {
+      work.data.contributors.map(
+        _.agent.label
+      ) should contain theSameElementsAs Seq(
+        "Nicholas Fallaize",
+        "SMERSH",
+        "Aristotle and Descartes, Glubbdubdrib",
+        "Nora Helmer",
+        "SPECTRE",
+        "James Barry and Florence Nightingale, waiting for a train"
+      )
+    }
+
   }
 }
