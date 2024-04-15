@@ -5,19 +5,21 @@ module "ftp_lambda" {
   runtime = "python3.10"
 
   filename    = data.archive_file.empty_zip.output_path
+  handler     = "main.lambda_handler"
   memory_size = 512
   timeout     = 10 * 60 // 10 minutes
 
   environment = {
     variables = {
       S3_BUCKET = aws_s3_bucket.ebsco_adapter.bucket
-      S3_PREFIX = "ftp"
+      S3_PREFIX = "prod"
 
-      FTP_SERVER     = aws_ssm_parameter.ebsco_adapter_ftp_server.value
-      FTP_USERNAME   = aws_ssm_parameter.ebsco_adapter_ftp_username.value
-      FTP_PASSWORD   = aws_ssm_parameter.ebsco_adapter_ftp_password.value
-      FTP_REMOTE_DIR = aws_ssm_parameter.ebsco_adapter_ftp_remote_dir.value
-      CUSTOMER_ID    = aws_ssm_parameter.ebsco_adapter_customer_id.value
+      FTP_SERVER       = aws_ssm_parameter.ebsco_adapter_ftp_server.value
+      FTP_USERNAME     = aws_ssm_parameter.ebsco_adapter_ftp_username.value
+      FTP_PASSWORD     = aws_ssm_parameter.ebsco_adapter_ftp_password.value
+      FTP_REMOTE_DIR   = aws_ssm_parameter.ebsco_adapter_ftp_remote_dir.value
+      CUSTOMER_ID      = aws_ssm_parameter.ebsco_adapter_customer_id.value
+      OUTPUT_TOPIC_ARN = module.ebsco_adapter_output_topic.arn
     }
   }
 
