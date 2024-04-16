@@ -17,12 +17,16 @@ class EbscoFtp:
 
     def list_files(self, valid_suffixes):
         ftp_files = []
-        self.ftp.retrlines('LIST', ftp_files.append)
-        ftp_files = [file.split()[-1] for file in ftp_files if file.endswith(tuple(valid_suffixes))]
+        self.ftp.retrlines("LIST", ftp_files.append)
+        ftp_files = [
+            file.split()[-1]
+            for file in ftp_files
+            if file.endswith(tuple(valid_suffixes))
+        ]
         return ftp_files
 
     def download_file(self, file, temp_dir):
-        with open(os.path.join(temp_dir, file), 'wb') as f:
+        with open(os.path.join(temp_dir, file), "wb") as f:
             print(f"Downloading {file}...")
             self.ftp.retrbinary(f"RETR {file}", f.write)
 

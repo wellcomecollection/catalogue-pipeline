@@ -21,20 +21,33 @@ sns_topic_arn = os.environ.get("OUTPUT_TOPIC_ARN")
 s3_bucket = os.environ.get("S3_BUCKET")
 s3_prefix = os.environ.get("S3_PREFIX")
 
-ftp_s3_prefix = os.path.join(s3_prefix, 'ftp')
-xml_s3_prefix = os.path.join(s3_prefix, 'xml')
+ftp_s3_prefix = os.path.join(s3_prefix, "ftp")
+xml_s3_prefix = os.path.join(s3_prefix, "xml")
 
 
 def lambda_handler(event, context):
     with tempfile.TemporaryDirectory() as temp_dir:
-        with EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp:
+        with EbscoFtp(
+            ftp_server, ftp_username, ftp_password, ftp_remote_dir
+        ) as ebsco_ftp:
             s3_store = S3Store(s3_bucket)
             sns_publisher = SnsPublisher(sns_topic_arn)
 
-            available_files = sync_and_list_files(temp_dir, ftp_s3_prefix, ebsco_ftp, s3_store)
-            updates = compare_uploads(available_files, extract_marc_records, xml_s3_prefix, temp_dir, s3_store)
+            available_files = sync_and_list_files(
+                temp_dir, ftp_s3_prefix, ebsco_ftp, s3_store
+            )
+            updates = compare_uploads(
+                available_files, extract_marc_records, xml_s3_prefix, temp_dir, s3_store
+            )
             if updates is not None:
-                update_notifier(updates, updates['notify_for_batch'], s3_store, s3_bucket, xml_s3_prefix, sns_publisher)
+                update_notifier(
+                    updates,
+                    updates["notify_for_batch"],
+                    s3_store,
+                    s3_bucket,
+                    xml_s3_prefix,
+                    sns_publisher,
+                )
 
     return {}
 

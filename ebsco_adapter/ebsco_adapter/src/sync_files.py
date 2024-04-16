@@ -6,13 +6,19 @@ import os
 # the second part is the customer id, the third part is an iso date, the fourth part is not important
 def get_marc_file_details(filename):
     try:
-        filename_parts = filename.split('-')
-        assert len(filename_parts) == 4, f"Unexpected name parts for file {filename}! Skipping..."
+        filename_parts = filename.split("-")
+        assert (
+            len(filename_parts) == 4
+        ), f"Unexpected name parts for file {filename}! Skipping..."
 
-        assert filename.endswith('.xml'), f"Invalid file type for file {filename}! Skipping..."
-        assert filename.startswith(f"ebz-"), f"Unexpected file name for file {filename}! Skipping..."
+        assert filename.endswith(
+            ".xml"
+        ), f"Invalid file type for file {filename}! Skipping..."
+        assert filename.startswith(
+            f"ebz-"
+        ), f"Unexpected file name for file {filename}! Skipping..."
 
-        file_date = datetime.datetime.strptime(filename_parts[2], '%Y%m%d')
+        file_date = datetime.datetime.strptime(filename_parts[2], "%Y%m%d")
         return {
             "filename": filename,
             "date": file_date,
@@ -26,12 +32,16 @@ def get_marc_file_details(filename):
 
 
 def get_batch_name(file):
-    return file["date"].strftime('%Y-%m-%d')
+    return file["date"].strftime("%Y-%m-%d")
 
 
 def list_files(s3_prefix, s3_store):
-    valid_suffixes = ['.xml']
-    s3_files = [file for file in s3_store.list_files(s3_prefix) if file.endswith(tuple(valid_suffixes))]
+    valid_suffixes = [".xml"]
+    s3_files = [
+        file
+        for file in s3_store.list_files(s3_prefix)
+        if file.endswith(tuple(valid_suffixes))
+    ]
 
     available_files = []
     for file in s3_files:
@@ -45,9 +55,13 @@ def list_files(s3_prefix, s3_store):
 
 
 def sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
-    valid_suffixes = ['.xml']
+    valid_suffixes = [".xml"]
 
-    s3_files = [file for file in s3_store.list_files(s3_prefix) if file.endswith(tuple(valid_suffixes))]
+    s3_files = [
+        file
+        for file in s3_store.list_files(s3_prefix)
+        if file.endswith(tuple(valid_suffixes))
+    ]
     ftp_files = ebsco_ftp.list_files(valid_suffixes)
 
     print(f"Files found in FTP: {len(ftp_files)}")
@@ -60,11 +74,13 @@ def sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
     if len(files_to_download) > 0:
         print(f"Downloading files to {temp_dir}")
         for file in files_to_download:
-            with open(os.path.join(temp_dir, file), 'wb') as f:
+            with open(os.path.join(temp_dir, file), "wb") as f:
                 download_location = ebsco_ftp.download_file(file, temp_dir)
                 file_details = get_marc_file_details(file)
 
-                print(f"Uploading {file} to S3, location: {s3_prefix}, date: {file_details['date']}")
+                print(
+                    f"Uploading {file} to S3, location: {s3_prefix}, date: {file_details['date']}"
+                )
                 upload_location = s3_store.upload_file(s3_prefix, download_location)
 
                 file_details["download_location"] = download_location
@@ -86,12 +102,14 @@ def sync_and_list_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
 
     uploaded_files = {}
     for file in uploaded_files_list:
-        uploaded_files[file['batch_name']] = file
+        uploaded_files[file["batch_name"]] = file
 
     file_list = {}
     for file in available_files_list:
-        if file['batch_name'] in uploaded_files:
-            file['download_location'] = uploaded_files[file['batch_name']]['download_location']
-        file_list[file['batch_name']] = file
+        if file["batch_name"] in uploaded_files:
+            file["download_location"] = uploaded_files[file["batch_name"]][
+                "download_location"
+            ]
+        file_list[file["batch_name"]] = file
 
     return file_list

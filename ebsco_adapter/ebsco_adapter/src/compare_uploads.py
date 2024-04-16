@@ -1,5 +1,6 @@
 import os
 
+
 def find_uploads_to_compare(available_files):
     available_files_dates = list(available_files.keys())
     dates_list = sorted(available_files_dates, reverse=True)
@@ -7,19 +8,15 @@ def find_uploads_to_compare(available_files):
     print(f"Available uploads: {dates_list}")
 
     if len(dates_list) == 1:
-        comparison_results = {
-            "previous": None,
-            "current": dates_list[0]
-        }
+        comparison_results = {"previous": None, "current": dates_list[0]}
     elif len(dates_list) >= 2:
-        comparison_results = {
-            "previous": dates_list[1],
-            "current": dates_list[0]
-        }
+        comparison_results = {"previous": dates_list[1], "current": dates_list[0]}
     else:
         comparison_results = None
 
-    print(f"Comparing uploads from {comparison_results['previous']} to {comparison_results['current']}")
+    print(
+        f"Comparing uploads from {comparison_results['previous']} to {comparison_results['current']}"
+    )
 
     return comparison_results
 
@@ -28,7 +25,7 @@ def find_updated_records(current_records, previous_records):
     for id, record in current_records.items():
         if id not in previous_records:
             yield id, record
-        elif record['sha256'] != previous_records[id]['sha256']:
+        elif record["sha256"] != previous_records[id]["sha256"]:
             yield id, record
 
 
@@ -38,51 +35,84 @@ def find_deleted_records(current_records, previous_records):
             yield id
 
 
-def compare_uploads(available_files, marc_records_extractor, xml_s3_prefix, temp_dir, s3_store):
+def compare_uploads(
+    available_files, marc_records_extractor, xml_s3_prefix, temp_dir, s3_store
+):
     assert len(available_files) > 0, "No files found to sync, stopping."
 
     dates_to_compare = find_uploads_to_compare(available_files)
     assert dates_to_compare is not None, "No dates found to compare, stopping."
 
-    candidates_to_extract = {date: available_files[date] for date in dates_to_compare.values() if date is not None}
-    records = marc_records_extractor(candidates_to_extract, xml_s3_prefix, temp_dir, s3_store)
+    candidates_to_extract = {
+        date: available_files[date]
+        for date in dates_to_compare.values()
+        if date is not None
+    }
+    records = marc_records_extractor(
+        candidates_to_extract, xml_s3_prefix, temp_dir, s3_store
+    )
 
-    assert 0 < len(records) <= 2, f"Unexpected number of uploads to compare (got {len(records)}), stopping."
-    assert dates_to_compare["current"] in records, "Current upload not found in extracted records, stopping."
+    assert (
+        0 < len(records) <= 2
+    ), f"Unexpected number of uploads to compare (got {len(records)}), stopping."
+    assert (
+        dates_to_compare["current"] in records
+    ), "Current upload not found in extracted records, stopping."
 
     # Check if we've sent a notification for the current upload, if so, return None
     notified_completion_flag = "notified.flag"
-    notified_completion_flag_path = os.path.join(xml_s3_prefix, dates_to_compare["current"], notified_completion_flag)
+    notified_completion_flag_path = os.path.join(
+        xml_s3_prefix, dates_to_compare["current"], notified_completion_flag
+    )
     notified_completed = s3_store.file_exists(notified_completion_flag_path)
 
     if notified_completed:
         print(f"Already notified for {dates_to_compare['current']}, stopping.")
         return None
 
-    previous_available_count = len(records[dates_to_compare["previous"]]) if dates_to_compare["previous"] else 0
+    previous_available_count = (
+        len(records[dates_to_compare["previous"]])
+        if dates_to_compare["previous"]
+        else 0
+    )
     current_available_count = len(records[dates_to_compare["current"]])
 
-    print(f"Previous upload has {previous_available_count} files, current upload has {current_available_count} files.")
+    print(
+        f"Previous upload has {previous_available_count} files, current upload has {current_available_count} files."
+    )
 
     if len(records) == 1:
-        only_current = dates_to_compare["current"] is not None and dates_to_compare["previous"] is None
-        assert only_current, "Only one upload found, but it's not the current one, stopping."
+        only_current = (
+            dates_to_compare["current"] is not None
+            and dates_to_compare["previous"] is None
+        )
+        assert (
+            only_current
+        ), "Only one upload found, but it's not the current one, stopping."
         print(f"No previous upload found, notifying for {dates_to_compare['current']}.")
-        print(f"Found {len(records[dates_to_compare['current']])} updated records to notify.")
+        print(
+            f"Found {len(records[dates_to_compare['current']])} updated records to notify."
+        )
         return {
             "updated": records[dates_to_compare["current"]],
             "deleted": None,
         }
     else:
-        updated_records = list(find_updated_records(
-            records[dates_to_compare["current"]],
-            records[dates_to_compare["previous"]]
-        ))
-        deleted_records = list(find_deleted_records(
-            records[dates_to_compare["current"]],
-            records[dates_to_compare["previous"]]
-        ))
-        print(f"Found {len(updated_records)} updated records and {len(deleted_records)} deleted records to notify.")
+        updated_records = list(
+            find_updated_records(
+                records[dates_to_compare["current"]],
+                records[dates_to_compare["previous"]],
+            )
+        )
+        deleted_records = list(
+            find_deleted_records(
+                records[dates_to_compare["current"]],
+                records[dates_to_compare["previous"]],
+            )
+        )
+        print(
+            f"Found {len(updated_records)} updated records and {len(deleted_records)} deleted records to notify."
+        )
         return {
             "notify_for_batch": dates_to_compare["current"],
             "updated": updated_records,
