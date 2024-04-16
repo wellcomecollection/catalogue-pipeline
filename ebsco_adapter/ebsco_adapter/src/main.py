@@ -33,7 +33,8 @@ def lambda_handler(event, context):
 
             available_files = sync_and_list_files(temp_dir, ftp_s3_prefix, ebsco_ftp, s3_store)
             updates = compare_uploads(available_files, extract_marc_records, xml_s3_prefix, temp_dir, s3_store)
-            update_notifier(updates, updates['notify_for_batch'], s3_store, s3_bucket, xml_s3_prefix, sns_publisher)
+            if updates is not None:
+                update_notifier(updates, updates['notify_for_batch'], s3_store, s3_bucket, xml_s3_prefix, sns_publisher)
 
     return {}
 
