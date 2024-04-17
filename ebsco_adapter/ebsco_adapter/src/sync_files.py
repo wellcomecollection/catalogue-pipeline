@@ -47,9 +47,10 @@ def list_files(s3_prefix, s3_store):
     for file in s3_files:
         upload_location = os.path.join(s3_prefix, os.path.basename(file))
         file_details = get_marc_file_details(file)
-        file_details["upload_location"] = upload_location
-        file_details["batch_name"] = get_batch_name(file_details)
-        available_files.append(file_details)
+        if file_details is not None:
+            file_details["upload_location"] = upload_location
+            file_details["batch_name"] = get_batch_name(file_details)
+            available_files.append(file_details)
 
     return available_files
 
@@ -77,19 +78,21 @@ def sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
             with open(os.path.join(temp_dir, file), "wb") as f:
                 download_location = ebsco_ftp.download_file(file, temp_dir)
                 file_details = get_marc_file_details(file)
+                if file_details is not None:
+                    print(
+                        f"Uploading {file} to S3, location: {s3_prefix}, date: {file_details['date']}"
+                    )
+                    upload_location = s3_store.upload_file(s3_prefix, download_location)
 
-                print(
-                    f"Uploading {file} to S3, location: {s3_prefix}, date: {file_details['date']}"
-                )
-                upload_location = s3_store.upload_file(s3_prefix, download_location)
+                    file_details["download_location"] = download_location
+                    file_details["upload_location"] = upload_location
+                    file_details["batch_name"] = get_batch_name(file_details)
 
-                file_details["download_location"] = download_location
-                file_details["upload_location"] = upload_location
-                file_details["batch_name"] = get_batch_name(file_details)
-
-            uploaded_files.append(file_details)
+                    uploaded_files.append(file_details)
     else:
         print("No files to download!")
+
+    print(f"Files uploaded: {len(uploaded_files)}")
 
     return uploaded_files
 
