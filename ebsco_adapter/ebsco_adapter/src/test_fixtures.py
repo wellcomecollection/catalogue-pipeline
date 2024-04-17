@@ -2,7 +2,7 @@ import os
 
 
 class FakeEbscoFtp:
-    def __init__(self, files = {}):
+    def __init__(self, files={}):
         self.files = files
 
     def __enter__(self):
@@ -10,9 +10,7 @@ class FakeEbscoFtp:
 
     def list_files(self, valid_suffixes):
         return [
-            file
-            for file in self.files.keys()
-            if file.endswith(tuple(valid_suffixes))
+            file for file in self.files.keys() if file.endswith(tuple(valid_suffixes))
         ]
 
     def download_file(self, file, temp_dir):
@@ -56,5 +54,5 @@ class FakeS3Client:
         self.objects[Key] = {
             "Body": Body,
             "Metadata": Metadata,
-            "ContentType": ContentType
+            "ContentType": ContentType,
         }

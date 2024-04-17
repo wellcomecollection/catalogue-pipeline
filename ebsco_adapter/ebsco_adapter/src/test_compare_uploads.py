@@ -16,17 +16,17 @@ fixture_file_name = "ebz-s7451719-20240328-1.xml"
 current_dir = os.path.dirname(os.path.realpath(__file__))
 fixtures_file = os.path.join(current_dir, "fixtures", fixture_file_name)
 expected_results = {
-    'updated': {
-        'ebs9579e': {
-            's3_key': 'xml/2024-03-22/ebs9579e.xml',
-            'sha256': '4c4a7fb13bf8b7beda96bbe75358eb882a6130592b29f6149a308d82e0356d22'
+    "updated": {
+        "ebs9579e": {
+            "s3_key": "xml/2024-03-22/ebs9579e.xml",
+            "sha256": "4c4a7fb13bf8b7beda96bbe75358eb882a6130592b29f6149a308d82e0356d22",
         },
-        'ebs29555e': {
-            's3_key': 'xml/2024-03-22/ebs29555e.xml',
-            'sha256': 'cb719218d3435395a2fa948088bf2c0fe86748dddfb5a2e8e2bbb199f6cf48dd'
-        }
+        "ebs29555e": {
+            "s3_key": "xml/2024-03-22/ebs29555e.xml",
+            "sha256": "cb719218d3435395a2fa948088bf2c0fe86748dddfb5a2e8e2bbb199f6cf48dd",
+        },
     },
-    'deleted': None
+    "deleted": None,
 }
 
 available_files = {
@@ -65,12 +65,16 @@ def test_compare_uploads():
 
         assert "ebs9579e.xml" in stored_files, "Expected ebs9579e.xml to be uploaded"
         assert "ebs29555e.xml" in stored_files, "Expected ebs29555e.xml to be uploaded"
-        assert "completed.flag" in stored_files, "Expected completed.flag to be uploaded"
+        assert (
+            "completed.flag" in stored_files
+        ), "Expected completed.flag to be uploaded"
 
         target_objects = fake_s3_client.list_objects_v2("test_bucket", "xml/2024-03-22")
 
         for s3_key, value in target_objects.items():
             if s3_key.endswith(".xml"):
-                sha256_hash = hashlib.sha256(value['Body']).hexdigest()
-                expected_sha256 = expected_results["updated"][s3_key.split(".")[0]]["sha256"]
+                sha256_hash = hashlib.sha256(value["Body"]).hexdigest()
+                expected_sha256 = expected_results["updated"][s3_key.split(".")[0]][
+                    "sha256"
+                ]
                 assert sha256_hash == expected_sha256, f"Unexpected sha256 for {s3_key}"

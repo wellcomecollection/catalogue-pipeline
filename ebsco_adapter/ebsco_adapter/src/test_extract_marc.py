@@ -15,15 +15,15 @@ fixture_file_name = "ebz-s7451719-20240328-1.xml"
 current_dir = os.path.dirname(os.path.realpath(__file__))
 fixtures_file = os.path.join(current_dir, "fixtures", fixture_file_name)
 expected_results = {
-    '2024-03-22': {
-        'ebs9579e': {
-            's3_key': f"xml/{batch_name}/ebs9579e.xml",
-            'sha256': '4c4a7fb13bf8b7beda96bbe75358eb882a6130592b29f6149a308d82e0356d22'
+    "2024-03-22": {
+        "ebs9579e": {
+            "s3_key": f"xml/{batch_name}/ebs9579e.xml",
+            "sha256": "4c4a7fb13bf8b7beda96bbe75358eb882a6130592b29f6149a308d82e0356d22",
         },
-        'ebs29555e': {
-            's3_key': f"xml/{batch_name}/ebs29555e.xml",
-            'sha256': 'cb719218d3435395a2fa948088bf2c0fe86748dddfb5a2e8e2bbb199f6cf48dd'
-        }
+        "ebs29555e": {
+            "s3_key": f"xml/{batch_name}/ebs29555e.xml",
+            "sha256": "cb719218d3435395a2fa948088bf2c0fe86748dddfb5a2e8e2bbb199f6cf48dd",
+        },
     }
 }
 
@@ -49,8 +49,12 @@ def test_extract_marc_records_reads_from_download_location():
         fake_s3_client = FakeS3Client(s3_objects)
         s3_store = S3Store("test_bucket", fake_s3_client)
 
-        results = extract_marc_records(available_files, xml_s3_prefix, temp_dir, s3_store)
-        assert results == expected_results, "Unexpected results from extract_marc_records"
+        results = extract_marc_records(
+            available_files, xml_s3_prefix, temp_dir, s3_store
+        )
+        assert (
+            results == expected_results
+        ), "Unexpected results from extract_marc_records"
 
 
 def test_extract_marc_records_reads_from_upload_location():
@@ -64,5 +68,9 @@ def test_extract_marc_records_reads_from_upload_location():
         fake_s3_client = FakeS3Client(s3_objects)
         s3_store = S3Store("test_bucket", fake_s3_client)
 
-        results = extract_marc_records(available_files, xml_s3_prefix, temp_dir, s3_store)
-        assert results == expected_results, "Unexpected results from extract_marc_records"
+        results = extract_marc_records(
+            available_files, xml_s3_prefix, temp_dir, s3_store
+        )
+        assert (
+            results == expected_results
+        ), "Unexpected results from extract_marc_records"
