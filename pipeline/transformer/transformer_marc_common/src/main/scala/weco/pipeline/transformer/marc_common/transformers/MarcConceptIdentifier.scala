@@ -1,10 +1,10 @@
-package weco.pipeline.transformer.sierra.transformers
+package weco.pipeline.transformer.marc_common.transformers
 
 import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.sierra.models.marc.VarField
+import weco.pipeline.transformer.marc_common.models.MarcField
 
 // Implements logic for finding a source identifier for varFields with
 // MARC tag 648, 650, 651 and 655.  These are the fields we use for genre
@@ -22,7 +22,7 @@ import weco.sierra.models.marc.VarField
 // https://www.loc.gov/marc/bibliographic/bd651.html
 // https://www.loc.gov/marc/bibliographic/bd655.html
 //
-object SierraConceptIdentifier {
+object MarcConceptIdentifier {
 
   /** Determine the Library of Congress identifier type from the identifier
     * value prefix.
@@ -70,26 +70,21 @@ object SierraConceptIdentifier {
         )
 
     }
-  def maybeFindIdentifier(
-    varField: VarField,
+  def apply(
+    field: MarcField,
     identifierSubfieldContent: String,
     ontologyType: String
   ): Option[SourceIdentifier] = {
-    val maybeIdentifierType = varField.indicator2 match {
-      case None => None
-
+    val maybeIdentifierType = field.indicator2 match {
       // These mappings are provided by the MARC spec.
       // https://www.loc.gov/marc/bibliographic/bd655.html
-      case Some("0") => Some(locScheme(identifierSubfieldContent))
-      case Some("2") => Some(IdentifierType.MESH)
-      case Some("4") => None
-
+      case "0" => Some(locScheme(identifierSubfieldContent))
+      case "2" => Some(IdentifierType.MESH)
       // For now we omit the other schemes as they're fairly unusual in
       // our collections.  If ind2 = "7", then we need to look in another
       // subfield to find the identifier scheme.  For now, we just highlight
       // LCSH and MESH, and drop everything else.
-      // TODO: Revisit this properly.
-      case Some(scheme) => None
+      case _ => None
     }
 
     maybeIdentifierType match {
