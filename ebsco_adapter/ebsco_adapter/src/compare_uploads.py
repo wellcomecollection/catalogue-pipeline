@@ -1,18 +1,38 @@
 import os
 
 
-def find_uploads_to_compare(available_files):
+def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
     available_files_dates = list(available_files.keys())
     dates_list = sorted(available_files_dates, reverse=True)
 
     print(f"Available uploads: {dates_list}")
 
-    if len(dates_list) == 1:
-        comparison_results = {"previous": None, "current": dates_list[0]}
-    elif len(dates_list) >= 2:
-        comparison_results = {"previous": dates_list[1], "current": dates_list[0]}
-    else:
-        comparison_results = None
+    # Check if we've sent a notification for the date
+    notified_completion_flag = "notified.flag"
+    date_list_with_notified_flag = []
+    for date in dates_list:
+        notified_completion_flag_path = os.path.join(
+            xml_s3_prefix, date, notified_completion_flag
+        )
+        notified_completed = s3_store.file_exists(notified_completion_flag_path)
+        date_list_with_notified_flag.append(
+            {"date": date, "notified_completed": notified_completed}
+        )
+
+    # The current date is the most recent if it has not been notified
+    current_date = None
+    if len(date_list_with_notified_flag) > 0 and not date_list_with_notified_flag[0]["notified_completed"]:
+        current_date = date_list_with_notified_flag[0]["date"]
+
+    # The previous date is the next most recent if it has been notified
+    previous_date = None
+    if len(date_list_with_notified_flag) > 1:
+        previous_date = next(
+            (date["date"] for date in date_list_with_notified_flag[1:] if date["notified_completed"]),
+            None,
+        )
+
+    comparison_results = {"previous": previous_date, "current": current_date}
 
     print(
         f"Comparing uploads from {comparison_results['previous']} to {comparison_results['current']}"
@@ -39,9 +59,11 @@ def compare_uploads(
     available_files, marc_records_extractor, xml_s3_prefix, temp_dir, s3_store
 ):
     assert len(available_files) > 0, "No files found to sync, stopping."
+    dates_to_compare = find_uploads_to_compare(available_files, xml_s3_prefix, s3_store)
 
-    dates_to_compare = find_uploads_to_compare(available_files)
-    assert dates_to_compare is not None, "No dates found to compare, stopping."
+    if dates_to_compare['current'] is None:
+        print("No upload found to process, stopping.")
+        return None
 
     candidates_to_extract = {
         date: available_files[date]
@@ -59,17 +81,6 @@ def compare_uploads(
         dates_to_compare["current"] in records
     ), "Current upload not found in extracted records, stopping."
 
-    # Check if we've sent a notification for the current upload, if so, return None
-    notified_completion_flag = "notified.flag"
-    notified_completion_flag_path = os.path.join(
-        xml_s3_prefix, dates_to_compare["current"], notified_completion_flag
-    )
-    notified_completed = s3_store.file_exists(notified_completion_flag_path)
-
-    if notified_completed:
-        print(f"Already notified for {dates_to_compare['current']}, stopping.")
-        return None
-
     previous_available_count = (
         len(records[dates_to_compare["previous"]])
         if dates_to_compare["previous"]
@@ -82,34 +93,24 @@ def compare_uploads(
     )
 
     if len(records) == 1:
-        only_current = (
-            dates_to_compare["current"] is not None
-            and dates_to_compare["previous"] is None
-        )
-        assert (
-            only_current
-        ), "Only one upload found, but it's not the current one, stopping."
-        print(f"No previous upload found, notifying for {dates_to_compare['current']}.")
+        print(f"No previous upload found to compare, notifying for {dates_to_compare['current']}.")
         print(
             f"Found {len(records[dates_to_compare['current']])} updated records to notify."
         )
         return {
+            "notify_for_batch": dates_to_compare["current"],
             "updated": records[dates_to_compare["current"]],
             "deleted": None,
         }
     else:
-        updated_records = list(
-            find_updated_records(
-                records[dates_to_compare["current"]],
-                records[dates_to_compare["previous"]],
-            )
-        )
-        deleted_records = list(
-            find_deleted_records(
-                records[dates_to_compare["current"]],
-                records[dates_to_compare["previous"]],
-            )
-        )
+        updated_records = dict(find_updated_records(
+            records[dates_to_compare["current"]],
+            records[dates_to_compare["previous"]],
+        ))
+        deleted_records = list(find_deleted_records(
+            records[dates_to_compare["current"]],
+            records[dates_to_compare["previous"]],
+        ))
         print(
             f"Found {len(updated_records)} updated records and {len(deleted_records)} deleted records to notify."
         )
