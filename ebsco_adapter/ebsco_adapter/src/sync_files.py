@@ -75,20 +75,19 @@ def sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
     if len(files_to_download) > 0:
         print(f"Downloading files to {temp_dir}")
         for file in files_to_download:
-            with open(os.path.join(temp_dir, file), "wb") as f:
-                download_location = ebsco_ftp.download_file(file, temp_dir)
-                file_details = get_marc_file_details(file)
-                if file_details is not None:
-                    print(
-                        f"Uploading {file} to S3, location: {s3_prefix}, date: {file_details['date']}"
-                    )
-                    upload_location = s3_store.upload_file(s3_prefix, download_location)
+            download_location = ebsco_ftp.download_file(file, temp_dir)
+            file_details = get_marc_file_details(file)
+            if file_details is not None:
+                print(
+                    f"Uploading {file} to S3, location: {s3_prefix}, date: {file_details['date']}"
+                )
+                upload_location = s3_store.upload_file(s3_prefix, download_location)
 
-                    file_details["download_location"] = download_location
-                    file_details["upload_location"] = upload_location
-                    file_details["batch_name"] = get_batch_name(file_details)
+                file_details["download_location"] = download_location
+                file_details["upload_location"] = upload_location
+                file_details["batch_name"] = get_batch_name(file_details)
 
-                    uploaded_files.append(file_details)
+                uploaded_files.append(file_details)
     else:
         print("No files to download!")
 

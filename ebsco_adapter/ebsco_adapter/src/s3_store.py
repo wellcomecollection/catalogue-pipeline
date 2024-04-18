@@ -31,7 +31,7 @@ class S3Store:
                     return False
 
             return True
-        except Exception as e:
+        except Exception:
             return False
 
     def download_file(self, s3_key, local_directory):
