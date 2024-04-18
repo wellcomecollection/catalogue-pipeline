@@ -55,7 +55,7 @@ def list_files(s3_prefix, s3_store):
     return available_files
 
 
-def sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
+def sync_files(target_directory, s3_prefix, ebsco_ftp, s3_store):
     valid_suffixes = [".xml"]
 
     s3_files = [
@@ -73,9 +73,9 @@ def sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
 
     uploaded_files = []
     if len(files_to_download) > 0:
-        print(f"Downloading files to {temp_dir}")
+        print(f"Downloading files to {target_directory}")
         for file in files_to_download:
-            download_location = ebsco_ftp.download_file(file, temp_dir)
+            download_location = ebsco_ftp.download_file(file, target_directory)
             file_details = get_marc_file_details(file)
             if file_details is not None:
                 print(
@@ -98,8 +98,8 @@ def sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
 
 # Returns a dictionary of files with the filename as the key, if the file has just been
 # uploaded, the download location will be included in the dictionary.
-def sync_and_list_files(temp_dir, s3_prefix, ebsco_ftp, s3_store):
-    uploaded_files_list = sync_files(temp_dir, s3_prefix, ebsco_ftp, s3_store)
+def sync_and_list_files(target_directory, s3_prefix, ebsco_ftp, s3_store):
+    uploaded_files_list = sync_files(target_directory, s3_prefix, ebsco_ftp, s3_store)
     available_files_list = list_files(s3_prefix, s3_store)
 
     uploaded_files = {}

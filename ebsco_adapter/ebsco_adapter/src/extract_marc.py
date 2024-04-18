@@ -20,7 +20,7 @@ def split_marc_records(file_path):
 
 
 def extract_marc_records(
-    available_files, xml_s3_prefix, temp_dir, s3_store, batch_size=100
+    available_files, xml_s3_prefix, target_directory, s3_store, batch_size=100
 ):
     unpacked_files = {}
     for batch_name, file in available_files.items():
@@ -33,7 +33,7 @@ def extract_marc_records(
         if not batch_completed:
             if "download_location" not in file:
                 download_location = s3_store.download_file(
-                    file["upload_location"], temp_dir
+                    file["upload_location"], target_directory
                 )
             else:
                 download_location = file["download_location"]
@@ -76,7 +76,7 @@ def extract_marc_records(
         else:
             print(f"Batch {batch_name} already unpacked.")
             downloaded_flag = s3_store.download_file(
-                batch_completion_flag_path, temp_dir
+                batch_completion_flag_path, target_directory
             )
             with open(downloaded_flag, "r") as f:
                 files_uploaded = json.load(f)

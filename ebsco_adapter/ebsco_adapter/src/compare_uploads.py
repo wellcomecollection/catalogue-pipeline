@@ -56,7 +56,7 @@ def find_deleted_records(current_records, previous_records):
 
 
 def compare_uploads(
-    available_files, marc_records_extractor, xml_s3_prefix, temp_dir, s3_store
+    available_files, marc_records_extractor, xml_s3_prefix, target_directory, s3_store
 ):
     assert len(available_files) > 0, "No files found to sync, stopping."
     dates_to_compare = find_uploads_to_compare(available_files, xml_s3_prefix, s3_store)
@@ -71,7 +71,7 @@ def compare_uploads(
         if date is not None
     }
     records = marc_records_extractor(
-        candidates_to_extract, xml_s3_prefix, temp_dir, s3_store
+        candidates_to_extract, xml_s3_prefix, target_directory, s3_store
     )
 
     assert (
