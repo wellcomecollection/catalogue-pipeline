@@ -21,14 +21,21 @@ def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
 
     # The current date is the most recent if it has not been notified
     current_date = None
-    if len(date_list_with_notified_flag) > 0 and not date_list_with_notified_flag[0]["notified_completed"]:
+    if (
+        len(date_list_with_notified_flag) > 0
+        and not date_list_with_notified_flag[0]["notified_completed"]
+    ):
         current_date = date_list_with_notified_flag[0]["date"]
 
     # The previous date is the next most recent if it has been notified
     previous_date = None
     if len(date_list_with_notified_flag) > 1:
         previous_date = next(
-            (date["date"] for date in date_list_with_notified_flag[1:] if date["notified_completed"]),
+            (
+                date["date"]
+                for date in date_list_with_notified_flag[1:]
+                if date["notified_completed"]
+            ),
             None,
         )
 
@@ -61,7 +68,7 @@ def compare_uploads(
     assert len(available_files) > 0, "No files found to sync, stopping."
     dates_to_compare = find_uploads_to_compare(available_files, xml_s3_prefix, s3_store)
 
-    if dates_to_compare['current'] is None:
+    if dates_to_compare["current"] is None:
         print("No upload found to process, stopping.")
         return None
 
@@ -93,7 +100,9 @@ def compare_uploads(
     )
 
     if len(records) == 1:
-        print(f"No previous upload found to compare, notifying for {dates_to_compare['current']}.")
+        print(
+            f"No previous upload found to compare, notifying for {dates_to_compare['current']}."
+        )
         print(
             f"Found {len(records[dates_to_compare['current']])} updated records to notify."
         )
@@ -103,14 +112,18 @@ def compare_uploads(
             "deleted": None,
         }
     else:
-        updated_records = dict(find_updated_records(
-            records[dates_to_compare["current"]],
-            records[dates_to_compare["previous"]],
-        ))
-        deleted_records = list(find_deleted_records(
-            records[dates_to_compare["current"]],
-            records[dates_to_compare["previous"]],
-        ))
+        updated_records = dict(
+            find_updated_records(
+                records[dates_to_compare["current"]],
+                records[dates_to_compare["previous"]],
+            )
+        )
+        deleted_records = list(
+            find_deleted_records(
+                records[dates_to_compare["current"]],
+                records[dates_to_compare["previous"]],
+            )
+        )
         print(
             f"Found {len(updated_records)} updated records and {len(deleted_records)} deleted records to notify."
         )
