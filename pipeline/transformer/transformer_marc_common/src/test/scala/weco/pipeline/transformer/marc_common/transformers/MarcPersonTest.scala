@@ -64,7 +64,7 @@ class MarcPersonTest
           )
       }
 
-      val nonLabelSubfields = Seq("m", "0", "u") map {
+      val nonLabelSubfields = Seq("m", "2", "u") map {
         tag =>
           MarcSubfield(
             tag = tag,

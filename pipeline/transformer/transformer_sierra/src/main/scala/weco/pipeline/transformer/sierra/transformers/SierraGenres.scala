@@ -2,6 +2,8 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
 import weco.catalogue.internal_model.work.{AbstractConcept, Genre, GenreConcept}
+import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
@@ -41,10 +43,12 @@ object SierraGenres
     extends SierraDataTransformer
     with SierraQueryOps
     with SierraConcepts
-    with ConceptsTransformer {
+    with ConceptsTransformer
+    with SierraMarcDataConversions {
 
   type Output = List[Genre[IdState.Unminted]]
-
+  override protected def getLabel(field: MarcField): Option[String] =
+    None // TODO
   def apply(bibData: SierraBibData): List[Genre[IdState.Unminted]] =
     bibData
       .varfieldsWithTag("655")
@@ -76,7 +80,7 @@ object SierraGenres
     // It's a bit hacky, but I hope it will go away at some point.
     val wholeFieldConceptId = getIdState(
       ontologyType = "Genre",
-      varField = varField
+      field = varField
     )
     wholeFieldConceptId match {
       case identifiable: IdState.Identifiable

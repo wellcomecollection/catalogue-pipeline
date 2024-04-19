@@ -1,11 +1,11 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{Organisation, Subject}
-import weco.pipeline.transformer.sierra.exceptions.CataloguingException
-import weco.pipeline.transformer.sierra.transformers.SierraAgents
-import weco.sierra.models.identifiers.SierraBibNumber
-import weco.sierra.models.marc.VarField
+import weco.catalogue.internal_model.work.AbstractRootConcept
+import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.marc_common.transformers.MarcOrganisation
+
+import scala.util.{Failure, Success, Try}
 
 // Populate wwork:subject
 //
@@ -23,50 +23,22 @@ import weco.sierra.models.marc.VarField
 //
 // https://www.loc.gov/marc/bibliographic/bd610.html
 //
-object SierraOrganisationSubjects
-    extends SierraSubjectsTransformer
-    with SierraAgents {
+object SierraOrganisationSubjects extends SierraSubjectsTransformer {
+  override protected val labelSubfields: Seq[String] =
+    Seq("a", "b", "c", "d", "e")
+  override protected val subjectVarFields: List[String] = List("610")
+  override protected val ontologyType: String = "Organisation"
 
-  val subjectVarFields = List("610")
-
-  def getSubjectsFromVarFields(
-    bibId: SierraBibNumber,
-    varFields: List[VarField]
-  ): Output =
-    varFields.map {
-      varField =>
-        val label =
-          createLabel(varField, subfieldTags = List("a", "b", "c", "d", "e"))
-
-        val organisation = createOrganisation(bibId, varField)
-
-        Subject(
-          label = label,
-          concepts = List(organisation),
-          id = identifyAgentSubject(varField, "Organisation")
-        )
-    }
-
-  private def createOrganisation(
-    bibId: SierraBibNumber,
-    varField: VarField
-  ): Organisation[IdState.Unminted] = {
-    val label = createLabel(varField, subfieldTags = List("a", "b"))
-
-    // @@AWLC: I'm not sure if this can happen in practice -- but we don't have
-    // enough information to build the Organisation, so erroring out here is
-    // the best we can do for now.
-    if (label == "") {
-      throw CataloguingException(
-        bibId,
-        s"Not enough information to build a label on $varField"
-      )
-    }
-
-    Organisation(
-      label = label,
-      id =
-        identifyAgentSubject(varfield = varField, ontologyType = "Organisation")
-    )
+  protected object OrganisationAsSubjectConcept extends MarcOrganisation {
+    override protected val labelSubfieldTags: Seq[String] = Seq("a", "b")
   }
+
+  override def getSubjectConcepts(
+    field: MarcField
+  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] =
+    OrganisationAsSubjectConcept(field) match {
+      case Success(organisation) => Success(Seq(organisation))
+      case Failure(exception)    => Failure(exception)
+    }
+
 }

@@ -1,22 +1,26 @@
 package weco.pipeline.transformer.marc_common.transformers
 
+import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import weco.catalogue.internal_model.identifiers.{
+  IdState,
   IdentifierType,
   SourceIdentifier
 }
-import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.marc_common.models.{MarcField, MarcSubfield}
 
-class MarcConceptIdentifierTest
+class MarcHasRecordControlNumberTest
     extends AnyFunSpec
     with Matchers
-    with TableDrivenPropertyChecks {
+    with TableDrivenPropertyChecks
+    with LoneElement {
   val ontologyType = "Concept"
   describe("a field with indicator2 set to 0") {
     it("finds an LCSH identifier") {
-      val field = create655FieldWith(indicator2 = "0")
+      val field =
+        create655FieldWith(indicator2 = "0", identifierValue = "sh2009124405")
 
       val expectedSourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LCSubjects,
@@ -24,19 +28,20 @@ class MarcConceptIdentifierTest
         ontologyType = ontologyType
       )
 
-      val actualSourceIdentifier = MarcConceptIdentifier
+      val actualSourceIdentifier = MarcHasRecordControlNumber
         .apply(
           field = field,
-          identifierSubfieldContent = "sh2009124405",
           ontologyType = ontologyType
         )
-        .get
+        .allSourceIdentifiers
+        .loneElement
 
       actualSourceIdentifier shouldBe expectedSourceIdentifier
     }
 
     it("finds an LC-Names identifier") {
-      val field = create655FieldWith(indicator2 = "0")
+      val field =
+        create655FieldWith(indicator2 = "0", identifierValue = "n84165387")
 
       val expectedSourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LCNames,
@@ -44,13 +49,13 @@ class MarcConceptIdentifierTest
         ontologyType = ontologyType
       )
 
-      val actualSourceIdentifier = MarcConceptIdentifier
+      val actualSourceIdentifier = MarcHasRecordControlNumber
         .apply(
           field = field,
-          identifierSubfieldContent = "n84165387",
           ontologyType = ontologyType
         )
-        .get
+        .allSourceIdentifiers
+        .loneElement
 
       actualSourceIdentifier shouldBe expectedSourceIdentifier
     }
@@ -69,22 +74,25 @@ class MarcConceptIdentifierTest
         )
       ) {
         identifier =>
-          val field = create655FieldWith(indicator2 = "0")
+          val field =
+            create655FieldWith(indicator2 = "0", identifierValue = identifier)
           assertThrows[IllegalArgumentException] {
-            MarcConceptIdentifier
+            MarcHasRecordControlNumber
               .apply(
                 field = field,
-                identifierSubfieldContent = identifier,
                 ontologyType = ontologyType
               )
-              .get
+              .allSourceIdentifiers
+              .loneElement
+
           }
       }
     }
   }
 
   it("finds a MESH identifier") {
-    val field = create655FieldWith(indicator2 = "2")
+    val field =
+      create655FieldWith(indicator2 = "2", identifierValue = "mesh/456")
 
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.MESH,
@@ -92,49 +100,47 @@ class MarcConceptIdentifierTest
       ontologyType = ontologyType
     )
 
-    val actualSourceIdentifier = MarcConceptIdentifier
+    val actualSourceIdentifier = MarcHasRecordControlNumber
       .apply(
         field = field,
-        identifierSubfieldContent = "mesh/456",
         ontologyType = ontologyType
       )
-      .get
+      .allSourceIdentifiers
+      .loneElement
 
     actualSourceIdentifier shouldBe expectedSourceIdentifier
   }
 
   it("finds a no-ID identifier if indicator 2 = 4") {
-    val field = create655FieldWith(indicator2 = "4")
+    val field =
+      create655FieldWith(indicator2 = "4", identifierValue = "noid/000")
 
-    MarcConceptIdentifier.apply(
+    MarcHasRecordControlNumber.apply(
       field = field,
-      identifierSubfieldContent = "noid/000",
       ontologyType = ontologyType
-    ) shouldBe None
+    ) shouldBe IdState.Unidentifiable
   }
 
   it("returns None if indicator 2 is empty") {
-    val field = create655FieldWith(indicator2 = "")
+    val field = create655FieldWith(indicator2 = "", "lcsh/789")
 
-    MarcConceptIdentifier.apply(
+    MarcHasRecordControlNumber.apply(
       field = field,
-      identifierSubfieldContent = "lcsh/789",
       ontologyType = ontologyType
-    ) shouldBe None
+    ) shouldBe IdState.Unidentifiable
   }
 
   it("returns None if it sees an unrecognised identifier scheme") {
-    val field = create655FieldWith(indicator2 = "8")
+    val field = create655FieldWith(indicator2 = "8", "u/xxx")
 
-    MarcConceptIdentifier.apply(
+    MarcHasRecordControlNumber.apply(
       field = field,
-      identifierSubfieldContent = "u/xxx",
       ontologyType = ontologyType
-    ) shouldBe None
+    ) shouldBe IdState.Unidentifiable
   }
 
   it("passes through the ontology type") {
-    val field = create655FieldWith(indicator2 = "2")
+    val field = create655FieldWith(indicator2 = "2", "mesh/456")
 
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.MESH,
@@ -142,21 +148,25 @@ class MarcConceptIdentifierTest
       ontologyType = "Item"
     )
 
-    val actualSourceIdentifier = MarcConceptIdentifier
+    val actualSourceIdentifier = MarcHasRecordControlNumber
       .apply(
         field = field,
-        identifierSubfieldContent = "mesh/456",
         ontologyType = "Item"
       )
-      .get
+      .allSourceIdentifiers
+      .loneElement
 
     actualSourceIdentifier shouldBe expectedSourceIdentifier
   }
 
-  private def create655FieldWith(indicator2: String): MarcField = {
+  private def create655FieldWith(
+    indicator2: String,
+    identifierValue: String
+  ): MarcField = {
     MarcField(
       marcTag = "655",
-      indicator2 = indicator2
+      indicator2 = indicator2,
+      subfields = Seq(MarcSubfield("0", identifierValue))
     )
   }
 }

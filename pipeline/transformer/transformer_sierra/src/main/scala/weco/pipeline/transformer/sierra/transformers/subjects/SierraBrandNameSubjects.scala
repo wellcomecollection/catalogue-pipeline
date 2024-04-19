@@ -1,10 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
-import weco.catalogue.internal_model.work.{Concept, Subject}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.{AbstractRootConcept, Concept}
+import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.sierra.transformers.SierraConcepts
 import weco.pipeline.transformer.transformers.ConceptsTransformer
-import weco.sierra.models.identifiers.SierraBibNumber
-import weco.sierra.models.marc.VarField
+
+import scala.util.{Failure, Success, Try}
 
 // Populate wwork:subject
 //
@@ -15,23 +17,17 @@ object SierraBrandNameSubjects
     with ConceptsTransformer
     with SierraConcepts {
 
-  val subjectVarFields = List("652")
+  override protected val labelSubfields: Seq[String] =
+    Seq("a")
+  override protected val subjectVarFields: List[String] = List("652")
+  override protected val ontologyType: String = "Concept"
 
-  def getSubjectsFromVarFields(
-    bibId: SierraBibNumber,
-    varFields: List[VarField]
-  ): Output =
-    varFields
-      .subfieldsWithTag("a")
-      .contents
-      .map {
-        label =>
-          val identifier =
-            identifierFromText(label = label, ontologyType = "Concept")
-          new Subject(
-            id = identifier,
-            label = label,
-            concepts = List(Concept(label).identifiable())
-          )
-      }
+  override def getSubjectConcepts(
+    field: MarcField
+  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] = {
+    getLabel(field) match {
+      case Some(label) => Success(Seq(Concept(label).identifiable()))
+      case None => Failure(new Exception("could not extract label from field"))
+    }
+  }
 }

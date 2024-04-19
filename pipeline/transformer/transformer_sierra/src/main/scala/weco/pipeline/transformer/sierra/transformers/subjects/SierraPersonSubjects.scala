@@ -2,9 +2,13 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
+import scala.util.Success
+import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
+
+import scala.util.Try
 
 // Populate wwork:subject
 //
@@ -26,9 +30,9 @@ object SierraPersonSubjects
     extends SierraSubjectsTransformer
     with SierraAgents {
 
-  val subjectVarFields = List("600")
+  override protected val subjectVarFields: List[String] = List("600")
 
-  def getSubjectsFromVarFields(
+  override def getSubjectsFromVarFields(
     bibId: SierraBibNumber,
     varFields: List[VarField]
   ): Output = {
@@ -60,7 +64,7 @@ object SierraPersonSubjects
                 dates = getDates(subfields),
                 generalSubdivisions = generalSubdivisions
               )
-              val subjectIdentifier = identifyAgentSubject(varField, "Person")
+              val subjectIdentifier = getIdState(varField, "Person")
               val maybeIdentifiedPerson =
                 person.copy(id = subjectIdentifier)
               Subject(
@@ -94,4 +98,11 @@ object SierraPersonSubjects
     secondarySubfields.collect { case Subfield("e", role) => role }
   private def getDates(secondarySubfields: List[Subfield]) =
     secondarySubfields.find(_.tag == "d").map(_.content)
+
+  override protected val labelSubfields: Seq[String] = Nil
+  override protected val ontologyType: String = ""
+
+  override protected def getSubjectConcepts(
+    field: MarcField
+  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] = Success(Nil)
 }

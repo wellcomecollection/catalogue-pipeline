@@ -1,10 +1,13 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
-import weco.catalogue.internal_model.work.{Meeting, Subject}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.AbstractRootConcept
+import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.marc_common.transformers.MarcMeeting
 import weco.pipeline.transformer.sierra.transformers.SierraAgents
 import weco.pipeline.transformer.transformers.ConceptsTransformer
-import weco.sierra.models.identifiers.SierraBibNumber
-import weco.sierra.models.marc.VarField
+
+import scala.util.{Failure, Success, Try}
 
 // Populate wwork:subject
 //
@@ -27,28 +30,19 @@ object SierraMeetingSubjects
     with SierraAgents
     with ConceptsTransformer {
 
-  val subjectVarFields = List("611")
+  override protected val labelSubfields: Seq[String] =
+    Seq("a", "c", "d")
+  override protected val subjectVarFields: List[String] = List("611")
+  override protected val ontologyType: String = "Meeting"
 
-  val labelSubfields = List("a", "b", "c")
-
-  def getSubjectsFromVarFields(
-    bibId: SierraBibNumber,
-    varFields: List[VarField]
-  ): Output =
-    varFields.flatMap {
-      varField =>
-        createLabel(varField, subfieldTags = List("a", "c", "d")) match {
-          case "" => None
-          case label =>
-            val identifier = identifyAgentSubject(varField, "Meeting")
-
-            Some(
-              Subject(
-                id = identifier,
-                label = label,
-                concepts = List(Meeting(label = label, id = identifier))
-              )
-            )
-        }
+  override def getSubjectConcepts(
+    field: MarcField
+  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] =
+    MeetingAsSubjectConcept(field) match {
+      case Success(organisation) => Success(Seq(organisation))
+      case Failure(exception)    => Failure(exception)
     }
+  private object MeetingAsSubjectConcept extends MarcMeeting {
+    override protected val labelSubfieldTags: Seq[String] = Seq("a", "c", "d")
+  }
 }

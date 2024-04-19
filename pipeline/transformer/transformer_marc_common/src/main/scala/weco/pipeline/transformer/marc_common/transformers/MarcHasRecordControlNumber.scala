@@ -1,9 +1,13 @@
 package weco.pipeline.transformer.marc_common.transformers
 
+import grizzled.slf4j.Logging
+import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.catalogue.internal_model.identifiers.{
+  IdState,
   IdentifierType,
   SourceIdentifier
 }
+import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.marc_common.models.MarcField
 
 // Implements logic for finding a source identifier for varFields with
@@ -21,8 +25,22 @@ import weco.pipeline.transformer.marc_common.models.MarcField
 // https://www.loc.gov/marc/bibliographic/bd650.html
 // https://www.loc.gov/marc/bibliographic/bd651.html
 // https://www.loc.gov/marc/bibliographic/bd655.html
-//
-object MarcConceptIdentifier {
+
+trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
+  protected val defaultSecondIndicator: String = ""
+  protected def getLabel(field: MarcField): Option[String]
+
+  protected def normalise(identifier: String): String = {
+    // Sort out dodgy punctuation and spacing
+    identifier
+      .replaceAll("[.\\s]", "")
+  }
+
+  private def getIdentifierSubfieldContents(field: MarcField): Seq[String] =
+    field.subfields
+      .filter(_.tag == "0")
+      .map(subfield => normalise(subfield.content))
+      .distinct
 
   /** Determine the Library of Congress identifier type from the identifier
     * value prefix.
@@ -50,7 +68,7 @@ object MarcConceptIdentifier {
     * use in the Library of Congress Subject Headings (LCSH) and the Name
     * authority files that are maintained by the Library of Congress.
     */
-  private def locScheme(idValue: String): IdentifierType =
+  private def locScheme(idValue: String): IdentifierType = {
     idValue.split("\\d", 2).head match {
       // sh is the only legal prefix for a Subject Headings identifier.
       // At time of writing, there were some other s~ prefixed identifiers in use and marked as
@@ -70,15 +88,47 @@ object MarcConceptIdentifier {
         )
 
     }
-  def apply(
+  }
+
+  def getIdState(
     field: MarcField,
-    identifierSubfieldContent: String,
+    ontologyType: String
+  ): IdState.Unminted = {
+    val indicator2 = getSecondIndicator(field)
+
+    getIdentifierSubfieldContents(field) match {
+      case Seq(subfieldContent) =>
+        getSourceIdentifier(
+          indicator2 = indicator2,
+          identifierValue = subfieldContent,
+          ontologyType = ontologyType
+        ).map(IdState.Identifiable(_))
+          .getOrElse(IdState.Unidentifiable)
+      case Nil =>
+        getLabelDerivedIdentifier(ontologyType, field)
+      case _ =>
+        // TODO: throw here?
+        warn(
+          s"unable to identify, multiple identifier subfields found on $field"
+        )
+        IdState.Unidentifiable
+    }
+
+  }
+  private def getSecondIndicator(field: MarcField): String =
+    if (field.indicator2.trim().isEmpty) defaultSecondIndicator
+    else field.indicator2
+
+  private def getSourceIdentifier(
+    indicator2: String,
+    identifierValue: String,
     ontologyType: String
   ): Option[SourceIdentifier] = {
-    val maybeIdentifierType = field.indicator2 match {
+
+    val maybeIdentifierType = indicator2 match {
       // These mappings are provided by the MARC spec.
       // https://www.loc.gov/marc/bibliographic/bd655.html
-      case "0" => Some(locScheme(identifierSubfieldContent))
+      case "0" => Some(locScheme(identifierValue))
       case "2" => Some(IdentifierType.MESH)
       // For now we omit the other schemes as they're fairly unusual in
       // our collections.  If ind2 = "7", then we need to look in another
@@ -93,10 +143,28 @@ object MarcConceptIdentifier {
         Some(
           SourceIdentifier(
             identifierType = identifierType,
-            value = identifierSubfieldContent,
+            value = identifierValue,
             ontologyType = ontologyType
           )
         )
     }
   }
+
+  private def getLabelDerivedIdentifier(
+    ontologyType: String,
+    field: MarcField
+  ): IdState.Unminted =
+    getLabel(field) match {
+      case Some(label) =>
+        identifierFromText(label = label, ontologyType = ontologyType)
+      case None => IdState.Unidentifiable
+    }
+
+}
+
+object MarcHasRecordControlNumber extends MarcHasRecordControlNumber {
+  override protected def getLabel(field: MarcField): Option[String] = None
+
+  def apply(field: MarcField, ontologyType: String): IdState.Unminted =
+    getIdState(field, ontologyType)
 }

@@ -8,6 +8,8 @@ import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.{Subfield, VarField}
 
+import scala.util.{Success, Try}
+
 // Populate wwork:subject
 //
 // Use MARC field "650", "648" and "651" where the second indicator is not 7 (7 = "Source specified in subfield $2").
@@ -52,8 +54,13 @@ object SierraConceptSubjects
     with SierraConcepts {
 
   val subjectVarFields = List("650", "648", "651")
+  override protected def getSubjectConcepts(
+    field: weco.pipeline.transformer.marc_common.models.MarcField
+  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] = Success(Nil)
+  override protected val labelSubfields: Seq[String] = Nil
+  override protected val ontologyType: String = ""
 
-  def getSubjectsFromVarFields(
+  override def getSubjectsFromVarFields(
     bibId: SierraBibNumber,
     varfields: List[VarField]
   ): Output = {
@@ -91,8 +98,10 @@ object SierraConceptSubjects
           getConcepts(varfield, primarySubfields, subdivisionSubfields)
 
         Subject(
-          id =
-            getIdState(ontologyType = getFieldOntologyType(varfield), varfield),
+          id = getIdState(
+            ontologyType = getFieldOntologyType(varfield),
+            field = varfield
+          ),
           label = label,
           concepts = concepts
         )
@@ -113,7 +122,7 @@ object SierraConceptSubjects
         val conceptId =
           getIdState(
             ontologyType = getFieldOntologyType(varfield),
-            varfield
+            field = varfield
           ) match {
             case identifiable: IdState.Identifiable => Some(identifiable)
             case _                                  => None
