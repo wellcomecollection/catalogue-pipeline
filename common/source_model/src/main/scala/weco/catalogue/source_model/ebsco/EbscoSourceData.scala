@@ -6,5 +6,5 @@ sealed trait EbscoSourceData {
   val version: Int
 }
 case class EbscoChangedSourceData(s3Location: S3ObjectLocation, version: Int)
-  extends EbscoSourceData
+    extends EbscoSourceData
 case class EbscoDeletedSourceData(version: Int) extends EbscoSourceData
