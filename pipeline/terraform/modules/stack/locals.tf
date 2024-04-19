@@ -71,6 +71,7 @@ locals {
     "transformer_tei",
     "transformer_sierra",
     "transformer_calm",
+    "transformer_ebsco",
   ]
 
   miro_updates_topic_arn = data.terraform_remote_state.shared_infra.outputs.miro_updates_topic_arn
@@ -95,6 +96,10 @@ locals {
   # Tei adapter topics
   tei_adapter_topic_arn = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
   tei_adapter_bucket    = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
+
+  # EBSCO adapter topics
+  ebsco_adapter_topic_arn = data.terraform_remote_state.ebsco_adapter.outputs.tei_adapter_topic_arn
+  ebsco_adapter_bucket    = data.terraform_remote_state.ebsco_adapter.outputs.tei_adapter_bucket_name
 
   # Calm adapter VHS
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
@@ -157,6 +162,14 @@ locals {
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
       read_policy   = data.aws_iam_policy_document.read_tei_adapter_bucket.json
+    }
+
+    ebsco = {
+      topics = [
+        local.ebsco_adapter_topic_arn,
+      ],
+      reindex_topic = null # TODO: Add reindexer topic (the adapter doesn't have one yet)
+      read_policy   = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
     }
   }
 

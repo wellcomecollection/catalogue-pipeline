@@ -71,6 +71,7 @@ steps:
       - "transformer_miro"
       - "transformer_sierra"
       - "transformer_tei"
+      - "transformer_ebsco"
 
     agents:
       queue: "scala"
