@@ -10,15 +10,27 @@ def update_notifier(
     for update_id, update in dict(updates["updated"]).items():
         update_messages.append(
             {
-                "type": "updated",
                 "id": update_id,
-                "s3_location": f"s3://{s3_bucket}/{update['s3_key']}",
+                "location": {
+                    "bucket": s3_bucket,
+                    "key": update["s3_key"],
+                },
+                "version": 1,
+                "deleted": False,
                 "sha256": update["sha256"],
             }
         )
 
     for delete_id in updates["deleted"]:
-        deleted_messages.append({"type": "deleted", "id": delete_id})
+        deleted_messages.append(
+            {
+                "id": delete_id,
+                "location": None,
+                "version": 1,
+                "deleted": True,
+                "sha256": None,
+            }
+        )
 
     print(
         f"Sending {len(update_messages)} update messages and {len(deleted_messages)} delete messages."

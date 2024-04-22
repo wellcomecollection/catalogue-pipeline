@@ -7,17 +7,18 @@ def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
 
     print(f"Available uploads: {dates_list}")
 
-    # Check if we've sent a notification for the date
     notified_completion_flag = "notified.flag"
-    date_list_with_notified_flag = []
-    for date in dates_list:
+
+    def _is_notified(date):
         notified_completion_flag_path = os.path.join(
             xml_s3_prefix, date, notified_completion_flag
         )
-        notified_completed = s3_store.file_exists(notified_completion_flag_path)
-        date_list_with_notified_flag.append(
-            {"date": date, "notified_completed": notified_completed}
-        )
+        return s3_store.file_exists(notified_completion_flag_path)
+
+    # Check if we've sent a notification for the date
+    date_list_with_notified_flag = [
+        {"date": date, "notified_completed": _is_notified(date)} for date in dates_list
+    ]
 
     # The current date is the most recent if it has not been notified
     current_date = None
@@ -57,9 +58,7 @@ def find_updated_records(current_records, previous_records):
 
 
 def find_deleted_records(current_records, previous_records):
-    for id, record in previous_records.items():
-        if id not in current_records:
-            yield id
+    return (id for id in previous_records.keys() if id not in current_records)
 
 
 def compare_uploads(
