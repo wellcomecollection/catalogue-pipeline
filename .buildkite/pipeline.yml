@@ -150,6 +150,7 @@ steps:
     matrix:
       - "calm_adapter/calm_window_generator"
       - "calm_adapter/calm_deletion_check_initiator"
+      - "ebsco_adapter/ebsco_adapter"
       - "common/window_generator"
       - "tei_adapter/tei_updater"
 
