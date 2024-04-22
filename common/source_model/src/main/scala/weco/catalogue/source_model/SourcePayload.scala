@@ -10,13 +10,12 @@ sealed trait SourcePayload {
   val version: Int
 }
 
-// TODO: Update adapter to mirror this
 case class EbscoSourcePayload(
   id: String,
   location: Option[S3ObjectLocation],
-  // Version can be the unicode batch date
   version: Int,
-  isDeleted: Boolean = false
+  sha256: Option[String],
+  deleted: Boolean = false
 ) extends SourcePayload
 
 case class CalmSourcePayload(
