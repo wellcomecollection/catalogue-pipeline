@@ -57,9 +57,7 @@ def find_updated_records(current_records, previous_records):
 
 
 def find_deleted_records(current_records, previous_records):
-    for id, record in previous_records.items():
-        if id not in current_records:
-            yield id
+    return (id for id in previous_records.keys() if id not in current_records)
 
 
 def compare_uploads(
