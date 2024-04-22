@@ -14,9 +14,11 @@ def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
             xml_s3_prefix, date, notified_completion_flag
         )
         return s3_store.file_exists(notified_completion_flag_path)
-    
+
     # Check if we've sent a notification for the date
-    date_list_with_notified_flag = [{"date": date, "notified_completed": _is_notified(date)} for date in dates_list]
+    date_list_with_notified_flag = [
+        {"date": date, "notified_completed": _is_notified(date)} for date in dates_list
+    ]
 
     # The current date is the most recent if it has not been notified
     current_date = None
