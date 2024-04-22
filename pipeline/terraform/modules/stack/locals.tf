@@ -98,8 +98,8 @@ locals {
   tei_adapter_bucket    = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
 
   # EBSCO adapter topics
-  ebsco_adapter_topic_arn = data.terraform_remote_state.ebsco_adapter.outputs.tei_adapter_topic_arn
-  ebsco_adapter_bucket    = data.terraform_remote_state.ebsco_adapter.outputs.tei_adapter_bucket_name
+  ebsco_adapter_topic_arn = data.terraform_remote_state.ebsco_adapter.outputs.ebsco_adapter_topic_arn
+  ebsco_adapter_bucket    = data.terraform_remote_state.ebsco_adapter.outputs.ebsco_adapter_bucket_name
 
   # Calm adapter VHS
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
