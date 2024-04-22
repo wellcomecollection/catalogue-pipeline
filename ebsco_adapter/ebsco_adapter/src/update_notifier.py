@@ -22,13 +22,15 @@ def update_notifier(
         )
 
     for delete_id in updates["deleted"]:
-        deleted_messages.append({
-            "id": delete_id,
-            "location": None,
-            "version": 1,
-            "deleted": True,
-            "sha256": None,
-        })
+        deleted_messages.append(
+            {
+                "id": delete_id,
+                "location": None,
+                "version": 1,
+                "deleted": True,
+                "sha256": None,
+            }
+        )
 
     print(
         f"Sending {len(update_messages)} update messages and {len(deleted_messages)} delete messages."
