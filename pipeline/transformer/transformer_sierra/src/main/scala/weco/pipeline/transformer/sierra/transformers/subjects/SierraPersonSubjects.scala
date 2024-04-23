@@ -2,13 +2,10 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import scala.util.Success
-import weco.pipeline.transformer.marc_common.models.MarcField
-import weco.pipeline.transformer.sierra.transformers.SierraAgents
-import weco.sierra.models.identifiers.SierraBibNumber
-import weco.sierra.models.marc.{Subfield, VarField}
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
+import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.marc_common.transformers.MarcPerson
 
 // Populate wwork:subject
 //
@@ -28,81 +25,39 @@ import scala.util.Try
 //
 object SierraPersonSubjects
     extends SierraSubjectsTransformer
-    with SierraAgents {
+    with ExcludeMeshIds {
 
   override protected val subjectVarFields: List[String] = List("600")
+  private object PersonAsSubjectConcept extends MarcPerson with ExcludeMeshIds {
+    override protected val labelSubfieldTags: Seq[String] =
+      Seq("a", "b", "c", "d", "t", "p", "n", "q", "l")
+  }
+//TODO: I think this needs a bit of commentary.
+  // Some subfields form part of the concept involved, and some do something else.
+  override def getSubjectConcepts(
+    field: MarcField
+  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] =
+    PersonAsSubjectConcept(field) match {
+      case Success(person) =>
+        Success(Seq(person) ++ getGeneralSubdivisions(field).map(Concept(_)))
+      case Failure(exception) => Failure(exception)
+    }
 
-  override def getSubjectsFromVarFields(
-    bibId: SierraBibNumber,
-    varFields: List[VarField]
-  ): Output = {
-    // Second indicator 7 means that the subject authority is something other
-    // than library of congress or mesh. Some MARC records have duplicated subjects
-    // when the same subject has more than one authority (for example mesh and FAST),
-    // which causes duplicated subjects to appear in the API.
-    //
-    // So let's filter anything that is from another authority for now.
-    varFields
-      .filterNot { _.indicator2.contains("7") }
-      .flatMap {
-        varField: VarField =>
-          val subfields = varField.subfields
-          val maybePerson =
-            getPerson(subfields)
-          val generalSubdivisions =
-            varField.subfields
-              .collect {
-                case Subfield("x", content) =>
-                  content
-              }
+  private def getRoles(field: MarcField): Seq[String] =
+    field.subfields.filter(_.tag == "e").map(_.content)
+  private def getGeneralSubdivisions(field: MarcField): Seq[String] =
+    field.subfields.filter(_.tag == "x").map(_.content)
 
-          maybePerson.map {
-            person =>
-              val label = getPersonSubjectLabel(
-                person = person,
-                roles = getRoles(subfields),
-                dates = getDates(subfields),
-                generalSubdivisions = generalSubdivisions
-              )
-              val subjectIdentifier = getIdState(varField, "Person")
-              val maybeIdentifiedPerson =
-                person.copy(id = subjectIdentifier)
-              Subject(
-                label = label,
-                concepts = getConcepts(
-                  maybeIdentifiedPerson.identifiable(),
-                  generalSubdivisions
-                ),
-                id = subjectIdentifier
-              )
-          }
-      }
+  override protected def getLabel(field: MarcField): Option[String] = {
+    Option(
+      (field.subfields
+        .filter(subfield => labelSubfields.contains(subfield.tag))
+        .map(_.content) ++ getRoles(field) ++ getGeneralSubdivisions(field))
+        .mkString(" ")
+    ).filter(_.nonEmpty)
   }
 
-  private def getPersonSubjectLabel(
-    person: Person[IdState.Unminted],
-    roles: List[String],
-    dates: Option[String],
-    generalSubdivisions: List[String]
-  ): String =
-    (List(person.label) ++ roles ++ generalSubdivisions)
-      .mkString(" ")
-
-  private def getConcepts(
-    person: Person[IdState.Unminted],
-    generalSubdivisions: List[String]
-  ): List[AbstractRootConcept[IdState.Unminted]] =
-    person +: generalSubdivisions.map(Concept(_))
-
-  private def getRoles(secondarySubfields: List[Subfield]) =
-    secondarySubfields.collect { case Subfield("e", role) => role }
-  private def getDates(secondarySubfields: List[Subfield]) =
-    secondarySubfields.find(_.tag == "d").map(_.content)
-
-  override protected val labelSubfields: Seq[String] = Nil
-  override protected val ontologyType: String = ""
-
-  override protected def getSubjectConcepts(
-    field: MarcField
-  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] = Success(Nil)
+  override protected val labelSubfields: Seq[String] =
+    Seq("a", "b", "c", "d", "t", "p", "n", "q", "l")
+  override protected val ontologyType: String = "Person"
 }

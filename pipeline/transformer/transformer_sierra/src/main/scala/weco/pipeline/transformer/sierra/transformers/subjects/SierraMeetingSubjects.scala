@@ -4,8 +4,6 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.AbstractRootConcept
 import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.marc_common.transformers.MarcMeeting
-import weco.pipeline.transformer.sierra.transformers.SierraAgents
-import weco.pipeline.transformer.transformers.ConceptsTransformer
 
 import scala.util.{Failure, Success, Try}
 
@@ -27,8 +25,7 @@ import scala.util.{Failure, Success, Try}
 //
 object SierraMeetingSubjects
     extends SierraSubjectsTransformer
-    with SierraAgents
-    with ConceptsTransformer {
+    with ExcludeMeshIds {
 
   override protected val labelSubfields: Seq[String] =
     Seq("a", "c", "d")
@@ -42,7 +39,9 @@ object SierraMeetingSubjects
       case Success(organisation) => Success(Seq(organisation))
       case Failure(exception)    => Failure(exception)
     }
-  private object MeetingAsSubjectConcept extends MarcMeeting {
+  private object MeetingAsSubjectConcept
+      extends MarcMeeting
+      with ExcludeMeshIds {
     override protected val labelSubfieldTags: Seq[String] = Seq("a", "c", "d")
   }
 }

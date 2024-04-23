@@ -9,8 +9,7 @@ import scala.util.{Failure, Success, Try}
 
 trait MarcAbstractAgent extends MarcHasRecordControlNumber {
   type Output = Try[AbstractAgent[IdState.Unminted]]
-  // TODO: this is a Sierra quirk
-  override protected val defaultSecondIndicator: String = "0"
+  override protected val defaultSecondIndicator: String = ""
 
   protected val ontologyType: String
   protected val appropriateFields: Seq[String]
@@ -37,7 +36,8 @@ trait MarcAbstractAgent extends MarcHasRecordControlNumber {
     }
   }
 
-  protected def normaliseLabel(label: String): String = label.trimTrailing(',')
+  protected def normaliseLabel(label: String): String =
+    label.trimTrailing(',')
 
   private def isAppropriateField(field: MarcField): Boolean =
     appropriateFields.contains(field.marcTag)

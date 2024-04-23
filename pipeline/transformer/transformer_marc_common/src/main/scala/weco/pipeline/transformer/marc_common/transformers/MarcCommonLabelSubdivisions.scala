@@ -17,13 +17,15 @@ import weco.pipeline.transformer.transformers.{
  * $y - Chronological subdivision (R)
  * $z - Geographic subdivision (R)
  * */
-trait MarcHasSubdividedLabel extends ConceptsTransformer {
-
+trait MarcCommonLabelSubdivisions extends ConceptsTransformer {
+  protected val subdivisionSeparator = " - "
+  private val subdivisionTags = Seq("v", "x", "y", "z")
+  private val labelSubfieldTags = "a" +: subdivisionTags
   protected def getLabelSubfields(
     field: MarcField
   ): (Seq[MarcSubfield], Seq[MarcSubfield]) =
     field.subfields
-      .filter(subfield => Seq("a", "v", "x", "y", "z").contains(subfield.tag))
+      .filter(subfield => labelSubfieldTags.contains(subfield.tag))
       .partition { _.tag == "a" }
 
   // Get the label.  This is populated by the label of subfield $a, followed
@@ -34,11 +36,22 @@ trait MarcHasSubdividedLabel extends ConceptsTransformer {
     subdivisionSubfields: Seq[MarcSubfield]
   ): String = {
     val orderedSubfields = primarySubfields ++ subdivisionSubfields
-    orderedSubfields.map { _.content }.mkString(" - ").trimTrailingPeriod
+    orderedSubfields
+      .map { _.content }
+      .mkString(subdivisionSeparator)
+      .trimTrailingPeriod
   }
+  protected def getSubdivisions(
+    field: MarcField
+  ): Seq[AbstractConcept[IdState.Unminted]] =
+    getSubdivisions(
+      field.subfields.filter(subfield => subdivisionTags.contains(subfield.tag))
+    )
 
-  // Extract the subdivisions, which come from everything except subfield $a.
-  // These are never identified.  We preserve the order from MARC.
+  // Extract the subdivision as concepts of the appropriate type.
+  // These are never provided with an identifier in the source data,
+  // which refers either to the field as a whole, or just to the primary subfield,
+  // so will always have a label-derived identifier.
   protected def getSubdivisions(
     subdivisionSubfields: Seq[MarcSubfield]
   ): Seq[AbstractConcept[IdState.Unminted]] =

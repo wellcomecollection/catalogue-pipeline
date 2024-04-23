@@ -3,6 +3,7 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractRootConcept, Subject}
 import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.marc_common.transformers.MarcSubject
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.pipeline.transformer.sierra.transformers.{
   SierraAbstractConcepts,
@@ -20,9 +21,10 @@ trait SierraSubjectsTransformer
     extends SierraIdentifiedDataTransformer
     with SierraAbstractConcepts
     with SierraQueryOps
-    with SierraMarcDataConversions {
+    with SierraMarcDataConversions
+    with MarcSubject {
 
-  type Output = List[Subject[IdState.Unminted]]
+  override protected val defaultSecondIndicator: String = "0"
 
   protected val subjectVarFields: List[String]
   protected val labelSubfields: Seq[String]
@@ -50,19 +52,44 @@ trait SierraSubjectsTransformer
     bibId: SierraBibNumber,
     varFields: List[VarField]
   ): Output = {
-    varFields.map(getSubjectFromField(_))
+    // Second indicator 7 means that the subject authority is something other
+    // than library of congress or mesh. Some MARC records have duplicated subjects
+    // when the same subject has more than one authority (for example mesh and FAST),
+    // which causes duplicated subjects to appear in the API.
+    //
+    // Example from b10199135 (j7jm24hj)
+    //  650  2 Retina|xphysiology.|0D012160Q000502
+    //  650  2 Vision, Ocular.|0D014785
+    //  650  2 Visual Pathways.|0D014795
+    //  650  7 Retina.|2fast|0(OCoLC)fst01096191
+    //  650  7 Vision.|2fast|0(OCoLC)fst01167852
+    //
+    // So let's filter anything that is from another authority for now.
+    varFields
+      .filterNot(_.indicator2.contains("7"))
+      .flatMap(getSubjectFromField(_))
   }
-  def getSubjectFromField(field: MarcField): Subject[IdState.Unminted] = {
+
+  protected def getIdState(field: MarcField): IdState.Unminted =
+    super.getIdState(field, ontologyType)
+
+  private def getSubjectFromField(
+    field: MarcField
+  ): Option[Subject[IdState.Unminted]] = {
 
     getSubjectConcepts(field) match {
+      case Success(Nil) => None
       case Success(entities) =>
-        Subject(
-          label = getLabel(field).get,
-          concepts = entities.toList,
-          id = getIdState(field, ontologyType)
+        Some(
+          Subject(
+            label = getLabel(field).get,
+            concepts = entities.toList,
+            id = getIdState(field)
+          )
         )
       case Failure(exception) =>
-        throw exception // TODO: was CataloguingException with context in Organisation, log and move on in others
+        None
+      // throw exception // TODO: was CataloguingException with context in Organisation, log and move on in others
 
     }
   }

@@ -119,13 +119,11 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
     if (field.indicator2.trim().isEmpty) defaultSecondIndicator
     else field.indicator2
 
-  private def getSourceIdentifier(
+  protected def getIdentifierType(
     indicator2: String,
-    identifierValue: String,
-    ontologyType: String
-  ): Option[SourceIdentifier] = {
-
-    val maybeIdentifierType = indicator2 match {
+    identifierValue: String
+  ): Option[IdentifierType] =
+    indicator2 match {
       // These mappings are provided by the MARC spec.
       // https://www.loc.gov/marc/bibliographic/bd655.html
       case "0" => Some(locScheme(identifierValue))
@@ -136,8 +134,13 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
       // LCSH and MESH, and drop everything else.
       case _ => None
     }
+  private def getSourceIdentifier(
+    indicator2: String,
+    identifierValue: String,
+    ontologyType: String
+  ): Option[SourceIdentifier] = {
 
-    maybeIdentifierType match {
+    getIdentifierType(indicator2, identifierValue) match {
       case None => None
       case Some(identifierType) =>
         Some(

@@ -4,6 +4,7 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.AbstractRootConcept
 import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.marc_common.transformers.MarcOrganisation
+import weco.pipeline.transformer.text.TextNormalisation.TextNormalisationOps
 
 import scala.util.{Failure, Success, Try}
 
@@ -23,14 +24,20 @@ import scala.util.{Failure, Success, Try}
 //
 // https://www.loc.gov/marc/bibliographic/bd610.html
 //
-object SierraOrganisationSubjects extends SierraSubjectsTransformer {
+object SierraOrganisationSubjects
+    extends SierraSubjectsTransformer
+    with ExcludeMeshIds {
   override protected val labelSubfields: Seq[String] =
     Seq("a", "b", "c", "d", "e")
   override protected val subjectVarFields: List[String] = List("610")
   override protected val ontologyType: String = "Organisation"
 
-  protected object OrganisationAsSubjectConcept extends MarcOrganisation {
+  private object OrganisationAsSubjectConcept
+      extends MarcOrganisation
+      with ExcludeMeshIds {
     override protected val labelSubfieldTags: Seq[String] = Seq("a", "b")
+    override protected def normaliseLabel(label: String): String =
+      super.normaliseLabel(label).trimTrailingPeriod
   }
 
   override def getSubjectConcepts(
