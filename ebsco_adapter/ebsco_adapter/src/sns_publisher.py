@@ -38,8 +38,6 @@ class SnsPublisher:
             )
 
             if "Failed" in response and len(response["Failed"]) > 0:
-                raise ValueError(
-                    f"Failed to publish messages: {response['Failed']}"
-                )
+                raise ValueError(f"Failed to publish messages: {response['Failed']}")
 
         print(f"Published {len(messages)} messages in {len(batches)} batches.")

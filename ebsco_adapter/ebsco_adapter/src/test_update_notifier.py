@@ -24,9 +24,10 @@ def test_update_notifier():
             f"update-{i}": {
                 "s3_key": f"test_prefix/update-{i}.xml",
                 "sha256": "test_sha256",
-            } for i in range(number_of_updates)
+            }
+            for i in range(number_of_updates)
         },
-        "deleted": [f"delete-{i}" for i in range(number_of_deleted)]
+        "deleted": [f"delete-{i}" for i in range(number_of_deleted)],
     }
 
     expected_update_messages = [
@@ -39,7 +40,8 @@ def test_update_notifier():
             "version": 1,
             "deleted": False,
             "sha256": "test_sha256",
-        } for i in range(number_of_updates)
+        }
+        for i in range(number_of_updates)
     ]
 
     expected_deleted_messages = [
@@ -49,15 +51,19 @@ def test_update_notifier():
             "version": 1,
             "deleted": True,
             "sha256": None,
-        } for i in range(number_of_deleted)
+        }
+        for i in range(number_of_deleted)
     ]
 
     expected_messages = expected_update_messages + expected_deleted_messages
 
-    update_notifier(updates, notify_for_batch, s3_store, s3_bucket, xml_s3_prefix, sns_publisher)
+    update_notifier(
+        updates, notify_for_batch, s3_store, s3_bucket, xml_s3_prefix, sns_publisher
+    )
     published_messages = fake_sns_client.test_get_published_messages()
 
-    assert len(published_messages) == number_of_updates + number_of_deleted, \
-        f"Expected {number_of_updates} update messages to be published, but got {len(published_messages)}"
+    assert (
+        len(published_messages) == number_of_updates + number_of_deleted
+    ), f"Expected {number_of_updates} update messages to be published, but got {len(published_messages)}"
 
     assert published_messages == expected_messages

@@ -3,7 +3,6 @@ import os
 
 
 class FakeSnsClient:
-
     def __init__(self):
         self.published_messages = []
 
@@ -24,10 +23,7 @@ class FakeSnsClient:
 
         success_responses = [success_response for _ in PublishBatchRequestEntries]
 
-        return {
-            "Successful": success_responses,
-            "Failed": []
-        }
+        return {"Successful": success_responses, "Failed": []}
 
 
 class FakeEbscoFtp:
