@@ -8,7 +8,7 @@ def test_update_notifier():
     s3_bucket = "test_bucket"
     xml_s3_prefix = "test_prefix"
     topic_arn = "test_topic_arn"
-    notify_for_batch = "test_batch"
+    notify_for_batch = "2023-01-01"
 
     fake_s3_client = FakeS3Client()
     fake_sns_client = FakeSnsClient()
@@ -37,7 +37,7 @@ def test_update_notifier():
                 "bucket": s3_bucket,
                 "key": f"test_prefix/update-{i}.xml",
             },
-            "version": 1,
+            "version": 20230101,
             "deleted": False,
             "sha256": "test_sha256",
         }
@@ -48,7 +48,7 @@ def test_update_notifier():
         {
             "id": f"delete-{i}",
             "location": None,
-            "version": 1,
+            "version": 20230101,
             "deleted": True,
             "sha256": None,
         }
