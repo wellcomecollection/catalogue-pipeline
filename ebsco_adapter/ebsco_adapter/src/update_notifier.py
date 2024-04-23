@@ -7,6 +7,8 @@ def update_notifier(
     update_messages = []
     deleted_messages = []
 
+    version = int("".join(filter(str.isdigit, notify_for_batch)))
+
     if updates["updated"] is not None:
         for update_id, update in dict(updates["updated"]).items():
             update_messages.append(
@@ -16,7 +18,7 @@ def update_notifier(
                         "bucket": s3_bucket,
                         "key": update["s3_key"],
                     },
-                    "version": 1,
+                    "version": version,
                     "deleted": False,
                     "sha256": update["sha256"],
                 }
@@ -28,7 +30,7 @@ def update_notifier(
                 {
                     "id": delete_id,
                     "location": None,
-                    "version": 1,
+                    "version": version,
                     "deleted": True,
                     "sha256": None,
                 }
