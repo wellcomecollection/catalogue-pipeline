@@ -1,4 +1,33 @@
+import json
 import os
+
+
+class FakeSnsClient:
+
+    def __init__(self):
+        self.published_messages = []
+
+    def test_get_published_messages(self):
+        return self.published_messages
+
+    def publish_batch(self, TopicArn, PublishBatchRequestEntries):
+        success_response = {
+            "Id": "string",
+            "MessageId": "string",
+            "MD5OfMessageBody": "string",
+            "MD5OfMessageAttributes": "string",
+            "SequenceNumber": "string",
+        }
+
+        for entry in PublishBatchRequestEntries:
+            self.published_messages.append(json.loads(entry["Message"]))
+
+        success_responses = [success_response for _ in PublishBatchRequestEntries]
+
+        return {
+            "Successful": success_responses,
+            "Failed": []
+        }
 
 
 class FakeEbscoFtp:

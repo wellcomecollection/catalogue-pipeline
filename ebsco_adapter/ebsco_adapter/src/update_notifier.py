@@ -7,30 +7,32 @@ def update_notifier(
     update_messages = []
     deleted_messages = []
 
-    for update_id, update in dict(updates["updated"]).items():
-        update_messages.append(
-            {
-                "id": update_id,
-                "location": {
-                    "bucket": s3_bucket,
-                    "key": update["s3_key"],
-                },
-                "version": 1,
-                "deleted": False,
-                "sha256": update["sha256"],
-            }
-        )
+    if updates["updated"] is not None:
+        for update_id, update in dict(updates["updated"]).items():
+            update_messages.append(
+                {
+                    "id": update_id,
+                    "location": {
+                        "bucket": s3_bucket,
+                        "key": update["s3_key"],
+                    },
+                    "version": 1,
+                    "deleted": False,
+                    "sha256": update["sha256"],
+                }
+            )
 
-    for delete_id in updates["deleted"]:
-        deleted_messages.append(
-            {
-                "id": delete_id,
-                "location": None,
-                "version": 1,
-                "deleted": True,
-                "sha256": None,
-            }
-        )
+    if updates["deleted"] is not None:
+        for delete_id in updates["deleted"]:
+            deleted_messages.append(
+                {
+                    "id": delete_id,
+                    "location": None,
+                    "version": 1,
+                    "deleted": True,
+                    "sha256": None,
+                }
+            )
 
     print(
         f"Sending {len(update_messages)} update messages and {len(deleted_messages)} delete messages."

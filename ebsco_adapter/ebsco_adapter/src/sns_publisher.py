@@ -32,15 +32,14 @@ class SnsPublisher:
                     }
                 )
 
-                response = self.sns_client.publish_batch(
-                    TopicArn=self.sns_topic_arn,
-                    PublishBatchRequestEntries=batched_requests,
-                )
+            response = self.sns_client.publish_batch(
+                TopicArn=self.sns_topic_arn,
+                PublishBatchRequestEntries=batched_requests,
+            )
 
-                if "Failed" in response and len(response["Failed"]) > 0:
-                    print(response)
-                    raise ValueError(
-                        f"Failed to publish messages: {response['Failed']}"
-                    )
+            if "Failed" in response and len(response["Failed"]) > 0:
+                raise ValueError(
+                    f"Failed to publish messages: {response['Failed']}"
+                )
 
         print(f"Published {len(messages)} messages in {len(batches)} batches.")
