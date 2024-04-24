@@ -15,6 +15,11 @@ object Implicits {
   // Cache these here to improve compilation times (otherwise they are
   // re-derived every time they are required).
 
+  implicit val _decEbscoSourcePayload: Decoder[EbscoSourcePayload] =
+    deriveConfiguredDecoder
+  implicit val _encEbscoSourcePayload: Encoder[EbscoSourcePayload] =
+    deriveConfiguredEncoder
+
   implicit val _decCalmSourcePayload: Decoder[CalmSourcePayload] =
     deriveConfiguredDecoder
   implicit val _encCalmSourcePayload: Encoder[CalmSourcePayload] =
