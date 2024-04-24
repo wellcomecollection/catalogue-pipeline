@@ -1,4 +1,4 @@
-package weco.pipeline.transformer.sierra.transformers.subjects
+package weco.pipeline.transformer.marc_common.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.pipeline.transformer.marc_common.transformers.MarcHasRecordControlNumber

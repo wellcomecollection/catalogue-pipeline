@@ -2,8 +2,7 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractRootConcept, Subject}
-import weco.pipeline.transformer.marc_common.models.MarcField
-import weco.pipeline.transformer.marc_common.transformers.MarcSubject
+import weco.pipeline.transformer.marc_common.models.{MarcField, MarcRecord}
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.pipeline.transformer.sierra.transformers.{
   SierraAbstractConcepts,
@@ -16,20 +15,39 @@ import weco.sierra.models.identifiers.SierraBibNumber
 import weco.sierra.models.marc.VarField
 
 import scala.util.{Failure, Success, Try}
+trait SierraSubjectsTransformer2
+    extends SierraIdentifiedDataTransformer
+    with SierraMarcDataConversions {
+  private type SingleOutput = Subject[IdState.Unminted]
+  protected type OptionalSingleOutput = Option[SingleOutput]
+  override type Output = Seq[SingleOutput]
 
+  protected def getSubject(field: MarcField): OptionalSingleOutput
+  protected val subjectVarFields: Seq[String]
+  def apply(bibId: SierraBibNumber, bibData: SierraBibData): Output =
+    getSubjects(bibData)
+  protected def getSubjects(marcData: MarcRecord): Output =
+    marcData
+      .fieldsWithTags(subjectVarFields: _*)
+      .filterNot(_.indicator2.contains("7"))
+      .flatMap(getSubject)
+}
 trait SierraSubjectsTransformer
     extends SierraIdentifiedDataTransformer
     with SierraAbstractConcepts
     with SierraQueryOps
     with SierraMarcDataConversions
-    with MarcSubject {
+    with SierraSubjectsTransformer2 {
 
   override protected val defaultSecondIndicator: String = "0"
-
+  override protected def getSubjects(marcData: MarcRecord): Output =
+    throw new Exception(
+      "Don't!"
+    )
   protected val subjectVarFields: List[String]
   protected val labelSubfields: Seq[String]
   protected val ontologyType: String
-  def apply(bibId: SierraBibNumber, bibData: SierraBibData): Output =
+  override def apply(bibId: SierraBibNumber, bibData: SierraBibData): Output =
     getSubjectsFromVarFields(
       bibId,
       subjectVarFields.flatMap(bibData.varfieldsWithTag(_))
@@ -48,7 +66,7 @@ trait SierraSubjectsTransformer
     field: MarcField
   ): Try[Seq[AbstractRootConcept[IdState.Unminted]]]
 
-  def getSubjectsFromVarFields(
+  private def getSubjectsFromVarFields(
     bibId: SierraBibNumber,
     varFields: List[VarField]
   ): Output = {

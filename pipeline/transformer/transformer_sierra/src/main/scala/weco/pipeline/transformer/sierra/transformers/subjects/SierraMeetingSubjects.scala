@@ -1,47 +1,17 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
-import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.AbstractRootConcept
 import weco.pipeline.transformer.marc_common.models.MarcField
-import weco.pipeline.transformer.marc_common.transformers.MarcMeeting
+import weco.pipeline.transformer.marc_common.transformers.subjects.MarcMeetingSubject
 
-import scala.util.{Failure, Success, Try}
-
-// Populate wwork:subject
-//
-// Use MARC field "611".
-//
-// *  Populate the platform "label" with the concatenated values of
-//    subfields a, c, and d.
-//
-// *  Populate "concepts" with a single value:
-//
-//    -   Create "label" from subfields a, c and d
-//    -   Set "type" to "Meeting"
-//    -   Use subfield 0 to populate "identifiers", if present.  Note the
-//        identifierType should be "lc-names".
-//
-// https://www.loc.gov/marc/bibliographic/bd611.html
-//
-object SierraMeetingSubjects
-    extends SierraSubjectsTransformer
-    with ExcludeMeshIds {
-
-  override protected val labelSubfields: Seq[String] =
-    Seq("a", "c", "d")
-  override protected val subjectVarFields: List[String] = List("611")
-  override protected val ontologyType: String = "Meeting"
-
-  override def getSubjectConcepts(
-    field: MarcField
-  ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] =
-    MeetingAsSubjectConcept(field) match {
-      case Success(organisation) => Success(Seq(organisation))
-      case Failure(exception)    => Failure(exception)
-    }
-  private object MeetingAsSubjectConcept
-      extends MarcMeeting
-      with ExcludeMeshIds {
-    override protected val labelSubfieldTags: Seq[String] = Seq("a", "c", "d")
+object SierraMeetingSubjects extends SierraSubjectsTransformer2 {
+  private object SierraMeetingSubject extends MarcMeetingSubject {
+    override protected val defaultSecondIndicator: String = "0"
   }
+  override protected def getSubject(
+    field: MarcField
+  ): OptionalSingleOutput =
+    SierraMeetingSubject(field)
+
+  override protected val subjectVarFields: Seq[String] = List("611")
+
 }

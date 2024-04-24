@@ -1,8 +1,12 @@
-package weco.pipeline.transformer.marc_common.transformers
+package weco.pipeline.transformer.marc_common.transformers.subjects
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractRootConcept, Subject}
 import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.marc_common.transformers.{
+  MarcFieldTransformer,
+  MarcHasRecordControlNumber
+}
 import weco.pipeline.transformer.text.TextNormalisation.TextNormalisationOps
 
 import scala.util.{Failure, Success, Try}
