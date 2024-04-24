@@ -312,7 +312,7 @@ class SierraContributorsTest
 
     it("gets an identifier from subfield ǂ0") {
       val name = "Ivan the ivy"
-      val lcshCode = "lcsh7101607"
+      val lcshCode = "nlcsh7101607"
 
       val varFields = List(
         VarField(
@@ -339,13 +339,13 @@ class SierraContributorsTest
       "combines identifiers with inconsistent spacing/punctuation from subfield ǂ0"
     ) {
       val name = "Wanda the watercress"
-      val lcshCodeCanonical = "lcsh2055034"
-      val lcshCode1 = "lcsh 2055034"
-      val lcshCode2 = "  lcsh2055034 "
-      val lcshCode3 = " lc sh 2055034"
+      val lcshCodeCanonical = "nlcsh2055034"
+      val lcshCode1 = "nlcsh 2055034"
+      val lcshCode2 = "  nlcsh2055034 "
+      val lcshCode3 = " nlc sh 2055034"
 
       // Based on an example from a real record; see Sierra b3017492.
-      val lcshCode4 = "lcsh 2055034.,"
+      val lcshCode4 = "nlcsh 2055034.,"
 
       val varFields = List(
         VarField(
@@ -383,8 +383,8 @@ class SierraContributorsTest
           marcTag = "100",
           subfields = List(
             Subfield(tag = "a", content = name),
-            Subfield(tag = "0", content = "lcsh9069541"),
-            Subfield(tag = "0", content = "lcsh3384149")
+            Subfield(tag = "0", content = "nlcsh9069541"),
+            Subfield(tag = "0", content = "nlcsh3384149")
           )
         )
       )
@@ -537,7 +537,7 @@ class SierraContributorsTest
 
     it("gets an identifier from subfield ǂ0") {
       val name = "Gerry the Garlic"
-      val lcshCode = "lcsh7212"
+      val lcshCode = "nlcsh7212"
 
       val varFields = List(
         VarField(
@@ -565,10 +565,10 @@ class SierraContributorsTest
 
     it("gets an identifier with inconsistent spacing from subfield ǂ0") {
       val name = "Charlie the chive"
-      val lcshCodeCanonical = "lcsh6791210"
-      val lcshCode1 = "lcsh 6791210"
-      val lcshCode2 = "  lcsh6791210 "
-      val lcshCode3 = " lc sh 6791210"
+      val lcshCodeCanonical = "nlcsh6791210"
+      val lcshCode1 = "nlcsh 6791210"
+      val lcshCode2 = "  nlcsh6791210 "
+      val lcshCode3 = " nlc sh 6791210"
 
       val varFields = List(
         VarField(
@@ -605,8 +605,8 @@ class SierraContributorsTest
           marcTag = "110",
           subfields = List(
             Subfield(tag = "a", content = name),
-            Subfield(tag = "0", content = "lcsh3349285"),
-            Subfield(tag = "0", content = "lcsh9059917")
+            Subfield(tag = "0", content = "nlcsh3349285"),
+            Subfield(tag = "0", content = "nlcsh9059917")
           )
         )
       )
