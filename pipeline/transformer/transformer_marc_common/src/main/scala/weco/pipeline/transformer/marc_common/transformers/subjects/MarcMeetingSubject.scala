@@ -23,7 +23,7 @@ import scala.util.{Failure, Success, Try}
 //
 // https://www.loc.gov/marc/bibliographic/bd611.html
 //
-trait MarcMeetingSubject extends MarcSubject with ExcludeMeshIds {
+trait MarcMeetingSubject extends MarcSubject with OnlyLocIds {
   override protected val labelSubfields: Seq[String] =
     Seq("a", "c", "d")
   override protected val ontologyType: String = "Meeting"
@@ -35,9 +35,7 @@ trait MarcMeetingSubject extends MarcSubject with ExcludeMeshIds {
       case Success(organisation) => Success(Seq(organisation))
       case Failure(exception)    => Failure(exception)
     }
-  private object MeetingAsSubjectConcept
-      extends MarcMeeting
-      with ExcludeMeshIds {
+  private object MeetingAsSubjectConcept extends MarcMeeting with OnlyLocIds {
     override protected val labelSubfieldTags: Seq[String] = Seq("a", "c", "d")
   }
 

@@ -24,14 +24,15 @@ import scala.util.{Failure, Success, Try}
 //
 // https://www.loc.gov/marc/bibliographic/bd610.html
 //
-trait MarcOrganisationSubject extends MarcSubject with ExcludeMeshIds {
+trait MarcOrganisationSubject extends MarcSubject with OnlyLocIds {
   override protected val labelSubfields: Seq[String] =
     Seq("a", "b", "c", "d", "e")
   override protected val ontologyType: String = "Organisation"
 
   private object OrganisationAsSubjectConcept
       extends MarcOrganisation
-      with ExcludeMeshIds {
+      with OnlyLocIds
+      with DiscardMultipleIds {
     override protected val labelSubfieldTags: Seq[String] = Seq("a", "b")
     override protected def normaliseLabel(label: String): String =
       super.normaliseLabel(label).trimTrailingPeriod

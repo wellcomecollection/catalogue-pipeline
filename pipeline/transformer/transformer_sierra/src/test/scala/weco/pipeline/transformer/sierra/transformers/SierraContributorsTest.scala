@@ -596,9 +596,7 @@ class SierraContributorsTest
       contributor.agent shouldBe an[Organisation[_]]
     }
 
-    it(
-      "uses a label-derived identifier if there are multiple distinct identifiers in subfield ǂ0"
-    ) {
+    it("ignores multiple instances of subfield 0") {
       val name = "Luke the lime"
       val varFields = List(
         VarField(
@@ -729,7 +727,7 @@ class SierraContributorsTest
         marcTag = "111",
         subfields = List(
           Subfield(tag = "a", content = "label"),
-          Subfield(tag = "0", content = "456")
+          Subfield(tag = "0", content = "n456")
         )
       )
       val List(contributor) =
@@ -739,7 +737,7 @@ class SierraContributorsTest
         sourceIdentifier(
           identifierType = IdentifierType.LCNames,
           ontologyType = "Meeting",
-          value = "456"
+          value = "n456"
         )
       )
       contributor.roles shouldBe Nil

@@ -11,11 +11,11 @@ import weco.pipeline.transformer.marc_common.transformers.MarcPerson
 
 import scala.util.{Failure, Success, Try}
 
-trait MarcPersonSubject extends MarcSubject with ExcludeMeshIds {
+trait MarcPersonSubject extends MarcSubject with OnlyLocIds {
   override def apply(field: MarcField): Option[Subject[IdState.Unminted]] =
     getSubject(field)
 
-  private object PersonAsSubjectConcept extends MarcPerson with ExcludeMeshIds {
+  private object PersonAsSubjectConcept extends MarcPerson with OnlyLocIds {
     override protected val labelSubfieldTags: Seq[String] =
       Seq("a", "b", "c", "d", "t", "p", "n", "q", "l")
   }

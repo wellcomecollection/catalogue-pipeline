@@ -2,6 +2,7 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Place}
+import weco.pipeline.transformer.marc_common.transformers.subjects.DiscardMultipleIds
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.{
@@ -15,7 +16,8 @@ trait SierraConcepts
     extends SierraQueryOps
     with ConceptsTransformer
     with SierraAbstractConcepts
-    with SierraMarcDataConversions {
+    with SierraMarcDataConversions
+    with DiscardMultipleIds {
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
   // joined by " - ".

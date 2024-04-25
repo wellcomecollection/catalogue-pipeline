@@ -1,9 +1,10 @@
 package weco.pipeline.transformer.marc_common.transformers.subjects
 
-import weco.catalogue.internal_model.identifiers.IdentifierType
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.marc_common.transformers.MarcHasRecordControlNumber
 
-trait ExcludeMeshIds extends MarcHasRecordControlNumber {
+trait OnlyLocIds extends MarcHasRecordControlNumber {
 
   /** This is probably unnecessary as I believe that the only reason for
     * excluding MeSH in Agent Subjects is that an Agent is unlikely to have a
@@ -15,18 +16,18 @@ trait ExcludeMeshIds extends MarcHasRecordControlNumber {
     * The main reason for including this feature is to maintain the interface
     * specified by some existing tests during a refactor.
     */
-  override protected def getIdentifierType(
-    indicator2: String,
-    identifierValue: String
-  ): Option[IdentifierType] = {
-    indicator2 match {
+  override def getIdState(
+    field: MarcField,
+    ontologyType: String
+  ): IdState.Unminted = {
+    getSecondIndicator(field) match {
       case "0" =>
-        super.getIdentifierType(
-          indicator2,
-          identifierValue
+        super.getIdState(
+          field,
+          ontologyType
         )
-      case _ => None
-
+      case _ =>
+        getLabelDerivedIdentifier(ontologyType, field)
     }
   }
 }

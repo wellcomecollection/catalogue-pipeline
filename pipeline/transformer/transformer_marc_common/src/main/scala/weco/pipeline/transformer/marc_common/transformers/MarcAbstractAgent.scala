@@ -9,7 +9,7 @@ import scala.util.{Failure, Success, Try}
 
 trait MarcAbstractAgent extends MarcHasRecordControlNumber {
   type Output = Try[AbstractAgent[IdState.Unminted]]
-  override protected val defaultSecondIndicator: String = ""
+  override protected val defaultSecondIndicator: String = "0"
 
   protected val ontologyType: String
   protected val appropriateFields: Seq[String]

@@ -20,8 +20,8 @@ class SierraConceptsTest
     with TableDrivenPropertyChecks
     with SierraMarcDataConversions {
   private val transformer = new SierraConcepts {
-    override def getLabel(field: MarcField): Option[String] = None
-    // TODO
+    override def getLabel(field: MarcField): Option[String] =
+      Some(field.subfields.filter(_.tag == "a").map(_.content).mkString(" "))
   }
   private val unsupportedSchemes = List(
     None,

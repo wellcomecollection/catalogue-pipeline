@@ -7,7 +7,6 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.pipeline.transformer.sierra.exceptions.CataloguingException
 import weco.pipeline.transformer.sierra.transformers.matchers.{
   ConceptMatchers,
   HasIdMatchers,
@@ -73,7 +72,7 @@ class SierraOrganisationSubjectsTest
     it("creates an Organisation as the concept") {
       val bibData = create610bibDataWith(
         subfields = List(
-          Subfield(tag = "a", content = "Wellcome Trust."),
+          Subfield(tag = "a", content = "Wellcome Trust.")
         )
       )
 
@@ -81,11 +80,12 @@ class SierraOrganisationSubjectsTest
 
       val List(concept) = subject.concepts
       concept should have(
-        'label ("Wellcome Trust"),
+        'label("Wellcome Trust"),
         sourceIdentifier(
           value = "wellcome trust",
           ontologyType = "Organisation",
-          identifierType = IdentifierType.LabelDerived)
+          identifierType = IdentifierType.LabelDerived
+        )
       )
     }
 
@@ -167,13 +167,14 @@ class SierraOrganisationSubjectsTest
     }
 
     it(
-      "creates an Identifiable Organisation if subfield 0 has multiple but unambiguous values") {
+      "creates an Identifiable Organisation if subfield 0 has multiple but unambiguous values"
+    ) {
       val bibData = create610bibDataWith(
         indicator2 = "0",
         subfields = List(
           Subfield(tag = "a", content = "ACME Corp"),
           Subfield(tag = "0", content = "  n1234"),
-          Subfield(tag = "0", content = "n1234"),
+          Subfield(tag = "0", content = "n1234")
         )
       )
 
@@ -215,10 +216,11 @@ class SierraOrganisationSubjectsTest
         )
       )
 
-      val subjects = getOrganisationSubjects(bibData)
-      val concepts = subjects.head.concepts
-      val unmintedOrganisation = concepts.head
-      unmintedOrganisation.id shouldBe IdState.Unidentifiable
+      val subject = getOrganisationSubjects(bibData).head
+      subject.onlyConcept should have(
+        'label("ACME Corp"),
+        labelDerivedOrganisationId("acme corp")
+      )
     }
   }
 
@@ -228,20 +230,12 @@ class SierraOrganisationSubjectsTest
     // throw and have somebody inspect the record manually.  It's not at all
     // clear what we should do, as we don't have enough to populate the
     // Organisation label.
-    it("errors if there's nothing in subfield a or b") {
+    it("returns zero subjects if there's nothing in subfield a or b") {
       val varField = createMarc610VarField(subfields = List())
       val bibData = createSierraBibDataWith(varFields = List(varField))
 
       val bibId = createSierraBibNumber
-
-      val caught = intercept[CataloguingException] {
-        getOrganisationSubjects(bibId = bibId, bibData = bibData)
-      }
-
-      caught.getMessage should startWith("Problem in the Sierra data")
-      caught.getMessage should include(bibId.withoutCheckDigit)
-      caught.getMessage should include(
-        "Not enough information to build a label")
+      getOrganisationSubjects(bibId = bibId, bibData = bibData) shouldBe Nil
     }
   }
 
@@ -270,16 +264,20 @@ class SierraOrganisationSubjectsTest
     subjects should have size 3
   }
 
-  private def create610bibDataWith(subfields: List[Subfield],
-                                   indicator2: String = ""): SierraBibData =
+  private def create610bibDataWith(
+    subfields: List[Subfield],
+    indicator2: String = ""
+  ): SierraBibData =
     createSierraBibDataWith(
       varFields = List(
         createMarc610VarField(subfields = subfields, indicator2 = indicator2)
       )
     )
 
-  private def createMarc610VarField(subfields: List[Subfield],
-                                    indicator2: String = ""): VarField =
+  private def createMarc610VarField(
+    subfields: List[Subfield],
+    indicator2: String = ""
+  ): VarField =
     VarField(
       marcTag = Some("610"),
       indicator1 = Some(""),
@@ -287,8 +285,9 @@ class SierraOrganisationSubjectsTest
       subfields = subfields
     )
 
-  private def getOrganisationSubjects(bibData: SierraBibData,
-                                      bibId: SierraBibNumber =
-                                        createSierraBibNumber) =
+  private def getOrganisationSubjects(
+    bibData: SierraBibData,
+    bibId: SierraBibNumber = createSierraBibNumber
+  ) =
     SierraOrganisationSubjects(bibId, bibData)
 }

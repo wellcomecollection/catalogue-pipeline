@@ -33,7 +33,7 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
   protected def normalise(identifier: String): String = {
     // Sort out dodgy punctuation and spacing
     identifier
-      .replaceAll("[.\\s]", "")
+      .replaceAll("[,.\\s]", "")
   }
 
   private def getIdentifierSubfieldContents(field: MarcField): Seq[String] =
@@ -79,7 +79,7 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
       // but because there is no definitive list of LCNames prefixes, we do not wish to accidentally
       // exclude a real one in the future by insisting that the prefix we find must be a member of
       // a closed list.
-      case prefix if prefix.head == 'n' => IdentifierType.LCNames
+      case prefix if prefix.headOption.contains('n') => IdentifierType.LCNames
       // Any prefix other than sh or n is an error. Common mistakes include MeSH ids marked as LoC ids
       // and general typographical errors such as `shsh`.  Guard against these by rejecting the identifier.
       case _ =>
@@ -106,16 +106,24 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
           .getOrElse(IdState.Unidentifiable)
       case Nil =>
         getLabelDerivedIdentifier(ontologyType, field)
-      case _ =>
+      case values =>
         // TODO: throw here?
         warn(
-          s"unable to identify, multiple identifier subfields found on $field"
+          s"unable to identify definitively, multiple identifier subfields found on $field"
         )
-        IdState.Unidentifiable
-    }
+        handleMultipleIdFields(
+          values,
+          getLabelDerivedIdentifier(ontologyType, field)
+        )
 
+    }
   }
-  private def getSecondIndicator(field: MarcField): String =
+  protected def handleMultipleIdFields(
+    values: Seq[String],
+    candidateIdentifier: IdState.Unminted
+  ): IdState.Unminted = candidateIdentifier
+
+  protected def getSecondIndicator(field: MarcField): String =
     if (field.indicator2.trim().isEmpty) defaultSecondIndicator
     else field.indicator2
 
@@ -153,7 +161,7 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
     }
   }
 
-  private def getLabelDerivedIdentifier(
+  protected def getLabelDerivedIdentifier(
     ontologyType: String,
     field: MarcField
   ): IdState.Unminted =

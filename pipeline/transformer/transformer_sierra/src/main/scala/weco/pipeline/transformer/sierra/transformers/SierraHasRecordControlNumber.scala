@@ -27,7 +27,9 @@ trait SierraHasRecordControlNumber extends MarcHasRecordControlNumber {
   //
   override protected def normalise(identifier: String): String =
     super
-      .normalise(identifier)
-      .replaceFirst("^\\(DNLM\\)", "")
-      .replaceFirst("^https://id\\.nlm\\.nih\\.gov/mesh/", "")
+      .normalise(
+        identifier
+          .replaceFirst("^\\(DNLM\\)", "")
+          .replaceFirst("^https://id\\.nlm\\.nih\\.gov/mesh/", "")
+      )
 }
