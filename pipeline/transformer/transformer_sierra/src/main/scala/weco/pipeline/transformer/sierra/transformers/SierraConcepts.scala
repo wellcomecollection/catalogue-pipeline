@@ -2,6 +2,8 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Place}
+import weco.pipeline.transformer.marc_common.transformers.MarcConceptIdentifier
+import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.pipeline.transformer.text.TextNormalisation._
 import weco.pipeline.transformer.transformers.{
   ConceptsTransformer,
@@ -13,7 +15,8 @@ import weco.sierra.models.marc.{Subfield, VarField}
 trait SierraConcepts
     extends SierraQueryOps
     with ConceptsTransformer
-    with SierraAbstractConcepts {
+    with SierraAbstractConcepts
+    with SierraMarcDataConversions {
 
   // Get the label.  This is populated by the label of subfield $a, followed
   // by other subfields, in the order they come from MARC.  The labels are
@@ -82,12 +85,11 @@ trait SierraConcepts
     varField: VarField,
     identifierSubfieldContent: String
   ): IdState.Unminted =
-    SierraConceptIdentifier
-      .maybeFindIdentifier(
-        varField = varField,
-        identifierSubfieldContent = identifierSubfieldContent,
-        ontologyType = ontologyType
-      )
+    MarcConceptIdentifier(
+      field = varField,
+      identifierSubfieldContent = identifierSubfieldContent,
+      ontologyType = ontologyType
+    )
       .map(IdState.Identifiable(_))
       .getOrElse(IdState.Unidentifiable)
 
