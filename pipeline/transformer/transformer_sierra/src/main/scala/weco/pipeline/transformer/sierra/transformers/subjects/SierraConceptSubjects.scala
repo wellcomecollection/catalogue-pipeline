@@ -5,7 +5,7 @@ import weco.catalogue.internal_model.work.Subject
 import weco.pipeline.transformer.marc_common.transformers.subjects.MarcConceptSubject
 import weco.pipeline.transformer.marc_common.models.MarcField
 
-object SierraConceptSubjects extends SierraSubjectsTransformer2 {
+object SierraConceptSubjects extends SierraSubjectsTransformer {
   override protected val subjectVarFields: Seq[String] =
     Seq("650", "648", "651")
 

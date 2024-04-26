@@ -3,7 +3,7 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.marc_common.transformers.subjects.MarcMeetingSubject
 
-object SierraMeetingSubjects extends SierraSubjectsTransformer2 {
+object SierraMeetingSubjects extends SierraSubjectsTransformer {
   private object SierraMeetingSubject extends MarcMeetingSubject {
     override protected val defaultSecondIndicator: String = "0"
   }

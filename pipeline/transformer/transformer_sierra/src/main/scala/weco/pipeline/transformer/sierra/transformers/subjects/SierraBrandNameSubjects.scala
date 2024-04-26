@@ -10,7 +10,7 @@ import weco.pipeline.transformer.text.TextNormalisation.TextNormalisationOps
 //
 // Use MARC field "652". This is not documented but is a custom field used to
 // represent brand names
-object SierraBrandNameSubjects extends SierraSubjectsTransformer2 {
+object SierraBrandNameSubjects extends SierraSubjectsTransformer {
   override protected val subjectVarFields: Seq[String] =
     Seq("652")
 

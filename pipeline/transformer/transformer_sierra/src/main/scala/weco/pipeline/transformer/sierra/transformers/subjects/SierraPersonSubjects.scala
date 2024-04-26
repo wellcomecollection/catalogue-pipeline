@@ -19,7 +19,7 @@ import weco.pipeline.transformer.marc_common.transformers.subjects.MarcPersonSub
 // The person can be identified if there is an identifier in subfield $0 and the second indicator is "0".
 // If second indicator is anything other than 0, we don't expose the identifier for now.
 //
-object SierraPersonSubjects extends SierraSubjectsTransformer2 {
+object SierraPersonSubjects extends SierraSubjectsTransformer {
 
   override protected val subjectVarFields: List[String] = List("600")
 

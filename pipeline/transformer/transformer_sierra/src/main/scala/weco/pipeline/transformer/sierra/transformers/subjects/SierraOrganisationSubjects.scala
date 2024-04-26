@@ -3,7 +3,7 @@ package weco.pipeline.transformer.sierra.transformers.subjects
 import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.marc_common.transformers.subjects.MarcOrganisationSubject
 
-object SierraOrganisationSubjects extends SierraSubjectsTransformer2 {
+object SierraOrganisationSubjects extends SierraSubjectsTransformer {
   override protected val subjectVarFields: List[String] = List("610")
   override protected def getSubject(
     field: MarcField
