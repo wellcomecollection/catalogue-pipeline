@@ -1,13 +1,12 @@
 package weco.pipeline.transformer.sierra.transformers
 
-import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
-import weco.catalogue.internal_model.work.{AbstractConcept, Genre, GenreConcept}
-import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.Genre
+import weco.pipeline.transformer.marc_common.transformers.MarcGenres
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
 import weco.pipeline.transformer.transformers.ConceptsTransformer
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
-import weco.sierra.models.marc.{Subfield, VarField}
 
 // Populate wwork:genres
 //
@@ -47,61 +46,7 @@ object SierraGenres
     with SierraMarcDataConversions {
 
   type Output = List[Genre[IdState.Unminted]]
-  override protected def getLabel(field: MarcField): Option[String] =
-    None // TODO
+
   def apply(bibData: SierraBibData): List[Genre[IdState.Unminted]] =
-    bibData
-      .varfieldsWithTag("655")
-      .flatMap {
-        varField =>
-          val (primarySubfields, subdivisionSubfields) =
-            getLabelSubfields(varField)
-
-          val label = getLabel(primarySubfields, subdivisionSubfields)
-          val concepts = getPrimaryConcept(
-            primarySubfields,
-            varField = varField
-          ) ++ getSubdivisions(subdivisionSubfields)
-          label match {
-            case "" => None
-            case nonEmptyLabel =>
-              Some(Genre(label = nonEmptyLabel, concepts = concepts).normalised)
-          }
-      }
-      .distinct
-
-  private def identifyPrimaryConcept(varField: VarField): IdState.Unminted = {
-    // For Genres, the identifier found in $0 is assigned to the primary concept.
-    // This is in contrast to Subjects, where it is assigned to the Subject itself.
-    // However, for a subject, if no identifier is found, one is created that represents
-    // the whole field.  In Genres, this should not be the case, because the primary concept
-    // will get an identifier made for the concept itself on its own.
-    // This method fixes that inconsistency by discarding the LabelDerived identifier
-    // It's a bit hacky, but I hope it will go away at some point.
-    val wholeFieldConceptId = getIdState(
-      ontologyType = "Genre",
-      field = varField
-    )
-    wholeFieldConceptId match {
-      case identifiable: IdState.Identifiable
-          if identifiable.sourceIdentifier.identifierType == IdentifierType.LabelDerived =>
-        IdState.Unidentifiable
-
-      case other => other
-    }
-
-  }
-  // Extract the primary concept, which comes from subfield $a.  This is the
-  // only concept which might be identified.
-  private def getPrimaryConcept(
-    primarySubfields: List[Subfield],
-    varField: VarField
-  ): List[AbstractConcept[IdState.Unminted]] =
-    primarySubfields.map {
-      subfield =>
-        GenreConcept(
-          id = identifyPrimaryConcept(varField),
-          label = subfield.content
-        ).normalised.identifiable()
-    }
+    MarcGenres(bibData).toList
 }

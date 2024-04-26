@@ -21,7 +21,7 @@ trait MarcAbstractAgent extends MarcHasRecordControlNumber {
 
   /** Construct a label from the subfields representing an agent.
     */
-  protected def getLabel(field: MarcField): Option[String] = {
+  override protected def getLabel(field: MarcField): Option[String] = {
     val contents =
       field.subfields
         .filter {

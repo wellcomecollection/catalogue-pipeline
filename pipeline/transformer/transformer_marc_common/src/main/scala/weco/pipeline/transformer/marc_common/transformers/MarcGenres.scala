@@ -3,7 +3,7 @@ package weco.pipeline.transformer.marc_common.transformers
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.Genre
-import weco.pipeline.transformer.marc_common.models.{MarcField, MarcRecord}
+import weco.pipeline.transformer.marc_common.models.MarcRecord
 
 object MarcGenres extends MarcDataTransformer with Logging {
 

@@ -28,7 +28,9 @@ import weco.pipeline.transformer.marc_common.models.MarcField
 
 trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
   protected val defaultSecondIndicator: String = ""
-  protected def getLabel(field: MarcField): Option[String]
+  protected def getLabel(field: MarcField): Option[String] =
+    Option(field.subfields.filter(_.tag == "a").map(_.content).mkString(" "))
+      .filter(_.isEmpty)
 
   protected def normalise(identifier: String): String = {
     // Sort out dodgy punctuation and spacing
@@ -170,7 +172,6 @@ trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
         identifierFromText(label = label, ontologyType = ontologyType)
       case None => IdState.Unidentifiable
     }
-
 }
 
 object MarcHasRecordControlNumber extends MarcHasRecordControlNumber {

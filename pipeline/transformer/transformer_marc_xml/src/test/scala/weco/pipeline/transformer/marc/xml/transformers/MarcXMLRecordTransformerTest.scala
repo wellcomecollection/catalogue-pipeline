@@ -78,6 +78,9 @@ class MarcXMLRecordTransformerTest
           <datafield tag ="651">
             <subfield code="a">Houyhnhnm Land</subfield>
           </datafield>
+          <datafield tag ="655">
+            <subfield code="a">Lo-Fi Darkwave</subfield>
+          </datafield>
           <datafield tag ="700">
             <subfield code="a">Nora Helmer</subfield>
           </datafield>
@@ -146,6 +149,7 @@ class MarcXMLRecordTransformerTest
         "James Barry and Florence Nightingale, waiting for a train"
       )
     }
+
     it("extracts subjects") {
       workData.subjects.map(
         _.label
@@ -157,6 +161,9 @@ class MarcXMLRecordTransformerTest
         "Effective Homeopathy",
         "Houyhnhnm Land"
       )
+    }
+    it("extracts genres") {
+      workData.genres.loneElement.label shouldBe "Lo-Fi Darkwave"
     }
   }
 }
