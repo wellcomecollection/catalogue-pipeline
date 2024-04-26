@@ -10,6 +10,14 @@ sealed trait SourcePayload {
   val version: Int
 }
 
+case class EbscoSourcePayload(
+  id: String,
+  location: Option[S3ObjectLocation],
+  version: Int,
+  sha256: Option[String],
+  deleted: Boolean = false
+) extends SourcePayload
+
 case class CalmSourcePayload(
   id: String,
   location: S3ObjectLocation,

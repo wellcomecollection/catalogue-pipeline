@@ -27,7 +27,8 @@ class SierraMeetingSubjectsTest
     createVarFieldWith(
       marcTag = tag,
       subfields = subfields.toList,
-      indicator2 = "0")
+      indicator2 = "0"
+    )
 
   it("returns zero subjects if there are none") {
     SierraMeetingSubjects(bibId, bibData()) shouldBe Nil
@@ -43,7 +44,7 @@ class SierraMeetingSubjectsTest
   it("returns subjects for varfield 611, subfield $$a") {
     val data = bibData(
       varField("600", Subfield(tag = "a", content = "Not content")),
-      varField("611", Subfield(tag = "a", content = "Content")),
+      varField("611", Subfield(tag = "a", content = "Content"))
     )
 
     // It is a happy accident of history that Subjects derived from Meetings have an ontologyType
@@ -52,45 +53,49 @@ class SierraMeetingSubjectsTest
     // simply up to the concepts that define it, but for now, we will ensure that it exists.
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
-      'label ("Content"),
+      'label("Content"),
       sourceIdentifier(
         value = "content",
         ontologyType = "Meeting",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
     val List(concept) = subject.concepts
     concept should have(
-      'label ("Content"),
+      'label("Content"),
       labelDerivedMeetingId("content")
     )
   }
 
   it(
-    "returns subjects with subfields $$a, $$c and $$d concatenated in order they appear") {
+    "returns subjects with subfields $$a, $$c and $$d concatenated in order they appear"
+  ) {
     val data = bibData(
       varField(
         "611",
         Subfield(tag = "c", content = "C"),
         Subfield(tag = "a", content = "A"),
-        Subfield(tag = "d", content = "D"),
+        Subfield(tag = "d", content = "D")
       )
     )
 
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
-      'label ("C A D"),
+      'label("C A D"),
       sourceIdentifier(
         value = "c a d",
         ontologyType = "Meeting",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
     val List(concept) = subject.concepts
     concept should have(
-      'label ("C A D"),
+      'label("C A D"),
       sourceIdentifier(
         value = "c a d",
         ontologyType = "Meeting",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
   }
 
@@ -98,25 +103,27 @@ class SierraMeetingSubjectsTest
     val data = bibData(
       varField(
         "611",
-        Subfield(tag = "a", content = "Düsseldorf Convention 2097"),
+        Subfield(tag = "a", content = "Düsseldorf Convention 2097")
       )
     )
 
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
-      'label ("Düsseldorf Convention 2097"),
+      'label("Düsseldorf Convention 2097"),
       sourceIdentifier(
         value = "dusseldorf convention 2097",
         ontologyType = "Meeting",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
     val List(concept) = subject.concepts
     concept should have(
-      'label ("Düsseldorf Convention 2097"),
+      'label("Düsseldorf Convention 2097"),
       sourceIdentifier(
         value = "dusseldorf convention 2097",
         ontologyType = "Meeting",
-        identifierType = IdentifierType.LabelDerived)
+        identifierType = IdentifierType.LabelDerived
+      )
     )
   }
 
@@ -125,25 +132,27 @@ class SierraMeetingSubjectsTest
       varField(
         "611",
         Subfield(tag = "a", content = "Content"),
-        Subfield(tag = "0", content = "lcsh7212")
+        Subfield(tag = "0", content = "nlcsh7212")
       )
     )
 
     val List(subject) = SierraMeetingSubjects(bibId, data)
     subject should have(
-      'label ("Content"),
+      'label("Content"),
       sourceIdentifier(
-        value = "lcsh7212",
+        value = "nlcsh7212",
         ontologyType = "Meeting",
-        identifierType = IdentifierType.LCNames)
+        identifierType = IdentifierType.LCNames
+      )
     )
     val List(concept) = subject.concepts
     concept should have(
-      'label ("Content"),
+      'label("Content"),
       sourceIdentifier(
-        value = "lcsh7212",
+        value = "nlcsh7212",
         ontologyType = "Meeting",
-        identifierType = IdentifierType.LCNames)
+        identifierType = IdentifierType.LCNames
+      )
     )
 
   }
@@ -151,7 +160,7 @@ class SierraMeetingSubjectsTest
   it("returns multiple subjects if multiple 611") {
     val data = bibData(
       varField("611", Subfield(tag = "a", content = "First")),
-      varField("611", Subfield(tag = "a", content = "Second")),
+      varField("611", Subfield(tag = "a", content = "Second"))
     )
     val subjects = SierraMeetingSubjects(bibId, data)
     subjects.length shouldBe 2
@@ -161,19 +170,21 @@ class SierraMeetingSubjectsTest
         // only those places that did have them should keep them
         // They should not be introduced anywhere else.
         subject should have(
-          'label (label),
+          'label(label),
           sourceIdentifier(
             value = label.toLowerCase,
             ontologyType = "Meeting",
-            identifierType = IdentifierType.LabelDerived)
+            identifierType = IdentifierType.LabelDerived
+          )
         )
         val List(concept) = subject.concepts
         concept should have(
-          'label (label),
+          'label(label),
           sourceIdentifier(
             value = label.toLowerCase,
             ontologyType = "Meeting",
-            identifierType = IdentifierType.LabelDerived)
+            identifierType = IdentifierType.LabelDerived
+          )
         )
     }
   }

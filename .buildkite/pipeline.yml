@@ -71,6 +71,7 @@ steps:
       - "transformer_miro"
       - "transformer_sierra"
       - "transformer_tei"
+      - "transformer_ebsco"
 
     agents:
       queue: "scala"
@@ -149,6 +150,7 @@ steps:
     matrix:
       - "calm_adapter/calm_window_generator"
       - "calm_adapter/calm_deletion_check_initiator"
+      - "ebsco_adapter/ebsco_adapter"
       - "common/window_generator"
       - "tei_adapter/tei_updater"
 
