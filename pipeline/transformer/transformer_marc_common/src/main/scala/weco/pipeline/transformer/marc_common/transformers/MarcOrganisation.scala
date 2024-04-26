@@ -3,7 +3,7 @@ package weco.pipeline.transformer.marc_common.transformers
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractAgent, Organisation}
 
-object MarcOrganisation extends MarcFieldTransformer with MarcAbstractAgent {
+trait MarcOrganisation extends MarcFieldTransformer with MarcAbstractAgent {
 
   override protected val ontologyType: String = "Organisation"
   override protected val appropriateFields: Seq[String] =
@@ -26,3 +26,5 @@ object MarcOrganisation extends MarcFieldTransformer with MarcAbstractAgent {
     new Organisation(label = normaliseLabel(label), id = identifier)
 
 }
+
+object MarcOrganisation extends MarcOrganisation

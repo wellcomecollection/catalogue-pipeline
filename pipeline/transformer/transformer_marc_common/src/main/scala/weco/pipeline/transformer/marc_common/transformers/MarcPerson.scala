@@ -4,7 +4,7 @@ import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{AbstractAgent, Person}
 import weco.pipeline.transformer.marc_common.models.MarcField
 
-object MarcPerson extends MarcFieldTransformer with MarcAbstractAgent {
+trait MarcPerson extends MarcFieldTransformer with MarcAbstractAgent {
 
   override protected val ontologyType: String = "Person"
   override protected val appropriateFields: Seq[String] =
@@ -40,3 +40,4 @@ object MarcPerson extends MarcFieldTransformer with MarcAbstractAgent {
     new Person(label = label, id = identifier)
 
 }
+object MarcPerson extends MarcPerson

@@ -13,6 +13,7 @@ import weco.pipeline.transformer.marc_common.transformers.{
   MarcEdition,
   MarcElectronicResources,
   MarcInternationalStandardIdentifiers,
+  MarcSubjects,
   MarcTitle
 }
 
@@ -31,7 +32,8 @@ object MarcXMLRecordTransformer {
       currentFrequency = MarcCurrentFrequency(record),
       edition = MarcEdition(record),
       items = MarcElectronicResources(record).toList,
-      contributors = MarcContributors(record).toList
+      contributors = MarcContributors(record).toList,
+      subjects = MarcSubjects(record).toList
     )
   }
 }

@@ -4,6 +4,7 @@ import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.locations.DigitalLocation
+
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 
@@ -58,6 +59,24 @@ class MarcXMLRecordTransformerTest
           </datafield>
           <datafield tag ="520">
             <subfield code="a">Some of them [sc. physicians] I know are ignorant beyond Description.</subfield>
+          </datafield>
+          <datafield tag ="600">
+            <subfield code="a">William Burroughs</subfield>
+          </datafield>
+          <datafield tag ="610">
+            <subfield code="a">Umbrella Corporation</subfield>
+          </datafield>
+          <datafield tag ="611">
+            <subfield code="a">Derndingle Entmoot 3019</subfield>
+          </datafield>
+          <datafield tag ="648">
+            <subfield code="a">Fourth Millenium of the Third Age</subfield>
+          </datafield>
+          <datafield tag ="650">
+            <subfield code="a">Effective Homeopathy</subfield>
+          </datafield>
+          <datafield tag ="651">
+            <subfield code="a">Houyhnhnm Land</subfield>
           </datafield>
           <datafield tag ="700">
             <subfield code="a">Nora Helmer</subfield>
@@ -127,6 +146,17 @@ class MarcXMLRecordTransformerTest
         "James Barry and Florence Nightingale, waiting for a train"
       )
     }
-
+    it("extracts subjects") {
+      workData.subjects.map(
+        _.label
+      ) should contain theSameElementsAs Seq(
+        "William Burroughs",
+        "Umbrella Corporation",
+        "Derndingle Entmoot 3019",
+        "Fourth Millenium of the Third Age",
+        "Effective Homeopathy",
+        "Houyhnhnm Land"
+      )
+    }
   }
 }

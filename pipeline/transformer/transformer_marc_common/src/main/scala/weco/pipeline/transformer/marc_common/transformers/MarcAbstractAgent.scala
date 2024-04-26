@@ -1,19 +1,15 @@
 package weco.pipeline.transformer.marc_common.transformers
 
-import weco.catalogue.internal_model.identifiers.{
-  IdState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.AbstractAgent
-import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
-import weco.pipeline.transformer.marc_common.models.{MarcField, MarcSubfield}
+import weco.pipeline.transformer.marc_common.models.MarcField
 import weco.pipeline.transformer.text.TextNormalisation.TextNormalisationOps
 
 import scala.util.{Failure, Success, Try}
 
-trait MarcAbstractAgent extends LabelDerivedIdentifiers {
+trait MarcAbstractAgent extends MarcHasRecordControlNumber {
   type Output = Try[AbstractAgent[IdState.Unminted]]
+  override protected val defaultSecondIndicator: String = "0"
 
   protected val ontologyType: String
   protected val appropriateFields: Seq[String]
@@ -40,53 +36,9 @@ trait MarcAbstractAgent extends LabelDerivedIdentifiers {
     }
   }
 
-  protected def normaliseLabel(label: String): String = label.trimTrailing(',')
+  protected def normaliseLabel(label: String): String =
+    label.trimTrailing(',')
 
-  /* Given an agent and the associated MARC subfields, look for instances of subfield $0,
-   * which are used for identifiers.
-   * TODO: UPDATE THIS COMMENT
-   * This methods them (if present) and wraps the agent in Unidentifiable or Identifiable
-   * as appropriate.
-   */
-  // TODO: Consider if this might be a trait in its own right.
-  //   Does it apply to things that are not agents?
-  //   Yes!
-  protected def getIdentifier(
-    subfields: Seq[MarcSubfield],
-    label: String
-  ): IdState.Unminted = {
-
-    // We take the contents of subfield $0.  They may contain inconsistent
-    // spacing and punctuation, such as:
-    //
-    //    " nr 82270463"
-    //    "nr 82270463"
-    //    "nr 82270463.,"
-    //
-    // which all refer to the same identifier.
-    //
-    // For consistency, we remove all whitespace and some punctuation
-    // before continuing.
-    val codes = subfields.collect {
-      case MarcSubfield("0", content) =>
-        content.replaceAll("[.,\\s]", "")
-    }
-
-    // If we get exactly one value, we can use it to identify the record.
-    // Some records have multiple instances of subfield $0 (it's a repeatable
-    // field in the MARC spec).
-    codes.distinct match {
-      case Seq(code) =>
-        IdState.Identifiable(
-          SourceIdentifier(
-            identifierType = IdentifierType.LCNames,
-            value = code,
-            ontologyType = ontologyType
-          )
-        )
-      case _ => identifierFromText(label = label, ontologyType = ontologyType)
-    }
-  }
   private def isAppropriateField(field: MarcField): Boolean =
     appropriateFields.contains(field.marcTag)
 
@@ -99,10 +51,7 @@ trait MarcAbstractAgent extends LabelDerivedIdentifiers {
           Success(
             createAgent(
               label,
-              getIdentifier(
-                subfields = field.subfields,
-                label = label
-              )
+              getIdState(field, ontologyType)
             )
           )
         case None =>
