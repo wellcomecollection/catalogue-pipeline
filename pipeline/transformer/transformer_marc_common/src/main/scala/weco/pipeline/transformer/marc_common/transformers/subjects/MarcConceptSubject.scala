@@ -118,6 +118,10 @@ trait MarcConceptSubject extends MarcSubject with MarcCommonLabelSubdivisions {
         }
     }
 
+  // This deviant behaviour - of having a single object that produces
+  // differently-typed outputs depending on the input is inherited from the Sierra
+  // transformer, and should probably be changed.
+  // (in contrast to Meeting/Organisation/Person)
   protected def getFieldOntologyType(field: MarcField): String =
     field.marcTag match {
       case "650" => "Concept"

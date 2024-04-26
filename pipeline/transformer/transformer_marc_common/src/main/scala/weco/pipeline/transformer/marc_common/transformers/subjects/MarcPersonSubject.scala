@@ -19,8 +19,8 @@ trait MarcPersonSubject extends MarcSubject with OnlyLocIds {
     override protected val labelSubfieldTags: Seq[String] =
       Seq("a", "b", "c", "d", "t", "p", "n", "q", "l")
   }
-  // TODO: I think this needs a bit of commentary.
   // Some subfields form part of the concept involved, and some do something else.
+  // such as describe the relationship between this concept and the Work
   override def getSubjectConcepts(
     field: MarcField
   ): Try[Seq[AbstractRootConcept[IdState.Unminted]]] =
