@@ -195,8 +195,9 @@ def verify_specific_ids(*, source, specific_ids):
 )
 @click.option(
     "--mode",
+    required=True,
     type=click.Choice(["complete", "partial", "specific"]),
-    help="Should this reindex send every record (complete), just a few (partial), or specific records (specific)?",
+    prompt="Should this reindex send every record (complete), just a few (partial), or specific records (specific)?",
 )
 @click.option(
     "--input-file",
@@ -246,7 +247,7 @@ def start_reindex(ctx, src, dst, mode, input_file):
         if not parameters:
             return sys.exit("Specified input file does not exist")
     elif not mode:
-        return sys.exist("You must specify an input file or a mode")
+        return sys.exit("You must specify an input file or a mode")
 
     job_config_id = f"{src}--{dst}"
     reindexer_job_config = get_reindexer_job_config(session)
