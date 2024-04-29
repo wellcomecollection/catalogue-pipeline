@@ -65,7 +65,8 @@ case class Bag(
 
   // Storage-service only stores a list of files, so we need to search for a
   // XML file in data directory named with some b-number.
-  private val metsFileRegex = "^data/b[0-9]{7}[0-9x].xml$".r
+  private val metsFileRegex =
+    "^data/(b[0-9]{7}[0-9x]|METS\\.[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}).xml$".r
 
   // A bag can contain number of manifestations, generally named the same as the
   // main METS file followed by an underscore and it's (zero-padded) index.
