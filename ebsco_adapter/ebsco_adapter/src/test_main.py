@@ -14,43 +14,44 @@ topic_arn = "test_topic_arn"
 test_bucket = "test_bucket"
 
 ebs9579e = {
-    'id': 'ebs9579e',
-    'location': {
-        'bucket': 'wellcomecollection-platform-ebsco-adapter',
-        'key': 'dev/xml/2024-03-22/ebs9579e.xml'
+    "id": "ebs9579e",
+    "location": {
+        "bucket": "wellcomecollection-platform-ebsco-adapter",
+        "key": "dev/xml/2024-03-22/ebs9579e.xml",
     },
-    'version': 20240322,
-    'deleted': False,
-    'sha256': '4c4a7fb13bf8b7beda96bbe75358eb882a6130592b29f6149a308d82e0356d22'
+    "version": 20240322,
+    "deleted": False,
+    "sha256": "4c4a7fb13bf8b7beda96bbe75358eb882a6130592b29f6149a308d82e0356d22",
 }
 
 ebs29555e = {
-    'id': 'ebs29555e',
-    'location': {
-        'bucket': 'wellcomecollection-platform-ebsco-adapter',
-        'key': 'dev/xml/2024-03-22/ebs29555e.xml'
+    "id": "ebs29555e",
+    "location": {
+        "bucket": "wellcomecollection-platform-ebsco-adapter",
+        "key": "dev/xml/2024-03-22/ebs29555e.xml",
     },
-    'version': 20240322,
-    'deleted': False,
-    'sha256': 'cb719218d3435395a2fa948088bf2c0fe86748dddfb5a2e8e2bbb199f6cf48dd'
+    "version": 20240322,
+    "deleted": False,
+    "sha256": "cb719218d3435395a2fa948088bf2c0fe86748dddfb5a2e8e2bbb199f6cf48dd",
 }
 
 ebs9579e_20240405 = {
-    'id': 'ebs9579e',
-    'location': {
-        'bucket': 'wellcomecollection-platform-ebsco-adapter',
-        'key': 'dev/xml/2024-04-05/ebs9579e.xml'
-    }, 'version': 20240405,
-    'deleted': False,
-    'sha256': 'b166aa8eb3c4f85dc95602fbdd920b444dfb6e08f6bc59881ad737878ed04822'
+    "id": "ebs9579e",
+    "location": {
+        "bucket": "wellcomecollection-platform-ebsco-adapter",
+        "key": "dev/xml/2024-04-05/ebs9579e.xml",
+    },
+    "version": 20240405,
+    "deleted": False,
+    "sha256": "b166aa8eb3c4f85dc95602fbdd920b444dfb6e08f6bc59881ad737878ed04822",
 }
 
 ebs29555e_20240405_deleted = {
-    'id': 'ebs29555e',
-    'location': None,
-    'version': 20240405,
-    'deleted': True,
-    'sha256': None
+    "id": "ebs29555e",
+    "location": None,
+    "version": 20240405,
+    "deleted": True,
+    "sha256": None,
 }
 
 
@@ -130,10 +131,7 @@ def test_run_process():
         for msg in published_messages:
             print(msg)
 
-        expected_messages = [
-            ebs9579e_20240405,
-            ebs29555e_20240405_deleted
-        ]
+        expected_messages = [ebs9579e_20240405, ebs29555e_20240405_deleted]
 
         for msg in expected_messages:
             print(msg)
@@ -200,5 +198,3 @@ def test_run_reindex():
 
         reindex_published_messages = fake_sns_client.test_get_published_messages()
         assert reindex_published_messages == [ebs9579e]
-
-

@@ -48,9 +48,7 @@ class S3Store:
         s3 = self.s3_client
 
         response = s3.get_object(Bucket=self.s3_bucket, Key=s3_key)
-        return json.loads(
-            response["Body"].read()
-        )
+        return json.loads(response["Body"].read())
 
     def upload_file(self, s3_prefix, file):
         s3 = self.s3_client

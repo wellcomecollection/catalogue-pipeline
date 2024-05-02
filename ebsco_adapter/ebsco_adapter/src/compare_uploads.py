@@ -27,7 +27,8 @@ def find_notified_and_completed_flag(available_files, xml_s3_prefix, s3_store):
             "date": date,
             "notified_completed": _is_notified(date),
             "unpacking_completed": _is_completed(date),
-        } for date in dates_list
+        }
+        for date in dates_list
     ]
 
 

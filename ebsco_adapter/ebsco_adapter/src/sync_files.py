@@ -117,6 +117,4 @@ def sync_and_list_files(target_directory, s3_prefix, ebsco_ftp, s3_store):
             ]
         return file
 
-    return {
-        k: _add_download_location(file) for k, file in available_files_list.items()
-    }
+    return {k: _add_download_location(file) for k, file in available_files_list.items()}

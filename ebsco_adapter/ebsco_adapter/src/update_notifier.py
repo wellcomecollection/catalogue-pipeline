@@ -49,8 +49,4 @@ def update_notifier(
     notified_completion_flag_path = os.path.join(
         xml_s3_prefix, notify_for_batch, notified_completion_flag
     )
-    s3_store.create_file(
-        notified_completion_flag_path,
-        b"",
-        "application/txt"
-    )
+    s3_store.create_file(notified_completion_flag_path, b"", "application/txt")

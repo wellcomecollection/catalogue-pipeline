@@ -57,9 +57,7 @@ def extract_marc_records(
                 for control_number, record in batch.items():
                     s3_key = os.path.join(upload_prefix, f"{control_number}.xml")
                     uploaded_file = s3_store.create_file(
-                        s3_key,
-                        record,
-                        "application/xml"
+                        s3_key, record, "application/xml"
                     )
                     files_uploaded[control_number] = {
                         "s3_key": s3_key,
@@ -75,7 +73,7 @@ def extract_marc_records(
             s3_store.create_file(
                 batch_completion_flag_path,
                 json_encoded_files_uploaded.encode("utf-8"),
-                "application/json"
+                "application/json",
             )
 
             unpacked_files[batch_name] = files_uploaded
