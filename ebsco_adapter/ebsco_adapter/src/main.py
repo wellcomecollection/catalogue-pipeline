@@ -19,8 +19,8 @@ ftp_password = os.environ.get("FTP_PASSWORD")
 ftp_remote_dir = os.environ.get("FTP_REMOTE_DIR")
 sns_topic_arn = os.environ.get("OUTPUT_TOPIC_ARN")
 
-s3_bucket = os.environ.get("S3_BUCKET")
-s3_prefix = os.environ.get("S3_PREFIX")
+s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
+s3_prefix = os.environ.get("S3_PREFIX", "dev")
 
 ftp_s3_prefix = os.path.join(s3_prefix, "ftp")
 xml_s3_prefix = os.path.join(s3_prefix, "xml")
@@ -46,6 +46,7 @@ def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher):
 
     return {}
 
+
 def run_reindex(s3_store, sns_publisher, reindex_type, ids=None):
     assert reindex_type in ["full", "partial"], "Invalid reindex type"
     assert ids is not None or reindex_type == "full", "You must provide IDs for partial reindexing"
@@ -68,11 +69,12 @@ def run_reindex(s3_store, sns_publisher, reindex_type, ids=None):
 
     print("Loading completed flag file ...")
     completed_flag_path = os.path.join(xml_s3_prefix, most_recent_batch, "completed.flag")
+    print(completed_flag_path)
     completed_flag = s3_store.load_file(completed_flag_path)
     print(f"Completed flag loaded, found {len(completed_flag)} records.")
 
     if ids is not None:
-        # Filter out records that are not in the provided list of IDs
+        # Include only the IDs that are in the list provided if any
         completed_flag = {id: record for id, record in completed_flag.items() if id in ids}
         print(f"Finding matches for {len(ids)} IDs, found {len(completed_flag)} matches.")
         print(f"IDs not found: {set(ids) - set(completed_flag.keys())}")

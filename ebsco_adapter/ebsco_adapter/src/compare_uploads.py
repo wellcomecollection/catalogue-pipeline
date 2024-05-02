@@ -36,7 +36,6 @@ def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
     date_list_with_notified_flag = find_notified_and_completed_flag(
         available_files, xml_s3_prefix, s3_store
     )
-
     # The current date is the most recent if it has not been notified
     current_date = None
     if (

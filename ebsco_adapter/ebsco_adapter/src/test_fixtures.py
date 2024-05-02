@@ -6,6 +6,9 @@ class FakeSnsClient:
     def __init__(self):
         self.published_messages = []
 
+    def test_reset(self):
+        self.published_messages = []
+
     def test_get_published_messages(self):
         return self.published_messages
 
@@ -47,6 +50,15 @@ class FakeEbscoFtp:
         pass
 
 
+# This class is used to simulate the body of a streaming response from S3.
+class FakeStreamingBody:
+    def __init__(self, body):
+        self.body = body
+
+    def read(self):
+        return self.body
+
+
 class FakeS3Client:
     def __init__(self, objects=None):
         if objects is None:
@@ -66,6 +78,10 @@ class FakeS3Client:
     def download_file(self, Bucket, Key, target_location):
         with open(target_location, "wb") as f:
             f.write(self.objects[Key]["Body"])
+
+    def get_object(self, Bucket, Key):
+        streaming_body = FakeStreamingBody(self.objects[Key]["Body"])
+        return {"Body": streaming_body}
 
     def upload_file(self, file, Bucket, Key):
         with open(file, "rb") as f:

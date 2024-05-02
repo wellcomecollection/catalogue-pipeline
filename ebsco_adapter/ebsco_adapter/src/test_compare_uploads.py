@@ -83,7 +83,7 @@ def test_compare_uploads_with_one_file():
 
 
 def test_compare_uploads_with_two_files_first_notified():
-    batch_name_1 = "2024-03-22"
+    batch_name_1 = "2024-03-28"
     batch_name_2 = "2024-04-05"
     fixture_file_name_1 = "ebz-s7451719-20240328-1.xml"
     fixture_file_name_2 = "ebz-s7451719-20240405-1.xml"
