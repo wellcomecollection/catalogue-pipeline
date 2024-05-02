@@ -1,6 +1,8 @@
-import boto3
+import json
 import os
 import hashlib
+
+import boto3
 
 
 class S3Store:
@@ -42,6 +44,14 @@ class S3Store:
 
         return target_location
 
+    def load_file(self, s3_key):
+        s3 = self.s3_client
+
+        response = s3.get_object(Bucket=self.s3_bucket, Key=s3_key)
+        return json.loads(
+            response["Body"].read()
+        )
+
     def upload_file(self, s3_prefix, file):
         s3 = self.s3_client
 
@@ -50,7 +60,7 @@ class S3Store:
 
         return s3_key
 
-    def create_file(self, s3_key, file_contents_as_bytes):
+    def create_file(self, s3_key, file_contents_as_bytes, content_type):
         # generate sha256 checksum of the file contents
         sha256_hash = hashlib.sha256(file_contents_as_bytes).hexdigest()
 
@@ -63,7 +73,7 @@ class S3Store:
                 Key=s3_key,
                 Body=file_contents_as_bytes,
                 Metadata={"sha256": sha256_hash},
-                ContentType="application/xml",
+                ContentType=content_type,
             )
             synced = True
 

@@ -1,13 +1,14 @@
 import os
 
 
-def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
+def find_notified_and_completed_flag(available_files, xml_s3_prefix, s3_store):
     available_files_dates = list(available_files.keys())
     dates_list = sorted(available_files_dates, reverse=True)
 
     print(f"Available uploads: {dates_list}")
 
     notified_completion_flag = "notified.flag"
+    unpacking_completed_flag = "completed.flag"
 
     def _is_notified(date):
         notified_completion_flag_path = os.path.join(
@@ -15,10 +16,26 @@ def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
         )
         return s3_store.file_exists(notified_completion_flag_path)
 
-    # Check if we've sent a notification for the date
-    date_list_with_notified_flag = [
-        {"date": date, "notified_completed": _is_notified(date)} for date in dates_list
+    def _is_completed(date):
+        completed_flag_path = os.path.join(
+            xml_s3_prefix, date, unpacking_completed_flag
+        )
+        return s3_store.file_exists(completed_flag_path)
+
+    return [
+        {
+            "date": date,
+            "notified_completed": _is_notified(date),
+            "unpacking_completed": _is_completed(date),
+        } for date in dates_list
     ]
+
+
+def find_uploads_to_compare(available_files, xml_s3_prefix, s3_store):
+    # Check if we've sent a notification for the date
+    date_list_with_notified_flag = find_notified_and_completed_flag(
+        available_files, xml_s3_prefix, s3_store
+    )
 
     # The current date is the most recent if it has not been notified
     current_date = None

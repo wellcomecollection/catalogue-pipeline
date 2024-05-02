@@ -52,7 +52,11 @@ def list_files(s3_prefix, s3_store):
             file_details["batch_name"] = get_batch_name(file_details)
             available_files.append(file_details)
 
-    return available_files
+    file_list = {}
+    for file in available_files:
+        file_list[file["batch_name"]] = file
+
+    return file_list
 
 
 def sync_files(target_directory, s3_prefix, ebsco_ftp, s3_store):
@@ -106,12 +110,13 @@ def sync_and_list_files(target_directory, s3_prefix, ebsco_ftp, s3_store):
     for file in uploaded_files_list:
         uploaded_files[file["batch_name"]] = file
 
-    file_list = {}
-    for file in available_files_list:
+    def _add_download_location(file):
         if file["batch_name"] in uploaded_files:
             file["download_location"] = uploaded_files[file["batch_name"]][
                 "download_location"
             ]
-        file_list[file["batch_name"]] = file
+        return file
 
-    return file_list
+    return {
+        k: _add_download_location(file) for k, file in available_files_list.items()
+    }
