@@ -67,9 +67,8 @@ def run_reindex(s3_store, sns_publisher, reindex_type, ids=None):
     most_recent_batch = max(notified_and_completed_batches)
     print(f"Attempting reindex for most recent batch: {most_recent_batch}")
 
-    print("Loading completed flag file ...")
     completed_flag_path = os.path.join(xml_s3_prefix, most_recent_batch, "completed.flag")
-    print(completed_flag_path)
+    print(f"Loading completed flag file ({completed_flag_path}) ...")
     completed_flag = s3_store.load_file(completed_flag_path)
     print(f"Completed flag loaded, found {len(completed_flag)} records.")
 
