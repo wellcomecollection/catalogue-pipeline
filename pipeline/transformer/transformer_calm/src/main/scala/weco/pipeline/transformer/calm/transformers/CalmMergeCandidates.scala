@@ -41,7 +41,7 @@ object CalmMergeCandidates extends CalmRecordOps {
       .flatMap {
         id =>
           SourceIdentifier(
-            identifierType = IdentifierType.METS,
+            identifierType = IdentifierType.CalmRefNo,
             ontologyType = "Work",
             value = id
           ).validatedWithWarning

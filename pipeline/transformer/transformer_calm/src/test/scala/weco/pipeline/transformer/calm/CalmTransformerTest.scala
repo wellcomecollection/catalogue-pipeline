@@ -48,7 +48,7 @@ class CalmTransformerTest
           mergeCandidates = List(
             MergeCandidate(
               identifier =
-                SourceIdentifier(IdentifierType.METS, "Work", "a/b/c"),
+                SourceIdentifier(IdentifierType.CalmRefNo, "Work", "a/b/c"),
               reason = "Archivematica work"
             )
           )
@@ -159,7 +159,7 @@ class CalmTransformerTest
         MergeCandidate(
           identifier = SourceIdentifier(
             value = "a/b/c",
-            identifierType = IdentifierType.METS,
+            identifierType = IdentifierType.CalmRefNo,
             ontologyType = "Work"
           ),
           reason = "Archivematica work"

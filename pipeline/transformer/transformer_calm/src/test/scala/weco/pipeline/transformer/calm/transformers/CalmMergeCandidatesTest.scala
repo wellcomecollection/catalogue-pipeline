@@ -78,7 +78,7 @@ class CalmMergeCandidatesTest
 
         mergeCandidates.loneElement shouldBe MergeCandidate(
           identifier = SourceIdentifier(
-            identifierType = IdentifierType.METS,
+            identifierType = IdentifierType.CalmRefNo,
             ontologyType = "Work",
             value = refno
           ),
@@ -94,7 +94,7 @@ class CalmMergeCandidatesTest
 
         mergeCandidates.loneElement shouldBe MergeCandidate(
           identifier = SourceIdentifier(
-            identifierType = IdentifierType.METS,
+            identifierType = IdentifierType.CalmRefNo,
             ontologyType = "Work",
             value = uuid
           ),
@@ -156,7 +156,7 @@ class CalmMergeCandidatesTest
       mergeCandidates should contain theSameElementsAs Seq(
         MergeCandidate(
           identifier = SourceIdentifier(
-            identifierType = IdentifierType.METS,
+            identifierType = IdentifierType.CalmRefNo,
             ontologyType = "Work",
             value = refno
           ),
@@ -184,7 +184,7 @@ class CalmMergeCandidatesTest
       mergeCandidates.loneElement shouldBe
         MergeCandidate(
           identifier = SourceIdentifier(
-            identifierType = IdentifierType.METS,
+            identifierType = IdentifierType.CalmRefNo,
             ontologyType = "Work",
             value = refno
           ),
