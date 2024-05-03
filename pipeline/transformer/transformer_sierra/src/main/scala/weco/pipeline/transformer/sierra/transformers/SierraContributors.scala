@@ -2,11 +2,9 @@ package weco.pipeline.transformer.sierra.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work._
-import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.MarcContributors
 import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
-import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 
 /* Populate wwork:contributors. Rules:
@@ -33,9 +31,6 @@ import weco.sierra.models.data.SierraBibData
  */
 object SierraContributors
     extends SierraDataTransformer
-    with SierraQueryOps
-    with SierraAgents
-    with LabelDerivedIdentifiers
     with SierraMarcDataConversions {
 
   type Output = List[Contributor[IdState.Unminted]]

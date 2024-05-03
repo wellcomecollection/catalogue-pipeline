@@ -232,7 +232,7 @@ class SierraPersonSubjectsTest
     )
   }
 
-  it("does not extract an identifer if the second indicator is not 0") {
+  it("does not extract an identifier if the second indicator is not 0") {
     val name = "Gerry the Garlic"
     val bibData = createSierraBibDataWith(
       varFields = List(

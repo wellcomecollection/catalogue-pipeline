@@ -40,7 +40,7 @@ trait MarcSubject extends MarcFieldTransformer with MarcHasRecordControlNumber {
     // throw exception // TODO: was CataloguingException with context in Organisation, log and move on in others
   }
 
-  protected def getLabel(field: MarcField): Option[String] =
+  override protected def getLabel(field: MarcField): Option[String] =
     Option(
       field.subfields
         .filter(subfield => labelSubfields.contains(subfield.tag))
