@@ -37,7 +37,7 @@ object CalmMergeCandidates extends CalmRecordOps {
       }
   private def metsMergeCandidate(record: CalmRecord) =
     record
-      .get("SDB_URL")
+      .get("RefNo")
       .flatMap {
         id =>
           SourceIdentifier(

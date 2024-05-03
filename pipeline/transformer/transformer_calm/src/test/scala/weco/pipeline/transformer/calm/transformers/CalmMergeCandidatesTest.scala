@@ -53,16 +53,26 @@ class CalmMergeCandidatesTest
     }
   }
 
-  describe("creating a METS mergeCandidate from the SDB_URL") {
+  describe("creating a METS mergeCandidate from the RefNo") {
+    info(
+      "Although SDB_URL has been repurposed to record the Archivematica UUID"
+    )
+    info(
+      "(See: https://app.gitbook.com/o/-LumfFcEMKx4gYXKAZTQ/s/HcPN6OwpaxdCucwfmiAz/metadata-fields/superseded-fields#sdb_ref-sdb_type-sdb_url)"
+    )
+    info("Archivematica UUIDs are not stable, and change with every ingest.")
+    info(
+      "Therefore, the most stable identifier that is common to the two records is the RefNo."
+    )
+    info("Following the same pattern as Sierra bnumbers,")
+    info(
+      "the Refno serves as the identifier for the METS document, in its own namespace"
+    )
     describe("successful creation") {
-      info("SDB_URL has been repurposed to record the Archivematica UUID")
-      info(
-        "See: https://app.gitbook.com/o/-LumfFcEMKx4gYXKAZTQ/s/HcPN6OwpaxdCucwfmiAz/metadata-fields/superseded-fields#sdb_ref-sdb_type-sdb_url"
-      )
-      it("creates a mergeCandidate from a UUID") {
-        val uuid = "d00df00d-beef-cafe-f00d-beefcafef00d"
+      it("creates a mergeCandidate from the RefNo") {
+        val refno = "CAFE/FO/OD"
         val record = createCalmRecordWith(
-          "SDB_URL" -> uuid
+          "RefNo" -> refno
         )
         val mergeCandidates = CalmMergeCandidates(record)
 
@@ -70,15 +80,15 @@ class CalmMergeCandidatesTest
           identifier = SourceIdentifier(
             identifierType = IdentifierType.METS,
             ontologyType = "Work",
-            value = uuid
+            value = refno
           ),
           reason = "Archivematica work"
         )
       }
       it("ignores leading and trailing whitespace") {
-        val uuid = "d00df00d-beef-cafe-f00d-beefcafef00d"
+        val uuid = "CAFE/FO/OD"
         val record = createCalmRecordWith(
-          "SDB_URL" -> s" \n $uuid \t\r   "
+          "RefNo" -> s" \n $uuid \t\r   "
         )
         val mergeCandidates = CalmMergeCandidates(record)
 
@@ -134,10 +144,10 @@ class CalmMergeCandidatesTest
 
   describe("creating merge candidates of both types") {
     it("can merge with both a Sierra and a METS candidate") {
-      val uuid = "d00df00d-beef-cafe-f00d-beefcafef00d"
+      val refno = "DOO/DF/OOD"
       val bnumber = "b12345672"
       val record = createCalmRecordWith(
-        "SDB_URL" -> uuid,
+        "RefNo" -> refno,
         "BNumber" -> bnumber
       )
 
@@ -148,7 +158,7 @@ class CalmMergeCandidatesTest
           identifier = SourceIdentifier(
             identifierType = IdentifierType.METS,
             ontologyType = "Work",
-            value = uuid
+            value = refno
           ),
           reason = "Archivematica work"
         ),
@@ -163,9 +173,9 @@ class CalmMergeCandidatesTest
       )
     }
     it("can successfully create a METS candidate when faced with bad BNumber") {
-      val uuid = "d00df00d-beef-cafe-f00d-beefcafef00d"
+      val refno = "GOOD/FO/OD"
       val record = createCalmRecordWith(
-        "SDB_URL" -> uuid,
+        "RefNo" -> refno,
         "BNumber" -> "AAAAAAAAAAAAAAA!"
       )
 
@@ -176,7 +186,7 @@ class CalmMergeCandidatesTest
           identifier = SourceIdentifier(
             identifierType = IdentifierType.METS,
             ontologyType = "Work",
-            value = uuid
+            value = refno
           ),
           reason = "Archivematica work"
         )
