@@ -141,6 +141,8 @@ if __name__ == "__main__":
             reindex_ids = args.reindex_ids.split(",")
             reindex_ids = [rid.strip() for rid in reindex_ids]
 
-        event = {"reindex_type": args.reindex_type, "reindex_ids": reindex_ids}
+    # This is the event that will be passed to the lambda handler.
+    # When invoking the function, use this structure to trigger reindexing.
+    event = {"reindex_type": args.reindex_type, "reindex_ids": reindex_ids}
 
     lambda_handler(event, None)
