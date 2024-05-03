@@ -65,7 +65,7 @@ case class ArchivematicaMetsXML(root: Elem) extends MetsXml {
           new RuntimeException("multiple candidate record identifiers found")
         )
     }
-  
+
   def metsIdentifier: Either[Exception, String] = recordIdentifier
   def accessConditions: Either[Throwable, MetsAccessConditions] =
     (root \ "amdSec" \ "rightsMD").headOption
