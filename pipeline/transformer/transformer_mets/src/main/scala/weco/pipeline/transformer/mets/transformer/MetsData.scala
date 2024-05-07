@@ -24,7 +24,7 @@ import weco.pipeline.transformer.mets.transformers.{
 import weco.pipeline.transformer.result.Result
 
 sealed trait MetsData {
-  val metsIdentifier: String
+  val recordIdentifier: String
 
   def toWork: Work[Source]
 
@@ -39,12 +39,12 @@ sealed trait MetsData {
 
        In the case of Archivematica files, this value will already be a lowercase UUID.
        */
-      value = metsIdentifier.toLowerCase
+      value = recordIdentifier.toLowerCase
     )
 }
 
 case class DeletedMetsData(
-  metsIdentifier: String,
+  recordIdentifier: String,
   version: Int,
   modifiedTime: Instant
 ) extends MetsData {
@@ -57,7 +57,6 @@ case class DeletedMetsData(
 }
 
 case class InvisibleMetsData(
-  metsIdentifier: String,
   recordIdentifier: String,
   title: String,
   accessConditions: MetsAccessConditions,
@@ -145,11 +144,9 @@ object InvisibleMetsData {
     }
     for {
       recordIdentifier <- root.recordIdentifier
-      metsIdentifier <- root.metsIdentifier
       title <- MetsTitle(root.root)
       accessConditions <- filesRoot.accessConditions
     } yield InvisibleMetsData(
-      metsIdentifier = metsIdentifier,
       recordIdentifier = recordIdentifier,
       title = title,
       accessConditions = accessConditions,

@@ -35,13 +35,6 @@ class ArchivematicaMetsXMLTest
           "BA/AD/FO/OD"
       }
 
-      it("extracts the metsIdentifier from a dublincore identifier element") {
-        ArchivematicaMetsXML(
-          archivematicaMetsWith(recordIdentifier = "GO/OD/CA/FE")
-        ).metsIdentifier.right.get shouldBe
-          "GO/OD/CA/FE"
-      }
-
     }
 
     describe("failure conditions") {
