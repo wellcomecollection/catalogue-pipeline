@@ -29,7 +29,6 @@ class MetsXmlTransformerTest
     val now = Instant.now
     transform(root = Some(xml), createdDate = now) shouldBe Right(
       InvisibleMetsData(
-        metsIdentifier = "b30246039",
         recordIdentifier = "b30246039",
         title = "[Report 1942] /",
         accessConditions = MetsAccessConditions(
@@ -80,7 +79,6 @@ class MetsXmlTransformerTest
       manifestations = manifestations
     ) shouldBe Right(
       InvisibleMetsData(
-        metsIdentifier = "b22012692",
         recordIdentifier = "b22012692",
         title =
           "Enciclopedia anatomica che comprende l'anatomia descrittiva, l'anatomia generale, l'anatomia patologica, la storia dello sviluppo e delle razze umane /",
@@ -129,7 +127,6 @@ class MetsXmlTransformerTest
       manifestations = manifestations
     ) shouldBe Right(
       InvisibleMetsData(
-        metsIdentifier = "b30246039",
         recordIdentifier = "b30246039",
         title = title,
         accessConditions =
