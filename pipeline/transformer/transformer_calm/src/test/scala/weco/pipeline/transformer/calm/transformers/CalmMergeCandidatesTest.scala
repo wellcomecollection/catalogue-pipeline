@@ -64,10 +64,11 @@ class CalmMergeCandidatesTest
     info(
       "Therefore, the most stable identifier that is common to the two records is the RefNo."
     )
-    info("Following the same pattern as Sierra bnumbers,")
+    info("The Works derived from both the METS record and the CALM record")
     info(
-      "the Refno serves as the identifier for the METS document, in its own namespace"
+      "are expected to contain a merge candidate pointing to the CALM RefNo"
     )
+    info("This allows them to merge transitively across that identifier")
     describe("successful creation") {
       it("creates a mergeCandidate from the RefNo") {
         val refno = "CAFE/FO/OD"
