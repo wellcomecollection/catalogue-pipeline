@@ -1,9 +1,22 @@
 package weco.pipeline.transformer.ebsco
 
-import weco.catalogue.internal_model.identifiers.{DataState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  DataState,
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData, WorkState}
-import weco.catalogue.source_model.ebsco.{EbscoDeletedSourceData, EbscoSourceData, EbscoUpdatedSourceData}
+import weco.catalogue.internal_model.work.{
+  DeletedReason,
+  Work,
+  WorkData,
+  WorkState
+}
+import weco.catalogue.source_model.ebsco.{
+  EbscoDeletedSourceData,
+  EbscoSourceData,
+  EbscoUpdatedSourceData
+}
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
@@ -63,18 +76,18 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
       version = 0,
       state = state,
       data = WorkData[DataState.Unidentified](
-          title = MarcTitle(record),
-          alternativeTitles = MarcAlternativeTitles(record).toList,
-          otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
-          designation = MarcDesignation(record).toList,
-          description = MarcDescription(record),
-          currentFrequency = MarcCurrentFrequency(record),
-          edition = MarcEdition(record),
-          contributors = MarcContributors(record).toList,
-          subjects = MarcSubjects(record).toList,
-          genres = MarcGenres(record).toList,
-          holdings = MarcElectronicResources.toHoldings(record).toList
-        )
+        title = MarcTitle(record),
+        alternativeTitles = MarcAlternativeTitles(record).toList,
+        otherIdentifiers = MarcInternationalStandardIdentifiers(record).toList,
+        designation = MarcDesignation(record).toList,
+        description = MarcDescription(record),
+        currentFrequency = MarcCurrentFrequency(record),
+        edition = MarcEdition(record),
+        contributors = MarcContributors(record).toList,
+        subjects = MarcSubjects(record).toList,
+        genres = MarcGenres(record).toList,
+        holdings = MarcElectronicResources.toHoldings(record).toList
+      )
     )
   }
 }
