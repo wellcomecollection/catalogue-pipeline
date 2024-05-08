@@ -179,22 +179,6 @@ trait MarcElectronicResources extends Logging {
       )
     )
   )
-
-  private def createDigitalLocation(
-    url: String,
-    status: LicensedResources,
-    linkText: Option[String]
-  ): DigitalLocation = DigitalLocation(
-    url = url,
-    linkText = linkText,
-    locationType = OnlineResource,
-    accessConditions = List(
-      AccessCondition(
-        method = AccessMethod.ViewOnline,
-        status = status
-      )
-    )
-  )
 }
 
 object MarcElectronicResources extends MarcElectronicResources {
