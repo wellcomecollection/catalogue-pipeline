@@ -25,7 +25,7 @@ trait MarcElectronicResources extends Logging {
 
   def toHoldings(
     record: MarcRecord
-  )(implicit ctx: LoggingContext): Seq[Holdings] = {
+  ): Seq[Holdings] = {
     record.fieldsWithTags("856").flatMap {
       field =>
         for {
