@@ -13,7 +13,7 @@ object TargetPrecedence {
     singlePhysicalItemCalmWork,
     sierraDigitisedAv,
     physicalSierra,
-    sierraWork,
+    sierraWork
   )
 
   def targetSatisfying(

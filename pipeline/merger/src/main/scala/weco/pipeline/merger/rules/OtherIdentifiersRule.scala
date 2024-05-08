@@ -99,9 +99,9 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
     val isDefinedForSource: WorkPredicate = sierraWork
 
     def rule(
-              target: Work.Visible[Identified],
-              sources: NonEmptyList[Work[Identified]]
-            ): FieldData =
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
       target.data.otherIdentifiers ++ sources.toList.flatMap(
         getAllowedIdentifiersFromSource
       )
