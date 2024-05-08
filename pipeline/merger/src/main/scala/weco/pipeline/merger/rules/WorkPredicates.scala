@@ -34,7 +34,11 @@ object WorkPredicates {
   private val miroIdentified: WorkPredicate = identifierTypeId(
     IdentifierType.MiroImageNumber
   )
+  private val ebscoIdentified: WorkPredicate = identifierTypeId(
+    IdentifierType.EbscoAltLookup
+  )
 
+  val ebscoWork: WorkPredicate = ebscoIdentified
   val sierraWork: WorkPredicate = sierraIdentified
   val zeroItem: WorkPredicate = work => work.data.items.isEmpty
   val singleItem: WorkPredicate = work => work.data.items.size == 1

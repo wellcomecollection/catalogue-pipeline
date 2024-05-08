@@ -3,27 +3,46 @@ package weco.pipeline.transformer.marc_common.transformers
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.locations.AccessStatus.LicensedResources
-import weco.catalogue.internal_model.locations.{
-  AccessCondition,
-  AccessMethod,
-  AccessStatus,
-  DigitalLocation
-}
+import weco.catalogue.internal_model.locations.{AccessCondition, AccessMethod, AccessStatus, DigitalLocation}
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
-import weco.catalogue.internal_model.work.Item
+import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
-import weco.pipeline.transformer.marc_common.models.{
-  MarcField,
-  MarcRecord,
-  MarcSubfield
-}
+import weco.pipeline.transformer.marc_common.models.{MarcField, MarcRecord, MarcSubfield}
 
 import java.net.URL
 import scala.util.{Failure, Success, Try}
 
 trait MarcElectronicResources extends Logging {
 
-  protected def toItems(
+  def toHoldings(
+                         record: MarcRecord
+                       )(implicit ctx: LoggingContext): Seq[Holdings] = {
+    record.fieldsWithTags("856").flatMap { field =>
+      for {
+        url <- getUrl(field).toOption
+        linkText <- field.subfields.find(_.tag == "z").map(_.content)
+        enumeration <- field.subfields.filter(_.tag == "3").map(_.content).headOption
+      } yield Holdings(
+        note = None,
+        enumeration = List(enumeration),
+        location = Some(
+          DigitalLocation(
+            url = url,
+            linkText = Some(linkText),
+            locationType = OnlineResource,
+            accessConditions = List(
+              AccessCondition(
+                method = AccessMethod.ViewOnline,
+                status = status(field)
+              )
+            )
+          )
+        )
+      )
+    }
+  }
+
+  def toItems(
     record: MarcRecord
   )(implicit ctx: LoggingContext): Seq[Item[IdState.Unminted]] =
     record
@@ -144,6 +163,22 @@ trait MarcElectronicResources extends Logging {
             status = status
           )
         )
+      )
+    )
+  )
+
+  private def createDigitalLocation(
+    url: String,
+    status: LicensedResources,
+    linkText: Option[String]
+  ): DigitalLocation = DigitalLocation(
+    url = url,
+    linkText = linkText,
+    locationType = OnlineResource,
+    accessConditions = List(
+      AccessCondition(
+        method = AccessMethod.ViewOnline,
+        status = status
       )
     )
   )
