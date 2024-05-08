@@ -8,12 +8,12 @@ object TargetPrecedence {
 
   // This is the canonical list of the order in which we try to select target works
   private val targetPrecedence = Seq(
-    teiWork,
     ebscoWork,
+    teiWork,
     singlePhysicalItemCalmWork,
     sierraDigitisedAv,
     physicalSierra,
-    sierraWork
+    sierraWork,
   )
 
   def targetSatisfying(
