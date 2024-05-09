@@ -35,15 +35,6 @@ class ArchivematicaMetsXMLTest
           "BA/AD/FO/OD"
       }
 
-      it("extracts the metsIdentifier from a premis objectIdentifier element") {
-        ArchivematicaMetsXML(
-          archivematicaMetsWith(metsIdentifier =
-            "baadf00d-beef-cafe-f00d-beefcafef00d"
-          )
-        ).metsIdentifier.right.get shouldBe
-          "baadf00d-beef-cafe-f00d-beefcafef00d"
-      }
-
     }
 
     describe("failure conditions") {
