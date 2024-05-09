@@ -67,8 +67,9 @@ class WorkTest extends AnyFunSpec with Matchers with WorkGenerators {
   }
 
   it("preserves redirect sources when transitioning Work.Visible") {
-    val redirectSources = (1 to 3).map { _ =>
-      IdState.Identified(createCanonicalId, createSourceIdentifier)
+    val redirectSources = (1 to 3).map {
+      _ =>
+        IdState.Identified(createCanonicalId, createSourceIdentifier)
     }
 
     val w = identifiedWork().withRedirectSources(redirectSources)

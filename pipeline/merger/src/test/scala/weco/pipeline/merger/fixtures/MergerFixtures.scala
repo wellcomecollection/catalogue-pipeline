@@ -33,24 +33,26 @@ trait MergerFixtures extends PipelineStorageStreamFixtures {
     workSender: MemoryMessageSender,
     imageSender: MemoryMessageSender = new MemoryMessageSender(),
     metrics: Metrics[Future] = new MemoryMetrics,
-    index: mutable.Map[String, WorkOrImage] = mutable.Map.empty)(
-    testWith: TestWith[MergerWorkerService[String, String], R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue, metrics) { msgStream =>
-        val workerService = new MergerWorkerService(
-          msgStream = msgStream,
-          sourceWorkLookup = new IdentifiedWorkLookup(retriever),
-          mergerManager = new MergerManager(PlatformMerger),
-          workOrImageIndexer = new MemoryIndexer(index),
-          workMsgSender = workSender,
-          imageMsgSender = imageSender,
-          config = pipelineStorageConfig
-        )
+    index: mutable.Map[String, WorkOrImage] = mutable.Map.empty
+  )(testWith: TestWith[MergerWorkerService[String, String], R]): R =
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue, metrics) {
+          msgStream =>
+            val workerService = new MergerWorkerService(
+              msgStream = msgStream,
+              sourceWorkLookup = new IdentifiedWorkLookup(retriever),
+              mergerManager = new MergerManager(PlatformMerger),
+              workOrImageIndexer = new MemoryIndexer(index),
+              workMsgSender = workSender,
+              imageMsgSender = imageSender,
+              config = pipelineStorageConfig
+            )
 
-        workerService.run()
+            workerService.run()
 
-        testWith(workerService)
-      }
+            testWith(workerService)
+        }
     }
 
   def getWorksSent(workSender: MemoryMessageSender): Seq[String] =

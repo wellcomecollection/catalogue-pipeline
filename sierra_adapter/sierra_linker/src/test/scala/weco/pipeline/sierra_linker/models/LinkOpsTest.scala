@@ -117,7 +117,8 @@ class LinkOpsTest extends AnyFunSpec with Matchers with SierraRecordGenerators {
   }
 
   it(
-    "returns the link if it has the same modified date as the one already stored") {
+    "returns the link if it has the same modified date as the one already stored"
+  ) {
     val record = createSierraItemRecord
     val link = Link(record)
 

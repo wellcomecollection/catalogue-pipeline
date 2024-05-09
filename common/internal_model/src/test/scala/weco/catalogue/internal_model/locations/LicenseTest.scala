@@ -9,8 +9,9 @@ import weco.json.JsonUtil.{fromJson, toJson}
 class LicenseTest extends AnyFunSpec with Matchers {
 
   it("can serialise and then deserialise any license as JSON") {
-    License.values.foreach { license =>
-      assertRoundTripsLicenseCorrectly(license)
+    License.values.foreach {
+      license =>
+        assertRoundTripsLicenseCorrectly(license)
     }
   }
 

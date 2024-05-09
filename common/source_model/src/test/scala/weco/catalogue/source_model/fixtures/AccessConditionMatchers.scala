@@ -21,7 +21,7 @@ trait AccessConditionMatchers {
         propertyName = propertyName,
         expectedValue = expectedValue,
         actualValue = actualValue(condition)
-    )
+      )
 
   def method(method: AccessMethod): AccessConditionMatcher[AccessMethod] =
     createMatcher(
@@ -31,7 +31,8 @@ trait AccessConditionMatchers {
     )
 
   def status(
-    status: AccessStatus): AccessConditionMatcher[Option[AccessStatus]] =
+    status: AccessStatus
+  ): AccessConditionMatcher[Option[AccessStatus]] =
     createMatcher(
       propertyName = "status",
       expectedValue = Some(status),

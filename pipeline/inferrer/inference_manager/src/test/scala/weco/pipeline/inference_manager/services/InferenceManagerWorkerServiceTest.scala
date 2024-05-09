@@ -77,7 +77,7 @@ class InferenceManagerWorkerServiceTest
           case None =>
             warn(s"Unable to find matching image for request $req")
             None
-      },
+        },
       images = _ => Some(Responses.image)
     ) {
       case (QueuePair(queue, dlq), messageSender, augmentedImages, _, _) =>
@@ -88,37 +88,40 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.messages.map(_.body)) { id =>
-            val image = augmentedImages(id)
-            inside(image.state) {
-              case ImageState.Augmented(_, id, inferredData) =>
-                images should contain key id
-                val seed = id.hashCode
-                inside(inferredData) {
-                  case InferredData(
-                      features1,
-                      features2,
-                      reducedFeatures,
-                      paletteEmbedding,
-                      Some(averageColorHex),
-                      aspectRatio
-                      ) =>
-                    val featureVector =
-                      Responses.randomFeatureVector(seed)
-                    features1 should be(featureVector.slice(0, 2048))
-                    features2 should be(featureVector.slice(2048, 4096))
-                    reducedFeatures should be(
-                      featureVector.slice(0, 1024)
-                    )
-                    paletteEmbedding should be(Responses.randomPaletteVector(seed))
-                    averageColorHex should be(
-                      Responses.randomAverageColorHex(seed)
-                    )
-                    aspectRatio should be(
-                      Some(Responses.randomAspectRatio(seed))
-                    )
-                }
-            }
+          forAll(messageSender.messages.map(_.body)) {
+            id =>
+              val image = augmentedImages(id)
+              inside(image.state) {
+                case ImageState.Augmented(_, id, inferredData) =>
+                  images should contain key id
+                  val seed = id.hashCode
+                  inside(inferredData) {
+                    case InferredData(
+                          features1,
+                          features2,
+                          reducedFeatures,
+                          paletteEmbedding,
+                          Some(averageColorHex),
+                          aspectRatio
+                        ) =>
+                      val featureVector =
+                        Responses.randomFeatureVector(seed)
+                      features1 should be(featureVector.slice(0, 2048))
+                      features2 should be(featureVector.slice(2048, 4096))
+                      reducedFeatures should be(
+                        featureVector.slice(0, 1024)
+                      )
+                      paletteEmbedding should be(
+                        Responses.randomPaletteVector(seed)
+                      )
+                      averageColorHex should be(
+                        Responses.randomAverageColorHex(seed)
+                      )
+                      aspectRatio should be(
+                        Some(Responses.randomAspectRatio(seed))
+                      )
+                  }
+              }
           }
         }
     }
@@ -146,27 +149,28 @@ class InferenceManagerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          forAll(messageSender.messages.map(_.body)) { id =>
-            val image = augmentedImages(id)
-            inside(image.state) {
-              case ImageState.Augmented(_, _, inferredData) =>
-                inside(inferredData) {
-                  case InferredData(
-                      features1,
-                      features2,
-                      reducedFeatures,
-                      paletteEmbedding,
-                      averageColorHex,
-                      aspectRatio
-                      ) =>
-                    features1 should have length 2048
-                    features2 should have length 2048
-                    reducedFeatures should have length 1024
-                    paletteEmbedding should have length 1000
-                    averageColorHex.get should have length 7
-                    aspectRatio should not be empty
-                }
-            }
+          forAll(messageSender.messages.map(_.body)) {
+            id =>
+              val image = augmentedImages(id)
+              inside(image.state) {
+                case ImageState.Augmented(_, _, inferredData) =>
+                  inside(inferredData) {
+                    case InferredData(
+                          features1,
+                          features2,
+                          reducedFeatures,
+                          paletteEmbedding,
+                          averageColorHex,
+                          aspectRatio
+                        ) =>
+                      features1 should have length 2048
+                      features2 should have length 2048
+                      reducedFeatures should have length 1024
+                      paletteEmbedding should have length 1000
+                      averageColorHex.get should have length 7
+                      aspectRatio should not be empty
+                  }
+              }
           }
         }
     }
@@ -281,25 +285,27 @@ class InferenceManagerWorkerServiceTest
     imageRequestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Message],
     augmentedImages: mutable.Map[String, Image[Augmented]]
   )(testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
-    withLocalSqsQueuePair() { queuePair =>
-      val msgSender = new MemoryMessageSender()
-      val fileWriter = new MemoryFileWriter()
+    withLocalSqsQueuePair() {
+      queuePair =>
+        val msgSender = new MemoryMessageSender()
+        val fileWriter = new MemoryFileWriter()
 
-      withWorkerService(
-        queue = queuePair.queue,
-        msgSender = msgSender,
-        adapters = Set(
-          new FeatureVectorInferrerAdapter("feature_inferrer", 80),
-          new PaletteInferrerAdapter("palette_inferrer", 80),
-          new AspectRatioInferrerAdapter("aspect_ratio_inferrer", 80)
-        ),
-        fileWriter = fileWriter,
-        inferrerRequestPool = inferrerRequestPool,
-        imageRequestPool = imageRequestPool,
-        initialImages = initialImages,
-        augmentedImages = augmentedImages
-      ) { _ =>
-        testWith((queuePair, msgSender))
-      }
+        withWorkerService(
+          queue = queuePair.queue,
+          msgSender = msgSender,
+          adapters = Set(
+            new FeatureVectorInferrerAdapter("feature_inferrer", 80),
+            new PaletteInferrerAdapter("palette_inferrer", 80),
+            new AspectRatioInferrerAdapter("aspect_ratio_inferrer", 80)
+          ),
+          fileWriter = fileWriter,
+          inferrerRequestPool = inferrerRequestPool,
+          imageRequestPool = imageRequestPool,
+          initialImages = initialImages,
+          augmentedImages = augmentedImages
+        ) {
+          _ =>
+            testWith((queuePair, msgSender))
+        }
     }
 }

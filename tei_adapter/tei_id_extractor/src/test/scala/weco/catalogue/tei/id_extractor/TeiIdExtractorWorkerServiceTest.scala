@@ -50,7 +50,8 @@ class TeiIdExtractorWorkerServiceTest
   val repoUrl = "http://github:1234"
 
   it(
-    "receives a message, stores the file in s3 and send a message to the tei adapter with the file id") {
+    "receives a message, stores the file in s3 and send a message to the tei adapter with the file id"
+  ) {
     withWorkerService() {
       case (QueuePair(queue, dlq), messageSender, store, bucket) =>
         val modifiedTime = "2021-05-27T14:05:00Z"
@@ -71,13 +72,17 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             modifiedTime,
-            filename = "WMS_Arabic_1.xml")
+            filename = "WMS_Arabic_1.xml"
+          )
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
+            .getMessages[
+              TeiIdChangeMessage
+            ]() should contain only TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime))
+            Instant.parse(modifiedTime)
+          )
 
         }
     }
@@ -136,11 +141,13 @@ class TeiIdExtractorWorkerServiceTest
           val changeMessage = TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(createdTime))
+            Instant.parse(createdTime)
+          )
           val newKeyKey =
             s"tei_files/manuscript_15651/${modifiedTime.getEpochSecond}.xml"
           store.entries.keySet shouldNot contain(
-            S3ObjectLocation(bucket.name, newKeyKey))
+            S3ObjectLocation(bucket.name, newKeyKey)
+          )
           messageSender
             .getMessages[TeiIdMessage]() should contain only changeMessage
         }
@@ -169,12 +176,16 @@ class TeiIdExtractorWorkerServiceTest
           val changeMessage = TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime))
+            Instant.parse(modifiedTime)
+          )
           val deletedMessage = TeiIdDeletedMessage(
             id = "manuscript_15651",
-            Instant.parse(deletedTime))
+            Instant.parse(deletedTime)
+          )
           messageSender
-            .getMessages[TeiIdMessage]() should contain only (changeMessage, deletedMessage)
+            .getMessages[
+              TeiIdMessage
+            ]() should contain only (changeMessage, deletedMessage)
         }
 
     }
@@ -213,12 +224,16 @@ class TeiIdExtractorWorkerServiceTest
           val changeMessage = TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime))
+            Instant.parse(modifiedTime)
+          )
           val deletedMessage = TeiIdDeletedMessage(
             id = "manuscript_15651",
-            Instant.parse(deletedTime))
+            Instant.parse(deletedTime)
+          )
           messageSender
-            .getMessages[TeiIdMessage]() should contain only (changeMessage, deletedMessage)
+            .getMessages[
+              TeiIdMessage
+            ]() should contain only (changeMessage, deletedMessage)
         }
     }
   }
@@ -256,13 +271,17 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             modifiedTime,
-            filename = "WMS_Arabic_1.xml")
+            filename = "WMS_Arabic_1.xml"
+          )
 
           messageSender
-            .getMessages[TeiIdChangeMessage]() should contain only TeiIdChangeMessage(
+            .getMessages[
+              TeiIdChangeMessage
+            ]() should contain only TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(modifiedTime))
+            Instant.parse(modifiedTime)
+          )
 
         }
     }
@@ -298,18 +317,23 @@ class TeiIdExtractorWorkerServiceTest
             store,
             bucket,
             movedTime,
-            filename = "WMS_Arabic_1.xml")
+            filename = "WMS_Arabic_1.xml"
+          )
 
           val fileCreatedMessage = TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedS3Location,
-            Instant.parse(createdTime))
+            Instant.parse(createdTime)
+          )
           val fileMovedMessage = TeiIdChangeMessage(
             id = "manuscript_15651",
             s3Location = expectedNewS3Location,
-            Instant.parse(movedTime))
+            Instant.parse(movedTime)
+          )
           messageSender
-            .getMessages[TeiIdMessage]() should contain only (fileCreatedMessage, fileMovedMessage)
+            .getMessages[
+              TeiIdMessage
+            ]() should contain only (fileCreatedMessage, fileMovedMessage)
         }
 
     }
@@ -343,47 +367,63 @@ class TeiIdExtractorWorkerServiceTest
       }
   }
 
-  def withWorkerService[R](messageSender: MemoryMessageSender =
-                             new MemoryMessageSender(),
-                           httpClient: HttpClient = httpClient)(
-    testWith: TestWith[(QueuePair,
-                        MemoryMessageSender,
-                        MemoryStore[S3ObjectLocation, String],
-                        Bucket),
-                       R]): R =
+  def withWorkerService[R](
+    messageSender: MemoryMessageSender = new MemoryMessageSender(),
+    httpClient: HttpClient = httpClient
+  )(
+    testWith: TestWith[
+      (
+        QueuePair,
+        MemoryMessageSender,
+        MemoryStore[S3ObjectLocation, String],
+        Bucket
+      ),
+      R
+    ]
+  ): R =
     withLocalSqsQueuePair(visibilityTimeout = 3.seconds) {
       case q @ QueuePair(queue, _) =>
-        withActorSystem { implicit ac =>
-          implicit val ec = ac.dispatcher
-          withSQSStream(queue) { stream: SQSStream[NotificationMessage] =>
-            withPathIdTable {
-              case (config, table) =>
-                val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+        withActorSystem {
+          implicit ac =>
+            implicit val ec = ac.dispatcher
+            withSQSStream(queue) {
+              stream: SQSStream[NotificationMessage] =>
+                withPathIdTable {
+                  case (config, table) =>
+                    val gitHubBlobReader =
+                      new GitHubBlobContentReader(httpClient)
 
-                val store = new MemoryStore[S3ObjectLocation, String](Map())
-                val bucket = Bucket("bucket")
-                val service = new TeiIdExtractorWorkerService(
-                  messageStream = stream,
-                  tableProvisioner =
-                    new TableProvisioner(rdsClientConfig, config),
-                  gitHubBlobReader = gitHubBlobReader,
-                  pathIdManager =
-                    new PathIdManager(table, store, messageSender, bucket.name),
-                  config = TeiIdExtractorConfig(
-                    parallelism = 10,
-                    deleteMessageDelay = 500 milliseconds)
-                )
-                service.run()
-                testWith((q, messageSender, store, bucket))
+                    val store = new MemoryStore[S3ObjectLocation, String](Map())
+                    val bucket = Bucket("bucket")
+                    val service = new TeiIdExtractorWorkerService(
+                      messageStream = stream,
+                      tableProvisioner =
+                        new TableProvisioner(rdsClientConfig, config),
+                      gitHubBlobReader = gitHubBlobReader,
+                      pathIdManager = new PathIdManager(
+                        table,
+                        store,
+                        messageSender,
+                        bucket.name
+                      ),
+                      config = TeiIdExtractorConfig(
+                        parallelism = 10,
+                        deleteMessageDelay = 500 milliseconds
+                      )
+                    )
+                    service.run()
+                    testWith((q, messageSender, store, bucket))
+                }
             }
-          }
         }
     }
 
-  private def createFile(queue: SQS.Queue,
-                         store: MemoryStore[S3ObjectLocation, String],
-                         bucket: Bucket,
-                         repoUrl: String) = {
+  private def createFile(
+    queue: SQS.Queue,
+    store: MemoryStore[S3ObjectLocation, String],
+    bucket: Bucket,
+    repoUrl: String
+  ) = {
     val modifiedTime = "2021-05-27T14:05:00Z"
     val message = {
       s"""
@@ -400,15 +440,18 @@ class TeiIdExtractorWorkerServiceTest
         store,
         bucket,
         modifiedTime,
-        filename = "WMS_Arabic_1.xml")
+        filename = "WMS_Arabic_1.xml"
+      )
     }
     (modifiedTime, expectedS3Location)
   }
 
-  private def checkFileIsStored(store: MemoryStore[S3ObjectLocation, String],
-                                bucket: Bucket,
-                                modifiedTime: String,
-                                filename: String) = {
+  private def checkFileIsStored(
+    store: MemoryStore[S3ObjectLocation, String],
+    bucket: Bucket,
+    modifiedTime: String,
+    filename: String
+  ) = {
     val expectedKey =
       s"tei_files/manuscript_15651/${Instant.parse(modifiedTime).getEpochSecond}.xml"
     val expectedS3Location = S3ObjectLocation(bucket.name, expectedKey)
@@ -416,7 +459,8 @@ class TeiIdExtractorWorkerServiceTest
 
     assertXmlStringsAreEqual(
       store.entries(expectedS3Location),
-      readResource(filename))
+      readResource(filename)
+    )
 
     expectedS3Location
   }

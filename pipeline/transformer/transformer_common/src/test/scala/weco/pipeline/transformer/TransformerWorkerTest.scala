@@ -169,7 +169,9 @@ class TransformerWorkerTest
       }
     }
 
-    it("resends a work if it has different version and different info in state") {
+    it(
+      "resends a work if it has different version and different info in state"
+    ) {
       val id = randomAlphanumeric()
       val modifiedTime = Instant.now()
       val sourceIdentifier = createCalmSourceIdentifier
@@ -289,8 +291,9 @@ class TransformerWorkerTest
   it("transforms multiple works") {
     withWorker() {
       case (_, QueuePair(queue, dlq), workIndexer, workKeySender, store) =>
-        val payloads = (1 to 10).map { _ =>
-          createPayload(store)
+        val payloads = (1 to 10).map {
+          _ =>
+            createPayload(store)
         }
         payloads.foreach { sendNotificationToSQS(queue, _) }
 
@@ -370,13 +373,14 @@ class TransformerWorkerTest
 
           sendNotificationToSQS(queue, payload)
 
-          whenReady(worker.run()) { _ =>
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, size = 1)
+          whenReady(worker.run()) {
+            _ =>
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, size = 1)
 
-              workKeySender.messages shouldBe empty
-            }
+                workKeySender.messages shouldBe empty
+              }
           }
       }
     }
@@ -393,18 +397,20 @@ class TransformerWorkerTest
 
           sendNotificationToSQS(queue, payload)
 
-          whenReady(worker.run()) { _ =>
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, size = 1)
-            }
+          whenReady(worker.run()) {
+            _ =>
+              eventually {
+                assertQueueEmpty(queue)
+                assertQueueHasSize(dlq, size = 1)
+              }
           }
       }
     }
   }
 
   def withWorker[R](
-    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
+    workIndexer: MemoryIndexer[Work[Source]] =
+      new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
     store: MemoryVersionedStore[S3ObjectLocation, ExampleData] =
       MemoryVersionedStore[S3ObjectLocation, ExampleData](
@@ -430,26 +436,28 @@ class TransformerWorkerTest
           queue = queue,
           indexer = workIndexer,
           sender = workKeySender
-        ) { pipelineStream =>
-          val retriever =
-            new MemoryRetriever[Work[Source]](index = mutable.Map()) {
-              override def apply(id: String): Future[Work[Source]] =
-                workIndexer.index.get(id) match {
-                  case Some(w) => Future.successful(w)
-                  case None    => Future.failed(new RetrieverNotFoundException(id))
-                }
-            }
+        ) {
+          pipelineStream =>
+            val retriever =
+              new MemoryRetriever[Work[Source]](index = mutable.Map()) {
+                override def apply(id: String): Future[Work[Source]] =
+                  workIndexer.index.get(id) match {
+                    case Some(w) => Future.successful(w)
+                    case None =>
+                      Future.failed(new RetrieverNotFoundException(id))
+                  }
+              }
 
-          val worker = new TransformerWorker(
-            transformer = transformer,
-            pipelineStream = pipelineStream,
-            retriever = retriever,
-            sourceDataRetriever =
-              new ExampleSourcePayloadLookup(sourceStore = store)
-          )
-          worker.run()
+            val worker = new TransformerWorker(
+              transformer = transformer,
+              pipelineStream = pipelineStream,
+              retriever = retriever,
+              sourceDataRetriever =
+                new ExampleSourcePayloadLookup(sourceStore = store)
+            )
+            worker.run()
 
-          testWith((worker, q, workIndexer, workKeySender, store))
+            testWith((worker, q, workIndexer, workKeySender, store))
 
         }
     }

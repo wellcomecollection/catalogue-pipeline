@@ -28,10 +28,10 @@ class IdentifierGeneratorTest
     with MockitoSugar
     with OneInstancePerTest {
 
-  def withIdentifierGenerator[R](maybeIdentifiersDao: Option[IdentifiersDao] =
-                                   None,
-                                 existingDaoEntries: Seq[Identifier] = Nil)(
-    testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]): R =
+  def withIdentifierGenerator[R](
+    maybeIdentifiersDao: Option[IdentifiersDao] = None,
+    existingDaoEntries: Seq[Identifier] = Nil
+  )(testWith: TestWith[(IdentifierGenerator, IdentifiersTable), R]): R =
     withIdentifiersDao(existingDaoEntries) {
       case (identifiersDao, table) =>
         val identifierGenerator = maybeIdentifiersDao match {
@@ -97,8 +97,8 @@ class IdentifierGeneratorTest
   }
 
   it("reconciles new identical identifiers") {
-    //Given a batch with multiple identical source identifiers
-    //Only generate an identifier for each unique source id.
+    // Given a batch with multiple identical source identifiers
+    // Only generate an identifier for each unique source id.
     val sourceIdentifier1 = createSourceIdentifier
     val sourceIdentifier2 = createSourceIdentifier
 
@@ -106,7 +106,8 @@ class IdentifierGeneratorTest
       sourceIdentifier1,
       sourceIdentifier2,
       sourceIdentifier1,
-      sourceIdentifier2)
+      sourceIdentifier2
+    )
 
     withIdentifierGenerator() {
       case (identifierGenerator, identifiersTable) =>
@@ -157,7 +158,8 @@ class IdentifierGeneratorTest
           Identifier(
             canonicalId,
             sourceId
-          ))
+          )
+        )
     }.toMap
 
     val daoStub = mock[IdentifiersDao]("dao")
@@ -172,14 +174,17 @@ class IdentifierGeneratorTest
           IdentifiersDao.LookupResult(
             existingIdentifiers = Map.empty,
             unmintedIdentifiers = sourceIdentifiers
-          )))
+          )
+        )
+      )
       .thenReturn(
         Success(
           IdentifiersDao.LookupResult(
             existingIdentifiers = existingEntries,
             unmintedIdentifiers = Nil
           )
-        ))
+        )
+      )
 
     // When attempting to save, the first call fails, because the other participant
     // has now saved its identifiers.

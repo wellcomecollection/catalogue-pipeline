@@ -31,17 +31,20 @@ trait IndexerFixtures
     queue: Queue =
       Queue("test://q", "arn::test:q", visibilityTimeout = 1 seconds),
     typedStore: MemoryTypedStore[S3ObjectLocation, SierraTransformable],
-    indexPrefix: String)(
+    indexPrefix: String
+  )(
     testWith: TestWith[Worker, R]
   ): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-        val worker = new Worker(sqsStream, typedStore, indexPrefix)
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue) {
+          sqsStream =>
+            val worker = new Worker(sqsStream, typedStore, indexPrefix)
 
-        worker.run()
+            worker.run()
 
-        testWith(worker)
-      }
+            testWith(worker)
+        }
     }
 
   private def withIndex[R](prefix: String, suffix: String)(
@@ -57,22 +60,29 @@ trait IndexerFixtures
   def withIndices[R](testWith: TestWith[String, R]): R = {
     val indexPrefix = s"sierra_${randomAlphanumeric()}".toLowerCase()
 
-    withIndex(indexPrefix, "bibs") { _ =>
-      withIndex(indexPrefix, "items") { _ =>
-        withIndex(indexPrefix, "holdings") { _ =>
-          withIndex(indexPrefix, "varfields") { _ =>
-            withIndex(indexPrefix, "fixedfields") { _ =>
-              testWith(indexPrefix)
+    withIndex(indexPrefix, "bibs") {
+      _ =>
+        withIndex(indexPrefix, "items") {
+          _ =>
+            withIndex(indexPrefix, "holdings") {
+              _ =>
+                withIndex(indexPrefix, "varfields") {
+                  _ =>
+                    withIndex(indexPrefix, "fixedfields") {
+                      _ =>
+                        testWith(indexPrefix)
+                    }
+                }
             }
-          }
         }
-      }
     }
   }
 
-  def assertElasticsearchEventuallyHas(index: Index,
-                                       id: String,
-                                       json: String): Assertion =
+  def assertElasticsearchEventuallyHas(
+    index: Index,
+    id: String,
+    json: String
+  ): Assertion =
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
         get(index, id)

@@ -19,14 +19,14 @@ object ChildWork {
     * Because of the iterative nature of this stage, it may be that, when this
     * is executed, the collectionPath on the child contains more than just
     * parent/self, and the "parent" is not the direct parent of self, but a
-    * further ancestor.
-    * i.e. because it has already been executed once to resolve the
-    * grandparent/parent part (and possibly again to add great-grandparent etc.)
+    * further ancestor. i.e. because it has already been executed once to
+    * resolve the grandparent/parent part (and possibly again to add
+    * great-grandparent etc.)
     *
     * In that case it will still merge the paths as expected - e.g.
     *
-    * great-grandparent/grandparent + grandparent/parent/self
-    * -> great-grandparent/grandparent/parent/self.
+    * great-grandparent/grandparent + grandparent/parent/self ->
+    * great-grandparent/grandparent/parent/self.
     */
   def apply[State <: WorkState](
     parentPath: String,

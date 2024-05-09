@@ -33,6 +33,7 @@ class MiroRecordTest extends AnyFunSpec with Matchers {
       """.stripMargin
 
     MiroRecord.create(jsonString).creator shouldBe Some(
-      List(Some("Adêle Mongrédien")))
+      List(Some("Adêle Mongrédien"))
+    )
   }
 }

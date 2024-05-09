@@ -58,49 +58,58 @@ class MiroTransformerEndToEndTest
   }
 
   def withWorker[R](
-    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
+    workIndexer: MemoryIndexer[Work[Source]] =
+      new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
     store: MemoryTypedStore[S3ObjectLocation, MiroRecord] = MemoryTypedStore(
-      initialEntries = Map.empty)
+      initialEntries = Map.empty
+    )
   )(
-    testWith: TestWith[(TransformerWorker[MiroSourcePayload,
-                                          (MiroRecord,
-                                           MiroSourceOverrides,
-                                           MiroMetadata),
-                                          String],
-                        QueuePair,
-                        MemoryIndexer[Work[Source]],
-                        MemoryMessageSender,
-                        MemoryTypedStore[S3ObjectLocation, MiroRecord]),
-                       R]
+    testWith: TestWith[
+      (
+        TransformerWorker[
+          MiroSourcePayload,
+          (MiroRecord, MiroSourceOverrides, MiroMetadata),
+          String
+        ],
+        QueuePair,
+        MemoryIndexer[Work[Source]],
+        MemoryMessageSender,
+        MemoryTypedStore[S3ObjectLocation, MiroRecord]
+      ),
+      R
+    ]
   ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case q @ QueuePair(queue, _) =>
         withPipelineStream[Work[Source], R](
           queue = queue,
           indexer = workIndexer,
-          sender = workKeySender) { pipelineStream =>
-          val retriever =
-            new MemoryRetriever[Work[Source]](index = mutable.Map())
+          sender = workKeySender
+        ) {
+          pipelineStream =>
+            val retriever =
+              new MemoryRetriever[Work[Source]](index = mutable.Map())
 
-          val worker = new TransformerWorker[
-            MiroSourcePayload,
-            (MiroRecord, MiroSourceOverrides, MiroMetadata),
-            String](
-            transformer = new MiroRecordTransformer,
-            pipelineStream = pipelineStream,
-            retriever = retriever,
-            sourceDataRetriever = new MiroSourceDataRetriever(store)
-          )
-          worker.run()
+            val worker = new TransformerWorker[
+              MiroSourcePayload,
+              (MiroRecord, MiroSourceOverrides, MiroMetadata),
+              String
+            ](
+              transformer = new MiroRecordTransformer,
+              pipelineStream = pipelineStream,
+              retriever = retriever,
+              sourceDataRetriever = new MiroSourceDataRetriever(store)
+            )
+            worker.run()
 
-          testWith((worker, q, workIndexer, workKeySender, store))
+            testWith((worker, q, workIndexer, workKeySender, store))
 
         }
     }
   def createAndStorePayloadWith(id: String, version: Int)(
-    store: MemoryTypedStore[S3ObjectLocation, MiroRecord])
-    : MiroSourcePayload = {
+    store: MemoryTypedStore[S3ObjectLocation, MiroRecord]
+  ): MiroSourcePayload = {
 
     val record = createMiroRecordWith(imageNumber = id)
     val location = createS3ObjectLocation

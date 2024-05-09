@@ -20,58 +20,64 @@ class MultiItemGetterTest
   val multiItemGetter = new MultiItemGetter()
 
   it("finds a single specified record") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 5)
-      val specifiedRecord = records.head
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 5)
+        val specifiedRecord = records.head
 
-      val future = multiItemGetter.get[NamedRecord](
-        ids = Seq(specifiedRecord.id))(table.name)
+        val future = multiItemGetter.get[NamedRecord](
+          ids = Seq(specifiedRecord.id)
+        )(table.name)
 
-      whenReady(future) {
-        _ shouldBe Seq(specifiedRecord)
-      }
+        whenReady(future) {
+          _ shouldBe Seq(specifiedRecord)
+        }
     }
   }
 
   it("finds a list of specified records") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 5)
-      val specifiedRecords = records.slice(1, 3)
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 5)
+        val specifiedRecords = records.slice(1, 3)
 
-      val future = multiItemGetter.get[NamedRecord](specifiedRecords.map {
-        _.id
-      }.toList)(table.name)
+        val future = multiItemGetter.get[NamedRecord](specifiedRecords.map {
+          _.id
+        }.toList)(table.name)
 
-      whenReady(future) {
-        _ should contain theSameElementsAs specifiedRecords
-      }
+        whenReady(future) {
+          _ should contain theSameElementsAs specifiedRecords
+        }
     }
   }
 
   it("handles being asked for a non-existent record") {
-    withLocalDynamoDbTable { table =>
-      createRecords(table, count = 5)
+    withLocalDynamoDbTable {
+      table =>
+        createRecords(table, count = 5)
 
-      val future = multiItemGetter.get[NamedRecord](List("bananas"))(table.name)
+        val future =
+          multiItemGetter.get[NamedRecord](List("bananas"))(table.name)
 
-      whenReady(future) {
-        _ shouldBe empty
-      }
+        whenReady(future) {
+          _ shouldBe empty
+        }
     }
   }
 
   it("handles being asked for a mix of valid and non-existent records") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 5)
-      val specifiedRecordIds =
-        List(records.head.id, "durian", records(1).id, "jackfruit")
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 5)
+        val specifiedRecordIds =
+          List(records.head.id, "durian", records(1).id, "jackfruit")
 
-      val future =
-        multiItemGetter.get[NamedRecord](specifiedRecordIds)(table.name)
+        val future =
+          multiItemGetter.get[NamedRecord](specifiedRecordIds)(table.name)
 
-      whenReady(future) {
-        _ should contain theSameElementsAs Seq(records(0), records(1))
-      }
+        whenReady(future) {
+          _ should contain theSameElementsAs Seq(records(0), records(1))
+        }
     }
   }
 
@@ -82,7 +88,8 @@ class MultiItemGetterTest
       createTableWithHashKey(
         table,
         keyName = "sides",
-        keyType = ScalarAttributeType.S)
+        keyType = ScalarAttributeType.S
+      )
 
     val shapes = Seq(
       Shape(sides = "3", name = "triangle"),
@@ -90,36 +97,40 @@ class MultiItemGetterTest
       Shape(sides = "5", name = "pentagon")
     )
 
-    withSpecifiedTable(createShapeTable) { table =>
-      shapes.foreach { s =>
-        val scanamoTable = ScanamoTable[Shape](table.name)
-        Scanamo(dynamoClient).exec(scanamoTable.put(s))
-      }
+    withSpecifiedTable(createShapeTable) {
+      table =>
+        shapes.foreach {
+          s =>
+            val scanamoTable = ScanamoTable[Shape](table.name)
+            Scanamo(dynamoClient).exec(scanamoTable.put(s))
+        }
 
-      val future = multiItemGetter.get[Shape](
-        partitionKey = "sides",
-        ids = Seq("3", "4")
-      )(table.name)
+        val future = multiItemGetter.get[Shape](
+          partitionKey = "sides",
+          ids = Seq("3", "4")
+        )(table.name)
 
-      whenReady(future) {
-        _ should contain theSameElementsAs Seq(shapes(0), shapes(1))
-      }
+        whenReady(future) {
+          _ should contain theSameElementsAs Seq(shapes(0), shapes(1))
+        }
     }
   }
 
   it("fails if the data is in the wrong format") {
     case class NumberedRecord(id: Int, text: String)
 
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 5)
-      val ids = records.map { _.id }
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 5)
+        val ids = records.map { _.id }
 
-      val future = multiItemGetter.get[NumberedRecord](ids = ids)(table.name)
+        val future = multiItemGetter.get[NumberedRecord](ids = ids)(table.name)
 
-      whenReady(future.failed) { err =>
-        err shouldBe a[Throwable]
-        err.getMessage should startWith("Errors parsing Scanamo result")
-      }
+        whenReady(future.failed) {
+          err =>
+            err shouldBe a[Throwable]
+            err.getMessage should startWith("Errors parsing Scanamo result")
+        }
     }
   }
 }

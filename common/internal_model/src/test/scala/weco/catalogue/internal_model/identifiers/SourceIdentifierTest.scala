@@ -19,7 +19,8 @@ class SourceIdentifierTest extends AnyFunSpec with Matchers {
       SourceIdentifier(
         identifierType = IdentifierType.SierraSystemNumber,
         value = "b1234567  ",
-        ontologyType = "Work")
+        ontologyType = "Work"
+      )
     }
   }
 }

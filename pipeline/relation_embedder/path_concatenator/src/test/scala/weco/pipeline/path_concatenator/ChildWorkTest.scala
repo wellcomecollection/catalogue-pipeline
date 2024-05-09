@@ -9,7 +9,8 @@ class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
   describe("Concatenating collectionPaths") {
 
     it(
-      "replaces the head of the child's path with the whole of the parent's path") {
+      "replaces the head of the child's path with the whole of the parent's path"
+    ) {
       val newChild = ChildWork(
         parentPath = "a/b",
         childWork = mergedWork().collectionPath(CollectionPath("b/c"))
@@ -52,7 +53,8 @@ class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
     }
 
     it(
-      "does nothing if the collectionPath of the parent consists of a single node") {
+      "does nothing if the collectionPath of the parent consists of a single node"
+    ) {
       // When the parent is the root of the hierarchy,
       // that's fine, but there is nothing to do.
       val originalChild = mergedWork().collectionPath(CollectionPath("a/b"))
@@ -61,7 +63,8 @@ class ChildWorkTest extends AnyFunSpec with WorkGenerators with Matchers {
     }
 
     it(
-      "throws an exception if the end of the parent does not match the head of the child") {
+      "throws an exception if the end of the parent does not match the head of the child"
+    ) {
       assertThrows[IllegalArgumentException] {
         ChildWork(
           parentPath = "b/z",

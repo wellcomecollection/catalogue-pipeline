@@ -32,98 +32,104 @@ class ImageDownloaderTest
   describe("download") {
 
     it("makes a request for an image") {
-      withMaterializer { implicit materializer =>
-        withDownloaderAndFileWriter() {
-          case (downloader, requestPool, _) =>
-            val image = createImageDataWith(
-              locations = List(
-                createDigitalLocationWith(
-                  locationType = LocationType.IIIFImageAPI,
-                  url = "http://images.com/this-image.jpg"
+      withMaterializer {
+        implicit materializer =>
+          withDownloaderAndFileWriter() {
+            case (downloader, requestPool, _) =>
+              val image = createImageDataWith(
+                locations = List(
+                  createDigitalLocationWith(
+                    locationType = LocationType.IIIFImageAPI,
+                    url = "http://images.com/this-image.jpg"
+                  )
                 )
-              )
-            ).toInitialImage
-            val result = Source
-              .single(image)
-              .asSourceWithContext(_ => ())
-              .via(downloader.download)
-              .runWith(Sink.ignore)
+              ).toInitialImage
+              val result = Source
+                .single(image)
+                .asSourceWithContext(_ => ())
+                .via(downloader.download)
+                .runWith(Sink.ignore)
 
-            whenReady(result) { _ =>
-              requestPool.requests should have size 1
-              requestPool.requests.keys.head.uri.toString should be(
-                image.locations.head.url
-              )
-            }
-        }
+              whenReady(result) {
+                _ =>
+                  requestPool.requests should have size 1
+                  requestPool.requests.keys.head.uri.toString should be(
+                    image.locations.head.url
+                  )
+              }
+          }
       }
     }
 
     it("saves the image and outputs the path") {
-      withMaterializer { implicit materializer: Materializer =>
-        withDownloaderAndFileWriter() {
-          case (downloader, _, fileWriter) =>
-            val image = createImageData.toInitialImage
-            val result = Source
-              .single(image)
-              .asSourceWithContext(_ => ())
-              .via(downloader.download)
-              .runWith(Sink.last)
+      withMaterializer {
+        implicit materializer: Materializer =>
+          withDownloaderAndFileWriter() {
+            case (downloader, _, fileWriter) =>
+              val image = createImageData.toInitialImage
+              val result = Source
+                .single(image)
+                .asSourceWithContext(_ => ())
+                .via(downloader.download)
+                .runWith(Sink.last)
 
-            whenReady(result) {
-              case (downloadedImage, _) =>
-                fileWriter.files should have size 1
-                fileWriter.files.keys.head should be(downloadedImage.path)
-            }
-        }
+              whenReady(result) {
+                case (downloadedImage, _) =>
+                  fileWriter.files should have size 1
+                  fileWriter.files.keys.head should be(downloadedImage.path)
+              }
+          }
       }
     }
 
     it("fails when the image can't be downloaded") {
-      withMaterializer { implicit materializer: Materializer =>
-        withDownloaderAndFileWriter(_ => None) {
-          case (downloader, _, _) =>
-            val image = createImageData.toInitialImage
-            val result = Source
-              .single(image)
-              .asSourceWithContext(_ => ())
-              .via(downloader.download)
-              .runWith(Sink.ignore)
+      withMaterializer {
+        implicit materializer: Materializer =>
+          withDownloaderAndFileWriter(_ => None) {
+            case (downloader, _, _) =>
+              val image = createImageData.toInitialImage
+              val result = Source
+                .single(image)
+                .asSourceWithContext(_ => ())
+                .via(downloader.download)
+                .runWith(Sink.ignore)
 
-            result.failed.futureValue should not be null
-        }
+              result.failed.futureValue should not be null
+          }
       }
     }
 
     it("selects iiif-image locations from a list of locations") {
-      withMaterializer { implicit materializer =>
-        withDownloaderAndFileWriter() {
-          case (downloader, requestPool, _) =>
-            val image = createImageDataWith(
-              locations = List(
-                createDigitalLocationWith(
-                  locationType = LocationType.IIIFPresentationAPI,
-                  url = "http://example.com/image/manifest"
-                ),
-                createDigitalLocationWith(
-                  locationType = LocationType.IIIFImageAPI,
-                  url = "http://images.com/this-image.jpg"
+      withMaterializer {
+        implicit materializer =>
+          withDownloaderAndFileWriter() {
+            case (downloader, requestPool, _) =>
+              val image = createImageDataWith(
+                locations = List(
+                  createDigitalLocationWith(
+                    locationType = LocationType.IIIFPresentationAPI,
+                    url = "http://example.com/image/manifest"
+                  ),
+                  createDigitalLocationWith(
+                    locationType = LocationType.IIIFImageAPI,
+                    url = "http://images.com/this-image.jpg"
+                  )
                 )
-              )
-            ).toInitialImage
-            val result = Source
-              .single(image)
-              .asSourceWithContext(_ => ())
-              .via(downloader.download)
-              .runWith(Sink.ignore)
+              ).toInitialImage
+              val result = Source
+                .single(image)
+                .asSourceWithContext(_ => ())
+                .via(downloader.download)
+                .runWith(Sink.ignore)
 
-            whenReady(result) { _ =>
-              requestPool.requests should have size 1
-              requestPool.requests.keys.head.uri.toString should be(
-                image.locations(1).url
-              )
-            }
-        }
+              whenReady(result) {
+                _ =>
+                  requestPool.requests should have size 1
+                  requestPool.requests.keys.head.uri.toString should be(
+                    image.locations(1).url
+                  )
+              }
+          }
       }
     }
   }
@@ -135,19 +141,21 @@ class ImageDownloaderTest
         image,
         Paths.get("a", "b", "c", "default.jpg")
       )
-      withMaterializer { implicit materializer: Materializer =>
-        withDownloaderAndFileWriter(
-          existingFilePaths = Set(downloadedImage.path)
-        ) {
-          case (downloader, _, fileWriter) =>
-            val result = Source
-              .single(downloadedImage)
-              .runWith(downloader.delete)
+      withMaterializer {
+        implicit materializer: Materializer =>
+          withDownloaderAndFileWriter(
+            existingFilePaths = Set(downloadedImage.path)
+          ) {
+            case (downloader, _, fileWriter) =>
+              val result = Source
+                .single(downloadedImage)
+                .runWith(downloader.delete)
 
-            whenReady(result) { _ =>
-              fileWriter.files shouldBe empty
-            }
-        }
+              whenReady(result) {
+                _ =>
+                  fileWriter.files shouldBe empty
+              }
+          }
       }
     }
   }
@@ -168,9 +176,10 @@ class ImageDownloaderTest
     withRequestPool[(Uri, MergedIdentifiedImage), Unit, R](response) {
       requestPool =>
         val fileWriter = new MemoryFileWriter
-        existingFilePaths.foreach { existingFile =>
-          fileWriter.files
-            .put(existingFile, ByteString(Responses.randomBytes()))
+        existingFilePaths.foreach {
+          existingFile =>
+            fileWriter.files
+              .put(existingFile, ByteString(Responses.randomBytes()))
         }
         val downloader =
           new ImageDownloader(

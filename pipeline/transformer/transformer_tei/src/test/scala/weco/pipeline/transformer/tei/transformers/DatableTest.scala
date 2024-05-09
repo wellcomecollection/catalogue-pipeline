@@ -27,7 +27,8 @@ class DatableTest
         (<x from="">Owned by James Cole</x>, None),
         (
           <x from="" to="1901-12-25">Owned by James Cole</x>,
-          Some("(to 1901-12-25)"))
+          Some("(to 1901-12-25)")
+        )
       )
 
       forAll(tests) {
@@ -53,19 +54,24 @@ class DatableTest
         ("element", "result"),
         (
           undated % Attribute(None, "when", Text("1901-12-25"), Null),
-          "(1901-12-25)"),
+          "(1901-12-25)"
+        ),
         (
           undated % Attribute(None, "from", Text("1901-12-25"), Null),
-          "(from 1901-12-25)"),
+          "(from 1901-12-25)"
+        ),
         (
           undated % Attribute(None, "to", Text("1901-12-25"), Null),
-          "(to 1901-12-25)"),
+          "(to 1901-12-25)"
+        ),
         (
           undated % Attribute(None, "notBefore", Text("1901-12-25"), Null),
-          "(not before 1901-12-25)"),
+          "(not before 1901-12-25)"
+        ),
         (
           undated % Attribute(None, "notAfter", Text("1901-12-25"), Null),
-          "(not after 1901-12-25)"),
+          "(not after 1901-12-25)"
+        )
       )
 
       forAll(tests) {

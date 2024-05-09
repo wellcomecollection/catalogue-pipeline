@@ -25,27 +25,33 @@ class RetryFutureTest
   ).withMaxRestarts(maxRetries, maxRetries * 100 milliseconds)
 
   it("returns the future if it is initially a success") {
-    withMaterializer { implicit mat =>
-      whenReady(RetryFuture(Future.successful("success"))) { result =>
-        result shouldBe "success"
-      }
+    withMaterializer {
+      implicit mat =>
+        whenReady(RetryFuture(Future.successful("success"))) {
+          result =>
+            result shouldBe "success"
+        }
     }
   }
   it("returns the first success if the future initially fails") {
-    withMaterializer { implicit mat =>
-      val doAttempt = succeedAfterTries(3)
-      whenReady(RetryFuture(doAttempt())) { result =>
-        result shouldBe 3
-      }
+    withMaterializer {
+      implicit mat =>
+        val doAttempt = succeedAfterTries(3)
+        whenReady(RetryFuture(doAttempt())) {
+          result =>
+            result shouldBe 3
+        }
     }
   }
 
   it("throws an error if the configured max retries are exceeded") {
-    withMaterializer { implicit mat =>
-      val doAttempt = succeedAfterTries(maxRetries + 1)
-      whenReady(RetryFuture(doAttempt()).failed) { e =>
-        e shouldBe an[Exception]
-      }
+    withMaterializer {
+      implicit mat =>
+        val doAttempt = succeedAfterTries(maxRetries + 1)
+        whenReady(RetryFuture(doAttempt()).failed) {
+          e =>
+            e shouldBe an[Exception]
+        }
     }
   }
 

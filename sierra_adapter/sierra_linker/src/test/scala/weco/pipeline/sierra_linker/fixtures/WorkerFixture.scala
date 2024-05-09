@@ -32,32 +32,33 @@ trait WorkerFixture extends SQS with Akka {
 
   import weco.pipeline.sierra_linker.models.LinkOps._
 
-  def withWorker[Id <: TypedSierraRecordNumber,
-                 Record <: AbstractSierraRecord[Id],
-                 R](
+  def withWorker[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[
+    Id
+  ], R](
     queue: Queue,
     store: MemoryVersionedStore[Id, Link] =
       MemoryVersionedStore[Id, Link](initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
   )(testWith: TestWith[SierraLinkerWorker[Id, Record, String], R])(
-    implicit
-    linkOps: LinkOps[Record],
+    implicit linkOps: LinkOps[Record],
     decoder: Decoder[Record],
     encoder: Encoder[Record]
   ): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue, metrics) { sqsStream =>
-        val worker = new SierraLinkerWorker(
-          sqsStream = sqsStream,
-          linkStore = new LinkStore(store),
-          messageSender = messageSender
-        )
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue, metrics) {
+          sqsStream =>
+            val worker = new SierraLinkerWorker(
+              sqsStream = sqsStream,
+              linkStore = new LinkStore(store),
+              messageSender = messageSender
+            )
 
-        worker.run()
+            worker.run()
 
-        testWith(worker)
-      }
+            testWith(worker)
+        }
     }
 
   def withItemWorker[R](
@@ -66,33 +67,44 @@ trait WorkerFixture extends SQS with Akka {
       MemoryVersionedStore[SierraItemNumber, Link](initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
-  )(testWith: TestWith[
+  )(
+    testWith: TestWith[
       SierraLinkerWorker[SierraItemNumber, SierraItemRecord, String],
-      R]): R =
+      R
+    ]
+  ): R =
     withWorker[SierraItemNumber, SierraItemRecord, R](
       queue,
       store,
       metrics,
-      messageSender) { worker =>
-      testWith(worker)
+      messageSender
+    ) {
+      worker =>
+        testWith(worker)
     }
 
   def withHoldingsWorker[R](
     queue: Queue,
     store: MemoryVersionedStore[SierraHoldingsNumber, Link] =
       MemoryVersionedStore[SierraHoldingsNumber, Link](
-        initialEntries = Map.empty),
+        initialEntries = Map.empty
+      ),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
-  )(testWith: TestWith[
+  )(
+    testWith: TestWith[
       SierraLinkerWorker[SierraHoldingsNumber, SierraHoldingsRecord, String],
-      R]): R =
+      R
+    ]
+  ): R =
     withWorker[SierraHoldingsNumber, SierraHoldingsRecord, R](
       queue,
       store,
       metrics,
-      messageSender) { worker =>
-      testWith(worker)
+      messageSender
+    ) {
+      worker =>
+        testWith(worker)
     }
 
   def withOrderWorker[R](
@@ -101,14 +113,19 @@ trait WorkerFixture extends SQS with Akka {
       MemoryVersionedStore[SierraOrderNumber, Link](initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
-  )(testWith: TestWith[
+  )(
+    testWith: TestWith[
       SierraLinkerWorker[SierraOrderNumber, SierraOrderRecord, String],
-      R]): R =
+      R
+    ]
+  ): R =
     withWorker[SierraOrderNumber, SierraOrderRecord, R](
       queue,
       store,
       metrics,
-      messageSender) { worker =>
-      testWith(worker)
+      messageSender
+    ) {
+      worker =>
+        testWith(worker)
     }
 }

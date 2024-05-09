@@ -13,10 +13,10 @@ import scala.util.{Random, Success}
 
 trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
   case class TestDocument(
-     description: String,
-     createdAt: Instant = Instant.now(),
-     id: String,
-     document: Json,
+    description: String,
+    createdAt: Instant = Instant.now(),
+    id: String,
+    document: Json
   )
 
   override protected lazy val random: Random =
@@ -56,23 +56,25 @@ trait TestDocumentUtils extends InstantGenerators with RandomGenerators {
         // If it does, and the only difference is the date it was created, we don't need to
         // recreate it here -- skip writing a new file.
         val isAlreadyUpToDate =
-        if (file.exists()) {
-          val existingContents = FileUtils.readFileToString(file, "UTF-8")
+          if (file.exists()) {
+            val existingContents = FileUtils.readFileToString(file, "UTF-8")
 
-          fromJson[TestDocument](existingContents) match {
-            case Success(
-            TestDocument(
-            existingDescription,
-            _,
-            existingId,
-            existingDocument)) =>
-              existingDescription == doc.description && existingId == doc.id && existingDocument == doc.document
+            fromJson[TestDocument](existingContents) match {
+              case Success(
+                    TestDocument(
+                      existingDescription,
+                      _,
+                      existingId,
+                      existingDocument
+                    )
+                  ) =>
+                existingDescription == doc.description && existingId == doc.id && existingDocument == doc.document
 
-            case _ => false
+              case _ => false
+            }
+          } else {
+            false
           }
-        } else {
-          false
-        }
 
         if (!isAlreadyUpToDate) {
           val pw = new PrintWriter(file)

@@ -48,6 +48,7 @@ class CalmRecordGeneratorsTest
 
     record.data shouldBe Map(
       "Place" -> List("London", "Paris"),
-      "Date" -> List("2020"))
+      "Date" -> List("2020")
+    )
   }
 }

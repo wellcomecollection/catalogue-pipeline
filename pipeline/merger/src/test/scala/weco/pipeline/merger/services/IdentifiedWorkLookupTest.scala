@@ -57,22 +57,25 @@ class IdentifiedWorkLookupTest
   it("gets a mixture of works as appropriate") {
     val unchangedWorks = identifiedWorks(count = 3)
     val outdatedWorks = identifiedWorks(count = 2)
-    val updatedWorks = outdatedWorks.map { work =>
-      work.withVersion(work.version + 1)
+    val updatedWorks = outdatedWorks.map {
+      work =>
+        work.withVersion(work.version + 1)
     }
 
     val lookupWorks = unchangedWorks ++ outdatedWorks
     val storedWorks = unchangedWorks ++ updatedWorks
 
     val retriever = new MemoryRetriever[Work[Identified]](
-      index = mutable.Map(storedWorks.map { w =>
-        w.id -> w
+      index = mutable.Map(storedWorks.map {
+        w =>
+          w.id -> w
       }: _*)
     )
 
     val expectedLookupResult =
-      unchangedWorks.map { Some(_) } ++ (4 to 5).map { _ =>
-        None
+      unchangedWorks.map { Some(_) } ++ (4 to 5).map {
+        _ =>
+          None
       }
 
     whenReady(fetchAllWorks(retriever = retriever, lookupWorks: _*)) {
@@ -82,12 +85,14 @@ class IdentifiedWorkLookupTest
 
   private def fetchAllWorks(
     retriever: MemoryRetriever[Work[Identified]],
-    works: Work[Identified]*): Future[Seq[Option[Work[Identified]]]] = {
+    works: Work[Identified]*
+  ): Future[Seq[Option[Work[Identified]]]] = {
     val identifiedLookup = new IdentifiedWorkLookup(retriever)
 
     val workIdentifiers = works
-      .map { w =>
-        WorkIdentifier(w)
+      .map {
+        w =>
+          WorkIdentifier(w)
       }
 
     identifiedLookup.fetchAllWorks(workIdentifiers)

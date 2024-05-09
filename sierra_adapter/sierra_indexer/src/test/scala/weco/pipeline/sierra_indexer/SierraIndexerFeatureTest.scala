@@ -35,14 +35,17 @@ class SierraIndexerFeatureTest
 
     val bibId = createSierraBibNumber
 
-    val itemIds = (1 to 5).map { _ =>
-      createSierraItemNumber
+    val itemIds = (1 to 5).map {
+      _ =>
+        createSierraItemNumber
     }
-    val holdingsIds = (1 to 4).map { _ =>
-      createSierraHoldingsNumber
+    val holdingsIds = (1 to 4).map {
+      _ =>
+        createSierraHoldingsNumber
     }
-    val orderIds = (1 to 4).map { _ =>
-      createSierraOrderNumber
+    val orderIds = (1 to 4).map {
+      _ =>
+        createSierraOrderNumber
     }
 
     val transformable = createSierraTransformableWith(
@@ -84,14 +87,17 @@ class SierraIndexerFeatureTest
                |}
                |""".stripMargin
       ),
-      itemRecords = itemIds.map { id =>
-        createSierraItemRecordWith(id = id, bibIds = List(bibId))
+      itemRecords = itemIds.map {
+        id =>
+          createSierraItemRecordWith(id = id, bibIds = List(bibId))
       },
-      holdingsRecords = holdingsIds.map { id =>
-        createSierraHoldingsRecordWith(id = id, bibIds = List(bibId))
+      holdingsRecords = holdingsIds.map {
+        id =>
+          createSierraHoldingsRecordWith(id = id, bibIds = List(bibId))
       },
-      orderRecords = orderIds.map { id =>
-        createSierraOrderRecordWith(id = id, bibIds = List(bibId))
+      orderRecords = orderIds.map {
+        id =>
+          createSierraOrderRecordWith(id = id, bibIds = List(bibId))
       }
     )
 
@@ -99,51 +105,58 @@ class SierraIndexerFeatureTest
       initialEntries = Map(location -> transformable)
     )
 
-    withIndices { indexPrefix =>
-      withLocalSqsQueue() { queue =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = bibId.withoutCheckDigit,
-              location = location,
-              version = 1)
-          )
+    withIndices {
+      indexPrefix =>
+        withLocalSqsQueue() {
+          queue =>
+            withWorker(queue, store, indexPrefix) {
+              _ =>
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = bibId.withoutCheckDigit,
+                    location = location,
+                    version = 1
+                  )
+                )
 
-          val itemIdsList =
-            itemIds
-              .map { id =>
-                s"""
+                val itemIdsList =
+                  itemIds
+                    .map {
+                      id =>
+                        s"""
                  |"${id.withoutCheckDigit}"
                  |""".stripMargin
-              }
-              .sorted
-              .mkString(",")
+                    }
+                    .sorted
+                    .mkString(",")
 
-          val holdingsIdsList =
-            holdingsIds
-              .map { id =>
-                s"""
+                val holdingsIdsList =
+                  holdingsIds
+                    .map {
+                      id =>
+                        s"""
                  |"${id.withoutCheckDigit}"
                  |""".stripMargin
-              }
-              .sorted
-              .mkString(",")
+                    }
+                    .sorted
+                    .mkString(",")
 
-          val orderIdsList =
-            orderIds
-              .map { id =>
-                s"""
+                val orderIdsList =
+                  orderIds
+                    .map {
+                      id =>
+                        s"""
                    |"${id.withoutCheckDigit}"
                    |""".stripMargin
-              }
-              .sorted
-              .mkString(",")
+                    }
+                    .sorted
+                    .mkString(",")
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_bibs"),
-            id = bibId.withoutCheckDigit,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_bibs"),
+                  id = bibId.withoutCheckDigit,
+                  json = s"""
                 |{
                 |  "id" : "$bibId",
                 |  "idWithCheckDigit": "${bibId.withCheckDigit}",
@@ -154,12 +167,12 @@ class SierraIndexerFeatureTest
                 |  "orderIds": [$orderIdsList]
                 |}
                 |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-0",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-0",
+                  json = s"""
                 |{
                 |  "parent": {
                 |    "recordType": "bibs",
@@ -173,12 +186,12 @@ class SierraIndexerFeatureTest
                 |  }
                 |}
                 |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-1",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-1",
+                  json = s"""
                 |{
                 |  "parent": {
                 |    "recordType": "bibs",
@@ -200,12 +213,12 @@ class SierraIndexerFeatureTest
                 |  }
                 |}
                 |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-86",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-86",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -219,12 +232,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"bibs-${bibId.withoutCheckDigit}-265",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-265",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -238,9 +251,9 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
+            }
         }
-      }
     }
   }
 
@@ -274,7 +287,7 @@ class SierraIndexerFeatureTest
                     |""".stripMargin
       ),
       itemRecords = List(),
-      holdingsRecords = List(),
+      holdingsRecords = List()
     )
 
     val transformable2 = createSierraTransformableWith(
@@ -301,7 +314,7 @@ class SierraIndexerFeatureTest
                     |""".stripMargin
       ),
       itemRecords = List(),
-      holdingsRecords = List(),
+      holdingsRecords = List()
     )
 
     val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
@@ -311,22 +324,25 @@ class SierraIndexerFeatureTest
       )
     )
 
-    withIndices { indexPrefix =>
-      withLocalSqsQueuePair() {
-        case QueuePair(queue, dlq) =>
-          withWorker(queue, store, indexPrefix) { _ =>
-            sendNotificationToSQS(
-              queue,
-              SierraSourcePayload(
-                id = bibId.withoutCheckDigit,
-                location = location1,
-                version = 1)
-            )
+    withIndices {
+      indexPrefix =>
+        withLocalSqsQueuePair() {
+          case QueuePair(queue, dlq) =>
+            withWorker(queue, store, indexPrefix) {
+              _ =>
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = bibId.withoutCheckDigit,
+                    location = location1,
+                    version = 1
+                  )
+                )
 
-            assertElasticsearchEventuallyHas(
-              index = Index(s"${indexPrefix}_bibs"),
-              id = bibId.withoutCheckDigit,
-              json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_bibs"),
+                  id = bibId.withoutCheckDigit,
+                  json = s"""
                       |{
                       |  "id" : "$bibId",
                       |  "idWithCheckDigit": "${bibId.withCheckDigit}",
@@ -337,12 +353,12 @@ class SierraIndexerFeatureTest
                       |  "orderIds": []
                       |}
                       |""".stripMargin
-            )
+                )
 
-            assertElasticsearchEventuallyHas(
-              index = Index(s"${indexPrefix}_varfields"),
-              id = s"bibs-${bibId.withoutCheckDigit}-0",
-              json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -356,12 +372,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-            )
+                )
 
-            assertElasticsearchEventuallyHas(
-              index = Index(s"${indexPrefix}_fixedfields"),
-              id = s"bibs-${bibId.withoutCheckDigit}-86",
-              json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-86",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -375,40 +391,42 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-            )
+                )
 
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
-            }
+                eventually {
+                  assertQueueEmpty(queue)
+                  assertQueueEmpty(dlq)
+                }
 
-            // Now re-send the same notification, and check the queue clears
-            sendNotificationToSQS(
-              queue,
-              SierraSourcePayload(
-                id = bibId.withoutCheckDigit,
-                location = location1,
-                version = 1)
-            )
+                // Now re-send the same notification, and check the queue clears
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = bibId.withoutCheckDigit,
+                    location = location1,
+                    version = 1
+                  )
+                )
 
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueEmpty(dlq)
-            }
+                eventually {
+                  assertQueueEmpty(queue)
+                  assertQueueEmpty(dlq)
+                }
 
-            // Now send the new notification, and check the record gets updated
-            sendNotificationToSQS(
-              queue,
-              SierraSourcePayload(
-                id = bibId.withoutCheckDigit,
-                location = location2,
-                version = 2)
-            )
+                // Now send the new notification, and check the record gets updated
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = bibId.withoutCheckDigit,
+                    location = location2,
+                    version = 2
+                  )
+                )
 
-            assertElasticsearchEventuallyHas(
-              index = Index(s"${indexPrefix}_bibs"),
-              id = bibId.withoutCheckDigit,
-              json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_bibs"),
+                  id = bibId.withoutCheckDigit,
+                  json = s"""
                       |{
                       |  "id" : "$bibId",
                       |  "idWithCheckDigit": "${bibId.withCheckDigit}",
@@ -419,12 +437,12 @@ class SierraIndexerFeatureTest
                       |  "orderIds": []
                       |}
                       |""".stripMargin
-            )
+                )
 
-            assertElasticsearchEventuallyHas(
-              index = Index(s"${indexPrefix}_varfields"),
-              id = s"bibs-${bibId.withoutCheckDigit}-0",
-              json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -438,12 +456,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-            )
+                )
 
-            assertElasticsearchEventuallyHas(
-              index = Index(s"${indexPrefix}_fixedfields"),
-              id = s"bibs-${bibId.withoutCheckDigit}-86",
-              json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"bibs-${bibId.withoutCheckDigit}-86",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "bibs",
@@ -457,9 +475,9 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-            )
-          }
-      }
+                )
+            }
+        }
     }
   }
 
@@ -536,22 +554,25 @@ class SierraIndexerFeatureTest
       initialEntries = Map(location -> transformable)
     )
 
-    withIndices { indexPrefix =>
-      withLocalSqsQueue() { queue =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = transformable.sierraId.withoutCheckDigit,
-              location = location,
-              version = 1
-            )
-          )
+    withIndices {
+      indexPrefix =>
+        withLocalSqsQueue() {
+          queue =>
+            withWorker(queue, store, indexPrefix) {
+              _ =>
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = transformable.sierraId.withoutCheckDigit,
+                    location = location,
+                    version = 1
+                  )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_items"),
-            id = itemId1.withoutCheckDigit,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_items"),
+                  id = itemId1.withoutCheckDigit,
+                  json = s"""
                       |{
                       |  "id" : "$itemId1",
                       |  "idWithCheckDigit": "${itemId1.withCheckDigit}",
@@ -559,12 +580,12 @@ class SierraIndexerFeatureTest
                       |  "deleted" : false
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_items"),
-            id = itemId2.withoutCheckDigit,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_items"),
+                  id = itemId2.withoutCheckDigit,
+                  json = s"""
                   |{
                   |  "id" : "$itemId2",
                   |  "idWithCheckDigit": "${itemId2.withCheckDigit}",
@@ -572,12 +593,12 @@ class SierraIndexerFeatureTest
                   |  "deleted" : true
                   |}
                   |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"items-${itemId1.withoutCheckDigit}-0",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"items-${itemId1.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "items",
@@ -591,12 +612,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"items-${itemId2.withoutCheckDigit}-0",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"items-${itemId2.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "items",
@@ -618,12 +639,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"items-${itemId1.withoutCheckDigit}-86",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"items-${itemId1.withoutCheckDigit}-86",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "items",
@@ -637,12 +658,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"items-${itemId2.withoutCheckDigit}-265",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"items-${itemId2.withoutCheckDigit}-265",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "items",
@@ -656,9 +677,9 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
+            }
         }
-      }
     }
   }
 
@@ -734,22 +755,25 @@ class SierraIndexerFeatureTest
       initialEntries = Map(location -> transformable)
     )
 
-    withIndices { indexPrefix =>
-      withLocalSqsQueue() { queue =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = transformable.sierraId.withoutCheckDigit,
-              location = location,
-              version = 1
-            )
-          )
+    withIndices {
+      indexPrefix =>
+        withLocalSqsQueue() {
+          queue =>
+            withWorker(queue, store, indexPrefix) {
+              _ =>
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = transformable.sierraId.withoutCheckDigit,
+                    location = location,
+                    version = 1
+                  )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_holdings"),
-            id = holdingsId1.withoutCheckDigit,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_holdings"),
+                  id = holdingsId1.withoutCheckDigit,
+                  json = s"""
                       |{
                       |  "id" : "$holdingsId1",
                       |  "idWithCheckDigit": "${holdingsId1.withCheckDigit}",
@@ -757,12 +781,12 @@ class SierraIndexerFeatureTest
                       |  "deleted" : false
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_holdings"),
-            id = holdingsId2.withoutCheckDigit,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_holdings"),
+                  id = holdingsId2.withoutCheckDigit,
+                  json = s"""
                       |{
                       |  "id" : "$holdingsId2",
                       |  "idWithCheckDigit": "${holdingsId2.withCheckDigit}",
@@ -770,12 +794,12 @@ class SierraIndexerFeatureTest
                       |  "deleted" : true
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"holdings-${holdingsId1.withoutCheckDigit}-0",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"holdings-${holdingsId1.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
@@ -789,12 +813,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"holdings-${holdingsId2.withoutCheckDigit}-0",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"holdings-${holdingsId2.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
@@ -816,12 +840,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"holdings-${holdingsId1.withoutCheckDigit}-86",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"holdings-${holdingsId1.withoutCheckDigit}-86",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
@@ -835,12 +859,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"holdings-${holdingsId2.withoutCheckDigit}-265",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"holdings-${holdingsId2.withoutCheckDigit}-265",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "holdings",
@@ -854,9 +878,9 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
+            }
         }
-      }
     }
   }
 
@@ -932,22 +956,25 @@ class SierraIndexerFeatureTest
       initialEntries = Map(location -> transformable)
     )
 
-    withIndices { indexPrefix =>
-      withLocalSqsQueue() { queue =>
-        withWorker(queue, store, indexPrefix) { _ =>
-          sendNotificationToSQS(
-            queue,
-            SierraSourcePayload(
-              id = transformable.sierraId.withoutCheckDigit,
-              location = location,
-              version = 1
-            )
-          )
+    withIndices {
+      indexPrefix =>
+        withLocalSqsQueue() {
+          queue =>
+            withWorker(queue, store, indexPrefix) {
+              _ =>
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = transformable.sierraId.withoutCheckDigit,
+                    location = location,
+                    version = 1
+                  )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_orders"),
-            id = orderId1.withoutCheckDigit,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_orders"),
+                  id = orderId1.withoutCheckDigit,
+                  json = s"""
                       |{
                       |  "id" : "$orderId1",
                       |  "idWithCheckDigit": "${orderId1.withCheckDigit}",
@@ -955,12 +982,12 @@ class SierraIndexerFeatureTest
                       |  "deleted" : false
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_orders"),
-            id = orderId2.withoutCheckDigit,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_orders"),
+                  id = orderId2.withoutCheckDigit,
+                  json = s"""
                       |{
                       |  "id" : "$orderId2",
                       |  "idWithCheckDigit": "${orderId2.withCheckDigit}",
@@ -968,12 +995,12 @@ class SierraIndexerFeatureTest
                       |  "deleted" : true
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"orders-${orderId1.withoutCheckDigit}-0",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"orders-${orderId1.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "orders",
@@ -987,12 +1014,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_varfields"),
-            id = s"orders-${orderId2.withoutCheckDigit}-0",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_varfields"),
+                  id = s"orders-${orderId2.withoutCheckDigit}-0",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "orders",
@@ -1014,12 +1041,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"orders-${orderId1.withoutCheckDigit}-86",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"orders-${orderId1.withoutCheckDigit}-86",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "orders",
@@ -1033,12 +1060,12 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
 
-          assertElasticsearchEventuallyHas(
-            index = Index(s"${indexPrefix}_fixedfields"),
-            id = s"orders-${orderId2.withoutCheckDigit}-265",
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = Index(s"${indexPrefix}_fixedfields"),
+                  id = s"orders-${orderId2.withoutCheckDigit}-265",
+                  json = s"""
                       |{
                       |  "parent": {
                       |    "recordType": "orders",
@@ -1052,55 +1079,57 @@ class SierraIndexerFeatureTest
                       |  }
                       |}
                       |""".stripMargin
-          )
+                )
+            }
         }
-      }
     }
   }
 
   it("DLQs a message if one of the bulk requests fails") {
-    withIndices { indexPrefix =>
-      val location = createS3ObjectLocation
+    withIndices {
+      indexPrefix =>
+        val location = createS3ObjectLocation
 
-      val transformable = createSierraTransformable
+        val transformable = createSierraTransformable
 
-      val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
-        initialEntries = Map(location -> transformable)
-      )
+        val store = MemoryTypedStore[S3ObjectLocation, SierraTransformable](
+          initialEntries = Map(location -> transformable)
+        )
 
-      withLocalSqsQueuePair(visibilityTimeout = 1.second) {
-        case QueuePair(queue, dlq) =>
-          withWorker(queue, store, indexPrefix) { _ =>
-            // Make the varfields index read-only, so any attempt to index data into
-            // this index should fail.
-            //
-            // We need to do this after the worker has started, or it won't be able
-            // to create the index mappings and will never fetch messages from the queue.
-            Thread.sleep(1000)
-            elasticClient
-              .execute(
-                updateSettings(
-                  Indexes(s"${indexPrefix}_varfields"),
-                  settings = Map("blocks.read_only" -> "true")
+        withLocalSqsQueuePair(visibilityTimeout = 1.second) {
+          case QueuePair(queue, dlq) =>
+            withWorker(queue, store, indexPrefix) {
+              _ =>
+                // Make the varfields index read-only, so any attempt to index data into
+                // this index should fail.
+                //
+                // We need to do this after the worker has started, or it won't be able
+                // to create the index mappings and will never fetch messages from the queue.
+                Thread.sleep(1000)
+                elasticClient
+                  .execute(
+                    updateSettings(
+                      Indexes(s"${indexPrefix}_varfields"),
+                      settings = Map("blocks.read_only" -> "true")
+                    )
+                  )
+                  .await
+
+                sendNotificationToSQS(
+                  queue,
+                  SierraSourcePayload(
+                    id = transformable.sierraId.withoutCheckDigit,
+                    location = location,
+                    version = 1
+                  )
                 )
-              )
-              .await
 
-            sendNotificationToSQS(
-              queue,
-              SierraSourcePayload(
-                id = transformable.sierraId.withoutCheckDigit,
-                location = location,
-                version = 1
-              )
-            )
-
-            eventually {
-              assertQueueEmpty(queue)
-              assertQueueHasSize(dlq, size = 1)
+                eventually {
+                  assertQueueEmpty(queue)
+                  assertQueueHasSize(dlq, size = 1)
+                }
             }
-          }
-      }
+        }
     }
   }
 }
