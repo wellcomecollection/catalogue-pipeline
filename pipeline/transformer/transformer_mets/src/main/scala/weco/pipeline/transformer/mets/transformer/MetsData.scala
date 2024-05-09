@@ -140,8 +140,8 @@ object InvisibleMetsData {
     modifiedTime: Instant
   ): Result[InvisibleMetsData] = {
     val locationPrefix = filesRoot match {
-      case _: GoobiMetsXml         => "v2"
-      case _: ArchivematicaMetsXML => "collections/archives"
+      case _: GoobiMetsXml         => "v2/"
+      case _: ArchivematicaMetsXML => ""
     }
     for {
       recordIdentifier <- root.recordIdentifier

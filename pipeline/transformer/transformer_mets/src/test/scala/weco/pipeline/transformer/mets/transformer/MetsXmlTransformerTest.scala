@@ -41,7 +41,7 @@ class MetsXmlTransformerTest
         thumbnailReference = Some(thumbnailRef),
         version = 1,
         modifiedTime = now,
-        locationPrefix = "v2"
+        locationPrefix = "v2/"
       )
     )
   }
@@ -92,7 +92,7 @@ class MetsXmlTransformerTest
         thumbnailReference = Some(thumbnailRef),
         version = 1,
         modifiedTime = now,
-        locationPrefix = "v2"
+        locationPrefix = "v2/"
       )
     )
   }
@@ -136,7 +136,7 @@ class MetsXmlTransformerTest
           MetsAccessConditions(licence = Some(License.InCopyright)),
         version = 1,
         modifiedTime = now,
-        locationPrefix = "v2",
+        locationPrefix = "v2/",
         fileReferences = createFileReferences(2, "b30246039"),
         thumbnailReference = Some(thumbnailRef)
       )

@@ -34,6 +34,6 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
       thumbnailReference = thumbnailReference,
       version = version,
       modifiedTime = modifiedTime,
-      locationPrefix = "v2"
+      locationPrefix = "v2/"
     )
 }
