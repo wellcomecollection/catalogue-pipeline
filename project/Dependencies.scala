@@ -105,7 +105,7 @@ object ExternalDependencies {
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
     val enumeratum = "1.7.3"
-    val enumeratumScalacheck = "1.6.1"
+    val enumeratumScalacheck = "1.7.3"
     val jsoup = "1.13.1"
     val logback = "1.1.11"
     val scalatestPlus = "3.2.12.0"
