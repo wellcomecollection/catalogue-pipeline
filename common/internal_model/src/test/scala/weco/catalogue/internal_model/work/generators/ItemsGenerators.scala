@@ -34,8 +34,9 @@ trait ItemsGenerators extends IdentifiersGenerators with LocationGenerators {
   def createIdentifiedItem = createIdentifiedItemWith()
 
   def createIdentifiedItems(count: Int) =
-    (1 to count).map { _ =>
-      createIdentifiedItem
+    (1 to count).map {
+      _ =>
+        createIdentifiedItem
     }.toList
 
   def createUnidentifiableItemWith(

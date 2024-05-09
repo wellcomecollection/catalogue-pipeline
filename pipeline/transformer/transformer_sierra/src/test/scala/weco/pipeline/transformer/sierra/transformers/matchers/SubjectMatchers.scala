@@ -23,14 +23,16 @@ trait SubjectMatchers {
 
   implicit class SubjectTestOps[State](subject: Subject[State]) {
 
-    /**
-      * Return the concept from a Subject that has exactly one concept in its concepts list
+    /** Return the concept from a Subject that has exactly one concept in its
+      * concepts list
       *
-      * A common sequence in tests is to process an input that generates a Subject with one concept
-      * in order to assert that that concept has been created correctly.
+      * A common sequence in tests is to process an input that generates a
+      * Subject with one concept in order to assert that that concept has been
+      * created correctly.
       *
-      * Although not strictly a Matcher, this forms part of the test DSL, and will cause a test failure
-      * when the Subject's concept list is not as expected.
+      * Although not strictly a Matcher, this forms part of the test DSL, and
+      * will cause a test failure when the Subject's concept list is not as
+      * expected.
       */
     def onlyConcept: AbstractRootConcept[State] =
       subject.concepts match {

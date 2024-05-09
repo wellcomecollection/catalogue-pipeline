@@ -10,9 +10,11 @@ class ParsedPeriodTest extends AnyFunSpec with Matchers {
       Table(
         "label",
         "1909",
-        "[2123]",
-      )) { label =>
-      ParsedPeriod(label).range shouldNot be(None)
+        "[2123]"
+      )
+    ) {
+      label =>
+        ParsedPeriod(label).range shouldNot be(None)
     }
   }
 
@@ -26,9 +28,11 @@ class ParsedPeriodTest extends AnyFunSpec with Matchers {
         "[21233]",
         "[21u6]",
         "[^216]",
-        "[216]",
-      )) { label =>
-      ParsedPeriod(label).range shouldBe None
+        "[216]"
+      )
+    ) {
+      label =>
+        ParsedPeriod(label).range shouldBe None
     }
   }
 }

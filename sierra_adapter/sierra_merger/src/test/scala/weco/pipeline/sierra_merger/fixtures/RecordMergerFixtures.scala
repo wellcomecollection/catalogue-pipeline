@@ -29,23 +29,24 @@ trait RecordMergerFixtures extends Akka with SQS with SourceVHSFixture {
   )(
     testWith: TestWith[(Worker[Record, String], MemoryMessageSender), R]
   )(
-    implicit
-    decoder: Decoder[Record],
+    implicit decoder: Decoder[Record],
     transformableOps: TransformableOps[Record],
     recordOps: RecordOps[Record]
   ): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-        val messageSender = new MemoryMessageSender
-        val workerService = new Worker(
-          sqsStream = sqsStream,
-          updater = new Updater[Record](sourceVHS),
-          messageSender = messageSender
-        )
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue) {
+          sqsStream =>
+            val messageSender = new MemoryMessageSender
+            val workerService = new Worker(
+              sqsStream = sqsStream,
+              updater = new Updater[Record](sourceVHS),
+              messageSender = messageSender
+            )
 
-        workerService.run()
+            workerService.run()
 
-        testWith((workerService, messageSender))
-      }
+            testWith((workerService, messageSender))
+        }
     }
 }

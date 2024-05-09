@@ -36,7 +36,9 @@ class TransformableOpsTest
         caught.getMessage shouldEqual s"Non-matching bib ids ${bibRecord.id} != ${transformable.sierraId}"
       }
 
-      it("returns the same transformable if you merge the same record more than once") {
+      it(
+        "returns the same transformable if you merge the same record more than once"
+      ) {
         val bibRecord = createSierraBibRecord
 
         val transformable = SierraTransformable(bibRecord)
@@ -76,12 +78,15 @@ class TransformableOpsTest
         )
 
         transformable.add(newBibRecord).get.maybeBibRecord shouldBe Some(
-          newBibRecord)
+          newBibRecord
+        )
       }
     }
 
     describe("remove") {
-      it("throws an error if you try to remove a SierraBibRecord from a SierraTransformable") {
+      it(
+        "throws an error if you try to remove a SierraBibRecord from a SierraTransformable"
+      ) {
         val bibRecord = createSierraBibRecord
         val transformable = createSierraTransformable
 
@@ -103,7 +108,8 @@ class TransformableOpsTest
 
         val sierraTransformable =
           createSierraTransformableWith(
-            bibRecord = createSierraBibRecordWith(id = bibId))
+            bibRecord = createSierraBibRecordWith(id = bibId)
+          )
         val result = sierraTransformable.add(record)
 
         result.get.itemRecords shouldBe Map(record.id -> record)
@@ -130,7 +136,8 @@ class TransformableOpsTest
 
         result.get shouldBe sierraTransformable.copy(
           itemRecords = Map(itemRecord.id -> newerRecord),
-          modifiedTime = newerDate)
+          modifiedTime = newerDate
+        )
       }
 
       it("returns the record if you apply the same update more than once") {
@@ -141,7 +148,8 @@ class TransformableOpsTest
 
         val sierraTransformable =
           createSierraTransformableWith(
-            bibRecord = createSierraBibRecordWith(id = bibId))
+            bibRecord = createSierraBibRecordWith(id = bibId)
+          )
 
         val transformable1 = sierraTransformable.add(record)
         val transformable2 = transformable1.get.add(record)
@@ -180,7 +188,8 @@ class TransformableOpsTest
 
         val sierraTransformable =
           createSierraTransformableWith(
-            bibRecord = createSierraBibRecordWith(id = bibId))
+            bibRecord = createSierraBibRecordWith(id = bibId)
+          )
         val result1 = sierraTransformable.add(record1)
         val result2 = result1.get.add(record2)
 
@@ -199,7 +208,8 @@ class TransformableOpsTest
 
         val sierraTransformable =
           createSierraTransformableWith(
-            bibRecord = createSierraBibRecordWith(id = bibId))
+            bibRecord = createSierraBibRecordWith(id = bibId)
+          )
 
         val caught = intercept[RuntimeException] {
           sierraTransformable.add(record)
@@ -240,7 +250,9 @@ class TransformableOpsTest
           .get shouldBe expectedSierraTransformable
       }
 
-      it("returns None when merging an unlinked record which is already absent") {
+      it(
+        "returns None when merging an unlinked record which is already absent"
+      ) {
         val bibId = createSierraBibNumber
 
         val record = createSierraItemRecordWith(
@@ -261,7 +273,9 @@ class TransformableOpsTest
         sierraTransformable.remove(previouslyUnlinkedRecord) shouldBe None
       }
 
-      it("returns None when merging an unlinked record which has linked more recently") {
+      it(
+        "returns None when merging an unlinked record which has linked more recently"
+      ) {
         val bibId = createSierraBibNumber
 
         val record = createSierraItemRecordWith(
@@ -348,10 +362,13 @@ class TransformableOpsTest
 
         result.get shouldBe sierraTransformable.copy(
           holdingsRecords = Map(olderRecord.id -> newerRecord),
-          modifiedTime = newerDate)
+          modifiedTime = newerDate
+        )
       }
 
-      it("returns the same record if you apply the same update more than once") {
+      it(
+        "returns the same record if you apply the same update more than once"
+      ) {
         val bibId = createSierraBibNumber
         val record = createSierraHoldingsRecordWith(
           bibIds = List(bibId)
@@ -456,7 +473,8 @@ class TransformableOpsTest
       }
 
       it(
-        "removes the holdings if the modified date matches the existing record") {
+        "removes the holdings if the modified date matches the existing record"
+      ) {
         val bibId = createSierraBibNumber
 
         val record = createSierraHoldingsRecordWith(
@@ -486,7 +504,9 @@ class TransformableOpsTest
           .get shouldBe expectedSierraTransformable
       }
 
-      it("returns None when merging an unlinked record which is already absent") {
+      it(
+        "returns None when merging an unlinked record which is already absent"
+      ) {
         val bibId = createSierraBibNumber
 
         val record = createSierraHoldingsRecordWith(
@@ -507,7 +527,9 @@ class TransformableOpsTest
         sierraTransformable.remove(previouslyUnlinkedRecord) shouldBe None
       }
 
-      it("returns None when merging an unlinked record which has linked more recently") {
+      it(
+        "returns None when merging an unlinked record which has linked more recently"
+      ) {
         val bibId = createSierraBibNumber
 
         val record = createSierraHoldingsRecordWith(
@@ -594,10 +616,13 @@ class TransformableOpsTest
 
         result.get shouldBe sierraTransformable.copy(
           orderRecords = Map(olderRecord.id -> newerRecord),
-          modifiedTime = newerDate)
+          modifiedTime = newerDate
+        )
       }
 
-      it("returns the same record if you apply the same update more than once") {
+      it(
+        "returns the same record if you apply the same update more than once"
+      ) {
         val bibId = createSierraBibNumber
         val record = createSierraOrderRecordWith(
           bibIds = List(bibId)
@@ -701,7 +726,9 @@ class TransformableOpsTest
           .get shouldBe expectedSierraTransformable
       }
 
-      it("returns None when merging an unlinked record which is already absent") {
+      it(
+        "returns None when merging an unlinked record which is already absent"
+      ) {
         val bibId = createSierraBibNumber
 
         val record = createSierraOrderRecordWith(
@@ -722,7 +749,9 @@ class TransformableOpsTest
         sierraTransformable.remove(previouslyUnlinkedRecord) shouldBe None
       }
 
-      it("returns None when merging an unlinked record which has linked more recently") {
+      it(
+        "returns None when merging an unlinked record which has linked more recently"
+      ) {
         val bibId = createSierraBibNumber
 
         val record = createSierraOrderRecordWith(

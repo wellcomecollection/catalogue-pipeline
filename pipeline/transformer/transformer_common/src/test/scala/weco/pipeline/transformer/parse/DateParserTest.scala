@@ -14,7 +14,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1972, 1, 1),
         LocalDate of (1972, 12, 31),
-        "1972"))
+        "1972"
+      )
+    )
   }
 
   it("parses inferred year") {
@@ -22,7 +24,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1240, 1, 1),
         LocalDate of (1240, 12, 31),
-        "[1240]"))
+        "[1240]"
+      )
+    )
   }
 
   it("parses written dates with day first") {
@@ -30,7 +34,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1980, 7, 31),
         LocalDate of (1980, 7, 31),
-        "31 July 1980"))
+        "31 July 1980"
+      )
+    )
   }
 
   it("parses written dates with month first") {
@@ -38,7 +44,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1980, 7, 31),
         LocalDate of (1980, 7, 31),
-        "July 31 1980"))
+        "July 31 1980"
+      )
+    )
   }
 
   it("parses written dates with ordinal suffix") {
@@ -46,7 +54,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1980, 7, 31),
         LocalDate of (1980, 7, 31),
-        "July 31st 1980"))
+        "July 31st 1980"
+      )
+    )
   }
 
   it("parses inferred written dates") {
@@ -54,7 +64,8 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1980, 7, 31),
         LocalDate of (1980, 7, 31),
-        "[July 31st 1980]")
+        "[July 31st 1980]"
+      )
     )
   }
 
@@ -63,7 +74,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1913, 2, 10),
         LocalDate of (1913, 2, 10),
-        "10/02/1913"))
+        "10/02/1913"
+      )
+    )
   }
 
   it("parses inferred dates when only closing parentheses") {
@@ -71,7 +84,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1913, 2, 10),
         LocalDate of (1913, 2, 10),
-        "10/02/1913]"))
+        "10/02/1913]"
+      )
+    )
   }
 
   it("parses written month and year") {
@@ -79,7 +94,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1920, 4, 1),
         LocalDate of (1920, 4, 30),
-        "Apr 1920"))
+        "Apr 1920"
+      )
+    )
   }
 
   it("parses year ranges") {
@@ -87,7 +104,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1870, 1, 1),
         LocalDate of (1873, 12, 31),
-        "1870-1873"))
+        "1870-1873"
+      )
+    )
   }
 
   it("parses written date ranges spanning multiple years") {
@@ -95,7 +114,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1914, 8, 2),
         LocalDate of (1915, 4, 16),
-        "2 Aug 1914 - 16 Apr 1915"))
+        "2 Aug 1914 - 16 Apr 1915"
+      )
+    )
   }
 
   it("parses written date ranges without whitespace") {
@@ -103,7 +124,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1914, 8, 2),
         LocalDate of (1915, 4, 16),
-        "2 Aug 1914-16 Apr 1915"))
+        "2 Aug 1914-16 Apr 1915"
+      )
+    )
   }
 
   it("parses month ranges spanning multiple years") {
@@ -111,7 +134,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1914, 8, 1),
         LocalDate of (1915, 4, 30),
-        "August 1914 - April 1915"))
+        "August 1914 - April 1915"
+      )
+    )
   }
 
   it("parses day ranges within a single month") {
@@ -119,7 +144,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1968, 4, 2),
         LocalDate of (1968, 4, 10),
-        "2-10 April 1968"))
+        "2-10 April 1968"
+      )
+    )
   }
 
   it("parses month ranges within a single year") {
@@ -127,7 +154,9 @@ class DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1940, 1, 1),
         LocalDate of (1940, 3, 31),
-        "Jan-Mar 1940"))
+        "Jan-Mar 1940"
+      )
+    )
   }
 
   it("fails when day is not valid for a particular month") {

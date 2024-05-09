@@ -70,8 +70,10 @@ class SierraShelfmarkTest
 
     getShelfmark(
       bibData.copy(
-        materialType = Some(SierraMaterialType(ArchivesAndManuscripts.id))),
-      itemData) shouldBe None
+        materialType = Some(SierraMaterialType(ArchivesAndManuscripts.id))
+      ),
+      itemData
+    ) shouldBe None
   }
 
   it("ignores any other 949 subfields") {
@@ -135,7 +137,8 @@ class SierraShelfmarkTest
   }
 
   it(
-    "shows the shelfmark if the iconographic number on the bib and item have a common prefix") {
+    "shows the shelfmark if the iconographic number on the bib and item have a common prefix"
+  ) {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("k")),
       varFields = List(
@@ -156,11 +159,13 @@ class SierraShelfmarkTest
     val itemData = createSierraItemDataWith(varFields = varFields)
 
     getShelfmark(bibData = bibData, itemData = itemData) shouldBe Some(
-      "12345i.1")
+      "12345i.1"
+    )
   }
 
   it(
-    "skips the shelfmark if the iconographic number on the bib and item are the same") {
+    "skips the shelfmark if the iconographic number on the bib and item are the same"
+  ) {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("k")),
       varFields = List(

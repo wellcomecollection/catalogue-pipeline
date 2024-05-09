@@ -14,8 +14,10 @@ import weco.pipeline.relation_embedder.models.{
 }
 
 trait RelationGenerators extends WorkGenerators with ItemsGenerators {
-  def work(path: String,
-           isAvailableOnline: Boolean = false): Work.Visible[Merged] =
+  def work(
+    path: String,
+    isAvailableOnline: Boolean = false
+  ): Work.Visible[Merged] =
     mergedWork(createSourceIdentifierWith(value = path))
       .collectionPath(CollectionPath(path = path))
       .title(path)
@@ -28,7 +30,7 @@ trait RelationGenerators extends WorkGenerators with ItemsGenerators {
       data = RelationWorkData(
         title = work.data.title,
         collectionPath = work.data.collectionPath,
-        workType = work.data.workType,
+        workType = work.data.workType
       ),
       state = RelationWorkState(
         canonicalId = work.state.canonicalId,

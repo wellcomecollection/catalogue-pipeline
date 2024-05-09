@@ -38,7 +38,7 @@ class CalmContributorsTest
           id = labelDerivedAgentIdentifier("simone berbain"),
           label = "Simone Berbain"
         )
-      ),
+      )
     )
   }
 }

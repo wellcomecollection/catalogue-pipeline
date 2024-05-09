@@ -46,8 +46,9 @@ class WorksIndexConfigTest
     it("WorkState.Source") {
       withLocalSourceWorksIndex {
         implicit index =>
-          forAll { sourceWork: Work[WorkState.Source] =>
-            assertWorkCanBeIndexed(sourceWork)
+          forAll {
+            sourceWork: Work[WorkState.Source] =>
+              assertWorkCanBeIndexed(sourceWork)
           }
       }
     }
@@ -55,8 +56,9 @@ class WorksIndexConfigTest
     it("WorkState.Identified") {
       withLocalIdentifiedWorksIndex {
         implicit index =>
-          forAll { identifiedWork: Work[WorkState.Identified] =>
-            assertWorkCanBeIndexed(identifiedWork)
+          forAll {
+            identifiedWork: Work[WorkState.Identified] =>
+              assertWorkCanBeIndexed(identifiedWork)
           }
       }
     }
@@ -64,33 +66,36 @@ class WorksIndexConfigTest
     it("WorkState.Merged") {
       withLocalMergedWorksIndex {
         implicit index =>
-          forAll { mergedWork: Work[WorkState.Merged] =>
-            assertWorkCanBeIndexed(mergedWork)
+          forAll {
+            mergedWork: Work[WorkState.Merged] =>
+              assertWorkCanBeIndexed(mergedWork)
           }
       }
     }
 
     it("WorkState.Denormalised") {
-      withLocalDenormalisedWorksIndex{
+      withLocalDenormalisedWorksIndex {
         implicit index =>
-          forAll { denormalisedWork: Work[WorkState.Denormalised] =>
-            assertWorkCanBeIndexed(denormalisedWork)
+          forAll {
+            denormalisedWork: Work[WorkState.Denormalised] =>
+              assertWorkCanBeIndexed(denormalisedWork)
           }
       }
     }
   }
 
   it("does not put an invalid work") {
-    withLocalWorksIndex { implicit index =>
-      val notAWork = BadTestObject(
-        id = "id",
-        weight = 5
-      )
+    withLocalWorksIndex {
+      implicit index =>
+        val notAWork = BadTestObject(
+          id = "id",
+          weight = 5
+        )
 
-      val response = indexWork(id = "id", work = notAWork)
+        val response = indexWork(id = "id", work = notAWork)
 
-      response.isError shouldBe true
-      response.error shouldBe a[ElasticError]
+        response.isError shouldBe true
+        response.error shouldBe a[ElasticError]
     }
   }
 
@@ -126,10 +131,11 @@ class WorksIndexConfigTest
     work: W
   )(implicit index: Index, decoder: Decoder[W]) =
     eventually {
-      whenReady(client.execute(get(index, id))) { getResponse =>
-        getResponse.result.exists shouldBe true
+      whenReady(client.execute(get(index, id))) {
+        getResponse =>
+          getResponse.result.exists shouldBe true
 
-        fromJson[W](getResponse.result.sourceAsString).get shouldBe work
+          fromJson[W](getResponse.result.sourceAsString).get shouldBe work
       }
     }
 }

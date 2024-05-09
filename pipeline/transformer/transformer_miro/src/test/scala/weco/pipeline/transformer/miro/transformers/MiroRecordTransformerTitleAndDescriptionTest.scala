@@ -8,8 +8,8 @@ import weco.pipeline.transformer.miro.source.MiroRecord
 
 /** Tests that the Miro transformer extracts the "title" field correctly.
   *
-  *  The rules around this heuristic are somewhat fiddly, and we need to be
-  *  careful that we're extracting the right fields from the Miro metadata.
+  * The rules around this heuristic are somewhat fiddly, and we need to be
+  * careful that we're extracting the right fields from the Miro metadata.
   */
 class MiroRecordTransformerTitleAndDescriptionTest
     extends AnyFunSpec
@@ -41,7 +41,8 @@ class MiroRecordTransformerTitleAndDescriptionTest
   }
 
   it(
-    "uses image_image_desc if image_title is a prefix of image_image_desc (one-line description)") {
+    "uses image_image_desc if image_title is a prefix of image_image_desc (one-line description)"
+  ) {
     val title = "An icon of an iguana"
     val description = "An icon of an iguana is an intriguing image"
     transformRecordAndCheckTitle(
@@ -55,7 +56,8 @@ class MiroRecordTransformerTitleAndDescriptionTest
   }
 
   it(
-    "uses image_image_desc if image_title is a prefix of image_image_desc (multi-line description)") {
+    "uses image_image_desc if image_title is a prefix of image_image_desc (multi-line description)"
+  ) {
     val title = "An icon of an iguana"
     val longTitle = "An icon of an iguana is an intriguing image"
     val descriptionBody = "Woodcut, by A.R. Tist.  Italian.  1897."

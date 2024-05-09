@@ -32,6 +32,7 @@ object RequestPoolMock {
 
 trait RequestPoolFixtures {
   def withRequestPool[T, Ctx, R](matchResponse: String => Option[HttpResponse])(
-    testWith: TestWith[RequestPoolMock[T, Ctx], R]): R =
+    testWith: TestWith[RequestPoolMock[T, Ctx], R]
+  ): R =
     testWith(RequestPoolMock[T, Ctx](matchResponse))
 }

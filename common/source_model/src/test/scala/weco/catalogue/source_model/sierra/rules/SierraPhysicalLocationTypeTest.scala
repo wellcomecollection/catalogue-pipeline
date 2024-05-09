@@ -36,7 +36,8 @@ class SierraPhysicalLocationTypeTest
 
     forAll(testCases) {
       SierraPhysicalLocationType.fromName(id, _) shouldBe Some(
-        LocationType.ClosedStores)
+        LocationType.ClosedStores
+      )
     }
   }
 
@@ -53,18 +54,20 @@ class SierraPhysicalLocationTypeTest
       "Quick Ref. Collection",
       "Rare Materials Room",
       "Student Coll (Med Lit)",
-      "Student Coll. (ref only)",
+      "Student Coll. (ref only)"
     )
 
     forAll(testCases) {
       SierraPhysicalLocationType.fromName(id, _) shouldBe Some(
-        LocationType.OpenShelves)
+        LocationType.OpenShelves
+      )
     }
   }
 
   it("maps to the OnExhibition type") {
     SierraPhysicalLocationType.fromName(id, "On Exhibition") shouldBe Some(
-      LocationType.OnExhibition)
+      LocationType.OnExhibition
+    )
   }
 
   it("returns None if it can't pick a LocationType") {

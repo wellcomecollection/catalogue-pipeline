@@ -248,10 +248,11 @@ class DeletionCheckerWorkerServiceTest
   def abandonHandler: Cookie => Done = _ => Done
 
   def recordIds(q: CalmQueryBase): Seq[String] = q match {
-    case QueryLeaf("RecordId", id, _) => Seq(
-      // Strip quotes from the query
-      id.replace("\"", "")
-    )
+    case QueryLeaf("RecordId", id, _) =>
+      Seq(
+        // Strip quotes from the query
+        id.replace("\"", "")
+      )
     case QueryNode(left, right, _) =>
       recordIds(left) ++ recordIds(right)
     case _ => Nil

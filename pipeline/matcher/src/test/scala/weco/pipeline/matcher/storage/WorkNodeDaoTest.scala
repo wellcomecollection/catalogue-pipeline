@@ -24,26 +24,30 @@ class WorkNodeDaoTest
 
   describe("Get from dynamo") {
     it("returns nothing if ids are not in dynamo") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          whenReady(workNodeDao.get(Set(createCanonicalId))) {
-            _ shouldBe Set.empty
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            workNodeDao =>
+              whenReady(workNodeDao.get(Set(createCanonicalId))) {
+                _ shouldBe Set.empty
+              }
           }
-        }
       }
     }
 
     it("returns WorkNodes which are stored in DynamoDB") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          val (workA, workB) = createTwoWorks("A->B")
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            workNodeDao =>
+              val (workA, workB) = createTwoWorks("A->B")
 
-          putTableItems(items = Seq(workA, workB), table = table)
+              putTableItems(items = Seq(workA, workB), table = table)
 
-          whenReady(workNodeDao.get(Set(idA, idB))) {
-            _ shouldBe Set(workA, workB)
+              whenReady(workNodeDao.get(Set(idA, idB))) {
+                _ shouldBe Set(workA, workB)
+              }
           }
-        }
       }
     }
 
@@ -61,26 +65,32 @@ class WorkNodeDaoTest
 
   describe("getBySubgraphIds") {
     it("returns empty set if the subgraph ID isn't being used") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          whenReady(workNodeDao.getBySubgraphIds(Set("Not-there"))) {
-            _ shouldBe Set()
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            workNodeDao =>
+              whenReady(workNodeDao.getBySubgraphIds(Set("Not-there"))) {
+                _ shouldBe Set()
+              }
           }
-        }
       }
     }
 
     it("finds the matching works") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { matcherGraphDao =>
-          val (workA, workB) = createTwoWorks("A->B")
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            matcherGraphDao =>
+              val (workA, workB) = createTwoWorks("A->B")
 
-          putTableItems(items = Seq(workA, workB), table = table)
+              putTableItems(items = Seq(workA, workB), table = table)
 
-          whenReady(matcherGraphDao.getBySubgraphIds(Set(SubgraphId(idA, idB)))) {
-            _ shouldBe Set(workA, workB)
+              whenReady(
+                matcherGraphDao.getBySubgraphIds(Set(SubgraphId(idA, idB)))
+              ) {
+                _ shouldBe Set(workA, workB)
+              }
           }
-        }
       }
     }
 
@@ -90,90 +100,108 @@ class WorkNodeDaoTest
         dynamoConfig = createDynamoConfigWith(nonExistentTable)
       )
 
-      whenReady(workNodeDao.getBySubgraphIds(Set(SubgraphId(idA, idB))).failed) {
+      whenReady(
+        workNodeDao.getBySubgraphIds(Set(SubgraphId(idA, idB))).failed
+      ) {
         _ shouldBe a[ResourceNotFoundException]
       }
     }
 
     it("fails if Scanamo can't deserialise the data in the table") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: CanonicalId,
-                               subgraphId: String,
-                               componentIds: Int)
-          val badRecord: BadRecord =
-            BadRecord(
-              id = idA,
-              subgraphId = SubgraphId(idA, idB),
-              componentIds = 123)
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            workNodeDao =>
+              case class BadRecord(
+                id: CanonicalId,
+                subgraphId: String,
+                componentIds: Int
+              )
+              val badRecord: BadRecord =
+                BadRecord(
+                  id = idA,
+                  subgraphId = SubgraphId(idA, idB),
+                  componentIds = 123
+                )
 
-          putTableItem(badRecord, table = table)
+              putTableItem(badRecord, table = table)
 
-          val future =
-            workNodeDao.getBySubgraphIds(setIds = Set(SubgraphId(idA, idB)))
+              val future =
+                workNodeDao.getBySubgraphIds(setIds = Set(SubgraphId(idA, idB)))
 
-          whenReady(future.failed) {
-            _ shouldBe a[RuntimeException]
+              whenReady(future.failed) {
+                _ shouldBe a[RuntimeException]
+              }
           }
-        }
       }
     }
   }
 
   describe("Insert into dynamo") {
     it("puts a WorkNode") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          val work = createOneWork("A")
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            workNodeDao =>
+              val work = createOneWork("A")
 
-          whenReady(workNodeDao.put(Set(work))) { _ =>
-            getTableItem[WorkNode](work.id.underlying, table) shouldBe Some(
-              Right(work))
+              whenReady(workNodeDao.put(Set(work))) {
+                _ =>
+                  getTableItem[WorkNode](
+                    work.id.underlying,
+                    table
+                  ) shouldBe Some(Right(work))
+              }
           }
-        }
       }
     }
 
     it("puts lots of WorkNodes (>25 = a single BatchPutItem)") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          val works = (1 to 50).map { _ =>
-            val id = createCanonicalId
-            WorkNode(
-              id = id,
-              subgraphId = SubgraphId(id),
-              componentIds = List(id),
-              sourceWork =
-                SourceWorkData(id = createSourceIdentifier, version = 1)
-            )
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            workNodeDao =>
+              val works = (1 to 50).map {
+                _ =>
+                  val id = createCanonicalId
+                  WorkNode(
+                    id = id,
+                    subgraphId = SubgraphId(id),
+                    componentIds = List(id),
+                    sourceWork =
+                      SourceWorkData(id = createSourceIdentifier, version = 1)
+                  )
+              }
+
+              val future = workNodeDao.put(works.toSet)
+
+              whenReady(future) {
+                _ =>
+                  val storedWorks = scanTable[WorkNode](table).collect {
+                    case Right(w) => w
+                  }
+
+                  storedWorks should contain theSameElementsAs works
+              }
           }
-
-          val future = workNodeDao.put(works.toSet)
-
-          whenReady(future) { _ =>
-            val storedWorks = scanTable[WorkNode](table).collect {
-              case Right(w) => w
-            }
-
-            storedWorks should contain theSameElementsAs works
-          }
-        }
       }
     }
 
     it("returns an error if Scanamo fails to put a record") {
-      withWorkGraphTable { table =>
-        withWorkNodeDao(table) { workNodeDao =>
-          case class BadRecord(id: CanonicalId, componentIds: String)
-          val badRecord: BadRecord =
-            BadRecord(id = idA, componentIds = "1, 2, 3")
+      withWorkGraphTable {
+        table =>
+          withWorkNodeDao(table) {
+            workNodeDao =>
+              case class BadRecord(id: CanonicalId, componentIds: String)
+              val badRecord: BadRecord =
+                BadRecord(id = idA, componentIds = "1, 2, 3")
 
-          putTableItem(badRecord, table = table)
+              putTableItem(badRecord, table = table)
 
-          whenReady(workNodeDao.get(ids = Set(idA)).failed) {
-            _ shouldBe a[RuntimeException]
+              whenReady(workNodeDao.get(ids = Set(idA)).failed) {
+                _ shouldBe a[RuntimeException]
+              }
           }
-        }
       }
     }
 

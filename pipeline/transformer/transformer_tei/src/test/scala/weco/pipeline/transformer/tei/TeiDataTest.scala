@@ -88,7 +88,8 @@ class TeiDataTest
 
   it("transforms authors in nestedData") {
     val contributors = List(
-      Contributor(Person("John McClane"), List(ContributionRole("author"))))
+      Contributor(Person("John McClane"), List(ContributionRole("author")))
+    )
     val firstInnerTeiData = TeiData(
       id = "id_1",
       title = "item title",
@@ -233,7 +234,9 @@ class TeiDataTest
         label = "ca.1732-63AD",
         places = Nil,
         agents = Nil,
-        dates = List(ParsedPeriod("ca.1732-63AD"))))
+        dates = List(ParsedPeriod("ca.1732-63AD"))
+      )
+    )
     val data = TeiData(id = "id", title = "title", origin = production)
 
     data.toWork(Instant.now, 1).data.production shouldBe production
@@ -278,8 +281,9 @@ class TeiDataTest
 
       val teiData = createTeiDataWith(
         languages = List(),
-        nestedTeiData = innerLanguages.map { languages =>
-          createTeiDataWith(languages = languages)
+        nestedTeiData = innerLanguages.map {
+          languages =>
+            createTeiDataWith(languages = languages)
         }
       )
 
@@ -302,7 +306,8 @@ class TeiDataTest
     val data = TeiData(
       id = "id",
       title = "title",
-      physicalDescription = physicalDescription)
+      physicalDescription = physicalDescription
+    )
 
     data
       .toWork(Instant.now, 1)
@@ -312,7 +317,8 @@ class TeiDataTest
 
   it("passes subjects into workData") {
     val subjects = List(
-      Subject(label = "Botany", concepts = List(Concept(label = "Botany"))))
+      Subject(label = "Botany", concepts = List(Concept(label = "Botany")))
+    )
     val data = TeiData(id = "id", title = "title", subjects = subjects)
     data
       .toWork(Instant.now, 1)

@@ -153,14 +153,14 @@ class SierraLanguagesTest
         VarField(
           marcTag = "041",
           subfields = List(
-            Subfield(tag = "a", content = "eng "),
+            Subfield(tag = "a", content = "eng ")
           )
         )
       )
     )
 
     getLanguages(bibData) shouldBe List(
-      Language(label = "English", id = "eng"),
+      Language(label = "English", id = "eng")
     )
   }
 
@@ -171,7 +171,7 @@ class SierraLanguagesTest
           marcTag = "041",
           subfields = List(
             Subfield(tag = "a", content = "ENG"),
-            Subfield(tag = "a", content = "Lat"),
+            Subfield(tag = "a", content = "Lat")
           )
         )
       )
@@ -179,7 +179,7 @@ class SierraLanguagesTest
 
     getLanguages(bibData) shouldBe List(
       Language(label = "English", id = "eng"),
-      Language(label = "Latin", id = "lat"),
+      Language(label = "Latin", id = "lat")
     )
   }
 
