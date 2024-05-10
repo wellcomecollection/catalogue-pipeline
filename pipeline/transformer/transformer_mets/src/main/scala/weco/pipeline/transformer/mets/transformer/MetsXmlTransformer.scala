@@ -34,7 +34,7 @@ class MetsXmlTransformer(store: Readable[S3ObjectLocation, String])
     metsSourceData match {
       case DeletedMetsFile(createdDate, version) =>
         Right(
-          DeletedMetsData(metsIdentifier = id, version, createdDate)
+          DeletedMetsData(recordIdentifier = id, version, createdDate)
         )
 
       case metsFile @ MetsFileWithImages(
