@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse
+from datetime import datetime
 import tempfile
 import os
 
@@ -26,7 +27,7 @@ ftp_s3_prefix = os.path.join(s3_prefix, "ftp")
 xml_s3_prefix = os.path.join(s3_prefix, "xml")
 
 
-def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher):
+def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at):
     print("Running regular process ...")
     available_files = sync_and_list_files(temp_dir, ftp_s3_prefix, ebsco_ftp, s3_store)
     updates = compare_uploads(
@@ -40,12 +41,13 @@ def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher):
             s3_bucket,
             xml_s3_prefix,
             sns_publisher,
+            invoked_at,
         )
 
     return {}
 
 
-def run_reindex(s3_store, sns_publisher, reindex_type, ids=None):
+def run_reindex(s3_store, sns_publisher, invoked_at, reindex_type, ids=None):
     assert reindex_type in ["full", "partial"], "Invalid reindex type"
     assert (
         ids is not None or reindex_type == "full"
@@ -93,11 +95,27 @@ def run_reindex(s3_store, sns_publisher, reindex_type, ids=None):
         s3_bucket,
         xml_s3_prefix,
         sns_publisher,
+        invoked_at,
     )
 
 
+# This is required to ensure that the datetime is in the correct format
+# for the update_notifier function, Python's datetime.isoformat() does not
+# include the 'Z' at the end of the string for older versions of Python.
+def _get_iso8601_invoked_at():
+    invoked_at = datetime.utcnow().isoformat()
+    if invoked_at[-1] != "Z":
+        invoked_at += "Z"
+    return invoked_at
+
+
 def lambda_handler(event, context):
-    print("Starting lambda_handler, got event: ", event)
+    invoked_at = _get_iso8601_invoked_at()
+    if "invoked_at" in event:
+        invoked_at = event["invoked_at"]
+
+    print(f"Starting lambda_handler @ {invoked_at}, got event: {event}")
+
     with tempfile.TemporaryDirectory() as temp_dir:
         with EbscoFtp(
             ftp_server, ftp_username, ftp_password, ftp_remote_dir
@@ -109,11 +127,12 @@ def lambda_handler(event, context):
                 return run_reindex(
                     s3_store,
                     sns_publisher,
+                    invoked_at,
                     event["reindex_type"],
                     event.get("reindex_ids"),
                 )
             else:
-                return run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher)
+                return run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at)
 
 
 if __name__ == "__main__":

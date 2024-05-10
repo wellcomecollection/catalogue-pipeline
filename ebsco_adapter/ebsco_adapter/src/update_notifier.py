@@ -2,7 +2,7 @@ import os
 
 
 def update_notifier(
-    updates, notify_for_batch, s3_store, s3_bucket, xml_s3_prefix, sns_publisher
+    updates, notify_for_batch, s3_store, s3_bucket, xml_s3_prefix, sns_publisher, invoked_at
 ):
     update_messages = []
     deleted_messages = []
@@ -21,6 +21,7 @@ def update_notifier(
                     "version": version,
                     "deleted": False,
                     "sha256": update["sha256"],
+                    "time": invoked_at
                 }
             )
 
@@ -33,6 +34,7 @@ def update_notifier(
                     "version": version,
                     "deleted": True,
                     "sha256": None,
+                    "time": invoked_at
                 }
             )
 

@@ -10,6 +10,8 @@ import weco.storage.generators.S3ObjectLocationGenerators
 import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.store.memory.MemoryStore
 
+import java.time.Instant
+
 class EbscoTransformerTest
     extends AnyFunSpec
     with S3ObjectLocationGenerators
@@ -20,6 +22,7 @@ class EbscoTransformerTest
     it("generates a Work with a sourceIdentifier") {
       info("at minimum, a Work from an XML record needs an id and a title")
       val location = createS3ObjectLocation
+      val modifiedTime = Instant.parse("2021-04-01T12:00:00Z")
 
       val record =
         <record xmlns="http://www.loc.gov/MARC21/slim">
@@ -36,7 +39,7 @@ class EbscoTransformerTest
       )
 
       val result =
-        transformer.apply("3PaDhRp", EbscoUpdatedSourceData(location), 20240401)
+        transformer.apply("3PaDhRp", EbscoUpdatedSourceData(location, modifiedTime), 20240401)
       result shouldBe a[Right[_, _]]
       val work = result.value
 

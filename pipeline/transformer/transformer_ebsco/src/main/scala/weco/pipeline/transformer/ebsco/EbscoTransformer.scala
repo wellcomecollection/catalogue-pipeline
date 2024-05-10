@@ -37,20 +37,19 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
     version: Int
   ): Result[Work[WorkState.Source]] =
     sourceData match {
-      case EbscoUpdatedSourceData(s3Location) =>
+      case EbscoUpdatedSourceData(s3Location, modifiedTime) =>
         for {
           xmlString <- store.get(s3Location).left.map(_.e)
           xml <- Try(XML.loadString(xmlString.identifiedT)).toEither
-        } yield createWork(MarcXMLRecord(xml), version)
+        } yield createWork(MarcXMLRecord(xml), version, modifiedTime)
 
-      case EbscoDeletedSourceData =>
+      case EbscoDeletedSourceData(modifiedTime) =>
         Right(
           Work.Deleted[Source](
             version = version,
-            // TODO: The adapter should provide the date & time
             state = Source(
               SourceIdentifier(IdentifierType.EbscoAltLookup, "Work", id),
-              Instant.now()
+              modifiedTime
             ),
             deletedReason =
               DeletedReason.DeletedFromSource("Deleted by EBSCO source")
@@ -58,15 +57,14 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
         )
     }
 
-  private def createWork(record: MarcXMLRecord, version: Int): Work.Visible[Source] = {
+  private def createWork(record: MarcXMLRecord, version: Int, modifiedTime: Instant): Work.Visible[Source] = {
     val state = Source(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.EbscoAltLookup,
         ontologyType = "Work",
         value = record.controlField("001").get.content
       ),
-      // TODO: The adapter should provide the date & time
-      sourceModifiedTime = Instant.now
+      sourceModifiedTime = modifiedTime
     )
     implicit val ctx: LoggingContext = LoggingContext(
       state.sourceIdentifier.value
