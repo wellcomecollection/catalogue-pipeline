@@ -1,22 +1,10 @@
 package weco.pipeline.transformer.ebsco
 
-import weco.catalogue.internal_model.identifiers.{
-  DataState,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{DataState, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.Format.EJournals
 import weco.catalogue.internal_model.work.WorkState.Source
-import weco.catalogue.internal_model.work.{
-  DeletedReason,
-  Work,
-  WorkData,
-  WorkState
-}
-import weco.catalogue.source_model.ebsco.{
-  EbscoDeletedSourceData,
-  EbscoSourceData,
-  EbscoUpdatedSourceData
-}
+import weco.catalogue.internal_model.work.{DeletedReason, Work, WorkData, WorkState}
+import weco.catalogue.source_model.ebsco.{EbscoDeletedSourceData, EbscoSourceData, EbscoUpdatedSourceData}
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
@@ -83,7 +71,12 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
         contributors = MarcContributors(record).toList,
         subjects = MarcSubjects(record).toList,
         genres = MarcGenres(record).toList,
-        holdings = MarcElectronicResources.toHoldings(record).toList
+        holdings = MarcElectronicResources.toHoldings(record).toList,
+        languages = MarcLanguage(record).toList,
+        // TODO: We should rely on a Marc transformer to extract this information
+        //   but we know that all the records we are transforming from this source
+        //   are EJournals.
+        format = Some(EJournals)
       )
     )
   }
