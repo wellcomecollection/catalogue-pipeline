@@ -150,6 +150,16 @@ class OtherIdentifiersRuleTest
     }
   }
 
+  it("merges a Sierra work into an Ebsco work with no identifiers added") {
+    val (sierraWork, ebscoWork) = sierraEbscoIdentifiedWorkPair()
+
+    inside(OtherIdentifiersRule.merge(ebscoWork, List(sierraWork))) {
+      case FieldMergeResult(otherIdentifiers, mergedSources) =>
+        otherIdentifiers shouldBe empty
+        mergedSources should contain theSameElementsAs List(sierraWork)
+    }
+  }
+
   it(
     "does not merge any Miro source IDs into Sierra works with format != picture/digital image/3D object") {
     inside(

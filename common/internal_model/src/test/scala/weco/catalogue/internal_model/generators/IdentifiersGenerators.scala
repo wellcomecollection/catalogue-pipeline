@@ -2,11 +2,7 @@ package weco.catalogue.internal_model.generators
 
 import org.scalacheck.Arbitrary
 import weco.fixtures.RandomGenerators
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  IdentifierType,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdentifierType, SourceIdentifier}
 
 trait IdentifiersGenerators extends RandomGenerators {
   implicit val arbitraryCanonicalId: Arbitrary[CanonicalId] =
@@ -35,7 +31,8 @@ trait IdentifiersGenerators extends RandomGenerators {
     identifierType: IdentifierType = chooseFrom(
       IdentifierType.MiroImageNumber,
       IdentifierType.SierraSystemNumber,
-      IdentifierType.CalmRecordIdentifier
+      IdentifierType.CalmRecordIdentifier,
+      IdentifierType.EbscoAltLookup,
     ),
     value: String = randomAlphanumeric(length = 10),
     ontologyType: String = "Work"
