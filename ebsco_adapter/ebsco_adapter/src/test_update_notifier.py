@@ -61,7 +61,13 @@ def test_update_notifier():
     expected_messages = expected_update_messages + expected_deleted_messages
 
     update_notifier(
-        updates, notify_for_batch, s3_store, s3_bucket, xml_s3_prefix, sns_publisher, invoked_at
+        updates,
+        notify_for_batch,
+        s3_store,
+        s3_bucket,
+        xml_s3_prefix,
+        sns_publisher,
+        invoked_at,
     )
     published_messages = fake_sns_client.test_get_published_messages()
 

@@ -8,8 +8,7 @@ sealed trait EbscoSourceData {
   val modifiedTime: Instant
 }
 case class EbscoUpdatedSourceData(
-                                   s3Location: S3ObjectLocation,
-                                   modifiedTime: Instant
-                                 )
-    extends EbscoSourceData
+  s3Location: S3ObjectLocation,
+  modifiedTime: Instant
+) extends EbscoSourceData
 case class EbscoDeletedSourceData(modifiedTime: Instant) extends EbscoSourceData

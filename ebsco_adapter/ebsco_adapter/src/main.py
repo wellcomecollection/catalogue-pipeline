@@ -132,7 +132,9 @@ def lambda_handler(event, context):
                     event.get("reindex_ids"),
                 )
             else:
-                return run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at)
+                return run_process(
+                    temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at
+                )
 
 
 if __name__ == "__main__":
