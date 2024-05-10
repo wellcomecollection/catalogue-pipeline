@@ -13,7 +13,7 @@ trait MarcRecord {
   val fields: Seq[MarcField]
 
   // Only return a control field if there is exactly one with the given tag
-  // If there are multiple control fields with the same tag, return Noneg
+  // If there are multiple control fields with the same tag, return None
   def controlField(tag: String): Option[MarcControlField] =
     controlFields.filter(_.marcTag == tag) match {
       case Nil      => None
