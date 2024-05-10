@@ -7,6 +7,9 @@ output "topic_arn" {
   value = module.reindex_worker.topic_arn
 }
 
+output "ebsco_reindexer_topic_arn" {
+  value = local.ebsco_reindexer_topic_arn
+}
 output "tei_reindexer_topic_arn" {
   value = local.tei_reindexer_topic_arn
 }

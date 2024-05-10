@@ -109,6 +109,7 @@ locals {
   calm_deletions_topic_arn = data.terraform_remote_state.calm_adapter.outputs.calm_deletions_topic_arn
 
   # Reindexer topics
+  ebsco_reindexer_topic_arn  = data.terraform_remote_state.reindexer.outputs.ebsco_reindexer_topic_arn
   miro_reindexer_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn
   sierra_reindexer_topic_arn = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
   mets_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.mets_reindexer_topic_arn
@@ -168,7 +169,7 @@ locals {
       topics = [
         local.ebsco_adapter_topic_arn,
       ],
-      reindex_topic = null # TODO: Add reindexer topic (the adapter doesn't have one yet)
+      reindex_topic = local.ebsco_reindexer_topic_arn
       read_policy   = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
     }
   }
