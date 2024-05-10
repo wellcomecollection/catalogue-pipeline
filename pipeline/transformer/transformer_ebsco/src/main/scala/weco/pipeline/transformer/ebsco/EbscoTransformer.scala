@@ -57,7 +57,7 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.EbscoAltLookup,
         ontologyType = "Work",
-        value = record.controlField("001").get
+        value = record.controlField("001").get.content
       ),
       // TODO: The adapter should provide the date & time
       sourceModifiedTime = Instant.now
