@@ -1061,6 +1061,26 @@ class PlatformMergerTest
     )
   }
 
+  describe("merging EBSCO & Sierra works") {
+    it("merges a Sierra digital work with an EBSCO work") {
+      val merger = PlatformMerger
+      val (sierraDigitalWork, ebscoWork) = sierraEbscoIdentifiedWorkPair()
+
+      val result = merger
+        .merge(works = Seq(sierraDigitalWork, ebscoWork))
+        .mergedWorksWithTime(now)
+      val redirectedWorks = result.collect {
+        case w: Work.Redirected[Merged] => w
+      }
+      val visibleWorks = result.collect { case w: Work.Visible[Merged] => w }
+
+      redirectedWorks should have size 1
+      visibleWorks should have size 1
+
+      visibleWorks.head.state.canonicalId shouldBe ebscoWork.state.canonicalId
+    }
+  }
+
   describe("merging TEI works") {
     it("merges a physical sierra with a tei") {
       val merger = PlatformMerger
