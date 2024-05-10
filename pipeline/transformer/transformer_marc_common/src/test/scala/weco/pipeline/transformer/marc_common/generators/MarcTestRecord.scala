@@ -1,14 +1,11 @@
 package weco.pipeline.transformer.marc_common.generators
 
 import org.scalatest.LoneElement
-import weco.pipeline.transformer.marc_common.models.{
-  MarcField,
-  MarcRecord,
-  MarcSubfield
-}
+import weco.pipeline.transformer.marc_common.models.{MarcControlField, MarcField, MarcRecord, MarcSubfield}
 
 case class MarcTestRecord(
-  fields: Seq[MarcField]
+  fields: Seq[MarcField] = Nil,
+  controlFields: Seq[MarcControlField] = Nil,
 ) extends MarcRecord
     with LoneElement {
   def fieldsWithTags(tags: String*): Seq[MarcField] =
@@ -26,4 +23,6 @@ case class MarcTestRecord(
           .toList
     }
 
+  // These are not used in the tests, but we need to implement them to satisfy the interface
+  override val leader: String = ""
 }

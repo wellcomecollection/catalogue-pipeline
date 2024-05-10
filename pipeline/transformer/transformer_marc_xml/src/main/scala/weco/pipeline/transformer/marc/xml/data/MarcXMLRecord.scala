@@ -1,12 +1,16 @@
 package weco.pipeline.transformer.marc.xml.data
 
-import weco.pipeline.transformer.marc_common.models.{
-  MarcField,
-  MarcRecord,
-  MarcSubfield
-}
+import weco.pipeline.transformer.marc_common.models.{MarcControlField, MarcField, MarcRecord, MarcSubfield}
 
-import scala.xml.{Node, NodeSeq}
+import scala.xml.Node
+
+object MarcXMLControlField {
+  def apply(elem: Node): MarcControlField =
+    MarcControlField(
+      marcTag = elem \@ "tag",
+      content = elem.text
+    )
+}
 
 /*
  * Represents a MARC XML Record as sent by EBSCO
@@ -17,13 +21,9 @@ import scala.xml.{Node, NodeSeq}
 case class MarcXMLRecord(recordElement: Node) extends MarcRecord {
 
   lazy val leader: String = recordElement \ "leader" text
-  def controlField(tag: String): Option[String] =
-    recordElement \ "controlfield" filter hasTag(tag) match {
-      case NodeSeq.Empty => None
-      case Seq(node)     => Some(node.text)
-      case _ =>
-        None // TODO: warn that there are multiple matches and return (head.text)?
-    }
+
+  override val controlFields: Seq[MarcControlField] =
+    recordElement \ "controlfield" map (node => MarcXMLControlField(node))
 
   def fieldsWithTags(tags: String*): Seq[MarcField] =
     recordElement \ "datafield" filter hasTag(tags: _*) map (MarcXMLDataField(
