@@ -9,6 +9,8 @@ import boto3
 import click
 import tqdm
 
+from lambda_reindexers import invoke_lambda_reindexers
+
 SOURCES = {
     "miro": "vhs-sourcedata-miro",
     "sierra": "vhs-sierra-sierra-adapter-20200604",
@@ -281,6 +283,11 @@ def start_reindex(ctx, src, dst, mode, input_file):
         topic_arn=reindexer_topic_arn,
         parameters=parameters,
     )
+
+    # Lambda adapters implement their own reindexing logic,
+    # so we need to invoke them separately. Currently, we run
+    # a full reindex for all lambda adapters (only one at present).
+    invoke_lambda_reindexers(session)
 
     start_reindexer_tasks(session)
 
