@@ -16,9 +16,9 @@ trait MarcRecord {
   // If there are multiple control fields with the same tag, return Noneg
   def controlField(tag: String): Option[MarcControlField] =
     controlFields.filter(_.marcTag == tag) match {
-        case Nil => None
-        case x :: Nil => Some(x)
-        case _ => None
+      case Nil      => None
+      case x :: Nil => Some(x)
+      case _        => None
     }
 
   def fieldsWithTags(tags: String*): Seq[MarcField]
