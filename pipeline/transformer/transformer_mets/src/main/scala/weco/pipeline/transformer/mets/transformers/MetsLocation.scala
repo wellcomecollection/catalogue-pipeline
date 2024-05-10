@@ -19,7 +19,7 @@ object MetsLocation {
   ): DigitalLocation =
     DigitalLocation(
       url =
-        s"https://iiif.wellcomecollection.org/presentation/$locationPrefix/$recordIdentifier",
+        s"https://iiif.wellcomecollection.org/presentation/$locationPrefix$recordIdentifier",
       locationType = LocationType.IIIFPresentationAPI,
       license = license,
       accessConditions = accessConditions(accessStatus, accessConditionUsage)
