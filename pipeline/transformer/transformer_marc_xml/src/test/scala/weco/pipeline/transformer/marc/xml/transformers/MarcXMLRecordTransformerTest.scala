@@ -20,6 +20,7 @@ class MarcXMLRecordTransformerTest
       MarcXMLRecord(
         <record xmlns="http://www.loc.gov/MARC21/slim">
           <controlfield tag="001">3PaDhRp</controlfield>
+          <controlfield tag="008">030214c20039999cauar o 0 a0eng c</controlfield>
           <datafield tag ="245">
             <subfield code="a">matacologian</subfield>
           </datafield>
@@ -111,6 +112,12 @@ class MarcXMLRecordTransformerTest
       workData.otherIdentifiers.map(
         _.value
       ) should contain theSameElementsAs Seq("8601416781396", "1477-4615")
+    }
+
+    it("extracts language") {
+      workData.languages.map(
+        _.id
+      ) should contain theSameElementsAs Seq("eng")
     }
 
     it("extracts the current frequency") {

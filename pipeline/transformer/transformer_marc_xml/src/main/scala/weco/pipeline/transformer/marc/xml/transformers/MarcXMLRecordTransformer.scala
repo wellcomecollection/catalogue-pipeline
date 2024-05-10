@@ -4,19 +4,7 @@ import weco.catalogue.internal_model.identifiers.DataState
 import weco.catalogue.internal_model.work.WorkData
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
-import weco.pipeline.transformer.marc_common.transformers.{
-  MarcAlternativeTitles,
-  MarcContributors,
-  MarcCurrentFrequency,
-  MarcDescription,
-  MarcDesignation,
-  MarcEdition,
-  MarcElectronicResources,
-  MarcGenres,
-  MarcInternationalStandardIdentifiers,
-  MarcSubjects,
-  MarcTitle
-}
+import weco.pipeline.transformer.marc_common.transformers.{MarcAlternativeTitles, MarcContributors, MarcCurrentFrequency, MarcDescription, MarcDesignation, MarcEdition, MarcElectronicResources, MarcGenres, MarcInternationalStandardIdentifiers, MarcLanguage, MarcSubjects, MarcTitle}
 
 object MarcXMLRecordTransformer {
   def apply(
@@ -35,7 +23,8 @@ object MarcXMLRecordTransformer {
       items = MarcElectronicResources(record).toList,
       contributors = MarcContributors(record).toList,
       subjects = MarcSubjects(record).toList,
-      genres = MarcGenres(record).toList
+      genres = MarcGenres(record).toList,
+      languages = MarcLanguage(record).toList
     )
   }
 }
