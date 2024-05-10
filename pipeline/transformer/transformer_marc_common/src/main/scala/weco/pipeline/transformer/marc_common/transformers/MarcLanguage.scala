@@ -15,15 +15,18 @@ object MarcLanguage extends MarcDataTransformer {
   type Output = Option[Language]
 
   override def apply(record: MarcRecord): Option[Language] = {
-    record.controlField("008").flatMap { controlField =>
-      val fieldLength = controlField.content.length
-      // Assume missing material specific coded elements between 18-34,
-      // it seems common for this field to be omit positions in this range
-      // so read from end of field backwards.
-      MarcLanguageCodeList.fromCode(code = controlField.content.slice(
-        from = fieldLength - 5,
-        until = fieldLength - 2
-      ))
+    record.controlField("008").flatMap {
+      controlField =>
+        val fieldLength = controlField.content.length
+        // Assume missing material specific coded elements between 18-34,
+        // it seems common for this field to be omit positions in this range
+        // so read from end of field backwards.
+        MarcLanguageCodeList.fromCode(code =
+          controlField.content.slice(
+            from = fieldLength - 5,
+            until = fieldLength - 2
+          )
+        )
     }
   }
 }

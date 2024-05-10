@@ -12,7 +12,8 @@ trait MarcRecord {
 
   val fields: Seq[MarcField]
 
-  def controlField(tag: String): Option[MarcControlField] = controlFields.find(_.marcTag == tag)
+  def controlField(tag: String): Option[MarcControlField] =
+    controlFields.find(_.marcTag == tag)
 
   def fieldsWithTags(tags: String*): Seq[MarcField]
 

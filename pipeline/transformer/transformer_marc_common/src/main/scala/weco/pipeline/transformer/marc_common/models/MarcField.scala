@@ -14,5 +14,5 @@ case class MarcField(
 
 case class MarcControlField(
   marcTag: String,
-  content: String,
+  content: String
 ) extends MarcTaggedField

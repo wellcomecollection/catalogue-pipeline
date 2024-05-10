@@ -1,6 +1,11 @@
 package weco.pipeline.transformer.marc.xml.data
 
-import weco.pipeline.transformer.marc_common.models.{MarcControlField, MarcField, MarcRecord, MarcSubfield}
+import weco.pipeline.transformer.marc_common.models.{
+  MarcControlField,
+  MarcField,
+  MarcRecord,
+  MarcSubfield
+}
 
 import scala.xml.Node
 

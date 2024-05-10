@@ -1,6 +1,11 @@
 package weco.pipeline.transformer.sierra.data
 
-import weco.pipeline.transformer.marc_common.models.{MarcControlField, MarcField, MarcRecord, MarcSubfield}
+import weco.pipeline.transformer.marc_common.models.{
+  MarcControlField,
+  MarcField,
+  MarcRecord,
+  MarcSubfield
+}
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.marc.{Subfield, VarField}
