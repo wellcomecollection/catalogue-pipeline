@@ -41,7 +41,7 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
         for {
           xmlString <- store.get(s3Location).left.map(_.e)
           xml <- Try(XML.loadString(xmlString.identifiedT)).toEither
-        } yield createWork(MarcXMLRecord(xml))
+        } yield createWork(MarcXMLRecord(xml), version)
 
       case EbscoDeletedSourceData =>
         Right(
@@ -58,7 +58,7 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
         )
     }
 
-  private def createWork(record: MarcXMLRecord): Work.Visible[Source] = {
+  private def createWork(record: MarcXMLRecord, version: Int): Work.Visible[Source] = {
     val state = Source(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.EbscoAltLookup,
@@ -72,8 +72,7 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
       state.sourceIdentifier.value
     )
     Work.Visible[Source](
-      // TODO: Get version from the adapter
-      version = 0,
+      version = version,
       state = state,
       data = WorkData[DataState.Unidentified](
         title = MarcTitle(record),
