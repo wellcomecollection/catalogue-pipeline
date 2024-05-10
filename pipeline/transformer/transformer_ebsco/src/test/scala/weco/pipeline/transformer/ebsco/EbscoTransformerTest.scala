@@ -4,6 +4,7 @@ import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.DataState
+import weco.catalogue.internal_model.work.Format.EJournals
 import weco.catalogue.internal_model.work.WorkData
 import weco.catalogue.source_model.ebsco.EbscoUpdatedSourceData
 import weco.storage.generators.S3ObjectLocationGenerators
@@ -45,7 +46,10 @@ class EbscoTransformerTest
 
       work.state.sourceIdentifier.value shouldBe "3PaDhRp"
       work.data should equal(
-        WorkData[DataState.Unidentified](title = Some("matacologian"))
+        WorkData[DataState.Unidentified](
+          title = Some("matacologian"),
+          format = Some(EJournals)
+        )
       )
     }
   }
