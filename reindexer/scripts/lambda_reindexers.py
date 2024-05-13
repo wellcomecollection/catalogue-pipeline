@@ -13,15 +13,13 @@ def invoke_lambda_reindexers(session):
     # to add more in the future allowing the adapter to hold the logic
     # for performing re-indexes.
     function_names = ["ebsco-adapter-ftp"]
-    payload = {
-        "reindex_type": "full"
-    }
+    payload = {"reindex_type": "full"}
 
     lambda_client = session.client("lambda")
 
     for function_name in function_names:
         lambda_client.invoke(
             FunctionName=function_name,
-            InvocationType='Event',
-            Payload=json.dumps(payload).encode('utf-8')
+            InvocationType="Event",
+            Payload=json.dumps(payload).encode("utf-8"),
         )
