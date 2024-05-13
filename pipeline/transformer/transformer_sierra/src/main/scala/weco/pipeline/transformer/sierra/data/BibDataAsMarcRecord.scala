@@ -31,7 +31,9 @@ trait SierraMarcDataConversions {
       indicator2 = varField.indicator2.getOrElse(" ")
     )
 
-  implicit def varFieldToMarcControlField(varField: VarField): MarcControlField =
+  implicit def varFieldToMarcControlField(
+    varField: VarField
+  ): MarcControlField =
     MarcControlField(
       marcTag = varField.marcTag.get,
       content = varField.content.getOrElse("")
