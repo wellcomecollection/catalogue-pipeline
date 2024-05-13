@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.locations.DigitalLocation
 import weco.catalogue.internal_model.work.{Agent, Concept, InstantRange, Period, Place, ProductionEvent}
+import weco.catalogue.internal_model.work.CollectionPath
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 
@@ -110,6 +111,14 @@ class MarcXMLRecordTransformerTest
             <subfield code="a">James Barry and Florence Nightingale,</subfield>
             <subfield code="c">waiting for a train</subfield>
           </datafield>
+          <datafield tag ="773">
+            <subfield code="w">record_id</subfield>
+            <subfield code="g">A name by any other name.</subfield>
+          </datafield>
+          <datafield tag ="774">
+            <subfield code="t">A Host</subfield>
+            <subfield code="w">parent_id</subfield>
+          </datafield>
           <datafield tag ="856">
             <subfield code="y">Hampster Dance</subfield>
             <subfield code="u">https://example.com/hampsterdance</subfield>
@@ -192,6 +201,7 @@ class MarcXMLRecordTransformerTest
       workData.genres.loneElement.label shouldBe "Lo-Fi Darkwave"
     }
 
+<<<<<<< HEAD
     it("extracts production") {
       workData.production shouldBe List(
         ProductionEvent(
@@ -241,6 +251,12 @@ class MarcXMLRecordTransformerTest
           ),
           None
         )
+=======
+    it("extracts the collection path") {
+      workData.collectionPath.get shouldBe CollectionPath(
+        path = "parent_id/A_name_by_any_other_name_record_id",
+        label = None
+>>>>>>> 5377f7950 (Add transformation for MARC Collection Path)
       )
     }
   }

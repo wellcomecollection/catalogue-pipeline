@@ -31,9 +31,7 @@ trait SierraMarcDataConversions {
       indicator2 = varField.indicator2.getOrElse(" ")
     )
 
-  implicit def varFieldToMarcControlField(
-    varField: VarField
-  ): MarcControlField =
+  implicit def varFieldToMarcControlField(varField: VarField): MarcControlField =
     MarcControlField(
       marcTag = varField.marcTag.get,
       content = varField.content.getOrElse("")
@@ -82,7 +80,9 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
       // Anything that doesn't have a tag can be ignored at this point.
       .filter(_.marcTag.nonEmpty)
       .map(SierraMarcDataConversions.varFieldToMarcField)
+
   lazy val materialTypeId: Option[String] = bibData.materialType.map(_.code)
+
   override def fieldsWithTags(tags: String*): Seq[MarcField] =
     bibData
       .varfieldsWithTags(tags: _*)
