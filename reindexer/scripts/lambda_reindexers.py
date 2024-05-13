@@ -12,7 +12,7 @@ def invoke_lambda_reindexers(session):
     # There is currently only one Lambda re-indexer, the intention is
     # to add more in the future allowing the adapter to hold the logic
     # for performing re-indexes.
-    function_names = ["ebsco-adapter-ftp"]å
+    function_names = ["ebsco-adapter-ftp"]
     payload = {
         "reindex_type": "full"
     }
