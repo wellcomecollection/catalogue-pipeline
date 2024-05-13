@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-02-16T15:36:44.858500Z",
+  "createdAt" : "2024-05-13T10:22:01.091210Z",
   "id" : "mudchggm",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "mudchggm",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
           "value" : "XCPwwavyjz"
@@ -53,8 +53,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
           "value" : "XCPwwavyjz",

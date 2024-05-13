@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2024-02-16T15:36:44.932459Z",
+  "createdAt" : "2024-05-13T10:22:01.138969Z",
   "id" : "wn4ahfd3",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "wn4ahfd3",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "ebsco-alt-lookup"
           },
           "ontologyType" : "Work",
           "value" : "hRApGkJTZW"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "ebsco-alt-lookup",
+            "label" : "EBSCO lookup identifier",
             "type" : "IdentifierType"
           },
           "value" : "hRApGkJTZW",

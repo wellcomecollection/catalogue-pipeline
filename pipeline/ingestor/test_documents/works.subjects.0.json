@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-02-16T15:36:44.835880Z",
+  "createdAt" : "2024-05-13T10:22:01.070276Z",
   "id" : "njj1gugw",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "njj1gugw",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "JeGRUgE73g"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "JeGRUgE73g",

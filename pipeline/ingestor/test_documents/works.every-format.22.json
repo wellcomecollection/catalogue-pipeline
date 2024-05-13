@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-02-16T15:36:44.901570Z",
+  "createdAt" : "2024-05-13T10:22:01.119240Z",
   "id" : "ccfchgq4",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "ccfchgq4",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "ebsco-alt-lookup"
           },
           "ontologyType" : "Work",
           "value" : "a62zjJ09dk"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "ebsco-alt-lookup",
+            "label" : "EBSCO lookup identifier",
             "type" : "IdentifierType"
           },
           "value" : "a62zjJ09dk",

@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-02-16T15:36:44.706563Z",
+  "createdAt" : "2024-05-13T10:22:01.000767Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -62,8 +62,8 @@
         },
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "ebsco-alt-lookup",
+            "label" : "EBSCO lookup identifier",
             "type" : "IdentifierType"
           },
           "value" : "Hq3k05Fqag",
@@ -117,8 +117,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "calm-record-id",
-                    "label" : "Calm RecordIdentifier",
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
                     "type" : "IdentifierType"
                   },
                   "value" : "KLw3A3d2Sg",
@@ -133,8 +133,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "sierra-system-number",
-                    "label" : "Sierra system number",
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
                     "type" : "IdentifierType"
                   },
                   "value" : "9vtTXh5eC6",
@@ -149,8 +149,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "sierra-system-number",
-                    "label" : "Sierra system number",
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
                     "type" : "IdentifierType"
                   },
                   "value" : "Jxv9xrQ6Lp",
@@ -187,8 +187,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "miro-image-number",
-                    "label" : "Miro image number",
+                    "id" : "sierra-system-number",
+                    "label" : "Sierra system number",
                     "type" : "IdentifierType"
                   },
                   "value" : "Qgjny3fstP",
@@ -259,8 +259,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "sierra-system-number",
-                "label" : "Sierra system number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
               "value" : "da6nNHPpdW",

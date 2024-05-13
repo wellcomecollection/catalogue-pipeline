@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2024-02-16T15:36:44.079633Z",
+  "createdAt" : "2024-05-13T10:22:00.712340Z",
   "id" : "rczekocx",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "rczekocx",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "Y4unjFIXxl"

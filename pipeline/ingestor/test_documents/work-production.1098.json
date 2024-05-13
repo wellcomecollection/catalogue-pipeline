@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2024-02-16T15:36:44.229565Z",
+  "createdAt" : "2024-05-13T10:22:00.812626Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "guav7chy",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "W9fptfa5Xn"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "W9fptfa5Xn",

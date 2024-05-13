@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-02-16T15:36:45.092595Z",
+  "createdAt" : "2024-05-13T10:22:01.235015Z",
   "id" : "vh87ts9v",
   "document" : {
     "debug" : {
@@ -51,8 +51,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "sierra-system-number",
-                "label" : "Sierra system number",
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
               "value" : "Bhh45MMdul",

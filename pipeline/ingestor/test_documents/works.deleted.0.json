@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of deleted works",
-  "createdAt" : "2024-02-16T15:36:44.110356Z",
+  "createdAt" : "2024-05-13T10:22:00.729210Z",
   "id" : "pnwuzuig",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "pnwuzuig",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "ebsco-alt-lookup"
           },
           "ontologyType" : "Work",
           "value" : "h0Og1ZYVOG"

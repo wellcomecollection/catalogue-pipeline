@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2024-02-16T15:36:44.929055Z",
+  "createdAt" : "2024-05-13T10:22:01.136586Z",
   "id" : "bjh2wrdd",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "bjh2wrdd",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "ebsco-alt-lookup"
           },
           "ontologyType" : "Work",
           "value" : "8IL7DS24A3"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "ebsco-alt-lookup",
+            "label" : "EBSCO lookup identifier",
             "type" : "IdentifierType"
           },
           "value" : "8IL7DS24A3",

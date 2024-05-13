@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-02-16T15:36:44.898929Z",
+  "createdAt" : "2024-05-13T10:22:01.117676Z",
   "id" : "9is9e3tz",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "9is9e3tz",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "ZVe3xG7r6V"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "ZVe3xG7r6V",

@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2024-02-16T15:36:44.151896Z",
+  "createdAt" : "2024-05-13T10:22:00.752214Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "sahqcluh",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "rRRYGQYiF7"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "rRRYGQYiF7",

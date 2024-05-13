@@ -1,6 +1,6 @@
 {
   "description" : "a work whose title has lots of ES query syntax operators",
-  "createdAt" : "2024-02-16T15:36:44.782951Z",
+  "createdAt" : "2024-05-13T10:22:01.030810Z",
   "id" : "mdg1yvuv",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "mdg1yvuv",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "9P6mnsoyfd"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "9P6mnsoyfd",

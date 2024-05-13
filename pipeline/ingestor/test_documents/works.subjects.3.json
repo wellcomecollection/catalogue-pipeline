@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-02-16T15:36:44.838390Z",
+  "createdAt" : "2024-05-13T10:22:01.073044Z",
   "id" : "opaupm4b",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "opaupm4b",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "ebsco-alt-lookup"
           },
           "ontologyType" : "Work",
           "value" : "spewkKE1s2"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "ebsco-alt-lookup",
+            "label" : "EBSCO lookup identifier",
             "type" : "IdentifierType"
           },
           "value" : "spewkKE1s2",

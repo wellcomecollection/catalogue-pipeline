@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2024-02-16T15:36:44.815616Z",
+  "createdAt" : "2024-05-13T10:22:01.057086Z",
   "id" : "ub2i8snt",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "ub2i8snt",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "by26w1evrA"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "by26w1evrA",

@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-02-16T15:36:44.803590Z",
+  "createdAt" : "2024-05-13T10:22:01.049884Z",
   "id" : "6navwg1c",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "6navwg1c",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "ebsco-alt-lookup"
           },
           "ontologyType" : "Work",
           "value" : "Ra2FIC2DNd"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "ebsco-alt-lookup",
+            "label" : "EBSCO lookup identifier",
             "type" : "IdentifierType"
           },
           "value" : "Ra2FIC2DNd",

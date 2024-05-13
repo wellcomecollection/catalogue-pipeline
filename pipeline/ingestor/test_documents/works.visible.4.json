@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2024-02-16T15:36:44.014158Z",
+  "createdAt" : "2024-05-13T10:22:00.661990Z",
   "id" : "vbi1ii19",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "vbi1ii19",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "CzLNHBFHuR"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "CzLNHBFHuR",

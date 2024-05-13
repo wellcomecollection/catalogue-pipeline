@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2024-02-16T15:36:44.223193Z",
+  "createdAt" : "2024-05-13T10:22:00.810677Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "0fucriyr",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "KgSH5dUX0Z"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "KgSH5dUX0Z",

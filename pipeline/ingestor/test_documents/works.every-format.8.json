@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-02-16T15:36:44.893353Z",
+  "createdAt" : "2024-05-13T10:22:01.114011Z",
   "id" : "cwpfpixj",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "cwpfpixj",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "D1YQhdjF03"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "D1YQhdjF03",
