@@ -1,5 +1,6 @@
 package weco.pipeline.merger.services
 
+import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -9,21 +10,15 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{
-  Format,
-  InternalWork,
-  InvisibilityReason,
-  Item,
-  Work,
-  WorkData
-}
+import weco.catalogue.internal_model.work.{Format, InternalWork, InvisibilityReason, Item, Work, WorkData}
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
 
 class PlatformMergerTest
     extends AnyFunSpec
-    with SourceWorkGenerators
-    with MergeCandidateGenerators
-    with Matchers {
+      with SourceWorkGenerators
+      with MergeCandidateGenerators 
+      with LoneElement
+      with Matchers {
 
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC)
@@ -1077,7 +1072,7 @@ class PlatformMergerTest
       redirectedWorks should have size 1
       visibleWorks should have size 1
 
-      visibleWorks.head.state.canonicalId shouldBe ebscoWork.state.canonicalId
+      visibleWorks.loneElement.state.canonicalId shouldBe ebscoWork.state.canonicalId
     }
   }
 
@@ -1101,7 +1096,7 @@ class PlatformMergerTest
       redirectedWorks should have size 1
       visibleWorks should have size 1
 
-      visibleWorks.head.state.canonicalId shouldBe teiWork.state.canonicalId
+      visibleWorks.loneElement.state.canonicalId shouldBe teiWork.state.canonicalId
     }
 
     it("copies the thumbnail to the inner works") {
