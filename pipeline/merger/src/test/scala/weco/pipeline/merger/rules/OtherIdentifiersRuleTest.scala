@@ -2,11 +2,8 @@ package weco.pipeline.merger.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.{Inside, Inspectors}
-import weco.catalogue.internal_model.identifiers.{
-  IdentifierType,
-  SourceIdentifier
-}
+import org.scalatest.{Inside, Inspectors, LoneElement}
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
 import weco.catalogue.internal_model.work.{Format, Work, WorkState}
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
@@ -14,11 +11,12 @@ import weco.pipeline.merger.models.FieldMergeResult
 
 class OtherIdentifiersRuleTest
     extends AnyFunSpec
-    with Matchers
-    with SourceWorkGenerators
-    with MergeCandidateGenerators
-    with Inside
-    with Inspectors {
+      with Matchers
+      with SourceWorkGenerators
+      with MergeCandidateGenerators
+      with Inside
+      with LoneElement
+      with Inspectors {
   val nothingWork: Work.Visible[WorkState.Identified] = identifiedWork(
     sourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.MESH,
@@ -125,7 +123,7 @@ class OtherIdentifiersRuleTest
         otherIdentifiers should contain theSameElementsAs
           miroWork.sourceIdentifier :: physicalSierraWork.data.otherIdentifiers
 
-        mergedSources should contain only miroWork
+        mergedSources.loneElement shouldBe miroWork
     }
   }
 
@@ -146,7 +144,7 @@ class OtherIdentifiersRuleTest
         otherIdentifiers should contain theSameElementsAs
           miroWork.sourceIdentifier :: zeroItemPhysicalSierra.data.otherIdentifiers
 
-        mergedSources should contain theSameElementsAs List(miroWork)
+        mergedSources.loneElement shouldBe miroWork
     }
   }
 
@@ -156,7 +154,7 @@ class OtherIdentifiersRuleTest
     inside(OtherIdentifiersRule.merge(ebscoWork, List(sierraWork))) {
       case FieldMergeResult(otherIdentifiers, mergedSources) =>
         otherIdentifiers shouldBe empty
-        mergedSources should contain theSameElementsAs List(sierraWork)
+        mergedSources.loneElement shouldBe sierraWork
     }
   }
 
@@ -220,8 +218,7 @@ class OtherIdentifiersRuleTest
         otherIdentifiers should contain theSameElementsAs
           (miroWork.sourceIdentifier :: physicalSierraWork.data.otherIdentifiers)
 
-        mergeCandidates should contain theSameElementsAs List(
-          miroWorkWithOtherSources)
+        mergeCandidates.loneElement shouldBe miroWorkWithOtherSources
     }
   }
 
