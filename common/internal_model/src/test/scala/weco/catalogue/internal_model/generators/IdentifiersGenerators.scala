@@ -32,7 +32,8 @@ trait IdentifiersGenerators extends RandomGenerators {
       IdentifierType.MiroImageNumber,
       IdentifierType.SierraSystemNumber,
       IdentifierType.CalmRecordIdentifier,
-      IdentifierType.EbscoAltLookup,
+      // We do not include IdentifierType.EbscoAltLookup here
+      // because it always redirects Sierra works to Ebsco works.
     ),
     value: String = randomAlphanumeric(length = 10),
     ontologyType: String = "Work"
