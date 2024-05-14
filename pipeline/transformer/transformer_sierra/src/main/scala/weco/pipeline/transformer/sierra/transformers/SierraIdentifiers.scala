@@ -4,6 +4,9 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
+import weco.pipeline.transformer.marc_common.transformers.MarcInternationalStandardIdentifiers
+import weco.pipeline.transformer.sierra.data.SierraMarcDataConversions
+
 import weco.sierra.models.SierraQueryOps
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
@@ -22,8 +25,9 @@ object SierraIdentifiers
     bibData: SierraBibData
   ): List[SourceIdentifier] =
     createSierraIdentifier(bibId) ++
-      getIsbnIdentifiers(bibData) ++
-      getIssnIdentifiers(bibData) ++
+      MarcInternationalStandardIdentifiers(
+        SierraMarcDataConversions.bibDataToMarcRecord(bibData)
+      ) ++
       getDigcodes(bibData) ++
       getIconographicNumbers(bibData) ++
       getEstcReferences(bibData)
@@ -43,49 +47,6 @@ object SierraIdentifiers
         value = bibId.withoutCheckDigit
       )
     )
-
-  /** Find ISBN (International Serial Book Number) identifiers from MARC 020 ǂa.
-    *
-    * This field is repeatable. See
-    * https://www.loc.gov/marc/bibliographic/bd020.html
-    */
-  private def getIsbnIdentifiers(
-    bibData: SierraBibData
-  ): List[SourceIdentifier] =
-    bibData
-      .subfieldsWithTag("020" -> "a")
-      .contents
-      .distinct
-      .map {
-        value =>
-          SourceIdentifier(
-            identifierType = IdentifierType.ISBN,
-            ontologyType = "Work",
-            value = value.trim
-          )
-      }
-
-  /** Find ISSN (International Standard Serial Number) identifiers from MARC 022
-    * ǂa.
-    *
-    * This field is repeatable. See
-    * https://www.loc.gov/marc/bibliographic/bd022.html
-    */
-  private def getIssnIdentifiers(
-    bibData: SierraBibData
-  ): List[SourceIdentifier] =
-    bibData
-      .subfieldsWithTag("022" -> "a")
-      .contents
-      .distinct
-      .map {
-        value =>
-          SourceIdentifier(
-            identifierType = IdentifierType.ISSN,
-            ontologyType = "Work",
-            value = value.trim
-          )
-      }
 
   /** Find the digcodes from MARC 759 ǂa.
     *

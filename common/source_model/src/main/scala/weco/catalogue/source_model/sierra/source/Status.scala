@@ -6,6 +6,7 @@ object Status {
   val Missing = "m"
   val Unavailable = "r"
   val Closed = "h"
+  val Safeguarded = "g"
   val OnHoldshelf = "!"
   val Withdrawn = "x"
 }

@@ -11,14 +11,17 @@ locals {
   reporting_sierra_reindex_topic_arn = data.terraform_remote_state.shared_infra.outputs.reporting_sierra_reindex_topic_arn
   catalogue_miro_reindex_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn
   catalogue_sierra_reindex_topic_arn = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
-  mets_reindexer_topic_name          = module.mets_reindexer_topic.name
-  mets_reindexer_topic_arn           = module.mets_reindexer_topic.arn
-  tei_reindexer_topic_arn            = module.tei_reindexer_topic.arn
-  calm_reindexer_topic_name          = module.calm_reindexer_topic.name
-  calm_reindexer_topic_arn           = module.calm_reindexer_topic.arn
-  calm_deletion_checker_topic_name   = module.calm_deletion_checker_topic.name
-  calm_deletion_checker_topic_arn    = module.calm_deletion_checker_topic.arn
-  miro_updates_topic_arn             = data.terraform_remote_state.shared_infra.outputs.miro_updates_topic_arn
+
+  ebsco_reindexer_topic_name       = module.ebsco_reindexer_topic.name
+  ebsco_reindexer_topic_arn        = module.ebsco_reindexer_topic.arn
+  mets_reindexer_topic_name        = module.mets_reindexer_topic.name
+  mets_reindexer_topic_arn         = module.mets_reindexer_topic.arn
+  tei_reindexer_topic_arn          = module.tei_reindexer_topic.arn
+  calm_reindexer_topic_name        = module.calm_reindexer_topic.name
+  calm_reindexer_topic_arn         = module.calm_reindexer_topic.arn
+  calm_deletion_checker_topic_name = module.calm_deletion_checker_topic.name
+  calm_deletion_checker_topic_arn  = module.calm_deletion_checker_topic.arn
+  miro_updates_topic_arn           = data.terraform_remote_state.shared_infra.outputs.miro_updates_topic_arn
 
   vpc_id          = local.catalogue_vpcs["catalogue_vpc_delta_id"]
   private_subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]

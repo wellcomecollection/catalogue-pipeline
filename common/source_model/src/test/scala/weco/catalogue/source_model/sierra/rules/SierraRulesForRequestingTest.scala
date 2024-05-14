@@ -30,6 +30,7 @@ class SierraRulesForRequestingTest
         NotRequestable.OnExhibition(
           "On exhibition. Please ask at Enquiry Desk.")),
       ("y", NotRequestable.NoPublicMessage("fixed field 88 = y")),
+      ("g", NotRequestable.SafeguardedItem("Safeguarded item."))
     )
 
     forAll(testCases) {
@@ -174,7 +175,6 @@ class SierraRulesForRequestingTest
         "sgmoh",
         "somet",
         "somge",
-        "somja",
         "sompr",
         "somsy")
 

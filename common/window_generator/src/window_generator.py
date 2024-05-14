@@ -4,13 +4,15 @@ Publish a new update window to SNS.
 """
 
 import datetime as dt
+import decimal
+import json
 import os
+import logging
 
 import boto3
-from wellcome_aws_utils.lambda_utils import log_on_error
-from wellcome_aws_utils.sns_utils import publish_sns_message
-
 from build_windows import generate_windows
+
+logger = logging.getLogger(__name__)
 
 
 def build_window(minutes):
@@ -23,7 +25,40 @@ def build_window(minutes):
     return next(generate_windows(start=start, end=end, minutes=minutes))
 
 
-@log_on_error
+class EnhancedJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, dt.datetime):
+            return obj.isoformat()
+
+        if isinstance(obj, decimal.Decimal):
+            if float(obj).is_integer():
+                return int(obj)
+            else:
+                return float(obj)
+
+        return json.JSONEncoder.default(self, obj)
+
+
+def publish_sns_message(sns_client, topic_arn, message, subject="default-subject"):
+    """
+    Given a topic ARN and a series of key-value pairs, publish the key-value
+    data to the SNS topic.
+    """
+    response = sns_client.publish(
+        TopicArn=topic_arn,
+        MessageStructure="json",
+        Message=json.dumps({"default": json.dumps(message, cls=EnhancedJSONEncoder)}),
+        Subject=subject,
+    )
+
+    if response["ResponseMetadata"]["HTTPStatusCode"] == 200:
+        logger.debug("SNS: sent notification %s", response["MessageId"])
+    else:
+        raise RuntimeError(repr(response))
+
+    return response
+
+
 def main(event=None, _ctxt=None, sns_client=None):
     sns_client = sns_client or boto3.client("sns")
 

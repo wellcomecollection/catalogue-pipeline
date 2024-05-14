@@ -25,13 +25,6 @@ class GoobiMetsXmlTest
     MetsXml(xml).value.recordIdentifier shouldBe Right("b30246039")
   }
 
-  it("returns the same value as the recordIdentifier for the metsIdentifier") {
-    info(
-      "Goobi files do not have a distinct identifier from the Sierra record they link to"
-    )
-    MetsXml(xml).value.metsIdentifier shouldBe Right("b30246039")
-  }
-
   it("does not parse a mets if recordIdentifier is outside of dmdSec element") {
     GoobiMetsXml(xmlNodmdSec).recordIdentifier shouldBe a[Left[_, _]]
   }

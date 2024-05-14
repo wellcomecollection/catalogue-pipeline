@@ -16,10 +16,8 @@ import weco.catalogue.source_model.sierra._
 import weco.catalogue.source_model.Implicits._
 import weco.json.JsonUtil.fromJson
 import weco.json.exceptions.JsonDecodingError
-import weco.pipeline.transformer.sierra.exceptions.{
-  ShouldNotTransformException,
-  SierraTransformerException
-}
+import weco.pipeline.transformer.exceptions.ShouldNotTransformException
+import weco.pipeline.transformer.sierra.exceptions.SierraTransformerException
 import weco.pipeline.transformer.sierra.transformers._
 import weco.sierra.models.data.{
   SierraBibData,
@@ -146,7 +144,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       production = SierraProduction(bibId, bibData),
       languages = SierraLanguages(bibId, bibData),
       edition = SierraEdition(bibData),
-      notes = SierraNotes(bibData),
+      notes = SierraNotes(bibData).toList,
       duration = SierraDuration(bibData),
       items = SierraItemsOnOrder(
         bibId,
@@ -161,7 +159,7 @@ class SierraTransformer(sierraTransformable: SierraTransformable, version: Int)
       collectionPath = SierraCollectionPath(bibData),
       currentFrequency = SierraCurrentFrequency(bibData),
       formerFrequency = SierraFormerFrequency(bibData),
-      designation = SierraDesignation(bibData)
+      designation = SierraDesignation(bibId, bibData)
     )
   }
 

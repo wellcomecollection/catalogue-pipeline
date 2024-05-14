@@ -22,7 +22,6 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
     modifiedTime: Instant = Instant.ofEpochMilli(0)
   ): InvisibleMetsData =
     InvisibleMetsData(
-      metsIdentifier = bibNumber,
       recordIdentifier = bibNumber,
       title = title,
       ModsAccessConditions(
@@ -34,6 +33,6 @@ trait MetsDataGenerators extends SierraIdentifierGenerators {
       thumbnailReference = thumbnailReference,
       version = version,
       modifiedTime = modifiedTime,
-      locationPrefix = "v2"
+      locationPrefix = "v2/"
     )
 }

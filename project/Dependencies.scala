@@ -2,7 +2,7 @@ import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
 
-  val defaultVersion =
+  val defaultVersion = "32.40.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
     "32.40.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
@@ -210,6 +210,11 @@ object CatalogueDependencies {
   val transformerCommonDependencies: Seq[ModuleID] =
     WellcomeDependencies.storageLibrary ++
       ExternalDependencies.parseDependencies ++ ExternalDependencies.circeOpticsDependencies
+
+  val transformerMarcCommonDependencies: Seq[ModuleID] =
+    Nil
+
+  val transformerMarcXMLDependencies: Seq[ModuleID] = Nil
 
   val idminterDependencies: Seq[ModuleID] =
     ExternalDependencies.mySqlDependencies ++

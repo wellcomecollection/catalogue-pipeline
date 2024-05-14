@@ -20,6 +20,8 @@ steps:
       - "pipeline_storage"
       - "ingestor_common"
       - "transformer_common"
+      - "transformer_marc_common"
+      - "transformer_marc_xml"
       - "calm_api_client"
 
     # This will fail the build if internal model takes more than
@@ -69,6 +71,7 @@ steps:
       - "transformer_miro"
       - "transformer_sierra"
       - "transformer_tei"
+      - "transformer_ebsco"
 
     agents:
       queue: "scala"
@@ -126,18 +129,28 @@ steps:
     agents:
       queue: "scala"
 
-  - label: "{{ matrix }} (Lambda)"
-    command: |
-      ./builds/run_python_tests.sh "{{ matrix }}"
+  - label: "{{ matrix }} (Test/Lambda)"
+    plugins:
+      - docker-compose#v4.11.0:
+          config: "{{ matrix }}/docker-compose.yml"
+          run: test
 
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_lambda_zip.py "{{ matrix }}"
-      fi
+    matrix:
+      - "calm_adapter/calm_deletion_check_initiator"
+      - "calm_adapter/calm_window_generator"
+      - "ebsco_adapter/ebsco_adapter"
+      - "tei_adapter/tei_updater"
+      - "common/window_generator"
+
+  - label: "{{ matrix }} (Publish/Lambda)"
+    if: build.branch == "main"
+    command: |
+      ./builds/publish_lambda_zip.py "{{ matrix }}"
 
     matrix:
       - "calm_adapter/calm_window_generator"
       - "calm_adapter/calm_deletion_check_initiator"
+      - "ebsco_adapter/ebsco_adapter"
       - "common/window_generator"
       - "tei_adapter/tei_updater"
 
@@ -152,9 +165,9 @@ steps:
       commit: "${BUILDKITE_COMMIT}"
       branch: "${BUILDKITE_BRANCH}"
       env:
-        BUILDKITE_PULL_REQUEST:             "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
         BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO:        "${BUILDKITE_PULL_REQUEST_REPO}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"
 
   - label: trigger pipeline deployments
     if: build.branch == "main"
@@ -165,6 +178,6 @@ steps:
       commit: "${BUILDKITE_COMMIT}"
       branch: "${BUILDKITE_BRANCH}"
       env:
-        BUILDKITE_PULL_REQUEST:             "${BUILDKITE_PULL_REQUEST}"
+        BUILDKITE_PULL_REQUEST: "${BUILDKITE_PULL_REQUEST}"
         BUILDKITE_PULL_REQUEST_BASE_BRANCH: "${BUILDKITE_PULL_REQUEST_BASE_BRANCH}"
-        BUILDKITE_PULL_REQUEST_REPO:        "${BUILDKITE_PULL_REQUEST_REPO}"
+        BUILDKITE_PULL_REQUEST_REPO: "${BUILDKITE_PULL_REQUEST_REPO}"

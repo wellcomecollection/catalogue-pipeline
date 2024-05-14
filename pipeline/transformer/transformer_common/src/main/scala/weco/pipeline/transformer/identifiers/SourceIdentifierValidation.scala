@@ -63,14 +63,14 @@ object SourceIdentifierValidation {
      * There are two options for a METS id, depending on the source of the file.
      *  - b number
      *      - A Goobi METS file is identified using the b number of the corresponding Sierra record
-     *  - UUID
-     *      - An Archivematica METS file is identified using a UUID.
+     *  - CALM RefNo
+     *      - An Archivematica METS file is identified using the RefNo from the corresponding CALM record.
      *
      * From the perspective of anything wanting to validate a possible METS ID, this distinction is
      * irrelevant.  All a caller needs to know is whether the string in question looks like METS.
      */
     private def isValidMetsId(str: String): Boolean =
-      sierraSystemNumber.toPredicate(str) || tryParseUUID(str).isSuccess
+      sierraSystemNumber.toPredicate(str) || calmRefNo.toPredicate(str)
     private implicit class RegexOps(regex: Regex) {
       def toPredicate: String => Boolean = regex.findFirstIn(_).isDefined
     }

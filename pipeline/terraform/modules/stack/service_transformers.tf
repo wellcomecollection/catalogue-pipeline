@@ -44,10 +44,21 @@ locals {
       # sent to a DLQ.
       queue_visibility_timeout_seconds = 90
     }
+
+    ebsco = {
+      container_image = local.transformer_ebsco_image
+    }
   }
 
   transformer_output_topic_arns = [
-    for k, v in module.transformers : v.output_topic_arn
+    # Temporarily remove the Ebsco transformer output topic
+    # In order to experiment with the new transformer
+    module.transformers["mets"].output_topic_arn,
+    module.transformers["calm"].output_topic_arn,
+    module.transformers["sierra"].output_topic_arn,
+    module.transformers["tei"].output_topic_arn,
+    module.transformers["miro"].output_topic_arn,
+    # for k, v in module.transformers : v.output_topic_arn
   ]
 }
 

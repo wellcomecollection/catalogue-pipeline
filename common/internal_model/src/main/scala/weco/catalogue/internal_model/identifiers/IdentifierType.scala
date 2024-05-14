@@ -51,6 +51,11 @@ object IdentifierType extends Enum[IdentifierType] {
     val label = "Sierra identifier"
   }
 
+  case object EbscoAltLookup extends IdentifierType {
+    val id = "ebsco-alt-lookup"
+    val label = "EBSCO lookup identifier"
+  }
+
   case object LCGraphicMaterials extends IdentifierType {
     val id = "lc-gmgpc"
     val label = "Library of Congress Thesaurus for Graphic Materials"

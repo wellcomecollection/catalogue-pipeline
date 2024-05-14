@@ -34,8 +34,9 @@ import weco.sierra.models.data.SierraItemData
   *   - Variable length fields on items
   *     https://documentation.iii.com/sierrahelp/Content/sril/sril_records_varfld_types_item.html
   *
-  * This was last checked against Sierra based on a set of rules sent from Liz
-  * Richens on 31 January 2022.
+  * This was last checked against Sierra based on a set of rules provided by
+  * Louise Simon on 20th March 2024
+  * https://wellcome.slack.com/archives/C3TQSF63C/p1710937847843969
   */
 object SierraRulesForRequesting {
   def apply(itemData: SierraItemData): RulesForRequestingResult =
@@ -50,6 +51,7 @@ object SierraRulesForRequesting {
       //    q|i||88||=|z||
       //    q|i||88||=|v||This item is with conservation.
       //    q|i||88||=|h||This item is closed.
+      //    q|i||88||=|g||Safeguarded item.
       //
       // These rules mean "if fixed field 88 on the item has a given value,
       // show this message".
@@ -67,6 +69,8 @@ object SierraRulesForRequesting {
         NotRequestable.AtConservation("This item is with conservation.")
       case i if i.fixedField("88").contains("h") =>
         NotRequestable.ItemClosed("This item is closed.")
+      case i if i.fixedField("88").contains("g") =>
+        NotRequestable.SafeguardedItem("Safeguarded item.")
 
       // These cases cover the lines:
       //
@@ -276,7 +280,6 @@ object SierraRulesForRequesting {
       //    v|i||79||=|sgmoh||
       //    v|i||79||=|somet||
       //    v|i||79||=|somge||
-      //    v|i||79||=|somja||
       //    v|i||79||=|sompr||
       //    q|i||79||=|somsy||Please complete a manual request slip.  This item cannot be requested online.
       //
@@ -299,7 +302,6 @@ object SierraRulesForRequesting {
               "sgmoh",
               "somet",
               "somge",
-              "somja",
               "sompr",
               "somsy"
             ) =>

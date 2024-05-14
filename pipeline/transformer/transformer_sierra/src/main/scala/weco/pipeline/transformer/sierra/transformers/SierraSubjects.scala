@@ -7,16 +7,17 @@ import weco.pipeline.transformer.sierra.transformers.subjects.{
   SierraConceptSubjects,
   SierraMeetingSubjects,
   SierraOrganisationSubjects,
-  SierraPersonSubjects
+  SierraPersonSubjects,
+  SierraSubjectsTransformer
 }
 import weco.sierra.models.data.SierraBibData
 import weco.sierra.models.identifiers.SierraBibNumber
 
 object SierraSubjects extends SierraIdentifiedDataTransformer {
   type Output = List[Subject[IdState.Unminted]]
-  import OntologyTypeOps._
+  import weco.pipeline.transformer.marc_common.OntologyTypeOps._
 
-  val subjectsTransformers = List(
+  val subjectsTransformers: List[SierraSubjectsTransformer] = List(
     SierraConceptSubjects,
     SierraPersonSubjects,
     SierraOrganisationSubjects,

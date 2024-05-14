@@ -198,7 +198,7 @@ class SierraPersonSubjectsTest
     "creates an identifiable subject with library of congress heading if there is a subfield 0 and the second indicator is 0"
   ) {
     val name = "Gerry the Garlic"
-    val lcshCode = "lcsh7212"
+    val lcshCode = "nlcsh7212"
 
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -215,7 +215,7 @@ class SierraPersonSubjectsTest
 
     val List(subject) = SierraPersonSubjects(bibId, bibData)
     subject should have(
-      'label ("Gerry the Garlic"),
+      'label("Gerry the Garlic"),
       sourceIdentifier(
         identifierType = IdentifierType.LCNames,
         ontologyType = "Person",
@@ -223,7 +223,7 @@ class SierraPersonSubjectsTest
       )
     )
     subject.onlyConcept should have(
-      'label ("Gerry the Garlic"),
+      'label("Gerry the Garlic"),
       sourceIdentifier(
         identifierType = IdentifierType.LCNames,
         ontologyType = "Person",
@@ -232,7 +232,7 @@ class SierraPersonSubjectsTest
     )
   }
 
-  it("does not extract an identifer if the second indicator is not 0") {
+  it("does not extract an identifier if the second indicator is not 0") {
     val name = "Gerry the Garlic"
     val bibData = createSierraBibDataWith(
       varFields = List(
@@ -249,11 +249,11 @@ class SierraPersonSubjectsTest
 
     val List(subject) = SierraPersonSubjects(bibId, bibData)
     subject should have(
-      'label ("Gerry the Garlic")
+      'label("Gerry the Garlic")
     )
 
     subject.onlyConcept should have(
-      'label ("Gerry the Garlic"),
+      'label("Gerry the Garlic"),
       labelDerivedPersonId("gerry the garlic")
     )
   }
@@ -313,7 +313,7 @@ class SierraPersonSubjectsTest
     it("in the concepts") {
       subject.onlyConcept shouldBe a[Person[_]]
       subject.onlyConcept should have(
-        'label ("Aristophanes. Birds."),
+        'label("Aristophanes. Birds."),
         labelDerivedPersonId("aristophanes. birds")
       )
     }
@@ -329,7 +329,7 @@ class SierraPersonSubjectsTest
       // of the title as a whole as distinct from
       //  - the unmarked version n80119944, found in b13149143,
       //  - or the French version nr2006002530, found in b2201679x
-      val List(subjectWithLanguage)= SierraPersonSubjects(
+      val List(subjectWithLanguage) = SierraPersonSubjects(
         bibId,
         createSierraBibDataWith(
           varFields = List(
@@ -415,9 +415,8 @@ class SierraPersonSubjectsTest
     subject.id shouldBe IdState.Identifiable(sourceIdentifier)
   }
 
-  /**
-    * Assert that the result of creating subjects with the given bibdata results in a single
-    * subject with a single concept, both bearing the given label.
+  /** Assert that the result of creating subjects with the given bibdata results
+    * in a single subject with a single concept, both bearing the given label.
     */
   private def assertCreatesSubjectWithLabel(
     bibData: SierraBibData,

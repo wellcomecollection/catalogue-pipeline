@@ -211,6 +211,26 @@ lazy val transformer_common = setupProject(
   externalDependencies = CatalogueDependencies.transformerCommonDependencies
 )
 
+lazy val transformer_marc_common = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_marc_common",
+  localDependencies = Seq(transformer_common),
+  externalDependencies = CatalogueDependencies.transformerMarcCommonDependencies
+)
+
+lazy val transformer_marc_xml = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_marc_xml",
+  localDependencies = Seq(transformer_marc_common),
+  externalDependencies = CatalogueDependencies.transformerMarcXMLDependencies
+)
+
+lazy val transformer_ebsco = setupProject(
+  project,
+  folder = "pipeline/transformer/transformer_ebsco",
+  localDependencies = Seq(transformer_marc_xml)
+)
+
 lazy val transformer_miro = setupProject(
   project,
   folder = "pipeline/transformer/transformer_miro",
@@ -221,7 +241,7 @@ lazy val transformer_miro = setupProject(
 lazy val transformer_sierra = setupProject(
   project,
   folder = "pipeline/transformer/transformer_sierra",
-  localDependencies = Seq(transformer_common),
+  localDependencies = Seq(transformer_common, transformer_marc_common),
   externalDependencies = CatalogueDependencies.sierraTransformerDependencies
 )
 
@@ -334,7 +354,7 @@ lazy val tei_adapter = setupProject(
 s3CredentialsProvider := {
   _ =>
     val builder = new STSAssumeRoleSessionCredentialsProvider.Builder(
-      "arn:aws:iam::760097843905:role/platform-ci",
+      "arn:aws:iam::760097843905:role/terraform-20210811133135108800000001",
       UUID.randomUUID().toString
     )
     builder.build()

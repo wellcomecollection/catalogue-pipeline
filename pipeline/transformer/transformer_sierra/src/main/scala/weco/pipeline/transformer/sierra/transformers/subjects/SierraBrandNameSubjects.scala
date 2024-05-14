@@ -1,37 +1,36 @@
 package weco.pipeline.transformer.sierra.transformers.subjects
 
-import weco.catalogue.internal_model.work.{Concept, Subject}
-import weco.pipeline.transformer.sierra.transformers.SierraConcepts
-import weco.pipeline.transformer.transformers.ConceptsTransformer
-import weco.sierra.models.identifiers.SierraBibNumber
-import weco.sierra.models.marc.VarField
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.work.{AbstractConcept, Concept, Subject}
+import weco.pipeline.transformer.marc_common.models.MarcField
+import weco.pipeline.transformer.marc_common.transformers.subjects.MarcConceptSubject
+import weco.pipeline.transformer.text.TextNormalisation.TextNormalisationOps
 
 // Populate wwork:subject
 //
 // Use MARC field "652". This is not documented but is a custom field used to
 // represent brand names
-object SierraBrandNameSubjects
-    extends SierraSubjectsTransformer
-    with ConceptsTransformer
-    with SierraConcepts {
+object SierraBrandNameSubjects extends SierraSubjectsTransformer {
+  override protected val subjectVarFields: Seq[String] =
+    Seq("652")
 
-  val subjectVarFields = List("652")
+  override protected def getSubject(
+    field: MarcField
+  ): Option[Subject[IdState.Unminted]] = SierraBrandNameSubject(field)
 
-  def getSubjectsFromVarFields(
-    bibId: SierraBibNumber,
-    varFields: List[VarField]
-  ): Output =
-    varFields
-      .subfieldsWithTag("a")
-      .contents
-      .map {
-        label =>
-          val identifier =
-            identifierFromText(label = label, ontologyType = "Concept")
-          new Subject(
-            id = identifier,
-            label = label,
-            concepts = List(Concept(label).identifiable())
-          )
+  private object SierraBrandNameSubject extends MarcConceptSubject {
+    override protected val defaultSecondIndicator: String = "0"
+    override protected def getPrimaryTypeConcepts(
+      field: MarcField,
+      idstate: Option[IdState.Identifiable]
+    ): Seq[AbstractConcept[IdState.Unminted]] =
+      field.subfields.filter(_.tag == "a").map {
+        subfield =>
+          val label = subfield.content.trimTrailingPeriod
+          Concept(label = label).normalised.identifiable(idstate)
       }
+
+    override protected def getFieldOntologyType(field: MarcField): String =
+      "Concept"
+  }
 }

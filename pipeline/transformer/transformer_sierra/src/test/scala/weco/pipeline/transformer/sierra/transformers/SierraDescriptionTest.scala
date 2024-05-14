@@ -83,13 +83,15 @@ class SierraDescriptionTest
             Subfield(
               tag = "a",
               content =
-                "\"This book is about the ethics of nursing and midwifery\""),
+                "\"This book is about the ethics of nursing and midwifery\""
+            ),
             Subfield(tag = "c", content = "Provided by publisher.")
           )
         )
       ),
       expectedDescription = Some(
-        "<p>\"This book is about the ethics of nursing and midwifery\" Provided by publisher.</p>")
+        "<p>\"This book is about the ethics of nursing and midwifery\" Provided by publisher.</p>"
+      )
     )
   }
 
@@ -142,7 +144,8 @@ class SierraDescriptionTest
     }
 
     it(
-      "does not wrap the contents of ǂu in <a> tags if it doesn't look like a URL") {
+      "does not wrap the contents of ǂu in <a> tags if it doesn't look like a URL"
+    ) {
       val url1 = "https://fruitpicking.org/"
       val uContents = "A website about fruitpicking"
 

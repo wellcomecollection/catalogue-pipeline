@@ -71,6 +71,7 @@ locals {
     "transformer_tei",
     "transformer_sierra",
     "transformer_calm",
+    "transformer_ebsco",
   ]
 
   miro_updates_topic_arn = data.terraform_remote_state.shared_infra.outputs.miro_updates_topic_arn
@@ -96,6 +97,10 @@ locals {
   tei_adapter_topic_arn = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
   tei_adapter_bucket    = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
 
+  # EBSCO adapter topics
+  ebsco_adapter_topic_arn = data.terraform_remote_state.ebsco_adapter.outputs.ebsco_adapter_topic_arn
+  ebsco_adapter_bucket    = data.terraform_remote_state.ebsco_adapter.outputs.ebsco_adapter_bucket_name
+
   # Calm adapter VHS
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
 
@@ -104,6 +109,7 @@ locals {
   calm_deletions_topic_arn = data.terraform_remote_state.calm_adapter.outputs.calm_deletions_topic_arn
 
   # Reindexer topics
+  ebsco_reindexer_topic_arn  = data.terraform_remote_state.reindexer.outputs.ebsco_reindexer_topic_arn
   miro_reindexer_topic_arn   = data.terraform_remote_state.shared_infra.outputs.catalogue_miro_reindex_topic_arn
   sierra_reindexer_topic_arn = data.terraform_remote_state.shared_infra.outputs.catalogue_sierra_reindex_topic_arn
   mets_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.mets_reindexer_topic_arn
@@ -113,8 +119,6 @@ locals {
   infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
 
   shared_infra = data.terraform_remote_state.shared_infra.outputs
-
-  inferrer_config = data.terraform_remote_state.inferrer.outputs["inferrer_config"]
 
   adapter_config = {
     sierra = {
@@ -159,6 +163,14 @@ locals {
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
       read_policy   = data.aws_iam_policy_document.read_tei_adapter_bucket.json
+    }
+
+    ebsco = {
+      topics = [
+        local.ebsco_adapter_topic_arn,
+      ],
+      reindex_topic = local.ebsco_reindexer_topic_arn
+      read_policy   = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
     }
   }
 
