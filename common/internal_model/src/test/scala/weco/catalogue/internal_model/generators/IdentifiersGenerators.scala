@@ -32,8 +32,10 @@ trait IdentifiersGenerators extends RandomGenerators {
       IdentifierType.MiroImageNumber,
       IdentifierType.SierraSystemNumber,
       IdentifierType.CalmRecordIdentifier,
-      // We do not include IdentifierType.EbscoAltLookup here
-      // because it always redirects Sierra works to Ebsco works.
+      // We deliberately omit Tei & Ebsco identifiers here so that we
+      // have predictable merge behaviour in tests. Miro & Calm records
+      // are always merged to to Sierra, and this is the relationship
+      // we assume in tests that use this generator.
     ),
     value: String = randomAlphanumeric(length = 10),
     ontologyType: String = "Work"
