@@ -112,12 +112,12 @@ class MarcXMLRecordTransformerTest
             <subfield code="c">waiting for a train</subfield>
           </datafield>
           <datafield tag ="773">
-            <subfield code="w">record_id</subfield>
-            <subfield code="g">A name by any other name.</subfield>
+            <subfield code="w">parent_id</subfield>
+            <subfield code="g">Vol. 24, pt. B no. 9 (Sept. 1993), p. 235-48</subfield>
           </datafield>
           <datafield tag ="774">
-            <subfield code="t">A Host</subfield>
-            <subfield code="w">parent_id</subfield>
+            <subfield code="t">View E from rooftop of garden bounded by Bruckner Expressway</subfield>
+            <subfield code="w">constituent_unit_1</subfield>
           </datafield>
           <datafield tag ="856">
             <subfield code="y">Hampster Dance</subfield>
@@ -254,7 +254,7 @@ class MarcXMLRecordTransformerTest
 =======
     it("extracts the collection path") {
       workData.collectionPath.get shouldBe CollectionPath(
-        path = "parent_id/A_name_by_any_other_name_record_id",
+        path = "parent_id/Vol_24_pt_B_no_9_Sept_1993_p_23548_3PaDhRp",
         label = None
 >>>>>>> 5377f7950 (Add transformation for MARC Collection Path)
       )
