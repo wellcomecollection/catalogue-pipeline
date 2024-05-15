@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-05-13T10:22:01.195385Z",
+  "createdAt" : "2024-05-15T08:17:25.565005Z",
   "id" : "wdnn2etp",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "wdnn2etp",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
           "value" : "hx40zJbSlL"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
           "value" : "hx40zJbSlL",
@@ -52,8 +52,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "sierra-system-number",
-                    "label" : "Sierra system number",
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
                     "type" : "IdentifierType"
                   },
                   "value" : "85YYFFvT9f",

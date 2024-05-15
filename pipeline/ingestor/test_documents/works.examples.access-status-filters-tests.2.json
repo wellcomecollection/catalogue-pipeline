@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-05-13T10:22:01.233502Z",
+  "createdAt" : "2024-05-15T08:17:25.601305Z",
   "id" : "vcuqhxox",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "vcuqhxox",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "coEy1hoMJJ"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "coEy1hoMJJ",
@@ -51,8 +51,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "ebsco-alt-lookup",
-                "label" : "EBSCO lookup identifier",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
               "value" : "y8mU1pknKH",

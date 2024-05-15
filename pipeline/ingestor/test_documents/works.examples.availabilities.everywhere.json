@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-05-13T10:22:01.262601Z",
+  "createdAt" : "2024-05-15T08:17:25.623181Z",
   "id" : "ntlrk7nw",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "ntlrk7nw",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
           "value" : "9pCp7jd9rF"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
           "value" : "9pCp7jd9rF",
@@ -51,8 +51,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "miro-image-number",
-                "label" : "Miro image number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
               "value" : "S97qOpHViO",
@@ -79,8 +79,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "sierra-system-number",
-                "label" : "Sierra system number",
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
               "value" : "BZp7GTBM7U",

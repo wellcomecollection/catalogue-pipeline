@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-05-13T10:22:01.217027Z",
+  "createdAt" : "2024-05-15T08:17:25.583925Z",
   "id" : "vcba0kh0",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "vcba0kh0",
         "identifier" : {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "SiI3pPIMZv"
@@ -43,8 +43,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup",
-            "label" : "EBSCO lookup identifier",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "SiI3pPIMZv",

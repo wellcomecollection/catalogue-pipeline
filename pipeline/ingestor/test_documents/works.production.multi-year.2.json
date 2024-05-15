@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2024-05-13T10:22:01.136972Z",
+  "createdAt" : "2024-05-15T08:17:25.523444Z",
   "id" : "mse28reu",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "mse28reu",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "R5aFhbmGJs"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "R5aFhbmGJs",

@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-05-13T10:22:00.991946Z",
+  "createdAt" : "2024-05-15T08:17:25.421484Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "tmdfbk5k",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
           "value" : "Aic5qOhRoS"
@@ -53,8 +53,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
           "value" : "Aic5qOhRoS",
@@ -62,8 +62,8 @@
         },
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "UfcQYSxE7g",
@@ -117,8 +117,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "ebsco-alt-lookup",
-                    "label" : "EBSCO lookup identifier",
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
                     "type" : "IdentifierType"
                   },
                   "value" : "4fR1f4tFlV",
@@ -149,8 +149,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "calm-record-id",
-                    "label" : "Calm RecordIdentifier",
+                    "id" : "sierra-system-number",
+                    "label" : "Sierra system number",
                     "type" : "IdentifierType"
                   },
                   "value" : "MLX8biK5UW",
@@ -171,8 +171,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "sierra-system-number",
-                    "label" : "Sierra system number",
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
                     "type" : "IdentifierType"
                   },
                   "value" : "8xazsI6am8",
@@ -187,8 +187,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "calm-record-id",
-                    "label" : "Calm RecordIdentifier",
+                    "id" : "miro-image-number",
+                    "label" : "Miro image number",
                     "type" : "IdentifierType"
                   },
                   "value" : "aEhJ0QNRzQ",
@@ -203,8 +203,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "ebsco-alt-lookup",
-                    "label" : "EBSCO lookup identifier",
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
                     "type" : "IdentifierType"
                   },
                   "value" : "4g2k9frr0x",
@@ -224,8 +224,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
               "value" : "GWWFxlGgZX",
@@ -258,8 +258,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "sierra-system-number",
-                "label" : "Sierra system number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
               "value" : "dG0mvvCJtU",

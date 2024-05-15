@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-05-13T10:22:01.090694Z",
+  "createdAt" : "2024-05-15T08:17:25.485853Z",
   "id" : "toypx23i",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "toypx23i",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "MhQvVMFf3I"
@@ -53,8 +53,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "MhQvVMFf3I",

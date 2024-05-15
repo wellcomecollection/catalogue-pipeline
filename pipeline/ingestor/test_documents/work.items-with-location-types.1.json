@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-05-13T10:22:01.147313Z",
+  "createdAt" : "2024-05-15T08:17:25.530744Z",
   "id" : "feri8p7w",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "feri8p7w",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "MM8GfuD4za"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "MM8GfuD4za",
@@ -51,8 +51,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "ebsco-alt-lookup",
-                "label" : "EBSCO lookup identifier",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
               "value" : "XaTo6WyiCa",

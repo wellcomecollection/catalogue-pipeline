@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-13T10:22:01.157036Z",
+  "createdAt" : "2024-05-15T08:17:25.539638Z",
   "id" : "cdqpxiaz",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "cdqpxiaz",
         "identifier" : {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "kYbman54cI"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup",
-            "label" : "EBSCO lookup identifier",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "kYbman54cI",

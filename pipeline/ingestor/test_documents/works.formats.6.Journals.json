@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2024-05-13T10:22:01.024578Z",
+  "createdAt" : "2024-05-15T08:17:25.444151Z",
   "id" : "o5wujppw",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "o5wujppw",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
           "value" : "3jkbPOk92T"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
           "value" : "3jkbPOk92T",

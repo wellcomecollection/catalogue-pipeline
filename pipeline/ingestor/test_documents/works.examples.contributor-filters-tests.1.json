@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-05-13T10:22:01.216326Z",
+  "createdAt" : "2024-05-15T08:17:25.583261Z",
   "id" : "r7wachux",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "r7wachux",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
           "value" : "GY2AKxyW0l"
@@ -43,8 +43,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
           "value" : "GY2AKxyW0l",

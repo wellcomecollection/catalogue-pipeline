@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-05-13T10:22:01.196172Z",
+  "createdAt" : "2024-05-15T08:17:25.565376Z",
   "id" : "d5kj1fx3",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "d5kj1fx3",
         "identifier" : {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
           "value" : "1KOlZmZXOW"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup",
-            "label" : "EBSCO lookup identifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
           "value" : "1KOlZmZXOW",
@@ -52,8 +52,8 @@
               "identifiers" : [
                 {
                   "identifierType" : {
-                    "id" : "ebsco-alt-lookup",
-                    "label" : "EBSCO lookup identifier",
+                    "id" : "calm-record-id",
+                    "label" : "Calm RecordIdentifier",
                     "type" : "IdentifierType"
                   },
                   "value" : "odercwIWKJ",

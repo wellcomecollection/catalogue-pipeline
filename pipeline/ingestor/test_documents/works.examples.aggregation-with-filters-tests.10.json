@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-13T10:22:01.158333Z",
+  "createdAt" : "2024-05-15T08:17:25.540993Z",
   "id" : "uoi8tp8u",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "uoi8tp8u",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "Y14qUDXX1m"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "Y14qUDXX1m",

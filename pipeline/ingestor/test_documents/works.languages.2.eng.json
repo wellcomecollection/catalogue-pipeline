@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-05-13T10:22:01.038947Z",
+  "createdAt" : "2024-05-15T08:17:25.454214Z",
   "id" : "giiyodfc",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "giiyodfc",
         "identifier" : {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "9x0HfU454v"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup",
-            "label" : "EBSCO lookup identifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "9x0HfU454v",

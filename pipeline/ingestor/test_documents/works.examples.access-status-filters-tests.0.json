@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-05-13T10:22:01.232628Z",
+  "createdAt" : "2024-05-15T08:17:25.600488Z",
   "id" : "i2iqani2",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "i2iqani2",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "w5jYpuBxun"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "w5jYpuBxun",
@@ -51,8 +51,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "ebsco-alt-lookup",
-                "label" : "EBSCO lookup identifier",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
               "value" : "Gazclr9E9a",

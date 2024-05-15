@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-13T10:22:01.158770Z",
+  "createdAt" : "2024-05-15T08:17:25.541489Z",
   "id" : "xgqiid3b",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "xgqiid3b",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "3x3CaelluS"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "3x3CaelluS",

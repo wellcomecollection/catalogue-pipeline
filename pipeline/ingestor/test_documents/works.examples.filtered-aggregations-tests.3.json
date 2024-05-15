@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-05-13T10:22:01.243339Z",
+  "createdAt" : "2024-05-15T08:17:25.610122Z",
   "id" : "vguputez",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "vguputez",
         "identifier" : {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "6Fz9KprYAw"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "ebsco-alt-lookup",
-            "label" : "EBSCO lookup identifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
           "value" : "6Fz9KprYAw",

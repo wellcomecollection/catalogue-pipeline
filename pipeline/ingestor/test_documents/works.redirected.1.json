@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of redirected works",
-  "createdAt" : "2024-05-13T10:22:00.719846Z",
+  "createdAt" : "2024-05-15T08:17:25.220873Z",
   "id" : "6yu7udsf",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "6yu7udsf",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "WDU051A4vR"
@@ -25,7 +25,7 @@
       "canonicalId" : "7wax09hv",
       "sourceIdentifier" : {
         "identifierType" : {
-          "id" : "ebsco-alt-lookup"
+          "id" : "sierra-system-number"
         },
         "ontologyType" : "Work",
         "value" : "qK07HsFHaW"

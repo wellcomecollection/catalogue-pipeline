@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-13T10:22:01.155280Z",
+  "createdAt" : "2024-05-15T08:17:25.537351Z",
   "id" : "5axbzov3",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "5axbzov3",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "QJncU8pZH7"
@@ -38,8 +38,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "QJncU8pZH7",

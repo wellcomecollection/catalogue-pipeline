@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-05-13T10:22:01.147788Z",
+  "createdAt" : "2024-05-15T08:17:25.531459Z",
   "id" : "xzwsggki",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "xzwsggki",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
           "value" : "G6KR1DmPfn"
@@ -33,8 +33,8 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
           "value" : "G6KR1DmPfn",
@@ -51,8 +51,8 @@
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
                 "type" : "IdentifierType"
               },
               "value" : "k2sxFZY9hd",

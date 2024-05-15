@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of invisible works",
-  "createdAt" : "2024-05-13T10:22:00.712557Z",
+  "createdAt" : "2024-05-15T08:17:25.214801Z",
   "id" : "60edujsq",
   "document" : {
     "debug" : {
@@ -8,7 +8,7 @@
         "id" : "60edujsq",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
           "value" : "m0zER7Z50Y"
