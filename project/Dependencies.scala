@@ -256,7 +256,8 @@ object CatalogueDependencies {
   val sierraTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
       ExternalDependencies.scalacsvDependencies ++
-      WellcomeDependencies.jsonLibrary
+      WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.sierraLibrary
 
   val metsTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies
