@@ -2,7 +2,6 @@ package weco.pipeline.transformer.marc_common.exceptions
 
 import weco.pipeline.transformer.marc_common.models.MarcRecord
 
-
 // Thrown if the data has a cataloguing error -- that is, the transformer
 // cannot handle it without a change in the source data.
 //

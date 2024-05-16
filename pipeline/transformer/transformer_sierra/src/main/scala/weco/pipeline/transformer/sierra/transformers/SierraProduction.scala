@@ -9,7 +9,7 @@ import weco.sierra.models.identifiers.SierraBibNumber
 
 object SierraProduction
     extends SierraIdentifiedDataTransformer
-      with SierraMarcDataConversions {
+    with SierraMarcDataConversions {
 
   type Output = List[ProductionEvent[IdState.Unminted]]
 

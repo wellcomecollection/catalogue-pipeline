@@ -1,14 +1,33 @@
 package weco.pipeline.transformer.marc_common.transformers
 
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{Agent, Concept, Period, Place, ProductionEvent}
-import weco.pipeline.transformer.marc_common.exceptions.{CataloguingException, MarcTransformerException}
-import weco.pipeline.transformer.marc_common.models.{MarcField, MarcFieldOps, MarcRecord, MarcSubfield}
+import weco.catalogue.internal_model.work.{
+  Agent,
+  Concept,
+  Period,
+  Place,
+  ProductionEvent
+}
+import weco.pipeline.transformer.marc_common.exceptions.{
+  CataloguingException,
+  MarcTransformerException
+}
+import weco.pipeline.transformer.marc_common.models.{
+  MarcField,
+  MarcFieldOps,
+  MarcRecord,
+  MarcSubfield
+}
 import weco.pipeline.transformer.marc_common.transformers.parsers.MarcProductionEventParser
-import weco.pipeline.transformer.transformers.{ConceptsTransformer, ParsedPeriod}
+import weco.pipeline.transformer.transformers.{
+  ConceptsTransformer,
+  ParsedPeriod
+}
 
-
-object MarcProduction extends MarcDataTransformer with MarcFieldOps with ConceptsTransformer {
+object MarcProduction
+    extends MarcDataTransformer
+    with MarcFieldOps
+    with ConceptsTransformer {
   type Output = List[ProductionEvent[IdState.Unminted]]
 
   def apply(record: MarcRecord): List[ProductionEvent[IdState.Unminted]] = {
@@ -16,10 +35,10 @@ object MarcProduction extends MarcDataTransformer with MarcFieldOps with Concept
       getProductionFrom260Fields(record),
       getProductionFrom264Fields(record)
     ) match {
-      case (Nil, Nil) => Nil
+      case (Nil, Nil)     => Nil
       case (from260, Nil) => from260
       case (Nil, from264) => from264
-      case (_, _) => getProductionFromBothFields(record)
+      case (_, _)         => getProductionFromBothFields(record)
     }
 
     val marc008productionEvents = getProductionFrom008(record)
@@ -27,12 +46,12 @@ object MarcProduction extends MarcDataTransformer with MarcFieldOps with Concept
     (productionEvents, marc008productionEvents) match {
       // Use the dates from the first 008 production event if we couldn't parse those in 260/4
       case (
-        firstEvent :: otherEvents,
-        ProductionEvent(_, _, _, marc008dates, _) :: _
-        )
-        if firstEvent.dates.forall(
-          _.range.isEmpty
-        ) && marc008dates.nonEmpty =>
+            firstEvent :: otherEvents,
+            ProductionEvent(_, _, _, marc008dates, _) :: _
+          )
+          if firstEvent.dates.forall(
+            _.range.isEmpty
+          ) && marc008dates.nonEmpty =>
         // There is only ever 1 date in an 008 production event
         val productionLabelledDate = marc008dates.head.copy(
           label = firstEvent.dates.headOption
@@ -73,7 +92,9 @@ object MarcProduction extends MarcDataTransformer with MarcFieldOps with Concept
   //
   // https://www.loc.gov/marc/bibliographic/bd260.html
   //
-  private def getProductionFrom260Fields(record: MarcRecord): Seq[ProductionEvent[IdState.Unminted]] =
+  private def getProductionFrom260Fields(
+    record: MarcRecord
+  ): Seq[ProductionEvent[IdState.Unminted]] =
     record.fieldsWithTags("260").map {
       field =>
         val label = labelFromSubFields(field)
@@ -127,9 +148,10 @@ object MarcProduction extends MarcDataTransformer with MarcFieldOps with Concept
   // https://www.loc.gov/marc/bibliographic/bd264.html
   //
   private def getProductionFrom264Fields(
-                                          record: MarcRecord
-                                        ) =
-    record.fieldsWithTags("264")
+    record: MarcRecord
+  ) =
+    record
+      .fieldsWithTags("264")
       .filterNot {
         field =>
           field.indicator2.contains("4") || field.indicator2.contains(" ")
@@ -166,26 +188,28 @@ object MarcProduction extends MarcDataTransformer with MarcFieldOps with Concept
       }
 
   private def marc264OnlyContainsCopyright(
-                                            marcFields: List[MarcField]
-                                          ): Boolean =
+    marcFields: List[MarcField]
+  ): Boolean =
     marcFields match {
       case List(
-      MarcField("264", Seq(MarcSubfield("c", content)), _, _, _, _)
-      ) =>
+            MarcField("264", Seq(MarcSubfield("c", content)), _, _, _, _)
+          ) =>
         content.matches("^©\\d{4}$")
       case _ => false
     }
 
-  private def marc264IsOnlyPunctuation(marc264fields: List[MarcField]): Boolean =
+  private def marc264IsOnlyPunctuation(
+    marc264fields: List[MarcField]
+  ): Boolean =
     marc264fields
       .map { _.subfields.map(_.content).mkString("") }
       .forall { _ matches "^[:,]*$" }
 
   /** Populate the production data if both 260 and 264 are present.
-   *
-   * In general, this is a cataloguing error, but sometimes we can do something
-   * more sensible depending on if/how they're duplicated.
-   */
+    *
+    * In general, this is a cataloguing error, but sometimes we can do something
+    * more sensible depending on if/how they're duplicated.
+    */
   private def getProductionFromBothFields(record: MarcRecord) = {
     val marc260fields = record.fieldsWithTags("260").toList
     val marc264fields = record.fieldsWithTags("264").toList
@@ -233,8 +257,8 @@ object MarcProduction extends MarcDataTransformer with MarcFieldOps with Concept
   }
 
   def getProductionFrom008(
-                            record: MarcRecord
-                          ): List[ProductionEvent[IdState.Unminted]] =
+    record: MarcRecord
+  ): List[ProductionEvent[IdState.Unminted]] =
     record
       .fieldsWithTags("008")
       .flatMap(_.content)
@@ -259,27 +283,27 @@ object MarcProduction extends MarcDataTransformer with MarcFieldOps with Concept
     field.subfields.map(_.content).mkString(" ")
 
   private def placesFromSubfields(
-                                   field: MarcField,
-                                   subfieldTag: String
-                                 ): List[Place[IdState.Unminted]] =
+    field: MarcField,
+    subfieldTag: String
+  ): List[Place[IdState.Unminted]] =
     field
       .subfieldsWithTag(subfieldTag)
       .map(_.content)
       .map(Place(_).normalised)
 
   private def agentsFromSubfields(
-                                   field: MarcField,
-                                   subfieldTag: String
-                                 ): List[Agent[IdState.Unminted]] =
+    field: MarcField,
+    subfieldTag: String
+  ): List[Agent[IdState.Unminted]] =
     field
       .subfieldsWithTag(subfieldTag)
       .map(_.content)
       .map(Agent(_).normalised)
 
   private def datesFromSubfields(
-                                  field: MarcField,
-                                  subfieldTag: String
-                                ): List[Period[IdState.Unminted]] =
+    field: MarcField,
+    subfieldTag: String
+  ): List[Period[IdState.Unminted]] =
     field
       .subfieldsWithTag(subfieldTag)
       .map(_.content)

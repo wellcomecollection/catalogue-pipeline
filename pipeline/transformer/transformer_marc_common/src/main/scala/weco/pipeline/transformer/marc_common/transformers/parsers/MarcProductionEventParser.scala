@@ -8,10 +8,11 @@ import fastparse._
 import NoWhitespace._
 
 /** Parses Marc 008 fields into ProductionEvent
- *
- * Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
- */
-object MarcProductionEventParser extends Parser[ProductionEvent[IdState.Unminted]] {
+  *
+  * Spec: https://www.loc.gov/marc/bibliographic/bd008a.html
+  */
+object MarcProductionEventParser
+    extends Parser[ProductionEvent[IdState.Unminted]] {
 
   def parser[_: P] =
     (Start ~ createdDate ~ Marc008DateParser.parser ~ MarcPlaceParser.parser.?)
@@ -30,4 +31,3 @@ object MarcProductionEventParser extends Parser[ProductionEvent[IdState.Unminted
 
   def createdDate[_: P] = AnyChar.rep(exactly = 6)
 }
-
