@@ -1350,19 +1350,39 @@ class SierraTransformerTest
          |  ${createTitleVarfield()},
          |    {
          |      "marcTag": "440",
-         |      "content": "Series via 440"
+         |       "subfields": [
+         |         {
+         |           "tag": "a",
+         |           "content": "Series via 440"
+         |         }
+         |       ]
          |    },
          |    {
          |      "marcTag": "490",
-         |      "content": "Series via 490"
+         |      "subfields": [
+         |        {
+         |          "tag": "a",
+         |          "content": "Series via 490"
+         |        }
+         |      ]
          |    },
          |    {
          |      "marcTag": "773",
-         |      "content": "Series via 773"
+         |      "subfields": [
+         |        {
+         |          "tag": "a",
+         |          "content": "Series via 773"
+         |        }
+         |      ]
          |    },
          |    {
          |      "marcTag": "830",
-         |      "content": "Series via 830"
+         |      "subfields": [
+         |        {
+         |          "tag": "a",
+         |          "content": "Series via 830"
+         |        }
+         |      ]
          |    }
          |  ]
          |}""".stripMargin
