@@ -14,5 +14,8 @@ trait MarcFieldOps {
       }
     }
 
+    def subfieldsWithTag(tag: String): List[MarcSubfield] = {
+      field.subfields.filter(_.tag == tag).toList
+    }
   }
 }

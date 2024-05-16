@@ -9,7 +9,7 @@ import weco.catalogue.internal_model.work.{
   Place,
   ProductionEvent
 }
-import weco.pipeline.transformer.sierra.exceptions.CataloguingException
+import weco.pipeline.transformer.marc_common.exceptions.CataloguingException
 import weco.pipeline.transformer.transformers.ParsedPeriod
 import weco.sierra.generators.{MarcGenerators, SierraDataGenerators}
 import weco.sierra.models.marc.{Subfield, VarField}
