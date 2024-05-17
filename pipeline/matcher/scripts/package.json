@@ -1,10 +1,12 @@
 {
   "scripts": {
-    "getMatcherGraph": "ts-node getMatcherGraph"
+    "getMatcherGraph": "ts-node --transpile-only getMatcherGraph"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.44.0",
+    "@aws-sdk/client-secrets-manager": "^3.507.0",
     "@aws-sdk/lib-dynamodb": "^3.44.0",
+    "@elastic/elasticsearch": "^8.12.1",
     "@types/node": "^16.11.7",
     "@types/node-fetch": "2",
     "@types/yargs": "^17.0.5",
