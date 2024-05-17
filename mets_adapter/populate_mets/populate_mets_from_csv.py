@@ -11,7 +11,7 @@ from populate_mets import specific
 
 
 def main(csv_path):
-    with open(csv_path, 'r') as csv_file:
+    with open(csv_path, "r") as csv_file:
         specific(extract_bag_ids(csv.reader(csv_file)))
 
 
@@ -21,5 +21,5 @@ def extract_bag_ids(csv_reader):
             yield f"born-digital/{row[1]}"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1])
