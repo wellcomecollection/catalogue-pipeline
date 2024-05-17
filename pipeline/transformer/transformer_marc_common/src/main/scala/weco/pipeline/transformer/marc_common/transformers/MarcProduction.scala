@@ -10,7 +10,6 @@ import weco.catalogue.internal_model.work.{
 }
 import weco.pipeline.transformer.marc_common.exceptions.{
   CataloguingException,
-  MarcTransformerException
 }
 import weco.pipeline.transformer.marc_common.models.{
   MarcField,
@@ -169,7 +168,8 @@ object MarcProduction
             case "2" => "Distribution"
             case "3" => "Manufacture"
             case other =>
-              throw MarcTransformerException(
+              throw CataloguingException(
+                record = record,
                 message =
                   s"Unrecognised second indicator for production function: [$other]"
               )
@@ -192,7 +192,7 @@ object MarcProduction
   ): Boolean =
     marcFields match {
       case List(
-            MarcField("264", Seq(MarcSubfield("c", content)), _, _, _, _)
+            MarcField("264", Seq(MarcSubfield("c", content)), _, _, _)
           ) =>
         content.matches("^©\\d{4}$")
       case _ => false
@@ -256,12 +256,12 @@ object MarcProduction
     }
   }
 
-  def getProductionFrom008(
+  private def getProductionFrom008(
     record: MarcRecord
   ): List[ProductionEvent[IdState.Unminted]] =
     record
-      .fieldsWithTags("008")
-      .flatMap(_.content)
+      .controlField("008")
+      .map(_.content)
       .flatMap(MarcProductionEventParser(_))
       .toList
 

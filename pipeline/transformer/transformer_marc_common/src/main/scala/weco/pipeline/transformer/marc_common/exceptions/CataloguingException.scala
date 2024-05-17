@@ -10,7 +10,8 @@ import weco.pipeline.transformer.marc_common.models.MarcRecord
 class CataloguingException(record: MarcRecord, message: String)
     extends MarcTransformerException(
       new RuntimeException(
-        s"Problem in the MARC data for $record: $message"
+        // Try and extract the ID from field 001, so we can easily find it
+        s"Problem in the data for ${record.controlField("001")}: $message"
       )
     )
 

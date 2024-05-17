@@ -282,7 +282,12 @@ class SierraProductionTest
       }
 
       it("throws an error if the 2nd indicator is unrecognised") {
+        val bibId = createSierraBibNumber
         val varFields = List(
+          createVarFieldWith(
+            marcTag = "001",
+            content = Some(bibId.withCheckDigit)
+          ),
           createVarFieldWith(
             marcTag = "264",
             indicator2 = "x",
@@ -291,13 +296,12 @@ class SierraProductionTest
         )
 
         val bibData = createSierraBibDataWith(varFields = varFields)
-        val bibId = createSierraBibNumber
 
         val caught = intercept[CataloguingException] {
           SierraProduction(bibId, bibData)
         }
 
-        caught.getMessage should startWith("Problem in the Sierra data")
+        caught.getMessage should startWith("Problem in the data")
         caught.getMessage should include(bibId.withoutCheckDigit)
         caught.getMessage should include(
           "Unrecognised second indicator for production function")
@@ -440,8 +444,14 @@ class SierraProductionTest
   }
 
   describe("Both MARC field 260 and 264") {
-    it("throws a cataloguing error if both 260 and 264 are present") {
+    it("throws a cataloguing error if both 260 and 264 are present, and 264 has a 2nd indicator") {
+      val bibId = createSierraBibNumber
+
       val varFields = List(
+        VarField(
+          marcTag = Some("001"),
+          content = Some(bibId.withCheckDigit)
+        ),
         VarField(
           marcTag = "260",
           subfields = List(
@@ -449,7 +459,8 @@ class SierraProductionTest
           )
         ),
         VarField(
-          marcTag = "264",
+          marcTag = Some("264"),
+          indicator2 = Some("0"),
           subfields = List(
             Subfield(tag = "a", content = "London")
           )
@@ -457,13 +468,12 @@ class SierraProductionTest
       )
 
       val bibData = createSierraBibDataWith(varFields = varFields)
-      val bibId = createSierraBibNumber
 
       val caught = intercept[CataloguingException] {
         SierraProduction(bibId, bibData)
       }
 
-      caught.getMessage should startWith("Problem in the Sierra data")
+      caught.getMessage should startWith("Problem in the data")
       caught.getMessage should include(bibId.withoutCheckDigit)
       caught.getMessage should include("Record has both 260 and 264 fields")
     }
