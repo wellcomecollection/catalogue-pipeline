@@ -13,13 +13,14 @@ module "pipeline" {
     works = {
       identified = "works_identified.2023-05-26"
       merged     = "works_merged.2023-05-26"
-      indexed    = "works_indexed.2024-01-09"
+      indexed    = "works_indexed.2024-04-30"
     }
     images = {
       indexed        = "images_indexed.2024-01-09"
-      works_analysis = "works_indexed.2024-01-09"
+      works_analysis = "works_indexed.2024-04-30"
     }
   }
+  allow_delete_indices = true
 
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date
