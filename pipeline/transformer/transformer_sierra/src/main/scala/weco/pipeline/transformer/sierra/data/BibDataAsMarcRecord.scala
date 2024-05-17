@@ -32,8 +32,8 @@ trait SierraMarcDataConversions {
     )
 
   implicit def varFieldToMarcControlField(
-                                           varField: VarField
-                                         ): MarcControlField =
+    varField: VarField
+  ): MarcControlField =
     MarcControlField(
       marcTag = varField.marcTag.get,
       content = varField.content.getOrElse("")
@@ -55,7 +55,8 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
   // See: https://www.loc.gov/marc/bibliographic/bdleader.html
   override val leader: String = bibData.varFields
     .find(_.fieldTag.eq(Some("_")))
-    .flatMap(_.content).getOrElse("")
+    .flatMap(_.content)
+    .getOrElse("")
 
   // Control fields map to VarFields 001, 003, 005, 006, 007, 008
   // See: https://www.loc.gov/marc/bibliographic/bd00x.html

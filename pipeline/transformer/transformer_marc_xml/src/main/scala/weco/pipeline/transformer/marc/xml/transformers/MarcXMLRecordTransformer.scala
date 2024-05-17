@@ -4,7 +4,21 @@ import weco.catalogue.internal_model.identifiers.DataState
 import weco.catalogue.internal_model.work.WorkData
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
-import weco.pipeline.transformer.marc_common.transformers.{MarcAlternativeTitles, MarcContributors, MarcCurrentFrequency, MarcDescription, MarcDesignation, MarcEdition, MarcElectronicResources, MarcGenres, MarcInternationalStandardIdentifiers, MarcLanguage, MarcProduction, MarcSubjects, MarcTitle}
+import weco.pipeline.transformer.marc_common.transformers.{
+  MarcAlternativeTitles,
+  MarcContributors,
+  MarcCurrentFrequency,
+  MarcDescription,
+  MarcDesignation,
+  MarcEdition,
+  MarcElectronicResources,
+  MarcGenres,
+  MarcInternationalStandardIdentifiers,
+  MarcLanguage,
+  MarcProduction,
+  MarcSubjects,
+  MarcTitle
+}
 
 object MarcXMLRecordTransformer {
   def apply(

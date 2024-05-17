@@ -8,9 +8,7 @@ import weco.catalogue.internal_model.work.{
   Place,
   ProductionEvent
 }
-import weco.pipeline.transformer.marc_common.exceptions.{
-  CataloguingException,
-}
+import weco.pipeline.transformer.marc_common.exceptions.CataloguingException
 import weco.pipeline.transformer.marc_common.models.{
   MarcField,
   MarcFieldOps,
