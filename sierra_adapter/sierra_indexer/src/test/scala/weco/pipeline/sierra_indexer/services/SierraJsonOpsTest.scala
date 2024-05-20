@@ -189,7 +189,8 @@ class SierraJsonOpsTest extends AnyFunSpec with Matchers with EitherValues {
     }
 
     it(
-      "returns the remainder unmodified if there are no varFields or fixedFields") {
+      "returns the remainder unmodified if there are no varFields or fixedFields"
+    ) {
       val jsonString =
         s"""
            |{

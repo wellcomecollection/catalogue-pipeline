@@ -24,7 +24,8 @@ class SourcesTest
 
       Sources.findFirstLinkedDigitisedSierraWorkFor(
         physicalWork,
-        sources = Seq.empty) shouldBe None
+        sources = Seq.empty
+      ) shouldBe None
     }
 
     it("returns the first source work with a matching merge candidate") {
@@ -36,14 +37,15 @@ class SourcesTest
           .mergeCandidates(
             List(
               createSierraPairMergeCandidateFor(digitisedWork1),
-              createSierraPairMergeCandidateFor(digitisedWork2),
+              createSierraPairMergeCandidateFor(digitisedWork2)
             )
           )
 
       val result =
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
-          sources = Seq(digitisedWork1, digitisedWork2))
+          sources = Seq(digitisedWork1, digitisedWork2)
+        )
 
       result shouldBe Some(digitisedWork1)
     }
@@ -62,7 +64,8 @@ class SourcesTest
       val result =
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
-          sources = Seq(digitisedWork))
+          sources = Seq(digitisedWork)
+        )
 
       result shouldBe Some(digitisedWork)
     }
@@ -77,7 +80,8 @@ class SourcesTest
               MergeCandidate(
                 id = IdState.Identified(
                   sourceIdentifier = digitisedWork.sourceIdentifier,
-                  canonicalId = digitisedWork.state.canonicalId),
+                  canonicalId = digitisedWork.state.canonicalId
+                ),
                 reason = "Linked for a mystery reason"
               )
             )
@@ -86,7 +90,8 @@ class SourcesTest
       val result =
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
-          sources = Seq(digitisedWork))
+          sources = Seq(digitisedWork)
+        )
 
       result shouldBe None
     }
@@ -101,7 +106,8 @@ class SourcesTest
               MergeCandidate(
                 id = IdState.Identified(
                   sourceIdentifier = createSierraIdentifierSourceIdentifier,
-                  canonicalId = createCanonicalId),
+                  canonicalId = createCanonicalId
+                ),
                 reason = "Physical/digitised Sierra work"
               )
             )
@@ -110,7 +116,8 @@ class SourcesTest
       val result =
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
-          sources = Seq(digitisedWork))
+          sources = Seq(digitisedWork)
+        )
 
       result shouldBe None
     }
@@ -127,7 +134,8 @@ class SourcesTest
       val result =
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
-          sources = Seq(digitisedWork))
+          sources = Seq(digitisedWork)
+        )
 
       result shouldBe None
     }
@@ -144,7 +152,8 @@ class SourcesTest
       val result =
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
-          sources = Seq(digitisedWork))
+          sources = Seq(digitisedWork)
+        )
 
       result shouldBe None
     }
@@ -162,13 +171,15 @@ class SourcesTest
       val result =
         Sources.findFirstLinkedDigitisedSierraWorkFor(
           physicalWork,
-          sources = Seq(digitisedWork))
+          sources = Seq(digitisedWork)
+        )
 
       result shouldBe None
     }
 
     it(
-      "finds a merge candidate if the MC is on the e-bib, and the physical bib has an unrelated MC") {
+      "finds a merge candidate if the MC is on the e-bib, and the physical bib has an unrelated MC"
+    ) {
       val miroWork = miroIdentifiedWork()
       val physicalWork =
         sierraPhysicalIdentifiedWork()
@@ -185,7 +196,8 @@ class SourcesTest
 
       val result = Sources.findFirstLinkedDigitisedSierraWorkFor(
         physicalWork,
-        sources = Seq(digitisedWork, miroWork))
+        sources = Seq(digitisedWork, miroWork)
+      )
 
       result shouldBe Some(digitisedWork)
     }

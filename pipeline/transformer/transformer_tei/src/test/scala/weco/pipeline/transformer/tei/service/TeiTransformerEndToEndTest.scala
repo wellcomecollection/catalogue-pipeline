@@ -39,7 +39,8 @@ class TeiTransformerEndToEndTest
         val TeiPayload = createAndStorePayloadWith(
           id = "MS_WMS_1",
           version = 1,
-          title = title)(store)
+          title = title
+        )(store)
         sendNotificationToSQS(queue, TeiPayload)
 
         eventually {
@@ -60,43 +61,51 @@ class TeiTransformerEndToEndTest
   }
 
   def withWorker[R](
-    workIndexer: MemoryIndexer[Work[Source]] = new MemoryIndexer[Work[Source]](),
+    workIndexer: MemoryIndexer[Work[Source]] =
+      new MemoryIndexer[Work[Source]](),
     workKeySender: MemoryMessageSender = new MemoryMessageSender(),
     store: MemoryTypedStore[S3ObjectLocation, String] = MemoryTypedStore(
-      initialEntries = Map.empty)
+      initialEntries = Map.empty
+    )
   )(
     testWith: TestWith[
-      (TransformerWorker[TeiSourcePayload, TeiMetadata, String],
-       QueuePair,
-       MemoryIndexer[Work[Source]],
-       MemoryMessageSender,
-       MemoryTypedStore[S3ObjectLocation, String]),
-      R]
+      (
+        TransformerWorker[TeiSourcePayload, TeiMetadata, String],
+        QueuePair,
+        MemoryIndexer[Work[Source]],
+        MemoryMessageSender,
+        MemoryTypedStore[S3ObjectLocation, String]
+      ),
+      R
+    ]
   ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1.second) {
       case q @ QueuePair(queue, _) =>
         withPipelineStream[Work[Source], R](
           queue = queue,
           indexer = workIndexer,
-          sender = workKeySender) { pipelineStream =>
-          val retriever =
-            new MemoryRetriever[Work[Source]](index = mutable.Map())
+          sender = workKeySender
+        ) {
+          pipelineStream =>
+            val retriever =
+              new MemoryRetriever[Work[Source]](index = mutable.Map())
 
-          val worker =
-            new TransformerWorker[TeiSourcePayload, TeiMetadata, String](
-              transformer = new TeiTransformer(store),
-              pipelineStream = pipelineStream,
-              retriever = retriever,
-              sourceDataRetriever = new TeiSourceDataRetriever
-            )
-          worker.run()
+            val worker =
+              new TransformerWorker[TeiSourcePayload, TeiMetadata, String](
+                transformer = new TeiTransformer(store),
+                pipelineStream = pipelineStream,
+                retriever = retriever,
+                sourceDataRetriever = new TeiSourceDataRetriever
+              )
+            worker.run()
 
-          testWith((worker, q, workIndexer, workKeySender, store))
+            testWith((worker, q, workIndexer, workKeySender, store))
 
         }
     }
   def createAndStorePayloadWith(id: String, title: String, version: Int)(
-    store: MemoryTypedStore[S3ObjectLocation, String]): TeiSourcePayload = {
+    store: MemoryTypedStore[S3ObjectLocation, String]
+  ): TeiSourcePayload = {
 
     val xmlString =
       teiXml(id, refNo = idnoMsId(title))

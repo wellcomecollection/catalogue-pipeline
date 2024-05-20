@@ -60,7 +60,8 @@ class SierraHoldingsTest
           subfields = List(
             Subfield(
               tag = "u",
-              content = "https://resolver.example.com/journal"),
+              content = "https://resolver.example.com/journal"
+            ),
             Subfield(tag = "z", content = "Connect to Example Journals")
           )
         ),
@@ -73,7 +74,8 @@ class SierraHoldingsTest
             Subfield(tag = "k", content = "01-17"),
             Subfield(
               tag = "x",
-              content = "Chronology adjusted by embargo period"),
+              content = "Chronology adjusted by embargo period"
+            )
           )
         ),
         VarField(
@@ -82,7 +84,7 @@ class SierraHoldingsTest
             Subfield(tag = "8", content = "1"),
             Subfield(tag = "i", content = "(year)"),
             Subfield(tag = "j", content = "(month)"),
-            Subfield(tag = "k", content = "(day)"),
+            Subfield(tag = "k", content = "(day)")
           )
         )
       )
@@ -106,7 +108,8 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -115,14 +118,16 @@ class SierraHoldingsTest
     }
 
     it(
-      "creates multiple holdings based on multiple instance of 856 on the same holdings") {
+      "creates multiple holdings based on multiple instance of 856 on the same holdings"
+    ) {
       val varFields = List(
         VarField(
           marcTag = "856",
           subfields = List(
             Subfield(
               tag = "u",
-              content = "https://resolver.example.com/journal"),
+              content = "https://resolver.example.com/journal"
+            ),
             Subfield(tag = "z", content = "Connect to Example Journals")
           )
         ),
@@ -152,7 +157,8 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           ),
@@ -167,7 +173,8 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           ),
@@ -183,7 +190,8 @@ class SierraHoldingsTest
           subfields = List(
             Subfield(
               tag = "u",
-              content = "https://resolver.example.com/journal"),
+              content = "https://resolver.example.com/journal"
+            ),
             Subfield(tag = "z", content = "Connect to Example Journals")
           )
         )
@@ -219,7 +227,8 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           ),
@@ -234,7 +243,8 @@ class SierraHoldingsTest
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           ),
@@ -276,7 +286,8 @@ class SierraHoldingsTest
               Subfield(
                 tag = "z",
                 content =
-                  "Connect to 17th-18th Century Burney Collection newspapers")
+                  "Connect to 17th-18th Century Burney Collection newspapers"
+              )
             )
           )
         )
@@ -312,7 +323,8 @@ class SierraHoldingsTest
               Subfield(
                 tag = "z",
                 content =
-                  "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection")
+                  "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection"
+              )
             )
           )
         )
@@ -328,18 +340,21 @@ class SierraHoldingsTest
       holdings shouldBe List(
         Holdings(
           note = Some(
-            "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection"),
+            "Universal London Price Current -- Seventeenth and Eighteenth Century Burney Newspapers Collection"
+          ),
           enumeration = List("1 Jan. 1787 - 31 Dec. 1789"),
           location = Some(
             DigitalLocation(
               url = "http://example.org/journal",
               linkText = Some(
-                "Connect to 17th-18th Century Burney Collection newspapers"),
+                "Connect to 17th-18th Century Burney Collection newspapers"
+              ),
               locationType = LocationType.OnlineResource,
               accessConditions = List(
                 AccessCondition(
                   method = AccessMethod.ViewOnline,
-                  status = AccessStatus.LicensedResources())
+                  status = AccessStatus.LicensedResources()
+                )
               )
             )
           )
@@ -354,7 +369,8 @@ class SierraHoldingsTest
           subfields = List(
             Subfield(
               tag = "u",
-              content = "https://resolver.example.com/journal"),
+              content = "https://resolver.example.com/journal"
+            ),
             Subfield(tag = "z", content = "Connect to Example Journals")
           )
         )
@@ -391,8 +407,12 @@ class SierraHoldingsTest
 
       // We transform with deleted = true and deleted = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
-      getHoldings(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
-      getHoldings(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> deletedHoldingsData)
+      ) shouldBe empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> undeletedHoldingsData)
+      ) should not be empty
     }
 
     it("ignores electronic holdings that are suppressed") {
@@ -402,7 +422,8 @@ class SierraHoldingsTest
           subfields = List(
             Subfield(
               tag = "u",
-              content = "https://suppressed.example.org/journal")
+              content = "https://suppressed.example.org/journal"
+            )
           )
         )
       )
@@ -419,8 +440,12 @@ class SierraHoldingsTest
 
       // We transform with suppressed = true and suppressed = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
-      getHoldings(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
-      getHoldings(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> suppressedHoldingsData)
+      ) shouldBe empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)
+      ) should not be empty
     }
   }
 
@@ -500,7 +525,8 @@ class SierraHoldingsTest
             Subfield(tag = "a", content = "Missing Vol. 2"),
             Subfield(
               tag = "z",
-              content = "Lost in a mysterious fishing accident")
+              content = "Lost in a mysterious fishing accident"
+            )
           )
         )
       )
@@ -672,23 +698,24 @@ class SierraHoldingsTest
     }
 
     it("creates multiple holdings based on multiple data blocks") {
-      val dataMap = (1 to 3).map { volno =>
-        val varFields = List(
-          VarField(
-            marcTag = "866",
-            subfields = List(
-              Subfield(tag = "a", content = s"Vol. $volno only")
+      val dataMap = (1 to 3).map {
+        volno =>
+          val varFields = List(
+            VarField(
+              marcTag = "866",
+              subfields = List(
+                Subfield(tag = "a", content = s"Vol. $volno only")
+              )
             )
           )
-        )
 
-        val holdingsData = SierraHoldingsData(
-          fixedFields =
-            Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
-          varFields = varFields
-        )
+          val holdingsData = SierraHoldingsData(
+            fixedFields =
+              Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+            varFields = varFields
+          )
 
-        SierraHoldingsNumber(s"${volno}00000$volno") -> holdingsData
+          SierraHoldingsNumber(s"${volno}00000$volno") -> holdingsData
       }.toMap
 
       val holdings = getHoldings(dataMap)
@@ -696,28 +723,29 @@ class SierraHoldingsTest
       holdings.map { _.enumeration } shouldBe Seq(
         List("Vol. 1 only"),
         List("Vol. 2 only"),
-        List("Vol. 3 only"),
+        List("Vol. 3 only")
       )
     }
 
     it("de-duplicates holdings after transformation") {
-      val dataMap = (1 to 3).map { _ =>
-        val varFields = List(
-          VarField(
-            marcTag = "866",
-            subfields = List(
-              Subfield(tag = "a", content = "Complete set")
+      val dataMap = (1 to 3).map {
+        _ =>
+          val varFields = List(
+            VarField(
+              marcTag = "866",
+              subfields = List(
+                Subfield(tag = "a", content = "Complete set")
+              )
             )
           )
-        )
 
-        val holdingsData = SierraHoldingsData(
-          fixedFields =
-            Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
-          varFields = varFields
-        )
+          val holdingsData = SierraHoldingsData(
+            fixedFields =
+              Map("40" -> FixedField(label = "LOCATION", value = "stax ")),
+            varFields = varFields
+          )
 
-        createSierraHoldingsNumber -> holdingsData
+          createSierraHoldingsNumber -> holdingsData
       }.toMap
 
       val holdings = getHoldings(dataMap)
@@ -745,8 +773,12 @@ class SierraHoldingsTest
 
       // We transform with deleted = true and deleted = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
-      getHoldings(Map(createSierraHoldingsNumber -> deletedHoldingsData)) shouldBe empty
-      getHoldings(Map(createSierraHoldingsNumber -> undeletedHoldingsData)) should not be empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> deletedHoldingsData)
+      ) shouldBe empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> undeletedHoldingsData)
+      ) should not be empty
     }
 
     it("skips holdings that are suppressed") {
@@ -771,13 +803,17 @@ class SierraHoldingsTest
 
       // We transform with suppressed = true and suppressed = false, so we know
       // the holdings isn't being skipped because it's an incomplete record.
-      getHoldings(Map(createSierraHoldingsNumber -> suppressedHoldingsData)) shouldBe empty
-      getHoldings(Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)) should not be empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> suppressedHoldingsData)
+      ) shouldBe empty
+      getHoldings(
+        Map(createSierraHoldingsNumber -> unsuppressedHoldingsData)
+      ) should not be empty
     }
   }
 
   private def getHoldings(
-    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData])
-    : List[Holdings] =
+    holdingsDataMap: Map[SierraHoldingsNumber, SierraHoldingsData]
+  ): List[Holdings] =
     SierraHoldings(createSierraBibNumber, holdingsDataMap)
 }

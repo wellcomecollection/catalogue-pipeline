@@ -51,7 +51,8 @@ class MiroIdentifiersTest
   }
 
   it(
-    "uses a distinct type for iconographic numbers, but only if they look like i-numbers") {
+    "uses a distinct type for iconographic numbers, but only if they look like i-numbers"
+  ) {
     val miroRecord = createMiroRecordWith(
       libraryRefDepartment =
         List(Some("Iconographic Collection"), Some("Iconographic Collection")),

@@ -32,23 +32,23 @@ trait DynamoCalmVHSFixture
     with S3ObjectLocationGenerators
     with Matchers
     with EitherValues {
-  def createStore[T: Codec](table: DynamoFixtures.Table)
-    : VersionedHybridStore[String, Int, S3ObjectLocation, T] = {
+  def createStore[T: Codec](
+    table: DynamoFixtures.Table
+  ): VersionedHybridStore[String, Int, S3ObjectLocation, T] = {
     val dynamoConfig = createDynamoConfigWith(table)
     val hybridStore = {
       new HybridStoreWithMaxima[String, Int, S3ObjectLocation, T] {
         implicit override val indexedStore
-          : Store[Version[String, Int], S3ObjectLocation] with Maxima[
-            String,
-            Version[String, Int],
-            S3ObjectLocation] =
+          : Store[Version[String, Int], S3ObjectLocation]
+            with Maxima[String, Version[String, Int], S3ObjectLocation] =
           new DynamoHashStore[String, Int, S3ObjectLocation](dynamoConfig)
 
         override implicit val typedStore: TypedStore[S3ObjectLocation, T] =
           MemoryTypedStore[S3ObjectLocation, T]()
 
         override protected def createTypeStoreId(
-          id: Version[String, Int]): S3ObjectLocation = createS3ObjectLocation
+          id: Version[String, Int]
+        ): S3ObjectLocation = createS3ObjectLocation
       }
     }
     new VersionedHybridStore(hybridStore)
@@ -58,28 +58,34 @@ trait DynamoCalmVHSFixture
     createTableWithHashKey(table)
 
   def withDynamoSourceVHS[R](entries: Seq[CalmRecord])(
-    testWith: TestWith[(SourceVHS[CalmRecord],
-                        DynamoFixtures.Table,
-                        () => Seq[CalmSourceDynamoRow]),
-                       R]
-  ): R = withLocalDynamoDbTable { table =>
-    val sourceVhs = new SourceVHS[CalmRecord](createStore[CalmRecord](table))
-    val ids = entries.map { record =>
-      val result = sourceVhs.putLatest(record.id)(record)
-      result.value.id
-    }
-
-    def getRows: Seq[CalmSourceDynamoRow] =
-      ids.flatMap {
-        case Version(id, _) =>
-          scanamo
-            .exec {
-              ScanamoTable[CalmSourceDynamoRow](table.name)
-                .get("id" === id)
-            }
-            .map(_.value)
+    testWith: TestWith[
+      (
+        SourceVHS[CalmRecord],
+        DynamoFixtures.Table,
+        () => Seq[CalmSourceDynamoRow]
+      ),
+      R
+    ]
+  ): R = withLocalDynamoDbTable {
+    table =>
+      val sourceVhs = new SourceVHS[CalmRecord](createStore[CalmRecord](table))
+      val ids = entries.map {
+        record =>
+          val result = sourceVhs.putLatest(record.id)(record)
+          result.value.id
       }
 
-    testWith((sourceVhs, table, getRows _))
+      def getRows: Seq[CalmSourceDynamoRow] =
+        ids.flatMap {
+          case Version(id, _) =>
+            scanamo
+              .exec {
+                ScanamoTable[CalmSourceDynamoRow](table.name)
+                  .get("id" === id)
+              }
+              .map(_.value)
+        }
+
+      testWith((sourceVhs, table, getRows _))
   }
 }

@@ -22,7 +22,8 @@ class SierraTransformableTest
     // Is that likely?  Hard to say, but we can handle it so we might as well.
     SierraTransformable(
       sierraId = createSierraBibNumber,
-      modifiedTime = Instant.now)
+      modifiedTime = Instant.now
+    )
   }
 
   it("allows creation from only a SierraBibRecord") {
@@ -34,8 +35,9 @@ class SierraTransformableTest
 
   it("allows looking up items by ID") {
     val bibId = createSierraBibNumber
-    val itemRecords = (0 to 3).map { _ =>
-      createSierraItemRecordWith(bibIds = List(bibId))
+    val itemRecords = (0 to 3).map {
+      _ =>
+        createSierraItemRecordWith(bibIds = List(bibId))
     }
     val transformable = createSierraTransformableStubWith(
       bibId = bibId,

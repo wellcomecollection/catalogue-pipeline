@@ -32,132 +32,159 @@ class WorkMatcherTest
     with TimeAssertions {
 
   it(
-    "matches a work with no linked identifiers to itself only A and saves the updated graph A") {
-    withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        withWorkMatcher(workGraphStore) { workMatcher =>
-          val work = createWorkWith(id = idA)
+    "matches a work with no linked identifiers to itself only A and saves the updated graph A"
+  ) {
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            withWorkMatcher(workGraphStore) {
+              workMatcher =>
+                val work = createWorkWith(id = idA)
 
-          whenReady(workMatcher.matchWork(work)) { matcherResult =>
-            assertRecent(matcherResult.createdTime)
-            matcherResult.works shouldBe
-              Set(
-                MatchedIdentifiers(Set(WorkIdentifier(work.id, work.version))))
+                whenReady(workMatcher.matchWork(work)) {
+                  matcherResult =>
+                    assertRecent(matcherResult.createdTime)
+                    matcherResult.works shouldBe
+                      Set(
+                        MatchedIdentifiers(
+                          Set(WorkIdentifier(work.id, work.version))
+                        )
+                      )
 
-            val savedLinkedWork = getWorkNode(work.id, graphTable)
+                    val savedLinkedWork = getWorkNode(work.id, graphTable)
 
-            savedLinkedWork shouldBe
-              WorkNode(
-                id = work.id,
-                subgraphId = SubgraphId(work.id),
-                componentIds = List(work.id),
-                sourceWork = SourceWorkData(
-                  id = work.state.sourceIdentifier,
-                  version = work.version),
-              )
-          }
+                    savedLinkedWork shouldBe
+                      WorkNode(
+                        id = work.id,
+                        subgraphId = SubgraphId(work.id),
+                        componentIds = List(work.id),
+                        sourceWork = SourceWorkData(
+                          id = work.state.sourceIdentifier,
+                          version = work.version
+                        )
+                      )
+                }
+            }
         }
-      }
     }
   }
 
   it(
-    "matches a work with a single linked identifier A->B and saves the graph A->B") {
-    withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        withWorkMatcher(workGraphStore) { workMatcher =>
-          val work = createWorkWith(
-            id = idA,
-            mergeCandidateIds = Set(idB)
-          )
+    "matches a work with a single linked identifier A->B and saves the graph A->B"
+  ) {
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            withWorkMatcher(workGraphStore) {
+              workMatcher =>
+                val work = createWorkWith(
+                  id = idA,
+                  mergeCandidateIds = Set(idB)
+                )
 
-          whenReady(workMatcher.matchWork(work)) { matcherResult =>
-            assertRecent(matcherResult.createdTime)
-            matcherResult.works shouldBe
-              Set(MatchedIdentifiers(Set(WorkIdentifier(idA, work.version))))
+                whenReady(workMatcher.matchWork(work)) {
+                  matcherResult =>
+                    assertRecent(matcherResult.createdTime)
+                    matcherResult.works shouldBe
+                      Set(
+                        MatchedIdentifiers(
+                          Set(WorkIdentifier(idA, work.version))
+                        )
+                      )
 
-            val savedWorkNodes = scanTable[WorkNode](graphTable)
-              .map(_.right.value)
+                    val savedWorkNodes = scanTable[WorkNode](graphTable)
+                      .map(_.right.value)
 
-            savedWorkNodes should contain theSameElementsAs List(
-              WorkNode(
-                id = idA,
-                subgraphId = SubgraphId(idA, idB),
-                componentIds = List(idA, idB),
-                sourceWork = SourceWorkData(
-                  id = work.state.sourceIdentifier,
-                  version = work.version,
-                  mergeCandidateIds = List(idB)
-                ),
-              ),
-              WorkNode(
-                id = idB,
-                subgraphId = SubgraphId(idA, idB),
-                componentIds = List(idA, idB),
-              ),
-            )
-          }
+                    savedWorkNodes should contain theSameElementsAs List(
+                      WorkNode(
+                        id = idA,
+                        subgraphId = SubgraphId(idA, idB),
+                        componentIds = List(idA, idB),
+                        sourceWork = SourceWorkData(
+                          id = work.state.sourceIdentifier,
+                          version = work.version,
+                          mergeCandidateIds = List(idB)
+                        )
+                      ),
+                      WorkNode(
+                        id = idB,
+                        subgraphId = SubgraphId(idA, idB),
+                        componentIds = List(idA, idB)
+                      )
+                    )
+                }
+            }
         }
-      }
     }
   }
 
   it(
-    "matches a previously stored work A->B with an update B->C and saves the graph A->B->C") {
-    withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        withWorkMatcher(workGraphStore) { workMatcher =>
-          val (workA, workB) = createTwoWorks("A->B")
-          val workC = createOneWork("C")
+    "matches a previously stored work A->B with an update B->C and saves the graph A->B->C"
+  ) {
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            withWorkMatcher(workGraphStore) {
+              workMatcher =>
+                val (workA, workB) = createTwoWorks("A->B")
+                val workC = createOneWork("C")
 
-          putTableItems(
-            items = Seq(workA, workB, workC),
-            table = graphTable
-          )
-
-          val work = createWorkWith(
-            id = idB,
-            version = 2,
-            mergeCandidateIds = Set(idC)
-          )
-
-          whenReady(workMatcher.matchWork(work)) { matcherResult =>
-            assertRecent(matcherResult.createdTime)
-            matcherResult.works shouldBe
-              Set(
-                MatchedIdentifiers(
-                  Set(
-                    WorkIdentifier(idA, version = 1),
-                    WorkIdentifier(idB, version = 2),
-                    WorkIdentifier(idC, version = 1))
+                putTableItems(
+                  items = Seq(workA, workB, workC),
+                  table = graphTable
                 )
-              )
 
-            val savedNodes = scanTable[WorkNode](graphTable)
-              .map(_.right.value)
-              .toSet
-
-            savedNodes shouldBe Set(
-              workA
-                .copy(
-                  subgraphId = SubgraphId(idA, idB, idC),
-                  componentIds = List(idA, idB, idC),
-                ),
-              workB
-                .copy(
-                  subgraphId = SubgraphId(idA, idB, idC),
-                  componentIds = List(idA, idB, idC),
+                val work = createWorkWith(
+                  id = idB,
+                  version = 2,
+                  mergeCandidateIds = Set(idC)
                 )
-                .updateSourceWork(version = 2, mergeCandidateIds = Set(idC)),
-              workC
-                .copy(
-                  subgraphId = SubgraphId(idA, idB, idC),
-                  componentIds = List(idA, idB, idC),
-                ),
-            )
-          }
+
+                whenReady(workMatcher.matchWork(work)) {
+                  matcherResult =>
+                    assertRecent(matcherResult.createdTime)
+                    matcherResult.works shouldBe
+                      Set(
+                        MatchedIdentifiers(
+                          Set(
+                            WorkIdentifier(idA, version = 1),
+                            WorkIdentifier(idB, version = 2),
+                            WorkIdentifier(idC, version = 1)
+                          )
+                        )
+                      )
+
+                    val savedNodes = scanTable[WorkNode](graphTable)
+                      .map(_.right.value)
+                      .toSet
+
+                    savedNodes shouldBe Set(
+                      workA
+                        .copy(
+                          subgraphId = SubgraphId(idA, idB, idC),
+                          componentIds = List(idA, idB, idC)
+                        ),
+                      workB
+                        .copy(
+                          subgraphId = SubgraphId(idA, idB, idC),
+                          componentIds = List(idA, idB, idC)
+                        )
+                        .updateSourceWork(
+                          version = 2,
+                          mergeCandidateIds = Set(idC)
+                        ),
+                      workC
+                        .copy(
+                          subgraphId = SubgraphId(idA, idB, idC),
+                          componentIds = List(idA, idB, idC)
+                        )
+                    )
+                }
+            }
         }
-      }
     }
   }
 
@@ -173,63 +200,69 @@ class WorkMatcherTest
     val lockingService =
       new MemoryLockingService[MatcherResult, Future]()
 
-    withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        val work = createWorkStub
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            val work = createWorkStub
 
-        val workMatcher = new WorkMatcher(workGraphStore, lockingService)
+            val workMatcher = new WorkMatcher(workGraphStore, lockingService)
 
-        val result = workMatcher.matchWork(work)
+            val result = workMatcher.matchWork(work)
 
-        whenReady(result.failed) {
-          _.getMessage should startWith("FailedLock(")
+            whenReady(result.failed) {
+              _.getMessage should startWith("FailedLock(")
+            }
         }
-      }
     }
   }
 
   it("throws the locking error if it fails to lock secondary works") {
     val expectedException = new Throwable("BOOM!")
 
-    withWorkGraphTable { graphTable =>
-      withWorkGraphStore(graphTable) { workGraphStore =>
-        val subgraphId = SubgraphId(idA, idB, idC)
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            val subgraphId = SubgraphId(idA, idB, idC)
 
-        val (workA, workB, workC) = createThreeWorks("A->B->C")
+            val (workA, workB, workC) = createThreeWorks("A->B->C")
 
-        val future = workGraphStore.put(Set(workA, workB, workC))
+            val future = workGraphStore.put(Set(workA, workB, workC))
 
-        whenReady(future) { _ =>
-          val work = createWorkWith(
-            id = idA,
-            mergeCandidateIds = Set(idB),
-            version = workA.sourceWork.get.version + 1
-          )
+            whenReady(future) {
+              _ =>
+                val work = createWorkWith(
+                  id = idA,
+                  mergeCandidateIds = Set(idB),
+                  version = workA.sourceWork.get.version + 1
+                )
 
-          implicit val lockDao: MemoryLockDao[String, UUID] =
-            new MemoryLockDao[String, UUID] {
-              override def lock(id: String, contextId: UUID): LockResult =
-                synchronized {
-                  if (id == subgraphId) {
-                    Left(LockFailure(id, e = expectedException))
-                  } else {
-                    super.lock(id, contextId)
+                implicit val lockDao: MemoryLockDao[String, UUID] =
+                  new MemoryLockDao[String, UUID] {
+                    override def lock(id: String, contextId: UUID): LockResult =
+                      synchronized {
+                        if (id == subgraphId) {
+                          Left(LockFailure(id, e = expectedException))
+                        } else {
+                          super.lock(id, contextId)
+                        }
+                      }
                   }
+
+                val lockingService =
+                  new MemoryLockingService[MatcherResult, Future]()
+
+                val workMatcher =
+                  new WorkMatcher(workGraphStore, lockingService)
+
+                val result = workMatcher.matchWork(work)
+
+                whenReady(result.failed) {
+                  _.getMessage should startWith("FailedLock(")
                 }
             }
-
-          val lockingService =
-            new MemoryLockingService[MatcherResult, Future]()
-
-          val workMatcher = new WorkMatcher(workGraphStore, lockingService)
-
-          val result = workMatcher.matchWork(work)
-
-          whenReady(result.failed) {
-            _.getMessage should startWith("FailedLock(")
-          }
         }
-      }
     }
   }
 
@@ -243,61 +276,71 @@ class WorkMatcherTest
 
     val brokenStore = new WorkGraphStore(workNodeDao) {
       override def findAffectedWorks(
-        ids: Set[CanonicalId]): Future[Set[WorkNode]] =
+        ids: Set[CanonicalId]
+      ): Future[Set[WorkNode]] =
         Future.successful(Set[WorkNode]())
 
       override def put(nodes: Set[WorkNode]): Future[Unit] =
         Future.failed(expectedException)
     }
 
-    withWorkMatcher(brokenStore) { workMatcher =>
-      val work = createWorkStub
+    withWorkMatcher(brokenStore) {
+      workMatcher =>
+        val work = createWorkStub
 
-      whenReady(workMatcher.matchWork(work).failed) {
-        _.getMessage shouldBe expectedException.getMessage
-      }
+        whenReady(workMatcher.matchWork(work).failed) {
+          _.getMessage shouldBe expectedException.getMessage
+        }
     }
   }
 
   it("skips writing to the store if there are no changes") {
-    withWorkGraphTable { graphTable =>
-      withWorkNodeDao(graphTable) { workNodeDao =>
-        var putCount = 0
+    withWorkGraphTable {
+      graphTable =>
+        withWorkNodeDao(graphTable) {
+          workNodeDao =>
+            var putCount = 0
 
-        val spyStore = new WorkGraphStore(workNodeDao) {
-          override def put(nodes: Set[WorkNode]): Future[Unit] = {
-            putCount += 1
-            super.put(nodes)
-          }
+            val spyStore = new WorkGraphStore(workNodeDao) {
+              override def put(nodes: Set[WorkNode]): Future[Unit] = {
+                putCount += 1
+                super.put(nodes)
+              }
+            }
+
+            val work = createWorkStub
+
+            withWorkMatcher(spyStore) {
+              workMatcher =>
+                // Try to match the work more than once.  We have to match in sequence,
+                // not in parallel, or the locking will block all but one of them from
+                // doing anything non-trivial.
+                val futures =
+                  workMatcher
+                    .matchWork(work)
+                    .flatMap {
+                      _ =>
+                        workMatcher.matchWork(work)
+                    }
+                    .flatMap {
+                      _ =>
+                        workMatcher.matchWork(work)
+                    }
+                    .flatMap {
+                      _ =>
+                        workMatcher.matchWork(work)
+                    }
+                    .flatMap {
+                      _ =>
+                        workMatcher.matchWork(work)
+                    }
+
+                whenReady(futures) {
+                  _ =>
+                    putCount shouldBe 1
+                }
+            }
         }
-
-        val work = createWorkStub
-
-        withWorkMatcher(spyStore) { workMatcher =>
-          // Try to match the work more than once.  We have to match in sequence,
-          // not in parallel, or the locking will block all but one of them from
-          // doing anything non-trivial.
-          val futures =
-            workMatcher
-              .matchWork(work)
-              .flatMap { _ =>
-                workMatcher.matchWork(work)
-              }
-              .flatMap { _ =>
-                workMatcher.matchWork(work)
-              }
-              .flatMap { _ =>
-                workMatcher.matchWork(work)
-              }
-              .flatMap { _ =>
-                workMatcher.matchWork(work)
-              }
-
-          whenReady(futures) { _ =>
-            putCount shouldBe 1
-          }
-        }
-      }
     }
   }
 
@@ -319,106 +362,119 @@ class WorkMatcherTest
   // gets a stale value from A from the store, and blats the update to A.
   //
   it("locks over all the works affected in an update") {
-    withWorkGraphTable { graphTable =>
-      withWorkNodeDao(graphTable) { workNodeDao =>
-        // We take control of the lock dao here to ensure a very precise
-        // sequence of events:
-        //
-        //    1.  The matcher starts processing the update to A.
-        //    2.  It prepares what it's going to write to the graph store,
-        //        but it doesn't take an expanded lock. (*)
-        //    3.  The matcher starts processing the update to A.
-        //        It reads the old value of A/B from the store.
-        //    4.  Now we allow the update to 'A' to write the new values
-        //        to the store.
-        //    5.  The matcher prepares to write the new value of C, but doesn't
-        //        do so until the update to 'A' is finished. (**)
-        //
-        var createdLocksHistory: List[String] = List()
-        var findAffectedWorksHistory: List[Set[CanonicalId]] = List()
+    withWorkGraphTable {
+      graphTable =>
+        withWorkNodeDao(graphTable) {
+          workNodeDao =>
+            // We take control of the lock dao here to ensure a very precise
+            // sequence of events:
+            //
+            //    1.  The matcher starts processing the update to A.
+            //    2.  It prepares what it's going to write to the graph store,
+            //        but it doesn't take an expanded lock. (*)
+            //    3.  The matcher starts processing the update to A.
+            //        It reads the old value of A/B from the store.
+            //    4.  Now we allow the update to 'A' to write the new values
+            //        to the store.
+            //    5.  The matcher prepares to write the new value of C, but doesn't
+            //        do so until the update to 'A' is finished. (**)
+            //
+            var createdLocksHistory: List[String] = List()
+            var findAffectedWorksHistory: List[Set[CanonicalId]] = List()
 
-        val workGraphStore = new WorkGraphStore(workNodeDao) {
-          override def findAffectedWorks(
-            ids: Set[CanonicalId]): Future[Set[WorkNode]] = {
-            findAffectedWorksHistory = findAffectedWorksHistory :+ ids
-            super.findAffectedWorks(ids)
-          }
-        }
-
-        implicit val lockDao: MemoryLockDao[String, UUID] =
-          new MemoryLockDao[String, UUID] {
-            override def lock(id: String, contextId: UUID): LockResult = {
-              // (*) We don't let the update to 'A' start writing graph updates until
-              // we know the update to 'C' has read the old state of the graph
-              if (id == SubgraphId(idA, idB) && createdLocksHistory.count(
-                    _ == SubgraphId(idA, idB)) == 1) {
-                while (!findAffectedWorksHistory.contains(Set(idB, idC))) {}
+            val workGraphStore = new WorkGraphStore(workNodeDao) {
+              override def findAffectedWorks(
+                ids: Set[CanonicalId]
+              ): Future[Set[WorkNode]] = {
+                findAffectedWorksHistory = findAffectedWorksHistory :+ ids
+                super.findAffectedWorks(ids)
               }
-
-              // (**) We don't let the update to 'C' start writing graph updates until
-              // we know the update to 'A' is finished
-              if ((id == SubgraphId(idA, idB) || id == SubgraphId(
-                    idA,
-                    idB,
-                    idC)) &&
-                  createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 2) {
-                while (locks.contains(idA.underlying)) {}
-              }
-
-              createdLocksHistory = createdLocksHistory :+ id
-              super.lock(id, contextId)
             }
-          }
 
-        val workMatcher = new WorkMatcher(
-          workGraphStore = workGraphStore,
-          lockingService = new MemoryLockingService[MatcherResult, Future]()
-        )
+            implicit val lockDao: MemoryLockDao[String, UUID] =
+              new MemoryLockDao[String, UUID] {
+                override def lock(id: String, contextId: UUID): LockResult = {
+                  // (*) We don't let the update to 'A' start writing graph updates until
+                  // we know the update to 'C' has read the old state of the graph
+                  if (
+                    id == SubgraphId(idA, idB) && createdLocksHistory.count(
+                      _ == SubgraphId(idA, idB)
+                    ) == 1
+                  ) {
+                    while (!findAffectedWorksHistory.contains(Set(idB, idC))) {}
+                  }
 
-        // We have three works:
-        // (A) is standalone
-        // (B) points to A
-        // (C) points to B
-        val workA = createWorkWith(id = idA)
-        val workB = createWorkWith(id = idB, mergeCandidateIds = Set(idA))
-        val workC = createWorkWith(id = idC, mergeCandidateIds = Set(idB))
+                  // (**) We don't let the update to 'C' start writing graph updates until
+                  // we know the update to 'A' is finished
+                  if (
+                    (id == SubgraphId(idA, idB) || id == SubgraphId(
+                      idA,
+                      idB,
+                      idC
+                    )) &&
+                    createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 2
+                  ) {
+                    while (locks.contains(idA.underlying)) {}
+                  }
 
-        // First store work B in the graph.
-        //
-        // This will put two nodes in the graph: a node for B, and a stub for A.
-        Await.result(workMatcher.matchWork(workB), atMost = 5 seconds)
+                  createdLocksHistory = createdLocksHistory :+ id
+                  super.lock(id, contextId)
+                }
+              }
 
-        // Now try to store works A and C simultaneously.
-        //
-        // Here's how this can go wrong: when we get work C, we know we need
-        // to lock at least {B, C}.  It's only when we inspect the existing graph
-        // that we discover that we also need to link in A, so we should lock
-        // that ID as well.  If we don't lock over A, we might blat the update
-        // coming in work A.
-        //
-        // We need the locking to ensure we don't try to apply both updates at once.
-        val futureA = workMatcher.matchWork(workA)
-        val futureC = workMatcher.matchWork(workC)
+            val workMatcher = new WorkMatcher(
+              workGraphStore = workGraphStore,
+              lockingService = new MemoryLockingService[MatcherResult, Future]()
+            )
 
-        val resultA = Try {
-          Await.result(futureA, atMost = 5 seconds)
+            // We have three works:
+            // (A) is standalone
+            // (B) points to A
+            // (C) points to B
+            val workA = createWorkWith(id = idA)
+            val workB = createWorkWith(id = idB, mergeCandidateIds = Set(idA))
+            val workC = createWorkWith(id = idC, mergeCandidateIds = Set(idB))
+
+            // First store work B in the graph.
+            //
+            // This will put two nodes in the graph: a node for B, and a stub for A.
+            Await.result(workMatcher.matchWork(workB), atMost = 5 seconds)
+
+            // Now try to store works A and C simultaneously.
+            //
+            // Here's how this can go wrong: when we get work C, we know we need
+            // to lock at least {B, C}.  It's only when we inspect the existing graph
+            // that we discover that we also need to link in A, so we should lock
+            // that ID as well.  If we don't lock over A, we might blat the update
+            // coming in work A.
+            //
+            // We need the locking to ensure we don't try to apply both updates at once.
+            val futureA = workMatcher.matchWork(workA)
+            val futureC = workMatcher.matchWork(workC)
+
+            val resultA = Try {
+              Await.result(futureA, atMost = 5 seconds)
+            }
+            val resultC = Try {
+              Await.result(futureC, atMost = 5 seconds)
+            }
+
+            // The update to A should have succeeded; the update to B should have failed
+            // because of inconsistent data.
+            resultA shouldBe a[Success[_]]
+
+            resultC shouldBe a[Failure[_]]
+            resultC
+              .asInstanceOf[Failure[_]]
+              .exception
+              .getMessage should include(
+              "graph store contents changed during matching"
+            )
+
+            // If the update to A was successful, we should see the 'sourceWork' field
+            // for A is populated.  If not, this will fail.
+            getWorkNode(idA, graphTable).sourceWork shouldBe defined
         }
-        val resultC = Try {
-          Await.result(futureC, atMost = 5 seconds)
-        }
-
-        // The update to A should have succeeded; the update to B should have failed
-        // because of inconsistent data.
-        resultA shouldBe a[Success[_]]
-
-        resultC shouldBe a[Failure[_]]
-        resultC.asInstanceOf[Failure[_]].exception.getMessage should include(
-          "graph store contents changed during matching")
-
-        // If the update to A was successful, we should see the 'sourceWork' field
-        // for A is populated.  If not, this will fail.
-        getWorkNode(idA, graphTable).sourceWork shouldBe defined
-      }
     }
   }
 

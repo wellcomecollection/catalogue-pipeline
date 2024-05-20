@@ -16,7 +16,7 @@ class SubgraphIdTest extends AnyFunSpec with Matchers with WorkStubGenerators {
       SubgraphId(idB, idA, idC),
       SubgraphId(idB, idC, idA),
       SubgraphId(idC, idA, idB),
-      SubgraphId(idC, idB, idA),
+      SubgraphId(idC, idB, idA)
     )
 
     orderings should have size 1

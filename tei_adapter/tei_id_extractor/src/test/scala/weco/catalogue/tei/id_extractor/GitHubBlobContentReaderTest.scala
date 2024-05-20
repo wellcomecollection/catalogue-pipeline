@@ -39,12 +39,13 @@ class GitHubBlobContentReaderTest
 
     val httpClient = new MemoryHttpClient(responses)
 
-    withActorSystem { implicit ac =>
-      val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+    withActorSystem {
+      implicit ac =>
+        val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
 
-      whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
-        assertXmlStringsAreEqual(_, readResource("WMS_Arabic_1.xml"))
-      }
+        whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
+          assertXmlStringsAreEqual(_, readResource("WMS_Arabic_1.xml"))
+        }
     }
   }
 
@@ -66,12 +67,13 @@ class GitHubBlobContentReaderTest
 
     val httpClient = new MemoryHttpClient(responses)
 
-    withActorSystem { implicit ac =>
-      val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+    withActorSystem {
+      implicit ac =>
+        val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
 
-      whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
-        assertXmlStringsAreEqual(_, readResource("Javanese_11.xml"))
-      }
+        whenReady(gitHubBlobReader.getBlob(new URI(uri))) {
+          assertXmlStringsAreEqual(_, readResource("Javanese_11.xml"))
+        }
     }
   }
 
@@ -90,13 +92,15 @@ class GitHubBlobContentReaderTest
 
     val httpClient = new MemoryHttpClient(responses)
 
-    withActorSystem { implicit ac =>
-      val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
+    withActorSystem {
+      implicit ac =>
+        val gitHubBlobReader = new GitHubBlobContentReader(httpClient)
 
-      whenReady(gitHubBlobReader.getBlob(new URI(uri)).failed) { result =>
-        result shouldBe a[RuntimeException]
-        result.getMessage should include("Server Error")
-      }
+        whenReady(gitHubBlobReader.getBlob(new URI(uri)).failed) {
+          result =>
+            result shouldBe a[RuntimeException]
+            result.getMessage should include("Server Error")
+        }
     }
   }
 }

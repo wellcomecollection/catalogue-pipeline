@@ -35,26 +35,31 @@ trait CalmApiClientFixtures extends Akka {
   val randomFactor = 0.0
   val maxRestarts = 2
 
-  def withTestHttpCalmApiClient[R](responses: List[HttpResponse])(
-    testWith: TestWith[TestHttpCalmApiClient, R]): R =
-    withMaterializer { implicit mat =>
-      val client = new TestHttpCalmApiClient(responses)
-      testWith(client)
+  def withTestHttpCalmApiClient[R](
+    responses: List[HttpResponse]
+  )(testWith: TestWith[TestHttpCalmApiClient, R]): R =
+    withMaterializer {
+      implicit mat =>
+        val client = new TestHttpCalmApiClient(responses)
+        testWith(client)
     }
 
   def withTestCalmApiClient[R](
-                                handleSearch: CalmQueryBase => CalmSession = _ => throw new NotImplementedError,
-                                handleSummary: Int => CalmRecord = _ => throw new NotImplementedError,
-                                handleAbandon: Cookie => Done = _ => throw new NotImplementedError,
+    handleSearch: CalmQueryBase => CalmSession = _ =>
+      throw new NotImplementedError,
+    handleSummary: Int => CalmRecord = _ => throw new NotImplementedError,
+    handleAbandon: Cookie => Done = _ => throw new NotImplementedError
   )(testWith: TestWith[TestCalmApiClient, R]): R =
-    withMaterializer { mat =>
-      testWith(
-        new TestCalmApiClient(handleSearch, handleSummary, handleAbandon))
+    withMaterializer {
+      mat =>
+        testWith(
+          new TestCalmApiClient(handleSearch, handleSummary, handleAbandon)
+        )
     }
 
   class TestHttpClient(responses: Iterator[HttpResponse])(
-    implicit val ec: ExecutionContext)
-      extends HttpClient {
+    implicit val ec: ExecutionContext
+  ) extends HttpClient {
     final var requests: List[HttpRequest] = Nil
 
     def singleRequest(request: HttpRequest): Future[HttpResponse] = {
@@ -68,8 +73,8 @@ trait CalmApiClientFixtures extends Akka {
   }
 
   class TestHttpCalmApiClient(responseList: List[HttpResponse])(
-    implicit mat: Materializer)
-      extends HttpCalmApiClient(
+    implicit mat: Materializer
+  ) extends HttpCalmApiClient(
         client = new TestHttpClient(responseList.toIterator),
         url,
         username,
@@ -77,15 +82,16 @@ trait CalmApiClientFixtures extends Akka {
         minBackoff,
         maxBackoff,
         randomFactor,
-        maxRestarts) {
+        maxRestarts
+      ) {
     def requests: List[HttpRequest] =
       client.asInstanceOf[TestHttpClient].requests
   }
 
   class TestCalmApiClient(
-                           handleSearch: CalmQueryBase => CalmSession,
-                           handleSummary: Int => CalmRecord,
-                           handleAbandon: Cookie => Done
+    handleSearch: CalmQueryBase => CalmSession,
+    handleSummary: Int => CalmRecord,
+    handleAbandon: Cookie => Done
   ) extends CalmApiClient {
     var requests: List[(CalmXmlRequest, Option[Cookie])] = Nil
 

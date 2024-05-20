@@ -24,7 +24,7 @@ class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
           <controlfield tag="001">ebs1234567890e</controlfield>
           <controlfield tag="003">EBZ</controlfield>
         </record>
-      ).controlField("003").get shouldBe MarcControlField("003","EBZ")
+      ).controlField("003").get shouldBe MarcControlField("003", "EBZ")
     }
 
     it("returns None if the requested field does not exist") {

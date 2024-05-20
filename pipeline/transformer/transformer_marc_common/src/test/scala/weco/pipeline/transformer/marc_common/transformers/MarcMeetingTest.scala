@@ -49,7 +49,7 @@ class MarcMeetingTest
           }
       }
     }
-    
+
     val labelSubfieldTags = Seq(
       "a",
       "c",

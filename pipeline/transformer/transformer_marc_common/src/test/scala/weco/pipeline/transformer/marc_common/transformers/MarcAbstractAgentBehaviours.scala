@@ -16,7 +16,7 @@ trait MarcAbstractAgentBehaviours
     ontologyType: String,
     marcTag: String
   ): Unit = {
-    
+
     describe("error conditions") {
       it("returns an error if called with an inappropriate field") {
         transformer(

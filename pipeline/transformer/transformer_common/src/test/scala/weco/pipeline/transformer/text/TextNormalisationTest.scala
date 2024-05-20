@@ -37,8 +37,9 @@ class TextNormalisationTest extends AnyFunSpec with Matchers {
         ("a title ... with ... . ", "a title ... with ..."),
         ("a title ... with .... ", "a title ... with ...")
       )
-      forAll(examples) { (i: String, o: String) =>
-        i.trimTrailing('.') shouldBe o
+      forAll(examples) {
+        (i: String, o: String) =>
+          i.trimTrailing('.') shouldBe o
       }
     }
 
@@ -48,8 +49,9 @@ class TextNormalisationTest extends AnyFunSpec with Matchers {
         ("text\\", '\\'),
         ("text^", '^')
       )
-      forAll(examples) { (i: String, c: Char) =>
-        i.trimTrailing(c) shouldBe "text"
+      forAll(examples) {
+        (i: String, c: Char) =>
+          i.trimTrailing(c) shouldBe "text"
       }
     }
   }
@@ -61,10 +63,11 @@ class TextNormalisationTest extends AnyFunSpec with Matchers {
         ("text.", "text"),
         (" text. ", " text"),
         ("text. ", "text"),
-        ("text . ", "text"),
+        ("text . ", "text")
       )
-      forAll(examples) { (i: String, o: String) =>
-        i.trimTrailingPeriod shouldBe o
+      forAll(examples) {
+        (i: String, o: String) =>
+          i.trimTrailingPeriod shouldBe o
       }
     }
 
@@ -73,8 +76,9 @@ class TextNormalisationTest extends AnyFunSpec with Matchers {
         ("text...", "text..."),
         ("text... ", "text...")
       )
-      forAll(examples) { (i: String, o: String) =>
-        i.trimTrailingPeriod shouldBe o
+      forAll(examples) {
+        (i: String, o: String) =>
+          i.trimTrailingPeriod shouldBe o
       }
     }
   }
@@ -90,8 +94,9 @@ class TextNormalisationTest extends AnyFunSpec with Matchers {
         ("Text Text", "Text Text"),
         ("Text teXT", "Text teXT")
       )
-      forAll(examples) { (i: String, o: String) =>
-        i.sentenceCase shouldBe o
+      forAll(examples) {
+        (i: String, o: String) =>
+          i.sentenceCase shouldBe o
       }
     }
   }

@@ -77,7 +77,8 @@ class CalmStoreTest
     }
 
     it(
-      "does not replace a stored CALM record if the retrieval date is newer and the data is the same") {
+      "does not replace a stored CALM record if the retrieval date is newer and the data is the same"
+    ) {
       val oldRecord =
         CalmRecord("A", data, oldTime, published = true)
       val newRecord = CalmRecord("A", data, newTime)
@@ -95,7 +96,8 @@ class CalmStoreTest
     }
 
     it(
-      "replaces a stored CALM record if the data is the same but it is not recorded as published") {
+      "replaces a stored CALM record if the data is the same but it is not recorded as published"
+    ) {
       val oldRecord =
         CalmRecord("A", oldData, oldTime, published = false)
       val newRecord = CalmRecord("A", oldData, newTime)
@@ -122,7 +124,8 @@ class CalmStoreTest
     }
 
     it(
-      "does not replace a stored CALM record if the retrieval date on the new record is older") {
+      "does not replace a stored CALM record if the retrieval date on the new record is older"
+    ) {
       val oldRecord = CalmRecord("A", oldData, oldTime)
       val newRecord = CalmRecord("A", newData, newTime)
 
@@ -180,13 +183,14 @@ class CalmStoreTest
 
       val calmStore = new CalmStore(sourceVHS)
 
-      calmStore.setRecordPublished(Version("A", 5), record) shouldBe a[Right[_,
-                                                                             _]]
+      calmStore
+        .setRecordPublished(Version("A", 5), record) shouldBe a[Right[_, _]]
 
       assertStored(
         id = "A",
         expectedVersion = 6,
-        expectedRecord = record.copy(published = true))
+        expectedRecord = record.copy(published = true)
+      )
     }
 
     it("fails setting Calm record as published if version already exists") {
@@ -212,7 +216,7 @@ class CalmStoreTest
     storedLocation: S3ObjectLocation,
     storedRecord: CalmRecord,
     expectedVersion: Int,
-    expectedRecord: CalmRecord,
+    expectedRecord: CalmRecord
   )(
     implicit sourceVHS: SourceVHS[CalmRecord]
   ): Assertion = {
@@ -229,11 +233,12 @@ class CalmStoreTest
   private def assertStored(
     id: String,
     expectedVersion: Int,
-    expectedRecord: CalmRecord,
+    expectedRecord: CalmRecord
   )(
     implicit sourceVHS: SourceVHS[CalmRecord]
   ): Assertion =
     sourceVHS.underlying.getLatest(id).value shouldBe Identified(
       Version(id, expectedVersion),
-      expectedRecord)
+      expectedRecord
+    )
 }

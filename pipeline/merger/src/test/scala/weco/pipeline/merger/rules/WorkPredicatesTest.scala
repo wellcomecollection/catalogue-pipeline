@@ -26,8 +26,9 @@ class WorkPredicatesTest
     miroIdentifiedWork(),
     metsIdentifiedWork().invisible(),
     metsIdentifiedWork()
-      .items((0 to 3).map { _ =>
-        createDigitalItem
+      .items((0 to 3).map {
+        _ =>
+          createDigitalItem
       }.toList)
       .imageData(List(createMetsImageData.toIdentified))
       .invisible(),
@@ -38,9 +39,12 @@ class WorkPredicatesTest
     sierraIdentifiedWork()
       .items(
         (0 to 3)
-          .map(_ =>
-            createUnidentifiableItemWith(
-              locations = List(createDigitalLocation)))
+          .map(
+            _ =>
+              createUnidentifiableItemWith(
+                locations = List(createDigitalLocation)
+              )
+          )
           .toList
       ),
     sierraPhysicalIdentifiedWork(),
@@ -50,54 +54,60 @@ class WorkPredicatesTest
     sierraIdentifiedWork().format(Format.Pictures),
     sierraIdentifiedWork().format(Format.Music),
     sierraIdentifiedWork().otherIdentifiers(
-      List(createDigcodeIdentifier("digaids")))
+      List(createDigcodeIdentifier("digaids"))
+    )
   )
 
   it("selects Sierra works") {
     val filtered = works.filter(WorkPredicates.sierraWork)
     filtered should not be empty
-    forAll(filtered) { work =>
-      work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
+    forAll(filtered) {
+      work =>
+        work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
     }
   }
 
   it("selects singleDigitalItemMetsWork works") {
     val filtered = works.filter(WorkPredicates.singleDigitalItemMetsWork)
     filtered should not be empty
-    forAll(filtered) { work =>
-      work.sourceIdentifier.identifierType.id shouldBe "mets"
-      work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocation]
+    forAll(filtered) {
+      work =>
+        work.sourceIdentifier.identifierType.id shouldBe "mets"
+        work.data.items should have size 1
+        work.data.items.head.locations.head shouldBe a[DigitalLocation]
     }
   }
 
   it("selects singleDigitalItemMiroWork works") {
     val filtered = works.filter(WorkPredicates.singleDigitalItemMiroWork)
     filtered should not be empty
-    forAll(filtered) { work =>
-      work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
-      work.data.items should have size 1
-      work.data.items.head.locations.head shouldBe a[DigitalLocation]
+    forAll(filtered) {
+      work =>
+        work.sourceIdentifier.identifierType.id shouldBe "miro-image-number"
+        work.data.items should have size 1
+        work.data.items.head.locations.head shouldBe a[DigitalLocation]
     }
   }
 
   it("selects single-item Sierra works") {
     val filtered = works.filter(WorkPredicates.singleItemSierra)
     filtered should not be empty
-    forAll(filtered) { work =>
-      work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
-      work.data.items should have length 1
+    forAll(filtered) {
+      work =>
+        work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
+        work.data.items should have length 1
     }
   }
 
   it("selects physical Sierra works") {
     val filtered = works.filter(WorkPredicates.physicalSierra)
     filtered should not be empty
-    forAll(filtered) { work =>
-      work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
-      atLeast(1, work.data.items.flatMap(_.locations)) should matchPattern {
-        case _: PhysicalLocation =>
-      }
+    forAll(filtered) {
+      work =>
+        work.sourceIdentifier.identifierType.id shouldBe "sierra-system-number"
+        atLeast(1, work.data.items.flatMap(_.locations)) should matchPattern {
+          case _: PhysicalLocation =>
+        }
     }
   }
 
@@ -105,21 +115,24 @@ class WorkPredicatesTest
     val filtered =
       works.filter(WorkPredicates.sierraPictureDigitalImageOr3DObject)
     filtered should not be empty
-    forAll(filtered) { work =>
-      work.data.format should contain oneOf
-        (Format.Pictures,
-        Format.DigitalImages,
-        Format.`3DObjects`)
+    forAll(filtered) {
+      work =>
+        work.data.format should contain oneOf
+          (Format.Pictures,
+          Format.DigitalImages,
+          Format.`3DObjects`)
     }
   }
 
   it("selects Sierra works with the `digaids` digcode") {
     val filtered = works.filter(WorkPredicates.sierraDigitisedMiro)
     filtered should not be empty
-    forAll(filtered) { work =>
-      work.data.otherIdentifiers.map(_.identifierType.id) should contain(
-        "wellcome-digcode")
-      work.data.otherIdentifiers.map(_.value) should contain("digaids")
+    forAll(filtered) {
+      work =>
+        work.data.otherIdentifiers.map(_.identifierType.id) should contain(
+          "wellcome-digcode"
+        )
+        work.data.otherIdentifiers.map(_.value) should contain("digaids")
     }
   }
 }

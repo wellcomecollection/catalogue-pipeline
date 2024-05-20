@@ -4,7 +4,10 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 
-class CalmAlternativeTitlesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
+class CalmAlternativeTitlesTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmRecordGenerators {
   it("doesn't find any alternative titles on an empty record") {
     val record = createCalmRecord
 

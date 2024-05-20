@@ -84,7 +84,8 @@ class ReindexJobConfigBuilderTest extends AnyFunSpec with Matchers {
     configMap("mets--catalogue") shouldBe ReindexJobConfig(
       dynamoConfig = DynamoConfig(tableName = "mets-adapter-store-delta"),
       destinationConfig = SNSConfig(
-        topicArn = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"),
+        topicArn = "arn:aws:sns:eu-west-1:760097843905:mets_reindexer_topic"
+      ),
       source = Mets
     )
   }

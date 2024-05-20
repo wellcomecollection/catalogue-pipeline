@@ -40,16 +40,18 @@ class MiroRecordTransformerTest
   }
 
   it("passes through the INNOPAC ID as the Sierra system number") {
-    forAll(Table("", "b", "B", ".b", ".B")) { prefix =>
-      forAll(Table("8", "x")) { checkDigit =>
-        val innopacID = s"${prefix}1234567$checkDigit"
-        val expectedSierraNumber = s"b1234567$checkDigit"
+    forAll(Table("", "b", "B", ".b", ".B")) {
+      prefix =>
+        forAll(Table("8", "x")) {
+          checkDigit =>
+            val innopacID = s"${prefix}1234567$checkDigit"
+            val expectedSierraNumber = s"b1234567$checkDigit"
 
-        transformRecordAndCheckSierraSystemNumber(
-          innopacID = innopacID,
-          expectedSierraNumber = expectedSierraNumber
-        )
-      }
+            transformRecordAndCheckSierraSystemNumber(
+              innopacID = innopacID,
+              expectedSierraNumber = expectedSierraNumber
+            )
+        }
     }
   }
 
@@ -152,7 +154,8 @@ class MiroRecordTransformerTest
         )
       )
       work.data.description shouldBe Some(
-        description + " Biomedical Image Awards 2001.")
+        description + " Biomedical Image Awards 2001."
+      )
     }
 
     it("only includes WIA metadata") {
@@ -162,12 +165,14 @@ class MiroRecordTransformerTest
           description = Some(description),
           award = List(
             Some("Dirt, Wellcome Collection"),
-            Some("Biomedical Image Awards")),
+            Some("Biomedical Image Awards")
+          ),
           awardDate = List(None, Some("2002"))
         )
       )
       work.data.description shouldBe Some(
-        description + " Biomedical Image Awards 2002.")
+        description + " Biomedical Image Awards 2002."
+      )
     }
 
     it("combines multiple WIA metadata fields if necessary") {
@@ -181,7 +186,8 @@ class MiroRecordTransformerTest
         )
       )
       work.data.description shouldBe Some(
-        description + " Wellcome Image Awards Overall Winner 2015.")
+        description + " Wellcome Image Awards Overall Winner 2015."
+      )
     }
   }
 
@@ -313,7 +319,8 @@ class MiroRecordTransformerTest
   }
 
   it(
-    "transforms an image with no credit line and an image-specific contributor code") {
+    "transforms an image with no credit line and an image-specific contributor code"
+  ) {
     val work = transformWork(
       createMiroRecordWith(
         creditLine = None,
@@ -330,7 +337,8 @@ class MiroRecordTransformerTest
       accessConditions = List(
         AccessCondition(
           method = AccessMethod.ViewOnline,
-          status = AccessStatus.Open)
+          status = AccessStatus.Open
+        )
       )
     )
     work.data.items.head.locations shouldBe List(expectedDigitalLocation)
@@ -349,7 +357,8 @@ class MiroRecordTransformerTest
       accessConditions = List(
         AccessCondition(
           method = AccessMethod.ViewOnline,
-          status = AccessStatus.Open)
+          status = AccessStatus.Open
+        )
       )
     )
     work.data.items shouldBe List(
@@ -477,11 +486,12 @@ class MiroRecordTransformerTest
     val miroIDList = List(
       createMiroSourceIdentifierWith(value = miroId)
     )
-    val libraryRefList = expectedValues.map { value =>
-      createSourceIdentifierWith(
-        identifierType = IdentifierType.MiroLibraryReference,
-        value = value
-      )
+    val libraryRefList = expectedValues.map {
+      value =>
+        createSourceIdentifierWith(
+          identifierType = IdentifierType.MiroLibraryReference,
+          value = value
+        )
     }
     work.identifiers shouldBe (miroIDList ++ libraryRefList)
   }

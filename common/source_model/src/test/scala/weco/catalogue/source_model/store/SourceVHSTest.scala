@@ -38,8 +38,9 @@ class SourceVHSTest
     store.putLatest(id = "bluething")(shape) shouldBe a[Right[_, _]]
 
     val result = store
-      .update("bluething") { storedShape =>
-        Right(storedShape.copy(sides = storedShape.sides + 1))
+      .update("bluething") {
+        storedShape =>
+          Right(storedShape.copy(sides = storedShape.sides + 1))
       }
       .value
 
@@ -57,8 +58,9 @@ class SourceVHSTest
     val store = createSourceVHS[Shape]
 
     val err = store
-      .update("doesNotExist") { storedShape =>
-        Right(storedShape.copy(sides = storedShape.sides + 1))
+      .update("doesNotExist") {
+        storedShape =>
+          Right(storedShape.copy(sides = storedShape.sides + 1))
       }
       .left
       .value
@@ -72,8 +74,9 @@ class SourceVHSTest
     // Call upsert() on an empty store, which should cause this item
     // to be initialised at v1.
     val result1 = store
-      .upsert("splodge")(Shape(sides = 11, colour = "yellow")) { storedShape =>
-        Right(storedShape.copy(sides = storedShape.sides + 1))
+      .upsert("splodge")(Shape(sides = 11, colour = "yellow")) {
+        storedShape =>
+          Right(storedShape.copy(sides = storedShape.sides + 1))
       }
       .value
 
@@ -89,8 +92,9 @@ class SourceVHSTest
     // Now call upsert() a second time, which will update the entry
     // in the store.
     val result2 = store
-      .upsert("splodge")(Shape(sides = 11, colour = "yellow")) { storedShape =>
-        Right(storedShape.copy(sides = storedShape.sides + 1))
+      .upsert("splodge")(Shape(sides = 11, colour = "yellow")) {
+        storedShape =>
+          Right(storedShape.copy(sides = storedShape.sides + 1))
       }
       .value
 

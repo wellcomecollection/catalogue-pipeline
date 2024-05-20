@@ -5,7 +5,14 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.locations.DigitalLocation
-import weco.catalogue.internal_model.work.{Agent, Concept, InstantRange, Period, Place, ProductionEvent}
+import weco.catalogue.internal_model.work.{
+  Agent,
+  Concept,
+  InstantRange,
+  Period,
+  Place,
+  ProductionEvent
+}
 import weco.catalogue.internal_model.work.CollectionPath
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
@@ -201,22 +208,23 @@ class MarcXMLRecordTransformerTest
       workData.genres.loneElement.label shouldBe "Lo-Fi Darkwave"
     }
 
-<<<<<<< HEAD
     it("extracts production") {
       workData.production shouldBe List(
         ProductionEvent(
           "London : Arts Council of Great Britain, 1976; Twickenham : CTD Printers, 1974",
           List(
-            Place(Unidentifiable,"London"),
-            Place(Unidentifiable,"Twickenham")
+            Place(Unidentifiable, "London"),
+            Place(Unidentifiable, "Twickenham")
           ),
           List(
-            Agent(Unidentifiable,"Arts Council of Great Britain"),
-            Agent(Unidentifiable,"CTD Printers")
+            Agent(Unidentifiable, "Arts Council of Great Britain"),
+            Agent(Unidentifiable, "CTD Printers")
           ),
           List(
-            Period(Unidentifiable,"1976;",None),
-            Period(Unidentifiable,"1974",
+            Period(Unidentifiable, "1976;", None),
+            Period(
+              Unidentifiable,
+              "1974",
               Some(
                 InstantRange(
                   from = Instant.parse("1974-01-01T00:00:00Z"),
@@ -226,37 +234,46 @@ class MarcXMLRecordTransformerTest
               )
             )
           ),
-          Some(Concept(Unidentifiable,"Manufacture"))
+          Some(Concept(Unidentifiable, "Manufacture"))
         ),
         ProductionEvent(
           "Bethesda, Md. : Toxicology Information Program, National Library of Medicine [producer] ; Springfield, Va. : National Technical Information Service [distributor], 1974-",
           List(
-            Place(Unidentifiable,"Bethesda, Md."),
-            Place(Unidentifiable,"Springfield, Va.")
+            Place(Unidentifiable, "Bethesda, Md."),
+            Place(Unidentifiable, "Springfield, Va.")
           ),
           List(
-            Agent(Unidentifiable,"Toxicology Information Program, National Library of Medicine [producer] ;"),
-            Agent(Unidentifiable,"National Technical Information Service [distributor]")
+            Agent(
+              Unidentifiable,
+              "Toxicology Information Program, National Library of Medicine [producer] ;"
+            ),
+            Agent(
+              Unidentifiable,
+              "National Technical Information Service [distributor]"
+            )
           ),
           List(
-            Period(Unidentifiable,"1974-",
+            Period(
+              Unidentifiable,
+              "1974-",
               Some(
                 InstantRange(
                   Instant.parse("1974-01-01T00:00:00Z"),
                   Instant.parse("9999-12-31T23:59:59.999999999Z"),
-                  label="1974-"
+                  label = "1974-"
                 )
               )
             )
           ),
           None
         )
-=======
+      )
+    }
+
     it("extracts the collection path") {
       workData.collectionPath.get shouldBe CollectionPath(
         path = "parent_id/Vol_24_pt_B_no_9_Sept_1993_p_23548_3PaDhRp",
         label = None
->>>>>>> 5377f7950 (Add transformation for MARC Collection Path)
       )
     }
   }

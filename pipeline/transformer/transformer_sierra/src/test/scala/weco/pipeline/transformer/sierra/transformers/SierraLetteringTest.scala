@@ -42,7 +42,9 @@ class SierraLetteringTest
     )
   }
 
-  it("ignores records with the MARC field and 2nd indicator but wrong subfield") {
+  it(
+    "ignores records with the MARC field and 2nd indicator but wrong subfield"
+  ) {
     assertFindsCorrectLettering(
       varFields = List(
         createVarFieldWith(
@@ -51,7 +53,8 @@ class SierraLetteringTest
           subfields = List(
             Subfield(
               tag = "b",
-              content = "Belligerent beavers beneath a bridge")
+              content = "Belligerent beavers beneath a bridge"
+            )
           )
         )
       ),
@@ -68,7 +71,8 @@ class SierraLetteringTest
           subfields = List(
             Subfield(
               tag = "a",
-              content = "Crowded crows carry a chocolate crepe")
+              content = "Crowded crows carry a chocolate crepe"
+            )
           )
         )
       ),
@@ -92,12 +96,14 @@ class SierraLetteringTest
           subfields = List(
             Subfield(
               tag = "a",
-              content = "Enterprising eskimos exile every eagle")
+              content = "Enterprising eskimos exile every eagle"
+            )
           )
         )
       ),
       expectedLettering = Some(
-        "Daring dalmations dance with danger\n\nEnterprising eskimos exile every eagle")
+        "Daring dalmations dance with danger\n\nEnterprising eskimos exile every eagle"
+      )
     )
   }
 
@@ -107,36 +113,64 @@ class SierraLetteringTest
       val bibData = createSierraBibDataWith(
         materialType = Some(SierraMaterialType("k")),
         varFields = List(
-          VarField(marcTag = "514", subfields = List(Subfield(tag = "a", content = "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."))),
+          VarField(
+            marcTag = "514",
+            subfields = List(
+              Subfield(
+                tag = "a",
+                content =
+                  "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
+              )
+            )
+          ),
           VarField(
             marcTag = Some("246"),
             indicator2 = Some("6"),
             subfields = List(
-              Subfield(tag = "a", content = "Le m\u00e9decin et la garde malade. H.D. ...")
+              Subfield(
+                tag = "a",
+                content = "Le m\u00e9decin et la garde malade. H.D. ..."
+              )
             )
           )
         )
       )
 
-      SierraLettering(bibData) shouldBe Some("Le m\u00e9decin et la garde malade. H.D. ...\n\nLettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D.")
+      SierraLettering(bibData) shouldBe Some(
+        "Le m\u00e9decin et la garde malade. H.D. ...\n\nLettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
+      )
     }
 
     it("only uses 246 .6 ǂa for non-visual material") {
       val bibData = createSierraBibDataWith(
         materialType = Some(SierraMaterialType("not-k")),
         varFields = List(
-          VarField(marcTag = "514", subfields = List(Subfield(tag = "a", content = "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."))),
+          VarField(
+            marcTag = "514",
+            subfields = List(
+              Subfield(
+                tag = "a",
+                content =
+                  "Lettering continues: Comment va  le malade? H\\u00e9las Monsieur, il est mort ce matin \\u00e0 six heures! Ah il est mort le gaillard! .. Il n'a donc pas pris ma potion? Si Monsieur. Il en a donc trop pris? Non Monsieur. C'est qu'il n'en a assez pris. H.D."
+              )
+            )
+          ),
           VarField(
             marcTag = Some("246"),
             indicator2 = Some("6"),
             subfields = List(
-              Subfield(tag = "a", content = "Le m\u00e9decin et la garde malade. H.D. ...")
+              Subfield(
+                tag = "a",
+                content = "Le m\u00e9decin et la garde malade. H.D. ..."
+              )
             )
           )
         )
       )
 
-      SierraLettering(bibData) shouldBe Some("Le m\u00e9decin et la garde malade. H.D. ...")
+      SierraLettering(bibData) shouldBe Some(
+        "Le m\u00e9decin et la garde malade. H.D. ..."
+      )
     }
   }
 

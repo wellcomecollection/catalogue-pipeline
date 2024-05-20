@@ -312,7 +312,9 @@ class SierraMergeCandidatesTest
       )
     }
 
-    it("only creates an EBSCO merge candidate if the control number matches the expected format") {
+    it(
+      "only creates an EBSCO merge candidate if the control number matches the expected format"
+    ) {
       // These are all control numbers that we've seen in Sierra records
       val bibDataA = bibDataWith001And003("23734725", "DE-He213")
       getMergeCandidates(bibDataA) should be(empty)
@@ -414,7 +416,10 @@ class SierraMergeCandidatesTest
     }
   }
 
-  private def bibDataWith001And003(controlNumber: String, controlNumberIdentifier: String) =
+  private def bibDataWith001And003(
+    controlNumber: String,
+    controlNumberIdentifier: String
+  ) =
     createSierraBibDataWith(
       varFields = List(
         VarField(

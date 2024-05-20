@@ -11,8 +11,9 @@ class ParentWorkTest extends AnyFunSpec with Matchers with ImageGenerators {
     it("removes the imageData from a merged work") {
       val w =
         mergedWork()
-          .imageData((1 to 3).map { _ =>
-            createImageData.toIdentified
+          .imageData((1 to 3).map {
+            _ =>
+              createImageData.toIdentified
           }.toList)
 
       w.toParentWork.data.imageData shouldBe empty
@@ -21,8 +22,9 @@ class ParentWorkTest extends AnyFunSpec with Matchers with ImageGenerators {
     it("removes the imageData from an identified work") {
       val w =
         identifiedWork()
-          .imageData((1 to 3).map { _ =>
-            createImageData.toIdentified
+          .imageData((1 to 3).map {
+            _ =>
+              createImageData.toIdentified
           }.toList)
 
       w.toParentWork.data.imageData shouldBe empty

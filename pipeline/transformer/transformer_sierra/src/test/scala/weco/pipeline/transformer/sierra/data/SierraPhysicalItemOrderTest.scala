@@ -35,15 +35,17 @@ class SierraPhysicalItemOrderTest
     val item4 = createItem(id = SierraItemNumber("1874353"))
 
     val items = List(item1, item2, item3, item4)
-      .sortBy { it =>
-        it.id.sourceIdentifier.value
+      .sortBy {
+        it =>
+          it.id.sourceIdentifier.value
       }
 
     SierraPhysicalItemOrder(SierraBibNumber("1000024"), items) shouldBe List(
       item1,
       item2,
       item3,
-      item4)
+      item4
+    )
   }
 
   it("puts any items not mentioned in the override at the end]") {
@@ -58,7 +60,8 @@ class SierraPhysicalItemOrderTest
       item1,
       item2,
       item4,
-      item3)
+      item3
+    )
   }
 
   def createItem(id: SierraItemNumber): Item[IdState.Identifiable] =
@@ -75,7 +78,7 @@ class SierraPhysicalItemOrderTest
             value = id.withoutCheckDigit,
             ontologyType = "Item"
           )
-        ),
+        )
       ),
       locations = List(createPhysicalLocation)
     )

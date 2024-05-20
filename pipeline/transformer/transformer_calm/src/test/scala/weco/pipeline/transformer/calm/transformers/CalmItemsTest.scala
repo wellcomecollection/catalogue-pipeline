@@ -43,7 +43,8 @@ class CalmItemsTest
     }
 
     def getAccessConditions(
-      items: Seq[Item[IdState.Unminted]]): List[AccessCondition] = {
+      items: Seq[Item[IdState.Unminted]]
+    ): List[AccessCondition] = {
       items should have size 1
 
       val locations = items.head.locations

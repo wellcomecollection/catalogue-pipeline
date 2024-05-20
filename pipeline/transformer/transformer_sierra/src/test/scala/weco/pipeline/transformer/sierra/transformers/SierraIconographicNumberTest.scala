@@ -47,7 +47,7 @@ class SierraIconographicNumberTest
     )
 
     SierraIconographicNumber(bibData) shouldBe None
-  }  
+  }
   it("returns nothing if there is no 001") {
     val bibData = createSierraBibDataWith(
       materialType = Some(SierraMaterialType("r")),

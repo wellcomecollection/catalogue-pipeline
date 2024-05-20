@@ -30,43 +30,56 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
     notes should contain theSameElementsAs List(
       Note(
         contents = "Administered by the Active Administrator",
-        noteType = NoteType.BiographicalNote),
+        noteType = NoteType.BiographicalNote
+      ),
       Note(
         contents = "Collected by the Careful Custodian",
-        noteType = NoteType.OwnershipNote),
+        noteType = NoteType.OwnershipNote
+      ),
       Note(
         contents = "Acquired by the Academic Archivists",
-        noteType = NoteType.AcquisitionNote),
+        noteType = NoteType.AcquisitionNote
+      ),
       Note(
         contents = "Appraised by the Affable Appraiser",
-        noteType = NoteType.AppraisalNote),
+        noteType = NoteType.AppraisalNote
+      ),
       Note(
         contents = "Accrued by the Alliterative Acquirer",
-        noteType = NoteType.AccrualsNote),
+        noteType = NoteType.AccrualsNote
+      ),
       Note(
         contents = "Related to the Radiant Records",
-        noteType = NoteType.RelatedMaterial),
+        noteType = NoteType.RelatedMaterial
+      ),
       Note(
         contents = "Published in the Public Pamphlet",
-        noteType = NoteType.PublicationsNote),
+        noteType = NoteType.PublicationsNote
+      ),
       Note(
         contents = "Wrapped in the Worldly Words",
-        noteType = NoteType.FindingAids),
+        noteType = NoteType.FindingAids
+      ),
       Note(
         contents = "Copyright the Creative Consortium",
-        noteType = NoteType.CopyrightNote),
+        noteType = NoteType.CopyrightNote
+      ),
       Note(
         contents = "Arranged in an Adorable Alignment",
-        noteType = NoteType.ArrangementNote),
+        noteType = NoteType.ArrangementNote
+      ),
       Note(
         contents = "A copy is contained in the Circular Church",
-        noteType = NoteType.LocationOfDuplicatesNote),
+        noteType = NoteType.LocationOfDuplicatesNote
+      ),
       Note(
         contents = "Named now by Nicola Noble",
-        noteType = NoteType.GeneralNote),
+        noteType = NoteType.GeneralNote
+      ),
       Note(
         contents = "The original object is in the Orange Octagon",
-        noteType = NoteType.LocationOfOriginalNote)
+        noteType = NoteType.LocationOfOriginalNote
+      )
     )
   }
 
@@ -85,7 +98,7 @@ class CalmNotesTest extends AnyFunSpec with Matchers with CalmRecordGenerators {
   // See https://github.com/wellcomecollection/platform/issues/4773
   it("does not include the ReproductionConditions field") {
     val record = createCalmRecordWith(
-      ("ReproductionConditions", "Reproduction is Rarely Regulated"),
+      ("ReproductionConditions", "Reproduction is Rarely Regulated")
     )
 
     CalmNotes(record) shouldBe empty

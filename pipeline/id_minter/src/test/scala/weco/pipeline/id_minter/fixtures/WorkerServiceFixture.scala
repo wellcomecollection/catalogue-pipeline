@@ -30,27 +30,29 @@ trait WorkerServiceFixture
     identifiersDao: IdentifiersDao,
     identifiersTableConfig: IdentifiersTableConfig,
     mergedIndex: Map[String, Json] = Map.empty,
-    identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty)(
-    testWith: TestWith[IdMinterWorkerService[String], R]): R =
+    identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty
+  )(testWith: TestWith[IdMinterWorkerService[String], R]): R =
     withPipelineStream(
       queue,
       new MemoryIndexer(index = identifiedIndex),
-      messageSender) { stream =>
-      val identifierGenerator = new IdentifierGenerator(
-        identifiersDao = identifiersDao
-      )
-      val workerService = new IdMinterWorkerService(
-        identifierGenerator = identifierGenerator,
-        pipelineStream = stream,
-        jsonRetriever =
-          new MemoryRetriever(index = mutable.Map(mergedIndex.toSeq: _*)),
-        rdsClientConfig = rdsClientConfig,
-        identifiersTableConfig = identifiersTableConfig
-      )
+      messageSender
+    ) {
+      stream =>
+        val identifierGenerator = new IdentifierGenerator(
+          identifiersDao = identifiersDao
+        )
+        val workerService = new IdMinterWorkerService(
+          identifierGenerator = identifierGenerator,
+          pipelineStream = stream,
+          jsonRetriever =
+            new MemoryRetriever(index = mutable.Map(mergedIndex.toSeq: _*)),
+          rdsClientConfig = rdsClientConfig,
+          identifiersTableConfig = identifiersTableConfig
+        )
 
-      workerService.run()
+        workerService.run()
 
-      testWith(workerService)
+        testWith(workerService)
     }
 
   def withWorkerService[R](
@@ -58,8 +60,8 @@ trait WorkerServiceFixture
     queue: Queue,
     identifiersTableConfig: IdentifiersTableConfig,
     mergedIndex: Map[String, Json],
-    identifiedIndex: mutable.Map[String, Work[Identified]])(
-    testWith: TestWith[IdMinterWorkerService[String], R]): R = {
+    identifiedIndex: mutable.Map[String, Work[Identified]]
+  )(testWith: TestWith[IdMinterWorkerService[String], R]): R = {
     Class.forName("com.mysql.cj.jdbc.Driver")
     ConnectionPool.singleton(
       s"jdbc:mysql://$rdsHost:$port",
@@ -80,8 +82,10 @@ trait WorkerServiceFixture
       identifiersDao,
       identifiersTableConfig,
       mergedIndex,
-      identifiedIndex) { service =>
-      testWith(service)
+      identifiedIndex
+    ) {
+      service =>
+        testWith(service)
     }
   }
 

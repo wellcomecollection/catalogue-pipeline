@@ -16,7 +16,8 @@ class TeiLanguageDataTest
     (
       "grc",
       "Ancient Greek",
-      Language(id = "grc", label = "Greek, Ancient (to 1453)")),
+      Language(id = "grc", label = "Greek, Ancient (to 1453)")
+    ),
     ("btk", "Toba-Batak", Language(id = "btk", label = "Toba-Batak"))
   )
 

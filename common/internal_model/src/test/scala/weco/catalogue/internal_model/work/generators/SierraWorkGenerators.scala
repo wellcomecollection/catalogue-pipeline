@@ -16,8 +16,8 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
 
   def sierraEbscoIdentifiedWorkPair(): (
     Work.Visible[WorkState.Identified],
-      Work.Visible[WorkState.Identified]
-    ) = {
+    Work.Visible[WorkState.Identified]
+  ) = {
     val ebscoWork = ebscoIdentifiedWork()
     val sierraDigitalWork = sierraDigitalIdentifiedWork()
       .mergeCandidates(
@@ -57,7 +57,9 @@ trait SierraWorkGenerators extends WorkGenerators with ItemsGenerators {
   }
 
   def ebscoIdentifiedWork(): Work.Visible[WorkState.Identified] =
-    identifiedWork(sourceIdentifier = createSourceIdentifierWith(IdentifierType.EbscoAltLookup))
+    identifiedWork(sourceIdentifier =
+      createSourceIdentifierWith(IdentifierType.EbscoAltLookup)
+    )
 
   def sierraPhysicalIdentifiedWork(): Work.Visible[WorkState.Identified] =
     sierraIdentifiedWork().items(List(createIdentifiedPhysicalItem))

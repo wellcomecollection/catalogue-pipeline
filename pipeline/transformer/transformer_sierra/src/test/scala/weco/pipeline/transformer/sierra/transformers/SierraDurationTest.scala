@@ -18,21 +18,25 @@ class SierraDurationTest
     val varFields = List(
       VarField(
         marcTag = "306",
-        subfields = List(Subfield(tag = "a", content = "011012")))
+        subfields = List(Subfield(tag = "a", content = "011012"))
+      )
     )
 
     getDuration(varFields) shouldBe Some(
-      1 * hours + 10 * minutes + 12 * seconds)
+      1 * hours + 10 * minutes + 12 * seconds
+    )
   }
 
   it("uses the first duration when multiple defined") {
     val varFields = List(
       VarField(
         marcTag = "306",
-        subfields = List(Subfield(tag = "a", content = "001000"))),
+        subfields = List(Subfield(tag = "a", content = "001000"))
+      ),
       VarField(
         marcTag = "306",
-        subfields = List(Subfield(tag = "a", content = "001132")))
+        subfields = List(Subfield(tag = "a", content = "001132"))
+      )
     )
 
     getDuration(varFields) shouldBe Some(10 * minutes)
@@ -42,7 +46,8 @@ class SierraDurationTest
     val varFields = List(
       VarField(
         marcTag = "306",
-        subfields = List(Subfield(tag = "a", content = "01xx1012")))
+        subfields = List(Subfield(tag = "a", content = "01xx1012"))
+      )
     )
 
     getDuration(varFields) shouldBe None
@@ -52,7 +57,8 @@ class SierraDurationTest
     val varFields = List(
       VarField(
         marcTag = "500",
-        subfields = List(Subfield(tag = "a", content = "011012")))
+        subfields = List(Subfield(tag = "a", content = "011012"))
+      )
     )
 
     getDuration(varFields) shouldBe None
@@ -62,7 +68,8 @@ class SierraDurationTest
     val varFields = List(
       VarField(
         marcTag = "306",
-        subfields = List(Subfield(tag = "b", content = "011012")))
+        subfields = List(Subfield(tag = "b", content = "011012"))
+      )
     )
 
     getDuration(varFields) shouldBe None

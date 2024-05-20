@@ -31,37 +31,42 @@ trait InferenceManagerWorkerServiceFixture
     msgSender: MemoryMessageSender,
     adapters: Set[InferrerAdapter],
     fileWriter: FileWriter,
-    inferrerRequestPool: RequestPoolFlow[(DownloadedImage, InferrerAdapter),
-                                         Message],
+    inferrerRequestPool: RequestPoolFlow[
+      (DownloadedImage, InferrerAdapter),
+      Message
+    ],
     imageRequestPool: RequestPoolFlow[(Uri, MergedIdentifiedImage), Message],
     fileRoot: String = "/",
     initialImages: List[Image[Initial]] = Nil,
-    augmentedImages: mutable.Map[String, Image[Augmented]])(
-    testWith: TestWith[InferenceManagerWorkerService[String], R]): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { msgStream =>
-        val workerService = new InferenceManagerWorkerService(
-          msgStream = msgStream,
-          msgSender = msgSender,
-          imageRetriever = new MemoryRetriever[Image[Initial]](
-            index = mutable.Map(
-              initialImages.map(image => image.id -> image): _*
+    augmentedImages: mutable.Map[String, Image[Augmented]]
+  )(testWith: TestWith[InferenceManagerWorkerService[String], R]): R =
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue) {
+          msgStream =>
+            val workerService = new InferenceManagerWorkerService(
+              msgStream = msgStream,
+              msgSender = msgSender,
+              imageRetriever = new MemoryRetriever[Image[Initial]](
+                index = mutable.Map(
+                  initialImages.map(image => image.id -> image): _*
+                )
+              ),
+              imageIndexer = new MemoryIndexer(augmentedImages),
+              pipelineStorageConfig = pipelineStorageConfig,
+              inferrerAdapters = adapters,
+              imageDownloader = new ImageDownloader(
+                root = fileRoot,
+                fileWriter = fileWriter,
+                requestPool = imageRequestPool
+              ),
+              requestPool = inferrerRequestPool
             )
-          ),
-          imageIndexer = new MemoryIndexer(augmentedImages),
-          pipelineStorageConfig = pipelineStorageConfig,
-          inferrerAdapters = adapters,
-          imageDownloader = new ImageDownloader(
-            root = fileRoot,
-            fileWriter = fileWriter,
-            requestPool = imageRequestPool),
-          requestPool = inferrerRequestPool
-        )
 
-        workerService.run()
+            workerService.run()
 
-        testWith(workerService)
-      }
+            testWith(workerService)
+        }
     }
 
 }

@@ -128,7 +128,8 @@ class ThumbnailRuleTest
     )
 
   it(
-    "chooses the METS thumbnail from a single-item digital METS work for a digital Sierra target") {
+    "chooses the METS thumbnail from a single-item digital METS work for a digital Sierra target"
+  ) {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks :+ metsWork)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
@@ -153,7 +154,8 @@ class ThumbnailRuleTest
   }
 
   it(
-    "chooses a Miro thumbnail if no METS works are available, for a Tei target") {
+    "chooses a Miro thumbnail if no METS works are available, for a Tei target"
+  ) {
     inside(ThumbnailRule.merge(teiWork, miroWorks)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
@@ -162,7 +164,8 @@ class ThumbnailRuleTest
   }
 
   it(
-    "chooses a Miro thumbnail if no METS works are available, for a digital Sierra target") {
+    "chooses a Miro thumbnail if no METS works are available, for a digital Sierra target"
+  ) {
     inside(ThumbnailRule.merge(digitalSierraWork, miroWorks)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
@@ -171,7 +174,8 @@ class ThumbnailRuleTest
   }
 
   it(
-    "chooses a Miro thumbnail if no METS works are available, for a physical Sierra target") {
+    "chooses a Miro thumbnail if no METS works are available, for a physical Sierra target"
+  ) {
     inside(ThumbnailRule.merge(physicalSierraWork, miroWorks)) {
       case FieldMergeResult(thumbnail, _) =>
         thumbnail shouldBe defined
@@ -191,8 +195,11 @@ class ThumbnailRuleTest
   }
 
   it(
-    "suppresses thumbnails when a restriction is present on a digital location") {
-    forAll(List(restrictedDigitalWork, multiLocationWorkWithDigitalRestriction)) {
+    "suppresses thumbnails when a restriction is present on a digital location"
+  ) {
+    forAll(
+      List(restrictedDigitalWork, multiLocationWorkWithDigitalRestriction)
+    ) {
       work =>
         inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
           case FieldMergeResult(thumbnail, _) =>
@@ -202,9 +209,11 @@ class ThumbnailRuleTest
   }
 
   it(
-    "does not suppress thumbnails when a restriction is only present on a physical location") {
+    "does not suppress thumbnails when a restriction is only present on a physical location"
+  ) {
     forAll(
-      List(restrictedPhysicalWork, multiLocationWorkWithPhysicalRestriction)) {
+      List(restrictedPhysicalWork, multiLocationWorkWithPhysicalRestriction)
+    ) {
       work =>
         inside(ThumbnailRule.merge(work, miroWorks :+ metsWork)) {
           case FieldMergeResult(thumbnail, _) =>

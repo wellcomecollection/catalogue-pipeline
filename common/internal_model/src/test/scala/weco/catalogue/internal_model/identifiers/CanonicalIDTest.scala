@@ -43,7 +43,8 @@ class CanonicalIDTest extends AnyFunSpec with Matchers with JsonAssertions {
           |"12345678"
           |""".stripMargin
       fromJson[CanonicalId](jsonString) shouldBe Success(
-        CanonicalId("12345678"))
+        CanonicalId("12345678")
+      )
     }
   }
 
@@ -51,7 +52,8 @@ class CanonicalIDTest extends AnyFunSpec with Matchers with JsonAssertions {
     it("encodes as a string") {
       val id = CanonicalId("12345678")
       DynamoFormat[CanonicalId].write(id) shouldBe DynamoValue.fromString(
-        "12345678")
+        "12345678"
+      )
     }
 
     it("decodes from a string") {

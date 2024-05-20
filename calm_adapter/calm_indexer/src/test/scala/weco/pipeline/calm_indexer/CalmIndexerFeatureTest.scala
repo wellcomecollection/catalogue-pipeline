@@ -35,22 +35,25 @@ class CalmIndexerFeatureTest
       initialEntries = Map(location -> record)
     )
 
-    withLocalElasticsearchIndex(config = IndexConfig.empty) { index =>
-      withLocalSqsQueue() { queue =>
-        withWorker(queue, store, index) { _ =>
-          sendNotificationToSQS(queue, payload)
+    withLocalElasticsearchIndex(config = IndexConfig.empty) {
+      index =>
+        withLocalSqsQueue() {
+          queue =>
+            withWorker(queue, store, index) {
+              _ =>
+                sendNotificationToSQS(queue, payload)
 
-          assertElasticsearchEventuallyHas(
-            index = index,
-            id = record.id,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = index,
+                  id = record.id,
+                  json = s"""
                  |{
                  |  "Modified": "29/06/2020"
                  |}
                  |""".stripMargin
-          )
+                )
+            }
         }
-      }
     }
   }
 
@@ -72,26 +75,29 @@ class CalmIndexerFeatureTest
       initialEntries = Map(location -> record)
     )
 
-    withLocalElasticsearchIndex(config = IndexConfig.empty) { index =>
-      withLocalSqsQueue() { queue =>
-        withWorker(queue, store, index) { _ =>
-          sendNotificationToSQS(queue, payload)
+    withLocalElasticsearchIndex(config = IndexConfig.empty) {
+      index =>
+        withLocalSqsQueue() {
+          queue =>
+            withWorker(queue, store, index) {
+              _ =>
+                sendNotificationToSQS(queue, payload)
 
-          assertElasticsearchEventuallyHas(
-            index = index,
-            id = record.id,
-            json = s"""
+                assertElasticsearchEventuallyHas(
+                  index = index,
+                  id = record.id,
+                  json = s"""
                       |{
                       |  "Modified": "29/06/2020"
                       |}
                       |""".stripMargin
-          )
+                )
 
-          sendNotificationToSQS(queue, payloadDeleted)
+                sendNotificationToSQS(queue, payloadDeleted)
 
-          assertElasticsearchEmpty(index)
+                assertElasticsearchEmpty(index)
+            }
         }
-      }
     }
   }
 }

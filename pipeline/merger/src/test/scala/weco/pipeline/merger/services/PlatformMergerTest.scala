@@ -10,15 +10,22 @@ import weco.catalogue.internal_model.locations._
 import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.catalogue.internal_model.work.{Format, InternalWork, InvisibilityReason, Item, Work, WorkData}
+import weco.catalogue.internal_model.work.{
+  Format,
+  InternalWork,
+  InvisibilityReason,
+  Item,
+  Work,
+  WorkData
+}
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
 
 class PlatformMergerTest
     extends AnyFunSpec
-      with SourceWorkGenerators
-      with MergeCandidateGenerators 
-      with LoneElement
-      with Matchers {
+    with SourceWorkGenerators
+    with MergeCandidateGenerators
+    with LoneElement
+    with Matchers {
 
   val digitalLocationCCBYNC = createDigitalLocationWith(
     license = Some(License.CCBYNC)

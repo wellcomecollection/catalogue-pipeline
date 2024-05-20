@@ -30,7 +30,8 @@ class CalmXmlRequestTest extends AnyFunSpec with Matchers {
   }
 
   it(
-    "generates a CALM search request for a particular created or modified date") {
+    "generates a CALM search request for a particular created or modified date"
+  ) {
     val query = CalmQuery.CreatedOrModifiedDate(LocalDate.of(2008, 10, 2))
     compareXML(
       CalmSearchRequest(query).xml,

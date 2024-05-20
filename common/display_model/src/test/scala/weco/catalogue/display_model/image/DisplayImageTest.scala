@@ -8,7 +8,8 @@ import weco.catalogue.internal_model.locations.LocationType
 
 class DisplayImageTest extends AnyFunSpec with Matchers with ImageGenerators {
   it(
-    "sets the thumbnail to the first iiif-image location it finds in locations") {
+    "sets the thumbnail to the first iiif-image location it finds in locations"
+  ) {
     val imageLocation = createDigitalLocationWith(
       locationType = LocationType.IIIFImageAPI
     )
@@ -29,7 +30,9 @@ class DisplayImageTest extends AnyFunSpec with Matchers with ImageGenerators {
 
   it("throws an error if there is no iiif-image location") {
     val image =
-      createImageDataWith(locations = List(createManifestLocation)).toAugmentedImage
+      createImageDataWith(locations =
+        List(createManifestLocation)
+      ).toAugmentedImage
 
     assertThrows[RuntimeException] {
       DisplayImage(image)

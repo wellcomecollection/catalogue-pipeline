@@ -426,7 +426,7 @@ class CreateTestImageDocuments
                   )
                 )
               )
-              .title(s"Production event in $year"),
+              .title(s"Production event in $year")
           ),
           description = s"an image with a production event in $year",
           id = s"image-production.$year"

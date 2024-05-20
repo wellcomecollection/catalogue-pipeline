@@ -15,7 +15,8 @@ trait CalmResponseGenerators {
 
   def searchResponse(
     n: Int,
-    cookiePair: Option[(String, String)] = Some(cookie)): HttpResponse =
+    cookiePair: Option[(String, String)] = Some(cookie)
+  ): HttpResponse =
     HttpResponse(
       200,
       cookiePair.map {
@@ -47,8 +48,12 @@ trait CalmResponseGenerators {
             <SummaryHeaderResult>
               <SummaryList>
                 <Summary>
-                  {data.map { case (key, value) =>
-                  XML.loadString(s"<$key>$value</$key>") }}
+                  {
+        data.map {
+          case (key, value) =>
+            XML.loadString(s"<$key>$value</$key>")
+        }
+      }
                 </Summary>
               </SummaryList>
             </SummaryHeaderResult>

@@ -32,7 +32,11 @@ class DeletionMarkerTest
         val result = deletionMarker(targetRecord)
 
         result.success.value shouldBe targetRecord.copy(isDeleted = true)
-        getRecordFromTable(targetRecord.id, targetRecord.version, table) shouldEqual result.success.value
+        getRecordFromTable(
+          targetRecord.id,
+          targetRecord.version,
+          table
+        ) shouldEqual result.success.value
     }
   }
 
@@ -45,7 +49,11 @@ class DeletionMarkerTest
         val result = deletionMarker(targetRecord)
 
         result.success.value shouldBe targetRecord.copy(isDeleted = true)
-        getRecordFromTable(targetRecord.id, targetRecord.version, table) shouldEqual result.success.value
+        getRecordFromTable(
+          targetRecord.id,
+          targetRecord.version,
+          table
+        ) shouldEqual result.success.value
     }
   }
 
@@ -58,7 +66,11 @@ class DeletionMarkerTest
         val result = deletionMarker(targetRecord)
 
         result.success.value shouldBe targetRecord.copy(isDeleted = true)
-        getRecordFromTable(targetRecord.id, targetRecord.version, table) shouldEqual result.success.value
+        getRecordFromTable(
+          targetRecord.id,
+          targetRecord.version,
+          table
+        ) shouldEqual result.success.value
     }
   }
 
@@ -75,11 +87,13 @@ class DeletionMarkerTest
   override def createTable(table: DynamoFixtures.Table): DynamoFixtures.Table =
     createTableWithHashKey(table)
 
-  def withExistingRecords[T: DynamoFormat, R](records: Seq[T])(
-    testWith: TestWith[(DeletionMarker, Table), R]): R =
-    withLocalDynamoDbTable { table =>
-      putTableItems(records, table)
-      testWith((new DeletionMarker(table.name), table))
+  def withExistingRecords[T: DynamoFormat, R](
+    records: Seq[T]
+  )(testWith: TestWith[(DeletionMarker, Table), R]): R =
+    withLocalDynamoDbTable {
+      table =>
+        putTableItems(records, table)
+        testWith((new DeletionMarker(table.name), table))
     }
 
   def getRecordFromTable(

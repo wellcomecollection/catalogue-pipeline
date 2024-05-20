@@ -37,7 +37,8 @@ class SierraAlternativeTitlesTest
     getAlternativeTitles(varFields) shouldBe List(
       "Bananas",
       "Apples",
-      "Cherries")
+      "Cherries"
+    )
   }
 
   it("extracts all alternative titles when repeated fields") {
@@ -88,7 +89,7 @@ class SierraAlternativeTitlesTest
           Subfield(tag = "5", content = "Oranges"),
           Subfield(tag = "5", content = "UkLW")
         )
-      ),
+      )
     )
     val result = getAlternativeTitles(varFields)
     result should have length 1
@@ -107,7 +108,7 @@ class SierraAlternativeTitlesTest
           Subfield(tag = "5", content = "Oranges"),
           Subfield(tag = "5", content = "Carrots")
         )
-      ),
+      )
     )
     val result = getAlternativeTitles(varFields)
     result should have length 1

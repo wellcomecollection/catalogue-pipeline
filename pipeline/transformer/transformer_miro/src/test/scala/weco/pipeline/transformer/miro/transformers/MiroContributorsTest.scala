@@ -32,7 +32,8 @@ class MiroContributorsTest
       expectedContributors = List(
         ExpectedContributor(
           label = "Researcher Rosie",
-          idLabel = "researcher rosie")
+          idLabel = "researcher rosie"
+        )
       )
     )
   }
@@ -46,10 +47,12 @@ class MiroContributorsTest
       expectedContributors = List(
         ExpectedContributor(
           label = "Beekeeper Brian",
-          idLabel = "beekeeper brian"),
+          idLabel = "beekeeper brian"
+        ),
         ExpectedContributor(
           label = "Dog-owner Derek",
-          idLabel = "dog-owner derek")
+          idLabel = "dog-owner derek"
+        )
       )
     )
   }
@@ -62,7 +65,8 @@ class MiroContributorsTest
       expectedContributors = List(
         ExpectedContributor(
           label = "Scientist Sarah",
-          idLabel = "scientist sarah")
+          idLabel = "scientist sarah"
+        )
       )
     )
   }
@@ -76,10 +80,12 @@ class MiroContributorsTest
       expectedContributors = List(
         ExpectedContributor(
           label = "Gamekeeper Gordon",
-          idLabel = "gamekeeper gordon"),
+          idLabel = "gamekeeper gordon"
+        ),
         ExpectedContributor(
           label = "Herpetologist Harriet",
-          idLabel = "herpetologist harriet")
+          idLabel = "herpetologist harriet"
+        )
       )
     )
   }
@@ -93,10 +99,12 @@ class MiroContributorsTest
       expectedContributors = List(
         ExpectedContributor(
           label = "Mycologist Morgan",
-          idLabel = "mycologist morgan"),
+          idLabel = "mycologist morgan"
+        ),
         ExpectedContributor(
           label = "Manufacturer Mel",
-          idLabel = "manufacturer mel")
+          idLabel = "manufacturer mel"
+        )
       )
     )
   }
@@ -109,7 +117,8 @@ class MiroContributorsTest
       expectedContributors = List(
         ExpectedContributor(
           label = "Isabella Gavazzi",
-          idLabel = "isabella gavazzi")
+          idLabel = "isabella gavazzi"
+        )
       )
     )
   }
@@ -145,7 +154,8 @@ class MiroContributorsTest
       expectedContributors = List(
         ExpectedContributor(
           label = "Anna Gordon, Fernan Federici & Jim Haseloff",
-          idLabel = "anna gordon, fernan federici & jim haseloff"),
+          idLabel = "anna gordon, fernan federici & jim haseloff"
+        )
       )
     )
   }
