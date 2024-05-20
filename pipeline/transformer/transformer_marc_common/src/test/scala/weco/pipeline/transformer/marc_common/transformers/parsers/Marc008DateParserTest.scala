@@ -1,10 +1,10 @@
-package weco.pipeline.transformer.sierra.transformers.parsers
-
-import org.scalatest.matchers.should.Matchers
-import java.time.LocalDate
+package weco.pipeline.transformer.marc_common.transformers.parsers
 
 import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.InstantRange
+
+import java.time.LocalDate
 
 class Marc008DateParserTest extends AnyFunSpec with Matchers {
 

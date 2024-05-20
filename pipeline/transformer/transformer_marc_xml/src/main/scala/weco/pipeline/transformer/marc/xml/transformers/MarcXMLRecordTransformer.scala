@@ -15,6 +15,7 @@ import weco.pipeline.transformer.marc_common.transformers.{
   MarcGenres,
   MarcInternationalStandardIdentifiers,
   MarcLanguage,
+  MarcProduction,
   MarcSubjects,
   MarcTitle
 }
@@ -37,7 +38,8 @@ object MarcXMLRecordTransformer {
       contributors = MarcContributors(record).toList,
       subjects = MarcSubjects(record).toList,
       genres = MarcGenres(record).toList,
-      languages = MarcLanguage(record).toList
+      languages = MarcLanguage(record).toList,
+      production = MarcProduction(record)
     )
   }
 }

@@ -3,10 +3,13 @@ package weco.pipeline.transformer.marc.xml.transformers
 import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.locations.DigitalLocation
-
+import weco.catalogue.internal_model.work.{Agent, Concept, InstantRange, Period, Place, ProductionEvent}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
+
+import java.time.Instant
 
 class MarcXMLRecordTransformerTest
     extends AnyFunSpec
@@ -51,6 +54,21 @@ class MarcXMLRecordTransformerTest
           </datafield>
           <datafield tag ="250">
             <subfield code="a">Director's cut</subfield>
+          </datafield>
+          <datafield tag ="260">
+            <subfield code="a">London :</subfield>
+            <subfield code="b">Arts Council of Great Britain,</subfield>
+            <subfield code="c">1976;</subfield>
+            <subfield code="e">Twickenham :</subfield>
+            <subfield code="f">CTD Printers,</subfield>
+            <subfield code="g">1974</subfield>
+          </datafield>
+          <datafield tag ="260">
+            <subfield code="a">Bethesda, Md. :</subfield>
+            <subfield code="b">Toxicology Information Program, National Library of Medicine [producer] ;</subfield>
+            <subfield code="a">Springfield, Va. :</subfield>
+            <subfield code="b">National Technical Information Service [distributor],</subfield>
+            <subfield code="c">1974-</subfield>
           </datafield>
           <datafield tag ="310">
             <subfield code="a">Sizdah Behar on even-numbered years</subfield>
@@ -169,8 +187,61 @@ class MarcXMLRecordTransformerTest
         "Houyhnhnm Land"
       )
     }
+
     it("extracts genres") {
       workData.genres.loneElement.label shouldBe "Lo-Fi Darkwave"
+    }
+
+    it("extracts production") {
+      workData.production shouldBe List(
+        ProductionEvent(
+          "London : Arts Council of Great Britain, 1976; Twickenham : CTD Printers, 1974",
+          List(
+            Place(Unidentifiable,"London"),
+            Place(Unidentifiable,"Twickenham")
+          ),
+          List(
+            Agent(Unidentifiable,"Arts Council of Great Britain"),
+            Agent(Unidentifiable,"CTD Printers")
+          ),
+          List(
+            Period(Unidentifiable,"1976;",None),
+            Period(Unidentifiable,"1974",
+              Some(
+                InstantRange(
+                  from = Instant.parse("1974-01-01T00:00:00Z"),
+                  to = Instant.parse("1974-12-31T23:59:59.999999999Z"),
+                  label = "1974"
+                )
+              )
+            )
+          ),
+          Some(Concept(Unidentifiable,"Manufacture"))
+        ),
+        ProductionEvent(
+          "Bethesda, Md. : Toxicology Information Program, National Library of Medicine [producer] ; Springfield, Va. : National Technical Information Service [distributor], 1974-",
+          List(
+            Place(Unidentifiable,"Bethesda, Md."),
+            Place(Unidentifiable,"Springfield, Va.")
+          ),
+          List(
+            Agent(Unidentifiable,"Toxicology Information Program, National Library of Medicine [producer] ;"),
+            Agent(Unidentifiable,"National Technical Information Service [distributor]")
+          ),
+          List(
+            Period(Unidentifiable,"1974-",
+              Some(
+                InstantRange(
+                  Instant.parse("1974-01-01T00:00:00Z"),
+                  Instant.parse("9999-12-31T23:59:59.999999999Z"),
+                  label="1974-"
+                )
+              )
+            )
+          ),
+          None
+        )
+      )
     }
   }
 }
