@@ -12,6 +12,7 @@ xml_s3_prefix = "xml"
 ftp_s3_prefix = "ftp"
 topic_arn = "test_topic_arn"
 test_bucket = "test_bucket"
+invoked_at = "2023-01-01T00:00:00Z"
 
 ebs9579e = {
     "id": "ebs9579e",
@@ -22,6 +23,7 @@ ebs9579e = {
     "version": 20240322,
     "deleted": False,
     "sha256": "4c4a7fb13bf8b7beda96bbe75358eb882a6130592b29f6149a308d82e0356d22",
+    "time": invoked_at,
 }
 
 ebs29555e = {
@@ -33,6 +35,7 @@ ebs29555e = {
     "version": 20240322,
     "deleted": False,
     "sha256": "cb719218d3435395a2fa948088bf2c0fe86748dddfb5a2e8e2bbb199f6cf48dd",
+    "time": invoked_at,
 }
 
 ebs9579e_20240405 = {
@@ -44,6 +47,7 @@ ebs9579e_20240405 = {
     "version": 20240405,
     "deleted": False,
     "sha256": "b166aa8eb3c4f85dc95602fbdd920b444dfb6e08f6bc59881ad737878ed04822",
+    "time": invoked_at,
 }
 
 ebs29555e_20240405_deleted = {
@@ -52,6 +56,7 @@ ebs29555e_20240405_deleted = {
     "version": 20240405,
     "deleted": True,
     "sha256": None,
+    "time": invoked_at,
 }
 
 
@@ -110,7 +115,7 @@ def test_run_process():
         )
 
         print("\n--- Running test ingest process ---")
-        run_process(temp_dir, fake_ebsco_ftp, s3_store, sns_publisher)
+        run_process(temp_dir, fake_ebsco_ftp, s3_store, sns_publisher, invoked_at)
 
         files_ftp = s3_store.list_files(f"dev/{ftp_s3_prefix}")
         assert files_ftp == [
@@ -166,7 +171,7 @@ def test_run_reindex():
             }
         )
         print("\n--- Running test ingest process ---")
-        run_process(temp_dir, fake_ebsco_ftp, s3_store, sns_publisher)
+        run_process(temp_dir, fake_ebsco_ftp, s3_store, sns_publisher, invoked_at)
 
         # get the number of files in the s3 bucket under the xml prefix
         files = s3_store.list_files(f"dev/{xml_s3_prefix}")
@@ -185,7 +190,7 @@ def test_run_reindex():
         assert fake_sns_client.test_get_published_messages() == []
 
         print("\n--- Running test reindex with type full ---")
-        run_reindex(s3_store, sns_publisher, "full")
+        run_reindex(s3_store, sns_publisher, invoked_at, "full")
 
         reindex_published_messages = fake_sns_client.test_get_published_messages()
         assert reindex_published_messages == [ebs9579e, ebs29555e]
@@ -194,7 +199,7 @@ def test_run_reindex():
         assert fake_sns_client.test_get_published_messages() == []
 
         print("\n--- Running test reindex with type partial ---")
-        run_reindex(s3_store, sns_publisher, "partial", ["ebs9579e"])
+        run_reindex(s3_store, sns_publisher, invoked_at, "partial", ["ebs9579e"])
 
         reindex_published_messages = fake_sns_client.test_get_published_messages()
         assert reindex_published_messages == [ebs9579e]

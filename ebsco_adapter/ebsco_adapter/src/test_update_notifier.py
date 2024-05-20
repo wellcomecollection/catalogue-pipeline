@@ -18,6 +18,7 @@ def test_update_notifier():
 
     number_of_updates = 100
     number_of_deleted = 50
+    invoked_at = "2023-01-01T00:00:00Z"
 
     updates = {
         "updated": {
@@ -40,6 +41,7 @@ def test_update_notifier():
             "version": 20230101,
             "deleted": False,
             "sha256": "test_sha256",
+            "time": "2023-01-01T00:00:00Z",
         }
         for i in range(number_of_updates)
     ]
@@ -51,6 +53,7 @@ def test_update_notifier():
             "version": 20230101,
             "deleted": True,
             "sha256": None,
+            "time": "2023-01-01T00:00:00Z",
         }
         for i in range(number_of_deleted)
     ]
@@ -58,7 +61,13 @@ def test_update_notifier():
     expected_messages = expected_update_messages + expected_deleted_messages
 
     update_notifier(
-        updates, notify_for_batch, s3_store, s3_bucket, xml_s3_prefix, sns_publisher
+        updates,
+        notify_for_batch,
+        s3_store,
+        s3_bucket,
+        xml_s3_prefix,
+        sns_publisher,
+        invoked_at,
     )
     published_messages = fake_sns_client.test_get_published_messages()
 

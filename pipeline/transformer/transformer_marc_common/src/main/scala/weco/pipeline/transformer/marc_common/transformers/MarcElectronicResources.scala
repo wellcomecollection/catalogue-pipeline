@@ -10,7 +10,7 @@ import weco.catalogue.internal_model.locations.{
   DigitalLocation
 }
 import weco.catalogue.internal_model.locations.LocationType.OnlineResource
-import weco.catalogue.internal_model.work.Item
+import weco.catalogue.internal_model.work.{Holdings, Item}
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.models.{
   MarcField,
@@ -23,7 +23,39 @@ import scala.util.{Failure, Success, Try}
 
 trait MarcElectronicResources extends Logging {
 
-  protected def toItems(
+  def toHoldings(
+    record: MarcRecord
+  ): Seq[Holdings] = {
+    record.fieldsWithTags("856").flatMap {
+      field =>
+        for {
+          url <- getUrl(field).toOption
+          linkText <- field.subfields.find(_.tag == "z").map(_.content)
+          enumeration <- field.subfields
+            .filter(_.tag == "3")
+            .map(_.content)
+            .headOption
+        } yield Holdings(
+          note = None,
+          enumeration = List(enumeration),
+          location = Some(
+            DigitalLocation(
+              url = url,
+              linkText = Some(linkText),
+              locationType = OnlineResource,
+              accessConditions = List(
+                AccessCondition(
+                  method = AccessMethod.ViewOnline,
+                  status = status(field)
+                )
+              )
+            )
+          )
+        )
+    }
+  }
+
+  def toItems(
     record: MarcRecord
   )(implicit ctx: LoggingContext): Seq[Item[IdState.Unminted]] =
     record

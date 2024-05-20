@@ -112,6 +112,23 @@ class MergerIntegrationTest
     }
   }
 
+  Scenario("One Sierra and one Ebsco work are matched") {
+    withContext {
+      implicit context =>
+        Given("a Sierra work and a Miro work")
+        val (sierra, ebsco) = sierraEbscoIdentifiedWorkPair()
+
+        When("the works are processed by the matcher/merger")
+        processWorks(sierra, ebsco)
+
+        Then("the Sierra work is redirected to the Ebsco work")
+        context.getMerged(sierra) should beRedirectedTo(ebsco)
+
+        And("the Ebsco work should be unmodified")
+        context.getMerged(ebsco).data shouldBe ebsco.data
+    }
+  }
+
   Scenario("A Sierra picture and METS work are matched") {
     withContext {
       implicit context =>
