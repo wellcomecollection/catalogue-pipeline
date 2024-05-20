@@ -3,6 +3,7 @@ package weco.pipeline.transformer.marc.xml.data
 import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.pipeline.transformer.marc_common.models.MarcControlField
 
 class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
   describe("extracting the leader") {
@@ -23,7 +24,7 @@ class MarcXMLRecordTest extends AnyFunSpec with Matchers with LoneElement {
           <controlfield tag="001">ebs1234567890e</controlfield>
           <controlfield tag="003">EBZ</controlfield>
         </record>
-      ).controlField("003").get shouldBe "EBZ"
+      ).controlField("003").get shouldBe MarcControlField("003","EBZ")
     }
 
     it("returns None if the requested field does not exist") {

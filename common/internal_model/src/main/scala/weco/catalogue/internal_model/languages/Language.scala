@@ -10,7 +10,7 @@ import grizzled.slf4j.Logging
   *
   * e.g. you might have two languages:
   *
-  * Language(it = "ita", label = "Italian") Language(it = "ita", label =
+  * Language(id = "ita", label = "Italian") Language(it = "ita", label =
   * "Judeo-Italian")
   *
   * This is based on the MARC language code list. A single language might have

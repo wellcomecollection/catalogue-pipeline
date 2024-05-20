@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.sierra.data
 
 import weco.pipeline.transformer.marc_common.models.{
+  MarcControlField,
   MarcField,
   MarcRecord,
   MarcSubfield
@@ -25,7 +26,6 @@ trait SierraMarcDataConversions {
     MarcField(
       marcTag = varField.marcTag.get,
       subfields = varField.subfields.map(sierraSubfieldToMarcSubField),
-      content = None,
       fieldTag = varField.fieldTag,
       indicator1 = varField.indicator1.getOrElse(" "),
       indicator2 = varField.indicator2.getOrElse(" ")
@@ -41,6 +41,11 @@ object SierraMarcDataConversions extends SierraMarcDataConversions {}
 class BibDataAsMarcRecord(bibData: SierraBibData)
     extends MarcRecord
     with SierraQueryOps {
+
+  // BibData doesn't have a leader or control fields, so we provide empty values
+  override val leader: String = ""
+  override val controlFields: Seq[MarcControlField] = Nil
+
   lazy val fields: Seq[MarcField] =
     bibData.varFields
       // Only actual MARC varfields, with an actual MARC tag, are exercised
