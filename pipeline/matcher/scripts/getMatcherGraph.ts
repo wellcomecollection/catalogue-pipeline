@@ -1,12 +1,10 @@
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import fetch from 'node-fetch';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocument, QueryCommandInput } from '@aws-sdk/lib-dynamodb';
-import { getCreds } from '@weco/ts-aws/sts';
-import { digraph, INode, RootCluster, toDot } from 'ts-graphviz';
+import { Digraph, digraph, RootCluster, toDot } from 'ts-graphviz';
 import { execSync } from 'child_process';
-import { SourceWork } from './models';
+import { IndexedWork } from './models';
 import { getAttributes } from './graphAttributes';
+import { getPipelineClient } from './elasticsearch';
 
 type UserInput = {
   canonicalId: string;
@@ -17,6 +15,8 @@ type ElasticConfig = {
   worksIndex: string;
   imagesIndex: string;
 };
+
+type ElasticsearchClient = Awaited<ReturnType<typeof getPipelineClient>>;
 
 async function getInput(): Promise<UserInput> {
   let id: string;
@@ -51,82 +51,10 @@ async function getInput(): Promise<UserInput> {
   };
 }
 
-async function queryAllMatchingItems(
-  client: DynamoDBDocument,
-  query: QueryCommandInput
-): Promise<Record<string, any>[]> {
-  const result = await client.query(query);
-
-  const firstPageOfItems = result.Items ? result.Items : [];
-
-  const remainingItems = result.LastEvaluatedKey
-    ? await queryAllMatchingItems(client, {
-        ...query,
-        ExclusiveStartKey: result.LastEvaluatedKey,
-      })
-    : [];
-
-  return [...firstPageOfItems, ...remainingItems];
-}
-
-async function getRelevantWorks(
-  client: DynamoDBDocument,
+async function getWorksGraph(
+  client: ElasticsearchClient,
   input: UserInput
-): Promise<SourceWork[]> {
-  const tableName = `catalogue-${input.pipelineDate}_works-graph`;
-
-  console.log(`Querying ${tableName} for ${input.canonicalId}`);
-
-  const output = await client.get({
-    TableName: tableName,
-    Key: { id: input.canonicalId },
-  });
-
-  if (typeof output.Item === 'undefined') {
-    throw new Error(
-      `Could not find a matched work with ID ${input.canonicalId}`
-    );
-  }
-
-  const subgraphId = output.Item!.subgraphId;
-
-  const query: QueryCommandInput = {
-    TableName: tableName,
-    IndexName: 'work-sets-index',
-    KeyConditionExpression: '#subgraphId = :subgraphId',
-    ExpressionAttributeNames: { '#subgraphId': 'subgraphId' },
-    ExpressionAttributeValues: { ':subgraphId': subgraphId },
-  };
-
-  const worksInSubgraph: Record<string, any>[] = await queryAllMatchingItems(
-    client,
-    query
-  );
-
-  return worksInSubgraph.map((item: Record<string, any>) => {
-    return {
-      canonicalId: item.id,
-      mergeCandidateIds: item.sourceWork?.mergeCandidateIds,
-      suppressed: item.sourceWork?.suppressed,
-      componentIds: item.componentIds,
-      sourceIdentifier: item.sourceWork
-        ? {
-            value: item.sourceWork.id.value,
-
-            // This is an artefact of a slightly weird format in DynamoDB,
-            // where the identifierType is recorded as e.g.
-            //
-            //    {"identifierType": {"METS": "METS"}, ...}
-            //
-            // We might simplify this at some point.
-            identifierType: Object.keys(item.sourceWork.id.identifierType)[0],
-          }
-        : undefined,
-    };
-  });
-}
-
-async function createGraph(works: SourceWork[]): Promise<RootCluster> {
+): Promise<RootCluster> {
   const g = digraph(
     'G',
 
@@ -136,41 +64,56 @@ async function createGraph(works: SourceWork[]): Promise<RootCluster> {
     // See https://graphviz.org/docs/attrs/rankdir/
     { rankdir: 'LR' }
   );
+  const worksIndex = `works-indexed-${input.pipelineDate}`;
 
-  // Create all the nodes
-  const nodes: Map<string, INode> = new Map();
-  await Promise.all(
-    works.map(async (w: SourceWork) => {
-      const attributes = await getAttributes(w);
-
-      const newNode = g.createNode(w.canonicalId, attributes);
-
-      nodes.set(w.canonicalId, newNode);
-    })
-  );
-
-  // Add all the edges
-  works.forEach((w: SourceWork) => {
-    (w.mergeCandidateIds ?? []).forEach((target: string) => {
-      // Make sure this node is in the graph.  If it's not in the graph, it means
-      // this Work has a merge candidate that points to a Work the matcher hasn't
-      // seen.  Show it on the graph, but make it clear we don't know what it is.
-      if (!nodes.has(target)) {
-        nodes.set(target, g.createNode(target, { style: 'dotted' }));
-      }
-
-      // If A->B but they're in different components, it means one or both of them
-      // is suppressed.  Include the edge, but make it clear it's not used.
-      const attributes = {};
-      if (!w.componentIds.includes(target)) {
-        attributes['style'] = 'dotted';
-      }
-
-      g.createEdge([nodes.get(w.canonicalId), nodes.get(target)], attributes);
+  const buildGraph = async (workId: string): Promise<Digraph> => {
+    const work = await client.get<IndexedWork>({
+      index: worksIndex,
+      id: workId,
     });
-  });
+    if (!work.found) {
+      throw new Error(`Work ${workId} not found in index!`);
+    }
+    const mergeCandidates = work._source.debug.mergeCandidates;
 
-  return g;
+    const inNodes = await client.search<IndexedWork>({
+      index: worksIndex,
+      query: {
+        term: {
+          'debug.mergeCandidates.id.canonicalId': workId,
+        },
+      },
+    });
+
+    g.createNode(workId, await getAttributes(work._source));
+    mergeCandidates.forEach(mergeCandidate => {
+      g.createEdge([workId, mergeCandidate.id.canonicalId], {
+        label: mergeCandidate.reason,
+      });
+    });
+    await Promise.all(
+      inNodes.hits.hits
+        .filter(hit => !g.existNode(hit._id))
+        .map(async hit => {
+          g.createNode(hit._id, await getAttributes(hit._source));
+          g.createEdge([hit._id, workId], {
+            label: hit._source.debug.mergeCandidates.find(
+              m => m.id.canonicalId === workId
+            )?.reason,
+          });
+        })
+    );
+
+    const newNodes = mergeCandidates
+      .map(m => m.id.canonicalId)
+      .filter(id => !g.existNode(id));
+    if (newNodes.length !== 0) {
+      await Promise.all(newNodes.map(buildGraph));
+    }
+    return g;
+  };
+
+  return buildGraph(input.canonicalId);
 }
 
 // Takes the in-memory graph, renders it as a PDF and returns the filename.
@@ -200,16 +143,9 @@ function createPdf(canonicalId: string, g: RootCluster): string {
 export default async function getGraph(): Promise<void> {
   const input = await getInput();
 
-  const credentials = await getCreds('platform', 'read_only');
-  const dynamoDbClient = new DynamoDBClient({
-    credentials,
-    region: 'eu-west-1',
-  });
-  const documentClient = DynamoDBDocument.from(dynamoDbClient);
+  const elasticsearchClient = await getPipelineClient(input.pipelineDate);
 
-  const works = await getRelevantWorks(documentClient, input);
-
-  const g = await createGraph(works);
+  const g = await getWorksGraph(elasticsearchClient, input);
 
   const filename = createPdf(input.canonicalId, g);
 

@@ -21,7 +21,9 @@ class EbscoSourceDataRetriever
         Right(
           Identified(
             Version(payload.id, payload.version),
-            EbscoDeletedSourceData
+            EbscoDeletedSourceData(
+              modifiedTime = payload.time
+            )
           )
         )
 
@@ -29,7 +31,10 @@ class EbscoSourceDataRetriever
         Right(
           Identified(
             Version(payload.id, payload.version),
-            EbscoUpdatedSourceData(location)
+            EbscoUpdatedSourceData(
+              s3Location = location,
+              modifiedTime = payload.time
+            )
           )
         )
 

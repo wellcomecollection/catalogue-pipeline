@@ -52,6 +52,7 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
 
     val mergedSources = (
       List(
+        mergeIntoEbscoTarget,
         mergeIntoTeiTarget,
         mergeIntoCalmTarget,
         mergeSingleMiroIntoSingleOrZeroItemSierraTarget
@@ -92,6 +93,19 @@ object OtherIdentifiersRule extends FieldMergeRule with MergerLogging {
           getAllowedIdentifiersFromSource
         )
     }
+
+  private val mergeIntoEbscoTarget = new PartialRule {
+    val isDefinedForTarget: WorkPredicate = ebscoWork
+    val isDefinedForSource: WorkPredicate = sierraWork
+
+    def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
+      target.data.otherIdentifiers ++ sources.toList.flatMap(
+        getAllowedIdentifiersFromSource
+      )
+  }
 
   private val mergeIntoTeiTarget = new PartialRule {
     val isDefinedForTarget: WorkPredicate = teiWork

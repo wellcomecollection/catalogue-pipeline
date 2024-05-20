@@ -73,6 +73,7 @@ class BibDataAsMarcRecord(bibData: SierraBibData)
     bibData
       .varfieldsWithTags(tags: _*)
       .map(SierraMarcDataConversions.varFieldToMarcControlField)
+
   lazy val fields: Seq[MarcField] =
     bibData.varFields
       // Only actual MARC varfields, with an actual MARC tag, are exercised

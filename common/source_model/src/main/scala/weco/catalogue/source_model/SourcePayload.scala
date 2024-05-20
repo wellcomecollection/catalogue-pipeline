@@ -5,6 +5,8 @@ import weco.catalogue.source_model.mets.MetsSourceData
 import weco.catalogue.source_model.miro.{MiroSourceOverrides, MiroUpdateEvent}
 import weco.catalogue.source_model.tei.TeiMetadata
 
+import java.time.Instant
+
 sealed trait SourcePayload {
   val id: String
   val version: Int
@@ -15,7 +17,8 @@ case class EbscoSourcePayload(
   location: Option[S3ObjectLocation],
   version: Int,
   sha256: Option[String],
-  deleted: Boolean = false
+  deleted: Boolean = false,
+  time: Instant
 ) extends SourcePayload
 
 case class CalmSourcePayload(
