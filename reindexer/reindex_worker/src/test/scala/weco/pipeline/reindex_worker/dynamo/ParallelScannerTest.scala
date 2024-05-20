@@ -21,17 +21,18 @@ class ParallelScannerTest
   val scanner = new ParallelScanner()
 
   it("reads a table with a single record") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 1)
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 1)
 
-      val future = scanner.scan[NamedRecord](
-        segment = 0,
-        totalSegments = 1
-      )(table.name)
+        val future = scanner.scan[NamedRecord](
+          segment = 0,
+          totalSegments = 1
+        )(table.name)
 
-      whenReady(future) {
-        _ shouldBe records
-      }
+        whenReady(future) {
+          _ shouldBe records
+        }
     }
   }
 
@@ -44,53 +45,60 @@ class ParallelScannerTest
   }
 
   it("fails if asked for a segment that's greater than totalSegments") {
-    withLocalDynamoDbTable { table =>
-      val future = scanner.scan[NamedRecord](
-        segment = 10,
-        totalSegments = 5
-      )(table.name)
+    withLocalDynamoDbTable {
+      table =>
+        val future = scanner.scan[NamedRecord](
+          segment = 10,
+          totalSegments = 5
+        )(table.name)
 
-      whenReady(future.failed) { err =>
-        err shouldBe a[DynamoDbException]
-        err.getMessage should include(
-          "Value '10' at 'segment' failed to satisfy constraint: Member must have value less than or equal to 4")
-      }
+        whenReady(future.failed) {
+          err =>
+            err shouldBe a[DynamoDbException]
+            err.getMessage should include(
+              "Value '10' at 'segment' failed to satisfy constraint: Member must have value less than or equal to 4"
+            )
+        }
     }
   }
 
   it("fails if the data is in the wrong format") {
     case class NumberedRecord(id: Int, text: String)
 
-    withLocalDynamoDbTable { table =>
-      createRecords(table, count = 10)
+    withLocalDynamoDbTable {
+      table =>
+        createRecords(table, count = 10)
 
-      val future = scanner.scan[NumberedRecord](
-        segment = 0,
-        totalSegments = 1
-      )(table.name)
+        val future = scanner.scan[NumberedRecord](
+          segment = 0,
+          totalSegments = 1
+        )(table.name)
 
-      whenReady(future.failed) { err =>
-        err shouldBe a[RuntimeException]
-        err.getMessage should startWith("Errors parsing Scanamo result")
-      }
+        whenReady(future.failed) {
+          err =>
+            err shouldBe a[RuntimeException]
+            err.getMessage should startWith("Errors parsing Scanamo result")
+        }
     }
   }
 
   private def runTest(recordCount: Int, segmentCount: Int): Assertion = {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = recordCount)
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = recordCount)
 
-      // Note that segments are 0-indexed
-      val futures = (0 until segmentCount).map { segment =>
-        scanner.scan[NamedRecord](
-          segment = segment,
-          totalSegments = segmentCount
-        )(table.name)
-      }
+        // Note that segments are 0-indexed
+        val futures = (0 until segmentCount).map {
+          segment =>
+            scanner.scan[NamedRecord](
+              segment = segment,
+              totalSegments = segmentCount
+            )(table.name)
+        }
 
-      whenReady(Future.sequence(futures)) {
-        _.flatten should contain theSameElementsAs records
-      }
+        whenReady(Future.sequence(futures)) {
+          _.flatten should contain theSameElementsAs records
+        }
     }
   }
 }

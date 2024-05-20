@@ -280,10 +280,14 @@ class SierraItemsOnOrderTest
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val suppressedOrderData = orderData.map { od =>
-        od.copy(suppressed = true)
+      val suppressedOrderData = orderData.map {
+        od =>
+          od.copy(suppressed = true)
       }
-      getOrders(hasItems = false, orderData = suppressedOrderData) shouldBe empty
+      getOrders(
+        hasItems = false,
+        orderData = suppressedOrderData
+      ) shouldBe empty
     }
 
     it("unless the order is deleted") {
@@ -306,8 +310,9 @@ class SierraItemsOnOrderTest
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val deletedOrderData = orderData.map { od =>
-        od.copy(deleted = true)
+      val deletedOrderData = orderData.map {
+        od =>
+          od.copy(deleted = true)
       }
       getOrders(hasItems = false, orderData = deletedOrderData) shouldBe empty
     }
@@ -364,7 +369,10 @@ class SierraItemsOnOrderTest
       // Note: we test both with and without CAT DATE here, so we'll
       // spot if the lack of output is unrelated to the items.
       getOrders(bibData = bibData, orderData = orderData) should not be empty
-      getOrders(bibData = bibDataWithCatDate, orderData = orderData) shouldBe empty
+      getOrders(
+        bibData = bibDataWithCatDate,
+        orderData = orderData
+      ) shouldBe empty
     }
   }
 
@@ -463,10 +471,14 @@ class SierraItemsOnOrderTest
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val suppressedOrderData = orderData.map { od =>
-        od.copy(suppressed = true)
+      val suppressedOrderData = orderData.map {
+        od =>
+          od.copy(suppressed = true)
       }
-      getOrders(hasItems = false, orderData = suppressedOrderData) shouldBe empty
+      getOrders(
+        hasItems = false,
+        orderData = suppressedOrderData
+      ) shouldBe empty
     }
 
     it("unless the order is deleted") {
@@ -482,8 +494,9 @@ class SierraItemsOnOrderTest
 
       getOrders(hasItems = false, orderData = orderData) should not be empty
 
-      val deletedOrderData = orderData.map { od =>
-        od.copy(deleted = true)
+      val deletedOrderData = orderData.map {
+        od =>
+          od.copy(deleted = true)
       }
       getOrders(hasItems = false, orderData = deletedOrderData) shouldBe empty
     }
@@ -526,7 +539,10 @@ class SierraItemsOnOrderTest
       // Note: we test both with and without CAT DATE here, so we'll
       // spot if the lack of output is unrelated to the items.
       getOrders(bibData = bibData, orderData = orderData) should not be empty
-      getOrders(bibData = bibDataWithCatDate, orderData = orderData) shouldBe empty
+      getOrders(
+        bibData = bibDataWithCatDate,
+        orderData = orderData
+      ) shouldBe empty
     }
   }
 
@@ -551,15 +567,17 @@ class SierraItemsOnOrderTest
     }
   }
 
-  def getOrders(hasItems: Boolean = false,
-                bibData: SierraBibData = createSierraBibData,
-                orderData: List[SierraOrderData])
-    : List[Item[IdState.Unidentifiable.type]] = {
+  def getOrders(
+    hasItems: Boolean = false,
+    bibData: SierraBibData = createSierraBibData,
+    orderData: List[SierraOrderData]
+  ): List[Item[IdState.Unidentifiable.type]] = {
     val id = createSierraBibNumber
 
     val orderIds = (1 to orderData.size)
-      .map { _ =>
-        createSierraOrderNumber
+      .map {
+        _ =>
+          createSierraOrderNumber
       }
       .sortBy { _.withoutCheckDigit }
 

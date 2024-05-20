@@ -13,7 +13,8 @@ trait RetrieverTestCases[Context, T]
   def withContext[R](documents: Seq[T])(testWith: TestWith[Context, R]): R
 
   def withRetriever[R](testWith: TestWith[Retriever[T], R])(
-    implicit context: Context): R
+    implicit context: Context
+  ): R
 
   def createT: T
 
@@ -22,12 +23,13 @@ trait RetrieverTestCases[Context, T]
   it("retrieves a document") {
     val t = createT
 
-    withContext(documents = Seq(t)) { implicit context =>
-      val future = withRetriever { _.apply(id.indexId(t)) }
+    withContext(documents = Seq(t)) {
+      implicit context =>
+        val future = withRetriever { _.apply(id.indexId(t)) }
 
-      whenReady(future) {
-        _ shouldBe t
-      }
+        whenReady(future) {
+          _ shouldBe t
+        }
     }
   }
 
@@ -35,13 +37,17 @@ trait RetrieverTestCases[Context, T]
     val missingId = id.indexId(createT)
     val someOtherDocument = createT
 
-    withContext(documents = Seq(someOtherDocument)) { implicit context =>
-      val future = withRetriever { _.apply(missingId) }
+    withContext(documents = Seq(someOtherDocument)) {
+      implicit context =>
+        val future = withRetriever { _.apply(missingId) }
 
-      whenReady(future.failed) { exc =>
-        exc shouldBe a[RetrieverNotFoundException]
-        exc.getMessage should startWith(s"Nothing found with ID $missingId!")
-      }
+        whenReady(future.failed) {
+          exc =>
+            exc shouldBe a[RetrieverNotFoundException]
+            exc.getMessage should startWith(
+              s"Nothing found with ID $missingId!"
+            )
+        }
     }
   }
 
@@ -53,18 +59,20 @@ trait RetrieverTestCases[Context, T]
     val documents = Seq(t1, t2, t3)
     val ids = documents.map { id.indexId }
     val expectedResult = RetrieverMultiResult(
-      found = documents.map { t =>
-        id.indexId(t) -> t
+      found = documents.map {
+        t =>
+          id.indexId(t) -> t
       }.toMap,
       notFound = Map.empty
     )
 
-    withContext(documents = documents) { implicit context =>
-      val future = withRetriever { _.apply(ids) }
+    withContext(documents = documents) {
+      implicit context =>
+        val future = withRetriever { _.apply(ids) }
 
-      whenReady(future) {
-        _ shouldBe expectedResult
-      }
+        whenReady(future) {
+          _ shouldBe expectedResult
+        }
     }
   }
 
@@ -76,18 +84,21 @@ trait RetrieverTestCases[Context, T]
     val documents = Seq(t1, t2, t3)
     val ids = documents.map { id.indexId }
 
-    withContext(documents = Seq(t1, t2)) { implicit context =>
-      val future = withRetriever { _.apply(ids) }
+    withContext(documents = Seq(t1, t2)) {
+      implicit context =>
+        val future = withRetriever { _.apply(ids) }
 
-      whenReady(future) { result =>
-        result.found shouldBe Map(
-          id.indexId(t1) -> t1,
-          id.indexId(t2) -> t2
-        )
+        whenReady(future) {
+          result =>
+            result.found shouldBe Map(
+              id.indexId(t1) -> t1,
+              id.indexId(t2) -> t2
+            )
 
-        result.notFound.keySet shouldBe Set(id.indexId(t3))
-        result.notFound(id.indexId(t3)) shouldBe a[RetrieverNotFoundException]
-      }
+            result.notFound.keySet shouldBe Set(id.indexId(t3))
+            result
+              .notFound(id.indexId(t3)) shouldBe a[RetrieverNotFoundException]
+        }
     }
   }
 }

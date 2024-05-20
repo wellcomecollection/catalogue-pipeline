@@ -17,24 +17,24 @@ import weco.storage.streaming.Codec
 import weco.catalogue.source_model.store.SourceVHS
 
 trait SourceVHSFixture extends S3ObjectLocationGenerators with Matchers {
-  def createStore[T](implicit codec: Codec[T])
-    : VersionedHybridStore[String, Int, S3ObjectLocation, T] = {
+  def createStore[T](
+    implicit codec: Codec[T]
+  ): VersionedHybridStore[String, Int, S3ObjectLocation, T] = {
     val hybridStore =
       new HybridStoreWithMaxima[String, Int, S3ObjectLocation, T] {
         implicit override val indexedStore
-          : Store[Version[String, Int], S3ObjectLocation] with Maxima[
-            String,
-            Version[String, Int],
-            S3ObjectLocation] =
+          : Store[Version[String, Int], S3ObjectLocation]
+            with Maxima[String, Version[String, Int], S3ObjectLocation] =
           new MemoryStore[Version[String, Int], S3ObjectLocation](
-            initialEntries = Map.empty)
-          with MemoryMaxima[String, S3ObjectLocation]
+            initialEntries = Map.empty
+          ) with MemoryMaxima[String, S3ObjectLocation]
 
         override implicit val typedStore: TypedStore[S3ObjectLocation, T] =
           MemoryTypedStore[S3ObjectLocation, T]()
 
         override protected def createTypeStoreId(
-          id: Version[String, Int]): S3ObjectLocation =
+          id: Version[String, Int]
+        ): S3ObjectLocation =
           createS3ObjectLocation
       }
 

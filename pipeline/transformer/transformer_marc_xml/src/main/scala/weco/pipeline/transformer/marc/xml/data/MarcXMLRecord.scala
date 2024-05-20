@@ -6,7 +6,6 @@ import weco.pipeline.transformer.marc_common.models.{
   MarcRecord,
   MarcSubfield
 }
-
 import scala.xml.Node
 
 object MarcXMLControlField {

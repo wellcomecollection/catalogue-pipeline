@@ -41,10 +41,12 @@ trait WorkStubGenerators extends IdentifiersGenerators {
       mergeCandidateIds = collectionOf(min = 0) { createCanonicalId }.toSet
     )
 
-  def createWorkWith(id: CanonicalId = chooseFrom(idA, idB, idC, idD, idE),
-                     version: Int = randomInt(from = 1, to = 10),
-                     mergeCandidateIds: Set[CanonicalId] = Set(),
-                     workType: String = "Visible"): WorkStub = {
+  def createWorkWith(
+    id: CanonicalId = chooseFrom(idA, idB, idC, idD, idE),
+    version: Int = randomInt(from = 1, to = 10),
+    mergeCandidateIds: Set[CanonicalId] = Set(),
+    workType: String = "Visible"
+  ): WorkStub = {
 
     WorkStub(
       state = WorkState.Identified(
@@ -52,16 +54,19 @@ trait WorkStubGenerators extends IdentifiersGenerators {
         canonicalId = id,
         mergeCandidates = mergeCandidateIds
           .filterNot { _ == id }
-          .map { canonicalId =>
-            IdState.Identified(
-              canonicalId = canonicalId,
-              sourceIdentifier = sourceIdentifierFrom(canonicalId))
+          .map {
+            canonicalId =>
+              IdState.Identified(
+                canonicalId = canonicalId,
+                sourceIdentifier = sourceIdentifierFrom(canonicalId)
+              )
           }
-          .map { id =>
-            MergeCandidate(
-              id = id,
-              reason = "Linked in the matcher tests"
-            )
+          .map {
+            id =>
+              MergeCandidate(
+                id = id,
+                reason = "Linked in the matcher tests"
+              )
           }
           .toList,
         sourceModifiedTime = Instant.now()

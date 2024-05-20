@@ -23,10 +23,11 @@ trait MiroWorkGenerators extends ImageGenerators {
   def miroItems(
     count: Int = Random.nextInt(5)
   ): List[Item[IdState.Unidentifiable.type]] =
-    (1 to count).map { _ =>
-      createUnidentifiableItemWith(
-        locations = List(createImageLocation)
-      )
+    (1 to count).map {
+      _ =>
+        createUnidentifiableItemWith(
+          locations = List(createImageLocation)
+        )
     }.toList
 
   def miroIdentifiedWork(

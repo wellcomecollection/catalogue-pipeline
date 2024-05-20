@@ -42,7 +42,9 @@ class UpdaterTest
       .get
       .identifiedT shouldBe transformable
 
-  it("creates a record if it receives an item with a bibId that doesn't exist") {
+  it(
+    "creates a record if it receives an item with a bibId that doesn't exist"
+  ) {
     val sourceVHS = createSourceVHS[SierraTransformable]
     val updater = new Updater[SierraItemRecord](sourceVHS)
 
@@ -55,7 +57,8 @@ class UpdaterTest
 
     result shouldBe a[Right[_, _]]
     result.right.get.map { _.id } shouldBe List(
-      Version(bibId.withoutCheckDigit, 0))
+      Version(bibId.withoutCheckDigit, 0)
+    )
 
     val expectedSierraTransformable =
       createSierraTransformableStubWith(
@@ -99,7 +102,8 @@ class UpdaterTest
 
     result shouldBe a[Right[_, _]]
     result.right.get.map { _.id } should contain theSameElementsAs List(
-      Version(bibId.withoutCheckDigit, 1))
+      Version(bibId.withoutCheckDigit, 1)
+    )
 
     assertStored(
       expectedTransformable.sierraId,
@@ -161,7 +165,8 @@ class UpdaterTest
     result shouldBe a[Right[_, _]]
     result.right.get.map { _.id } should contain theSameElementsAs List(
       Version(bibId1.withoutCheckDigit, 1),
-      Version(bibId2.withoutCheckDigit, 1))
+      Version(bibId2.withoutCheckDigit, 1)
+    )
 
     assertStored(bibId1, expectedTransformable1, sourceVHS)
     assertStored(bibId2, expectedTransformable2, sourceVHS)
@@ -219,7 +224,8 @@ class UpdaterTest
     result shouldBe a[Right[_, _]]
     result.right.get.map { _.id } should contain theSameElementsAs List(
       Version(bibId1.withoutCheckDigit, 1),
-      Version(bibId2.withoutCheckDigit, 1))
+      Version(bibId2.withoutCheckDigit, 1)
+    )
 
     assertStored(bibId1, expectedTransformable1, sourceVHS)
     assertStored(bibId2, expectedTransformable2, sourceVHS)
@@ -236,7 +242,8 @@ class UpdaterTest
     val sierraTransformable1 =
       createSierraTransformableStubWith(
         bibId = bibId1,
-        itemRecords = List(itemRecord))
+        itemRecords = List(itemRecord)
+      )
 
     val sierraTransformable2 =
       createSierraTransformableStubWith(bibId = bibId2)
@@ -274,7 +281,8 @@ class UpdaterTest
     val result = updater.update(unlinkItemRecord)
     result shouldBe a[Right[_, _]]
     result.right.get.map { _.id } should contain theSameElementsAs List(
-      Version(bibId2.withoutCheckDigit, 1))
+      Version(bibId2.withoutCheckDigit, 1)
+    )
 
     assertStored(bibId1, expectedTransformable1, sourceVHS)
     assertStored(bibId2, expectedTransformable2, sourceVHS)
@@ -322,14 +330,15 @@ class UpdaterTest
     val sourceVHS = createSourceVHS[SierraTransformable]
     val updater = new Updater[SierraItemRecord](sourceVHS)
 
-    (1 to 5).foreach { _ =>
-      val result = updater.update(itemRecord)
-      result shouldBe a[Right[_, _]]
-      result.value should not be empty
+    (1 to 5).foreach {
+      _ =>
+        val result = updater.update(itemRecord)
+        result shouldBe a[Right[_, _]]
+        result.value should not be empty
     }
 
-    sourceVHS.underlying.getLatest(bibId.withoutCheckDigit) shouldBe a[Right[_,
-                                                                             _]]
+    sourceVHS.underlying
+      .getLatest(bibId.withoutCheckDigit) shouldBe a[Right[_, _]]
   }
 
   it("adds an item to the record if the bibId exists but has no itemData") {
@@ -355,7 +364,8 @@ class UpdaterTest
     val result = updater.update(itemRecord)
     result shouldBe a[Right[_, _]]
     result.right.get.map { _.id } should contain theSameElementsAs List(
-      Version(bibId.withoutCheckDigit, 1))
+      Version(bibId.withoutCheckDigit, 1)
+    )
 
     assertStored(bibId, expectedTransformable, sourceVHS)
   }
@@ -365,18 +375,19 @@ class UpdaterTest
         String,
         Int,
         S3ObjectLocation,
-        SierraTransformable] {
+        SierraTransformable
+      ] {
     override protected def createTypeStoreId(
-      id: Version[String, Int]): S3ObjectLocation =
+      id: Version[String, Int]
+    ): S3ObjectLocation =
       createS3ObjectLocation
 
     implicit override val indexedStore
-      : Store[Version[String, Int], S3ObjectLocation] with Maxima[
-        String,
-        Version[String, Int],
-        S3ObjectLocation] =
+      : Store[Version[String, Int], S3ObjectLocation]
+        with Maxima[String, Version[String, Int], S3ObjectLocation] =
       new MemoryStore[Version[String, Int], S3ObjectLocation](
-        initialEntries = Map.empty) with MemoryMaxima[String, S3ObjectLocation]
+        initialEntries = Map.empty
+      ) with MemoryMaxima[String, S3ObjectLocation]
 
     override implicit val typedStore
       : TypedStore[S3ObjectLocation, SierraTransformable] =
@@ -391,7 +402,8 @@ class UpdaterTest
         hybridStore = new BrokenStore()
       ) {
         override def upsert(id: String)(t: SierraTransformable)(
-          f: UpdateFunction): UpdateEither =
+          f: UpdateFunction
+        ): UpdateEither =
           Left(UpdateWriteError(StoreWriteError(exception)))
       }
     )

@@ -154,21 +154,23 @@ class StorageServiceOauthHttpClientTest
       )
     )
 
-    withActorSystem { implicit actorSystem =>
-      val authClient = new StorageServiceOauthHttpClient(
-        underlying = new MemoryHttpClient(responses),
-        credentials = credentials,
-        baseUri = Uri("http://storage:1234"),
-        tokenUri = Uri("http://storage:1234/token")
-      )
+    withActorSystem {
+      implicit actorSystem =>
+        val authClient = new StorageServiceOauthHttpClient(
+          underlying = new MemoryHttpClient(responses),
+          credentials = credentials,
+          baseUri = Uri("http://storage:1234"),
+          tokenUri = Uri("http://storage:1234/token")
+        )
 
-      val future = authClient.get(path = Path("bags/digitised/b16237456"))
+        val future = authClient.get(path = Path("bags/digitised/b16237456"))
 
-      whenReady(future) { resp =>
-        withStringEntity(resp.entity) {
-          assertJsonStringsAreEqual(_, bagJson)
+        whenReady(future) {
+          resp =>
+            withStringEntity(resp.entity) {
+              assertJsonStringsAreEqual(_, bagJson)
+            }
         }
-      }
     }
   }
 
@@ -233,32 +235,35 @@ class StorageServiceOauthHttpClientTest
       )
     )
 
-    withActorSystem { implicit actorSystem =>
-      val authClient = new StorageServiceOauthHttpClient(
-        underlying = new MemoryHttpClient(responses),
-        baseUri = Uri("http://storage:1234"),
-        tokenUri = Uri("http://storage:1234/token"),
-        credentials = credentials,
-        expiryGracePeriod = 3.seconds
-      )
+    withActorSystem {
+      implicit actorSystem =>
+        val authClient = new StorageServiceOauthHttpClient(
+          underlying = new MemoryHttpClient(responses),
+          baseUri = Uri("http://storage:1234"),
+          tokenUri = Uri("http://storage:1234/token"),
+          credentials = credentials,
+          expiryGracePeriod = 3.seconds
+        )
 
-      val future1 = authClient.get(path = Path("bags/digitised/b16237456"))
+        val future1 = authClient.get(path = Path("bags/digitised/b16237456"))
 
-      whenReady(future1) { resp1 =>
-        withStringEntity(resp1.entity) {
-          assertJsonStringsAreEqual(_, bagJson)
+        whenReady(future1) {
+          resp1 =>
+            withStringEntity(resp1.entity) {
+              assertJsonStringsAreEqual(_, bagJson)
+            }
         }
-      }
 
-      Thread.sleep(1000)
+        Thread.sleep(1000)
 
-      val future2 = authClient.get(path = Path("bags/digitised/b16237456"))
+        val future2 = authClient.get(path = Path("bags/digitised/b16237456"))
 
-      whenReady(future2) { resp2 =>
-        withStringEntity(resp2.entity) {
-          assertJsonStringsAreEqual(_, bagJson)
+        whenReady(future2) {
+          resp2 =>
+            withStringEntity(resp2.entity) {
+              assertJsonStringsAreEqual(_, bagJson)
+            }
         }
-      }
     }
   }
 }

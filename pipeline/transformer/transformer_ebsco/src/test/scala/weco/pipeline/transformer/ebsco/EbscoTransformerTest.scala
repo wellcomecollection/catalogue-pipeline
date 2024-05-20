@@ -40,7 +40,11 @@ class EbscoTransformerTest
       )
 
       val result =
-        transformer.apply("3PaDhRp", EbscoUpdatedSourceData(location, modifiedTime), 20240401)
+        transformer.apply(
+          "3PaDhRp",
+          EbscoUpdatedSourceData(location, modifiedTime),
+          20240401
+        )
       result shouldBe a[Right[_, _]]
       val work = result.value
 

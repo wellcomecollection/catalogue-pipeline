@@ -24,24 +24,30 @@ trait IndexerFixtures
     with IntegrationPatience
     with Akka
     with SQS { this: Suite =>
-  def withWorker[R](queue: Queue,
-                    typedStore: MemoryTypedStore[S3ObjectLocation, CalmRecord],
-                    index: Index)(
+  def withWorker[R](
+    queue: Queue,
+    typedStore: MemoryTypedStore[S3ObjectLocation, CalmRecord],
+    index: Index
+  )(
     testWith: TestWith[Worker, R]
   ): R =
-    withActorSystem { implicit actorSystem =>
-      withSQSStream[NotificationMessage, R](queue) { sqsStream =>
-        val worker = new Worker(sqsStream, typedStore, index)
+    withActorSystem {
+      implicit actorSystem =>
+        withSQSStream[NotificationMessage, R](queue) {
+          sqsStream =>
+            val worker = new Worker(sqsStream, typedStore, index)
 
-        worker.run()
+            worker.run()
 
-        testWith(worker)
-      }
+            testWith(worker)
+        }
     }
 
-  def assertElasticsearchEventuallyHas(index: Index,
-                                       id: String,
-                                       json: String): Assertion =
+  def assertElasticsearchEventuallyHas(
+    index: Index,
+    id: String,
+    json: String
+  ): Assertion =
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
         get(index, id)

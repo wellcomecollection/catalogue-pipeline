@@ -28,7 +28,9 @@ class SierraRulesForRequestingTest
       (
         "e",
         NotRequestable.OnExhibition(
-          "On exhibition. Please ask at Enquiry Desk.")),
+          "On exhibition. Please ask at Enquiry Desk."
+        )
+      ),
       ("y", NotRequestable.NoPublicMessage("fixed field 88 = y")),
       ("g", NotRequestable.SafeguardedItem("Safeguarded item."))
     )
@@ -50,7 +52,8 @@ class SierraRulesForRequestingTest
     )
 
     SierraRulesForRequesting(item) shouldBe NotRequestable.InUseByAnotherReader(
-      "Item is in use by another reader. Please ask at Enquiry Desk.")
+      "Item is in use by another reader. Please ask at Enquiry Desk."
+    )
   }
 
   it("blocks an item if fixed field 88 (status) is !") {
@@ -59,7 +62,8 @@ class SierraRulesForRequestingTest
     )
 
     SierraRulesForRequesting(item) shouldBe NotRequestable.InUseByAnotherReader(
-      "Item is in use by another reader. Please ask at Enquiry Desk.")
+      "Item is in use by another reader. Please ask at Enquiry Desk."
+    )
   }
 
   it("does not block an item if fixed field 87 (loan rule) is zero") {
@@ -79,7 +83,8 @@ class SierraRulesForRequestingTest
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.ContactUs(
-            "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97.")
+            "Item cannot be requested online. Please contact Medical Film & Audio Library.   Email: mfac@wellcome.ac.uk. Telephone: +44 (0)20 76118596/97."
+          )
         )
       }
     }
@@ -101,13 +106,16 @@ class SierraRulesForRequestingTest
         "dpleg",
         "dpuih",
         "gblip",
-        "ofvds")
+        "ofvds"
+      )
 
       forAll(testCases) {
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.NeedsManualRequest(
-            "This item cannot be requested online. Please place a manual request."))
+            "This item cannot be requested online. Please place a manual request."
+          )
+        )
       }
     }
 
@@ -118,7 +126,8 @@ class SierraRulesForRequestingTest
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.ContactUs(
-            "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722.")
+            "Item cannot be requested online. Please ask at Information Service desk, email: infoserv@wellcome.ac.uk or telephone +44 (0)20 7611 8722."
+          )
         )
       }
     }
@@ -163,7 +172,9 @@ class SierraRulesForRequestingTest
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.OnOpenShelves(
-            "Item is on open shelves.  Check Location and Shelfmark for location details."))
+            "Item is on open shelves.  Check Location and Shelfmark for location details."
+          )
+        )
       }
     }
 
@@ -176,24 +187,31 @@ class SierraRulesForRequestingTest
         "somet",
         "somge",
         "sompr",
-        "somsy")
+        "somsy"
+      )
 
       forAll(testCases) {
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.NeedsManualRequest(
-            "Please complete a manual request slip.  This item cannot be requested online."))
+            "Please complete a manual request slip.  This item cannot be requested online."
+          )
+        )
       }
     }
 
-    it("if it's one of the location codes blocked with no user-facing message") {
+    it(
+      "if it's one of the location codes blocked with no user-facing message"
+    ) {
       val testCases = Table("locationCode", "sepep", "rm001", "rmdda")
 
-      forAll(testCases) { locationCode =>
-        assertBlockedWith(
-          _,
-          expectedResult =
-            NotRequestable.NoPublicMessage(s"fixed field 79 = $locationCode"))
+      forAll(testCases) {
+        locationCode =>
+          assertBlockedWith(
+            _,
+            expectedResult =
+              NotRequestable.NoPublicMessage(s"fixed field 79 = $locationCode")
+          )
       }
     }
 
@@ -212,13 +230,15 @@ class SierraRulesForRequestingTest
         "swm#4",
         "swm#5",
         "swm#6",
-        "swm#7")
+        "swm#7"
+      )
 
       forAll(testCases) {
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.ItemUnavailable(
-            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened.")
+            "Item not available due to provisions of Data Protection Act. Return to Archives catalogue to see when this file will be opened."
+          )
         )
       }
     }
@@ -231,19 +251,23 @@ class SierraRulesForRequestingTest
         "temp3",
         "temp4",
         "temp5",
-        "temp6")
+        "temp6"
+      )
 
       forAll(testCases) {
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.AtDigitisation(
-            "At digitisation and temporarily unavailable."))
+            "At digitisation and temporarily unavailable."
+          )
+        )
       }
     }
 
     def assertBlockedWith(
       locationCode: String,
-      expectedResult: RulesForRequestingResult): Assertion = {
+      expectedResult: RulesForRequestingResult
+    ): Assertion = {
       val item = createSierraItemDataWith(
         fixedFields =
           Map("79" -> FixedField(label = "LOCATION", value = locationCode))
@@ -259,18 +283,24 @@ class SierraRulesForRequestingTest
       (
         "22",
         NotRequestable.OnExhibition(
-          "Item is on Exhibition Reserve. Please ask at the Enquiry Desk")),
+          "Item is on Exhibition Reserve. Please ask at the Enquiry Desk"
+        )
+      ),
       ("17", NotRequestable.NoPublicMessage("fixed field 61 = 17 (<none>)")),
       ("18", NotRequestable.NoPublicMessage("fixed field 61 = 18 (<none>)")),
       ("15", NotRequestable.NoPublicMessage("fixed field 61 = 15 (<none>)")),
       (
         "4",
         NotRequestable.NeedsManualRequest(
-          "Please complete a manual request slip.  This item cannot be requested online.")),
+          "Please complete a manual request slip.  This item cannot be requested online."
+        )
+      ),
       (
         "14",
         NotRequestable.NeedsManualRequest(
-          "Please complete a manual request slip.  This item cannot be requested online.")),
+          "Please complete a manual request slip.  This item cannot be requested online."
+        )
+      )
     )
 
     forAll(testCases) {
@@ -302,7 +332,7 @@ class SierraRulesForRequestingTest
         fixedFields = Map(
           "61" -> FixedField(label = "I TYPE", value = "5")
         )
-      ),
+      )
     )
 
     forAll(testCases) {

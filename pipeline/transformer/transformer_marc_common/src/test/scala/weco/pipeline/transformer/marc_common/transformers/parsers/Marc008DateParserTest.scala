@@ -13,7 +13,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1757, 1, 1),
         LocalDate of (1757, 12, 31),
-        "1757"))
+        "1757"
+      )
+    )
   }
 
   it("parses partial date consisting of century") {
@@ -21,7 +23,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1900, 1, 1),
         LocalDate of (1999, 12, 31),
-        "1900-1999"))
+        "1900-1999"
+      )
+    )
   }
 
   it("parses partial date consisting of century and deccade") {
@@ -29,7 +33,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1990, 1, 1),
         LocalDate of (1999, 12, 31),
-        "1990-1999"))
+        "1990-1999"
+      )
+    )
   }
 
   it("parses multiple dates") {
@@ -37,7 +43,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1625, 1, 1),
         LocalDate of (1700, 12, 31),
-        "1625-1700"))
+        "1625-1700"
+      )
+    )
   }
 
   it("parses reprint dates") {
@@ -45,7 +53,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1996, 1, 1),
         LocalDate of (1996, 12, 31),
-        "1996"))
+        "1996"
+      )
+    )
   }
 
   it("parses detailed dates") {
@@ -53,7 +63,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1908, 11, 21),
         LocalDate of (1908, 11, 21),
-        "1908/11/21"))
+        "1908/11/21"
+      )
+    )
   }
 
   it("parses publication and copyright dates") {
@@ -61,7 +73,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1907, 1, 1),
         LocalDate of (1907, 12, 31),
-        "1907"))
+        "1907"
+      )
+    )
   }
 
   it("parses continuing resource ceased publication") {
@@ -69,7 +83,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1916, 1, 1),
         LocalDate of (1924, 12, 31),
-        "1916-1924"))
+        "1916-1924"
+      )
+    )
   }
 
   it("parses continuing resource currently published") {
@@ -77,7 +93,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (2000, 1, 1),
         LocalDate of (9999, 12, 31),
-        "2000-"))
+        "2000-"
+      )
+    )
   }
 
   it("parses continuing resource status unknown") {
@@ -85,7 +103,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1959, 1, 1),
         LocalDate of (9999, 12, 31),
-        "1959-"))
+        "1959-"
+      )
+    )
   }
 
   it("parses questionable dates") {
@@ -93,7 +113,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1600, 1, 1),
         LocalDate of (1699, 12, 31),
-        "1600-1699"))
+        "1600-1699"
+      )
+    )
   }
 
   it("parses dates with different release and production") {
@@ -101,7 +123,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (2008, 1, 1),
         LocalDate of (2008, 12, 31),
-        "2008"))
+        "2008"
+      )
+    )
   }
 
   it("parses single date when date2 filled with number sign") {
@@ -109,7 +133,9 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (1874, 1, 1),
         LocalDate of (1874, 12, 31),
-        "1874"))
+        "1874"
+      )
+    )
   }
 
   it("drops an explicit 9999 from the displayed range") {
@@ -117,6 +143,8 @@ class Marc008DateParserTest extends AnyFunSpec with Matchers {
       InstantRange(
         LocalDate of (2017, 1, 1),
         LocalDate of (9999, 12, 31),
-        "2017-"))
+        "2017-"
+      )
+    )
   }
 }

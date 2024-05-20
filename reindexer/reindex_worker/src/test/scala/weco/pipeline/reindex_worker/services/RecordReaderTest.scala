@@ -26,56 +26,59 @@ class RecordReaderTest
   val reader = new RecordReader()
 
   it("finds records in the table with a complete reindex") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 2)
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 2)
 
-      val reindexParameters = CompleteReindexParameters(
-        segment = 0,
-        totalSegments = 1
-      )
+        val reindexParameters = CompleteReindexParameters(
+          segment = 0,
+          totalSegments = 1
+        )
 
-      val future = reader.findRecords[NamedRecord](
-        reindexParameters,
-        tableName = table.name
-      )
+        val future = reader.findRecords[NamedRecord](
+          reindexParameters,
+          tableName = table.name
+        )
 
-      whenReady(future) {
-        _ should contain theSameElementsAs records
-      }
+        whenReady(future) {
+          _ should contain theSameElementsAs records
+        }
     }
   }
 
   it("finds records in the table with a maxResults reindex") {
-    withLocalDynamoDbTable { table =>
-      createRecords(table, count = 15)
+    withLocalDynamoDbTable {
+      table =>
+        createRecords(table, count = 15)
 
-      val reindexParameters = PartialReindexParameters(maxRecords = 5)
+        val reindexParameters = PartialReindexParameters(maxRecords = 5)
 
-      val future = reader.findRecords[NamedRecord](
-        reindexParameters,
-        tableName = table.name
-      )
+        val future = reader.findRecords[NamedRecord](
+          reindexParameters,
+          tableName = table.name
+        )
 
-      whenReady(future) {
-        _ should have size 5
-      }
+        whenReady(future) {
+          _ should have size 5
+        }
     }
   }
 
   it("finds records in the table with a specified records reindex") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 15)
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 15)
 
-      val reindexParameters = SpecificReindexParameters(List(records.head.id))
+        val reindexParameters = SpecificReindexParameters(List(records.head.id))
 
-      val future = reader.findRecords[NamedRecord](
-        reindexParameters,
-        tableName = table.name
-      )
+        val future = reader.findRecords[NamedRecord](
+          reindexParameters,
+          tableName = table.name
+        )
 
-      whenReady(future) {
-        _ shouldBe Seq(records.head)
-      }
+        whenReady(future) {
+          _ shouldBe Seq(records.head)
+        }
     }
   }
 

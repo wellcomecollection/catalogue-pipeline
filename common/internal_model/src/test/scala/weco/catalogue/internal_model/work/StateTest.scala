@@ -119,7 +119,7 @@ class StateTest
 
       val denormalised = merged.transition[Denormalised](
         Relations(
-          //Mum is already in the list, granny is new
+          // Mum is already in the list, granny is new
           ancestors = List(newMum, granny)
         )
       )
@@ -188,7 +188,7 @@ class StateTest
 
       val denormalised = merged.transition[Denormalised](
         Relations(
-          //Mum is already in the list, granny is new
+          // Mum is already in the list, granny is new
           ancestors = List(mumsMum, dadsMum, mum2)
         )
       )

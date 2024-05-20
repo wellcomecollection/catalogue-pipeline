@@ -101,7 +101,8 @@ class LinkStoreTest
     assertStored(
       id = oldRecord.id,
       record = newRecord.copy(unlinkedBibIds = List(bibIds(2))),
-      version = 2)
+      version = 2
+    )
   }
 
   it("adds new bibIds and records unlinked bibIds in the same update") {
@@ -178,10 +179,12 @@ class LinkStoreTest
 
     val brokenStore = new MemoryVersionedStore(
       new MemoryStore[Version[SierraItemNumber, Int], Link](
-        initialEntries = Map.empty) with MemoryMaxima[SierraItemNumber, Link]
+        initialEntries = Map.empty
+      ) with MemoryMaxima[SierraItemNumber, Link]
     ) {
       override def upsert(id: SierraItemNumber)(t: Link)(
-        f: UpdateFunction): UpdateEither =
+        f: UpdateFunction
+      ): UpdateEither =
         Left(UpdateWriteError(StoreWriteError(exception)))
     }
 
@@ -192,15 +195,18 @@ class LinkStoreTest
     either.left.get shouldBe exception
   }
 
-  private def assertStored(id: SierraItemNumber,
-                           record: SierraItemRecord,
-                           version: Int)(
-    implicit store: MemoryVersionedStore[SierraItemNumber, Link]): Assertion =
+  private def assertStored(
+    id: SierraItemNumber,
+    record: SierraItemRecord,
+    version: Int
+  )(implicit store: MemoryVersionedStore[SierraItemNumber, Link]): Assertion =
     store.getLatest(id).value shouldBe Identified(
       Version(record.id, version),
-      Link(record))
+      Link(record)
+    )
 
   private def assertStored(record: SierraItemRecord, version: Int)(
-    implicit store: MemoryVersionedStore[SierraItemNumber, Link]): Assertion =
+    implicit store: MemoryVersionedStore[SierraItemNumber, Link]
+  ): Assertion =
     assertStored(id = record.id, record = record, version = version)
 }

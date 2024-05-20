@@ -14,10 +14,12 @@ import java.time.Instant
 trait MatcherResultFixture extends RandomGenerators {
   def createMatcherResultWith(
     matchedEntries: Set[Set[Work[Identified]]],
-    createdTime: Instant = randomInstant): MatcherResult =
+    createdTime: Instant = randomInstant
+  ): MatcherResult =
     MatcherResult(
-      works = matchedEntries.map { works =>
-        MatchedIdentifiers(works.map { WorkIdentifier(_) })
+      works = matchedEntries.map {
+        works =>
+          MatchedIdentifiers(works.map { WorkIdentifier(_) })
       },
       createdTime = createdTime
     )

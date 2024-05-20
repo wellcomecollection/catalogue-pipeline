@@ -13,7 +13,8 @@ trait ContributorMatchers {
   class HaveRoles(expectedRoles: List[String])
       extends HavePropertyMatcher[Contributor[Any], List[String]] {
     override def apply(
-      contributor: Contributor[Any]): HavePropertyMatchResult[List[String]] = {
+      contributor: Contributor[Any]
+    ): HavePropertyMatchResult[List[String]] = {
       val actualRoles = contributor.roles.map(_.label)
       HavePropertyMatchResult[List[String]](
         matches = actualRoles == expectedRoles,
@@ -24,11 +25,11 @@ trait ContributorMatchers {
     }
   }
 
-  /**
-    * Match a Contributor's roles against a list of role names
+  /** Match a Contributor's roles against a list of role names
     */
-  def roles(expectedRoles: List[String])
-    : HavePropertyMatcher[Contributor[Any], List[String]] =
+  def roles(
+    expectedRoles: List[String]
+  ): HavePropertyMatcher[Contributor[Any], List[String]] =
     new HaveRoles(expectedRoles)
 
   class IsPrimaryMatcher extends BePropertyMatcher[Contributor[Any]] {

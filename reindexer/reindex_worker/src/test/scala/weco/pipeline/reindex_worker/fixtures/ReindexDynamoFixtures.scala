@@ -19,14 +19,17 @@ trait ReindexDynamoFixtures extends ReindexableTable with RandomGenerators {
   )
 
   def createRecords(table: Table, count: Int): Seq[NamedRecord] = {
-    val records = (1 to count).map { _ =>
-      createRecord()
+    val records = (1 to count).map {
+      _ =>
+        createRecord()
     }
 
-    records.foreach(record => {
-      val scanamoTable = ScanamoTable[NamedRecord](table.name)
-      Scanamo(dynamoClient).exec(scanamoTable.put(record))
-    })
+    records.foreach(
+      record => {
+        val scanamoTable = ScanamoTable[NamedRecord](table.name)
+        Scanamo(dynamoClient).exec(scanamoTable.put(record))
+      }
+    )
 
     records
   }

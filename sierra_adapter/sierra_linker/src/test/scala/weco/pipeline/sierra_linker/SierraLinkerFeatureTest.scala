@@ -39,16 +39,18 @@ class SierraLinkerFeatureTest
       initialEntries = Map.empty
     )
 
-    withLocalSqsQueue() { queue =>
-      withItemWorker(queue, store = store, messageSender = messageSender) { _ =>
-        sendNotificationToSQS(queue, record)
+    withLocalSqsQueue() {
+      queue =>
+        withItemWorker(queue, store = store, messageSender = messageSender) {
+          _ =>
+            sendNotificationToSQS(queue, record)
 
-        eventually {
-          messageSender.getMessages[SierraItemRecord] shouldBe Seq(record)
+            eventually {
+              messageSender.getMessages[SierraItemRecord] shouldBe Seq(record)
 
-          store.getLatest(record.id).value.identifiedT shouldBe expectedLink
+              store.getLatest(record.id).value.identifiedT shouldBe expectedLink
+            }
         }
-      }
     }
   }
 
@@ -65,17 +67,24 @@ class SierraLinkerFeatureTest
       initialEntries = Map.empty
     )
 
-    withLocalSqsQueue() { queue =>
-      withHoldingsWorker(queue, store = store, messageSender = messageSender) {
-        _ =>
-          sendNotificationToSQS(queue, record)
+    withLocalSqsQueue() {
+      queue =>
+        withHoldingsWorker(
+          queue,
+          store = store,
+          messageSender = messageSender
+        ) {
+          _ =>
+            sendNotificationToSQS(queue, record)
 
-          eventually {
-            messageSender.getMessages[SierraHoldingsRecord] shouldBe Seq(record)
+            eventually {
+              messageSender.getMessages[SierraHoldingsRecord] shouldBe Seq(
+                record
+              )
 
-            store.getLatest(record.id).value.identifiedT shouldBe expectedLink
-          }
-      }
+              store.getLatest(record.id).value.identifiedT shouldBe expectedLink
+            }
+        }
     }
   }
 
@@ -92,17 +101,18 @@ class SierraLinkerFeatureTest
       initialEntries = Map.empty
     )
 
-    withLocalSqsQueue() { queue =>
-      withOrderWorker(queue, store = store, messageSender = messageSender) {
-        _ =>
-          sendNotificationToSQS(queue, record)
+    withLocalSqsQueue() {
+      queue =>
+        withOrderWorker(queue, store = store, messageSender = messageSender) {
+          _ =>
+            sendNotificationToSQS(queue, record)
 
-          eventually {
-            messageSender.getMessages[SierraOrderRecord] shouldBe Seq(record)
+            eventually {
+              messageSender.getMessages[SierraOrderRecord] shouldBe Seq(record)
 
-            store.getLatest(record.id).value.identifiedT shouldBe expectedLink
-          }
-      }
+              store.getLatest(record.id).value.identifiedT shouldBe expectedLink
+            }
+        }
     }
   }
 }

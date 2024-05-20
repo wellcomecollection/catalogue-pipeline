@@ -33,7 +33,8 @@ class SierraProductionTest
         subfields = List(
           Subfield(tag = "a", content = "Paris"),
           Subfield(tag = "a", content = "London")
-        ))
+        )
+      )
 
       production.places shouldBe List(
         Place(label = "Paris"),
@@ -46,7 +47,8 @@ class SierraProductionTest
         subfields = List(
           Subfield(tag = "b", content = "Gauthier-Villars ;"),
           Subfield(tag = "b", content = "Vogue")
-        ))
+        )
+      )
 
       production.agents shouldBe List(
         Agent(label = "Gauthier-Villars ;"),
@@ -60,7 +62,8 @@ class SierraProductionTest
           Subfield(tag = "c", content = "1955"),
           Subfield(tag = "c", content = "1984"),
           Subfield(tag = "c", content = "1999")
-        ))
+        )
+      )
 
       production.dates shouldBe List(
         ParsedPeriod(label = "1955"),
@@ -75,7 +78,8 @@ class SierraProductionTest
           Subfield(tag = "a", content = "New York"),
           Subfield(tag = "b", content = "Xerox Films"),
           Subfield(tag = "c", content = "1973")
-        ))
+        )
+      )
 
       production.function shouldBe None
     }
@@ -85,8 +89,9 @@ class SierraProductionTest
         subfields = List(
           Subfield(tag = "a", content = "New York, N.Y."),
           Subfield(tag = "e", content = "Reston, Va."),
-          Subfield(tag = "e", content = "[Philadelphia]"),
-        ))
+          Subfield(tag = "e", content = "[Philadelphia]")
+        )
+      )
 
       production.places shouldBe List(
         Place(label = "New York, N.Y."),
@@ -102,8 +107,9 @@ class SierraProductionTest
         subfields = List(
           Subfield(tag = "b", content = "Macmillan"),
           Subfield(tag = "f", content = "Sussex Tapes"),
-          Subfield(tag = "f", content = "US Dept of Energy"),
-        ))
+          Subfield(tag = "f", content = "US Dept of Energy")
+        )
+      )
 
       production.agents shouldBe List(
         Agent(label = "Macmillan"),
@@ -120,7 +126,8 @@ class SierraProductionTest
           Subfield(tag = "c", content = "1981"),
           Subfield(tag = "g", content = "April 15, 1977"),
           Subfield(tag = "g", content = "1973 printing")
-        ))
+        )
+      )
 
       production.dates shouldBe List(
         ParsedPeriod(label = "1981"),
@@ -151,11 +158,13 @@ class SierraProductionTest
             Subfield(
               tag = "b",
               content =
-                "Toxicology Information Program, National Library of Medicine [producer] ;"),
+                "Toxicology Information Program, National Library of Medicine [producer] ;"
+            ),
             Subfield(tag = "a", content = "Springfield, Va. :"),
             Subfield(
               tag = "b",
-              content = "National Technical Information Service [distributor],"),
+              content = "National Technical Information Service [distributor],"
+            ),
             Subfield(tag = "c", content = "1974-")
           )
         )
@@ -179,7 +188,8 @@ class SierraProductionTest
           places = List(Place("Bethesda, Md."), Place("Springfield, Va.")),
           agents = List(
             Agent(
-              "Toxicology Information Program, National Library of Medicine [producer] ;"),
+              "Toxicology Information Program, National Library of Medicine [producer] ;"
+            ),
             Agent("National Technical Information Service [distributor]")
           ),
           dates = List(ParsedPeriod("1974-")),
@@ -197,7 +207,8 @@ class SierraProductionTest
           Subfield(tag = "a", content = "London :"),
           Subfield(tag = "c", content = "1984 . "),
           Subfield(tag = "c", content = "1999.")
-        ))
+        )
+      )
 
       production.places shouldBe List(
         Place(label = "Paris"),
@@ -220,7 +231,8 @@ class SierraProductionTest
         subfields = List(
           Subfield(tag = "a", content = "Boston"),
           Subfield(tag = "a", content = "Cambridge")
-        ))
+        )
+      )
 
       production.places shouldBe List(
         Place(label = "Boston"),
@@ -233,7 +245,8 @@ class SierraProductionTest
         subfields = List(
           Subfield(tag = "b", content = "ABC Publishers"),
           Subfield(tag = "b", content = "Iverson Company")
-        ))
+        )
+      )
 
       production.agents shouldBe List(
         Agent(label = "ABC Publishers"),
@@ -247,7 +260,8 @@ class SierraProductionTest
           Subfield(tag = "c", content = "2002"),
           Subfield(tag = "c", content = "1983"),
           Subfield(tag = "c", content = "copyright 2005")
-        ))
+        )
+      )
 
       production.dates shouldBe List(
         ParsedPeriod(label = "2002"),
@@ -260,25 +274,29 @@ class SierraProductionTest
       it("sets Production from 2nd indicator == 0") {
         checkProductionFunctionFor264(
           indicator2 = "0",
-          expectedFunction = "Production")
+          expectedFunction = "Production"
+        )
       }
 
       it("sets Publication from 2nd indicator == 1") {
         checkProductionFunctionFor264(
           indicator2 = "1",
-          expectedFunction = "Publication")
+          expectedFunction = "Publication"
+        )
       }
 
       it("sets Distribution from 2nd indicator == 2") {
         checkProductionFunctionFor264(
           indicator2 = "2",
-          expectedFunction = "Distribution")
+          expectedFunction = "Distribution"
+        )
       }
 
       it("sets Manufacture from 2nd indicator == 3") {
         checkProductionFunctionFor264(
           indicator2 = "3",
-          expectedFunction = "Manufacture")
+          expectedFunction = "Manufacture"
+        )
       }
 
       it("throws an error if the 2nd indicator is unrecognised") {
@@ -304,12 +322,14 @@ class SierraProductionTest
         caught.getMessage should startWith("Problem in the data")
         caught.getMessage should include(bibId.withoutCheckDigit)
         caught.getMessage should include(
-          "Unrecognised second indicator for production function")
+          "Unrecognised second indicator for production function"
+        )
       }
     }
 
     it(
-      "ignores instances of the 264 field related to copyright (2nd indicator 4)") {
+      "ignores instances of the 264 field related to copyright (2nd indicator 4)"
+    ) {
       val varFields = List(
         createVarFieldWith(
           marcTag = "264",
@@ -425,7 +445,8 @@ class SierraProductionTest
           Subfield(tag = "c", content = "2002."),
           Subfield(tag = "c", content = "1983 ."),
           Subfield(tag = "c", content = "copyright 2005.")
-        ))
+        )
+      )
 
       production.places shouldBe List(
         Place(label = "Boston"),
@@ -444,7 +465,9 @@ class SierraProductionTest
   }
 
   describe("Both MARC field 260 and 264") {
-    it("throws a cataloguing error if both 260 and 264 are present, and 264 has a 2nd indicator") {
+    it(
+      "throws a cataloguing error if both 260 and 264 are present, and 264 has a 2nd indicator"
+    ) {
       val bibId = createSierraBibNumber
 
       val varFields = List(
@@ -588,7 +611,9 @@ class SierraProductionTest
           places = List(Place("England")),
           agents = List(),
           dates = List(ParsedPeriod("1757")),
-          function = None))
+          function = None
+        )
+      )
     }
 
     it("ignores field 008 if 264 is present") {
@@ -600,7 +625,10 @@ class SierraProductionTest
           indicator2 = "1",
           subfields = List(
             Subfield(tag = "c", content = "2002"),
-            Subfield(tag = "a", content = "London"))))
+            Subfield(tag = "a", content = "London")
+          )
+        )
+      )
 
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
@@ -608,7 +636,9 @@ class SierraProductionTest
           places = List(Place("London")),
           agents = List(),
           dates = List(ParsedPeriod("2002")),
-          function = Some(Concept("Publication"))))
+          function = Some(Concept("Publication"))
+        )
+      )
     }
 
     it("ignores field 008 if 260 is present") {
@@ -620,7 +650,10 @@ class SierraProductionTest
           indicator2 = "1",
           subfields = List(
             Subfield(tag = "c", content = "2002"),
-            Subfield(tag = "a", content = "London"))))
+            Subfield(tag = "a", content = "London")
+          )
+        )
+      )
 
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
@@ -628,7 +661,9 @@ class SierraProductionTest
           places = List(Place("London")),
           agents = List(),
           dates = List(ParsedPeriod("2002")),
-          function = None))
+          function = None
+        )
+      )
     }
 
     it("uses date information from 008 if not present in 260/264") {
@@ -638,7 +673,9 @@ class SierraProductionTest
         createVarFieldWith(
           marcTag = "260",
           indicator2 = "1",
-          subfields = List(Subfield(tag = "a", content = "London"))))
+          subfields = List(Subfield(tag = "a", content = "London"))
+        )
+      )
 
       transformToProduction(varFields) shouldBe List(
         ProductionEvent(
@@ -646,13 +683,16 @@ class SierraProductionTest
           places = List(Place("London")),
           agents = List(),
           dates = List(ParsedPeriod("1757")),
-          function = None))
+          function = None
+        )
+      )
     }
 
     // Example is from b28533306, with the 264 field modified so it's never parseable
     // and so this test is predictable.
     it(
-      "uses date information from 008 but labels from 260/4 if the latter cannot be parsed") {
+      "uses date information from 008 but labels from 260/4 if the latter cannot be parsed"
+    ) {
       val varFields = List(
         createVarFieldWith(
           marcTag = "008",
@@ -665,7 +705,8 @@ class SierraProductionTest
             Subfield(tag = "a", content = "[Netherne, Surrey],"),
             Subfield(
               tag = "c",
-              content = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴")
+              content = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴"
+            )
           )
         )
       )
@@ -679,7 +720,9 @@ class SierraProductionTest
         agents = Nil,
         dates = List(
           ParsedPeriod("1972").copy(
-            label = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴")),
+            label = "B̷A̴D̸ ̴U̶N̸P̵A̸R̸S̷E̷A̶B̵L̶E̸ ̵N̴O̴N̶S̵E̷N̷S̴E̴"
+          )
+        ),
         function = Some(Concept("Production"))
       )
     }
@@ -710,8 +753,10 @@ class SierraProductionTest
     transformToProduction(varFields = varFields).head
   }
 
-  private def checkProductionFunctionFor264(indicator2: String,
-                                            expectedFunction: String) = {
+  private def checkProductionFunctionFor264(
+    indicator2: String,
+    expectedFunction: String
+  ) = {
     val varFields = List(
       createVarFieldWith(
         marcTag = "264",
@@ -725,7 +770,8 @@ class SierraProductionTest
   }
 
   private def transformToProduction(
-    varFields: List[VarField]): List[ProductionEvent[IdState.Unminted]] = {
+    varFields: List[VarField]
+  ): List[ProductionEvent[IdState.Unminted]] = {
     val bibData = createSierraBibDataWith(varFields = varFields)
     SierraProduction(createSierraBibNumber, bibData)
   }

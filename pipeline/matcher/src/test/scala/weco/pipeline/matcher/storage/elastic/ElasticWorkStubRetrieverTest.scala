@@ -26,45 +26,54 @@ class ElasticWorkStubRetrieverTest
       implicit index =>
         withElasticIndexer(index) {
           indexer: ElasticIndexer[Work[WorkState.Identified]] =>
-            whenReady(indexer(Seq(work))) { _ =>
-              assertElasticsearchEventuallyHas(index, work)
+            whenReady(indexer(Seq(work))) {
+              _ =>
+                assertElasticsearchEventuallyHas(index, work)
 
-              withRetriever { retriever: Retriever[WorkStub] =>
-                whenReady(retriever(indexId.indexId(work))) {
-                  _ shouldBe WorkStub(
-                    state = work.state,
-                    version = work.version,
-                    workType = "Deleted"
-                  )
+                withRetriever {
+                  retriever: Retriever[WorkStub] =>
+                    whenReady(retriever(indexId.indexId(work))) {
+                      _ shouldBe WorkStub(
+                        state = work.state,
+                        version = work.version,
+                        workType = "Deleted"
+                      )
+                    }
                 }
-              }
             }
         }
     }
   }
 
-  override def withContext[R](stubs: Seq[WorkStub])(
-    testWith: TestWith[Index, R]): R =
-    withLocalIdentifiedWorksIndex { index =>
-      withElasticIndexer[Work[WorkState.Identified], R](index) { indexer =>
-        val works: Seq[Work[WorkState.Identified]] = stubs.map { w =>
-          identifiedWork()
-            .mapState { _ =>
-              w.state
+  override def withContext[R](
+    stubs: Seq[WorkStub]
+  )(testWith: TestWith[Index, R]): R =
+    withLocalIdentifiedWorksIndex {
+      index =>
+        withElasticIndexer[Work[WorkState.Identified], R](index) {
+          indexer =>
+            val works: Seq[Work[WorkState.Identified]] = stubs.map {
+              w =>
+                identifiedWork()
+                  .mapState {
+                    _ =>
+                      w.state
+                  }
+                  .withVersion(w.version)
             }
-            .withVersion(w.version)
-        }
 
-        whenReady(indexer(works)) { _ =>
-          assertElasticsearchEventuallyHas(index, works: _*)
+            whenReady(indexer(works)) {
+              _ =>
+                assertElasticsearchEventuallyHas(index, works: _*)
 
-          testWith(index)
+                testWith(index)
+            }
         }
-      }
     }
 
   override def withRetriever[R](testWith: TestWith[Retriever[WorkStub], R])(
-    implicit index: Index): R =
+    implicit index: Index
+  ): R =
     testWith(
       new ElasticWorkStubRetriever(elasticClient, index)
     )

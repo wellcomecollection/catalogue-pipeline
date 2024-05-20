@@ -18,53 +18,58 @@ class MaxRecordsScannerTest
   val scanner = new MaxRecordsScanner()
 
   it("reads a table with a single record") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 1)
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 1)
 
-      val future = scanner.scan[NamedRecord](maxRecords = 1)(table.name)
+        val future = scanner.scan[NamedRecord](maxRecords = 1)(table.name)
 
-      whenReady(future) {
-        _ shouldBe records
-      }
+        whenReady(future) {
+          _ shouldBe records
+        }
     }
   }
 
   it("handles being asked for more records than are in the table") {
-    withLocalDynamoDbTable { table =>
-      val records = createRecords(table, count = 5)
+    withLocalDynamoDbTable {
+      table =>
+        val records = createRecords(table, count = 5)
 
-      val future = scanner.scan[NamedRecord](maxRecords = 10)(table.name)
+        val future = scanner.scan[NamedRecord](maxRecords = 10)(table.name)
 
-      whenReady(future) {
-        _ should contain theSameElementsAs records
-      }
+        whenReady(future) {
+          _ should contain theSameElementsAs records
+        }
     }
   }
 
   it("only returns as many records as were asked for") {
-    withLocalDynamoDbTable { table =>
-      createRecords(table, count = 5)
+    withLocalDynamoDbTable {
+      table =>
+        createRecords(table, count = 5)
 
-      val future = scanner.scan[NamedRecord](maxRecords = 3)(table.name)
+        val future = scanner.scan[NamedRecord](maxRecords = 3)(table.name)
 
-      whenReady(future) {
-        _ should have size 3
-      }
+        whenReady(future) {
+          _ should have size 3
+        }
     }
   }
 
   it("fails if the data is in the wrong format") {
     case class NumberedRecord(id: Int, text: String)
 
-    withLocalDynamoDbTable { table =>
-      createRecords(table, count = 5)
+    withLocalDynamoDbTable {
+      table =>
+        createRecords(table, count = 5)
 
-      val future = scanner.scan[NumberedRecord](maxRecords = 3)(table.name)
+        val future = scanner.scan[NumberedRecord](maxRecords = 3)(table.name)
 
-      whenReady(future.failed) { err =>
-        err shouldBe a[RuntimeException]
-        err.getMessage should startWith("Errors parsing Scanamo result")
-      }
+        whenReady(future.failed) {
+          err =>
+            err shouldBe a[RuntimeException]
+            err.getMessage should startWith("Errors parsing Scanamo result")
+        }
     }
   }
 }

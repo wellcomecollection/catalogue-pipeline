@@ -18,8 +18,9 @@ class DisplayAbstractAgentTest
 
   val label: String = randomAlphanumeric(length = 25)
   val sourceIdentifier: SourceIdentifier = createSourceIdentifier
-  val otherIdentifiers: List[SourceIdentifier] = (1 to 3).map { _ =>
-    createSourceIdentifier
+  val otherIdentifiers: List[SourceIdentifier] = (1 to 3).map {
+    _ =>
+      createSourceIdentifier
   }.toList
   val canonicalId: CanonicalId = createCanonicalId
 
@@ -40,13 +41,19 @@ class DisplayAbstractAgentTest
     it(
       "converts an Unidentifiable Agent to a DisplayAgent (includesIdentifiers = true)"
     ) {
-      DisplayAbstractAgent(unidentifiedAgent, includesIdentifiers = true) shouldBe expectedUnidentifiedAgent
+      DisplayAbstractAgent(
+        unidentifiedAgent,
+        includesIdentifiers = true
+      ) shouldBe expectedUnidentifiedAgent
     }
 
     it(
       "converts an Unidentifiable Agent to a DisplayAgent (includesIdentifiers = false)"
     ) {
-      DisplayAbstractAgent(unidentifiedAgent, includesIdentifiers = false) shouldBe expectedUnidentifiedAgent
+      DisplayAbstractAgent(
+        unidentifiedAgent,
+        includesIdentifiers = false
+      ) shouldBe expectedUnidentifiedAgent
     }
 
     it(
@@ -60,7 +67,10 @@ class DisplayAbstractAgentTest
         label = label
       )
 
-      DisplayAbstractAgent(identifiedAgent, includesIdentifiers = true) shouldBe expectedAgent
+      DisplayAbstractAgent(
+        identifiedAgent,
+        includesIdentifiers = true
+      ) shouldBe expectedAgent
     }
 
     it(
@@ -72,7 +82,10 @@ class DisplayAbstractAgentTest
         label = label
       )
 
-      DisplayAbstractAgent(identifiedAgent, includesIdentifiers = false) shouldBe expectedAgent
+      DisplayAbstractAgent(
+        identifiedAgent,
+        includesIdentifiers = false
+      ) shouldBe expectedAgent
     }
   }
 
@@ -105,13 +118,19 @@ class DisplayAbstractAgentTest
     it(
       "converts an Unidentifiable Person to a DisplayPerson (includesIdentifiers = true)"
     ) {
-      DisplayAbstractAgent(unidentifiedPerson, includesIdentifiers = true) shouldBe expectedUnidentifiedPerson
+      DisplayAbstractAgent(
+        unidentifiedPerson,
+        includesIdentifiers = true
+      ) shouldBe expectedUnidentifiedPerson
     }
 
     it(
       "converts an Unidentifiable Person to a DisplayPerson (includesIdentifiers = false)"
     ) {
-      DisplayAbstractAgent(unidentifiedPerson, includesIdentifiers = false) shouldBe expectedUnidentifiedPerson
+      DisplayAbstractAgent(
+        unidentifiedPerson,
+        includesIdentifiers = false
+      ) shouldBe expectedUnidentifiedPerson
     }
 
     it(
@@ -127,7 +146,10 @@ class DisplayAbstractAgentTest
         numeration = Some(numeration)
       )
 
-      DisplayAbstractAgent(identifiedPerson, includesIdentifiers = true) shouldBe expectedPerson
+      DisplayAbstractAgent(
+        identifiedPerson,
+        includesIdentifiers = true
+      ) shouldBe expectedPerson
     }
 
     it(
@@ -141,7 +163,10 @@ class DisplayAbstractAgentTest
         numeration = Some(numeration)
       )
 
-      DisplayAbstractAgent(identifiedPerson, includesIdentifiers = false) shouldBe expectedPerson
+      DisplayAbstractAgent(
+        identifiedPerson,
+        includesIdentifiers = false
+      ) shouldBe expectedPerson
     }
   }
 
@@ -161,7 +186,10 @@ class DisplayAbstractAgentTest
     it(
       "converts an Unidentifiable Organisation to a DisplayOrganisation (includesIdentifiers = true)"
     ) {
-      DisplayAbstractAgent(unidentifiedOrganisation, includesIdentifiers = true) shouldBe expectedUnidentifiedOrganisation
+      DisplayAbstractAgent(
+        unidentifiedOrganisation,
+        includesIdentifiers = true
+      ) shouldBe expectedUnidentifiedOrganisation
     }
 
     it(
@@ -184,7 +212,10 @@ class DisplayAbstractAgentTest
         label = label
       )
 
-      DisplayAbstractAgent(identifiedOrganisation, includesIdentifiers = true) shouldBe expectedOrganisation
+      DisplayAbstractAgent(
+        identifiedOrganisation,
+        includesIdentifiers = true
+      ) shouldBe expectedOrganisation
     }
 
     it(
@@ -196,7 +227,10 @@ class DisplayAbstractAgentTest
         label = label
       )
 
-      DisplayAbstractAgent(identifiedOrganisation, includesIdentifiers = false) shouldBe expectedOrganisation
+      DisplayAbstractAgent(
+        identifiedOrganisation,
+        includesIdentifiers = false
+      ) shouldBe expectedOrganisation
     }
   }
 
@@ -209,21 +243,30 @@ class DisplayAbstractAgentTest
     it(
       "converts an Unidentifiable Meeting to a DisplayMeeting (includesIdentifiers = true)"
     ) {
-      DisplayAbstractAgent(unidentifiedMeeting, includesIdentifiers = true) shouldBe
+      DisplayAbstractAgent(
+        unidentifiedMeeting,
+        includesIdentifiers = true
+      ) shouldBe
         DisplayMeeting(None, None, label)
     }
 
     it(
       "converts an Unidentifiable Meeting to a DisplayOrganisation (includesIdentifiers = false)"
     ) {
-      DisplayAbstractAgent(unidentifiedMeeting, includesIdentifiers = false) shouldBe
+      DisplayAbstractAgent(
+        unidentifiedMeeting,
+        includesIdentifiers = false
+      ) shouldBe
         DisplayMeeting(None, None, label)
     }
 
     it(
       "converts an Identified Meeting to a DisplayMeeting (includesIdentifiers = true)"
     ) {
-      DisplayAbstractAgent(identifiedMeeting, includesIdentifiers = true) shouldBe
+      DisplayAbstractAgent(
+        identifiedMeeting,
+        includesIdentifiers = true
+      ) shouldBe
         DisplayMeeting(
           id = Some(canonicalId.underlying),
           identifiers = Some((List(sourceIdentifier) ++ otherIdentifiers).map {
@@ -236,7 +279,10 @@ class DisplayAbstractAgentTest
     it(
       "converts an Identified Meeting to a DisplayMeeting (includesIdentifiers = false)"
     ) {
-      DisplayAbstractAgent(identifiedMeeting, includesIdentifiers = false) shouldBe
+      DisplayAbstractAgent(
+        identifiedMeeting,
+        includesIdentifiers = false
+      ) shouldBe
         DisplayMeeting(
           id = Some(canonicalId.underlying),
           identifiers = None,

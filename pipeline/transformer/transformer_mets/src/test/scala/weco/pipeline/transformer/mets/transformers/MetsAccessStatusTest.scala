@@ -23,7 +23,8 @@ class MetsAccessStatusTest
     forAll(testCases) {
       case (accessConditionStatus, expectedStatus) =>
         MetsAccessStatus(Some(accessConditionStatus)) shouldBe Right(
-          Some(expectedStatus))
+          Some(expectedStatus)
+        )
     }
   }
 

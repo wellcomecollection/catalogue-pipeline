@@ -84,10 +84,11 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       {history.getOrElse(NodeSeq.Empty)}
     </msPart>
 
-  def history(origPlace: Option[Elem] = None,
-              originDates: List[Elem] = Nil,
-              provenance: List[Elem] = Nil,
-              acquisition: List[Elem] = Nil,
+  def history(
+    origPlace: Option[Elem] = None,
+    originDates: List[Elem] = Nil,
+    provenance: List[Elem] = Nil,
+    acquisition: List[Elem] = Nil
   ): Elem =
     <history>
       <origin>
@@ -111,7 +112,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       "notBefore" -> notBefore,
       "from" -> from,
       "to" -> to,
-      "notAfter" -> notAfter,
+      "notAfter" -> notAfter
     ).foldLeft(Null: MetaData) {
       case (metadata, (name, Some(value))) =>
         Attribute(name, Text(value), metadata)
@@ -133,7 +134,7 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       "notBefore" -> notBefore,
       "from" -> from,
       "to" -> to,
-      "notAfter" -> notAfter,
+      "notAfter" -> notAfter
     ).foldLeft(Null: MetaData) {
       case (metadata, (name, Some(value))) =>
         Attribute(name, Text(value), metadata)
@@ -148,8 +149,10 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       </textClass>
     </profileDesc>
 
-  def keywords(keywordsScheme: Option[String] = None,
-               subjects: NodeSeq = Nil) = {
+  def keywords(
+    keywordsScheme: Option[String] = None,
+    subjects: NodeSeq = Nil
+  ) = {
     val schemeAttribute = keywordsScheme
       .map(s => Attribute("scheme", Text(s), Null))
       .getOrElse(Null)
@@ -192,10 +195,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
       </handDesc>
     </physDesc>
 
-  def handNotes(label: String = "",
-                persNames: List[Elem] = Nil,
-                scribe: Option[String] = None,
-                locus: List[Elem] = Nil) = {
+  def handNotes(
+    label: String = "",
+    persNames: List[Elem] = Nil,
+    scribe: Option[String] = None,
+    locus: List[Elem] = Nil
+  ) = {
     val scribeAttribute =
       scribe.map(s => Attribute("scribe", Text(s), Null)).getOrElse(Null)
     <handNote>
@@ -203,23 +208,29 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   </handNote> % scribeAttribute
   }
 
-  def objectDesc(material: Option[String] = None,
-                 support: Option[Elem] = None,
-                 extent: Option[Elem] = None) = {
+  def objectDesc(
+    material: Option[String] = None,
+    support: Option[Elem] = None,
+    extent: Option[Elem] = None
+  ) = {
     val materialAttribute =
       material.map(s => Attribute("material", Text(s), Null)).getOrElse(Null)
     <objectDesc>
 
-      {<supportDesc>
+      {
+      <supportDesc>
       {extent.getOrElse(NodeSeq.Empty)}
       {support.getOrElse(NodeSeq.Empty)}
-      </supportDesc> % materialAttribute}
+      </supportDesc> % materialAttribute
+    }
     </objectDesc>
   }
 
-  def support(supportLabel: String,
-              watermarks: List[Elem] = Nil,
-              measures: List[Elem] = Nil) =
+  def support(
+    supportLabel: String,
+    watermarks: List[Elem] = Nil,
+    measures: List[Elem] = Nil
+  ) =
     <support>
       {supportLabel}
       {watermarks}
@@ -248,10 +259,12 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def scribe(name: String, `type`: Option[String] = None) =
     persName(label = name, role = Some("scr"), `type` = `type`)
 
-  def persName(label: String,
-               key: Option[String] = None,
-               `type`: Option[String] = None,
-               role: Option[String] = None) = {
+  def persName(
+    label: String,
+    key: Option[String] = None,
+    `type`: Option[String] = None,
+    role: Option[String] = None
+  ) = {
     val attributes = Map("key" -> key, "type" -> `type`, "role" -> role)
       .foldLeft(Null: MetaData) {
         case (metadata, (name, Some(value))) =>
@@ -279,11 +292,13 @@ trait TeiGenerators extends RandomGenerators { this: Suite =>
   def otherLanguage(id: String, label: String) =
     <textLang otherLangs={id} source="IANA">{label}</textLang>
 
-  def origPlace(country: Option[String] = None,
-                settlement: Option[String] = None,
-                region: Option[String] = None,
-                orgName: Option[String] = None,
-                label: Option[String] = None) =
+  def origPlace(
+    country: Option[String] = None,
+    settlement: Option[String] = None,
+    region: Option[String] = None,
+    orgName: Option[String] = None,
+    label: Option[String] = None
+  ) =
     <origPlace>
       <country>{country.getOrElse("")}</country>,
       <region>{region.getOrElse("")}</region>,

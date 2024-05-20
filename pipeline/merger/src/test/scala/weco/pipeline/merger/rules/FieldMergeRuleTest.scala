@@ -22,8 +22,10 @@ class FieldMergeRuleTest
       work => work.data.title.contains("A")
     override val isDefinedForSource: WorkPredicate = _ => true
 
-    override def rule(target: Work.Visible[Identified],
-                      sources: NonEmptyList[Work[Identified]]): FieldData =
+    override def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
       ()
   }
   val sourceTitleIsA = new PartialRule {
@@ -31,8 +33,10 @@ class FieldMergeRuleTest
     override val isDefinedForSource: WorkPredicate =
       work => work.data.title.contains("A")
 
-    override def rule(target: Work.Visible[Identified],
-                      sources: NonEmptyList[Work[Identified]]): FieldData =
+    override def rule(
+      target: Work.Visible[Identified],
+      sources: NonEmptyList[Work[Identified]]
+    ): FieldData =
       ()
   }
 
@@ -41,19 +45,34 @@ class FieldMergeRuleTest
 
   describe("PartialRule") {
     it(
-      "is a partial function that is defined only for targets satisfying isDefinedForTarget") {
-      targetTitleIsA(workWithTitleA, List(workWithTitleB)).isDefined shouldBe true
-      targetTitleIsA(workWithTitleB, List(workWithTitleB)).isDefined shouldBe false
+      "is a partial function that is defined only for targets satisfying isDefinedForTarget"
+    ) {
+      targetTitleIsA(
+        workWithTitleA,
+        List(workWithTitleB)
+      ).isDefined shouldBe true
+      targetTitleIsA(
+        workWithTitleB,
+        List(workWithTitleB)
+      ).isDefined shouldBe false
     }
 
     it(
-      "is a partial function that is defined only if at least one source satisfies isDefinedForSource") {
-      sourceTitleIsA(workWithTitleB, List(workWithTitleA, workWithTitleB)).isDefined shouldBe true
-      sourceTitleIsA(workWithTitleB, List(workWithTitleB)).isDefined shouldBe false
+      "is a partial function that is defined only if at least one source satisfies isDefinedForSource"
+    ) {
+      sourceTitleIsA(
+        workWithTitleB,
+        List(workWithTitleA, workWithTitleB)
+      ).isDefined shouldBe true
+      sourceTitleIsA(
+        workWithTitleB,
+        List(workWithTitleB)
+      ).isDefined shouldBe false
     }
 
     it(
-      "when applied, calls its rule method only for those sources satisfying isDefinedForSource") {
+      "when applied, calls its rule method only for those sources satisfying isDefinedForSource"
+    ) {
       val rule = new PartialRule {
         override val isDefinedForTarget: WorkPredicate = _ => true
         override val isDefinedForSource: WorkPredicate =
@@ -61,7 +80,8 @@ class FieldMergeRuleTest
 
         override def rule(
           target: Work.Visible[Identified],
-          sources: NonEmptyList[Work[Identified]]): FieldData = {
+          sources: NonEmptyList[Work[Identified]]
+        ): FieldData = {
           sources.toList should contain(workWithTitleA)
           sources.toList should not contain workWithTitleB
           None
@@ -76,6 +96,7 @@ class FieldMergeRuleTest
   // to access the private PartialRule trait
   override def merge(
     target: Work.Visible[Identified],
-    sources: Seq[Work[Identified]]): FieldMergeResult[FieldData] =
+    sources: Seq[Work[Identified]]
+  ): FieldMergeResult[FieldData] =
     throw new NotImplementedError()
 }

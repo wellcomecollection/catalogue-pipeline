@@ -17,11 +17,12 @@ class CalmLanguagesTest
         "languagesField",
         "",
         "  ",
-        "\n\n",
+        "\n\n"
       )
 
-    forAll(degenerateTestCases) { value =>
-      CalmLanguages(List(value)) shouldBe ((List(), List()))
+    forAll(degenerateTestCases) {
+      value =>
+        CalmLanguages(List(value)) shouldBe ((List(), List()))
     }
   }
 
@@ -33,7 +34,7 @@ class CalmLanguagesTest
     ("Swedish", List(Language(label = "Swedish", id = "swe"))),
     // A variant name in the MARC Language list
     ("Mandarin", List(Language(label = "Mandarin", id = "chi"))),
-    ("Middle English", List(Language(label = "Middle English", id = "enm"))),
+    ("Middle English", List(Language(label = "Middle English", id = "enm")))
   )
 
   it("handles exact matches") {
@@ -96,7 +97,7 @@ class CalmLanguagesTest
         Language(label = "English", id = "eng"),
         Language(label = "Russian", id = "rus")
       )
-    ),
+    )
   )
 
   it("handles multiple matches") {
@@ -107,7 +108,8 @@ class CalmLanguagesTest
     ("languagesField", "expectedLanguages"),
     (
       "<language>French</language>",
-      List(Language(label = "French", id = "fre"))),
+      List(Language(label = "French", id = "fre"))
+    ),
     // Case with multiple languages with matching langcodes
     (
       "<language langcode=\"ger\">German, </language><language langcode=\"fre\">French, </language>",
@@ -115,7 +117,7 @@ class CalmLanguagesTest
         Language(label = "German", id = "ger"),
         Language(label = "French", id = "fre")
       )
-    ),
+    )
   )
 
   it("handles <language> tags in the Calm data") {
@@ -145,9 +147,9 @@ class CalmLanguagesTest
         Language(label = "English", id = "eng"),
         Language(label = "Portuguese", id = "por"),
         Language(label = "French", id = "fre"),
-        Language(label = "Spanish", id = "spa"),
+        Language(label = "Spanish", id = "spa")
       )
-    ),
+    )
   )
 
   it("handles fuzzy cases") {
@@ -164,7 +166,7 @@ class CalmLanguagesTest
         Language(label = "French", id = "fre")
       )
     ),
-    ("Nigerian", List.empty),
+    ("Nigerian", List.empty)
   )
 
   it("handles fallback cases") {
@@ -186,16 +188,19 @@ class CalmLanguagesTest
         "The majority of this collection is in English, however Kitzinger recieved " +
           "letters from around the world and travelled widely for conferences so some " +
           "material is not."
-      ))
+      )
+    )
 
     languages shouldBe List(Language(label = "English", id = "eng"))
     languageNotes shouldBe List(
       Note(
-        contents = "The majority of this collection is in English, however Kitzinger received " +
-          "letters from around the world and travelled widely for conferences so some " +
-          "material is not.",
+        contents =
+          "The majority of this collection is in English, however Kitzinger received " +
+            "letters from around the world and travelled widely for conferences so some " +
+            "material is not.",
         noteType = NoteType.LanguageNote
-      ))
+      )
+    )
   }
 
   it("combines languages and notes from multiple values") {
@@ -220,7 +225,8 @@ class CalmLanguagesTest
     notes shouldBe List(
       Note(
         contents = "French with a Polish translation",
-        noteType = NoteType.LanguageNote),
+        noteType = NoteType.LanguageNote
+      ),
       Note(contents = "Chinese inscription", noteType = NoteType.LanguageNote)
     )
   }

@@ -35,15 +35,18 @@ class SierraPhysicalLocationTest
           "79" -> FixedField(
             label = "LOCATION",
             value = "scmac",
-            display = "Closed stores Arch. & MSS"),
+            display = "Closed stores Arch. & MSS"
+          ),
           "88" -> FixedField(
             label = "STATUS",
             value = "-",
-            display = "Available"),
+            display = "Available"
+          ),
           "108" -> FixedField(
             label = "OPACMSG",
             value = "f",
-            display = "Online request"),
+            display = "Online request"
+          )
         )
       )
 
@@ -53,11 +56,14 @@ class SierraPhysicalLocationTest
         accessConditions = List(
           AccessCondition(
             method = AccessMethod.OnlineRequest,
-            status = AccessStatus.Open))
+            status = AccessStatus.Open
+          )
+        )
       )
 
       transformer.getPhysicalLocation(itemData, bibData) shouldBe Some(
-        expectedLocation)
+        expectedLocation
+      )
     }
 
     it("uses the name as the label for non-closed locations") {
@@ -111,15 +117,18 @@ class SierraPhysicalLocationTest
           "79" -> FixedField(
             label = "LOCATION",
             value = "scmac",
-            display = "Closed stores Arch. & MSS"),
+            display = "Closed stores Arch. & MSS"
+          ),
           "88" -> FixedField(
             label = "STATUS",
             value = "-",
-            display = "Available"),
+            display = "Available"
+          ),
           "108" -> FixedField(
             label = "OPACMSG",
             value = "f",
-            display = "Online request"),
+            display = "Online request"
+          )
         ),
         location = Some(
           SierraLocation(code = "sgmed", name = "Closed stores Med.")
@@ -131,7 +140,8 @@ class SierraPhysicalLocationTest
       location.accessConditions shouldBe List(
         AccessCondition(
           method = AccessMethod.OnlineRequest,
-          status = Some(AccessStatus.Open))
+          status = Some(AccessStatus.Open)
+        )
       )
     }
 
@@ -193,7 +203,9 @@ class SierraPhysicalLocationTest
         result shouldBe None
       }
 
-      it("uses the fallback location if location name is 'contained in above'") {
+      it(
+        "uses the fallback location if location name is 'contained in above'"
+      ) {
         val result = transformer.getPhysicalLocation(
           bibData = createSierraBibData,
           itemData = createSierraItemDataWith(
@@ -216,7 +228,7 @@ class SierraPhysicalLocationTest
             marcTag = "506",
             subfields = List(
               Subfield("a", "You're not allowed yet"),
-              Subfield("g", "2099-12-31"),
+              Subfield("g", "2099-12-31")
             )
           )
         )
@@ -231,7 +243,8 @@ class SierraPhysicalLocationTest
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(
-            s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information.""")
+            s"""This item cannot be requested online. Please contact <a href="mailto:library@wellcomecollection.org">library@wellcomecollection.org</a> for more information."""
+          )
         )
       )
     }

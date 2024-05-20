@@ -34,17 +34,20 @@ trait IdentifiersDatabase
       val database: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.database)
       val table: SQLSyntax = SQLSyntax.createUnsafely(tableConfig.tableName)
 
-      val fields = NamedDB('primary) readOnly { implicit session =>
-        sql"DESCRIBE $database.$table"
-          .map(
-            rs =>
-              FieldDescription(
-                rs.string("Field"),
-                rs.string("Type"),
-                rs.string("Null"),
-                rs.string("Key")))
-          .list()
-          .apply()
+      val fields = NamedDB('primary) readOnly {
+        implicit session =>
+          sql"DESCRIBE $database.$table"
+            .map(
+              rs =>
+                FieldDescription(
+                  rs.string("Field"),
+                  rs.string("Type"),
+                  rs.string("Null"),
+                  rs.string("Key")
+                )
+            )
+            .list()
+            .apply()
       }
 
       fields.sortBy(_.field) shouldBe Seq(
@@ -52,22 +55,26 @@ trait IdentifiersDatabase
           field = "CanonicalId",
           dataType = "varchar(255)",
           nullable = "NO",
-          key = "PRI"),
+          key = "PRI"
+        ),
         FieldDescription(
           field = "OntologyType",
           dataType = "varchar(255)",
           nullable = "NO",
-          key = "MUL"),
+          key = "MUL"
+        ),
         FieldDescription(
           field = "SourceSystem",
           dataType = "varchar(255)",
           nullable = "NO",
-          key = ""),
+          key = ""
+        ),
         FieldDescription(
           field = "SourceId",
           dataType = "varchar(255)",
           nullable = "NO",
-          key = "")
+          key = ""
+        )
       ).sortBy(_.field)
     }
 
@@ -80,7 +87,8 @@ trait IdentifiersDatabase
   )
 
   def withIdentifiersTable[R](
-    testWith: TestWith[IdentifiersTableConfig, R]): R = {
+    testWith: TestWith[IdentifiersTableConfig, R]
+  ): R = {
     ConnectionPool.add(
       'primary,
       s"jdbc:mysql://$rdsHost:$rdsPort",
@@ -113,8 +121,9 @@ trait IdentifiersDatabase
 
       testWith(identifiersTableConfig)
     } finally {
-      NamedDB('primary) localTx { implicit session =>
-        sql"DROP DATABASE IF EXISTS $identifiersDatabase".execute().apply()
+      NamedDB('primary) localTx {
+        implicit session =>
+          sql"DROP DATABASE IF EXISTS $identifiersDatabase".execute().apply()
       }
 
       session.close()
@@ -122,47 +131,53 @@ trait IdentifiersDatabase
 
   }
 
-  def insertIdentifiers(table: IdentifiersTable,
-                        identifiers: Seq[Identifier]): Unit =
-    identifiers.foreach { id =>
-      NamedDB('primary) localTx { implicit session =>
-        withSQL {
-          insert
-            .into(table)
-            .namedValues(
-              table.column.CanonicalId -> sqls.?,
-              table.column.OntologyType -> sqls.?,
-              table.column.SourceSystem -> sqls.?,
-              table.column.SourceId -> sqls.?
-            )
-        }.batch {
-            Seq(
-              id.CanonicalId.toString,
-              id.OntologyType,
-              id.SourceSystem,
-              id.SourceId)
-          }
-          .apply()
-      }
+  def insertIdentifiers(
+    table: IdentifiersTable,
+    identifiers: Seq[Identifier]
+  ): Unit =
+    identifiers.foreach {
+      id =>
+        NamedDB('primary) localTx {
+          implicit session =>
+            withSQL {
+              insert
+                .into(table)
+                .namedValues(
+                  table.column.CanonicalId -> sqls.?,
+                  table.column.OntologyType -> sqls.?,
+                  table.column.SourceSystem -> sqls.?,
+                  table.column.SourceId -> sqls.?
+                )
+            }.batch {
+              Seq(
+                id.CanonicalId.toString,
+                id.OntologyType,
+                id.SourceSystem,
+                id.SourceId
+              )
+            }.apply()
+        }
     }
 
-  def withIdentifiersDao[R](existingEntries: Seq[Identifier] = Nil)(
-    testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
-    withIdentifiersTable { identifiersTableConfig =>
-      val identifiersTable = new IdentifiersTable(identifiersTableConfig)
+  def withIdentifiersDao[R](
+    existingEntries: Seq[Identifier] = Nil
+  )(testWith: TestWith[(IdentifiersDao, IdentifiersTable), R]): R =
+    withIdentifiersTable {
+      identifiersTableConfig =>
+        val identifiersTable = new IdentifiersTable(identifiersTableConfig)
 
-      new TableProvisioner(rdsClientConfig)
-        .provision(
-          database = identifiersTableConfig.database,
-          tableName = identifiersTableConfig.tableName
-        )
+        new TableProvisioner(rdsClientConfig)
+          .provision(
+            database = identifiersTableConfig.database,
+            tableName = identifiersTableConfig.tableName
+          )
 
-      val identifiersDao = new IdentifiersDao(identifiersTable)
+        val identifiersDao = new IdentifiersDao(identifiersTable)
 
-      eventuallyTableExists(identifiersTableConfig)
+        eventuallyTableExists(identifiersTableConfig)
 
-      insertIdentifiers(identifiersTable, existingEntries)
+        insertIdentifiers(identifiersTable, existingEntries)
 
-      testWith((identifiersDao, identifiersTable))
+        testWith((identifiersDao, identifiersTable))
     }
 }

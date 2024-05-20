@@ -6,6 +6,7 @@ import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.transformers.{
   MarcAlternativeTitles,
+  MarcCollectionPath,
   MarcContributors,
   MarcCurrentFrequency,
   MarcDescription,
@@ -39,7 +40,8 @@ object MarcXMLRecordTransformer {
       subjects = MarcSubjects(record).toList,
       genres = MarcGenres(record).toList,
       languages = MarcLanguage(record).toList,
-      production = MarcProduction(record)
+      production = MarcProduction(record),
+      collectionPath = MarcCollectionPath(record)
     )
   }
 }

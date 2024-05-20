@@ -73,7 +73,7 @@ class SierraGenresTest
           VarField(
             marcTag = "655",
             subfields = List(
-              Subfield(tag = "2", content = "rbgenr"),
+              Subfield(tag = "2", content = "rbgenr")
             )
           ),
           VarField(

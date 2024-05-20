@@ -32,12 +32,14 @@ trait IntegrationTestHelpers
     with WorkGenerators {
 
   type MergerIndex = mutable.Map[String, WorkOrImage]
-  type Context = (MemoryRetriever[Work[WorkState.Identified]],
-                  QueuePair,
-                  QueuePair,
-                  MemoryMessageSender,
-                  MemoryMessageSender,
-                  MergerIndex)
+  type Context = (
+    MemoryRetriever[Work[WorkState.Identified]],
+    QueuePair,
+    QueuePair,
+    MemoryMessageSender,
+    MemoryMessageSender,
+    MergerIndex
+  )
 
   implicit class ContextOps(context: Context) {
     private val index = {
@@ -46,7 +48,8 @@ trait IntegrationTestHelpers
     }
 
     def getMerged(
-      originalWork: Work[WorkState.Identified]): Work[WorkState.Merged] =
+      originalWork: Work[WorkState.Identified]
+    ): Work[WorkState.Merged] =
       index(originalWork.state.canonicalId.underlying).left.value
 
     def imageData: Seq[ImageData[IdState.Identified]] =
@@ -58,7 +61,8 @@ trait IntegrationTestHelpers
               sourceIdentifier = im.state.sourceIdentifier
             ),
             version = im.version,
-            locations = im.locations)
+            locations = im.locations
+          )
       }.toSeq
   }
 
@@ -69,106 +73,127 @@ trait IntegrationTestHelpers
     val matcherRetriever: MemoryRetriever[WorkStub] =
       new MemoryRetriever[WorkStub]() {
         override def apply(
-          ids: Seq[String]): Future[RetrieverMultiResult[WorkStub]] =
+          ids: Seq[String]
+        ): Future[RetrieverMultiResult[WorkStub]] =
           retriever
             .apply(ids)
-            .map { multiResult =>
-              RetrieverMultiResult(
-                found = multiResult.found.map {
-                  case (id, work) => id -> WorkStub(work)
-                },
-                notFound = multiResult.notFound
-              )
+            .map {
+              multiResult =>
+                RetrieverMultiResult(
+                  found = multiResult.found.map {
+                    case (id, work) => id -> WorkStub(work)
+                  },
+                  notFound = multiResult.notFound
+                )
             }(global)
       }
 
-    withLocalSqsQueuePair() { matcherQueuePair =>
-      withLocalSqsQueuePair() { mergerQueuePair =>
-        val matcherSender = new MemoryMessageSender() {
-          override def sendT[T](t: T)(
-            implicit encoder: Encoder[T]): Try[Unit] = {
-            sendNotificationToSQS(mergerQueuePair.queue, t)
-            super.sendT(t)
-          }
+    withLocalSqsQueuePair() {
+      matcherQueuePair =>
+        withLocalSqsQueuePair() {
+          mergerQueuePair =>
+            val matcherSender = new MemoryMessageSender() {
+              override def sendT[T](
+                t: T
+              )(implicit encoder: Encoder[T]): Try[Unit] = {
+                sendNotificationToSQS(mergerQueuePair.queue, t)
+                super.sendT(t)
+              }
+            }
+
+            val workSender = new MemoryMessageSender()
+            val imageSender = new MemoryMessageSender()
+
+            val mergerIndex = mutable.Map[String, WorkOrImage]()
+
+            withMatcherService(
+              matcherRetriever,
+              matcherQueuePair.queue,
+              matcherSender
+            ) {
+              _ =>
+                withMergerService(
+                  retriever,
+                  mergerQueuePair.queue,
+                  workSender,
+                  imageSender,
+                  index = mergerIndex
+                ) {
+                  _ =>
+                    testWith(
+                      (
+                        retriever,
+                        matcherQueuePair,
+                        mergerQueuePair,
+                        workSender,
+                        imageSender,
+                        mergerIndex
+                      )
+                    )
+                }
+            }
         }
-
-        val workSender = new MemoryMessageSender()
-        val imageSender = new MemoryMessageSender()
-
-        val mergerIndex = mutable.Map[String, WorkOrImage]()
-
-        withMatcherService(
-          matcherRetriever,
-          matcherQueuePair.queue,
-          matcherSender) { _ =>
-          withMergerService(
-            retriever,
-            mergerQueuePair.queue,
-            workSender,
-            imageSender,
-            index = mergerIndex) { _ =>
-            testWith(
-              (
-                retriever,
-                matcherQueuePair,
-                mergerQueuePair,
-                workSender,
-                imageSender,
-                mergerIndex))
-          }
-        }
-      }
     }
   }
 
-  def processWorks(works: Work[WorkState.Identified]*)(
-    implicit context: Context): Unit = {
+  def processWorks(
+    works: Work[WorkState.Identified]*
+  )(implicit context: Context): Unit = {
     val (
       retriever,
       matcherQueuePair,
       mergerQueuePair,
       workSender,
       imageSender,
-      mergerIndex) = context
+      mergerIndex
+    ) = context
 
-    works.foreach { w =>
-      println(
-        s"Processing work ${w.state.sourceIdentifier} (${w.state.canonicalId})")
+    works.foreach {
+      w =>
+        println(
+          s"Processing work ${w.state.sourceIdentifier} (${w.state.canonicalId})"
+        )
 
-      // Add the work to the retriever and send it to the matcher, as if it's
-      // just been processed by the ID minter.
-      retriever.index ++= Map(w.state.canonicalId.underlying -> w)
-      sendNotificationToSQS(
-        matcherQueuePair.queue,
-        body = w.state.canonicalId.underlying)
+        // Add the work to the retriever and send it to the matcher, as if it's
+        // just been processed by the ID minter.
+        retriever.index ++= Map(w.state.canonicalId.underlying -> w)
+        sendNotificationToSQS(
+          matcherQueuePair.queue,
+          body = w.state.canonicalId.underlying
+        )
 
-      // Check all the queues are eventually drained as the message moves through
-      // the matcher and the merger.
-      eventually {
-        assertQueueEmpty(matcherQueuePair.queue)
-        assertQueueEmpty(matcherQueuePair.dlq)
-        assertQueueEmpty(mergerQueuePair.queue)
-        assertQueueEmpty(mergerQueuePair.dlq)
-      }
+        // Check all the queues are eventually drained as the message moves through
+        // the matcher and the merger.
+        eventually {
+          assertQueueEmpty(matcherQueuePair.queue)
+          assertQueueEmpty(matcherQueuePair.dlq)
+          assertQueueEmpty(mergerQueuePair.queue)
+          assertQueueEmpty(mergerQueuePair.dlq)
+        }
 
-      // Check that the merger has notified the next application about everything
-      // in the index.  This check could be more robust, but it'll do for now.
-      val idsSentByTheMerger =
-        (workSender.messages ++ imageSender.messages).map(_.body).toSet
-      mergerIndex.keySet -- idsSentByTheMerger shouldBe empty
+        // Check that the merger has notified the next application about everything
+        // in the index.  This check could be more robust, but it'll do for now.
+        val idsSentByTheMerger =
+          (workSender.messages ++ imageSender.messages).map(_.body).toSet
+        mergerIndex.keySet -- idsSentByTheMerger shouldBe empty
     }
   }
 
   def processWork(work: Work[WorkState.Identified])(
-    implicit context: Context): Unit =
+    implicit context: Context
+  ): Unit =
     processWorks(work)
 
-  def updateInternalWork(internalWork: Work.Visible[WorkState.Identified],
-                         teiWork: Work.Visible[WorkState.Identified]) =
+  def updateInternalWork(
+    internalWork: Work.Visible[WorkState.Identified],
+    teiWork: Work.Visible[WorkState.Identified]
+  ) =
     internalWork
       .copy(version = teiWork.version)
-      .mapState(state =>
-        state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime))
+      .mapState(
+        state =>
+          state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime)
+      )
 
   class StateMatcher(right: WorkState.Identified)
       extends Matcher[WorkState.Merged] {
@@ -214,7 +239,7 @@ trait IntegrationTestHelpers
       MatchResult(
         left.isInstanceOf[Work.Visible[Merged]],
         s"${left.id} is not visible",
-        s"${left.id} is visible",
+        s"${left.id} is visible"
       )
   }
 

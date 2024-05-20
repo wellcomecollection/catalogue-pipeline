@@ -24,13 +24,14 @@ class CollectionPathSorterTest
       List("A/B/1", "A/B/2", "A/B/3"),
       List("A/B/a", "A/B/b", "A/B/c"),
       // A suffix added after a letter
-      List("A/1", "A/1a", "A/1b", "A/2", "A/10a", "A/10b", "A/11a"),
+      List("A/1", "A/1a", "A/1b", "A/2", "A/10a", "A/10b", "A/11a")
     )
 
-    forAll(testCases) { paths =>
-      // Pass in the list as a set so they don't pick up any implicit ordering
-      // from the test spec.
-      CollectionPathSorter.sortPaths(paths.toSet) shouldBe paths
+    forAll(testCases) {
+      paths =>
+        // Pass in the list as a set so they don't pick up any implicit ordering
+        // from the test spec.
+        CollectionPathSorter.sortPaths(paths.toSet) shouldBe paths
     }
   }
 }

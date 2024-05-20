@@ -20,8 +20,9 @@ class MemoryFileWriter extends FileWriter with Logging {
   def write(path: Path): Sink[ByteString, Future[IOResult]] =
     Flow[ByteString]
       .map(files.put(path, _))
-      .toMat(Sink.fold(IOResult(0L))({ (result, _) =>
-        IOResult(result.count + 1)
+      .toMat(Sink.fold(IOResult(0L))({
+        (result, _) =>
+          IOResult(result.count + 1)
       }))(Keep.right)
 
   def delete: Sink[Path, Future[Done]] =
