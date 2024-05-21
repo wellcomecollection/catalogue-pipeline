@@ -35,7 +35,7 @@ object MarcProduction
       case (Nil, Nil)     => Nil
       case (from260, Nil) => from260
       case (Nil, from264) => from264
-      // If both 260 and 264 are present we prefer the 260 fields, see if we can
+      // If both 260 and 264 are present we prefer the 260 fields, see if we can safely ignore the 264 content
       case (from260, _) =>
         if (shouldDiscard264(record)) from260
         else
