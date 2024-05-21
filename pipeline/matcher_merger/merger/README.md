@@ -28,7 +28,7 @@ sequenceDiagram
     participant Matcher
     participant Merger
     participant works-merged 🗄
-    participant Downstream Queue
+participant Downstream Queue
 
 Upstream Queue -) Matcher: abc123
 Matcher -) Merger: [abc123, def456, ghi789]
