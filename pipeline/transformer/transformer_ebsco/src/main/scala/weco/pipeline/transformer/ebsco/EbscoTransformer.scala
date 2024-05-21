@@ -9,6 +9,7 @@ import weco.catalogue.internal_model.work.Format.EJournals
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{
   DeletedReason,
+  Relations,
   Work,
   WorkData,
   WorkState
@@ -69,6 +70,7 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
         ontologyType = "Work",
         value = record.controlField("001").get.content
       ),
+      relations = Relations(ancestors = MarcParents(record)),
       sourceModifiedTime = modifiedTime
     )
     implicit val ctx: LoggingContext = LoggingContext(
