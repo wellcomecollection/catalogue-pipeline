@@ -93,6 +93,7 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
         production = MarcProduction(record),
         languages = MarcLanguage(record).toList,
         format = MarcFormat(record)
-    ))
+      )
+    )
   }
 }

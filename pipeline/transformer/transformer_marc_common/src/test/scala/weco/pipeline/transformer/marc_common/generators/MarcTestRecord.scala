@@ -11,7 +11,7 @@ import weco.pipeline.transformer.marc_common.models.{
 case class MarcTestRecord(
   fields: Seq[MarcField] = Nil,
   controlFields: Seq[MarcControlField] = Nil,
-  leader: String = "",
+  leader: String = ""
 ) extends MarcRecord
     with LoneElement {
   def fieldsWithTags(tags: String*): Seq[MarcField] =

@@ -8,7 +8,9 @@ import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
 import weco.pipeline.transformer.marc_common.models.MarcControlField
 
 class MarcFormatTest extends AnyFunSpec with Matchers with OptionValues {
-  describe("Extracting format information from MARC Leader/07, 006/06 & 008 material specific details") {
+  describe(
+    "Extracting format information from MARC Leader/07, 006/06 & 008 material specific details"
+  ) {
     info("https://www.loc.gov/marc/bibliographic/bdleader.html")
     info("https://www.loc.gov/marc/bibliographic/bd006.html")
     info("https://www.loc.gov/marc/bibliographic/bd008s.html")
@@ -38,7 +40,9 @@ class MarcFormatTest extends AnyFunSpec with Matchers with OptionValues {
     // We only care about the format ofe-journals and e-books at the moment
     // so we don't need to test for other formats. As this transformer
     // is only used in the context of the EBSCO transformer.
-    it("returns no format when metadata indicates neither e-journal nor e-book") {
+    it(
+      "returns no format when metadata indicates neither e-journal nor e-book"
+    ) {
       val record = MarcTestRecord(
         leader = "00000 am  2200289 a 4500",
         controlFields = Seq(
