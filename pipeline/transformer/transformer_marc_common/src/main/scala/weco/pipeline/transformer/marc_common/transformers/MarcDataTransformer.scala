@@ -32,7 +32,7 @@ trait MarcDataTransformerWithLoggingContext {
  * The FieldTransformer can generate a Person, regardless of which it is
  * while the corresponding DataTransformer sets the Subjectness or Contributorness
  * of it.
- *  */
+ * */
 trait MarcFieldTransformer {
   type Output
 
