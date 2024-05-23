@@ -32,7 +32,7 @@ sealed trait MarcPositionalElement extends MarcDataTransformer {
   * We infer the form of material based on values in the leader field.
   *
   * At present we only care about the form of item for books and continuing
-  * resources, in order to indentify e-books and e-journals (o in position 6).
+  * resources, in order to identify e-books and e-journals (o in position 6).
   * This could be extended to other forms of material in the future.
   */
 object Marc006Field {
