@@ -10,12 +10,15 @@ import weco.catalogue.internal_model.work.{
   Person,
   Place
 }
+import weco.fixtures.RandomGenerators
 import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
 import weco.pipeline.transformer.marc_common.models.{MarcField, MarcSubfield}
+import scala.language.existentials
 
 class MarcSubjectsTest
     extends MarcAbstractAgentBehaviours
     with LoneElement
+    with RandomGenerators
     with TableDrivenPropertyChecks {
   describe("When there are no subjects") {
     it("returns nothing if no relevant fields are present") {
@@ -51,7 +54,66 @@ class MarcSubjectsTest
         )
       ) shouldBe Nil
     }
+  }
 
+  private def subjectPair = chooseFrom(
+    ("600", a[Person[IdState.Identifiable]]),
+    ("610", a[Organisation[IdState.Identifiable]]),
+    ("611", a[Meeting[IdState.Identifiable]]),
+    ("648", a[Period[IdState.Identifiable]]),
+    ("650", a[Concept[IdState.Identifiable]]),
+    ("651", a[Place[IdState.Identifiable]])
+  )
+
+  describe("only extracting subjects that follow our cataloguing practise") {
+    forAll(
+      Table(
+        ("marcSubjectPair", "indicator2", "subfield2", "shouldCreateSubject"),
+        (subjectPair, "0", "", true),
+        (subjectPair, "1", "", false),
+        (subjectPair, "2", "", true),
+        (subjectPair, "3", "", false),
+        (subjectPair, "4", "", false),
+        (subjectPair, "5", "", false),
+        (subjectPair, "6", "", false),
+        (subjectPair, "7", "local", true),
+        (subjectPair, "7", "homoit", true),
+        (subjectPair, "7", "indig", true),
+        (subjectPair, "7", "enslv", true),
+        (subjectPair, "7", "asth", false),
+        (subjectPair, "7", "", false)
+      )
+    ) {
+      (subjectPair, indicator2, subfield2, shouldCreateSubject) =>
+        val (marcTag, subjectType) = subjectPair
+        it(
+          s"creates a Subject containing a ${subjectType.clazzTag.toString().split('.').last} given a $$$marcTag field" +
+            s"with indicator2 $indicator2 and subfield2 $subfield2"
+        ) {
+          val subject = MarcSubjects(
+            MarcTestRecord(fields =
+              Seq(
+                MarcField(
+                  marcTag = marcTag,
+                  subfields = Seq(
+                    MarcSubfield(tag = "a", content = "The Title")
+                  ) ++ (
+                    if (subfield2.isEmpty) Seq.empty
+                    else Seq(MarcSubfield(tag = "2", content = subfield2))
+                  ),
+                  indicator2 = indicator2
+                )
+              )
+            )
+          )
+
+          if (shouldCreateSubject) {
+            subject.loneElement.concepts.loneElement shouldBe subjectType
+          } else {
+            subject shouldBe Nil
+          }
+        }
+    }
   }
   describe("extracting subjects from various fields") {
     forAll(
@@ -75,7 +137,8 @@ class MarcSubjectsTest
                 MarcField(
                   marcTag = marcTag,
                   subfields =
-                    Seq(MarcSubfield(tag = "a", content = "The Title"))
+                    Seq(MarcSubfield(tag = "a", content = "The Title")),
+                  indicator2 = "0"
                 )
               )
             )
@@ -104,7 +167,8 @@ class MarcSubjectsTest
             marcTag =>
               MarcField(
                 marcTag = marcTag,
-                subfields = Seq(MarcSubfield(tag = "a", content = s"$marcTag"))
+                subfields = Seq(MarcSubfield(tag = "a", content = s"$marcTag")),
+                indicator2 = "0"
               )
           )
         )
@@ -130,7 +194,8 @@ class MarcSubjectsTest
               MarcSubfield(tag = "p", content = "P"),
               MarcSubfield(tag = "q", content = "Q"),
               MarcSubfield(tag = "l", content = "L")
-            )
+            ),
+            indicator2 = "0"
           )
         )
       )
