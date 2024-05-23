@@ -9,7 +9,7 @@ import weco.pipeline.transformer.marc_common.models.MarcRecord
   * found in the 006 field at position 6.
   */
 sealed trait FormOfItem
-object MarcO08Field {
+object Marc008Field {
   object FormOfItem {
     case object Online extends FormOfItem
   }
@@ -35,7 +35,7 @@ sealed trait MarcPositionalElement extends MarcDataTransformer {
   * resources, in order to indentify e-books and e-journals (o in position 6).
   * This could be extended to other forms of material in the future.
   */
-object MarcO06Field {
+object Marc006Field {
   trait FormOfItemField extends MarcPositionalElement {
     type Output = Option[FormOfItem]
 
@@ -47,7 +47,7 @@ object MarcO06Field {
         .map(_.content)
         .map(_.slice(position, position + length))
         .flatMap {
-          case "o" => Some(MarcO08Field.FormOfItem.Online)
+          case "o" => Some(Marc008Field.FormOfItem.Online)
           case _   => None
         }
     }
@@ -142,14 +142,14 @@ object MarcFormat extends MarcDataTransformer {
         (
           material,
           level,
-          MarcO06Field.ContinuingResource.FormOfItemField(record)
+          Marc006Field.ContinuingResource.FormOfItemField(record)
         )
 
       case (
             material @ Some(MarcLeader.TypeOfRecord.LanguageMaterial),
             level @ Some(MarcLeader.BibliographicLevel.Monograph)
           ) =>
-        (material, level, MarcO06Field.Books.FormOfItemField(record))
+        (material, level, Marc006Field.Books.FormOfItemField(record))
 
       case _ => (None, None, None)
     }
@@ -158,13 +158,13 @@ object MarcFormat extends MarcDataTransformer {
       case (
             Some(MarcLeader.TypeOfRecord.LanguageMaterial),
             Some(MarcLeader.BibliographicLevel.Serial),
-            Some(MarcO08Field.FormOfItem.Online)
+            Some(Marc008Field.FormOfItem.Online)
           ) =>
         Some(Format.EJournals)
       case (
             Some(MarcLeader.TypeOfRecord.LanguageMaterial),
             Some(MarcLeader.BibliographicLevel.Monograph),
-            Some(MarcO08Field.FormOfItem.Online)
+            Some(Marc008Field.FormOfItem.Online)
           ) =>
         Some(Format.EBooks)
       case _ => None
