@@ -37,7 +37,7 @@ class MarcFormatTest extends AnyFunSpec with Matchers with OptionValues {
       MarcFormat(record).value shouldBe EBooks
     }
 
-    // We only care about the format ofe-journals and e-books at the moment
+    // We only care about the format of e-journals and e-books at the moment
     // so we don't need to test for other formats. As this transformer
     // is only used in the context of the EBSCO transformer.
     it(
