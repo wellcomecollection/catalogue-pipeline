@@ -54,9 +54,6 @@ object MarcSubjects extends MarcDataTransformer with MarcFieldOps {
     "651" -> MarcConceptSubject
   )
 
-  val validIndicator2Values: Seq[String] = Seq("0", "2")
-  val validSubjectMarcTags: Seq[String] = transformMap.keys.toSeq
-
   private lazy val marcTags = transformMap.keys.toSeq
   override def apply(record: MarcRecord): Output = {
     record
@@ -64,18 +61,28 @@ object MarcSubjects extends MarcDataTransformer with MarcFieldOps {
       .filter {
         field =>
           {
-            (field.marcTag, field.indicator2) match {
-              case (tag, i2)
-                  if validSubjectMarcTags.contains(tag) && validIndicator2Values
-                    .contains(i2) =>
-                true
-              case (tag, "7") if validSubjectMarcTags.contains(tag) =>
+            field.indicator2 match {
+              case "0" | "2" => true
+              case "7" =>
                 field
                   .subfieldsWithTag("2")
-                  .exists(_.content match {
-                    case "local" | "homoit" | "indig" | "enslv" => true
-                    case _                                      => false
-                  })
+                  /** The below strings are "subject sources". See:
+                    * https://www.loc.gov/standards/sourcelist/subject.html
+                    *
+                    * "Subject Sources identifies subject heading lists,
+                    * thesauri, and databases that are the sources of topical,
+                    * geographic, chronological, and other headings or terms
+                    * used to describe the subject content of a resource"
+                    *
+                    * For example "homoit" is "an international linked data
+                    * vocabulary of LGBTQ+ terms.", see: https://homosaurus.org/
+                    */
+                  .exists(
+                    subjectSource =>
+                      Seq("local", "homoit", "indig", "enslv")
+                        .contains(subjectSource.content)
+                  )
+
               case _ => false
             }
           }
