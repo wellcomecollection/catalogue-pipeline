@@ -113,14 +113,14 @@ lazy val ingestor_images = setupProject(
 
 lazy val matcher = setupProject(
   project,
-  "pipeline/matcher",
+  "pipeline/matcher_merger/matcher",
   localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.matcherDependencies
 )
 
 lazy val merger = setupProject(
   project,
-  "pipeline/merger",
+  "pipeline/matcher_merger/merger",
   localDependencies = Seq(internal_model, matcher, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
