@@ -3,13 +3,11 @@ package weco.pipeline.transformer.marc_common.transformers
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.{
-  Agent,
   Concept,
   Place,
   ProductionEvent
 }
 import weco.fixtures.RandomGenerators
-import weco.pipeline.transformer.marc_common.exceptions.CataloguingException
 import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
 import weco.pipeline.transformer.marc_common.models.{
   MarcControlField,
@@ -29,136 +27,38 @@ class MarcProductionTest
 
   describe("Both MARC field 260 and 264") {
     it(
-      "throws a cataloguing error if both 260 and 264 are present, and 264 has a 2nd indicator"
+      "if both 260 and 264 are present, accept 260"
     ) {
-      val bibId = randomAlphanumeric(length = 9)
-      val caught = intercept[CataloguingException] {
-        MarcProduction(
-          MarcTestRecord(
-            controlFields = List(
-              MarcControlField(
-                marcTag = "001",
-                content = bibId
-              )
-            ),
-            fields = List(
-              MarcField(
-                marcTag = "260",
-                subfields = List(
-                  MarcSubfield(tag = "a", content = "Paris")
-                )
-              ),
-              MarcField(
-                marcTag = "264",
-                indicator2 = "0",
-                subfields = List(
-                  MarcSubfield(tag = "a", content = "London")
-                )
-              )
-            )
-          )
-        )
-      }
-
-      caught.getMessage should startWith("Problem in the data")
-      caught.getMessage should include(bibId)
-      caught.getMessage should include("Record has both 260 and 264 fields")
-    }
-
-    it("uses 260 if 264 only contains a copyright statement in subfield c") {
       MarcProduction(
         MarcTestRecord(
-          fields = List(
-            MarcField(
-              marcTag = "260",
-              subfields = List(
-                MarcSubfield(tag = "a", content = "San Francisco :"),
-                MarcSubfield(
-                  tag = "b",
-                  content = "Morgan Kaufmann Publishers,"
-                ),
-                MarcSubfield(tag = "c", content = "2004")
-              )
-            ),
-            MarcField(
-              marcTag = "264",
-              subfields = List(
-                MarcSubfield(tag = "c", content = "©2004")
-              )
+          controlFields = List(
+            MarcControlField(
+              marcTag = "001",
+              content = randomAlphanumeric(length = 9)
             )
-          )
-        )
-      ) shouldBe List(
-        ProductionEvent(
-          label = "San Francisco : Morgan Kaufmann Publishers, 2004",
-          places = List(Place("San Francisco")),
-          agents = List(
-            Agent("Morgan Kaufmann Publishers")
           ),
-          dates = List(ParsedPeriod("2004")),
-          function = None
-        )
-      )
-    }
-
-    it("returns correctly if 260 and 264 contain the same subfields") {
-      val matchingSubfields = List(
-        MarcSubfield(tag = "a", content = "London :"),
-        MarcSubfield(tag = "b", content = "Wellcome Trust,"),
-        MarcSubfield(tag = "c", content = "1992")
-      )
-
-      MarcProduction(
-        MarcTestRecord(
-          fields = List(
-            MarcField(
-              marcTag = "260",
-              subfields = matchingSubfields
-            ),
-            MarcField(
-              marcTag = "264",
-              subfields = matchingSubfields
-            )
-          )
-        )
-      ) shouldBe List(
-        ProductionEvent(
-          label = "London : Wellcome Trust, 1992",
-          places = List(Place("London")),
-          agents = List(Agent("Wellcome Trust")),
-          dates = List(ParsedPeriod("1992")),
-          function = None
-        )
-      )
-    }
-
-    // Based on b31500018, as retrieved on 28 March 2019
-    it("returns correctly if the 264 subfields only contain punctuation") {
-      MarcProduction(
-        MarcTestRecord(
           fields = List(
             MarcField(
               marcTag = "260",
               subfields = List(
-                MarcSubfield(tag = "c", content = "2019")
+                MarcSubfield(tag = "a", content = "Paris")
               )
             ),
             MarcField(
               marcTag = "264",
+              indicator2 = "0",
               subfields = List(
-                MarcSubfield(tag = "a", content = ":"),
-                MarcSubfield(tag = "b", content = ","),
-                MarcSubfield(tag = "c", content = "")
+                MarcSubfield(tag = "a", content = "London")
               )
             )
           )
         )
       ) shouldBe List(
         ProductionEvent(
-          label = "2019",
-          places = List(),
+          label = "Paris",
+          places = List(Place("Paris")),
           agents = List(),
-          dates = List(ParsedPeriod("2019")),
+          dates = List(),
           function = None
         )
       )
