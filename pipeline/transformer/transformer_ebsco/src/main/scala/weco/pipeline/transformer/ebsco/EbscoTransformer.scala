@@ -5,7 +5,6 @@ import weco.catalogue.internal_model.identifiers.{
   IdentifierType,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.Format.EJournals
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work.{
   DeletedReason,
@@ -91,11 +90,9 @@ class EbscoTransformer(store: Readable[S3ObjectLocation, String])
         subjects = MarcSubjects(record).toList,
         genres = MarcGenres(record).toList,
         holdings = MarcElectronicResources.toHoldings(record).toList,
+        production = MarcProduction(record),
         languages = MarcLanguage(record).toList,
-        // TODO: We should rely on a Marc transformer to extract this information
-        //   but we know that all the records we are transforming from this source
-        //   are EJournals.
-        format = Some(EJournals)
+        format = MarcFormat(record)
       )
     )
   }
