@@ -11,7 +11,9 @@ import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
 import weco.pipeline.transformer.marc_common.models.{MarcField, MarcSubfield}
 
 class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
-  describe("Extracting relation information from MARC fields 440, 490, 773 & 830") {
+  describe(
+    "Extracting relation information from MARC fields 440, 490, 773 & 830"
+  ) {
     info("https://www.loc.gov/marc/bibliographic/bd4xx.html")
     info("https://www.loc.gov/marc/bibliographic/bd773.html")
     info("https://www.loc.gov/marc/bibliographic/bd830.html")
@@ -22,7 +24,8 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "440",
-            subfields = List(MarcSubfield(tag = "a", content = "A title from 440ǂa"))
+            subfields =
+              List(MarcSubfield(tag = "a", content = "A title from 440ǂa"))
           )
         ),
         List("A title from 440ǂa")
@@ -31,7 +34,8 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "490",
-            subfields = List(MarcSubfield(tag = "a", content = "A title from 490ǂa"))
+            subfields =
+              List(MarcSubfield(tag = "a", content = "A title from 490ǂa"))
           )
         ),
         List("A title from 490ǂa")
@@ -40,7 +44,8 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "773",
-            subfields = List(MarcSubfield(tag = "t", content = "A title from 773ǂt"))
+            subfields =
+              List(MarcSubfield(tag = "t", content = "A title from 773ǂt"))
           )
         ),
         List("A title from 773ǂt")
@@ -49,7 +54,8 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "773",
-            subfields = List(MarcSubfield(tag = "a", content = "A title from 773ǂa"))
+            subfields =
+              List(MarcSubfield(tag = "a", content = "A title from 773ǂa"))
           )
         ),
         List("A title from 773ǂa")
@@ -58,7 +64,8 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "773",
-            subfields = List(MarcSubfield(tag = "s", content = "A title from 773ǂs"))
+            subfields =
+              List(MarcSubfield(tag = "s", content = "A title from 773ǂs"))
           )
         ),
         List("A title from 773ǂs")
@@ -67,7 +74,8 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "830",
-            subfields = List(MarcSubfield(tag = "t", content = "A title from 830ǂt"))
+            subfields =
+              List(MarcSubfield(tag = "t", content = "A title from 830ǂt"))
           )
         ),
         List("A title from 830ǂt")
@@ -76,7 +84,8 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "830",
-            subfields = List(MarcSubfield(tag = "a", content = "A title from 830ǂa"))
+            subfields =
+              List(MarcSubfield(tag = "a", content = "A title from 830ǂa"))
           )
         ),
         List("A title from 830ǂa")
@@ -109,11 +118,13 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         List(
           MarcField(
             marcTag = "440",
-            subfields = List(MarcSubfield(tag = "a", content = "A title from 440ǂa"))
+            subfields =
+              List(MarcSubfield(tag = "a", content = "A title from 440ǂa"))
           ),
           MarcField(
             marcTag = "490",
-            subfields = List(MarcSubfield(tag = "a", content = "A title from 490ǂa"))
+            subfields =
+              List(MarcSubfield(tag = "a", content = "A title from 490ǂa"))
           )
         ),
         List("A title from 440ǂa", "A title from 490ǂa")
@@ -126,7 +137,7 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
           )
         ),
         List()
-      ),
+      )
     )
 
     def createRelationWithTitle(title: String): Relation =
@@ -140,11 +151,12 @@ class MarcParentsTest extends AnyFunSpec with Matchers with LoneElement {
         numDescendents = 0
       )
 
-    /**
-     * This test uses the same test data as SierraParentsTest, modified to create
-     * MarcField instances instead of VarField instances.
-     */
-    it("constructs relations appropriate for the MARC fields 440, 490, 773, 830") {
+    /** This test uses the same test data as SierraParentsTest, modified to
+      * create MarcField instances instead of VarField instances.
+      */
+    it(
+      "constructs relations appropriate for the MARC fields 440, 490, 773, 830"
+    ) {
       forAll(testCases) {
         case (testMarcFields, expectedTitles) =>
           MarcParents(

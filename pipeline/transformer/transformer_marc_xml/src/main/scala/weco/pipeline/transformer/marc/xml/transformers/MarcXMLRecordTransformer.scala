@@ -18,6 +18,7 @@ import weco.pipeline.transformer.marc_common.transformers.{
   MarcDesignation,
   MarcEdition,
   MarcElectronicResources,
+  MarcFormat,
   MarcGenres,
   MarcInternationalStandardIdentifiers,
   MarcLanguage,
@@ -64,7 +65,8 @@ object MarcXMLRecordTransformer {
         genres = MarcGenres(record).toList,
         languages = MarcLanguage(record).toList,
         production = MarcProduction(record),
-        collectionPath = MarcCollectionPath(record)
+        collectionPath = MarcCollectionPath(record),
+        format = MarcFormat(record)
       )
     )
   }

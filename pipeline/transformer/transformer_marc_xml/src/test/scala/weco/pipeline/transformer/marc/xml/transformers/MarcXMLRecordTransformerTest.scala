@@ -5,7 +5,17 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.IdState.Unidentifiable
 import weco.catalogue.internal_model.locations.DigitalLocation
-import weco.catalogue.internal_model.work.{Agent, CollectionPath, Concept, InstantRange, Period, Place, ProductionEvent, Relations, SeriesRelation}
+import weco.catalogue.internal_model.work.{
+  Agent,
+  CollectionPath,
+  Concept,
+  InstantRange,
+  Period,
+  Place,
+  ProductionEvent,
+  Relations,
+  SeriesRelation
+}
 import weco.pipeline.transformer.marc.xml.data.MarcXMLRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 
@@ -25,7 +35,9 @@ class MarcXMLRecordTransformerTest
     val work = MarcXMLRecordTransformer(
       record = MarcXMLRecord(
         <record xmlns="http://www.loc.gov/MARC21/slim">
+          <leader>00000cas a22000003a 4500</leader>
           <controlfield tag="001">3PaDhRp</controlfield>
+          <controlfield tag="006">m\\\\\o\\d\\||||||</controlfield>
           <controlfield tag="008">030214c20039999cauar o 0 a0eng c</controlfield>
           <datafield tag="245">
             <subfield code="a">matacologian</subfield>
@@ -206,6 +218,10 @@ class MarcXMLRecordTransformerTest
 
     it("extracts genres") {
       work.data.genres.loneElement.label shouldBe "Lo-Fi Darkwave"
+    }
+
+    it("extracts format") {
+      work.data.format.get.label shouldBe "E-journals"
     }
 
     it("extracts production") {

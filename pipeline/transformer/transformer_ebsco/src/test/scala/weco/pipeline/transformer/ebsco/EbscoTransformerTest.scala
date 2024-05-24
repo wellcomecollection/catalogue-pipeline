@@ -27,10 +27,13 @@ class EbscoTransformerTest
 
       val record =
         <record xmlns="http://www.loc.gov/MARC21/slim">
+            <leader>00000cas a2200000 a 4500</leader>
             <controlfield tag="001">3PaDhRp</controlfield>
+            <controlfield tag="006">m\\\\\o\\d\\||||||</controlfield>
             <datafield tag ="245">
               <subfield code="a">matacologian</subfield>
             </datafield>
+
           </record>
 
       val transformer = new EbscoTransformer(
