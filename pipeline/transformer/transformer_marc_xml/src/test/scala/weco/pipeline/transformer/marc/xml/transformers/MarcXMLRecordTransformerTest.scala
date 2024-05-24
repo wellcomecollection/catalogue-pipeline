@@ -97,22 +97,22 @@ class MarcXMLRecordTransformerTest
           <datafield tag="520">
             <subfield code="a">Some of them [sc. physicians] I know are ignorant beyond Description.</subfield>
           </datafield>
-          <datafield tag="600">
+          <datafield tag="600" ind2="0">
             <subfield code="a">William Burroughs</subfield>
           </datafield>
-          <datafield tag="610">
+          <datafield tag="610" ind2="0">
             <subfield code="a">Umbrella Corporation</subfield>
           </datafield>
-          <datafield tag="611">
+          <datafield tag="611" ind2="0">
             <subfield code="a">Derndingle Entmoot 3019</subfield>
           </datafield>
-          <datafield tag="648">
+          <datafield tag="648" ind2="0">
             <subfield code="a">Fourth Millenium of the Third Age</subfield>
           </datafield>
-          <datafield tag="650">
+          <datafield tag="650"  ind2="0">
             <subfield code="a">Effective Homeopathy</subfield>
           </datafield>
-          <datafield tag="651">
+          <datafield tag="651" ind2="0">
             <subfield code="a">Houyhnhnm Land</subfield>
           </datafield>
           <datafield tag="655">
