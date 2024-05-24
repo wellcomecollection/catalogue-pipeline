@@ -2,11 +2,24 @@ package weco.pipeline.transformer.marc_common.transformers
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState
-import weco.catalogue.internal_model.work.{Agent, Concept, Period, Place, ProductionEvent}
+import weco.catalogue.internal_model.work.{
+  Agent,
+  Concept,
+  Period,
+  Place,
+  ProductionEvent
+}
 import weco.pipeline.transformer.marc_common.exceptions.CataloguingException
-import weco.pipeline.transformer.marc_common.models.{MarcField, MarcFieldOps, MarcRecord}
+import weco.pipeline.transformer.marc_common.models.{
+  MarcField,
+  MarcFieldOps,
+  MarcRecord
+}
 import weco.pipeline.transformer.marc_common.transformers.parsers.MarcProductionEventParser
-import weco.pipeline.transformer.transformers.{ConceptsTransformer, ParsedPeriod}
+import weco.pipeline.transformer.transformers.{
+  ConceptsTransformer,
+  ParsedPeriod
+}
 
 object MarcProduction
     extends MarcDataTransformer
@@ -26,7 +39,9 @@ object MarcProduction
 
       // If both 260 and 264 are present we prefer the 260 fields
       case (from260, _) => {
-        warn(s"Record ${record.controlField("001")} has both 260 and 264 fields. Using 260 fields.")
+        warn(
+          s"Record ${record.controlField("001")} has both 260 and 264 fields. Using 260 fields."
+        )
         from260
       }
     }
