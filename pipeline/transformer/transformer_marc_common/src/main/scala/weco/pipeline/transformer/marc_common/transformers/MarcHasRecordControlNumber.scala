@@ -28,14 +28,17 @@ import weco.pipeline.transformer.marc_common.models.MarcField
 
 trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
   protected val defaultSecondIndicator: String = ""
+  private val urlLocPrefix: String = "http://idlocgov/authorities/subjects/"
+
   protected def getLabel(field: MarcField): Option[String] =
     Option(field.subfields.filter(_.tag == "a").map(_.content).mkString(" "))
       .filter(_.isEmpty)
 
   protected def normalise(identifier: String): String = {
-    // Sort out dodgy punctuation and spacing
+    // Sort out dodgy punctuation and spacing and remove a URL prefix which exists on some otherwise valid LCSH IDs
     identifier
       .replaceAll("[,.\\s]", "")
+      .stripPrefix(urlLocPrefix)
   }
 
   private def getIdentifierSubfieldContents(field: MarcField): Seq[String] =

@@ -60,6 +60,27 @@ class MarcHasRecordControlNumberTest
       actualSourceIdentifier shouldBe expectedSourceIdentifier
     }
 
+    it("finds an identifier with a URL prefix") {
+      val field =
+        create655FieldWith(indicator2 = "0", identifierValue = "http://idlocgov/authorities/subjects/sh92000896")
+
+      val expectedSourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.LCSubjects,
+        value = "sh92000896",
+        ontologyType = ontologyType
+      )
+
+      val actualSourceIdentifier = MarcHasRecordControlNumber
+        .apply(
+          field = field,
+          ontologyType = ontologyType
+        )
+        .allSourceIdentifiers
+        .loneElement
+
+      actualSourceIdentifier shouldBe expectedSourceIdentifier
+    }
+
     it("throws an exception on an invalid LoC identifier") {
       forAll(
         Table(
