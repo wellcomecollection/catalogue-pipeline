@@ -2,14 +2,10 @@ package weco.catalogue.source_model.sierra.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.locations.{
-  AccessMethod,
-  AccessStatus,
-  LocationType
-}
+import weco.catalogue.internal_model.locations.{AccessMethod, AccessStatus, LocationType}
 import weco.catalogue.source_model.fixtures.AccessConditionMatchers
 import weco.sierra.generators.SierraDataGenerators
-import weco.sierra.models.marc.{FixedField, VarField}
+import weco.sierra.models.marc.{FixedField, Subfield, VarField}
 
 class SierraItemAccessTest
     extends AnyFunSpec
@@ -743,7 +739,7 @@ class SierraItemAccessTest
   }
 
   describe("an item on exhibition") {
-    it("has a note based on its Reserves Note") {
+    it("has a note based on its 999 MARC tag") {
       val displayreservation =
         "Locked filing cabinet, disused lavatory with a sign saying 'Beware of The Leopard'"
       val itemData = createSierraItemDataWith(
@@ -751,7 +747,7 @@ class SierraItemAccessTest
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(fieldTag = "r", displayreservation)
+          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content=displayreservation)))
         )
       )
 
@@ -764,7 +760,7 @@ class SierraItemAccessTest
         note(displayreservation)
       )
     }
-    it("has a note based on its Reserves Note even when it has a due date") {
+    it("has a note based on its 999 MARC tag even when it has a due date") {
       val displayreservation =
         "Locked filing cabinet, disused lavatory with a sign saying 'Beware of The Leopard'"
       val itemData = createSierraItemDataWith(
@@ -773,7 +769,7 @@ class SierraItemAccessTest
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(fieldTag = "r", displayreservation)
+          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content=displayreservation)))
         )
       )
 
@@ -786,18 +782,15 @@ class SierraItemAccessTest
         note(displayreservation)
       )
     }
-    it("can show multiple Reserves Notes") {
+    it("can show multiple 999 MARC tag notes") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(fieldTag = "r", "in the bottom of a locked filing cabinet"),
-          VarField(fieldTag = "r", "stuck in a disused lavatory"),
-          VarField(
-            fieldTag = "r",
-            "with a sign on the door saying 'Beware of The Leopard'"
-          )
+          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="in the bottom of a locked filing cabinet"))),
+          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="stuck in a disused lavatory"))),
+          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="with a sign on the door saying 'Beware of The Leopard'")))
         )
       )
 
@@ -814,21 +807,18 @@ class SierraItemAccessTest
         )
       )
     }
-    it("Only shows substantive content from Reserves Notes") {
+    it("can show multiple subfields in a single 999 MARC tag") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(
-            fieldTag = "r",
-            "25-12-22 ON RESERVE FOR Beware of the Leopard"
-          ),
-          VarField(
-            fieldTag = "r",
-            "25-12-22 OFF RESERVE FOR Beware of the Leopard CIRCED 2 TIMES"
-          ),
-          VarField(fieldTag = "r", "In a locked filing cabinet")
+          VarField(marcTag = "999", subfields=List(
+              Subfield(tag="a", content="Beware of the Leopard"),
+              Subfield(tag="a", content="Beware of the Leopard"),
+              Subfield(tag="a", content="In a locked filing cabinet")
+            )
+          )
         )
       )
 
@@ -836,13 +826,7 @@ class SierraItemAccessTest
         location = Some(LocationType.OnExhibition),
         itemData = itemData
       )
-      // To avoid confusion for staff, and in the interest of completeness, notes that are identical
-      // after removing the non-interesting content are preserved.
-      // This scenario *should* not be encountered.
-      //  - Something that is On Exhibition is not expected to have an off reserve entry.
-      //  - Something that has both an on and an off reserve entry is not expected to be On Exhibition.
-      // However, it is something that *could* happen.
-      // If these duplicate lines are encountered in real life, we should get the record corrected in Sierra.
+
       ac should have(
         note(
           "Beware of the Leopard<br />" +
