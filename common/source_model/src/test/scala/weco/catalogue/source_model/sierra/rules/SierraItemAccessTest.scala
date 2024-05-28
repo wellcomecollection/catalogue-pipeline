@@ -836,7 +836,7 @@ class SierraItemAccessTest
       )
     }
     it(
-      "has the default 'contact the library' note if there are no Reserves Notes"
+      "has the default 'contact the library' note if there are MARC 999 fields"
     ) {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(

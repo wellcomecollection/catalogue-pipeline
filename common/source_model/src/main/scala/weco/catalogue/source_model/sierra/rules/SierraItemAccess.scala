@@ -364,10 +364,10 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // When an item is on display in an exhibition, it is not available for request.
       // In this case, the 999 MARC tag field should give some more detail.
       case (_, _, _, _, Some(LocationType.OnExhibition))
-          if itemData.varFields.exists(_.marcTag.exists(tag => tag == "999")) =>
+          if itemData.varFields.exists(_.marcTag.exists(_ == "999")) =>
         val marcTag999SubfieldContent =
           itemData.varFields
-            .filter(_.marcTag.exists(tag => tag == "999"))
+            .filter(_.marcTag.exists(_ == "999"))
             .flatMap(varField => varField.subfields.map(sub => sub.content))
 
         AccessCondition(
