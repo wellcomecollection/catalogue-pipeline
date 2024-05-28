@@ -366,9 +366,9 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       case (_, _, _, _, Some(LocationType.OnExhibition))
           if itemData.varFields.exists(_.marcTag.exists(tag => tag == "999")) =>
         val marcTag999SubfieldContent =
-           itemData.varFields
-             .filter(_.marcTag.exists(tag => tag == "999"))
-             .flatMap(varField => varField.subfields.map(sub => sub.content))
+          itemData.varFields
+            .filter(_.marcTag.exists(tag => tag == "999"))
+            .flatMap(varField => varField.subfields.map(sub => sub.content))
 
         AccessCondition(
           method = AccessMethod.NotRequestable,
