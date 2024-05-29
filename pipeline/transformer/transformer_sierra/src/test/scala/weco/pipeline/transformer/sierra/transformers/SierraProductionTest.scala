@@ -466,7 +466,7 @@ class SierraProductionTest
 
   describe("Both MARC field 260 and 264") {
     it(
-      "throws a cataloguing error if both 260 and 264 are present, and 264 has a 2nd indicator"
+      "if both 260 and 264 are present, accept 260"
     ) {
       val bibId = createSierraBibNumber
 
@@ -492,13 +492,15 @@ class SierraProductionTest
 
       val bibData = createSierraBibDataWith(varFields = varFields)
 
-      val caught = intercept[CataloguingException] {
-        SierraProduction(bibId, bibData)
-      }
-
-      caught.getMessage should startWith("Problem in the data")
-      caught.getMessage should include(bibId.withoutCheckDigit)
-      caught.getMessage should include("Record has both 260 and 264 fields")
+      SierraProduction(bibId, bibData) shouldBe List(
+        ProductionEvent(
+          label = "Paris",
+          places = List(Place("Paris")),
+          agents = List(),
+          dates = List(),
+          function = None
+        )
+      )
     }
 
     it("uses 260 if 264 only contains a copyright statement in subfield c") {
