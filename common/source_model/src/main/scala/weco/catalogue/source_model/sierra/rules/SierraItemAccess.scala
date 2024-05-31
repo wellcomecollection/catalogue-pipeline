@@ -367,11 +367,11 @@ object SierraItemAccess extends SierraQueryOps with Logging {
       // the contents of this field under the "a" subfield of the "MARC 999" field.
       case (_, _, _, _, Some(LocationType.OnExhibition))
           if itemData.varFields.exists(_.marcTag.exists(_ == "999")) =>
-        // Get all subfields inside of all "MARC 999" fields
+        // Get all "a" subfields inside of all "MARC 999" fields
         val marcTag999SubfieldContent =
           itemData.varFields
             .filter(_.marcTag.exists(_ == "999"))
-            .flatMap(varField => varField.subfields.map(sub => sub.content))
+            .flatMap(varField => varField.subfields.filter(_.tag == "a").map(sub => sub.content))
 
         // Concatenate all of them together and separate them with "<br />"
         AccessCondition(

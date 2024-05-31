@@ -782,7 +782,7 @@ class SierraItemAccessTest
         note(displayreservation)
       )
     }
-    it("can show multiple 999 MARC tag notes") {
+    it("can show multiple 999 MARC tag subfields tagged with 'a' and ignores other subfield tags") {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
           "79" -> createLocationWith("exres", "On Exhibition")
@@ -790,7 +790,8 @@ class SierraItemAccessTest
         varFields = List(
           VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="in the bottom of a locked filing cabinet"))),
           VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="stuck in a disused lavatory"))),
-          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="with a sign on the door saying 'Beware of The Leopard'")))
+          VarField(marcTag = "999", subfields=List(Subfield(tag="b", content="ignore me"))),
+          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="with a sign on the door saying 'Beware of The Leopard'"))),
         )
       )
 
