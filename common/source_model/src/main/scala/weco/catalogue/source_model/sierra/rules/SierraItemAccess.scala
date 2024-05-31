@@ -362,14 +362,18 @@ object SierraItemAccess extends SierraQueryOps with Logging {
         )
 
       // When an item is on display in an exhibition, it is not available for request.
-      // In this case, the 999 MARC tag field should give some more detail.
+      // The exhibition team uses the "Shelfmark 999" field in the Sierra client to provide more
+      // information on items which are on loan or on an exhibition. The Sierra API then exposes
+      // the contents of this field under the "a" subfield of the "MARC 999" field.
       case (_, _, _, _, Some(LocationType.OnExhibition))
           if itemData.varFields.exists(_.marcTag.exists(_ == "999")) =>
+        // Get all subfields inside of all "MARC 999" fields
         val marcTag999SubfieldContent =
           itemData.varFields
             .filter(_.marcTag.exists(_ == "999"))
             .flatMap(varField => varField.subfields.map(sub => sub.content))
 
+        // Concatenate all of them together and separate them with "<br />"
         AccessCondition(
           method = AccessMethod.NotRequestable,
           note = Some(marcTag999SubfieldContent.mkString("<br />"))
