@@ -1,5 +1,6 @@
 package weco.pipeline.transformer.marc_common.transformers
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.work.{
   Agent,
@@ -12,8 +13,7 @@ import weco.pipeline.transformer.marc_common.exceptions.CataloguingException
 import weco.pipeline.transformer.marc_common.models.{
   MarcField,
   MarcFieldOps,
-  MarcRecord,
-  MarcSubfield
+  MarcRecord
 }
 import weco.pipeline.transformer.marc_common.transformers.parsers.MarcProductionEventParser
 import weco.pipeline.transformer.transformers.{
@@ -24,7 +24,8 @@ import weco.pipeline.transformer.transformers.{
 object MarcProduction
     extends MarcDataTransformer
     with MarcFieldOps
-    with ConceptsTransformer {
+    with ConceptsTransformer
+    with Logging {
   type Output = List[ProductionEvent[IdState.Unminted]]
 
   def apply(record: MarcRecord): List[ProductionEvent[IdState.Unminted]] = {
@@ -35,16 +36,14 @@ object MarcProduction
       case (Nil, Nil)     => Nil
       case (from260, Nil) => from260
       case (Nil, from264) => from264
-      // If both 260 and 264 are present we prefer the 260 fields, see if we can safely ignore the 264 content
-      case (from260, _) =>
-        if (shouldDiscard264(record)) from260
-        else
-          // Otherwise this is some sort of cataloguing error.  This is fairly
-          // rare, so let it bubble on to a DLQ.
-          throw CataloguingException(
-            record,
-            message = "Record has both 260 and 264 fields."
-          )
+
+      // If both 260 and 264 are present we prefer the 260 fields
+      case (from260, _) => {
+        warn(
+          s"Record ${record.controlField("001")} has both 260 and 264 fields. Using 260 fields."
+        )
+        from260
+      }
     }
 
     val marc008productionEvents = getProductionFrom008(record)
@@ -193,50 +192,6 @@ object MarcProduction
             function = productionFunction
           )
       }
-
-  /** Populate the production data if both 260 and 264 are present.
-    *
-    * In general, this is a cataloguing error, but sometimes we can do something
-    * more sensible depending on if/how they're duplicated.
-    */
-  private def shouldDiscard264(record: MarcRecord) = {
-    val marc260fields = record.fieldsWithTags("260").toList
-    val marc264fields = record.fieldsWithTags("264").toList
-
-    // We've seen cases where the 264 field only has the following subfields:
-    //
-    //      [('tag', 'c'), ('content', '©2012')]
-    //
-    // or similar, and the 260 field is populated.  In that case, we can
-    // discard the 264 and just use the 260 fields.
-    val marc264OnlyContainsCopyright = marc264fields match {
-      case List(
-            MarcField("264", Seq(MarcSubfield("c", content)), _, _, _)
-          ) =>
-        content.matches("^©\\d{4}$")
-      case _ => false
-    }
-
-    // We've also seen cases where the 260 and 264 field are both present,
-    // and they have matching subfields!  We use the 260 field as it's not
-    // going to throw an exception about unrecognised second indicator.
-    val marc260fieldsMatch264fields =
-      marc260fields.map { _.subfields } == marc264fields.map { _.subfields }
-
-    // We've seen cases where the 264 field only contains punctuation,
-    // for example (MARC record 3150001, retrieved 28 March 2019):
-    //
-    //      260    2019
-    //      264  1 :|b,|c
-    //
-    // If these subfields are entirely punctuation, we discard 264 and
-    // just use 260.
-    val marc264IsOnlyPunctuation = marc264fields
-      .map { _.subfields.map(_.content).mkString("") }
-      .forall { _ matches "^[:,]*$" }
-
-    marc264OnlyContainsCopyright || marc260fieldsMatch264fields || marc264IsOnlyPunctuation
-  }
 
   private def getProductionFrom008(
     record: MarcRecord
