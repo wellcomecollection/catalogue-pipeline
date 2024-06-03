@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 # This is required to ensure that the datetime is in the correct format
 # for the update_notifier function, Python's datetime.isoformat() does not
 # include the 'Z' at the end of the string for older versions of Python.
