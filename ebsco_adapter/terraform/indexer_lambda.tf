@@ -38,10 +38,10 @@ resource "aws_iam_role_policy" "indexer_lambda_policy" {
   policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
 }
 
-resource "aws_lambda_event_source_mapping" "trigger_indexer_lambda" {
-  event_source_arn = module.ebsco_adapter_output_topic.arn
-  function_name    = module.indexer_lambda.lambda.function_name
-  batch_size       = 1
+resource "aws_sns_topic_subscription" "indexer_lambda_subscription" {
+  topic_arn = module.ebsco_adapter_output_topic.arn
+  protocol  = "lambda"
+  endpoint  = module.indexer_lambda.lambda.arn
 }
 
 resource "aws_lambda_permission" "allow_indexer_lambda_sns_trigger" {

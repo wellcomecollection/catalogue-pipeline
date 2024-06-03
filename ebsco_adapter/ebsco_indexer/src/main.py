@@ -9,6 +9,7 @@ def _get_iso8601_invoked_at():
         invoked_at += "Z"
     return invoked_at
 
+
 def lambda_handler(event, context):
     invoked_at = _get_iso8601_invoked_at()
     if "invoked_at" in event:
