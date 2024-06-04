@@ -109,10 +109,12 @@ trait MarcNotes extends Logging {
           }
           .mkString(" ")
 
-
-      val contentsWithoutCodebreakerReferences = codebreakersLocationSentences.foldLeft(contents)(
-        (currentContents, codebreakersSentence) => currentContents.replace(codebreakersSentence, "")
-      ).replace("  ", " ")
+      val contentsWithoutCodebreakerReferences = codebreakersLocationSentences
+        .foldLeft(contents)(
+          (currentContents, codebreakersSentence) =>
+            currentContents.replace(codebreakersSentence, "")
+        )
+        .replace("  ", " ")
 
       Note(contents = contentsWithoutCodebreakerReferences, noteType = noteType)
     }
