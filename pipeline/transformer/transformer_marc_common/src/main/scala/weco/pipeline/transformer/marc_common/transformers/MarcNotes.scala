@@ -13,6 +13,10 @@ import scala.util.Try
 trait MarcNotes extends Logging {
 
   protected val globallySuppressedSubfields: Set[String] = Set("5")
+  private val codebreakersLocationSentences: List[String] = List(
+    "This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics.",
+    "A digitised copy is held by the Wellcome Library as part of the Codebreakers: Makers of Modern Genetics programme."
+  )
 
   val notesFields: Map[String, MarcField => Note] = Map(
     "500" -> createNoteFromContents(NoteType.GeneralNote),
@@ -105,7 +109,12 @@ trait MarcNotes extends Logging {
           }
           .mkString(" ")
 
-      Note(contents = contents, noteType = noteType)
+
+      val contentsWithoutCodebreakerReferences = codebreakersLocationSentences.foldLeft(contents)(
+        (currentContents, codebreakersSentence) => currentContents.replace(codebreakersSentence, "")
+      ).replace("  ", " ")
+
+      Note(contents = contentsWithoutCodebreakerReferences, noteType = noteType)
     }
 
   private def isUrl(s: String): Boolean =

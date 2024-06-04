@@ -379,4 +379,47 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
       "<a href=\"https://example.com/works/a65fex5m\">https://example.com/works/a65fex5m</a>"
     )
   }
+
+
+  it("removes references to Codebreakers") {
+    val recordWithNotes = MarcTestRecord(
+      fields = List(
+        MarcField(
+          marcTag = "535",
+          indicator1 = "1",
+          subfields =
+            List(MarcSubfield(tag = "a", content = "This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."))
+        ),
+        MarcField(
+          marcTag = "535",
+          indicator1 = "2",
+          subfields = List(
+            MarcSubfield(tag = "a", content = "A digitised copy is held by the Wellcome Library as part of the Codebreakers: Makers of Modern Genetics programme.")
+          )
+        )
+      )
+    )
+
+    MarcNotes(recordWithNotes) shouldBe List()
+  }
+
+  it("only removes Codebreakers sentences") {
+    val recordWithNotes = MarcTestRecord(
+      fields = List(
+        MarcField(
+          marcTag = "535",
+          indicator1 = "1",
+          subfields =
+            List(MarcSubfield(tag = "a", content = "Keep me. This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics. And keep me too."))
+        ),
+      )
+    )
+
+    MarcNotes(recordWithNotes) shouldBe List(
+      Note(
+        contents = "Keep me. And keep me too.",
+        noteType = NoteType.LocationOfOriginalNote
+      )
+    )
+  }
 }
