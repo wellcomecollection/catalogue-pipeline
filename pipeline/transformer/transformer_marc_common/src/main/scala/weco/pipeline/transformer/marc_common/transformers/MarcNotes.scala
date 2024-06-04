@@ -111,13 +111,17 @@ trait MarcNotes extends Logging {
             case MarcSubfield(_, contents) => contents
           }
           .mkString(" ")
-      
+
       // We want to remove all sentences mentioning Codebreakers from the location note.
       // This involves filtering out 5 distinct sentences, which are hardcoded in `codebreakersLocationSentences`.
       // Note that we don't want to get rid of the whole field. It might have useful information in other sentences.
       val contentsWithoutCodebreakerReferences = codebreakersLocationSentences.foldLeft(contents)(
-        (currentContents, codebreakersSentence) => currentContents.replace(codebreakersSentence, "")
-      ).replace("  ", " ")
+        (currentContents, codebreakersSentence) => {
+          // Match an optional leading white space to make sure that removing a sentence doesn't lead to double spaces
+          val regex = ("\\s?" + codebreakersSentence).r
+          regex.replaceAllIn(currentContents, "")
+        }
+      ).trim()
 
       Note(contents = contentsWithoutCodebreakerReferences, noteType = noteType)
     }
