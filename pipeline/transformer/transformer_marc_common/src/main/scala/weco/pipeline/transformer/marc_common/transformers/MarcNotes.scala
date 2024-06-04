@@ -15,7 +15,10 @@ trait MarcNotes extends Logging {
   protected val globallySuppressedSubfields: Set[String] = Set("5")
   private val codebreakersLocationSentences: List[String] = List(
     "This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics.",
-    "A digitised copy is held by the Wellcome Library as part of the Codebreakers: Makers of Modern Genetics programme."
+    "A digitised copy is held by the Wellcome Library as part of the Codebreakers: Makers of Modern Genetics programme.",
+    "A digitised copy is held by Wellcome Collection as part of Codebreakers: Makers of Modern Genetics.",
+    "This catalogue is held by the Wellcome Library as part of the Codebreakers: Makers of Modern Genetics programme.",
+    "A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."
   )
 
   val notesFields: Map[String, MarcField => Note] = Map(
@@ -110,6 +113,9 @@ trait MarcNotes extends Logging {
           .mkString(" ")
 
 
+      // We want to remove all sentences mentioning Codebreakers from the location note.
+      // This involves filtering out 5 distinct sentences, which are hardcoded in `codebreakersLocationSentences`.
+      // Note that we don't want to get rid of the whole field. It might have useful information in other sentences.
       val contentsWithoutCodebreakerReferences = codebreakersLocationSentences.foldLeft(contents)(
         (currentContents, codebreakersSentence) => currentContents.replace(codebreakersSentence, "")
       ).replace("  ", " ")

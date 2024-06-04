@@ -422,4 +422,23 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
       )
     )
   }
+
+  it("removes duplicated Codebreakers sentences") {
+    // There are a few Sierra works (e.g. 2063966), which contain the same Codebreakers sentence twice (presumably by error).
+    // This tests that both duplicate sentences are removed.
+    val recordWithNotes = MarcTestRecord(
+      fields = List(
+        MarcField(
+          marcTag = "535",
+          indicator1 = "1",
+          subfields =
+            List(MarcSubfield(tag = "a", content = "A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics.A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."))
+        ),
+      )
+    )
+
+    MarcNotes(recordWithNotes) shouldBe List()
+  }
 }
+
+
