@@ -111,8 +111,7 @@ trait MarcNotes extends Logging {
             case MarcSubfield(_, contents) => contents
           }
           .mkString(" ")
-
-
+      
       // We want to remove all sentences mentioning Codebreakers from the location note.
       // This involves filtering out 5 distinct sentences, which are hardcoded in `codebreakersLocationSentences`.
       // Note that we don't want to get rid of the whole field. It might have useful information in other sentences.
