@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
-from weco_datascience import http
-from weco_datascience.image import get_image_from_url
-from weco_datascience.logging import get_logger
+from common import http
+from common.image import get_image_from_url
+from common.logging import get_logger
 
 logger = get_logger(__name__)
 
