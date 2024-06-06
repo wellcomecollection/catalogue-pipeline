@@ -159,6 +159,8 @@ object SierraRulesForRequesting {
       //    v|i||79||=|dingo||
       //    v|i||79||=|dpleg||
       //    v|i||79||=|dpuih||
+      //    v|i||79||=|enhal||
+      //    #line above added so that laptops (enhal) cannot be requested online  ls 30/05/24
       //    v|i||79||=|gblip||
       //    q|i||79||=|ofvds||This item cannot be requested online. Please place a manual request.
       //
@@ -179,6 +181,7 @@ object SierraRulesForRequesting {
               "dingo",
               "dpleg",
               "dpuih",
+              "enhal",
               "gblip",
               "ofvds"
             ) =>

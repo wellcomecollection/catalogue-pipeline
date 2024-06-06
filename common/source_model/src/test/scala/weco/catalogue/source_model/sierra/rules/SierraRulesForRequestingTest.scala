@@ -105,6 +105,7 @@ class SierraRulesForRequestingTest
         "dingo",
         "dpleg",
         "dpuih",
+        "enhal",
         "gblip",
         "ofvds"
       )
