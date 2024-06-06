@@ -45,8 +45,8 @@ async def fetch_url_json(url, params=None):
             # closed
             return {"object": response, "json": await response.json()}
         except (
-                json.JSONDecodeError,
-                aiohttp.client_exceptions.ContentTypeError,
+            json.JSONDecodeError,
+            aiohttp.client_exceptions.ContentTypeError,
         ):
             raise ValueError(f"Couldn't decode json from {url}")
 

@@ -19,7 +19,6 @@ async def get_image_from_url(image_url, size=None):
     try:
         image = Image.open(BytesIO(image_pointer))
     except UnidentifiedImageError:
-
         # If this error gets thrown from inside Pillow, it only has the BytesIO
         # object, and we get the moderately unhelpful error:
         #
@@ -27,9 +26,7 @@ async def get_image_from_url(image_url, size=None):
         #
         # Rethrowing it with the image URL should give us more context if/when
         # this error occurs.
-        raise UnidentifiedImageError(
-            "cannot identify image from URL %r" % image_url
-        )
+        raise UnidentifiedImageError("cannot identify image from URL %r" % image_url)
 
     if size:
         image = image.resize((size, size), resample=Image.BILINEAR)
@@ -46,9 +43,7 @@ async def get_local_image(path):
 
 def is_valid_image(response):
     image_formats = ["image/png", "image/jpeg", "image/jpg", "image/jp2"]
-    is_valid = (response.status == 200) and (
-            response.content_type in image_formats
-    )
+    is_valid = (response.status == 200) and (response.content_type in image_formats)
     return is_valid
 
 

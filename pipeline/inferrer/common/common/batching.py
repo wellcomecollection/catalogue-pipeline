@@ -36,10 +36,10 @@ class BatchExecutionQueue(Generic[Input, Result]):
     """
 
     def __init__(
-            self,
-            sync_batch_processor: Callable[[List[Input]], List[Result]],
-            batch_size: int,
-            timeout: float,
+        self,
+        sync_batch_processor: Callable[[List[Input]], List[Result]],
+        batch_size: int,
+        timeout: float,
     ):
         self.sync_batch_processor = sync_batch_processor
         self.batch_size = batch_size
@@ -83,9 +83,7 @@ class BatchExecutionQueue(Generic[Input, Result]):
             async with timeout(self.batch_size * self.timeout):
                 await self.queue.put((execution_id, input))
         except asyncio.TimeoutError as e:
-            log.error(
-                "Queue slot didn't become available in time, restarting worker"
-            )
+            log.error("Queue slot didn't become available in time, restarting worker")
             self.__restart_worker()
             raise e
 
@@ -107,9 +105,7 @@ class BatchExecutionQueue(Generic[Input, Result]):
             try:
                 worker_exception = self.task.exception()
             except asyncio.InvalidStateError:
-                worker_exception = Exception(
-                    "Task failed before job was processed"
-                )
+                worker_exception = Exception("Task failed before job was processed")
             self.__restart_worker()
             raise worker_exception from None
 
