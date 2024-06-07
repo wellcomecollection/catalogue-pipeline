@@ -4,7 +4,9 @@ from .local_utils import construct_sns_event
 
 
 def test_lambda_handler_correctly_indexes_documents():
-    index_event = construct_sns_event("test_id_1", "test_bucket", "prod/test_id_1", False)
+    index_event = construct_sns_event(
+        "test_id_1", "test_bucket", "prod/test_id_1", False
+    )
 
     lambda_handler(index_event, None)
 
@@ -27,12 +29,20 @@ def test_lambda_handler_correctly_indexes_documents():
     assert field_856["subfields.code"] == ["3", "z", "u"]
 
     assert field_856["subfields.content"][0] == "Full text available: 1995 to present."
-    assert field_856["subfields.content"][1] == "Available in ScienceDirect Subject Collections - Agricultural and Biological Sciences.\n            "
-    assert field_856["subfields.content"][2] == "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=841.9579.0&epcustomerid=s7451719"
+    assert (
+        field_856["subfields.content"][1]
+        == "Available in ScienceDirect Subject Collections - Agricultural and Biological Sciences.\n            "
+    )
+    assert (
+        field_856["subfields.content"][2]
+        == "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=841.9579.0&epcustomerid=s7451719"
+    )
 
 
 def test_lambda_handler_deletes_indexed_documents():
-    index_event = construct_sns_event("test_id_1", "test_bucket", "prod/test_id_1", False)
+    index_event = construct_sns_event(
+        "test_id_1", "test_bucket", "prod/test_id_1", False
+    )
 
     lambda_handler(index_event, None)
 
@@ -49,7 +59,9 @@ def test_lambda_handler_deletes_indexed_documents():
 
 
 def test_lambda_handler_does_not_delete_incorrect_documents():
-    index_event = construct_sns_event("test_id_1", "test_bucket", "prod/test_id_1", False)
+    index_event = construct_sns_event(
+        "test_id_1", "test_bucket", "prod/test_id_1", False
+    )
 
     lambda_handler(index_event, None)
 
