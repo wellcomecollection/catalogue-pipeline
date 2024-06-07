@@ -38,14 +38,10 @@ def construct_elasticsearch_documents(ebsco_record: pymarc.record.Record):
         tag_attributes = tag_data.__dict__
 
         tag = tag_attributes["tag"]
-        position = i+1
+        position = i + 1
 
         document_id = f"{ebsco_item_id}-{tag}-{position}"
-        document = {
-            "parent.id": ebsco_item_id,
-            "tag": tag,
-            "position": position
-        }
+        document = {"parent.id": ebsco_item_id, "tag": tag, "position": position}
 
         if "data" in tag_attributes:
             document["data"] = tag_attributes["data"]
@@ -64,7 +60,9 @@ def construct_elasticsearch_documents(ebsco_record: pymarc.record.Record):
 def index_documents(elasticsearch_client, documents: dict[str, dict]):
     for document_id, document in documents.items():
         try:
-            elasticsearch_client.index(index=ES_INDEX_NAME, id=document_id, document=document)
+            elasticsearch_client.index(
+                index=ES_INDEX_NAME, id=document_id, document=document
+            )
         except ApiError as e:
             print(f"Failed to index document with id {document_id}: {e}")
 
@@ -86,7 +84,10 @@ def lambda_handler(event, context):
 
     print(f"Starting lambda_handler @ {invoked_at}, got event: {event}")
 
-    ebsco_item_xml = load_s3_file_streaming_body("wellcomecollection-platform-ebsco-adapter", "prod/xml/2024-05-23/ebs100013422e.xml")
+    ebsco_item_xml = load_s3_file_streaming_body(
+        "wellcomecollection-platform-ebsco-adapter",
+        "prod/xml/2024-05-23/ebs100013422e.xml",
+    )
     ebsco_item = pymarc.marcxml.parse_xml_to_array(ebsco_item_xml)[0]
 
     elasticsearch_client = get_elasticsearch_client()
