@@ -27,6 +27,7 @@ else
 fi
 
 docker build \
-  --file "pipeline/inferrer/$PROJECT_NAME/Dockerfile" \
+  --file "pipeline/inferrer/Dockerfile" \
   --tag "$PROJECT_NAME:$IMAGE_TAG" \
-  "pipeline/inferrer/$PROJECT_NAME"
+  --target "$PROJECT_NAME" \
+  "pipeline/inferrer"

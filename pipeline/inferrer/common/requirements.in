@@ -1,0 +1,9 @@
+fastapi==0.95.0
+gunicorn==20.1.0
+uvicorn==0.11.7
+
+aiofile>=3.8.8
+aiohttp[speedups]>=3.9.5
+Pillow>=10.3.0
+piffle>=0.5.0
+async-timeout>=4.0.3
