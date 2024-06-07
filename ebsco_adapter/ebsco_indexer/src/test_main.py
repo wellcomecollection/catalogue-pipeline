@@ -6,8 +6,8 @@ from .main import lambda_handler
 from .test_mocks import MockElasticsearchClient, MockBoto3Session, get_absolute_path
 
 
-@mock.patch('boto3.Session', return_value=MockBoto3Session())
-@mock.patch('elasticsearch.Elasticsearch', return_value=MockElasticsearchClient())
+@mock.patch("boto3.Session", return_value=MockBoto3Session())
+@mock.patch("elasticsearch.Elasticsearch", return_value=MockElasticsearchClient())
 def test_lambda_handler(*args):
     index_event_fixture_file = get_absolute_path("fixtures/index_event.json")
     with open(index_event_fixture_file, "r") as f:

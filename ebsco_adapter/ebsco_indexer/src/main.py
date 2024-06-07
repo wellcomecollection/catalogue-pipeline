@@ -161,7 +161,7 @@ if __name__ == "__main__":
     raw_message = json.dumps(message)
     event = {
         "invoked_at": datetime.utcnow().isoformat(),
-        "Records": [{"Sns": {"Message": raw_message}}]
+        "Records": [{"Sns": {"Message": raw_message}}],
     }
 
     lambda_handler(event, None)

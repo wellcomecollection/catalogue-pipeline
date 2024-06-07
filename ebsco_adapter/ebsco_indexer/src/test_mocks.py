@@ -19,6 +19,7 @@ class MockS3Client:
 
         return {"Body": io.BytesIO(body)}
 
+
 class MockElasticsearchClient:
     def index(self, index: str, id: str, document: dict):
         pass
