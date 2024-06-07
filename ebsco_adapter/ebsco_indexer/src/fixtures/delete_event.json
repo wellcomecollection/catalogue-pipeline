@@ -1,0 +1,9 @@
+{
+  "Records": [
+    {
+      "Sns": {
+        "Message": "{\"id\": \"ebs64743e\", \"location\": {\"bucket\": \"test-bucket\", \"key\": \"test/xml/2024-05-23/test_id.xml\"}, \"version\": 20240523, \"deleted\": true, \"sha256\": \"test_sha\", \"time\": \"2024-06-07T08:22:52.888862Z\"}"
+      }
+    }
+  ]
+}

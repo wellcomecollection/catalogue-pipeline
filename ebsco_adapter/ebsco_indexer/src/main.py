@@ -5,28 +5,27 @@ from datetime import datetime
 
 import boto3
 import pymarc
-from elasticsearch import Elasticsearch, ApiError
-
-session = boto3.Session()
-secretsmanager = session.client("secretsmanager")
-s3 = session.client("s3")
+import elasticsearch
 
 ES_INDEX_NAME = os.environ.get("ES_INDEX")
 
 
 def load_s3_file_streaming_body(s3_bucket, s3_key):
+    s3 = boto3.Session().client("s3")
     response = s3.get_object(Bucket=s3_bucket, Key=s3_key)
     return response["Body"]
 
 
 def get_elasticsearch_client():
+    secretsmanager = boto3.Session().client("secretsmanager")
+
     def _get_secretsmanager_value(secret_id: str):
         return secretsmanager.get_secret_value(SecretId=secret_id)["SecretString"]
 
     api_key = _get_secretsmanager_value("reporting/ebsco_indexer/es_apikey")
     es_host = _get_secretsmanager_value("reporting/es_host")
 
-    return Elasticsearch(f"https://{es_host}", api_key=api_key)
+    return elasticsearch.Elasticsearch(f"https://{es_host}", api_key=api_key)
 
 
 def construct_elasticsearch_documents(ebsco_record: pymarc.record.Record):
@@ -70,7 +69,7 @@ def index_documents(
                 index=ES_INDEX_NAME, id=document_id, document=document
             )
             success_count += 1
-        except ApiError as e:
+        except elasticsearch.ApiError as e:
             print(f"Failed to index document with id {document_id}: {e}")
             fail_count += 1
 
@@ -91,18 +90,8 @@ def delete_documents_by_parent_id(elasticsearch_client, ebsco_item_id: str):
         print(
             f"Deleted {result['deleted']} documents with the parent ID {ebsco_item_id}."
         )
-    except ApiError as e:
+    except elasticsearch.ApiError as e:
         print(f"Failed to delete documents with the parent ID {ebsco_item_id} : {e}")
-
-
-# This is required to ensure that the datetime is in the correct format
-# for the update_notifier function, Python's datetime.isoformat() does not
-# include the 'Z' at the end of the string for older versions of Python.
-def _get_iso8601_invoked_at():
-    invoked_at = datetime.utcnow().isoformat()
-    if invoked_at[-1] != "Z":
-        invoked_at += "Z"
-    return invoked_at
 
 
 def extract_sns_message_from_event(event):
@@ -111,11 +100,7 @@ def extract_sns_message_from_event(event):
 
 
 def lambda_handler(event, context):
-    invoked_at = _get_iso8601_invoked_at()
-    if "invoked_at" in event:
-        invoked_at = event["invoked_at"]
-
-    print(f"Starting lambda_handler @ {invoked_at}, got event: {event}")
+    print(f"Starting lambda_handler @ {event['invoked_at']}, got event: {event}")
 
     sns_message = extract_sns_message_from_event(event)
     is_deleted = sns_message["deleted"]
@@ -162,6 +147,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    # Construct an SNS message from the passed args
     message = {
         "id": args.id,
         "location": {
@@ -170,8 +156,12 @@ if __name__ == "__main__":
         },
         "deleted": args.delete,
     }
-    raw_message = json.dumps(message)
 
-    event = {"Records": [{"Sns": {"Message": raw_message}}]}
+    # In AWS, the Lambda handler receives the message JSON as a string, so we do the same here
+    raw_message = json.dumps(message)
+    event = {
+        "invoked_at": datetime.utcnow().isoformat(),
+        "Records": [{"Sns": {"Message": raw_message}}]
+    }
 
     lambda_handler(event, None)
