@@ -2,6 +2,7 @@ import os
 import io
 from collections import defaultdict
 
+
 def get_absolute_path(relative_path: str):
     current_dir = os.path.dirname(os.path.realpath(__file__))
     return os.path.join(current_dir, relative_path)
@@ -52,7 +53,7 @@ class MockBoto3Session:
     def __init__(self):
         self.clients = {
             "secretsmanager": MockSecretsManagerClient(),
-            "s3": MockS3Client()
+            "s3": MockS3Client(),
         }
 
     def client(self, client_name: str):
