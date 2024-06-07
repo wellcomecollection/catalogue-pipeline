@@ -400,7 +400,7 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
       )
     )
 
-    MarcNotes(recordWithNotes) shouldBe List()
+    MarcNotes(recordWithNotes) shouldBe empty
   }
 
   it("only removes Codebreakers sentences") {
