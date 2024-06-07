@@ -1,11 +1,12 @@
 import argparse
 import os
 import json
-from datetime import datetime
 
 import boto3
 import pymarc
 import elasticsearch
+
+from .local_utils import construct_sns_event
 
 ES_INDEX_NAME = os.environ.get("ES_INDEX")
 
@@ -125,7 +126,7 @@ if __name__ == "__main__":
         description="Index EBSCO item fields into the Elasticsearch reporting cluster."
     )
     parser.add_argument(
-        "--id", type=str, help="ID of the EBSCO item to index", required=True
+        "--ebsco_id", type=str, help="ID of the EBSCO item to index", required=True
     )
     parser.add_argument(
         "--s3-bucket",
@@ -147,21 +148,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    # Construct an SNS message from the passed args
-    message = {
-        "id": args.id,
-        "location": {
-            "bucket": args.s3_bucket,
-            "key": args.s3_key,
-        },
-        "deleted": args.delete,
-    }
-
-    # In AWS, the Lambda handler receives the message JSON as a string, so we do the same here
-    raw_message = json.dumps(message)
-    event = {
-        "invoked_at": datetime.utcnow().isoformat(),
-        "Records": [{"Sns": {"Message": raw_message}}],
-    }
-
+    event = construct_sns_event(**args)
     lambda_handler(event, None)
