@@ -35,6 +35,21 @@ data "aws_iam_policy_document" "read_ebsco_adapter_bucket" {
   }
 }
 
+data "aws_iam_policy_document" "allow_secret_read" {
+  statement {
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:reporting/es_host*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:reporting/ebsco_indexer*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "read_secrets_policy" {
+  role   = module.indexer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.allow_secret_read.json
+}
+
 resource "aws_iam_role_policy" "indexer_lambda_policy" {
   role   = module.indexer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
@@ -52,3 +67,4 @@ resource "aws_lambda_permission" "allow_indexer_lambda_sns_trigger" {
   principal     = "sns.amazonaws.com"
   source_arn    = module.ebsco_adapter_output_topic.arn
 }
+
