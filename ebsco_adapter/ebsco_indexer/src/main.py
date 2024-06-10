@@ -149,6 +149,5 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-
     event = construct_sns_event(**vars(args))
     lambda_handler(event, None)
