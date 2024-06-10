@@ -1,8 +1,11 @@
 import json
-from datetime import datetime
 
 
 def construct_sns_event(ebsco_id: str, s3_bucket: str, s3_key: str, delete: bool):
+    """
+    Constructs a fake SNS event object mimicking a real event published by the adapter lambda.
+    This is only used when running the indexer locally and for unit testing.
+    """
     # Construct an SNS message from the passed args
     message = {
         "id": ebsco_id,
@@ -13,10 +16,9 @@ def construct_sns_event(ebsco_id: str, s3_bucket: str, s3_key: str, delete: bool
         "deleted": delete,
     }
 
-    # In AWS, the Lambda handler receives the message JSON as a string, so we do the same here
+    # In AWS, the SNS object stores the message JSON as a string, so we do the same here
     raw_message = json.dumps(message)
     event = {
-        "invoked_at": datetime.utcnow().isoformat(),
         "Records": [{"Sns": {"Message": raw_message}}],
     }
 

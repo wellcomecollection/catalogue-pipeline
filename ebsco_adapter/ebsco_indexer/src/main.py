@@ -6,7 +6,7 @@ import boto3
 import pymarc
 import elasticsearch
 
-from .local_utils import construct_sns_event
+from local_utils import construct_sns_event
 
 ES_INDEX_NAME = os.environ.get("ES_INDEX")
 
@@ -102,7 +102,7 @@ def extract_sns_message_from_event(event):
 
 
 def lambda_handler(event, context):
-    print(f"Starting lambda_handler @ {event['invoked_at']}, got event: {event}")
+    print(f"Starting lambda_handler, got event: {event}")
 
     sns_message = extract_sns_message_from_event(event)
     is_deleted = sns_message["deleted"]
@@ -110,6 +110,8 @@ def lambda_handler(event, context):
 
     elasticsearch_client = get_elasticsearch_client()
 
+    # If the item is flagged as deleted, remove it from the Elasticsearch index.
+    # Otherwise, extract the item from S3 and index it.
     if is_deleted:
         delete_documents_by_parent_id(elasticsearch_client, ebsco_item_id)
     else:

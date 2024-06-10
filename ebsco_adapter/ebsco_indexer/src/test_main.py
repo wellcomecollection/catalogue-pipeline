@@ -1,6 +1,6 @@
-from .main import lambda_handler
-from .test_mocks import MockElasticsearchClient
-from .local_utils import construct_sns_event
+from main import lambda_handler
+from test_mocks import MockElasticsearchClient
+from local_utils import construct_sns_event
 
 
 def test_lambda_handler_correctly_indexes_documents():
