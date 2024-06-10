@@ -59,6 +59,8 @@ def test_lambda_handler_deletes_indexed_documents():
 
 
 def test_lambda_handler_does_not_delete_incorrect_documents():
+    # Index all fields of EBSCO item `test_id_1` and then try to delete all fields of EBSCO item `test_id_2`.
+    # No items should be deleted.
     index_event = construct_sns_event(
         "test_id_1", "test_bucket", "prod/test_id_1", False
     )

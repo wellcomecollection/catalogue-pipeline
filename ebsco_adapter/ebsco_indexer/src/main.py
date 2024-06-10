@@ -25,7 +25,6 @@ def get_elasticsearch_client():
 
     api_key = _get_secretsmanager_value("reporting/ebsco_indexer/es_apikey")
     es_host = _get_secretsmanager_value("reporting/es_host")
-    print(es_host)
 
     return elasticsearch.Elasticsearch(f"https://{es_host}", api_key=api_key)
 
