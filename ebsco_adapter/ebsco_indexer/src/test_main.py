@@ -11,7 +11,7 @@ def test_lambda_handler_correctly_indexes_documents():
     lambda_handler(index_event, None)
 
     indexed_documents = MockElasticsearchClient.indexed_documents["test_ebsco_index"]
-    assert len(indexed_documents.keys()) == 3
+    assert len(indexed_documents.keys()) == 5
 
     for document in indexed_documents.values():
         assert document["parent.id"] == "test_id_1"

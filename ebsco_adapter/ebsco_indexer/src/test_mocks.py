@@ -29,7 +29,9 @@ class MockS3Client:
         elif f"{Bucket}/{Key}" == "test_bucket/prod/test_id_2":
             fixture_name = "fixtures/ebsco_item_fixture_2.xml"
         else:
-            raise FileNotFoundError("There is no fixture corresponding to this Bucket/Key combination.")
+            raise FileNotFoundError(
+                "There is no fixture corresponding to this Bucket/Key combination."
+            )
 
         with open(get_absolute_path(fixture_name), "rb") as f:
             body = f.read()
