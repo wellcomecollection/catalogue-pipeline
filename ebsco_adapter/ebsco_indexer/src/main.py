@@ -79,7 +79,9 @@ def index_documents(
             f"Successfully indexed {success_count} documents with the parent ID {ebsco_item_id}."
         )
     if fail_count > 0:
-        raise Exception(f"Failed to index {fail_count} documents with the parent ID {ebsco_item_id}. See above for individual exceptions for each document.")
+        raise Exception(
+            f"Failed to index {fail_count} documents with the parent ID {ebsco_item_id}. See above for individual exceptions for each document."
+        )
 
 
 def delete_documents_by_parent_id(elasticsearch_client, ebsco_item_id: str):
