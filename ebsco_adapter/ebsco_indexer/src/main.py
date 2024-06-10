@@ -70,7 +70,7 @@ def index_documents(
                 index=ES_INDEX_NAME, id=document_id, document=document
             )
             success_count += 1
-        except elasticsearch.ApiError as e:
+        except Exception as e:
             print(f"Failed to index document with id {document_id}: {e}")
             fail_count += 1
 
@@ -79,20 +79,13 @@ def index_documents(
             f"Successfully indexed {success_count} documents with the parent ID {ebsco_item_id}."
         )
     if fail_count > 0:
-        print(
-            f"Failed to index {fail_count} documents with the parent ID {ebsco_item_id}"
-        )
+        raise Exception(f"Failed to index {fail_count} documents with the parent ID {ebsco_item_id}. See above for individual exceptions for each document.")
 
 
 def delete_documents_by_parent_id(elasticsearch_client, ebsco_item_id: str):
-    try:
-        body = {"query": {"match": {"parent.id": ebsco_item_id}}}
-        result = elasticsearch_client.delete_by_query(index=ES_INDEX_NAME, body=body)
-        print(
-            f"Deleted {result['deleted']} documents with the parent ID {ebsco_item_id}."
-        )
-    except elasticsearch.ApiError as e:
-        print(f"Failed to delete documents with the parent ID {ebsco_item_id} : {e}")
+    body = {"query": {"match": {"parent.id": ebsco_item_id}}}
+    result = elasticsearch_client.delete_by_query(index=ES_INDEX_NAME, body=body)
+    print(f"Deleted {result['deleted']} documents with the parent ID {ebsco_item_id}.")
 
 
 def extract_sns_message_from_event(event):
