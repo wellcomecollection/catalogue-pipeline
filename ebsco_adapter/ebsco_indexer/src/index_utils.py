@@ -22,7 +22,7 @@ def recreate_elasticsearch_index(
     password: str = None,
 ):
     """
-    Removes the existing index (and all documents it indexes) and recreates it again with the specified field_mapping
+    Removes the existing index (and all documents it indexes) and recreates it again with the specified `field_mappings`
     """
     if api_key is None and (username is None or password is None):
         raise ValueError(

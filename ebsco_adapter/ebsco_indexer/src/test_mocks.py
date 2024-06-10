@@ -15,7 +15,7 @@ class MockSecretsManagerClient:
         if SecretId == "reporting/ebsco_indexer/es_apikey":
             secret_value = MOCK_API_KEY
         elif SecretId == "reporting/es_host":
-            secret_value = "test_host.com"
+            secret_value = "test-host.com"
         else:
             raise KeyError("Secret value does not exist.")
 
@@ -26,8 +26,6 @@ class MockS3Client:
     def get_object(self, Bucket: str, Key: str):
         if f"{Bucket}/{Key}" == "test_bucket/prod/test_id_1":
             fixture_name = "fixtures/ebsco_item_fixture_1.xml"
-        elif f"{Bucket}/{Key}" == "test_bucket/prod/test_id_2":
-            fixture_name = "fixtures/ebsco_item_fixture_2.xml"
         else:
             raise FileNotFoundError(
                 "There is no fixture corresponding to this Bucket/Key combination."

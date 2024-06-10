@@ -7,13 +7,10 @@ module "indexer_lambda" {
   filename    = data.archive_file.empty_zip.output_path
   handler     = "main.lambda_handler"
   memory_size = 512
-  timeout     = 10 * 60 // 10 minutes
+  timeout     = 60 // 1 minute
 
   environment = {
     variables = {
-      S3_BUCKET = aws_s3_bucket.ebsco_adapter.bucket
-      S3_PREFIX = "prod"
-
       ES_INDEX = "ebsco_fields"
     }
   }
