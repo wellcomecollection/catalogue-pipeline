@@ -10,9 +10,10 @@ BUILDS_DIR="$ROOT/builds"
 for PROJECT in feature_inferrer palette_inferrer aspect_ratio_inferrer
 do
   docker build \
-    --file "$ROOT/pipeline/inferrer/$PROJECT/Dockerfile" \
+    --file "$ROOT/pipeline/inferrer/Dockerfile" \
     --tag "$PROJECT" \
-    "$ROOT/pipeline/inferrer/$PROJECT"
+    --target "$PROJECT" \
+    "$ROOT/pipeline/inferrer"
 done
 
 pushd "$ROOT/pipeline/inferrer/inference_manager"

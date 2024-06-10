@@ -2,15 +2,14 @@ import numpy as np
 import base64
 
 from fastapi import FastAPI, HTTPException
-from weco_datascience import http
-from weco_datascience.batching import BatchExecutionQueue
-from weco_datascience.image import get_image_from_url
-from weco_datascience.logging import get_logger
+from common import http
+from common.image import get_image_from_url
+from common.logging import get_logger
+from common.batching import BatchExecutionQueue
 
 from src.feature_extraction import extract_features
 
 logger = get_logger(__name__)
-
 
 # initialise API
 logger.info("Starting API")

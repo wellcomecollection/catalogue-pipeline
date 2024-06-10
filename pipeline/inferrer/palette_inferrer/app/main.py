@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException
-from weco_datascience import http
-from weco_datascience.batching import BatchExecutionQueue
-from weco_datascience.image import get_image_from_url
-from weco_datascience.logging import get_logger
+from common import http
+from common.batching import BatchExecutionQueue
+from common.image import get_image_from_url
+from common.logging import get_logger
 import base64
 
 from .palette_encoder import PaletteEncoder
