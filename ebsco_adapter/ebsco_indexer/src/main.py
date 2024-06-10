@@ -25,6 +25,7 @@ def get_elasticsearch_client():
 
     api_key = _get_secretsmanager_value("reporting/ebsco_indexer/es_apikey")
     es_host = _get_secretsmanager_value("reporting/es_host")
+    print(es_host)
 
     return elasticsearch.Elasticsearch(f"https://{es_host}", api_key=api_key)
 
@@ -126,7 +127,7 @@ if __name__ == "__main__":
         description="Index EBSCO item fields into the Elasticsearch reporting cluster."
     )
     parser.add_argument(
-        "--ebsco_id", type=str, help="ID of the EBSCO item to index", required=True
+        "--ebsco-id", type=str, help="ID of the EBSCO item to index", required=True
     )
     parser.add_argument(
         "--s3-bucket",
@@ -148,5 +149,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    event = construct_sns_event(**args)
+
+    event = construct_sns_event(**vars(args))
     lambda_handler(event, None)
