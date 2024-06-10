@@ -1,9 +1,9 @@
 module "indexer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name    = "ebsco-adapter-indexer"
+  name        = "ebsco-adapter-indexer"
   description = "Indexes EBSCO fields into the reporting cluster."
-  runtime = "python3.10"
+  runtime     = "python3.10"
 
   filename    = data.archive_file.empty_zip.output_path
   handler     = "main.lambda_handler"
