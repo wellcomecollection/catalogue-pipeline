@@ -10,6 +10,8 @@ module "indexer_lambda" {
   memory_size = 512
   timeout     = 60 // 1 minute
 
+  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
+
   environment = {
     variables = {
       ES_INDEX = "ebsco_fields"
@@ -65,4 +67,3 @@ resource "aws_lambda_permission" "allow_indexer_lambda_sns_trigger" {
   principal     = "sns.amazonaws.com"
   source_arn    = module.ebsco_adapter_output_topic.arn
 }
-
