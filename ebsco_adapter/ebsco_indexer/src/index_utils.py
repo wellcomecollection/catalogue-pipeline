@@ -4,14 +4,13 @@ import boto3
 from elasticsearch import Elasticsearch
 
 EBSCO_FIELDS_INDEX_NAME = "ebsco_fields"
-API_KEY = "<INSERT ELASTICSEARCH API KEY HERE>"
 
 
-def _get_elasticsearch_host():
+def _get_secretsmanager_secret_value(secret_id: str):
     secretsmanager = boto3.Session(profile_name="platform-developer").client(
         "secretsmanager"
     )
-    return secretsmanager.get_secret_value(SecretId="reporting/es_host")["SecretString"]
+    return secretsmanager.get_secret_value(SecretId=secret_id)["SecretString"]
 
 
 def recreate_elasticsearch_index(
@@ -29,7 +28,7 @@ def recreate_elasticsearch_index(
             "Please provide either an `api_key` or a `username` and `password` to authenticate with Elasticsearch."
         )
 
-    host_url = f"https://{_get_elasticsearch_host()}"
+    host_url = f"https://{_get_secretsmanager_secret_value('reporting/es_host')}"
     if api_key is not None:
         elasticsearch = Elasticsearch(host_url, api_key=api_key)
     else:
@@ -44,9 +43,12 @@ if __name__ == "__main__":
     with open("config/index_mappings.json", "r") as f:
         mappings = json.loads(f.read())
 
+    # Get the API key for the ebsco_indexer user, which has privileges to delete/create the EBSCO index
+    es_api_key = _get_secretsmanager_secret_value("reporting/ebsco_indexer/es_apikey")
+
     # Recreate the index with the loaded mappings
     recreate_elasticsearch_index(
         index_name=EBSCO_FIELDS_INDEX_NAME,
         field_mappings=mappings,
-        api_key=API_KEY,
+        api_key=es_api_key,
     )
