@@ -1,11 +1,13 @@
 import json
 
 
-def construct_sns_event(ebsco_id: str, s3_bucket: str, s3_key: str, delete: bool):
+def construct_sns_message(s3_bucket: str, s3_key: str, delete: bool):
     """
-    Constructs a fake SNS event object mimicking a real event published by the adapter lambda.
+    Constructs a fake SNS message object mimicking a real message published by the adapter lambda.
     This is only used when running the indexer locally and for unit testing.
     """
+    ebsco_id = s3_key.split("/")[-1].split(".")[0]
+    
     # Construct an SNS message from the passed args
     message = {
         "id": ebsco_id,
@@ -15,11 +17,19 @@ def construct_sns_event(ebsco_id: str, s3_bucket: str, s3_key: str, delete: bool
         },
         "deleted": delete,
     }
+    
+    return message
 
-    # In AWS, the SNS object stores the message JSON as a string, so we do the same here
-    raw_message = json.dumps(message)
+
+def construct_sqs_event(s3_bucket: str, s3_keys_to_index_or_delete: dict[str, bool]):
+    raw_sns_messages = []
+    
+    for s3_key, delete in s3_keys_to_index_or_delete.items():
+        sns_message = construct_sns_message(s3_bucket, s3_key, delete)
+        raw_sns_messages.append({"body": json.dumps(sns_message)})
+    
     event = {
-        "Records": [{"Sns": {"Message": raw_message}}],
+        "Records": raw_sns_messages
     }
-
+    
     return event

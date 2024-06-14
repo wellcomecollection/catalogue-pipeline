@@ -10,7 +10,7 @@ module "indexer_lambda" {
   memory_size = 512
   timeout     = 60 // 1 minute
 
-  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
+#  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 
   environment = {
     variables = {
@@ -37,10 +37,24 @@ data "aws_iam_policy_document" "read_ebsco_adapter_bucket" {
 
 data "aws_iam_policy_document" "allow_secret_read" {
   statement {
-    actions = ["secretsmanager:GetSecretValue"]
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:reporting/es_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:reporting/ebsco_indexer*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "allow_sqs_receive_message" {
+  statement {
+    actions = [
+      "sqs:ReceiveMessage",
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes",
+      "sqs:GetQueueUrl"
+    ]
+    resources = [
+      aws_sqs_queue.indexer_message_queue.arn
     ]
   }
 }
@@ -55,15 +69,57 @@ resource "aws_iam_role_policy" "indexer_lambda_policy" {
   policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
 }
 
-resource "aws_sns_topic_subscription" "indexer_lambda_subscription" {
-  topic_arn = module.ebsco_adapter_output_topic.arn
-  protocol  = "lambda"
-  endpoint  = module.indexer_lambda.lambda.arn
+resource "aws_iam_role_policy" "indexer_lambda_sqs_policy" {
+  role   = module.indexer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.allow_sqs_receive_message.json
 }
 
-resource "aws_lambda_permission" "allow_indexer_lambda_sns_trigger" {
+resource "aws_sns_topic_subscription" "indexer_sqs_subscription" {
+  topic_arn = module.ebsco_adapter_output_topic.arn
+  protocol  = "sqs"
+  endpoint  = aws_sqs_queue.indexer_message_queue.arn
+}
+
+resource "aws_sqs_queue" "indexer_message_queue" {
+  name = "ebsco-indexer-message-queue"
+  visibility_timeout_seconds = 90
+}
+
+data "aws_iam_policy_document" "indexer_message_queue_policy_data" {
+  statement {
+    actions   = ["sqs:SendMessage"]
+    resources = [aws_sqs_queue.indexer_message_queue.arn]
+    condition {
+      test     = "ArnEquals"
+      values   = [module.ebsco_adapter_output_topic.arn]
+      variable = "aws:SourceArn"
+    }
+    principals {
+      identifiers = ["sns.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_sqs_queue_policy" "indexer_message_queue_policy" {
+  queue_url = aws_sqs_queue.indexer_message_queue.id
+  policy    = data.aws_iam_policy_document.indexer_message_queue_policy_data.json
+}
+
+resource "aws_lambda_event_source_mapping" "sqs_to_indexer_lambda" {
+  event_source_arn                   = aws_sqs_queue.indexer_message_queue.arn
+  function_name                      = module.indexer_lambda.lambda.function_name
+  batch_size                         = 10
+  enabled                            = true
+  maximum_batching_window_in_seconds = 60
+  scaling_config {
+    maximum_concurrency = 10
+  }
+}
+
+resource "aws_lambda_permission" "allow_indexer_lambda_sqs_trigger" {
   action        = "lambda:InvokeFunction"
   function_name = module.indexer_lambda.lambda.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = module.ebsco_adapter_output_topic.arn
+  principal     = "sqs.amazonaws.com"
+  source_arn    = aws_sqs_queue.indexer_message_queue.arn
 }

@@ -1,12 +1,10 @@
 from main import lambda_handler
 from test_mocks import MockElasticsearchClient
-from local_utils import construct_sns_event
+from local_utils import construct_sqs_event
 
 
 def test_lambda_handler_correctly_indexes_documents():
-    index_event = construct_sns_event(
-        "test_id_1", "test_bucket", "prod/test_id_1", False
-    )
+    index_event = construct_sqs_event("test_bucket", {"prod/test_id_1.xml": False})
 
     lambda_handler(index_event, None)
 
@@ -40,18 +38,14 @@ def test_lambda_handler_correctly_indexes_documents():
 
 
 def test_lambda_handler_deletes_indexed_documents():
-    index_event = construct_sns_event(
-        "test_id_1", "test_bucket", "prod/test_id_1", False
-    )
+    index_event = construct_sqs_event("test_bucket", {"prod/test_id_1.xml": False})
 
     lambda_handler(index_event, None)
 
     indexed_documents = MockElasticsearchClient.indexed_documents["test_ebsco_index"]
     assert len(indexed_documents.keys()) == 3
 
-    delete_event = construct_sns_event(
-        "test_id_1", "test_bucket", "prod/test_id_1", True
-    )
+    delete_event = construct_sqs_event("test_bucket", {"prod/test_id_1.xml": True})
     lambda_handler(delete_event, None)
 
     indexed_documents = MockElasticsearchClient.indexed_documents["test_ebsco_index"]
@@ -61,18 +55,14 @@ def test_lambda_handler_deletes_indexed_documents():
 def test_lambda_handler_does_not_delete_incorrect_documents():
     # Index all fields of EBSCO item `test_id_1` and then try to delete all fields of EBSCO item `test_id_2`.
     # No items should be deleted.
-    index_event = construct_sns_event(
-        "test_id_1", "test_bucket", "prod/test_id_1", False
-    )
+    index_event = construct_sqs_event("test_bucket", {"prod/test_id_1.xml": False})
 
     lambda_handler(index_event, None)
 
     indexed_documents = MockElasticsearchClient.indexed_documents["test_ebsco_index"]
     assert len(indexed_documents.keys()) == 3
 
-    delete_event = construct_sns_event(
-        "test_id_2", "test_bucket", "prod/test_id_2", True
-    )
+    delete_event = construct_sqs_event("test_bucket", {"prod/test_id_2.xml": True})
     lambda_handler(delete_event, None)
 
     indexed_documents = MockElasticsearchClient.indexed_documents["test_ebsco_index"]
