@@ -139,6 +139,7 @@ steps:
       - "calm_adapter/calm_deletion_check_initiator"
       - "calm_adapter/calm_window_generator"
       - "ebsco_adapter/ebsco_adapter"
+      - "ebsco_adapter/ebsco_indexer"
       - "tei_adapter/tei_updater"
       - "common/window_generator"
 
@@ -151,6 +152,7 @@ steps:
       - "calm_adapter/calm_window_generator"
       - "calm_adapter/calm_deletion_check_initiator"
       - "ebsco_adapter/ebsco_adapter"
+      - "ebsco_adapter/ebsco_indexer"
       - "common/window_generator"
       - "tei_adapter/tei_updater"
 
