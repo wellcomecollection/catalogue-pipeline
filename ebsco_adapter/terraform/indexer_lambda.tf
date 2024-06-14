@@ -10,7 +10,7 @@ module "indexer_lambda" {
   memory_size = 512
   timeout     = 60 // 1 minute
 
-#  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
+  #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 
   environment = {
     variables = {
@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "read_ebsco_adapter_bucket" {
 
 data "aws_iam_policy_document" "allow_secret_read" {
   statement {
-    actions   = ["secretsmanager:GetSecretValue"]
+    actions = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:reporting/es_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:reporting/ebsco_indexer*"
@@ -81,7 +81,7 @@ resource "aws_sns_topic_subscription" "indexer_sqs_subscription" {
 }
 
 resource "aws_sqs_queue" "indexer_message_queue" {
-  name = "ebsco-indexer-message-queue"
+  name                       = "ebsco-indexer-message-queue"
   visibility_timeout_seconds = 90
 }
 
