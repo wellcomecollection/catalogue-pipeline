@@ -74,17 +74,19 @@ resource "aws_iam_role_policy" "indexer_lambda_sqs_policy" {
   policy = data.aws_iam_policy_document.allow_sqs_receive_message.json
 }
 
+# Add an SQS queue which will collect messages from SNS
+resource "aws_sqs_queue" "indexer_message_queue" {
+  name                       = "ebsco-indexer-message-queue"
+  visibility_timeout_seconds = 90
+}
+
 resource "aws_sns_topic_subscription" "indexer_sqs_subscription" {
   topic_arn = module.ebsco_adapter_output_topic.arn
   protocol  = "sqs"
   endpoint  = aws_sqs_queue.indexer_message_queue.arn
 }
 
-resource "aws_sqs_queue" "indexer_message_queue" {
-  name                       = "ebsco-indexer-message-queue"
-  visibility_timeout_seconds = 90
-}
-
+# Give SNS permission to send messages to SQS
 data "aws_iam_policy_document" "indexer_message_queue_policy_data" {
   statement {
     actions   = ["sqs:SendMessage"]
@@ -106,6 +108,11 @@ resource "aws_sqs_queue_policy" "indexer_message_queue_policy" {
   policy    = data.aws_iam_policy_document.indexer_message_queue_policy_data.json
 }
 
+# This configures an EventSourceMapping which automatically polls the SQS queue for new messages and triggers
+# the indexer Lambda function. All messages received in a 60 second window (defined by `maximum_batching_window_in_seconds`)
+# are collected and sent to the Lambda for processing in batches of at most 10 messages (defined by `batch_size`).
+# Additionally, the `maximum_concurrency` parameter ensures that there are at most 10 active indexer Lambda functions
+# running at a time to make sure we don't overwhelm the Elasticsearch cluster.
 resource "aws_lambda_event_source_mapping" "sqs_to_indexer_lambda" {
   event_source_arn                   = aws_sqs_queue.indexer_message_queue.arn
   function_name                      = module.indexer_lambda.lambda.function_name
@@ -117,6 +124,7 @@ resource "aws_lambda_event_source_mapping" "sqs_to_indexer_lambda" {
   }
 }
 
+# Give the SQS queue permission to invoke the indexer lambda
 resource "aws_lambda_permission" "allow_indexer_lambda_sqs_trigger" {
   action        = "lambda:InvokeFunction"
   function_name = module.indexer_lambda.lambda.function_name
