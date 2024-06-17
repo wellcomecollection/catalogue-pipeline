@@ -64,7 +64,7 @@ module "indexer_message_queue" {
   topic_arns                 = [module.ebsco_adapter_output_topic.arn]
   visibility_timeout_seconds = 90
   max_receive_count          = 3
-  alarm_topic_arn = "arn:aws:sns:eu-west-1:760097843905:platform_dlq_non_empty_alarm"
+  alarm_topic_arn            = "arn:aws:sns:eu-west-1:760097843905:platform_dlq_non_empty_alarm"
 }
 
 # Allow the Lambda function to read from the queue
