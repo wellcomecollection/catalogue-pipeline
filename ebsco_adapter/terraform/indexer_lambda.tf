@@ -10,7 +10,7 @@ module "indexer_lambda" {
   memory_size = 512
   timeout     = 60 // 1 minute
 
-  #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
+  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 
   environment = {
     variables = {
@@ -45,20 +45,6 @@ data "aws_iam_policy_document" "allow_secret_read" {
   }
 }
 
-data "aws_iam_policy_document" "allow_sqs_receive_message" {
-  statement {
-    actions = [
-      "sqs:ReceiveMessage",
-      "sqs:DeleteMessage",
-      "sqs:GetQueueAttributes",
-      "sqs:GetQueueUrl"
-    ]
-    resources = [
-      aws_sqs_queue.indexer_message_queue.arn
-    ]
-  }
-}
-
 resource "aws_iam_role_policy" "read_secrets_policy" {
   role   = module.indexer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_secret_read.json
@@ -69,43 +55,22 @@ resource "aws_iam_role_policy" "indexer_lambda_policy" {
   policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
 }
 
+# Add an SQS queue which will collect messages from SNS
+module "indexer_message_queue" {
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+
+  queue_name = "ebsco-indexer-message-queue"
+
+  topic_arns                 = [module.ebsco_adapter_output_topic.arn]
+  visibility_timeout_seconds = 90
+  max_receive_count          = 3
+  alarm_topic_arn = "arn:aws:sns:eu-west-1:760097843905:platform_dlq_non_empty_alarm"
+}
+
+# Allow the Lambda function to read from the queue
 resource "aws_iam_role_policy" "indexer_lambda_sqs_policy" {
   role   = module.indexer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_sqs_receive_message.json
-}
-
-# Add an SQS queue which will collect messages from SNS
-resource "aws_sqs_queue" "indexer_message_queue" {
-  name                       = "ebsco-indexer-message-queue"
-  visibility_timeout_seconds = 90
-}
-
-resource "aws_sns_topic_subscription" "indexer_sqs_subscription" {
-  topic_arn = module.ebsco_adapter_output_topic.arn
-  protocol  = "sqs"
-  endpoint  = aws_sqs_queue.indexer_message_queue.arn
-}
-
-# Give SNS permission to send messages to SQS
-data "aws_iam_policy_document" "indexer_message_queue_policy_data" {
-  statement {
-    actions   = ["sqs:SendMessage"]
-    resources = [aws_sqs_queue.indexer_message_queue.arn]
-    condition {
-      test     = "ArnEquals"
-      values   = [module.ebsco_adapter_output_topic.arn]
-      variable = "aws:SourceArn"
-    }
-    principals {
-      identifiers = ["sns.amazonaws.com"]
-      type        = "Service"
-    }
-  }
-}
-
-resource "aws_sqs_queue_policy" "indexer_message_queue_policy" {
-  queue_url = aws_sqs_queue.indexer_message_queue.id
-  policy    = data.aws_iam_policy_document.indexer_message_queue_policy_data.json
+  policy = module.indexer_message_queue.read_policy
 }
 
 # This configures an EventSourceMapping which automatically polls the SQS queue for new messages and triggers
@@ -114,7 +79,7 @@ resource "aws_sqs_queue_policy" "indexer_message_queue_policy" {
 # Additionally, the `maximum_concurrency` parameter ensures that there are at most 10 active indexer Lambda functions
 # running at a time to make sure we don't overwhelm the Elasticsearch cluster.
 resource "aws_lambda_event_source_mapping" "sqs_to_indexer_lambda" {
-  event_source_arn                   = aws_sqs_queue.indexer_message_queue.arn
+  event_source_arn                   = module.indexer_message_queue.arn
   function_name                      = module.indexer_lambda.lambda.function_name
   batch_size                         = 10
   enabled                            = true
@@ -129,5 +94,5 @@ resource "aws_lambda_permission" "allow_indexer_lambda_sqs_trigger" {
   action        = "lambda:InvokeFunction"
   function_name = module.indexer_lambda.lambda.function_name
   principal     = "sqs.amazonaws.com"
-  source_arn    = aws_sqs_queue.indexer_message_queue.arn
+  source_arn    = module.indexer_message_queue.arn
 }
