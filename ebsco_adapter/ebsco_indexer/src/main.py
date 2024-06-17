@@ -132,7 +132,7 @@ def lambda_handler(event, context):
     elasticsearch_client = get_elasticsearch_client()
 
     if len(items_to_delete) > 0:
-        delete_documents_by_parent_id(elasticsearch_client, items_to_delete.keys())
+        delete_documents_by_parent_id(elasticsearch_client, list(items_to_delete.keys()))
 
     if len(items_to_index) > 0:
         index_ebsco_items_in_bulk(elasticsearch_client, items_to_index)
