@@ -92,8 +92,8 @@ def extract_sns_messages_from_sqs_event(event):
     sns_messages = []
 
     for record in event["Records"]:
-        sns_message = json.loads(record["body"])
-        sns_messages.append(sns_message)
+        sns_message = json.loads(record["body"])["Message"]
+        sns_messages.append(json.loads(sns_message))
 
     return sns_messages
 

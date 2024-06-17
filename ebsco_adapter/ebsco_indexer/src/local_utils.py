@@ -17,8 +17,8 @@ def construct_sns_message(s3_bucket: str, s3_key: str, delete: bool):
         },
         "deleted": delete,
     }
-
-    return message
+    # In AWS, the SNS object stores the message JSON as a string, so we do the same here
+    return {"Message": json.dumps(message)}
 
 
 def construct_sqs_event(s3_bucket: str, s3_keys_to_index_or_delete: dict[str, bool]):
@@ -30,7 +30,7 @@ def construct_sqs_event(s3_bucket: str, s3_keys_to_index_or_delete: dict[str, bo
 
     for s3_key, delete in s3_keys_to_index_or_delete.items():
         sns_message = construct_sns_message(s3_bucket, s3_key, delete)
-        # In AWS, the SQS object stores the message JSON as a string, so we do the same here
+        # In AWS, the SQS object stores the body JSON as a string, so we do the same here
         raw_sns_messages.append({"body": json.dumps(sns_message)})
 
     event = {"Records": raw_sns_messages}
