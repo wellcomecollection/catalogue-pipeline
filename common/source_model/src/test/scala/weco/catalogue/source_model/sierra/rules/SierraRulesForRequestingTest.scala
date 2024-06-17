@@ -107,6 +107,7 @@ class SierraRulesForRequestingTest
         "dpuih",
         "enhal",
         "gblip",
+        "harcl",
         "ofvds"
       )
 
