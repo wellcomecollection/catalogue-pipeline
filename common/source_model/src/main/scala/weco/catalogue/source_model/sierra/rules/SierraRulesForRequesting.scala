@@ -197,11 +197,11 @@ object SierraRulesForRequesting {
       //    # line above added so that Offsite deepstore material is not requestable.  LS 13/06/24
       //
       case i
-        if i
-          .fixedField("79")
-          .containsAnyOf(
-            "harcl",
-          ) =>
+          if i
+            .fixedField("79")
+            .containsAnyOf(
+              "harcl"
+            ) =>
         NotRequestable.ItemUnavailable(
           "This item is unavailable."
         )
