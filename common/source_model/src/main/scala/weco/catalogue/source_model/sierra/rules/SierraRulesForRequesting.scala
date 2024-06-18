@@ -202,7 +202,7 @@ object SierraRulesForRequesting {
           .containsAnyOf(
             "harcl",
           ) =>
-        NotRequestable.NeedsManualRequest(
+        NotRequestable.ItemUnavailable(
           "This item is unavailable."
         )
 
