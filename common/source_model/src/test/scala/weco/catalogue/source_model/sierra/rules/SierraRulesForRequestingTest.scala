@@ -107,7 +107,6 @@ class SierraRulesForRequestingTest
         "dpuih",
         "enhal",
         "gblip",
-        "harcl",
         "ofvds"
       )
 
@@ -116,6 +115,22 @@ class SierraRulesForRequestingTest
           _,
           expectedResult = NotRequestable.NeedsManualRequest(
             "This item cannot be requested online. Please place a manual request."
+          )
+        )
+      }
+    }
+
+    it("if it has a generic unavailable message") {
+      val testCases = Table(
+        "locationCode",
+        "harcl",
+      )
+
+      forAll(testCases) {
+        assertBlockedWith(
+          _,
+          expectedResult = NotRequestable.NeedsManualRequest(
+            "This item is unavailable."
           )
         )
       }

@@ -185,11 +185,25 @@ object SierraRulesForRequesting {
               "dpuih",
               "enhal",
               "gblip",
-              "harcl",
               "ofvds"
             ) =>
         NotRequestable.NeedsManualRequest(
           "This item cannot be requested online. Please place a manual request."
+        )
+
+      // These cases cover the lines:
+      //
+      //    v|i||79||=|harcl||
+      //    # line above added so that Offsite deepstore material is not requestable.  LS 13/06/24
+      //
+      case i
+        if i
+          .fixedField("79")
+          .containsAnyOf(
+            "harcl",
+          ) =>
+        NotRequestable.NeedsManualRequest(
+          "This item is unavailable."
         )
 
       // These cases cover the lines:
