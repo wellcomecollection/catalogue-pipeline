@@ -6,7 +6,7 @@ import boto3
 import pymarc
 import elasticsearch
 
-from local_utils import construct_sns_event
+from local_utils import construct_sqs_event
 
 ES_INDEX_NAME = os.environ.get("ES_INDEX")
 
@@ -61,7 +61,7 @@ def construct_elasticsearch_documents(ebsco_record: pymarc.record.Record):
 
 
 def index_documents(
-    elasticsearch_client, documents: dict[str, dict], ebsco_item_id: str
+    elasticsearch_client: elasticsearch.Elasticsearch, documents: dict[str, dict]
 ):
     success_count, fail_count = 0, 0
     for document_id, document in documents.items():
@@ -75,55 +75,74 @@ def index_documents(
             fail_count += 1
 
     if success_count > 0:
-        print(
-            f"Successfully indexed {success_count} documents with the parent ID {ebsco_item_id}."
-        )
+        print(f"Successfully indexed {success_count} documents.")
     if fail_count > 0:
         raise Exception(
-            f"Failed to index {fail_count} documents with the parent ID {ebsco_item_id}. See above for individual exceptions for each document."
+            f"Failed to index {fail_count} documents. See above for individual exceptions for each document."
         )
 
 
-def delete_documents_by_parent_id(elasticsearch_client, ebsco_item_id: str):
-    body = {"query": {"match": {"parent.id": ebsco_item_id}}}
+def delete_documents_by_parent_id(elasticsearch_client, ebsco_item_ids: list[str]):
+    body = {"query": {"terms": {"parent.id": ebsco_item_ids}}}
     result = elasticsearch_client.delete_by_query(index=ES_INDEX_NAME, body=body)
-    print(f"Deleted {result['deleted']} documents with the parent ID {ebsco_item_id}.")
+    print(f"Deleted {result['deleted']} documents.")
 
 
-def extract_sns_message_from_event(event):
-    sns_message = json.loads(event["Records"][0]["Sns"]["Message"])
-    return sns_message
+def extract_sns_messages_from_sqs_event(event):
+    sns_messages = []
+
+    for record in event["Records"]:
+        sns_message = json.loads(record["body"])["Message"]
+        sns_messages.append(json.loads(sns_message))
+
+    return sns_messages
 
 
-def lambda_handler(event, context):
-    print(f"Starting lambda_handler, got event: {event}")
-
-    sns_message = extract_sns_message_from_event(event)
-    is_deleted = sns_message["deleted"]
-    ebsco_item_id = sns_message["id"]
-
-    elasticsearch_client = get_elasticsearch_client()
-
-    # If the item is flagged as deleted, remove it from the Elasticsearch index.
-    # Otherwise, extract the item from S3 and index it.
-    if is_deleted:
-        delete_documents_by_parent_id(elasticsearch_client, ebsco_item_id)
-    else:
+def index_ebsco_items_in_bulk(
+    elasticsearch_client: elasticsearch.Elasticsearch, items_to_index: dict[str, dict]
+):
+    all_documents = {}
+    for sns_message in items_to_index.values():
         s3_bucket = sns_message["location"]["bucket"]
         s3_key = sns_message["location"]["key"]
 
         ebsco_item_xml = load_s3_file_streaming_body(s3_bucket, s3_key)
         ebsco_item = pymarc.marcxml.parse_xml_to_array(ebsco_item_xml)[0]
-        documents = construct_elasticsearch_documents(ebsco_item)
-        index_documents(elasticsearch_client, documents, ebsco_item_id)
+        ebsco_item_documents = construct_elasticsearch_documents(ebsco_item)
+        all_documents |= ebsco_item_documents
+
+    index_documents(elasticsearch_client, all_documents)
+
+
+def lambda_handler(event, context):
+    print(f"Starting lambda_handler, got event: {event}")
+
+    sns_messages = extract_sns_messages_from_sqs_event(event)
+
+    items_to_index, items_to_delete = {}, {}
+    for sns_message in sns_messages:
+        is_deleted = sns_message["deleted"]
+        ebsco_item_id = sns_message["id"]
+
+        if is_deleted:
+            items_to_delete[ebsco_item_id] = sns_message
+        else:
+            items_to_index[ebsco_item_id] = sns_message
+
+    elasticsearch_client = get_elasticsearch_client()
+
+    if len(items_to_delete) > 0:
+        delete_documents_by_parent_id(
+            elasticsearch_client, list(items_to_delete.keys())
+        )
+
+    if len(items_to_index) > 0:
+        index_ebsco_items_in_bulk(elasticsearch_client, items_to_index)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Index EBSCO item fields into the Elasticsearch reporting cluster."
-    )
-    parser.add_argument(
-        "--ebsco-id", type=str, help="ID of the EBSCO item to index", required=True
     )
     parser.add_argument(
         "--s3-bucket",
@@ -145,5 +164,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    event = construct_sns_event(**vars(args))
+    event = construct_sqs_event(
+        s3_bucket=args.s3_bucket, s3_keys_to_index_or_delete={args.s3_key: args.delete}
+    )
     lambda_handler(event, None)

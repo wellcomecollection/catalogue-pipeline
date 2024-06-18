@@ -11,15 +11,15 @@ needs to be indexed/deleted.
 To manually index documents from a local environment, navigate to the `ebsco_indexer` directory and run:  
 ```sh
 AWS_PROFILE=platform-developer \
-ES_INDEX=ebsco-index \
-python3 src/main.py --ebsco-id <EBSCO_ITEM_ID> --s3-bucket <BUCKET_CONTAINING_EBSCO_XML> --s3-key <KEY_CONTAINING_EBSCO_XML>
+ES_INDEX=ebsco_fields \
+python3 src/main.py --s3-bucket <BUCKET_CONTAINING_EBSCO_XML> --s3-key <KEY_CONTAINING_EBSCO_XML>
 ```
 
 To delete a document from the index, run:
 ```sh
 AWS_PROFILE=platform-developer \
-ES_INDEX=ebsco-index \
-python3 src/main.py --ebsco-id <EBSCO_ITEM_ID> --s3-bucket <BUCKET_CONTAINING_EBSCO_XML> --s3-key <KEY_CONTAINING_EBSCO_XML> --delete true
+ES_INDEX=ebsco_fields \
+python3 src/main.py --s3-bucket <BUCKET_CONTAINING_EBSCO_XML> --s3-key <KEY_CONTAINING_EBSCO_XML> --delete true
 ```
 
 ## Recreating the index

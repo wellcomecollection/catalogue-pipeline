@@ -24,8 +24,10 @@ class MockSecretsManagerClient:
 
 class MockS3Client:
     def get_object(self, Bucket: str, Key: str):
-        if f"{Bucket}/{Key}" == "test_bucket/prod/test_id_1":
+        if f"{Bucket}/{Key}" == "test_bucket/prod/test_id_1.xml":
             fixture_name = "fixtures/ebsco_item_fixture_1.xml"
+        elif f"{Bucket}/{Key}" == "test_bucket/prod/test_id_2.xml":
+            fixture_name = "fixtures/ebsco_item_fixture_2.xml"
         else:
             raise FileNotFoundError(
                 "There is no fixture corresponding to this Bucket/Key combination."
@@ -48,13 +50,13 @@ class MockElasticsearchClient:
         self.indexed_documents[index][id] = document
 
     def delete_by_query(self, index: str, body: dict):
-        deleted_parent_id = body["query"]["match"]["parent.id"]
+        deleted_parent_ids = body["query"]["terms"]["parent.id"]
 
         new_indexed_documents = {}
 
         deleted_count = 0
         for _id, document in self.indexed_documents[index].items():
-            if document["parent.id"] != deleted_parent_id:
+            if document["parent.id"] not in deleted_parent_ids:
                 new_indexed_documents[_id] = document
             else:
                 deleted_count += 1
