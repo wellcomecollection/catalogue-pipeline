@@ -113,7 +113,7 @@ class SierraRulesForRequestingTest
       forAll(testCases) {
         assertBlockedWith(
           _,
-          expectedResult = NotRequestable.ItemUnavailable(
+          expectedResult = NotRequestable.NeedsManualRequest(
             "This item cannot be requested online. Please place a manual request."
           )
         )
@@ -129,7 +129,7 @@ class SierraRulesForRequestingTest
       forAll(testCases) {
         assertBlockedWith(
           _,
-          expectedResult = NotRequestable.NeedsManualRequest(
+          expectedResult = NotRequestable.ItemUnavailable(
             "This item is unavailable."
           )
         )
