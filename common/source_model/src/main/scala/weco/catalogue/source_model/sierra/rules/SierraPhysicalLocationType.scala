@@ -23,7 +23,8 @@ object SierraPhysicalLocationType extends Logging {
             "early printed books",
             "iconographic collection",
             "offsite",
-            "unrequestable"
+            "unrequestable",
+            "deepstore"
           ) =>
         Some(LocationType.ClosedStores)
 
