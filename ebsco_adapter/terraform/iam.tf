@@ -3,6 +3,11 @@ resource "aws_iam_role_policy" "publish_to_topic" {
   role   = module.ftp_lambda.lambda_role.name
 }
 
+resource "aws_iam_role_policy" "publish_to_topic_task" {
+  policy = module.ebsco_adapter_output_topic.publish_policy
+  role   = module.ftp_task_definition.task_role_name
+}
+
 data "aws_iam_policy_document" "ebsco_s3_bucket_full_access" {
   statement {
     actions = [
@@ -34,4 +39,9 @@ resource "aws_iam_policy" "ebsco_s3_bucket_full_access" {
 resource "aws_iam_role_policy_attachment" "ebsco_s3_bucket_full_access" {
   policy_arn = aws_iam_policy.ebsco_s3_bucket_full_access.arn
   role       = module.ftp_lambda.lambda_role.name
+}
+
+resource "aws_iam_role_policy_attachment" "ebsco_s3_bucket_full_access_task" {
+  policy_arn = aws_iam_policy.ebsco_s3_bucket_full_access.arn
+  role       = module.ftp_task_definition.task_role_name
 }
