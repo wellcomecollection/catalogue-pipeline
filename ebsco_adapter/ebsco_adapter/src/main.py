@@ -154,6 +154,11 @@ if __name__ == "__main__":
         type=str,
         help="Comma-separated list of IDs to reindex (for partial)",
     )
+    parser.add_argument(
+        "--scheduled-invoke",
+        action="store_true",
+        help="To run a regular process invocation, without reindexing.",
+    )
 
     args = parser.parse_args()
     if args.reindex_type:
@@ -162,8 +167,13 @@ if __name__ == "__main__":
             reindex_ids = args.reindex_ids.split(",")
             reindex_ids = [rid.strip() for rid in reindex_ids]
 
-    # This is the event that will be passed to the lambda handler.
-    # When invoking the function, use this structure to trigger reindexing.
-    event = {"reindex_type": args.reindex_type, "reindex_ids": reindex_ids}
+    if args.scheduled_invoke:
+        event = {}
+    else:
+        context.invoked_function_arn = "arn:aws:lambda:eu-west-1:123456789012:function:ebsco-adapter"
+        context.invoked_function_arn += ":$LATEST"
+        # This is the event that will be passed to the lambda handler.
+        # When invoking the function, use this structure to trigger reindexing.
+        event = {"reindex_type": args.reindex_type, "reindex_ids": reindex_ids}
 
     lambda_handler(event, None)

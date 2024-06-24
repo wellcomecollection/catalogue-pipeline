@@ -1,9 +1,11 @@
 steps:
   - label: deploy EBSCO adapter
     command: |
-      ./builds/deploy_lambda_zip.sh \
-        ebsco_adapter/ebsco_adapter \
-        ebsco-adapter-ftp
+      ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \
+        uk.ac.wellcome/ebsco_adapter 
+
+      CLUSTER=ebsco_adapter ./builds/deploy_ecs_services.sh \
+        ebsco_adapter
 
     plugins:
       - wellcomecollection/aws-assume-role#v0.2.2:
