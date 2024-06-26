@@ -2,17 +2,6 @@
 
 # Usage: ./run_local.sh <args>
 
-# this script should use the AWS CLI to run docker-compose locally getting env vars out of parameter store
-
-#        - OUTPUT_TOPIC_ARN=${OUTPUT_TOPIC_ARN}
- #        - CUSTOMER_ID=${CUSTOMER_ID}
- #        - S3_BUCKET=${S3_BUCKET}
- #        - S3_PREFIX=${S3_PREFIX}
- #        - FTP_SERVER=${FTP_SERVER}
- #        - FTP_USERNAME=${FTP_USERNAME}
- #        - FTP_PASSWORD=${FTP_PASSWORD}
- #        - FTP_REMOTE_DIR=${FTP_REMOTE_DIR}
-
 AWS_PROFILE=platform-developer
 
 export AWS_PROFILE

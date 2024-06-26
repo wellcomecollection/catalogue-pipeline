@@ -1,7 +1,3 @@
-'''
-This is copied from an AWS Lambda function blueprint.
-'''
-
 import json
 import logging
 import os
@@ -22,7 +18,6 @@ def lambda_handler(event, context):
     logger.info("Message: " + str(message))
 
     alarm_name = message['AlarmName']
-    #old_state = message['OldStateValue']
     new_state = message['NewStateValue']
     reason = message['NewStateReason']
 

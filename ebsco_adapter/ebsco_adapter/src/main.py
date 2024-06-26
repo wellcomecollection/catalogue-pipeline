@@ -57,7 +57,7 @@ def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at):
 def run_reindex(s3_store, sns_publisher, invoked_at, reindex_type, ids=None):
     assert reindex_type in ["full", "partial"], "Invalid reindex type"
     assert (
-            ids is not None or reindex_type == "full"
+        ids is not None or reindex_type == "full"
     ), "You must provide IDs for partial reindexing"
 
     print(f"Running reindex with type {reindex_type} and ids {ids} ...")
@@ -152,11 +152,11 @@ if __name__ == "__main__":
     elif args.scheduled_invoke:
         process_type = "scheduled"
 
-    with \
-            ProcessMetrics(process_type) as metrics, \
-            tempfile.TemporaryDirectory() as temp_dir, \
-            EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp:
-
+    with ProcessMetrics(
+        process_type
+    ) as metrics, tempfile.TemporaryDirectory() as temp_dir, EbscoFtp(
+        ftp_server, ftp_username, ftp_password, ftp_remote_dir
+    ) as ebsco_ftp:
         s3_store = S3Store(s3_bucket)
         sns_publisher = SnsPublisher(sns_topic_arn)
 
@@ -169,10 +169,4 @@ if __name__ == "__main__":
                 reindex_ids,
             )
         elif args.scheduled_invoke:
-            run_process(
-                temp_dir,
-                ebsco_ftp,
-                s3_store,
-                sns_publisher,
-                invoked_at
-            )
+            run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at)

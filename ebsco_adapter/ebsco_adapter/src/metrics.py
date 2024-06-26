@@ -21,21 +21,16 @@ class ProcessMetrics:
 
     def put_metric(self, metric_name: str, value: float):
         print(f"Putting metric {metric_name} ({self.process_name}) with value {value}s")
-        boto3.client('cloudwatch').put_metric_data(
-            Namespace='ebsco_adapter',
+        boto3.client("cloudwatch").put_metric_data(
+            Namespace="ebsco_adapter",
             MetricData=[
                 {
-                    'MetricName': metric_name,
-                    'Dimensions': [
-                        {
-                            'Name': 'process_name',
-                            'Value': self.process_name
-                        }
+                    "MetricName": metric_name,
+                    "Dimensions": [
+                        {"Name": "process_name", "Value": self.process_name}
                     ],
-                    'Value': value,
-                    'Unit': 'Seconds'
+                    "Value": value,
+                    "Unit": "Seconds",
                 }
-            ]
+            ],
         )
-
-
