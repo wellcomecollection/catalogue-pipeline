@@ -30,4 +30,7 @@ S3_PREFIX=prod
 
 export FTP_PASSWORD FTP_SERVER FTP_USERNAME CUSTOMER_ID FTP_REMOTE_DIR S3_BUCKET S3_PREFIX OUTPUT_TOPIC_ARN
 
+# Ensure the docker image is up to date
+docker-compose --log-level ERROR build dev
+
 docker-compose run dev "$@"

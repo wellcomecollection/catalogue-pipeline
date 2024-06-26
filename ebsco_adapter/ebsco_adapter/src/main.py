@@ -13,6 +13,7 @@ from sync_files import sync_and_list_files, list_files
 from extract_marc import extract_marc_records
 from compare_uploads import compare_uploads, find_notified_and_completed_flag
 from update_notifier import update_notifier
+from metrics import ProcessMetrics
 
 ftp_server = os.environ.get("FTP_SERVER")
 ftp_username = os.environ.get("FTP_USERNAME")
@@ -30,6 +31,12 @@ xml_s3_prefix = os.path.join(s3_prefix, "xml")
 def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at):
     print("Running regular process ...")
     available_files = sync_and_list_files(temp_dir, ftp_s3_prefix, ebsco_ftp, s3_store)
+
+    # Holding the connection open for the next step
+    # is unnecessary, if we close here we avoid any
+    # potential timeout issues with the connection.
+    ebsco_ftp.quit()
+
     updates = compare_uploads(
         available_files, extract_marc_records, xml_s3_prefix, temp_dir, s3_store
     )
@@ -50,7 +57,7 @@ def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at):
 def run_reindex(s3_store, sns_publisher, invoked_at, reindex_type, ids=None):
     assert reindex_type in ["full", "partial"], "Invalid reindex type"
     assert (
-        ids is not None or reindex_type == "full"
+            ids is not None or reindex_type == "full"
     ), "You must provide IDs for partial reindexing"
 
     print(f"Running reindex with type {reindex_type} and ids {ids} ...")
@@ -109,34 +116,6 @@ def _get_iso8601_invoked_at():
     return invoked_at
 
 
-def lambda_handler(event, context):
-    invoked_at = _get_iso8601_invoked_at()
-    if "invoked_at" in event:
-        invoked_at = event["invoked_at"]
-
-    print(f"Starting lambda_handler @ {invoked_at}, got event: {event}")
-
-    with tempfile.TemporaryDirectory() as temp_dir:
-        with EbscoFtp(
-            ftp_server, ftp_username, ftp_password, ftp_remote_dir
-        ) as ebsco_ftp:
-            s3_store = S3Store(s3_bucket)
-            sns_publisher = SnsPublisher(sns_topic_arn)
-
-            if event is not None and "reindex_type" in event:
-                return run_reindex(
-                    s3_store,
-                    sns_publisher,
-                    invoked_at,
-                    event["reindex_type"],
-                    event.get("reindex_ids"),
-                )
-            else:
-                return run_process(
-                    temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at
-                )
-
-
 if __name__ == "__main__":
     event = None
     context = SimpleNamespace(invoked_function_arn=None)
@@ -160,20 +139,40 @@ if __name__ == "__main__":
         help="To run a regular process invocation, without reindexing.",
     )
 
+    invoked_at = _get_iso8601_invoked_at()
     args = parser.parse_args()
+
+    process_type = None
+    reindex_ids = None
     if args.reindex_type:
-        reindex_ids = None
+        process_type = f"reindex-{args.reindex_type}"
         if args.reindex_ids:
             reindex_ids = args.reindex_ids.split(",")
             reindex_ids = [rid.strip() for rid in reindex_ids]
+    elif args.scheduled_invoke:
+        process_type = "scheduled"
 
-    if args.scheduled_invoke:
-        event = {}
-    else:
-        context.invoked_function_arn = "arn:aws:lambda:eu-west-1:123456789012:function:ebsco-adapter"
-        context.invoked_function_arn += ":$LATEST"
-        # This is the event that will be passed to the lambda handler.
-        # When invoking the function, use this structure to trigger reindexing.
-        event = {"reindex_type": args.reindex_type, "reindex_ids": reindex_ids}
+    with \
+            ProcessMetrics(process_type) as metrics, \
+            tempfile.TemporaryDirectory() as temp_dir, \
+            EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp:
 
-    lambda_handler(event, None)
+        s3_store = S3Store(s3_bucket)
+        sns_publisher = SnsPublisher(sns_topic_arn)
+
+        if args.reindex_type:
+            run_reindex(
+                s3_store,
+                sns_publisher,
+                invoked_at,
+                args.reindex_type,
+                reindex_ids,
+            )
+        elif args.scheduled_invoke:
+            run_process(
+                temp_dir,
+                ebsco_ftp,
+                s3_store,
+                sns_publisher,
+                invoked_at
+            )
