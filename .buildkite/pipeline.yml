@@ -156,7 +156,7 @@ steps:
       - "tei_adapter/tei_updater"
 
   - label: "{{ matrix }} (Publish/Image)"
-#    branches: "main"
+    branches: "main"
     plugins:
       - wellcomecollection/aws-assume-role#v0.2.2:
           role: "arn:aws:iam::760097843905:role/platform-ci"

@@ -4,9 +4,6 @@ steps:
       ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \
         uk.ac.wellcome/ebsco_adapter 
 
-      CLUSTER=ebsco_adapter ./builds/deploy_ecs_services.sh \
-        ebsco_adapter
-
     plugins:
       - wellcomecollection/aws-assume-role#v0.2.2:
           role: "arn:aws:iam::760097843905:role/platform-ci"
