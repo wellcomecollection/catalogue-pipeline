@@ -1,4 +1,5 @@
-If you are new to the catalogue pipeline the [GitBook documentation](https://docs.wellcomecollection.org/catalogue-pipeline) is a good place to start.
+If you are new to the catalogue pipeline
+the [GitBook documentation](https://docs.wellcomecollection.org/catalogue-pipeline) is a good place to start.
 
 ## Developing
 
@@ -8,9 +9,11 @@ Information for developers working on the catalogue-pipeline.
 
 #### Reindexing
 
-If the [internal_model](../common/internal_model) has been changed you will want to update the information stored by the pipeline to match that model.
+If the [internal_model](../common/internal_model) has been changed you will want to update the information stored by the
+pipeline to match that model.
 
-A reindex operation runs the source data from the [adapters](adapters/README.md) through the pipeline causing it to be re-transformed / matched & merged as appropriate.
+A reindex operation runs the source data from the [adapters](adapters/README.md) through the pipeline causing it to be
+re-transformed / matched & merged as appropriate.
 
 If you want to perform a reindex, follow the instructions in [REINDEXING.md](../REINDEXING.md).
 
@@ -20,6 +23,7 @@ Some information for [working with Python lambdas](./lambdas/README.md).
 
 #### Scripts
 
+https://github.com/wellcomecollection/catalogue-api
 Generally small things you might want to do irregularly involving the
 API & data are in [/scripts](../scripts)
 
