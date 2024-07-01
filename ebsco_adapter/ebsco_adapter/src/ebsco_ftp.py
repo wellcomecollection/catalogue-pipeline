@@ -8,11 +8,13 @@ class EbscoFtp:
         self.ftp_username = ftp_username
         self.ftp_password = ftp_password
         self.ftp_remote_dir = ftp_remote_dir
+        self.ftp_connection_open = False
 
     def __enter__(self):
         self.ftp = FTP(self.ftp_server)
         self.ftp.login(self.ftp_username, self.ftp_password)
         self.ftp.cwd(self.ftp_remote_dir)
+        self.ftp_connection_open = True
         return self
 
     def list_files(self, valid_suffixes):
@@ -32,5 +34,10 @@ class EbscoFtp:
 
         return os.path.join(temp_dir, file)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def quit(self):
         self.ftp.quit()
+        self.ftp_connection_open = False
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.ftp_connection_open:
+            self.ftp.quit()
