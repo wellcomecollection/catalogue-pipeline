@@ -28,12 +28,13 @@ trait MarcSubject extends MarcFieldTransformer with MarcHasRecordControlNumber {
   ): Output = getSubjectConcepts(field) match {
     case Success(Nil) => None
     case Success(entities) =>
-      Some(
-        Subject(
-          label = getLabel(field).get,
-          concepts = entities.toList,
-          id = getIdState(field)
-        )
+      getLabel(field).map(
+        label =>
+          Subject(
+            label = label,
+            concepts = entities.toList,
+            id = getIdState(field)
+          )
       )
     case Failure(exception) =>
       None
