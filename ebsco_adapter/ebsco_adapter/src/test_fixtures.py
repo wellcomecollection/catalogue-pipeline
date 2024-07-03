@@ -46,6 +46,9 @@ class FakeEbscoFtp:
             f.write(self.files[file])
         return os.path.join(temp_dir, file)
 
+    def quit(self):
+        pass
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
