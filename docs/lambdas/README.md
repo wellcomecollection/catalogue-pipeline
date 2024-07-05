@@ -32,7 +32,7 @@ pyenv shell 3.6
 
 ### Virtual environments
 
-In order to manage dependencies for projects when working locally you can make use of Python virual environments in your project folders. In order to create and activate a virtual environment you can run the following _after_ you have switched to the correct Python version:
+In order to manage dependencies for projects when working locally you can make use of Python virtual environments in your project folders. In order to create and activate a virtual environment you can run the following _after_ you have switched to the correct Python version:
 
 ```console
 python3 -m venv env # Only needed the first time (env folder is in .gitignore)

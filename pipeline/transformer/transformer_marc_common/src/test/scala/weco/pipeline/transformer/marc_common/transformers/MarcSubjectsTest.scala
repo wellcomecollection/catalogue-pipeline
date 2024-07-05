@@ -38,16 +38,27 @@ class MarcSubjectsTest
       MarcSubjects(
         MarcTestRecord(fields =
           Seq(
+            // with no subfields
             MarcField(
               marcTag = "610",
               subfields = Nil
             ),
+            // with blank or blank-like subfields
             MarcField(
-              marcTag = "600",
+              marcTag = "650",
+              indicator2 = "0",
               subfields = Seq(
                 MarcSubfield(tag = "a", content = "   "),
                 MarcSubfield(tag = "b", content = ""),
                 MarcSubfield(tag = "c", content = "  ")
+              )
+            ),
+            // with a dodgy second indicator
+            MarcField(
+              marcTag = "650",
+              indicator2 = "x",
+              subfields = Seq(
+                MarcSubfield(tag = "a", content = "Hello, World!")
               )
             )
           )

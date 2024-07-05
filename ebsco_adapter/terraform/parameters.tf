@@ -62,3 +62,17 @@ resource "aws_ssm_parameter" "ebsco_adapter_customer_id" {
     ]
   }
 }
+
+resource "aws_ssm_parameter" "ebsco_adapter_output_topic_arn" {
+  name        = "/catalogue_pipeline/ebsco_adapter/output_topic_arn"
+  description = "The ARN of the SNS topic to publish messages to"
+  type        = "String"
+  value       = module.ebsco_adapter_output_topic.arn
+}
+
+resource "aws_ssm_parameter" "ebsco_adapter_bucket_name" {
+  name        = "/catalogue_pipeline/ebsco_adapter/bucket_name"
+  description = "The name of the S3 bucket to write files to"
+  type        = "String"
+  value       = aws_s3_bucket.ebsco_adapter.bucket
+}

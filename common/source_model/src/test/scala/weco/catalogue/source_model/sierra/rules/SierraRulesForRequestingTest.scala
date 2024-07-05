@@ -120,6 +120,22 @@ class SierraRulesForRequestingTest
       }
     }
 
+    it("if it has a generic unavailable message") {
+      val testCases = Table(
+        "locationCode",
+        "harcl",
+      )
+
+      forAll(testCases) {
+        assertBlockedWith(
+          _,
+          expectedResult = NotRequestable.ItemUnavailable(
+            "This item is unavailable."
+          )
+        )
+      }
+    }
+
     it("if it's with Information Services") {
       val testCases = Table("locationCode", "isvid", "iscdr")
 

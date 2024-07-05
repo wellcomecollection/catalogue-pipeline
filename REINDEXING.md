@@ -55,7 +55,7 @@ A partial reindex will allow sending a few records (by default 10) in order to v
 
 #### Monitor the reindex
 
-You can monitor a reindex in progress using Grafana at [https://monitoring.wellcomecollection.org/](https://monitoring.wellcomecollection.org/), or by looking at CloudWatch metrics in the `platform` AWS account.
+You can monitor a reindex in progress by looking at CloudWatch metrics in the `platform` AWS account.
 
 Non-empty DLQs will be reported in the Wellcome #wc-platform-alerts Slack channel.
 
