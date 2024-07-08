@@ -1,6 +1,6 @@
 package weco.pipeline.calm_api_client
 
-import akka.stream.RestartSettings
+import org.apache.pekko.stream.RestartSettings
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

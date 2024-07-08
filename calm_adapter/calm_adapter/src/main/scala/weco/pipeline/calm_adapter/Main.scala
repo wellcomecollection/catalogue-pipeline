@@ -1,7 +1,7 @@
 package weco.pipeline.calm_adapter
 
 import scala.concurrent.ExecutionContext
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}

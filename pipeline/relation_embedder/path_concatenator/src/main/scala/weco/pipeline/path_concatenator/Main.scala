@@ -1,6 +1,6 @@
 package weco.pipeline.path_concatenator
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.catalogue.internal_model.Implicits._

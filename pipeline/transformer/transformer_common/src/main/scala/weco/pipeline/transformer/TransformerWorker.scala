@@ -1,6 +1,6 @@
 package weco.pipeline.transformer
 
-import akka.Done
+import org.apache.pekko.Done
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import io.circe.syntax._

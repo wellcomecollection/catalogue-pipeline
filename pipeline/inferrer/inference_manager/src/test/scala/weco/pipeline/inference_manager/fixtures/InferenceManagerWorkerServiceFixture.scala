@@ -1,6 +1,6 @@
 package weco.pipeline.inference_manager.fixtures
 
-import akka.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.Uri
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}

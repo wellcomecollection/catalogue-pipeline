@@ -1,12 +1,12 @@
 package weco.catalogue.tei.id_extractor.github
 
-import akka.http.scaladsl.model.{
+import org.apache.pekko.http.scaladsl.model.{
   HttpCharsets,
   HttpRequest,
   HttpResponse,
   MediaType
 }
-import akka.http.scaladsl.model.headers.{
+import org.apache.pekko.http.scaladsl.model.headers.{
   Accept,
   Authorization,
   OAuth2BearerToken

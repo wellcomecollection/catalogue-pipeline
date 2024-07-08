@@ -1,8 +1,8 @@
 package weco.pipeline.calm_adapter
 
 import java.time.{Instant, LocalDate}
-import akka.NotUsed
-import akka.stream.scaladsl._
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.scaladsl._
 import io.circe.Encoder
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}

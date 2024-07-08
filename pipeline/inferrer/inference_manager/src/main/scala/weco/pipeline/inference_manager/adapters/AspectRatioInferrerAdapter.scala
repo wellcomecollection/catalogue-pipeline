@@ -1,6 +1,6 @@
 package weco.pipeline.inference_manager.adapters
 
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest, Uri}
+import org.apache.pekko.http.scaladsl.model.{HttpMethods, HttpRequest, Uri}
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import weco.catalogue.internal_model.image.InferredData

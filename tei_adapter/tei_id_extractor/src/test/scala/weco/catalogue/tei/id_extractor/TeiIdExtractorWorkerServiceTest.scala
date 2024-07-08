@@ -1,7 +1,7 @@
 package weco.catalogue.tei.id_extractor
 
-import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.model.{
+import org.apache.pekko.http.scaladsl.model.Uri.Path
+import org.apache.pekko.http.scaladsl.model.{
   ContentTypes,
   HttpEntity,
   HttpRequest,

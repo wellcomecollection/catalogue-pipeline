@@ -1,8 +1,8 @@
 package weco.pipeline.calm_deletion_checker
 
 import java.util.concurrent.ConcurrentHashMap
-import akka.Done
-import akka.http.scaladsl.model.headers.Cookie
+import org.apache.pekko.Done
+import org.apache.pekko.http.scaladsl.model.headers.Cookie
 import org.scalacheck.{Gen, Shrink}
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec

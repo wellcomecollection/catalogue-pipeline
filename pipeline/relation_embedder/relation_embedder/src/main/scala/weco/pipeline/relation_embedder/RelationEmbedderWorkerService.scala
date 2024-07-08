@@ -3,9 +3,9 @@ package weco.pipeline.relation_embedder
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
-import akka.{Done, NotUsed}
-import akka.stream.Materializer
-import akka.stream.scaladsl._
+import org.apache.pekko.{Done, NotUsed}
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl._
 import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
 import weco.messaging.MessageSender

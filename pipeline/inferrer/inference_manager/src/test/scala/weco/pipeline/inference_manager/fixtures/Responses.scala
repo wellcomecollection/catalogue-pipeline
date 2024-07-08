@@ -1,6 +1,6 @@
 package weco.pipeline.inference_manager.fixtures
 
-import akka.http.scaladsl.model.{
+import org.apache.pekko.http.scaladsl.model.{
   ContentType,
   ContentTypes,
   HttpEntity,

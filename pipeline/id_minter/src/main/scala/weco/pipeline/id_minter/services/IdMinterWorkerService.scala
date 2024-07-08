@@ -1,7 +1,7 @@
 package weco.pipeline.id_minter.services
 
-import akka.Done
-import akka.stream.scaladsl.Flow
+import org.apache.pekko.Done
+import org.apache.pekko.stream.scaladsl.Flow
 import grizzled.slf4j.Logging
 import io.circe.Json
 import software.amazon.awssdk.services.sqs.model.Message

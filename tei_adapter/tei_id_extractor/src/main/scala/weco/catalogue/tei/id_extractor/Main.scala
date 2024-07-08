@@ -1,6 +1,6 @@
 package weco.catalogue.tei.id_extractor
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import software.amazon.awssdk.services.s3.S3Client
 import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}

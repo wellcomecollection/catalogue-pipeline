@@ -1,7 +1,7 @@
 package weco.pipeline.mets_adapter.services
 
-import akka.Done
-import akka.stream.scaladsl._
+import org.apache.pekko.Done
+import org.apache.pekko.stream.scaladsl._
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import weco.pipeline.mets_adapter.models._

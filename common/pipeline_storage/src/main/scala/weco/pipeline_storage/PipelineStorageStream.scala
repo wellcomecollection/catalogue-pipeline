@@ -1,7 +1,7 @@
 package weco.pipeline_storage
 
-import akka.stream.scaladsl.Flow
-import akka.{Done, NotUsed}
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.{Done, NotUsed}
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import software.amazon.awssdk.services.sqs.model.Message

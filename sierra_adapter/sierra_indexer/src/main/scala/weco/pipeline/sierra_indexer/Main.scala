@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_indexer
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.sksamuel.elastic4s.ElasticClient
 import software.amazon.awssdk.services.s3.S3Client
 import weco.catalogue.source_model.Implicits._

@@ -1,8 +1,8 @@
 package weco.pipeline.ingestor.common
 
 import scala.concurrent.{ExecutionContext, Future}
-import akka.Done
-import akka.stream.scaladsl.Flow
+import org.apache.pekko.Done
+import org.apache.pekko.stream.scaladsl.Flow
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.messaging.sns.NotificationMessage
 import weco.pipeline_storage.PipelineStorageStream.{

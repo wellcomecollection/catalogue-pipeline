@@ -1,6 +1,6 @@
 package weco.pipeline.reindex_worker.services
 
-import akka.Done
+import org.apache.pekko.Done
 import org.scanamo.generic.auto._
 import weco.json.JsonUtil._
 import weco.messaging.sns.NotificationMessage

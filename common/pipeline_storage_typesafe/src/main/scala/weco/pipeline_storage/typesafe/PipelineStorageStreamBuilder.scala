@@ -1,6 +1,6 @@
 package weco.pipeline_storage.typesafe
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.typesafe.config.Config
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage

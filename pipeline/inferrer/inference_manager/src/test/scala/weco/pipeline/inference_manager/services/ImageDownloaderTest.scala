@@ -1,10 +1,10 @@
 package weco.pipeline.inference_manager.services
 
 import java.nio.file.{Path, Paths}
-import akka.http.scaladsl.model.{HttpResponse, Uri}
-import akka.stream.Materializer
-import akka.stream.scaladsl.{Sink, Source}
-import akka.util.ByteString
+import org.apache.pekko.http.scaladsl.model.{HttpResponse, Uri}
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{Sink, Source}
+import org.apache.pekko.util.ByteString
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

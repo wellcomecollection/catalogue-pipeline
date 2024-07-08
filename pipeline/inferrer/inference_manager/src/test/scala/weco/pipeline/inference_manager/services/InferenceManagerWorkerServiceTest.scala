@@ -1,7 +1,7 @@
 package weco.pipeline.inference_manager.services
 
 import scala.collection.mutable
-import akka.http.scaladsl.model.{HttpResponse, Uri}
+import org.apache.pekko.http.scaladsl.model.{HttpResponse, Uri}
 import org.scalatest.concurrent.{Eventually, PatienceConfiguration}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

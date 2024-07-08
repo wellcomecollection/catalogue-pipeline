@@ -1,9 +1,9 @@
 package weco.pipeline.inference_manager.services
 
-import akka.Done
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.HttpResponse
-import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
+import org.apache.pekko.Done
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model.HttpResponse
+import org.apache.pekko.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.messaging.MessageSender

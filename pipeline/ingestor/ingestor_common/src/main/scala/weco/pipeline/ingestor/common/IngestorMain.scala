@@ -1,6 +1,6 @@
 package weco.pipeline.ingestor.common
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import io.circe.{Decoder, Encoder}

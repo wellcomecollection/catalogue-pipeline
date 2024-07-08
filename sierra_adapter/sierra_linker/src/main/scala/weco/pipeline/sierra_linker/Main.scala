@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_linker
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._

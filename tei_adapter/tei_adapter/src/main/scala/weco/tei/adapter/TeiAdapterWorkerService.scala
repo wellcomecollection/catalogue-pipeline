@@ -1,7 +1,7 @@
 package weco.tei.adapter
 
-import akka.{Done, NotUsed}
-import akka.stream.scaladsl.{Flow, Source}
+import org.apache.pekko.{Done, NotUsed}
+import org.apache.pekko.stream.scaladsl.{Flow, Source}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.json.JsonUtil.fromJson
 import weco.messaging.MessageSender

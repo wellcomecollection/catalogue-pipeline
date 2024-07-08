@@ -1,9 +1,9 @@
 package weco.pipeline.calm_api_client.fixtures
 
-import akka.Done
-import akka.http.scaladsl.model.headers.Cookie
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.stream.Materializer
+import org.apache.pekko.Done
+import org.apache.pekko.http.scaladsl.model.headers.Cookie
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
+import org.apache.pekko.stream.Materializer
 import weco.akka.fixtures.Akka
 import weco.fixtures.TestWith
 import weco.pipeline.calm_api_client._

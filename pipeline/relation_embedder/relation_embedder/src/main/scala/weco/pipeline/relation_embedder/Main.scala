@@ -1,6 +1,6 @@
 package weco.pipeline.relation_embedder
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.elasticsearch.typesafe.ElasticBuilder

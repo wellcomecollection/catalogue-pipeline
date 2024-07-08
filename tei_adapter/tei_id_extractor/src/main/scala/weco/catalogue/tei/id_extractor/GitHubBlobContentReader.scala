@@ -1,8 +1,8 @@
 package weco.catalogue.tei.id_extractor
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.unmarshalling.Unmarshal
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
 
 import java.net.URI
 import scala.concurrent.Future

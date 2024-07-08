@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_linker.services
 
-import akka.Done
+import org.apache.pekko.Done
 import io.circe.{Decoder, Encoder}
 import weco.json.JsonUtil.fromJson
 import weco.messaging.MessageSender

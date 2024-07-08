@@ -2,11 +2,11 @@ package weco.pipeline.calm_api_client
 
 import java.time.Instant
 
-import akka.http.scaladsl.model.{HttpResponse, ResponseEntity}
-import akka.http.scaladsl.model.headers.{`Set-Cookie`, Cookie, Date}
-import akka.http.scaladsl.unmarshalling.Unmarshal
-import akka.stream.Materializer
-import akka.util.ByteString
+import org.apache.pekko.http.scaladsl.model.{HttpResponse, ResponseEntity}
+import org.apache.pekko.http.scaladsl.model.headers.{`Set-Cookie`, Cookie, Date}
+import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.util.ByteString
 import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}

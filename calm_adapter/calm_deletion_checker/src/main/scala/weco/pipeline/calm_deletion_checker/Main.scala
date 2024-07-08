@@ -1,6 +1,6 @@
 package weco.pipeline.calm_deletion_checker
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.typesafe.DynamoBuilder
