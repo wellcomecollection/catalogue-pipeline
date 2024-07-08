@@ -1,6 +1,10 @@
 package weco.pipeline.inference_manager.adapters
 
-import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes}
+import org.apache.pekko.http.scaladsl.model.{
+  HttpRequest,
+  HttpResponse,
+  StatusCodes
+}
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
 import org.apache.pekko.stream.Materializer
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._

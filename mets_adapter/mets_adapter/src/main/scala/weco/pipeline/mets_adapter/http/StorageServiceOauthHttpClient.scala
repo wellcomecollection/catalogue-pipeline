@@ -7,7 +7,10 @@ import org.apache.pekko.http.scaladsl.model.headers.{
   OAuth2BearerToken
 }
 import org.apache.pekko.http.scaladsl.model._
-import org.apache.pekko.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal}
+import org.apache.pekko.http.scaladsl.unmarshalling.{
+  FromEntityUnmarshaller,
+  Unmarshal
+}
 import weco.json.JsonUtil._
 import weco.http.client.{HttpClient, HttpGet, TokenExchange}
 import weco.http.json.CirceMarshalling
