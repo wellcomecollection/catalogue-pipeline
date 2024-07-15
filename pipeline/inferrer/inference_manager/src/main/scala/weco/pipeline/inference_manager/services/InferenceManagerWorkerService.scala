@@ -165,8 +165,10 @@ class InferenceManagerWorkerService[Destination](
                       (AdapterResponseBundle(_, adapter, Success(response)), _)
                     ) =>
                   adapter.augment(data, response.asInstanceOf[adapter.Response])
-                case (data, (AdapterResponseBundle(_, _, Failure(_)), _)) =>
-                  data
+                // This should never be pattern matched because failures are already filtered out above,
+                // but the compiler complains if it's not included.
+                case (_, (AdapterResponseBundle(_, _, Failure(_)), _)) =>
+                  throw new IllegalStateException("Unexpected failure.")
               }
               elements.head match {
                 case (
