@@ -17,7 +17,9 @@ trait RecordOps[SierraRecord <: AbstractSierraRecord[_]] extends Logging {
 }
 
 object RecordOps {
-  implicit class SierraRecordOps[SierraRecord <: AbstractSierraRecord[_]](r: SierraRecord)(
+  implicit class SierraRecordOps[SierraRecord <: AbstractSierraRecord[_]](
+    r: SierraRecord
+  )(
     implicit ops: RecordOps[SierraRecord]
   ) {
     def linkedBibIds: List[SierraBibNumber] =

@@ -21,14 +21,19 @@ trait TransformableOps[SierraRecord <: AbstractSierraRecord[_]] {
 
   def add(t: SierraTransformable, r: SierraRecord): Option[SierraTransformable]
 
-  def remove(t: SierraTransformable, r: SierraRecord): Option[SierraTransformable]
+  def remove(
+    t: SierraTransformable,
+    r: SierraRecord
+  ): Option[SierraTransformable]
 }
 
 object TransformableOps {
   implicit class SierraTransformableOps(t: SierraTransformable) {
     def add[SierraRecord <: AbstractSierraRecord[_]](
       r: SierraRecord
-    )(implicit ops: TransformableOps[SierraRecord]): Option[SierraTransformable] =
+    )(
+      implicit ops: TransformableOps[SierraRecord]
+    ): Option[SierraTransformable] =
       ops
         .add(t, r)
         .map {
@@ -40,7 +45,9 @@ object TransformableOps {
 
     def remove[SierraRecord <: AbstractSierraRecord[_]](
       r: SierraRecord
-    )(implicit ops: TransformableOps[SierraRecord]): Option[SierraTransformable] =
+    )(
+      implicit ops: TransformableOps[SierraRecord]
+    ): Option[SierraTransformable] =
       ops
         .remove(t, r)
         .map {

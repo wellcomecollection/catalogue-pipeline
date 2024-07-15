@@ -165,7 +165,8 @@ class InferenceManagerWorkerService[Destination](
                       (AdapterResponseBundle(_, adapter, Success(response)), _)
                     ) =>
                   adapter.augment(data, response.asInstanceOf[adapter.Response])
-                case (data, (AdapterResponseBundle(_, _, Failure(_)), _)) => data
+                case (data, (AdapterResponseBundle(_, _, Failure(_)), _)) =>
+                  data
               }
               elements.head match {
                 case (
