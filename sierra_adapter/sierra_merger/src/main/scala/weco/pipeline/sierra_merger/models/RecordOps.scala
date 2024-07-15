@@ -10,15 +10,15 @@ import weco.catalogue.source_model.sierra.{
 }
 import weco.sierra.models.identifiers.SierraBibNumber
 
-trait RecordOps[Record <: AbstractSierraRecord[_]] extends Logging {
-  def getBibIds(r: Record): List[SierraBibNumber]
+trait RecordOps[SierraRecord <: AbstractSierraRecord[_]] extends Logging {
+  def getBibIds(r: SierraRecord): List[SierraBibNumber]
 
-  def getUnlinkedBibIds(r: Record): List[SierraBibNumber]
+  def getUnlinkedBibIds(r: SierraRecord): List[SierraBibNumber]
 }
 
 object RecordOps {
-  implicit class SierraRecordOps[Record <: AbstractSierraRecord[_]](r: Record)(
-    implicit ops: RecordOps[Record]
+  implicit class SierraRecordOps[SierraRecord <: AbstractSierraRecord[_]](r: SierraRecord)(
+    implicit ops: RecordOps[SierraRecord]
   ) {
     def linkedBibIds: List[SierraBibNumber] =
       ops.getBibIds(r)

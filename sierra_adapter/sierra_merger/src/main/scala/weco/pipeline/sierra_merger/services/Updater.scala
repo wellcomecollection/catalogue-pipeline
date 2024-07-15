@@ -11,16 +11,16 @@ import weco.sierra.models.identifiers.SierraBibNumber
 import weco.storage.providers.s3.S3ObjectLocation
 import weco.storage.{Identified, StorageError, UpdateNotApplied, Version}
 
-class Updater[Record <: AbstractSierraRecord[_]](
+class Updater[SierraRecord <: AbstractSierraRecord[_]](
   sourceVHS: SourceVHS[SierraTransformable]
 )(
-  implicit transformableOps: TransformableOps[Record],
-  recordOps: RecordOps[Record]
+  implicit transformableOps: TransformableOps[SierraRecord],
+  recordOps: RecordOps[SierraRecord]
 ) {
   import weco.pipeline.sierra_merger.models.RecordOps._
   import weco.pipeline.sierra_merger.models.TransformableOps._
 
-  def update(record: Record): Either[StorageError, List[
+  def update(record: SierraRecord): Either[StorageError, List[
     Identified[Version[String, Int], S3ObjectLocation]
   ]] = {
     val linkUpdates =
@@ -35,7 +35,7 @@ class Updater[Record <: AbstractSierraRecord[_]](
     }.sequence
   }
 
-  private def linkBib(bibId: SierraBibNumber, record: Record): Either[
+  private def linkBib(bibId: SierraBibNumber, record: SierraRecord): Either[
     StorageError,
     Identified[Version[String, Int], S3ObjectLocation]
   ] = {
@@ -58,7 +58,7 @@ class Updater[Record <: AbstractSierraRecord[_]](
 
   private def unlinkBib(
     unlinkedBibId: SierraBibNumber,
-    record: Record
+    record: SierraRecord
   ): Either[StorageError, Identified[Version[String, Int], S3ObjectLocation]] =
     sourceVHS
       .update(unlinkedBibId.withoutCheckDigit) {

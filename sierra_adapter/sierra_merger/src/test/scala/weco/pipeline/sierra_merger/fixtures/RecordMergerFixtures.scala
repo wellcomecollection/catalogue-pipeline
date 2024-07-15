@@ -22,16 +22,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait RecordMergerFixtures extends Akka with SQS with SourceVHSFixture {
 
-  def withRunningWorker[Record <: AbstractSierraRecord[_], R](
+  def withRunningWorker[SierraRecord <: AbstractSierraRecord[_], R](
     queue: Queue,
     sourceVHS: SourceVHS[SierraTransformable] =
       createSourceVHS[SierraTransformable]
   )(
-    testWith: TestWith[(Worker[Record, String], MemoryMessageSender), R]
+    testWith: TestWith[(Worker[SierraRecord, String], MemoryMessageSender), R]
   )(
-    implicit decoder: Decoder[Record],
-    transformableOps: TransformableOps[Record],
-    recordOps: RecordOps[Record]
+    implicit decoder: Decoder[SierraRecord],
+    transformableOps: TransformableOps[SierraRecord],
+    recordOps: RecordOps[SierraRecord]
   ): R =
     withActorSystem {
       implicit actorSystem =>
@@ -40,7 +40,7 @@ trait RecordMergerFixtures extends Akka with SQS with SourceVHSFixture {
             val messageSender = new MemoryMessageSender
             val workerService = new Worker(
               sqsStream = sqsStream,
-              updater = new Updater[Record](sourceVHS),
+              updater = new Updater[SierraRecord](sourceVHS),
               messageSender = messageSender
             )
 

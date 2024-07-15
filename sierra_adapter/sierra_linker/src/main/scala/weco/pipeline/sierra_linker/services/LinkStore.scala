@@ -6,12 +6,12 @@ import weco.sierra.models.identifiers.TypedSierraRecordNumber
 import weco.storage.store.VersionedStore
 import weco.storage.{Identified, UpdateNotApplied}
 
-class LinkStore[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[
+class LinkStore[Id <: TypedSierraRecordNumber, SierraRecord <: AbstractSierraRecord[
   Id
 ]](
   store: VersionedStore[Id, Int, Link]
-)(implicit linkOps: LinkOps[Record]) {
-  def update(newRecord: Record): Either[Throwable, Option[Record]] = {
+)(implicit linkOps: LinkOps[SierraRecord]) {
+  def update(newRecord: SierraRecord): Either[Throwable, Option[SierraRecord]] = {
     val newLink = linkOps.createLink(newRecord)
 
     val upsertResult: store.UpdateEither =

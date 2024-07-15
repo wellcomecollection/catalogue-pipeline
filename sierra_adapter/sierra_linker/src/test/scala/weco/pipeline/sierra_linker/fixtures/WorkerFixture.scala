@@ -32,7 +32,7 @@ trait WorkerFixture extends SQS with Akka {
 
   import weco.pipeline.sierra_linker.models.LinkOps._
 
-  def withWorker[Id <: TypedSierraRecordNumber, Record <: AbstractSierraRecord[
+  def withWorker[Id <: TypedSierraRecordNumber, SierraRecord <: AbstractSierraRecord[
     Id
   ], R](
     queue: Queue,
@@ -40,10 +40,10 @@ trait WorkerFixture extends SQS with Akka {
       MemoryVersionedStore[Id, Link](initialEntries = Map.empty),
     metrics: Metrics[Future] = new MemoryMetrics(),
     messageSender: MemoryMessageSender = new MemoryMessageSender
-  )(testWith: TestWith[SierraLinkerWorker[Id, Record, String], R])(
-    implicit linkOps: LinkOps[Record],
-    decoder: Decoder[Record],
-    encoder: Encoder[Record]
+  )(testWith: TestWith[SierraLinkerWorker[Id, SierraRecord, String], R])(
+    implicit linkOps: LinkOps[SierraRecord],
+    decoder: Decoder[SierraRecord],
+    encoder: Encoder[SierraRecord]
   ): R =
     withActorSystem {
       implicit actorSystem =>

@@ -37,7 +37,7 @@ class PathQueryRelationsService(
       s"Querying affected works with ES request: ${elasticClient.show(request)}"
     )
     Source
-      .fromPublisher(elasticClient.publisher(request))
+      .fromPublisher(elasticClient.publisher(request)(as.asInstanceOf[akka.actor.ActorSystem]))
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
   }
 
@@ -47,7 +47,7 @@ class PathQueryRelationsService(
       s"Querying complete tree with ES request: ${elasticClient.show(request)}"
     )
     Source
-      .fromPublisher(elasticClient.publisher(request))
+      .fromPublisher(elasticClient.publisher(request)(as.asInstanceOf[akka.actor.ActorSystem]))
       .map(searchHit => searchHit.safeTo[RelationWork].get)
   }
 }
