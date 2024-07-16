@@ -48,7 +48,7 @@ class InferenceManagerWorkerService[Destination](
   val parallelism = 10
   val maxInferrerWait = 30 seconds
   val maxOpenRequests = actorSystem.settings.config
-    .getInt("akka.http.host-connection-pool.max-open-requests")
+    .getInt("pekko.http.host-connection-pool.max-open-requests")
 
   val indexAndSend = batchIndexAndSendFlow(
     pipelineStorageConfig,
