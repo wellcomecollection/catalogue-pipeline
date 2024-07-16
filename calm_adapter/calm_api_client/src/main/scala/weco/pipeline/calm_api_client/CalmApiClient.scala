@@ -10,7 +10,7 @@ import org.apache.pekko.http.scaladsl.model.headers.{
 }
 import org.apache.pekko.stream.{Materializer, RestartSettings}
 import weco.catalogue.source_model.calm.CalmRecord
-import weco.http.client.{PekkoHttpClient, HttpClient}
+import weco.http.client.{HttpClient, PekkoHttpClient}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
