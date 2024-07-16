@@ -12,7 +12,7 @@ import org.apache.pekko.stream.scaladsl.Source
 import org.apache.commons.io.IOUtils
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
@@ -33,7 +33,7 @@ class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with SQS
-    with Akka
+    with Pekko
     with IndexFixtures
     with RelationGenerators {
 

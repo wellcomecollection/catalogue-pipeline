@@ -5,7 +5,7 @@ import org.apache.pekko.stream.scaladsl.Sink
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.Merged
@@ -18,7 +18,7 @@ class RelationsServiceTest
     with Matchers
     with IndexFixtures
     with RelationGenerators
-    with Akka {
+    with Pekko {
 
   def service(
     index: Index,

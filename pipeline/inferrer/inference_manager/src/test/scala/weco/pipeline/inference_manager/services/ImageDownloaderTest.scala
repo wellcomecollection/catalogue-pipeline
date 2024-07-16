@@ -8,7 +8,7 @@ import org.apache.pekko.util.ByteString
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.locations.LocationType
@@ -27,7 +27,7 @@ class ImageDownloaderTest
     with IntegrationPatience
     with ImageGenerators
     with RequestPoolFixtures
-    with Akka {
+    with Pekko {
 
   describe("download") {
 

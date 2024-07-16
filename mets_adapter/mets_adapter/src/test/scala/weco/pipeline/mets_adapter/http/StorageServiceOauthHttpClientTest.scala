@@ -10,7 +10,7 @@ import org.apache.pekko.http.scaladsl.model._
 import org.scalatest.concurrent.IntegrationPatience
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.http.client.MemoryHttpClient
 import weco.http.fixtures.HttpFixtures
 
@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class StorageServiceOauthHttpClientTest
     extends AnyFunSpec
     with Matchers
-    with Akka
+    with Pekko
     with HttpFixtures
     with IntegrationPatience {
   val credentials: BasicHttpCredentials =

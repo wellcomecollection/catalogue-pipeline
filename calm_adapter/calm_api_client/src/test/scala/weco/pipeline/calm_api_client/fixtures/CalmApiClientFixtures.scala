@@ -4,7 +4,7 @@ import org.apache.pekko.Done
 import org.apache.pekko.http.scaladsl.model.headers.Cookie
 import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
 import org.apache.pekko.stream.Materializer
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.pipeline.calm_api_client._
 import weco.catalogue.source_model.calm.CalmRecord
@@ -25,7 +25,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-trait CalmApiClientFixtures extends Akka {
+trait CalmApiClientFixtures extends Pekko {
   val url = "calm.api"
   val username = "calm-user"
   val password = "calm-password"

@@ -11,7 +11,7 @@ import org.apache.pekko.http.scaladsl.model.{
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.source_model.tei.{
   TeiIdChangeMessage,
   TeiIdDeletedMessage,
@@ -40,7 +40,7 @@ import scala.util.Try
 class TeiIdExtractorWorkerServiceTest
     extends AnyFunSpec
     with SQS
-    with Akka
+    with Pekko
     with Eventually
     with IntegrationPatience
     with PathIdDatabase

@@ -9,7 +9,7 @@ import com.sksamuel.elastic4s.requests.get.GetResponse
 import org.scalatest.{Assertion, Suite}
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.elasticsearch.IndexConfig
 import weco.elasticsearch.test.fixtures.ElasticsearchFixtures
 import weco.fixtures.TestWith
@@ -25,7 +25,7 @@ trait IndexerFixtures
     extends ElasticsearchFixtures
     with Eventually
     with IntegrationPatience
-    with Akka
+    with Pekko
     with SQS { this: Suite =>
   def withWorker[R](
     queue: Queue =

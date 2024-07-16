@@ -6,7 +6,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.source_model.MetsSourcePayload
 import weco.catalogue.source_model.generators.MetsSourceDataGenerators
 import weco.catalogue.source_model.mets.MetsSourceData
@@ -33,7 +33,7 @@ import scala.util.{Failure, Try}
 class MetsAdapterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
-    with Akka
+    with Pekko
     with SQS
     with Eventually
     with IntegrationPatience

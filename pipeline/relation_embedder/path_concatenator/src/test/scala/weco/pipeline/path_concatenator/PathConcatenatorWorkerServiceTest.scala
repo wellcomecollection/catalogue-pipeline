@@ -4,7 +4,7 @@ import com.sksamuel.elastic4s.Index
 import org.scalatest.Assertion
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.WorkGenerators
@@ -36,7 +36,7 @@ class PathConcatenatorWorkerServiceTest
     with PipelineStorageStreamFixtures
     with Eventually
     with IntegrationPatience
-    with Akka
+    with Pekko
     with IndexFixtures {
 
   it(

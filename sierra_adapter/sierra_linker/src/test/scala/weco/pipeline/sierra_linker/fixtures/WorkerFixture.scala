@@ -1,7 +1,7 @@
 package weco.pipeline.sierra_linker.fixtures
 
 import io.circe.{Decoder, Encoder}
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.Queue
@@ -28,7 +28,7 @@ import weco.sierra.models.identifiers.{
 
 import scala.concurrent.Future
 
-trait WorkerFixture extends SQS with Akka {
+trait WorkerFixture extends SQS with Pekko {
 
   import weco.pipeline.sierra_linker.models.LinkOps._
 

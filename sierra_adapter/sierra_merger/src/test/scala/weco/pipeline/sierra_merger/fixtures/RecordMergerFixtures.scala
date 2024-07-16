@@ -1,7 +1,7 @@
 package weco.pipeline.sierra_merger.fixtures
 
 import io.circe.Decoder
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.source_model.fixtures.SourceVHSFixture
 import weco.catalogue.source_model.sierra.{
   AbstractSierraRecord,
@@ -20,7 +20,7 @@ import weco.storage.streaming.Codec._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-trait RecordMergerFixtures extends Akka with SQS with SourceVHSFixture {
+trait RecordMergerFixtures extends Pekko with SQS with SourceVHSFixture {
 
   def withRunningWorker[SierraRecord <: AbstractSierraRecord[_], R](
     queue: Queue,
