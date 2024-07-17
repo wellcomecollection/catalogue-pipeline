@@ -1,7 +1,6 @@
 package weco.pipeline.mets_adapter.services
 
 import io.circe.Encoder
-import org.apache.pekko.actor.ActorSystem
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
