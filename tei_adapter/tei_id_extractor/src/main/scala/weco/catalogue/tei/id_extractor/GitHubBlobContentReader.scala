@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
 import java.net.URI
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
-import de.heikoseeberger.akkahttpcirce.ErrorAccumulatingCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.ErrorAccumulatingCirceSupport._
 import io.circe.Decoder
 import weco.json.JsonUtil._
 import weco.http.client.HttpClient
