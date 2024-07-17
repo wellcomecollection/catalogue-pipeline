@@ -18,7 +18,6 @@ import java.util.Base64
 import scala.concurrent.Future
 import scala.util.{Success, Try}
 
-
 /*
  * An InferrerAdapter is specific to the inferrer and the data that is being augmented.
  * Implementors must provide:
