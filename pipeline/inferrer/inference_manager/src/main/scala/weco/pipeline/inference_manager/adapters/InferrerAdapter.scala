@@ -7,7 +7,7 @@ import org.apache.pekko.http.scaladsl.model.{
 }
 import org.apache.pekko.http.scaladsl.unmarshalling.Unmarshal
 import org.apache.pekko.stream.Materializer
-import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import com.github.pjfanning.pekkohttpcirce.FailFastCirceSupport._
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import weco.catalogue.internal_model.image.InferredData
@@ -17,6 +17,7 @@ import java.nio.{ByteBuffer, ByteOrder}
 import java.util.Base64
 import scala.concurrent.Future
 import scala.util.{Success, Try}
+
 
 /*
  * An InferrerAdapter is specific to the inferrer and the data that is being augmented.
