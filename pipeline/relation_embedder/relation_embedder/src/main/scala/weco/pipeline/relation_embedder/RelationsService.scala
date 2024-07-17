@@ -36,8 +36,17 @@ class PathQueryRelationsService(
     debug(
       s"Querying affected works with ES request: ${elasticClient.show(request)}"
     )
-    val sourceSettings = SourceSettings(search = request, maxItems = Long.MaxValue, fetchThreshold = affectedWorksScroll, warm = true)
-    Source.fromGraph(new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)).map(searchHit => searchHit.safeTo[Work[Merged]].get)
+    val sourceSettings = SourceSettings(
+      search = request,
+      maxItems = Long.MaxValue,
+      fetchThreshold = affectedWorksScroll,
+      warm = true
+    )
+    Source
+      .fromGraph(
+        new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)
+      )
+      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
   }
 
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] = {
@@ -45,8 +54,16 @@ class PathQueryRelationsService(
     debug(
       s"Querying complete tree with ES request: ${elasticClient.show(request)}"
     )
-    val sourceSettings = SourceSettings(search = request, maxItems = Long.MaxValue, fetchThreshold = affectedWorksScroll, warm = true)
-    Source.fromGraph(new ElasticSource(elasticClient, sourceSettings)(as.dispatcher))
+    val sourceSettings = SourceSettings(
+      search = request,
+      maxItems = Long.MaxValue,
+      fetchThreshold = affectedWorksScroll,
+      warm = true
+    )
+    Source
+      .fromGraph(
+        new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)
+      )
       .map(searchHit => searchHit.safeTo[RelationWork].get)
   }
 }
