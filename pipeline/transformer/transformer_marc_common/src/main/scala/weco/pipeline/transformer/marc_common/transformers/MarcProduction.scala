@@ -13,8 +13,8 @@ import weco.pipeline.transformer.marc_common.exceptions.CataloguingException
 import weco.pipeline.transformer.marc_common.models.{
   MarcField,
   MarcFieldOps,
-  MarcSubfield,
-  MarcRecord
+  MarcRecord,
+  MarcSubfield
 }
 import weco.pipeline.transformer.marc_common.transformers.parsers.MarcProductionEventParser
 import weco.pipeline.transformer.transformers.{
@@ -191,10 +191,10 @@ object MarcProduction
       }
 
   /** Populate the production data if both 260 and 264 are present.
-   *
-   * In general, this is a cataloguing error, but sometimes we can do something
-   * more sensible depending on if/how they're duplicated.
-   */
+    *
+    * In general, this is a cataloguing error, but sometimes we can do something
+    * more sensible depending on if/how they're duplicated.
+    */
   def shouldDiscard264(record: MarcRecord) = {
     val marc260fields = record.fieldsWithTags("260").toList
     val marc264fields = record.fieldsWithTags("264").toList
@@ -207,8 +207,8 @@ object MarcProduction
     // discard the 264 and just use the 260 fields.
     val marc264OnlyContainsCopyright = marc264fields match {
       case List(
-      MarcField("264", Seq(MarcSubfield("c", content)), _, _, _)
-      ) =>
+            MarcField("264", Seq(MarcSubfield("c", content)), _, _, _)
+          ) =>
         content.matches("^©\\d{4}$")
       case _ => false
     }
