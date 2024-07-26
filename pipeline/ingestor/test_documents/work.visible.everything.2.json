@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-05-15T08:17:25.426470Z",
+  "createdAt" : "2024-07-24T16:49:25.157101Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -423,17 +423,6 @@
       "notes" : [
         {
           "contents" : [
-            "KatsdMX"
-          ],
-          "noteType" : {
-            "id" : "general-note",
-            "label" : "Notes",
-            "type" : "NoteType"
-          },
-          "type" : "Note"
-        },
-        {
-          "contents" : [
             "1009JS",
             "Gxz9bfcN5B"
           ],
@@ -451,6 +440,17 @@
           "noteType" : {
             "id" : "funding-info",
             "label" : "Funding information",
+            "type" : "NoteType"
+          },
+          "type" : "Note"
+        },
+        {
+          "contents" : [
+            "KatsdMX"
+          ],
+          "noteType" : {
+            "id" : "general-note",
+            "label" : "Notes",
             "type" : "NoteType"
           },
           "type" : "Note"
