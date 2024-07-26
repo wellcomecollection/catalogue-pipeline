@@ -3,7 +3,6 @@ import scala.language.reflectiveCalls
 object WellcomeDependencies {
 
   val defaultVersion = "32.42.0" // This is automatically bumped by the scala-libs release process, do not edit this line manually
-    "32.40.4" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
