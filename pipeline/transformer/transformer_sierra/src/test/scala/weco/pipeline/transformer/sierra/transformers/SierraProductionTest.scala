@@ -466,7 +466,7 @@ class SierraProductionTest
 
   describe("Both MARC field 260 and 264") {
     it(
-      "if both 260 and 264 are present, accept 260"
+      "if both 260 and 264 are present, accept 264"
     ) {
       val bibId = createSierraBibNumber
 
@@ -494,11 +494,11 @@ class SierraProductionTest
 
       SierraProduction(bibId, bibData) shouldBe List(
         ProductionEvent(
-          label = "Paris",
-          places = List(Place("Paris")),
+          label = "London",
+          places = List(Place("London")),
           agents = List(),
           dates = List(),
-          function = None
+          function = Some(Concept(label="Production"))
         )
       )
     }
