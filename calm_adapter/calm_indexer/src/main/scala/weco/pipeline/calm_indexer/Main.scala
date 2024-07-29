@@ -1,6 +1,6 @@
 package weco.pipeline.calm_indexer
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import software.amazon.awssdk.services.s3.S3Client
 import weco.catalogue.source_model.calm.CalmRecord

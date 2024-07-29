@@ -9,14 +9,14 @@ import weco.catalogue.source_model.sierra.{
 }
 import weco.sierra.models.identifiers.SierraBibNumber
 
-trait LinkOps[Record <: AbstractSierraRecord[_]] extends Logging {
-  def getBibIds(r: Record): List[SierraBibNumber]
+trait LinkOps[SierraRecord <: AbstractSierraRecord[_]] extends Logging {
+  def getBibIds(r: SierraRecord): List[SierraBibNumber]
 
-  def createLink(r: Record): Link
+  def createLink(r: SierraRecord): Link
 
-  def copyUnlinkedBibIds(link: Link, targetRecord: Record): Record
+  def copyUnlinkedBibIds(link: Link, targetRecord: SierraRecord): SierraRecord
 
-  def updateLink(existingLink: Link, newRecord: Record): Option[Link] =
+  def updateLink(existingLink: Link, newRecord: SierraRecord): Option[Link] =
     if (
       existingLink.modifiedDate.isBefore(newRecord.modifiedDate) ||
       existingLink.modifiedDate == newRecord.modifiedDate

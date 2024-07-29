@@ -3,7 +3,7 @@ package weco.tei.adapter;
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
@@ -34,7 +34,7 @@ class TeiAdapterWorkerServiceTest
     extends AnyFunSpec
     with SQS
     with Eventually
-    with Akka
+    with Pekko
     with IntegrationPatience {
   it("processes a message from the tei id extractor") {
     withWorkerService() {

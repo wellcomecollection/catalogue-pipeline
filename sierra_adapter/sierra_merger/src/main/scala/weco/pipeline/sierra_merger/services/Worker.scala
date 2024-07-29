@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_merger.services
 
-import akka.Done
+import org.apache.pekko.Done
 import grizzled.slf4j.Logging
 import io.circe.Decoder
 import weco.json.JsonUtil.fromJson
@@ -16,17 +16,17 @@ import weco.catalogue.source_model.Implicits._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Worker[Record <: AbstractSierraRecord[_], Destination](
+class Worker[SierraRecord <: AbstractSierraRecord[_], Destination](
   sqsStream: SQSStream[NotificationMessage],
-  updater: Updater[Record],
+  updater: Updater[SierraRecord],
   messageSender: MessageSender[Destination]
-)(implicit ec: ExecutionContext, decoder: Decoder[Record])
+)(implicit ec: ExecutionContext, decoder: Decoder[SierraRecord])
     extends Runnable
     with Logging {
 
   private def process(message: NotificationMessage): Future[Unit] = {
     val f = for {
-      record <- fromJson[Record](message.body).toEither
+      record <- fromJson[SierraRecord](message.body).toEither
       updatedKeys <- updater
         .update(record)
         .left

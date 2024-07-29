@@ -2,7 +2,7 @@ package weco.pipeline.batcher
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.typesafe.config.Config
 
 import weco.messaging.sns.NotificationMessage

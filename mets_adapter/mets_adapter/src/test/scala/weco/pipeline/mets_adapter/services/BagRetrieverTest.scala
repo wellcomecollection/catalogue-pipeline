@@ -1,10 +1,10 @@
 package weco.pipeline.mets_adapter.services
 
-import akka.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.pipeline.mets_adapter.models._
 import weco.http.client.{HttpGet, MemoryHttpClient}
@@ -17,7 +17,7 @@ class BagRetrieverTest
     with Matchers
     with ScalaFutures
     with IntegrationPatience
-    with Akka {
+    with Pekko {
 
   it("gets a bag from the storage service") {
     val responses = Seq(

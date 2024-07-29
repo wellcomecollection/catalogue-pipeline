@@ -1,7 +1,7 @@
 package weco.pipeline.inference_manager.adapters
 
 import java.nio.file.Paths
-import akka.http.scaladsl.model.{HttpMethods, HttpRequest}
+import org.apache.pekko.http.scaladsl.model.{HttpMethods, HttpRequest}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{Inside, OptionValues}

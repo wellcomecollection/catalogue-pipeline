@@ -1,14 +1,14 @@
 package weco.pipeline.calm_adapter
 
 import java.time.{Instant, LocalDate}
-import akka.NotUsed
-import akka.stream.scaladsl._
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.scaladsl._
 import io.circe.Encoder
 import org.scalatest.EitherValues
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
@@ -37,7 +37,7 @@ class CalmAdapterWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with EitherValues
-    with Akka
+    with Pekko
     with SQS
     with Eventually
     with IntegrationPatience

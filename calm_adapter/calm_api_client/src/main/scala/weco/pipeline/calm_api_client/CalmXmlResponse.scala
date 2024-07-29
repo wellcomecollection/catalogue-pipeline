@@ -6,8 +6,8 @@ import scala.util.Try
 import scala.xml.{Elem, Node, NodeSeq, XML}
 import java.time.Instant
 
-import akka.Done
-import akka.http.scaladsl.model.headers.Cookie
+import org.apache.pekko.Done
+import org.apache.pekko.http.scaladsl.model.headers.Cookie
 import weco.catalogue.source_model.calm.CalmRecord
 
 trait CalmXmlResponse[T] {

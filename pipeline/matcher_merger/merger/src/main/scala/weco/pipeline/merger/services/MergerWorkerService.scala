@@ -1,7 +1,7 @@
 package weco.pipeline.merger.services
 
-import akka.stream.scaladsl.Flow
-import akka.{Done, NotUsed}
+import org.apache.pekko.stream.scaladsl.Flow
+import org.apache.pekko.{Done, NotUsed}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial

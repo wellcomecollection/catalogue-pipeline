@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-05-15T08:17:25.421484Z",
+  "createdAt" : "2024-07-24T16:49:25.147331Z",
   "id" : "tmdfbk5k",
   "document" : {
     "debug" : {
@@ -451,23 +451,23 @@
         },
         {
           "contents" : [
-            "pneMkt"
-          ],
-          "noteType" : {
-            "id" : "location-of-duplicates",
-            "label" : "Location of duplicates",
-            "type" : "NoteType"
-          },
-          "type" : "Note"
-        },
-        {
-          "contents" : [
             "w1YfRQ9an",
             "5wdlW2gcpt"
           ],
           "noteType" : {
             "id" : "funding-info",
             "label" : "Funding information",
+            "type" : "NoteType"
+          },
+          "type" : "Note"
+        },
+        {
+          "contents" : [
+            "pneMkt"
+          ],
+          "noteType" : {
+            "id" : "location-of-duplicates",
+            "label" : "Location of duplicates",
             "type" : "NoteType"
           },
           "type" : "Note"

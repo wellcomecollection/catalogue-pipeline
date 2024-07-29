@@ -1,7 +1,7 @@
 package weco.pipeline.calm_api_client
 
-import akka.stream.{Materializer, RestartSettings}
-import akka.stream.scaladsl.{RestartSource, Sink, Source}
+import org.apache.pekko.stream.{Materializer, RestartSettings}
+import org.apache.pekko.stream.scaladsl.{RestartSource, Sink, Source}
 
 import scala.concurrent.Future
 import scala.concurrent.duration._

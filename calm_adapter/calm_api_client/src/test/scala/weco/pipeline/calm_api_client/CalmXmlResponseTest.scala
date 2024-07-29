@@ -4,7 +4,7 @@ import java.time.Instant
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import akka.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
+import org.apache.pekko.http.scaladsl.model.headers.{Cookie, HttpCookiePair}
 import weco.catalogue.source_model.calm.CalmRecord
 
 class CalmXmlResponseTest extends AnyFunSpec with Matchers {

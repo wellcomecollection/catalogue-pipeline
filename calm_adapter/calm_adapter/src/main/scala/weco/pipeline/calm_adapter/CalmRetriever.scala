@@ -1,7 +1,7 @@
 package weco.pipeline.calm_adapter
 
-import akka.NotUsed
-import akka.stream.scaladsl.Source
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.scaladsl.Source
 import grizzled.slf4j.Logging
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.calm_api_client.{

@@ -1,8 +1,8 @@
 package weco.pipeline.inference_manager
 
 import scala.concurrent.ExecutionContext
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.Http
 import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import software.amazon.awssdk.services.sqs.model.Message

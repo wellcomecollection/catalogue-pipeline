@@ -1,13 +1,16 @@
 package weco.pipeline.mets_adapter.http
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.headers.{
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model.headers.{
   Authorization,
   BasicHttpCredentials,
   OAuth2BearerToken
 }
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.unmarshalling.{FromEntityUnmarshaller, Unmarshal}
+import org.apache.pekko.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.unmarshalling.{
+  FromEntityUnmarshaller,
+  Unmarshal
+}
 import weco.json.JsonUtil._
 import weco.http.client.{HttpClient, HttpGet, TokenExchange}
 import weco.http.json.CirceMarshalling

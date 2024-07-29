@@ -1,14 +1,14 @@
 package weco.pipeline.calm_adapter
 
 import scala.concurrent.ExecutionContext
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import weco.typesafe.WellcomeTypesafeApp
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.catalogue.source_model.config.SourceVHSBuilder
 import weco.catalogue.source_model.Implicits._
-import weco.pipeline.calm_api_client.AkkaHttpCalmApiClient
+import weco.pipeline.calm_api_client.PekkoHttpCalmApiClient
 
 object Main extends WellcomeTypesafeApp {
 
@@ -20,7 +20,7 @@ object Main extends WellcomeTypesafeApp {
         actorSystem.dispatcher
 
       val calmRetriever = new ApiCalmRetriever(
-        apiClient = new AkkaHttpCalmApiClient(
+        apiClient = new PekkoHttpCalmApiClient(
           url = config.requireString("calm.api.url"),
           username = config.requireString("calm.api.username"),
           password = config.requireString("calm.api.password")

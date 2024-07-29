@@ -16,19 +16,24 @@ import weco.sierra.models.identifiers.{
   TypedSierraRecordNumber
 }
 
-trait TransformableOps[Record <: AbstractSierraRecord[_]] {
-  def create(id: SierraBibNumber, r: Record): SierraTransformable
+trait TransformableOps[SierraRecord <: AbstractSierraRecord[_]] {
+  def create(id: SierraBibNumber, r: SierraRecord): SierraTransformable
 
-  def add(t: SierraTransformable, r: Record): Option[SierraTransformable]
+  def add(t: SierraTransformable, r: SierraRecord): Option[SierraTransformable]
 
-  def remove(t: SierraTransformable, r: Record): Option[SierraTransformable]
+  def remove(
+    t: SierraTransformable,
+    r: SierraRecord
+  ): Option[SierraTransformable]
 }
 
 object TransformableOps {
   implicit class SierraTransformableOps(t: SierraTransformable) {
-    def add[Record <: AbstractSierraRecord[_]](
-      r: Record
-    )(implicit ops: TransformableOps[Record]): Option[SierraTransformable] =
+    def add[SierraRecord <: AbstractSierraRecord[_]](
+      r: SierraRecord
+    )(
+      implicit ops: TransformableOps[SierraRecord]
+    ): Option[SierraTransformable] =
       ops
         .add(t, r)
         .map {
@@ -38,9 +43,11 @@ object TransformableOps {
             )
         }
 
-    def remove[Record <: AbstractSierraRecord[_]](
-      r: Record
-    )(implicit ops: TransformableOps[Record]): Option[SierraTransformable] =
+    def remove[SierraRecord <: AbstractSierraRecord[_]](
+      r: SierraRecord
+    )(
+      implicit ops: TransformableOps[SierraRecord]
+    ): Option[SierraTransformable] =
       ops
         .remove(t, r)
         .map {
@@ -102,19 +109,19 @@ object TransformableOps {
 
   trait SubrecordTransformableOps[
     Id <: TypedSierraRecordNumber,
-    Record <: AbstractSierraRecord[Id]
-  ] extends TransformableOps[Record] {
-    implicit val recordOps: RecordOps[Record]
+    SierraRecord <: AbstractSierraRecord[Id]
+  ] extends TransformableOps[SierraRecord] {
+    implicit val recordOps: RecordOps[SierraRecord]
 
-    def getRecords(t: SierraTransformable): Map[Id, Record]
+    def getRecords(t: SierraTransformable): Map[Id, SierraRecord]
     def setRecords(
       t: SierraTransformable,
-      records: Map[Id, Record]
+      records: Map[Id, SierraRecord]
     ): SierraTransformable
 
     override def create(
       sierraId: SierraBibNumber,
-      record: Record
+      record: SierraRecord
     ): SierraTransformable = {
       val t = SierraTransformable(
         sierraId = sierraId,
@@ -136,15 +143,15 @@ object TransformableOps {
     // "latest to the merger wins".  If this is wrong, somebody can
     // update the record in Sierra again to increment the updatedDate.
     private def shouldReplaceExisting(
-      existing: Record,
-      newRecord: Record
+      existing: SierraRecord,
+      newRecord: SierraRecord
     ): Boolean =
       newRecord.modifiedDate.isAfter(existing.modifiedDate) ||
         newRecord.modifiedDate == existing.modifiedDate
 
     override def add(
       t: SierraTransformable,
-      record: Record
+      record: SierraRecord
     ): Option[SierraTransformable] = {
       if (!recordOps.getBibIds(record).contains(t.sierraId)) {
         throw new RuntimeException(
@@ -177,7 +184,7 @@ object TransformableOps {
 
     override def remove(
       t: SierraTransformable,
-      record: Record
+      record: SierraRecord
     ): Option[SierraTransformable] = {
       if (!recordOps.getUnlinkedBibIds(record).contains(t.sierraId)) {
         throw new RuntimeException(

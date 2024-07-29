@@ -1,7 +1,7 @@
 package weco.catalogue.tei.id_extractor
 
-import akka.http.scaladsl.model.Uri.Path
-import akka.http.scaladsl.model.{
+import org.apache.pekko.http.scaladsl.model.Uri.Path
+import org.apache.pekko.http.scaladsl.model.{
   ContentTypes,
   HttpEntity,
   HttpRequest,
@@ -11,7 +11,7 @@ import akka.http.scaladsl.model.{
 import io.circe.Encoder
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.source_model.tei.{
   TeiIdChangeMessage,
   TeiIdDeletedMessage,
@@ -40,7 +40,7 @@ import scala.util.Try
 class TeiIdExtractorWorkerServiceTest
     extends AnyFunSpec
     with SQS
-    with Akka
+    with Pekko
     with Eventually
     with IntegrationPatience
     with PathIdDatabase

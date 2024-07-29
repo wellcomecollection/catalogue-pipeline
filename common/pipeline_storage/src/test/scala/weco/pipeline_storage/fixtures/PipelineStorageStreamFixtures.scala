@@ -1,6 +1,6 @@
 package weco.pipeline_storage.fixtures
 
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.Queue
@@ -14,7 +14,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait PipelineStorageStreamFixtures extends Akka with SQS {
+trait PipelineStorageStreamFixtures extends Pekko with SQS {
   val pipelineStorageConfig = PipelineStorageConfig(
     batchSize = 1,
     flushInterval = 1 milliseconds,

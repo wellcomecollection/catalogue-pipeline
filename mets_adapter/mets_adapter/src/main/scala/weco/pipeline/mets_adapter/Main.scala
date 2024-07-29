@@ -1,13 +1,13 @@
 package weco.pipeline.mets_adapter
 
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.Uri
-import akka.http.scaladsl.model.headers.BasicHttpCredentials
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.headers.BasicHttpCredentials
 import com.typesafe.config.Config
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.catalogue.source_model.mets.MetsSourceData
-import weco.http.client.AkkaHttpClient
+import weco.http.client.PekkoHttpClient
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.mets_adapter.http.StorageServiceOauthHttpClient
 import weco.pipeline.mets_adapter.services.{
@@ -34,7 +34,7 @@ object Main extends WellcomeTypesafeApp {
         DynamoDbClient.builder().build()
 
       val oauthClient = new StorageServiceOauthHttpClient(
-        underlying = new AkkaHttpClient(),
+        underlying = new PekkoHttpClient(),
         baseUri = Uri(config.requireString("bags.api.url")),
         tokenUri = Uri(config.requireString("bags.oauth.url")),
         credentials = BasicHttpCredentials(

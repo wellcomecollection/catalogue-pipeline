@@ -1,20 +1,20 @@
 package weco.pipeline.inference_manager.services
 
 import java.nio.file.{Files, Path, Paths}
-import akka.{Done, NotUsed}
-import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{
+import org.apache.pekko.{Done, NotUsed}
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.model.{
   HttpMethods,
   HttpRequest,
   HttpResponse,
   StatusCodes,
   Uri
 }
-import akka.stream.scaladsl.FlowWithContext
-import akka.stream.{IOResult, Materializer}
-import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink}
-import akka.util.ByteString
+import org.apache.pekko.stream.scaladsl.FlowWithContext
+import org.apache.pekko.stream.{IOResult, Materializer}
+import org.apache.pekko.stream.scaladsl.{FileIO, Flow, Keep, Sink}
+import org.apache.pekko.util.ByteString
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.locations.{DigitalLocation, LocationType}
 import weco.pipeline.inference_manager.models
