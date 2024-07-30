@@ -20,7 +20,7 @@ import weco.pipeline.sierra_merger.models.TransformableOps
 import weco.pipeline.sierra_merger.services.Worker
 import weco.sierra.models.identifiers.SierraBibNumber
 
-trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
+trait SierraRecordMergerFeatureTestCases[SierraRecord <: AbstractSierraRecord[_]]
     extends AnyFunSpec
     with EitherValues
     with SQS
@@ -33,12 +33,12 @@ trait SierraRecordMergerFeatureTestCases[Record <: AbstractSierraRecord[_]]
     queue: Queue,
     sourceVHS: SourceVHS[SierraTransformable] =
       createSourceVHS[SierraTransformable]
-  )(testWith: TestWith[(Worker[Record, String], MemoryMessageSender), R]): R
+  )(testWith: TestWith[(Worker[SierraRecord, String], MemoryMessageSender), R]): R
 
-  def createRecordWith(bibIds: List[SierraBibNumber]): Record
+  def createRecordWith(bibIds: List[SierraBibNumber]): SierraRecord
 
-  implicit val encoder: Encoder[Record]
-  implicit val transformableOps: TransformableOps[Record]
+  implicit val encoder: Encoder[SierraRecord]
+  implicit val transformableOps: TransformableOps[SierraRecord]
 
   def assertStoredAndSent(
     id: Version[String, Int],

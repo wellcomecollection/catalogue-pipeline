@@ -1,7 +1,7 @@
 package weco.pipeline.inference_manager
 
-import akka.http.scaladsl.model.{HttpRequest, HttpResponse}
-import akka.stream.scaladsl.{Flow, FlowWithContext}
+import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse}
+import org.apache.pekko.stream.scaladsl.{Flow, FlowWithContext}
 import weco.catalogue.internal_model.image.{Image, ImageState}
 
 import scala.util.Try

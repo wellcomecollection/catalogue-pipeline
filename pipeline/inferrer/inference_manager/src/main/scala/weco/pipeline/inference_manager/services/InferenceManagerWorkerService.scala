@@ -1,9 +1,9 @@
 package weco.pipeline.inference_manager.services
 
-import akka.Done
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model.HttpResponse
-import akka.stream.scaladsl.{Flow, FlowWithContext, Source}
+import org.apache.pekko.Done
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model.HttpResponse
+import org.apache.pekko.stream.scaladsl.{Flow, FlowWithContext, Source}
 import grizzled.slf4j.Logging
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.messaging.MessageSender
@@ -48,7 +48,7 @@ class InferenceManagerWorkerService[Destination](
   val parallelism = 10
   val maxInferrerWait = 30 seconds
   val maxOpenRequests = actorSystem.settings.config
-    .getInt("akka.http.host-connection-pool.max-open-requests")
+    .getInt("pekko.http.host-connection-pool.max-open-requests")
 
   val indexAndSend = batchIndexAndSendFlow(
     pipelineStorageConfig,
@@ -165,6 +165,10 @@ class InferenceManagerWorkerService[Destination](
                       (AdapterResponseBundle(_, adapter, Success(response)), _)
                     ) =>
                   adapter.augment(data, response.asInstanceOf[adapter.Response])
+                // This should never be pattern matched because failures are already filtered out above,
+                // but the compiler complains if it's not included.
+                case (_, (AdapterResponseBundle(_, _, Failure(_)), _)) =>
+                  throw new IllegalStateException("Unexpected failure.")
               }
               elements.head match {
                 case (

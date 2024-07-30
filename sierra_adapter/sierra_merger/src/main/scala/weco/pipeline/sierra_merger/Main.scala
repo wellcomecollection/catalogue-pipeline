@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_merger
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.typesafe.config.Config
 import weco.catalogue.source_model.config.SourceVHSBuilder
 import weco.catalogue.source_model.sierra._

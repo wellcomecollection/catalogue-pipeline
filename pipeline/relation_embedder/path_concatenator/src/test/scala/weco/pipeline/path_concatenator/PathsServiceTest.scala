@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.Implicits._
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,7 +21,7 @@ class PathsServiceTest
     extends AnyFunSpec
     with Matchers
     with IndexFixtures
-    with Akka
+    with Pekko
     with WorkGenerators {
 
   private def work(path: String): Work.Visible[Merged] =

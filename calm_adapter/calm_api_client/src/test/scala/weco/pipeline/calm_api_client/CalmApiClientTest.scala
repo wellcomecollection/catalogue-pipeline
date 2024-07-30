@@ -1,9 +1,9 @@
 package weco.pipeline.calm_api_client
 
 import java.time.LocalDate
-import akka.Done
-import akka.http.scaladsl.model.HttpResponse
-import akka.http.scaladsl.model.headers.{
+import org.apache.pekko.Done
+import org.apache.pekko.http.scaladsl.model.HttpResponse
+import org.apache.pekko.http.scaladsl.model.headers.{
   Authorization,
   BasicHttpCredentials,
   Cookie,

@@ -1,10 +1,10 @@
 package weco.catalogue.tei.id_extractor
 
-import akka.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.model._
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.tei.id_extractor.fixtures.XmlAssertions
 import weco.fixtures.LocalResources
 import weco.http.client.MemoryHttpClient
@@ -16,7 +16,7 @@ class GitHubBlobContentReaderTest
     extends AnyFunSpec
     with ScalaFutures
     with Matchers
-    with Akka
+    with Pekko
     with IntegrationPatience
     with LocalResources
     with XmlAssertions {

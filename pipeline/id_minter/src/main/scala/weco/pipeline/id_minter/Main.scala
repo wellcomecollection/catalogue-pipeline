@@ -1,6 +1,6 @@
 package weco.pipeline.id_minter
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 
 import scala.concurrent.ExecutionContext
 import com.sksamuel.elastic4s.Index

@@ -1,7 +1,7 @@
 package weco.pipeline.calm_deletion_checker
 
-import akka.Done
-import akka.stream.scaladsl.{Flow, Keep}
+import org.apache.pekko.Done
+import org.apache.pekko.stream.scaladsl.{Flow, Keep}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage

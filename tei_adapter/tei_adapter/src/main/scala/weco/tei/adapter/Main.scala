@@ -1,6 +1,6 @@
 package weco.tei.adapter
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.storage.store.dynamo.DynamoSingleVersionStore
 import weco.storage.typesafe.DynamoBuilder

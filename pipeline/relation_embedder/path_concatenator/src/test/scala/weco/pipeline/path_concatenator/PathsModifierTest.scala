@@ -4,7 +4,7 @@ import org.scalatest.Assertion
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.{CollectionPath, Work}
 import weco.catalogue.internal_model.work.WorkState.Merged
@@ -19,7 +19,7 @@ class PathsModifierTest
     with Matchers
     with ScalaFutures
     with IndexFixtures
-    with Akka
+    with Pekko
     with WorkGenerators {
 
   private def work(path: String): Work.Visible[Merged] =

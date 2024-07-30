@@ -1,7 +1,7 @@
 package weco.pipeline.calm_deletion_checker
 
-import akka.Done
-import akka.http.scaladsl.model.headers.Cookie
+import org.apache.pekko.Done
+import org.apache.pekko.http.scaladsl.model.headers.Cookie
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

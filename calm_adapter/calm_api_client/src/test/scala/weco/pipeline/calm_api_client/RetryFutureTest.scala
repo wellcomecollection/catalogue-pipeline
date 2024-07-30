@@ -1,10 +1,10 @@
 package weco.pipeline.calm_api_client
 
-import akka.stream.RestartSettings
+import org.apache.pekko.stream.RestartSettings
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 
 import scala.concurrent.duration._
 import scala.concurrent.Future
@@ -13,7 +13,7 @@ class RetryFutureTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with Akka
+    with Pekko
     with IntegrationPatience {
 
   val maxRetries = 5

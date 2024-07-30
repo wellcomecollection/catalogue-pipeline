@@ -1,6 +1,6 @@
 package weco.pipeline.reindex_worker.fixtures
 
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.fixtures.{RandomGenerators, TestWith}
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.Queue
@@ -17,7 +17,7 @@ import weco.storage.fixtures.DynamoFixtures.Table
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait WorkerServiceFixture
-    extends Akka
+    extends Pekko
     with SQS
     with ReindexDynamoFixtures
     with RandomGenerators {

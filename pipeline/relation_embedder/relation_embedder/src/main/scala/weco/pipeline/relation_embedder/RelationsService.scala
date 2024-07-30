@@ -1,15 +1,15 @@
 package weco.pipeline.relation_embedder
 
-import akka.NotUsed
-import akka.actor.ActorSystem
-import akka.stream.scaladsl.Source
+import org.apache.pekko.NotUsed
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.scaladsl.Source
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
-import com.sksamuel.elastic4s.streams.ReactiveElastic._
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
+import com.sksamuel.elastic4s.pekko.streams._
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.relation_embedder.models.{Batch, RelationWork}
@@ -36,8 +36,16 @@ class PathQueryRelationsService(
     debug(
       s"Querying affected works with ES request: ${elasticClient.show(request)}"
     )
+    val sourceSettings = SourceSettings(
+      search = request,
+      maxItems = Long.MaxValue,
+      fetchThreshold = affectedWorksScroll,
+      warm = true
+    )
     Source
-      .fromPublisher(elasticClient.publisher(request))
+      .fromGraph(
+        new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)
+      )
       .map(searchHit => searchHit.safeTo[Work[Merged]].get)
   }
 
@@ -46,8 +54,16 @@ class PathQueryRelationsService(
     debug(
       s"Querying complete tree with ES request: ${elasticClient.show(request)}"
     )
+    val sourceSettings = SourceSettings(
+      search = request,
+      maxItems = Long.MaxValue,
+      fetchThreshold = affectedWorksScroll,
+      warm = true
+    )
     Source
-      .fromPublisher(elasticClient.publisher(request))
+      .fromGraph(
+        new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)
+      )
       .map(searchHit => searchHit.safeTo[RelationWork].get)
   }
 }

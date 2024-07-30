@@ -2,10 +2,10 @@ package weco.pipeline.inference_manager.fixtures
 
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
-import akka.Done
-import akka.stream.IOResult
-import akka.stream.scaladsl.{Flow, Keep, Sink}
-import akka.util.ByteString
+import org.apache.pekko.Done
+import org.apache.pekko.stream.IOResult
+import org.apache.pekko.stream.scaladsl.{Flow, Keep, Sink}
+import org.apache.pekko.util.ByteString
 import grizzled.slf4j.Logging
 import weco.pipeline.inference_manager.services.FileWriter
 

@@ -5,7 +5,7 @@ import scala.io.Source
 import scala.collection.mutable
 import java.io.File
 import java.nio.file.Paths
-import akka.http.scaladsl.Http
+import org.apache.pekko.http.scaladsl.Http
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
@@ -16,7 +16,7 @@ import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.image.ImageState.{Augmented, Initial}
-import akka.http.scaladsl.model.Uri
+import org.apache.pekko.http.scaladsl.model.Uri
 import weco.catalogue.internal_model.generators.ImageGenerators
 import weco.catalogue.internal_model.image.{Image, InferredData}
 import weco.catalogue.internal_model.locations.LocationType

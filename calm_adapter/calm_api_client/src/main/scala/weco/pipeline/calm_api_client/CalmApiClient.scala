@@ -1,16 +1,16 @@
 package weco.pipeline.calm_api_client
 
-import akka.Done
-import akka.actor.ActorSystem
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.model.headers.{
+import org.apache.pekko.Done
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.http.scaladsl.model._
+import org.apache.pekko.http.scaladsl.model.headers.{
   BasicHttpCredentials,
   Cookie,
   RawHeader
 }
-import akka.stream.{Materializer, RestartSettings}
+import org.apache.pekko.stream.{Materializer, RestartSettings}
 import weco.catalogue.source_model.calm.CalmRecord
-import weco.http.client.{AkkaHttpClient, HttpClient}
+import weco.http.client.{HttpClient, PekkoHttpClient}
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
@@ -102,7 +102,7 @@ class HttpCalmApiClient(
   }
 }
 
-class AkkaHttpCalmApiClient(
+class PekkoHttpCalmApiClient(
   url: String,
   username: String,
   password: String,
@@ -112,7 +112,7 @@ class AkkaHttpCalmApiClient(
   maxRestarts: Int = 10
 )(implicit actorSystem: ActorSystem)
     extends HttpCalmApiClient(
-      client = new AkkaHttpClient(),
+      client = new PekkoHttpClient(),
       url,
       username,
       password,

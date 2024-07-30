@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_linker.services
 
-import akka.Done
+import org.apache.pekko.Done
 import io.circe.{Decoder, Encoder}
 import weco.json.JsonUtil.fromJson
 import weco.messaging.MessageSender
@@ -15,19 +15,19 @@ import scala.util.Success
 
 class SierraLinkerWorker[
   Id <: TypedSierraRecordNumber,
-  Record <: AbstractSierraRecord[Id],
+  SierraRecord <: AbstractSierraRecord[Id],
   Destination
 ](
   sqsStream: SQSStream[NotificationMessage],
-  linkStore: LinkStore[Id, Record],
+  linkStore: LinkStore[Id, SierraRecord],
   messageSender: MessageSender[Destination]
-)(implicit decoder: Decoder[Record], encoder: Encoder[Record])
+)(implicit decoder: Decoder[SierraRecord], encoder: Encoder[SierraRecord])
     extends Runnable {
 
   private def process(message: NotificationMessage): Future[Unit] =
     Future.fromTry {
       for {
-        record <- fromJson[Record](message.body)
+        record <- fromJson[SierraRecord](message.body)
         record <- linkStore.update(record).toTry
         _ <- record match {
           case Some(k) => messageSender.sendT(k)

@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-05-15T08:17:25.424426Z",
+  "createdAt" : "2024-07-24T16:49:25.152519Z",
   "id" : "dhzcyeul",
   "document" : {
     "debug" : {
@@ -425,17 +425,6 @@
       "notes" : [
         {
           "contents" : [
-            "BD4V4eC"
-          ],
-          "noteType" : {
-            "id" : "general-note",
-            "label" : "Notes",
-            "type" : "NoteType"
-          },
-          "type" : "Note"
-        },
-        {
-          "contents" : [
             "PxyMQW"
           ],
           "noteType" : {
@@ -453,6 +442,17 @@
           "noteType" : {
             "id" : "funding-info",
             "label" : "Funding information",
+            "type" : "NoteType"
+          },
+          "type" : "Note"
+        },
+        {
+          "contents" : [
+            "BD4V4eC"
+          ],
+          "noteType" : {
+            "id" : "general-note",
+            "label" : "Notes",
             "type" : "NoteType"
           },
           "type" : "Note"

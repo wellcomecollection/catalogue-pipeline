@@ -1,6 +1,6 @@
 package weco.catalogue.tei.id_extractor
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import software.amazon.awssdk.services.s3.S3Client
 import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -13,7 +13,7 @@ import weco.catalogue.tei.id_extractor.database.{
   TableProvisioner
 }
 import weco.typesafe.config.builders.EnrichConfig.RichConfig
-import weco.http.client.AkkaHttpClient
+import weco.http.client.PekkoHttpClient
 import weco.catalogue.tei.id_extractor.github.GitHubAuthenticatedHttpClient
 
 import scala.concurrent.ExecutionContext
@@ -38,7 +38,7 @@ object Main extends WellcomeTypesafeApp {
       val store = S3TypedStore[String]
 
       val httpClient = new GitHubAuthenticatedHttpClient(
-        underlying = new AkkaHttpClient(),
+        underlying = new PekkoHttpClient(),
         token = config.requireString("tei.github.token")
       )
 

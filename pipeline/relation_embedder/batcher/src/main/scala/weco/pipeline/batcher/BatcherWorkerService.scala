@@ -3,9 +3,9 @@ package weco.pipeline.batcher
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import scala.util.{Failure, Success}
-import akka.{Done, NotUsed}
-import akka.stream.scaladsl._
-import akka.stream.Materializer
+import org.apache.pekko.{Done, NotUsed}
+import org.apache.pekko.stream.scaladsl._
+import org.apache.pekko.stream.Materializer
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
 

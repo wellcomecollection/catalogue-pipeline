@@ -3,9 +3,9 @@ package weco.flows
 import grizzled.slf4j.Logging
 
 import scala.concurrent.{ExecutionContext, Future}
-import akka.NotUsed
-import akka.stream.FlowShape
-import akka.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
+import org.apache.pekko.NotUsed
+import org.apache.pekko.stream.FlowShape
+import org.apache.pekko.stream.scaladsl.{Broadcast, Flow, GraphDSL, Merge}
 
 trait FlowOps extends Logging {
 

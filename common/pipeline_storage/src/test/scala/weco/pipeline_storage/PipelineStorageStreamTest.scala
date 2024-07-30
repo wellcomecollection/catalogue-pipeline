@@ -1,8 +1,8 @@
 package weco.pipeline_storage
 
-import akka.Done
-import akka.stream.OverflowStrategy
-import akka.stream.scaladsl.{Keep, Sink, Source}
+import org.apache.pekko.Done
+import org.apache.pekko.stream.OverflowStrategy
+import org.apache.pekko.stream.scaladsl.{Keep, Sink, Source}
 import com.sksamuel.elastic4s.{ElasticClient, Index}
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec

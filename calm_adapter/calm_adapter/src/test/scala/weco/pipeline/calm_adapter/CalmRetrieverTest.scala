@@ -1,8 +1,8 @@
 package weco.pipeline.calm_adapter
 
 import java.time.LocalDate
-import akka.http.scaladsl.model.headers._
-import akka.stream.scaladsl._
+import org.apache.pekko.http.scaladsl.model.headers._
+import org.apache.pekko.stream.scaladsl._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

@@ -1,6 +1,6 @@
 package weco.pipeline.sierra_linker
 
-import akka.actor.ActorSystem
+import org.apache.pekko.actor.ActorSystem
 import com.typesafe.config.Config
 import org.scanamo.DynamoFormat
 import org.scanamo.generic.auto._
@@ -85,11 +85,11 @@ object Main extends WellcomeTypesafeApp {
 
   def createLinkStore[
     Id <: TypedSierraRecordNumber,
-    Record <: AbstractSierraRecord[Id]
+    SierraRecord <: AbstractSierraRecord[Id]
   ](config: Config)(
-    implicit linkOps: LinkOps[Record],
+    implicit linkOps: LinkOps[SierraRecord],
     format: DynamoFormat[Id]
-  ): LinkStore[Id, Record] = {
+  ): LinkStore[Id, SierraRecord] = {
     implicit val dynamoClient: DynamoDbClient =
       DynamoDbClient.builder().build()
 
@@ -98,6 +98,6 @@ object Main extends WellcomeTypesafeApp {
         config = DynamoBuilder.buildDynamoConfig(config)
       )
 
-    new LinkStore[Id, Record](versionedStore)
+    new LinkStore[Id, SierraRecord](versionedStore)
   }
 }

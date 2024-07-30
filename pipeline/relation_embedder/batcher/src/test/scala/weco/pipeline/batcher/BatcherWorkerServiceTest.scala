@@ -10,7 +10,7 @@ import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
 import io.circe.Encoder
 import weco.fixtures.TestWith
-import weco.akka.fixtures.Akka
+import weco.pekko.fixtures.Pekko
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
@@ -21,7 +21,7 @@ class BatcherWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with SQS
-    with Akka
+    with Pekko
     with Eventually
     with IntegrationPatience {
 
