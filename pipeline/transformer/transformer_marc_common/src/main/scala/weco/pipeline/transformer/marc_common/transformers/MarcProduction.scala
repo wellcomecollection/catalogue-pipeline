@@ -13,8 +13,7 @@ import weco.pipeline.transformer.marc_common.exceptions.CataloguingException
 import weco.pipeline.transformer.marc_common.models.{
   MarcField,
   MarcFieldOps,
-  MarcRecord,
-  MarcSubfield
+  MarcRecord
 }
 import weco.pipeline.transformer.marc_common.transformers.parsers.MarcProductionEventParser
 import weco.pipeline.transformer.transformers.{
@@ -29,7 +28,10 @@ object MarcProduction
     with Logging {
   type Output = List[ProductionEvent[IdState.Unminted]]
 
-  def apply(record: MarcRecord, prefer264Field: Boolean = false): List[ProductionEvent[IdState.Unminted]] = {
+  def apply(
+    record: MarcRecord,
+    prefer264Field: Boolean = false
+  ): List[ProductionEvent[IdState.Unminted]] = {
     val productionEvents = (
       getProductionFrom260Fields(record),
       getProductionFrom264Fields(record)
