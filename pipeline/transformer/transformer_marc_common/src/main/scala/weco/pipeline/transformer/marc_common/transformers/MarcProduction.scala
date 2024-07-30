@@ -29,16 +29,19 @@ object MarcProduction
     with Logging {
   type Output = List[ProductionEvent[IdState.Unminted]]
 
-  def apply(record: MarcRecord, prefer264Field: Boolean = false): List[ProductionEvent[IdState.Unminted]] = {
+  def apply(
+    record: MarcRecord,
+    prefer264Field: Boolean = false
+  ): List[ProductionEvent[IdState.Unminted]] = {
     val productionEvents = (
       getProductionFrom260Fields(record),
       getProductionFrom264Fields(record),
       prefer264Field
     ) match {
-      case (Nil, Nil, _)     => Nil
-      case (from260, Nil, _) => from260
-      case (Nil, from264, _) => from264
-      case (_, from264, true) => from264
+      case (Nil, Nil, _)       => Nil
+      case (from260, Nil, _)   => from260
+      case (Nil, from264, _)   => from264
+      case (_, from264, true)  => from264
       case (from260, _, false) => from260
     }
 
