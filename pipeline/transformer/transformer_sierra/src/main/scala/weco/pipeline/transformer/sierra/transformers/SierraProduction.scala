@@ -17,5 +17,5 @@ object SierraProduction
     bibId: SierraBibNumber,
     bibData: SierraBibData
   ): List[ProductionEvent[IdState.Unminted]] =
-    MarcProduction(bibData)
+    MarcProduction(bibData, prefer264Field = true)
 }
