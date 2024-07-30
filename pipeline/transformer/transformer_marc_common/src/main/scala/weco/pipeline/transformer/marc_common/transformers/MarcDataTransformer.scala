@@ -10,6 +10,12 @@ import weco.pipeline.transformer.marc_common.models.{MarcField, MarcRecord}
 trait MarcDataTransformer {
   type Output
 
+  def apply(record: MarcRecord): Output
+}
+
+trait MarcProductionTransformer {
+  type Output
+
   def apply(record: MarcRecord, prefer264Field: Boolean): Output
 }
 

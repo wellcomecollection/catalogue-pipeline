@@ -22,7 +22,7 @@ import weco.pipeline.transformer.transformers.{
 }
 
 object MarcProduction
-    extends MarcDataTransformer
+    extends MarcProductionTransformer
     with MarcFieldOps
     with ConceptsTransformer
     with Logging {
