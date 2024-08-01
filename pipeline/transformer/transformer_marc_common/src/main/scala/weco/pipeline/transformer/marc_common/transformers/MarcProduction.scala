@@ -22,13 +22,16 @@ import weco.pipeline.transformer.transformers.{
 }
 
 object MarcProduction
-    extends MarcDataTransformer
+    extends MarcProductionTransformer
     with MarcFieldOps
     with ConceptsTransformer
     with Logging {
   type Output = List[ProductionEvent[IdState.Unminted]]
 
-  def apply(record: MarcRecord): List[ProductionEvent[IdState.Unminted]] = {
+  def apply(
+    record: MarcRecord,
+    prefer264Field: Boolean = false
+  ): List[ProductionEvent[IdState.Unminted]] = {
     val productionEvents = (
       getProductionFrom260Fields(record),
       getProductionFrom264Fields(record)
@@ -36,14 +39,9 @@ object MarcProduction
       case (Nil, Nil)     => Nil
       case (from260, Nil) => from260
       case (Nil, from264) => from264
-
-      // If both 260 and 264 are present we prefer the 260 fields
-      case (from260, _) => {
-        warn(
-          s"Record ${record.controlField("001")} has both 260 and 264 fields. Using 260 fields."
-        )
-        from260
-      }
+      case (from260, from264) =>
+        if (prefer264Field) from264
+        else from260
     }
 
     val marc008productionEvents = getProductionFrom008(record)

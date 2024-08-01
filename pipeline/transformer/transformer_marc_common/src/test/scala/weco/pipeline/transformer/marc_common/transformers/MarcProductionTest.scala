@@ -21,13 +21,78 @@ class MarcProductionTest
     with Matchers
     with RandomGenerators {
 
+
+  private val MARC_260_FIXTURE = MarcField(
+    marcTag = "260",
+    subfields = List(
+      MarcSubfield(tag = "a", content = "Paris")
+    )
+  )
+
+  private val MARC_264_FIXTURE = MarcField(
+    marcTag = "264",
+    indicator2 = "0",
+    subfields = List(
+      MarcSubfield(tag = "a", content = "London")
+    )
+  )
+
+  private val PRODUCTION_260_FIXTURE = ProductionEvent(
+    label = "Paris",
+    places = List(Place("Paris")),
+    agents = List(),
+    dates = List(),
+    function = None
+  )
+
+  private val PRODUCTION_264_FIXTURE =  ProductionEvent(
+    label = "London",
+    places = List(Place("London")),
+    agents = List(),
+    dates = List(),
+    function = Some(Concept(label="Production"))
+  )
+
   it("returns an empty list if neither 260 nor 264 are present") {
     MarcProduction(MarcTestRecord(fields = List())) shouldBe List()
   }
 
   describe("Both MARC field 260 and 264") {
     it(
-      "if both 260 and 264 are present, accept 260"
+      "if both 260 and 264 are present, accept 260 by default"
+    ) {
+      MarcProduction(
+        MarcTestRecord(
+          controlFields = List(
+            MarcControlField(
+              marcTag = "001",
+              content = randomAlphanumeric(length = 9)
+            )
+          ),
+          fields = List(MARC_260_FIXTURE, MARC_264_FIXTURE)
+        )
+      ) shouldBe List(PRODUCTION_260_FIXTURE)
+    }
+
+    it(
+      "if both 260 and 264 are present, accept 264 if preferred"
+    ) {
+      MarcProduction(
+        MarcTestRecord(
+          controlFields = List(
+            MarcControlField(
+              marcTag = "001",
+              content = randomAlphanumeric(length = 9)
+            )
+          ),
+          fields = List(MARC_260_FIXTURE, MARC_264_FIXTURE)
+        ),
+        prefer264Field = true
+      ) shouldBe List(PRODUCTION_264_FIXTURE)
+    }
+
+    it(
+      "if 264 is preferred but has an indicator2='4', accept 260"
     ) {
       MarcProduction(
         MarcTestRecord(
@@ -38,30 +103,89 @@ class MarcProductionTest
             )
           ),
           fields = List(
-            MarcField(
-              marcTag = "260",
-              subfields = List(
-                MarcSubfield(tag = "a", content = "Paris")
-              )
-            ),
+            MARC_260_FIXTURE,
             MarcField(
               marcTag = "264",
-              indicator2 = "0",
+              indicator2 = "4",
               subfields = List(
                 MarcSubfield(tag = "a", content = "London")
               )
             )
           )
-        )
-      ) shouldBe List(
-        ProductionEvent(
-          label = "Paris",
-          places = List(Place("Paris")),
-          agents = List(),
-          dates = List(),
-          function = None
-        )
-      )
+        ),
+        prefer264Field = true
+      ) shouldBe List(PRODUCTION_260_FIXTURE)
+    }
+
+
+    it(
+      "if 260 doesn't exist, accept 264"
+    ) {
+      MarcProduction(
+        MarcTestRecord(
+          controlFields = List(
+            MarcControlField(
+              marcTag = "001",
+              content = randomAlphanumeric(length = 9)
+            )
+          ),
+          fields = List(MARC_260_FIXTURE)
+        ),
+        prefer264Field = true
+      ) shouldBe List(PRODUCTION_260_FIXTURE)
+    }
+
+    it(
+      "if 264 is preferred but doesn't exist, accept 260"
+    ) {
+      MarcProduction(
+        MarcTestRecord(
+          controlFields = List(
+            MarcControlField(
+              marcTag = "001",
+              content = randomAlphanumeric(length = 9)
+            )
+          ),
+          fields = List(MARC_260_FIXTURE)
+        ),
+        prefer264Field = true
+      ) shouldBe List(PRODUCTION_260_FIXTURE)
+    }
+
+    it(
+      "filters out 264 tags with indicator2='4' or indicator2=' '"
+    ) {
+      MarcProduction(
+        MarcTestRecord(
+          controlFields = List(
+            MarcControlField(
+              marcTag = "001",
+              content = randomAlphanumeric(length = 9)
+            )
+          ),
+          fields = List(
+            MARC_260_FIXTURE,
+            MARC_264_FIXTURE,
+            MarcField(
+              marcTag = "264",
+              indicator2 = "4",
+              subfields = List(
+                MarcSubfield(tag = "a", content = "Test"),
+                MarcSubfield(tag = "b", content = "Test"),
+                MarcSubfield(tag = "c", content = "Test")
+              )
+            ),
+            MarcField(
+              marcTag = "264",
+              indicator2 = " ",
+              subfields = List(
+                MarcSubfield(tag = "a", content = "Berlin")
+              )
+            )
+          )
+        ),
+        prefer264Field = true
+      ) shouldBe List(PRODUCTION_264_FIXTURE)
     }
   }
 

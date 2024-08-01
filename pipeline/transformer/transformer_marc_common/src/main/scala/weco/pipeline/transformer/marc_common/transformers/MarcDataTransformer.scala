@@ -13,6 +13,12 @@ trait MarcDataTransformer {
   def apply(record: MarcRecord): Output
 }
 
+trait MarcProductionTransformer {
+  type Output
+
+  def apply(record: MarcRecord, prefer264Field: Boolean): Output
+}
+
 trait MarcDataTransformerWithLoggingContext {
   type Output
 
