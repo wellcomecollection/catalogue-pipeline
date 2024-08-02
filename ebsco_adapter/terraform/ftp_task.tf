@@ -28,10 +28,10 @@ resource "aws_scheduler_schedule" "ftp_task_schedule" {
     mode = "OFF"
   }
 
-  schedule_expression = "rate(1 days)"
+  schedule_expression = "at(2024-08-05T10:30:00)"
 
   # Disable the schedule for now
-  state = "DISABLED"
+  state = "ENABLED"
 
   target {
     arn      = aws_ecs_cluster.cluster.arn
