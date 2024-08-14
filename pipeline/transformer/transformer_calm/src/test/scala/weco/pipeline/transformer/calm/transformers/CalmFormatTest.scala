@@ -15,6 +15,9 @@ class CalmFormatTest extends AnyFunSpec with Matchers with CalmRecordGenerators 
     val digitalFormat = CalmFormat(digitalRecord)
 
     digitalFormat shouldBe Format.ArchivesDigital
+
+    // Check that the label is "Archives - Digital"
+    Format.ArchivesDigital.label shouldBe("Archives - Digital")
   }
 
   it("Defaults to ArchivesAndManuscripts for all other contents of Material") {
