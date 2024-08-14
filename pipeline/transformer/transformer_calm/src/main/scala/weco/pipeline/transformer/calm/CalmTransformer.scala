@@ -151,7 +151,7 @@ object CalmTransformer
       title = Some(title),
       alternativeTitles = CalmAlternativeTitles(record),
       otherIdentifiers = otherIdentifiers(record),
-      format = Some(Format.ArchivesAndManuscripts),
+      format = Some(CalmFormat(record)),
       collectionPath = Some(collectionPath),
       referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
       subjects = subjects(record),
