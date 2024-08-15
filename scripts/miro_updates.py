@@ -90,15 +90,24 @@ def _get_reindexer_topic_arn():
     return outputs["topic_arn"]["value"]
 
 
+def has_subscriptions(sns_client, *, topic_arn):
+    """
+    Returns True if a topic ARN has any subscriptions (e.g. an SQS queue), False otherwise.
+    """
+    resp = sns_client.list_subscriptions_by_topic(TopicArn=topic_arn)
+
+    return bool(resp["Subscriptions"])
+
+
 def _request_reindex_for(miro_id):
     sns_client = SESSION.client("sns")
-
+    topic_arn = _get_reindexer_topic_arn()
     message = {
         "jobConfigId": "miro--catalogue_miro_updates",
         "parameters": {"ids": [miro_id], "type": "SpecificReindexParameters"},
     }
 
-    sns_client.publish(TopicArn=_get_reindexer_topic_arn(), Message=json.dumps(message))
+    sns_client.publish(TopicArn=topic_arn, Message=json.dumps(message))
 
 
 def _get_timestamp():
@@ -121,7 +130,7 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
 
     new_event = {
         "description": "Change isClearedForCatalogueAPI from %r to %r"
-        % (item["isClearedForCatalogueAPI"], is_available),
+                       % (item["isClearedForCatalogueAPI"], is_available),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -264,12 +273,27 @@ def suppress_image(*, miro_id, message: str):
     _remove_image_from_cloudfront(miro_id=miro_id)
 
 
+def unsuppress_image(*, miro_id, message: str):
+    """
+    Reinstate a hidden Miro image from wellcomecollection.org.
+    These operations must happen in a specific order: _set_image_availability first, as the DDB table is the source of truth for Miro images when building pipelines
+    """
+    sns_client = SESSION.client("sns")
+    topic_arn = _get_reindexer_topic_arn()
+    if not has_subscriptions(sns_client, topic_arn=topic_arn):
+        print("Nothing is listening to the reindexer, this action will not have the expected effect, aborting")
+        exit(1)
+
+    _set_image_availability(miro_id=miro_id, message=message, is_available=True)
+    _request_reindex_for(miro_id=miro_id)
+
+
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
     item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
 
     new_event = {
         "description": "Change overrides.%s from %r to %r"
-        % (override_key, item.get("overrides", {}).get(override_key), override_value),
+                       % (override_key, item.get("overrides", {}).get(override_key), override_value),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -309,7 +333,7 @@ def _remove_override(*, miro_id, message: str, override_key: str):
 
     new_event = {
         "description": "Remove overrides.%s (previously %r)"
-        % (override_key, item.get("overrides", {}).get(override_key)),
+                       % (override_key, item.get("overrides", {}).get(override_key)),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -416,12 +440,12 @@ def update_miro_image_suppressions_doc():
             outfile.write("</tr>\n")
 
             for (date, message), events in itertools.groupby(
-                sorted(
-                    get_all_miro_suppression_events(),
-                    key=lambda e: e["date"],
-                    reverse=True,
-                ),
-                key=lambda e: (e["date"].date(), e["message"]),
+                    sorted(
+                        get_all_miro_suppression_events(),
+                        key=lambda e: e["date"],
+                        reverse=True,
+                    ),
+                    key=lambda e: (e["date"].date(), e["message"]),
             ):
                 outfile.write("<tr>\n")
                 outfile.write(f'  <td>{"<br>".join(ev["id"] for ev in events)}</td>\n')
@@ -461,3 +485,21 @@ def update_miro_image_suppressions_doc():
         print(
             f"*** To approve these changes, visit https://github.com/wellcomecollection/private/pull/{new_pr_number}"
         )
+
+
+def register_on_dlcs(origin_url, miro_id):
+    dlcs_response = dlcs_api_client().post(
+        f"https://api.dlcs.io/customers/2/queue",
+        json={
+            "@type": "Collection",
+            "member": [
+                {
+                    "space": "8",
+                    "origin": origin_url,
+                    "id": miro_id,
+                    "mediaType": "image/jpeg"
+                }
+            ]
+        }
+    )
+    print(dlcs_response.text)
