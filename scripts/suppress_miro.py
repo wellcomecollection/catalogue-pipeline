@@ -10,10 +10,12 @@ miro_id_regex = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
 
 
 @click.command()
-@click.option('--id_source',
-              help='newline-separated list of MIRO ids',
-              type=click.File('r'),
-              default=sys.stdin)
+@click.option(
+    "--id_source",
+    help="newline-separated list of MIRO ids",
+    type=click.File("r"),
+    default=sys.stdin,
+)
 @click.option(
     "--message",
     help="Why the image was removed, a link to a Slack message, etc.",
