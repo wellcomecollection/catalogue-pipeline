@@ -22,9 +22,7 @@ miro_id_regex = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
     required=True,
 )
 @click.option(
-    "--dry-run",
-    help="Show what will happen, without actually doing it",
-    is_flag=True
+    "--dry-run", help="Show what will happen, without actually doing it", is_flag=True
 )
 def suppress_miro(id_source, message, dry_run):
     """
