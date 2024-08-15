@@ -1,22 +1,22 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-05-15T08:17:25.623181Z",
-  "id" : "ntlrk7nw",
+  "createdAt" : "2024-08-15T08:40:28.406646Z",
+  "id" : "9stpxl39",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "ntlrk7nw",
+        "id" : "9stpxl39",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "9pCp7jd9rF"
+          "value" : "iOhIDpmZQS"
         },
-        "version" : 85,
-        "modifiedTime" : "2003-11-23T19:57:31Z"
+        "version" : 90,
+        "modifiedTime" : "2053-10-10T09:57:01Z"
       },
-      "mergedTime" : "2003-11-23T19:57:31Z",
+      "mergedTime" : "2053-10-10T09:57:01Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "ntlrk7nw",
-      "title" : "title-5hDXNpf0jl",
+      "id" : "9stpxl39",
+      "title" : "title-ZJBZp7GTBM",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "9pCp7jd9rF",
+          "value" : "iOhIDpmZQS",
           "type" : "Identifier"
         }
       ],
@@ -47,15 +47,15 @@
       ],
       "items" : [
         {
-          "id" : "dc51h9g3",
+          "id" : "qdr9gb06",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
                 "type" : "IdentifierType"
               },
-              "value" : "S97qOpHViO",
+              "value" : "szcI3pLB8w",
               "type" : "Identifier"
             }
           ],
@@ -67,6 +67,12 @@
                 "type" : "LocationType"
               },
               "label" : "locationLabel",
+              "license" : {
+                "id" : "pdm",
+                "label" : "Public Domain Mark",
+                "url" : "https://creativecommons.org/share-your-work/public-domain/pdm/",
+                "type" : "License"
+              },
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -75,15 +81,15 @@
           "type" : "Item"
         },
         {
-          "id" : "tpxl396z",
+          "id" : "y1i7iplx",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "miro-image-number",
-                "label" : "Miro image number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "BZp7GTBM7U",
+              "value" : "9QmlF92mk9",
               "type" : "Identifier"
             }
           ],
@@ -95,12 +101,7 @@
                 "type" : "LocationType"
               },
               "label" : "locationLabel",
-              "license" : {
-                "id" : "cc-by",
-                "label" : "Attribution 4.0 International (CC BY 4.0)",
-                "url" : "http://creativecommons.org/licenses/by/4.0/",
-                "type" : "License"
-              },
+              "shelfmark" : "Shelfmark: cCc2QL7V8",
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -118,7 +119,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/TvJ.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/AUd.jpg/info.json",
+              "linkText" : "Link text: zYQpvm",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -198,22 +200,22 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "ntlrk7nw",
-      "sourceIdentifier.value" : "9pCp7jd9rF",
+      "id" : "9stpxl39",
+      "sourceIdentifier.value" : "iOhIDpmZQS",
       "identifiers.value" : [
-        "9pCp7jd9rF"
+        "iOhIDpmZQS"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "dc51h9g3",
-        "tpxl396z"
+        "qdr9gb06",
+        "y1i7iplx"
       ],
       "items.identifiers.value" : [
-        "S97qOpHViO",
-        "BZp7GTBM7U"
+        "szcI3pLB8w",
+        "9QmlF92mk9"
       ],
       "languages.label" : [
       ],
@@ -228,7 +230,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-5hDXNpf0jl"
+      "title" : "title-ZJBZp7GTBM"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -244,7 +246,7 @@
       "contributors.agent.label" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
+        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}",
         "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
       ],
       "availabilities" : [
@@ -269,22 +271,22 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "9pCp7jd9rF"
+        "iOhIDpmZQS"
       ],
       "items.locations.license.id" : [
-        "cc-by",
+        "pdm",
         "cc-by"
       ],
       "items.locations.accessConditions.status.id" : [
         "open-with-advisory"
       ],
       "items.id" : [
-        "dc51h9g3",
-        "tpxl396z"
+        "qdr9gb06",
+        "y1i7iplx"
       ],
       "items.identifiers.value" : [
-        "S97qOpHViO",
-        "BZp7GTBM7U"
+        "szcI3pLB8w",
+        "9QmlF92mk9"
       ],
       "items.locations.locationType.id" : [
         "closed-stores",

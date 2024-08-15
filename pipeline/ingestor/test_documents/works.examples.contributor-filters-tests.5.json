@@ -1,22 +1,22 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-02-16T15:36:45.065713Z",
-  "id" : "tru6joq4",
+  "createdAt" : "2024-08-15T08:40:28.368935Z",
+  "id" : "syv21f7g",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "tru6joq4",
+        "id" : "syv21f7g",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "NS7lxBF816"
+          "value" : "4Dxc6NTEVZ"
         },
-        "version" : 38,
-        "modifiedTime" : "2022-09-30T14:40:50Z"
+        "version" : 40,
+        "modifiedTime" : "2031-05-07T13:00:36Z"
       },
-      "mergedTime" : "2022-09-30T14:40:50Z",
+      "mergedTime" : "2031-05-07T13:00:36Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "tru6joq4",
-      "title" : "title-JD6zf5rF0X",
+      "id" : "syv21f7g",
+      "title" : "title-bSjf9AwXjw",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "NS7lxBF816",
+          "value" : "4Dxc6NTEVZ",
           "type" : "Identifier"
         }
       ],
@@ -84,10 +84,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "tru6joq4",
-      "sourceIdentifier.value" : "NS7lxBF816",
+      "id" : "syv21f7g",
+      "sourceIdentifier.value" : "4Dxc6NTEVZ",
       "identifiers.value" : [
-        "NS7lxBF816"
+        "4Dxc6NTEVZ"
       ],
       "images.id" : [
       ],
@@ -110,7 +110,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-JD6zf5rF0X"
+      "title" : "title-bSjf9AwXjw"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -146,7 +146,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "NS7lxBF816"
+        "4Dxc6NTEVZ"
       ],
       "items.locations.license.id" : [
       ],

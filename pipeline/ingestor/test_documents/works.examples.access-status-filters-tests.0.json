@@ -1,22 +1,22 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-05-15T08:17:25.600488Z",
-  "id" : "i2iqani2",
+  "createdAt" : "2024-08-15T08:40:28.385931Z",
+  "id" : "e9alfxx5",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "i2iqani2",
+        "id" : "e9alfxx5",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "w5jYpuBxun"
+          "value" : "I95Gazclr9"
         },
-        "version" : 36,
-        "modifiedTime" : "1994-07-09T07:36:53Z"
+        "version" : 99,
+        "modifiedTime" : "2029-10-27T02:35:11Z"
       },
-      "mergedTime" : "1994-07-09T07:36:53Z",
+      "mergedTime" : "2029-10-27T02:35:11Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "i2iqani2",
-      "title" : "title-Um7p7NJFW4",
+      "id" : "e9alfxx5",
+      "title" : "title-bPGXaLqwYH",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -37,7 +37,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "w5jYpuBxun",
+          "value" : "I95Gazclr9",
           "type" : "Identifier"
         }
       ],
@@ -47,7 +47,7 @@
       ],
       "items" : [
         {
-          "id" : "wxjwbli9",
+          "id" : "8tetlds3",
           "identifiers" : [
             {
               "identifierType" : {
@@ -55,7 +55,7 @@
                 "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "Gazclr9E9a",
+              "value" : "TJcj7uta7H",
               "type" : "Identifier"
             }
           ],
@@ -66,8 +66,9 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/xc6.jpg/info.json",
-              "linkText" : "Link text: 7GjbSjf9",
+              "url" : "https://iiif.wellcomecollection.org/image/sk7.jpg/info.json",
+              "credit" : "Credit line: VBr7VL",
+              "linkText" : "Link text: fab67TffQN",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -132,20 +133,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "i2iqani2",
-      "sourceIdentifier.value" : "w5jYpuBxun",
+      "id" : "e9alfxx5",
+      "sourceIdentifier.value" : "I95Gazclr9",
       "identifiers.value" : [
-        "w5jYpuBxun"
+        "I95Gazclr9"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "wxjwbli9"
+        "8tetlds3"
       ],
       "items.identifiers.value" : [
-        "Gazclr9E9a"
+        "TJcj7uta7H"
       ],
       "languages.label" : [
       ],
@@ -160,7 +161,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-Um7p7NJFW4"
+      "title" : "title-bPGXaLqwYH"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -197,7 +198,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "w5jYpuBxun"
+        "I95Gazclr9"
       ],
       "items.locations.license.id" : [
         "cc-by"
@@ -206,10 +207,10 @@
         "restricted"
       ],
       "items.id" : [
-        "wxjwbli9"
+        "8tetlds3"
       ],
       "items.identifiers.value" : [
-        "Gazclr9E9a"
+        "TJcj7uta7H"
       ],
       "items.locations.locationType.id" : [
         "iiif-presentation"

@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-15T08:17:25.544863Z",
-  "id" : "4hdjmnto",
+  "createdAt" : "2024-08-15T08:40:28.330293Z",
+  "id" : "kw3kldau",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "4hdjmnto",
+        "id" : "kw3kldau",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "7ZYKrzxgMS"
+          "value" : "lzYfNgtG1S"
         },
-        "version" : 70,
-        "modifiedTime" : "1970-06-23T06:21:51Z"
+        "version" : 8,
+        "modifiedTime" : "1959-09-06T22:36:54Z"
       },
-      "mergedTime" : "1970-06-23T06:21:51Z",
+      "mergedTime" : "1959-09-06T22:36:54Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "4hdjmnto",
-      "title" : "title-weq2UFKJPl",
+      "id" : "kw3kldau",
+      "title" : "title-4GKNsXvX3N",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "s",
-        "label" : "E-sound",
+        "id" : "v",
+        "label" : "E-books",
         "type" : "Format"
       },
       "contributors" : [
@@ -38,28 +38,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "7ZYKrzxgMS",
+          "value" : "lzYfNgtG1S",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "IhNdLDgGiV",
+          "label" : "hQnFei9OwD",
           "concepts" : [
             {
-              "label" : "W1mQ40pgbiIgGzg",
+              "label" : "HmXSsBa8UqTG3Gu",
               "type" : "Concept"
             },
             {
-              "label" : "YBChQnFei9OwDHm",
+              "label" : "W07LA7wtXxMtg7d",
               "type" : "Concept"
             },
             {
-              "label" : "XSsBa8UqTG3GuW0",
+              "label" : "koPI8hxmCeKjABF",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "4hdjmnto",
-      "sourceIdentifier.value" : "7ZYKrzxgMS",
+      "id" : "kw3kldau",
+      "sourceIdentifier.value" : "lzYfNgtG1S",
       "identifiers.value" : [
-        "7ZYKrzxgMS"
+        "lzYfNgtG1S"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "W1mQ40pgbiIgGzg",
-        "YBChQnFei9OwDHm",
-        "XSsBa8UqTG3GuW0"
+        "HmXSsBa8UqTG3Gu",
+        "W07LA7wtXxMtg7d",
+        "koPI8hxmCeKjABF"
       ],
-      "title" : "title-weq2UFKJPl"
+      "title" : "title-4GKNsXvX3N"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"s\",\"label\":\"E-sound\",\"type\":\"Format\"}"
+        "{\"id\":\"v\",\"label\":\"E-books\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"IhNdLDgGiV\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"hQnFei9OwD\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "s",
+      "format.id" : "v",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "IhNdLDgGiV"
+        "hQnFei9OwD"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "7ZYKrzxgMS"
+        "lzYfNgtG1S"
       ],
       "items.locations.license.id" : [
       ],

@@ -1,22 +1,22 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-05-15T08:17:25.621915Z",
-  "id" : "cc2ql7v8",
+  "createdAt" : "2024-08-15T08:40:28.405827Z",
+  "id" : "jy8lcdnc",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "cc2ql7v8",
+        "id" : "jy8lcdnc",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "I3pLB8wFUc"
+          "value" : "r5gilWx8gA"
         },
-        "version" : 97,
-        "modifiedTime" : "1994-05-11T15:38:25Z"
+        "version" : 60,
+        "modifiedTime" : "1938-04-17T00:01:19Z"
       },
-      "mergedTime" : "1994-05-11T15:38:25Z",
+      "mergedTime" : "1938-04-17T00:01:19Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "cc2ql7v8",
-      "title" : "title-Y1i7IPlxU9",
+      "id" : "jy8lcdnc",
+      "title" : "title-EVdllKtj1b",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "I3pLB8wFUc",
+          "value" : "r5gilWx8gA",
           "type" : "Identifier"
         }
       ],
@@ -84,10 +84,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "cc2ql7v8",
-      "sourceIdentifier.value" : "I3pLB8wFUc",
+      "id" : "jy8lcdnc",
+      "sourceIdentifier.value" : "r5gilWx8gA",
       "identifiers.value" : [
-        "I3pLB8wFUc"
+        "r5gilWx8gA"
       ],
       "images.id" : [
       ],
@@ -110,7 +110,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-Y1i7IPlxU9"
+      "title" : "title-EVdllKtj1b"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -146,7 +146,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "I3pLB8wFUc"
+        "r5gilWx8gA"
       ],
       "items.locations.license.id" : [
       ],

@@ -1,22 +1,22 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2024-02-16T15:36:45.016661Z",
-  "id" : "velydjdv",
+  "createdAt" : "2024-08-15T08:40:28.350941Z",
+  "id" : "pbeanc7x",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "velydjdv",
+        "id" : "pbeanc7x",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "Rew3RmJ48v"
+          "value" : "ZmmbPJWDqm"
         },
-        "version" : 20,
-        "modifiedTime" : "1960-03-11T19:55:05Z"
+        "version" : 82,
+        "modifiedTime" : "2049-02-26T19:42:13Z"
       },
-      "mergedTime" : "1960-03-11T19:55:05Z",
+      "mergedTime" : "2049-02-26T19:42:13Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,7 +24,7 @@
       ]
     },
     "display" : {
-      "id" : "velydjdv",
+      "id" : "pbeanc7x",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "Rew3RmJ48v",
+          "value" : "ZmmbPJWDqm",
           "type" : "Identifier"
         }
       ],
@@ -84,10 +84,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "velydjdv",
-      "sourceIdentifier.value" : "Rew3RmJ48v",
+      "id" : "pbeanc7x",
+      "sourceIdentifier.value" : "ZmmbPJWDqm",
       "identifiers.value" : [
-        "Rew3RmJ48v"
+        "ZmmbPJWDqm"
       ],
       "images.id" : [
       ],
@@ -146,7 +146,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "Rew3RmJ48v"
+        "ZmmbPJWDqm"
       ],
       "items.locations.license.id" : [
       ],

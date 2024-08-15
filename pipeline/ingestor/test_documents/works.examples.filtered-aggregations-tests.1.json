@@ -1,22 +1,22 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-05-15T08:17:25.609517Z",
-  "id" : "1ndk3ton",
+  "createdAt" : "2024-08-15T08:40:28.394666Z",
+  "id" : "ryawvgup",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "1ndk3ton",
+        "id" : "ryawvgup",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "HgjmZ1Psfx"
+          "value" : "jHeY6Fz9Kp"
         },
-        "version" : 31,
-        "modifiedTime" : "1942-02-08T16:28:55Z"
+        "version" : 72,
+        "modifiedTime" : "2059-12-28T14:23:34Z"
       },
-      "mergedTime" : "1942-02-08T16:28:55Z",
+      "mergedTime" : "2059-12-28T14:23:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,7 +24,7 @@
       ]
     },
     "display" : {
-      "id" : "1ndk3ton",
+      "id" : "ryawvgup",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -38,11 +38,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "HgjmZ1Psfx",
+          "value" : "jHeY6Fz9Kp",
           "type" : "Identifier"
         }
       ],
@@ -94,10 +94,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "1ndk3ton",
-      "sourceIdentifier.value" : "HgjmZ1Psfx",
+      "id" : "ryawvgup",
+      "sourceIdentifier.value" : "jHeY6Fz9Kp",
       "identifiers.value" : [
-        "HgjmZ1Psfx"
+        "jHeY6Fz9Kp"
       ],
       "images.id" : [
       ],
@@ -160,7 +160,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "HgjmZ1Psfx"
+        "jHeY6Fz9Kp"
       ],
       "items.locations.license.id" : [
       ],

@@ -1,22 +1,22 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-05-15T08:17:25.611669Z",
-  "id" : "u1amc1nv",
+  "createdAt" : "2024-08-15T08:40:28.396366Z",
+  "id" : "el5rbb4t",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "u1amc1nv",
+        "id" : "el5rbb4t",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "rB0Sw27DZl"
+          "value" : "uNmLrXrfr8"
         },
-        "version" : 30,
-        "modifiedTime" : "1945-11-08T14:38:47Z"
+        "version" : 48,
+        "modifiedTime" : "2036-09-29T11:49:16Z"
       },
-      "mergedTime" : "1945-11-08T14:38:47Z",
+      "mergedTime" : "2036-09-29T11:49:16Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,7 +24,7 @@
       ]
     },
     "display" : {
-      "id" : "u1amc1nv",
+      "id" : "el5rbb4t",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -38,11 +38,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "rB0Sw27DZl",
+          "value" : "uNmLrXrfr8",
           "type" : "Identifier"
         }
       ],
@@ -94,10 +94,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "u1amc1nv",
-      "sourceIdentifier.value" : "rB0Sw27DZl",
+      "id" : "el5rbb4t",
+      "sourceIdentifier.value" : "uNmLrXrfr8",
       "identifiers.value" : [
-        "rB0Sw27DZl"
+        "uNmLrXrfr8"
       ],
       "images.id" : [
       ],
@@ -160,7 +160,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "rB0Sw27DZl"
+        "uNmLrXrfr8"
       ],
       "items.locations.license.id" : [
       ],

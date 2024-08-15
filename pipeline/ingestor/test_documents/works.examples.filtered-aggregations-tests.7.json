@@ -1,22 +1,22 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-02-16T15:36:45.104231Z",
-  "id" : "nx7u2kmr",
+  "createdAt" : "2024-08-15T08:40:28.396139Z",
+  "id" : "rfckqwuh",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "nx7u2kmr",
+        "id" : "rfckqwuh",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "gyOBC4cRmD"
+          "value" : "e1HWk1Ah2x"
         },
-        "version" : 57,
-        "modifiedTime" : "2059-06-20T15:32:07Z"
+        "version" : 48,
+        "modifiedTime" : "1997-05-16T00:21:21Z"
       },
-      "mergedTime" : "2059-06-20T15:32:07Z",
+      "mergedTime" : "1997-05-16T00:21:21Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,7 +24,7 @@
       ]
     },
     "display" : {
-      "id" : "nx7u2kmr",
+      "id" : "rfckqwuh",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -38,11 +38,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "gyOBC4cRmD",
+          "value" : "e1HWk1Ah2x",
           "type" : "Identifier"
         }
       ],
@@ -94,10 +94,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "nx7u2kmr",
-      "sourceIdentifier.value" : "gyOBC4cRmD",
+      "id" : "rfckqwuh",
+      "sourceIdentifier.value" : "e1HWk1Ah2x",
       "identifiers.value" : [
-        "gyOBC4cRmD"
+        "e1HWk1Ah2x"
       ],
       "images.id" : [
       ],
@@ -160,7 +160,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "gyOBC4cRmD"
+        "e1HWk1Ah2x"
       ],
       "items.locations.license.id" : [
       ],

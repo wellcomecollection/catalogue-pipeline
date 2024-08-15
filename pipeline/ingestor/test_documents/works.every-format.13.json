@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-05-15T08:17:25.505036Z",
+  "createdAt" : "2024-08-15T08:40:28.289755Z",
   "id" : "83tyy1gh",
   "document" : {
     "debug" : {
@@ -29,8 +29,8 @@
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "n",
-        "label" : "Film",
+        "id" : "hdig",
+        "label" : "Archives - Digital",
         "type" : "Format"
       },
       "contributors" : [
@@ -119,7 +119,7 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"n\",\"label\":\"Film\",\"type\":\"Format\"}"
+        "{\"id\":\"hdig\",\"label\":\"Archives - Digital\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
@@ -137,7 +137,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "n",
+      "format.id" : "hdig",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],

@@ -1,22 +1,22 @@
 {
-  "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-15T08:40:28.367350Z",
-  "id" : "ijnwmvup",
+  "description" : "examples for the aggregation-with-filters tests",
+  "createdAt" : "2024-08-15T08:40:28.332265Z",
+  "id" : "y6iujg4j",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "ijnwmvup",
+        "id" : "y6iujg4j",
         "identifier" : {
           "identifierType" : {
             "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "Kd2KzPZAnM"
+          "value" : "xGjZEnp6i2"
         },
-        "version" : 98,
-        "modifiedTime" : "1968-12-03T01:32:55Z"
+        "version" : 42,
+        "modifiedTime" : "2052-01-06T08:18:52Z"
       },
-      "mergedTime" : "1968-12-03T01:32:55Z",
+      "mergedTime" : "2052-01-06T08:18:52Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,21 +24,16 @@
       ]
     },
     "display" : {
-      "id" : "ijnwmvup",
-      "title" : "title-uMNql7LBhP",
+      "id" : "y6iujg4j",
+      "title" : "title-CRDZnkaHR8",
       "alternativeTitles" : [
       ],
+      "workType" : {
+        "id" : "x",
+        "label" : "Manuscripts",
+        "type" : "Format"
+      },
       "contributors" : [
-        {
-          "agent" : {
-            "label" : "Bath, Patricia",
-            "type" : "Person"
-          },
-          "roles" : [
-          ],
-          "primary" : true,
-          "type" : "Contributor"
-        }
       ],
       "identifiers" : [
         {
@@ -47,11 +42,29 @@
             "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "Kd2KzPZAnM",
+          "value" : "xGjZEnp6i2",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
+        {
+          "label" : "hQnFei9OwD",
+          "concepts" : [
+            {
+              "label" : "HmXSsBa8UqTG3Gu",
+              "type" : "Concept"
+            },
+            {
+              "label" : "W07LA7wtXxMtg7d",
+              "type" : "Concept"
+            },
+            {
+              "label" : "koPI8hxmCeKjABF",
+              "type" : "Concept"
+            }
+          ],
+          "type" : "Subject"
+        }
       ],
       "genres" : [
       ],
@@ -89,16 +102,15 @@
       "alternativeTitles" : [
       ],
       "contributors.agent.label" : [
-        "Bath, Patricia"
       ],
       "description" : null,
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "ijnwmvup",
-      "sourceIdentifier.value" : "Kd2KzPZAnM",
+      "id" : "y6iujg4j",
+      "sourceIdentifier.value" : "xGjZEnp6i2",
       "identifiers.value" : [
-        "Kd2KzPZAnM"
+        "xGjZEnp6i2"
       ],
       "images.id" : [
       ],
@@ -120,22 +132,26 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
+        "HmXSsBa8UqTG3Gu",
+        "W07LA7wtXxMtg7d",
+        "koPI8hxmCeKjABF"
       ],
-      "title" : "title-uMNql7LBhP"
+      "title" : "title-CRDZnkaHR8"
     },
     "aggregatableValues" : {
       "workType" : [
+        "{\"id\":\"x\",\"label\":\"Manuscripts\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
+        "{\"label\":\"hQnFei9OwD\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
       "contributors.agent.label" : [
-        "{\"label\":\"Bath, Patricia\",\"type\":\"Person\"}"
       ],
       "items.locations.license" : [
       ],
@@ -143,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : null,
+      "format.id" : "x",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -154,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
+        "hQnFei9OwD"
       ],
       "contributors.agent.label" : [
-        "Bath, Patricia"
       ],
       "identifiers.value" : [
-        "Kd2KzPZAnM"
+        "xGjZEnp6i2"
       ],
       "items.locations.license.id" : [
       ],

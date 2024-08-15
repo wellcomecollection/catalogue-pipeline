@@ -1,22 +1,22 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-05-15T08:17:25.611067Z",
-  "id" : "cpyuhtp8",
+  "createdAt" : "2024-08-15T08:40:28.395909Z",
+  "id" : "7dzlu1am",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "cpyuhtp8",
+        "id" : "7dzlu1am",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "KSqlcVurSf"
+          "value" : "2z2trB0Sw2"
         },
-        "version" : 26,
-        "modifiedTime" : "1958-09-25T01:35:38Z"
+        "version" : 87,
+        "modifiedTime" : "2005-08-09T18:48:42Z"
       },
-      "mergedTime" : "1958-09-25T01:35:38Z",
+      "mergedTime" : "2005-08-09T18:48:42Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,7 +24,7 @@
       ]
     },
     "display" : {
-      "id" : "cpyuhtp8",
+      "id" : "7dzlu1am",
       "title" : "rats",
       "alternativeTitles" : [
       ],
@@ -42,7 +42,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "KSqlcVurSf",
+          "value" : "2z2trB0Sw2",
           "type" : "Identifier"
         }
       ],
@@ -94,10 +94,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "cpyuhtp8",
-      "sourceIdentifier.value" : "KSqlcVurSf",
+      "id" : "7dzlu1am",
+      "sourceIdentifier.value" : "2z2trB0Sw2",
       "identifiers.value" : [
-        "KSqlcVurSf"
+        "2z2trB0Sw2"
       ],
       "images.id" : [
       ],
@@ -160,7 +160,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "KSqlcVurSf"
+        "2z2trB0Sw2"
       ],
       "items.locations.license.id" : [
       ],

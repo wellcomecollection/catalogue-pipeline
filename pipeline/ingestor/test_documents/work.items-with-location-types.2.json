@@ -1,22 +1,22 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-05-15T08:17:25.531459Z",
-  "id" : "xzwsggki",
+  "createdAt" : "2024-08-15T08:40:28.317933Z",
+  "id" : "gubhlxq1",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "xzwsggki",
+        "id" : "gubhlxq1",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "G6KR1DmPfn"
+          "value" : "Qiy0B0TSmD"
         },
-        "version" : 27,
-        "modifiedTime" : "1950-04-09T22:30:42Z"
+        "version" : 52,
+        "modifiedTime" : "1954-07-26T16:28:04Z"
       },
-      "mergedTime" : "1950-04-09T22:30:42Z",
+      "mergedTime" : "1954-07-26T16:28:04Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "xzwsggki",
-      "title" : "title-po5xNC2PnQ",
+      "id" : "gubhlxq1",
+      "title" : "title-wO98EpYD0E",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "G6KR1DmPfn",
+          "value" : "Qiy0B0TSmD",
           "type" : "Identifier"
         }
       ],
@@ -47,15 +47,15 @@
       ],
       "items" : [
         {
-          "id" : "lacffliq",
+          "id" : "iptnnwys",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "sierra-system-number",
-                "label" : "Sierra system number",
+                "id" : "calm-record-id",
+                "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "k2sxFZY9hd",
+              "value" : "EYydewbq2T",
               "type" : "Identifier"
             }
           ],
@@ -68,11 +68,12 @@
               },
               "label" : "locationLabel",
               "license" : {
-                "id" : "pdm",
-                "label" : "Public Domain Mark",
-                "url" : "https://creativecommons.org/share-your-work/public-domain/pdm/",
+                "id" : "ogl",
+                "label" : "Open Government Licence",
+                "url" : "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
                 "type" : "License"
               },
+              "shelfmark" : "Shelfmark: A6uWTQ",
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -123,20 +124,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "xzwsggki",
-      "sourceIdentifier.value" : "G6KR1DmPfn",
+      "id" : "gubhlxq1",
+      "sourceIdentifier.value" : "Qiy0B0TSmD",
       "identifiers.value" : [
-        "G6KR1DmPfn"
+        "Qiy0B0TSmD"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "lacffliq"
+        "iptnnwys"
       ],
       "items.identifiers.value" : [
-        "k2sxFZY9hd"
+        "EYydewbq2T"
       ],
       "languages.label" : [
       ],
@@ -151,7 +152,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-po5xNC2PnQ"
+      "title" : "title-wO98EpYD0E"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -167,7 +168,7 @@
       "contributors.agent.label" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        "{\"id\":\"ogl\",\"label\":\"Open Government Licence\",\"url\":\"http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\"type\":\"License\"}"
       ],
       "availabilities" : [
         "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
@@ -189,18 +190,18 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "G6KR1DmPfn"
+        "Qiy0B0TSmD"
       ],
       "items.locations.license.id" : [
-        "pdm"
+        "ogl"
       ],
       "items.locations.accessConditions.status.id" : [
       ],
       "items.id" : [
-        "lacffliq"
+        "iptnnwys"
       ],
       "items.identifiers.value" : [
-        "k2sxFZY9hd"
+        "EYydewbq2T"
       ],
       "items.locations.locationType.id" : [
         "closed-stores"

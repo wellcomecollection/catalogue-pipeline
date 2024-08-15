@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-15T08:17:25.543585Z",
-  "id" : "iautlnkw",
+  "createdAt" : "2024-08-15T08:40:28.329179Z",
+  "id" : "ior3tm3c",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "iautlnkw",
+        "id" : "ior3tm3c",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "CcLh1PJlWp"
+          "value" : "FndKxMxs7k"
         },
-        "version" : 42,
-        "modifiedTime" : "1945-03-21T21:20:18Z"
+        "version" : 73,
+        "modifiedTime" : "1966-09-05T20:54:00Z"
       },
-      "mergedTime" : "1945-03-21T21:20:18Z",
+      "mergedTime" : "1966-09-05T20:54:00Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "iautlnkw",
-      "title" : "title-W6CgVzwIJF",
+      "id" : "ior3tm3c",
+      "title" : "title-Oqp5RA4f5g",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "u",
-        "label" : "Standing order",
+        "id" : "c",
+        "label" : "Music",
         "type" : "Format"
       },
       "contributors" : [
@@ -38,28 +38,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "CcLh1PJlWp",
+          "value" : "FndKxMxs7k",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "9SceRNaTEl",
+          "label" : "fIbfVPkqaf",
           "concepts" : [
             {
-              "label" : "ZtfG4qEc4MTvdPA",
+              "label" : "Pgpz7am59I9Cwkj",
               "type" : "Concept"
             },
             {
-              "label" : "cgpfIbfVPkqafPg",
+              "label" : "zoIhNdLDgGiVW1m",
               "type" : "Concept"
             },
             {
-              "label" : "pz7am59I9Cwkjzo",
+              "label" : "Q40pgbiIgGzgYBC",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "iautlnkw",
-      "sourceIdentifier.value" : "CcLh1PJlWp",
+      "id" : "ior3tm3c",
+      "sourceIdentifier.value" : "FndKxMxs7k",
       "identifiers.value" : [
-        "CcLh1PJlWp"
+        "FndKxMxs7k"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "ZtfG4qEc4MTvdPA",
-        "cgpfIbfVPkqafPg",
-        "pz7am59I9Cwkjzo"
+        "Pgpz7am59I9Cwkj",
+        "zoIhNdLDgGiVW1m",
+        "Q40pgbiIgGzgYBC"
       ],
-      "title" : "title-W6CgVzwIJF"
+      "title" : "title-Oqp5RA4f5g"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"u\",\"label\":\"Standing order\",\"type\":\"Format\"}"
+        "{\"id\":\"c\",\"label\":\"Music\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"9SceRNaTEl\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"fIbfVPkqaf\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "u",
+      "format.id" : "c",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "9SceRNaTEl"
+        "fIbfVPkqaf"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "CcLh1PJlWp"
+        "FndKxMxs7k"
       ],
       "items.locations.license.id" : [
       ],
