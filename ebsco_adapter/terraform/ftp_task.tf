@@ -31,7 +31,7 @@ resource "aws_scheduler_schedule" "ftp_task_schedule" {
   schedule_expression = "rate(1 days)"
 
   # Disable the schedule for now
-  state = "DISABLED"
+  state = "ENABLED"
 
   target {
     arn      = aws_ecs_cluster.cluster.arn
