@@ -3,6 +3,23 @@ resource "aws_iam_role_policy" "ftp_adapter_publish_to_topic" {
   role   = module.ftp_task.task_role_name
 }
 
+data "aws_iam_policy_document" "ebsco_adapter_reindex_publish_to_topic" {
+  statement {
+    actions = [
+      "sns:Publish",
+    ]
+
+    resources = [
+      local.reindexer_topic_arn,
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "ftp_adapter_publish_to_reindex_topic" {
+  policy = data.aws_iam_policy_document.ebsco_adapter_reindex_publish_to_topic.json
+  role   = module.ftp_task.task_role_name
+}
+
 data "aws_iam_policy_document" "ebsco_s3_bucket_full_access" {
   statement {
     actions = [

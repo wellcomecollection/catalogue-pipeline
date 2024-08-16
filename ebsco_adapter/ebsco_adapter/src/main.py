@@ -20,6 +20,7 @@ ftp_username = os.environ.get("FTP_USERNAME")
 ftp_password = os.environ.get("FTP_PASSWORD")
 ftp_remote_dir = os.environ.get("FTP_REMOTE_DIR")
 sns_topic_arn = os.environ.get("OUTPUT_TOPIC_ARN")
+reindex_topic_arn = os.environ.get("REINDEX_TOPIC_ARN")
 
 s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
 s3_prefix = os.environ.get("S3_PREFIX", "dev")
@@ -144,13 +145,19 @@ if __name__ == "__main__":
 
     process_type = None
     reindex_ids = None
+    sns_publisher = None
+
+    # TODO: Update tests to ensure reindex_topic_arn path is covered
+
     if args.reindex_type:
         process_type = f"reindex-{args.reindex_type}"
-        if args.reindex_ids:
+        sns_publisher = SnsPublisher(reindex_topic_arn)
+    if args.reindex_ids:
             reindex_ids = args.reindex_ids.split(",")
             reindex_ids = [rid.strip() for rid in reindex_ids]
     elif args.scheduled_invoke:
         process_type = "scheduled"
+        sns_publisher = SnsPublisher(sns_topic_arn)
 
     with ProcessMetrics(
         process_type
@@ -158,7 +165,6 @@ if __name__ == "__main__":
         ftp_server, ftp_username, ftp_password, ftp_remote_dir
     ) as ebsco_ftp:
         s3_store = S3Store(s3_bucket)
-        sns_publisher = SnsPublisher(sns_topic_arn)
 
         if args.reindex_type:
             run_reindex(
