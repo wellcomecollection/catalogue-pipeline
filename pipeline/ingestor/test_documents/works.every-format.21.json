@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-05-15T08:17:25.507529Z",
+  "createdAt" : "2024-08-15T08:40:28.291826Z",
   "id" : "3ygkb1yd",
   "document" : {
     "debug" : {
@@ -29,8 +29,8 @@
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "f",
-        "label" : "E-videos",
+        "id" : "j",
+        "label" : "E-journals",
         "type" : "Format"
       },
       "contributors" : [
@@ -119,7 +119,7 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"f\",\"label\":\"E-videos\",\"type\":\"Format\"}"
+        "{\"id\":\"j\",\"label\":\"E-journals\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
@@ -137,7 +137,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "f",
+      "format.id" : "j",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],

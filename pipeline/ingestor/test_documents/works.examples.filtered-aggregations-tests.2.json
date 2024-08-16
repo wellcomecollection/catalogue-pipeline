@@ -1,22 +1,22 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-02-16T15:36:45.102261Z",
-  "id" : "8xiun5qm",
+  "createdAt" : "2024-08-15T08:40:28.394935Z",
+  "id" : "z5orxsbq",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "8xiun5qm",
+        "id" : "z5orxsbq",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "keAffGPGNx"
+          "value" : "K1TpzZmCli"
         },
-        "version" : 75,
-        "modifiedTime" : "1992-09-20T01:47:13Z"
+        "version" : 66,
+        "modifiedTime" : "1981-06-28T10:43:18Z"
       },
-      "mergedTime" : "1992-09-20T01:47:13Z",
+      "mergedTime" : "1981-06-28T10:43:18Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,7 +24,7 @@
       ]
     },
     "display" : {
-      "id" : "8xiun5qm",
+      "id" : "z5orxsbq",
       "title" : "tapirs",
       "alternativeTitles" : [
       ],
@@ -42,7 +42,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "keAffGPGNx",
+          "value" : "K1TpzZmCli",
           "type" : "Identifier"
         }
       ],
@@ -94,10 +94,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "8xiun5qm",
-      "sourceIdentifier.value" : "keAffGPGNx",
+      "id" : "z5orxsbq",
+      "sourceIdentifier.value" : "K1TpzZmCli",
       "identifiers.value" : [
-        "keAffGPGNx"
+        "K1TpzZmCli"
       ],
       "images.id" : [
       ],
@@ -160,7 +160,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "keAffGPGNx"
+        "K1TpzZmCli"
       ],
       "items.locations.license.id" : [
       ],

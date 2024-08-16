@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-15T08:17:25.545284Z",
-  "id" : "kldauk4g",
+  "createdAt" : "2024-08-15T08:40:28.330680Z",
+  "id" : "lmxtr1wn",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "kldauk4g",
+        "id" : "lmxtr1wn",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "fNgtG1SKw3"
+          "value" : "IXCFVccBcF"
         },
-        "version" : 62,
-        "modifiedTime" : "2064-03-27T14:42:18Z"
+        "version" : 47,
+        "modifiedTime" : "2040-03-06T15:16:33Z"
       },
-      "mergedTime" : "2064-03-27T14:42:18Z",
+      "mergedTime" : "2040-03-06T15:16:33Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "kldauk4g",
-      "title" : "title-NsXvX3NJfI",
+      "id" : "lmxtr1wn",
+      "title" : "title-mlLNPr0YHU",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "j",
-        "label" : "E-journals",
+        "id" : "s",
+        "label" : "E-sound",
         "type" : "Format"
       },
       "contributors" : [
@@ -42,24 +42,24 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "fNgtG1SKw3",
+          "value" : "IXCFVccBcF",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "IhNdLDgGiV",
+          "label" : "hQnFei9OwD",
           "concepts" : [
             {
-              "label" : "W1mQ40pgbiIgGzg",
+              "label" : "HmXSsBa8UqTG3Gu",
               "type" : "Concept"
             },
             {
-              "label" : "YBChQnFei9OwDHm",
+              "label" : "W07LA7wtXxMtg7d",
               "type" : "Concept"
             },
             {
-              "label" : "XSsBa8UqTG3GuW0",
+              "label" : "koPI8hxmCeKjABF",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "kldauk4g",
-      "sourceIdentifier.value" : "fNgtG1SKw3",
+      "id" : "lmxtr1wn",
+      "sourceIdentifier.value" : "IXCFVccBcF",
       "identifiers.value" : [
-        "fNgtG1SKw3"
+        "IXCFVccBcF"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "W1mQ40pgbiIgGzg",
-        "YBChQnFei9OwDHm",
-        "XSsBa8UqTG3GuW0"
+        "HmXSsBa8UqTG3Gu",
+        "W07LA7wtXxMtg7d",
+        "koPI8hxmCeKjABF"
       ],
-      "title" : "title-NsXvX3NJfI"
+      "title" : "title-mlLNPr0YHU"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"j\",\"label\":\"E-journals\",\"type\":\"Format\"}"
+        "{\"id\":\"s\",\"label\":\"E-sound\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"IhNdLDgGiV\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"hQnFei9OwD\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "j",
+      "format.id" : "s",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "IhNdLDgGiV"
+        "hQnFei9OwD"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "fNgtG1SKw3"
+        "IXCFVccBcF"
       ],
       "items.locations.license.id" : [
       ],

@@ -31,6 +31,7 @@ class CalmTransformerTest
       "Level" -> "Collection",
       "RefNo" -> "a/b/c",
       "AltRefNo" -> "a.b.c",
+      "Material" -> "Archives - Non-digital",
       "CatalogueStatus" -> "Catalogued",
       "Language" -> "English, with Russian commentary",
       "AccNo" -> """<span class="HIT">WI</span>/<span class="HIT">86</span>"""

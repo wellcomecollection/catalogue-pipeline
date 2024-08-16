@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-15T08:17:25.544011Z",
-  "id" : "3tm3cnoq",
+  "createdAt" : "2024-08-15T08:40:28.329559Z",
+  "id" : "bpisihnt",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "3tm3cnoq",
+        "id" : "bpisihnt",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "KxMxs7kIOR"
+          "value" : "IptlxE0qlB"
         },
-        "version" : 74,
-        "modifiedTime" : "2019-08-09T21:38:32Z"
+        "version" : 96,
+        "modifiedTime" : "1998-11-30T20:57:58Z"
       },
-      "mergedTime" : "2019-08-09T21:38:32Z",
+      "mergedTime" : "1998-11-30T20:57:58Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "3tm3cnoq",
-      "title" : "title-5RA4f5gWVI",
+      "id" : "bpisihnt",
+      "title" : "title-JBs3eSemcG",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "z",
-        "label" : "Web sites",
+        "id" : "u",
+        "label" : "Standing order",
         "type" : "Format"
       },
       "contributors" : [
@@ -38,28 +38,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "KxMxs7kIOR",
+          "value" : "IptlxE0qlB",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "9SceRNaTEl",
+          "label" : "fIbfVPkqaf",
           "concepts" : [
             {
-              "label" : "ZtfG4qEc4MTvdPA",
+              "label" : "Pgpz7am59I9Cwkj",
               "type" : "Concept"
             },
             {
-              "label" : "cgpfIbfVPkqafPg",
+              "label" : "zoIhNdLDgGiVW1m",
               "type" : "Concept"
             },
             {
-              "label" : "pz7am59I9Cwkjzo",
+              "label" : "Q40pgbiIgGzgYBC",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "3tm3cnoq",
-      "sourceIdentifier.value" : "KxMxs7kIOR",
+      "id" : "bpisihnt",
+      "sourceIdentifier.value" : "IptlxE0qlB",
       "identifiers.value" : [
-        "KxMxs7kIOR"
+        "IptlxE0qlB"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "ZtfG4qEc4MTvdPA",
-        "cgpfIbfVPkqafPg",
-        "pz7am59I9Cwkjzo"
+        "Pgpz7am59I9Cwkj",
+        "zoIhNdLDgGiVW1m",
+        "Q40pgbiIgGzgYBC"
       ],
-      "title" : "title-5RA4f5gWVI"
+      "title" : "title-JBs3eSemcG"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"z\",\"label\":\"Web sites\",\"type\":\"Format\"}"
+        "{\"id\":\"u\",\"label\":\"Standing order\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"9SceRNaTEl\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"fIbfVPkqaf\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "z",
+      "format.id" : "u",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "9SceRNaTEl"
+        "fIbfVPkqaf"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "KxMxs7kIOR"
+        "IptlxE0qlB"
       ],
       "items.locations.license.id" : [
       ],

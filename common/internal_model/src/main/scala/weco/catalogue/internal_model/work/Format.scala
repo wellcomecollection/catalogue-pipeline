@@ -100,6 +100,15 @@ object Format extends Enum[Format] {
     override val label: String = "Archives and manuscripts"
   }
 
+  case object ArchivesDigital extends Unlinked {
+    // This format is found in CALM material type, not Sierra.
+    // We have been using ArchivesAndManuscripts as the format
+    // for all CALM sourced works, hence the id here is prefixed
+    // with a "h" to namespace it within "ArchivesAndManuscripts".
+    override val id: String = "hdig"
+    override val label: String = "Archives - Digital"
+  }
+
   case object Film extends Unlinked with Audiovisual {
     override val id: String = "n"
     override val label: String = "Film"

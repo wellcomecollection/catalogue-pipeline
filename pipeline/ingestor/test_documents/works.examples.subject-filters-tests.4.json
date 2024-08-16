@@ -1,22 +1,22 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-05-15T08:17:25.577611Z",
-  "id" : "t8hhmnzs",
+  "createdAt" : "2024-08-15T08:40:28.361688Z",
+  "id" : "ppcdklf9",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "t8hhmnzs",
+        "id" : "ppcdklf9",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "7erLcgxEad"
+          "value" : "3o0GGLKeJC"
         },
-        "version" : 3,
-        "modifiedTime" : "2013-05-09T02:35:31Z"
+        "version" : 31,
+        "modifiedTime" : "2004-11-14T20:49:37Z"
       },
-      "mergedTime" : "2013-05-09T02:35:31Z",
+      "mergedTime" : "2004-11-14T20:49:37Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "t8hhmnzs",
-      "title" : "title-RFusVBNn8S",
+      "id" : "ppcdklf9",
+      "title" : "title-BG0vJlw8MZ",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "7erLcgxEad",
+          "value" : "3o0GGLKeJC",
           "type" : "Identifier"
         }
       ],
@@ -46,15 +46,15 @@
           "label" : "London (England)",
           "concepts" : [
             {
-              "label" : "Z5Ju5hoUH5ZhFqr",
+              "label" : "lxZzGryOg3KGy7M",
               "type" : "Concept"
             },
             {
-              "label" : "BAO66qqlbcmHn7a",
+              "label" : "z5GNUj1it3ic4OR",
               "type" : "Concept"
             },
             {
-              "label" : "ct97zOQ6G6Rkv6Q",
+              "label" : "9LzJV7M3Kvqw9fG",
               "type" : "Concept"
             }
           ],
@@ -64,15 +64,15 @@
           "label" : "Psychology, Pathological",
           "concepts" : [
             {
-              "label" : "H5zn9bqmY6Obq6l",
+              "label" : "ol7E1K1L8XUhcLZ",
               "type" : "Concept"
             },
             {
-              "label" : "xZzGryOg3KGy7Mz",
+              "label" : "hc35m9C4DAgxJAj",
               "type" : "Concept"
             },
             {
-              "label" : "5GNUj1it3ic4OR9",
+              "label" : "Eybh6q7wkoWRiNO",
               "type" : "Concept"
             }
           ],
@@ -94,15 +94,15 @@
           "label" : "Darwin \"Jones\", Charles",
           "concepts" : [
             {
-              "label" : "LzJV7M3Kvqw9fGo",
+              "label" : "oLbpS5jRX3FqozN",
               "type" : "Concept"
             },
             {
-              "label" : "l7E1K1L8XUhcLZh",
+              "label" : "GJ9PfCPwnrkDO6V",
               "type" : "Concept"
             },
             {
-              "label" : "c35m9C4DAgxJAjE",
+              "label" : "p3bULWghZ3Z5q2k",
               "type" : "Concept"
             }
           ],
@@ -150,10 +150,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "t8hhmnzs",
-      "sourceIdentifier.value" : "7erLcgxEad",
+      "id" : "ppcdklf9",
+      "sourceIdentifier.value" : "3o0GGLKeJC",
       "identifiers.value" : [
-        "7erLcgxEad"
+        "3o0GGLKeJC"
       ],
       "images.id" : [
       ],
@@ -175,17 +175,17 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "Z5Ju5hoUH5ZhFqr",
-        "BAO66qqlbcmHn7a",
-        "ct97zOQ6G6Rkv6Q",
-        "H5zn9bqmY6Obq6l",
-        "xZzGryOg3KGy7Mz",
-        "5GNUj1it3ic4OR9",
-        "LzJV7M3Kvqw9fGo",
-        "l7E1K1L8XUhcLZh",
-        "c35m9C4DAgxJAjE"
+        "lxZzGryOg3KGy7M",
+        "z5GNUj1it3ic4OR",
+        "9LzJV7M3Kvqw9fG",
+        "ol7E1K1L8XUhcLZ",
+        "hc35m9C4DAgxJAj",
+        "Eybh6q7wkoWRiNO",
+        "oLbpS5jRX3FqozN",
+        "GJ9PfCPwnrkDO6V",
+        "p3bULWghZ3Z5q2k"
       ],
-      "title" : "title-RFusVBNn8S"
+      "title" : "title-BG0vJlw8MZ"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -227,7 +227,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "7erLcgxEad"
+        "3o0GGLKeJC"
       ],
       "items.locations.license.id" : [
       ],

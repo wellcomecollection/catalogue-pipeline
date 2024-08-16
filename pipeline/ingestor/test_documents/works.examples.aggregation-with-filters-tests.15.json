@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-15T08:17:25.543166Z",
-  "id" : "fzrzebxx",
+  "createdAt" : "2024-08-15T08:40:28.328797Z",
+  "id" : "lwpiautl",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "fzrzebxx",
+        "id" : "lwpiautl",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "fNUyylf5KL"
+          "value" : "2tqCcLh1PJ"
         },
-        "version" : 100,
-        "modifiedTime" : "1939-09-12T19:57:56Z"
+        "version" : 33,
+        "modifiedTime" : "2049-05-05T22:23:19Z"
       },
-      "mergedTime" : "1939-09-12T19:57:56Z",
+      "mergedTime" : "2049-05-05T22:23:19Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "fzrzebxx",
-      "title" : "title-iS5MlN0hQ2",
+      "id" : "lwpiautl",
+      "title" : "title-kWyW6CgVzw",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "c",
-        "label" : "Music",
+        "id" : "b",
+        "label" : "Manuscripts",
         "type" : "Format"
       },
       "contributors" : [
@@ -38,28 +38,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "fNUyylf5KL",
+          "value" : "2tqCcLh1PJ",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "9SceRNaTEl",
+          "label" : "fIbfVPkqaf",
           "concepts" : [
             {
-              "label" : "ZtfG4qEc4MTvdPA",
+              "label" : "Pgpz7am59I9Cwkj",
               "type" : "Concept"
             },
             {
-              "label" : "cgpfIbfVPkqafPg",
+              "label" : "zoIhNdLDgGiVW1m",
               "type" : "Concept"
             },
             {
-              "label" : "pz7am59I9Cwkjzo",
+              "label" : "Q40pgbiIgGzgYBC",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "fzrzebxx",
-      "sourceIdentifier.value" : "fNUyylf5KL",
+      "id" : "lwpiautl",
+      "sourceIdentifier.value" : "2tqCcLh1PJ",
       "identifiers.value" : [
-        "fNUyylf5KL"
+        "2tqCcLh1PJ"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "ZtfG4qEc4MTvdPA",
-        "cgpfIbfVPkqafPg",
-        "pz7am59I9Cwkjzo"
+        "Pgpz7am59I9Cwkj",
+        "zoIhNdLDgGiVW1m",
+        "Q40pgbiIgGzgYBC"
       ],
-      "title" : "title-iS5MlN0hQ2"
+      "title" : "title-kWyW6CgVzw"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"c\",\"label\":\"Music\",\"type\":\"Format\"}"
+        "{\"id\":\"b\",\"label\":\"Manuscripts\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"9SceRNaTEl\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"fIbfVPkqaf\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "c",
+      "format.id" : "b",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "9SceRNaTEl"
+        "fIbfVPkqaf"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "fNUyylf5KL"
+        "2tqCcLh1PJ"
       ],
       "items.locations.license.id" : [
       ],

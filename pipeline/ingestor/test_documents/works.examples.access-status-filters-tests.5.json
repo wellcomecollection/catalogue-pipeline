@@ -1,22 +1,22 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-05-15T08:17:25.602538Z",
-  "id" : "phdnojlc",
+  "createdAt" : "2024-08-15T08:40:28.387760Z",
+  "id" : "8ezcyfql",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "phdnojlc",
+        "id" : "8ezcyfql",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "s5auwvXuSK"
+          "value" : "uDZSkVVbac"
         },
-        "version" : 92,
-        "modifiedTime" : "2032-11-02T13:47:49Z"
+        "version" : 71,
+        "modifiedTime" : "1955-12-31T01:30:20Z"
       },
-      "mergedTime" : "2032-11-02T13:47:49Z",
+      "mergedTime" : "1955-12-31T01:30:20Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "phdnojlc",
-      "title" : "title-kzJLX5AiO6",
+      "id" : "8ezcyfql",
+      "title" : "title-GTOMLJUBPs",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "s5auwvXuSK",
+          "value" : "uDZSkVVbac",
           "type" : "Identifier"
         }
       ],
@@ -47,15 +47,15 @@
       ],
       "items" : [
         {
-          "id" : "udzskvvb",
+          "id" : "rk57syon",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "miro-image-number",
-                "label" : "Miro image number",
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
                 "type" : "IdentifierType"
               },
-              "value" : "c8ezCyfQlB",
+              "value" : "rNNX4MZClE",
               "type" : "Identifier"
             }
           ],
@@ -66,8 +66,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/s66.jpg/info.json",
-              "linkText" : "Link text: bEFIYK",
+              "url" : "https://iiif.wellcomecollection.org/image/vH8.jpg/info.json",
+              "linkText" : "Link text: h1czKSHpT0",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -137,20 +137,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "phdnojlc",
-      "sourceIdentifier.value" : "s5auwvXuSK",
+      "id" : "8ezcyfql",
+      "sourceIdentifier.value" : "uDZSkVVbac",
       "identifiers.value" : [
-        "s5auwvXuSK"
+        "uDZSkVVbac"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "udzskvvb"
+        "rk57syon"
       ],
       "items.identifiers.value" : [
-        "c8ezCyfQlB"
+        "rNNX4MZClE"
       ],
       "languages.label" : [
       ],
@@ -165,7 +165,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-kzJLX5AiO6"
+      "title" : "title-GTOMLJUBPs"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -203,7 +203,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "s5auwvXuSK"
+        "uDZSkVVbac"
       ],
       "items.locations.license.id" : [
         "cc-by"
@@ -212,10 +212,10 @@
         "licensed-resources"
       ],
       "items.id" : [
-        "udzskvvb"
+        "rk57syon"
       ],
       "items.identifiers.value" : [
-        "c8ezCyfQlB"
+        "rNNX4MZClE"
       ],
       "items.locations.locationType.id" : [
         "iiif-presentation"

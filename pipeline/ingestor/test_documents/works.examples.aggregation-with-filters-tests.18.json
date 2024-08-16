@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-05-15T08:17:25.544443Z",
-  "id" : "sihntejb",
+  "createdAt" : "2024-08-15T08:40:28.329924Z",
+  "id" : "gms4hdjm",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "sihntejb",
+        "id" : "gms4hdjm",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "lxE0qlBbPi"
+          "value" : "Xd87ZYKrzx"
         },
-        "version" : 14,
-        "modifiedTime" : "1968-01-10T17:53:21Z"
+        "version" : 78,
+        "modifiedTime" : "2057-03-30T08:52:31Z"
       },
-      "mergedTime" : "1968-01-10T17:53:21Z",
+      "mergedTime" : "2057-03-30T08:52:31Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "sihntejb",
-      "title" : "title-3eSemcGNQX",
+      "id" : "gms4hdjm",
+      "title" : "title-ToBweq2UFK",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "v",
-        "label" : "E-books",
+        "id" : "z",
+        "label" : "Web sites",
         "type" : "Format"
       },
       "contributors" : [
@@ -42,24 +42,24 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "lxE0qlBbPi",
+          "value" : "Xd87ZYKrzx",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "IhNdLDgGiV",
+          "label" : "hQnFei9OwD",
           "concepts" : [
             {
-              "label" : "W1mQ40pgbiIgGzg",
+              "label" : "HmXSsBa8UqTG3Gu",
               "type" : "Concept"
             },
             {
-              "label" : "YBChQnFei9OwDHm",
+              "label" : "W07LA7wtXxMtg7d",
               "type" : "Concept"
             },
             {
-              "label" : "XSsBa8UqTG3GuW0",
+              "label" : "koPI8hxmCeKjABF",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "sihntejb",
-      "sourceIdentifier.value" : "lxE0qlBbPi",
+      "id" : "gms4hdjm",
+      "sourceIdentifier.value" : "Xd87ZYKrzx",
       "identifiers.value" : [
-        "lxE0qlBbPi"
+        "Xd87ZYKrzx"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "W1mQ40pgbiIgGzg",
-        "YBChQnFei9OwDHm",
-        "XSsBa8UqTG3GuW0"
+        "HmXSsBa8UqTG3Gu",
+        "W07LA7wtXxMtg7d",
+        "koPI8hxmCeKjABF"
       ],
-      "title" : "title-3eSemcGNQX"
+      "title" : "title-ToBweq2UFK"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"v\",\"label\":\"E-books\",\"type\":\"Format\"}"
+        "{\"id\":\"z\",\"label\":\"Web sites\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"IhNdLDgGiV\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"hQnFei9OwD\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "v",
+      "format.id" : "z",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "IhNdLDgGiV"
+        "hQnFei9OwD"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "lxE0qlBbPi"
+        "Xd87ZYKrzx"
       ],
       "items.locations.license.id" : [
       ],

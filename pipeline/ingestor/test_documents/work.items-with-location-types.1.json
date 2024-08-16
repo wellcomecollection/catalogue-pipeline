@@ -1,22 +1,22 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-05-15T08:17:25.530744Z",
-  "id" : "feri8p7w",
+  "createdAt" : "2024-08-15T08:40:28.317581Z",
+  "id" : "pfnxzwsg",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "feri8p7w",
+        "id" : "pfnxzwsg",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "MM8GfuD4za"
+          "value" : "3WPG6KR1Dm"
         },
-        "version" : 53,
-        "modifiedTime" : "2033-07-23T10:10:36Z"
+        "version" : 86,
+        "modifiedTime" : "2009-12-08T11:45:37Z"
       },
-      "mergedTime" : "2033-07-23T10:10:36Z",
+      "mergedTime" : "2009-12-08T11:45:37Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "feri8p7w",
-      "title" : "title-WKu978dFW3",
+      "id" : "pfnxzwsg",
+      "title" : "title-KiQpo5xNC2",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "MM8GfuD4za",
+          "value" : "3WPG6KR1Dm",
           "type" : "Identifier"
         }
       ],
@@ -47,7 +47,7 @@
       ],
       "items" : [
         {
-          "id" : "lwa6uwtq",
+          "id" : "k2sxfzy9",
           "identifiers" : [
             {
               "identifierType" : {
@@ -55,7 +55,7 @@
                 "label" : "Calm RecordIdentifier",
                 "type" : "IdentifierType"
               },
-              "value" : "XaTo6WyiCa",
+              "value" : "dRJC6PIObm",
               "type" : "Identifier"
             }
           ],
@@ -66,7 +66,9 @@
                 "label" : "IIIF Image API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/nVo.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/LKO.jpg/info.json",
+              "credit" : "Credit line: PPIvUnh",
+              "linkText" : "Link text: 2Z5Ks7",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -83,7 +85,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/QUS.jpg/info.json",
+              "url" : "https://iiif.wellcomecollection.org/image/7v4.jpg/info.json",
+              "linkText" : "Link text: UCKKVOQ",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -135,20 +138,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "feri8p7w",
-      "sourceIdentifier.value" : "MM8GfuD4za",
+      "id" : "pfnxzwsg",
+      "sourceIdentifier.value" : "3WPG6KR1Dm",
       "identifiers.value" : [
-        "MM8GfuD4za"
+        "3WPG6KR1Dm"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "lwa6uwtq"
+        "k2sxfzy9"
       ],
       "items.identifiers.value" : [
-        "XaTo6WyiCa"
+        "dRJC6PIObm"
       ],
       "languages.label" : [
       ],
@@ -163,7 +166,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-WKu978dFW3"
+      "title" : "title-KiQpo5xNC2"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -201,7 +204,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "MM8GfuD4za"
+        "3WPG6KR1Dm"
       ],
       "items.locations.license.id" : [
         "cc-by",
@@ -210,10 +213,10 @@
       "items.locations.accessConditions.status.id" : [
       ],
       "items.id" : [
-        "lwa6uwtq"
+        "k2sxfzy9"
       ],
       "items.identifiers.value" : [
-        "XaTo6WyiCa"
+        "dRJC6PIObm"
       ],
       "items.locations.locationType.id" : [
         "iiif-image",

@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-02-16T15:36:44.971237Z",
-  "id" : "rdsofxpt",
+  "createdAt" : "2024-08-15T08:40:28.328417Z",
+  "id" : "5klfzrze",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "rdsofxpt",
+        "id" : "5klfzrze",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "YlQvQzSQr2"
+          "value" : "Iw5fNUyylf"
         },
-        "version" : 35,
-        "modifiedTime" : "2033-03-18T16:57:24Z"
+        "version" : 52,
+        "modifiedTime" : "1983-11-07T09:48:39Z"
       },
-      "mergedTime" : "2033-03-18T16:57:24Z",
+      "mergedTime" : "1983-11-07T09:48:39Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "rdsofxpt",
-      "title" : "title-o35aec2IoI",
+      "id" : "5klfzrze",
+      "title" : "title-XXZiS5MlN0",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "b",
-        "label" : "Manuscripts",
+        "id" : "n",
+        "label" : "Film",
         "type" : "Format"
       },
       "contributors" : [
@@ -38,28 +38,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "YlQvQzSQr2",
+          "value" : "Iw5fNUyylf",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "9SceRNaTEl",
+          "label" : "fIbfVPkqaf",
           "concepts" : [
             {
-              "label" : "ZtfG4qEc4MTvdPA",
+              "label" : "Pgpz7am59I9Cwkj",
               "type" : "Concept"
             },
             {
-              "label" : "cgpfIbfVPkqafPg",
+              "label" : "zoIhNdLDgGiVW1m",
               "type" : "Concept"
             },
             {
-              "label" : "pz7am59I9Cwkjzo",
+              "label" : "Q40pgbiIgGzgYBC",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "rdsofxpt",
-      "sourceIdentifier.value" : "YlQvQzSQr2",
+      "id" : "5klfzrze",
+      "sourceIdentifier.value" : "Iw5fNUyylf",
       "identifiers.value" : [
-        "YlQvQzSQr2"
+        "Iw5fNUyylf"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "ZtfG4qEc4MTvdPA",
-        "cgpfIbfVPkqafPg",
-        "pz7am59I9Cwkjzo"
+        "Pgpz7am59I9Cwkj",
+        "zoIhNdLDgGiVW1m",
+        "Q40pgbiIgGzgYBC"
       ],
-      "title" : "title-o35aec2IoI"
+      "title" : "title-XXZiS5MlN0"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"b\",\"label\":\"Manuscripts\",\"type\":\"Format\"}"
+        "{\"id\":\"n\",\"label\":\"Film\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"9SceRNaTEl\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"fIbfVPkqaf\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "b",
+      "format.id" : "n",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "9SceRNaTEl"
+        "fIbfVPkqaf"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "YlQvQzSQr2"
+        "Iw5fNUyylf"
       ],
       "items.locations.license.id" : [
       ],

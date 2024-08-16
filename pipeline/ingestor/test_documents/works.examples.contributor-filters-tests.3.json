@@ -1,22 +1,22 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-05-15T08:17:25.583925Z",
-  "id" : "vcba0kh0",
+  "createdAt" : "2024-08-15T08:40:28.368346Z",
+  "id" : "816tru6j",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "vcba0kh0",
+        "id" : "816tru6j",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "SiI3pPIMZv"
+          "value" : "9jNNS7lxBF"
         },
-        "version" : 82,
-        "modifiedTime" : "2043-08-15T21:52:17Z"
+        "version" : 90,
+        "modifiedTime" : "1969-03-18T15:11:34Z"
       },
-      "mergedTime" : "2043-08-15T21:52:17Z",
+      "mergedTime" : "1969-03-18T15:11:34Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "vcba0kh0",
-      "title" : "title-B2aGWT6gTi",
+      "id" : "816tru6j",
+      "title" : "title-q4UJD6zf5r",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -43,11 +43,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "SiI3pPIMZv",
+          "value" : "9jNNS7lxBF",
           "type" : "Identifier"
         }
       ],
@@ -95,10 +95,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "vcba0kh0",
-      "sourceIdentifier.value" : "SiI3pPIMZv",
+      "id" : "816tru6j",
+      "sourceIdentifier.value" : "9jNNS7lxBF",
       "identifiers.value" : [
-        "SiI3pPIMZv"
+        "9jNNS7lxBF"
       ],
       "images.id" : [
       ],
@@ -121,7 +121,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-B2aGWT6gTi"
+      "title" : "title-q4UJD6zf5r"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -159,7 +159,7 @@
         "Darwin \"Jones\", Charles"
       ],
       "identifiers.value" : [
-        "SiI3pPIMZv"
+        "9jNNS7lxBF"
       ],
       "items.locations.license.id" : [
       ],

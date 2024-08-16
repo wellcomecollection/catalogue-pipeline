@@ -1,22 +1,22 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-05-15T08:17:25.602142Z",
-  "id" : "tq4mfefg",
+  "createdAt" : "2024-08-15T08:40:28.387403Z",
+  "id" : "n2u7aru7",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "tq4mfefg",
+        "id" : "n2u7aru7",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "rG23dzV6hX"
+          "value" : "HrklHuS07i"
         },
-        "version" : 48,
-        "modifiedTime" : "2012-04-21T19:28:19Z"
+        "version" : 73,
+        "modifiedTime" : "1979-09-22T19:35:19Z"
       },
-      "mergedTime" : "2012-04-21T19:28:19Z",
+      "mergedTime" : "1979-09-22T19:35:19Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "tq4mfefg",
-      "title" : "title-Pdnmb6ilPO",
+      "id" : "n2u7aru7",
+      "title" : "title-CiTs5auwvX",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "rG23dzV6hX",
+          "value" : "HrklHuS07i",
           "type" : "Identifier"
         }
       ],
@@ -47,15 +47,15 @@
       ],
       "items" : [
         {
-          "id" : "klhus07i",
+          "id" : "9xyhqdqn",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "sierra-system-number",
-                "label" : "Sierra system number",
+                "id" : "miro-image-number",
+                "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
-              "value" : "2u7aRU7LCi",
+              "value" : "XRANbEFIYK",
               "type" : "Identifier"
             }
           ],
@@ -66,8 +66,8 @@
                 "label" : "IIIF Presentation API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/1fY.jpg/info.json",
-              "linkText" : "Link text: NIu1OH",
+              "url" : "https://iiif.wellcomecollection.org/image/SKp.jpg/info.json",
+              "linkText" : "Link text: X5AiO63s6",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -137,20 +137,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "tq4mfefg",
-      "sourceIdentifier.value" : "rG23dzV6hX",
+      "id" : "n2u7aru7",
+      "sourceIdentifier.value" : "HrklHuS07i",
       "identifiers.value" : [
-        "rG23dzV6hX"
+        "HrklHuS07i"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "klhus07i"
+        "9xyhqdqn"
       ],
       "items.identifiers.value" : [
-        "2u7aRU7LCi"
+        "XRANbEFIYK"
       ],
       "languages.label" : [
       ],
@@ -165,7 +165,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-Pdnmb6ilPO"
+      "title" : "title-CiTs5auwvX"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -203,7 +203,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "rG23dzV6hX"
+        "HrklHuS07i"
       ],
       "items.locations.license.id" : [
         "cc-by"
@@ -212,10 +212,10 @@
         "open-with-advisory"
       ],
       "items.id" : [
-        "klhus07i"
+        "9xyhqdqn"
       ],
       "items.identifiers.value" : [
-        "2u7aRU7LCi"
+        "XRANbEFIYK"
       ],
       "items.locations.locationType.id" : [
         "iiif-presentation"
