@@ -1,22 +1,22 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-02-16T15:36:44.970667Z",
-  "id" : "bsxzfe7h",
+  "createdAt" : "2024-08-15T08:40:28.328063Z",
+  "id" : "qr2rdsof",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "bsxzfe7h",
+        "id" : "qr2rdsof",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "MPZzhLJtbk"
+          "value" : "b5lYlQvQzS"
         },
-        "version" : 88,
-        "modifiedTime" : "1998-08-02T02:39:28Z"
+        "version" : 25,
+        "modifiedTime" : "1934-10-12T18:01:51Z"
       },
-      "mergedTime" : "1998-08-02T02:39:28Z",
+      "mergedTime" : "1934-10-12T18:01:51Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,13 +24,13 @@
       ]
     },
     "display" : {
-      "id" : "bsxzfe7h",
-      "title" : "title-IlUXQf0x4b",
+      "id" : "qr2rdsof",
+      "title" : "title-PTXo35aec2",
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "n",
-        "label" : "Film",
+        "id" : "hdig",
+        "label" : "Archives - Digital",
         "type" : "Format"
       },
       "contributors" : [
@@ -38,28 +38,28 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "MPZzhLJtbk",
+          "value" : "b5lYlQvQzS",
           "type" : "Identifier"
         }
       ],
       "subjects" : [
         {
-          "label" : "9SceRNaTEl",
+          "label" : "fIbfVPkqaf",
           "concepts" : [
             {
-              "label" : "ZtfG4qEc4MTvdPA",
+              "label" : "Pgpz7am59I9Cwkj",
               "type" : "Concept"
             },
             {
-              "label" : "cgpfIbfVPkqafPg",
+              "label" : "zoIhNdLDgGiVW1m",
               "type" : "Concept"
             },
             {
-              "label" : "pz7am59I9Cwkjzo",
+              "label" : "Q40pgbiIgGzgYBC",
               "type" : "Concept"
             }
           ],
@@ -107,10 +107,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "bsxzfe7h",
-      "sourceIdentifier.value" : "MPZzhLJtbk",
+      "id" : "qr2rdsof",
+      "sourceIdentifier.value" : "b5lYlQvQzS",
       "identifiers.value" : [
-        "MPZzhLJtbk"
+        "b5lYlQvQzS"
       ],
       "images.id" : [
       ],
@@ -132,22 +132,22 @@
       ],
       "referenceNumber" : null,
       "subjects.concepts.label" : [
-        "ZtfG4qEc4MTvdPA",
-        "cgpfIbfVPkqafPg",
-        "pz7am59I9Cwkjzo"
+        "Pgpz7am59I9Cwkj",
+        "zoIhNdLDgGiVW1m",
+        "Q40pgbiIgGzgYBC"
       ],
-      "title" : "title-IlUXQf0x4b"
+      "title" : "title-PTXo35aec2"
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"n\",\"label\":\"Film\",\"type\":\"Format\"}"
+        "{\"id\":\"hdig\",\"label\":\"Archives - Digital\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
       "production.dates" : [
       ],
       "subjects.label" : [
-        "{\"label\":\"9SceRNaTEl\",\"concepts\":[],\"type\":\"Subject\"}"
+        "{\"label\":\"fIbfVPkqaf\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
@@ -159,7 +159,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "n",
+      "format.id" : "hdig",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],
@@ -170,12 +170,12 @@
       "genres.concepts.id" : [
       ],
       "subjects.label" : [
-        "9SceRNaTEl"
+        "fIbfVPkqaf"
       ],
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "MPZzhLJtbk"
+        "b5lYlQvQzS"
       ],
       "items.locations.license.id" : [
       ],

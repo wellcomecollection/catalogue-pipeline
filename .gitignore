@@ -398,3 +398,13 @@ update_task_for_config_change/src/simplejson/
 update_task_for_config_change/src/structlog/
 
 .hydra/
+
+# Ignore pyenv virtualenvs
+**/*/bin
+pyvenv.cfg
+
+# Ignore input to reindexer
+reindexer/scripts/ids
+
+# Ignore output miro links script
+scripts/mirolinks.csv

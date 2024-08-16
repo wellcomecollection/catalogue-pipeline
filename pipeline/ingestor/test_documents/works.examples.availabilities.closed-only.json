@@ -1,22 +1,22 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-05-15T08:17:25.619978Z",
-  "id" : "bb4tv6zd",
+  "createdAt" : "2024-08-15T08:40:28.404121Z",
+  "id" : "iopgf0nj",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "bb4tv6zd",
+        "id" : "iopgf0nj",
         "identifier" : {
           "identifierType" : {
             "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "rXrfr8eL5R"
+          "value" : "3glZntXsvt"
         },
-        "version" : 47,
-        "modifiedTime" : "1969-11-05T18:12:49Z"
+        "version" : 64,
+        "modifiedTime" : "1940-10-05T05:45:04Z"
       },
-      "mergedTime" : "1969-11-05T18:12:49Z",
+      "mergedTime" : "1940-10-05T05:45:04Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "bb4tv6zd",
-      "title" : "title-uptWXSBlJF",
+      "id" : "iopgf0nj",
+      "title" : "title-tuZQUd4A61",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -37,7 +37,7 @@
             "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "rXrfr8eL5R",
+          "value" : "3glZntXsvt",
           "type" : "Identifier"
         }
       ],
@@ -47,7 +47,7 @@
       ],
       "items" : [
         {
-          "id" : "lbwsensp",
+          "id" : "wpw7kqmd",
           "identifiers" : [
             {
               "identifierType" : {
@@ -55,7 +55,7 @@
                 "label" : "Miro image number",
                 "type" : "IdentifierType"
               },
-              "value" : "JJ01MHKXQ3",
+              "value" : "vOEvkncTXy",
               "type" : "Identifier"
             }
           ],
@@ -68,11 +68,12 @@
               },
               "label" : "locationLabel",
               "license" : {
-                "id" : "cc-by",
-                "label" : "Attribution 4.0 International (CC BY 4.0)",
-                "url" : "http://creativecommons.org/licenses/by/4.0/",
+                "id" : "ogl",
+                "label" : "Open Government Licence",
+                "url" : "http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
                 "type" : "License"
               },
+              "shelfmark" : "Shelfmark: UIgSWmx",
               "accessConditions" : [
               ],
               "type" : "PhysicalLocation"
@@ -123,20 +124,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "bb4tv6zd",
-      "sourceIdentifier.value" : "rXrfr8eL5R",
+      "id" : "iopgf0nj",
+      "sourceIdentifier.value" : "3glZntXsvt",
       "identifiers.value" : [
-        "rXrfr8eL5R"
+        "3glZntXsvt"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "lbwsensp"
+        "wpw7kqmd"
       ],
       "items.identifiers.value" : [
-        "JJ01MHKXQ3"
+        "vOEvkncTXy"
       ],
       "languages.label" : [
       ],
@@ -151,7 +152,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-uptWXSBlJF"
+      "title" : "title-tuZQUd4A61"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -167,7 +168,7 @@
       "contributors.agent.label" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        "{\"id\":\"ogl\",\"label\":\"Open Government Licence\",\"url\":\"http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\"type\":\"License\"}"
       ],
       "availabilities" : [
         "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
@@ -189,18 +190,18 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "rXrfr8eL5R"
+        "3glZntXsvt"
       ],
       "items.locations.license.id" : [
-        "cc-by"
+        "ogl"
       ],
       "items.locations.accessConditions.status.id" : [
       ],
       "items.id" : [
-        "lbwsensp"
+        "wpw7kqmd"
       ],
       "items.identifiers.value" : [
-        "JJ01MHKXQ3"
+        "vOEvkncTXy"
       ],
       "items.locations.locationType.id" : [
         "closed-stores"

@@ -1,22 +1,22 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-05-15T08:17:25.530111Z",
-  "id" : "tnnwysoe",
+  "createdAt" : "2024-08-15T08:40:28.317189Z",
+  "id" : "4zaferi8",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "tnnwysoe",
+        "id" : "4zaferi8",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "JC6PIObmiP"
+          "value" : "lfxMM8GfuD"
         },
-        "version" : 42,
-        "modifiedTime" : "1968-08-04T13:15:13Z"
+        "version" : 86,
+        "modifiedTime" : "2038-12-13T02:35:56Z"
       },
-      "mergedTime" : "1968-08-04T13:15:13Z",
+      "mergedTime" : "2038-12-13T02:35:56Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "tnnwysoe",
-      "title" : "title-ydewbq2T7l",
+      "id" : "4zaferi8",
+      "title" : "title-7W1WKu978d",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -33,11 +33,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "JC6PIObmiP",
+          "value" : "lfxMM8GfuD",
           "type" : "Identifier"
         }
       ],
@@ -47,15 +47,15 @@
       ],
       "items" : [
         {
-          "id" : "4bhmwgtz",
+          "id" : "xato6wyi",
           "identifiers" : [
             {
               "identifierType" : {
-                "id" : "calm-record-id",
-                "label" : "Calm RecordIdentifier",
+                "id" : "sierra-system-number",
+                "label" : "Sierra system number",
                 "type" : "IdentifierType"
               },
-              "value" : "0FUCKKVOQZ",
+              "value" : "aLacffLiQz",
               "type" : "Identifier"
             }
           ],
@@ -66,9 +66,8 @@
                 "label" : "IIIF Image API",
                 "type" : "LocationType"
               },
-              "url" : "https://iiif.wellcomecollection.org/image/Fmn.jpg/info.json",
-              "credit" : "Credit line: IEpzyM",
-              "linkText" : "Link text: tI2pjU6",
+              "url" : "https://iiif.wellcomecollection.org/image/n6e.jpg/info.json",
+              "linkText" : "Link text: UShs8ZXp5K",
               "license" : {
                 "id" : "cc-by",
                 "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -120,20 +119,20 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "tnnwysoe",
-      "sourceIdentifier.value" : "JC6PIObmiP",
+      "id" : "4zaferi8",
+      "sourceIdentifier.value" : "lfxMM8GfuD",
       "identifiers.value" : [
-        "JC6PIObmiP"
+        "lfxMM8GfuD"
       ],
       "images.id" : [
       ],
       "images.identifiers.value" : [
       ],
       "items.id" : [
-        "4bhmwgtz"
+        "xato6wyi"
       ],
       "items.identifiers.value" : [
-        "0FUCKKVOQZ"
+        "aLacffLiQz"
       ],
       "languages.label" : [
       ],
@@ -148,7 +147,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-ydewbq2T7l"
+      "title" : "title-7W1WKu978d"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -185,7 +184,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "JC6PIObmiP"
+        "lfxMM8GfuD"
       ],
       "items.locations.license.id" : [
         "cc-by"
@@ -193,10 +192,10 @@
       "items.locations.accessConditions.status.id" : [
       ],
       "items.id" : [
-        "4bhmwgtz"
+        "xato6wyi"
       ],
       "items.identifiers.value" : [
-        "0FUCKKVOQZ"
+        "aLacffLiQz"
       ],
       "items.locations.locationType.id" : [
         "iiif-image"

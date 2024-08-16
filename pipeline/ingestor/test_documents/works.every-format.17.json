@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-05-15T08:17:25.506336Z",
+  "createdAt" : "2024-08-15T08:40:28.290816Z",
   "id" : "9is9e3tz",
   "document" : {
     "debug" : {
@@ -29,8 +29,8 @@
       "alternativeTitles" : [
       ],
       "workType" : {
-        "id" : "z",
-        "label" : "Web sites",
+        "id" : "u",
+        "label" : "Standing order",
         "type" : "Format"
       },
       "contributors" : [
@@ -119,7 +119,7 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"z\",\"label\":\"Web sites\",\"type\":\"Format\"}"
+        "{\"id\":\"u\",\"label\":\"Standing order\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
@@ -137,7 +137,7 @@
       ]
     },
     "filterableValues" : {
-      "format.id" : "z",
+      "format.id" : "u",
       "workType" : "Standard",
       "production.dates.range.from" : [
       ],

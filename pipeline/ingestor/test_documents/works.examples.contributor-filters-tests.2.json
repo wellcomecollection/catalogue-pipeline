@@ -1,22 +1,22 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-05-15T08:17:25.583599Z",
-  "id" : "wmvuppum",
+  "createdAt" : "2024-08-15T08:40:28.368053Z",
+  "id" : "5ramofto",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "wmvuppum",
+        "id" : "5ramofto",
         "identifier" : {
           "identifierType" : {
-            "id" : "calm-record-id"
+            "id" : "sierra-system-number"
           },
           "ontologyType" : "Work",
-          "value" : "KzPZAnMiJN"
+          "value" : "iZ6KWys5lZ"
         },
-        "version" : 60,
-        "modifiedTime" : "1945-07-07T10:18:32Z"
+        "version" : 77,
+        "modifiedTime" : "1998-03-21T07:04:06Z"
       },
-      "mergedTime" : "1945-07-07T10:18:32Z",
+      "mergedTime" : "1998-03-21T07:04:06Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "wmvuppum",
-      "title" : "title-ql7LBhP7Ng",
+      "id" : "5ramofto",
+      "title" : "title-5bCvMTmP7w",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -43,11 +43,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "calm-record-id",
-            "label" : "Calm RecordIdentifier",
+            "id" : "sierra-system-number",
+            "label" : "Sierra system number",
             "type" : "IdentifierType"
           },
-          "value" : "KzPZAnMiJN",
+          "value" : "iZ6KWys5lZ",
           "type" : "Identifier"
         }
       ],
@@ -95,10 +95,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "wmvuppum",
-      "sourceIdentifier.value" : "KzPZAnMiJN",
+      "id" : "5ramofto",
+      "sourceIdentifier.value" : "iZ6KWys5lZ",
       "identifiers.value" : [
-        "KzPZAnMiJN"
+        "iZ6KWys5lZ"
       ],
       "images.id" : [
       ],
@@ -121,7 +121,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-ql7LBhP7Ng"
+      "title" : "title-5bCvMTmP7w"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -159,7 +159,7 @@
         "Jake Paul"
       ],
       "identifiers.value" : [
-        "KzPZAnMiJN"
+        "iZ6KWys5lZ"
       ],
       "items.locations.license.id" : [
       ],

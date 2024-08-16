@@ -1,22 +1,22 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-05-15T08:17:25.610416Z",
-  "id" : "xsbqgayk",
+  "createdAt" : "2024-08-15T08:40:28.395413Z",
+  "id" : "ursfcpyu",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "xsbqgayk",
+        "id" : "ursfcpyu",
         "identifier" : {
           "identifierType" : {
-            "id" : "sierra-system-number"
+            "id" : "miro-image-number"
           },
           "ontologyType" : "Work",
-          "value" : "zZmCliZ5OR"
+          "value" : "DATqKSqlcV"
         },
-        "version" : 75,
-        "modifiedTime" : "2065-03-14T20:41:38Z"
+        "version" : 18,
+        "modifiedTime" : "2068-12-03T06:41:51Z"
       },
-      "mergedTime" : "2065-03-14T20:41:38Z",
+      "mergedTime" : "2068-12-03T06:41:51Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,7 +24,7 @@
       ]
     },
     "display" : {
-      "id" : "xsbqgayk",
+      "id" : "ursfcpyu",
       "title" : "capybara",
       "alternativeTitles" : [
       ],
@@ -38,11 +38,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "sierra-system-number",
-            "label" : "Sierra system number",
+            "id" : "miro-image-number",
+            "label" : "Miro image number",
             "type" : "IdentifierType"
           },
-          "value" : "zZmCliZ5OR",
+          "value" : "DATqKSqlcV",
           "type" : "Identifier"
         }
       ],
@@ -94,10 +94,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "xsbqgayk",
-      "sourceIdentifier.value" : "zZmCliZ5OR",
+      "id" : "ursfcpyu",
+      "sourceIdentifier.value" : "DATqKSqlcV",
       "identifiers.value" : [
-        "zZmCliZ5OR"
+        "DATqKSqlcV"
       ],
       "images.id" : [
       ],
@@ -160,7 +160,7 @@
       "contributors.agent.label" : [
       ],
       "identifiers.value" : [
-        "zZmCliZ5OR"
+        "DATqKSqlcV"
       ],
       "items.locations.license.id" : [
       ],

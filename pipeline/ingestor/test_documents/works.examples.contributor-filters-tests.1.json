@@ -1,22 +1,22 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-05-15T08:17:25.583261Z",
-  "id" : "r7wachux",
+  "createdAt" : "2024-08-15T08:40:28.367729Z",
+  "id" : "mzvvcba0",
   "document" : {
     "debug" : {
       "source" : {
-        "id" : "r7wachux",
+        "id" : "mzvvcba0",
         "identifier" : {
           "identifierType" : {
-            "id" : "miro-image-number"
+            "id" : "calm-record-id"
           },
           "ontologyType" : "Work",
-          "value" : "GY2AKxyW0l"
+          "value" : "gDuSiI3pPI"
         },
-        "version" : 16,
-        "modifiedTime" : "1986-10-13T12:45:40Z"
+        "version" : 29,
+        "modifiedTime" : "1993-02-03T00:28:21Z"
       },
-      "mergedTime" : "1986-10-13T12:45:40Z",
+      "mergedTime" : "1993-02-03T00:28:21Z",
       "indexedTime" : "2001-01-01T01:01:01Z",
       "redirectSources" : [
       ],
@@ -24,8 +24,8 @@
       ]
     },
     "display" : {
-      "id" : "r7wachux",
-      "title" : "title-rv8PglAGaK",
+      "id" : "mzvvcba0",
+      "title" : "title-h0iB2aGWT6",
       "alternativeTitles" : [
       ],
       "contributors" : [
@@ -43,11 +43,11 @@
       "identifiers" : [
         {
           "identifierType" : {
-            "id" : "miro-image-number",
-            "label" : "Miro image number",
+            "id" : "calm-record-id",
+            "label" : "Calm RecordIdentifier",
             "type" : "IdentifierType"
           },
-          "value" : "GY2AKxyW0l",
+          "value" : "gDuSiI3pPI",
           "type" : "Identifier"
         }
       ],
@@ -95,10 +95,10 @@
       "edition" : null,
       "genres.concepts.label" : [
       ],
-      "id" : "r7wachux",
-      "sourceIdentifier.value" : "GY2AKxyW0l",
+      "id" : "mzvvcba0",
+      "sourceIdentifier.value" : "gDuSiI3pPI",
       "identifiers.value" : [
-        "GY2AKxyW0l"
+        "gDuSiI3pPI"
       ],
       "images.id" : [
       ],
@@ -121,7 +121,7 @@
       "referenceNumber" : null,
       "subjects.concepts.label" : [
       ],
-      "title" : "title-rv8PglAGaK"
+      "title" : "title-h0iB2aGWT6"
     },
     "aggregatableValues" : {
       "workType" : [
@@ -159,7 +159,7 @@
         "Karl Marx"
       ],
       "identifiers.value" : [
-        "GY2AKxyW0l"
+        "gDuSiI3pPI"
       ],
       "items.locations.license.id" : [
       ],
