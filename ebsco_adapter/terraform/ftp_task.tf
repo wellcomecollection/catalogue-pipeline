@@ -68,7 +68,7 @@ resource "aws_scheduler_schedule" "ftp_task_schedule" {
 }
 
 resource "aws_cloudwatch_event_rule" "reindex_rule" {
-  name        = "cloudwatch-rule"
+  name        = "ebsco-adapter-reindex-rule"
   description = "Rule to catch custom reindex event"
   event_pattern = jsonencode({
     "source": ["weco.pipeline.reindex"],
@@ -105,8 +105,4 @@ resource "aws_cloudwatch_event_target" "ftp_task_reindex_target" {
       }
     ]
   })
-
-  retry_policy {
-    maximum_retry_attempts = 3
-  }
 }

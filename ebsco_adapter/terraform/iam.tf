@@ -89,6 +89,13 @@ resource "aws_iam_role" "eventbridge_task_scheduler" {
           Service = ["scheduler.amazonaws.com"]
         }
         Action = "sts:AssumeRole"
+      },
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = ["events.amazonaws.com"]
+        }
+        Action = "sts:AssumeRole"
       }
     ]
   })
