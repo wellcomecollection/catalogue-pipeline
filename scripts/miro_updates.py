@@ -162,16 +162,6 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
     _request_reindex_for(miro_id)
 
 
-def make_image_available(*, miro_id, message: str):
-    """
-    Make a Miro image available on wellcomecollection.org.
-    """
-    _set_image_availability(miro_id=miro_id, message=message, is_available=True)
-    print(
-        f"Warning: you need to register {miro_id} with DLCS separately", file=sys.stderr
-    )
-
-
 def _remove_image_from_elasticsearch(*, miro_id):
     search_templates_url = (
         "https://api.wellcomecollection.org/catalogue/v2/search-templates.json"
@@ -273,10 +263,9 @@ def suppress_image(*, miro_id, message: str):
     _remove_image_from_cloudfront(miro_id=miro_id)
 
 
-def unsuppress_image(*, miro_id, message: str):
+def unsuppress_image(*, miro_id: str, origin: str, message: str):
     """
-    Reinstate a hidden Miro image from wellcomecollection.org.
-    These operations must happen in a specific order: _set_image_availability first, as the DDB table is the source of truth for Miro images when building pipelines
+    Reinstate a hidden Miro image
     """
     sns_client = SESSION.client("sns")
     topic_arn = _get_reindexer_topic_arn()
@@ -284,7 +273,14 @@ def unsuppress_image(*, miro_id, message: str):
         print("Nothing is listening to the reindexer, this action will not have the expected effect, aborting")
         exit(1)
 
+    # First, make the DDS record reflect that the image should be visible
     _set_image_availability(miro_id=miro_id, message=message, is_available=True)
+
+    # Now the actual image must be registered on DLCS so that it can be seen
+    register_on_dlcs(
+        origin_url=origin,
+        miro_id=miro_id)
+    # Finally, reindex the Miro record. This makes the Image record available to the API.
     _request_reindex_for(miro_id=miro_id)
 
 
@@ -489,7 +485,7 @@ def update_miro_image_suppressions_doc():
 
 def register_on_dlcs(origin_url, miro_id):
     dlcs_response = dlcs_api_client().post(
-        f"https://api.dlcs.io/customers/2/queue",
+        f"https://api.dlcs.io/customers/2/queue/priority",
         json={
             "@type": "Collection",
             "member": [
