@@ -101,7 +101,7 @@ resource "aws_cloudwatch_event_target" "ftp_task_reindex_target" {
     containerOverrides = [
       {
         name    = "ebsco-adapter-ftp"
-        command = ["--reindex-type full"]
+        command = ["--reindex-type", "full"]
       }
     ]
   })

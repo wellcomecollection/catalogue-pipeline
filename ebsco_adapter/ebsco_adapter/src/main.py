@@ -147,8 +147,6 @@ if __name__ == "__main__":
     reindex_ids = None
     sns_publisher = None
 
-    # TODO: Update tests to ensure reindex_topic_arn path is covered
-
     if args.reindex_type:
         process_type = f"reindex-{args.reindex_type}"
         sns_publisher = SnsPublisher(reindex_topic_arn)
