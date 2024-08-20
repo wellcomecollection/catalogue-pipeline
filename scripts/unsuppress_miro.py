@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 import click
-import re
-import httpx
 
-from miro_updates import unsuppress_image, register_on_dlcs, _remove_image_from_dlcs
-
-miro_id_regex = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
+from miro_updates import unsuppress_image, register_on_dlcs, _remove_image_from_dlcs, is_valid_miro_id
 
 
 @click.command()
@@ -48,28 +44,15 @@ def unsuppress_miro(id, origin, message):
     If you are confident that it is not working, and you wish it to be, suppress it
     (specifically, this is in order remove it from DLCS) and try again.
     """
-
-    if miro_id_regex.search(id):
+    id = id.strip()
+    if is_valid_miro_id(id):
         miro_id = id
     else:
-        catalogue_response = httpx.get(
-            f"https://api.wellcomecollection.org/catalogue/v2/works/{id}?include=identifiers"
+        raise click.ClickException(
+            f"{id} doesn't look like a Miro ID and isn't the identifier of a catalogue record containing a Miro ID"
         )
-        try:
-            response_data = catalogue_response.json()
-            identifiers = response_data["identifiers"]
-            miro_id = next(
-                i["value"]
-                for i in identifiers
-                if i["identifierType"]["id"] == "miro-image-number"
-            )
-            print(f"Miro identifier: {miro_id}")
-        except Exception:
-            raise click.ClickException(
-                f"{id} doesn't look like a Miro ID and isn't the identifier of a catalogue record containing a Miro ID"
-            )
 
-    unsuppress_image(miro_id=miro_id, origin=origin, message=message)
+    # unsuppress_image(miro_id=miro_id, origin=origin, message=message)
 
 
 if __name__ == "__main__":

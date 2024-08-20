@@ -8,6 +8,7 @@ import functools
 import itertools
 import json
 import sys
+import re
 
 import boto3
 import httpx
@@ -499,3 +500,10 @@ def register_on_dlcs(origin_url, miro_id):
         },
     )
     print(dlcs_response.text)
+
+
+RE_MIRO_ID = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
+
+
+def is_valid_miro_id(maybe_miro_id: str):
+    return RE_MIRO_ID.fullmatch(maybe_miro_id)
