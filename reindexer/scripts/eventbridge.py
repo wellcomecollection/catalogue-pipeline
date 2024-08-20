@@ -15,7 +15,6 @@ def send_eventbridge_reindex_event(session, reindex_target):
     if reindex_target not in EVENTBRIDGE_REINDEX_TARGETS:
         raise ValueError(f"Invalid reindex target: {reindex_target}")
 
-    print(f"Sending EventBridge event to reindex: {reindex_target}")
     response = session.client("events").put_events(
         Entries=[
             {

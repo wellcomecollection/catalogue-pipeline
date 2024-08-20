@@ -221,6 +221,7 @@ def start_reindex(ctx, src, dst, mode, input_file):
             click.confirm(click.style(warning_message, "yellow"), abort=True)
 
         if src in EVENTBRIDGE_REINDEX_TARGETS:
+            print(f"Starting an eventbridge reindex {src} ~> {dst}")
             send_eventbridge_reindex_event(session, src)
         else:
             for source in SOURCES.keys():
@@ -230,6 +231,7 @@ def start_reindex(ctx, src, dst, mode, input_file):
                 print("")
 
             for reindex_target in EVENTBRIDGE_REINDEX_TARGETS:
+                print(f"Starting an eventbridge reindex {reindex_target} ~> {dst}")
                 send_eventbridge_reindex_event(session, reindex_target)
 
         return
