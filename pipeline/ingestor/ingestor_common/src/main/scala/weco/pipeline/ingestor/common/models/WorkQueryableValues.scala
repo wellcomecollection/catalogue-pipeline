@@ -1,11 +1,7 @@
 package weco.pipeline.ingestor.common.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.{
-  CanonicalId,
-  DataState,
-  SourceIdentifier
-}
+import weco.catalogue.internal_model.identifiers.{CanonicalId, DataState, SourceIdentifier}
 import weco.catalogue.internal_model.work.{Relations, Work, WorkData, WorkState}
 
 case class WorkQueryableValues(
@@ -23,6 +19,7 @@ case class WorkQueryableValues(
   @JsonKey("images.identifiers.value") imagesIdentifiersValue: List[String],
   @JsonKey("items.id") itemsId: List[String],
   @JsonKey("items.identifiers.value") itemsIdentifiersValue: List[String],
+  @JsonKey("items.shelfmark.value") itemsShelfmarksValue: List[String],
   @JsonKey("languages.label") languagesLabel: List[String],
   @JsonKey("lettering") lettering: Option[String],
   @JsonKey("notes.contents") notesContents: List[String],
@@ -63,6 +60,9 @@ case object WorkQueryableValues {
       itemsId = data.items.map(_.id).canonicalIds,
       itemsIdentifiersValue =
         data.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
+      itemsShelfmarksValue = data.items
+        .flatMap(_.locations)
+        .flatMap(locationShelfmark),
       languagesLabel = data.languages.map(_.label),
       lettering = data.lettering,
       notesContents = data.notes.map(_.contents),
