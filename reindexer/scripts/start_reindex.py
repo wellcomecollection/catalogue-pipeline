@@ -21,6 +21,7 @@ SOURCES = {
 
 DESTINATIONS = ["catalogue", "catalogue_miro_updates", "reporting"]
 
+
 def how_many_segments(table_name):
     """
     When we do a complete reindex, we need to tell the reindexer how many segments
@@ -182,7 +183,9 @@ def verify_specific_ids(*, source, specific_ids):
     # To run a reindex, avoiding the creation of unwanted Image records,
     # we need to first run everything that is not miro, then once that
     # has all made it through the matcher/merger, run miro.
-    type=click.Choice(["all"] + ["notmiro"] + EVENTBRIDGE_REINDEX_TARGETS + list(SOURCES.keys())),
+    type=click.Choice(
+        ["all"] + ["notmiro"] + EVENTBRIDGE_REINDEX_TARGETS + list(SOURCES.keys())
+    ),
     required=True,
     prompt="Which source do you want to reindex?",
     help="Name of the source to reindex, or all to reindex all sources",

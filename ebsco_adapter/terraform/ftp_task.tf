@@ -71,17 +71,17 @@ resource "aws_cloudwatch_event_rule" "reindex_rule" {
   name        = "ebsco-adapter-reindex-rule"
   description = "Rule to catch custom reindex event"
   event_pattern = jsonencode({
-    "source": ["weco.pipeline.reindex"],
-    "detail": {
-      "ReindexTargets": ["ebsco"]
+    "source" : ["weco.pipeline.reindex"],
+    "detail" : {
+      "ReindexTargets" : ["ebsco"]
     }
   })
 }
 
 resource "aws_cloudwatch_event_target" "ftp_task_reindex_target" {
-  arn       = aws_ecs_cluster.cluster.arn
-  rule      = aws_cloudwatch_event_rule.reindex_rule.name
-  role_arn  = aws_iam_role.eventbridge_task_scheduler.arn
+  arn      = aws_ecs_cluster.cluster.arn
+  rule     = aws_cloudwatch_event_rule.reindex_rule.name
+  role_arn = aws_iam_role.eventbridge_task_scheduler.arn
 
   ecs_target {
     task_definition_arn = local.task_definition_arn_latest

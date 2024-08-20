@@ -3,6 +3,7 @@ import json
 EVENTBRIDGE_SOURCE = "weco.pipeline.reindex"
 EVENTBRIDGE_REINDEX_TARGETS = ["ebsco"]
 
+
 def send_eventbridge_reindex_event(session, reindex_target):
     """
     Send an AWS EventBridge event to trigger a re-index
@@ -20,14 +21,10 @@ def send_eventbridge_reindex_event(session, reindex_target):
             {
                 "Source": EVENTBRIDGE_SOURCE,
                 "DetailType": "Reindex triggered by start_reindex.py",
-                "Detail": json.dumps({
-                    "ReindexTargets": [reindex_target]
-                }),
+                "Detail": json.dumps({"ReindexTargets": [reindex_target]}),
             }
         ]
     )
 
     if response["FailedEntryCount"] > 0:
         raise RuntimeError(f"Failed to send EventBridge event: {response}")
-
-

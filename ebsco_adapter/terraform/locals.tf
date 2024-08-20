@@ -15,5 +15,5 @@ locals {
     ec_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
   }
 
-  reindexer_topic_arn  = data.terraform_remote_state.reindexer.outputs.ebsco_reindexer_topic_arn
+  reindexer_topic_arn = data.terraform_remote_state.reindexer.outputs.ebsco_reindexer_topic_arn
 }

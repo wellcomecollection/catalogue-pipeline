@@ -151,8 +151,8 @@ if __name__ == "__main__":
         process_type = f"reindex-{args.reindex_type}"
         sns_publisher = SnsPublisher(reindex_topic_arn)
     if args.reindex_ids:
-            reindex_ids = args.reindex_ids.split(",")
-            reindex_ids = [rid.strip() for rid in reindex_ids]
+        reindex_ids = args.reindex_ids.split(",")
+        reindex_ids = [rid.strip() for rid in reindex_ids]
     elif args.scheduled_invoke:
         process_type = "scheduled"
         sns_publisher = SnsPublisher(sns_topic_arn)
