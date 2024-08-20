@@ -1,7 +1,11 @@
 package weco.pipeline.ingestor.common.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.{CanonicalId, DataState, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  DataState,
+  SourceIdentifier
+}
 import weco.catalogue.internal_model.work.{Relations, Work, WorkData, WorkState}
 
 case class WorkQueryableValues(

@@ -39,6 +39,6 @@ object ValueTransforms {
   def locationShelfmark(location: Location): Option[String] =
     location match {
       case PhysicalLocation(_, _, _, shelfmark, _) => shelfmark
-      case _ => None
+      case _                                       => None
     }
 }
