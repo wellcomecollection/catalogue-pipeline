@@ -52,7 +52,7 @@ def unsuppress_miro(id, origin, message):
             f"{id} doesn't look like a Miro ID and isn't the identifier of a catalogue record containing a Miro ID"
         )
 
-    # unsuppress_image(miro_id=miro_id, origin=origin, message=message)
+    unsuppress_image(miro_id=miro_id, origin=origin, message=message)
 
 
 if __name__ == "__main__":
