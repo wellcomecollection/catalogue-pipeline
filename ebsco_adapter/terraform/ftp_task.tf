@@ -6,14 +6,15 @@ module "ftp_task" {
   image = "${aws_ecr_repository.ebsco_adapter.repository_url}:latest"
 
   environment = {
-    FTP_SERVER       = aws_ssm_parameter.ebsco_adapter_ftp_server.value
-    FTP_USERNAME     = aws_ssm_parameter.ebsco_adapter_ftp_username.value
-    FTP_REMOTE_DIR   = aws_ssm_parameter.ebsco_adapter_ftp_remote_dir.value
-    CUSTOMER_ID      = aws_ssm_parameter.ebsco_adapter_customer_id.value
-    FTP_PASSWORD     = aws_ssm_parameter.ebsco_adapter_ftp_password.value
-    OUTPUT_TOPIC_ARN = module.ebsco_adapter_output_topic.arn
-    S3_BUCKET        = aws_s3_bucket.ebsco_adapter.bucket
-    S3_PREFIX        = "prod"
+    FTP_SERVER        = aws_ssm_parameter.ebsco_adapter_ftp_server.value
+    FTP_USERNAME      = aws_ssm_parameter.ebsco_adapter_ftp_username.value
+    FTP_REMOTE_DIR    = aws_ssm_parameter.ebsco_adapter_ftp_remote_dir.value
+    CUSTOMER_ID       = aws_ssm_parameter.ebsco_adapter_customer_id.value
+    FTP_PASSWORD      = aws_ssm_parameter.ebsco_adapter_ftp_password.value
+    OUTPUT_TOPIC_ARN  = module.ebsco_adapter_output_topic.arn
+    REINDEX_TOPIC_ARN = local.reindexer_topic_arn
+    S3_BUCKET         = aws_s3_bucket.ebsco_adapter.bucket
+    S3_PREFIX         = "prod"
   }
 
   cpu    = 2048
@@ -64,4 +65,44 @@ resource "aws_scheduler_schedule" "ftp_task_schedule" {
       maximum_retry_attempts = 3
     }
   }
+}
+
+resource "aws_cloudwatch_event_rule" "reindex_rule" {
+  name        = "ebsco-adapter-reindex-rule"
+  description = "Rule to catch custom reindex event"
+  event_pattern = jsonencode({
+    "source" : ["weco.pipeline.reindex"],
+    "detail" : {
+      "ReindexTargets" : ["ebsco"]
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "ftp_task_reindex_target" {
+  arn      = aws_ecs_cluster.cluster.arn
+  rule     = aws_cloudwatch_event_rule.reindex_rule.name
+  role_arn = aws_iam_role.eventbridge_task_scheduler.arn
+
+  ecs_target {
+    task_definition_arn = local.task_definition_arn_latest
+    launch_type         = "FARGATE"
+
+    network_configuration {
+      assign_public_ip = false
+      security_groups = [
+        aws_security_group.egress.id,
+        local.network_config.ec_privatelink_security_group_id
+      ]
+      subnets = local.network_config.subnets
+    }
+  }
+
+  input = jsonencode({
+    containerOverrides = [
+      {
+        name    = "ebsco-adapter-ftp"
+        command = ["--reindex-type", "full"]
+      }
+    ]
+  })
 }

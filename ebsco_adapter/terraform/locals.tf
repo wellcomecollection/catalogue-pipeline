@@ -12,7 +12,8 @@ locals {
     vpc_id  = local.catalogue_vpcs["catalogue_vpc_delta_id"]
     subnets = local.catalogue_vpcs["catalogue_vpc_delta_private_subnets"]
 
-
     ec_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
   }
+
+  reindexer_topic_arn = data.terraform_remote_state.reindexer.outputs.ebsco_reindexer_topic_arn
 }
