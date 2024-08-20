@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 import click
 
-from miro_updates import unsuppress_image, register_on_dlcs, _remove_image_from_dlcs, is_valid_miro_id
+from miro_updates import (
+    unsuppress_image,
+    register_on_dlcs,
+    _remove_image_from_dlcs,
+    is_valid_miro_id,
+)
 
 
 @click.command()

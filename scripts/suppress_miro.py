@@ -3,7 +3,11 @@ import click
 import httpx
 import sys
 
-from miro_updates import suppress_image, update_miro_image_suppressions_doc, is_valid_miro_id
+from miro_updates import (
+    suppress_image,
+    update_miro_image_suppressions_doc,
+    is_valid_miro_id,
+)
 
 
 @click.command()
