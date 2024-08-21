@@ -119,6 +119,12 @@
       "max_token_count": 75
     }
   },
+  "tokenizer": {
+    "dot_hierarchy": {
+      "type": "path_hierarchy",
+      "delimiter": "."
+    }
+  },
   "analyzer": {
     "german": {
       "filter": [
@@ -215,6 +221,14 @@
       ],
       "type": "custom",
       "tokenizer": "path_hierarchy"
+    },
+    "dot_path_analyzer": {
+      "filter": [
+        "asciifolding",
+        "lowercase"
+      ],
+      "type": "custom",
+      "tokenizer": "dot_hierarchy"
     },
     "persian": {
       "filter": [

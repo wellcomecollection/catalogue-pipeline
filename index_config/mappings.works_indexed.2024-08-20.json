@@ -441,6 +441,11 @@
                     "path": {
                       "type": "text",
                       "analyzer": "path_analyzer",
+                      "search_analyzer": "lowercase_whitespace_tokens",
+                    },
+                    "dot_path": {
+                      "type": "text",
+                      "analyzer": "dot_path_analyzer",
                       "search_analyzer": "lowercase_whitespace_tokens"
                     }
                   }
