@@ -8,6 +8,7 @@ import functools
 import itertools
 import json
 import sys
+import re
 
 import boto3
 import httpx
@@ -90,9 +91,17 @@ def _get_reindexer_topic_arn():
     return outputs["topic_arn"]["value"]
 
 
+def has_subscriptions(sns_client, *, topic_arn):
+    """
+    Returns True if a topic ARN has any subscriptions (e.g. an SQS queue), False otherwise.
+    """
+    resp = sns_client.list_subscriptions_by_topic(TopicArn=topic_arn)
+
+    return bool(resp["Subscriptions"])
+
+
 def _request_reindex_for(miro_id):
     sns_client = SESSION.client("sns")
-
     message = {
         "jobConfigId": "miro--catalogue_miro_updates",
         "parameters": {"ids": [miro_id], "type": "SpecificReindexParameters"},
@@ -151,16 +160,6 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
     )
 
     _request_reindex_for(miro_id)
-
-
-def make_image_available(*, miro_id, message: str):
-    """
-    Make a Miro image available on wellcomecollection.org.
-    """
-    _set_image_availability(miro_id=miro_id, message=message, is_available=True)
-    print(
-        f"Warning: you need to register {miro_id} with DLCS separately", file=sys.stderr
-    )
 
 
 def _remove_image_from_elasticsearch(*, miro_id):
@@ -262,6 +261,25 @@ def suppress_image(*, miro_id, message: str):
     _remove_image_from_elasticsearch(miro_id=miro_id)
     _remove_image_from_dlcs(miro_id=miro_id)
     _remove_image_from_cloudfront(miro_id=miro_id)
+
+
+def unsuppress_image(*, miro_id: str, origin: str, message: str):
+    """
+    Reinstate a hidden Miro image
+    """
+    sns_client = SESSION.client("sns")
+    topic_arn = _get_reindexer_topic_arn()
+    if not has_subscriptions(sns_client, topic_arn=topic_arn):
+        print(
+            "Nothing is listening to the reindexer, this action will not have the expected effect, aborting"
+        )
+        exit(1)
+
+    # First, make the DDS record reflect that the image should be visible
+    _set_image_availability(miro_id=miro_id, message=message, is_available=True)
+
+    # Now the actual image must be registered on DLCS so that it can be seen
+    register_on_dlcs(origin_url=origin, miro_id=miro_id)
 
 
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
@@ -461,3 +479,32 @@ def update_miro_image_suppressions_doc():
         print(
             f"*** To approve these changes, visit https://github.com/wellcomecollection/private/pull/{new_pr_number}"
         )
+
+
+def register_on_dlcs(origin_url, miro_id):
+    dlcs_response = dlcs_api_client().post(
+        f"https://api.dlcs.io/customers/2/queue/priority",
+        json={
+            "@type": "Collection",
+            "member": [
+                {
+                    "space": "8",
+                    "origin": origin_url,
+                    "id": miro_id,
+                    "mediaType": "image/jpeg",
+                }
+            ],
+        },
+    )
+    # DLCS will process the above request asynchronously and it may take considerable time.
+    # This is particularly true if it is already busy with something else.
+    # The response contains details that will allow you to interrogate DLCS to
+    # find out whether it has processed (or failed to process - e.g. there's a typo in your origin_url) your request.
+    print(dlcs_response.text)
+
+
+RE_MIRO_ID = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
+
+
+def is_valid_miro_id(maybe_miro_id: str):
+    return RE_MIRO_ID.fullmatch(maybe_miro_id)

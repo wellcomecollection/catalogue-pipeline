@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 import click
-import re
 import httpx
 import sys
 
-from miro_updates import suppress_image, update_miro_image_suppressions_doc
-
-miro_id_regex = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
+from miro_updates import (
+    suppress_image,
+    update_miro_image_suppressions_doc,
+    is_valid_miro_id,
+)
 
 
 @click.command()
 @click.option(
-    "--id_source",
+    "--id-source",
     help="newline-separated list of MIRO ids",
     type=click.File("r"),
     default=sys.stdin,
@@ -40,8 +41,9 @@ def suppress_miro(id_source, message, dry_run):
 
 def valid_ids(id_source):
     for single_id in id_source:
-        if miro_id_regex.search(single_id):
-            yield single_id.strip()
+        single_id = single_id.strip()
+        if is_valid_miro_id(single_id):
+            yield single_id
         else:
             catalogue_response = httpx.get(
                 f"https://api.wellcomecollection.org/catalogue/v2/works/{single_id}?include=identifiers"
