@@ -130,7 +130,7 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
 
     new_event = {
         "description": "Change isClearedForCatalogueAPI from %r to %r"
-        % (item["isClearedForCatalogueAPI"], is_available),
+                       % (item["isClearedForCatalogueAPI"], is_available),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -280,8 +280,6 @@ def unsuppress_image(*, miro_id: str, origin: str, message: str):
 
     # Now the actual image must be registered on DLCS so that it can be seen
     register_on_dlcs(origin_url=origin, miro_id=miro_id)
-    # Finally, reindex the Miro record. This makes the Image record available to the API.
-    _request_reindex_for(miro_id=miro_id)
 
 
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
@@ -289,7 +287,7 @@ def _set_overrides(*, miro_id, message: str, override_key: str, override_value: 
 
     new_event = {
         "description": "Change overrides.%s from %r to %r"
-        % (override_key, item.get("overrides", {}).get(override_key), override_value),
+                       % (override_key, item.get("overrides", {}).get(override_key), override_value),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -329,7 +327,7 @@ def _remove_override(*, miro_id, message: str, override_key: str):
 
     new_event = {
         "description": "Remove overrides.%s (previously %r)"
-        % (override_key, item.get("overrides", {}).get(override_key)),
+                       % (override_key, item.get("overrides", {}).get(override_key)),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -436,12 +434,12 @@ def update_miro_image_suppressions_doc():
             outfile.write("</tr>\n")
 
             for (date, message), events in itertools.groupby(
-                sorted(
-                    get_all_miro_suppression_events(),
-                    key=lambda e: e["date"],
-                    reverse=True,
-                ),
-                key=lambda e: (e["date"].date(), e["message"]),
+                    sorted(
+                        get_all_miro_suppression_events(),
+                        key=lambda e: e["date"],
+                        reverse=True,
+                    ),
+                    key=lambda e: (e["date"].date(), e["message"]),
             ):
                 outfile.write("<tr>\n")
                 outfile.write(f'  <td>{"<br>".join(ev["id"] for ev in events)}</td>\n')
@@ -498,6 +496,10 @@ def register_on_dlcs(origin_url, miro_id):
             ],
         },
     )
+    # DLCS will process the above request asynchronously and it may take considerable time.
+    # This is particularly true if it is already busy with something else.
+    # The response contains details that will allow you to interrogate DLCS to
+    # find out whether it has processed (or failed to process - e.g. there's a typo in your origin_url) your request.
     print(dlcs_response.text)
 
 
