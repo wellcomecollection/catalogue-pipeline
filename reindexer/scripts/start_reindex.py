@@ -9,7 +9,7 @@ import boto3
 import click
 import tqdm
 
-from lambda_reindexers import invoke_lambda_reindexers
+from eventbridge import send_eventbridge_reindex_event, EVENTBRIDGE_REINDEX_TARGETS
 
 SOURCES = {
     "miro": "vhs-sourcedata-miro",
@@ -183,7 +183,9 @@ def verify_specific_ids(*, source, specific_ids):
     # To run a reindex, avoiding the creation of unwanted Image records,
     # we need to first run everything that is not miro, then once that
     # has all made it through the matcher/merger, run miro.
-    type=click.Choice(["all"] + ["notmiro"] + list(SOURCES.keys())),
+    type=click.Choice(
+        ["all"] + ["notmiro"] + EVENTBRIDGE_REINDEX_TARGETS + list(SOURCES.keys())
+    ),
     required=True,
     prompt="Which source do you want to reindex?",
     help="Name of the source to reindex, or all to reindex all sources",
@@ -207,9 +209,9 @@ def verify_specific_ids(*, source, specific_ids):
 )
 @click.pass_context
 def start_reindex(ctx, src, dst, mode, input_file):
-    if src in ["all", "notmiro"]:
+    if src in ["all", "notmiro"] + EVENTBRIDGE_REINDEX_TARGETS:
         if mode != "complete":
-            sys.exit("All-source reindexes only support --mode=complete")
+            sys.exit(f"Reindex source ({src}) only supports --mode=complete")
 
         if src == "all":
             warning_message = (
@@ -218,14 +220,23 @@ def start_reindex(ctx, src, dst, mode, input_file):
             )
             click.confirm(click.style(warning_message, "yellow"), abort=True)
 
-        for source in SOURCES.keys():
-            if source == "miro" and src == "notmiro":
-                continue
-            ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
-            print("")
+        if src in EVENTBRIDGE_REINDEX_TARGETS:
+            print(f"Starting an eventbridge reindex {src} ~> {dst}")
+            send_eventbridge_reindex_event(session, src)
+        else:
+            for source in SOURCES.keys():
+                if source == "miro" and src == "notmiro":
+                    continue
+                ctx.invoke(start_reindex, src=source, dst=dst, mode=mode)
+                print("")
+
+            for reindex_target in EVENTBRIDGE_REINDEX_TARGETS:
+                print(f"Starting an eventbridge reindex {reindex_target} ~> {dst}")
+                send_eventbridge_reindex_event(session, reindex_target)
+
         return
 
-    print(f"Starting a reindex {src} ~> {dst}")
+    print(f"Starting a standard reindex {src} ~> {dst}")
 
     if mode == "complete":
         total_segments = how_many_segments(table_name=SOURCES[src])
@@ -283,11 +294,6 @@ def start_reindex(ctx, src, dst, mode, input_file):
         topic_arn=reindexer_topic_arn,
         parameters=parameters,
     )
-
-    # Lambda adapters implement their own reindexing logic,
-    # so we need to invoke them separately. Currently, we run
-    # a full reindex for all lambda adapters (only one at present).
-    invoke_lambda_reindexers(session)
 
     start_reindexer_tasks(session)
 
