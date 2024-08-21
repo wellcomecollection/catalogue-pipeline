@@ -130,7 +130,7 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
 
     new_event = {
         "description": "Change isClearedForCatalogueAPI from %r to %r"
-                       % (item["isClearedForCatalogueAPI"], is_available),
+        % (item["isClearedForCatalogueAPI"], is_available),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -287,7 +287,7 @@ def _set_overrides(*, miro_id, message: str, override_key: str, override_value: 
 
     new_event = {
         "description": "Change overrides.%s from %r to %r"
-                       % (override_key, item.get("overrides", {}).get(override_key), override_value),
+        % (override_key, item.get("overrides", {}).get(override_key), override_value),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -327,7 +327,7 @@ def _remove_override(*, miro_id, message: str, override_key: str):
 
     new_event = {
         "description": "Remove overrides.%s (previously %r)"
-                       % (override_key, item.get("overrides", {}).get(override_key)),
+        % (override_key, item.get("overrides", {}).get(override_key)),
         "message": message,
         "date": _get_timestamp(),
         "user": _get_user(),
@@ -434,12 +434,12 @@ def update_miro_image_suppressions_doc():
             outfile.write("</tr>\n")
 
             for (date, message), events in itertools.groupby(
-                    sorted(
-                        get_all_miro_suppression_events(),
-                        key=lambda e: e["date"],
-                        reverse=True,
-                    ),
-                    key=lambda e: (e["date"].date(), e["message"]),
+                sorted(
+                    get_all_miro_suppression_events(),
+                    key=lambda e: e["date"],
+                    reverse=True,
+                ),
+                key=lambda e: (e["date"].date(), e["message"]),
             ):
                 outfile.write("<tr>\n")
                 outfile.write(f'  <td>{"<br>".join(ev["id"] for ev in events)}</td>\n')
