@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1904",
-  "createdAt" : "2023-11-21T14:25:44.335617Z",
+  "createdAt" : "2024-08-22T10:18:20.139201Z",
   "id" : "8r3h7lpn",
   "document" : {
     "modifiedTime" : "1963-02-05T12:54:03Z",
@@ -84,6 +84,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

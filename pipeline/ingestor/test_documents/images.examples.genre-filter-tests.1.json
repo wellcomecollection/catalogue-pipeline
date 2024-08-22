@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2023-11-21T14:25:44.060826Z",
+  "createdAt" : "2024-08-22T10:18:19.997676Z",
   "id" : "bah7vup6",
   "document" : {
     "modifiedTime" : "2049-05-23T13:53:19Z",
@@ -88,6 +88,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

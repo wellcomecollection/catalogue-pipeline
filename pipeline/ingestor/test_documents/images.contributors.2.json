@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2023-11-21T14:25:43.895409Z",
+  "createdAt" : "2024-08-22T10:18:19.918737Z",
   "id" : "cc8gnrfd",
   "document" : {
     "modifiedTime" : "1954-10-27T14:08:04Z",
@@ -110,6 +110,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

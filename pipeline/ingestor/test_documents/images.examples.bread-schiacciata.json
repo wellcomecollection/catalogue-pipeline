@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2023-11-21T14:25:44.204768Z",
+  "createdAt" : "2024-08-22T10:18:20.080527Z",
   "id" : "drmfrjk1",
   "document" : {
     "modifiedTime" : "2032-01-03T16:39:00Z",
@@ -88,6 +88,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

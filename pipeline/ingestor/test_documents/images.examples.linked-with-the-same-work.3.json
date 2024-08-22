@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2023-11-21T14:25:44.126121Z",
+  "createdAt" : "2024-08-22T10:18:20.059410Z",
   "id" : "rzdabpna",
   "document" : {
     "modifiedTime" : "2005-03-11T21:05:37Z",
@@ -88,6 +88,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

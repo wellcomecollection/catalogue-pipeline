@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-21T14:25:44.271972Z",
+  "createdAt" : "2024-08-22T10:18:20.098189Z",
   "id" : "vwtlblqa",
   "document" : {
     "modifiedTime" : "2019-11-02T09:06:12Z",
@@ -93,6 +93,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

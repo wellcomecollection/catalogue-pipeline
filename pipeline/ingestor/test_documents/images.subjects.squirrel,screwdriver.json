@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2023-11-21T14:25:44.284918Z",
+  "createdAt" : "2024-08-22T10:18:20.103026Z",
   "id" : "30p2xtsf",
   "document" : {
     "modifiedTime" : "1984-03-03T23:20:51Z",
@@ -101,6 +101,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],
