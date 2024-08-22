@@ -2,11 +2,11 @@ module "pipeline" {
   source = "../modules/stack"
 
   reindexing_state = {
-    listen_to_reindexer      = true
+    listen_to_reindexer      = false
     scale_up_tasks           = true
     scale_up_elastic_cluster = true
-    scale_up_id_minter_db    = false
-    scale_up_matcher_db      = false
+    scale_up_id_minter_db    = true
+    scale_up_matcher_db      = true
   }
 
   index_config = {
@@ -17,10 +17,11 @@ module "pipeline" {
     }
     images = {
       indexed        = "images_indexed.2024-01-09"
-      works_analysis = "works_indexed.2024-04-30"
+      works_analysis = "works_indexed.2024-08-20"
     }
   }
 
+  // TODO: make this false before release
   allow_delete_indices = true
 
   pipeline_date = local.pipeline_date
