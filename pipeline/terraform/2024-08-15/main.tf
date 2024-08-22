@@ -3,10 +3,10 @@ module "pipeline" {
 
   reindexing_state = {
     listen_to_reindexer      = false
-    scale_up_tasks           = true
-    scale_up_elastic_cluster = true
-    scale_up_id_minter_db    = true
-    scale_up_matcher_db      = true
+    scale_up_tasks           = false
+    scale_up_elastic_cluster = false
+    scale_up_id_minter_db    = false
+    scale_up_matcher_db      = false
   }
 
   index_config = {
@@ -16,13 +16,12 @@ module "pipeline" {
       indexed    = "works_indexed.2024-08-20"
     }
     images = {
-      indexed        = "images_indexed.2024-01-09"
+      indexed        = "images_indexed.2024-08-20"
       works_analysis = "works_indexed.2024-08-20"
     }
   }
 
-  // TODO: make this false before release
-  allow_delete_indices = true
+  allow_delete_indices = false
 
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date
