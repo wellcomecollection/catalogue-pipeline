@@ -321,6 +321,7 @@
               "id": "closed-stores"
             },
             "label": "Closed stores",
+            "shelfmark": "EPB/ENCY/1.v1",
             "accessConditions": [
               {
                 "method": {
