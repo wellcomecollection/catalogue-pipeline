@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2024-05-15T08:17:25.176805Z",
+  "createdAt" : "2024-08-22T10:16:19.902846Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
@@ -96,6 +96,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

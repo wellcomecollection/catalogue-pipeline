@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-05-15T08:17:25.482999Z",
+  "createdAt" : "2024-08-22T10:16:20.052378Z",
   "id" : "5qgfzto1",
   "document" : {
     "debug" : {
@@ -107,6 +107,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

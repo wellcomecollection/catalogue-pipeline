@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-08-15T08:40:28.386335Z",
+  "createdAt" : "2024-08-22T10:16:20.143323Z",
   "id" : "xmya3fco",
   "document" : {
     "debug" : {
@@ -147,6 +147,8 @@
       ],
       "items.identifiers.value" : [
         "383Pmg46QE"
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

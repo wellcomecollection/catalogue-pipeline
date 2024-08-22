@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2024-05-15T08:17:25.463336Z",
+  "createdAt" : "2024-08-22T10:16:20.035108Z",
   "id" : "ub2i8snt",
   "document" : {
     "debug" : {
@@ -145,6 +145,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

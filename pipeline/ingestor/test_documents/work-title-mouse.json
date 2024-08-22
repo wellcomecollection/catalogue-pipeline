@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'mouse' in the title",
-  "createdAt" : "2024-05-15T08:17:25.258939Z",
+  "createdAt" : "2024-08-22T10:16:19.958184Z",
   "id" : "lnn17cwk",
   "document" : {
     "debug" : {
@@ -97,6 +97,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

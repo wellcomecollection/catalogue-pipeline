@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2024-02-16T15:36:44.765831Z",
+  "createdAt" : "2024-08-22T10:16:20.016858Z",
   "id" : "rbbzqhyt",
   "document" : {
     "debug" : {
@@ -101,6 +101,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

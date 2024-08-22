@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-05-15T08:17:25.486303Z",
+  "createdAt" : "2024-08-22T10:16:20.056357Z",
   "id" : "mudchggm",
   "document" : {
     "debug" : {
@@ -118,6 +118,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

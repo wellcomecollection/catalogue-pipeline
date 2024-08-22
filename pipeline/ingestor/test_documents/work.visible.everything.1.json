@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-07-24T16:49:25.152519Z",
+  "createdAt" : "2024-08-22T10:16:20.002249Z",
   "id" : "dhzcyeul",
   "document" : {
     "debug" : {
@@ -564,6 +564,8 @@
       "items.identifiers.value" : [
         "HYZ1N6BwQR",
         "fYVwu7Y7Y7"
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
         "BGyGwVoRP",

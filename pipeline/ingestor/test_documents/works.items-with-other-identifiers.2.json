@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2024-05-15T08:17:25.491454Z",
+  "createdAt" : "2024-08-22T10:16:20.060916Z",
   "id" : "si1cs1lq",
   "document" : {
     "debug" : {
@@ -143,6 +143,8 @@
       "items.identifiers.value" : [
         "NW5yJ4Q4nj",
         "0YnPboqbXN"
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

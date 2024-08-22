@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2024-05-15T08:17:25.490704Z",
+  "createdAt" : "2024-08-22T10:16:20.060195Z",
   "id" : "hdjyypp6",
   "document" : {
     "debug" : {
@@ -142,6 +142,8 @@
       "items.identifiers.value" : [
         "xJJR2dtnlu",
         "MKDvFJ5itR"
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

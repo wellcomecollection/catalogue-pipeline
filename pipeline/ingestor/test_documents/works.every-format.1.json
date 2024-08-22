@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-02-16T15:36:44.888746Z",
+  "createdAt" : "2024-08-22T10:16:20.070574Z",
   "id" : "jminkez1",
   "document" : {
     "debug" : {
@@ -101,6 +101,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

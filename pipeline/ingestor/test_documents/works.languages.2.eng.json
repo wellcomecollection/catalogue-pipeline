@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-05-15T08:17:25.454214Z",
+  "createdAt" : "2024-08-22T10:16:20.027409Z",
   "id" : "giiyodfc",
   "document" : {
     "debug" : {
@@ -101,6 +101,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
         "English"

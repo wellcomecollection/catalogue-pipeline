@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-08-15T08:40:28.329924Z",
+  "createdAt" : "2024-08-22T10:16:20.105362Z",
   "id" : "gms4hdjm",
   "document" : {
     "debug" : {
@@ -119,6 +119,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],
