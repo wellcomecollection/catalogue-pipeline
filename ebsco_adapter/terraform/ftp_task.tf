@@ -56,7 +56,7 @@ resource "aws_scheduler_schedule" "ftp_task_schedule" {
       containerOverrides = [
         {
           name    = "ebsco-adapter-ftp"
-          command = ["--scheduled-invoke"]
+          command = ["--process-type", "scheduled"]
         }
       ]
     })
@@ -101,7 +101,7 @@ resource "aws_cloudwatch_event_target" "ftp_task_reindex_target" {
     containerOverrides = [
       {
         name    = "ebsco-adapter-ftp"
-        command = ["--reindex-type", "full"]
+        command = ["--process-type", "reindex-full"]
       }
     ]
   })
