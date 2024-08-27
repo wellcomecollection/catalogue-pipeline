@@ -35,7 +35,7 @@ object ValueTransforms {
       .map(_.value)
   }
 
-  // Shelfmarks are only available on physical locations, so
+  // Shelfmarks are only available on physical locations
   def locationShelfmark(location: Location): Option[String] =
     location match {
       case PhysicalLocation(_, _, _, shelfmark, _) => shelfmark
