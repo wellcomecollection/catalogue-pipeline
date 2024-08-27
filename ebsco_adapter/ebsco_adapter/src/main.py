@@ -165,7 +165,7 @@ if __name__ == "__main__":
 
     # Run the process
     with ProcessMetrics(
-            process_type
+        process_type
     ) as metrics, tempfile.TemporaryDirectory() as temp_dir, EbscoFtp(
         ftp_server, ftp_username, ftp_password, ftp_remote_dir
     ) as ebsco_ftp:
@@ -181,7 +181,8 @@ if __name__ == "__main__":
                 reindex_ids,
             )
         else:
-            assert process_type == "scheduled", "Invalid process type, arg validation failed?!"
+            assert (
+                process_type == "scheduled"
+            ), "Invalid process type, arg validation failed?!"
             sns_publisher = SnsPublisher(output_topic_arn)
             run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at)
-
