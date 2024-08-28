@@ -1,6 +1,7 @@
 package weco.pipeline.ingestor.common.models
 
 import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.locations.{Location, PhysicalLocation}
 import weco.catalogue.internal_model.work.{AbstractConcept, Genre}
 
 object ValueTransforms {
@@ -33,4 +34,11 @@ object ValueTransforms {
       .flatten
       .map(_.value)
   }
+
+  // Shelfmarks are only available on physical locations
+  def locationShelfmark(location: Location): Option[String] =
+    location match {
+      case PhysicalLocation(_, _, _, shelfmark, _) => shelfmark
+      case _                                       => None
+    }
 }

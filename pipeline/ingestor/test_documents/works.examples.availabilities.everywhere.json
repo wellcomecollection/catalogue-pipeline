@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-08-15T08:40:28.406646Z",
+  "createdAt" : "2024-08-22T10:16:20.160122Z",
   "id" : "9stpxl39",
   "document" : {
     "debug" : {
@@ -216,6 +216,9 @@
       "items.identifiers.value" : [
         "szcI3pLB8w",
         "9QmlF92mk9"
+      ],
+      "items.shelfmark.value" : [
+        "Shelfmark: cCc2QL7V8"
       ],
       "languages.label" : [
       ],

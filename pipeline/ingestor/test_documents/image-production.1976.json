@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1976",
-  "createdAt" : "2023-11-21T14:25:44.323395Z",
+  "createdAt" : "2024-08-22T10:18:20.111718Z",
   "id" : "vgcwcshr",
   "document" : {
     "modifiedTime" : "2024-03-22T05:14:37Z",
@@ -84,6 +84,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

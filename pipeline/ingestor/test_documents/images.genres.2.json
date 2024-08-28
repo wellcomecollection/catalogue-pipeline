@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2023-11-21T14:25:43.955777Z",
+  "createdAt" : "2024-08-22T10:18:19.953357Z",
   "id" : "kcqsym0i",
   "document" : {
     "modifiedTime" : "2006-06-11T06:02:02Z",
@@ -106,6 +106,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

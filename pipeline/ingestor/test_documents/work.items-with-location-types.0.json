@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-08-15T08:40:28.317189Z",
+  "createdAt" : "2024-08-22T10:16:20.094162Z",
   "id" : "4zaferi8",
   "document" : {
     "debug" : {
@@ -133,6 +133,8 @@
       ],
       "items.identifiers.value" : [
         "aLacffLiQz"
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

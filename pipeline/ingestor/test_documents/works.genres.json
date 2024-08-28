@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2024-05-15T08:17:25.470317Z",
+  "createdAt" : "2024-08-22T10:16:20.041591Z",
   "id" : "jlp05mgl",
   "document" : {
     "debug" : {
@@ -129,6 +129,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

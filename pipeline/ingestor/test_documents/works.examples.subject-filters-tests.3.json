@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-08-15T08:40:28.360946Z",
+  "createdAt" : "2024-08-22T10:16:20.128683Z",
   "id" : "3kdpeojw",
   "document" : {
     "debug" : {
@@ -126,6 +126,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

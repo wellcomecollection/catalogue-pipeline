@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-08-15T08:40:28.394389Z",
+  "createdAt" : "2024-08-22T10:16:20.149193Z",
   "id" : "pgnx8xiu",
   "document" : {
     "debug" : {
@@ -106,6 +106,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
         "Bashkir"

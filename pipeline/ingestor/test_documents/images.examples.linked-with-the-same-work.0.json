@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2023-11-21T14:25:44.112134Z",
+  "createdAt" : "2024-08-22T10:18:20.058327Z",
   "id" : "442i1muy",
   "document" : {
     "modifiedTime" : "1994-09-19T04:49:23Z",
@@ -90,6 +90,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

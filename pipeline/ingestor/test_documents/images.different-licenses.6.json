@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-21T14:25:43.553478Z",
+  "createdAt" : "2024-08-22T10:18:19.838252Z",
   "id" : "gt4jeta0",
   "document" : {
     "modifiedTime" : "2068-06-15T19:26:53Z",
@@ -90,6 +90,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

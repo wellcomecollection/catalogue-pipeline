@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-05-15T08:17:25.474180Z",
+  "createdAt" : "2024-08-22T10:16:20.045043Z",
   "id" : "el28gega",
   "document" : {
     "debug" : {
@@ -96,6 +96,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

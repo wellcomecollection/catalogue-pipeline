@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-05-15T08:17:25.472147Z",
+  "createdAt" : "2024-08-22T10:16:20.043492Z",
   "id" : "njj1gugw",
   "document" : {
     "debug" : {
@@ -114,6 +114,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

@@ -36,6 +36,7 @@ class WorkQueryableValuesTest
       imagesIdentifiersValue = List("L0045108"),
       itemsId = List("r8mz6j8c"),
       itemsIdentifiersValue = List("i15863207", "1586320"),
+      itemsShelfmarksValue = List("EPB/ENCY/1.v1"),
       languagesLabel = List("English"),
       lettering = Some("For Alan ..."),
       notesContents = List(

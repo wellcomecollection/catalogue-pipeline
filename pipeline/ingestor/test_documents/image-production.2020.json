@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 2020",
-  "createdAt" : "2023-11-21T14:25:44.342537Z",
+  "createdAt" : "2024-08-22T10:18:20.142809Z",
   "id" : "fh2wwbhh",
   "document" : {
     "modifiedTime" : "2010-05-28T21:46:34Z",
@@ -88,6 +88,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

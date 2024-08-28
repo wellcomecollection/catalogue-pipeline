@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2024-05-15T08:17:25.271712Z",
+  "createdAt" : "2024-08-22T10:16:19.967162Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -110,6 +110,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

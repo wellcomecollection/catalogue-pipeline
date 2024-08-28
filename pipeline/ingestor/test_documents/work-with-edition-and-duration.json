@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2024-05-15T08:17:25.244884Z",
+  "createdAt" : "2024-08-22T10:16:19.945025Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -98,6 +98,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

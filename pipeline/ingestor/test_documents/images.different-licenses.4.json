@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2023-11-21T14:25:43.542274Z",
+  "createdAt" : "2024-08-22T10:18:19.836382Z",
   "id" : "p72gjhle",
   "document" : {
     "modifiedTime" : "1941-01-01T21:13:28Z",
@@ -90,6 +90,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

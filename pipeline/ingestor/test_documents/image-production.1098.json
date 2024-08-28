@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1098",
-  "createdAt" : "2023-11-21T14:25:44.352679Z",
+  "createdAt" : "2024-08-22T10:18:20.146418Z",
   "id" : "rcwca9kx",
   "document" : {
     "modifiedTime" : "2021-05-29T16:02:15Z",
@@ -84,6 +84,8 @@
         "items.id" : [
         ],
         "items.identifiers.value" : [
+        ],
+        "items.shelfmark.value" : [
         ],
         "languages.label" : [
         ],

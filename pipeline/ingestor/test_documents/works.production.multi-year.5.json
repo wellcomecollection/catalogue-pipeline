@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2024-08-15T08:40:28.310453Z",
+  "createdAt" : "2024-08-22T10:16:20.088887Z",
   "id" : "dbkiu6iz",
   "document" : {
     "debug" : {
@@ -118,6 +118,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],

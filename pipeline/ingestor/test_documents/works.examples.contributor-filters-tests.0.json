@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-15T08:40:28.367350Z",
+  "createdAt" : "2024-08-22T10:16:20.133109Z",
   "id" : "ijnwmvup",
   "document" : {
     "debug" : {
@@ -107,6 +107,8 @@
       "items.id" : [
       ],
       "items.identifiers.value" : [
+      ],
+      "items.shelfmark.value" : [
       ],
       "languages.label" : [
       ],
