@@ -56,9 +56,9 @@ def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at):
 
 
 def run_reindex(s3_store, sns_publisher, invoked_at, reindex_type, ids=None):
-    assert reindex_type in ["full", "partial"], "Invalid reindex type"
+    assert reindex_type in ["reindex-full", "reindex-partial"], "Invalid reindex type"
     assert (
-        ids is not None or reindex_type == "full"
+        ids is not None or reindex_type == "reindex-full"
     ), "You must provide IDs for partial reindexing"
 
     print(f"Running reindex with type {reindex_type} and ids {ids} ...")
@@ -159,7 +159,7 @@ if __name__ == "__main__":
 
     if process_type == "reindex-partial" and not args.reindex_ids:
         raise ValueError("You must provide IDs for partial reindexing")
-    else:
+    elif process_type == "reindex-partial":
         reindex_ids = args.reindex_ids.split(",")
         reindex_ids = [rid.strip() for rid in reindex_ids]
 
@@ -177,7 +177,7 @@ if __name__ == "__main__":
                 s3_store,
                 sns_publisher,
                 invoked_at,
-                args.reindex_type,
+                process_type,
                 reindex_ids,
             )
         else:
