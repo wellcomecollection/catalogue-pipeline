@@ -1,4 +1,5 @@
 package weco.pipeline.transformer.mets.transformers
+import grizzled.slf4j.Logging
 import weco.pipeline.transformer.result.Result
 
 import scala.xml.Node
@@ -18,7 +19,7 @@ case class PremisAccessConditions(
     )
 }
 
-object PremisAccessConditions {
+object PremisAccessConditions extends Logging{
 
   /** The access conditions are encoded a premis elementin the METS. For
     * example:
@@ -51,14 +52,41 @@ object PremisAccessConditions {
     */
   def apply(rightsMd: Node): PremisAccessConditions = {
     val rightsStatement = rightsMd \ "mdWrap" \ "xmlData" \ "rightsStatement"
+
+    val rightsBasis = (rightsStatement \ "rightsBasis").headOption
+
+    // Copyright specific information is held in the copyrightNote element
     val copyrightNoteElem =
       (rightsStatement \ "copyrightInformation" \ "copyrightNote").headOption
+
+    // CC license information is indicated in the licenseNote element
+    val licenseNoteElem =
+      (rightsStatement \ "licenseInformation" \ "licenseNote").headOption
+
+    // Following discussion with a.ray here:
+    // https://wellcome.slack.com/archives/C02ANCYL90E/p1725026316294549
+    val rightsNote = rightsBasis match {
+      case Some(basis) if basis.text == "Copyright" => copyrightNoteElem
+      case Some(basis) if basis.text == "License" => licenseNoteElem
+
+      // If we don't have a rightsBasis, pick from either copyright or
+      // license preferring copyright
+      case _ =>
+        warn(s"rightsBasis not found in rightsMD!")
+
+        List(
+          copyrightNoteElem,
+          licenseNoteElem,
+        ).flatten.headOption
+    }
+
     val useRightsElem =
       ((rightsStatement \ "rightsGranted").filter(
         n => (n \ "act").text == "use"
       ) \ "rightsGrantedNote").headOption
+
     PremisAccessConditions(
-      copyrightNote = copyrightNoteElem.map(_.text),
+      copyrightNote = rightsNote.map(_.text),
       useRightsGrantedNote = useRightsElem.map(_.text)
     )
   }
