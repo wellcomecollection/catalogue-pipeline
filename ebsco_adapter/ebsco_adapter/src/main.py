@@ -19,7 +19,7 @@ ftp_server = os.environ.get("FTP_SERVER")
 ftp_username = os.environ.get("FTP_USERNAME")
 ftp_password = os.environ.get("FTP_PASSWORD")
 ftp_remote_dir = os.environ.get("FTP_REMOTE_DIR")
-sns_topic_arn = os.environ.get("OUTPUT_TOPIC_ARN")
+output_topic_arn = os.environ.get("OUTPUT_TOPIC_ARN")
 reindex_topic_arn = os.environ.get("REINDEX_TOPIC_ARN")
 
 s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
@@ -56,9 +56,9 @@ def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at):
 
 
 def run_reindex(s3_store, sns_publisher, invoked_at, reindex_type, ids=None):
-    assert reindex_type in ["full", "partial"], "Invalid reindex type"
+    assert reindex_type in ["reindex-full", "reindex-partial"], "Invalid reindex type"
     assert (
-        ids is not None or reindex_type == "full"
+        ids is not None or reindex_type == "reindex-full"
     ), "You must provide IDs for partial reindexing"
 
     print(f"Running reindex with type {reindex_type} and ids {ids} ...")
@@ -117,46 +117,53 @@ def _get_iso8601_invoked_at():
     return invoked_at
 
 
+# This script can be run locally, or invoked as an ECS task with the required
+# command overrides.
+#
+# Usage: main.py --process-type <process_type> --reindex-ids <reindex_ids>
+# process_type: Type of process (reindex-full, reindex-partial, scheduled)
+# reindex_ids: Comma-separated list of IDs to reindex (for partial)
 if __name__ == "__main__":
     event = None
     context = SimpleNamespace(invoked_function_arn=None)
 
+    reindex_processes = {"reindex-full", "reindex-partial"}
+    valid_process_types = reindex_processes.union({"scheduled"})
+
     # Parse command line arguments for running locally
     parser = argparse.ArgumentParser(description="Perform reindexing operations")
     parser.add_argument(
-        "--reindex-type",
+        "--process-type",
         type=str,
-        choices=["full", "partial"],
-        help="Type of reindexing (full or partial)",
+        choices=list(valid_process_types),
+        required=True,
+        help="Type of process (reindex-full, reindex-partial, scheduled)",
     )
     parser.add_argument(
         "--reindex-ids",
         type=str,
         help="Comma-separated list of IDs to reindex (for partial)",
     )
-    parser.add_argument(
-        "--scheduled-invoke",
-        action="store_true",
-        help="To run a regular process invocation, without reindexing.",
-    )
 
     invoked_at = _get_iso8601_invoked_at()
     args = parser.parse_args()
 
-    process_type = None
     reindex_ids = None
     sns_publisher = None
 
-    if args.reindex_type:
-        process_type = f"reindex-{args.reindex_type}"
-        sns_publisher = SnsPublisher(reindex_topic_arn)
-    if args.reindex_ids:
+    process_type = args.process_type
+
+    # Validate arguments, stop if invalid
+    if process_type not in valid_process_types:
+        raise ValueError(f"Invalid process type: {process_type}")
+
+    if process_type == "reindex-partial" and not args.reindex_ids:
+        raise ValueError("You must provide IDs for partial reindexing")
+    elif process_type == "reindex-partial":
         reindex_ids = args.reindex_ids.split(",")
         reindex_ids = [rid.strip() for rid in reindex_ids]
-    elif args.scheduled_invoke:
-        process_type = "scheduled"
-        sns_publisher = SnsPublisher(sns_topic_arn)
 
+    # Run the process
     with ProcessMetrics(
         process_type
     ) as metrics, tempfile.TemporaryDirectory() as temp_dir, EbscoFtp(
@@ -164,13 +171,18 @@ if __name__ == "__main__":
     ) as ebsco_ftp:
         s3_store = S3Store(s3_bucket)
 
-        if args.reindex_type:
+        if process_type in reindex_processes:
+            sns_publisher = SnsPublisher(reindex_topic_arn)
             run_reindex(
                 s3_store,
                 sns_publisher,
                 invoked_at,
-                args.reindex_type,
+                process_type,
                 reindex_ids,
             )
-        elif args.scheduled_invoke:
+        else:
+            assert (
+                process_type == "scheduled"
+            ), "Invalid process type, arg validation failed?!"
+            sns_publisher = SnsPublisher(output_topic_arn)
             run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at)

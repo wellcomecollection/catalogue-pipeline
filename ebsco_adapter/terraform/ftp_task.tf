@@ -21,55 +21,9 @@ module "ftp_task" {
   memory = 4096
 }
 
-resource "aws_scheduler_schedule" "ftp_task_schedule" {
-  name       = "ebsco-adapter-ftp-schedule"
-  group_name = "default"
-
-  flexible_time_window {
-    mode = "OFF"
-  }
-
-  schedule_expression = "rate(1 days)"
-
-  # Disable the schedule for now
-  state = "ENABLED"
-
-  target {
-    arn      = aws_ecs_cluster.cluster.arn
-    role_arn = aws_iam_role.eventbridge_task_scheduler.arn
-
-    ecs_parameters {
-      task_definition_arn = local.task_definition_arn_latest
-      launch_type         = "FARGATE"
-
-      network_configuration {
-        assign_public_ip = false
-        security_groups = [
-          aws_security_group.egress.id,
-          local.network_config.ec_privatelink_security_group_id
-        ]
-        subnets = local.network_config.subnets
-      }
-    }
-
-    input = jsonencode({
-      containerOverrides = [
-        {
-          name    = "ebsco-adapter-ftp"
-          command = ["--scheduled-invoke"]
-        }
-      ]
-    })
-
-    retry_policy {
-      maximum_retry_attempts = 3
-    }
-  }
-}
-
 resource "aws_cloudwatch_event_rule" "reindex_rule" {
   name        = "ebsco-adapter-reindex-rule"
-  description = "Rule to catch custom reindex event"
+  description = "Rule to trigger custom reindex event for EBSCO adapter"
   event_pattern = jsonencode({
     "source" : ["weco.pipeline.reindex"],
     "detail" : {
@@ -101,7 +55,52 @@ resource "aws_cloudwatch_event_target" "ftp_task_reindex_target" {
     containerOverrides = [
       {
         name    = "ebsco-adapter-ftp"
-        command = ["--reindex-type", "full"]
+        command = ["--process-type", "reindex-full"]
+      }
+    ]
+  })
+}
+
+resource "aws_cloudwatch_event_rule" "schedule_rule" {
+  name        = "ebsco-adapter-schedule-rule"
+  description = "Rule to schedule and manually trigger EBSCO adapter"
+
+  # Invoke the rule every day
+  schedule_expression = "rate(1 day)"
+
+  # Also allow manual invocation
+  event_pattern = jsonencode({
+    "source" : ["weco.pipeline.adapter"],
+    "detail" : {
+      "InvokeTargets" : ["ebsco"]
+    }
+  })
+}
+
+resource "aws_cloudwatch_event_target" "ftp_task_schedule_target" {
+  arn      = aws_ecs_cluster.cluster.arn
+  rule     = aws_cloudwatch_event_rule.schedule_rule.name
+  role_arn = aws_iam_role.eventbridge_task_scheduler.arn
+
+  ecs_target {
+    task_definition_arn = local.task_definition_arn_latest
+    launch_type         = "FARGATE"
+
+    network_configuration {
+      assign_public_ip = false
+      security_groups = [
+        aws_security_group.egress.id,
+        local.network_config.ec_privatelink_security_group_id
+      ]
+      subnets = local.network_config.subnets
+    }
+  }
+
+  input = jsonencode({
+    containerOverrides = [
+      {
+        name    = "ebsco-adapter-ftp"
+        command = ["--process-type", "scheduled"]
       }
     ]
   })

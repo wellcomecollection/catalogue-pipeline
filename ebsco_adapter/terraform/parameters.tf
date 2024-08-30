@@ -70,6 +70,13 @@ resource "aws_ssm_parameter" "ebsco_adapter_output_topic_arn" {
   value       = module.ebsco_adapter_output_topic.arn
 }
 
+resource "aws_ssm_parameter" "ebsco_adapter_reindex_topic_arn" {
+  name        = "/catalogue_pipeline/ebsco_adapter/reindex_topic_arn"
+  description = "The ARN of the SNS topic to publish reindex messages to"
+  type        = "String"
+  value       = local.reindexer_topic_arn
+}
+
 resource "aws_ssm_parameter" "ebsco_adapter_bucket_name" {
   name        = "/catalogue_pipeline/ebsco_adapter/bucket_name"
   description = "The name of the S3 bucket to write files to"

@@ -190,7 +190,7 @@ def test_run_reindex():
         assert fake_sns_client.test_get_published_messages() == []
 
         print("\n--- Running test reindex with type full ---")
-        run_reindex(s3_store, sns_publisher, invoked_at, "full")
+        run_reindex(s3_store, sns_publisher, invoked_at, "reindex-full")
 
         reindex_published_messages = fake_sns_client.test_get_published_messages()
         assert reindex_published_messages == [ebs9579e, ebs29555e]
@@ -199,7 +199,9 @@ def test_run_reindex():
         assert fake_sns_client.test_get_published_messages() == []
 
         print("\n--- Running test reindex with type partial ---")
-        run_reindex(s3_store, sns_publisher, invoked_at, "partial", ["ebs9579e"])
+        run_reindex(
+            s3_store, sns_publisher, invoked_at, "reindex-partial", ["ebs9579e"]
+        )
 
         reindex_published_messages = fake_sns_client.test_get_published_messages()
         assert reindex_published_messages == [ebs9579e]
