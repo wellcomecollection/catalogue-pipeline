@@ -19,12 +19,14 @@ class PremisAccessConditionsTest
           Some("Open")
         ).parse.right.get.accessStatus.get shouldBe AccessStatus.Open
       }
+
       it("translates the copyrightNote into a Licence") {
         PremisAccessConditions(
           Some("In Copyright"),
           None
         ).parse.right.get.licence.get shouldBe License.InCopyright
       }
+
       it("has no access conditions if none are given") {
         val conditions = PremisAccessConditions(
           None,
@@ -50,14 +52,35 @@ class PremisAccessConditionsTest
     }
 
     describe("extracting values from a rightsMD section") {
-      it("pulls out the copyrightNote for the licence") {
+      it("pulls out the copyrightNote where rightsBasis is 'Copyright'") {
         PremisAccessConditions(
           openInCopyrightRightsMD
         ).copyrightNote shouldBe Some(
           "In copyright"
         )
       }
+
+      it("pulls out the licenceNote where rightsBasis is 'License'") {
+        PremisAccessConditions(
+          openCCBYNCRightsMD
+        ).copyrightNote shouldBe Some("CC-BY-NC")
+      }
+
+      it("pulls out the copyrightNote where rightsBasis is not specified") {
+        PremisAccessConditions(
+          openMixedCCBYNCWithCopyrightRightsMD
+        ).copyrightNote shouldBe Some(
+          "In copyright"
+        )
+      }
+
       it("pulls out the rightsGrantedNote for the access status") {
+        PremisAccessConditions(
+          openInCopyrightRightsMD
+        ).useRightsGrantedNote shouldBe Some("Open")
+      }
+
+      it("pulls out the copy for the access status") {
         PremisAccessConditions(
           openInCopyrightRightsMD
         ).useRightsGrantedNote shouldBe Some("Open")
