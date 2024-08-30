@@ -19,7 +19,7 @@ case class PremisAccessConditions(
     )
 }
 
-object PremisAccessConditions extends Logging{
+object PremisAccessConditions extends Logging {
 
   /** The access conditions are encoded a premis elementin the METS. For
     * example:
@@ -67,7 +67,7 @@ object PremisAccessConditions extends Logging{
     // https://wellcome.slack.com/archives/C02ANCYL90E/p1725026316294549
     val rightsNote = rightsBasis match {
       case Some(basis) if basis.text == "Copyright" => copyrightNoteElem
-      case Some(basis) if basis.text == "License" => licenseNoteElem
+      case Some(basis) if basis.text == "License"   => licenseNoteElem
 
       // If we don't have a rightsBasis, pick from either copyright or
       // license preferring copyright
@@ -76,7 +76,7 @@ object PremisAccessConditions extends Logging{
 
         List(
           copyrightNoteElem,
-          licenseNoteElem,
+          licenseNoteElem
         ).flatten.headOption
     }
 
