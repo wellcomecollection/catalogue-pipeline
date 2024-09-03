@@ -137,9 +137,9 @@ object SierraRulesForRequesting {
       //    v|i||108||=|p||
       //    #ls Line above opacmsg = By approval for vs 27/08/24
       case i
-        if i
-          .fixedField("108")
-          .containsAnyOf("n", "a", "p") =>
+          if i
+            .fixedField("108")
+            .containsAnyOf("n", "a", "p") =>
         NotRequestable.NeedsManualRequest(
           "This item cannot be requested online. Please place a manual request."
         )
@@ -149,9 +149,9 @@ object SierraRulesForRequesting {
       //    q|i||108||=|u||
       //    #ls Line above opacmsg = Unavailable for vs 27/08/24
       case i
-        if i
-          .fixedField("108")
-          .contains("u") =>
+          if i
+            .fixedField("108")
+            .contains("u") =>
         NotRequestable.ItemUnavailable(
           "This item is unavailable."
         )
