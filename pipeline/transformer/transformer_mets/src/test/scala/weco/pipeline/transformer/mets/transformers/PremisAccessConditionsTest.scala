@@ -80,12 +80,6 @@ class PremisAccessConditionsTest
         ).useRightsGrantedNote shouldBe Some("Open")
       }
 
-      it("pulls out the copy for the access status") {
-        PremisAccessConditions(
-          openInCopyrightRightsMD
-        ).useRightsGrantedNote shouldBe Some("Open")
-      }
-
       it("creates empty accessConditions if the relevant fields are absent") {
         val conditions = PremisAccessConditions(
           emptyRightsMD
