@@ -7,13 +7,18 @@ case object Requestable extends RulesForRequestingResult
 sealed trait NotRequestable extends RulesForRequestingResult
 
 object NotRequestable {
-  case class NeedsManualRequest(message: String) extends NotRequestable
+  val defaultManualRequestMessage =
+    "This item cannot be requested online. Please place a manual request."
+  val defaultItemUnavailableMessage =
+    "This item is unavailable."
+
+  case class NeedsManualRequest(message: String = defaultManualRequestMessage) extends NotRequestable
 
   case class ItemClosed(message: String) extends NotRequestable
   case class SafeguardedItem(message: String) extends NotRequestable
   case class ItemMissing(message: String) extends NotRequestable
   case class ItemOnSearch(message: String) extends NotRequestable
-  case class ItemUnavailable(message: String) extends NotRequestable
+  case class ItemUnavailable(message: String = defaultItemUnavailableMessage) extends NotRequestable
   case class ItemWithdrawn(message: String) extends NotRequestable
 
   case class ContactUs(message: String) extends NotRequestable

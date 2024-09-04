@@ -227,7 +227,7 @@ class SierraRulesForRequestingTest
         assertBlockedWith(
           _,
           expectedResult = NotRequestable.NeedsManualRequest(
-            "Please complete a manual request slip.  This item cannot be requested online."
+            "This item cannot be requested online. Please place a manual request."
           )
         )
       }
@@ -325,13 +325,13 @@ class SierraRulesForRequestingTest
       (
         "4",
         NotRequestable.NeedsManualRequest(
-          "Please complete a manual request slip.  This item cannot be requested online."
+          "This item cannot be requested online. Please place a manual request."
         )
       ),
       (
         "14",
         NotRequestable.NeedsManualRequest(
-          "Please complete a manual request slip.  This item cannot be requested online."
+          "This item cannot be requested online. Please place a manual request."
         )
       )
     )

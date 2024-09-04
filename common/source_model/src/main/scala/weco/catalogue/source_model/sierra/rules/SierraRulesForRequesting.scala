@@ -62,7 +62,7 @@ object SierraRulesForRequesting {
       case i if i.fixedField("88").contains("x") =>
         NotRequestable.ItemWithdrawn("This item is withdrawn.")
       case i if i.fixedField("88").contains("r") =>
-        NotRequestable.ItemUnavailable("This item is unavailable.")
+        NotRequestable.ItemUnavailable()
       case i if i.fixedField("88").contains("z") =>
         NotRequestable.NoPublicMessage("fixed field 88 = z")
       case i if i.fixedField("88").contains("v") =>
@@ -140,9 +140,7 @@ object SierraRulesForRequesting {
           if i
             .fixedField("108")
             .containsAnyOf("n", "a", "p") =>
-        NotRequestable.NeedsManualRequest(
-          "This item cannot be requested online. Please place a manual request."
-        )
+        NotRequestable.NeedsManualRequest()
 
       // These cases cover the lines:
       //
@@ -152,9 +150,7 @@ object SierraRulesForRequesting {
           if i
             .fixedField("108")
             .contains("u") =>
-        NotRequestable.ItemUnavailable(
-          "This item is unavailable."
-        )
+        NotRequestable.ItemUnavailable()
 
       // These cases cover the lines:
       //
@@ -215,9 +211,7 @@ object SierraRulesForRequesting {
               "gblip",
               "ofvds"
             ) =>
-        NotRequestable.NeedsManualRequest(
-          "This item cannot be requested online. Please place a manual request."
-        )
+        NotRequestable.NeedsManualRequest()
 
       // These cases cover the lines:
       //
@@ -230,9 +224,7 @@ object SierraRulesForRequesting {
             .containsAnyOf(
               "harcl"
             ) =>
-        NotRequestable.ItemUnavailable(
-          "This item is unavailable."
-        )
+        NotRequestable.ItemUnavailable()
 
       // These cases cover the lines:
       //
@@ -353,9 +345,7 @@ object SierraRulesForRequesting {
               "sompr",
               "somsy"
             ) =>
-        NotRequestable.NeedsManualRequest(
-          "Please complete a manual request slip.  This item cannot be requested online."
-        )
+        NotRequestable.NeedsManualRequest()
 
       // This case covers the line:
       //
