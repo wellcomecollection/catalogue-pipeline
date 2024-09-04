@@ -14,7 +14,11 @@ import weco.json.JsonUtil.{fromJson, toJson}
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
-import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier
+}
 import weco.pipeline_storage.{Indexer, PipelineStorageConfig}
 import weco.typesafe.Runnable
 
@@ -31,7 +35,8 @@ object MergerWorker {
   type WorkSet = Seq[Option[Work[Identified]]]
 }
 
-trait MergerWorker extends Worker[MatcherResult, Future[List[MergerWorker.WorkOrImage]]] {
+trait MergerWorker
+    extends Worker[MatcherResult, Future[List[MergerWorker.WorkOrImage]]] {
   import MergerWorker._
 
   implicit val ec: ExecutionContext
@@ -40,19 +45,23 @@ trait MergerWorker extends Worker[MatcherResult, Future[List[MergerWorker.WorkOr
 
   def doWork(matcherResult: MatcherResult): Future[List[WorkOrImage]] = {
     getWorkSets(matcherResult)
-      .map(workSets => workSets.filter(_.flatten.nonEmpty).flatMap(
-        ws =>
-          // We use the matcher result time as the "modified" time on
-          // the merged works, because it reflects the last time the
-          // matcher inspected the connections between these works.
-          //
-          // We *cannot* rely on the modified times of the individual
-          // works -- this may cause us to drop updates if works
-          // get unlinked.
-          //
-          // See https://github.com/wellcomecollection/docs/tree/8d83d75aba89ead23559584db2533e95ceb09200/rfcs/038-matcher-versioning
-          applyMerge(ws, matcherResult.createdTime)
-        )
+      .map(
+        workSets =>
+          workSets
+            .filter(_.flatten.nonEmpty)
+            .flatMap(
+              ws =>
+                // We use the matcher result time as the "modified" time on
+                // the merged works, because it reflects the last time the
+                // matcher inspected the connections between these works.
+                //
+                // We *cannot* rely on the modified times of the individual
+                // works -- this may cause us to drop updates if works
+                // get unlinked.
+                //
+                // See https://github.com/wellcomecollection/docs/tree/8d83d75aba89ead23559584db2533e95ceb09200/rfcs/038-matcher-versioning
+                applyMerge(ws, matcherResult.createdTime)
+            )
       )
   }
 
@@ -65,9 +74,9 @@ trait MergerWorker extends Worker[MatcherResult, Future[List[MergerWorker.WorkOr
     }
 
   private def applyMerge(
-                          workSet: WorkSet,
-                          matcherResultTime: Instant
-                        ): Seq[WorkOrImage] =
+    workSet: WorkSet,
+    matcherResultTime: Instant
+  ): Seq[WorkOrImage] =
     mergerManager
       .applyMerge(maybeWorks = workSet)
       .mergedWorksAndImagesWithTime(matcherResultTime)
@@ -78,19 +87,23 @@ class CommandLineMergerWorkerService(
   val mergerManager: MergerManager
 )(val workIds: Option[String])(implicit val ec: ExecutionContext)
     extends Runnable
-      with MergerWorker {
+    with MergerWorker {
 
   import MergerWorker._
 
   def runWithIds(str: String): Future[Unit] = {
-    val workIdentifiers = str.split(",").map { id =>
-      WorkIdentifier(CanonicalId(id), 0)
-    }.toSeq
+    val workIdentifiers = str
+      .split(",")
+      .map {
+        id =>
+          WorkIdentifier(CanonicalId(id), 0)
+      }
+      .toSeq
 
     val matcherResult = MatcherResult(
       works = Set(
         MatchedIdentifiers(
-          identifiers = workIdentifiers.toSet,
+          identifiers = workIdentifiers.toSet
         )
       ),
       createdTime = Instant.now
@@ -100,10 +113,9 @@ class CommandLineMergerWorkerService(
 
   def run(): Future[Unit] =
     workIds match {
-        case Some(ids) => runWithIds(ids)
-        case None      => Future.failed(new RuntimeException("No work IDs provided"))
+      case Some(ids) => runWithIds(ids)
+      case None => Future.failed(new RuntimeException("No work IDs provided"))
     }
-
 
   import io.circe.generic.auto._
 
@@ -127,8 +139,8 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   config: PipelineStorageConfig
 )(implicit val ec: ExecutionContext)
     extends Runnable
-      with MergerWorker
-      with FlowOps {
+    with MergerWorker
+    with FlowOps {
 
   import weco.pipeline_storage.Indexable._
   import weco.pipeline_storage.PipelineStorageStream._
@@ -152,13 +164,14 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     : Flow[(Message, List[WorkOrImage]), Message, NotUsed] =
     batchIndexAndSendFlow(config, sendWorkOrImage, workOrImageIndexer)
 
-
   private def processMessage(
     message: NotificationMessage
   ): Future[List[WorkOrImage]] =
-    Future.fromTry(
+    Future
+      .fromTry(
         fromJson[MatcherResult](message.body)
-    ).flatMap(doWork)
+      )
+      .flatMap(doWork)
 
   private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {

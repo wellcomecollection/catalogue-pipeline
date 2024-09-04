@@ -8,9 +8,9 @@ import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 import scala.concurrent.{ExecutionContext, Future}
 
 class IdentifiedWorkLookup(
-                            retriever: Retriever[Work[Identified]],
-                            checkLatestVersion: Boolean = true
-                          )(
+  retriever: Retriever[Work[Identified]],
+  checkLatestVersion: Boolean = true
+)(
   implicit ec: ExecutionContext
 ) {
   def fetchAllWorks(
@@ -38,7 +38,8 @@ class IdentifiedWorkLookup(
                 // in the retriever and find {Av2, Bv3}, we shouldn't merge
                 // these -- we should wait for the matcher to confirm we should
                 // still be merging these two works.
-                if (work.version == version || !checkLatestVersion) Some(work) else None
+                if (work.version == version || !checkLatestVersion) Some(work)
+                else None
             }
         case RetrieverMultiResult(_, notFound) =>
           throw new RuntimeException(s"Works not found: $notFound")

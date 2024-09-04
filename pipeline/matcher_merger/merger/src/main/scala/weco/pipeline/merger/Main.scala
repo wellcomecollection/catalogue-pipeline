@@ -11,7 +11,13 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.pipeline.merger.services.{CommandLineMergerWorkerService, IdentifiedWorkLookup, MergerManager, MergerWorkerService, PlatformMerger}
+import weco.pipeline.merger.services.{
+  CommandLineMergerWorkerService,
+  IdentifiedWorkLookup,
+  MergerManager,
+  MergerWorkerService,
+  PlatformMerger
+}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -24,7 +30,7 @@ object Main extends WellcomeTypesafeApp {
 
   // read and print args passed from the command line
   val runAsCli = args.length > 0
-  val idsToCheck = if(runAsCli) Some(args(0)) else None
+  val idsToCheck = if (runAsCli) Some(args(0)) else None
 
   runWithConfig {
     config: Config =>
@@ -89,7 +95,8 @@ object Main extends WellcomeTypesafeApp {
           workOrImageIndexer = workOrImageIndexer,
           workMsgSender = workMsgSender,
           imageMsgSender = imageMsgSender,
-          config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
+          config =
+            PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
         )
       }
   }
