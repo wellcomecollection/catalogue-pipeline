@@ -12,13 +12,15 @@ object NotRequestable {
   val defaultItemUnavailableMessage =
     "This item is unavailable."
 
-  case class NeedsManualRequest(message: String = defaultManualRequestMessage) extends NotRequestable
+  case class NeedsManualRequest(message: String = defaultManualRequestMessage)
+      extends NotRequestable
 
   case class ItemClosed(message: String) extends NotRequestable
   case class SafeguardedItem(message: String) extends NotRequestable
   case class ItemMissing(message: String) extends NotRequestable
   case class ItemOnSearch(message: String) extends NotRequestable
-  case class ItemUnavailable(message: String = defaultItemUnavailableMessage) extends NotRequestable
+  case class ItemUnavailable(message: String = defaultItemUnavailableMessage)
+      extends NotRequestable
   case class ItemWithdrawn(message: String) extends NotRequestable
 
   case class ContactUs(message: String) extends NotRequestable
