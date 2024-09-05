@@ -8,7 +8,11 @@ import weco.messaging.sqs.SQSStream
 import weco.pipeline_storage.PipelineStorageStream._
 import weco.pipeline.matcher.matcher.WorkMatcher
 import weco.pipeline.matcher.models.MatcherResult._
-import weco.pipeline.matcher.models.{MatcherResult, VersionExpectedConflictException, WorkStub}
+import weco.pipeline.matcher.models.{
+  MatcherResult,
+  VersionExpectedConflictException,
+  WorkStub
+}
 import weco.typesafe.Runnable
 import weco.pipeline_storage.{PipelineStorageConfig, Retriever}
 
@@ -18,9 +22,11 @@ trait Worker[T, Output] {
   def doWork(t: T): Output
 }
 
-trait MatcherWorker extends Worker[WorkStub, Future[Option[MatcherResult]]] with Logging {
-    implicit val ec: ExecutionContext
-    val workMatcher: WorkMatcher
+trait MatcherWorker
+    extends Worker[WorkStub, Future[Option[MatcherResult]]]
+    with Logging {
+  implicit val ec: ExecutionContext
+  val workMatcher: WorkMatcher
 
   def doWork(workStub: WorkStub): Future[Option[MatcherResult]] = {
     workMatcher
@@ -45,7 +51,7 @@ class CommandLineMatcherWorkerService(
 
   def run(): Future[Unit] = workId match {
     case Some(workId) => runWithId(workId)
-    case None         => Future.failed(new RuntimeException("No work ID provided"))
+    case None => Future.failed(new RuntimeException("No work ID provided"))
   }
 
   private def runWithId(workId: String): Future[Unit] =
@@ -83,10 +89,10 @@ class MatcherWorkerService[MsgDestination](
 
   def processMessage(workStub: WorkStub): Future[Unit] = {
     doWork(workStub).flatMap {
-        case Some(matcherResult) =>
-            Future.fromTry(msgSender.sendT(matcherResult))
-        case None =>
-            Future.successful(())
+      case Some(matcherResult) =>
+        Future.fromTry(msgSender.sendT(matcherResult))
+      case None =>
+        Future.successful(())
     }
   }
 }

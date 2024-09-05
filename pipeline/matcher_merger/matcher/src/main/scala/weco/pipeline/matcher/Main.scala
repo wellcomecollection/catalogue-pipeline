@@ -10,7 +10,10 @@ import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.matcher.matcher.WorkMatcher
 import weco.pipeline.matcher.models.MatcherResult
-import weco.pipeline.matcher.services.{CommandLineMatcherWorkerService, MatcherWorkerService}
+import weco.pipeline.matcher.services.{
+  CommandLineMatcherWorkerService,
+  MatcherWorkerService
+}
 import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -25,7 +28,7 @@ object Main extends WellcomeTypesafeApp {
 
   // read and print args passed from the command line
   val runAsCli = args.length > 0
-  val idsToCheck = if(runAsCli) Some(args(0)) else None
+  val idsToCheck = if (runAsCli) Some(args(0)) else None
 
   runWithConfig {
     config: Config =>
@@ -71,5 +74,5 @@ object Main extends WellcomeTypesafeApp {
           workMatcher = workMatcher
         )
       }
-    }
+  }
 }
