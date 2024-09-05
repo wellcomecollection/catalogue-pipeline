@@ -10,7 +10,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.matcher.matcher.WorkMatcher
 import weco.pipeline.matcher.models.MatcherResult
-import weco.pipeline.matcher.services.MatcherWorkerService
+import weco.pipeline.matcher.services.{CommandLineMatcherWorkerService, MatcherWorkerService}
 import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -22,6 +22,11 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.higherKinds
 
 object Main extends WellcomeTypesafeApp {
+
+  // read and print args passed from the command line
+  val runAsCli = args.length > 0
+  val idsToCheck = if(runAsCli) Some(args(0)) else None
+
   runWithConfig {
     config: Config =>
       implicit val actorSystem: ActorSystem =
@@ -51,13 +56,20 @@ object Main extends WellcomeTypesafeApp {
           index = Index(config.requireString("es.index"))
         )
 
-      new MatcherWorkerService(
-        PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
-        retriever = retriever,
-        msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        msgSender = SNSBuilder
-          .buildSNSMessageSender(config, subject = "Sent from the matcher"),
-        workMatcher = workMatcher
-      )
-  }
+      if (runAsCli) {
+        new CommandLineMatcherWorkerService(
+          retriever = retriever,
+          workMatcher = workMatcher
+        )(workId = idsToCheck)
+      } else {
+        new MatcherWorkerService(
+          PipelineStorageStreamBuilder.buildPipelineStorageConfig(config),
+          retriever = retriever,
+          msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+          msgSender = SNSBuilder
+            .buildSNSMessageSender(config, subject = "Sent from the matcher"),
+          workMatcher = workMatcher
+        )
+      }
+    }
 }

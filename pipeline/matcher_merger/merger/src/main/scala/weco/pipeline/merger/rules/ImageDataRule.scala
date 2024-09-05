@@ -92,6 +92,7 @@ object ImagesRule extends ImageRule with ImageDataOps {
   )(sierraTarget: Work.Visible[Identified]): FieldMergeResult[FieldData] = {
     val metsImages =
       getMetsPictureAndEphemeraImages(sierraTarget, sources).getOrElse(Nil)
+
     val miroImages = mergeMetsLicenceIntoMiroLocation(
       getPairedMiroImages(sierraTarget, sources).getOrElse(Nil),
       metsImages
