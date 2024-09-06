@@ -1,5 +1,5 @@
 module "input_queue" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.4.0"
 
   queue_name = var.queue_config.name
 
