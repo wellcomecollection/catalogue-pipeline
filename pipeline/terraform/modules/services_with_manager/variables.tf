@@ -156,4 +156,5 @@ variable "max_receive_count" {
 
 variable "dlq_alarm_topic_arn" {
   type = string
+  default = null
 }

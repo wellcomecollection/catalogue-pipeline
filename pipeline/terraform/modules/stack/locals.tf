@@ -177,7 +177,7 @@ locals {
   monitoring_config = {
     shared_logging_secrets = local.shared_infra["shared_secrets_logging"]
     logging_cluster_id     = local.shared_infra["logging_cluster_id"]
-    dlq_alarm_arn          = data.terraform_remote_state.monitoring.outputs.platform_dlq_alarm_topic_arn
+    dlq_alarm_arn          = null
   }
 
   network_config = {
