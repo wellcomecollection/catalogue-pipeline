@@ -103,7 +103,6 @@ class PipelineStorageStream[In, Out, MsgDestination](
             )
       )
     } yield done
-
 }
 
 object PipelineStorageStream extends Logging {
@@ -180,7 +179,11 @@ object PipelineStorageStream extends Logging {
                             err
                           )
                           None
-                        case Right(doc) => Some((messages(idx), doc))
+                        case Right(doc) =>
+                          info(
+                            s"Retrieved document with id: $id"
+                          )
+                          Some((messages(idx), doc))
                       }
                   }
                   .collect { case Some((msg, doc)) => (msg, doc) }
@@ -212,6 +215,12 @@ object PipelineStorageStream extends Logging {
                   s"Some documents failed ingesting: ${failedIds.mkString(", ")}"
                 )
               }
+              val succeeded = result.right.getOrElse(Nil)
+              val succeededIds = succeeded.map { indexable.id }
+              info(
+                s"Successfully ingested ${succeeded.size} documents: ${succeededIds.mkString(", ")}"
+              )
+
               bundles.collect {
                 case Bundle(message, doc, numberOfItems)
                     if !failed.contains(doc) =>

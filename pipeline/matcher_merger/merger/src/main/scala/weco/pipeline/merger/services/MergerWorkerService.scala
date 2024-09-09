@@ -1,5 +1,6 @@
 package weco.pipeline.merger.services
 
+import grizzled.slf4j.Logging
 import org.apache.pekko.stream.scaladsl.Flow
 import org.apache.pekko.{Done, NotUsed}
 import software.amazon.awssdk.services.sqs.model.Message
@@ -9,16 +10,12 @@ import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.flows.FlowOps
-import weco.pipeline.matcher.models.MatcherResult._
 import weco.json.JsonUtil.{fromJson, toJson}
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
-import weco.pipeline.matcher.models.{
-  MatchedIdentifiers,
-  MatcherResult,
-  WorkIdentifier
-}
+import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier}
+import weco.pipeline.merger.services.MergerWorker.WorkOrImage
 import weco.pipeline_storage.{Indexer, PipelineStorageConfig}
 import weco.typesafe.Runnable
 
@@ -36,7 +33,7 @@ object MergerWorker {
 }
 
 trait MergerWorker
-    extends Worker[MatcherResult, Future[List[MergerWorker.WorkOrImage]]] {
+    extends Worker[MatcherResult, Future[List[MergerWorker.WorkOrImage]]] with Logging {
   import MergerWorker._
 
   implicit val ec: ExecutionContext
@@ -44,6 +41,9 @@ trait MergerWorker
   val sourceWorkLookup: IdentifiedWorkLookup
 
   def doWork(matcherResult: MatcherResult): Future[List[WorkOrImage]] = {
+    info(
+      s"Received matcher result: $matcherResult; processing works"
+    )
     getWorkSets(matcherResult)
       .map(
         workSets =>
@@ -82,6 +82,29 @@ trait MergerWorker
       .mergedWorksAndImagesWithTime(matcherResultTime)
 }
 
+object CommandLineMergerWorkerService extends Logging {
+  import io.circe.generic.auto._
+
+  def printResults(results: List[WorkOrImage]): Unit = {
+    info(s"Merger result (${results.length}):")
+    val resultDetail = results.map {
+      case Left(work) =>
+        val srcId = work.state.sourceIdentifier
+        val collectionPath = work.data.collectionPath
+        work match {
+          case w: Work.Visible[_] => s"${work.id} / $srcId ($collectionPath), visible"
+          case w: Work.Deleted[_] => s"${work.id} / $srcId ($collectionPath), deleted, reason ${w.deletedReason}"
+          case w: Work.Invisible[_] => s"${work.id} / $srcId ($collectionPath), invisible"
+          case w: Work.Redirected[_] => s"${work.id} / $srcId ($collectionPath), redirected, target ${w.redirectTarget.canonicalId}"
+        }
+
+      case Right(image) =>
+        info(toJson(image))
+    }
+    info(s"\n${resultDetail.mkString("\n")}")
+  }
+}
+
 class CommandLineMergerWorkerService(
   val sourceWorkLookup: IdentifiedWorkLookup,
   val mergerManager: MergerManager
@@ -89,9 +112,9 @@ class CommandLineMergerWorkerService(
     extends Runnable
     with MergerWorker {
 
-  import MergerWorker._
+  import CommandLineMergerWorkerService._
 
-  def runWithIds(str: String): Future[Unit] = {
+  private def runWithIds(str: String): Future[Unit] = {
     val workIdentifiers = str
       .split(",")
       .map {
@@ -116,17 +139,6 @@ class CommandLineMergerWorkerService(
       case Some(ids) => runWithIds(ids)
       case None => Future.failed(new RuntimeException("No work IDs provided"))
     }
-
-  import io.circe.generic.auto._
-
-  def printResults(results: List[WorkOrImage]): Unit = {
-    results.foreach {
-      case Left(work) =>
-        info(toJson(work))
-      case Right(image) =>
-        info(toJson(image))
-    }
-  }
 }
 
 class MergerWorkerService[WorkDestination, ImageDestination](
@@ -171,12 +183,14 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       .fromTry(
         fromJson[MatcherResult](message.body)
       )
-      .flatMap(doWork)
+      .flatMap(doWork).map { results =>
+        CommandLineMergerWorkerService.printResults(results)
+        results
+      }
 
   private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {
       case Left(work)   => workMsgSender.send(workIndexable.id(work))
       case Right(image) => imageMsgSender.send(imageIndexable.id(image))
     }
-
 }

@@ -54,6 +54,7 @@ class WorkMatcher(
         matcherResult <-
           if (updatedNodes.isEmpty) {
             val result = MatcherResult(
+              // TODO: There could be an issue here - the merger relies on the versions reported here to be correct
               works = toMatchedIdentifiers(afterNodes),
               createdTime = Instant.now()
             )

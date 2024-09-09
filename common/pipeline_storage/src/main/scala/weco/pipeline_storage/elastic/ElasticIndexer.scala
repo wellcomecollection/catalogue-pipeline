@@ -54,7 +54,7 @@ class ElasticIndexer[T: Indexable](
       )
       .flatMap {
         _ =>
-          debug(
+          info(
             s"Indexing ${documents.map(doc => indexable.id(doc)).mkString(", ")}"
           )
           val inserts = documents.map {
