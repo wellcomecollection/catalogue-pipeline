@@ -62,7 +62,7 @@ object SierraRulesForRequesting {
       case i if i.fixedField("88").contains("x") =>
         NotRequestable.ItemWithdrawn("This item is withdrawn.")
       case i if i.fixedField("88").contains("r") =>
-        NotRequestable.ItemUnavailable("This item is unavailable.")
+        NotRequestable.ItemUnavailable()
       case i if i.fixedField("88").contains("z") =>
         NotRequestable.NoPublicMessage("fixed field 88 = z")
       case i if i.fixedField("88").contains("v") =>
@@ -130,6 +130,30 @@ object SierraRulesForRequesting {
 
       // These cases cover the lines:
       //
+      //    v|i||108||=|n||
+      //    #ls Line above opacmsg = manual request for vs 27/08/24
+      //    v|i||108||=|a||
+      //    #ls Line above opacmsg = By appointment for vs 27/08/24
+      //    v|i||108||=|p||
+      //    #ls Line above opacmsg = By approval for vs 27/08/24
+      case i
+          if i
+            .fixedField("108")
+            .containsAnyOf("n", "a", "p") =>
+        NotRequestable.NeedsManualRequest()
+
+      // These cases cover the lines:
+      //
+      //    q|i||108||=|u||
+      //    #ls Line above opacmsg = Unavailable for vs 27/08/24
+      case i
+          if i
+            .fixedField("108")
+            .contains("u") =>
+        NotRequestable.ItemUnavailable()
+
+      // These cases cover the lines:
+      //
       //    v|i||79||=|mfgmc||
       //    v|i||79||=|mfinc||
       //    v|i||79||=|mfwcm||
@@ -187,9 +211,7 @@ object SierraRulesForRequesting {
               "gblip",
               "ofvds"
             ) =>
-        NotRequestable.NeedsManualRequest(
-          "This item cannot be requested online. Please place a manual request."
-        )
+        NotRequestable.NeedsManualRequest()
 
       // These cases cover the lines:
       //
@@ -202,9 +224,7 @@ object SierraRulesForRequesting {
             .containsAnyOf(
               "harcl"
             ) =>
-        NotRequestable.ItemUnavailable(
-          "This item is unavailable."
-        )
+        NotRequestable.ItemUnavailable()
 
       // These cases cover the lines:
       //
@@ -325,9 +345,7 @@ object SierraRulesForRequesting {
               "sompr",
               "somsy"
             ) =>
-        NotRequestable.NeedsManualRequest(
-          "Please complete a manual request slip.  This item cannot be requested online."
-        )
+        NotRequestable.NeedsManualRequest()
 
       // This case covers the line:
       //
