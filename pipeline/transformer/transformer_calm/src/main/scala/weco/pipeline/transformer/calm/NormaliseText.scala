@@ -1,7 +1,7 @@
 package weco.pipeline.transformer.calm
 
 import org.jsoup.Jsoup
-import org.jsoup.safety.Whitelist
+import org.jsoup.safety.Safelist
 import org.jsoup.nodes.Document.OutputSettings
 import org.jsoup.parser.Parser
 
@@ -13,19 +13,19 @@ object NormaliseText {
    * a, b, blockquote, br, cite, code, dd, dl, dt, em, i, li, ol, p, pre, q,
    * small, span, strike, strong, sub, sup, u, ul
    */
-  val basic = Whitelist.basic()
+  val basic = Safelist.basic()
 
   /* The none whitelist prevents all HTML tags
    */
-  val none = Whitelist.none()
+  val none = Safelist.none()
 
   /* The onlyItalics whitelist prevents all HTML tags apart from i
    */
-  val onlyItalics = Whitelist.none().addTags("i")
+  val onlyItalics = Safelist.none().addTags("i")
 
   private val settings = new OutputSettings().prettyPrint(false)
 
-  def apply(str: String, whitelist: Whitelist = basic): String =
+  def apply(str: String, whitelist: Safelist = basic): String =
     Jsoup
       .clean(str, "", whitelist, settings)
       .linesIterator
