@@ -413,9 +413,10 @@ def update_miro_image_suppressions_doc():
     # the Github CLI is required
     os.system(
         f"gh workflow run update_miro_suppressions_doc.yml "
-          f"--repo wellcomecollection/private "
-          f"--field committer='{git('config', 'user.name')} <{git('config', 'user.email')}>'"
+        f"--repo wellcomecollection/private "
+        f"--field committer='{git('config', 'user.name')} <{git('config', 'user.email')}>'"
     )
+
 
 def register_on_dlcs(origin_url, miro_id):
     dlcs_response = dlcs_api_client().post(
