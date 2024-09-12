@@ -5,7 +5,6 @@ Miro VHS, e.g. to suppress images or override the licence.
 
 import datetime
 import functools
-import itertools
 import json
 import sys
 import re
@@ -21,6 +20,7 @@ from _common import (
     get_secret_string,
     get_session,
     get_date_from_index_name,
+    get_dynamodb_items
 )
 
 SESSION = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
