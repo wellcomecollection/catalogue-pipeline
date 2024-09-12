@@ -20,7 +20,7 @@ from _common import (
     get_secret_string,
     get_session,
     get_date_from_index_name,
-    get_dynamodb_items
+    get_dynamodb_items,
 )
 
 SESSION = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
@@ -407,7 +407,9 @@ def get_all_miro_suppression_events():
 
 
 def update_miro_image_suppressions_doc():
-    print("*** Creating a workflow_dispatch event for update_miro_suppressions_doc.yml in repo wellcomecollection/private ***")
+    print(
+        "*** Creating a workflow_dispatch event for update_miro_suppressions_doc.yml in repo wellcomecollection/private ***"
+    )
 
     # create a workflow_dispatch event to trigger the update_miro_suppressions_doc.yml workflow
     # the Github CLI is required
