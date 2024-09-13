@@ -22,7 +22,7 @@ class DeletionMarker(sourceTable: String)(implicit client: DynamoDbClient)
             .when(attributeExists("id"))
             .update(
               "id" === record.id,
-              set("isDeleted", true) and add("version", 1),
+              set("isDeleted", true) and add("version", 1)
             )
         )
         .map(_.toPayload)
