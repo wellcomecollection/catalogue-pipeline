@@ -22,6 +22,9 @@ class DeletionMarker(sourceTable: String)(implicit client: DynamoDbClient)
             .when(attributeExists("id"))
             .update(
               "id" === record.id,
+              // Set isDeleted = true and increment the version
+              // We must increment the version to ensure downstream
+              // services detect that the record has been updated
               set("isDeleted", true) and add("version", 1)
             )
         )
