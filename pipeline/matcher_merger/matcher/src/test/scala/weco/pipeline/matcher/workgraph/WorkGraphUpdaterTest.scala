@@ -317,10 +317,16 @@ class WorkGraphUpdaterTest
 
       result shouldBe Set(
         workA
-          .copy(componentIds = List(idA))
+          .copy(
+            componentIds = List(idA),
+            subgraphId = SubgraphId(idA)
+          )
           .updateSourceWork(version = 2),
         workB
-          .copy(componentIds = List(idB))
+          .copy(
+            componentIds = List(idB),
+            subgraphId = SubgraphId(idB)
+          )
       )
     }
 

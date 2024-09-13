@@ -64,7 +64,9 @@ class CommandLineMatcherWorkerService(
       .map { _.foreach(printResults) }
 
   private def printResults(matcherResult: MatcherResult): Unit = {
-    info(s"Matcher result (${matcherResult.works.flatMap(_.identifiers).toList.length}): ${matcherResult.works.flatMap(_.identifiers.map(_.identifier)).toList.reverse.mkString(",")}")
+    matcherResult.works.foreach { matchedSet =>
+      info(s"Matched works: ${matchedSet.identifiers.map(_.identifier).mkString(",")}")
+    }
   }
 }
 

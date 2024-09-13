@@ -16,54 +16,70 @@ import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.typesafe.Runnable
 import weco.pipeline_storage.Indexable.workIndexable
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline.relation_embedder.models.Selector._
 import weco.pipeline.relation_embedder.models.{ArchiveRelationsCache, Batch}
 import weco.pipeline_storage.Indexer
 
-class RelationEmbedderWorkerService[MsgDestination](
-  sqsStream: SQSStream[NotificationMessage],
-  msgSender: MessageSender[MsgDestination],
-  workIndexer: Indexer[Work[Denormalised]],
-  relationsService: RelationsService,
-  indexBatchSize: Int = 100,
-  indexFlushInterval: FiniteDuration = 20 seconds
-)(implicit ec: ExecutionContext, materializer: Materializer)
-    extends Runnable
+trait Worker[T, Output] {
+  def doWork(t: T): Output
+}
+
+trait RelationEmbedderWorker[MsgDestination]
+    extends Worker[Batch, Future[Unit]]
     with Logging {
 
-  def run(): Future[Done] =
-    workIndexer.init().flatMap {
-      _ =>
-        sqsStream.foreach(this.getClass.getSimpleName, processMessage)
-    }
+  implicit val ec: ExecutionContext
+  implicit val materializer: Materializer
 
-  def processMessage(message: NotificationMessage): Future[Unit] = {
-    val batch = fromJson[Batch](message.body)
-    Future
-      .fromTry(batch)
-      .flatMap {
-        batch =>
-          info(
-            s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
-                .mkString(", ")}"
-          )
-          fetchRelations(batch)
-            .flatMap {
-              relationsCache =>
-                info(
-                  s"Built cache for tree ${batch.rootPath}, containing ${relationsCache.size} relations (${relationsCache.numParents} works map to parent works)."
+  val relationsService: RelationsService
+  val workIndexer: Indexer[Work[Denormalised]]
+  val msgSender: MessageSender[MsgDestination]
+
+  val indexBatchSize: Int
+  val indexFlushInterval: FiniteDuration
+
+  private def denormaliseAll(
+                              batch: Batch,
+                              relationsCache: ArchiveRelationsCache
+                            ): Source[Work[Denormalised], NotUsed] =
+    relationsService
+      .getAffectedWorks(batch)
+      .map {
+        work =>
+          val relations = relationsCache(work)
+          work.transition[Denormalised](relations)
+      }
+
+  private def indexWorks(
+                          denormalisedWorks: Source[Work[Denormalised], NotUsed]
+                        ) =
+    denormalisedWorks
+      .groupedWeightedWithin(
+        indexBatchSize,
+        indexFlushInterval
+      )(workIndexable.weight)
+      .mapAsync(1) {
+        works =>
+            workIndexer(works).flatMap {
+              case Left(failedWorks) =>
+                Future.failed(
+                  new Exception(s"Failed indexing works: $failedWorks")
                 )
-                indexWorks(denormaliseAll(batch, relationsCache))
+              case Right(_) => Future.successful(works.toList)
 
-            }
+          }
+
       }
-      .recoverWith {
-        case err =>
-          val batchString =
-            batch.map(_.toString).getOrElse("could not parse message")
-          error(s"Failed processing batch: $batchString", err)
-          Future.failed(err)
+      .mapConcat(_.map(_.id))
+      .mapAsync(3) {
+        id =>
+          Future(msgSender.send(id)).flatMap {
+            case Success(_)   => Future.successful(())
+            case Failure(err) => Future.failed(err)
+          }
       }
-  }
+      .runWith(Sink.ignore)
+      .map(_ => ())
 
   private def fetchRelations(batch: Batch): Future[ArchiveRelationsCache] =
     relationsService
@@ -77,44 +93,74 @@ class RelationEmbedderWorkerService[MsgDestination](
           ArchiveRelationsCache(relationWorks)
       }
 
-  private def denormaliseAll(
-    batch: Batch,
-    relationsCache: ArchiveRelationsCache
-  ): Source[Work[Denormalised], NotUsed] =
-    relationsService
-      .getAffectedWorks(batch)
-      .map {
-        work =>
-          val relations = relationsCache(work)
-          work.transition[Denormalised](relations)
+  def doWork(batch: Batch): Future[Unit] = {
+    info(
+      s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
+        .mkString(", ")}"
+    )
+    fetchRelations(batch)
+      .flatMap {
+        relationsCache =>
+          info(
+            s"Built cache for tree ${batch.rootPath}, containing ${relationsCache.size} relations (${relationsCache.numParents} works map to parent works)."
+          )
+          indexWorks(denormaliseAll(batch, relationsCache))
       }
+  }
+}
 
-  private def indexWorks(
-    denormalisedWorks: Source[Work[Denormalised], NotUsed]
-  ) =
-    denormalisedWorks
-      .groupedWeightedWithin(
-        indexBatchSize,
-        indexFlushInterval
-      )(workIndexable.weight)
-      .mapAsync(1) {
-        works =>
-          workIndexer(works).flatMap {
-            case Left(failedWorks) =>
-              Future.failed(
-                new Exception(s"Failed indexing works: $failedWorks")
-              )
-            case Right(_) => Future.successful(works.toList)
-          }
+class CommandLineRelationEmbedderWorkerService[MsgDestination](
+    val relationsService: RelationsService,
+    val workIndexer: Indexer[Work[Denormalised]],
+    val msgSender: MessageSender[MsgDestination]
+)(path: String)(
+  implicit val ec: ExecutionContext,
+  val materializer: Materializer
+)
+    extends Runnable
+      with RelationEmbedderWorker[MsgDestination] {
+
+  def runWithPaths(path: String): Future[Done] = {
+    val batch = Batch(path.split("/").head, List(Node(path)))
+    info(s"Running with batch: $batch")
+    doWork(batch).map(_ => Done)
+  }
+
+  def run(): Future[Done] =
+    runWithPaths(path).map(_ => Done)
+
+  override val indexBatchSize: Int = 1
+  override val indexFlushInterval: FiniteDuration = 1 seconds
+}
+
+class RelationEmbedderWorkerService[MsgDestination](
+  sqsStream: SQSStream[NotificationMessage],
+  val msgSender: MessageSender[MsgDestination],
+  val workIndexer: Indexer[Work[Denormalised]],
+  val relationsService: RelationsService,
+  val indexBatchSize: Int = 100,
+  val indexFlushInterval: FiniteDuration = 20 seconds
+)(implicit val ec: ExecutionContext, val materializer: Materializer)
+    extends Runnable
+      with RelationEmbedderWorker[MsgDestination] {
+
+  def run(): Future[Done] =
+    workIndexer.init().flatMap {
+      _ =>
+        sqsStream.foreach(this.getClass.getSimpleName, processMessage)
+    }
+
+  def processMessage(message: NotificationMessage): Future[Unit] = {
+    val batch = fromJson[Batch](message.body)
+    Future
+      .fromTry(batch)
+      .flatMap(doWork)
+      .recoverWith {
+        case err =>
+          val batchString =
+            batch.map(_.toString).getOrElse("could not parse message")
+          error(s"Failed processing batch: $batchString", err)
+          Future.failed(err)
       }
-      .mapConcat(_.map(_.id))
-      .mapAsync(3) {
-        id =>
-          Future(msgSender.send(id)).flatMap {
-            case Success(_)   => Future.successful(())
-            case Failure(err) => Future.failed(err)
-          }
-      }
-      .runWith(Sink.ignore)
-      .map(_ => ())
+  }
 }

@@ -20,7 +20,15 @@ object WorkGraphUpdater extends Logging {
         n.id -> n
     }.toMap
 
+    info(
+      s"Affected works: ${affectedWorks.keys.mkString(", ")}"
+    )
+
     checkVersionConflicts(work, affectedWorks)
+
+    info(
+      s"Merge candidate IDs: ${work.mergeCandidateIds.mkString(", ")}"
+    )
 
     val newSubgraph = new WorkSubgraph(
       newWork = WorkNode(
@@ -70,7 +78,7 @@ object WorkGraphUpdater extends Logging {
 private class WorkSubgraph(
   newWork: WorkNode,
   existingWorks: Map[CanonicalId, WorkNode]
-) {
+) extends Logging {
   require(!existingWorks.contains(newWork.id))
 
   // This is a lookup of all the works in this update
@@ -99,9 +107,22 @@ private class WorkSubgraph(
     val links =
       sourceWorks
         .flatMap {
-          case (id, sourceWork) =>
-            sourceWork.mergeCandidateIds.map { id ~> _ }
+          case (id, sourceWork) => {
+            info(
+              s"Work $id: ${sourceWork.mergeCandidateIds.mkString(", ")}"
+            )
+            sourceWork.mergeCandidateIds.map {
+              id ~> _
+            }
+          }
         }
+
+    info(
+      s"All works: ${allWorks.keys.mkString(", ")}, length: ${allWorks.size}"
+    )
+    info(
+      s"Links: \n${links.mkString("\n")}"
+    )
 
     // Remove any links that come to/from works that are suppressed.
     // This means we won't match "through" these works.
@@ -122,6 +143,10 @@ private class WorkSubgraph(
           link.head.isSuppressed || link.to.isSuppressed
       }
 
+    info(
+      s"unsuppressedLinks: \n${unsuppressedLinks.mkString("\n")}"
+    )
+
     // Get the IDs of all the works in this graph, and construct a Graph object.
     val workIds =
       sourceWorks.flatMap {
@@ -129,7 +154,15 @@ private class WorkSubgraph(
           id +: work.mergeCandidateIds
       }.toSet
 
+    info(
+      s"workIds: ${workIds.mkString(", ")}, length: ${workIds.size}"
+    )
+
     val g = Graph.from(edges = unsuppressedLinks, nodes = workIds)
+
+    info(
+      s"Graph: \n${g.isConnected}"
+    )
 
     // Go through the components of the graph, and turn each of them into
     // a set of WorkNode instances.
@@ -140,12 +173,18 @@ private class WorkSubgraph(
     //
     // Here there are two components: (A B C F G) and (D E H)
     //
-    val subgraphId = SubgraphId(workIds)
 
-    g.componentTraverser()
+    g.componentTraverser().foreach{
+        component => info(
+          s"Component: ${component.nodes.map(_.value).mkString(", ")}"
+        )
+    }
+
+    val foo = g.componentTraverser()
       .flatMap(
         component => {
           val componentIds = component.nodes.map(_.value).toList.sorted
+          val subgraphId = SubgraphId(componentIds.toSet)
 
           component.nodes.map(
             node => {
@@ -162,6 +201,12 @@ private class WorkSubgraph(
         }
       )
       .toSet
+
+    info(
+      s"foo: ${foo.map(_.id).mkString(", ")}, length: ${foo.size}"
+    )
+
+    foo
   }
 
   implicit class WorkOps(id: CanonicalId) {

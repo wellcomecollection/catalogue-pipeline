@@ -21,7 +21,7 @@ sealed trait Selector {
   def superSelectors: List[Selector] = {
     import Selector._
     val ancestorPaths = ancestors(path)
-    val ancestorDescendents = ancestorPaths.map(Descendents(_))
+    val ancestorDescendents = ancestorPaths.map(Descendents)
     val tree = Tree(rootPath)
     this match {
       case Tree(_) => Nil
