@@ -31,10 +31,12 @@ trait MatcherWorker
   def doWork(workStub: WorkStub): Future[Option[MatcherResult]] = {
     workMatcher
       .matchWork(workStub)
-      .map(matcherResult => {
-        info(s"Matching works: $matcherResult; for work: ${workStub.id}")
-        Some(matcherResult)
-      })
+      .map(
+        matcherResult => {
+          info(s"Matching works: $matcherResult; for work: ${workStub.id}")
+          Some(matcherResult)
+        }
+      )
       .recover {
         case e: VersionExpectedConflictException =>
           debug(
@@ -64,8 +66,11 @@ class CommandLineMatcherWorkerService(
       .map { _.foreach(printResults) }
 
   private def printResults(matcherResult: MatcherResult): Unit = {
-    matcherResult.works.foreach { matchedSet =>
-      info(s"Matched works: ${matchedSet.identifiers.map(_.identifier).mkString(",")}")
+    matcherResult.works.foreach {
+      matchedSet =>
+        info(
+          s"Matched works: ${matchedSet.identifiers.map(_.identifier).mkString(",")}"
+        )
     }
   }
 }

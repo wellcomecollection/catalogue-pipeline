@@ -39,9 +39,9 @@ trait RelationEmbedderWorker[MsgDestination]
   val indexFlushInterval: FiniteDuration
 
   private def denormaliseAll(
-                              batch: Batch,
-                              relationsCache: ArchiveRelationsCache
-                            ): Source[Work[Denormalised], NotUsed] =
+    batch: Batch,
+    relationsCache: ArchiveRelationsCache
+  ): Source[Work[Denormalised], NotUsed] =
     relationsService
       .getAffectedWorks(batch)
       .map {
@@ -51,8 +51,8 @@ trait RelationEmbedderWorker[MsgDestination]
       }
 
   private def indexWorks(
-                          denormalisedWorks: Source[Work[Denormalised], NotUsed]
-                        ) =
+    denormalisedWorks: Source[Work[Denormalised], NotUsed]
+  ) =
     denormalisedWorks
       .groupedWeightedWithin(
         indexBatchSize,
@@ -60,12 +60,12 @@ trait RelationEmbedderWorker[MsgDestination]
       )(workIndexable.weight)
       .mapAsync(1) {
         works =>
-            workIndexer(works).flatMap {
-              case Left(failedWorks) =>
-                Future.failed(
-                  new Exception(s"Failed indexing works: $failedWorks")
-                )
-              case Right(_) => Future.successful(works.toList)
+          workIndexer(works).flatMap {
+            case Left(failedWorks) =>
+              Future.failed(
+                new Exception(s"Failed indexing works: $failedWorks")
+              )
+            case Right(_) => Future.successful(works.toList)
 
           }
 
@@ -96,7 +96,7 @@ trait RelationEmbedderWorker[MsgDestination]
   def doWork(batch: Batch): Future[Unit] = {
     info(
       s"Received batch for tree ${batch.rootPath} containing ${batch.selectors.size} selectors: ${batch.selectors
-        .mkString(", ")}"
+          .mkString(", ")}"
     )
     fetchRelations(batch)
       .flatMap {
@@ -110,15 +110,14 @@ trait RelationEmbedderWorker[MsgDestination]
 }
 
 class CommandLineRelationEmbedderWorkerService[MsgDestination](
-    val relationsService: RelationsService,
-    val workIndexer: Indexer[Work[Denormalised]],
-    val msgSender: MessageSender[MsgDestination]
+  val relationsService: RelationsService,
+  val workIndexer: Indexer[Work[Denormalised]],
+  val msgSender: MessageSender[MsgDestination]
 )(path: String)(
   implicit val ec: ExecutionContext,
   val materializer: Materializer
-)
-    extends Runnable
-      with RelationEmbedderWorker[MsgDestination] {
+) extends Runnable
+    with RelationEmbedderWorker[MsgDestination] {
 
   def runWithPaths(path: String): Future[Done] = {
     val batch = Batch(path.split("/").head, List(Node(path)))
@@ -142,7 +141,7 @@ class RelationEmbedderWorkerService[MsgDestination](
   val indexFlushInterval: FiniteDuration = 20 seconds
 )(implicit val ec: ExecutionContext, val materializer: Materializer)
     extends Runnable
-      with RelationEmbedderWorker[MsgDestination] {
+    with RelationEmbedderWorker[MsgDestination] {
 
   def run(): Future[Done] =
     workIndexer.init().flatMap {

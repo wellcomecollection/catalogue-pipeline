@@ -14,7 +14,11 @@ import weco.json.JsonUtil.{fromJson, toJson}
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
-import weco.pipeline.matcher.models.{MatchedIdentifiers, MatcherResult, WorkIdentifier}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier
+}
 import weco.pipeline.merger.services.MergerWorker.WorkOrImage
 import weco.pipeline_storage.{Indexer, PipelineStorageConfig}
 import weco.typesafe.Runnable
@@ -33,7 +37,8 @@ object MergerWorker {
 }
 
 trait MergerWorker
-    extends Worker[MatcherResult, Future[List[MergerWorker.WorkOrImage]]] with Logging {
+    extends Worker[MatcherResult, Future[List[MergerWorker.WorkOrImage]]]
+    with Logging {
   import MergerWorker._
 
   implicit val ec: ExecutionContext
@@ -92,10 +97,14 @@ object CommandLineMergerWorkerService extends Logging {
         val srcId = work.state.sourceIdentifier
         val collectionPath = work.data.collectionPath
         work match {
-          case w: Work.Visible[_] => s"${work.id} / $srcId ($collectionPath), visible"
-          case w: Work.Deleted[_] => s"${work.id} / $srcId ($collectionPath), deleted, reason ${w.deletedReason}"
-          case w: Work.Invisible[_] => s"${work.id} / $srcId ($collectionPath), invisible"
-          case w: Work.Redirected[_] => s"${work.id} / $srcId ($collectionPath), redirected, target ${w.redirectTarget.canonicalId}"
+          case w: Work.Visible[_] =>
+            s"${work.id} / $srcId ($collectionPath), visible"
+          case w: Work.Deleted[_] =>
+            s"${work.id} / $srcId ($collectionPath), deleted, reason ${w.deletedReason}"
+          case w: Work.Invisible[_] =>
+            s"${work.id} / $srcId ($collectionPath), invisible"
+          case w: Work.Redirected[_] =>
+            s"${work.id} / $srcId ($collectionPath), redirected, target ${w.redirectTarget.canonicalId}"
         }
 
       case Right(image) =>
@@ -183,9 +192,11 @@ class MergerWorkerService[WorkDestination, ImageDestination](
       .fromTry(
         fromJson[MatcherResult](message.body)
       )
-      .flatMap(doWork).map { results =>
-        CommandLineMergerWorkerService.printResults(results)
-        results
+      .flatMap(doWork)
+      .map {
+        results =>
+          CommandLineMergerWorkerService.printResults(results)
+          results
       }
 
   private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =

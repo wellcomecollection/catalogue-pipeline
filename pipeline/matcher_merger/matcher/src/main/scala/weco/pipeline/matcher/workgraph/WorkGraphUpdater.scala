@@ -174,13 +174,15 @@ private class WorkSubgraph(
     // Here there are two components: (A B C F G) and (D E H)
     //
 
-    g.componentTraverser().foreach{
-        component => info(
+    g.componentTraverser().foreach {
+      component =>
+        info(
           s"Component: ${component.nodes.map(_.value).mkString(", ")}"
         )
     }
 
-    val foo = g.componentTraverser()
+    val foo = g
+      .componentTraverser()
       .flatMap(
         component => {
           val componentIds = component.nodes.map(_.value).toList.sorted
