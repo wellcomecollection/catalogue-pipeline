@@ -139,13 +139,12 @@ private class WorkSubgraph(
     //              F - G       H
     //
     // Here there are two components: (A B C F G) and (D E H)
-    //
-    val subgraphId = SubgraphId(workIds)
 
     g.componentTraverser()
       .flatMap(
         component => {
           val componentIds = component.nodes.map(_.value).toList.sorted
+          val subgraphId = SubgraphId(componentIds.toSet)
 
           component.nodes.map(
             node => {
