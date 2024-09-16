@@ -67,12 +67,16 @@ class SierraRulesForRequestingTest
   }
 
   it("blocks an item if fixed field 108 (status) is n,a,p or u") {
-    List("n","a","p").map { status =>
-      val item = createSierraItemDataWith(
-        fixedFields = Map("108" -> FixedField(label = "STATUS", value = status))
-      )
+    List("n", "a", "p").map {
+      status =>
+        val item = createSierraItemDataWith(
+          fixedFields =
+            Map("108" -> FixedField(label = "STATUS", value = status))
+        )
 
-      SierraRulesForRequesting(item) shouldBe a[NotRequestable.NeedsManualRequest]
+        SierraRulesForRequesting(item) shouldBe a[
+          NotRequestable.NeedsManualRequest
+        ]
     }
 
     val item = createSierraItemDataWith(
@@ -139,7 +143,7 @@ class SierraRulesForRequestingTest
     it("if it has a generic unavailable message") {
       val testCases = Table(
         "locationCode",
-        "harcl",
+        "harcl"
       )
 
       forAll(testCases) {

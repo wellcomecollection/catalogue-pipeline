@@ -42,13 +42,7 @@ class RelationEmbedderWorkerServiceTest
 
   /** The following tests use works within this tree:
     *
-    * a
-    * \|---
-    * \| | 1 2
-    * \| |---
-    * \| | | b c d†
-    * \|
-    * \| e
+    * a \|--- \| | 1 2 \| |--- \| | | b c d† \| \| e
     *
     * d† is available online
     */

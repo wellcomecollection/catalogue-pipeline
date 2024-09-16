@@ -24,11 +24,12 @@ class SierraParentsTest
   }
 
   it(
-    "returns a Series relation for a 440 - Series Statement/Added Entry-Title field") {
+    "returns a Series relation for a 440 - Series Statement/Added Entry-Title field"
+  ) {
     val varFields = List(
       VarField(
         marcTag = Some("440"),
-        subfields = List(Subfield(tag = "a", content = "A Series")),
+        subfields = List(Subfield(tag = "a", content = "A Series"))
       )
     )
     getParents(varFields) shouldBe List(SeriesRelation("A Series"))
@@ -38,31 +39,36 @@ class SierraParentsTest
     val varFields = List(
       VarField(
         marcTag = Some("490"),
-        subfields = List(Subfield(tag = "a", content = "A Series")),
+        subfields = List(Subfield(tag = "a", content = "A Series"))
       )
     )
     getParents(varFields) shouldBe List(SeriesRelation("A Series"))
   }
   it(
-    "returns a Series relation for a 773 - Host Item Entry field with the title from a subfield") {
+    "returns a Series relation for a 773 - Host Item Entry field with the title from a subfield"
+  ) {
     forAll(
       Table(
         "tag",
         "t",
         "a",
         "s"
-      )) { (tag) =>
-      val varFields = List(
-        VarField(
-          marcTag = "773",
-          subfields = List(Subfield(tag = tag, content = "A Series"))
-        )
       )
-      getParents(varFields) shouldBe List(SeriesRelation("A Series"))
+    ) {
+      (tag) =>
+        val varFields = List(
+          VarField(
+            marcTag = "773",
+            subfields = List(Subfield(tag = tag, content = "A Series"))
+          )
+        )
+        getParents(varFields) shouldBe List(SeriesRelation("A Series"))
     }
   }
 
-  it("returns a Series relation with one title, even if multiple are available") {
+  it(
+    "returns a Series relation with one title, even if multiple are available"
+  ) {
     // It is expected that there is one title subfield in the 773 field.
     // If there are more than one, the first will be returned as the title
     val varFields = List(
@@ -71,14 +77,16 @@ class SierraParentsTest
         subfields = List(
           Subfield(tag = "t", content = "The Series"),
           Subfield(tag = "a", content = "A Series"),
-          Subfield(tag = "s", content = "Some Series"))
+          Subfield(tag = "s", content = "Some Series")
+        )
       )
     )
     getParents(varFields) shouldBe List(SeriesRelation("The Series"))
   }
 
   it(
-    "returns a Series relation for an 830 - Series Added Entry-Uniform Title field") {
+    "returns a Series relation for an 830 - Series Added Entry-Uniform Title field"
+  ) {
     val varFields = List(
       VarField(
         marcTag = Some("830"),
@@ -96,14 +104,16 @@ class SierraParentsTest
         "490",
         "773",
         "830"
-      )) { (marcTag) =>
-      val varFields = List(
-        VarField(
-          marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "a", content = "A Series"))
-        )
       )
-      getParents(varFields) shouldBe List(SeriesRelation("A Series"))
+    ) {
+      (marcTag) =>
+        val varFields = List(
+          VarField(
+            marcTag = Some(marcTag),
+            subfields = List(Subfield(tag = "a", content = "A Series"))
+          )
+        )
+        getParents(varFields) shouldBe List(SeriesRelation("A Series"))
     }
 
   }
@@ -116,15 +126,17 @@ class SierraParentsTest
         "490",
         "773",
         "830"
-      )) { (marcTag) =>
-      val varFields = List(
-        VarField(
-          marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "a", content = "A Series")),
-          content = Some("Ignore me, I'm not here")
-        )
       )
-      getParents(varFields) shouldBe List(SeriesRelation("A Series"))
+    ) {
+      (marcTag) =>
+        val varFields = List(
+          VarField(
+            marcTag = Some(marcTag),
+            subfields = List(Subfield(tag = "a", content = "A Series")),
+            content = Some("Ignore me, I'm not here")
+          )
+        )
+        getParents(varFields) shouldBe List(SeriesRelation("A Series"))
     }
   }
 
@@ -134,22 +146,26 @@ class SierraParentsTest
     val varFields = List(
       VarField(
         marcTag = Some("830"),
-        subfields = List(Subfield(tag = "t", content = "A Series"), Subfield(tag = "s", content = "A Version")),
+        subfields = List(
+          Subfield(tag = "t", content = "A Series"),
+          Subfield(tag = "s", content = "A Version")
+        )
       )
     )
     getParents(varFields) shouldBe List(SeriesRelation("A Series"))
   }
 
   it(
-    "returns a list of series relations when multiple relevant MARC fields are present") {
+    "returns a list of series relations when multiple relevant MARC fields are present"
+  ) {
     val varFields = List(
       VarField(
         marcTag = Some("440"),
-        subfields = List(Subfield(tag = "a", content = "A Series")),
+        subfields = List(Subfield(tag = "a", content = "A Series"))
       ),
       VarField(
         marcTag = Some("490"),
-        subfields = List(Subfield(tag = "a", content = "Another Series")),
+        subfields = List(Subfield(tag = "a", content = "Another Series"))
       ),
       VarField(
         marcTag = Some("773"),
@@ -157,19 +173,20 @@ class SierraParentsTest
       ),
       VarField(
         marcTag = Some("830"),
-        subfields = List(Subfield(tag = "a", content = "Yet Another Series")),
+        subfields = List(Subfield(tag = "a", content = "Yet Another Series"))
       )
     )
     getParents(varFields) shouldBe List(
       SeriesRelation("A Series"),
       SeriesRelation("Another Series"),
       SeriesRelation("A Host"),
-      SeriesRelation("Yet Another Series"),
+      SeriesRelation("Yet Another Series")
     )
   }
 
   it(
-    "returns a list of series relations when the same relevant MARC field is present multiple times") {
+    "returns a list of series relations when the same relevant MARC field is present multiple times"
+  ) {
     forAll(
       Table(
         "marcTag",
@@ -177,32 +194,35 @@ class SierraParentsTest
         "490",
         "773",
         "830"
-      )) { (marcTag) =>
-      val varFields = List(
-        VarField(
-          marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "a", content = "A Series"))
-        ),
-        VarField(
-          marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "a", content = "Another Series"))
-        ),
-        VarField(
-          marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "a", content = "A Host"))
-        ),
-        VarField(
-          marcTag = Some(marcTag),
-          subfields = List(Subfield(tag = "a", content = "Yet Another Series"))
+      )
+    ) {
+      (marcTag) =>
+        val varFields = List(
+          VarField(
+            marcTag = Some(marcTag),
+            subfields = List(Subfield(tag = "a", content = "A Series"))
+          ),
+          VarField(
+            marcTag = Some(marcTag),
+            subfields = List(Subfield(tag = "a", content = "Another Series"))
+          ),
+          VarField(
+            marcTag = Some(marcTag),
+            subfields = List(Subfield(tag = "a", content = "A Host"))
+          ),
+          VarField(
+            marcTag = Some(marcTag),
+            subfields =
+              List(Subfield(tag = "a", content = "Yet Another Series"))
+          )
         )
-      )
 
-      getParents(varFields) shouldBe List(
-        SeriesRelation("A Series"),
-        SeriesRelation("Another Series"),
-        SeriesRelation("A Host"),
-        SeriesRelation("Yet Another Series"),
-      )
+        getParents(varFields) shouldBe List(
+          SeriesRelation("A Series"),
+          SeriesRelation("Another Series"),
+          SeriesRelation("A Host"),
+          SeriesRelation("Yet Another Series")
+        )
     }
   }
 
@@ -223,7 +243,7 @@ class SierraParentsTest
     )
     getParents(varFields) shouldBe List(
       SeriesRelation("A Series"),
-      SeriesRelation("Another Series"),
+      SeriesRelation("Another Series")
     )
   }
 
@@ -231,29 +251,29 @@ class SierraParentsTest
     val varFields = List(
       VarField(
         marcTag = Some("440"),
-        subfields = List(Subfield(tag = "a", content = "A Series")),
+        subfields = List(Subfield(tag = "a", content = "A Series"))
       ),
       VarField(
         marcTag = Some("490"),
-        subfields = List(Subfield(tag = "a", content = "")),
+        subfields = List(Subfield(tag = "a", content = ""))
       ),
       VarField(
         marcTag = Some("490"),
         // This should be filtered by the subfield separator removal logic,
         // resulting in an empty string, so is to be ignored.
-        subfields = List(Subfield(tag = "a", content = " ;")),
+        subfields = List(Subfield(tag = "a", content = " ;"))
       ),
       VarField(
         marcTag = Some("830")
       ),
       VarField(
         marcTag = Some("830"),
-        subfields = List(Subfield(tag = "t", content = "Another Series")),
+        subfields = List(Subfield(tag = "t", content = "Another Series"))
       )
     )
     getParents(varFields) shouldBe List(
       SeriesRelation("A Series"),
-      SeriesRelation("Another Series"),
+      SeriesRelation("Another Series")
     )
   }
 
@@ -289,18 +309,27 @@ class SierraParentsTest
         "suffix",
         ";",
         ","
-      )) { (suffix) =>
-      val varFields = List(
-        VarField(
-          marcTag = Some("830"),
-          subfields = List(Subfield(tag = "t", content = s"Published papers${suffix} (Wellcome Chemical Research Laboratories) ${suffix}")),
+      )
+    ) {
+      (suffix) =>
+        val varFields = List(
+          VarField(
+            marcTag = Some("830"),
+            subfields = List(
+              Subfield(
+                tag = "t",
+                content =
+                  s"Published papers${suffix} (Wellcome Chemical Research Laboratories) ${suffix}"
+              )
+            )
+          )
         )
-      )
 
-      getParents(varFields) shouldBe List(
-        SeriesRelation(
-          s"Published papers${suffix} (Wellcome Chemical Research Laboratories)")
-      )
+        getParents(varFields) shouldBe List(
+          SeriesRelation(
+            s"Published papers${suffix} (Wellcome Chemical Research Laboratories)"
+          )
+        )
     }
   }
 
