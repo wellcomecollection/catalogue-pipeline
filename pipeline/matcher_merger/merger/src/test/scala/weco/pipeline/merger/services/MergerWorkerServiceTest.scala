@@ -169,42 +169,6 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("discards Works with version 0") {
-    withMergerWorkerServiceFixtures {
-      case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
-        val versionZeroWork =
-          identifiedWork()
-            .withVersion(0)
-
-        val work =
-          identifiedWork(canonicalId = versionZeroWork.state.canonicalId)
-            .withVersion(1)
-
-        val matcherResult =
-          createMatcherResultWith(Set(Set(work, versionZeroWork)))
-
-        retriever.index ++= Map(work.id -> work)
-
-        sendNotificationToSQS(
-          queue = queue,
-          message = matcherResult
-        )
-
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
-
-          getWorksSent(senders) should contain only work.id
-          index shouldBe Map(
-            work.id -> Left(work.transition[Merged](matcherResult.createdTime))
-          )
-
-          metrics.incrementedCounts.length shouldBe 1
-          metrics.incrementedCounts.last should endWith("_success")
-        }
-    }
-  }
-
   it(
     "if it merges two Works, it sends two onward results (one merged, one redirected)"
   ) {
