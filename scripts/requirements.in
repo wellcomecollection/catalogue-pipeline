@@ -1,8 +1,9 @@
 boto3
 elasticsearch
-httpx
+httpx>=0.23.0
 maya
 yaspin
 hyperlink
 tqdm
 click
+requests
