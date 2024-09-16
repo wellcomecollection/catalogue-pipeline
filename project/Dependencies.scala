@@ -94,7 +94,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val apacheCommons = "1.9"
+    val apacheCommons = "1.11.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.0"
