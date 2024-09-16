@@ -373,7 +373,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("doesn't send anything if the works are outdated") {
+  it("sends messages even if the works are outdated") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work0 = identifiedWork().withVersion(0)
@@ -391,8 +391,10 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          getWorksSent(senders) shouldBe empty
-          index shouldBe Map()
+          getWorksSent(senders) shouldBe List(work1.id)
+          index shouldBe Map(
+            work1.id -> Left(work1.transition[Merged](matcherResult.createdTime))
+          )
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")
