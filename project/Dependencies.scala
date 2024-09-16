@@ -106,7 +106,7 @@ object ExternalDependencies {
     val enumeratum = "1.6.1"
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.18.1"
-    val logback = "1.1.8"
+    val logback = "1.1.11"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"
   }
