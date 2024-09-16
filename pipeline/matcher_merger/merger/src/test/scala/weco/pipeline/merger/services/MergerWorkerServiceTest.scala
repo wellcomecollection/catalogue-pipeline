@@ -17,6 +17,7 @@ import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
+import scala.List
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -136,7 +137,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("always sends the highest version of a Work") {
+  it("send versions of a Work even if they are not the latest") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, _, index) =>
         val work = identifiedWork()
@@ -157,9 +158,12 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-          getWorksSent(senders) should contain only work.id
+          getWorksSent(senders) should contain allOf (work.id, olderWork.id)
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](matcherResult.createdTime))
+            work.id -> Left(work.transition[Merged](matcherResult.createdTime)),
+            newerWork.id -> Left(
+              newerWork.transition[Merged](matcherResult.createdTime)
+            )
           )
         }
     }
