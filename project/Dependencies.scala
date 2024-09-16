@@ -97,7 +97,7 @@ object ExternalDependencies {
     val apacheCommons = "1.11.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
-    val fastparse = "2.3.0"
+    val fastparse = "2.3.3"
     val scalatest = "3.2.3"
     val scalatestplus = "3.1.2.0"
     val scalacheckShapeless = "1.1.8"
