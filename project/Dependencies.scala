@@ -2,7 +2,7 @@ import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
 
-  val defaultVersion = "32.42.0" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion = "32.42.1" // This is automatically bumped by the scala-libs release process, do not edit this line manually
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -86,8 +86,8 @@ object WellcomeDependencies {
   )
 
   private def library(name: String, version: String): Seq[ModuleID] = Seq(
-    "weco" %% name % version,
-    "weco" %% name % version % "test" classifier "tests"
+    "org.wellcomecollection" %% name % version,
+    "org.wellcomecollection" %% name % version % "test" classifier "tests"
   )
 }
 
