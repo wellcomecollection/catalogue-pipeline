@@ -93,7 +93,7 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val apacheCommons = "1.9"
+    val apacheCommons = "1.11.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.0"
@@ -104,7 +104,7 @@ object ExternalDependencies {
     val scalaGraph = "1.12.5"
     val enumeratum = "1.6.1"
     val enumeratumScalacheck = "1.6.1"
-    val jsoup = "1.13.1"
+    val jsoup = "1.18.1"
     val logback = "1.1.8"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"

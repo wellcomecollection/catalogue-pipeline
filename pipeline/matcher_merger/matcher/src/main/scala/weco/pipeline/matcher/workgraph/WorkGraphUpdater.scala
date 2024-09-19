@@ -140,6 +140,23 @@ private class WorkSubgraph(
     //
     // Here there are two components: (A B C F G) and (D E H)
     //
+    // This subgraphId contains all the works in an update, regardless of
+    // whether they're in the same component. Even when graphs are split into
+    // multiple components, they all share the same subgraph ID. This is to
+    // allow graphs to be reconnected by preserving edge relationships that
+    // span components.
+    //
+    // e.g.
+    //        A->B->C->D->E
+    //
+    //    If we update work C, the graph will be split into two components:
+    //
+    //        A->B->C
+    //        D->E
+    //
+    // The subgraphId for both components will be the same, so that when we
+    // recombine the graph, we can still match across the C->D edge.
+
     val subgraphId = SubgraphId(workIds)
 
     g.componentTraverser()
