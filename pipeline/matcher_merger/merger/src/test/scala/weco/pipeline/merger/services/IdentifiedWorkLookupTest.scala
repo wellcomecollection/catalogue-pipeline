@@ -41,7 +41,7 @@ class IdentifiedWorkLookupTest
     }
   }
 
-  it("returns None if the stored version has a higher version") {
+  it("returns Some even if the stored version has a higher version") {
     val oldWork = identifiedWork()
     val newWork = oldWork.withVersion(oldWork.version + 1)
 
@@ -50,7 +50,7 @@ class IdentifiedWorkLookupTest
     )
 
     whenReady(fetchAllWorks(retriever = retriever, oldWork)) {
-      _ shouldBe Seq(None)
+      _ shouldBe Seq(Some(newWork))
     }
   }
 
@@ -72,14 +72,8 @@ class IdentifiedWorkLookupTest
       }: _*)
     )
 
-    val expectedLookupResult =
-      unchangedWorks.map { Some(_) } ++ (4 to 5).map {
-        _ =>
-          None
-      }
-
     whenReady(fetchAllWorks(retriever = retriever, lookupWorks: _*)) {
-      _ shouldBe expectedLookupResult
+      _ shouldBe storedWorks.map(Some(_))
     }
   }
 
