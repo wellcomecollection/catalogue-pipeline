@@ -10,7 +10,7 @@ object WellcomeDependencies {
     val monitoring = "32.43.0"
     val storage = "32.42.1"
     val elasticsearch = "32.43.0"
-    val sierra = "32.42.1"
+    val sierra = "32.43.0"
   }
 
   val jsonLibrary: Seq[ModuleID] = Seq(
