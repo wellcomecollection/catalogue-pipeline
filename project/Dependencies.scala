@@ -2,7 +2,7 @@ import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
 
-  val defaultVersion = "32.42.1" // This is automatically bumped by the scala-libs release process, do not edit this line manually
+  val defaultVersion = "32.42.1"
 
   lazy val versions = new {
     val typesafe = defaultVersion
@@ -15,79 +15,78 @@ object WellcomeDependencies {
     val elasticsearch = defaultVersion
   }
 
-  val jsonLibrary: Seq[ModuleID] = library(
-    name = "json",
-    version = versions.json
+  val jsonLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "json" % versions.json,
+    "org.wellcomecollection" %% "json" % versions.json % "test" classifier "tests"
   )
 
-  val fixturesLibrary: Seq[ModuleID] = library(
-    name = "fixtures",
-    version = versions.fixtures
+
+  val fixturesLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "fixtures" % versions.fixtures,
+    "org.wellcomecollection" %% "fixtures" % versions.fixtures % "test" classifier "tests"
   )
 
-  val messagingLibrary: Seq[ModuleID] = library(
-    name = "messaging",
-    version = versions.messaging
+
+  val messagingLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "messaging" % versions.messaging,
+    "org.wellcomecollection" %% "messaging" % versions.messaging % "test" classifier "tests"
   )
 
-  val elasticsearchLibrary: Seq[ModuleID] = library(
-    name = "elasticsearch",
-    version = versions.elasticsearch
+  val elasticsearchLibrary: Seq[ModuleID] =  Seq(
+    "org.wellcomecollection" %% "elasticsearch" % versions.elasticsearch,
+    "org.wellcomecollection" %% "elasticsearch" % versions.elasticsearch % "test" classifier "tests"
   )
 
-  val elasticsearchTypesafeLibrary: Seq[ModuleID] = library(
-    name = "elasticsearch_typesafe",
-    version = versions.elasticsearch
+  val elasticsearchTypesafeLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "elasticsearch_typesafe" % versions.elasticsearch,
+    "org.wellcomecollection" %% "elasticsearch_typesafe" % versions.elasticsearch % "test" classifier "tests"
   )
 
-  val httpLibrary: Seq[ModuleID] = library(
-    name = "http",
-    version = versions.http
+
+  val httpLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "http" % versions.http,
+    "org.wellcomecollection" %% "http" % versions.http % "test" classifier "tests"
   )
 
-  val monitoringLibrary: Seq[ModuleID] = library(
-    name = "monitoring",
-    version = versions.monitoring
+
+  val monitoringLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "monitoring" % versions.monitoring,
+    "org.wellcomecollection" %% "monitoring" % versions.monitoring % "test" classifier "tests"
   )
 
-  val monitoringTypesafeLibrary: Seq[ModuleID] = monitoringLibrary ++ library(
-    name = "monitoring_typesafe",
-    version = versions.monitoring
+  val monitoringTypesafeLibrary: Seq[ModuleID] = monitoringLibrary ++ Seq(
+    "org.wellcomecollection" %% "monitoring_typesafe" % versions.monitoring,
+    "org.wellcomecollection" %% "monitoring_typesafe" % versions.monitoring % "test" classifier "tests"
   )
 
-  val storageLibrary: Seq[ModuleID] = library(
-    name = "storage",
-    version = versions.storage
+  val storageLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "storage" % versions.storage,
+    "org.wellcomecollection" %% "storage" % versions.storage % "test" classifier "tests"
   )
 
-  val typesafeLibrary: Seq[ModuleID] = library(
-    name = "typesafe_app",
-    version = versions.typesafe
+  val typesafeLibrary: Seq[ModuleID] =  Seq(
+    "org.wellcomecollection" %% "typesafe_app" % versions.typesafe,
+    "org.wellcomecollection" %% "typesafe_app" % versions.typesafe % "test" classifier "tests"
   ) ++ fixturesLibrary
 
-  val storageTypesafeLibrary: Seq[ModuleID] = storageLibrary ++ library(
-    name = "storage_typesafe",
-    version = versions.storage
+  val storageTypesafeLibrary: Seq[ModuleID] = storageLibrary ++ Seq(
+    "org.wellcomecollection" %% "storage_typesafe" % versions.storage,
+    "org.wellcomecollection" %% "storage_typesafe" % versions.storage % "test" classifier "tests"
   )
 
-  val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ library(
-    name = "messaging_typesafe",
-    version = versions.messaging
+  val messagingTypesafeLibrary: Seq[ModuleID] = messagingLibrary ++ Seq(
+    "org.wellcomecollection" %% "messaging_typesafe" % versions.messaging,
+    "org.wellcomecollection" %% "messaging_typesafe" % versions.messaging % "test" classifier "tests"
   ) ++ monitoringLibrary
 
-  val sierraLibrary: Seq[ModuleID] = library(
-    name = "sierra",
-    version = defaultVersion
+  val sierraLibrary: Seq[ModuleID] = Seq(
+    "org.wellcomecollection" %% "sierra" % defaultVersion,
+    "org.wellcomecollection" %% "sierra" % defaultVersion % "test" classifier "tests"
   )
 
-  val sierraTypesafeLibrary: Seq[ModuleID] = sierraLibrary ++ library(
-    name = "sierra_typesafe",
-    version = defaultVersion
-  )
-
-  private def library(name: String, version: String): Seq[ModuleID] = Seq(
-    "org.wellcomecollection" %% name % version,
-    "org.wellcomecollection" %% name % version % "test" classifier "tests"
+  val sierraTypesafeLibrary: Seq[ModuleID] = sierraLibrary ++ Seq(
+    "org.wellcomecollection" %% "sierra_typesafe" % defaultVersion,
+    "org.wellcomecollection" %% "sierra_typesafe" % defaultVersion % "test" classifier "tests"
   )
 }
 
