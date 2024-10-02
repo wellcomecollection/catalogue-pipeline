@@ -20,19 +20,17 @@ object WellcomeDependencies {
     "org.wellcomecollection" %% "json" % versions.json % "test" classifier "tests"
   )
 
-
   val fixturesLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "fixtures" % versions.fixtures,
     "org.wellcomecollection" %% "fixtures" % versions.fixtures % "test" classifier "tests"
   )
-
 
   val messagingLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "messaging" % versions.messaging,
     "org.wellcomecollection" %% "messaging" % versions.messaging % "test" classifier "tests"
   )
 
-  val elasticsearchLibrary: Seq[ModuleID] =  Seq(
+  val elasticsearchLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "elasticsearch" % versions.elasticsearch,
     "org.wellcomecollection" %% "elasticsearch" % versions.elasticsearch % "test" classifier "tests"
   )
@@ -42,12 +40,10 @@ object WellcomeDependencies {
     "org.wellcomecollection" %% "elasticsearch_typesafe" % versions.elasticsearch % "test" classifier "tests"
   )
 
-
   val httpLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "http" % versions.http,
     "org.wellcomecollection" %% "http" % versions.http % "test" classifier "tests"
   )
-
 
   val monitoringLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "monitoring" % versions.monitoring,
@@ -64,7 +60,7 @@ object WellcomeDependencies {
     "org.wellcomecollection" %% "storage" % versions.storage % "test" classifier "tests"
   )
 
-  val typesafeLibrary: Seq[ModuleID] =  Seq(
+  val typesafeLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "typesafe_app" % versions.typesafe,
     "org.wellcomecollection" %% "typesafe_app" % versions.typesafe % "test" classifier "tests"
   ) ++ fixturesLibrary
@@ -104,7 +100,7 @@ object ExternalDependencies {
     val enumeratum = "1.6.1"
     val enumeratumScalacheck = "1.6.1"
     val jsoup = "1.18.1"
-    val logback = "1.1.8"
+    val logback = "1.1.11"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"
   }
