@@ -498,7 +498,7 @@ class SierraProductionTest
           places = List(Place("London")),
           agents = List(),
           dates = List(),
-          function = Some(Concept(label="Production"))
+          function = Some(Concept(label = "Production"))
         )
       )
     }

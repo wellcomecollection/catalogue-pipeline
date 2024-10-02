@@ -2,7 +2,11 @@ package weco.catalogue.source_model.sierra.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.locations.{AccessMethod, AccessStatus, LocationType}
+import weco.catalogue.internal_model.locations.{
+  AccessMethod,
+  AccessStatus,
+  LocationType
+}
 import weco.catalogue.source_model.fixtures.AccessConditionMatchers
 import weco.sierra.generators.SierraDataGenerators
 import weco.sierra.models.marc.{FixedField, Subfield, VarField}
@@ -747,7 +751,10 @@ class SierraItemAccessTest
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content=displayreservation)))
+          VarField(
+            marcTag = "999",
+            subfields = List(Subfield(tag = "a", content = displayreservation))
+          )
         )
       )
 
@@ -769,7 +776,10 @@ class SierraItemAccessTest
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content=displayreservation)))
+          VarField(
+            marcTag = "999",
+            subfields = List(Subfield(tag = "a", content = displayreservation))
+          )
         )
       )
 
@@ -782,16 +792,42 @@ class SierraItemAccessTest
         note(displayreservation)
       )
     }
-    it("can show multiple 999 MARC tag subfields tagged with 'a' and ignores other subfield tags") {
+    it(
+      "can show multiple 999 MARC tag subfields tagged with 'a' and ignores other subfield tags"
+    ) {
       val itemData = createSierraItemDataWith(
         fixedFields = Map(
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="in the bottom of a locked filing cabinet"))),
-          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="stuck in a disused lavatory"))),
-          VarField(marcTag = "999", subfields=List(Subfield(tag="b", content="ignore me"))),
-          VarField(marcTag = "999", subfields=List(Subfield(tag="a", content="with a sign on the door saying 'Beware of The Leopard'"))),
+          VarField(
+            marcTag = "999",
+            subfields = List(
+              Subfield(
+                tag = "a",
+                content = "in the bottom of a locked filing cabinet"
+              )
+            )
+          ),
+          VarField(
+            marcTag = "999",
+            subfields =
+              List(Subfield(tag = "a", content = "stuck in a disused lavatory"))
+          ),
+          VarField(
+            marcTag = "999",
+            subfields = List(Subfield(tag = "b", content = "ignore me"))
+          ),
+          VarField(
+            marcTag = "999",
+            subfields = List(
+              Subfield(
+                tag = "a",
+                content =
+                  "with a sign on the door saying 'Beware of The Leopard'"
+              )
+            )
+          )
         )
       )
 
@@ -814,10 +850,12 @@ class SierraItemAccessTest
           "79" -> createLocationWith("exres", "On Exhibition")
         ),
         varFields = List(
-          VarField(marcTag = "999", subfields=List(
-              Subfield(tag="a", content="Beware of the Leopard"),
-              Subfield(tag="a", content="Beware of the Leopard"),
-              Subfield(tag="a", content="In a locked filing cabinet")
+          VarField(
+            marcTag = "999",
+            subfields = List(
+              Subfield(tag = "a", content = "Beware of the Leopard"),
+              Subfield(tag = "a", content = "Beware of the Leopard"),
+              Subfield(tag = "a", content = "In a locked filing cabinet")
             )
           )
         )
