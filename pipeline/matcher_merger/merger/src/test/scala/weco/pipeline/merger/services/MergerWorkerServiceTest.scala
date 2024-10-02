@@ -394,7 +394,9 @@ class MergerWorkerServiceTest
 
           getWorksSent(senders) shouldBe List(work1.id)
           index shouldBe Map(
-            work1.id -> Left(work1.transition[Merged](matcherResult.createdTime))
+            work1.id -> Left(
+              work1.transition[Merged](matcherResult.createdTime)
+            )
           )
 
           metrics.incrementedCounts.length shouldBe 1
