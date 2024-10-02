@@ -147,7 +147,7 @@ object ExternalDependencies {
   )
 
   val scalaXmlDependencies = Seq(
-    "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
+    "org.scala-lang.modules" %% "scala-xml" % "1.3.1"
   )
 
   val jsoupDependencies = Seq(
