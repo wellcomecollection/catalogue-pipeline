@@ -92,7 +92,7 @@ object ExternalDependencies {
     val fastparse = "2.3.0"
     val scalatest = "3.2.3"
     val scalatestplus = "3.1.2.0"
-    val scalacheckShapeless = "1.1.6"
+    val scalacheckShapeless = "1.1.8"
     val scalacsv = "1.3.5"
     val scalaGraph = "1.12.5"
     val enumeratum = "1.7.4"
