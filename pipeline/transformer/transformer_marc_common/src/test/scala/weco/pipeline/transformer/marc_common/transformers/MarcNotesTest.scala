@@ -380,21 +380,29 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
     )
   }
 
-
   it("removes references to Codebreakers") {
     val recordWithNotes = MarcTestRecord(
       fields = List(
         MarcField(
           marcTag = "535",
           indicator1 = "1",
-          subfields =
-            List(MarcSubfield(tag = "a", content = "This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."))
+          subfields = List(
+            MarcSubfield(
+              tag = "a",
+              content =
+                "This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."
+            )
+          )
         ),
         MarcField(
           marcTag = "535",
           indicator1 = "2",
           subfields = List(
-            MarcSubfield(tag = "a", content = "A digitised copy is held by the Wellcome Library as part of the Codebreakers: Makers of Modern Genetics programme.")
+            MarcSubfield(
+              tag = "a",
+              content =
+                "A digitised copy is held by the Wellcome Library as part of the Codebreakers: Makers of Modern Genetics programme."
+            )
           )
         )
       )
@@ -409,9 +417,14 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
         MarcField(
           marcTag = "535",
           indicator1 = "1",
-          subfields =
-            List(MarcSubfield(tag = "a", content = "Keep me. This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics. And keep me too."))
-        ),
+          subfields = List(
+            MarcSubfield(
+              tag = "a",
+              content =
+                "Keep me. This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics. And keep me too."
+            )
+          )
+        )
       )
     )
 
@@ -431,14 +444,17 @@ class MarcNotesTest extends AnyFunSpec with Matchers {
         MarcField(
           marcTag = "535",
           indicator1 = "1",
-          subfields =
-            List(MarcSubfield(tag = "a", content = "A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics.A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."))
-        ),
+          subfields = List(
+            MarcSubfield(
+              tag = "a",
+              content =
+                "A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics.A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."
+            )
+          )
+        )
       )
     )
 
     MarcNotes(recordWithNotes) shouldBe empty
   }
 }
-
-

@@ -68,7 +68,7 @@ trait WorkNodeGenerators extends WorkStubGenerators {
             subgraphId = SubgraphId(idA, idB),
             componentIds = List(idA, idB),
             sourceWork = createSourceWork(idB)
-          ),
+          )
         )
       case "C->D" =>
         (
@@ -84,7 +84,7 @@ trait WorkNodeGenerators extends WorkStubGenerators {
             subgraphId = SubgraphId(idC, idD),
             componentIds = List(idC, idD),
             sourceWork = createSourceWork(idD)
-          ),
+          )
         )
     }
 
@@ -111,7 +111,7 @@ trait WorkNodeGenerators extends WorkStubGenerators {
             subgraphId = SubgraphId(idA, idB, idC),
             componentIds = List(idA, idB, idC),
             sourceWork = createSourceWork(idC)
-          ),
+          )
         )
       case "A<->B->C" =>
         (
@@ -134,7 +134,7 @@ trait WorkNodeGenerators extends WorkStubGenerators {
             subgraphId = SubgraphId(idA, idB, idC),
             componentIds = List(idA, idB, idC),
             sourceWork = createSourceWork(idC)
-          ),
+          )
         )
     }
 
@@ -177,7 +177,7 @@ trait WorkNodeGenerators extends WorkStubGenerators {
             subgraphId = SubgraphId(idA, idB, idC, idD, idE),
             componentIds = List(idA, idB, idC, idD, idE),
             sourceWork = createSourceWork(idE)
-          ),
+          )
         )
     }
 
