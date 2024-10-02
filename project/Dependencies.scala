@@ -5,7 +5,7 @@ object WellcomeDependencies {
     val typesafe = "32.43.0"
     val fixtures = "32.43.0"
     val http = "32.43.0"
-    val json = "32.42.1"
+    val json = "32.43.0"
     val messaging = "32.42.1"
     val monitoring = "32.42.1"
     val storage = "32.42.1"
