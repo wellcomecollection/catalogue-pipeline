@@ -10,7 +10,7 @@ botocore==1.27.64
     # via
     #   boto3
     #   s3transfer
-certifi==2022.6.15
+certifi==2024.8.30
     # via elastic-transport
 click==8.1.3
     # via -r ./requirements.in

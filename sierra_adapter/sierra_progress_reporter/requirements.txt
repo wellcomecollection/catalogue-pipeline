@@ -6,7 +6,7 @@
 #
 attrs==20.3.0
     # via -r requirements.in
-certifi==2020.12.5
+certifi==2024.8.30
     # via requests
 chardet==4.0.0
     # via requests
