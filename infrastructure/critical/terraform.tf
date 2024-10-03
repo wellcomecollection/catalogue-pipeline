@@ -1,6 +1,4 @@
 terraform {
-  required_version = ">= 0.12.29"
-
   backend "s3" {
     role_arn = "arn:aws:iam::760097843905:role/platform-developer"
 
