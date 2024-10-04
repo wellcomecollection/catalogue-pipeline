@@ -9,12 +9,8 @@ class SelectorTest extends AnyFunSpec with Matchers {
 
   /** The following tests use paths representing this tree:
     *
-    * A
-    * \|
-    * \|-------------
-    * \| | | B C E
-    * \| |------ |---------
-    * \| | | | | | | | D X Y Z 1 2 3 4
+    * A \| \|------------- \| | | B C E \| |------ |--------- \| | | | | | | | D
+    * X Y Z 1 2 3 4
     */
   it("generates selectors for a single path") {
     Selector.forPath("A/C") should contain theSameElementsAs List(

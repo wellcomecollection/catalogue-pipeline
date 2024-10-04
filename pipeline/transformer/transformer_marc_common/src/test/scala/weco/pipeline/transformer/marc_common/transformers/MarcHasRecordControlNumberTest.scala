@@ -62,7 +62,10 @@ class MarcHasRecordControlNumberTest
 
     it("finds an identifier with a URL prefix") {
       val field =
-        create655FieldWith(indicator2 = "0", identifierValue = "http://idlocgov/authorities/subjects/sh92000896")
+        create655FieldWith(
+          indicator2 = "0",
+          identifierValue = "http://idlocgov/authorities/subjects/sh92000896"
+        )
 
       val expectedSourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LCSubjects,
