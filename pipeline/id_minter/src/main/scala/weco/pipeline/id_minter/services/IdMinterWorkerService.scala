@@ -34,7 +34,7 @@ trait Worker[T, Output] {
 }
 
 trait IdMinterWorker
-  extends Worker[Json, Try[List[Work[Identified]]]]
+    extends Worker[Json, Try[List[Work[Identified]]]]
     with Logging {
   val identifierGenerator: IdentifierGenerator
 
@@ -70,15 +70,16 @@ class CommandLineIdMinterWorkerService(
   jsonRetriever: Retriever[Json]
 )(sourceWorkId: String)(implicit ec: ExecutionContext)
     extends Runnable
-      with IdMinterWorker
-      with Logging {
+    with IdMinterWorker
+    with Logging {
 
   def run(): Future[Done] = {
     jsonRetriever(sourceWorkId)
-      .flatMap { json =>
-        info(s"Processing work with source identifier $sourceWorkId")
-        Future.fromTry(doWork(json))
-      } map(_ => Done)
+      .flatMap {
+        json =>
+          info(s"Processing work with source identifier $sourceWorkId")
+          Future.fromTry(doWork(json))
+      } map (_ => Done)
   }
 }
 

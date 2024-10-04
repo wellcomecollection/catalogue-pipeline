@@ -118,7 +118,9 @@ class IdentifiersDao(identifiers: IdentifiersTable) extends Logging {
       val otherIdentifiers =
         distinctIdentifiers.toSet -- existingIdentifiers.keySet
 
-      info(s"Found identifiers (${existingIdentifiers.size}): ${existingIdentifiers}")
+      info(
+        s"Found identifiers (${existingIdentifiers.size}): ${existingIdentifiers}"
+      )
       info(s"Missing identifiers (${otherIdentifiers.size}): $otherIdentifiers")
 
       LookupResult(

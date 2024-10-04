@@ -12,10 +12,16 @@ import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.pipeline.id_minter.config.builders.{IdentifiersTableBuilder, RDSBuilder}
+import weco.pipeline.id_minter.config.builders.{
+  IdentifiersTableBuilder,
+  RDSBuilder
+}
 import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.models.IdentifiersTable
-import weco.pipeline.id_minter.services.{CommandLineIdMinterWorkerService, IdMinterWorkerService}
+import weco.pipeline.id_minter.services.{
+  CommandLineIdMinterWorkerService,
+  IdMinterWorkerService
+}
 import weco.pipeline.id_minter.steps.IdentifierGenerator
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -66,7 +72,7 @@ object Main extends WellcomeTypesafeApp {
           index = Index(config.requireString("es.source-works.index"))
         )
 
-      if(runAsCli) {
+      if (runAsCli) {
         new CommandLineIdMinterWorkerService(
           identifierGenerator = identifierGenerator,
           jsonRetriever = jsonRetriever
