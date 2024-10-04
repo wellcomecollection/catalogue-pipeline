@@ -4,6 +4,10 @@ output "rds_cluster_id" {
   value = module.identifiers_delta_rds_cluster.rds_cluster_id
 }
 
+output "rds_serverless_cluster_id" {
+  value = module.identifiers_serverless_rds_cluster.rds_cluster_id
+}
+
 output "rds_subnet_group_name" {
   value = aws_db_subnet_group.default.name
 }

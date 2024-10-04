@@ -34,6 +34,7 @@ module "id_minter" {
     ingest_flush_interval_seconds = 30
   }
 
+  // TODO: These will need updating when the data is moved to the new RDS cluster
   secret_env_vars = merge({
     cluster_url          = "rds/identifiers-delta-cluster/endpoint"
     cluster_url_readonly = "rds/identifiers-delta-cluster/reader_endpoint"
