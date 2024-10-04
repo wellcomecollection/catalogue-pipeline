@@ -26,7 +26,7 @@ object RDSBuilder {
     ConnectionPool.add(
       name = 'primary,
       url =
-        s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}",
+        s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}/identifiers",
       user = rdsClientConfig.username,
       password = rdsClientConfig.password,
       settings = connectionPoolSettings

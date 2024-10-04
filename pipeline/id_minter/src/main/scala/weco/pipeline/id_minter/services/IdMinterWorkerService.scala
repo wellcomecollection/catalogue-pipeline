@@ -29,8 +29,61 @@ import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+trait Worker[T, Output] {
+  def doWork(t: T): Output
+}
+
+trait IdMinterWorker
+  extends Worker[Json, Try[List[Work[Identified]]]]
+    with Logging {
+  val identifierGenerator: IdentifierGenerator
+
+  def doWork(json: Json): Try[List[Work[Identified]]] = {
+    for {
+      updatedJson <- embedIds(json)
+      work <- decodeWork(updatedJson)
+    } yield List(work)
+  }
+
+  private def embedIds(json: Json): Try[Json] = {
+    for {
+      sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
+      mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
+        sourceIdentifiers
+      )
+
+      canonicalIdentifiers = mintedIdentifiers.map {
+        case (sourceIdentifier, identifier) =>
+          (sourceIdentifier, identifier.CanonicalId)
+      }
+
+      updatedJson <- SourceIdentifierEmbedder.update(json, canonicalIdentifiers)
+    } yield updatedJson
+  }
+
+  private def decodeWork(json: Json): Try[Work[Identified]] =
+    fromJson[Work[Identified]](json.noSpaces)
+}
+
+class CommandLineIdMinterWorkerService(
+  val identifierGenerator: IdentifierGenerator,
+  jsonRetriever: Retriever[Json]
+)(sourceWorkId: String)(implicit ec: ExecutionContext)
+    extends Runnable
+      with IdMinterWorker
+      with Logging {
+
+  def run(): Future[Done] = {
+    jsonRetriever(sourceWorkId)
+      .flatMap { json =>
+        info(s"Processing work with source identifier $sourceWorkId")
+        Future.fromTry(doWork(json))
+      } map(_ => Done)
+  }
+}
+
 class IdMinterWorkerService[Destination](
-  identifierGenerator: IdentifierGenerator,
+  val identifierGenerator: IdentifierGenerator,
   pipelineStream: PipelineStorageStream[NotificationMessage, Work[
     Identified
   ], Destination],
@@ -39,6 +92,7 @@ class IdMinterWorkerService[Destination](
   identifiersTableConfig: IdentifiersTableConfig
 )(implicit ec: ExecutionContext)
     extends Runnable
+    with IdMinterWorker
     with Logging {
 
   def run(): Future[Done] = {
@@ -58,33 +112,9 @@ class IdMinterWorkerService[Destination](
         .via(
           processFlow(
             pipelineStream.config,
-            item => Future.fromTry(processMessage(item))
+            item => Future.fromTry(doWork(item))
           )
         )
     )
   }
-
-  def processMessage(json: Json): Try[List[Work[Identified]]] =
-    for {
-      updatedJson <- embedIds(json)
-      work <- decodeWork(updatedJson)
-    } yield List(work)
-
-  private def embedIds(json: Json): Try[Json] =
-    for {
-      sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
-      mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
-        sourceIdentifiers
-      )
-
-      canonicalIdentifiers = mintedIdentifiers.map {
-        case (sourceIdentifier, identifier) =>
-          (sourceIdentifier, identifier.CanonicalId)
-      }
-
-      updatedJson <- SourceIdentifierEmbedder.update(json, canonicalIdentifiers)
-    } yield updatedJson
-
-  private def decodeWork(json: Json): Try[Work[Identified]] =
-    fromJson[Work[Identified]](json.noSpaces)
 }
