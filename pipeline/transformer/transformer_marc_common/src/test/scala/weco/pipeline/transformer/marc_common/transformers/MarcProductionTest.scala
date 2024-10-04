@@ -2,11 +2,7 @@ package weco.pipeline.transformer.marc_common.transformers
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.work.{
-  Concept,
-  Place,
-  ProductionEvent
-}
+import weco.catalogue.internal_model.work.{Concept, Place, ProductionEvent}
 import weco.fixtures.RandomGenerators
 import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
 import weco.pipeline.transformer.marc_common.models.{
@@ -20,7 +16,6 @@ class MarcProductionTest
     extends AnyFunSpec
     with Matchers
     with RandomGenerators {
-
 
   private val MARC_260_FIXTURE = MarcField(
     marcTag = "260",
@@ -45,12 +40,12 @@ class MarcProductionTest
     function = None
   )
 
-  private val PRODUCTION_264_FIXTURE =  ProductionEvent(
+  private val PRODUCTION_264_FIXTURE = ProductionEvent(
     label = "London",
     places = List(Place("London")),
     agents = List(),
     dates = List(),
-    function = Some(Concept(label="Production"))
+    function = Some(Concept(label = "Production"))
   )
 
   it("returns an empty list if neither 260 nor 264 are present") {
@@ -116,7 +111,6 @@ class MarcProductionTest
         prefer264Field = true
       ) shouldBe List(PRODUCTION_260_FIXTURE)
     }
-
 
     it(
       "if 260 doesn't exist, accept 264"

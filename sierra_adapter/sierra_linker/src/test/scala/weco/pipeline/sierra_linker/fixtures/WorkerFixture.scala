@@ -32,9 +32,13 @@ trait WorkerFixture extends SQS with Pekko {
 
   import weco.pipeline.sierra_linker.models.LinkOps._
 
-  def withWorker[Id <: TypedSierraRecordNumber, SierraRecord <: AbstractSierraRecord[
-    Id
-  ], R](
+  def withWorker[
+    Id <: TypedSierraRecordNumber,
+    SierraRecord <: AbstractSierraRecord[
+      Id
+    ],
+    R
+  ](
     queue: Queue,
     store: MemoryVersionedStore[Id, Link] =
       MemoryVersionedStore[Id, Link](initialEntries = Map.empty),
