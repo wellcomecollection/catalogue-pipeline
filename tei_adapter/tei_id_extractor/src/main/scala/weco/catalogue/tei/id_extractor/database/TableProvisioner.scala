@@ -10,18 +10,20 @@ class TableProvisioner(
 ) {
 
   def provision(): Unit = {
-    val flyway = new Flyway()
-    flyway.setDataSource(
+    val flyway = Flyway.configure()
+      .dataSource(
       s"jdbc:mysql://${rdsClientConfig.host}:${rdsClientConfig.port}/${pathIdConfig.database}",
       rdsClientConfig.username,
       rdsClientConfig.password
     )
-    flyway.setPlaceholders(
+    .placeholders(
       Map(
         "database" -> pathIdConfig.database,
         "tableName" -> pathIdConfig.tableName
       ).asJava
     )
+      .load()
+
     flyway.migrate()
   }
 
