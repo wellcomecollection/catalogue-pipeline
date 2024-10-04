@@ -7,7 +7,7 @@ object WellcomeDependencies {
     val http = "32.43.1"
     val json = "32.43.1"
     val messaging = "32.43.1"
-    val monitoring = "32.42.1"
+    val monitoring = "32.43.1"
     val storage = "32.42.1"
     val elasticsearch = "32.43.1"
     val sierra = "32.42.1"
