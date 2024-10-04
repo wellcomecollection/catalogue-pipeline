@@ -2,15 +2,15 @@ import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
   lazy val versions = new {
-    val typesafe = "32.43.0"
-    val fixtures = "32.43.0"
-    val http = "32.43.0"
-    val json = "32.43.0"
-    val messaging = "32.43.0"
-    val monitoring = "32.43.0"
-    val storage = "32.43.0"
-    val elasticsearch = "32.43.0"
-    val sierra = "32.43.0"
+    val typesafe = "32.43.1"
+    val fixtures = "32.43.1"
+    val http = "32.43.1"
+    val json = "32.43.1"
+    val messaging = "32.43.1"
+    val monitoring = "32.43.1"
+    val storage = "32.43.1"
+    val elasticsearch = "32.43.1"
+    val sierra = "32.43.1"
   }
 
   val jsonLibrary: Seq[ModuleID] = Seq(
