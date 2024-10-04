@@ -35,6 +35,7 @@ object CalmMergeCandidates extends CalmRecordOps {
             reason = "CALM/Sierra harvest work"
           )
       }
+
   private def metsMergeCandidate(record: CalmRecord) =
     record
       .get("RefNo")

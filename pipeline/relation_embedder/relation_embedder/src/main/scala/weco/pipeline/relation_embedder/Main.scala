@@ -17,6 +17,10 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 object Main extends WellcomeTypesafeApp {
+  // read and print args passed from the command line
+  val runAsCli = args.length > 0
+  val pathToDenormalise = if (runAsCli) Some(args(0)) else None
+
   runWithConfig {
     config: Config =>
       implicit val actorSystem: ActorSystem =
@@ -29,31 +33,42 @@ object Main extends WellcomeTypesafeApp {
 
       val esClient = ElasticBuilder.buildElasticClient(config)
 
+      val relationsService = new PathQueryRelationsService(
+        esClient,
+        identifiedIndex,
+        completeTreeScroll = config.requireInt("es.works.scroll.complete_tree"),
+        affectedWorksScroll =
+          config.requireInt("es.works.scroll.affected_works")
+      )
+
       val workIndexer =
         new ElasticIndexer[Work[Denormalised]](
           client = esClient,
           index = Index(config.requireString(s"es.denormalised-works.index"))
         )
 
-      new RelationEmbedderWorkerService(
-        sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        msgSender = SNSBuilder
-          .buildSNSMessageSender(
-            config,
-            subject = "Sent from the relation_embedder"
-          ),
-        workIndexer = workIndexer,
-        relationsService = new PathQueryRelationsService(
-          esClient,
-          identifiedIndex,
-          completeTreeScroll =
-            config.requireInt("es.works.scroll.complete_tree"),
-          affectedWorksScroll =
-            config.requireInt("es.works.scroll.affected_works")
-        ),
-        indexBatchSize = config.requireInt("es.works.batch_size"),
-        indexFlushInterval =
-          config.requireInt("es.works.flush_interval_seconds").seconds
-      )
+      val msgSender = SNSBuilder
+        .buildSNSMessageSender(
+          config,
+          subject = "Sent from the relation_embedder"
+        )
+
+      if (runAsCli) {
+        new CommandLineRelationEmbedderWorkerService(
+          relationsService = relationsService,
+          workIndexer = workIndexer,
+          msgSender = msgSender
+        )(pathToDenormalise.get)
+      } else {
+        new RelationEmbedderWorkerService(
+          sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+          msgSender = msgSender,
+          workIndexer = workIndexer,
+          relationsService = relationsService,
+          indexBatchSize = config.requireInt("es.works.batch_size"),
+          indexFlushInterval =
+            config.requireInt("es.works.flush_interval_seconds").seconds
+        )
+      }
   }
 }

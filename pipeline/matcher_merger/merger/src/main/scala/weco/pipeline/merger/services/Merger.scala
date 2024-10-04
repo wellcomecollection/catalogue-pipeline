@@ -214,6 +214,7 @@ object PlatformMerger extends Merger with WorkMergingOps {
             imageData = targetImageData.data
           )
       }
+
     val redirectSources = Seq(
       items,
       thumbnail,
@@ -221,6 +222,7 @@ object PlatformMerger extends Merger with WorkMergingOps {
       targetImageData,
       separateImageData
     ).flatMap(_.sources).distinct
+
     (
       redirectSources,
       MergeResult(
@@ -235,5 +237,4 @@ object PlatformMerger extends Merger with WorkMergingOps {
       )
     )
   }
-
 }

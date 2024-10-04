@@ -12,6 +12,7 @@ import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.pipeline.merger.services.{
+  CommandLineMergerWorkerService,
   IdentifiedWorkLookup,
   MergerManager,
   MergerWorkerService,
@@ -26,6 +27,11 @@ import weco.typesafe.config.builders.EnrichConfig._
 import scala.concurrent.ExecutionContext
 
 object Main extends WellcomeTypesafeApp {
+
+  // read and print args passed from the command line
+  val runAsCli = args.length > 0
+  val idsToCheck = if (runAsCli) Some(args(0)) else None
+
   runWithConfig {
     config: Config =>
       implicit val actorSystem: ActorSystem =
@@ -40,10 +46,6 @@ object Main extends WellcomeTypesafeApp {
           client = esClient,
           index = Index(config.requireString("es.identified-works.index"))
         )
-
-      val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
-
-      val mergerManager = new MergerManager(PlatformMerger)
 
       val workMsgSender =
         SNSBuilder.buildSNSMessageSender(
@@ -71,14 +73,31 @@ object Main extends WellcomeTypesafeApp {
           )
         )
 
-      new MergerWorkerService(
-        msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        sourceWorkLookup = sourceWorkLookup,
-        mergerManager = mergerManager,
-        workOrImageIndexer = workOrImageIndexer,
-        workMsgSender = workMsgSender,
-        imageMsgSender = imageMsgSender,
-        config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
-      )
+      val mergerManager = new MergerManager(PlatformMerger)
+
+      if (runAsCli) {
+        val sourceWorkLookup = new IdentifiedWorkLookup(
+          retriever = retriever,
+          checkLatestVersion = false
+        )
+
+        new CommandLineMergerWorkerService(
+          sourceWorkLookup = sourceWorkLookup,
+          mergerManager = mergerManager
+        )(idsToCheck)
+      } else {
+        val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
+
+        new MergerWorkerService(
+          msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
+          sourceWorkLookup = sourceWorkLookup,
+          mergerManager = mergerManager,
+          workOrImageIndexer = workOrImageIndexer,
+          workMsgSender = workMsgSender,
+          imageMsgSender = imageMsgSender,
+          config =
+            PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
+        )
+      }
   }
 }
