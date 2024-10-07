@@ -77,7 +77,7 @@ module "identifiers_serverless_rds_cluster" {
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
 
   # This is the snapshot from the last time we migrated the database.
-  snapshot_identifier = "rds:identifiers-delta-cluster-2024-10-03-03-42"
+  snapshot_identifier = "rds:identifiers-delta-cluster-ADDNAMEOFSNAPSHOTHERE"
 
   engine_version = "8.0.mysql_aurora.3.07.1"
 }
