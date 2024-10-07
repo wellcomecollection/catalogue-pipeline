@@ -20,8 +20,9 @@ import weco.pipeline.sierra_merger.models.TransformableOps
 import weco.pipeline.sierra_merger.services.Worker
 import weco.sierra.models.identifiers.SierraBibNumber
 
-trait SierraRecordMergerFeatureTestCases[SierraRecord <: AbstractSierraRecord[_]]
-    extends AnyFunSpec
+trait SierraRecordMergerFeatureTestCases[SierraRecord <: AbstractSierraRecord[
+  _
+]] extends AnyFunSpec
     with EitherValues
     with SQS
     with SourceVHSFixture
@@ -33,7 +34,9 @@ trait SierraRecordMergerFeatureTestCases[SierraRecord <: AbstractSierraRecord[_]
     queue: Queue,
     sourceVHS: SourceVHS[SierraTransformable] =
       createSourceVHS[SierraTransformable]
-  )(testWith: TestWith[(Worker[SierraRecord, String], MemoryMessageSender), R]): R
+  )(
+    testWith: TestWith[(Worker[SierraRecord, String], MemoryMessageSender), R]
+  ): R
 
   def createRecordWith(bibIds: List[SierraBibNumber]): SierraRecord
 

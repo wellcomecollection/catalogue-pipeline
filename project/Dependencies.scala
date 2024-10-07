@@ -2,15 +2,15 @@ import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
   lazy val versions = new {
-    val typesafe = "32.42.1"
-    val fixtures = "32.42.1"
-    val http = "32.42.1"
-    val json = "32.42.1"
-    val messaging = "32.42.1"
-    val monitoring = "32.42.1"
-    val storage = "32.42.1"
-    val elasticsearch = "32.42.1"
-    val sierra = "32.42.1"
+    val typesafe = "32.43.2"
+    val fixtures = "32.43.2"
+    val http = "32.43.2"
+    val json = "32.43.2"
+    val messaging = "32.43.2"
+    val monitoring = "32.43.2"
+    val storage = "32.43.2"
+    val elasticsearch = "32.43.2"
+    val sierra = "32.43.2"
   }
 
   val jsonLibrary: Seq[ModuleID] = Seq(
@@ -18,19 +18,17 @@ object WellcomeDependencies {
     "org.wellcomecollection" %% "json" % versions.json % "test" classifier "tests"
   )
 
-
   val fixturesLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "fixtures" % versions.fixtures,
     "org.wellcomecollection" %% "fixtures" % versions.fixtures % "test" classifier "tests"
   )
-
 
   val messagingLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "messaging" % versions.messaging,
     "org.wellcomecollection" %% "messaging" % versions.messaging % "test" classifier "tests"
   )
 
-  val elasticsearchLibrary: Seq[ModuleID] =  Seq(
+  val elasticsearchLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "elasticsearch" % versions.elasticsearch,
     "org.wellcomecollection" %% "elasticsearch" % versions.elasticsearch % "test" classifier "tests"
   )
@@ -40,12 +38,10 @@ object WellcomeDependencies {
     "org.wellcomecollection" %% "elasticsearch_typesafe" % versions.elasticsearch % "test" classifier "tests"
   )
 
-
   val httpLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "http" % versions.http,
     "org.wellcomecollection" %% "http" % versions.http % "test" classifier "tests"
   )
-
 
   val monitoringLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "monitoring" % versions.monitoring,
@@ -62,7 +58,7 @@ object WellcomeDependencies {
     "org.wellcomecollection" %% "storage" % versions.storage % "test" classifier "tests"
   )
 
-  val typesafeLibrary: Seq[ModuleID] =  Seq(
+  val typesafeLibrary: Seq[ModuleID] = Seq(
     "org.wellcomecollection" %% "typesafe_app" % versions.typesafe,
     "org.wellcomecollection" %% "typesafe_app" % versions.typesafe % "test" classifier "tests"
   ) ++ fixturesLibrary
@@ -90,19 +86,19 @@ object WellcomeDependencies {
 
 object ExternalDependencies {
   lazy val versions = new {
-    val apacheCommons = "1.11.0"
+    val apacheCommons = "1.12.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
-    val fastparse = "2.3.0"
-    val scalatest = "3.2.3"
-    val scalatestplus = "3.1.2.0"
-    val scalacheckShapeless = "1.1.6"
-    val scalacsv = "1.3.5"
-    val scalaGraph = "1.12.5"
-    val enumeratum = "1.6.1"
-    val enumeratumScalacheck = "1.6.1"
+    val fastparse = "2.3.3"
+    val scalatest = "3.2.19"
+    val scalatestplus = "3.1.4.0"
+    val scalacheckShapeless = "1.1.8"
+    val scalacsv = "1.3.10"
+    val scalaGraph = "1.13.1"
+    val enumeratum = "1.7.4"
+    val enumeratumScalacheck = "1.7.4"
     val jsoup = "1.18.1"
-    val logback = "1.1.8"
+    val logback = "1.1.11"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"
   }
@@ -121,9 +117,11 @@ object ExternalDependencies {
   )
 
   val mySqlDependencies = Seq(
-    "org.flywaydb" % "flyway-core" % "4.2.0",
-    "org.scalikejdbc" %% "scalikejdbc" % "3.4.0",
-    "mysql" % "mysql-connector-java" % "8.0.31"
+    // Version 7.15.0 is the latest version of Flyway which supports MySQL 5.7. To update to a newer version of Flyway,
+    // we would also need to update the MySQL tei-adapter-cluster and identifiers-delta-cluster databases in RDS.
+    "org.flywaydb" % "flyway-core" % "7.15.0",
+    "org.scalikejdbc" %% "scalikejdbc" % "3.4.2",
+    "com.mysql" % "mysql-connector-j" % "8.2.0"
   )
 
   val scalacheckDependencies = Seq(
@@ -149,7 +147,7 @@ object ExternalDependencies {
   )
 
   val scalaXmlDependencies = Seq(
-    "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
+    "org.scala-lang.modules" %% "scala-xml" % "1.3.1"
   )
 
   val jsoupDependencies = Seq(
