@@ -66,7 +66,7 @@ module "identifiers_delta_rds_cluster" {
 
 # This is the serverless RDS cluster that we will migrate to.
 module "identifiers_serverless_rds_cluster" {
-  source             = "./modules/rds-serverless"
+  source = "./modules/rds-serverless"
 
   cluster_identifier = "identifiers-serverless"
   database_name      = "identifiers"
