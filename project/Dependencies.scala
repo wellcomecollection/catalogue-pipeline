@@ -89,16 +89,16 @@ object ExternalDependencies {
     val apacheCommons = "1.12.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
-    val fastparse = "2.3.3"
+    val fastparse = "3.1.1"
     val scalatest = "3.2.19"
-    val scalatestplus = "3.1.4.0"
+    val scalatestplus = "3.2.2.0"
     val scalacheckShapeless = "1.1.8"
-    val scalacsv = "1.3.10"
+    val scalacsv = "1.4.1"
     val scalaGraph = "1.13.1"
-    val enumeratum = "1.7.4"
-    val enumeratumScalacheck = "1.7.4"
+    val enumeratum = "1.7.5"
+    val enumeratumScalacheck = "1.7.5"
     val jsoup = "1.18.1"
-    val logback = "1.1.11"
+    val logback = "1.5.8"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"
   }
@@ -119,9 +119,9 @@ object ExternalDependencies {
   val mySqlDependencies = Seq(
     // Version 7.15.0 is the latest version of Flyway which supports MySQL 5.7. To update to a newer version of Flyway,
     // we would also need to update the MySQL tei-adapter-cluster and identifiers-delta-cluster databases in RDS.
-    "org.flywaydb" % "flyway-core" % "7.15.0",
-    "org.scalikejdbc" %% "scalikejdbc" % "3.4.2",
-    "com.mysql" % "mysql-connector-j" % "8.2.0"
+    "org.flywaydb" % "flyway-core" % "10.19.0",
+    "org.scalikejdbc" %% "scalikejdbc" % "3.5.0",
+    "com.mysql" % "mysql-connector-j" % "8.4.0"
   )
 
   val scalacheckDependencies = Seq(
@@ -147,7 +147,7 @@ object ExternalDependencies {
   )
 
   val scalaXmlDependencies = Seq(
-    "org.scala-lang.modules" %% "scala-xml" % "1.3.1"
+    "org.scala-lang.modules" %% "scala-xml" % "2.3.0"
   )
 
   val jsoupDependencies = Seq(
