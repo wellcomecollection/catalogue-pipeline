@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   mysql:
-    image: "public.ecr.aws/docker/library/mysql:5.7"
+    image: "public.ecr.aws/docker/library/mysql:8.0"
     ports:
       - "3307:3306"
     environment:
