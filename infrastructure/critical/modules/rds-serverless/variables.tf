@@ -28,11 +28,11 @@ variable "snapshot_identifier" {
 
 
 variable "max_scaling_capacity" {
-  type = number
+  type    = number
   default = 8.0
 }
 
 variable "min_scaling_capacity" {
-  type = number
+  type    = number
   default = 0.5
 }
