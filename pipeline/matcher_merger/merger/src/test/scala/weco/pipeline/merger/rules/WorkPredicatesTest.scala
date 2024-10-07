@@ -118,9 +118,7 @@ class WorkPredicatesTest
     forAll(filtered) {
       work =>
         work.data.format should contain oneOf
-          (Format.Pictures,
-          Format.DigitalImages,
-          Format.`3DObjects`)
+          (Format.Pictures, Format.DigitalImages, Format.`3DObjects`)
     }
   }
 

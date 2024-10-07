@@ -167,7 +167,10 @@ class AvailabilityTest
       )
       val workAvailabilities = Availabilities.forWorkData(work.data)
 
-      workAvailabilities should contain allOf (Availability.ClosedStores, Availability.Online)
+      workAvailabilities should contain allOf (
+        Availability.ClosedStores,
+        Availability.Online
+      )
     }
 
     it("does not add either availability if no conditions are satisfied") {

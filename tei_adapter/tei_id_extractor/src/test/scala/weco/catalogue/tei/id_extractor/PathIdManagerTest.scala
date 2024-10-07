@@ -205,11 +205,14 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
           messageSender
             .getMessages[
               TeiIdMessage
-            ]() should contain only (TeiIdChangeMessage(
-            id = updatedPathId.id,
-            s3Location = expectedS3Location,
-            newTime
-          ), TeiIdDeletedMessage(id = "manuscript_1234", newTime))
+            ]() should contain only (
+            TeiIdChangeMessage(
+              id = updatedPathId.id,
+              s3Location = expectedS3Location,
+              newTime
+            ),
+            TeiIdDeletedMessage(id = "manuscript_1234", newTime)
+          )
 
       }
     }
@@ -311,11 +314,14 @@ class PathIdManagerTest extends AnyFunSpec with PathIdDatabase {
           messageSender
             .getMessages[
               TeiIdMessage
-            ]() should contain only (TeiIdChangeMessage(
-            id = id2,
-            s3Location = expectedS3Location,
-            newTime
-          ), TeiIdDeletedMessage(id = id1, newTime))
+            ]() should contain only (
+            TeiIdChangeMessage(
+              id = id2,
+              s3Location = expectedS3Location,
+              newTime
+            ),
+            TeiIdDeletedMessage(id = id1, newTime)
+          )
 
       }
     }
