@@ -16,7 +16,7 @@ module "pipeline_step" {
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
-  name = "${local.namespace}_${var.service_name}"
+  name      = "${local.namespace}_${var.service_name}"
   image_tag = "env.${var.pipeline_date}"
 }
 
@@ -38,7 +38,7 @@ variable "service_name" {
 }
 
 variable "description" {
-  type = string
+  type    = string
   default = ""
 }
 
