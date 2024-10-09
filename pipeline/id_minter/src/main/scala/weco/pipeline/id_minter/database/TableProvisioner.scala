@@ -8,17 +8,15 @@ import scala.collection.JavaConverters._
 class TableProvisioner(rdsClientConfig: RDSClientConfig) {
 
   def provision(database: String, tableName: String): Unit = {
-    val flyway = Flyway
-      .configure()
-      .dataSource(
-        s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}/$database",
-        rdsClientConfig.username,
-        rdsClientConfig.password
-      )
-      .placeholders(
-        Map("database" -> database, "tableName" -> tableName).asJava
-      )
-      .load()
+    val flyway = new Flyway()
+    flyway.setDataSource(
+      s"jdbc:mysql://${rdsClientConfig.primaryHost}:${rdsClientConfig.port}/$database",
+      rdsClientConfig.username,
+      rdsClientConfig.password
+    )
+    flyway.setPlaceholders(
+      Map("database" -> database, "tableName" -> tableName).asJava
+    )
 
     flyway.migrate()
   }

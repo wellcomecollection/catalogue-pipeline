@@ -119,7 +119,7 @@ object ExternalDependencies {
   val mySqlDependencies = Seq(
     // Version 7.15.0 is the latest version of Flyway which supports MySQL 5.7. To update to a newer version of Flyway,
     // we would also need to update the MySQL tei-adapter-cluster and identifiers-delta-cluster databases in RDS.
-    "org.flywaydb" % "flyway-core" % "7.15.0",
+    "org.flywaydb" % "flyway-core" % "4.2.0",
     "org.scalikejdbc" %% "scalikejdbc" % "3.4.2",
     "com.mysql" % "mysql-connector-j" % "8.2.0"
   )
