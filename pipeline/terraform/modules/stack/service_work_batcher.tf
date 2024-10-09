@@ -30,6 +30,15 @@ module "batcher_output_topic" {
   role_names = [module.batcher.task_role_name]
 }
 
+module "batcher_lambda" {
+  source = "../pipeline_lambda"
+
+  pipeline_date = var.pipeline_date
+  service_name  = "batcher"
+
+  ecr_repository_name = "uk.ac.wellcome/batcher"
+}
+
 module "batcher" {
   source = "../fargate_service"
 

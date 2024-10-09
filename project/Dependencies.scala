@@ -87,6 +87,7 @@ object WellcomeDependencies {
 object ExternalDependencies {
   lazy val versions = new {
     val apacheCommons = "1.12.0"
+    val awsLambdaClient = "2.5.1"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.3"
@@ -110,6 +111,10 @@ object ExternalDependencies {
 
   val apacheCommonsDependencies = Seq(
     "org.apache.commons" % "commons-text" % versions.apacheCommons
+  )
+
+  val awsLambdaClient: Seq[ModuleID] = Seq(
+    "com.amazonaws" % "aws-lambda-java-runtime-interface-client" % versions.awsLambdaClient
   )
 
   val circeOpticsDependencies = Seq(
@@ -232,6 +237,7 @@ object CatalogueDependencies {
 
   val batcherDependencies: Seq[ModuleID] =
     ExternalDependencies.scalatestDependencies ++
+      ExternalDependencies.awsLambdaClient ++
       WellcomeDependencies.typesafeLibrary ++
       WellcomeDependencies.fixturesLibrary ++
       WellcomeDependencies.messagingTypesafeLibrary
