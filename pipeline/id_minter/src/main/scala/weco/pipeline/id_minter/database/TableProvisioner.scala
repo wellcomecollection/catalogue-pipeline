@@ -15,6 +15,7 @@ class TableProvisioner(rdsClientConfig: RDSClientConfig) {
         rdsClientConfig.username,
         rdsClientConfig.password
       )
+      .table("schema_version") // Name of the table Flyway uses to track migrations
       .placeholders(
         Map("database" -> database, "tableName" -> tableName).asJava
       )
