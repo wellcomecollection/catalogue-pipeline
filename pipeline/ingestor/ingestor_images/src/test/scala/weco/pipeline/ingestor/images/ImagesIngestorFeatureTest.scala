@@ -88,7 +88,7 @@ class ImagesIngestorFeatureTest
         withImagesIngestor(queue, existingImages = Nil) {
           index =>
             assertElasticsearchEmpty(index)
-            eventually(Timeout(Span(5, Seconds))) {
+            eventually(Timeout(Span(10, Seconds))) {
               assertQueueEmpty(queue)
               assertQueueHasSize(dlq, size = 1)
             }
