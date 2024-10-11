@@ -3,7 +3,6 @@ package weco.pipeline.ingestor.images
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.{Index, Response}
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import weco.catalogue.display_model.image.DisplayImage
