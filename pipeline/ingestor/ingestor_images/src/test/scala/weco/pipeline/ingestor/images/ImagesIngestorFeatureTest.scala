@@ -88,7 +88,12 @@ class ImagesIngestorFeatureTest
         withImagesIngestor(queue, existingImages = Nil) {
           index =>
             assertElasticsearchEmpty(index)
-            eventually(timeout(Span(10, Seconds)), interval(Span(1, Seconds))) {
+            eventually(
+              timeout(Span(10, Seconds)),
+              // The message does not expire until a second has elapsed, so don't bother
+              // looking until at least then.
+              interval(Span(1, Seconds))
+            ) {
               assertQueueEmpty(queue)
               assertQueueHasSize(dlq, size = 1)
             }
