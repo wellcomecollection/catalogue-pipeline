@@ -32,7 +32,8 @@ class ImagesIngestorFeatureTest
     extends AnyFunSpec
     with ImageGenerators
     with IndexFixtures
-    with IngestorFixtures {
+    with IngestorFixtures
+     {
 
   it("reads an image from the queue, ingests it and deletes the message") {
     val image = createImageData.toAugmentedImage
@@ -88,7 +89,7 @@ class ImagesIngestorFeatureTest
         withImagesIngestor(queue, existingImages = Nil) {
           index =>
             assertElasticsearchEmpty(index)
-            eventually(Timeout(Span(10, Seconds))) {
+            eventually(timeout(Span(10, Seconds)), interval(Span(1, Seconds))) {
               assertQueueEmpty(queue)
               assertQueueHasSize(dlq, size = 1)
             }
