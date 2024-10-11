@@ -18,13 +18,23 @@ import weco.pipeline.id_minter.config.builders.{
 }
 import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.models.IdentifiersTable
-import weco.pipeline.id_minter.services.IdMinterWorkerService
+import weco.pipeline.id_minter.services.{
+  CommandLineIdMinterWorkerService,
+  IdMinterWorkerService
+}
 import weco.pipeline.id_minter.steps.IdentifierGenerator
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.config.builders.EnrichConfig._
 
 object Main extends WellcomeTypesafeApp {
+  // read and print args passed from the command line
+  val runAsCli = args.length > 0
+  val idToProcess = if (runAsCli) Some(args(0)) else None
+
+  println(s"runAsCli: $runAsCli")
+  println(s"idToProcess: $idToProcess")
+
   runWithConfig {
     config: Config =>
       implicit val executionContext: ExecutionContext =
@@ -62,12 +72,19 @@ object Main extends WellcomeTypesafeApp {
           index = Index(config.requireString("es.source-works.index"))
         )
 
-      new IdMinterWorkerService(
-        identifierGenerator = identifierGenerator,
-        jsonRetriever = jsonRetriever,
-        pipelineStream = pipelineStream,
-        rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
-        identifiersTableConfig = identifiersTableConfig
-      )
+      if (runAsCli) {
+        new CommandLineIdMinterWorkerService(
+          identifierGenerator = identifierGenerator,
+          jsonRetriever = jsonRetriever
+        )(idToProcess.get)
+      } else {
+        new IdMinterWorkerService(
+          identifierGenerator = identifierGenerator,
+          jsonRetriever = jsonRetriever,
+          pipelineStream = pipelineStream,
+          rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
+          identifiersTableConfig = identifiersTableConfig
+        )
+      }
   }
 }

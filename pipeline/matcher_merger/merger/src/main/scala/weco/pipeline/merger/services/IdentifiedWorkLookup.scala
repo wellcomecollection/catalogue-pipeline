@@ -8,7 +8,10 @@ import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class IdentifiedWorkLookup(retriever: Retriever[Work[Identified]])(
+class IdentifiedWorkLookup(
+  retriever: Retriever[Work[Identified]],
+  checkLatestVersion: Boolean = true
+)(
   implicit ec: ExecutionContext
 ) extends Logging {
   def fetchAllWorks(

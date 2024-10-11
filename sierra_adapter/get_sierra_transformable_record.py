@@ -49,6 +49,21 @@ def get_bnumber_from_user_input(user_input):
         raise ValueError(f"Not a valid bnumber: {user_input}")
 
 
+def item_to_sns_message(item):
+    # item:
+    # {'payload': {'bucket': 'wellcomecollection-vhs-sierra-sierra-adapter-20200604', 'key': '3349817/4/663a1518-863a-4c4a-9073-b0d68b996024.json'}, 'id': '3349817', 'version': Decimal('4')}
+    # message:
+    # {'location': {'bucket': 'wellcomecollection-vhs-sierra-sierra-adapter-20200604', 'key': '3349817/4/663a1518-863a-4c4a-9073-b0d68b996024.json'}, 'id': '3349817', 'version': 4)}
+    return {
+        "id": item["id"],
+        "version": int(item["version"]),
+        "location": {
+            "bucket": item["payload"]["bucket"],
+            "key": item["payload"]["key"],
+        },
+    }
+
+
 def get_transformable(bnumber):
     session = get_session(role_arn="arn:aws:iam::760097843905:role/platform-read_only")
 
@@ -59,6 +74,8 @@ def get_transformable(bnumber):
         item = table.get_item(Key={"id": bnumber})["Item"]
     except KeyError:
         raise RuntimeError(f"Unable to find a DynamoDB record with id={bnumber}")
+
+    print(json.dumps(item_to_sns_message(item), indent=2))
 
     location = item["payload"]
 

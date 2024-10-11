@@ -51,8 +51,6 @@ class RouterWorkerService[MsgDestination](
         }
 
         sender.send(path).map(_ => Nil)
-
     }
   }
-
 }
