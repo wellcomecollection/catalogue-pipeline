@@ -17,7 +17,7 @@ locals {
   namespace = "catalogue-${var.pipeline_date}"
 
   name      = "${local.namespace}_${var.service_name}"
-  image_tag = "env.${var.pipeline_date}"
+  image_tag = var.tag_override != "" ? var.tag_override : "env.${var.pipeline_date}"
 }
 
 data "aws_ecr_repository" "repository" {
@@ -27,6 +27,11 @@ data "aws_ecr_repository" "repository" {
 data "aws_ecr_image" "lambda_image" {
   repository_name = data.aws_ecr_repository.repository.name
   image_tag       = local.image_tag
+}
+
+variable "tag_override" {
+  type = string
+  default = ""
 }
 
 variable "ecr_repository_name" {
