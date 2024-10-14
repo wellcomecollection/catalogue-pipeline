@@ -34,13 +34,13 @@ module "id_minter" {
     ingest_flush_interval_seconds = 30
   }
 
-    secret_env_vars = merge({
-      cluster_url          = "rds/identifiers-serverless/endpoint"
-      cluster_url_readonly = "rds/identifiers-serverless/reader_endpoint"
-      db_port              = "rds/identifiers-serverless/port"
-      db_username          = "catalogue/id_minter/rds_user"
-      db_password          = "catalogue/id_minter/rds_password"
-    }, local.pipeline_storage_es_service_secrets["id_minter"])
+  secret_env_vars = merge({
+    cluster_url          = "rds/identifiers-serverless/endpoint"
+    cluster_url_readonly = "rds/identifiers-serverless/reader_endpoint"
+    db_port              = "rds/identifiers-serverless/port"
+    db_username          = "catalogue/id_minter/rds_user"
+    db_password          = "catalogue/id_minter/rds_password"
+  }, local.pipeline_storage_es_service_secrets["id_minter"])
 
   cpu    = 2048
   memory = 4096
