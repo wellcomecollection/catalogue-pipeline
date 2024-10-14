@@ -23,20 +23,6 @@ resource "aws_rds_cluster" "serverless" {
   }
 }
 
-// Note when migrating we will need to:
-// - comment out the serverless cluster instance
-// - create a new serverless cluster instance with type "db.t3.medium"
-// - when complete uncomment the serverless cluster instance
-// - manual failover to the new serverless cluster
-// - delete the old serverless cluster instance
-
-resource "aws_rds_cluster_instance" "migration_instance" {
-  cluster_identifier = aws_rds_cluster.serverless.id
-  instance_class     = "db.t3.medium"
-  engine             = aws_rds_cluster.serverless.engine
-  engine_version     = aws_rds_cluster.serverless.engine_version
-}
-
 resource "aws_rds_cluster_instance" "serverless_instance" {
   cluster_identifier = aws_rds_cluster.serverless.id
   instance_class     = "db.serverless"
