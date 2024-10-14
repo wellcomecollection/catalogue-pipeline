@@ -57,13 +57,31 @@ module "identifiers_delta_rds_cluster" {
   instance_count = 1
   instance_class = "db.t3.medium"
 
-  db_security_group_id = aws_security_group.database_sg.id
-
+  db_security_group_id     = aws_security_group.database_sg.id
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
 
   engine                  = "aurora-mysql"
   db_parameter_group_name = "default.aurora-mysql5.7"
 }
+
+# This is the serverless RDS cluster that we will migrate to.
+module "identifiers_serverless_rds_cluster" {
+  source = "./modules/rds-serverless"
+
+  cluster_identifier = "identifiers-serverless"
+  database_name      = "identifiers"
+  master_username    = local.rds_username
+  master_password    = local.rds_password
+
+  db_security_group_id     = aws_security_group.database_sg.id
+  aws_db_subnet_group_name = aws_db_subnet_group.default.name
+
+  # This is the snapshot from the last time we migrated the database.
+  snapshot_identifier = "aurora-mysql-v3-pre-migration-24-10-08"
+
+  engine_version = "8.0.mysql_aurora.3.07.1"
+}
+
 
 resource "aws_security_group" "rds_ingress_security_group" {
   name        = "pipeline_rds_ingress_security_group"
