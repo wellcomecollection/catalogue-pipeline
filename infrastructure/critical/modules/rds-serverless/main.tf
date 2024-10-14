@@ -16,6 +16,7 @@ resource "aws_rds_cluster" "serverless" {
   storage_encrypted = false
   // This needs to be false until migration is complete
   enable_http_endpoint = true
+  deletion_protection  = true
 
   serverlessv2_scaling_configuration {
     max_capacity = var.max_scaling_capacity
