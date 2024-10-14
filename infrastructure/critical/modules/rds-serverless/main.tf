@@ -37,10 +37,10 @@ resource "aws_rds_cluster_instance" "migration_instance" {
   engine_version     = aws_rds_cluster.serverless.engine_version
 }
 
-# resource "aws_rds_cluster_instance" "serverless_instance" {
-#   cluster_identifier = aws_rds_cluster.serverless.id
-#   instance_class     = "db.serverless"
-#   engine             = aws_rds_cluster.serverless.engine
-#   engine_version     = aws_rds_cluster.serverless.engine_version
-# }
+resource "aws_rds_cluster_instance" "serverless_instance" {
+  cluster_identifier = aws_rds_cluster.serverless.id
+  instance_class     = "db.serverless"
+  engine             = aws_rds_cluster.serverless.engine
+  engine_version     = aws_rds_cluster.serverless.engine_version
+}
 
