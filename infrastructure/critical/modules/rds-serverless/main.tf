@@ -23,13 +23,6 @@ resource "aws_rds_cluster" "serverless" {
   }
 }
 
-resource "aws_rds_cluster_instance" "t3_instance" {
-  cluster_identifier = aws_rds_cluster.serverless.id
-  instance_class     = "db.t3.medium"
-  engine             = aws_rds_cluster.serverless.engine
-  engine_version     = aws_rds_cluster.serverless.engine_version
-}
-
 resource "aws_rds_cluster_instance" "serverless_instance" {
   cluster_identifier = aws_rds_cluster.serverless.id
   instance_class     = "db.serverless"
