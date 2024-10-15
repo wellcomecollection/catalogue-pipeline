@@ -35,7 +35,8 @@ module "batcher_lambda" {
 
   pipeline_date = var.pipeline_date
   service_name  = "batcher"
-  tag_override  = "dev"
+
+  queue_config = {}
 
   ecr_repository_name = "uk.ac.wellcome/batcher"
 }
