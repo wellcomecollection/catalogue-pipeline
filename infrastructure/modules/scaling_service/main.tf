@@ -10,7 +10,7 @@ locals {
 }
 
 module "service" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=rk_add-entrypoint"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v4.1.0"
 
   task_definition_arn            = module.task_definition.arn
   service_name                   = local.service_name
@@ -34,7 +34,7 @@ module "service" {
 }
 
 module "autoscaling" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=rk_add-entrypoint"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/autoscaling?ref=v4.1.0"
 
   name = var.name
 
@@ -49,7 +49,7 @@ module "autoscaling" {
 }
 
 module "task_definition" {
-  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=rk_add-entrypoint"
+  source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/task_definition?ref=v4.1.0"
 
   cpu    = var.cpu
   memory = var.memory
@@ -66,14 +66,14 @@ module "task_definition" {
 }
 
 module "log_router_container" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=rk_add-entrypoint"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/firelens?ref=v4.1.0"
   namespace = var.name
 
   use_privatelink_endpoint = true
 }
 
 module "log_router_permissions" {
-  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=rk_add-entrypoint"
+  source    = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/secrets?ref=v4.1.0"
   secrets   = var.shared_logging_secrets
   role_name = module.task_definition.task_execution_role_name
 }
