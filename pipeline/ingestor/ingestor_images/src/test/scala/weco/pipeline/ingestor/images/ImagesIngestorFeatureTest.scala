@@ -3,7 +3,6 @@ package weco.pipeline.ingestor.images
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.requests.get.GetResponse
 import com.sksamuel.elastic4s.{Index, Response}
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.time.{Seconds, Span}
 import weco.catalogue.display_model.image.DisplayImage
@@ -32,7 +31,8 @@ class ImagesIngestorFeatureTest
     extends AnyFunSpec
     with ImageGenerators
     with IndexFixtures
-    with IngestorFixtures {
+    with IngestorFixtures
+     {
 
   it("reads an image from the queue, ingests it and deletes the message") {
     val image = createImageData.toAugmentedImage
@@ -88,7 +88,12 @@ class ImagesIngestorFeatureTest
         withImagesIngestor(queue, existingImages = Nil) {
           index =>
             assertElasticsearchEmpty(index)
-            eventually(Timeout(Span(10, Seconds))) {
+            eventually(
+              timeout(Span(10, Seconds)),
+              // The message does not expire until a second has elapsed, so don't bother
+              // looking until at least then.
+              interval(Span(1, Seconds))
+            ) {
               assertQueueEmpty(queue)
               assertQueueHasSize(dlq, size = 1)
             }
