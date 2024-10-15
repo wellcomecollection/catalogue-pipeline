@@ -2,18 +2,22 @@ package weco.pipeline.batcher
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 import org.apache.pekko.{Done, NotUsed}
 import org.apache.pekko.stream.scaladsl._
 import org.apache.pekko.stream.Materializer
-import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
+import software.amazon.awssdk.services.sqs.model.{
+  Message,
+  Message => SQSMessage
+}
 import grizzled.slf4j.Logging
-
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable
 import weco.json.JsonUtil._
+
+import scala.collection.immutable
 
 case class Batch(rootPath: String, selectors: List[Selector])
 
@@ -30,20 +34,21 @@ class BatcherWorkerService[MsgDestination](
   def run(): Future[Done] =
     msgStream.runStream(
       this.getClass.getSimpleName,
-      source =>
-        source
+      (source: Source[(SQSMessage, NotificationMessage), NotUsed]) => {
+        val x: Source[immutable.Seq[(Message, String)], NotUsed] = source
           .map {
-            case (msg, notificationMessage) =>
+            case (msg: SQSMessage, notificationMessage: NotificationMessage) =>
               (msg, notificationMessage.body)
           }
           .groupedWithin(maxProcessedPaths, flushInterval)
-          .map(_.toList.unzip)
+        x.map(_.toList.unzip)
           .mapAsync(1) {
             case (msgs, paths) =>
               info(s"Processing ${paths.size} input paths")
               processPaths(msgs, paths)
           }
           .flatMapConcat(identity)
+      }
     )
 
   /** Process a list of input paths by generating appropriate batches to send to
@@ -54,21 +59,7 @@ class BatcherWorkerService[MsgDestination](
     msgs: List[SQSMessage],
     paths: List[String]
   ): Future[Source[SQSMessage, NotUsed]] =
-    generateBatches(paths)
-      .mapAsyncUnordered(10) {
-        case (batch, msgIndices) =>
-          Future {
-            msgSender.sendT(batch) match {
-              case Success(_) => None
-              case Failure(err) =>
-                error(s"Failed processing batch $batch with error: $err")
-                Some(msgIndices)
-            }
-          }
-      }
-      .collect { case Some(failedIndices) => failedIndices }
-      .mapConcat(identity)
-      .runWith(Sink.seq)
+    PathsProcessor(maxBatchSize, paths, SNSDownstream)
       .map {
         failedIndices =>
           val failedIdxSet = failedIndices.toSet
@@ -78,45 +69,8 @@ class BatcherWorkerService[MsgDestination](
             }
       }
 
-  /** Given a list of input paths, generate the minimal set of selectors
-    * matching works needing to be denormalised, and group these according to
-    * tree and within a maximum `batchSize`.
-    */
-  private def generateBatches(
-    paths: List[String]
-  ): Source[(Batch, List[Long]), NotUsed] = {
-    val selectors = Selector.forPaths(paths)
-    val groupedSelectors = selectors.groupBy(_._1.rootPath)
-    info(
-      s"Generated ${selectors.size} selectors spanning ${groupedSelectors.size} trees from ${paths.size} paths."
-    )
-    paths.sorted.grouped(1000).toList.zipWithIndex.foreach {
-      case (paths, idx) =>
-        val startIdx = idx * 1000 + 1
-        info(
-          s"Input paths ($startIdx-${startIdx + paths.length - 1}): ${paths.mkString(", ")}"
-        )
-    }
-    groupedSelectors.foreach {
-      case (rootPath, selectors) =>
-        info(
-          s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}"
-        )
-    }
-    Source(groupedSelectors.toList).map {
-      case (rootPath, selectorsAndIndices) =>
-        // For batches consisting of a really large number of selectors, we
-        // should just send the whole tree: this avoids really long queries
-        // in the relation embedder, or duplicate work of creating the archives
-        // cache multiple times, and it is likely pretty much all the nodes will
-        // be denormalised anyway.
-        val (selectors, msgIndices) = selectorsAndIndices.unzip(identity)
-        val batch =
-          if (selectors.size > maxBatchSize)
-            Batch(rootPath, List(Selector.Tree(rootPath)))
-          else
-            Batch(rootPath, selectors)
-        batch -> msgIndices
-    }
+  private object SNSDownstream extends Downstream {
+
+    override def notify(batch: Batch): Try[Unit] = msgSender.sendT(batch)
   }
 }
