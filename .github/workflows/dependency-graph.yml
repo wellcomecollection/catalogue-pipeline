@@ -15,6 +15,8 @@ jobs:
     name: Update Dependency Graph
     runs-on: ubuntu-latest
     steps:
+      - name: Install sbt
+        uses: sbt/setup-sbt@v1
       - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
