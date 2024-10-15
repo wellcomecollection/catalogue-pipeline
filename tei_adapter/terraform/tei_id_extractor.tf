@@ -30,8 +30,11 @@ module "tei_id_extractor_w" {
 
   // The total number of connections to RDS across all tasks
   // must not exceed the maximum supported by the RDS instance.
-  min_capacity = local.min_capacity
-  max_capacity = min(floor(local.rds_max_connections / local.tei_id_extractor_max_connections), local.max_capacity)
+  # min_capacity = local.min_capacity
+  # max_capacity = min(floor(local.rds_max_connections / local.tei_id_extractor_max_connections), local.max_capacity)
+
+  min_capacity = 0
+  max_capacity = 0
 
   cpu    = 1024
   memory = 2048

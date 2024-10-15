@@ -58,7 +58,6 @@ module "tei_id_extractor_rds_cluster" {
   instance_class = "db.t3.small"
 
   db_security_group_id = aws_security_group.database_sg.id
-
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
 
   engine                  = "aurora-mysql"
