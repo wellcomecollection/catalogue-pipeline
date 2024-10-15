@@ -30,11 +30,28 @@ module "batcher_output_topic" {
   role_names = [module.batcher.task_role_name]
 }
 
+module "batcher_lambda" {
+  source = "../pipeline_lambda"
+
+  pipeline_date = var.pipeline_date
+  service_name  = "batcher"
+  tag_override  = "dev"
+
+  ecr_repository_name = "uk.ac.wellcome/batcher"
+}
+
 module "batcher" {
   source = "../fargate_service"
 
   name            = "batcher"
   container_image = local.batcher_image
+
+  // Override entrypoint & command to dual use lambda container image
+  // This should be removed once we have a dedicated batcher_lambda image
+  entrypoint = [
+    "/opt/docker/bin/batcher"
+  ]
+  command = null
 
   topic_arns = [
     module.router_path_output_topic.arn,

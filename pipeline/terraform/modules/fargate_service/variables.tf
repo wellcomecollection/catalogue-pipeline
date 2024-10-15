@@ -29,6 +29,16 @@ variable "queue_name" {
   default = null
 }
 
+variable "entrypoint" {
+  type    = list(string)
+  default = null
+}
+
+variable "command" {
+  default = null
+  type    = list(string)
+}
+
 variable "queue_visibility_timeout_seconds" {
   type    = number
   default = 30
