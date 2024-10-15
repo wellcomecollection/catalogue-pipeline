@@ -13,8 +13,7 @@ resource "aws_rds_cluster" "serverless" {
   db_subnet_group_name   = var.aws_db_subnet_group_name
   vpc_security_group_ids = [var.db_security_group_id]
 
-  storage_encrypted = false
-  // This needs to be false until migration is complete
+  storage_encrypted    = false
   enable_http_endpoint = true
   deletion_protection  = true
 

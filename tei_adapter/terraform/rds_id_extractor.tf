@@ -57,13 +57,28 @@ module "tei_id_extractor_rds_cluster" {
   instance_count = 1
   instance_class = "db.t3.small"
 
-  db_security_group_id = aws_security_group.database_sg.id
-
+  db_security_group_id     = aws_security_group.database_sg.id
   aws_db_subnet_group_name = aws_db_subnet_group.default.name
 
   engine                  = "aurora-mysql"
   db_parameter_group_name = aws_db_parameter_group.default.id
 }
+
+module "tei_id_extractor_rds_serverless_cluster" {
+  source             = "../../infrastructure/critical/modules/rds-serverless"
+  cluster_identifier = "tei-adapter-cluster-serverless"
+  database_name      = "pathid"
+  master_username    = local.rds_username
+  master_password    = local.rds_password
+
+  db_security_group_id     = aws_security_group.database_sg.id
+  aws_db_subnet_group_name = aws_db_subnet_group.default.name
+
+  engine_version = "8.0.mysql_aurora.3.07.1"
+
+  snapshot_identifier = "aurora-mysql-v3-tei-pre-migration-24-15-08"
+}
+
 
 resource "aws_security_group" "rds_ingress_security_group" {
   name        = "tei_adapter_rds_ingress_security_group"

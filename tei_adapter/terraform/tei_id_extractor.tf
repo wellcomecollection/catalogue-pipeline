@@ -21,8 +21,8 @@ module "tei_id_extractor_w" {
   }
 
   secret_env_vars = {
-    db_host      = "rds/tei-adapter-cluster/endpoint"
-    db_port      = "rds/tei-adapter-cluster/port"
+    db_host      = "rds/tei-adapter-cluster-serverless/endpoint"
+    db_port      = "rds/tei-adapter-cluster-serverless/port"
     db_username  = "catalogue/tei_id_extractor/rds_user"
     db_password  = "catalogue/tei_id_extractor/rds_password"
     github_token = "catalogue/tei_id_extractor/github_token"
