@@ -2,14 +2,11 @@ package weco.pipeline.batcher
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 import org.apache.pekko.{Done, NotUsed}
 import org.apache.pekko.stream.scaladsl._
 import org.apache.pekko.stream.Materializer
-import software.amazon.awssdk.services.sqs.model.{
-  Message,
-  Message => SQSMessage
-}
+import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
 import weco.messaging.MessageSender
 import weco.messaging.sns.NotificationMessage
@@ -35,7 +32,7 @@ class BatcherWorkerService[MsgDestination](
     msgStream.runStream(
       this.getClass.getSimpleName,
       (source: Source[(SQSMessage, NotificationMessage), NotUsed]) => {
-        val x: Source[immutable.Seq[(Message, String)], NotUsed] = source
+        val x: Source[immutable.Seq[(SQSMessage, String)], NotUsed] = source
           .map {
             case (msg: SQSMessage, notificationMessage: NotificationMessage) =>
               (msg, notificationMessage.body)
