@@ -32,13 +32,13 @@ class BatcherWorkerService[MsgDestination](
     msgStream.runStream(
       this.getClass.getSimpleName,
       (source: Source[(SQSMessage, NotificationMessage), NotUsed]) => {
-        val x: Source[immutable.Seq[(SQSMessage, String)], NotUsed] = source
+        source
           .map {
             case (msg: SQSMessage, notificationMessage: NotificationMessage) =>
               (msg, notificationMessage.body)
           }
           .groupedWithin(maxProcessedPaths, flushInterval)
-        x.map(_.toList.unzip)
+        .map(_.toList.unzip)
           .mapAsync(1) {
             case (msgs, paths) =>
               info(s"Processing ${paths.size} input paths")
@@ -67,7 +67,6 @@ class BatcherWorkerService[MsgDestination](
       }
 
   private object SNSDownstream extends Downstream {
-
     override def notify(batch: Batch): Try[Unit] = msgSender.sendT(batch)
   }
 }
