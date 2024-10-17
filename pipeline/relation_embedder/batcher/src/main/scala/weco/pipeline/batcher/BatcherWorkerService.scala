@@ -38,7 +38,7 @@ class BatcherWorkerService[MsgDestination](
               (msg, notificationMessage.body)
           }
           .groupedWithin(maxProcessedPaths, flushInterval)
-        .map(_.toList.unzip)
+          .map(_.toList.unzip)
           .mapAsync(1) {
             case (msgs, paths) =>
               info(s"Processing ${paths.size} input paths")
