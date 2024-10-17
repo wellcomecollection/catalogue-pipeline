@@ -2,8 +2,16 @@ package weco.pipeline.calm_api_client.fixtures
 
 import java.time.Instant
 
-import org.apache.pekko.http.scaladsl.model.{DateTime, HttpProtocols, HttpResponse}
-import org.apache.pekko.http.scaladsl.model.headers.{`Set-Cookie`, Date, HttpCookie}
+import org.apache.pekko.http.scaladsl.model.{
+  DateTime,
+  HttpProtocols,
+  HttpResponse
+}
+import org.apache.pekko.http.scaladsl.model.headers.{
+  `Set-Cookie`,
+  Date,
+  HttpCookie
+}
 
 import scala.xml.XML
 

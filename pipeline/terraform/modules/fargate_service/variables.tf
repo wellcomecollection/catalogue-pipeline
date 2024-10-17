@@ -29,6 +29,16 @@ variable "queue_name" {
   default = null
 }
 
+variable "entrypoint" {
+  type    = list(string)
+  default = null
+}
+
+variable "command" {
+  default = null
+  type    = list(string)
+}
+
 variable "queue_visibility_timeout_seconds" {
   type    = number
   default = 30
@@ -37,13 +47,8 @@ variable "queue_visibility_timeout_seconds" {
 variable "message_retention_seconds" {
   type = number
   # The actual default on SQS is four whole days.
-  #   default = 345600
   # This is sufficient to cope with normal bank holiday weekends.
-
-  # However, if a message is sitting on any main queue for more than a day,
-  # then something has gone rather awry, and it should be moved to a DLQ,
-  # rather than cluttering a main queue.
-  default = 86400
+  default = 345600
 }
 
 variable "max_receive_count" {

@@ -17,6 +17,7 @@ import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
+import scala.List
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -136,50 +137,17 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("always sends the highest version of a Work") {
+  it("sends a Work even if the matched version is not the latest") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, _, index) =>
-        val work = identifiedWork()
-        val olderWork = identifiedWork()
-        val newerWork =
-          identifiedWork(canonicalId = olderWork.state.canonicalId)
-            .withVersion(olderWork.version + 1)
+        val workA = identifiedWork()
+        val workB = identifiedWork()
+        val newerWorkB =
+          identifiedWork(canonicalId = workB.state.canonicalId)
+            .withVersion(workB.version + 1)
+        val matcherResult = createMatcherResultWith(Set(Set(workA, workB)))
 
-        val matcherResult = createMatcherResultWith(Set(Set(work, olderWork)))
-
-        retriever.index ++= Map(work.id -> work, newerWork.id -> newerWork)
-
-        sendNotificationToSQS(
-          queue = queue,
-          message = matcherResult
-        )
-
-        eventually {
-          assertQueueEmpty(queue)
-          assertQueueEmpty(dlq)
-          getWorksSent(senders) should contain only work.id
-          index shouldBe Map(
-            work.id -> Left(work.transition[Merged](matcherResult.createdTime))
-          )
-        }
-    }
-  }
-
-  it("discards Works with version 0") {
-    withMergerWorkerServiceFixtures {
-      case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
-        val versionZeroWork =
-          identifiedWork()
-            .withVersion(0)
-
-        val work =
-          identifiedWork(canonicalId = versionZeroWork.state.canonicalId)
-            .withVersion(1)
-
-        val matcherResult =
-          createMatcherResultWith(Set(Set(work, versionZeroWork)))
-
-        retriever.index ++= Map(work.id -> work)
+        retriever.index ++= Map(workA.id -> workA, workB.id -> newerWorkB)
 
         sendNotificationToSQS(
           queue = queue,
@@ -189,14 +157,15 @@ class MergerWorkerServiceTest
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
-
-          getWorksSent(senders) should contain only work.id
+          getWorksSent(senders) should contain allOf (workA.id, workB.id)
           index shouldBe Map(
-            work.id -> Left(work.transition[Merged](matcherResult.createdTime))
+            workA.id -> Left(
+              workA.transition[Merged](matcherResult.createdTime)
+            ),
+            workB.id -> Left(
+              newerWorkB.transition[Merged](matcherResult.createdTime)
+            )
           )
-
-          metrics.incrementedCounts.length shouldBe 1
-          metrics.incrementedCounts.last should endWith("_success")
         }
     }
   }
@@ -405,7 +374,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  it("doesn't send anything if the works are outdated") {
+  it("sends messages even if the works are outdated") {
     withMergerWorkerServiceFixtures {
       case (retriever, QueuePair(queue, dlq), senders, metrics, index) =>
         val work0 = identifiedWork().withVersion(0)
@@ -423,8 +392,12 @@ class MergerWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
 
-          getWorksSent(senders) shouldBe empty
-          index shouldBe Map()
+          getWorksSent(senders) shouldBe List(work1.id)
+          index shouldBe Map(
+            work1.id -> Left(
+              work1.transition[Merged](matcherResult.createdTime)
+            )
+          )
 
           metrics.incrementedCounts.length shouldBe 1
           metrics.incrementedCounts.last should endWith("_success")

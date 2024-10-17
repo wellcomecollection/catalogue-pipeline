@@ -31,7 +31,10 @@ class DeletionMarkerTest
         val targetRecord = rows.head.toPayload
         val result = deletionMarker(targetRecord)
 
-        result.success.value shouldBe targetRecord.copy(isDeleted = true)
+        result.success.value shouldBe targetRecord.copy(
+          isDeleted = true,
+          version = targetRecord.version + 1
+        )
         getRecordFromTable(
           targetRecord.id,
           targetRecord.version,
@@ -48,7 +51,10 @@ class DeletionMarkerTest
         val targetRecord = rows.head.toPayload
         val result = deletionMarker(targetRecord)
 
-        result.success.value shouldBe targetRecord.copy(isDeleted = true)
+        result.success.value shouldBe targetRecord.copy(
+          isDeleted = true,
+          version = targetRecord.version + 1
+        )
         getRecordFromTable(
           targetRecord.id,
           targetRecord.version,
@@ -65,7 +71,10 @@ class DeletionMarkerTest
         val targetRecord = records.head.toPayload
         val result = deletionMarker(targetRecord)
 
-        result.success.value shouldBe targetRecord.copy(isDeleted = true)
+        result.success.value shouldBe targetRecord.copy(
+          isDeleted = true,
+          version = targetRecord.version + 1
+        )
         getRecordFromTable(
           targetRecord.id,
           targetRecord.version,

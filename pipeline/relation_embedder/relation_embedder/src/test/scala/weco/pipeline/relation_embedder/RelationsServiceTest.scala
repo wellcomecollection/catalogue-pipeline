@@ -34,12 +34,7 @@ class RelationsServiceTest
 
   /** The following tests use works within this tree:
     *
-    * A
-    * \|-------------
-    * \| | | B C E
-    * \| |------ |---
-    * \| | | | | | D X Y Z 1 2
-    * \|
+    * A \|------------- \| | | B C E \| |------ |--- \| | | | | | D X Y Z 1 2 \|
     * | -- |
     * |:---|
     * |    |

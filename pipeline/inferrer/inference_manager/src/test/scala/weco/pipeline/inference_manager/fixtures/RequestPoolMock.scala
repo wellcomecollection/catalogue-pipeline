@@ -1,7 +1,12 @@
 package weco.pipeline.inference_manager.fixtures
 
 import java.util.concurrent.ConcurrentHashMap
-import org.apache.pekko.http.scaladsl.model.{HttpRequest, HttpResponse, StatusCodes, Uri}
+import org.apache.pekko.http.scaladsl.model.{
+  HttpRequest,
+  HttpResponse,
+  StatusCodes,
+  Uri
+}
 import org.apache.pekko.stream.scaladsl.Flow
 import weco.fixtures.TestWith
 import weco.pipeline.inference_manager.services.RequestPoolFlow
