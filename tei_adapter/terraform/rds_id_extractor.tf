@@ -46,24 +46,6 @@ resource "aws_security_group" "database_sg" {
   }
 }
 
-module "tei_id_extractor_rds_cluster" {
-  source             = "../../infrastructure/critical/modules/rds"
-  cluster_identifier = "tei-adapter-cluster"
-  database_name      = "pathid"
-  username           = local.rds_username
-  password           = local.rds_password
-
-  # This instance class provides us with 45 connections per instance.
-  instance_count = 1
-  instance_class = "db.t3.small"
-
-  db_security_group_id     = aws_security_group.database_sg.id
-  aws_db_subnet_group_name = aws_db_subnet_group.default.name
-
-  engine                  = "aurora-mysql"
-  db_parameter_group_name = aws_db_parameter_group.default.id
-}
-
 module "tei_id_extractor_rds_serverless_cluster" {
   source             = "../../infrastructure/critical/modules/rds-serverless"
   cluster_identifier = "tei-adapter-cluster-serverless"

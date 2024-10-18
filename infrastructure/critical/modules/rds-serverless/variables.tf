@@ -1,5 +1,6 @@
 variable "cluster_identifier" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "database_name" {
