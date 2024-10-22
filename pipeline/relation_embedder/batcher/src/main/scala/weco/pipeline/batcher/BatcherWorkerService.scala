@@ -14,8 +14,6 @@ import weco.messaging.sqs.SQSStream
 import weco.typesafe.Runnable
 import weco.json.JsonUtil._
 
-import scala.collection.immutable
-
 case class Batch(rootPath: String, selectors: List[Selector])
 
 class BatcherWorkerService[MsgDestination](
