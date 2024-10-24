@@ -24,10 +24,14 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
       actorSystem.dispatcher
 
     val recordList: List[SQSMessage] = event.getRecords.asScala.toList
-    val paths = recordList flatMap {
+    val paths = recordList map {
       message: SQSMessage =>
-        ujson.read(message.getBody).obj.get("Message").toList
-    } map (_.str)
+        // This assumes that the input is message body is just the path
+        // not wrapped in any other JSON.
+        // This may need to be altered depending on how the message is formatted
+        // in real life
+        ujson.read(message.getBody).str
+    }
     PathsProcessor(
       40, // TODO: 40 is the number in the config used by Main, do this properly later
       paths,
