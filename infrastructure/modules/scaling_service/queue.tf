@@ -1,5 +1,5 @@
 module "input_queue" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.4.0"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=max-age-alarm"
 
   queue_name = var.queue_config.name
 
@@ -8,6 +8,9 @@ module "input_queue" {
   max_receive_count          = var.queue_config.max_receive_count
   message_retention_seconds  = var.queue_config.message_retention_seconds
   alarm_topic_arn            = var.queue_config.dlq_alarm_arn
+
+  enable_queue_age_alarm = true
+  queue_age_alarm_name_suffix = "slack_alarm"
 }
 
 resource "aws_iam_role_policy" "read_from_q" {

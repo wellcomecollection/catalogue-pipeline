@@ -17,7 +17,7 @@ locals {
   # The max number of connections allowed by the instance.
   # specified at /infrastructure/critical/rds_id_minter.tf
   base_rds_instances             = 1
-  id_minter_rds_max_connections  = (local.base_rds_instances + local.extra_rds_instances) * 45
+  id_minter_rds_max_connections  = local.base_rds_instances * 45
   id_minter_task_max_connections = min(9, local.max_capacity)
 
   # We don't want to overload our databases if we're not reindexing
@@ -194,7 +194,6 @@ locals {
   }
 
   rds_config = {
-    cluster_id        = local.infra_critical.rds_cluster_id
     subnet_group      = local.infra_critical.rds_subnet_group_name
     security_group_id = local.infra_critical.rds_access_security_group_id
   }
