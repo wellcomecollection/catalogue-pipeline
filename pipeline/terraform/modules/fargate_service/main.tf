@@ -53,6 +53,7 @@ module "scaling_service" {
     cooldown_period = var.cooldown_period
 
     dlq_alarm_arn = var.fargate_service_boilerplate.dlq_alarm_topic_arn
+    main_q_age_alarm_action_arns = var.fargate_service_boilerplate.main_q_age_alarm_action_arns
   }
 
   scale_down_adjustment = lookup(var.fargate_service_boilerplate, "scale_down_adjustment", -1)

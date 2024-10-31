@@ -116,9 +116,9 @@ locals {
   tei_reindexer_topic_arn    = data.terraform_remote_state.reindexer.outputs.tei_reindexer_topic_arn
   calm_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.calm_reindexer_topic_arn
 
-  infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
-
-  shared_infra = data.terraform_remote_state.shared_infra.outputs
+  infra_critical   = data.terraform_remote_state.catalogue_infra_critical.outputs
+  shared_infra     = data.terraform_remote_state.shared_infra.outputs
+  monitoring_infra = data.terraform_remote_state.monitoring.outputs
 
   adapter_config = {
     sierra = {
@@ -175,9 +175,10 @@ locals {
   }
 
   monitoring_config = {
-    shared_logging_secrets = local.shared_infra["shared_secrets_logging"]
-    logging_cluster_id     = local.shared_infra["logging_cluster_id"]
-    dlq_alarm_arn          = null
+    shared_logging_secrets       = local.shared_infra["shared_secrets_logging"]
+    logging_cluster_id           = local.shared_infra["logging_cluster_id"]
+    dlq_alarm_arn                = null
+    main_q_age_alarm_action_arns = [local.monitoring_infra["chatbot_topic_arn"]]
   }
 
   network_config = {
@@ -208,7 +209,8 @@ locals {
     scale_down_adjustment = local.scale_down_adjustment
     scale_up_adjustment   = local.scale_up_adjustment
 
-    dlq_alarm_topic_arn = local.monitoring_config.dlq_alarm_arn
+    dlq_alarm_topic_arn          = local.monitoring_config.dlq_alarm_arn
+    main_q_age_alarm_action_arns = local.monitoring_config.main_q_age_alarm_action_arns
 
     subnets = local.network_config.subnets
 

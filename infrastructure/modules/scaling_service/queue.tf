@@ -9,8 +9,7 @@ module "input_queue" {
   message_retention_seconds  = var.queue_config.message_retention_seconds
   alarm_topic_arn            = var.queue_config.dlq_alarm_arn
 
-  enable_queue_age_alarm = true
-  queue_age_alarm_name_suffix = "slack_alarm"
+  main_q_age_alarm_action_arns = var.queue_config.main_q_age_alarm_action_arns
 }
 
 resource "aws_iam_role_policy" "read_from_q" {

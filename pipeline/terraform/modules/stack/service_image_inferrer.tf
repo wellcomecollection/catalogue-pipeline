@@ -175,7 +175,8 @@ module "image_inferrer" {
   scale_down_adjustment = local.scale_down_adjustment
   scale_up_adjustment   = local.scale_up_adjustment
 
-  dlq_alarm_topic_arn = local.monitoring_config.dlq_alarm_arn
+  dlq_alarm_topic_arn            = local.monitoring_config.dlq_alarm_arn
+    main_q_age_alarm_action_arns = local.monitoring_config.main_q_age_alarm_action_arns
 
   subnets = local.network_config.subnets
 

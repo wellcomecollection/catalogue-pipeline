@@ -116,5 +116,7 @@ variable "queue_config" {
     max_receive_count          = number
     cooldown_period            = string
     dlq_alarm_arn              = string
+
+    main_q_age_alarm_action_arns = optional(list(string),[])
   })
 }
