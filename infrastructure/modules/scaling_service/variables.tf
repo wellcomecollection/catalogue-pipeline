@@ -117,6 +117,6 @@ variable "queue_config" {
     cooldown_period            = string
     dlq_alarm_arn              = string
 
-    main_q_age_alarm_action_arns = optional(list(string),[])
+    main_q_age_alarm_action_arns = optional(list(string), [])
   })
 }
