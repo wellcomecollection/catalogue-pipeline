@@ -12,7 +12,7 @@ ENTRYPOINT ["/opt/docker/bin/batcher"]
 
 FROM base AS lambda_rie
 ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/v1.22/aws-lambda-rie /aws-lambda/aws-lambda-rie
-RUN chmod +x aws-lambda/aws-lambda-rie
+RUN chmod +x /aws-lambda/aws-lambda-rie
 ENTRYPOINT ["/aws-lambda/aws-lambda-rie"]
 
 CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.batcher.LambdaMain::handleRequest"]
