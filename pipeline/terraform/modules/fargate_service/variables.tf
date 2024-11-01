@@ -95,10 +95,26 @@ variable "cooldown_period" {
   default = "1m"
 }
 
-# This is intentionally untyped.
-# If typed you can't have optional nulls which results in some complexity.
-# See https://github.com/hashicorp/terraform/issues/19898
-variable "fargate_service_boilerplate" {}
+variable "fargate_service_boilerplate" {
+  type = object({
+    egress_security_group_id             = optional(string, null)
+    elastic_cloud_vpce_security_group_id = optional(string, null)
+
+    cluster_name = optional(string, null)
+    cluster_arn  = optional(string, null)
+
+    scale_down_adjustment = optional(number, null)
+    scale_up_adjustment   = optional(number, null)
+
+    dlq_alarm_topic_arn          = optional(string, null)
+    main_q_age_alarm_action_arns = optional(list(string), null)
+
+    subnets   = optional(list(string), null)
+    namespace = optional(string, null)
+
+    shared_logging_secrets = optional(map(any), null)
+  })
+}
 
 variable "service_discovery_namespace_id" {
   type    = string
