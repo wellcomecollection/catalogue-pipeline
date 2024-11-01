@@ -30,7 +30,7 @@
       ],
       "workType" : {
         "id" : "hdig",
-        "label" : "Archives - Digital",
+        "label" : "Born-digital archives",
         "type" : "Format"
       },
       "contributors" : [
@@ -121,7 +121,7 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"hdig\",\"label\":\"Archives - Digital\",\"type\":\"Format\"}"
+        "{\"id\":\"hdig\",\"label\":\"Born-digital archives\",\"type\":\"Format\"}"
       ],
       "genres.label" : [
       ],
