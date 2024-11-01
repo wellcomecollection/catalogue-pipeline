@@ -1,5 +1,5 @@
 module "input_queue" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=max-age-alarm"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.5.0"
 
   queue_name = var.queue_config.name
 
