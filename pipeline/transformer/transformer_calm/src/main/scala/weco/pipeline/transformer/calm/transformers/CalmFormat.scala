@@ -8,7 +8,7 @@ object CalmFormat extends CalmRecordOps {
   def apply(record: CalmRecord): Format = {
     record.get("Material") match {
       case Some("Born-digital archives") => Format.ArchivesDigital
-      case _                          => Format.ArchivesAndManuscripts
+      case _                             => Format.ArchivesAndManuscripts
     }
   }
 }
