@@ -1,8 +1,17 @@
 package weco.pipeline.ingestor.common.models
 
 import io.circe.generic.extras.JsonKey
-import weco.catalogue.internal_model.identifiers.{CanonicalId, DataState, IdState, SourceIdentifier}
-import weco.catalogue.internal_model.work.{Relations, Subject, Work, WorkData, WorkState}
+import weco.catalogue.internal_model.identifiers.{
+  CanonicalId,
+  DataState,
+  SourceIdentifier
+}
+import weco.catalogue.internal_model.work.{
+  Relations,
+  Work,
+  WorkData,
+  WorkState
+}
 
 case class WorkQueryableValues(
   @JsonKey("collectionPath.label") collectionPathLabel: Option[String],
@@ -76,7 +85,10 @@ case object WorkQueryableValues {
       referenceNumber = data.referenceNumber.map(_.underlying),
       subjectsConceptsLabel =
         data.subjects.flatMap(_.concepts).map(_.label).map(queryableLabel),
-      subjectsConceptsId = data.subjects.flatMap(_.concepts).flatMap(_.id.maybeCanonicalId).map(_.underlying),
+      subjectsConceptsId = data.subjects
+        .flatMap(_.concepts)
+        .flatMap(_.id.maybeCanonicalId)
+        .map(_.underlying),
       title = data.title
     )
 
