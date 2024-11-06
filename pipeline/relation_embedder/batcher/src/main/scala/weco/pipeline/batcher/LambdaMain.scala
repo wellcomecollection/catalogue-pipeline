@@ -33,22 +33,29 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     implicit val ec: ExecutionContext =
       actorSystem.dispatcher
 
-    val recordList: List[SQSMessage] = event.getRecords.asScala.toList
-    val paths = recordList map {
-      message: SQSMessage =>
-        // This assumes that the input is message body is just the path
-        // not wrapped in any other JSON.
-        // This may need to be altered depending on how the message is formatted
-        // in real life
-        ujson.read(message.getBody).str
-    }
     PathsProcessor(
       config.requireInt("batcher.max_batch_size"),
-      paths,
+      extractPathsFromEvent(event),
       downstream
     )
     "Done"
   }
+
+  /** Messages consumed by this Lambda are taken from a queue populated by an
+    * SNS topic. The actual message we are interested in is a String containing
+    * the path. However, the matryoshka-like nature of these things means the
+    * lambda receives
+    *   - an event containing
+    *   - a `Records` list, each Record containing
+    *   - an SQS Message with a JSON body containing
+    *   - an SNS notification containing
+    *   - a `Message`, which is the actual content we want
+    */
+  private def extractPathsFromEvent(event: SQSEvent): List[String] =
+    event.getRecords.asScala.toList.map(extractPathFromMessage)
+
+  private def extractPathFromMessage(message: SQSMessage): String =
+    ujson.read(message.getBody).obj.get("Message").toString
 
   private object SNSDownstream extends Downstream {
     private val msgSender = SNSBuilder
