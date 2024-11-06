@@ -88,7 +88,7 @@ object ExternalDependencies {
   lazy val versions = new {
     val apacheCommons = "1.12.0"
     val awsLambdaClient = "2.5.1"
-    val awsLambdaEvents = "3.12.0"
+    val awsLambdaEvents = "3.14.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.3"
