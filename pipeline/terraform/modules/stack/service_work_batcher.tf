@@ -30,11 +30,27 @@ module "batcher_output_topic" {
   role_names = [module.batcher.task_role_name]
 }
 
+module "batcher_lambda_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_batcher_lambda_output"
+  role_names = [module.batcher_lambda.lambda_role_name]
+}
+
 module "batcher_lambda" {
   source = "../pipeline_lambda"
 
   pipeline_date = var.pipeline_date
   service_name  = "batcher"
+
+  environment_variables = {
+    output_topic_arn = module.batcher_lambda_output_topic.arn
+
+    flush_interval_minutes = local.wait_minutes
+    max_processed_paths    = local.max_processed_paths
+
+    max_batch_size = 40
+  }
 
   queue_config = {}
 
