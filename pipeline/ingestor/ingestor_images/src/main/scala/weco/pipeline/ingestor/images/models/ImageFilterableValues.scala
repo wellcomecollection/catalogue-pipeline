@@ -14,7 +14,9 @@ case class ImageFilterableValues(
   @JsonKey("source.genres.label") sourceGenresLabel: List[String],
   @JsonKey("source.genres.concepts.id") sourceGenresConceptsId: List[String],
   @JsonKey("source.subjects.label") sourceSubjectsLabel: List[String],
-  @JsonKey("source.subjects.concepts.id") sourceSubjectsConceptsId: List[String],
+  @JsonKey("source.subjects.concepts.id") sourceSubjectsConceptsId: List[
+    String
+  ],
   @JsonKey(
     "source.production.dates.range.from"
   ) sourceProductionDatesRangeFrom: List[Long]
