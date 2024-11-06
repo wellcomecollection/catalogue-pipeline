@@ -15,6 +15,9 @@ ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/downlo
 RUN chmod +x /aws-lambda/aws-lambda-rie
 ENTRYPOINT ["/aws-lambda/aws-lambda-rie"]
 
+ENV max_batch_size=40
+ENV use_downstream=stdio
+
 CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.batcher.LambdaMain::handleRequest"]
 
 FROM base

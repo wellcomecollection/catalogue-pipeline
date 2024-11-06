@@ -11,6 +11,10 @@ You can pipe a bunch of paths to CLIMain, thus:
 
 `cat src/test/resources/paths.txt | java weco.pipeline.batcher.CLIMain`
 
+Or, if you'd rather not have to set the classpath, SBT will have generated a script you can call,
+
+`cat src/test/resources/paths.txt | target/universal/stage/bin/cli-main`
+
 ### As a Lambda
 
 You can run the Lambda version locally thus:

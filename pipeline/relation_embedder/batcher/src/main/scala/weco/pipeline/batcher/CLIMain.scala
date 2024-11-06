@@ -12,7 +12,6 @@ import org.apache.pekko.stream.scaladsl.{
 import org.apache.pekko.util.ByteString
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 object CLIMain extends App {
   implicit val actorSystem: ActorSystem =
@@ -52,7 +51,4 @@ object CLIMain extends App {
     .via(pathsProcessorFlow)
     .runWith(Sink.seq)
   actorSystem.terminate()
-  private object STDIODownstream extends Downstream {
-    override def notify(batch: Batch): Try[Unit] = Try(println(batch))
-  }
 }

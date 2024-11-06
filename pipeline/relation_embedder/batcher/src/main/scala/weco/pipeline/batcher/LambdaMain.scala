@@ -17,6 +17,11 @@ import scala.util.Try
 object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
   private val config = ConfigFactory.load("application")
 
+  private val downstream = config.getString("batcher.use_downstream") match {
+    case "sns"   => SNSDownstream
+    case "stdio" => STDIODownstream
+  }
+
   override def handleRequest(
     event: SQSEvent,
     context: Context
@@ -40,7 +45,7 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     PathsProcessor(
       config.requireInt("batcher.max_batch_size"),
       paths,
-      SNSDownstream
+      downstream
     )
     "Done"
   }
