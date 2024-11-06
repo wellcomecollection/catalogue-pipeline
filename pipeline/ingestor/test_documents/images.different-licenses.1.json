@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2024-08-22T10:18:19.833418Z",
+  "createdAt" : "2024-11-06T16:34:49.496308Z",
   "id" : "waaqwfw4",
   "document" : {
     "modifiedTime" : "2026-10-17T08:23:38Z",
@@ -124,11 +124,15 @@
       ],
       "source.contributors.agent.label" : [
       ],
+      "source.contributors.agent.id" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
       "source.subjects.label" : [
+      ],
+      "source.subjects.concepts.id" : [
       ],
       "source.production.dates.range.from" : [
       ]

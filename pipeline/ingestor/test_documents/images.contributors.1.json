@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2024-08-22T10:18:19.915616Z",
+  "createdAt" : "2024-11-06T16:34:49.616909Z",
   "id" : "q7isn7gh",
   "document" : {
     "modifiedTime" : "2055-10-11T18:35:24Z",
@@ -145,11 +145,15 @@
         "carrots",
         "parrots"
       ],
+      "source.contributors.agent.id" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
       "source.subjects.label" : [
+      ],
+      "source.subjects.concepts.id" : [
       ],
       "source.production.dates.range.from" : [
       ]

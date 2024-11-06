@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2024-08-22T10:18:20.100614Z",
+  "createdAt" : "2024-11-06T16:34:49.779485Z",
   "id" : "hfwfbogx",
   "document" : {
     "modifiedTime" : "2068-12-13T11:19:09Z",
@@ -138,6 +138,8 @@
       ],
       "source.contributors.agent.label" : [
       ],
+      "source.contributors.agent.id" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
@@ -145,6 +147,9 @@
       "source.subjects.label" : [
         "Squashed squirrels",
         "Struck samples"
+      ],
+      "source.subjects.concepts.id" : [
+        "subject2"
       ],
       "source.production.dates.range.from" : [
       ]

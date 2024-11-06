@@ -32,7 +32,7 @@ trait WorksIngestorFixtures
   def assertWorkIndexed(
     index: Index,
     work: Work[WorkState.Denormalised]
-  ): Assertion = {
+  ): Assertion =
     eventually {
       val response: Response[GetResponse] = elasticClient.execute {
         get(index, work.state.canonicalId.toString)
@@ -71,7 +71,6 @@ trait WorksIngestorFixtures
 
       assertRecent(storedWork.debug.indexedTime)
     }
-  }
 
   def withWorksIngestor[R](
     queue: Queue,

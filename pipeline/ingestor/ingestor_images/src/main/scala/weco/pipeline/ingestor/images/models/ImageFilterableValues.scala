@@ -31,7 +31,7 @@ object ImageFilterableValues extends ImageValues {
         _.data.contributors.map(_.agent.label).map(queryableLabel)
       ),
       sourceContributorsAgentId = fromParentWork(image.source)(
-        _.data.contributors.map(_.id).canonicalIds
+        _.data.contributors.map(_.agent.id).canonicalIds
       ),
       sourceGenresLabel = fromParentWork(image.source)(
         _.data.genres.map(_.label).map(queryableLabel)
