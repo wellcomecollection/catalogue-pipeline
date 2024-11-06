@@ -1,17 +1,28 @@
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:11 as base
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:11 AS base
 
-LABEL maintainer = "Wellcome Collection <digital@wellcomecollection.org>"
+LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
 ADD target/universal/stage /opt/docker
-
+ENV CLASSPATH="/opt/docker/lib/*"
 WORKDIR /opt/docker
 
-FROM base as ecs
+FROM base AS ecs
 
 ENTRYPOINT ["/opt/docker/bin/batcher"]
 
+FROM base AS lambda_rie
+ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/v1.22/aws-lambda-rie /aws-lambda/aws-lambda-rie
+RUN chmod +x /aws-lambda/aws-lambda-rie
+ENTRYPOINT ["/aws-lambda/aws-lambda-rie"]
+
+ENV max_batch_size=40
+ENV use_downstream=stdio
+
+CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.batcher.LambdaMain::handleRequest"]
+
 FROM base
 
-ENTRYPOINT [ "/usr/bin/java", "-cp", "./lib/*", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
+ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
 
 CMD ["weco.pipeline.batcher.LambdaMain::handleRequest"]
+
