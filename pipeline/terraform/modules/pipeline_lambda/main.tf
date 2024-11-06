@@ -3,7 +3,7 @@ module "pipeline_step" {
 
   name         = local.name
   package_type = "Image"
-  image_uri    = "${data.aws_ecr_repository.repository.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+  image_uri    = "${data.aws_ecr_repository.repository.repository_url}:latest"
   timeout      = var.timeout
   memory_size  = var.memory_size
   description  = var.description
