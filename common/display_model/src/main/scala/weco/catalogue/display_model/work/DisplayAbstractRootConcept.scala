@@ -38,7 +38,9 @@ case object DisplayAbstractConcept extends GetIdentifiers {
     abstractConcept match {
       case Concept(id, label) =>
         DisplayConcept(
-          id = id.maybeCanonicalId.map { _.underlying },
+          id = id.maybeCanonicalId.map {
+            _.underlying
+          },
           label = label,
           identifiers = getIdentifiers(id, includesIdentifiers)
         )

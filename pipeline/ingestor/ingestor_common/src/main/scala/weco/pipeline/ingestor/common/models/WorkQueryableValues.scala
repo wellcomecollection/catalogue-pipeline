@@ -32,7 +32,6 @@ case class WorkQueryableValues(
   @JsonKey("production.label") productionLabel: List[String],
   @JsonKey("referenceNumber") referenceNumber: Option[String],
   @JsonKey("subjects.concepts.label") subjectsConceptsLabel: List[String],
-  @JsonKey("subjects.concepts.id") subjectsConceptsId: List[String],
   @JsonKey("title") title: Option[String]
 )
 
@@ -80,10 +79,6 @@ case object WorkQueryableValues {
       referenceNumber = data.referenceNumber.map(_.underlying),
       subjectsConceptsLabel =
         data.subjects.flatMap(_.concepts).map(_.label).map(queryableLabel),
-      subjectsConceptsId = data.subjects
-        .flatMap(_.concepts)
-        .flatMap(_.id.maybeCanonicalId)
-        .map(_.underlying),
       title = data.title
     )
 
