@@ -6,12 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{
-  Relations,
-  Work,
-  WorkData,
-  WorkState
-}
+import weco.catalogue.internal_model.work.{Relations, Work, WorkData, WorkState}
 
 case class WorkQueryableValues(
   @JsonKey("collectionPath.label") collectionPathLabel: Option[String],
