@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2024-08-22T10:16:20.016858Z",
+  "createdAt" : "2024-11-06T15:31:39.256927Z",
   "id" : "rbbzqhyt",
   "document" : {
     "debug" : {
@@ -151,7 +151,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "149f5nQPon"

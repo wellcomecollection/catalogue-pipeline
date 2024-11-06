@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2024-08-22T10:16:19.902846Z",
+  "createdAt" : "2024-11-06T15:31:39.001900Z",
   "id" : "raob2ruv",
   "document" : {
     "debug" : {
@@ -145,7 +145,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "wyJzS2SuiH"

@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'dodo' in the title",
-  "createdAt" : "2024-08-22T10:16:19.956319Z",
+  "createdAt" : "2024-11-06T15:31:39.079872Z",
   "id" : "ezagik4b",
   "document" : {
     "debug" : {
@@ -146,7 +146,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "xg9OuzGali"

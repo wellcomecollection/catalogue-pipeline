@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-08-22T10:16:20.052378Z",
+  "createdAt" : "2024-11-06T15:31:39.306899Z",
   "id" : "5qgfzto1",
   "document" : {
     "debug" : {
@@ -157,8 +157,12 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
         "47"
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "x4HrV5FXFI"

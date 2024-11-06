@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-08-22T10:16:20.028257Z",
+  "createdAt" : "2024-11-06T15:31:39.277751Z",
   "id" : "taqruniu",
   "document" : {
     "debug" : {
@@ -161,7 +161,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "xzEZGWEGMy"

@@ -50,7 +50,7 @@ object WorkFilterableValues {
       subjectsConceptsId = work.data.subjects.map(_.id).canonicalIds,
       contributorsAgentLabel =
         work.data.contributors.map(_.agent.label).map(queryableLabel),
-      contributorsAgentId = work.data.contributors.map(_.id).canonicalIds,
+      contributorsAgentId = work.data.contributors.map(_.agent.id).canonicalIds,
       identifiersValue =
         (work.sourceIdentifier +: work.data.otherIdentifiers).map(_.value),
       itemsLocationsLicenseId =
