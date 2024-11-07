@@ -8,7 +8,7 @@ WORKDIR /opt/docker
 
 FROM base AS ecs
 
-ENTRYPOINT ["/opt/docker/bin/batcher"]
+ENTRYPOINT ["/opt/docker/bin/main"]
 
 FROM base AS lambda_rie
 ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/v1.22/aws-lambda-rie /aws-lambda/aws-lambda-rie
