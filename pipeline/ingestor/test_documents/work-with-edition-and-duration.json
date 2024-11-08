@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2024-08-22T10:16:19.945025Z",
+  "createdAt" : "2024-11-06T15:31:39.066413Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -147,7 +147,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "7YNi35xO0f"

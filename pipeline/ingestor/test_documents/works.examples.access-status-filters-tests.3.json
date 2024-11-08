@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-08-22T10:16:20.143870Z",
+  "createdAt" : "2024-11-06T15:31:39.417411Z",
   "id" : "f1p8iujf",
   "document" : {
     "debug" : {
@@ -202,7 +202,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "3dCafwzrSa"

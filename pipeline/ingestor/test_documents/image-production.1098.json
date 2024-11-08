@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1098",
-  "createdAt" : "2024-08-22T10:18:20.146418Z",
+  "createdAt" : "2024-11-06T16:34:49.810289Z",
   "id" : "rcwca9kx",
   "document" : {
     "modifiedTime" : "2021-05-29T16:02:15Z",
@@ -120,11 +120,15 @@
       ],
       "source.contributors.agent.label" : [
       ],
+      "source.contributors.agent.id" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
       "source.subjects.label" : [
+      ],
+      "source.subjects.concepts.id" : [
       ],
       "source.production.dates.range.from" : [
         -27517622400000

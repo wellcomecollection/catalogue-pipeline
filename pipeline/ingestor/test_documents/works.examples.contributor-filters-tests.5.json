@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-22T10:16:20.134293Z",
+  "createdAt" : "2024-11-06T15:31:39.404469Z",
   "id" : "syv21f7g",
   "document" : {
     "debug" : {
@@ -145,7 +145,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "4Dxc6NTEVZ"

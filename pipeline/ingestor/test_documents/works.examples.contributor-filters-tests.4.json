@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-22T10:16:20.134088Z",
+  "createdAt" : "2024-11-06T15:31:39.404024Z",
   "id" : "xuni2iqa",
   "document" : {
     "debug" : {
@@ -169,9 +169,13 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
         "Bath, Patricia",
         "Darwin \"Jones\", Charles"
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "XzQw5jYpuB"

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-08-22T10:16:20.122687Z",
+  "createdAt" : "2024-11-06T15:31:39.389883Z",
   "id" : "vr490vab",
   "document" : {
     "debug" : {
@@ -205,7 +205,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "AzAiZFAZvT"

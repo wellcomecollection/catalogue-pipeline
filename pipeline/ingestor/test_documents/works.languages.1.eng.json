@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-08-22T10:16:20.026650Z",
+  "createdAt" : "2024-11-06T15:31:39.271758Z",
   "id" : "mye6nsw6",
   "document" : {
     "debug" : {
@@ -153,7 +153,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "jswjHR3oqS"

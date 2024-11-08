@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-08-22T10:16:20.128266Z",
+  "createdAt" : "2024-11-06T15:31:39.396145Z",
   "id" : "eadt8hhm",
   "document" : {
     "debug" : {
@@ -168,7 +168,11 @@
       "subjects.label" : [
         "Psychology, Pathological"
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "SSg7erLcgx"

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-22T10:16:20.133352Z",
+  "createdAt" : "2024-11-06T15:31:39.402975Z",
   "id" : "mzvvcba0",
   "document" : {
     "debug" : {
@@ -157,8 +157,12 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
         "Karl Marx"
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "gDuSiI3pPI"

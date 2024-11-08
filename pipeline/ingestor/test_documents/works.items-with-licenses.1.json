@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2024-08-22T10:16:20.034397Z",
+  "createdAt" : "2024-11-06T15:31:39.284917Z",
   "id" : "sojyedta",
   "document" : {
     "debug" : {
@@ -171,7 +171,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "xSR5EK6UWY"

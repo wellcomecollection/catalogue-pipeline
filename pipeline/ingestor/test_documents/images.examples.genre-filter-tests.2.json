@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2024-08-22T10:18:19.998241Z",
+  "createdAt" : "2024-11-06T16:34:49.695781Z",
   "id" : "sbf5lyqg",
   "document" : {
     "modifiedTime" : "2057-05-07T10:51:14Z",
@@ -147,6 +147,8 @@
       ],
       "source.contributors.agent.label" : [
       ],
+      "source.contributors.agent.id" : [
+      ],
       "source.genres.label" : [
         "Emu entrepreneurship",
         "Falcon finances"
@@ -156,6 +158,8 @@
         "baadf00d"
       ],
       "source.subjects.label" : [
+      ],
+      "source.subjects.concepts.id" : [
       ],
       "source.production.dates.range.from" : [
       ]

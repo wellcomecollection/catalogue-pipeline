@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-08-22T10:16:20.003895Z",
+  "createdAt" : "2024-11-06T15:31:39.239581Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -653,9 +653,13 @@
         "Uauios0IzD",
         "6n2QtjPUbf"
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
         "person-h9jhXW",
         "person-QdWhUu"
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "bWRaGNi2Hd",

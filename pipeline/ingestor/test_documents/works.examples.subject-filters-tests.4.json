@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-08-22T10:16:20.129198Z",
+  "createdAt" : "2024-11-06T15:31:39.397382Z",
   "id" : "ppcdklf9",
   "document" : {
     "debug" : {
@@ -226,7 +226,12 @@
         "Psychology, Pathological",
         "Darwin \"Jones\", Charles"
       ],
+      "subjects.concepts.id" : [
+        "darwin01"
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "3o0GGLKeJC"
