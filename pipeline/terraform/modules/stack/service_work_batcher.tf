@@ -52,7 +52,13 @@ module "batcher_lambda" {
     max_batch_size = 40
   }
 
-  queue_config = {}
+  queue_config = {
+    topic_arns = [
+      module.router_path_output_topic.arn,
+      module.path_concatenator_output_topic.arn,
+    ]
+    visibility_timeout_seconds = (local.wait_minutes + 5) * 60
+  }
 
   ecr_repository_name = "uk.ac.wellcome/batcher"
 }
