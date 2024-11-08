@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-08-22T10:16:20.044288Z",
+  "createdAt" : "2024-11-06T15:31:39.296922Z",
   "id" : "ixapupnn",
   "document" : {
     "debug" : {
@@ -168,7 +168,11 @@
       "subjects.label" : [
         "realAnalysis"
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "DSV5vB01pf"

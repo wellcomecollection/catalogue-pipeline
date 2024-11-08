@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1976",
-  "createdAt" : "2024-08-22T10:18:20.111718Z",
+  "createdAt" : "2024-11-06T16:34:49.797449Z",
   "id" : "vgcwcshr",
   "document" : {
     "modifiedTime" : "2024-03-22T05:14:37Z",
@@ -120,11 +120,15 @@
       ],
       "source.contributors.agent.label" : [
       ],
+      "source.contributors.agent.id" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
       "source.subjects.label" : [
+      ],
+      "source.subjects.concepts.id" : [
       ],
       "source.production.dates.range.from" : [
         189302400000

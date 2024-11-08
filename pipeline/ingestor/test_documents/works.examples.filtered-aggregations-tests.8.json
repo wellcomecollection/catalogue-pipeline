@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-08-22T10:16:20.151024Z",
+  "createdAt" : "2024-11-06T15:31:39.425624Z",
   "id" : "el5rbb4t",
   "document" : {
     "debug" : {
@@ -159,7 +159,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "uNmLrXrfr8"

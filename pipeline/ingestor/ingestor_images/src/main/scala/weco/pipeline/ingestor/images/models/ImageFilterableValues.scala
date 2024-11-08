@@ -8,9 +8,15 @@ case class ImageFilterableValues(
   @JsonKey(
     "source.contributors.agent.label"
   ) sourceContributorsAgentLabel: List[String],
+  @JsonKey(
+    "source.contributors.agent.id"
+  ) sourceContributorsAgentId: List[String],
   @JsonKey("source.genres.label") sourceGenresLabel: List[String],
   @JsonKey("source.genres.concepts.id") sourceGenresConceptsId: List[String],
   @JsonKey("source.subjects.label") sourceSubjectsLabel: List[String],
+  @JsonKey("source.subjects.concepts.id") sourceSubjectsConceptsId: List[
+    String
+  ],
   @JsonKey(
     "source.production.dates.range.from"
   ) sourceProductionDatesRangeFrom: List[Long]
@@ -24,6 +30,9 @@ object ImageFilterableValues extends ImageValues {
       sourceContributorsAgentLabel = fromParentWork(image.source)(
         _.data.contributors.map(_.agent.label).map(queryableLabel)
       ),
+      sourceContributorsAgentId = fromParentWork(image.source)(
+        _.data.contributors.map(_.agent.id).canonicalIds
+      ),
       sourceGenresLabel = fromParentWork(image.source)(
         _.data.genres.map(_.label).map(queryableLabel)
       ),
@@ -35,6 +44,9 @@ object ImageFilterableValues extends ImageValues {
       ),
       sourceSubjectsLabel = fromParentWork(image.source)(
         _.data.subjects.map(_.label).map(queryableLabel)
+      ),
+      sourceSubjectsConceptsId = fromParentWork(image.source)(
+        _.data.subjects.map(_.id).canonicalIds
       ),
       sourceProductionDatesRangeFrom = fromParentWork(image.source)(
         _.data.production

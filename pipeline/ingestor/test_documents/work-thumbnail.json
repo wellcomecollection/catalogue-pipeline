@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2024-08-22T10:16:19.953780Z",
+  "createdAt" : "2024-11-06T15:31:39.075823Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -162,7 +162,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "rRRYGQYiF7"

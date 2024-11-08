@@ -11,7 +11,9 @@ case class WorkFilterableValues(
   @JsonKey("genres.label") genresLabel: List[String],
   @JsonKey("genres.concepts.id") genresConceptsId: List[String],
   @JsonKey("subjects.label") subjectsLabel: List[String],
+  @JsonKey("subjects.concepts.id") subjectsConceptsId: List[String],
   @JsonKey("contributors.agent.label") contributorsAgentLabel: List[String],
+  @JsonKey("contributors.agent.id") contributorsAgentId: List[String],
   @JsonKey("identifiers.value") identifiersValue: List[String],
   @JsonKey("items.locations.license.id") itemsLocationsLicenseId: List[String],
   @JsonKey(
@@ -45,8 +47,10 @@ object WorkFilterableValues {
         id <- concept.id.maybeCanonicalId
       } yield id.underlying,
       subjectsLabel = work.data.subjects.map(_.label).map(queryableLabel),
+      subjectsConceptsId = work.data.subjects.map(_.id).canonicalIds,
       contributorsAgentLabel =
         work.data.contributors.map(_.agent.label).map(queryableLabel),
+      contributorsAgentId = work.data.contributors.map(_.agent.id).canonicalIds,
       identifiersValue =
         (work.sourceIdentifier +: work.data.otherIdentifiers).map(_.value),
       itemsLocationsLicenseId =

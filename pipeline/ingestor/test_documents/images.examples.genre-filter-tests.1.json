@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2024-08-22T10:18:19.997676Z",
+  "createdAt" : "2024-11-06T16:34:49.694799Z",
   "id" : "bah7vup6",
   "document" : {
     "modifiedTime" : "2049-05-23T13:53:19Z",
@@ -123,11 +123,15 @@
       ],
       "source.contributors.agent.label" : [
       ],
+      "source.contributors.agent.id" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
       "source.subjects.label" : [
+      ],
+      "source.subjects.concepts.id" : [
       ],
       "source.production.dates.range.from" : [
       ]

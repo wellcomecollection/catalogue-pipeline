@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-08-22T10:16:20.156160Z",
+  "createdAt" : "2024-11-06T15:31:39.432871Z",
   "id" : "fntlrk7n",
   "document" : {
     "debug" : {
@@ -183,7 +183,11 @@
       ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
       ],
       "identifiers.value" : [
         "y9pCp7jd9r"
