@@ -248,7 +248,7 @@ class TeiXmlTest
 
     result.value.subjects shouldBe List(
       Subject(
-        id = labelDerivedSubjectIdentifier("botany"),
+        id = labelDerivedConceptIdentifier("botany"),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
       )
