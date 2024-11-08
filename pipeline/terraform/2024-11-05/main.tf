@@ -17,7 +17,7 @@ module "pipeline" {
     }
     images = {
       indexed        = "images_indexed.2024-11-06"
-      works_analysis = "works_indexed.2024-08-20"
+      works_analysis = "works_indexed.2024-11-06"
     }
   }
 
