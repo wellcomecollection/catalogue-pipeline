@@ -52,10 +52,10 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     *   - a `Message`, which is the actual content we want
     */
   private def extractPathsFromEvent(event: SQSEvent): List[String] =
-    event.getRecords.asScala.toList.map(extractPathFromMessage)
+    event.getRecords.asScala.toList.flatMap(extractPathFromMessage)
 
-  private def extractPathFromMessage(message: SQSMessage): String =
-    ujson.read(message.getBody).obj.get("Message").toString
+  private def extractPathFromMessage(message: SQSMessage): Option[String] =
+    ujson.read(message.getBody).obj.get("Message").map(_.toString)
 
   private object SNSDownstream extends Downstream {
     private val msgSender = SNSBuilder
