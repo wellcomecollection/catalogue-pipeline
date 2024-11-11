@@ -11,10 +11,17 @@ case class ImageFilterableValues(
   @JsonKey(
     "source.contributors.agent.id"
   ) sourceContributorsAgentId: List[String],
+  @JsonKey(
+    "source.contributors.agent.sourceId"
+  ) sourceContributorsAgentSourceId: List[String],
   @JsonKey("source.genres.label") sourceGenresLabel: List[String],
   @JsonKey("source.genres.concepts.id") sourceGenresConceptsId: List[String],
+  @JsonKey("source.genres.concepts.sourceId") sourceGenresConceptsSourceId: List[String],
   @JsonKey("source.subjects.label") sourceSubjectsLabel: List[String],
   @JsonKey("source.subjects.concepts.id") sourceSubjectsConceptsId: List[
+    String
+  ],
+  @JsonKey("source.subjects.concepts.sourceId") sourceSubjectsConceptsSourceId: List[
     String
   ],
   @JsonKey(
@@ -33,6 +40,9 @@ object ImageFilterableValues extends ImageValues {
       sourceContributorsAgentId = fromParentWork(image.source)(
         _.data.contributors.map(_.agent.id).canonicalIds
       ),
+      sourceContributorsAgentSourceId = fromParentWork(image.source)(
+        _.data.contributors.map(_.agent.id).sourceIdentifiers
+      ),
       sourceGenresLabel = fromParentWork(image.source)(
         _.data.genres.map(_.label).map(queryableLabel)
       ),
@@ -42,11 +52,20 @@ object ImageFilterableValues extends ImageValues {
             .flatMap(_.id.maybeCanonicalId)
             .map(_.underlying)
       ),
+      sourceGenresConceptsSourceId = fromParentWork(image.source)(
+        work =>
+          genreConcepts(work.data.genres)
+            .map(_.id)
+            .sourceIdentifiers
+      ),
       sourceSubjectsLabel = fromParentWork(image.source)(
         _.data.subjects.map(_.label).map(queryableLabel)
       ),
       sourceSubjectsConceptsId = fromParentWork(image.source)(
         _.data.subjects.map(_.id).canonicalIds
+      ),
+      sourceSubjectsConceptsSourceId = fromParentWork(image.source)(
+        _.data.subjects.map(_.id).sourceIdentifiers
       ),
       sourceProductionDatesRangeFrom = fromParentWork(image.source)(
         _.data.production

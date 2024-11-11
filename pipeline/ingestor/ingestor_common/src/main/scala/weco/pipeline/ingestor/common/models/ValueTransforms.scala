@@ -26,13 +26,13 @@ object ValueTransforms {
     def canonicalIds: List[String] =
       ids.flatMap(_.maybeCanonicalId).map(_.underlying).toList
 
-    def sourceIdentifiers: Seq[String] = ids
+    def sourceIdentifiers: List[String] = ids
       .collect {
         case IdState.Identified(_, sourceIdentifier, otherIdentifiers) =>
           sourceIdentifier +: otherIdentifiers
       }
       .flatten
-      .map(_.value)
+      .map(_.value).toList
   }
 
   // Shelfmarks are only available on physical locations

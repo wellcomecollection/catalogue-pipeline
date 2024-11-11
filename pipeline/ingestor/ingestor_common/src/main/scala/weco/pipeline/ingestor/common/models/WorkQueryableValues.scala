@@ -60,7 +60,7 @@ case object WorkQueryableValues {
         (sourceIdentifier +: data.otherIdentifiers).map(_.value),
       imagesId = data.imageData.map(_.id).canonicalIds,
       imagesIdentifiersValue =
-        data.imageData.map(_.id).sourceIdentifiers.toList,
+        data.imageData.map(_.id).sourceIdentifiers,
       itemsId = data.items.map(_.id).canonicalIds,
       itemsIdentifiersValue =
         data.items.flatMap(_.id.allSourceIdentifiers).map(_.value),
