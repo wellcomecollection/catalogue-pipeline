@@ -52,12 +52,17 @@ module "batcher_lambda" {
     max_batch_size = 40
   }
 
+  timeout = 60 * 5 # 5 Minutes
+
   queue_config = {
     topic_arns = [
       module.router_path_output_topic.arn,
       module.path_concatenator_output_topic.arn,
     ]
     visibility_timeout_seconds = (local.wait_minutes + 5) * 60
+    maximum_concurrency = 20
+    batch_size = 5000
+    maximum_batching_window_in_seconds = 60
   }
 
   ecr_repository_name = "uk.ac.wellcome/batcher"
