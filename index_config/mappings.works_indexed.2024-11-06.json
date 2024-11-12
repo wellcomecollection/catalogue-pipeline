@@ -108,7 +108,8 @@
                   "type": "keyword"
                 },
                 "sourceId": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "normalizer": "lowercase"
                 }
               }
             }
@@ -129,7 +130,8 @@
                   "type": "keyword"
                 },
                 "sourceId": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "normalizer": "lowercase"
                 }
               }
             },
@@ -228,7 +230,8 @@
                   "type": "keyword"
                 },
                 "sourceId": {
-                  "type": "keyword"
+                  "type": "keyword",
+                  "normalizer": "lowercase"
                 }
               }
             },
