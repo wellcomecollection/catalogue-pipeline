@@ -106,6 +106,9 @@
                 },
                 "id": {
                   "type": "keyword"
+                },
+                "sourceId": {
+                  "type": "keyword"
                 }
               }
             }
@@ -123,6 +126,9 @@
             "concepts": {
               "properties": {
                 "id": {
+                  "type": "keyword"
+                },
+                "sourceId": {
                   "type": "keyword"
                 }
               }
@@ -219,6 +225,9 @@
             "concepts": {
               "properties": {
                 "id": {
+                  "type": "keyword"
+                },
+                "sourceId": {
                   "type": "keyword"
                 }
               }
