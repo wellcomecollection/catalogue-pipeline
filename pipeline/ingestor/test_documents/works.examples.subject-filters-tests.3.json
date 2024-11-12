@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-11-06T15:31:39.396917Z",
+  "createdAt" : "2024-11-12T12:52:55.854651Z",
   "id" : "3kdpeojw",
   "document" : {
     "debug" : {
@@ -177,15 +177,22 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
         "Darwin \"Jones\", Charles"
       ],
       "subjects.concepts.id" : [
         "darwin01"
       ],
+      "subjects.concepts.sourceId" : [
+        "lcnames-darwin"
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "SqD7qcFvAY"

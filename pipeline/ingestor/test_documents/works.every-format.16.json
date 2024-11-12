@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-06T15:31:39.329882Z",
+  "createdAt" : "2024-11-12T12:52:55.787238Z",
   "id" : "4blsy3iy",
   "document" : {
     "debug" : {
@@ -149,13 +149,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "CwPK521Yf5"

@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-11-06T15:31:39.354977Z",
+  "createdAt" : "2024-11-12T12:52:55.811836Z",
   "id" : "pfnxzwsg",
   "document" : {
     "debug" : {
@@ -201,13 +201,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "3WPG6KR1Dm"

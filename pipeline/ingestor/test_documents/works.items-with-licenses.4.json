@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2024-11-06T15:31:39.285971Z",
+  "createdAt" : "2024-11-12T12:52:55.738024Z",
   "id" : "abt11p2s",
   "document" : {
     "debug" : {
@@ -143,13 +143,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "Jxv45oXcss"

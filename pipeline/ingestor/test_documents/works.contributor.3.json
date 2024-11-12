@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-11-06T15:31:39.310649Z",
+  "createdAt" : "2024-11-12T12:52:55.762539Z",
   "id" : "mudchggm",
   "document" : {
     "debug" : {
@@ -167,15 +167,21 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceId" : [
       ],
       "contributors.agent.label" : [
         "MI5",
         "GCHQ"
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "XCPwwavyjz"

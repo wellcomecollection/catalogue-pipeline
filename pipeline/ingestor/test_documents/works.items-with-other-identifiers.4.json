@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2024-11-06T15:31:39.317129Z",
+  "createdAt" : "2024-11-12T12:52:55.769490Z",
   "id" : "rzcvxgso",
   "document" : {
     "debug" : {
@@ -190,13 +190,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "8CwvL5s2ax"

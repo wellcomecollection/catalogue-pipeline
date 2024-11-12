@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-11-06T15:31:39.395423Z",
+  "createdAt" : "2024-11-12T12:52:55.853428Z",
   "id" : "kx6ceruj",
   "document" : {
     "debug" : {
@@ -186,15 +186,23 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
         "Sanitation"
       ],
       "subjects.concepts.id" : [
         "sanitati"
       ],
+      "subjects.concepts.sourceId" : [
+        "lcsh-sanitation",
+        "mesh-sanitation"
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "KEnxzBExh6"

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-06T15:31:39.404024Z",
+  "createdAt" : "2024-11-12T12:52:55.861557Z",
   "id" : "xuni2iqa",
   "document" : {
     "debug" : {
@@ -167,15 +167,21 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceId" : [
       ],
       "contributors.agent.label" : [
         "Bath, Patricia",
         "Darwin \"Jones\", Charles"
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "XzQw5jYpuB"

@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2024-11-06T15:31:39.387153Z",
+  "createdAt" : "2024-11-12T12:52:55.843989Z",
   "id" : "pbeanc7x",
   "document" : {
     "debug" : {
@@ -143,13 +143,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "ZmmbPJWDqm"

@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-11-06T15:31:39.310188Z",
+  "createdAt" : "2024-11-12T12:52:55.761844Z",
   "id" : "toypx23i",
   "document" : {
     "debug" : {
@@ -167,15 +167,21 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceId" : [
       ],
       "contributors.agent.label" : [
         "007",
         "MI5"
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "MhQvVMFf3I"

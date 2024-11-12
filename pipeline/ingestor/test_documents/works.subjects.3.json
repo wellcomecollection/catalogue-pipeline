@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-11-06T15:31:39.297396Z",
+  "createdAt" : "2024-11-12T12:52:55.750841Z",
   "id" : "opaupm4b",
   "document" : {
     "debug" : {
@@ -187,15 +187,21 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
         "paleoNeuroBiology",
         "realAnalysis"
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "spewkKE1s2"

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-06T15:31:39.403202Z",
+  "createdAt" : "2024-11-12T12:52:55.860981Z",
   "id" : "5ramofto",
   "document" : {
     "debug" : {
@@ -155,14 +155,20 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceId" : [
       ],
       "contributors.agent.label" : [
         "Jake Paul"
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "iZ6KWys5lZ"

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-11-06T15:31:39.389883Z",
+  "createdAt" : "2024-11-12T12:52:55.847291Z",
   "id" : "vr490vab",
   "document" : {
     "debug" : {
@@ -203,13 +203,20 @@
       "genres.concepts.id" : [
         "lmpakqz5"
       ],
+      "genres.concepts.sourceId" : [
+        "DpKgb0Wdy2"
+      ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "AzAiZFAZvT"

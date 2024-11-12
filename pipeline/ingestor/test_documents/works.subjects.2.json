@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-11-06T15:31:39.296922Z",
+  "createdAt" : "2024-11-12T12:52:55.750227Z",
   "id" : "ixapupnn",
   "document" : {
     "debug" : {
@@ -165,14 +165,20 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceId" : [
+      ],
       "subjects.label" : [
         "realAnalysis"
       ],
       "subjects.concepts.id" : [
       ],
+      "subjects.concepts.sourceId" : [
+      ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceId" : [
       ],
       "identifiers.value" : [
         "DSV5vB01pf"
