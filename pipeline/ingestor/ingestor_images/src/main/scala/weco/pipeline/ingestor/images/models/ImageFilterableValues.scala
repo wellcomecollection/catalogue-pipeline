@@ -21,7 +21,9 @@ case class ImageFilterableValues(
   @JsonKey("source.subjects.concepts.id") sourceSubjectsConceptsId: List[
     String
   ],
-  @JsonKey("source.subjects.concepts.sourceId") sourceSubjectsConceptsSourceId: List[
+  @JsonKey(
+    "source.subjects.concepts.sourceId"
+  ) sourceSubjectsConceptsSourceId: List[
     String
   ],
   @JsonKey(
