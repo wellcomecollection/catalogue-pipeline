@@ -47,4 +47,3 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     override def notify(batch: Batch): Try[Unit] = msgSender.sendT(batch)
   }
 }
-
