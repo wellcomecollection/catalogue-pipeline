@@ -26,7 +26,7 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     event: SQSEvent,
     context: Context
   ): String = {
-    info(s"running batcher lambda, got event: $event")
+    debug(s"Running batcher lambda, got event: $event")
 
     implicit val actorSystem: ActorSystem =
       ActorSystem("main-actor-system")
@@ -38,6 +38,7 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
       extractPathsFromEvent(event),
       downstream
     )
+
     "Done"
   }
 
