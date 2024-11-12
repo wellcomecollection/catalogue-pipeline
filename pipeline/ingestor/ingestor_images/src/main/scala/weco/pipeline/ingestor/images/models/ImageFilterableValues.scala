@@ -16,12 +16,16 @@ case class ImageFilterableValues(
   ) sourceContributorsAgentSourceId: List[String],
   @JsonKey("source.genres.label") sourceGenresLabel: List[String],
   @JsonKey("source.genres.concepts.id") sourceGenresConceptsId: List[String],
-  @JsonKey("source.genres.concepts.sourceId") sourceGenresConceptsSourceId: List[String],
+  @JsonKey(
+    "source.genres.concepts.sourceId"
+  ) sourceGenresConceptsSourceId: List[String],
   @JsonKey("source.subjects.label") sourceSubjectsLabel: List[String],
   @JsonKey("source.subjects.concepts.id") sourceSubjectsConceptsId: List[
     String
   ],
-  @JsonKey("source.subjects.concepts.sourceId") sourceSubjectsConceptsSourceId: List[
+  @JsonKey(
+    "source.subjects.concepts.sourceId"
+  ) sourceSubjectsConceptsSourceId: List[
     String
   ],
   @JsonKey(
