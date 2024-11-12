@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1904",
-  "createdAt" : "2024-11-06T16:34:49.801881Z",
+  "createdAt" : "2024-11-12T12:49:30.683977Z",
   "id" : "8r3h7lpn",
   "document" : {
     "modifiedTime" : "1963-02-05T12:54:03Z",
@@ -122,13 +122,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
+      "source.contributors.agent.sourceId" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
+      "source.genres.concepts.sourceId" : [
+      ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
+      ],
+      "source.subjects.concepts.sourceId" : [
       ],
       "source.production.dates.range.from" : [
         -2082844800000

@@ -1,6 +1,6 @@
 {
   "description" : "images linked with another work",
-  "createdAt" : "2024-11-06T16:34:49.736358Z",
+  "createdAt" : "2024-11-12T12:49:30.617059Z",
   "id" : "zs6cxirr",
   "document" : {
     "modifiedTime" : "2010-10-05T23:16:10Z",
@@ -125,13 +125,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
+      "source.contributors.agent.sourceId" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
+      "source.genres.concepts.sourceId" : [
+      ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
+      ],
+      "source.subjects.concepts.sourceId" : [
       ],
       "source.production.dates.range.from" : [
       ]

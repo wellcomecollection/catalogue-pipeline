@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2024-11-06T16:34:49.723026Z",
+  "createdAt" : "2024-11-12T12:49:30.603857Z",
   "id" : "imwkwk2d",
   "document" : {
     "modifiedTime" : "2054-12-28T10:14:19Z",
@@ -125,13 +125,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
+      "source.contributors.agent.sourceId" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
+      "source.genres.concepts.sourceId" : [
+      ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
+      ],
+      "source.subjects.concepts.sourceId" : [
       ],
       "source.production.dates.range.from" : [
       ]

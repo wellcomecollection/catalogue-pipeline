@@ -32,7 +32,8 @@ object ValueTransforms {
           sourceIdentifier +: otherIdentifiers
       }
       .flatten
-      .map(_.value).toList
+      .map(_.value)
+      .toList
   }
 
   // Shelfmarks are only available on physical locations

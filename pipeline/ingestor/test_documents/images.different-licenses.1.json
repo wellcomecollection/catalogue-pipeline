@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2024-11-06T16:34:49.496308Z",
+  "createdAt" : "2024-11-12T12:49:30.345685Z",
   "id" : "waaqwfw4",
   "document" : {
     "modifiedTime" : "2026-10-17T08:23:38Z",
@@ -126,13 +126,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
+      "source.contributors.agent.sourceId" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
+      "source.genres.concepts.sourceId" : [
+      ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
+      ],
+      "source.subjects.concepts.sourceId" : [
       ],
       "source.production.dates.range.from" : [
       ]

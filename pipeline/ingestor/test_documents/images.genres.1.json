@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2024-11-06T16:34:49.641126Z",
+  "createdAt" : "2024-11-12T12:49:30.527011Z",
   "id" : "onjwqn3s",
   "document" : {
     "modifiedTime" : "2013-12-24T22:18:34Z",
@@ -123,13 +123,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
+      "source.contributors.agent.sourceId" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
+      "source.genres.concepts.sourceId" : [
+      ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
+      ],
+      "source.subjects.concepts.sourceId" : [
       ],
       "source.production.dates.range.from" : [
       ]
