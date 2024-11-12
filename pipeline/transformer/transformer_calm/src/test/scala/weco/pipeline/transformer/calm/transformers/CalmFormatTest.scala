@@ -15,7 +15,7 @@ class CalmFormatTest
     "Correctly extracts the ArchivesDigital Format when the appropriate Material string is present"
   ) {
     val digitalRecord = createCalmRecordWith(
-      ("Material", "Born-digital archives")
+      ("Material", "Archives - Digital")
     )
 
     val digitalFormat = CalmFormat(digitalRecord)
