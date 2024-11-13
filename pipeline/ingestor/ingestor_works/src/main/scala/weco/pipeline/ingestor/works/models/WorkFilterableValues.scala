@@ -10,13 +10,19 @@ case class WorkFilterableValues(
   @JsonKey("languages.id") languagesId: List[String],
   @JsonKey("genres.label") genresLabel: List[String],
   @JsonKey("genres.concepts.id") genresConceptsId: List[String],
-  @JsonKey("genres.concepts.sourceIdentifier") genresConceptsSourceIdentifier: List[String],
+  @JsonKey(
+    "genres.concepts.sourceIdentifier"
+  ) genresConceptsSourceIdentifier: List[String],
   @JsonKey("subjects.label") subjectsLabel: List[String],
   @JsonKey("subjects.concepts.id") subjectsConceptsId: List[String],
-  @JsonKey("subjects.concepts.sourceIdentifier") subjectsConceptsSourceIdentifier: List[String],
+  @JsonKey(
+    "subjects.concepts.sourceIdentifier"
+  ) subjectsConceptsSourceIdentifier: List[String],
   @JsonKey("contributors.agent.label") contributorsAgentLabel: List[String],
   @JsonKey("contributors.agent.id") contributorsAgentId: List[String],
-  @JsonKey("contributors.agent.sourceIdentifier") contributorsAgentSourceIdentifier: List[
+  @JsonKey(
+    "contributors.agent.sourceIdentifier"
+  ) contributorsAgentSourceIdentifier: List[
     String
   ],
   @JsonKey("identifiers.value") identifiersValue: List[String],
@@ -55,7 +61,8 @@ object WorkFilterableValues {
         genreConcepts(work.data.genres).map(_.id).sourceIdentifiers,
       subjectsLabel = work.data.subjects.map(_.label).map(queryableLabel),
       subjectsConceptsId = work.data.subjects.map(_.id).canonicalIds,
-      subjectsConceptsSourceIdentifier = work.data.subjects.map(_.id).sourceIdentifiers,
+      subjectsConceptsSourceIdentifier =
+        work.data.subjects.map(_.id).sourceIdentifiers,
       contributorsAgentLabel =
         work.data.contributors.map(_.agent.label).map(queryableLabel),
       contributorsAgentId = work.data.contributors.map(_.agent.id).canonicalIds,
