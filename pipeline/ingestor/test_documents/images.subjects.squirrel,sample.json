@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2024-11-12T12:49:30.656452Z",
+  "createdAt" : "2024-11-13T08:40:21.351697Z",
   "id" : "hfwfbogx",
   "document" : {
     "modifiedTime" : "2068-12-13T11:19:09Z",
@@ -140,13 +140,13 @@
       ],
       "source.contributors.agent.id" : [
       ],
-      "source.contributors.agent.sourceId" : [
+      "source.contributors.agent.sourceIdentifier" : [
       ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
-      "source.genres.concepts.sourceId" : [
+      "source.genres.concepts.sourceIdentifier" : [
       ],
       "source.subjects.label" : [
         "Squashed squirrels",
@@ -155,7 +155,7 @@
       "source.subjects.concepts.id" : [
         "subject2"
       ],
-      "source.subjects.concepts.sourceId" : [
+      "source.subjects.concepts.sourceIdentifier" : [
         "l2hsv3LLcX"
       ],
       "source.production.dates.range.from" : [

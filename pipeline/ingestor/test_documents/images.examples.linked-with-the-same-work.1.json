@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2024-11-12T12:49:30.603406Z",
+  "createdAt" : "2024-11-13T08:40:21.290704Z",
   "id" : "1wbpae6j",
   "document" : {
     "modifiedTime" : "2055-12-28T21:50:52Z",
@@ -123,19 +123,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
-      "source.contributors.agent.sourceId" : [
+      "source.contributors.agent.sourceIdentifier" : [
       ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
-      "source.genres.concepts.sourceId" : [
+      "source.genres.concepts.sourceIdentifier" : [
       ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
       ],
-      "source.subjects.concepts.sourceId" : [
+      "source.subjects.concepts.sourceIdentifier" : [
       ],
       "source.production.dates.range.from" : [
       ]

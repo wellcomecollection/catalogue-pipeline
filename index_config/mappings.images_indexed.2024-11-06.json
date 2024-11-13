@@ -70,7 +70,7 @@
                     "label": {
                       "type": "keyword"
                     },
-                    "sourceId": {
+                    "sourceIdentifier": {
                       "type": "keyword",
                       "normalizer": "lowercase"
                     }
@@ -85,7 +85,7 @@
                     "id": {
                       "type": "keyword"
                     },
-                    "sourceId": {
+                    "sourceIdentifier": {
                       "type": "keyword",
                       "normalizer": "lowercase"
                     }
@@ -118,7 +118,7 @@
                     "id": {
                       "type": "keyword"
                     },
-                    "sourceId": {
+                    "sourceIdentifier": {
                       "type": "keyword",
                       "normalizer": "lowercase"
                     }
