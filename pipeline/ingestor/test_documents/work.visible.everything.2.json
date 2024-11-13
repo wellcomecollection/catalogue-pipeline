@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-11-12T12:52:55.685497Z",
+  "createdAt" : "2024-11-13T08:43:26.428912Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -649,7 +649,7 @@
         "co3t5a2c",
         "vp7gvran"
       ],
-      "genres.concepts.sourceId" : [
+      "genres.concepts.sourceIdentifier" : [
         "KLw3A3d2Sg",
         "okW4LcPBC1"
       ],
@@ -659,7 +659,7 @@
       ],
       "subjects.concepts.id" : [
       ],
-      "subjects.concepts.sourceId" : [
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
         "person-h9jhXW",
@@ -667,7 +667,7 @@
       ],
       "contributors.agent.id" : [
       ],
-      "contributors.agent.sourceId" : [
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "bWRaGNi2Hd",

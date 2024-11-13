@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2024-11-12T12:49:30.342813Z",
+  "createdAt" : "2024-11-13T08:40:21.053440Z",
   "id" : "45peyutt",
   "document" : {
     "modifiedTime" : "1997-11-05T06:19:21Z",
@@ -124,19 +124,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
-      "source.contributors.agent.sourceId" : [
+      "source.contributors.agent.sourceIdentifier" : [
       ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
-      "source.genres.concepts.sourceId" : [
+      "source.genres.concepts.sourceIdentifier" : [
       ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
       ],
-      "source.subjects.concepts.sourceId" : [
+      "source.subjects.concepts.sourceIdentifier" : [
       ],
       "source.production.dates.range.from" : [
       ]

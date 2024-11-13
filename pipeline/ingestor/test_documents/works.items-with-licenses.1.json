@@ -1,6 +1,6 @@
 {
   "description" : "a work with licensed digital items",
-  "createdAt" : "2024-11-12T12:52:55.736730Z",
+  "createdAt" : "2024-11-13T08:43:26.480726Z",
   "id" : "sojyedta",
   "document" : {
     "debug" : {
@@ -169,19 +169,19 @@
       ],
       "genres.concepts.id" : [
       ],
-      "genres.concepts.sourceId" : [
+      "genres.concepts.sourceIdentifier" : [
       ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
-      "subjects.concepts.sourceId" : [
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
       ],
-      "contributors.agent.sourceId" : [
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "xSR5EK6UWY"

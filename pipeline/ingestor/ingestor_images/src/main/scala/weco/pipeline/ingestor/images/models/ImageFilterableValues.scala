@@ -12,20 +12,20 @@ case class ImageFilterableValues(
     "source.contributors.agent.id"
   ) sourceContributorsAgentId: List[String],
   @JsonKey(
-    "source.contributors.agent.sourceId"
-  ) sourceContributorsAgentSourceId: List[String],
+    "source.contributors.agent.sourceIdentifier"
+  ) sourceContributorsAgentSourceIdentifier: List[String],
   @JsonKey("source.genres.label") sourceGenresLabel: List[String],
   @JsonKey("source.genres.concepts.id") sourceGenresConceptsId: List[String],
   @JsonKey(
-    "source.genres.concepts.sourceId"
-  ) sourceGenresConceptsSourceId: List[String],
+    "source.genres.concepts.sourceIdentifier"
+  ) sourceGenresConceptsSourceIdentifier: List[String],
   @JsonKey("source.subjects.label") sourceSubjectsLabel: List[String],
   @JsonKey("source.subjects.concepts.id") sourceSubjectsConceptsId: List[
     String
   ],
   @JsonKey(
-    "source.subjects.concepts.sourceId"
-  ) sourceSubjectsConceptsSourceId: List[
+    "source.subjects.concepts.sourceIdentifier"
+  ) sourceSubjectsConceptsSourceIdentifier: List[
     String
   ],
   @JsonKey(
@@ -44,7 +44,7 @@ object ImageFilterableValues extends ImageValues {
       sourceContributorsAgentId = fromParentWork(image.source)(
         _.data.contributors.map(_.agent.id).canonicalIds
       ),
-      sourceContributorsAgentSourceId = fromParentWork(image.source)(
+      sourceContributorsAgentSourceIdentifier = fromParentWork(image.source)(
         _.data.contributors.map(_.agent.id).sourceIdentifiers
       ),
       sourceGenresLabel = fromParentWork(image.source)(
@@ -56,7 +56,7 @@ object ImageFilterableValues extends ImageValues {
             .flatMap(_.id.maybeCanonicalId)
             .map(_.underlying)
       ),
-      sourceGenresConceptsSourceId = fromParentWork(image.source)(
+      sourceGenresConceptsSourceIdentifier = fromParentWork(image.source)(
         work =>
           genreConcepts(work.data.genres)
             .map(_.id)
@@ -68,7 +68,7 @@ object ImageFilterableValues extends ImageValues {
       sourceSubjectsConceptsId = fromParentWork(image.source)(
         _.data.subjects.map(_.id).canonicalIds
       ),
-      sourceSubjectsConceptsSourceId = fromParentWork(image.source)(
+      sourceSubjectsConceptsSourceIdentifier = fromParentWork(image.source)(
         _.data.subjects.map(_.id).sourceIdentifiers
       ),
       sourceProductionDatesRangeFrom = fromParentWork(image.source)(

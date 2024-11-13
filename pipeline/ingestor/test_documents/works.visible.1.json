@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2024-11-12T12:52:55.440483Z",
+  "createdAt" : "2024-11-13T08:43:26.179486Z",
   "id" : "dph7sjip",
   "document" : {
     "debug" : {
@@ -143,19 +143,19 @@
       ],
       "genres.concepts.id" : [
       ],
-      "genres.concepts.sourceId" : [
+      "genres.concepts.sourceIdentifier" : [
       ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
-      "subjects.concepts.sourceId" : [
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
       ],
-      "contributors.agent.sourceId" : [
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "WpBejTwv1N"

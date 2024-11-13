@@ -1,6 +1,6 @@
 {
   "description" : "works with items with other identifiers",
-  "createdAt" : "2024-11-12T12:52:55.769490Z",
+  "createdAt" : "2024-11-13T08:43:26.519069Z",
   "id" : "rzcvxgso",
   "document" : {
     "debug" : {
@@ -190,19 +190,19 @@
       ],
       "genres.concepts.id" : [
       ],
-      "genres.concepts.sourceId" : [
+      "genres.concepts.sourceIdentifier" : [
       ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
-      "subjects.concepts.sourceId" : [
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
       ],
       "contributors.agent.id" : [
       ],
-      "contributors.agent.sourceId" : [
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "8CwvL5s2ax"

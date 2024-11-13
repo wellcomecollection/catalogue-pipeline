@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-11-12T12:52:55.762539Z",
+  "createdAt" : "2024-11-13T08:43:26.512223Z",
   "id" : "mudchggm",
   "document" : {
     "debug" : {
@@ -167,13 +167,13 @@
       ],
       "genres.concepts.id" : [
       ],
-      "genres.concepts.sourceId" : [
+      "genres.concepts.sourceIdentifier" : [
       ],
       "subjects.label" : [
       ],
       "subjects.concepts.id" : [
       ],
-      "subjects.concepts.sourceId" : [
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
         "MI5",
@@ -181,7 +181,7 @@
       ],
       "contributors.agent.id" : [
       ],
-      "contributors.agent.sourceId" : [
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "XCPwwavyjz"
