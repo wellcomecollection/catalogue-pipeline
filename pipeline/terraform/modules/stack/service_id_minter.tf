@@ -45,15 +45,8 @@ module "id_minter" {
   cpu    = 2048
   memory = 4096
 
-  # The total number of connections to RDS across all tasks from all ID minter
-  # services must not exceed the maximum supported by the RDS instance.
   min_capacity = var.min_capacity
-  max_capacity = min(
-    floor(
-      local.id_minter_rds_max_connections / local.id_minter_task_max_connections
-    ),
-    local.max_capacity
-  )
+  max_capacity = local.max_capacity
 
   fargate_service_boilerplate = local.fargate_service_boilerplate
 }
