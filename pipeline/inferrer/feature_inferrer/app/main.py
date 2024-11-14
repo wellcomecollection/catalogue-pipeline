@@ -14,9 +14,7 @@ logger = get_logger(__name__)
 logger.info("Starting API")
 app = FastAPI(
     title="Feature vector encoder",
-    description=(
-        "Takes an image url and returns the image's feature vector"
-    ),
+    description=("Takes an image url and returns the image's feature vector"),
 )
 logger.info("API started, awaiting requests")
 
@@ -38,9 +36,7 @@ async def main(query_url: str):
     features = await batch_inferrer_queue.execute(image)
     logger.info(f"extracted features from url: {query_url}")
 
-    return {
-        "features_b64": base64.b64encode(features["vector"])
-    }
+    return {"features_b64": base64.b64encode(features)}
 
 
 @app.get("/healthcheck")

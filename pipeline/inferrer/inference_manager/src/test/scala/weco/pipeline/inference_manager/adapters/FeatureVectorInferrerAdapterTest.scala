@@ -38,4 +38,16 @@ class FeatureVectorInferrerAdapterTest
       }
     }
   }
+
+  describe("augment") {
+    it("augments InferredData with the data from the inferrer response") {
+      val features = (0 until 4096).map(_ / 4096f).toList
+      val featuresB64 = Encoding.toLittleEndianBase64(features)
+      val response = FeatureVectorInferrerResponse(
+        features_b64 = featuresB64
+      )
+      val inferredData = adapter.augment(InferredData.empty, response)
+      inferredData.features should be(features)
+    }
+  }
 }
