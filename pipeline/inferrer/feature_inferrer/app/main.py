@@ -1,4 +1,3 @@
-import numpy as np
 import base64
 
 from fastapi import FastAPI, HTTPException
@@ -16,35 +15,14 @@ logger.info("Starting API")
 app = FastAPI(
     title="Feature vector encoder",
     description=(
-        "Takes an image url and returns the image's feature vector, "
-        "and a reduced 1024-dimensional form of the vector"
+        "Takes an image url and returns the image's feature vector"
     ),
 )
 logger.info("API started, awaiting requests")
 
 
-def feature_reducer(vectors: np.ndarray) -> np.ndarray:
-    """
-    return the first 1024 elements of a set of vectors, normalised
-    to unit length. Normalisation is done to ensure that the vectors
-    can be compared using dot_product similarity, rather than cosine.
-
-    N.B. This is a placeholder for a more sophisticated dimensionality
-    reduction technique
-    """
-    sliced = vectors[:, :1024]
-    normalised_vectors = sliced / np.linalg.norm(sliced, axis=1, keepdims=True)
-    return normalised_vectors
-
-
-def batch_infer_features(images):
-    vectors = extract_features(images)
-    reduced = feature_reducer(vectors)
-    return [{"vector": v, "reduced_vector": r} for v, r in zip(vectors, reduced)]
-
-
 batch_inferrer_queue = BatchExecutionQueue(
-    batch_infer_features, batch_size=16, timeout=0.250
+    extract_features, batch_size=16, timeout=0.250
 )
 
 
@@ -61,8 +39,7 @@ async def main(query_url: str):
     logger.info(f"extracted features from url: {query_url}")
 
     return {
-        "features_b64": base64.b64encode(features["vector"]),
-        "reduced_features_b64": base64.b64encode(features["reduced_vector"]),
+        "features_b64": base64.b64encode(features["vector"])
     }
 
 
