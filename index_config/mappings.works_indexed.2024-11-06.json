@@ -106,6 +106,10 @@
                 },
                 "id": {
                   "type": "keyword"
+                },
+                "sourceIdentifier": {
+                  "type": "keyword",
+                  "normalizer": "lowercase"
                 }
               }
             }
@@ -124,6 +128,10 @@
               "properties": {
                 "id": {
                   "type": "keyword"
+                },
+                "sourceIdentifier": {
+                  "type": "keyword",
+                  "normalizer": "lowercase"
                 }
               }
             },
@@ -220,6 +228,10 @@
               "properties": {
                 "id": {
                   "type": "keyword"
+                },
+                "sourceIdentifier": {
+                  "type": "keyword",
+                  "normalizer": "lowercase"
                 }
               }
             },

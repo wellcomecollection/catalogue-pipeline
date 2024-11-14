@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 2020",
-  "createdAt" : "2024-11-06T16:34:49.806072Z",
+  "createdAt" : "2024-11-13T08:40:21.381519Z",
   "id" : "fh2wwbhh",
   "document" : {
     "modifiedTime" : "2010-05-28T21:46:34Z",
@@ -126,13 +126,19 @@
       ],
       "source.contributors.agent.id" : [
       ],
+      "source.contributors.agent.sourceIdentifier" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
       ],
+      "source.genres.concepts.sourceIdentifier" : [
+      ],
       "source.subjects.label" : [
       ],
       "source.subjects.concepts.id" : [
+      ],
+      "source.subjects.concepts.sourceIdentifier" : [
       ],
       "source.production.dates.range.from" : [
         1577836800000

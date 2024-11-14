@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2024-11-06T16:34:49.776805Z",
+  "createdAt" : "2024-11-13T08:40:21.347433Z",
   "id" : "vwtlblqa",
   "document" : {
     "modifiedTime" : "2019-11-02T09:06:12Z",
@@ -131,15 +131,22 @@
       ],
       "source.contributors.agent.id" : [
       ],
+      "source.contributors.agent.sourceIdentifier" : [
+      ],
       "source.genres.label" : [
       ],
       "source.genres.concepts.id" : [
+      ],
+      "source.genres.concepts.sourceIdentifier" : [
       ],
       "source.subjects.label" : [
         "Simple screwdrivers"
       ],
       "source.subjects.concepts.id" : [
         "subject1"
+      ],
+      "source.subjects.concepts.sourceIdentifier" : [
+        "q73Dbt0Znh"
       ],
       "source.production.dates.range.from" : [
       ]
