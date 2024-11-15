@@ -26,6 +26,8 @@ object PathsProcessor extends Logging {
     implicit ec: ExecutionContext,
     materializer: Materializer
   ): Future[Seq[Long]] = {
+    info(s"Processing ${paths.size} paths with max batch size $maxBatchSize")
+
     generateBatches(maxBatchSize, paths)
       .mapAsyncUnordered(10) {
         case (batch, msgIndices) =>
