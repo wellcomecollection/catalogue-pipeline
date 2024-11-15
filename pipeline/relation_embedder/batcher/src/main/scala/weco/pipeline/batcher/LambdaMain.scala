@@ -16,7 +16,22 @@ import scala.util.Try
 object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
   import weco.pipeline.batcher.lib.SQSEventOps._
 
+  // Initialize anything we want to be shared across lambda invocations here
+
   private val config = ConfigFactory.load("application")
+
+  private object SNSDownstream extends Downstream {
+    private val msgSender = SNSBuilder
+      .buildSNSMessageSender(config, subject = "Sent from batcher")
+    override def notify(batch: Batch): Try[Unit] = msgSender.sendT(batch)
+  }
+
+  val downstream = config.getString("batcher.use_downstream") match {
+    case "sns"   => SNSDownstream
+    case "stdio" => STDIODownstream
+  }
+
+  // This is the entry point for the lambda
 
   override def handleRequest(
     event: SQSEvent,
@@ -28,17 +43,6 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
       ActorSystem("main-actor-system")
     implicit val ec: ExecutionContext =
       actorSystem.dispatcher
-
-    object SNSDownstream extends Downstream {
-      private val msgSender = SNSBuilder
-        .buildSNSMessageSender(config, subject = "Sent from batcher")
-      override def notify(batch: Batch): Try[Unit] = msgSender.sendT(batch)
-    }
-
-    val downstream = config.getString("batcher.use_downstream") match {
-      case "sns"   => SNSDownstream
-      case "stdio" => STDIODownstream
-    }
 
     val f = PathsProcessor(
       config.requireInt("batcher.max_batch_size"),
