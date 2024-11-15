@@ -21,6 +21,8 @@ locals {
   # NOTE: SQS in flight limit is 120k
   # See https://aws.amazon.com/sqs/faqs/ "Q: How large can Amazon SQS message queues be?"
   max_processed_paths = var.reindexing_state.scale_up_tasks ? 120000 : 5000
+
+  lambda_timeout = 60 * 10 # 10 Minutes
 }
 
 module "batcher_output_topic" {
@@ -45,21 +47,21 @@ module "batcher_lambda" {
 
   environment_variables = {
     output_topic_arn = module.batcher_lambda_output_topic.arn
+    max_batch_size   = 40
 
-    flush_interval_minutes = local.wait_minutes
-    max_processed_paths    = local.max_processed_paths
-
-    max_batch_size = 40
+    # These are unused by the lambda, but are required in the environment
+    flush_interval_minutes = 0
+    max_processed_paths    = 0
   }
 
-  timeout = 60 * 10 # 10 Minutes
+  timeout = local.lambda_timeout
 
   queue_config = {
     topic_arns = [
       module.router_path_output_topic.arn,
       module.path_concatenator_output_topic.arn,
     ]
-    visibility_timeout_seconds = (local.wait_minutes + 9) * 60
+    visibility_timeout_seconds = local.lambda_timeout
 
     maximum_concurrency     = 20
     batch_size              = 2500

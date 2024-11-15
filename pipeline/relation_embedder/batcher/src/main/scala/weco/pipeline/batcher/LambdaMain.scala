@@ -45,7 +45,11 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
       event.extractPaths,
       downstream
     )
+
+    // Wait here so that lambda can finish executing correctly.
+    // 15 minutes is the maximum time allowed for a lambda to run.
     Await.result(f, 15.minutes)
+
     "Done"
   }
 }
