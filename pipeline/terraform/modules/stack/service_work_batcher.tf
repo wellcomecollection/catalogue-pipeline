@@ -59,7 +59,7 @@ module "batcher_lambda" {
       module.router_path_output_topic.arn,
       module.path_concatenator_output_topic.arn,
     ]
-    visibility_timeout_seconds = (local.wait_minutes + 5) * 60
+    visibility_timeout_seconds = (local.wait_minutes + 9) * 60
 
     maximum_concurrency     = 20
     batch_size              = 2500
