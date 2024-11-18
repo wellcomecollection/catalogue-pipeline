@@ -24,11 +24,11 @@ locals {
 
   # Lambda specific settings
   # ------------------------
-  lambda_timeout_seconds      = 60 * 10 # 10 Minutes
+  lambda_timeout_seconds = 60 * 10 # 10 Minutes
   # This value should be higher than or equal to the lambda timeout, to avoid messages being reprocessed.
   lamda_q_vis_timeout_seconds = local.lambda_timeout_seconds
   # How long to wait to accumulate message: 5 minutes during reindexing, 1 minute otherwise
-  batching_window_seconds     = var.reindexing_state.scale_up_tasks ? (60 * 5) : 60
+  batching_window_seconds = var.reindexing_state.scale_up_tasks ? (60 * 5) : 60
 }
 
 module "batcher_output_topic" {
