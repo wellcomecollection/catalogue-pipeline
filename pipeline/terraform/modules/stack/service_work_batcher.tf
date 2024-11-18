@@ -69,7 +69,7 @@ module "batcher_lambda" {
     ]
     max_receive_count   = 1
     maximum_concurrency = 20
-    batch_size          = 2500
+    batch_size          = 10000
 
     visibility_timeout_seconds = local.lamda_q_vis_timeout_seconds
     batching_window_seconds    = local.batching_window_seconds
