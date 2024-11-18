@@ -26,6 +26,8 @@ object PathsProcessor extends Logging {
     implicit ec: ExecutionContext,
     materializer: Materializer
   ): Future[Seq[Long]] = {
+    info(s"Processing ${paths.size} paths with max batch size $maxBatchSize")
+
     generateBatches(maxBatchSize, paths)
       .mapAsyncUnordered(10) {
         case (batch, msgIndices) =>
@@ -53,19 +55,19 @@ object PathsProcessor extends Logging {
   ): Source[(Batch, List[Long]), NotUsed] = {
     val selectors = Selector.forPaths(paths)
     val groupedSelectors = selectors.groupBy(_._1.rootPath)
-    debug(
+    info(
       s"Generated ${selectors.size} selectors spanning ${groupedSelectors.size} trees from ${paths.size} paths."
     )
     paths.sorted.grouped(1000).toList.zipWithIndex.foreach {
       case (paths, idx) =>
         val startIdx = idx * 1000 + 1
-        debug(
+        info(
           s"Input paths ($startIdx-${startIdx + paths.length - 1}): ${paths.mkString(", ")}"
         )
     }
     groupedSelectors.foreach {
       case (rootPath, selectors) =>
-        debug(
+        info(
           s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}"
         )
     }
