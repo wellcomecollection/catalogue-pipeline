@@ -1,3 +1,4 @@
+import numpy as np
 import base64
 
 from fastapi import FastAPI, HTTPException
@@ -34,9 +35,11 @@ async def main(query_url: str):
         raise HTTPException(status_code=404, detail=error_string)
 
     features = await batch_inferrer_queue.execute(image)
+    normalised_features = features / np.linalg.norm(features, axis=0, keepdims=True)
+
     logger.info(f"extracted features from url: {query_url}")
 
-    return {"features_b64": base64.b64encode(features)}
+    return {"features_b64": base64.b64encode(normalised_features)}
 
 
 @app.get("/healthcheck")
