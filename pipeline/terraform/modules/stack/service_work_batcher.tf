@@ -22,7 +22,13 @@ locals {
   # See https://aws.amazon.com/sqs/faqs/ "Q: How large can Amazon SQS message queues be?"
   max_processed_paths = var.reindexing_state.scale_up_tasks ? 120000 : 5000
 
-  lambda_timeout = 60 * 10 # 10 Minutes
+  # Lambda specific settings
+  # ------------------------
+  lambda_timeout_seconds = 60 * 10 # 10 Minutes
+  # This value should be higher than or equal to the lambda timeout, to avoid messages being reprocessed.
+  lamda_q_vis_timeout_seconds = local.lambda_timeout_seconds
+  # How long to wait to accumulate message: 5 minutes during reindexing, 1 minute otherwise
+  batching_window_seconds = var.reindexing_state.scale_up_tasks ? (60 * 5) : 60
 }
 
 module "batcher_output_topic" {
@@ -54,18 +60,19 @@ module "batcher_lambda" {
     max_processed_paths    = 0
   }
 
-  timeout = local.lambda_timeout
+  timeout = local.lambda_timeout_seconds
 
   queue_config = {
     topic_arns = [
       module.router_path_output_topic.arn,
       module.path_concatenator_output_topic.arn,
     ]
-    visibility_timeout_seconds = local.lambda_timeout
+    max_receive_count   = 1
+    maximum_concurrency = 20
+    batch_size          = 10000
 
-    maximum_concurrency     = 20
-    batch_size              = 2500
-    batching_window_seconds = 60
+    visibility_timeout_seconds = local.lamda_q_vis_timeout_seconds
+    batching_window_seconds    = local.batching_window_seconds
   }
 
   ecr_repository_name = "uk.ac.wellcome/batcher"
