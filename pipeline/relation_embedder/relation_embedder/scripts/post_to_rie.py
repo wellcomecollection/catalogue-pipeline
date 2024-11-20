@@ -3,7 +3,7 @@ import requests
 import json
 
 
-def format_message(path):
+def format_message(batch):
     return {
         "messageId": "12345678-1234-5678-1234-567812345678",
         "receiptHandle": "MessageReceiptHandle",
@@ -12,8 +12,8 @@ def format_message(path):
                 "Type": "Notification",
                 "MessageId": "g00dcafe-dead-beef-f00d-d00bed0bed00",
                 "TopicArn": "arn:aws:sns:eu-west-1:999999999999:my_upstream_topic",
-                "Subject": "Sent from the batcher",
-                "Message": path,
+                "Subject": "Sent from the router",
+                "Message": batch,
                 "Timestamp": "2024-11-06T10:50:43.532Z",
                 "SignatureVersion": "1",
                 "Signature": "BigLoadOfBase64==",
@@ -35,7 +35,7 @@ def format_message(path):
     }
 
 
-payload = {"Records": [format_message(path.strip()) for path in sys.stdin.readlines()]}
+payload = {"Records": [format_message(batch) for batch in sys.stdin.readlines()]}
 requests.post(
     "http://localhost:9000/2015-03-31/functions/function/invocations",
     data=json.dumps(payload),
