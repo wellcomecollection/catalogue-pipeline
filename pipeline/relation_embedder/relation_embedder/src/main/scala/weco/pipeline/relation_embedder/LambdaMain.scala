@@ -9,7 +9,7 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     event: SQSEvent,
     context: Context
   ): String = {
-    info(s"running relation_ lambda, got event")
+    info(s"running relation_embedder lambda, got event")
     "Done"
   }
 }
