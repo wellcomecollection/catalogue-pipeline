@@ -1,0 +1,5 @@
+{"rootPath":"MS1302","selectors":[{"path":"MS1302","type":"Node"},{"path":"MS1302","type":"Children"},{"path":"MS1302/5403","type":"Descendents"}]}
+{"rootPath":"MS5122","selectors":[{"path":"MS5122","type":"Tree"}]}
+{"rootPath":"MS5120","selectors":[{"path":"MS5120","type":"Children"},{"path":"MS5120","type":"Node"},{"path":"MS5120/5121","type":"Descendents"}]}
+{"rootPath":"MS6037","selectors":[{"path":"MS6037","type":"Tree"}]}
+{"rootPath":"SAIPA","selectors":[{"path":"SAIPA/B/1/23","type":"Node"},{"path":"SAIPA/B/1/23","type":"Children"},{"path":"SAIPA/B/1/23/22","type":"Descendents"}]}
