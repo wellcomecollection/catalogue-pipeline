@@ -2,7 +2,10 @@ package weco.pipeline.ingestor.images.models
 
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.internal_model.image.{Image, ImageState}
-import weco.pipeline.ingestor.common.models.{AggregatableIdLabel, AggregatableValues}
+import weco.pipeline.ingestor.common.models.{
+  AggregatableIdLabel,
+  AggregatableValues
+}
 
 case class ImageAggregatableValues(
   @JsonKey("locations.license") licenses: List[AggregatableIdLabel],
@@ -20,8 +23,7 @@ case object ImageAggregatableValues
       contributors =
         fromParentWork(image.source)(_.data.contributorAggregatableValues),
       genres = fromParentWork(image.source)(_.data.genreAggregatableValues),
-      subjects =
-        fromParentWork(image.source)(_.data.subjectAggregatableValues)
+      subjects = fromParentWork(image.source)(_.data.subjectAggregatableValues)
     )
 
 }

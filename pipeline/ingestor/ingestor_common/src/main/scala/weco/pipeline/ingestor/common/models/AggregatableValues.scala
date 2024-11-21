@@ -11,24 +11,32 @@ trait AggregatableValues {
     def genreAggregatableValues: List[AggregatableIdLabel] =
       workData.genres.map(
         genre =>
-          AggregatableIdLabel.fromIdState(genre.concepts.headOption.map(_.id), genre.label)
+          AggregatableIdLabel.fromIdState(
+            genre.concepts.headOption.map(_.id),
+            genre.label
+          )
       )
 
     def subjectAggregatableValues: List[AggregatableIdLabel] =
       workData.subjects.map(
-        subject => AggregatableIdLabel.fromIdState(Some(subject.id), subject.label)
+        subject =>
+          AggregatableIdLabel.fromIdState(Some(subject.id), subject.label)
       )
 
     def contributorAggregatableValues: List[AggregatableIdLabel] =
       workData.contributors
         .map(_.agent)
-        .map(agent => AggregatableIdLabel.fromIdState(Some(agent.id), agent.label))
+        .map(
+          agent => AggregatableIdLabel.fromIdState(Some(agent.id), agent.label)
+        )
 
     def licenseAggregatableValues: List[AggregatableIdLabel] =
       workData.items
         .flatMap(_.locations)
         .flatMap(_.license)
-        .map(license => AggregatableIdLabel.fromId(Some(license.id), license.label))
+        .map(
+          license => AggregatableIdLabel.fromId(Some(license.id), license.label)
+        )
 
     def languageAggregatableValues: List[AggregatableIdLabel] =
       workData.languages
@@ -45,11 +53,16 @@ trait AggregatableValues {
             }
         )
         .distinct
-        .map(language => AggregatableIdLabel.fromId(Some(language.id), language.label))
+        .map(
+          language =>
+            AggregatableIdLabel.fromId(Some(language.id), language.label)
+        )
 
     def workTypeAggregatableValues: List[AggregatableIdLabel] =
       workData.format.toList
-        .map(format => AggregatableIdLabel.fromId(Some(format.id), format.label))
+        .map(
+          format => AggregatableIdLabel.fromId(Some(format.id), format.label)
+        )
 
     // Note: this is based on the previous Elasticsearch behaviour, which aggregated over
     // the start date of the periods.
@@ -73,14 +86,21 @@ trait AggregatableValues {
           // where _.from is the very beginning of the year.
           range => LocalDate.ofInstant(range.from, ZoneOffset.UTC).getYear
         )
-        .map(startYear => AggregatableIdLabel.fromId(None: Option[String], label = startYear.toString))
+        .map(
+          startYear =>
+            AggregatableIdLabel
+              .fromId(None: Option[String], label = startYear.toString)
+        )
   }
 
   implicit class AvailabilityOps(availabilities: Set[Availability]) {
     def aggregatableValues: List[AggregatableIdLabel] =
-      availabilities.map(
-        availability =>
-          AggregatableIdLabel.fromId(Some(availability.id), availability.label)
-      ).toList
+      availabilities
+        .map(
+          availability =>
+            AggregatableIdLabel
+              .fromId(Some(availability.id), availability.label)
+        )
+        .toList
   }
 }
