@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-11-13T08:43:26.604274Z",
+  "createdAt" : "2024-11-21T12:05:51.362288Z",
   "id" : "plxkke6n",
   "document" : {
     "debug" : {
@@ -220,18 +220,27 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
-        "{\"label\":\"Pamphlets\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Genre\"}"
+      "genres" : [
+        {
+          "id" : "g00dcafe",
+          "label" : "Pamphlets"
+        },
+        {
+          "id" : "baadf00d",
+          "label" : "Psychology, Pathological"
+        },
+        {
+          "id" : "lmpakqz5",
+          "label" : "Darwin \"Jones\", Charles"
+        }
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

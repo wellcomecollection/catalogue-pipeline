@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre filter tests",
-  "createdAt" : "2024-11-13T08:40:21.258243Z",
+  "createdAt" : "2024-11-21T12:19:00.267688Z",
   "id" : "xmgujsvi",
   "document" : {
     "modifiedTime" : "1973-07-14T04:22:57Z",
@@ -126,12 +126,15 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
-        "{\"label\":\"Carrot counselling\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres" : [
+        {
+          "id" : "g00dcafe",
+          "label" : "Carrot counselling"
+        }
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

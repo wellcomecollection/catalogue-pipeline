@@ -1,6 +1,6 @@
 {
   "description" : "a work with a thumbnail",
-  "createdAt" : "2024-11-13T08:43:26.254004Z",
+  "createdAt" : "2024-11-21T12:05:51.015858Z",
   "id" : "sahqcluh",
   "document" : {
     "debug" : {
@@ -134,15 +134,15 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

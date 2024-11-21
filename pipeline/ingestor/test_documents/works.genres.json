@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2024-11-13T08:43:26.490041Z",
+  "createdAt" : "2024-11-21T12:05:51.257033Z",
   "id" : "jlp05mgl",
   "document" : {
     "debug" : {
@@ -150,16 +150,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
-        "{\"label\":\"Electronic books\",\"concepts\":[],\"type\":\"Genre\"}"
+      "genres" : [
+        {
+          "id" : null,
+          "label" : "Electronic books"
+        }
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

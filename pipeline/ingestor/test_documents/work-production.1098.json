@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1098",
-  "createdAt" : "2024-11-13T08:43:26.277829Z",
+  "createdAt" : "2024-11-21T12:05:51.043099Z",
   "id" : "guav7chy",
   "document" : {
     "debug" : {
@@ -132,16 +132,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
-        "{\"label\":\"1098\",\"type\":\"Period\"}"
+        {
+          "id" : null,
+          "label" : "1098"
+        }
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

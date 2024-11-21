@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-13T08:40:21.232594Z",
+  "createdAt" : "2024-11-21T12:19:00.241481Z",
   "id" : "2asytm3k",
   "document" : {
     "modifiedTime" : "1984-08-19T17:29:37Z",
@@ -121,12 +121,15 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
-        "{\"label\":\"Machiavelli, Niccolo\",\"type\":\"Person\"}"
+      "source.contributors.agent" : [
+        {
+          "id" : null,
+          "label" : "Machiavelli, Niccolo"
+        }
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

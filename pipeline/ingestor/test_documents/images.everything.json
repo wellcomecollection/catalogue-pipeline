@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2024-11-13T08:40:21.278971Z",
+  "createdAt" : "2024-11-21T12:19:00.283128Z",
   "id" : "wp52vobn",
   "document" : {
     "modifiedTime" : "1959-06-25T19:38:02Z",
@@ -190,15 +190,27 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
-        "{\"label\":\"Adrian Aardvark\",\"type\":\"Person\"}",
-        "{\"label\":\"Beatrice Buffalo\",\"type\":\"Person\"}"
+      "source.contributors.agent" : [
+        {
+          "id" : null,
+          "label" : "Adrian Aardvark"
+        },
+        {
+          "id" : null,
+          "label" : "Beatrice Buffalo"
+        }
       ],
-      "source.genres.label" : [
-        "{\"label\":\"Crumbly cabbages\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Deadly durians\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres" : [
+        {
+          "id" : "lhv6fymm",
+          "label" : "Crumbly cabbages"
+        },
+        {
+          "id" : "f6d8tqxf",
+          "label" : "Deadly durians"
+        }
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

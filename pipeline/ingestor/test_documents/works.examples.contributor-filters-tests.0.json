@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-13T08:43:26.618807Z",
+  "createdAt" : "2024-11-21T12:05:51.383684Z",
   "id" : "ijnwmvup",
   "document" : {
     "debug" : {
@@ -128,16 +128,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"Bath, Patricia\",\"type\":\"Person\"}"
+      "contributors.agent" : [
+        {
+          "id" : null,
+          "label" : "Bath, Patricia"
+        }
       ],
       "items.locations.license" : [
       ],

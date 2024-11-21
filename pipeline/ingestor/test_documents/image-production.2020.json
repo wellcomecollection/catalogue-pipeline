@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 2020",
-  "createdAt" : "2024-11-13T08:40:21.381519Z",
+  "createdAt" : "2024-11-21T12:19:00.384012Z",
   "id" : "fh2wwbhh",
   "document" : {
     "modifiedTime" : "2010-05-28T21:46:34Z",
@@ -111,11 +111,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

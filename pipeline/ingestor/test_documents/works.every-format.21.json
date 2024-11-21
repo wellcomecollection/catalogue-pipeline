@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-13T08:43:26.536834Z",
+  "createdAt" : "2024-11-21T12:05:51.296130Z",
   "id" : "3ygkb1yd",
   "document" : {
     "debug" : {
@@ -121,17 +121,20 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"j\",\"label\":\"E-journals\",\"type\":\"Format\"}"
+        {
+          "id" : "j",
+          "label" : "E-journals"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

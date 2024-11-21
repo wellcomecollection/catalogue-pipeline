@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of formats",
-  "createdAt" : "2024-11-13T08:43:26.444809Z",
+  "createdAt" : "2024-11-21T12:05:51.204571Z",
   "id" : "cfrzpe3b",
   "document" : {
     "debug" : {
@@ -121,17 +121,20 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"a\",\"label\":\"Books\",\"type\":\"Format\"}"
+        {
+          "id" : "a",
+          "label" : "Books"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

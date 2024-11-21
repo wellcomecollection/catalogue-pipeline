@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2024-11-13T08:40:21.291230Z",
+  "createdAt" : "2024-11-21T12:19:00.295765Z",
   "id" : "imwkwk2d",
   "document" : {
     "modifiedTime" : "2054-12-28T10:14:19Z",
@@ -110,11 +110,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

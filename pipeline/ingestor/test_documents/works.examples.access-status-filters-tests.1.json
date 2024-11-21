@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-11-13T08:43:26.635802Z",
+  "createdAt" : "2024-11-21T12:05:51.399902Z",
   "id" : "xmya3fco",
   "document" : {
     "debug" : {
@@ -168,18 +168,21 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id" : "cc-by",
+          "label" : "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
       "availabilities" : [
       ]

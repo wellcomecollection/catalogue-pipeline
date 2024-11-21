@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2024-11-13T08:40:21.058826Z",
+  "createdAt" : "2024-11-21T12:19:00.066818Z",
   "id" : "sh4pa61s",
   "document" : {
     "modifiedTime" : "1966-02-22T19:31:55Z",
@@ -107,13 +107,16 @@
     },
     "aggregatableValues" : {
       "locations.license" : [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id" : "cc-by",
+          "label" : "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

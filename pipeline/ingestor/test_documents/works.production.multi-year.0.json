@@ -1,6 +1,6 @@
 {
   "description" : "works with multi-year production ranges",
-  "createdAt" : "2024-11-13T08:43:26.555984Z",
+  "createdAt" : "2024-11-21T12:05:51.318225Z",
   "id" : "wrhbusqt",
   "document" : {
     "debug" : {
@@ -142,16 +142,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
-        "{\"label\":\"1850\",\"type\":\"Period\"}"
+        {
+          "id" : null,
+          "label" : "1850"
+        }
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

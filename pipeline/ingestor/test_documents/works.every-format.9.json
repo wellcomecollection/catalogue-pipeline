@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-13T08:43:26.532035Z",
+  "createdAt" : "2024-11-21T12:05:51.292921Z",
   "id" : "6visru7m",
   "document" : {
     "debug" : {
@@ -121,17 +121,20 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"p\",\"label\":\"Mixed materials\",\"type\":\"Format\"}"
+        {
+          "id" : "p",
+          "label" : "Mixed materials"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

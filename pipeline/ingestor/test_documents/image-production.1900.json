@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1900",
-  "createdAt" : "2024-11-13T08:40:21.362998Z",
+  "createdAt" : "2024-11-21T12:19:00.367982Z",
   "id" : "ihnwqeiu",
   "document" : {
     "modifiedTime" : "1979-07-12T04:54:26Z",
@@ -109,11 +109,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

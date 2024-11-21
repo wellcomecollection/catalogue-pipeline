@@ -1,6 +1,6 @@
 {
   "description" : "a work with a collection path",
-  "createdAt" : "2024-11-13T08:43:26.524477Z",
+  "createdAt" : "2024-11-21T12:05:51.285352Z",
   "id" : "ynrhjtvf",
   "document" : {
     "debug" : {
@@ -117,15 +117,15 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

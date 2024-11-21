@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2024-11-13T08:40:21.351697Z",
+  "createdAt" : "2024-11-21T12:19:00.356609Z",
   "id" : "hfwfbogx",
   "document" : {
     "modifiedTime" : "2068-12-13T11:19:09Z",
@@ -123,13 +123,19 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
-        "{\"label\":\"Squashed squirrels\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Struck samples\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects" : [
+        {
+          "id" : null,
+          "label" : "Squashed squirrels"
+        },
+        {
+          "id" : "subject2",
+          "label" : "Struck samples"
+        }
       ]
     },
     "filterableValues" : {

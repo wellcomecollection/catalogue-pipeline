@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2024-11-13T08:40:21.181375Z",
+  "createdAt" : "2024-11-21T12:19:00.191748Z",
   "id" : "mherdyx0",
   "document" : {
     "modifiedTime" : "1984-06-19T23:29:34Z",
@@ -117,12 +117,15 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
-        "{\"label\":\"carrots\",\"type\":\"Agent\"}"
+      "source.contributors.agent" : [
+        {
+          "id" : null,
+          "label" : "carrots"
+        }
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

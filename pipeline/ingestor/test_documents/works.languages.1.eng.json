@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-11-13T08:43:26.469710Z",
+  "createdAt" : "2024-11-21T12:05:51.234491Z",
   "id" : "mye6nsw6",
   "document" : {
     "debug" : {
@@ -123,16 +123,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
-        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}"
+        {
+          "id" : "eng",
+          "label" : "English"
+        }
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

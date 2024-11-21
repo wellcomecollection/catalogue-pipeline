@@ -1,6 +1,6 @@
 {
   "description" : "examples of works with different types",
-  "createdAt" : "2024-11-13T08:43:26.599808Z",
+  "createdAt" : "2024-11-21T12:05:51.358919Z",
   "id" : "pbeanc7x",
   "document" : {
     "debug" : {
@@ -117,15 +117,15 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

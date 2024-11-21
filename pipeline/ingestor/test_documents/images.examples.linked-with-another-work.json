@@ -1,6 +1,6 @@
 {
   "description" : "images linked with another work",
-  "createdAt" : "2024-11-13T08:40:21.305665Z",
+  "createdAt" : "2024-11-21T12:19:00.313683Z",
   "id" : "zs6cxirr",
   "document" : {
     "modifiedTime" : "2010-10-05T23:16:10Z",
@@ -110,11 +110,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

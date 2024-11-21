@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-11-13T08:43:26.428912Z",
+  "createdAt" : "2024-11-21T12:05:51.193788Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -604,29 +604,65 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
-        "{\"label\":\"DKbwserVib\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"6uOUAue10N\",\"concepts\":[],\"type\":\"Genre\"}"
+      "genres" : [
+        {
+          "id" : "co3t5a2c",
+          "label" : "DKbwserVib"
+        },
+        {
+          "id" : "vp7gvran",
+          "label" : "6uOUAue10N"
+        }
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"Uauios0IzD\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"6n2QtjPUbf\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : null,
+          "label" : "Uauios0IzD"
+        },
+        {
+          "id" : null,
+          "label" : "6n2QtjPUbf"
+        }
       ],
       "languages" : [
-        "{\"id\":\"BRh\",\"label\":\"E6F0oBW\",\"type\":\"Language\"}",
-        "{\"id\":\"52j\",\"label\":\"TlqNXqK\",\"type\":\"Language\"}",
-        "{\"id\":\"K4Q\",\"label\":\"hldbPB44o8\",\"type\":\"Language\"}"
+        {
+          "id" : "BRh",
+          "label" : "E6F0oBW"
+        },
+        {
+          "id" : "52j",
+          "label" : "TlqNXqK"
+        },
+        {
+          "id" : "K4Q",
+          "label" : "hldbPB44o8"
+        }
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"person-h9jhXW\",\"type\":\"Person\"}",
-        "{\"label\":\"person-QdWhUu\",\"type\":\"Person\"}"
+      "contributors.agent" : [
+        {
+          "id" : null,
+          "label" : "person-h9jhXW"
+        },
+        {
+          "id" : null,
+          "label" : "person-QdWhUu"
+        }
       ],
       "items.locations.license" : [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id" : "cc-by",
+          "label" : "Attribution 4.0 International (CC BY 4.0)"
+        },
+        {
+          "id" : "cc-by",
+          "label" : "Attribution 4.0 International (CC BY 4.0)"
+        },
+        {
+          "id" : "cc-by",
+          "label" : "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
       "availabilities" : [
       ]

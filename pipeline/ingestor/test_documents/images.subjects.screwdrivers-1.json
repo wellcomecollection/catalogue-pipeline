@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2024-11-13T08:40:21.341530Z",
+  "createdAt" : "2024-11-21T12:19:00.350428Z",
   "id" : "608yinvr",
   "document" : {
     "modifiedTime" : "1952-12-18T13:47:18Z",
@@ -115,12 +115,15 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
-        "{\"label\":\"Simple screwdrivers\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects" : [
+        {
+          "id" : "subject1",
+          "label" : "Simple screwdrivers"
+        }
       ]
     },
     "filterableValues" : {
