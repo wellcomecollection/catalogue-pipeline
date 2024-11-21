@@ -1,71 +1,36 @@
 package weco.pipeline.ingestor.common.models
 
-import io.circe.syntax._
-import io.circe.{Encoder, Json, JsonObject}
-import weco.catalogue.display_model.Implicits._
-import weco.catalogue.display_model.languages.DisplayLanguage
-import weco.catalogue.display_model.locations.DisplayLicense
-import weco.catalogue.display_model.work._
 import weco.catalogue.internal_model.identifiers.DataState
 import weco.catalogue.internal_model.languages.MarcLanguageCodeList
 import weco.catalogue.internal_model.work.{Availability, WorkData}
 
 import java.time.{LocalDate, ZoneOffset}
 
-/** We store aggregatable values in the Elasticsearch documents we store for the
-  * API.
-  *
-  * These values are serialised with the display models, so the API can read
-  * these values and drop them directly into an API response, without needing to
-  * know about what the display models look like.
-  *
-  * See
-  * https://github.com/wellcomecollection/docs/tree/main/rfcs/049-catalogue-api-aggregations-modelling
-  */
 trait AggregatableValues {
   implicit class WorkDataOps(workData: WorkData[DataState.Identified]) {
-    private def aggregableLabel(label: String): String = label.stripSuffix(".")
+    def genreAggregatableValues: List[AggregatableIdLabel] =
+      workData.genres.map(
+        genre =>
+          AggregatableIdLabel.fromIdState(genre.concepts.headOption.map(_.id), genre.label)
+      )
 
-    private def withAggregableLabel(json: JsonObject): JsonObject =
-      json("label") match {
-        case Some(label) if label.isString =>
-          json.add("label", aggregableLabel(label.asString.get).asJson)
-        case _ => json
-      }
-    def genreAggregatableValues: List[String] =
-      workData.genres
-        .map(DisplayGenre(_, includesIdentifiers = false))
-        .asJson(_.update("concepts", Json.fromValues(List())))
+    def subjectAggregatableValues: List[AggregatableIdLabel] =
+      workData.subjects.map(
+        subject => AggregatableIdLabel.fromIdState(Some(subject.id), subject.label)
+      )
 
-    // We use this aggregation for subject *labels*, not ids.
-    //
-    // It's possible for the same subject label to appear with different identifiers.
-    // e.g. we have "Horses" as an LCSH-identified, MeSH-identified, and unidentified subject.
-    //
-    // For aggregating by label, we don't care about this distinction, so we
-    // remove the ID from subjects before aggregating.
-    def subjectLabelAggregatableValues: List[String] =
-      workData.subjects
-        .map(DisplaySubject(_, includesIdentifiers = false))
-        .map(subject => subject.copy(label = aggregableLabel(subject.label)))
-        .asJson(_.update("concepts", Json.fromValues(List())).remove("id"))
-
-    def contributorAggregatableValues: List[String] =
+    def contributorAggregatableValues: List[AggregatableIdLabel] =
       workData.contributors
         .map(_.agent)
-        .map(DisplayAbstractRootConcept(_, includesIdentifiers = false))
-        .asJson(
-          json => json.mapObject(o => withAggregableLabel(o.remove("roles")))
-        )
+        .map(agent => AggregatableIdLabel.fromIdState(Some(agent.id), agent.label))
 
-    def licenseAggregatableValues: List[String] =
+    def licenseAggregatableValues: List[AggregatableIdLabel] =
       workData.items
         .flatMap(_.locations)
         .flatMap(_.license)
-        .map(DisplayLicense(_))
-        .asJson()
+        .map(license => AggregatableIdLabel.fromId(Some(license.id), license.label))
 
-    def languageAggregatableValues: List[String] =
+    def languageAggregatableValues: List[AggregatableIdLabel] =
       workData.languages
         .map(
           lang =>
@@ -80,13 +45,11 @@ trait AggregatableValues {
             }
         )
         .distinct
-        .map(DisplayLanguage(_))
-        .asJson()
+        .map(language => AggregatableIdLabel.fromId(Some(language.id), language.label))
 
-    def workTypeAggregatableValues: List[String] =
+    def workTypeAggregatableValues: List[AggregatableIdLabel] =
       workData.format.toList
-        .map(DisplayFormat(_))
-        .asJson()
+        .map(format => AggregatableIdLabel.fromId(Some(format.id), format.label))
 
     // Note: this is based on the previous Elasticsearch behaviour, which aggregated over
     // the start date of the periods.
@@ -95,7 +58,7 @@ trait AggregatableValues {
     // or if it's the best we could squeeze into Elasticsearch terms aggregations.
     // I'm going to leave it as-is for now, but this is a note that we can revisit this
     // (and other aggregations) at some point, because this approach gives us more flexibility.
-    def productionDateAggregatableValues: List[String] =
+    def productionDateAggregatableValues: List[AggregatableIdLabel] =
       workData.production
         .flatMap(_.dates)
         .flatMap(_.range)
@@ -110,61 +73,14 @@ trait AggregatableValues {
           // where _.from is the very beginning of the year.
           range => LocalDate.ofInstant(range.from, ZoneOffset.UTC).getYear
         )
-        .map(startYear => DisplayPeriod(label = startYear.toString))
-        .asJson()
+        .map(startYear => AggregatableIdLabel.fromId(None: Option[String], label = startYear.toString))
   }
 
   implicit class AvailabilityOps(availabilities: Set[Availability]) {
-    def aggregatableValues: List[String] =
-      availabilities.map(DisplayAvailability(_)).toList.asJson().sorted
-  }
-
-  implicit class JsonStringOps[T](t: List[T])(implicit encoder: Encoder[T]) {
-    def asJson(transform: Json => Json = identity[Json]): List[String] =
-      t.map(_.asJson.deepDropNullValues)
-        .map(transform(_))
-        .map(_.noSpaces)
-  }
-
-  implicit class JsonOps(json: Json) {
-    // Update a key/value pair in a JSON object.
-    //
-    // e.g.
-    //
-    //    json =
-    //    { "color": "red", "sides": 5 }
-    //
-    //    json.update("color", "blue")
-    //    { "color": "blue", "sides": 5 }
-    //
-    // Note: this is meant to preserve the order of keys in the original object.
-    //
-    def update(key: String, value: Json): Json =
-      json.mapObject(
-        jsonObj =>
-          Json
-            .fromFields(
-              jsonObj.toIterable
-                .map {
-                  case (k, v) =>
-                    if (k == key) (key, value) else (k, v)
-                }
-            )
-            .asObject
-            .get
-      )
-
-    // Remove a key pair from a JSON object.
-    //
-    // e.g.
-    //
-    //    json =
-    //    { "color": "red", "sides": 5 }
-    //
-    //    json.remove("sides")
-    //    { "color": "red" }
-    //
-    def remove(key: String): Json =
-      json.mapObject(jsonObj => jsonObj.remove(key))
+    def aggregatableValues: List[AggregatableIdLabel] =
+      availabilities.map(
+        availability =>
+          AggregatableIdLabel.fromId(Some(availability.id), availability.label)
+      ).toList
   }
 }
