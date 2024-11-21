@@ -113,16 +113,16 @@ module "pipeline_indices" {
 
   allow_delete = var.allow_delete_indices
 
-  es_works_source_index               = local.es_works_source_index
-  es_works_merged_index               = local.es_works_merged_index
-  es_works_identified_index           = local.es_works_identified_index
-  es_works_denormalised_index         = local.es_works_denormalised_index
-  es_lambda_works_denormalised_index  = local.es_lambda_works_denormalised_index
-  es_works_index                      = local.es_works_index
+  es_works_source_index              = local.es_works_source_index
+  es_works_merged_index              = local.es_works_merged_index
+  es_works_identified_index          = local.es_works_identified_index
+  es_works_denormalised_index        = local.es_works_denormalised_index
+  es_lambda_works_denormalised_index = local.es_lambda_works_denormalised_index
+  es_works_index                     = local.es_works_index
 
-  es_images_initial_index             = local.es_images_initial_index
-  es_images_augmented_index           = local.es_images_augmented_index
-  es_images_index                     = local.es_images_index
+  es_images_initial_index   = local.es_images_initial_index
+  es_images_augmented_index = local.es_images_augmented_index
+  es_images_index           = local.es_images_index
 
   index_config = var.index_config
 
