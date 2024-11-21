@@ -11,12 +11,16 @@ trait AggregatableValues {
     def genreAggregatableValues: List[AggregatableIdLabel] =
       workData.genres.map(
         genre =>
-          AggregatableIdLabel.fromIdState(genre.concepts.headOption.map(_.id), genre.label)
+          AggregatableIdLabel.fromIdState(
+            genre.concepts.headOption.map(_.id),
+            genre.label
+          )
       )
 
     def subjectAggregatableValues: List[AggregatableIdLabel] =
       workData.subjects.map(
-        subject => AggregatableIdLabel.fromIdState(Some(subject.id), subject.label)
+        subject =>
+          AggregatableIdLabel.fromIdState(Some(subject.id), subject.label)
       )
 
     def contributorAggregatableValues: List[AggregatableIdLabel] =
@@ -45,11 +49,16 @@ trait AggregatableValues {
             }
         )
         .distinct
-        .map(language => AggregatableIdLabel.fromId(Some(language.id), language.label))
+        .map(
+          language =>
+            AggregatableIdLabel.fromId(Some(language.id), language.label)
+        )
 
     def workTypeAggregatableValues: List[AggregatableIdLabel] =
       workData.format.toList
-        .map(format => AggregatableIdLabel.fromId(Some(format.id), format.label))
+        .map(
+          format => AggregatableIdLabel.fromId(Some(format.id), format.label)
+        )
 
     // Note: this is based on the previous Elasticsearch behaviour, which aggregated over
     // the start date of the periods.
@@ -73,7 +82,11 @@ trait AggregatableValues {
           // where _.from is the very beginning of the year.
           range => LocalDate.ofInstant(range.from, ZoneOffset.UTC).getYear
         )
-        .map(startYear => AggregatableIdLabel.fromId(None: Option[String], label = startYear.toString))
+        .map(
+          startYear =>
+            AggregatableIdLabel
+              .fromId(None: Option[String], label = startYear.toString)
+        )
   }
 
   implicit class AvailabilityOps(availabilities: Set[Availability]) {

@@ -2,7 +2,10 @@ package weco.pipeline.ingestor.works.models
 
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.internal_model.work.{Work, WorkState}
-import weco.pipeline.ingestor.common.models.{AggregatableIdLabel, AggregatableValues}
+import weco.pipeline.ingestor.common.models.{
+  AggregatableIdLabel,
+  AggregatableValues
+}
 
 case class WorkAggregatableValues(
   @JsonKey("workType") workTypes: List[AggregatableIdLabel],
