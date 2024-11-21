@@ -26,13 +26,17 @@ trait AggregatableValues {
     def contributorAggregatableValues: List[AggregatableIdLabel] =
       workData.contributors
         .map(_.agent)
-        .map(agent => AggregatableIdLabel.fromIdState(Some(agent.id), agent.label))
+        .map(
+          agent => AggregatableIdLabel.fromIdState(Some(agent.id), agent.label)
+        )
 
     def licenseAggregatableValues: List[AggregatableIdLabel] =
       workData.items
         .flatMap(_.locations)
         .flatMap(_.license)
-        .map(license => AggregatableIdLabel.fromId(Some(license.id), license.label))
+        .map(
+          license => AggregatableIdLabel.fromId(Some(license.id), license.label)
+        )
 
     def languageAggregatableValues: List[AggregatableIdLabel] =
       workData.languages
@@ -91,9 +95,12 @@ trait AggregatableValues {
 
   implicit class AvailabilityOps(availabilities: Set[Availability]) {
     def aggregatableValues: List[AggregatableIdLabel] =
-      availabilities.map(
-        availability =>
-          AggregatableIdLabel.fromId(Some(availability.id), availability.label)
-      ).toList
+      availabilities
+        .map(
+          availability =>
+            AggregatableIdLabel
+              .fromId(Some(availability.id), availability.label)
+        )
+        .toList
   }
 }

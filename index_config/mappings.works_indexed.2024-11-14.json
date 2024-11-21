@@ -93,17 +93,13 @@
         },
         "subjects": {
           "properties": {
+            "id": {
+              "type": "keyword",
+              "eager_global_ordinals": true
+            },
             "label": {
-              "properties": {
-                "id": {
-                  "type": "keyword",
-                  "eager_global_ordinals": true
-                },
-                "label": {
-                  "type": "keyword",
-                  "eager_global_ordinals": true
-                }
-              }
+              "type": "keyword",
+              "eager_global_ordinals": true
             }
           }
         },
