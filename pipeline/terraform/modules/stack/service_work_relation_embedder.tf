@@ -22,7 +22,7 @@ module "relation_embedder_lambda" {
     output_topic_arn = module.relation_embedder_lambda_output_topic.arn
 
     es_merged_index       = local.es_works_merged_index
-    es_denormalised_index = local.es_works_denormalised_index
+    es_denormalised_index = local.es_lambda_works_denormalised_index
 
     affected_works_scroll_size   = 50 // NOTE: limit to avoid memory errors
     complete_tree_scroll_size    = 800
