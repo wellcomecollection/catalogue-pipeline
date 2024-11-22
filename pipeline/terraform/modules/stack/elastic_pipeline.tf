@@ -155,8 +155,7 @@ locals {
     }
     router = {
       read  = [local.indices.works_merged]
-      write = [local.indices.denormalised]
-      # write = [local.indices.denormalised, local.indices.lambda_denormalised]
+      write = [local.indices.denormalised, local.indices.lambda_denormalised]
     }
     path_concatenator = {
       read  = [local.indices.works_merged]
@@ -164,8 +163,7 @@ locals {
     }
     relation_embedder = {
       read  = [local.indices.works_merged]
-      write = [local.indices.denormalised]
-      # write = [local.indices.denormalised, local.indices.lambda_denormalised]
+      write = [local.indices.denormalised, local.indices.lambda_denormalised]
     }
     work_ingestor = {
       read  = [local.indices.denormalised]
