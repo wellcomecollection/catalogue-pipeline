@@ -57,3 +57,63 @@ module "router" {
 
   fargate_service_boilerplate = local.fargate_service_boilerplate
 }
+
+module "router_temp_path_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_router_temp_path_output" // subscribed by batcher
+  role_names = [module.router.task_role_name]
+}
+
+module "router_temp_candidate_incomplete_paths_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_router_temp_candidate_incomplete_paths_output" // subscribed by path_concatenator
+  role_names = [module.router.task_role_name]
+}
+
+module "router_temp_work_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_router_temp_work_output" // subscribed by ingestor_works
+  role_names = [module.router.task_role_name]
+}
+
+module "router_temp" {
+  source = "../fargate_service"
+
+  name            = "router_temp"
+  container_image = local.router_image
+
+  topic_arns = [
+    module.merger_works_output_topic.arn,
+  ]
+
+  env_vars = {
+    queue_parallelism = 10
+
+    paths_topic_arn             = module.router_temp_path_output_topic.arn
+    path_concatenator_topic_arn = module.router_temp_candidate_incomplete_paths_output_topic.arn
+    works_topic_arn             = module.router_temp_work_output_topic.arn
+
+    es_merged_index       = local.es_works_merged_index
+    es_denormalised_index = local.es_lambda_works_denormalised_index
+    batch_size            = 100
+    # The flush interval must be sufficiently lower than the message timeout
+    # to allow the messages to be processed after the flush interval but before
+    # they expire.  The upstream queue timeout is not set by us, leaving it
+    # at the default 30 seconds.
+    # See https://github.com/wellcomecollection/platform/issues/5463
+    flush_interval_seconds = 20
+  }
+
+  secret_env_vars = local.pipeline_storage_es_service_secrets["router"]
+
+  cpu    = 1024
+  memory = 2048
+
+  min_capacity = var.min_capacity
+  max_capacity = local.max_capacity
+
+  fargate_service_boilerplate = local.fargate_service_boilerplate
+}
