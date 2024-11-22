@@ -61,21 +61,21 @@ module "router" {
 module "router_temp_path_output_topic" {
   source = "../topic"
 
-  name       = "${local.namespace}_router_temp_path_output" // subscribed by batcher
+  name       = "${local.namespace}_router_temp_path_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_temp_candidate_incomplete_paths_output_topic" {
   source = "../topic"
 
-  name       = "${local.namespace}_router_temp_candidate_incomplete_paths_output" // subscribed by path_concatenator
+  name       = "${local.namespace}_router_temp_candidate_incomplete_paths_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_temp_work_output_topic" {
   source = "../topic"
 
-  name       = "${local.namespace}_router_temp_work_output" // subscribed by ingestor_works
+  name       = "${local.namespace}_router_temp_work_output"
   role_names = [module.router.task_role_name]
 }
 
