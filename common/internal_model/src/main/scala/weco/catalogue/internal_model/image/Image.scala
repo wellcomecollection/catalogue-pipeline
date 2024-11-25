@@ -92,11 +92,7 @@ object ImageFsm {
 }
 
 case class InferredData(
-  // We split the feature vector so that it can fit into
-  // ES's dense vector type (max length 2048)
-  features1: List[Float],
-  features2: List[Float],
-  reducedFeatures: List[Float],
+  features: List[Float],
   paletteEmbedding: List[Float],
   averageColorHex: Option[String],
   aspectRatio: Option[Float]
@@ -104,9 +100,7 @@ case class InferredData(
 
 object InferredData {
   def empty: InferredData = InferredData(
-    features1 = Nil,
-    features2 = Nil,
-    reducedFeatures = Nil,
+    features = Nil,
     paletteEmbedding = Nil,
     averageColorHex = None,
     aspectRatio = None

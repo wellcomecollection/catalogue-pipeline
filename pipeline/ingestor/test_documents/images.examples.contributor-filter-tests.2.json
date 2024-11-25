@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-14T14:37:56.434842Z",
+  "createdAt" : "2024-11-25T15:14:41.165474Z",
   "id" : "gxxntbp9",
   "document" : {
     "modifiedTime" : "2006-10-01T20:03:54Z",
@@ -108,11 +108,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

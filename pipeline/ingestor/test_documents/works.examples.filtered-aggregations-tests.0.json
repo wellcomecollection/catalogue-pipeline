@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-11-13T08:43:26.643155Z",
+  "createdAt" : "2024-11-25T15:15:12.493124Z",
   "id" : "pgnx8xiu",
   "document" : {
     "debug" : {
@@ -127,18 +127,24 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"a\",\"label\":\"Books\",\"type\":\"Format\"}"
+        {
+          "id" : "a",
+          "label" : "Books"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
-        "{\"id\":\"bak\",\"label\":\"Bashkir\",\"type\":\"Language\"}"
+        {
+          "id" : "bak",
+          "label" : "Bashkir"
+        }
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

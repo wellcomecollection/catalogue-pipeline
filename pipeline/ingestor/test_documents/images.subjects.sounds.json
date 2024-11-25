@@ -1,6 +1,6 @@
 {
   "description" : "images with different subjects",
-  "createdAt" : "2024-11-14T14:37:56.552107Z",
+  "createdAt" : "2024-11-25T15:14:41.257309Z",
   "id" : "kzssqpi3",
   "document" : {
     "modifiedTime" : "1988-08-30T19:53:42Z",
@@ -114,12 +114,15 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
-        "{\"label\":\"Square sounds\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects" : [
+        {
+          "id" : "Square sounds",
+          "label" : "Square sounds"
+        }
       ]
     },
     "filterableValues" : {

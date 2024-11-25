@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1904",
-  "createdAt" : "2024-11-14T14:37:56.586389Z",
+  "createdAt" : "2024-11-25T15:14:41.292034Z",
   "id" : "zj4rti6w",
   "document" : {
     "modifiedTime" : "1954-03-26T03:10:59Z",
@@ -109,11 +109,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

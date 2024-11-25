@@ -1,6 +1,6 @@
 {
   "description" : "an example of images with work metadata for the API tests",
-  "createdAt" : "2024-11-14T14:37:56.532694Z",
+  "createdAt" : "2024-11-25T15:14:41.239069Z",
   "id" : "a0jqzjtw",
   "document" : {
     "modifiedTime" : "1958-01-12T23:10:27Z",
@@ -108,11 +108,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

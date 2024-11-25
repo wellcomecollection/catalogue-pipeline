@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2024-11-14T14:37:56.379788Z",
+  "createdAt" : "2024-11-25T15:14:41.120044Z",
   "id" : "8p59sfry",
   "document" : {
     "modifiedTime" : "2021-10-07T09:48:56Z",
@@ -130,13 +130,19 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
-        "{\"label\":\"carrots\",\"type\":\"Agent\"}",
-        "{\"label\":\"parrots\",\"type\":\"Organisation\"}"
+      "source.contributors.agent" : [
+        {
+          "id" : "carrots",
+          "label" : "carrots"
+        },
+        {
+          "id" : "parrots",
+          "label" : "parrots"
+        }
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "images with different licenses",
-  "createdAt" : "2024-11-14T14:37:56.310591Z",
+  "createdAt" : "2024-11-25T15:14:41.009788Z",
   "id" : "k85xxljq",
   "document" : {
     "modifiedTime" : "2036-04-06T08:36:24Z",
@@ -109,13 +109,16 @@
     },
     "aggregatableValues" : {
       "locations.license" : [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        {
+          "id" : "pdm",
+          "label" : "Public Domain Mark"
+        }
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

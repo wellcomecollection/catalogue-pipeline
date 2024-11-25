@@ -155,27 +155,15 @@
     },
     "vectorValues": {
       "properties": {
-        "features1": {
+        "features": {
           "type": "dense_vector",
-          "dims": 2048,
+          "dims": 4096,
           "index": true,
-          "similarity": "cosine"
-        },
-        "features2": {
-          "type": "dense_vector",
-          "dims": 2048,
-          "index": true,
-          "similarity": "cosine"
+          "similarity": "dot_product"
         },
         "paletteEmbedding": {
           "type": "dense_vector",
           "dims": 1000,
-          "index": true,
-          "similarity": "dot_product"
-        },
-        "reducedFeatures": {
-          "type": "dense_vector",
-          "dims": 1024,
           "index": true,
           "similarity": "dot_product"
         }

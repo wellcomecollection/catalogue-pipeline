@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-11-13T08:43:26.660241Z",
+  "createdAt" : "2024-11-25T15:15:12.516547Z",
   "id" : "9stpxl39",
   "document" : {
     "debug" : {
@@ -238,24 +238,39 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}",
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id" : "pdm",
+          "label" : "Public Domain Mark"
+        },
+        {
+          "id" : "cc-by",
+          "label" : "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
       "availabilities" : [
-        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}",
-        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}",
-        "{\"id\":\"open-shelves\",\"label\":\"Open shelves\",\"type\":\"Availability\"}"
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores"
+        },
+        {
+          "id" : "open-shelves",
+          "label" : "Open shelves"
+        },
+        {
+          "id" : "online",
+          "label" : "Online"
+        }
       ]
     },
     "filterableValues" : {
