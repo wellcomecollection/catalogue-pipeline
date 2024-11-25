@@ -7,7 +7,6 @@ import weco.pipeline.transformer.calm.NormaliseText
 import weco.pipeline.transformer.calm.models.CalmRecordOps
 import weco.pipeline.transformer.identifiers.LabelDerivedIdentifiers
 
-
 object CalmSubjects extends CalmRecordOps with LabelDerivedIdentifiers {
   def apply(record: CalmRecord): List[Subject[IdState.Unminted]] =
     record.getList("Subject").map {

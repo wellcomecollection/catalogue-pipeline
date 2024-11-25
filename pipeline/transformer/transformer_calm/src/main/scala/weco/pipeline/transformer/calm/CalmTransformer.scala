@@ -2,14 +2,21 @@ package weco.pipeline.transformer.calm
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers._
-import weco.catalogue.internal_model.work.DeletedReason.{DeletedFromSource, SuppressedFromSource}
+import weco.catalogue.internal_model.work.DeletedReason.{
+  DeletedFromSource,
+  SuppressedFromSource
+}
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.calm.models.CalmTransformerException._
-import weco.pipeline.transformer.calm.models.{CalmRecordOps, CalmSourceData, CalmTransformerException}
+import weco.pipeline.transformer.calm.models.{
+  CalmRecordOps,
+  CalmSourceData,
+  CalmTransformerException
+}
 import weco.pipeline.transformer.calm.transformers._
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.transformers.ParsedPeriod
