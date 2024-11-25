@@ -19,13 +19,16 @@ trait AggregatableValues {
 
     def subjectAggregatableValues: List[AggregatableField] =
       workData.subjects.map(
-        subject => AggregatableField.fromIdState(Some(subject.id), subject.label)
+        subject =>
+          AggregatableField.fromIdState(Some(subject.id), subject.label)
       )
 
     def contributorAggregatableValues: List[AggregatableField] =
       workData.contributors
         .map(_.agent)
-        .map(agent => AggregatableField.fromIdState(Some(agent.id), agent.label))
+        .map(
+          agent => AggregatableField.fromIdState(Some(agent.id), agent.label)
+        )
 
     def licenseAggregatableValues: List[AggregatableField] =
       workData.items
@@ -85,8 +88,7 @@ trait AggregatableValues {
     def aggregatableValues: List[AggregatableField] =
       availabilities
         .map(
-          availability =>
-            AggregatableField(availability.id, availability.label)
+          availability => AggregatableField(availability.id, availability.label)
         )
         .toList
   }
