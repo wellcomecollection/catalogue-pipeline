@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-11-25T14:39:18.993086Z",
+  "createdAt" : "2024-11-13T08:43:26.579361Z",
   "id" : "gms4hdjm",
   "document" : {
     "debug" : {
@@ -142,24 +142,18 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "z",
-          "label" : "Web sites"
-        }
+        "{\"id\":\"z\",\"label\":\"Web sites\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
-        {
-          "id" : "hQnFei9OwD",
-          "label" : "hQnFei9OwD"
-        }
+      "subjects.label" : [
+        "{\"label\":\"hQnFei9OwD\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-21T12:05:51.293889Z",
+  "createdAt" : "2024-11-13T08:43:26.533471Z",
   "id" : "02pauy4p",
   "document" : {
     "debug" : {
@@ -121,20 +121,17 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "h",
-          "label" : "Archives and manuscripts"
-        }
+        "{\"id\":\"h\",\"label\":\"Archives and manuscripts\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-11-21T12:05:51.236665Z",
+  "createdAt" : "2024-11-13T08:43:26.471194Z",
   "id" : "giiyodfc",
   "document" : {
     "debug" : {
@@ -123,19 +123,16 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
-        {
-          "id" : "eng",
-          "label" : "English"
-        }
+        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}"
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-21T12:05:51.291482Z",
+  "createdAt" : "2024-11-13T08:43:26.529965Z",
   "id" : "btrlxjc4",
   "document" : {
     "debug" : {
@@ -121,20 +121,17 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "e",
-          "label" : "Maps"
-        }
+        "{\"id\":\"e\",\"label\":\"Maps\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

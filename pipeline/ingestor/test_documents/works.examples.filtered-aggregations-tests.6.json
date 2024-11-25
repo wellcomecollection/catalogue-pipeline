@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-11-21T12:05:51.409827Z",
+  "createdAt" : "2024-11-13T08:43:26.644979Z",
   "id" : "7dzlu1am",
   "document" : {
     "debug" : {
@@ -127,24 +127,18 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "d",
-          "label" : "Journals"
-        }
+        "{\"id\":\"d\",\"label\":\"Journals\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
-        {
-          "id" : "que",
-          "label" : "Quechua"
-        }
+        "{\"id\":\"que\",\"label\":\"Quechua\",\"type\":\"Language\"}"
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

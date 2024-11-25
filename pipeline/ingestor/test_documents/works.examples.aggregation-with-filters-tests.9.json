@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-11-25T14:39:18.989449Z",
+  "createdAt" : "2024-11-13T08:43:26.574285Z",
   "id" : "x1muoi8t",
   "document" : {
     "debug" : {
@@ -142,24 +142,18 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "p",
-          "label" : "Mixed materials"
-        }
+        "{\"id\":\"p\",\"label\":\"Mixed materials\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
-        {
-          "id" : "S4hioTvwQl",
-          "label" : "S4hioTvwQl"
-        }
+      "subjects.label" : [
+        "{\"label\":\"S4hioTvwQl\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-11-21T12:05:51.420813Z",
+  "createdAt" : "2024-11-13T08:43:26.655994Z",
   "id" : "iopgf0nj",
   "document" : {
     "debug" : {
@@ -160,27 +160,21 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
-        {
-          "id" : "ogl",
-          "label" : "Open Government Licence"
-        }
+        "{\"id\":\"ogl\",\"label\":\"Open Government Licence\",\"url\":\"http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\"type\":\"License\"}"
       ],
       "availabilities" : [
-        {
-          "id" : "closed-stores",
-          "label" : "Closed stores"
-        }
+        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
       ]
     },
     "filterableValues" : {

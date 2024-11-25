@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-21T12:05:51.294521Z",
+  "createdAt" : "2024-11-13T08:43:26.534193Z",
   "id" : "vwzsza7o",
   "document" : {
     "debug" : {
@@ -121,20 +121,17 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "n",
-          "label" : "Film"
-        }
+        "{\"id\":\"n\",\"label\":\"Film\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

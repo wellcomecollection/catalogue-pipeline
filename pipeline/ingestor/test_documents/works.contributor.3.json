@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-11-25T14:39:18.930036Z",
+  "createdAt" : "2024-11-13T08:43:26.512223Z",
   "id" : "mudchggm",
   "document" : {
     "debug" : {
@@ -139,23 +139,17 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
-        {
-          "id" : "MI5",
-          "label" : "MI5"
-        },
-        {
-          "id" : "GCHQ",
-          "label" : "GCHQ"
-        }
+      "contributors.agent.label" : [
+        "{\"label\":\"MI5\",\"type\":\"Organisation\"}",
+        "{\"label\":\"GCHQ\",\"type\":\"Organisation\"}"
       ],
       "items.locations.license" : [
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-11-25T14:39:19.023536Z",
+  "createdAt" : "2024-11-13T08:43:26.613143Z",
   "id" : "ppcdklf9",
   "document" : {
     "debug" : {
@@ -192,27 +192,18 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
-        {
-          "id" : "London (England)",
-          "label" : "London (England)"
-        },
-        {
-          "id" : "Psychology, Pathological",
-          "label" : "Psychology, Pathological"
-        },
-        {
-          "id" : "darwin01",
-          "label" : "Darwin \"Jones\", Charles"
-        }
+      "subjects.label" : [
+        "{\"label\":\"London (England)\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Subject\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

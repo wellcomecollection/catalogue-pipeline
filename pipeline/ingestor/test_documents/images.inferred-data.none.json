@@ -1,20 +1,19 @@
 {
   "description" : "an image without any inferred data",
-  "createdAt" : "2024-11-21T12:19:00.231263Z",
-  "id" : "ufcikdvs",
+  "createdAt" : "2024-11-14T14:37:56.423442Z",
+  "id" : "gtanwhoe",
   "document" : {
-    "modifiedTime" : "1993-08-20T09:44:34Z",
+    "modifiedTime" : "2033-11-17T21:40:10Z",
     "display" : {
-      "id" : "ufcikdvs",
+      "id" : "gtanwhoe",
       "thumbnail" : {
         "locationType" : {
           "id" : "iiif-image",
           "label" : "IIIF Image API",
           "type" : "LocationType"
         },
-        "url" : "https://iiif.wellcomecollection.org/image/OGW.jpg/info.json",
-        "credit" : "Credit line: 8iiZ9XU0",
-        "linkText" : "Link text: rlvl17FE",
+        "url" : "https://iiif.wellcomecollection.org/image/pkk.jpg/info.json",
+        "linkText" : "Link text: O63XqJ",
         "license" : {
           "id" : "cc-by",
           "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -32,9 +31,8 @@
             "label" : "IIIF Image API",
             "type" : "LocationType"
           },
-          "url" : "https://iiif.wellcomecollection.org/image/OGW.jpg/info.json",
-          "credit" : "Credit line: 8iiZ9XU0",
-          "linkText" : "Link text: rlvl17FE",
+          "url" : "https://iiif.wellcomecollection.org/image/pkk.jpg/info.json",
+          "linkText" : "Link text: O63XqJ",
           "license" : {
             "id" : "cc-by",
             "label" : "Attribution 4.0 International (CC BY 4.0)",
@@ -49,8 +47,8 @@
       "aspectRatio" : 1.0,
       "averageColor" : "#ffffff",
       "source" : {
-        "id" : "1dxubvgl",
-        "title" : "title-mMQJoSsmZw",
+        "id" : "4nevz1ct",
+        "title" : "title-LU07b2voqu",
         "contributors" : [
         ],
         "languages" : [
@@ -64,7 +62,7 @@
       "type" : "Image"
     },
     "query" : {
-      "id" : "ufcikdvs",
+      "id" : "gtanwhoe",
       "source" : {
         "collectionPath.label" : null,
         "collectionPath.path" : null,
@@ -76,12 +74,12 @@
         "edition" : null,
         "genres.concepts.label" : [
         ],
-        "id" : "1dxubvgl",
-        "sourceIdentifier.value" : "2qrsqf64ot",
+        "id" : "4nevz1ct",
+        "sourceIdentifier.value" : "Vu82EGkZo1",
         "identifiers.value" : [
-          "2qrsqf64ot",
-          "Hk07S36Yqb",
-          "hr8ZyzBT1J"
+          "Vu82EGkZo1",
+          "5ONYuMkgt1",
+          "beQTH6WifJ"
         ],
         "images.id" : [
         ],
@@ -106,17 +104,17 @@
         "referenceNumber" : null,
         "subjects.concepts.label" : [
         ],
-        "title" : "title-mMQJoSsmZw"
+        "title" : "title-LU07b2voqu"
       }
     },
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent" : [
+      "source.contributors.agent.label" : [
       ],
-      "source.genres" : [
+      "source.genres.label" : [
       ],
-      "source.subjects" : [
+      "source.subjects.label" : [
       ]
     },
     "filterableValues" : {
@@ -145,11 +143,7 @@
       ]
     },
     "vectorValues" : {
-      "features1" : [
-      ],
-      "features2" : [
-      ],
-      "reducedFeatures" : [
+      "features" : [
       ],
       "paletteEmbedding" : [
       ]

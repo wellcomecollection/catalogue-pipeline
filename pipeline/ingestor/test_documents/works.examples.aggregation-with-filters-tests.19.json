@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-11-25T14:39:18.993472Z",
+  "createdAt" : "2024-11-13T08:43:26.579805Z",
   "id" : "kw3kldau",
   "document" : {
     "debug" : {
@@ -142,24 +142,18 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "v",
-          "label" : "E-books"
-        }
+        "{\"id\":\"v\",\"label\":\"E-books\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
-        {
-          "id" : "hQnFei9OwD",
-          "label" : "hQnFei9OwD"
-        }
+      "subjects.label" : [
+        "{\"label\":\"hQnFei9OwD\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

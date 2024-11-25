@@ -1,6 +1,6 @@
 {
   "description" : "a work with optional top-level fields",
-  "createdAt" : "2024-11-21T12:05:51.006941Z",
+  "createdAt" : "2024-11-13T08:43:26.245788Z",
   "id" : "gsruvqwf",
   "document" : {
     "debug" : {
@@ -119,15 +119,15 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

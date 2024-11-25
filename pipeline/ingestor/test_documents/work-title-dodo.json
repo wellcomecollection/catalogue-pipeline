@@ -1,6 +1,6 @@
 {
   "description" : "a work with 'dodo' in the title",
-  "createdAt" : "2024-11-21T12:05:51.019270Z",
+  "createdAt" : "2024-11-13T08:43:26.256912Z",
   "id" : "ezagik4b",
   "document" : {
     "debug" : {
@@ -118,15 +118,15 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

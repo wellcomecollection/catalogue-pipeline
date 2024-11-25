@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-11-21T12:05:51.419423Z",
+  "createdAt" : "2024-11-13T08:43:26.653938Z",
   "id" : "fntlrk7n",
   "document" : {
     "debug" : {
@@ -154,23 +154,20 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],
       "availabilities" : [
-        {
-          "id" : "open-shelves",
-          "label" : "Open shelves"
-        }
+        "{\"id\":\"open-shelves\",\"label\":\"Open shelves\",\"type\":\"Availability\"}"
       ]
     },
     "filterableValues" : {

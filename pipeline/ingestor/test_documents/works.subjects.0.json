@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-11-25T14:39:18.916644Z",
+  "createdAt" : "2024-11-13T08:43:26.493183Z",
   "id" : "njj1gugw",
   "document" : {
     "debug" : {
@@ -138,19 +138,16 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
-        {
-          "id" : "paleoNeuroBiology",
-          "label" : "paleoNeuroBiology"
-        }
+      "subjects.label" : [
+        "{\"label\":\"paleoNeuroBiology\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

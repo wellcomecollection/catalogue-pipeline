@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-21T12:05:51.290976Z",
+  "createdAt" : "2024-11-13T08:43:26.529316Z",
   "id" : "jminkez1",
   "document" : {
     "debug" : {
@@ -121,20 +121,17 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "q",
-          "label" : "Digital Images"
-        }
+        "{\"id\":\"q\",\"label\":\"Digital Images\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

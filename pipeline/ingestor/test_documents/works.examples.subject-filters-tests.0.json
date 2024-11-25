@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-11-21T12:05:51.376019Z",
+  "createdAt" : "2024-11-13T08:43:26.610661Z",
   "id" : "kx6ceruj",
   "document" : {
     "debug" : {
@@ -159,19 +159,16 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
-        {
-          "id" : "sanitati",
-          "label" : "Sanitation"
-        }
+      "subjects.label" : [
+        "{\"label\":\"Sanitation\",\"concepts\":[],\"type\":\"Subject\"}"
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

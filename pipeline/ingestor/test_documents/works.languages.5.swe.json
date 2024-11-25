@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-11-21T12:05:51.241047Z",
+  "createdAt" : "2024-11-13T08:43:26.475246Z",
   "id" : "olhrstrz",
   "document" : {
     "debug" : {
@@ -123,19 +123,16 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
-        {
-          "id" : "swe",
-          "label" : "Swedish"
-        }
+        "{\"id\":\"swe\",\"label\":\"Swedish\",\"type\":\"Language\"}"
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

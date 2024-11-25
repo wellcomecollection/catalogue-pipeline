@@ -1,6 +1,6 @@
 {
   "description" : "items with different location types",
-  "createdAt" : "2024-11-21T12:05:51.328007Z",
+  "createdAt" : "2024-11-13T08:43:26.564398Z",
   "id" : "pfnxzwsg",
   "document" : {
     "debug" : {
@@ -173,25 +173,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
-        {
-          "id" : "cc-by",
-          "label" : "Attribution 4.0 International (CC BY 4.0)"
-        },
-        {
-          "id" : "cc-by",
-          "label" : "Attribution 4.0 International (CC BY 4.0)"
-        }
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}",
+        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
       ],
       "availabilities" : [
       ]

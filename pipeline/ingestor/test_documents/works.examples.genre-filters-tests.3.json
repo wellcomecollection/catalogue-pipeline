@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-11-21T12:05:51.361948Z",
+  "createdAt" : "2024-11-13T08:43:26.603672Z",
   "id" : "vr490vab",
   "document" : {
     "debug" : {
@@ -174,19 +174,16 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
-        {
-          "id" : "lmpakqz5",
-          "label" : "Darwin \"Jones\", Charles"
-        }
+      "genres.label" : [
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Genre\"}"
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

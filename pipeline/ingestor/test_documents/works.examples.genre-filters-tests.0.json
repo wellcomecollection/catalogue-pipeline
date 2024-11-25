@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-11-21T12:05:51.361152Z",
+  "createdAt" : "2024-11-13T08:43:26.602371Z",
   "id" : "xowd5kj1",
   "document" : {
     "debug" : {
@@ -157,19 +157,16 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
-        {
-          "id" : "g00dcafe",
-          "label" : "Annual reports"
-        }
+      "genres.label" : [
+        "{\"label\":\"Annual reports\",\"concepts\":[],\"type\":\"Genre\"}"
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

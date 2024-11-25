@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-25T14:39:19.029861Z",
+  "createdAt" : "2024-11-13T08:43:26.620588Z",
   "id" : "xuni2iqa",
   "document" : {
     "debug" : {
@@ -139,23 +139,17 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
       ],
-      "contributors.agent" : [
-        {
-          "id" : "Bath, Patricia",
-          "label" : "Bath, Patricia"
-        },
-        {
-          "id" : "Darwin \"Jones\", Charles",
-          "label" : "Darwin \"Jones\", Charles"
-        }
+      "contributors.agent.label" : [
+        "{\"label\":\"Bath, Patricia\",\"type\":\"Person\"}",
+        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"type\":\"Person\"}"
       ],
       "items.locations.license" : [
       ],

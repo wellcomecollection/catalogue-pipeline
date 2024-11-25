@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-11-21T12:05:51.408891Z",
+  "createdAt" : "2024-11-13T08:43:26.643763Z",
   "id" : "z5orxsbq",
   "document" : {
     "debug" : {
@@ -127,24 +127,18 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "k",
-          "label" : "Pictures"
-        }
+        "{\"id\":\"k\",\"label\":\"Pictures\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
-        {
-          "id" : "que",
-          "label" : "Quechua"
-        }
+        "{\"id\":\"que\",\"label\":\"Quechua\",\"type\":\"Language\"}"
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],

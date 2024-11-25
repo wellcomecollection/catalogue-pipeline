@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-11-21T12:05:51.410662Z",
+  "createdAt" : "2024-11-13T08:43:26.645904Z",
   "id" : "svnlbwse",
   "document" : {
     "debug" : {
@@ -127,24 +127,18 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        {
-          "id" : "i",
-          "label" : "Audio"
-        }
+        "{\"id\":\"i\",\"label\":\"Audio\",\"type\":\"Format\"}"
       ],
-      "genres" : [
+      "genres.label" : [
       ],
       "production.dates" : [
       ],
-      "subjects" : [
+      "subjects.label" : [
       ],
       "languages" : [
-        {
-          "id" : "che",
-          "label" : "Chechen"
-        }
+        "{\"id\":\"che\",\"label\":\"Chechen\",\"type\":\"Language\"}"
       ],
-      "contributors.agent" : [
+      "contributors.agent.label" : [
       ],
       "items.locations.license" : [
       ],
