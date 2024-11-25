@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-11-21T12:05:51.335716Z",
+  "createdAt" : "2024-11-25T14:39:18.989858Z",
   "id" : "lusxgqii",
   "document" : {
     "debug" : {
@@ -153,7 +153,7 @@
       ],
       "subjects" : [
         {
-          "id" : null,
+          "id" : "S4hioTvwQl",
           "label" : "S4hioTvwQl"
         }
       ],

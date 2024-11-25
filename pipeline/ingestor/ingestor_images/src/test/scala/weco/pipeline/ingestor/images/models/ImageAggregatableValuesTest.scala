@@ -2,7 +2,7 @@ package weco.pipeline.ingestor.images.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.ingestor.common.models.AggregatableIdLabel
+import weco.pipeline.ingestor.common.models.AggregatableField
 
 class ImageAggregatableValuesTest
     extends AnyFunSpec
@@ -12,27 +12,27 @@ class ImageAggregatableValuesTest
   it("creates aggregatable values from an image") {
     ImageAggregatableValues(testImage) shouldBe ImageAggregatableValues(
       licenses = List(
-        AggregatableIdLabel(
-          Some("cc-by"),
+        AggregatableField(
+          "cc-by",
           "Attribution 4.0 International (CC BY 4.0)"
         )
       ),
       contributors = List(
-        AggregatableIdLabel(Some("npanm646"), "M.A.C.T"),
-        AggregatableIdLabel(
-          Some("wfkwqmmx"),
+        AggregatableField("npanm646", "M.A.C.T"),
+        AggregatableField(
+          "wfkwqmmx",
           "McGlashan, Alan Fleming, 1898-1997"
         )
       ),
       genres = List(
-        AggregatableIdLabel(Some("h5fvmn9u"), "Ink drawings"),
-        AggregatableIdLabel(Some("tgxvuh8x"), "Drawings")
+        AggregatableField("h5fvmn9u", "Ink drawings"),
+        AggregatableField("tgxvuh8x", "Drawings")
       ),
       subjects = List(
-        AggregatableIdLabel(Some("bse2dtxc"), "Jungian psychology"),
-        AggregatableIdLabel(Some("hjw49bkh"), "Dreams"),
-        AggregatableIdLabel(
-          Some("wfkwqmmx"),
+        AggregatableField("bse2dtxc", "Jungian psychology"),
+        AggregatableField("hjw49bkh", "Dreams"),
+        AggregatableField(
+          "wfkwqmmx",
           "McGlashan, Alan Fleming, 1898-1997"
         )
       )

@@ -3,19 +3,19 @@ package weco.pipeline.ingestor.works.models
 import io.circe.generic.extras.JsonKey
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.pipeline.ingestor.common.models.{
-  AggregatableIdLabel,
+  AggregatableField,
   AggregatableValues
 }
 
 case class WorkAggregatableValues(
-  @JsonKey("workType") workTypes: List[AggregatableIdLabel],
-  @JsonKey("genres") genres: List[AggregatableIdLabel],
-  @JsonKey("production.dates") productionDates: List[AggregatableIdLabel],
-  @JsonKey("subjects") subjects: List[AggregatableIdLabel],
-  @JsonKey("languages") languages: List[AggregatableIdLabel],
-  @JsonKey("contributors.agent") contributors: List[AggregatableIdLabel],
-  @JsonKey("items.locations.license") itemLicenses: List[AggregatableIdLabel],
-  @JsonKey("availabilities") availabilities: List[AggregatableIdLabel]
+  @JsonKey("workType") workTypes: List[AggregatableField],
+  @JsonKey("genres") genres: List[AggregatableField],
+  @JsonKey("production.dates") productionDates: List[AggregatableField],
+  @JsonKey("subjects") subjects: List[AggregatableField],
+  @JsonKey("languages") languages: List[AggregatableField],
+  @JsonKey("contributors.agent") contributors: List[AggregatableField],
+  @JsonKey("items.locations.license") itemLicenses: List[AggregatableField],
+  @JsonKey("availabilities") availabilities: List[AggregatableField]
 )
 
 case object WorkAggregatableValues extends AggregatableValues {

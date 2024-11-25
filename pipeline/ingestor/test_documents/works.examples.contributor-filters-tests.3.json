@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-21T12:05:51.384491Z",
+  "createdAt" : "2024-11-25T14:39:19.029515Z",
   "id" : "816tru6j",
   "document" : {
     "debug" : {
@@ -138,7 +138,7 @@
       ],
       "contributors.agent" : [
         {
-          "id" : null,
+          "id" : "Darwin \"Jones\", Charles",
           "label" : "Darwin \"Jones\", Charles"
         }
       ],

@@ -1,6 +1,6 @@
 {
   "description" : "works with different subjects",
-  "createdAt" : "2024-11-21T12:05:51.261136Z",
+  "createdAt" : "2024-11-25T14:39:18.918070Z",
   "id" : "opaupm4b",
   "document" : {
     "debug" : {
@@ -165,11 +165,11 @@
       ],
       "subjects" : [
         {
-          "id" : null,
+          "id" : "paleoNeuroBiology",
           "label" : "paleoNeuroBiology"
         },
         {
-          "id" : null,
+          "id" : "realAnalysis",
           "label" : "realAnalysis"
         }
       ],

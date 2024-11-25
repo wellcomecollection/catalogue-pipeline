@@ -1,6 +1,6 @@
 {
   "description" : "a list of work with all the include-able fields",
-  "createdAt" : "2024-11-21T12:05:51.193788Z",
+  "createdAt" : "2024-11-25T14:39:18.848303Z",
   "id" : "kspmagtl",
   "document" : {
     "debug" : {
@@ -618,11 +618,11 @@
       ],
       "subjects" : [
         {
-          "id" : null,
+          "id" : "Uauios0IzD",
           "label" : "Uauios0IzD"
         },
         {
-          "id" : null,
+          "id" : "6n2QtjPUbf",
           "label" : "6n2QtjPUbf"
         }
       ],
@@ -642,11 +642,11 @@
       ],
       "contributors.agent" : [
         {
-          "id" : null,
+          "id" : "person-h9jhXW",
           "label" : "person-h9jhXW"
         },
         {
-          "id" : null,
+          "id" : "person-QdWhUu",
           "label" : "person-QdWhUu"
         }
       ],

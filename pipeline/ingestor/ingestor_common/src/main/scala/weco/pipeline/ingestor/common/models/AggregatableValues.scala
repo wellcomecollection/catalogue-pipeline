@@ -8,37 +8,32 @@ import java.time.{LocalDate, ZoneOffset}
 
 trait AggregatableValues {
   implicit class WorkDataOps(workData: WorkData[DataState.Identified]) {
-    def genreAggregatableValues: List[AggregatableIdLabel] =
+    def genreAggregatableValues: List[AggregatableField] =
       workData.genres.map(
         genre =>
-          AggregatableIdLabel.fromIdState(
+          AggregatableField.fromIdState(
             genre.concepts.headOption.map(_.id),
             genre.label
           )
       )
 
-    def subjectAggregatableValues: List[AggregatableIdLabel] =
+    def subjectAggregatableValues: List[AggregatableField] =
       workData.subjects.map(
-        subject =>
-          AggregatableIdLabel.fromIdState(Some(subject.id), subject.label)
+        subject => AggregatableField.fromIdState(Some(subject.id), subject.label)
       )
 
-    def contributorAggregatableValues: List[AggregatableIdLabel] =
+    def contributorAggregatableValues: List[AggregatableField] =
       workData.contributors
         .map(_.agent)
-        .map(
-          agent => AggregatableIdLabel.fromIdState(Some(agent.id), agent.label)
-        )
+        .map(agent => AggregatableField.fromIdState(Some(agent.id), agent.label))
 
-    def licenseAggregatableValues: List[AggregatableIdLabel] =
+    def licenseAggregatableValues: List[AggregatableField] =
       workData.items
         .flatMap(_.locations)
         .flatMap(_.license)
-        .map(
-          license => AggregatableIdLabel.fromId(Some(license.id), license.label)
-        )
+        .map(license => AggregatableField(license.id, license.label))
 
-    def languageAggregatableValues: List[AggregatableIdLabel] =
+    def languageAggregatableValues: List[AggregatableField] =
       workData.languages
         .map(
           lang =>
@@ -53,16 +48,11 @@ trait AggregatableValues {
             }
         )
         .distinct
-        .map(
-          language =>
-            AggregatableIdLabel.fromId(Some(language.id), language.label)
-        )
+        .map(language => AggregatableField(language.id, language.label))
 
-    def workTypeAggregatableValues: List[AggregatableIdLabel] =
+    def workTypeAggregatableValues: List[AggregatableField] =
       workData.format.toList
-        .map(
-          format => AggregatableIdLabel.fromId(Some(format.id), format.label)
-        )
+        .map(format => AggregatableField(format.id, format.label))
 
     // Note: this is based on the previous Elasticsearch behaviour, which aggregated over
     // the start date of the periods.
@@ -71,7 +61,7 @@ trait AggregatableValues {
     // or if it's the best we could squeeze into Elasticsearch terms aggregations.
     // I'm going to leave it as-is for now, but this is a note that we can revisit this
     // (and other aggregations) at some point, because this approach gives us more flexibility.
-    def productionDateAggregatableValues: List[AggregatableIdLabel] =
+    def productionDateAggregatableValues: List[AggregatableField] =
       workData.production
         .flatMap(_.dates)
         .flatMap(_.range)
@@ -87,19 +77,16 @@ trait AggregatableValues {
           range => LocalDate.ofInstant(range.from, ZoneOffset.UTC).getYear
         )
         .map(
-          startYear =>
-            AggregatableIdLabel
-              .fromId(None: Option[String], label = startYear.toString)
+          startYear => AggregatableField.fromLabel(label = startYear.toString)
         )
   }
 
   implicit class AvailabilityOps(availabilities: Set[Availability]) {
-    def aggregatableValues: List[AggregatableIdLabel] =
+    def aggregatableValues: List[AggregatableField] =
       availabilities
         .map(
           availability =>
-            AggregatableIdLabel
-              .fromId(Some(availability.id), availability.label)
+            AggregatableField(availability.id, availability.label)
         )
         .toList
   }

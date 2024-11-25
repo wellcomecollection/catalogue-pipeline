@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2024-11-21T12:19:00.195780Z",
+  "createdAt" : "2024-11-25T14:41:26.207532Z",
   "id" : "q7isn7gh",
   "document" : {
     "modifiedTime" : "2055-10-11T18:35:24Z",
@@ -130,11 +130,11 @@
       ],
       "source.contributors.agent" : [
         {
-          "id" : null,
+          "id" : "carrots",
           "label" : "carrots"
         },
         {
-          "id" : null,
+          "id" : "parrots",
           "label" : "parrots"
         }
       ],

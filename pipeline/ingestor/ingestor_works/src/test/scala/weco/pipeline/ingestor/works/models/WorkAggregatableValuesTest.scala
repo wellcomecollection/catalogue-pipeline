@@ -10,7 +10,7 @@ import weco.catalogue.internal_model.work.generators.{
   ProductionEventGenerators
 }
 import weco.catalogue.internal_model.work._
-import weco.pipeline.ingestor.common.models.AggregatableIdLabel
+import weco.pipeline.ingestor.common.models.AggregatableField
 import weco.pipeline.ingestor.models.IngestorTestData
 
 class WorkAggregatableValuesTest
@@ -26,35 +26,35 @@ class WorkAggregatableValuesTest
 
   it("creates aggregatable values") {
     testWorkAggregatableValues shouldBe WorkAggregatableValues(
-      workTypes = List(AggregatableIdLabel(Some("k"), "Pictures")),
+      workTypes = List(AggregatableField("k", "Pictures")),
       genres = List(
-        AggregatableIdLabel(Some("h5fvmn9u"), "Ink drawings"),
-        AggregatableIdLabel(Some("tgxvuh8x"), "Drawings")
+        AggregatableField("h5fvmn9u", "Ink drawings"),
+        AggregatableField("tgxvuh8x", "Drawings")
       ),
       productionDates = List(
-        AggregatableIdLabel(None: Option[String], "1970")
+        AggregatableField.fromLabel("1970")
       ),
       subjects = List(
-        AggregatableIdLabel(Some("bse2dtxc"), "Jungian psychology"),
-        AggregatableIdLabel(Some("hjw49bkh"), "Dreams"),
-        AggregatableIdLabel(
-          Some("wfkwqmmx"),
+        AggregatableField("bse2dtxc", "Jungian psychology"),
+        AggregatableField("hjw49bkh", "Dreams"),
+        AggregatableField(
+          "wfkwqmmx",
           "McGlashan, Alan Fleming, 1898-1997"
         )
       ),
       languages = List(
-        AggregatableIdLabel(Some("eng"), "English")
+        AggregatableField("eng", "English")
       ),
       contributors = List(
-        AggregatableIdLabel(Some("npanm646"), "M.A.C.T"),
-        AggregatableIdLabel(Some("wfkwqmmx"), "McGlashan, Alan Fleming, 1898-1997")
+        AggregatableField("npanm646", "M.A.C.T"),
+        AggregatableField("wfkwqmmx", "McGlashan, Alan Fleming, 1898-1997")
       ),
       itemLicenses = List(
-        AggregatableIdLabel(Some("cc-by"), "Attribution 4.0 International (CC BY 4.0)"),
+        AggregatableField("cc-by", "Attribution 4.0 International (CC BY 4.0)"),
       ),
       availabilities = List(
-        AggregatableIdLabel(Some("closed-stores"), "Closed stores"),
-        AggregatableIdLabel(Some("online"), "Online"),
+        AggregatableField("closed-stores", "Closed stores"),
+        AggregatableField("online", "Online"),
       )
     )
   }
@@ -72,7 +72,7 @@ class WorkAggregatableValuesTest
     )
 
     aggregatableValues.languages shouldBe List(
-      AggregatableIdLabel(Some("chi"), "Chinese"),
+      AggregatableField("chi", "Chinese"),
     )
   }
 
@@ -93,7 +93,7 @@ class WorkAggregatableValuesTest
           )
         )
       ).subjects shouldBe List(
-        AggregatableIdLabel(None, "salty sandwiches"),
+        AggregatableField.fromLabel("salty sandwiches"),
       )
     }
 
@@ -111,7 +111,7 @@ class WorkAggregatableValuesTest
           )
         )
       ).contributors shouldBe List(
-        AggregatableIdLabel(None, "Pablo Picasso"),
+        AggregatableField.fromLabel("Pablo Picasso"),
       )
     }
   }

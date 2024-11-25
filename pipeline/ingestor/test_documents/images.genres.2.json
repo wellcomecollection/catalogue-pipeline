@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2024-11-21T12:19:00.219180Z",
+  "createdAt" : "2024-11-25T14:41:26.245994Z",
   "id" : "kcqsym0i",
   "document" : {
     "modifiedTime" : "2006-06-11T06:02:02Z",
@@ -132,15 +132,15 @@
       ],
       "source.genres" : [
         {
-          "id" : null,
+          "id" : "Emu entrepreneurship",
           "label" : "Emu entrepreneurship"
         },
         {
-          "id" : null,
+          "id" : "Falcon finances",
           "label" : "Falcon finances"
         },
         {
-          "id" : null,
+          "id" : "Carrot counselling",
           "label" : "Carrot counselling"
         }
       ],

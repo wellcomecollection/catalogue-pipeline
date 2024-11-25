@@ -1,6 +1,6 @@
 {
   "description" : "an image with every include",
-  "createdAt" : "2024-11-21T12:19:00.283128Z",
+  "createdAt" : "2024-11-25T14:41:26.343150Z",
   "id" : "wp52vobn",
   "document" : {
     "modifiedTime" : "1959-06-25T19:38:02Z",
@@ -192,11 +192,11 @@
       ],
       "source.contributors.agent" : [
         {
-          "id" : null,
+          "id" : "Adrian Aardvark",
           "label" : "Adrian Aardvark"
         },
         {
-          "id" : null,
+          "id" : "Beatrice Buffalo",
           "label" : "Beatrice Buffalo"
         }
       ],
