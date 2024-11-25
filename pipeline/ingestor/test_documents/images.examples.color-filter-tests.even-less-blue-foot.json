@@ -169,15 +169,27 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        }
       ],
-      "source.contributors.agent.label": [],
-      "source.genres.label": [
-        "{\"label\":\"Gouaches\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Paintings\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.contributors.agent": [],
+      "source.genres": [
+        {
+          "id": "rs4dpxyv",
+          "label": "Gouaches"
+        },
+        {
+          "id": "q9b2ep5v",
+          "label": "Paintings"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Yoga\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "wku5d45h",
+          "label": "Yoga"
+        }
       ]
     },
     "filterableValues": {

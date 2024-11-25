@@ -230,17 +230,35 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"inc\",\"label\":\"In copyright\",\"url\":\"http://rightsstatements.org/vocab/InC/1.0/\",\"type\":\"License\"}"
+        {
+          "id": "inc",
+          "label": "In copyright"
+        }
       ],
-      "source.contributors.agent.label": [],
-      "source.genres.label": [
-        "{\"label\":\"Posters\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Lithographs\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.contributors.agent": [],
+      "source.genres": [
+        {
+          "id": "whcsuusy",
+          "label": "Posters"
+        },
+        {
+          "id": "fmydsuw2",
+          "label": "Lithographs"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Diabetes\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Mycetoma\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Kenya\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "pjhy9w6d",
+          "label": "Diabetes"
+        },
+        {
+          "id": "wqqmkzb3",
+          "label": "Mycetoma"
+        },
+        {
+          "id": "fjshhu4m",
+          "label": "Kenya"
+        }
       ]
     },
     "filterableValues": {

@@ -241,22 +241,55 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"d9u9jqys\",\"label\":\"Dr. Caroline Pope and William Parish, University of Bristol\",\"type\":\"Agent\"}"
+      "source.contributors.agent": [
+        {
+          "id": "d9u9jqys",
+          "label": "Dr. Caroline Pope and William Parish, University of Bristol"
+        }
       ],
-      "source.genres.label": [],
-      "source.subjects.label": [
-        "{\"label\":\"Glassware\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Conical flask\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Measuring cylinder\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Experiment\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Heat\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Red\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Yellow\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"White\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Black\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.genres": [],
+      "source.subjects": [
+        {
+          "id": "s2vfajqb",
+          "label": "Glassware"
+        },
+        {
+          "id": "duc2b442",
+          "label": "Conical flask"
+        },
+        {
+          "id": "zbh2g54f",
+          "label": "Measuring cylinder"
+        },
+        {
+          "id": "nuh2cqeu",
+          "label": "Experiment"
+        },
+        {
+          "id": "q95qxgqd",
+          "label": "Heat"
+        },
+        {
+          "id": "pg4pfxze",
+          "label": "Red"
+        },
+        {
+          "id": "gmg9ew4m",
+          "label": "Yellow"
+        },
+        {
+          "id": "p2bcbxnc",
+          "label": "White"
+        },
+        {
+          "id": "asj4hhdn",
+          "label": "Black"
+        }
       ]
     },
     "filterableValues": {

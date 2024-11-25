@@ -225,19 +225,40 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"wzs8agfx\",\"label\":\"Jobbins, John Richard, active 1839-1864\",\"type\":\"Person\"}",
-        "{\"id\":\"qwmdm7rg\",\"label\":\"Green, James, 1781-1849\",\"type\":\"Person\"}"
+      "source.contributors.agent": [
+        {
+          "id": "wzs8agfx",
+          "label": "Jobbins, John Richard, active 1839-1864"
+        },
+        {
+          "id": "qwmdm7rg",
+          "label": "Green, James, 1781-1849"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Lithographs\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "fmydsuw2",
+          "label": "Lithographs"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Hospitals - England - 19th century\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Accrington (England)\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Peel Institution (Accrington, England)\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "rz2yv25k",
+          "label": "Hospitals - England - 19th century"
+        },
+        {
+          "id": "jaek4vgf",
+          "label": "Accrington (England)"
+        },
+        {
+          "id": "twghfmqm",
+          "label": "Peel Institution (Accrington, England)"
+        }
       ]
     },
     "filterableValues": {

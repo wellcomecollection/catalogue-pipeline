@@ -201,18 +201,36 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"xff2rber\",\"label\":\"Lambert, J., active 1812-1851\",\"type\":\"Person\"}"
+      "source.contributors.agent": [
+        {
+          "id": "xff2rber",
+          "label": "Lambert, J., active 1812-1851"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Engravings\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "xff2rber",
+          "label": "Engravings"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Hospitals\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Schools\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Christ's Hospital (London, England)\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "rz2yv25k",
+          "label": "Hospitals"
+        },
+        {
+          "id": "c264c59j",
+          "label": "Schools"
+        },
+        {
+          "id": "wyzywkvq",
+          "label": "Christ's Hospital (London, England)"
+        }
       ]
     },
     "filterableValues": {

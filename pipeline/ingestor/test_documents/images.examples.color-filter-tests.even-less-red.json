@@ -232,18 +232,36 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"inc\",\"label\":\"In copyright\",\"url\":\"http://rightsstatements.org/vocab/InC/1.0/\",\"type\":\"License\"}"
+        {
+          "id": "inc",
+          "label": "In copyright"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"vmxx4ee7\",\"label\":\"Mead Johnson International\",\"type\":\"Organisation\"}"
+      "source.contributors.agent": [
+        {
+          "id": "vmxx4ee7",
+          "label": "Mead Johnson International"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Ephemera\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "ucmbnwkq",
+          "label": "Ephemera"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Infant Formula\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Bottle Feeding\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Mexico\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "xap87fpw",
+          "label": "Infant Formula"
+        },
+        {
+          "id": "yqg6f6vf",
+          "label": "Bottle Feeding"
+        },
+        {
+          "id": "gwjttuaz",
+          "label": "Mexico"
+        }
       ]
     },
     "filterableValues": {
