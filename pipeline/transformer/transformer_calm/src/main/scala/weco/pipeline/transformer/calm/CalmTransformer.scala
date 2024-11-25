@@ -2,21 +2,14 @@ package weco.pipeline.transformer.calm
 
 import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.identifiers._
-import weco.catalogue.internal_model.work.DeletedReason.{
-  DeletedFromSource,
-  SuppressedFromSource
-}
+import weco.catalogue.internal_model.work.DeletedReason.{DeletedFromSource, SuppressedFromSource}
 import weco.catalogue.internal_model.work.InvisibilityReason._
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.calm.CalmRecord
 import weco.pipeline.transformer.Transformer
 import weco.pipeline.transformer.calm.models.CalmTransformerException._
-import weco.pipeline.transformer.calm.models.{
-  CalmRecordOps,
-  CalmSourceData,
-  CalmTransformerException
-}
+import weco.pipeline.transformer.calm.models.{CalmRecordOps, CalmSourceData, CalmTransformerException}
 import weco.pipeline.transformer.calm.transformers._
 import weco.pipeline.transformer.result.Result
 import weco.pipeline.transformer.transformers.ParsedPeriod
@@ -154,7 +147,7 @@ object CalmTransformer
       format = Some(CalmFormat(record)),
       collectionPath = Some(collectionPath),
       referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
-      subjects = subjects(record),
+      subjects = CalmSubjects(record),
       languages = languages,
       items = CalmItems(record),
       contributors = CalmContributors(record),
@@ -259,17 +252,4 @@ object CalmTransformer
         )
     }
   }
-
-  def subjects(record: CalmRecord): List[Subject[IdState.Unminted]] =
-    record
-      .getList("Subject")
-      .map {
-        label =>
-          val normalisedLabel =
-            NormaliseText(label, whitelist = NormaliseText.none)
-          Subject(
-            label = normalisedLabel,
-            concepts = List(Concept(normalisedLabel))
-          )
-      }
 }
