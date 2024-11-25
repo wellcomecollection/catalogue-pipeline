@@ -13,14 +13,10 @@ class ImageVectorValuesTest
   it("creates vector values from an image") {
     inside(ImageVectorValues(testImage)) {
       case ImageVectorValues(
-            features1,
-            features2,
-            reducedFeatures,
+            features,
             paletteEmbedding
           ) =>
-        features1 shouldBe testImage.state.inferredData.features1
-        features2 shouldBe testImage.state.inferredData.features2
-        reducedFeatures shouldBe testImage.state.inferredData.reducedFeatures
+        features shouldBe testImage.state.inferredData.features
         paletteEmbedding shouldBe testImage.state.inferredData.paletteEmbedding
     }
   }

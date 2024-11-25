@@ -31,18 +31,13 @@ class ImagesIndexConfigTest
   it("cannot index an image with image vectors that are too long") {
     withLocalImagesIndex {
       implicit index =>
-        val features1 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-        val features2 = (0 until 3000).map(_ => Random.nextFloat() * 100).toList
-        val reducedFeatures =
-          (0 until 3000).map(_ => Random.nextFloat() * 100).toList
+        val features = (0 until 5000).map(_ => Random.nextFloat() * 100).toList
         val paletteEmbedding = randomUnitLengthVector(1000).toList
         val averageColorHex = Some(randomHexString)
         val aspectRatio = Some(Random.nextFloat())
         val image = createImageData.toAugmentedImageWith(
           inferredData = InferredData(
-            features1,
-            features2,
-            reducedFeatures,
+            features,
             paletteEmbedding,
             averageColorHex,
             aspectRatio
@@ -58,17 +53,13 @@ class ImagesIndexConfigTest
   it("cannot index an image with image vectors that are too short") {
     withLocalImagesIndex {
       implicit index =>
-        val features1 = List(2.0f)
-        val features2 = List(2.0f)
-        val reducedFeatures = List(2.0f)
+        val features = List(2.0f)
         val paletteEmbedding = randomUnitLengthVector(1000).toList
         val averageColorHex = Some(randomHexString)
         val aspectRatio = Some(Random.nextFloat())
         val image = createImageData.toAugmentedImageWith(
           inferredData = InferredData(
-            features1,
-            features2,
-            reducedFeatures,
+            features,
             paletteEmbedding,
             averageColorHex,
             aspectRatio

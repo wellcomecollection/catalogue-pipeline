@@ -77,9 +77,7 @@ class ManagerInferrerIntegrationTest
               id should be(image.state.canonicalId)
               inside(inferredData) {
                 case InferredData(
-                      features1,
-                      features2,
-                      reducedFeatures,
+                      features,
                       paletteEmbedding,
                       Some(averageColorHex),
                       aspectRatio
@@ -87,11 +85,8 @@ class ManagerInferrerIntegrationTest
                   // Note for future explorers: if a vector is the wrong length,
                   // make sure that the inferrer is encoding a list of single precision
                   // floats (ie float32/double) as that's what we're expecting to decode!
-                  features1 should have length 2048
-                  features2 should have length 2048
-                  forAll(features1 ++ features2) { _.isNaN shouldBe false }
-                  reducedFeatures should have length 1024
-                  forAll(reducedFeatures) { _.isNaN shouldBe false }
+                  features should have length 4096
+                  forAll(features) { _.isNaN shouldBe false }
                   paletteEmbedding should have length 1000
                   averageColorHex should have length 7
                   aspectRatio should not be empty
