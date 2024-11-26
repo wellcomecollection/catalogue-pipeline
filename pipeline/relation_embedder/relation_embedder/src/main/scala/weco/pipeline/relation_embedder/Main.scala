@@ -5,7 +5,7 @@ import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import weco.messaging.typesafe.SQSBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.typesafe.WellcomeTypesafeApp
@@ -15,7 +15,6 @@ import weco.pipeline_storage.elastic.ElasticIndexer
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
-
 object Main extends WellcomeTypesafeApp {
   runWithConfig {
     config: Config =>
@@ -35,14 +34,16 @@ object Main extends WellcomeTypesafeApp {
           index = Index(config.requireString(s"es.denormalised-works.index"))
         )
 
+      val batchWriter = new BatchIndexWriter(
+        workIndexer = workIndexer,
+        maxBatchWeight = config.requireInt("es.works.batch_size"),
+        maxBatchWait =
+          config.requireInt("es.works.flush_interval_seconds").seconds
+      )
+
       new RelationEmbedderWorkerService(
         sqsStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        msgSender = SNSBuilder
-          .buildSNSMessageSender(
-            config,
-            subject = "Sent from the relation_embedder"
-          ),
-        workIndexer = workIndexer,
+        downstream = Downstream(Some(config)),
         relationsService = new PathQueryRelationsService(
           esClient,
           identifiedIndex,
@@ -51,9 +52,7 @@ object Main extends WellcomeTypesafeApp {
           affectedWorksScroll =
             config.requireInt("es.works.scroll.affected_works")
         ),
-        indexBatchSize = config.requireInt("es.works.batch_size"),
-        indexFlushInterval =
-          config.requireInt("es.works.flush_interval_seconds").seconds
+        batchWriter = batchWriter
       )
   }
 }

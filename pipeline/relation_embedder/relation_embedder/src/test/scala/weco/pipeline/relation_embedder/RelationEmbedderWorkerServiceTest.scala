@@ -28,6 +28,7 @@ import weco.pipeline.relation_embedder.models._
 import weco.pipeline_storage.memory.MemoryIndexer
 
 import java.nio.charset.StandardCharsets
+import scala.util.Try
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
@@ -268,6 +269,13 @@ class RelationEmbedderWorkerServiceTest
                 withSQSStream[NotificationMessage, R](queuePair.queue) {
                   sqsStream =>
                     val messageSender = new MemoryMessageSender
+                    object MemoryDownstream extends Downstream {
+                      private val msgSender = messageSender
+
+                      override def notify(workId: String): Try[Unit] =
+                        Try(msgSender.send(workId))
+                    }
+
                     val denormalisedIndex =
                       mutable.Map.empty[String, Work[Denormalised]]
                     val relationsService =
@@ -278,13 +286,18 @@ class RelationEmbedderWorkerServiceTest
                           mergedIndex,
                           10
                         )
+                    val batchWriter = new BatchIndexWriter(
+                      workIndexer = new MemoryIndexer(denormalisedIndex),
+                      maxBatchWeight = 100,
+                      maxBatchWait = 1 milliseconds
+                    )
+
                     val workerService =
                       new RelationEmbedderWorkerService[String](
                         sqsStream = sqsStream,
-                        msgSender = messageSender,
-                        workIndexer = new MemoryIndexer(denormalisedIndex),
-                        relationsService = relationsService,
-                        indexFlushInterval = 1 milliseconds
+                        downstream = MemoryDownstream,
+                        batchWriter = batchWriter,
+                        relationsService = relationsService
                       )
                     workerService.run()
                     testWith((queuePair, denormalisedIndex, messageSender))
