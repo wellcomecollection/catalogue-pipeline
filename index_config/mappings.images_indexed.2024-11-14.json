@@ -6,6 +6,7 @@
         "locations": {
           "properties": {
             "license": {
+              "type": "nested",
               "properties": {
                 "id": {
                   "type": "keyword",
@@ -24,6 +25,7 @@
             "contributors": {
               "properties": {
                 "agent": {
+                  "type": "nested",
                   "properties": {
                     "id": {
                       "type": "keyword",
@@ -38,6 +40,7 @@
               }
             },
             "genres": {
+              "type": "nested",
               "properties": {
                 "id": {
                   "type": "keyword",
@@ -50,6 +53,7 @@
               }
             },
             "subjects": {
+              "type": "nested",
               "properties": {
                 "id": {
                   "type": "keyword",
