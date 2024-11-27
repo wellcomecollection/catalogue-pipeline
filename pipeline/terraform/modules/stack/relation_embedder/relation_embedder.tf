@@ -31,7 +31,7 @@ module "relation_embedder_lambda" {
       module.batcher_lambda_output_topic.arn
     ]
 
-    maximum_concurrency = 10 # could we go up to 30? ie. service's max_capacity x queue_parallelism
+    maximum_concurrency        = 10      # could we go up to 30? ie. service's max_capacity x queue_parallelism
     visibility_timeout_seconds = 60 * 15 # same or higher than lambda timeout
   }
 

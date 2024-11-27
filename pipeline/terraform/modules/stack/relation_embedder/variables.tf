@@ -16,15 +16,15 @@ variable "reindexing_state" {
   })
 }
 
-variable es_works_merged_index {
+variable "es_works_merged_index" {
   type = string
 }
 
-variable es_works_denormalised_index {
+variable "es_works_denormalised_index" {
   type = string
 }
 
-variable pipeline_storage_es_service_secrets {
+variable "pipeline_storage_es_service_secrets" {
   type = object({
     es_host     = string
     es_port     = string
@@ -33,15 +33,15 @@ variable pipeline_storage_es_service_secrets {
   })
 }
 
-variable path_concatenator_image {
+variable "path_concatenator_image" {
   type = string
 }
 
-variable router_image {
+variable "router_image" {
   type = string
 }
 
-variable router_input_topic_arn {
+variable "router_input_topic_arn" {
   type = string
 }
 
@@ -56,6 +56,6 @@ variable "max_capacity" {
   description = "The max capacity of every ECS service will be less than or equal to this value"
 }
 
-variable fargate_service_boilerplate {}
+variable "fargate_service_boilerplate" {}
 
 
