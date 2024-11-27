@@ -31,56 +31,42 @@ locals {
   batching_window_seconds = var.reindexing_state.scale_up_tasks ? (60 * 5) : 60
 }
 
-module "batcher_output_topic" {
-  source = "../topic"
+module "batcher_lambda_output_topic" {
+  source = "../../topic"
 
-  name       = "${local.namespace}_batcher_output"
-  role_names = [module.batcher.task_role_name]
+  name       = "${var.namespace}_batcher_lambda_output"
+  role_names = [module.batcher_lambda.lambda_role_name]
 }
 
+module "batcher_lambda" {
+  source = "../../pipeline_lambda"
 
+  pipeline_date = var.pipeline_date
+  service_name  = "batcher"
 
-module "batcher" {
-  source = "../fargate_service"
+  environment_variables = {
+    output_topic_arn = module.batcher_lambda_output_topic.arn
+    max_batch_size   = 40
 
-  name            = "batcher"
-  container_image = local.batcher_image
-
-  // Override entrypoint & command to dual use lambda container image
-  // This should be removed once we have a dedicated batcher_lambda image
-  entrypoint = [
-    "/opt/docker/bin/main"
-  ]
-  command = null
-
-  topic_arns = [
-    module.router_path_output_topic.arn,
-    module.path_concatenator_output_topic.arn,
-  ]
-
-  # Note: this needs to be bigger than the flush_interval_minutes
-  queue_visibility_timeout_seconds = (local.wait_minutes + 5) * 60
-
-  env_vars = {
-    output_topic_arn = module.batcher_output_topic.arn
-
-    flush_interval_minutes = local.wait_minutes
-    max_processed_paths    = local.max_processed_paths
-
-    max_batch_size = 40
+    # These are unused by the lambda, but are required in the environment
+    flush_interval_minutes = 0
+    max_processed_paths    = 0
   }
 
-  cpu    = 1024
-  memory = 2048
+  timeout = local.lambda_timeout_seconds
 
-  min_capacity = var.min_capacity
-  # We need to minimise fragmentation as much as possible, to serve the goal of the batcher.
-  # Running multiple batchers in parallel would defeat this purpose.
-  max_capacity = 1
+  queue_config = {
+    topic_arns = [
+      module.router_path_output_topic.arn,
+      module.path_concatenator_output_topic.arn,
+    ]
+    max_receive_count   = 1
+    maximum_concurrency = 20
+    batch_size          = 10000
 
-  # Unlike all our other tasks, the batcher isn't really set up to cope
-  # with unexpected interruptions.
-  use_fargate_spot = false
+    visibility_timeout_seconds = local.lamda_q_vis_timeout_seconds
+    batching_window_seconds    = local.batching_window_seconds
+  }
 
-  fargate_service_boilerplate = local.fargate_service_boilerplate
+  ecr_repository_name = "uk.ac.wellcome/batcher"
 }
