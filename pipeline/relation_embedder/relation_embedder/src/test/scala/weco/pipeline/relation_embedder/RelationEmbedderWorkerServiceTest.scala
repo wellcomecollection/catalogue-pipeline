@@ -286,7 +286,7 @@ class RelationEmbedderWorkerServiceTest
                           mergedIndex,
                           10
                         )
-                    val batchWriter = new BatchIndexWriter(
+                    val batchWriter = new BulkIndexWriter(
                       workIndexer = new MemoryIndexer(denormalisedIndex),
                       maxBatchWeight = 100,
                       maxBatchWait = 1 milliseconds

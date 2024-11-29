@@ -10,7 +10,7 @@ import weco.pipeline_storage.Indexer
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
 
-trait BatchWriter {
+trait BulkWriter {
   // Maximum size (number of average documents) of batch to write
   val maxBatchWeight: Int = 100
   // maximum time to wait for a batch to reach the maximum weight
@@ -40,12 +40,12 @@ trait BatchWriter {
   * works into appropriate batches.
   */
 
-class BatchIndexWriter(
+class BulkIndexWriter(
   workIndexer: Indexer[Work[Denormalised]],
   override val maxBatchWeight: Int,
   override val maxBatchWait: FiniteDuration
 )(implicit ec: ExecutionContext)
-    extends BatchWriter {
+    extends BulkWriter {
 
   // init checks whether we can connect to the index named in workIndexer
   // There really is no point in doing anything else if it can't.
@@ -67,10 +67,10 @@ class BatchIndexWriter(
   * works into appropriate batches.
   */
 
-class BatchSTDOutWriter(
+class BulkSTDOutWriter(
   override val maxBatchWeight: Int,
   override val maxBatchWait: FiniteDuration
-) extends BatchWriter {
+) extends BulkWriter {
 
   protected def writeWorks(
     works: Seq[Work[Denormalised]]
