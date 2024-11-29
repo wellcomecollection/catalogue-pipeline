@@ -25,12 +25,12 @@ variable "es_works_denormalised_index" {
 }
 
 variable "pipeline_storage_es_service_secrets" {
-  type = object({
-    es_host     = string
-    es_port     = string
-    es_protocol = string
-    es_apikey   = string
-  })
+  type = map(object({
+      es_host     = string
+      es_port     = string
+      es_protocol = string
+      es_apikey   = string
+  }))
 }
 
 variable "path_concatenator_image" {

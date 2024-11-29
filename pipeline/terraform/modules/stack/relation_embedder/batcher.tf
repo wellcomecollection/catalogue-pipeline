@@ -7,23 +7,11 @@ locals {
   # of executions.
 
   # During a reindex, the batcher is expected to receive
-  # roughly 0.5 million messages in roughly 2 hours.
-  # At peak, messages appear at a rate of about 6000 per minute, so
-  # waiting for 20 minutes would perfectly align with processing 120000 at a time.
-  # Waiting a little longer ensures that the full 120K capacity is used up more often.
-  #
-  # During normal running, the maximum message count is never expected to be hit,
-  # and processing the same Work multiple times would not be a significant extra load.
-  # Wait a minute and bundle them up anyway, in case multiple related works are
-  # coming through together.
-  wait_minutes = var.reindexing_state.scale_up_tasks ? 25 : 1
+  # roughly 0.5 million messages in roughly 2 hours & at peak,
+  # messages appear at a rate of about 6000 per minute.
 
-  # NOTE: SQS in flight limit is 120k
-  # See https://aws.amazon.com/sqs/faqs/ "Q: How large can Amazon SQS message queues be?"
-  max_processed_paths = var.reindexing_state.scale_up_tasks ? 120000 : 5000
+  # These values are chosen to ensure that the batcher can keep up.
 
-  # Lambda specific settings
-  # ------------------------
   lambda_timeout_seconds = 60 * 10 # 10 Minutes
   # This value should be higher than or equal to the lambda timeout, to avoid messages being reprocessed.
   lamda_q_vis_timeout_seconds = local.lambda_timeout_seconds

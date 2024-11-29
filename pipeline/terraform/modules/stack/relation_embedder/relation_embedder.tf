@@ -35,5 +35,5 @@ module "relation_embedder_lambda" {
     visibility_timeout_seconds = 60 * 15 # same or higher than lambda timeout
   }
 
-  ecr_repository_name = "uk.ac.wellcome/batcher"
+  ecr_repository_name = "uk.ac.wellcome/relation_embedder"
 }
