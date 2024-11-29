@@ -74,7 +74,7 @@ module "pipeline_storage_secrets" {
     # We could hard-code these values as "https" and "9243", but we can just as easily infer
     # them from the actual endpoint value.
     (local.pipeline_storage_protocol) = split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint)[0]
-    (local.pipeline_storage_port)     = reverse(split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint))[0]
+    (local.pipeline_storage_port) = reverse(split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint))[0]
 
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
@@ -99,7 +99,7 @@ module "pipeline_storage_secrets_catalogue" {
     # We could hard-code these values as "https" and "9243", but we can just as easily infer
     # them from the actual endpoint value.
     (local.pipeline_storage_protocol) = split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint)[0]
-    (local.pipeline_storage_port)     = reverse(split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint))[0]
+    (local.pipeline_storage_port) = reverse(split(":", ec_deployment.pipeline.elasticsearch[0].https_endpoint))[0]
 
     # See https://www.elastic.co/guide/en/cloud/current/ec-traffic-filtering-vpc.html
     (local.pipeline_storage_private_host) = "${local.pipeline_storage_elastic_id}.vpce.${local.pipeline_storage_elastic_region}.aws.elastic-cloud.com"
@@ -132,52 +132,56 @@ module "pipeline_indices" {
 locals {
   indices = module.pipeline_indices.index_names
   service_index_permissions = {
+    read_only = {
+      read = ["*"]
+      write = []
+    }
     transformer = {
-      read  = []
+      read = []
       write = [local.indices.source]
     }
     id_minter = {
-      read  = [local.indices.source]
+      read = [local.indices.source]
       write = [local.indices.works_identified]
     }
     matcher = {
-      read  = [local.indices.works_identified]
+      read = [local.indices.works_identified]
       write = []
     }
     merger = {
-      read  = [local.indices.works_identified]
+      read = [local.indices.works_identified]
       write = [local.indices.works_merged, local.indices.images_initial]
     }
     router = {
-      read  = [local.indices.works_merged]
+      read = [local.indices.works_merged]
       write = [local.indices.denormalised]
     }
     path_concatenator = {
-      read  = [local.indices.works_merged]
+      read = [local.indices.works_merged]
       write = [local.indices.works_merged]
     }
     relation_embedder = {
-      read  = [local.indices.works_merged]
+      read = [local.indices.works_merged]
       write = [local.indices.denormalised]
     }
     work_ingestor = {
-      read  = [local.indices.denormalised]
+      read = [local.indices.denormalised]
       write = [local.indices.works_indexed]
     }
     inferrer = {
-      read  = [local.indices.images_initial]
+      read = [local.indices.images_initial]
       write = [local.indices.images_augmented]
     }
     image_ingestor = {
-      read  = [local.indices.images_augmented]
+      read = [local.indices.images_augmented]
       write = [local.indices.images_indexed]
     }
     snapshot_generator = {
-      read  = [local.indices.works_indexed, local.indices.images_indexed]
+      read = [local.indices.works_indexed, local.indices.images_indexed]
       write = []
     }
     catalogue_api = {
-      read  = [local.indices.works_indexed, local.indices.images_indexed]
+      read = [local.indices.works_indexed, local.indices.images_indexed]
       write = []
     }
   }
@@ -205,7 +209,7 @@ module "pipeline_services" {
   read_from = each.value.read
   write_to  = each.value.write
 
-  pipeline_date       = var.pipeline_date
+  pipeline_date = var.pipeline_date
   expose_to_catalogue = contains(local.catalogue_account_services, each.key)
   providers = {
     aws.catalogue = aws.catalogue
@@ -218,7 +222,7 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   name = "read_only"
 
   indices {
-    names      = [for idx in module.pipeline_indices.indices : idx.name]
+    names = [for idx in module.pipeline_indices.indices : idx.name]
     privileges = ["read"]
   }
 }
@@ -230,7 +234,7 @@ resource "random_password" "read_only_user" {
 resource "elasticstack_elasticsearch_security_user" "read_only" {
   username = "read_only"
   password = random_password.read_only_user.result
-  roles    = [elasticstack_elasticsearch_security_role.read_only.name]
+  roles = [elasticstack_elasticsearch_security_role.read_only.name]
 }
 
 module "readonly_user_secrets" {
