@@ -40,7 +40,7 @@ module "router" {
     es_denormalised_index = var.es_works_denormalised_index
     batch_size            = 100
     # The flush interval must be sufficiently lower than the message timeout
-    # to allow the messages to be processed after the flush inteval but before
+    # to allow the messages to be processed after the flush interval but before
     # they expire.  The upstream queue timeout is not set by us, leaving it
     # at the default 30 seconds.
     # See https://github.com/wellcomecollection/platform/issues/5463
