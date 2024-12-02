@@ -154,7 +154,7 @@ object CalmTransformer
       format = Some(CalmFormat(record)),
       collectionPath = Some(collectionPath),
       referenceNumber = collectionPath.label.map(ReferenceNumber(_)),
-      subjects = subjects(record),
+      subjects = CalmSubjects(record),
       languages = languages,
       items = CalmItems(record),
       contributors = CalmContributors(record),
@@ -259,17 +259,4 @@ object CalmTransformer
         )
     }
   }
-
-  def subjects(record: CalmRecord): List[Subject[IdState.Unminted]] =
-    record
-      .getList("Subject")
-      .map {
-        label =>
-          val normalisedLabel =
-            NormaliseText(label, whitelist = NormaliseText.none)
-          Subject(
-            label = normalisedLabel,
-            concepts = List(Concept(normalisedLabel))
-          )
-      }
 }
