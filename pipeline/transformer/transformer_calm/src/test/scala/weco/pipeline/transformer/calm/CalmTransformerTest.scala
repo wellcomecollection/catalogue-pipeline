@@ -253,13 +253,19 @@ class CalmTransformerTest
       "Subject" -> "<i>anatomy</i>",
       "CatalogueStatus" -> "Catalogued"
     )
+
     CalmTransformer(
       record,
       version
     ).right.get.data.subjects should contain theSameElementsAs List(
-      Subject("anatomy", List(Concept("anatomy"))),
-      Subject("botany", List(Concept("botany")))
-    )
+      "anatomy",
+      "botany"
+    ).map((strippedSubject: String) => {
+      val id = labelDerivedConceptIdentifier(strippedSubject)
+      val concepts = List(Concept(id, strippedSubject))
+
+      Subject(id, strippedSubject, concepts)
+    })
   }
 
   it("finds a single language") {
