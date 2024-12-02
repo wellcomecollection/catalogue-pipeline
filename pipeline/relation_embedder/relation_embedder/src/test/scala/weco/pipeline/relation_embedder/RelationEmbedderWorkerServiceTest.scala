@@ -295,18 +295,20 @@ class RelationEmbedderWorkerServiceTest
                           mergedIndex,
                           10
                         )
-                    val batchWriter = new BulkIndexWriter(
+                    val bulkWriter = new BulkIndexWriter(
                       workIndexer = new MemoryIndexer(denormalisedIndex),
                       maxBatchWeight = 100,
                       maxBatchWait = 1 milliseconds
                     )
-
+                    val processor = new BatchProcessor(
+                      downstream = MemoryDownstream,
+                      bulkWriter = bulkWriter,
+                      relationsService = relationsService
+                    )
                     val workerService =
                       new RelationEmbedderWorkerService[String](
                         sqsStream = sqsStream,
-                        downstream = MemoryDownstream,
-                        batchWriter = batchWriter,
-                        relationsService = relationsService
+                        batchProcessor = processor
                       )
                     workerService.run()
                     testWith((queuePair, denormalisedIndex, messageSender))

@@ -26,7 +26,7 @@ import scala.concurrent.duration._
 
 class BatchProcessor(
   relationsService: RelationsService,
-  batchWriter: BulkWriter,
+  bulkWriter: BulkWriter,
   downstream: Downstream
 )(
   implicit ec: ExecutionContext,
@@ -81,8 +81,8 @@ class BatchProcessor(
   private def indexWorks(
     denormalisedWorks: Source[Work[Denormalised], NotUsed]
   ) =
-    batchWriter
-      .writeBatch(denormalisedWorks)
+    denormalisedWorks
+      .via(bulkWriter.writeWorksFlow)
       .mapConcat(_.map(_.id))
       .mapAsync(3) {
         id =>
@@ -131,7 +131,7 @@ object BatchProcessor {
         affectedWorksScroll =
           config.requireInt("es.works.scroll.affected_works")
       ),
-      batchWriter = batchWriter,
+      bulkWriter = batchWriter,
       downstream = Downstream(Some(config))
     )
 
