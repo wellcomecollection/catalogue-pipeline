@@ -132,6 +132,10 @@ module "pipeline_indices" {
 locals {
   indices = module.pipeline_indices.index_names
   service_index_permissions = {
+    read_only = {
+      read  = ["*"]
+      write = []
+    }
     transformer = {
       read  = []
       write = [local.indices.source]
