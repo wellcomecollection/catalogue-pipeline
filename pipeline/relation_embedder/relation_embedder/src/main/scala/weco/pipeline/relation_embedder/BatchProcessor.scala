@@ -32,6 +32,13 @@ class BatchProcessor(
   implicit ec: ExecutionContext,
   materializer: Materializer
 ) extends Logging {
+
+  /** Process a single Batch as sent to the Relation Embedder This involves:
+    *   - pull the relevant (sub) tree from the upstream index
+    *   - for any works referenced by the selectors in the Batch, update their
+    *     Relations
+    *     - Write any affected works downstream
+    */
   def apply(
     batch: Batch
   ): Future[Unit] = {

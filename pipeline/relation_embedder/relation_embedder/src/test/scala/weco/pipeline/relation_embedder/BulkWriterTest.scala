@@ -1,33 +1,21 @@
 package weco.pipeline.relation_embedder
 
-import org.apache.pekko.NotUsed
-import org.apache.pekko.stream.scaladsl.{Sink, Source}
-import org.scalatest.{Assertion, Inspectors}
-import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
+import org.scalatest.Inspectors
 import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
-import weco.catalogue.internal_model.work.WorkState.Denormalised
 import weco.catalogue.internal_model.work.{Relations, Work, WorkState}
-import org.apache.pekko.stream.Materializer
-import org.scalatest.concurrent.{ScalaFutures, TimeLimits}
-import weco.pekko.fixtures.Pekko
-import weco.pipeline.relation_embedder.fixtures.RelationGenerators
+import org.scalatest.concurrent.TimeLimits
+import weco.pipeline.relation_embedder.fixtures.BulkWriterAssertions
 
-import scala.collection.immutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration.FiniteDuration
 
 class BulkWriterTest
-    extends AnyFunSpec
-    with Matchers
-    with ScalaFutures
-    with Pekko
+    extends BulkWriterAssertions
     with Inspectors
-    with RelationGenerators
     with TimeLimits {
 
-  // what the writer does internally is not the concern of these tests
+  // what the writer does to actually write things out is not the concern of these tests
   // the writer bundles the input stream up into chunks that the recipient
   // of the write can handle. Having written them, it emits those chunks
   // The NoOp writer does nothing but the chunking.
@@ -39,32 +27,6 @@ class BulkWriterTest
       works: Seq[Work[WorkState.Denormalised]]
     ): Future[Seq[Work[WorkState.Denormalised]]] =
       Future(works)
-  }
-
-  def works(n: Int): List[Work[Denormalised]] =
-    List.fill(n)(denormalisedWork())
-
-  private def assertResultsHaveLengths(
-    workList: List[Work[Denormalised]],
-    lengths: Seq[Int]
-  )(implicit writer: BulkWriter): Assertion = {
-
-    val worksSource: Source[Work[WorkState.Denormalised], NotUsed] =
-      Source(workList)
-
-    withMaterializer {
-      implicit materializer: Materializer =>
-        {
-          val stream = worksSource
-            .via(writer.writeWorksFlow)
-            .runWith(Sink.seq)
-          whenReady(stream) {
-            result: immutable.Seq[Seq[Work[Denormalised]]] =>
-              val actualLengths = result.map(_.length)
-              actualLengths should contain theSameElementsAs lengths
-          }
-        }
-    }
   }
 
   it("bundles a series of works into a sequences of size `weight`") {
