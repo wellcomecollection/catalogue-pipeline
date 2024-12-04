@@ -172,7 +172,6 @@ class BatchProcessorTest
   describe("given a tree containing an invisible Work") {
     val invisibleWork = work("a/2/invisible").invisible()
 
-    println(invisibleWork.id)
     withProcessedBatch(
       invisibleWork :: works,
       Batch(rootPath = "a", selectors = List(Tree("a")))
