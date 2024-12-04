@@ -16,6 +16,14 @@ module "denormalised_index" {
   allow_delete  = var.allow_delete
 }
 
+module "lambda_denormalised_index" {
+  source        = "../es_index"
+  name          = var.es_lambda_works_denormalised_index
+  mappings_name = "empty"
+  config_path   = var.es_config_path
+  allow_delete  = var.allow_delete
+}
+
 module "images_initial_index" {
   source        = "../es_index"
   name          = var.es_images_initial_index

@@ -11,8 +11,15 @@ module "relation_embedder" {
   name            = "relation_embedder"
   container_image = local.relation_embedder_image
 
+  // Override entrypoint & command to dual use lambda container image
+  // This should be removed once we have a dedicated batcher_lambda image
+  entrypoint = [
+    "/opt/docker/bin/main"
+  ]
+  command = null
+
   topic_arns = [
-    module.batcher_lambda_output_topic.arn
+    module.batcher_output_topic.arn
   ]
 
   # We know that 10 minutes is too short; some big archives can't be

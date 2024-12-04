@@ -90,8 +90,9 @@ then
     transformer_sierra \
     transformer_tei
 
-  echo "Deploying λ pipline services to catalogue-$PIPELINE_DATE"
+  echo "Deploying λ pipeline services to catalogue-$PIPELINE_DATE"
   "$ROOT/builds/deploy_lambda_services.sh" \
-    batcher
+    batcher \
+    relation_embedder
 fi
 
