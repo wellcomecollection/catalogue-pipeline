@@ -228,18 +228,39 @@
     },
     "aggregatableValues": {
       "locations.license": [],
-      "source.contributors.agent.label": [
-        "{\"id\":\"hb43zca4\",\"label\":\"Wright, Thomas, 1810-1877\",\"type\":\"Person\"}",
-        "{\"id\":\"wnvpundv\",\"label\":\"Jones, H. Longueville (Harry Longueville), 1806-1870\",\"type\":\"Person\"}",
-        "{\"id\":\"vcmxn47e\",\"label\":\"Le Keux, John, 1783-1846\",\"type\":\"Person\"}"
+      "source.contributors.agent": [
+        {
+          "id": "hb43zca4",
+          "label": "Wright, Thomas, 1810-1877"
+        },
+        {
+          "id": "wnvpundv",
+          "label": "Jones, H. Longueville (Harry Longueville), 1806-1870"
+        },
+        {
+          "id": "vcmxn47e",
+          "label": "Le Keux, John, 1783-1846"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Viewbooks\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "gwr26qnc",
+          "label": "Viewbooks"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Architecture - history\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Cambridge (England)\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"University of Cambridge\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "a282jy98",
+          "label": "Architecture - history"
+        },
+        {
+          "id": "ppd9r5dq",
+          "label": "Cambridge (England)"
+        },
+        {
+          "id": "f5jq6btt",
+          "label": "University of Cambridge"
+        }
       ]
     },
     "filterableValues": {

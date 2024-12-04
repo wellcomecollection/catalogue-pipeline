@@ -1,6 +1,6 @@
 {
   "description" : "images with different contributors",
-  "createdAt" : "2024-11-14T14:37:56.374848Z",
+  "createdAt" : "2024-11-25T15:14:41.116414Z",
   "id" : "s6atajrq",
   "document" : {
     "modifiedTime" : "1991-06-19T20:23:45Z",
@@ -117,12 +117,15 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
-        "{\"label\":\"carrots\",\"type\":\"Agent\"}"
+      "source.contributors.agent" : [
+        {
+          "id" : "carrots",
+          "label" : "carrots"
+        }
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2024-11-14T14:37:56.502353Z",
+  "createdAt" : "2024-11-25T15:14:41.214173Z",
   "id" : "ovet6upc",
   "document" : {
     "modifiedTime" : "1979-08-24T17:45:33Z",
@@ -110,11 +110,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

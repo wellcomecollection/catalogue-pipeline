@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-11-13T08:43:26.511704Z",
+  "createdAt" : "2024-11-25T15:15:12.360200Z",
   "id" : "toypx23i",
   "document" : {
     "debug" : {
@@ -139,17 +139,23 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"007\",\"type\":\"Agent\"}",
-        "{\"label\":\"MI5\",\"type\":\"Organisation\"}"
+      "contributors.agent" : [
+        {
+          "id" : "007",
+          "label" : "007"
+        },
+        {
+          "id" : "MI5",
+          "label" : "MI5"
+        }
       ],
       "items.locations.license" : [
       ],

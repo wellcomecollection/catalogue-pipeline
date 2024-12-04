@@ -241,19 +241,40 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"inc\",\"label\":\"In copyright\",\"url\":\"http://rightsstatements.org/vocab/InC/1.0/\",\"type\":\"License\"}"
+        {
+          "id": "inc",
+          "label": "In copyright"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"e23yasdv\",\"label\":\"C. & J. Clark Ltd\",\"type\":\"Organisation\"}"
+      "source.contributors.agent": [
+        {
+          "id": "e23yasdv",
+          "label": "C. & J. Clark Ltd"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Ephemera\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Posters\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "ucmbnwkq",
+          "label": "Ephemera"
+        },
+        {
+          "id": "whcsuusy",
+          "label": "Posters"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Shoes\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Foot\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Child Development\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "tjwt533n",
+          "label": "Shoes"
+        },
+        {
+          "id": "ukm9xsds",
+          "label": "Foot"
+        },
+        {
+          "id": "y2dazdgp",
+          "label": "Child Development"
+        }
       ]
     },
     "filterableValues": {

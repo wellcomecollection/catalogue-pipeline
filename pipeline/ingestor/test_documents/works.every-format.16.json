@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-13T08:43:26.534887Z",
+  "createdAt" : "2024-11-25T15:15:12.383095Z",
   "id" : "4blsy3iy",
   "document" : {
     "debug" : {
@@ -121,17 +121,20 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"c\",\"label\":\"Music\",\"type\":\"Format\"}"
+        {
+          "id" : "c",
+          "label" : "Music"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

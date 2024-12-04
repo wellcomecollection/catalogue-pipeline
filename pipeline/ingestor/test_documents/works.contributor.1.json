@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-11-13T08:43:26.505699Z",
+  "createdAt" : "2024-11-25T15:15:12.357718Z",
   "id" : "a8uyvixy",
   "document" : {
     "debug" : {
@@ -128,16 +128,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"47\",\"type\":\"Agent\"}"
+      "contributors.agent" : [
+        {
+          "id" : "47",
+          "label" : "47"
+        }
       ],
       "items.locations.license" : [
       ],

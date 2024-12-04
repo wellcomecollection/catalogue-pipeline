@@ -1,6 +1,6 @@
 {
   "description" : "images linked with the same work",
-  "createdAt" : "2024-11-14T14:37:56.501674Z",
+  "createdAt" : "2024-11-25T15:14:41.213390Z",
   "id" : "gop4oetl",
   "document" : {
     "modifiedTime" : "1994-02-11T11:59:16Z",
@@ -112,11 +112,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

@@ -280,25 +280,67 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"wmqhmq5g\",\"label\":\"David Linstead\",\"type\":\"Agent\"}"
+      "source.contributors.agent": [
+        {
+          "id": "wmqhmq5g",
+          "label": "David Linstead"
+        }
       ],
-      "source.genres.label": [],
-      "source.subjects.label": [
-        "{\"label\":\"Specimen\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Structure\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Morphology\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Dye\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Feet\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Sole\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Sweat duct\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Spiral\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Monkey\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Red\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Yellow\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Blue\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.genres": [],
+      "source.subjects": [
+        {
+          "id": "ygx6gn7w",
+          "label": "Specimen"
+        },
+        {
+          "id": "fgybpuea",
+          "label": "Structure"
+        },
+        {
+          "id": "fxgxwdfq",
+          "label": "Morphology"
+        },
+        {
+          "id": "hc4ja8jh",
+          "label": "Dye"
+        },
+        {
+          "id": "wa25ujm4",
+          "label": "Feet"
+        },
+        {
+          "id": "aqzhyyfm",
+          "label": "Sole"
+        },
+        {
+          "id": "gqnrzssm",
+          "label": "Sweat duct"
+        },
+        {
+          "id": "zvy2exwb",
+          "label": "Spiral"
+        },
+        {
+          "id": "x73v2qnu",
+          "label": "Monkey"
+        },
+        {
+          "id": "pg4pfxze",
+          "label": "Red"
+        },
+        {
+          "id": "gmg9ew4m",
+          "label": "Yellow"
+        },
+        {
+          "id": "us4p6zsw",
+          "label": "Blue"
+        }
       ]
     },
     "filterableValues": {

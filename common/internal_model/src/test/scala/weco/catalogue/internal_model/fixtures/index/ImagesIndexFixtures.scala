@@ -13,7 +13,7 @@ trait ImagesIndexFixtures extends IndexFixturesBase {
     withLocalElasticSearchIndex[R](config =
       getConfig(
         mappings = "mappings.images_indexed.2024-11-14.json",
-        analysis = "analysis.works_indexed.2024-11-06.json"
+        analysis = "analysis.works_indexed.2024-11-14.json"
       )
     )
   }

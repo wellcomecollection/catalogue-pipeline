@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-13T08:43:26.530610Z",
+  "createdAt" : "2024-11-25T15:15:12.379099Z",
   "id" : "xlcpwdx8",
   "document" : {
     "debug" : {
@@ -121,17 +121,20 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"w\",\"label\":\"Student dissertations\",\"type\":\"Format\"}"
+        {
+          "id" : "w",
+          "label" : "Student dissertations"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

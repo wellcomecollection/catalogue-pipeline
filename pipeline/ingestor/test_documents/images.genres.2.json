@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2024-11-14T14:37:56.409135Z",
+  "createdAt" : "2024-11-25T15:14:41.145077Z",
   "id" : "5j2tl5et",
   "document" : {
     "modifiedTime" : "2050-09-28T06:48:13Z",
@@ -126,14 +126,23 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
-        "{\"label\":\"Emu entrepreneurship\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Falcon finances\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Carrot counselling\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres" : [
+        {
+          "id" : "Emu entrepreneurship",
+          "label" : "Emu entrepreneurship"
+        },
+        {
+          "id" : "Falcon finances",
+          "label" : "Falcon finances"
+        },
+        {
+          "id" : "Carrot counselling",
+          "label" : "Carrot counselling"
+        }
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

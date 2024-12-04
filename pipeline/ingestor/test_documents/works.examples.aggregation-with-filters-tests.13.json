@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-11-13T08:43:26.576975Z",
+  "createdAt" : "2024-11-25T15:15:12.422473Z",
   "id" : "qr2rdsof",
   "document" : {
     "debug" : {
@@ -142,18 +142,24 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"hdig\",\"label\":\"Born-digital archives\",\"type\":\"Format\"}"
+        {
+          "id" : "hdig",
+          "label" : "Born-digital archives"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"fIbfVPkqaf\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : "fIbfVPkqaf",
+          "label" : "fIbfVPkqaf"
+        }
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

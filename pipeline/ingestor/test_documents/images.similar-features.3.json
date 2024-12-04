@@ -204,18 +204,36 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"gp5j27t8\",\"label\":\"Tappen, George, approximately 1771-1830\",\"type\":\"Person\"}"
+      "source.contributors.agent": [
+        {
+          "id": "gp5j27t8",
+          "label": "Tappen, George, approximately 1771-1830"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Etchings\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "yfqryj26",
+          "label": "Etchings"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Asylums\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"London (England)\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Royal Caledonian Asylum (London, England)\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "n5ktsbcb",
+          "label": "Asylums"
+        },
+        {
+          "id": "a7gmt7ff",
+          "label": "London (England)"
+        },
+        {
+          "id": "vwekvhjq",
+          "label": "Royal Caledonian Asylum (London, England)"
+        }
       ]
     },
     "filterableValues": {

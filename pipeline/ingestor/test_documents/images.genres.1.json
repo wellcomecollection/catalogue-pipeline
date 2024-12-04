@@ -1,6 +1,6 @@
 {
   "description" : "images with different genres",
-  "createdAt" : "2024-11-14T14:37:56.407937Z",
+  "createdAt" : "2024-11-25T15:14:41.144302Z",
   "id" : "rq5xcdkx",
   "document" : {
     "modifiedTime" : "2048-01-18T04:47:01Z",
@@ -108,11 +108,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

@@ -1,6 +1,6 @@
 {
   "description" : "an arbitrary list of visible works",
-  "createdAt" : "2024-11-13T08:43:26.180590Z",
+  "createdAt" : "2024-11-25T15:15:12.036077Z",
   "id" : "fyqts0co",
   "document" : {
     "debug" : {
@@ -117,15 +117,15 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
