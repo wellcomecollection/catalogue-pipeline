@@ -1,6 +1,6 @@
 {
   "description" : "works with every format",
-  "createdAt" : "2024-11-13T08:43:26.536496Z",
+  "createdAt" : "2024-11-25T15:15:12.384501Z",
   "id" : "qph7iot8",
   "document" : {
     "debug" : {
@@ -121,17 +121,20 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"s\",\"label\":\"E-sound\",\"type\":\"Format\"}"
+        {
+          "id" : "s",
+          "label" : "E-sound"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

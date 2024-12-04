@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1900",
-  "createdAt" : "2024-11-13T08:43:26.268138Z",
+  "createdAt" : "2024-11-25T15:15:12.128853Z",
   "id" : "rbnro6wx",
   "document" : {
     "debug" : {
@@ -132,16 +132,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
-        "{\"label\":\"1900\",\"type\":\"Period\"}"
+        {
+          "id" : "1900",
+          "label" : "1900"
+        }
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

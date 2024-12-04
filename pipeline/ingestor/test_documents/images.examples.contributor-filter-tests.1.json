@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-11-14T14:37:56.433940Z",
+  "createdAt" : "2024-11-25T15:14:41.164706Z",
   "id" : "vcokkolz",
   "document" : {
     "modifiedTime" : "2040-09-05T22:54:29Z",
@@ -117,12 +117,15 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
-        "{\"label\":\"Edward Said\",\"type\":\"Person\"}"
+      "source.contributors.agent" : [
+        {
+          "id" : "Edward Said",
+          "label" : "Edward Said"
+        }
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

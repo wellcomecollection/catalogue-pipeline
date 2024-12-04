@@ -10,6 +10,7 @@ import weco.catalogue.internal_model.work.generators.{
   ProductionEventGenerators
 }
 import weco.catalogue.internal_model.work._
+import weco.pipeline.ingestor.common.models.AggregatableField
 import weco.pipeline.ingestor.models.IngestorTestData
 
 class WorkAggregatableValuesTest
@@ -25,61 +26,36 @@ class WorkAggregatableValuesTest
 
   it("creates aggregatable values") {
     testWorkAggregatableValues shouldBe WorkAggregatableValues(
-      workTypes = List("""{"id":"k","label":"Pictures","type":"Format"}"""),
+      workTypes = List(AggregatableField("k", "Pictures")),
       genres = List(
-        """{"label":"Ink drawings","concepts":[],"type":"Genre"}""",
-        """{"label":"Drawings","concepts":[],"type":"Genre"}"""
+        AggregatableField("h5fvmn9u", "Ink drawings"),
+        AggregatableField("tgxvuh8x", "Drawings")
       ),
-      productionDates = List("""{"label":"1970","type":"Period"}"""),
+      productionDates = List(
+        AggregatableField.fromLabel("1970")
+      ),
       subjects = List(
-        """{"label":"Jungian psychology","concepts":[],"type":"Subject"}""",
-        """{"label":"Dreams","concepts":[],"type":"Subject"}""",
-        """{"label":"McGlashan, Alan Fleming, 1898-1997","concepts":[],"type":"Subject"}"""
+        AggregatableField("bse2dtxc", "Jungian psychology"),
+        AggregatableField("hjw49bkh", "Dreams"),
+        AggregatableField(
+          "wfkwqmmx",
+          "McGlashan, Alan Fleming, 1898-1997"
+        )
       ),
-      languages = List("""{"id":"eng","label":"English","type":"Language"}"""),
+      languages = List(
+        AggregatableField("eng", "English")
+      ),
       contributors = List(
-        """{"id":"npanm646","label":"M.A.C.T","type":"Person"}""",
-        """{"id":"wfkwqmmx","label":"McGlashan, Alan Fleming, 1898-1997","type":"Person"}"""
+        AggregatableField("npanm646", "M.A.C.T"),
+        AggregatableField("wfkwqmmx", "McGlashan, Alan Fleming, 1898-1997")
       ),
       itemLicenses = List(
-        """{"id":"cc-by","label":"Attribution 4.0 International (CC BY 4.0)","url":"http://creativecommons.org/licenses/by/4.0/","type":"License"}"""
+        AggregatableField("cc-by", "Attribution 4.0 International (CC BY 4.0)"),
       ),
       availabilities = List(
-        """{"id":"closed-stores","label":"Closed stores","type":"Availability"}""",
-        """{"id":"online","label":"Online","type":"Availability"}"""
+        AggregatableField("closed-stores", "Closed stores"),
+        AggregatableField("online", "Online"),
       )
-    )
-  }
-
-  it("removes identifiers from subjects") {
-    val aggregatableValues = WorkAggregatableValues(
-      testWork.copy[WorkState.Denormalised](data =
-        testWork.data.copy[DataState.Identified](subjects =
-          List(
-            Subject(
-              id = IdState.Identified(
-                canonicalId = createCanonicalId,
-                sourceIdentifier = createSourceIdentifier
-              ),
-              label = "impish indicators"
-            ),
-            Subject(
-              id = IdState.Identified(
-                canonicalId = createCanonicalId,
-                sourceIdentifier = createSourceIdentifier
-              ),
-              label = "ill-fated ideas"
-            ),
-            Subject(label = "illicit implications", concepts = List())
-          )
-        )
-      )
-    )
-
-    aggregatableValues.subjects shouldBe List(
-      """{"label":"impish indicators","concepts":[],"type":"Subject"}""",
-      """{"label":"ill-fated ideas","concepts":[],"type":"Subject"}""",
-      """{"label":"illicit implications","concepts":[],"type":"Subject"}"""
     )
   }
 
@@ -96,7 +72,7 @@ class WorkAggregatableValuesTest
     )
 
     aggregatableValues.languages shouldBe List(
-      """{"id":"chi","label":"Chinese","type":"Language"}"""
+      AggregatableField("chi", "Chinese"),
     )
   }
 
@@ -117,7 +93,7 @@ class WorkAggregatableValuesTest
           )
         )
       ).subjects shouldBe List(
-        """{"label":"salty sandwiches","concepts":[],"type":"Subject"}"""
+        AggregatableField.fromLabel("salty sandwiches"),
       )
     }
 
@@ -135,7 +111,7 @@ class WorkAggregatableValuesTest
           )
         )
       ).contributors shouldBe List(
-        """{"label":"Pablo Picasso","type":"Person"}"""
+        AggregatableField.fromLabel("Pablo Picasso"),
       )
     }
   }

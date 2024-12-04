@@ -254,23 +254,50 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id": "cc-by",
+          "label": "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"wmqhmq5g\",\"label\":\"David Linstead\",\"type\":\"Agent\"}"
+      "source.contributors.agent": [
+        {
+          "id": "wmqhmq5g",
+          "label": "David Linstead"
+        }
       ],
-      "source.genres.label": [],
-      "source.subjects.label": [
-        "{\"label\":\"Specimen\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Structure\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Morphology\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Dye\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Herbivore\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Blue\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Black\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Lines\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Yellow\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Green\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.genres": [],
+      "source.subjects": [
+        {
+          "id": "ygx6gn7w",
+          "label": "Specimen"
+        },        {
+          "id": "fgybpuea",
+          "label": "Structure"
+        },        {
+          "id": "fxgxwdfq",
+          "label": "Morphology"
+        },        {
+          "id": "hc4ja8jh",
+          "label": "Dye"
+        },        {
+          "id": "z8uu9bnz",
+          "label": "Herbivore"
+        },        {
+          "id": "us4p6zsw",
+          "label": "Blue"
+        },        {
+          "id": "asj4hhdn",
+          "label": "Black"
+        },        {
+          "id": "qd6mgsd7",
+          "label": "Lines"
+        },        {
+          "id": "gmg9ew4m",
+          "label": "Yellow"
+        },        {
+          "id": "bqv39tft",
+          "label": "Green"
+        }
       ]
     },
     "filterableValues": {

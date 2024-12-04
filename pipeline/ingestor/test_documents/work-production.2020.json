@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 2020",
-  "createdAt" : "2024-11-13T08:43:26.275334Z",
+  "createdAt" : "2024-11-25T15:15:12.136151Z",
   "id" : "0fucriyr",
   "document" : {
     "debug" : {
@@ -132,16 +132,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
-        "{\"label\":\"2020\",\"type\":\"Period\"}"
+        {
+          "id" : "2020",
+          "label" : "2020"
+        }
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

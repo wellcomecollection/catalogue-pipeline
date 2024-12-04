@@ -340,26 +340,68 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"inc\",\"label\":\"In copyright\",\"url\":\"http://rightsstatements.org/vocab/InC/1.0/\",\"type\":\"License\"}"
+        {
+          "id": "inc",
+          "label": "In copyright"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"ms5vu5e6\",\"label\":\"North Warwickshire NHS Trust. Health Promotion Service\",\"type\":\"Organisation\"}"
+      "source.contributors.agent": [
+        {
+          "id": "ms5vu5e6",
+          "label": "North Warwickshire NHS Trust. Health Promotion Service"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Ephemera\",\"concepts\":[],\"type\":\"Genre\"}",
-        "{\"label\":\"Leaflets\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "ucmbnwkq",
+          "label": "Ephemera"
+        },
+        {
+          "id": "h7ke4a5n",
+          "label": "Leaflets"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"HIV\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"HIV Seropositivity - transmission\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Acquired Immunodeficiency Syndrome\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Safe Sex\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Condoms\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Substance Abuse, Intravenous\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"AIDS Serodiagnosis\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Nuneaton (England)\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Bedworth (England)\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Warwickshire (England)\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "hfwwn7yb",
+          "label": "HIV"
+        },
+        {
+          "id": "bjdva9jf",
+          "label": "HIV Seropositivity - transmission"
+        },
+        {
+          "id": "exgkgv7u",
+          "label": "Acquired Immunodeficiency Syndrome"
+        },
+        {
+          "id": "xtqcfe8k",
+          "label": "Safe Sex"
+        },
+        {
+          "id": "frhjttus",
+          "label": "Condoms"
+        },
+        {
+          "id": "b5hajr4w",
+          "label": "Substance Abuse, Intravenous"
+        },
+        {
+          "id": "w5zscyh9",
+          "label": "AIDS Serodiagnosis"
+        },
+        {
+          "id": "by72mxnu",
+          "label": "Nuneaton (England)"
+        },
+        {
+          "id": "qxxszr8p",
+          "label": "Bedworth (England)"
+        },
+        {
+          "id": "q35z5xss",
+          "label": "Warwickshire (England)"
+        }
       ]
     },
     "filterableValues": {

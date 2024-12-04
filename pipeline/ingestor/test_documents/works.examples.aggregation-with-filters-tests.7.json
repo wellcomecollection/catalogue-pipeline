@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-11-13T08:43:26.573376Z",
+  "createdAt" : "2024-11-25T15:15:12.420361Z",
   "id" : "p7zbfaov",
   "document" : {
     "debug" : {
@@ -142,18 +142,24 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"m\",\"label\":\"CD-Roms\",\"type\":\"Format\"}"
+        {
+          "id" : "m",
+          "label" : "CD-Roms"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"S4hioTvwQl\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : "S4hioTvwQl",
+          "label" : "S4hioTvwQl"
+        }
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

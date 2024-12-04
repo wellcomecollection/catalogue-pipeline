@@ -1,6 +1,6 @@
 {
   "description" : "an image with a production event in 1098",
-  "createdAt" : "2024-11-14T14:37:56.596538Z",
+  "createdAt" : "2024-11-25T15:14:41.303247Z",
   "id" : "zim2up41",
   "document" : {
     "modifiedTime" : "2019-11-11T12:04:49Z",
@@ -109,11 +109,11 @@
     "aggregatableValues" : {
       "locations.license" : [
       ],
-      "source.contributors.agent.label" : [
+      "source.contributors.agent" : [
       ],
-      "source.genres.label" : [
+      "source.genres" : [
       ],
-      "source.subjects.label" : [
+      "source.subjects" : [
       ]
     },
     "filterableValues" : {

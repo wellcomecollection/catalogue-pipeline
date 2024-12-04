@@ -188,17 +188,32 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        }
       ],
-      "source.contributors.agent.label": [
-        "{\"id\":\"hxzteya7\",\"label\":\"Robinson, W. R\",\"type\":\"Person\"}"
+      "source.contributors.agent": [
+        {
+          "id": "hxzteya7",
+          "label": "Robinson, W. R"
+        }
       ],
-      "source.genres.label": [
-        "{\"label\":\"Etchings\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.genres": [
+        {
+          "id": "yfqryj26",
+          "label": "Etchings"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Hospitals\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Richmond (Yorkshire, England)\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "rz2yv25k",
+          "label": "Hospitals"
+        },
+        {
+          "id": "wf35jybw",
+          "label": "Richmond (Yorkshire, England)"
+        }
       ]
     },
     "filterableValues": {

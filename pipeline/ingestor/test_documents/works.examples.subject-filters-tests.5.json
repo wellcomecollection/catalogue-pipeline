@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-11-13T08:43:26.613497Z",
+  "createdAt" : "2024-11-25T15:15:12.457471Z",
   "id" : "w0lr7wac",
   "document" : {
     "debug" : {
@@ -117,15 +117,15 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],

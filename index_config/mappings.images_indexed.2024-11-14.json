@@ -6,8 +6,17 @@
         "locations": {
           "properties": {
             "license": {
-              "eager_global_ordinals": true,
-              "type": "keyword"
+              "type": "nested",
+              "properties": {
+                "id": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                },
+                "label": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                }
+              }
             }
           }
         },
@@ -16,28 +25,43 @@
             "contributors": {
               "properties": {
                 "agent": {
+                  "type": "nested",
                   "properties": {
+                    "id": {
+                      "type": "keyword",
+                      "eager_global_ordinals": true
+                    },
                     "label": {
-                      "eager_global_ordinals": true,
-                      "type": "keyword"
+                      "type": "keyword",
+                      "eager_global_ordinals": true
                     }
                   }
                 }
               }
             },
             "genres": {
+              "type": "nested",
               "properties": {
+                "id": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                },
                 "label": {
-                  "eager_global_ordinals": true,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "eager_global_ordinals": true
                 }
               }
             },
             "subjects": {
+              "type": "nested",
               "properties": {
+                "id": {
+                  "type": "keyword",
+                  "eager_global_ordinals": true
+                },
                 "label": {
-                  "eager_global_ordinals": true,
-                  "type": "keyword"
+                  "type": "keyword",
+                  "eager_global_ordinals": true
                 }
               }
             }

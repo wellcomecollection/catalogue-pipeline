@@ -192,16 +192,31 @@
     },
     "aggregatableValues": {
       "locations.license": [
-        "{\"id\":\"pdm\",\"label\":\"Public Domain Mark\",\"url\":\"https://creativecommons.org/share-your-work/public-domain/pdm/\",\"type\":\"License\"}"
+        {
+          "id": "pdm",
+          "label": "Public Domain Mark"
+        }
       ],
-      "source.contributors.agent.label": [],
-      "source.genres.label": [
-        "{\"label\":\"Wood engravings\",\"concepts\":[],\"type\":\"Genre\"}"
+      "source.contributors.agent": [],
+      "source.genres": [
+        {
+          "id": "hjzzh4gd",
+          "label": "Wood engravings"
+        }
       ],
-      "source.subjects.label": [
-        "{\"label\":\"Holloway (England)\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Nightingale, Florence, 1820-1910 Homes and haunts\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Lea Hurst (England)\",\"concepts\":[],\"type\":\"Subject\"}"
+      "source.subjects": [
+        {
+          "id": "fe2ppnsv",
+          "label": "Holloway (England)"
+        },
+        {
+          "id": "gk2eca5r",
+          "label": "Nightingale, Florence, 1820-1910 Homes and haunts"
+        },
+        {
+          "id": "mt2usfy2",
+          "label": "Lea Hurst (England)"
+        }
       ]
     },
     "filterableValues": {

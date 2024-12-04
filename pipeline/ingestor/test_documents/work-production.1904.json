@@ -1,6 +1,6 @@
 {
   "description" : "a work with a production event in 1904",
-  "createdAt" : "2024-11-13T08:43:26.272823Z",
+  "createdAt" : "2024-11-25T15:15:12.134053Z",
   "id" : "aiv95swj",
   "document" : {
     "debug" : {
@@ -132,16 +132,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
-        "{\"label\":\"1904\",\"type\":\"Period\"}"
+        {
+          "id" : "1904",
+          "label" : "1904"
+        }
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
