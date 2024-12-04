@@ -241,7 +241,8 @@ object CatalogueDependencies {
   val relationEmbedderDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary ++
       ExternalDependencies.awsLambdaClient ++
-      ExternalDependencies.awsLambdaEvents
+      ExternalDependencies.awsLambdaEvents ++
+      ExternalDependencies.uPickle
 
   val routerDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary

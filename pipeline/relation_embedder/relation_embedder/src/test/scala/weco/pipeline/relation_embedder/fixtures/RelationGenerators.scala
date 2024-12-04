@@ -6,7 +6,12 @@ import weco.catalogue.internal_model.work.generators.{
   ItemsGenerators,
   WorkGenerators
 }
-import weco.catalogue.internal_model.work.{CollectionPath, Work}
+import weco.catalogue.internal_model.work.{
+  CollectionPath,
+  Relation,
+  Work,
+  WorkType
+}
 import weco.pipeline.relation_embedder.models.{
   RelationWork,
   RelationWorkData,
@@ -37,4 +42,18 @@ trait RelationGenerators extends WorkGenerators with ItemsGenerators {
         availabilities = work.state.availabilities
       )
     )
+
+  def relations(n: Int): List[Relation] = {
+    List.fill(n)(
+      new Relation(
+        id = Some(createCanonicalId),
+        title = None,
+        collectionPath = None,
+        workType = WorkType.Standard,
+        depth = 0,
+        numChildren = 1,
+        numDescendents = 1
+      )
+    )
+  }
 }
