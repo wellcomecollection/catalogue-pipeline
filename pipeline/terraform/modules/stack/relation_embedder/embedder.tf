@@ -35,7 +35,7 @@ module "embedder_lambda" {
       module.batcher_lambda_output_topic.arn
     ]
 
-    batching_window_seconds = 60 # How long to wait to accumulate message: 1 minute
+    batching_window_seconds = 60                        # How long to wait to accumulate message: 1 minute
     maximum_concurrency     = local.maximum_concurrency # number of messages in flight is max_capacity x queue_parallelism
 
     visibility_timeout_seconds = 60 * 15 # same or higher than lambda timeout
