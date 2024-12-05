@@ -1,18 +1,22 @@
-module "relation_embedder_lambda_output_topic" {
-  source = "../../topic"
-
-  name       = "${var.namespace}_relation_embedder_lambda_output"
-  role_names = [module.relation_embedder_lambda.lambda_role_name]
+locals {
+  maximum_concurrency = var.reindexing_state.scale_up_tasks ? 10 : 3
 }
 
-module "relation_embedder_lambda" {
+module "embedder_lambda_output_topic" {
+  source = "../../topic"
+
+  name       = "${var.namespace}_embedder_lambda_output"
+  role_names = [module.embedder_lambda.lambda_role_name]
+}
+
+module "embedder_lambda" {
   source = "../../pipeline_lambda"
 
   pipeline_date = var.pipeline_date
-  service_name  = "relation_embedder"
+  service_name  = "${var.namespace}_embedder"
 
   environment_variables = {
-    output_topic_arn = module.relation_embedder_lambda_output_topic.arn
+    output_topic_arn = module.embedder_lambda_output_topic.arn
 
     es_merged_index       = var.es_works_merged_index
     es_denormalised_index = var.es_works_denormalised_index
@@ -31,8 +35,13 @@ module "relation_embedder_lambda" {
       module.batcher_lambda_output_topic.arn
     ]
 
-    maximum_concurrency        = 10      # could we go up to 30? ie. service's max_capacity x queue_parallelism
+    batching_window_seconds = 60                        # How long to wait to accumulate message: 1 minute
+    maximum_concurrency     = local.maximum_concurrency # number of messages in flight is max_capacity x queue_parallelism
+
     visibility_timeout_seconds = 60 * 15 # same or higher than lambda timeout
+
+    max_receive_count = 3
+    batch_size        = 10
   }
 
   ecr_repository_name = "uk.ac.wellcome/relation_embedder"

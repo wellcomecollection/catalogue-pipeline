@@ -1,7 +1,7 @@
 module "relation_embedder_sub" {
   source = "./relation_embedder"
 
-  namespace        = "relation_embedder_sub"
+  namespace        = "r_embed"
   pipeline_date    = var.pipeline_date
   reindexing_state = var.reindexing_state
 

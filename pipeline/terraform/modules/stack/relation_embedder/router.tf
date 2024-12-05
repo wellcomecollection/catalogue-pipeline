@@ -22,7 +22,7 @@ module "router_work_output_topic" {
 module "router" {
   source = "../../fargate_service"
 
-  name            = "router"
+  name            = "${var.namespace}_router"
   container_image = var.router_image
 
   topic_arns = [
