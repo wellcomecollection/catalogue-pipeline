@@ -1,5 +1,6 @@
 package weco.pipeline.relation_embedder
 
+import grizzled.slf4j.Logging
 import org.apache.pekko.NotUsed
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Denormalised
@@ -9,6 +10,7 @@ import weco.pipeline_storage.Indexer
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import io.circe.{Encoder, Printer}
 
 /** Trait to handle the bulk writing of Works to a target in appropriately sized
   * batches.
@@ -72,17 +74,19 @@ class BulkIndexWriter(
 class BulkSTDOutWriter(
   override val maxBatchWeight: Int,
   override val maxBatchWait: FiniteDuration
-) extends BulkWriter {
+)(implicit encoder: Encoder[Work[Denormalised]])
+    extends BulkWriter
+    with Logging {
 
   protected def writeWorks(
     works: Seq[Work[Denormalised]]
   ): Future[Seq[Work[Denormalised]]] = {
-    println(works.map {
+    info(s"indexing ${works.length} Works")
+    works.foreach {
       work =>
-        val weight = workIndexable.weight(work)
-        println(s"${work.id}, ${weight}")
-        weight
-    }.sum)
+        val json = encoder(work).deepDropNullValues
+        println(Printer.noSpaces.print(json))
+    }
 
     Future.successful(works)
   }
