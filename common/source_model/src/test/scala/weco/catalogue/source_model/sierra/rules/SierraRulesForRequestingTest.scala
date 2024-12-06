@@ -19,6 +19,7 @@ class SierraRulesForRequestingTest
       ("s", NotRequestable.ItemOnSearch("This item is on search.")),
       ("x", NotRequestable.ItemWithdrawn("This item is withdrawn.")),
       ("r", NotRequestable.ItemUnavailable("This item is unavailable.")),
+      ("j", NotRequestable.ItemUnavailable("This item is unavailable.")),
       ("z", NotRequestable.NoPublicMessage("fixed field 88 = z")),
       ("v", NotRequestable.AtConservation("This item is with conservation.")),
       ("h", NotRequestable.ItemClosed("This item is closed.")),
