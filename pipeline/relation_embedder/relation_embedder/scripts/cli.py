@@ -27,4 +27,5 @@ set_environment("2024-11-18")
 #
 # es = Elasticsearch([f"https://{os.environ['es_host']}:{os.environ['es_port']}"], api_key=os.environ["es_apikey"])
 # print(es.count())
-subprocess.run(sys.argv[1], input=sys.stdin.read(), text=True)
+subprocess.run(sys.argv[1])
+print("done")
