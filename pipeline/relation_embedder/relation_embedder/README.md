@@ -7,7 +7,11 @@ First, build it (from the base of the repo)
 
 ### As a JAR
 
-You can pipe a bunch of paths to CLIMain, thus:
+Set the environment variable PIPELINE_DATE, e.g.
+
+`export PIPELINE_DATE=2024-11-18`
+
+You can pipe a bunch of Batches to CLIMain, thus:
 
 `cat scripts/batches.txt | java weco.pipeline.relation_embedder.CLIMain`
 

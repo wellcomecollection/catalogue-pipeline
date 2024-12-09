@@ -22,10 +22,5 @@ def set_environment(pipeline_date):
     os.environ["es_merged_index"] = f"works-merged-{pipeline_date}"
 
 
-set_environment("2024-11-18")
-# from elasticsearch import Elasticsearch
-#
-# es = Elasticsearch([f"https://{os.environ['es_host']}:{os.environ['es_port']}"], api_key=os.environ["es_apikey"])
-# print(es.count())
+set_environment(os.environ["PIPELINE_DATE"])
 subprocess.run(sys.argv[1])
-print("done")
