@@ -4,7 +4,7 @@ import sys
 import subprocess
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CLI_MAIN = os.path.join(HERE, '..', 'target', 'universal', 'stage', 'bin', 'cli-main')
+CLI_MAIN = os.path.join(HERE, "..", "target", "universal", "stage", "bin", "cli-main")
 
 
 def get_secret_string(session, secret_id):
