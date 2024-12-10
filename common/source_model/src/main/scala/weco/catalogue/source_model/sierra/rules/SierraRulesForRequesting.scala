@@ -72,6 +72,14 @@ object SierraRulesForRequesting {
       case i if i.fixedField("88").contains("g") =>
         NotRequestable.SafeguardedItem("Safeguarded item.")
 
+      // This line covers the case:
+      //
+      // q|i||88||=|j||Deny item request if catalogue record has data issues.
+      //
+      // This rule is intended to deny item requests if a catalogue record has data issues.
+      case i if i.fixedField("88").contains("j") =>
+        NotRequestable.ItemUnavailable()
+
       // These cases cover the lines:
       //
       //    v|i||88||=|b||

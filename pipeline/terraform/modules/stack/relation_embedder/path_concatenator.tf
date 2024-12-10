@@ -9,7 +9,7 @@ module "path_concatenator_output_topic" {
 module "path_concatenator" {
   source = "../../fargate_service"
 
-  name            = "path_concatenator"
+  name            = "${var.namespace}_path_concatenator"
   container_image = var.path_concatenator_image
 
   topic_arns = [

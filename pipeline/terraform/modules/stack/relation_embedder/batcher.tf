@@ -16,7 +16,7 @@ locals {
   # This value should be higher than or equal to the lambda timeout, to avoid messages being reprocessed.
   lamda_q_vis_timeout_seconds = local.lambda_timeout_seconds
   # How long to wait to accumulate message: 5 minutes during reindexing, 1 minute otherwise
-  batching_window_seconds = var.reindexing_state.scale_up_tasks ? (60 * 5) : 60
+  batcher_batching_window_seconds = var.reindexing_state.scale_up_tasks ? (60 * 5) : 60
 }
 
 module "batcher_lambda_output_topic" {
@@ -30,7 +30,7 @@ module "batcher_lambda" {
   source = "../../pipeline_lambda"
 
   pipeline_date = var.pipeline_date
-  service_name  = "batcher"
+  service_name  = "${var.namespace}_batcher"
 
   environment_variables = {
     output_topic_arn = module.batcher_lambda_output_topic.arn
@@ -53,7 +53,7 @@ module "batcher_lambda" {
     batch_size          = 10000
 
     visibility_timeout_seconds = local.lamda_q_vis_timeout_seconds
-    batching_window_seconds    = local.batching_window_seconds
+    batching_window_seconds    = local.batcher_batching_window_seconds
   }
 
   ecr_repository_name = "uk.ac.wellcome/batcher"
