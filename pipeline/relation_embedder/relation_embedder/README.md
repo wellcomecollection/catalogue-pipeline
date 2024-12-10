@@ -7,17 +7,15 @@ First, build it (from the base of the repo)
 
 ### As a JAR
 
-Set the environment variable PIPELINE_DATE, e.g.
+This stage needs read permissions on the upstream elasticsearch index.  
+`scripts/cli.py` fetches the appropriate secrets and configures the environment
+to provide that access.
 
-`export PIPELINE_DATE=2024-11-18`
+You can pipe a bunch of Batches to cli.py, providing the pipeline date, thus:
 
-You can pipe a bunch of Batches to CLIMain, thus:
+`cat scripts/batches.txt | AWS_PROFILE=my-profile python scripts/cli.py 2024-11-18`
 
-`cat scripts/batches.txt | java weco.pipeline.relation_embedder.CLIMain`
-
-Or, if you'd rather not have to set the classpath, SBT will have generated a script you can call,
-
-`cat scripts/batches.txt | target/universal/stage/bin/cli-main`
+You must provide an accessible profile with access to the index secrets.
 
 ### As a Lambda
 

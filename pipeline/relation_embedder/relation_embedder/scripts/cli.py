@@ -3,6 +3,9 @@ import os
 import sys
 import subprocess
 
+HERE = os.path.dirname(os.path.abspath(__file__))
+CLI_MAIN = os.path.join(HERE, '..', 'target', 'universal', 'stage', 'bin', 'cli-main')
+
 
 def get_secret_string(session, secret_id):
     """
@@ -22,5 +25,5 @@ def set_environment(pipeline_date):
     os.environ["es_merged_index"] = f"works-merged-{pipeline_date}"
 
 
-set_environment(os.environ["PIPELINE_DATE"])
-subprocess.run(sys.argv[1])
+set_environment(sys.argv[1])
+subprocess.run([CLI_MAIN, sys.argv[1]])
