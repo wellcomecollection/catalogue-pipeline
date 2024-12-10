@@ -1,3 +1,4 @@
+{"rootPath":"GC103","selectors":[{"path":"GC103","type":"Tree"}]}
 {"rootPath":"MS1302","selectors":[{"path":"MS1302","type":"Node"},{"path":"MS1302","type":"Children"},{"path":"MS1302/5403","type":"Descendents"}]}
 {"rootPath":"MS5122","selectors":[{"path":"MS5122","type":"Tree"}]}
 {"rootPath":"MS5120","selectors":[{"path":"MS5120","type":"Children"},{"path":"MS5120","type":"Node"},{"path":"MS5120/5121","type":"Descendents"}]}
