@@ -16,7 +16,7 @@ class NeptuneClient:
         self.neptune_endpoint = neptune_endpoint
         self.session = boto3.Session(profile_name="platform-developer")
 
-    def _make_request(self, method: str, relative_url: str, payload: dict = None):
+    def _make_request(self, method: str, relative_url: str, payload: dict):
         url = f"{self.load_balancer_url}{relative_url}"
         headers = {
             "Host": self.neptune_endpoint,
@@ -47,4 +47,5 @@ class NeptuneClient:
         return response['results']
 
     def get_graph_summary(self):
-        return self._make_request("GET", "/propertygraph/statistics/summary", {})["payload"]['graphSummary']
+        response = self._make_request("GET", "/propertygraph/statistics/summary", {})
+        return response["payload"]['graphSummary']
