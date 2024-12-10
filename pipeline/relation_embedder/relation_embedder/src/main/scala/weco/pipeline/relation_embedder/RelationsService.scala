@@ -64,11 +64,6 @@ class PathQueryRelationsService(
       .fromGraph(
         new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)
       )
-      .map {
-        searchHit =>
-          info(searchHit.id)
-          searchHit
-      }
       .map(searchHit => searchHit.safeTo[RelationWork].get)
   }
 }
