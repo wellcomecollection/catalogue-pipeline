@@ -1,5 +1,23 @@
-version: '3.3'
 services:
+  lambda:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: lambda_rie
+    volumes:
+      - ~/.aws:/root/.aws
+    ports:
+      - "9000:8080"
+    environment:
+      - AWS_PROFILE=platform-developer
+      - metrics_namespace=catalogue-dev_relation_embedder
+      - affected_works_scroll_size=50
+      - complete_tree_scroll_size=800
+      - index_batch_size=100
+      - index_flush_interval_seconds=60
+    env_file:
+      - .env
+
   localstack:
     image: "public.ecr.aws/localstack/localstack:3.5.0"
     environment:
