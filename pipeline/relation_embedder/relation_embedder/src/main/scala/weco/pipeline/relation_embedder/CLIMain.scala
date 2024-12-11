@@ -4,7 +4,6 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.DurationInt
 
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.scaladsl.{Flow, Sink}
 
 import com.typesafe.config.ConfigFactory
 import com.sksamuel.elastic4s.Index
@@ -36,16 +35,11 @@ object CLIMain extends App with StdInBatches {
     downstream = STDIODownstream
   )
 
-  private val batchProcessorFlow = Flow.fromFunction(batchProcessor.apply)
-
   Await.result(
-    batchSource
-      .via(batchProcessorFlow)
-      .runWith(Sink.seq)
-      .flatMap(Future.sequence(_)),
-    // give the futures a chance to resolve before shutting down
+    Future.sequence(batches.map(batchProcessor.apply)),
     5 minutes
   )
+
   esClient.close()
   actorSystem.terminate()
 }

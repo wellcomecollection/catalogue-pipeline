@@ -1,18 +1,15 @@
 package weco.pipeline.relation_embedder.lib
-
-import org.apache.pekko.NotUsed
-import org.apache.pekko.stream.IOResult
-import org.apache.pekko.stream.scaladsl.{Flow, Source}
 import weco.json.JsonUtil._
 import weco.pipeline.relation_embedder.models.Batch
 
-import scala.concurrent.Future
+import scala.io.Source.stdin
 
-trait StdInBatches extends StdInStrings {
-  private val toBatchFlow: Flow[String, Batch, NotUsed] =
-    Flow.fromFunction((jsonString: String) => fromJson[Batch](jsonString).get)
+trait StdInBatches {
+  private val stdInStrings: Iterator[String] = stdin.getLines()
 
-  protected val batchSource: Source[Batch, Future[IOResult]] = stringSource
-    .via(toBatchFlow)
+  private def toBatch(jsonString: String) =
+    fromJson[Batch](jsonString).get
 
+  protected val batches: Iterator[Batch] =
+    stdInStrings.map(toBatch)
 }
