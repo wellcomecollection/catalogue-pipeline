@@ -21,10 +21,6 @@ ENTRYPOINT ["/aws-lambda/aws-lambda-rie"]
 
 ENV use_downstream=stdio
 
-# These are test values, for demonstration purposes only
-ENV es_port=9200
-ENV es_host=secret:elasticsearch/pipeline_storage_2024-11-18/private_host
-
 CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.relation_embedder.LambdaMain::handleRequest"]
 
 FROM base
