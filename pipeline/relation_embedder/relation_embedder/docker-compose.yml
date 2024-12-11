@@ -1,3 +1,4 @@
+# Run locally using `docker compose build lambda && docker compose run --rm  --service-ports lambda`
 services:
   lambda:
     build:
