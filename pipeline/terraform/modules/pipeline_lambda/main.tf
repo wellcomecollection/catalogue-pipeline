@@ -9,7 +9,7 @@ module "pipeline_step" {
   description  = var.description
 
   environment = {
-    variables = var.environment_variables
+    variables = local.environment_variables_with_secrets
   }
 }
 

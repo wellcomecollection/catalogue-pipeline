@@ -26,6 +26,9 @@ module "embedder_lambda" {
     index_batch_size             = 100 // NOTE: too large results in 413 from ES
     index_flush_interval_seconds = 60
   }
+
+  secret_env_vars = var.pipeline_storage_es_service_secrets["relation_embedder"]
+
   # see comment on fargate service's queue_visibility_timeout_seconds
   # 15 minutes is the max for lambda, is it going to be enough?
   timeout = 60 * 15 # 15 Minutes
