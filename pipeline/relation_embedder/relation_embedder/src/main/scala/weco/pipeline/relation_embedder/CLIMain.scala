@@ -32,7 +32,7 @@ object CLIMain extends App with StdInBatches {
       elasticClient = esClient,
       index = Index(config.requireString("es.merged-works.index"))
     ),
-    bulkWriter = new BulkSTDOutWriter(10, 1.second),
+    bulkWriter = new BulkSTDOutWriter(10),
     downstream = STDIODownstream
   )
 

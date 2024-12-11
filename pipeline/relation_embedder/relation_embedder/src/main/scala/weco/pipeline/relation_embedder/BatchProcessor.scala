@@ -22,8 +22,6 @@ import scala.util.{Failure, Success}
 import weco.catalogue.internal_model.Implicits._
 import weco.typesafe.config.builders.EnrichConfig._
 
-import scala.concurrent.duration._
-
 class BatchProcessor(
   relationsService: RelationsService,
   bulkWriter: BulkWriter,
@@ -125,9 +123,7 @@ object BatchProcessor {
 
     val batchWriter = new BulkIndexWriter(
       workIndexer = workIndexer,
-      maxBatchWeight = config.requireInt("es.works.batch_size"),
-      maxBatchWait =
-        config.requireInt("es.works.flush_interval_seconds").seconds
+      maxBatchWeight = config.requireInt("es.works.batch_size")
     )
 
     new BatchProcessor(
