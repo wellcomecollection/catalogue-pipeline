@@ -9,9 +9,10 @@ import weco.pipeline.relation_embedder.lib._
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-object LambdaMain extends RequestHandler[SQSEvent, String]
-  with Logging
-  with LambdaConfiguration {
+object LambdaMain
+    extends RequestHandler[SQSEvent, String]
+    with Logging
+    with LambdaConfiguration {
 
   import SQSEventOps._
 
