@@ -191,7 +191,7 @@ lazy val batcher = setupProject(
     // https://github.com/wellcomecollection/catalogue-pipeline/pull/2327
     //
     // But ultimately it wasn't a good use of time to keep debugging this.
-    internal_model
+//    internal_model
   ),
   externalDependencies = CatalogueDependencies.batcherDependencies
 )
