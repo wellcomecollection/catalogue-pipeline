@@ -8,7 +8,6 @@ import weco.pipeline.relation_embedder.fixtures.{
   SampleWorkTree
 }
 import org.apache.pekko.stream.Materializer
-import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import weco.catalogue.internal_model.work.{Availability, Relations, Work}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.fixtures.TestWith
@@ -49,8 +48,7 @@ class BatchProcessorTest
 
     implicit val bulkWriter: BulkWriter = new BulkIndexWriter(
       workIndexer = new MemoryIndexer(denormalisedIndex),
-      maxBatchWeight = 10,
-      maxBatchWait = 1 milliseconds
+      maxBatchWeight = 10
     )
     withUpstreamIndex(workList) {
       mergedIndex =>

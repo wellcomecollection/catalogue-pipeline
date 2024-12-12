@@ -2,7 +2,6 @@ package weco.pipeline.relation_embedder
 
 import com.sksamuel.elastic4s.Index
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.time.SpanSugar.convertIntToGrainOfTime
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Denormalised
@@ -27,11 +26,7 @@ class BulkIndexWriterTest
         index = Index("this-index-does-not-exist")
       )
     val caught = intercept[RuntimeException] {
-      new BulkIndexWriter(
-        workIndexer = workIndexer,
-        maxBatchWeight = 1,
-        maxBatchWait = 1.second
-      )
+      new BulkIndexWriter(workIndexer = workIndexer, maxBatchWeight = 1)
     }
     caught.getMessage should include(
       "Indexer Initialisation error looking for index: this-index-does-not-exist"
@@ -44,8 +39,7 @@ class BulkIndexWriterTest
 
     implicit val bulkWriter: BulkWriter = new BulkIndexWriter(
       workIndexer = new MemoryIndexer(denormalisedIndex),
-      maxBatchWeight = 3,
-      maxBatchWait = 1 milliseconds
+      maxBatchWeight = 3
     )
     assertWhenWritingCompleted(works(5)) {
       result: Seq[Seq[Work[Denormalised]]] =>
