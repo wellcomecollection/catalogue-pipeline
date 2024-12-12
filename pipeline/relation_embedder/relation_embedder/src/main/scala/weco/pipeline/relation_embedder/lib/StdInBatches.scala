@@ -3,13 +3,24 @@ import weco.json.JsonUtil._
 import weco.pipeline.relation_embedder.models.Batch
 
 import scala.io.Source.stdin
+import scala.util.Try
 
-trait StdInBatches {
+trait StdInNDJSON[T] {
+  protected def jsonToInstance(str: String): Try[T]
   private val stdInStrings: Iterator[String] = stdin.getLines()
 
-  private def toBatch(jsonString: String) =
-    fromJson[Batch](jsonString).get
+  private def toInstance(jsonString: String): Option[T] =
+    jsonToInstance(jsonString).toOption
 
-  protected val batches: Iterator[Batch] =
-    stdInStrings.map(toBatch)
+  protected val batches: Iterator[T] =
+    stdInStrings
+      .flatMap(
+        toInstance
+      )
+
+}
+
+trait StdInBatches extends StdInNDJSON[Batch] {
+  def jsonToInstance(jsonString: String): Try[Batch] =
+    fromJson[Batch](jsonString)
 }
