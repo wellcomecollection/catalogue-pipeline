@@ -162,8 +162,7 @@ class RelationEmbedderWorkerServiceTest
                         )
                     val bulkWriter = new BulkIndexWriter(
                       workIndexer = new MemoryIndexer(denormalisedIndex),
-                      maxBatchWeight = 100,
-                      maxBatchWait = 1 milliseconds
+                      maxBatchWeight = 100
                     )
                     val processor = new BatchProcessor(
                       downstream = MemoryDownstream,

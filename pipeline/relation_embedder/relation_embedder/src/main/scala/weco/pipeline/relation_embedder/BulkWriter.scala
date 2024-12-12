@@ -1,5 +1,6 @@
 package weco.pipeline.relation_embedder
 
+import grizzled.slf4j.Logging
 import org.apache.pekko.NotUsed
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Denormalised
@@ -9,15 +10,15 @@ import weco.pipeline_storage.Indexer
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration._
+import io.circe.{Encoder, Printer}
 
 /** Trait to handle the bulk writing of Works to a target in appropriately sized
   * batches.
   */
 trait BulkWriter {
   // Maximum size (number of average documents) of batch to write
-  val maxBatchWeight: Int = 100
-  // maximum time to wait for a batch to reach the maximum weight
-  val maxBatchWait: FiniteDuration = 20.seconds
+  protected val maxBatchWeight: Int = 100
+
   def writeWorksFlow
     : Flow[Work[Denormalised], Seq[Work[Denormalised]], NotUsed] =
     Flow[Work[Denormalised]]
@@ -28,9 +29,8 @@ trait BulkWriter {
 
   private def groupedFlow
     : Flow[Work[Denormalised], Seq[Work[Denormalised]], NotUsed] =
-    Flow[Work[Denormalised]].groupedWeightedWithin(
-      maxBatchWeight,
-      maxBatchWait
+    Flow[Work[Denormalised]].groupedWeighted(
+      maxBatchWeight
     )(workIndexable.weight)
 
   protected def writeWorks(
@@ -44,8 +44,7 @@ trait BulkWriter {
 
 class BulkIndexWriter(
   workIndexer: Indexer[Work[Denormalised]],
-  override val maxBatchWeight: Int,
-  override val maxBatchWait: FiniteDuration
+  override val maxBatchWeight: Int
 )(implicit ec: ExecutionContext)
     extends BulkWriter {
 
@@ -70,19 +69,20 @@ class BulkIndexWriter(
   */
 
 class BulkSTDOutWriter(
-  override val maxBatchWeight: Int,
-  override val maxBatchWait: FiniteDuration
-) extends BulkWriter {
+  override val maxBatchWeight: Int
+)(implicit encoder: Encoder[Work[Denormalised]])
+    extends BulkWriter
+    with Logging {
 
   protected def writeWorks(
     works: Seq[Work[Denormalised]]
   ): Future[Seq[Work[Denormalised]]] = {
-    println(works.map {
+    info(s"indexing ${works.length} Works")
+    works.foreach {
       work =>
-        val weight = workIndexable.weight(work)
-        println(s"${work.id}, ${weight}")
-        weight
-    }.sum)
+        val json = encoder(work).deepDropNullValues
+        println(Printer.noSpaces.print(json))
+    }
 
     Future.successful(works)
   }

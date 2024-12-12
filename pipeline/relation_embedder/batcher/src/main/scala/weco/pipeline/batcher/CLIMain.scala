@@ -19,7 +19,6 @@ object CLIMain extends App {
   implicit val ec: ExecutionContext =
     actorSystem.dispatcher
 
-  println("hello")
   val stdinSource: Source[ByteString, Future[IOResult]] =
     StreamConverters.fromInputStream(() => System.in)
 
