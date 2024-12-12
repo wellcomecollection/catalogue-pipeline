@@ -35,6 +35,10 @@ get_secret() {
   echo "[${LAMBDA_EXTENSION_NAME}] Getting secret: $secret_name" > /dev/tty
 
   secret_value=$(aws secretsmanager get-secret-value --secret-id "$secret_name" --query SecretString --output text)
+  if [[ -z "$secret_value" ]]; then
+    echo "[${LAMBDA_EXTENSION_NAME}] Secret not found: $secret_name" > /dev/tty
+    exit 1
+  fi
   echo "$secret_value"
 }
 
