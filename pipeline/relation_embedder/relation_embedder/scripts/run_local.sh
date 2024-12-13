@@ -2,12 +2,16 @@
 
 set -euo pipefail
 
-if [ "$#" -ne 1 ]; then
-  echo "Usage: $0 <PIPELINE_DATE>"
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $0 <PIPELINE_DATE> [--skip-build]"
   exit 1
 fi
 
 export PIPELINE_DATE=$1
+SKIP_BUILD=false
+if [ "$#" -eq 2 ] && [ "$2" == "--skip-build" ]; then
+  SKIP_BUILD=true
+fi
 
 PROJECT_NAME="relation_embedder"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -16,10 +20,14 @@ cd "$DIR"/..
 # Read .template.env, substitute variables, and write to .env
 envsubst < template.env > .env
 
-# Build the project
-pushd ../../..
-sbt "project $PROJECT_NAME" ";stage"
-popd
+# Build the project, skipping if requested
+if [ "$SKIP_BUILD" = true ]; then
+  echo "Skipping build"
+else
+  pushd ../../..
+  sbt "project $PROJECT_NAME" ";stage"
+  popd
+fi
 
 # Build the docker image
 docker compose -f local.docker-compose.yml \
