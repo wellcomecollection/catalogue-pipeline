@@ -21,13 +21,7 @@ You must provide an accessible profile with access to the index secrets.
 
 You can run the Lambda version locally thus:
 
-Build the appropriate Docker
-
-`docker build --target lambda_rie -t lambda_relation_embedder .`
-
-Run it with the port available
-
-`docker run -p 9000:8080 lambda_relation_embedder`
+`./scripts/run_local.sh <PIPELINE_DATE>`
 
 You can now post JSON SQS messages to it. Because SQS-fed-by-SNS is so awkwardly verbose,
 a convenience script will fill out the boilerplate for you. As with CLIMain, you can pipe some

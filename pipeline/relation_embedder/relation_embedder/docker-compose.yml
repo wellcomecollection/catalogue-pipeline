@@ -1,4 +1,5 @@
 version: '3.3'
+
 services:
   localstack:
     image: "public.ecr.aws/localstack/localstack:3.5.0"

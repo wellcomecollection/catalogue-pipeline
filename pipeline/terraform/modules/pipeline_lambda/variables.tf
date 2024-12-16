@@ -20,6 +20,10 @@ variable "pipeline_date" {
   type = string
 }
 
+variable "secret_env_vars" {
+  type    = map(string)
+  default = {}
+}
 
 variable "environment_variables" {
   type        = map(string)
