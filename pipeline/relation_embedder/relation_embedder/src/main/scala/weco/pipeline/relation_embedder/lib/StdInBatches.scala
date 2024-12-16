@@ -12,7 +12,7 @@ trait StdInNDJSON[T] {
   private def toInstance(jsonString: String): Option[T] =
     jsonToInstance(jsonString).toOption
 
-  protected val batches: Iterator[T] =
+  protected val instances: Iterator[T] =
     stdInStrings
       .flatMap(
         toInstance
@@ -23,4 +23,6 @@ trait StdInNDJSON[T] {
 trait StdInBatches extends StdInNDJSON[Batch] {
   def jsonToInstance(jsonString: String): Try[Batch] =
     fromJson[Batch](jsonString)
+
+  protected val batches: Iterator[Batch] = instances
 }
