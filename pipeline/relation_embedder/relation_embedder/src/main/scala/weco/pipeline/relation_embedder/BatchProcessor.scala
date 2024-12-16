@@ -4,7 +4,6 @@ import com.sksamuel.elastic4s.Index
 import com.typesafe.config.Config
 import grizzled.slf4j.Logging
 import org.apache.pekko.NotUsed
-import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import weco.catalogue.internal_model.work.Work
@@ -105,8 +104,7 @@ object BatchProcessor {
   def apply(
     config: Config
   )(
-    implicit actorSystem: ActorSystem,
-    ec: ExecutionContext,
+    implicit ec: ExecutionContext,
     materializer: Materializer
   ): BatchProcessor = {
 

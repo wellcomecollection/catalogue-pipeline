@@ -52,33 +52,32 @@ class BatchProcessorTest
     )
     withUpstreamIndex(workList) {
       mergedIndex =>
-        withActorSystem {
-          implicit actorSystem =>
-            val relationsService = new PathQueryRelationsService(
-              elasticClient,
-              mergedIndex,
-              10
-            )
-            withMaterializer {
-              implicit materializer: Materializer =>
-                val downstream = new MemoryDownstream
-                val processor = new BatchProcessor(
-                  relationsService = relationsService,
-                  bulkWriter = bulkWriter,
-                  downstream = downstream
-                )
+        {
+          val relationsService = new PathQueryRelationsService(
+            elasticClient,
+            mergedIndex,
+            10
+          )
+          withMaterializer {
+            implicit materializer: Materializer =>
+              val downstream = new MemoryDownstream
+              val processor = new BatchProcessor(
+                relationsService = relationsService,
+                bulkWriter = bulkWriter,
+                downstream = downstream
+              )
 
-                whenReady(processor(batch)) {
-                  _ =>
-                    testWith(
-                      (
-                        downstream.msgSender.messages.map(_.body),
-                        denormalisedIndex
-                      )
+              whenReady(processor(batch)) {
+                _ =>
+                  testWith(
+                    (
+                      downstream.msgSender.messages.map(_.body),
+                      denormalisedIndex
                     )
-                }
+                  )
+              }
 
-            }
+          }
         }
     }
   }
