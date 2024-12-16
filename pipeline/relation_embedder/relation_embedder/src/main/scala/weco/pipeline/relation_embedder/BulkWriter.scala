@@ -17,9 +17,8 @@ import io.circe.{Encoder, Printer}
   */
 trait BulkWriter {
   // Maximum size (number of average documents) of batch to write
-  val maxBatchWeight: Int = 100
-  // maximum time to wait for a batch to reach the maximum weight
-  val maxBatchWait: FiniteDuration = 20.seconds
+  protected val maxBatchWeight: Int = 100
+
   def writeWorksFlow
     : Flow[Work[Denormalised], Seq[Work[Denormalised]], NotUsed] =
     Flow[Work[Denormalised]]
@@ -30,9 +29,8 @@ trait BulkWriter {
 
   private def groupedFlow
     : Flow[Work[Denormalised], Seq[Work[Denormalised]], NotUsed] =
-    Flow[Work[Denormalised]].groupedWeightedWithin(
-      maxBatchWeight,
-      maxBatchWait
+    Flow[Work[Denormalised]].groupedWeighted(
+      maxBatchWeight
     )(workIndexable.weight)
 
   protected def writeWorks(
@@ -46,8 +44,7 @@ trait BulkWriter {
 
 class BulkIndexWriter(
   workIndexer: Indexer[Work[Denormalised]],
-  override val maxBatchWeight: Int,
-  override val maxBatchWait: FiniteDuration
+  override val maxBatchWeight: Int
 )(implicit ec: ExecutionContext)
     extends BulkWriter {
 
@@ -72,8 +69,7 @@ class BulkIndexWriter(
   */
 
 class BulkSTDOutWriter(
-  override val maxBatchWeight: Int,
-  override val maxBatchWait: FiniteDuration
+  override val maxBatchWeight: Int
 )(implicit encoder: Encoder[Work[Denormalised]])
     extends BulkWriter
     with Logging {

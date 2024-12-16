@@ -8,7 +8,6 @@ import weco.pipeline.relation_embedder.fixtures.BulkWriterAssertions
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration.FiniteDuration
 
 class BulkWriterTest
     extends BulkWriterAssertions
@@ -20,8 +19,7 @@ class BulkWriterTest
   // of the write can handle. Having written them, it emits those chunks
   // The NoOp writer does nothing but the chunking.
   class BulkNoOpWriter(
-    override val maxBatchWeight: Int,
-    override val maxBatchWait: FiniteDuration
+    override val maxBatchWeight: Int
   ) extends BulkWriter {
     override protected def writeWorks(
       works: Seq[Work[WorkState.Denormalised]]
@@ -30,19 +28,19 @@ class BulkWriterTest
   }
 
   it("bundles a series of works into a sequences of size `weight`") {
-    implicit val writer: BulkWriter = new BulkNoOpWriter(2, 1.millisecond)
+    implicit val writer: BulkWriter = new BulkNoOpWriter(2)
     assertResultsHaveLengths(works(20), Seq.fill(10)(2))
   }
 
   it("emits and completes promptly when it cannot make a full bulk batch") {
-    implicit val writer: BulkWriter = new BulkNoOpWriter(2, 1.hour)
+    implicit val writer: BulkWriter = new BulkNoOpWriter(2)
     failAfter(1.second) {
       assertResultsHaveLengths(works(5), Seq(2, 2, 1))
     }
   }
 
   it("considers 20 relations to be equivalent to a whole work") {
-    implicit val writer: BulkWriter = new BulkNoOpWriter(4, 1.hour)
+    implicit val writer: BulkWriter = new BulkNoOpWriter(4)
     val unrelatedWorks = works(2)
     // A work with 20 relations is worth two with none, the 20 relations and the work itself.
     val twoWeightWork = denormalisedWork(relations =
@@ -63,7 +61,7 @@ class BulkWriterTest
   }
 
   it("considers roughly 20 relations to equal 20 when calculating weight") {
-    implicit val writer: BulkWriter = new BulkNoOpWriter(4, 1.hour)
+    implicit val writer: BulkWriter = new BulkNoOpWriter(4)
     val unrelatedWorks = works(2)
     // A work with 20 relations is worth two with none, the 20 relations and the work itself.
     val twoishWeightWork = denormalisedWork(relations =

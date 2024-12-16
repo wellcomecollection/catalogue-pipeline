@@ -13,7 +13,7 @@ module "pipeline" {
     works = {
       identified = "works_identified.2023-05-26"
       merged     = "works_merged.2023-05-26"
-      indexed    = "works_indexed.2024-11-06"
+      indexed    = "works_indexed.2024-11-14"
     }
     images = {
       indexed        = "images_indexed.2024-11-14"
