@@ -5,6 +5,13 @@ import weco.pipeline.relation_embedder.models.Batch
 import scala.io.Source.stdin
 import scala.util.Try
 
+/** Trait to deal with Newline Delimited JSON being provided on STDIN.
+  *
+  * Each JSON object in the input is transformed to an instance of T, according
+  * to jsonToInstance (provided by the extending class) and used to populate the
+  * instances Iterator.
+  */
+
 trait StdInNDJSON[T] {
   protected def jsonToInstance(str: String): Try[T]
   private val stdInStrings: Iterator[String] = stdin.getLines()
