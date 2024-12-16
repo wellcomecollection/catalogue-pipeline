@@ -1,9 +1,10 @@
 package weco.pipeline.relation_embedder.lib
+import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
 import weco.pipeline.relation_embedder.models.Batch
 
 import scala.io.Source.stdin
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /** Trait to deal with Newline Delimited JSON being provided on STDIN.
   *
@@ -12,12 +13,17 @@ import scala.util.Try
   * instances Iterator.
   */
 
-trait StdInNDJSON[T] {
+trait StdInNDJSON[T] extends Logging {
   protected def jsonToInstance(str: String): Try[T]
   private val stdInStrings: Iterator[String] = stdin.getLines()
 
   private def toInstance(jsonString: String): Option[T] =
-    jsonToInstance(jsonString).toOption
+    jsonToInstance(jsonString) match {
+      case Failure(exception) =>
+        error(exception.getMessage)
+        None
+      case Success(value) => Some(value)
+    }
 
   protected val instances: Iterator[T] =
     stdInStrings
