@@ -2,9 +2,10 @@ import requests
 from collections.abc import Generator
 import gzip
 import json
+from .base_source import BaseSource
 
 
-class GZipSource:
+class GZipSource(BaseSource):
     def __init__(self, url: str):
         self.url = url
 
@@ -14,3 +15,13 @@ class GZipSource:
         with gzip.GzipFile(fileobj=response.raw) as file:
             for line_bytes in file:
                 yield json.loads(line_bytes.decode("utf8"))
+
+
+class MultiGZipSource(BaseSource):
+    def __init__(self, urls: list[str]):
+        self.urls = urls
+
+    def stream_raw(self) -> Generator[dict]:
+        for url in self.urls:
+            source = GZipSource(url)
+            yield from source.stream_raw()

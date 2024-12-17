@@ -63,6 +63,10 @@ def construct_upsert_edges_query(edges: list[BaseEdge]):
     from_type = edges[0].from_type
     to_type = edges[0].to_type
     relationship = edges[0].relationship
+    attributes = edges[0].attributes or dict()
+
+    field_set = [f"n.{f} = data.{f}" for f in attributes.keys()]
+    field_set_statement = ", ".join(field_set)    
 
     joined_cypher_maps = ",\n".join(
         [_pydantic_object_to_cypher_map(edge) for edge in edges]
@@ -74,5 +78,7 @@ def construct_upsert_edges_query(edges: list[BaseEdge]):
             MATCH (a:{from_type} {{id: data.from_id}})
             MATCH (b:{to_type} {{id: data.to_id}})
             MERGE (a)-[r:{relationship}]->(b)
+            ON CREATE SET r={field_set_statement}
+            ON MATCH SET r={field_set_statement}
         """
     return query

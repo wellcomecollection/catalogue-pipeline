@@ -10,7 +10,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-class NeptuneClient:
+class LocalNeptuneClient:
     def __init__(self, load_balancer_url: str, neptune_endpoint: str):
         self.load_balancer_url = load_balancer_url
         self.neptune_endpoint = neptune_endpoint
