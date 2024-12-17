@@ -1,0 +1,9 @@
+# Calls lint_python workflow in https://github.com/wellcomecollection/.github
+# using py-actions/flake8@v2 GHA
+name: "Python linting"
+
+on: [ push, pull_request ]
+
+jobs:
+  python_lint:
+    uses: wellcomecollection/.github/.github/workflows/lint_python.yml@0237abe5edf53b08ebd90f0709537065e28e2d4c

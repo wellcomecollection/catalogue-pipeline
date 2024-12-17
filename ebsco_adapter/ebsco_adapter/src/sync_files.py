@@ -15,7 +15,7 @@ def get_marc_file_details(filename):
             ".xml"
         ), f"Invalid file type for file {filename}! Skipping..."
         assert filename.startswith(
-            f"ebz-"
+            "ebz-"
         ), f"Unexpected file name for file {filename}! Skipping..."
 
         file_date = datetime.datetime.strptime(filename_parts[2], "%Y%m%d")
