@@ -215,7 +215,7 @@ def start_reindex(ctx, src, dst, mode, input_file):
 
         if src == "all":
             warning_message = (
-                f"Warning: Sending Miro at the same time as everything else "
+                "Warning: Sending Miro at the same time as everything else "
                 "may result in the erroneous creation of Image records.\nContinue?"
             )
             click.confirm(click.style(warning_message, "yellow"), abort=True)
