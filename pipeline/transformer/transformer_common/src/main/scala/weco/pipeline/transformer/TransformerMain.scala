@@ -55,7 +55,7 @@ class TransformerMain[Payload <: SourcePayload, SourceData](
     new TransformerWorker(
       transformer = transformer,
       pipelineStream = pipelineStream,
-      retriever = sourceWorkRetriever,
+      transformedWorkRetriever = sourceWorkRetriever,
       sourceDataRetriever = sourceDataRetriever
     )
   }

@@ -98,7 +98,7 @@ class MiroTransformerEndToEndTest
             ](
               transformer = new MiroRecordTransformer,
               pipelineStream = pipelineStream,
-              retriever = retriever,
+              transformedWorkRetriever = retriever,
               sourceDataRetriever = new MiroSourceDataRetriever(store)
             )
             worker.run()

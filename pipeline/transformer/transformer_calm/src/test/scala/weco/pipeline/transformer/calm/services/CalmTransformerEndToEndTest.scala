@@ -87,7 +87,7 @@ class CalmTransformerEndToEndTest
               new TransformerWorker[CalmSourcePayload, CalmSourceData, String](
                 transformer = CalmTransformer,
                 pipelineStream = pipelineStream,
-                retriever = retriever,
+                transformedWorkRetriever = retriever,
                 sourceDataRetriever = new CalmSourceDataRetriever(store)
               )
             worker.run()

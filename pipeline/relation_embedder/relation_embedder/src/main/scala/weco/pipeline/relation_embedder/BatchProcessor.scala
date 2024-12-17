@@ -137,6 +137,5 @@ object BatchProcessor {
       bulkWriter = batchWriter,
       downstream = Downstream(Some(config))
     )
-
   }
 }
