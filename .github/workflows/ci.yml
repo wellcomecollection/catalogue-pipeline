@@ -15,4 +15,4 @@ jobs:
           java-version: 11
           cache: sbt
       - name: Build and Test
-        run: sbt test
+        run: sbt -v +test
