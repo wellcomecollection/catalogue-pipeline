@@ -6,4 +6,4 @@ on: [ push, pull_request ]
 
 jobs:
   python_lint:
-    uses: wellcomecollection/.github/.github/workflows/lint_python.yml@fee3f8c73791b876d557a957e9ca1adc3f84e67a
+    uses: wellcomecollection/.github/.github/workflows/lint_python.yml@f8afd840d13215342968183fe53af89e07ca3788
