@@ -12,11 +12,13 @@ trait ConfigurationBuilder[C, T <: ApplicationConfig] {
   def config: T = build(rawConfig)
 }
 
-trait TypesafeConfigurable[T <: ApplicationConfig] extends ConfigurationBuilder[Config, T] {
+trait TypesafeConfigurable[T <: ApplicationConfig]
+    extends ConfigurationBuilder[Config, T] {
   def build(rawConfig: Config): T
 }
 
-trait LambdaConfigurable[T <: ApplicationConfig] extends TypesafeConfigurable[T] {
+trait LambdaConfigurable[T <: ApplicationConfig]
+    extends TypesafeConfigurable[T] {
   private val defaultResolveFromFile: String = "/tmp/config"
   private val defaultApplicationConfig: String = "application.conf"
 
