@@ -1,7 +1,6 @@
 package weco.pipeline.relation_embedder
 
 import com.sksamuel.elastic4s.Index
-import com.typesafe.config.Config
 import grizzled.slf4j.Logging
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ActorSystem
@@ -9,18 +8,14 @@ import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Denormalised
-import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.pipeline.relation_embedder.models.{
-  ArchiveRelationsCache,
-  Batch,
-  RelationWork
-}
+import lib.ElasticBuilder
+import weco.pipeline.relation_embedder.models.{ArchiveRelationsCache, Batch, RelationWork}
 import weco.pipeline_storage.elastic.ElasticIndexer
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import weco.catalogue.internal_model.Implicits._
-import weco.typesafe.config.builders.EnrichConfig._
+import weco.pipeline.relation_embedder.lib.{Downstream, RelationEmbedderConfig}
 
 class BatchProcessor(
   relationsService: RelationsService,
@@ -103,7 +98,7 @@ class BatchProcessor(
 object BatchProcessor {
 
   def apply(
-    config: Config
+    config: RelationEmbedderConfig
   )(
     implicit actorSystem: ActorSystem,
     ec: ExecutionContext,
@@ -111,31 +106,30 @@ object BatchProcessor {
   ): BatchProcessor = {
 
     val identifiedIndex =
-      Index(config.requireString("es.merged-works.index"))
+      Index(config.mergedWorkIndex)
 
-    val esClient = ElasticBuilder.buildElasticClient(config)
+    val esClient = ElasticBuilder.buildElasticClient(config.elasticConfig)
 
     val workIndexer =
       new ElasticIndexer[Work[Denormalised]](
         client = esClient,
-        index = Index(config.requireString(s"es.denormalised-works.index"))
+        index = Index(config.denormalisedWorkIndex)
       )
 
     val batchWriter = new BulkIndexWriter(
       workIndexer = workIndexer,
-      maxBatchWeight = config.requireInt("es.works.batch_size")
+      maxBatchWeight = config.maxBatchWeight
     )
 
     new BatchProcessor(
       relationsService = new PathQueryRelationsService(
         esClient,
         identifiedIndex,
-        completeTreeScroll = config.requireInt("es.works.scroll.complete_tree"),
-        affectedWorksScroll =
-          config.requireInt("es.works.scroll.affected_works")
+        completeTreeScroll = config.completeTreeScroll,
+        affectedWorksScroll = config.affectedWorksScroll
       ),
       bulkWriter = batchWriter,
-      downstream = Downstream(Some(config))
+      downstream = Downstream(config.downstreamTarget)
     )
   }
 }
