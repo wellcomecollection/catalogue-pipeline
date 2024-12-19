@@ -50,6 +50,12 @@ lazy val display_model = setupProject(
   externalDependencies = CatalogueDependencies.displayModelDependencies
 )
 
+lazy val lambda = setupProject(
+  project,
+  "common/lambda",
+  externalDependencies = CatalogueDependencies.lambdaDependencies
+)
+
 lazy val flows = setupProject(
   project,
   "common/flows",
