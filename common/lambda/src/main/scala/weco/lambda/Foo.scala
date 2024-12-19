@@ -1,5 +1,3 @@
 package weco.lambda
 
-trait Foo {
-
-}
+trait Foo {}
