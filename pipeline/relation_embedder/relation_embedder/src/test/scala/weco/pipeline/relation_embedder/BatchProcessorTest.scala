@@ -3,7 +3,10 @@ package weco.pipeline.relation_embedder
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pekko.fixtures.Pekko
-import weco.pipeline.relation_embedder.fixtures.{BulkWriterAssertions, SampleWorkTree}
+import weco.pipeline.relation_embedder.fixtures.{
+  BulkWriterAssertions,
+  SampleWorkTree
+}
 import org.apache.pekko.stream.Materializer
 import weco.catalogue.internal_model.work.{Availability, Relations, Work}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
