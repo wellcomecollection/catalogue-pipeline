@@ -8,12 +8,30 @@ resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   storage_encrypted                    = true
   vpc_security_group_ids               = [aws_security_group.neptune_security_group.id]
   neptune_subnet_group_name            = aws_db_subnet_group.neptune_subnet_group.name
+  iam_roles                            = [aws_iam_role.catalogue_graph_cluster.arn]
 
   # Set minimum capacity to 1 NCU, and maximum capacity to 16 NCUs. These are the minimum possible values.
   serverless_v2_scaling_configuration {
     min_capacity = 1
     max_capacity = 16
   }
+}
+
+resource "aws_iam_role" "catalogue_graph_cluster" {
+  name = "catalogue-graph-cluster"
+
+  assume_role_policy = jsonencode({
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = {
+          Service = "rds.amazonaws.com" # Neptune uses RDS for some operations
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
 }
 
 resource "aws_neptune_cluster_instance" "catalogue_graph_instance" {
@@ -36,6 +54,14 @@ resource "aws_security_group" "neptune_security_group" {
 resource "aws_vpc_security_group_ingress_rule" "neptune_ingress" {
   security_group_id = aws_security_group.neptune_security_group.id
   cidr_ipv4         = data.aws_vpc.vpc.cidr_block
+  ip_protocol       = "-1"
+}
+
+# Allow any egress traffic. The Neptune cluster needs to be able to reach the `wellcomecollection-neptune-graph-loader`
+# S3 bucket for bulk loading.
+resource "aws_vpc_security_group_egress_rule" "neptune_egress" {
+  security_group_id = aws_security_group.neptune_security_group.id
+  cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1"
 }
 

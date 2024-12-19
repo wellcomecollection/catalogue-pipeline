@@ -29,7 +29,7 @@ data "aws_iam_policy_document" "allow_secret_read" {
   }
 }
 
-resource "aws_iam_role_policy" "read_secrets_policy" {
+resource "aws_iam_role_policy" "indexer_lambda_read_secrets_policy" {
   role   = module.indexer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_secret_read.json
 }
@@ -109,18 +109,15 @@ resource "aws_iam_role_policy" "indexer_lambda_neptune_policy" {
 }
 
 # This configures an EventSourceMapping which automatically polls the SQS queue for new messages and triggers
-# the indexer Lambda function. All messages received in a 60 second window (defined by `maximum_batching_window_in_seconds`)
-# are collected and sent to the Lambda for processing in batches of at most 10 messages (defined by `batch_size`).
-# Additionally, the `maximum_concurrency` parameter ensures that there are at most 10 active indexer Lambda functions
-# running at a time.
+# the indexer Lambda function.
 resource "aws_lambda_event_source_mapping" "sqs_to_indexer_lambda" {
   event_source_arn                   = module.indexer_message_queue.arn
   function_name                      = module.indexer_lambda.lambda.function_name
-  batch_size                         = 1
+  batch_size                         = 5 # Maximum number of messages processed in a single Lambda run.
   enabled                            = true
   maximum_batching_window_in_seconds = 60
   scaling_config {
-    maximum_concurrency = 20
+    maximum_concurrency = 20 # Maximum number of active indexer Lambda functions running at a time
   }
 }
 

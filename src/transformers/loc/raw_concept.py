@@ -42,7 +42,7 @@ class RawLibraryOfCongressConcept:
             return raw_label[0]
 
         return raw_label["@value"]
-    
+
     def exclude(self):
         if self._raw_concept_node is None:
             return True
@@ -73,7 +73,7 @@ class RawLibraryOfCongressConcept:
             return [self._extract_label(item) for item in raw_alternative_labels]
 
         return [self._extract_label(raw_alternative_labels)]
-    
+
     @property
     def broader_concept_ids(self):
         broader_concepts = self._raw_concept_node.get("skos:broader", [])
@@ -82,9 +82,14 @@ class RawLibraryOfCongressConcept:
         if isinstance(broader_concepts, dict):
             broader_concepts = [broader_concepts]
 
-        broader_ids = [
-            self._remove_id_prefix(concept["@id"]) for concept in broader_concepts
-        ]
+        broader_ids = []
+        for concept in broader_concepts:
+            # Some broader concepts have IDs in the format `_:n<some_hexadecimal_string>`.
+            # These IDs do not exist in the LoC source files or the LoC website, so we filter them out.
+            if concept["@id"].startswith("_:n"):
+                continue
+
+            broader_ids.append(self._remove_id_prefix(concept["@id"]))
 
         return broader_ids
 
@@ -92,22 +97,22 @@ class RawLibraryOfCongressConcept:
     def is_geographic(self):
         if self._raw_concept_node is None:
             return False
-        
+
         # Notations are sometimes returned as a single notation (with a `@type` property, and a `@value` property),
-        # and sometimes as a list of notations. 
+        # and sometimes as a list of notations.
         notation = self._raw_concept_node.get("skos:notation", [])
         if isinstance(notation, dict):
             notation = [notation]
 
         notation_types = {item.get("@type") for item in notation}
         return "http://id.loc.gov/datatypes/codes/gac" in notation_types
-    
+
     @property
     def source(self):
         if "subjects" in self.raw_concept["@id"]:
             return "lc-subjects"
-        
+
         if "names" in self.raw_concept["@id"]:
             return "lc-names"
-        
+
         raise ValueError("Unknown concept type.")

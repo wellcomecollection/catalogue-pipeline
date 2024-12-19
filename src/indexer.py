@@ -1,14 +1,7 @@
-import boto3
 import json
+import argparse
 
-from clients.neptune_client import NeptuneClient
-
-
-def _get_secret(secret_name: str):
-    secrets_manager_client = boto3.client("secretsmanager", region_name="eu-west-1")
-    response = secrets_manager_client.get_secret_value(SecretId=secret_name)
-
-    return response["SecretString"]
+from utils.aws import get_neptune_client
 
 
 def extract_sns_messages_from_sqs_event(event):
@@ -21,13 +14,32 @@ def extract_sns_messages_from_sqs_event(event):
     return queries
 
 
-def lambda_handler(event: dict, context):
-    queries = extract_sns_messages_from_sqs_event(event)
-    neptune_client = NeptuneClient(_get_secret("NeptuneTest/InstanceEndpoint"))
+def handler(queries: list[str], is_local=False):
+    neptune_client = get_neptune_client(is_local)
+
+    print(f"Received number of queries: {len(queries)}")
 
     for query in queries:
         neptune_client.run_open_cypher_query(query)
 
 
+def lambda_handler(event: dict, context):
+    queries = extract_sns_messages_from_sqs_event(event)
+    handler(queries)
+
+
+def local_handler():
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        "--cypher-query",
+        type=str,
+        help="An openCypher query to run against the Neptune cluster.",
+        required=True,
+    )
+    args = parser.parse_args()
+
+    handler([args.cypher_query], is_local=True)
+
+
 if __name__ == "__main__":
-    lambda_handler({}, None)
+    local_handler()
