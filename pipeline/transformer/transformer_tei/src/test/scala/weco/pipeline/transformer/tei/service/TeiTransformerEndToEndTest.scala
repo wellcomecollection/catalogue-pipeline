@@ -94,7 +94,7 @@ class TeiTransformerEndToEndTest
               new TransformerWorker[TeiSourcePayload, TeiMetadata, String](
                 transformer = new TeiTransformer(store),
                 pipelineStream = pipelineStream,
-                retriever = retriever,
+                transformedWorkRetriever = retriever,
                 sourceDataRetriever = new TeiSourceDataRetriever
               )
             worker.run()
