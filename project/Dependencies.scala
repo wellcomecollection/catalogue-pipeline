@@ -197,6 +197,12 @@ object CatalogueDependencies {
   val flowDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
 
+  val lambdaDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary ++
+      ExternalDependencies.awsLambdaClient ++
+      ExternalDependencies.awsLambdaEvents ++
+      ExternalDependencies.uPickle
+
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary ++
