@@ -3,11 +3,22 @@ package weco.pipeline.relation_embedder.lib
 import java.io.File
 import com.typesafe.config.{Config, ConfigFactory}
 
-trait Configuration {
-  val config: Config
+trait ApplicationConfig {}
+
+trait ConfigurationBuilder[C, T <: ApplicationConfig] {
+  protected val rawConfig: C
+
+  def build(rawConfig: C): T
+  def config: T = build(rawConfig)
 }
 
-trait LambdaConfiguration extends Configuration {
+trait TypesafeConfigurable[T <: ApplicationConfig]
+    extends ConfigurationBuilder[Config, T] {
+  def build(rawConfig: Config): T
+}
+
+trait LambdaConfigurable[T <: ApplicationConfig]
+    extends TypesafeConfigurable[T] {
   private val defaultResolveFromFile: String = "/tmp/config"
   private val defaultApplicationConfig: String = "application.conf"
 
@@ -26,7 +37,7 @@ trait LambdaConfiguration extends Configuration {
     ConfigFactory.empty()
   }
 
-  lazy val config = lambdaConfig
+  lazy val rawConfig = lambdaConfig
     .withFallback(applicationConfig)
     .withFallback(baseConfig)
     .resolve()
