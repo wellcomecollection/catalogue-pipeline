@@ -1,6 +1,7 @@
 package weco.pipeline.relation_embedder
 
 import com.sksamuel.elastic4s.Index
+import io.circe.Encoder
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,8 +22,8 @@ import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.catalogue.internal_model.work._
+import weco.lambda.Downstream
 import weco.pipeline.relation_embedder.fixtures.SampleWorkTree
-import weco.pipeline.relation_embedder.lib.Downstream
 import weco.pipeline.relation_embedder.models._
 import weco.pipeline_storage.memory.MemoryIndexer
 
@@ -148,6 +149,10 @@ class RelationEmbedderWorkerServiceTest
 
                       override def notify(workId: String): Try[Unit] =
                         Try(msgSender.send(workId))
+
+                      override def notify[T](batch: T)(
+                        implicit encoder: Encoder[T]
+                      ): Try[Unit] = ???
                     }
 
                     val denormalisedIndex =
