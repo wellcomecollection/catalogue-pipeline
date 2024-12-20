@@ -3,11 +3,24 @@ import grizzled.slf4j.Logging
 import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
+import weco.lambda.Downstream
+import weco.json.JsonUtil._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-object PathsProcessor extends Logging {
+/** Processes a list of paths by bundling them into Batches and sending them to
+  * a downstream service for processing.
+  *
+  * @param downstream
+  *   The downstream target to send the Batches to
+  * @param maxBatchSize
+  *   The maximum number of selectors to include in a single Batch
+  */
+class PathsProcessor(downstream: Downstream, maxBatchSize: Int)(
+  implicit ec: ExecutionContext,
+  materializer: Materializer
+) extends Logging {
 
   /** Takes a list of strings, each representing a path to be processed by
     * _downstream_
@@ -22,10 +35,7 @@ object PathsProcessor extends Logging {
     *   SQS/SNS-driven. Should just be the actual failed paths, and the caller
     *   should build a map to work it out if it wants to)
     */
-  def apply(maxBatchSize: Int, paths: List[String], downstream: Downstream)(
-    implicit ec: ExecutionContext,
-    materializer: Materializer
-  ): Future[Seq[Long]] = {
+  def apply(paths: List[String]): Future[Seq[Long]] = {
     info(s"Processing ${paths.size} paths with max batch size $maxBatchSize")
 
     generateBatches(maxBatchSize, paths)
@@ -87,4 +97,12 @@ object PathsProcessor extends Logging {
         batch -> msgIndices
     }
   }
+}
+
+object PathsProcessor {
+  def apply(
+    downstream: Downstream,
+    maxBatchSize: Int
+  )(implicit ec: ExecutionContext, mat: Materializer): PathsProcessor =
+    new PathsProcessor(downstream, maxBatchSize)
 }

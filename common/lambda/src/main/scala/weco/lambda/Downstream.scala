@@ -1,12 +1,15 @@
 package weco.lambda
 
+import io.circe.Encoder
 import software.amazon.awssdk.services.sns.SnsClient
 import weco.messaging.sns.{SNSConfig, SNSMessageSender}
+import weco.json.JsonUtil.toJson
 
 import scala.util.Try
 
 trait Downstream {
   def notify(workId: String): Try[Unit]
+  def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit]
 }
 
 class SNSDownstream(snsConfig: SNSConfig) extends Downstream {
@@ -17,10 +20,12 @@ class SNSDownstream(snsConfig: SNSConfig) extends Downstream {
   )
 
   override def notify(workId: String): Try[Unit] = Try(msgSender.send(workId))
+  override def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit] = msgSender.sendT(batch)
 }
 
 object STDIODownstream extends Downstream {
   override def notify(workId: String): Try[Unit] = Try(println(workId))
+  override def notify[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] = Try(println(toJson(t)))
 }
 
 sealed trait DownstreamTarget

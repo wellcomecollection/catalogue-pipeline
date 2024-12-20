@@ -12,9 +12,9 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
   describe("Using the implicit class SQSEventOps") {
     it("extracts paths from an SQSEvent") {
       val fakeMessage = new SQSMessage()
-        fakeMessage.setBody("{\"Message\":\"A/C\"}")
+      fakeMessage.setBody("{\"Message\":\"A/C\"}")
       val fakeSQSEvent = new SQSEvent()
-        fakeSQSEvent.setRecords(List(fakeMessage).asJava)
+      fakeSQSEvent.setRecords(List(fakeMessage).asJava)
 
       val paths = fakeSQSEvent.extractPaths
 
