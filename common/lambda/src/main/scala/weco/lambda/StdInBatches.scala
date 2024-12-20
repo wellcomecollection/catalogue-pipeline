@@ -20,7 +20,9 @@ trait StdInNDJSON[T] extends Logging {
 
   private val stdInStrings: Iterator[String] = stdin.getLines()
 
-  private def toInstance(jsonString: String)(implicit decoder: Decoder[T]): Option[T] =
+  private def toInstance(
+    jsonString: String
+  )(implicit decoder: Decoder[T]): Option[T] =
     jsonToInstance(jsonString) match {
       case Failure(exception) =>
         error(exception.getMessage)

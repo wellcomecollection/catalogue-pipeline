@@ -202,6 +202,7 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
+      ExternalDependencies.scalatestDependencies ++
       ExternalDependencies.awsLambdaClient ++
       ExternalDependencies.awsLambdaEvents ++
       ExternalDependencies.uPickle
