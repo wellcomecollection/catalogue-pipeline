@@ -13,6 +13,8 @@ def handler(transformer_type: str, entity_type: EntityType, is_local=False):
     file_name = f"{transformer_type}__{entity_type}.csv"
     s3_file_uri = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
 
+    print(f"Initiating bulk load from {s3_file_uri}.")
+
     neptune_client = get_neptune_client(is_local)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 

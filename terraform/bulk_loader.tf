@@ -10,7 +10,7 @@ module "bulk_loader_lambda" {
 
   handler     = "bulk_loader.lambda_handler"
   memory_size = 128
-  timeout     = 20 // 20 seconds
+  timeout     = 15*60 // 15 minutes
 
   vpc_config = {
     subnet_ids         = local.private_subnets
@@ -37,7 +37,8 @@ resource "aws_iam_role_policy" "bulk_loader_lambda_read_secrets_policy" {
 data "aws_iam_policy_document" "neptune_load" {
   statement {
     actions = [
-      "neptune-db:StartLoaderJob"
+      "neptune-db:StartLoaderJob",
+      "neptune-db:GetLoaderJobStatus"
     ]
 
     resources = [

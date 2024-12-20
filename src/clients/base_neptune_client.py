@@ -80,18 +80,17 @@ class BaseNeptuneClient:
         response = self._make_request(
             "GET", f"/loader?loadId={load_id}&errors=TRUE&details=TRUE"
         )
+
         payload = response["payload"]
-
         overall_status = payload["overallStatus"]
-        status = overall_status["status"]
-        full_uri = overall_status["fullUri"]
-        processed_count = overall_status["totalRecords"]
-
-        print(f"Bulk load status: {status}")
-        print(f"    Source file URI: {full_uri}")
-        print(f"    Processed records: {processed_count:,}")
+        error_logs = payload["errors"]["errorLogs"]
 
         # Statuses: https://docs.aws.amazon.com/neptune/latest/userguide/loader-message.html
+        status = overall_status["status"]
+        processed_count = overall_status["totalRecords"]
+
+        print(f"Bulk load status: {status}. (Processed {processed_count:,} records.)")
+
         if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
             return
 
@@ -105,7 +104,6 @@ class BaseNeptuneClient:
         print(f"    Data type mismatch errors: {data_type_error_count:,}")
         print(f"    Total time spent: {formatted_time}")
 
-        error_logs = payload["errors"]["errorLogs"]
         if error_logs:
             print("    First 10 errors:")
 

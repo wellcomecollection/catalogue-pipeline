@@ -5,12 +5,15 @@ module "extractor_lambda" {
   description = "Extracts source concepts and turns them into Cypher queries."
   runtime     = "python3.13"
 
-  filename = "../build.zip"
+  filename         = "../build.zip"
   source_code_hash = filesha256("../build.zip")
 
   handler     = "extractor.lambda_handler"
-  memory_size = 128
-  timeout     = 60 // 1 minute
+
+  // This Lambda does not need a lot of memory, but it downloads and processes large datasets (with up to 10 million
+  // items) and therefore needs the additional compute and networking capacity which comes with increased memory.
+  memory_size = 4096
+  timeout     = 15*60 // 15 minutes
 
   vpc_config = {
     subnet_ids         = local.private_subnets
