@@ -1,59 +1,24 @@
 package weco.pipeline.batcher
 
-import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
-import grizzled.slf4j.Logging
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import org.apache.pekko.actor.ActorSystem
-import weco.messaging.typesafe.SNSBuilder
-import weco.json.JsonUtil._
-import com.typesafe.config.ConfigFactory
-import weco.typesafe.config.builders.EnrichConfig.RichConfig
-import scala.concurrent.Await
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.ExecutionContext
-import scala.util.Try
+import weco.lambda._
+import weco.pipeline.batcher.lib.{BatcherConfig, BatcherConfigurable}
 
-object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
-  import weco.pipeline.batcher.lib.SQSEventOps._
+import scala.concurrent.Future
 
-  // Initialize anything we want to be shared across lambda invocations here
+object LambdaMain
+    extends LambdaApp[SQSEvent, String, BatcherConfig]
+    with BatcherConfigurable {
 
-  private val config = ConfigFactory.load("application")
+  import weco.lambda.SQSEventOps._
 
-  private object SNSDownstream extends Downstream {
-    private val msgSender = SNSBuilder
-      .buildSNSMessageSender(config, subject = "Sent from batcher")
-    override def notify(batch: Batch): Try[Unit] = msgSender.sendT(batch)
-  }
+  private val pathsProcessor = PathsProcessor(
+    Downstream(config.downstreamTarget),
+    config.maxBatchSize
+  )
 
-  val downstream = config.getString("batcher.use_downstream") match {
-    case "sns"   => SNSDownstream
-    case "stdio" => STDIODownstream
-  }
-
-  // This is the entry point for the lambda
-
-  override def handleRequest(
-    event: SQSEvent,
-    context: Context
-  ): String = {
-    debug(s"Running batcher lambda, got event: $event")
-
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val ec: ExecutionContext =
-      actorSystem.dispatcher
-
-    val f = PathsProcessor(
-      config.requireInt("batcher.max_batch_size"),
-      event.extractPaths,
-      downstream
-    )
-
-    // Wait here so that lambda can finish executing correctly.
-    // 15 minutes is the maximum time allowed for a lambda to run.
-    Await.result(f, 15.minutes)
-
-    "Done"
+  override def processEvent(in: SQSEvent): Future[String] = {
+    debug(s"Running batcher lambda, got event: $in")
+    pathsProcessor(in.extract[String]).map(_ => "Done")
   }
 }

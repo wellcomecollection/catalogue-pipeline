@@ -202,6 +202,7 @@ object CatalogueDependencies {
       WellcomeDependencies.messagingTypesafeLibrary ++
       WellcomeDependencies.elasticsearchTypesafeLibrary ++
       WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.fixturesLibrary ++
       ExternalDependencies.scalatestDependencies ++
       ExternalDependencies.awsLambdaClient ++
       ExternalDependencies.awsLambdaEvents ++
@@ -248,20 +249,8 @@ object CatalogueDependencies {
   val pathConcatenatorDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
 
-  val relationEmbedderDependencies: Seq[ModuleID] =
-    WellcomeDependencies.messagingTypesafeLibrary
-
   val routerDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
-
-  val batcherDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalatestDependencies ++
-      ExternalDependencies.awsLambdaClient ++
-      ExternalDependencies.awsLambdaEvents ++
-      ExternalDependencies.uPickle ++
-      WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.fixturesLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++
