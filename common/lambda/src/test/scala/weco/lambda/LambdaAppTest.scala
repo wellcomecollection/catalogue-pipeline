@@ -1,13 +1,13 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
 
 import com.typesafe.config.Config
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
+import org.scalatest.matchers.must.Matchers
 import weco.fixtures.RandomGenerators
-import weco.pipeline.relation_embedder.helpers.ConfigurationTestHelpers
+import weco.lambda.helpers.ConfigurationTestHelpers
 
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.Future
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 
 class LambdaAppTest
     extends AnyFunSpec
@@ -47,7 +47,7 @@ class LambdaAppTest
     lambdaApp.handleRequest(
       eventString,
       null
-    ) shouldBe eventString + configString
+    ) mustBe eventString + configString
   }
 
   class FailingTestLambdaApp extends TestLambdaApp {

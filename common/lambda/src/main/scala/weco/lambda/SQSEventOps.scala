@@ -24,7 +24,9 @@ object SQSEventOps {
     def extract[T]()(implicit decoder: Decoder[T]) =
       event.getRecords.asScala.toList.flatMap(extractFromMessage[T](_))
 
-    private def extractFromMessage[T](message: SQSMessage)(implicit decoder: Decoder[T]): Option[T] =
+    private def extractFromMessage[T](
+      message: SQSMessage
+    )(implicit decoder: Decoder[T]): Option[T] =
       ujson.read(message.getBody).obj.get("Message").flatMap {
         value: Value => fromJson[T](value.str).toOption
       }

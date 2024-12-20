@@ -1,8 +1,8 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
 
 import org.scalatest.funspec.AnyFunSpec
-import org.scalatest.matchers.should.Matchers
-import weco.pipeline.relation_embedder.helpers.ConfigurationTestHelpers
+import org.scalatest.matchers.must.Matchers
+import weco.lambda.helpers.ConfigurationTestHelpers
 
 class ConfigurationTest
     extends AnyFunSpec
@@ -19,7 +19,7 @@ class ConfigurationTest
       baseConfig = baseConfig
     ) {
       config =>
-        config shouldBe TestAppConfiguration(
+        config mustBe TestAppConfiguration(
           config1 = Some("value")
         )
     }
@@ -36,7 +36,7 @@ class ConfigurationTest
           |""".asConfig
     ) {
       config =>
-        config shouldBe TestAppConfiguration(
+        config mustBe TestAppConfiguration(
           config1 = Some("valueFromApplicationForConfig1"),
           config2 = Some("valueFromBaseForConfig2")
         )
@@ -58,7 +58,7 @@ class ConfigurationTest
           |""".asConfig
     ) {
       config =>
-        config shouldBe TestAppConfiguration(
+        config mustBe TestAppConfiguration(
           config1 = Some("valueFromLambdaForConfig1"),
           config2 = Some("valueFromBaseForConfig2"),
           config3 = Some("valueFromApplicationForConfig3")
@@ -78,7 +78,7 @@ class ConfigurationTest
           |""".asConfig
     ) {
       config =>
-        config shouldBe TestAppConfiguration(
+        config mustBe TestAppConfiguration(
           config1 = Some("valueFromLambdaForConfig2")
         )
     }

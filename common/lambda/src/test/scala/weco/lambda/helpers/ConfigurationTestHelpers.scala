@@ -1,11 +1,8 @@
-package weco.pipeline.relation_embedder.helpers
+package weco.lambda.helpers
 
 import com.typesafe.config.{Config, ConfigFactory}
 import weco.fixtures.TestWith
-import weco.pipeline.relation_embedder.lib.{
-  ApplicationConfig,
-  LambdaConfigurable
-}
+import weco.lambda.{ApplicationConfig, LambdaConfigurable}
 
 trait ConfigurationTestHelpers {
 
