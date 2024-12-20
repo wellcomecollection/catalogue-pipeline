@@ -20,6 +20,7 @@ class LambdaAppTest
 
   case class TestLambdaAppConfiguration(configString: String)
       extends ApplicationConfig
+
   class TestLambdaApp
       extends LambdaApp[String, String, TestLambdaAppConfiguration] {
     override protected val maximumExecutionTime: FiniteDuration = 200.millis
