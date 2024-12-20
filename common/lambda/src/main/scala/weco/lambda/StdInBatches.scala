@@ -15,7 +15,7 @@ import scala.util.{Failure, Success, Try}
   */
 
 trait StdInNDJSON[T] extends Logging {
-  def jsonToInstance(jsonString: String)(implicit decoder: Decoder[T]): Try[T] =
+  private def jsonToInstance(jsonString: String)(implicit decoder: Decoder[T]): Try[T] =
     fromJson[T](jsonString)
 
   private val stdInStrings: Iterator[String] = stdin.getLines()
