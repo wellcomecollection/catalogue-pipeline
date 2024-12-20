@@ -10,7 +10,8 @@ def construct_upsert_nodes_query(nodes: list[BaseNode]) -> str:
     field_set = [f"n.{f} = data.{f}" for f in all_fields]
     field_set_statement = ", ".join(field_set)
 
-    unwind_maps = [CypherQueryConverter(node).convert_to_cypher_map() for node in nodes]
+    converter = CypherQueryConverter("nodes")
+    unwind_maps = [converter.convert_to_cypher_map(node) for node in nodes]
     joined_unwind_maps = ",\n".join(unwind_maps)
 
     query = f"""
@@ -36,7 +37,8 @@ def construct_upsert_edges_query(edges: list[BaseEdge]) -> str:
     if len(field_set_statement) == 0:
         field_set_statement = "r={}"
 
-    unwind_maps = [CypherQueryConverter(edge).convert_to_cypher_map() for edge in edges]
+    converter = CypherQueryConverter("edges")
+    unwind_maps = [converter.convert_to_cypher_map(edge) for edge in edges]
     joined_unwind_maps = ",\n".join(unwind_maps)
 
     query = f"""

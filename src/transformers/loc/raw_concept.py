@@ -1,3 +1,10 @@
+ID_PREFIXES_TO_REMOVE = (
+    "/authorities/subjects/",
+    "http://id.loc.gov/authorities/subjects/",
+    "/authorities/names/",
+)
+
+
 class RawLibraryOfCongressConcept:
     def __init__(self, raw_concept: dict):
         self.raw_concept = raw_concept
@@ -5,31 +12,26 @@ class RawLibraryOfCongressConcept:
 
     @staticmethod
     def _remove_id_prefix(raw_id: str):
-        prefixes_to_remove = [
-            "/authorities/subjects/",
-            "http://id.loc.gov/authorities/subjects/",
-            "/authorities/names/",
-        ]
-
-        for prefix in prefixes_to_remove:
+        for prefix in ID_PREFIXES_TO_REMOVE:
             raw_id = raw_id.removeprefix(prefix)
 
         return raw_id
 
     def _extract_concept_node(self):
         graph = self.raw_concept["@graph"]
-        concept_nodes = [
-            node
-            for node in graph
-            if self.source_id in node.get("@id") and node["@type"] == "skos:Concept"
-        ]
 
         # Some LoC concepts (e.g. deprecated concepts) do not store a concept node in their graph.
         # When this happens, return `None` because there is no concept for us to extract.
-        if len(concept_nodes) == 0:
-            return None
+        concept_node = next(
+            (
+                node
+                for node in graph
+                if self.source_id in node.get("@id") and node["@type"] == "skos:Concept"
+            ),
+            None,
+        )
 
-        return concept_nodes[0]
+        return concept_node
 
     @staticmethod
     def _extract_label(raw_label: str | dict):

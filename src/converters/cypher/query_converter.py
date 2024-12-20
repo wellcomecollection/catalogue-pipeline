@@ -1,11 +1,12 @@
 from models.graph_node import BaseNode
 from models.graph_edge import BaseEdge
 from .base_converter import CypherBaseConverter
+from typing import Literal
 
 
 class CypherQueryConverter(CypherBaseConverter):
-    def __init__(self, model_to_convert: BaseEdge | BaseNode):
-        self.model = model_to_convert
+    def __init__(self, entity_type: Literal["nodes", "edges"]):
+        self.entity_type = entity_type
 
     def _convert_str(self, raw_value: str) -> str:
         # All strings need to be surrounded in single quotation marks, and all single quotation marks
@@ -13,30 +14,30 @@ class CypherQueryConverter(CypherBaseConverter):
         escaped = raw_value.replace("'", "\\'")
         return f"'{escaped}'"
 
-    def _node_to_cypher_map(self) -> str:
+    def _node_to_cypher_map(self, model: BaseNode) -> str:
         properties = []
 
-        for key, raw_value in dict(self.model).items():
+        for key, raw_value in model.dict().items():
             value = self._raw_value_to_cypher_value(raw_value)
             properties.append(f"{key}: {value}")
 
         return "{" + ", ".join(properties) + "}"
 
-    def _edge_to_cypher_map(self) -> str:
+    def _edge_to_cypher_map(self, model: BaseEdge) -> str:
         properties = []
 
-        for key, raw_value in self.model.attributes.items():
+        for key, raw_value in model.attributes.items():
             value = self._raw_value_to_cypher_value(raw_value)
             properties.append(f"{key}: {value}")
 
-        for key, raw_value in self.model:
+        for key, raw_value in model:
             if key in ("from_id", "to_id"):
                 value = self._raw_value_to_cypher_value(raw_value)
                 properties.append(f"{key}: {value}")
 
         return "{" + ", ".join(properties) + "}"
 
-    def convert_to_cypher_map(self):
+    def convert_to_cypher_map(self, model: BaseNode | BaseEdge):
         """
         Returns a string representing an openCypher Map of the entity (node or edge) for use with an `UNWIND` query.
 
@@ -45,10 +46,10 @@ class CypherQueryConverter(CypherBaseConverter):
 
         See https://neo4j.com/docs/cypher-manual/current/values-and-types/maps/.
         """
-        if isinstance(self.model, BaseNode):
-            return self._node_to_cypher_map()
-        elif isinstance(self.model, BaseEdge):
-            return self._edge_to_cypher_map()
+        if self.entity_type == "nodes":
+            return self._node_to_cypher_map(model)
+        elif self.entity_type == "edges":
+            return self._edge_to_cypher_map(model)
         else:
             raise ValueError(
                 "Unsupported Pydantic model. Each model must subclass BaseEdge or BaseNode."

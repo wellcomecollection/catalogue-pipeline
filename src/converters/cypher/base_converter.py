@@ -1,11 +1,4 @@
-from models.graph_node import BaseNode
-from models.graph_edge import BaseEdge
-
-
 class CypherBaseConverter:
-    def __init__(self, model_to_convert: BaseEdge | BaseNode):
-        self.model = model_to_convert
-
     def _convert_str(self, raw_value: str) -> str:
         return raw_value
 

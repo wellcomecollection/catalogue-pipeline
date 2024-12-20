@@ -55,7 +55,7 @@ class BaseTransformer:
                 yield node
                 counter += 1
 
-                if counter % 5000 == 0:
+                if counter % 10000 == 0:
                     print(f"Streamed {counter} nodes...")
             if counter == number:
                 return
@@ -74,7 +74,7 @@ class BaseTransformer:
                 yield edge
 
                 counter += 1
-                if counter % 5000 == 0:
+                if counter % 10000 == 0:
                     print(f"Streamed {counter} edges...")
                 if counter == number:
                     return
@@ -106,7 +106,11 @@ class BaseTransformer:
             yield chunk
 
     def stream_to_s3(
-        self, s3_uri: str, entity_type: EntityType, sample_size: int = None
+        self,
+        s3_uri: str,
+        entity_type: EntityType,
+        chunk_size: int,
+        sample_size: int = None,
     ):
         """
         Streams transformed entities (nodes or edges) into an S3 bucket for bulk loading into the Neptune cluster.
@@ -116,13 +120,18 @@ class BaseTransformer:
         with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
             csv_writer = None
 
-            for entity in self._stream_entities(entity_type, sample_size):
-                bulk_dict = CypherBulkLoadConverter(entity).convert_to_bulk_cypher()
-                if csv_writer is None:
-                    csv_writer = csv.DictWriter(f, fieldnames=bulk_dict.keys())
-                    csv_writer.writeheader()
+            converter = CypherBulkLoadConverter(entity_type)
+            for chunk in self._stream_chunks(entity_type, chunk_size, sample_size):
+                bulk_dicts = []
 
-                csv_writer.writerow(bulk_dict)
+                for entity in chunk:
+                    bulk_dict = converter.convert_to_bulk_cypher(entity)
+                    bulk_dicts.append(bulk_dict)
+                    if csv_writer is None:
+                        csv_writer = csv.DictWriter(f, fieldnames=bulk_dict.keys())
+                        csv_writer.writeheader()
+
+                csv_writer.writerows(bulk_dicts)
 
     def stream_to_graph(
         self,

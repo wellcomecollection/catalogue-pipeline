@@ -2,7 +2,7 @@
 mkdir -p temp
 
 cp -r src/* temp/
-pip3 install -r src/requirements.txt --platform manylinux2014_x86_64 --target temp/ --only-binary=:all: --python-version 3.10
+pip3 install -r src/requirements.txt --platform manylinux2014_x86_64 --target temp/ --only-binary=:all: --python-version 3.13
 
 cd temp
 zip -r ../build.zip .

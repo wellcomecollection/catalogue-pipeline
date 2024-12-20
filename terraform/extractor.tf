@@ -3,7 +3,7 @@ module "extractor_lambda" {
 
   name        = "catalogue-graph-extractor"
   description = "Extracts source concepts and turns them into Cypher queries."
-  runtime     = "python3.10"
+  runtime     = "python3.13"
 
   filename = "../build.zip"
   source_code_hash = filesha256("../build.zip")
@@ -12,10 +12,15 @@ module "extractor_lambda" {
   memory_size = 128
   timeout     = 60 // 1 minute
 
+  vpc_config = {
+    subnet_ids         = local.private_subnets
+    security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+  }
+
   #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 }
 
-data "aws_iam_policy_document" "publish_to_queries_topic" {
+data "aws_iam_policy_document" "stream_to_sns" {
   statement {
     actions = [
       "sns:Publish",
@@ -27,7 +32,25 @@ data "aws_iam_policy_document" "publish_to_queries_topic" {
   }
 }
 
-resource "aws_iam_role_policy" "reindex_jobs_policy" {
+data "aws_iam_policy_document" "stream_to_s3" {
+  statement {
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "stream_to_sns_policy" {
   role   = module.extractor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.publish_to_queries_topic.json
+  policy = data.aws_iam_policy_document.stream_to_sns.json
+}
+
+resource "aws_iam_role_policy" "stream_to_s3_policy" {
+  role   = module.extractor_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.stream_to_s3.json
 }
