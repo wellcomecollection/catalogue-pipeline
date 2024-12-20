@@ -13,19 +13,22 @@ trait Downstream {
 }
 
 class SNSDownstream(snsConfig: SNSConfig) extends Downstream {
-  private val msgSender = new SNSMessageSender(
+  protected val msgSender = new SNSMessageSender(
     snsClient = SnsClient.builder().build(),
     snsConfig = snsConfig,
     subject = "Sent from relation_embedder"
   )
 
   override def notify(workId: String): Try[Unit] = Try(msgSender.send(workId))
-  override def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit] = msgSender.sendT(batch)
+  override def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit] =
+    msgSender.sendT(batch)
 }
 
 object STDIODownstream extends Downstream {
   override def notify(workId: String): Try[Unit] = Try(println(workId))
-  override def notify[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] = Try(println(toJson(t)))
+  override def notify[T](t: T)(implicit encoder: Encoder[T]): Try[Unit] = Try(
+    println(toJson(t))
+  )
 }
 
 sealed trait DownstreamTarget

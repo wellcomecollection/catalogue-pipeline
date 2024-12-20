@@ -20,8 +20,6 @@ object Main extends WellcomeTypesafeApp {
 
       new BatcherWorkerService(
         msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        msgSender = SNSBuilder
-          .buildSNSMessageSender(config, subject = "Sent from batcher"),
         flushInterval =
           config.requireInt("batcher.flush_interval_minutes").minutes,
         pathsProcessor = new PathsProcessor(
