@@ -7,6 +7,7 @@ import ujson.Value
 import weco.json.JsonUtil.fromJson
 
 import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
 
 object SQSEventOps {
 
@@ -21,14 +22,20 @@ object SQSEventOps {
     *   - a `Message`, which is the actual content we want
     */
   implicit class ExtractTFromSqsEvent(event: SQSEvent) {
-    def extract[T]()(implicit decoder: Decoder[T]) =
+    def extract[T]()(implicit decoder: Decoder[T], ct: ClassTag[T]) =
       event.getRecords.asScala.toList.flatMap(extractFromMessage[T](_))
 
     private def extractFromMessage[T](
       message: SQSMessage
-    )(implicit decoder: Decoder[T]): Option[T] =
+    )(implicit decoder: Decoder[T], ct: ClassTag[T]): Option[T] =
       ujson.read(message.getBody).obj.get("Message").flatMap {
-        value: Value => fromJson[T](value.str).toOption
+        value: Value =>
+          {
+            ct.runtimeClass match {
+              case c if c == classOf[String] => Some(value.str.asInstanceOf[T])
+              case _                         => fromJson[T](value.str).toOption
+            }
+          }
       }
   }
 }
