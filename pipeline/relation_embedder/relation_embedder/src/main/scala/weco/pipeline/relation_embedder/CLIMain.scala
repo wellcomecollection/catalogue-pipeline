@@ -8,7 +8,8 @@ import com.sksamuel.elastic4s.Index
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.json.JsonUtil._
-import weco.pipeline.relation_embedder.lib.{STDIODownstream, StdInBatches}
+import weco.lambda.{STDIODownstream, StdInNDJSON}
+import weco.pipeline.relation_embedder.models.Batch
 
 /** A main function providing a local CLI for the relation embedder. To invoke,
   * provide a list of Batch objects in NDJSON on StdIn.
@@ -16,7 +17,7 @@ import weco.pipeline.relation_embedder.lib.{STDIODownstream, StdInBatches}
   * This will embed relations as required and print the resulting Works and
   * their identifiers
   */
-object CLIMain extends App with StdInBatches {
+object CLIMain extends App with StdInNDJSON[Batch] {
   implicit val actorSystem: ActorSystem = ActorSystem("main-actor-system")
   implicit val ec: ExecutionContext = actorSystem.dispatcher
 
@@ -33,7 +34,7 @@ object CLIMain extends App with StdInBatches {
   )
 
   Await.result(
-    Future.sequence(batches.map(batchProcessor.apply)),
+    Future.sequence(instances.map(batchProcessor.apply)),
     5 minutes
   )
 

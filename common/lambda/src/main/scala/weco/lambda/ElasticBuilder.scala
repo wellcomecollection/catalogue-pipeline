@@ -1,4 +1,4 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
 
 import com.sksamuel.elastic4s.ElasticClient
 import com.typesafe.config.Config

@@ -1,11 +1,10 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
+import io.circe.Decoder
 import ujson.Value
 import weco.json.JsonUtil.fromJson
-import weco.pipeline.relation_embedder.models.Batch
-import weco.json.JsonUtil._
 
 import scala.collection.JavaConverters._
 
@@ -21,13 +20,13 @@ object SQSEventOps {
     *   - an SNS notification containing
     *   - a `Message`, which is the actual content we want
     */
-  implicit class ExtractBatchFromSqsEvent(event: SQSEvent) {
-    def extractBatches: List[Batch] =
-      event.getRecords.asScala.toList.flatMap(extractBatchFromMessage)
+  implicit class ExtractTFromSqsEvent(event: SQSEvent) {
+    def extract[T]()(implicit decoder: Decoder[T]) =
+      event.getRecords.asScala.toList.flatMap(extractFromMessage[T](_))
 
-    private def extractBatchFromMessage(message: SQSMessage): Option[Batch] =
+    private def extractFromMessage[T](message: SQSMessage)(implicit decoder: Decoder[T]): Option[T] =
       ujson.read(message.getBody).obj.get("Message").flatMap {
-        value: Value => fromJson[Batch](value.str).toOption
+        value: Value => fromJson[T](value.str).toOption
       }
   }
 }
