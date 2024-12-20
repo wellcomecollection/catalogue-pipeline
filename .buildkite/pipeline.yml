@@ -13,6 +13,7 @@ steps:
 
     matrix:
       - "internal_model"
+      - "lambda"
       - "display_model"
       - "source_model"
       - "pipeline_storage"

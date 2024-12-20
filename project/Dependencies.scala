@@ -197,6 +197,17 @@ object CatalogueDependencies {
   val flowDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
 
+  val lambdaDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
+      WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.fixturesLibrary ++
+      ExternalDependencies.scalatestDependencies ++
+      ExternalDependencies.awsLambdaClient ++
+      ExternalDependencies.awsLambdaEvents ++
+      ExternalDependencies.uPickle
+
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary ++
@@ -238,23 +249,8 @@ object CatalogueDependencies {
   val pathConcatenatorDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
 
-  val relationEmbedderDependencies: Seq[ModuleID] =
-    WellcomeDependencies.messagingTypesafeLibrary ++
-      ExternalDependencies.awsLambdaClient ++
-      ExternalDependencies.awsLambdaEvents ++
-      ExternalDependencies.uPickle
-
   val routerDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
-
-  val batcherDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalatestDependencies ++
-      ExternalDependencies.awsLambdaClient ++
-      ExternalDependencies.awsLambdaEvents ++
-      ExternalDependencies.uPickle ++
-      WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.fixturesLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++

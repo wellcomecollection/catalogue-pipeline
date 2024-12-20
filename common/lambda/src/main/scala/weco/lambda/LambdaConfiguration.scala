@@ -1,7 +1,8 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
+
+import com.typesafe.config.{Config, ConfigFactory}
 
 import java.io.File
-import com.typesafe.config.{Config, ConfigFactory}
 
 trait ApplicationConfig {}
 

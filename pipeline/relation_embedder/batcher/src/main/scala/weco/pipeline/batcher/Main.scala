@@ -4,7 +4,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 import org.apache.pekko.actor.ActorSystem
 import com.typesafe.config.Config
-
+import weco.lambda.SNSDownstream
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
 import weco.typesafe.WellcomeTypesafeApp
@@ -20,12 +20,15 @@ object Main extends WellcomeTypesafeApp {
 
       new BatcherWorkerService(
         msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        msgSender = SNSBuilder
-          .buildSNSMessageSender(config, subject = "Sent from batcher"),
         flushInterval =
           config.requireInt("batcher.flush_interval_minutes").minutes,
-        maxProcessedPaths = config.requireInt("batcher.max_processed_paths"),
-        maxBatchSize = config.requireInt("batcher.max_batch_size")
+        pathsProcessor = new PathsProcessor(
+          downstream = new SNSDownstream(
+            snsConfig = SNSBuilder.buildSNSConfig(config)
+          ),
+          maxBatchSize = config.requireInt("batcher.max_batch_size")
+        ),
+        maxProcessedPaths = config.requireInt("batcher.max_processed_paths")
       )
   }
 }
