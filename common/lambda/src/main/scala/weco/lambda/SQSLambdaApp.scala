@@ -14,7 +14,8 @@ import scala.reflect.ClassTag
 // of the AWS SDK with the Scala compiler.
 // See: https://stackoverflow.com/questions/54098144/aws-lambda-handler-throws-a-classcastexception-with-scala-generics
 abstract class SQSLambdaApp[T, Out, Config <: ApplicationConfig]()(
-  implicit val decoder: Decoder[T], val ct: ClassTag[T]
+  implicit val decoder: Decoder[T],
+  val ct: ClassTag[T]
 ) extends RequestHandler[SQSEvent, Out]
     with LambdaConfigurable[Config]
     with Logging {
@@ -32,10 +33,9 @@ abstract class SQSLambdaApp[T, Out, Config <: ApplicationConfig]()(
   def processT(t: List[T]): Future[Out]
 
   override def handleRequest(
-                              event: SQSEvent,
-                              context: Context
-                            ): Out = Await.result(
-
+    event: SQSEvent,
+    context: Context
+  ): Out = Await.result(
     processT(event.extract[T]),
     maximumExecutionTime
   )

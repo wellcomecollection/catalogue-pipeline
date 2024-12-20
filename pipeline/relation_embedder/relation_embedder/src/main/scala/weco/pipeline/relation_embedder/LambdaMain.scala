@@ -8,7 +8,7 @@ import weco.pipeline.relation_embedder.models.Batch
 import scala.concurrent.Future
 
 object LambdaMain
-  extends SQSLambdaApp[Batch, String, RelationEmbedderConfig]
+    extends SQSLambdaApp[Batch, String, RelationEmbedderConfig]
     with RelationEmbedderConfigurable {
 
   private lazy val batchProcessor = BatchProcessor(config)
@@ -21,4 +21,3 @@ object LambdaMain
       .map(_ => "Done")
   }
 }
-
