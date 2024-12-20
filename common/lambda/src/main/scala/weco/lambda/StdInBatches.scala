@@ -1,7 +1,8 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
+
 import grizzled.slf4j.Logging
-import weco.json.JsonUtil._
-import weco.pipeline.relation_embedder.models.Batch
+import io.circe.Decoder
+import weco.json.JsonUtil.fromJson
 
 import scala.io.Source.stdin
 import scala.util.{Failure, Success, Try}
@@ -14,10 +15,12 @@ import scala.util.{Failure, Success, Try}
   */
 
 trait StdInNDJSON[T] extends Logging {
-  protected def jsonToInstance(str: String): Try[T]
+  def jsonToInstance(jsonString: String)(implicit decoder: Decoder[T]): Try[T] =
+    fromJson[T](jsonString)
+
   private val stdInStrings: Iterator[String] = stdin.getLines()
 
-  private def toInstance(jsonString: String): Option[T] =
+  private def toInstance(jsonString: String)(implicit decoder: Decoder[T]): Option[T] =
     jsonToInstance(jsonString) match {
       case Failure(exception) =>
         error(exception.getMessage)
@@ -25,17 +28,10 @@ trait StdInNDJSON[T] extends Logging {
       case Success(value) => Some(value)
     }
 
-  protected val instances: Iterator[T] =
+  protected def instances(implicit decoder: Decoder[T]): Iterator[T] =
     stdInStrings
       .flatMap(
-        toInstance
+        toInstance(_)
       )
 
-}
-
-trait StdInBatches extends StdInNDJSON[Batch] {
-  def jsonToInstance(jsonString: String): Try[Batch] =
-    fromJson[Batch](jsonString)
-
-  protected val batches: Iterator[Batch] = instances
 }

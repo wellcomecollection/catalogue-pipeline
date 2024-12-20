@@ -1,11 +1,11 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
 
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import grizzled.slf4j.Logging
 import org.apache.pekko.actor.ActorSystem
 
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 trait LambdaApp[In, Out, Config <: ApplicationConfig]
     extends RequestHandler[In, Out]

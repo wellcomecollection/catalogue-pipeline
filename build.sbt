@@ -141,7 +141,7 @@ lazy val path_concatenator = setupProject(
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe, lambda),
   externalDependencies = CatalogueDependencies.relationEmbedderDependencies
 )
 

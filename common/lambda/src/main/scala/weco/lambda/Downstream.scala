@@ -1,4 +1,4 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
 
 import software.amazon.awssdk.services.sns.SnsClient
 import weco.messaging.sns.{SNSConfig, SNSMessageSender}
