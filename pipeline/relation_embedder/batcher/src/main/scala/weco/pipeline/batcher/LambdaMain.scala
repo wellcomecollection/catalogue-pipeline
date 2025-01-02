@@ -38,7 +38,7 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     context: Context
   ): String = {
     debug(s"Running batcher lambda, got event: $event")
-    
+
     val f = PathsProcessor(
       config.requireInt("batcher.max_batch_size"),
       event.extractPaths.map(PathFromString),
