@@ -4,7 +4,6 @@ from utils.aws import get_neptune_client
 
 import typing
 import argparse
-import time
 
 S3_BULK_LOAD_BUCKET_NAME = "wellcomecollection-neptune-graph-loader"
 
@@ -18,22 +17,13 @@ def handler(transformer_type: str, entity_type: EntityType, is_local=False):
     neptune_client = get_neptune_client(is_local)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 
-    while True:
-        final_status = neptune_client.get_bulk_load_status(load_id)
-
-        if final_status is not None:
-            break
-
-        time.sleep(20)
-
-    if final_status != "LOAD_COMPLETED":
-        raise Exception("Load failed. See error log above.")
+    return {"loadId": load_id}
 
 
 def lambda_handler(event: dict, context):
     transformer_type = TransformerType.argparse(event["transformer_type"])
     entity_type = event["entity_type"]
-    handler(transformer_type, entity_type)
+    return handler(transformer_type, entity_type)
 
 
 def local_handler():

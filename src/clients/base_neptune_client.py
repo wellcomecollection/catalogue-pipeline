@@ -92,7 +92,7 @@ class BaseNeptuneClient:
         print(f"Bulk load status: {status}. (Processed {processed_count:,} records.)")
 
         if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
-            return
+            return status
 
         insert_error_count = overall_status["insertErrors"]
         parsing_error_count = overall_status["parsingErrors"]
@@ -113,3 +113,8 @@ class BaseNeptuneClient:
                 print(f"         {code}: {message}")
 
         return status
+
+    def get_bulk_load_statuses(self):
+        response = self._make_request("GET", "/loader")
+        payload = response["payload"]
+        return payload

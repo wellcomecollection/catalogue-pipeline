@@ -10,7 +10,7 @@ module "bulk_loader_lambda" {
 
   handler     = "bulk_loader.lambda_handler"
   memory_size = 128
-  timeout     = 15*60 // 15 minutes
+  timeout     = 30 // 30 seconds
 
   vpc_config = {
     subnet_ids         = local.private_subnets
