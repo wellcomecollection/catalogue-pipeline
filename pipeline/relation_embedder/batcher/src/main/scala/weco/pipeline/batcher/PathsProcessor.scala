@@ -32,7 +32,7 @@ object PathsProcessor extends Logging {
         case (batch, msgPaths) =>
           notifyDownstream(downstream, batch, msgPaths)
       }
-      .collect { case Some(failedIndices) => failedIndices }
+      .collect { case Some(failedPaths) => failedPaths }
       .mapConcat(identity)
       .runWith(Sink.seq)
   }
@@ -68,19 +68,19 @@ object PathsProcessor extends Logging {
     logSelectors(paths, selectors, groupedSelectors)
 
     groupedSelectors.map {
-      case (rootPath, selectorsAndIndices) =>
+      case (rootPath, selectorsAndPaths) =>
         // For batches consisting of a really large number of selectors, we
         // should just send the whole tree: this avoids really long queries
         // in the relation embedder, or duplicate work of creating the archives
         // cache multiple times, and it is likely pretty much all the nodes will
         // be denormalised anyway.
-        val (selectors, msgIndices) = selectorsAndIndices.unzip(identity)
+        val (selectors, inputPaths) = selectorsAndPaths.unzip(identity)
         val batch =
           if (selectors.size > maxBatchSize)
             Batch(rootPath, List(Selector.Tree(rootPath)))
           else
             Batch(rootPath, selectors)
-        batch -> msgIndices
+        batch -> inputPaths
     }.toSeq
   }
 
