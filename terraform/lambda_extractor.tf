@@ -8,7 +8,7 @@ module "extractor_lambda" {
   filename         = "../build.zip"
   source_code_hash = filesha256("../build.zip")
 
-  handler     = "extractor.lambda_handler"
+  handler = "extractor.lambda_handler"
 
   // This Lambda does not need a lot of memory, but it downloads and processes large datasets (with up to 10 million
   // items) and therefore needs the additional compute and networking capacity which comes with increased memory.
@@ -18,6 +18,13 @@ module "extractor_lambda" {
   vpc_config = {
     subnet_ids         = local.private_subnets
     security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+  }
+
+  environment = {
+    variables = {
+      S3_BULK_LOAD_BUCKET_NAME = aws_s3_bucket.neptune_bulk_upload_bucket.bucket
+      GRAPH_QUERIES_SNS_TOPIC_ARN = module.catalogue_graph_queries_topic.arn
+    }
   }
 
   #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]

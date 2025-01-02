@@ -19,7 +19,7 @@ graph database (running in Amazon Neptune). It consists of several Lambda functi
 Lambda function execution is orchestrated via AWS Step Functions (see `terraform` directory). Several state machines are
 utilised for this purpose:
 
-* `catalogue-graph-pipeline`: Represents the full pipeline, extracting and loading all concepts into the cluster.
+* `catalogue-graph-pipeline`: Represents the full pipeline, extracting all concepts and loading them into the cluster.
   Triggers the `extractors` state machine, followed by the `bulk_loaders` state machine.
 * `extractors`: Invokes `extractor` Lambda function instances in parallel, one for each combination of source type and
   entity type (e.g. one for LoC Concept nodes, one for LoC Concept edges, etc.).

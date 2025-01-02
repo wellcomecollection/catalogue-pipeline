@@ -1,11 +1,13 @@
+import typing
+import argparse
+import os
+
 from transformers.base_transformer import EntityType
 from transformers.transformer_type import TransformerType
 from utils.aws import get_neptune_client
 
-import typing
-import argparse
 
-S3_BULK_LOAD_BUCKET_NAME = "wellcomecollection-neptune-graph-loader"
+S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
 
 
 def handler(transformer_type: str, entity_type: EntityType, is_local=False):

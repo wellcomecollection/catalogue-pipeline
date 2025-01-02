@@ -5,7 +5,7 @@ module "bulk_loader_lambda" {
   description = "Bulk loads entities from an S3 bucket into the Neptune database."
   runtime     = "python3.13"
 
-  filename = "../build.zip"
+  filename         = "../build.zip"
   source_code_hash = filesha256("../build.zip")
 
   handler     = "bulk_loader.lambda_handler"
@@ -15,6 +15,12 @@ module "bulk_loader_lambda" {
   vpc_config = {
     subnet_ids         = local.private_subnets
     security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+  }
+
+  environment = {
+    variables = {
+      S3_BULK_LOAD_BUCKET_NAME = aws_s3_bucket.neptune_bulk_upload_bucket.bucket
+    }
   }
 
   #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]

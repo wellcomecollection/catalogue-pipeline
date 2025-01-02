@@ -9,10 +9,6 @@ LOC_SUBJECT_HEADINGS_URL = (
 )
 LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.skosrdf.jsonld.gz"
 
-GRAPH_QUERIES_SNS_TOPIC_ARN = (
-    "arn:aws:sns:eu-west-1:760097843905:catalogue_graph_queries"
-)
-
 
 class TransformerType(enum.Enum):
     LOC_CONCEPTS = LibraryOfCongressConceptsTransformer(LOC_SUBJECT_HEADINGS_URL)
