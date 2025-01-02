@@ -1,4 +1,8 @@
 class CypherBaseConverter:
+    """
+    Converts various data types into a format compatible with openCypher.
+    """
+
     def _convert_str(self, raw_value: str) -> str:
         return raw_value
 

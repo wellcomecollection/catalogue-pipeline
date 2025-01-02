@@ -20,6 +20,7 @@ module "bulk_loader_lambda" {
   #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 }
 
+# S3 bucket for storing files to be bulk loaded into the Neptune cluster
 resource "aws_s3_bucket" "neptune_bulk_upload_bucket" {
   bucket = "wellcomecollection-neptune-graph-loader"
 }

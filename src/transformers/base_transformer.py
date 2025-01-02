@@ -4,7 +4,7 @@ from models.graph_node import BaseNode
 from sources.base_source import BaseSource
 from clients.base_neptune_client import BaseNeptuneClient
 from query_builders.cypher import construct_upsert_cypher_query
-from utils.aws import publish_to_sns
+from utils.aws import publish_batch_to_sns
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 
 import smart_open
@@ -186,7 +186,7 @@ class BaseTransformer:
 
             # SNS supports a maximum batch size of 10
             if len(queries) >= 10:
-                publish_to_sns(topic_arn, queries)
+                publish_batch_to_sns(topic_arn, queries)
                 queries = []
 
             counter += 1
@@ -195,4 +195,4 @@ class BaseTransformer:
 
         # Publish remaining messages (if any)
         if len(queries) > 0:
-            publish_to_sns(topic_arn, queries)
+            publish_batch_to_sns(topic_arn, queries)

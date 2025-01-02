@@ -12,7 +12,7 @@ def get_secret(secret_name: str):
     return response["SecretString"]
 
 
-def publish_to_sns(topic_arn: str, queries: list[str]):
+def publish_batch_to_sns(topic_arn: str, queries: list[str]):
     request_entries = []
     for i, query in enumerate(queries):
         request_entries.append(

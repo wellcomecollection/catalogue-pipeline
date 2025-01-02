@@ -6,7 +6,7 @@ from utils.aws import get_neptune_client
 from transformers.base_transformer import BaseTransformer, EntityType, StreamDestination
 from transformers.transformer_type import TransformerType
 
-QUERY_CHUNK_SIZE = 256
+CHUNK_SIZE = 256
 S3_BULK_LOAD_BUCKET_NAME = "wellcomecollection-neptune-graph-loader"
 SNS_QUERY_TOPIC_ARN = "arn:aws:sns:eu-west-1:760097843905:catalogue_graph_queries"
 
@@ -28,15 +28,15 @@ def handler(
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)
         transformer.stream_to_graph(
-            neptune_client, entity_type, QUERY_CHUNK_SIZE, sample_size
+            neptune_client, entity_type, CHUNK_SIZE, sample_size
         )
     elif stream_destination == "s3":
         file_name = f"{transformer_type}__{entity_type}.csv"
         s3_uri = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
-        transformer.stream_to_s3(s3_uri, entity_type, QUERY_CHUNK_SIZE, sample_size)
+        transformer.stream_to_s3(s3_uri, entity_type, CHUNK_SIZE, sample_size)
     elif stream_destination == "sns":
         transformer.stream_to_sns(
-            SNS_QUERY_TOPIC_ARN, entity_type, QUERY_CHUNK_SIZE, sample_size
+            SNS_QUERY_TOPIC_ARN, entity_type, CHUNK_SIZE, sample_size
         )
     else:
         raise ValueError("Unsupported stream destination.")

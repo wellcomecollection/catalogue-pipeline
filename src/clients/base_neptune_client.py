@@ -7,6 +7,13 @@ from botocore.awsrequest import AWSRequest
 
 
 class BaseNeptuneClient:
+    """
+    Communicates with the Neptune cluster. Makes openCypher queries, triggers bulk load operations, etc.
+
+    Do not use this base class directly. Use either LambdaNeptuneClient (when running in the same VPC as the Neptune
+    cluster) or LocalNeptuneClient (when connecting to the cluster from outside the VPC).
+    """
+
     def __init__(self):
         self.session = None
         self.neptune_endpoint = None
