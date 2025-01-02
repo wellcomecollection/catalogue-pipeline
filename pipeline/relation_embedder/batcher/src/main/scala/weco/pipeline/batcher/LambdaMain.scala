@@ -3,7 +3,6 @@ package weco.pipeline.batcher
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import grizzled.slf4j.Logging
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
-import org.apache.pekko.actor.ActorSystem
 import weco.messaging.typesafe.SNSBuilder
 import weco.json.JsonUtil._
 import com.typesafe.config.ConfigFactory
@@ -12,6 +11,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.ExecutionContext
 import scala.util.Try
+import ExecutionContext.Implicits.global
 
 object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
   import weco.pipeline.batcher.lib.SQSEventOps._
@@ -38,12 +38,7 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
     context: Context
   ): String = {
     debug(s"Running batcher lambda, got event: $event")
-
-    implicit val actorSystem: ActorSystem =
-      ActorSystem("main-actor-system")
-    implicit val ec: ExecutionContext =
-      actorSystem.dispatcher
-
+    
     val f = PathsProcessor(
       config.requireInt("batcher.max_batch_size"),
       event.extractPaths.map(PathFromString),
