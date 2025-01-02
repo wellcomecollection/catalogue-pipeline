@@ -34,7 +34,7 @@ sealed trait Selector {
     }
   }
 
-  def shouldSuppress(otherSelectors: Set[Selector]): Boolean =
+  protected def shouldSuppress(otherSelectors: Set[Selector]): Boolean =
     superSelectors.exists(otherSelectors.contains)
 }
 
