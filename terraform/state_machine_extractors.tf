@@ -3,9 +3,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors" {
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment       = "Extract raw concepts, transform them into nodes and edges, and stream them into an S3 bucket."
-    StartAt       = "Trigger extractors"
-    States        = {
+    Comment = "Extract raw concepts from all sources, transform them into nodes and edges, and stream them into an S3 bucket."
+    StartAt = "Trigger extractors"
+    States  = {
       "Trigger extractors" = {
         Type     = "Parallel"
         Branches = flatten([

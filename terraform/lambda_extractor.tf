@@ -30,6 +30,12 @@ module "extractor_lambda" {
   #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 }
 
+# openCypher queries will be streamed to this SNS topic (when SNS is chosen as the streaming destination)
+module "catalogue_graph_queries_topic" {
+  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
+  name   = "catalogue_graph_queries"
+}
+
 data "aws_iam_policy_document" "stream_to_sns" {
   statement {
     actions = [

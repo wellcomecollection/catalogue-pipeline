@@ -35,6 +35,8 @@ resource "aws_iam_policy" "state_machine_policy" {
         Action   = ["states:StartExecution", "states:DescribeExecution", "states:StopExecution"],
         Resource = "*"
       },
+      # These EventBridge permissions are needed to allow state machines to perform the "startExecution.sync:2" action
+      # (i.e. trigger another state machine and wait for it to complete)
       {
         Effect   = "Allow",
         Action   = ["events:PutTargets", "events:PutRule", "events:DescribeRule"],

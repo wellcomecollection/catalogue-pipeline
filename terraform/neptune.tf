@@ -34,6 +34,26 @@ resource "aws_iam_role" "catalogue_graph_cluster" {
   })
 }
 
+# Read-only access to the bulk load S3 bucket
+data "aws_iam_policy_document" "neptune_s3_read_only_policy" {
+  statement {
+    effect  = "Allow"
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      aws_s3_bucket.neptune_bulk_upload_bucket.arn,
+      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "s3_read_only_policy_attachment" {
+  role   = aws_iam_role.catalogue_graph_cluster.name
+  policy = data.aws_iam_policy_document.neptune_s3_read_only_policy.json
+}
+
 resource "aws_neptune_cluster_instance" "catalogue_graph_instance" {
   cluster_identifier           = aws_neptune_cluster.catalogue_graph_cluster.cluster_identifier
   instance_class               = "db.serverless"

@@ -25,19 +25,7 @@ resource "aws_iam_role_policy" "bulk_load_poller_lambda_read_secrets_policy" {
   policy = data.aws_iam_policy_document.allow_secret_read.json
 }
 
-data "aws_iam_policy_document" "neptune_poll" {
-  statement {
-    actions = [
-      "neptune-db:GetLoaderJobStatus"
-    ]
-
-    resources = [
-      "*"
-    ]
-  }
-}
-
 resource "aws_iam_role_policy" "bulk_load_poller_lambda_neptune_policy" {
   role   = module.bulk_load_poller_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.neptune_poll.json
+  policy = data.aws_iam_policy_document.neptune_load_poll.json
 }

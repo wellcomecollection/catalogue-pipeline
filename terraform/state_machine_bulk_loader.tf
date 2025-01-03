@@ -4,7 +4,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
 
   definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = "Extract raw concepts, transform them into nodes and edges, and stream them into an S3 bucket."
+    Comment       = "Trigger a Neptune bulk load from a file stored in S3 and periodically check the status of the bulk load until complete."
     StartAt       = "Trigger bulk load"
     States        = {
       "Trigger bulk load" : {

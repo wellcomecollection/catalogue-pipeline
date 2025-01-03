@@ -52,11 +52,6 @@ resource "aws_vpc_security_group_egress_rule" "neptune_lambda_egress" {
   ip_protocol       = "-1"
 }
 
-module "catalogue_graph_queries_topic" {
-  source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name   = "catalogue_graph_queries"
-}
-
 # Add an SQS queue which will collect messages from SNS
 module "indexer_message_queue" {
   source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.2.1"
