@@ -1,6 +1,6 @@
 {
   "description" : "examples for availabilities tests",
-  "createdAt" : "2024-08-22T10:16:20.157118Z",
+  "createdAt" : "2024-11-25T15:15:12.508878Z",
   "id" : "iopgf0nj",
   "document" : {
     "debug" : {
@@ -160,21 +160,27 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"ogl\",\"label\":\"Open Government Licence\",\"url\":\"http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/\",\"type\":\"License\"}"
+        {
+          "id" : "ogl",
+          "label" : "Open Government Licence"
+        }
       ],
       "availabilities" : [
-        "{\"id\":\"closed-stores\",\"label\":\"Closed stores\",\"type\":\"Availability\"}"
+        {
+          "id" : "closed-stores",
+          "label" : "Closed stores"
+        }
       ]
     },
     "filterableValues" : {
@@ -188,9 +194,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "3glZntXsvt"

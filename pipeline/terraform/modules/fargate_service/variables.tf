@@ -29,6 +29,16 @@ variable "queue_name" {
   default = null
 }
 
+variable "entrypoint" {
+  type    = list(string)
+  default = null
+}
+
+variable "command" {
+  default = null
+  type    = list(string)
+}
+
 variable "queue_visibility_timeout_seconds" {
   type    = number
   default = 30
@@ -37,13 +47,8 @@ variable "queue_visibility_timeout_seconds" {
 variable "message_retention_seconds" {
   type = number
   # The actual default on SQS is four whole days.
-  #   default = 345600
   # This is sufficient to cope with normal bank holiday weekends.
-
-  # However, if a message is sitting on any main queue for more than a day,
-  # then something has gone rather awry, and it should be moved to a DLQ,
-  # rather than cluttering a main queue.
-  default = 86400
+  default = 345600
 }
 
 variable "max_receive_count" {
@@ -90,10 +95,26 @@ variable "cooldown_period" {
   default = "1m"
 }
 
-# This is intentionally untyped.
-# If typed you can't have optional nulls which results in some complexity.
-# See https://github.com/hashicorp/terraform/issues/19898
-variable "fargate_service_boilerplate" {}
+variable "fargate_service_boilerplate" {
+  type = object({
+    egress_security_group_id             = optional(string, null)
+    elastic_cloud_vpce_security_group_id = optional(string, null)
+
+    cluster_name = optional(string, null)
+    cluster_arn  = optional(string, null)
+
+    scale_down_adjustment = optional(number, null)
+    scale_up_adjustment   = optional(number, null)
+
+    dlq_alarm_topic_arn          = optional(string, null)
+    main_q_age_alarm_action_arns = optional(list(string), null)
+
+    subnets   = optional(list(string), null)
+    namespace = optional(string, null)
+
+    shared_logging_secrets = optional(map(any), null)
+  })
+}
 
 variable "service_discovery_namespace_id" {
   type    = string

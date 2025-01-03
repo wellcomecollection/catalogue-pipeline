@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-22T10:16:20.134088Z",
+  "createdAt" : "2024-11-25T15:15:12.463782Z",
   "id" : "xuni2iqa",
   "document" : {
     "debug" : {
@@ -139,17 +139,23 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"Bath, Patricia\",\"type\":\"Person\"}",
-        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"type\":\"Person\"}"
+      "contributors.agent" : [
+        {
+          "id" : "Bath, Patricia",
+          "label" : "Bath, Patricia"
+        },
+        {
+          "id" : "Darwin \"Jones\", Charles",
+          "label" : "Darwin \"Jones\", Charles"
+        }
       ],
       "items.locations.license" : [
       ],
@@ -167,11 +173,21 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
         "Bath, Patricia",
         "Darwin \"Jones\", Charles"
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "XzQw5jYpuB"

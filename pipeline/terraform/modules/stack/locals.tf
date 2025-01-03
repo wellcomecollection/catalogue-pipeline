@@ -1,11 +1,12 @@
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
-  es_works_source_index       = "works-source-${var.pipeline_date}"
-  es_works_merged_index       = "works-merged-${var.pipeline_date}"
-  es_works_identified_index   = "works-identified-${var.pipeline_date}"
-  es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
-  es_works_index              = "works-indexed-${var.pipeline_date}"
+  es_works_source_index              = "works-source-${var.pipeline_date}"
+  es_works_merged_index              = "works-merged-${var.pipeline_date}"
+  es_works_identified_index          = "works-identified-${var.pipeline_date}"
+  es_works_denormalised_index        = "works-denormalised-${var.pipeline_date}"
+  es_lambda_works_denormalised_index = "works-denormalised-lambda-${var.pipeline_date}"
+  es_works_index                     = "works-indexed-${var.pipeline_date}"
 
   es_images_initial_index   = "images-initial-${var.pipeline_date}"
   es_images_augmented_index = "images-augmented-${var.pipeline_date}"
@@ -17,7 +18,7 @@ locals {
   # The max number of connections allowed by the instance.
   # specified at /infrastructure/critical/rds_id_minter.tf
   base_rds_instances             = 1
-  id_minter_rds_max_connections  = (local.base_rds_instances + local.extra_rds_instances) * 45
+  id_minter_rds_max_connections  = local.base_rds_instances * 45
   id_minter_task_max_connections = min(9, local.max_capacity)
 
   # We don't want to overload our databases if we're not reindexing
@@ -116,9 +117,9 @@ locals {
   tei_reindexer_topic_arn    = data.terraform_remote_state.reindexer.outputs.tei_reindexer_topic_arn
   calm_reindexer_topic_arn   = data.terraform_remote_state.reindexer.outputs.calm_reindexer_topic_arn
 
-  infra_critical = data.terraform_remote_state.catalogue_infra_critical.outputs
-
-  shared_infra = data.terraform_remote_state.shared_infra.outputs
+  infra_critical   = data.terraform_remote_state.catalogue_infra_critical.outputs
+  shared_infra     = data.terraform_remote_state.shared_infra.outputs
+  monitoring_infra = data.terraform_remote_state.monitoring.outputs
 
   adapter_config = {
     sierra = {
@@ -175,9 +176,10 @@ locals {
   }
 
   monitoring_config = {
-    shared_logging_secrets = local.shared_infra["shared_secrets_logging"]
-    logging_cluster_id     = local.shared_infra["logging_cluster_id"]
-    dlq_alarm_arn          = null
+    shared_logging_secrets       = local.shared_infra["shared_secrets_logging"]
+    logging_cluster_id           = local.shared_infra["logging_cluster_id"]
+    dlq_alarm_arn                = null
+    main_q_age_alarm_action_arns = [local.monitoring_infra["chatbot_topic_arn"]]
   }
 
   network_config = {
@@ -194,7 +196,6 @@ locals {
   }
 
   rds_config = {
-    cluster_id        = local.infra_critical.rds_cluster_id
     subnet_group      = local.infra_critical.rds_subnet_group_name
     security_group_id = local.infra_critical.rds_access_security_group_id
   }
@@ -209,7 +210,8 @@ locals {
     scale_down_adjustment = local.scale_down_adjustment
     scale_up_adjustment   = local.scale_up_adjustment
 
-    dlq_alarm_topic_arn = local.monitoring_config.dlq_alarm_arn
+    dlq_alarm_topic_arn          = local.monitoring_config.dlq_alarm_arn
+    main_q_age_alarm_action_arns = local.monitoring_config.main_q_age_alarm_action_arns
 
     subnets = local.network_config.subnets
 

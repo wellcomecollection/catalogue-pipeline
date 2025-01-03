@@ -11,8 +11,15 @@ module "relation_embedder" {
   name            = "relation_embedder"
   container_image = local.relation_embedder_image
 
+  // Override entrypoint & command to dual use lambda container image
+  // This should be removed once we have a dedicated batcher_lambda image
+  entrypoint = [
+    "/opt/docker/bin/main"
+  ]
+  command = null
+
   topic_arns = [
-    module.batcher_output_topic.arn,
+    module.batcher_output_topic.arn
   ]
 
   # We know that 10 minutes is too short; some big archives can't be
@@ -25,11 +32,10 @@ module "relation_embedder" {
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index
 
-    queue_parallelism            = 3  // NOTE: limit to avoid memory errors
-    affected_works_scroll_size   = 50 // NOTE: limit to avoid memory errors
-    complete_tree_scroll_size    = 800
-    index_batch_size             = 100 // NOTE: too large results in 413 from ES
-    index_flush_interval_seconds = 60
+    queue_parallelism          = 3  // NOTE: limit to avoid memory errors
+    affected_works_scroll_size = 50 // NOTE: limit to avoid memory errors
+    complete_tree_scroll_size  = 800
+    index_batch_size           = 100 // NOTE: too large results in 413 from ES
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["relation_embedder"]

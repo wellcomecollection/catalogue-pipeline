@@ -1,5 +1,5 @@
 module "input_queue" {
-  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.4.0"
+  source = "github.com/wellcomecollection/terraform-aws-sqs//queue?ref=v1.5.0"
 
   queue_name = var.queue_config.name
 
@@ -8,6 +8,8 @@ module "input_queue" {
   max_receive_count          = var.queue_config.max_receive_count
   message_retention_seconds  = var.queue_config.message_retention_seconds
   alarm_topic_arn            = var.queue_config.dlq_alarm_arn
+
+  main_q_age_alarm_action_arns = var.queue_config.main_q_age_alarm_action_arns
 }
 
 resource "aws_iam_role_policy" "read_from_q" {

@@ -6,26 +6,35 @@ import weco.catalogue.internal_model.work._
 import weco.catalogue.source_model.generators.CalmRecordGenerators
 import weco.fixtures.RandomGenerators
 
-class CalmFormatTest extends AnyFunSpec with Matchers with CalmRecordGenerators with RandomGenerators {
-  it("Correctly extracts the ArchivesDigital Format when the appropriate Material string is present") {
+class CalmFormatTest
+    extends AnyFunSpec
+    with Matchers
+    with CalmRecordGenerators
+    with RandomGenerators {
+  it(
+    "Correctly extracts the ArchivesDigital Format when the appropriate Material string is present"
+  ) {
     val digitalRecord = createCalmRecordWith(
-      ("Material", "Archives - Digital"),
+      ("Material", "Archives - Digital")
     )
 
     val digitalFormat = CalmFormat(digitalRecord)
 
     digitalFormat shouldBe Format.ArchivesDigital
 
-    // Check that the label is "Archives - Digital"
-    Format.ArchivesDigital.label shouldBe("Archives - Digital")
+    // Check that the label is "Born-digital archives"
+    Format.ArchivesDigital.label shouldBe ("Born-digital archives")
   }
 
   it("Defaults to ArchivesAndManuscripts for all other contents of Material") {
     val nonDigitalRecords = (1 to 100)
       .map(_ => randomAlphanumeric())
-      .map(materialName => createCalmRecordWith(
-        ("Material", materialName),
-      ))
+      .map(
+        materialName =>
+          createCalmRecordWith(
+            ("Material", materialName)
+          )
+      )
 
     val nonDigitalFormats = nonDigitalRecords.map(CalmFormat(_)).toSet
 

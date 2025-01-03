@@ -26,12 +26,12 @@ trait LabelDerivedIdentifiersGenerators {
       )
     )
 
-  def labelDerivedSubjectIdentifier(value: String): Identifiable =
+  def labelDerivedConceptIdentifier(value: String): Identifiable =
     IdState.Identifiable(
       sourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LabelDerived,
         value = value,
-        ontologyType = "Subject"
+        ontologyType = "Concept"
       )
     )
 }

@@ -56,12 +56,12 @@ object TeiSubjects extends LabelDerivedIdentifiers {
         IdState.Identifiable(
           sourceIdentifier = SourceIdentifier(
             identifierType = identifierType,
-            ontologyType = "Subject",
+            ontologyType = "Concept",
             value = value
           )
         )
       case _ =>
-        identifierFromText(label, ontologyType = "Subject")
+        identifierFromText(label, ontologyType = "Concept")
     }
   }
 

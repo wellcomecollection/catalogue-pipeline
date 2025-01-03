@@ -32,8 +32,8 @@ class DeletionMarkerTest
         val result = deletionMarker(targetRecord)
 
         result.success.value shouldBe targetRecord.copy(
-            isDeleted = true,
-            version = targetRecord.version + 1
+          isDeleted = true,
+          version = targetRecord.version + 1
         )
         getRecordFromTable(
           targetRecord.id,

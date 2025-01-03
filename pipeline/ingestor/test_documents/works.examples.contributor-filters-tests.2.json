@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-22T10:16:20.133584Z",
+  "createdAt" : "2024-11-25T15:15:12.463107Z",
   "id" : "5ramofto",
   "document" : {
     "debug" : {
@@ -128,16 +128,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"Jake Paul\",\"type\":\"Person\"}"
+      "contributors.agent" : [
+        {
+          "id" : "Jake Paul",
+          "label" : "Jake Paul"
+        }
       ],
       "items.locations.license" : [
       ],
@@ -155,10 +158,20 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
         "Jake Paul"
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "iZ6KWys5lZ"

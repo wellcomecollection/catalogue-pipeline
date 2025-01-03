@@ -60,13 +60,65 @@ class MarcHasRecordControlNumberTest
       actualSourceIdentifier shouldBe expectedSourceIdentifier
     }
 
-    it("finds an identifier with a URL prefix") {
+    it("finds an identifier with a LoC URL prefix") {
       val field =
-        create655FieldWith(indicator2 = "0", identifierValue = "http://idlocgov/authorities/subjects/sh92000896")
+        create655FieldWith(
+          indicator2 = "0",
+          identifierValue = "http://idlocgov/authorities/subjects/sh92000896"
+        )
 
       val expectedSourceIdentifier = SourceIdentifier(
         identifierType = IdentifierType.LCSubjects,
         value = "sh92000896",
+        ontologyType = ontologyType
+      )
+
+      val actualSourceIdentifier = MarcHasRecordControlNumber
+        .apply(
+          field = field,
+          ontologyType = ontologyType
+        )
+        .allSourceIdentifiers
+        .loneElement
+
+      actualSourceIdentifier shouldBe expectedSourceIdentifier
+    }
+
+    it("finds an identifier with a NLM URL prefix") {
+      val field =
+        create655FieldWith(
+          indicator2 = "2",
+          identifierValue = "https://id.nlm.nih.gov/mesh/D049671"
+        )
+
+      val expectedSourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.MESH,
+        value = "D049671",
+        ontologyType = ontologyType
+      )
+
+      val actualSourceIdentifier = MarcHasRecordControlNumber
+        .apply(
+          field = field,
+          ontologyType = ontologyType
+        )
+        .allSourceIdentifiers
+        .loneElement
+
+      actualSourceIdentifier shouldBe expectedSourceIdentifier
+    }
+
+
+    it("strips (DNLM) prefix") {
+      val field =
+        create655FieldWith(
+          indicator2 = "2",
+          identifierValue = "(DNLM)D049671"
+        )
+
+      val expectedSourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.MESH,
+        value = "D049671",
         ontologyType = ontologyType
       )
 
