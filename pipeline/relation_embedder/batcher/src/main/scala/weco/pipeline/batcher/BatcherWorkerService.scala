@@ -5,7 +5,6 @@ import scala.concurrent.duration._
 import scala.util.Try
 import org.apache.pekko.{Done, NotUsed}
 import org.apache.pekko.stream.scaladsl._
-import org.apache.pekko.stream.Materializer
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 import grizzled.slf4j.Logging
 import weco.messaging.MessageSender
@@ -22,7 +21,7 @@ class BatcherWorkerService[MsgDestination](
   flushInterval: FiniteDuration,
   maxProcessedPaths: Int,
   maxBatchSize: Int
-)(implicit ec: ExecutionContext, materializer: Materializer)
+)(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
 
