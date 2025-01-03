@@ -94,7 +94,7 @@ class MetsTransformerEndToEndTest
               new TransformerWorker[MetsSourcePayload, MetsSourceData, String](
                 transformer = new MetsXmlTransformer(store),
                 pipelineStream = pipelineStream,
-                retriever = retriever,
+                transformedWorkRetriever = retriever,
                 sourceDataRetriever = new MetsSourceDataRetriever
               )
             worker.run()
