@@ -3,7 +3,7 @@ import sbt._
 
 object Common {
   val settings: Seq[Def.Setting[_]] = Seq(
-    scalaVersion := "2.12.20",
+    scalaVersion := "2.13.15",
     organization := "weco",
     scalacOptions ++= Seq(
       "-deprecation",

@@ -298,7 +298,7 @@ trait WorkGenerators
                     sourceIdentifier = internalWork.sourceIdentifier,
                     canonicalId = internalWork.state.canonicalId,
                     workData = internalWork.data
-                  ),
+                  )
                 )
             )
           )
