@@ -20,13 +20,32 @@ Lambda function execution is orchestrated via AWS Step Functions (see `terraform
 utilised for this purpose:
 
 * `catalogue-graph-pipeline`: Represents the full pipeline, extracting all concepts and loading them into the cluster.
-  Triggers the `extractors` state machine, followed by the `bulk_loaders` state machine.
-* `extractors`: Invokes `extractor` Lambda function instances in parallel, one for each combination of source type and
-  entity type (e.g. one for LoC Concept nodes, one for LoC Concept edges, etc.).
-* `bulk_loaders`: Triggers `bulk_loader` state machine instances in sequence, one for each combination of source type
-  and entity type.
-* `bulk_loader`: Invokes a single `bulk_loader` Lambda function to start a bulk load job. Repeatedly invokes
-  the `bulk_load_poller` Lambda function to check the status of the job until it completes.
+  Triggers the `catalogue-graph-extractors` state machine, followed by the `catalogue-graph-bulk_loaders` state machine.
+* `catalogue-graph-extractors`: Invokes `extractor` Lambda function instances in parallel, one for each combination of
+  source type and entity type (e.g. one for LoC Concept nodes, one for LoC Concept edges, etc.).
+* `catalogue-graph-bulk-loaders`: Triggers `catalogue-graph-bulk-loader` state machine instances in sequence, one for
+  each combination of transformer type and entity type.
+* `catalogue-graph-bulk-loader`: Invokes a single `bulk_loader` Lambda function to start a bulk load job. Then
+  repeatedly invokes the `bulk_load_poller` Lambda function to check the status of the job until it completes.
+* `catalogue-graph-single-extract-load`: Not part of the full pipeline. Extracts and loads a single entity type by
+  invoking the `extractor` Lambda function, followed by the `catalogue-graph-bulk-loader` state machine. Useful for
+  updating the graph after a change in a single source/transformer without having to run the full pipeline.
+
+## Running the pipeline
+
+The full pipeline can be triggered manually via
+the [AWS console](https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines/view/arn%3Aaws%3Astates%3Aeu-west-1%3A760097843905%3AstateMachine%3Acatalogue-graph-pipeline).
+
+The `catalogue-graph-single-extract-load` pipeline can also be triggered via the console, requiring input in the
+following format:
+
+```json
+{
+  "transformer_type": "loc_concepts",
+  "entity_type": "nodes",
+  "sample_size": null
+}
+```
 
 ## Source code organisation
 

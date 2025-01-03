@@ -78,6 +78,7 @@ class BaseNeptuneClient:
                 "parallelism": "MEDIUM",
                 "queueRequest": "TRUE",
                 "userProvidedEdgeIds": "TRUE",
+                "updateSingleCardinalityProperties": "TRUE",
             },
         )
         return response["payload"]["loadId"]
