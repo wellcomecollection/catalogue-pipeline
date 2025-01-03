@@ -90,6 +90,19 @@ Subdirectories contain various modules and are shared by all Lambda functions.
   yields a single Pydantic model). The BaseTransformer class implements a `stream_to_<destination>` method for each
   supported destination.
 
+## Deployment
+
+The pipeline does not currently have an automated deployment process in place. To deploy a new version of the source
+code to all Lambda functions, run the `create_zip.sh` script (to create a new `build.zip` file), followed by
+a `terraform apply` command (to upload the new zip file to all Lambda functions):
+
+```sh
+sh create_zip.sh
+cd terraform
+terraform apply
+```
+
+
 ## Local execution
 
 To run one of the Lambda functions locally, navigate to the `src` directory and then run the chosen function via the
