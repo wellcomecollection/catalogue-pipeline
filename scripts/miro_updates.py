@@ -422,7 +422,7 @@ def update_miro_image_suppressions_doc():
 
 def register_on_dlcs(origin_url, miro_id):
     dlcs_response = dlcs_api_client().post(
-        f"https://api.dlcs.io/customers/2/queue/priority",
+        "https://api.dlcs.io/customers/2/queue/priority",
         json={
             "@type": "Collection",
             "member": [
