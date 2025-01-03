@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-08-22T10:16:20.129198Z",
+  "createdAt" : "2024-11-25T15:15:12.457193Z",
   "id" : "ppcdklf9",
   "document" : {
     "debug" : {
@@ -192,18 +192,27 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"London (England)\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Subject\"}",
-        "{\"label\":\"Darwin \\\"Jones\\\", Charles\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : "London (England)",
+          "label" : "London (England)"
+        },
+        {
+          "id" : "Psychology, Pathological",
+          "label" : "Psychology, Pathological"
+        },
+        {
+          "id" : "darwin01",
+          "label" : "Darwin \"Jones\", Charles"
+        }
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -221,12 +230,24 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
         "London (England)",
         "Psychology, Pathological",
         "Darwin \"Jones\", Charles"
       ],
+      "subjects.concepts.id" : [
+        "darwin01"
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+        "lcnames-darwin"
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "3o0GGLKeJC"

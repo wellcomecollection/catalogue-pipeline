@@ -97,20 +97,14 @@ class InferenceManagerWorkerServiceTest
                   val seed = id.hashCode
                   inside(inferredData) {
                     case InferredData(
-                          features1,
-                          features2,
-                          reducedFeatures,
+                          features,
                           paletteEmbedding,
                           Some(averageColorHex),
                           aspectRatio
                         ) =>
                       val featureVector =
                         Responses.randomFeatureVector(seed)
-                      features1 should be(featureVector.slice(0, 2048))
-                      features2 should be(featureVector.slice(2048, 4096))
-                      reducedFeatures should be(
-                        featureVector.slice(0, 1024)
-                      )
+                      features should be(featureVector)
                       paletteEmbedding should be(
                         Responses.randomPaletteVector(seed)
                       )
@@ -156,16 +150,12 @@ class InferenceManagerWorkerServiceTest
                 case ImageState.Augmented(_, _, inferredData) =>
                   inside(inferredData) {
                     case InferredData(
-                          features1,
-                          features2,
-                          reducedFeatures,
+                          features,
                           paletteEmbedding,
                           averageColorHex,
                           aspectRatio
                         ) =>
-                      features1 should have length 2048
-                      features2 should have length 2048
-                      reducedFeatures should have length 1024
+                      features should have length 4096
                       paletteEmbedding should have length 1000
                       averageColorHex.get should have length 7
                       aspectRatio should not be empty

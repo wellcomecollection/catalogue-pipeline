@@ -41,19 +41,13 @@ class FeatureVectorInferrerAdapter(val host: String, port: Int)
   ): InferredData =
     inferrerResponse match {
       case FeatureVectorInferrerResponse(
-            features_b64,
-            reduced_features_b64
+            features_b64
           ) =>
         val features = decodeBase64ToFloatList(features_b64)
-        val reducedFeatures = decodeBase64ToFloatList(
-          reduced_features_b64
-        )
+
         if (features.size == 4096) {
-          val (features1, features2) = features.splitAt(features.size / 2)
           inferredData.copy(
-            features1 = features1,
-            features2 = features2,
-            reducedFeatures = reducedFeatures
+            features = features
           )
         } else inferredData
     }

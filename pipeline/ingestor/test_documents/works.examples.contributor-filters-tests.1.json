@@ -1,6 +1,6 @@
 {
   "description" : "examples for the contributor filter tests",
-  "createdAt" : "2024-08-22T10:16:20.133352Z",
+  "createdAt" : "2024-11-25T15:15:12.462681Z",
   "id" : "mzvvcba0",
   "document" : {
     "debug" : {
@@ -128,16 +128,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"Karl Marx\",\"type\":\"Person\"}"
+      "contributors.agent" : [
+        {
+          "id" : "Karl Marx",
+          "label" : "Karl Marx"
+        }
       ],
       "items.locations.license" : [
       ],
@@ -155,10 +158,20 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
         "Karl Marx"
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "gDuSiI3pPI"

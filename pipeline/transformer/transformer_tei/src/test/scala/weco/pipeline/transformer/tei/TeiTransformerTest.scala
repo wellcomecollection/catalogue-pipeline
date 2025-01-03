@@ -82,7 +82,7 @@ class TeiTransformerTest
               id = Identifiable(
                 SourceIdentifier(
                   IdentifierType.LCSubjects,
-                  "Subject",
+                  "Concept",
                   "sh85083116"
                 )
               ),

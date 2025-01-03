@@ -10,6 +10,9 @@ variable "es_works_identified_index" {
 variable "es_works_denormalised_index" {
   type = string
 }
+variable "es_lambda_works_denormalised_index" {
+  type = string
+}
 variable "es_works_index" {
   type = string
 }

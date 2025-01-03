@@ -22,13 +22,22 @@ class WorkFilterableValuesTest
       languagesId = List("eng"),
       genresLabel = List("Ink drawings", "Drawings"),
       genresConceptsId = List("h5fvmn9u", "tgxvuh8x"),
+      genresConceptsSourceIdentifier = List("ink drawings", "drawings"),
       subjectsLabel = List(
         "Jungian psychology",
         "Dreams",
         "McGlashan, Alan Fleming, 1898-1997"
       ),
+      subjectsConceptsId = List(
+        "bse2dtxc",
+        "hjw49bkh",
+        "wfkwqmmx"
+      ),
+      subjectsConceptsSourceIdentifier = List("sh95006221", "sh85039483", "mcglashan, alan fleming, 1898-1997"),
       contributorsAgentLabel =
         List("M.A.C.T", "McGlashan, Alan Fleming, 1898-1997"),
+      contributorsAgentId = List("npanm646", "wfkwqmmx"),
+      contributorsAgentSourceIdentifier = List("m.a.c.t", "mcglashan, alan fleming, 1898-1997"),
       identifiersValue = List("b16582962", "1658296", "658296i", "L0045108"),
       itemsLocationsLicenseId = List("cc-by"),
       itemsLocationsAccessConditionsStatusId = List("open", "open"),

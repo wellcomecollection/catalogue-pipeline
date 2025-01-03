@@ -406,7 +406,16 @@ class SierraConceptSubjectsTest
           indicator2 = "2",
           subfields = List(
             Subfield(tag = "a", content = "abolition"),
-            Subfield(tag = "0", content = "mesh/456")
+            Subfield(tag = "0", content = "mesh/456"),
+          )
+        ),
+        createVarFieldWith(
+          marcTag = "650",
+          // MESH heading with a "(DNLM)" prefix
+          indicator2 = "2",
+          subfields = List(
+            Subfield(tag = "a", content = "something"),
+            Subfield(tag = "0", content = "(DNLM)123456"),
           )
         )
       )
@@ -421,6 +430,11 @@ class SierraConceptSubjectsTest
       SourceIdentifier(
         identifierType = IdentifierType.MESH,
         value = "mesh/456",
+        ontologyType = "Concept"
+      ),
+      SourceIdentifier(
+        identifierType = IdentifierType.MESH,
+        value = "123456",
         ontologyType = "Concept"
       )
     )

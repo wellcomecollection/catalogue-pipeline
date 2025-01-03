@@ -71,6 +71,7 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
 
 if [[ "$TASK" == "tag_images_and_deploy_services" ]]
 then
+  echo "Deploying ECS pipeline services to catalogue-$PIPELINE_DATE"
   CLUSTER="catalogue-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
     id_minter \
     image_inferrer \
@@ -88,5 +89,10 @@ then
     transformer_miro \
     transformer_sierra \
     transformer_tei
+
+  echo "Deploying λ pipeline services to catalogue-$PIPELINE_DATE"
+  "$ROOT/builds/deploy_lambda_services.sh" \
+    batcher \
+    relation_embedder
 fi
 

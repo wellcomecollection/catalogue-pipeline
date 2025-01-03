@@ -1,6 +1,6 @@
 {
   "description" : "examples for the works filtered aggregations tests",
-  "createdAt" : "2024-08-22T10:16:20.149431Z",
+  "createdAt" : "2024-11-25T15:15:12.493435Z",
   "id" : "ryawvgup",
   "document" : {
     "debug" : {
@@ -127,18 +127,24 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"d\",\"label\":\"Journals\",\"type\":\"Format\"}"
+        {
+          "id" : "d",
+          "label" : "Journals"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
-        "{\"id\":\"mar\",\"label\":\"Marathi\",\"type\":\"Language\"}"
+        {
+          "id" : "mar",
+          "label" : "Marathi"
+        }
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -157,9 +163,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "jHeY6Fz9Kp"

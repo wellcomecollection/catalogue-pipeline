@@ -22,8 +22,8 @@ class CalmFormatTest
 
     digitalFormat shouldBe Format.ArchivesDigital
 
-    // Check that the label is "Archives - Digital"
-    Format.ArchivesDigital.label shouldBe ("Archives - Digital")
+    // Check that the label is "Born-digital archives"
+    Format.ArchivesDigital.label shouldBe ("Born-digital archives")
   }
 
   it("Defaults to ArchivesAndManuscripts for all other contents of Material") {

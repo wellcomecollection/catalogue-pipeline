@@ -1,9 +1,31 @@
-FROM public.ecr.aws/docker/library/eclipse-temurin:11-jre-alpine
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:11 AS base
 
-LABEL maintainer = "Wellcome Collection <digital@wellcomecollection.org>"
+LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
-RUN apk add --no-cache bash
+RUN yum install awscli -y
+COPY bash_secrets_extension.sh /opt/extensions/bash_secrets_extension.sh
 
 ADD target/universal/stage /opt/docker
+ENV CLASSPATH="/opt/docker/lib/*"
+WORKDIR /opt/docker
 
-ENTRYPOINT ["/opt/docker/bin/relation_embedder"]
+FROM base AS ecs
+
+ENTRYPOINT ["/opt/docker/bin/main"]
+
+FROM base AS lambda_rie
+
+ADD https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/download/v1.22/aws-lambda-rie /aws-lambda/aws-lambda-rie
+RUN chmod +x /aws-lambda/aws-lambda-rie
+ENTRYPOINT ["/aws-lambda/aws-lambda-rie"]
+
+ENV use_downstream=stdio
+
+CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.relation_embedder.LambdaMain::handleRequest"]
+
+FROM base
+
+ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
+
+CMD ["weco.pipeline.relation_embedder.LambdaMain::handleRequest"]
+

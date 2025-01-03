@@ -2,6 +2,7 @@ package weco.pipeline.ingestor.images.models
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.pipeline.ingestor.common.models.AggregatableField
 
 class ImageAggregatableValuesTest
     extends AnyFunSpec
@@ -11,20 +12,29 @@ class ImageAggregatableValuesTest
   it("creates aggregatable values from an image") {
     ImageAggregatableValues(testImage) shouldBe ImageAggregatableValues(
       licenses = List(
-        """{"id":"cc-by","label":"Attribution 4.0 International (CC BY 4.0)","url":"http://creativecommons.org/licenses/by/4.0/","type":"License"}"""
+        AggregatableField(
+          "cc-by",
+          "Attribution 4.0 International (CC BY 4.0)"
+        )
       ),
       contributors = List(
-        """{"id":"npanm646","label":"M.A.C.T","type":"Person"}""",
-        """{"id":"wfkwqmmx","label":"McGlashan, Alan Fleming, 1898-1997","type":"Person"}"""
+        AggregatableField("npanm646", "M.A.C.T"),
+        AggregatableField(
+          "wfkwqmmx",
+          "McGlashan, Alan Fleming, 1898-1997"
+        )
       ),
       genres = List(
-        """{"label":"Ink drawings","concepts":[],"type":"Genre"}""",
-        """{"label":"Drawings","concepts":[],"type":"Genre"}"""
+        AggregatableField("h5fvmn9u", "Ink drawings"),
+        AggregatableField("tgxvuh8x", "Drawings")
       ),
       subjects = List(
-        """{"label":"Jungian psychology","concepts":[],"type":"Subject"}""",
-        """{"label":"Dreams","concepts":[],"type":"Subject"}""",
-        """{"label":"McGlashan, Alan Fleming, 1898-1997","concepts":[],"type":"Subject"}"""
+        AggregatableField("bse2dtxc", "Jungian psychology"),
+        AggregatableField("hjw49bkh", "Dreams"),
+        AggregatableField(
+          "wfkwqmmx",
+          "McGlashan, Alan Fleming, 1898-1997"
+        )
       )
     )
   }

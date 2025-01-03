@@ -12,8 +12,8 @@ trait ImagesIndexFixtures extends IndexFixturesBase {
   def withLocalImagesIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =
       getConfig(
-        mappings = "mappings.images_indexed.2024-08-20.json",
-        analysis = "analysis.works_indexed.2024-08-20.json"
+        mappings = "mappings.images_indexed.2024-11-14.json",
+        analysis = "analysis.works_indexed.2024-11-14.json"
       )
     )
   }
