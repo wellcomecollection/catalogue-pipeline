@@ -31,9 +31,12 @@ object CLIMain extends App {
   val toStringFlow: Flow[ByteString, String, NotUsed] =
     Flow[ByteString].map(_.utf8String)
 
-  val pathsProcessorFlow: Flow[Seq[String], Future[Seq[Long]], NotUsed] =
-    Flow[Seq[String]].map {
-      paths: Seq[String] =>
+  val toPathFlow: Flow[String, Path, NotUsed] =
+    Flow[String].map(PathFromString)
+
+  val pathsProcessorFlow: Flow[Seq[Path], Future[Seq[Path]], NotUsed] =
+    Flow[Seq[Path]].map {
+      paths: Seq[Path] =>
         PathsProcessor(
           40, // TODO: 40 is the number in the config used by Main, do this properly later
           paths.toList,
@@ -44,6 +47,7 @@ object CLIMain extends App {
   stdinSource
     .via(lineDelimiter)
     .via(toStringFlow)
+    .via(toPathFlow)
     // this number is pretty arbitrary, but grouping of some kind is needed in order to
     // provide a list to the next step, rather than individual paths
     .grouped(10000)

@@ -46,7 +46,7 @@ object LambdaMain extends RequestHandler[SQSEvent, String] with Logging {
 
     val f = PathsProcessor(
       config.requireInt("batcher.max_batch_size"),
-      event.extractPaths,
+      event.extractPaths.map(PathFromString),
       downstream
     )
 
