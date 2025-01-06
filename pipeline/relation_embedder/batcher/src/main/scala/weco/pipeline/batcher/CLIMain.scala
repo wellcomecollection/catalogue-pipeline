@@ -38,8 +38,8 @@ object CLIMain extends App {
       paths: Seq[Path] => pathsProcessor(paths)
     }
 
-    private val toPathFlow: Flow[String, Path, NotUsed] =
-      Flow[String].map(PathFromString)
+  private val toPathFlow: Flow[String, Path, NotUsed] =
+    Flow[String].map(PathFromString)
 
   stdinSource
     .via(lineDelimiter)
