@@ -238,7 +238,10 @@ def _remove_image_from_dlcs(*, miro_id):
         f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
     )
     if resp.status_code == 404:
-        print(f"Failed to delete image {miro_id} from DLCS, image not found!", file=sys.stderr)
+        print(
+            f"Failed to delete image {miro_id} from DLCS, image not found!",
+            file=sys.stderr,
+        )
         return
     else:
         assert resp.status_code == 204, resp
