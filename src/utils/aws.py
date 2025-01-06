@@ -11,7 +11,8 @@ def get_secret(secret_name: str) -> str:
     secrets_manager_client = boto3.client("secretsmanager", region_name="eu-west-1")
     response = secrets_manager_client.get_secret_value(SecretId=secret_name)
 
-    return response["SecretString"]
+    secret: str = response["SecretString"]
+    return secret
 
 
 def publish_batch_to_sns(topic_arn: str, queries: list[str]) -> None:
