@@ -15,5 +15,5 @@ class LambdaNeptuneClient(BaseNeptuneClient):
             aws_session_token=os.getenv("AWS_SESSION_TOKEN"),
         )
 
-    def _get_client_url(self):
+    def _get_client_url(self) -> str:
         return f"https://{self.neptune_endpoint}:8182"

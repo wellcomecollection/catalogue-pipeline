@@ -58,7 +58,7 @@ def construct_upsert_edges_query(edges: list[BaseEdge]) -> str:
 
 def construct_upsert_cypher_query(
     entities: list[BaseNode | BaseEdge], entity_type: Literal["nodes", "edges"]
-):
+) -> str:
     """
     Returns an openCypher `UNWIND` query which creates a graph node or edge for each item specified in `entities`,
     or updates an existing matching node or edge.

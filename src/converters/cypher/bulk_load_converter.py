@@ -10,7 +10,7 @@ class CypherBulkLoadConverter(CypherBaseConverter):
     def __init__(self, entity_type: Literal["nodes", "edges"]):
         self.entity_type = entity_type
 
-    def _node_to_bulk_cypher(self, model: BaseNode):
+    def _node_to_bulk_cypher(self, model: BaseNode) -> dict:
         bulk_node = {":ID": model.id, ":LABEL": type(model).__name__}
 
         for key, raw_value in model.dict().items():
@@ -19,7 +19,7 @@ class CypherBulkLoadConverter(CypherBaseConverter):
 
         return bulk_node
 
-    def _edge_to_bulk_cypher(self, model: BaseEdge):
+    def _edge_to_bulk_cypher(self, model: BaseEdge) -> dict:
         bulk_edge = {
             ":ID": f"{model.from_id}-->{model.to_id}",
             ":START_ID": model.from_id,

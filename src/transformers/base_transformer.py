@@ -29,7 +29,7 @@ def _generator_to_chunks(items: Generator, chunk_size: int) -> Generator:
 
 
 class BaseTransformer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
 
     def transform_node(self, raw_node: dict) -> BaseNode | None:
@@ -114,7 +114,7 @@ class BaseTransformer:
         entity_type: EntityType,
         chunk_size: int,
         sample_size: int | None = None,
-    ):
+    ) -> None:
         """
         Streams transformed entities (nodes or edges) into an S3 bucket for bulk loading into the Neptune cluster.
         Suitable for indexing large numbers of entities in production. Provides limited observability.
@@ -142,14 +142,14 @@ class BaseTransformer:
         entity_type: EntityType,
         query_chunk_size: int,
         sample_size: int | None = None,
-    ):
+    ) -> None:
         """
         Streams transformed entities (nodes or edges) directly into Neptune using multiple threads for parallel
         processing. Suitable for local testing. Not recommended for indexing large numbers of entities.
         """
         chunks = self._stream_chunks(entity_type, query_chunk_size, sample_size)
 
-        def run_query(chunk):
+        def run_query(chunk: list[BaseNode | BaseEdge]) -> None:
             query = construct_upsert_cypher_query(chunk, entity_type)
             neptune_client.run_open_cypher_query(query)
 
@@ -179,7 +179,7 @@ class BaseTransformer:
         entity_type: EntityType,
         query_chunk_size: int,
         sample_size: int | None = None,
-    ):
+    ) -> None:
         """
         Streams transformed entities (nodes or edges) into an SNS topic as openCypher queries, where they will be
         consumed by the `indexer` Lambda function.

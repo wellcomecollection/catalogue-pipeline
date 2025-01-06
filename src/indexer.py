@@ -1,10 +1,11 @@
 import argparse
 import json
+import typing
 
 from utils.aws import get_neptune_client
 
 
-def extract_sns_messages_from_sqs_event(event):
+def extract_sns_messages_from_sqs_event(event: dict) -> list[str]:
     queries = []
 
     for record in event["Records"]:
@@ -14,7 +15,7 @@ def extract_sns_messages_from_sqs_event(event):
     return queries
 
 
-def handler(queries: list[str], is_local=False):
+def handler(queries: list[str], is_local: bool = False) -> None:
     neptune_client = get_neptune_client(is_local)
 
     print(f"Received number of queries: {len(queries)}")
@@ -23,12 +24,12 @@ def handler(queries: list[str], is_local=False):
         neptune_client.run_open_cypher_query(query)
 
 
-def lambda_handler(event: dict, context):
+def lambda_handler(event: dict, context: typing.Any) -> None:
     queries = extract_sns_messages_from_sqs_event(event)
     handler(queries)
 
 
-def local_handler():
+def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
         "--cypher-query",
