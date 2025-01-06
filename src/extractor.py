@@ -16,7 +16,7 @@ def handler(
     stream_destination: StreamDestination,
     transformer_type: TransformerType,
     entity_type: EntityType,
-    sample_size: int = None,
+    sample_size: int | None = None,
     is_local=False,
 ):
     print(

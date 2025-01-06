@@ -41,7 +41,7 @@ class BaseTransformer:
             "Each transformer must implement an `extract_edges` method."
         )
 
-    def _stream_nodes(self, number: int = None) -> Generator[BaseNode]:
+    def _stream_nodes(self, number: int | None = None) -> Generator[BaseNode]:
         """
         Extracts nodes from the specified source and transforms them. The `source` must define a `stream_raw` method.
         Takes an optional parameter to only extract the first `number` nodes.
@@ -60,7 +60,7 @@ class BaseTransformer:
             if counter == number:
                 return
 
-    def _stream_edges(self, number: int = None) -> Generator[BaseEdge]:
+    def _stream_edges(self, number: int | None = None) -> Generator[BaseEdge]:
         """
         Extracts edges from the specified source and transforms them. The `source` must define a `stream_raw` method.
         Takes an optional parameter to only extract the first `number` edges.
@@ -80,7 +80,7 @@ class BaseTransformer:
                     return
 
     def _stream_entities(
-        self, entity_type: EntityType, sample_size: int = None
+        self, entity_type: EntityType, sample_size: int | None = None
     ) -> Generator[BaseNode | BaseEdge]:
         if entity_type == "nodes":
             entities = self._stream_nodes(sample_size)
@@ -95,7 +95,7 @@ class BaseTransformer:
         self,
         entity_type: EntityType,
         chunk_size: int,
-        sample_size: int = None,
+        sample_size: int | None = None,
     ) -> Generator[list[BaseNode | BaseEdge]]:
         """
         Extracts the specified entity type (nodes or edges) from its source, transforms each entity,
@@ -110,7 +110,7 @@ class BaseTransformer:
         s3_uri: str,
         entity_type: EntityType,
         chunk_size: int,
-        sample_size: int = None,
+        sample_size: int | None = None,
     ):
         """
         Streams transformed entities (nodes or edges) into an S3 bucket for bulk loading into the Neptune cluster.
@@ -123,13 +123,13 @@ class BaseTransformer:
             converter = CypherBulkLoadConverter(entity_type)
             for chunk in self._stream_chunks(entity_type, chunk_size, sample_size):
                 bulk_dicts = []
-
                 for entity in chunk:
                     bulk_dict = converter.convert_to_bulk_cypher(entity)
                     bulk_dicts.append(bulk_dict)
-                    if csv_writer is None:
-                        csv_writer = csv.DictWriter(f, fieldnames=bulk_dict.keys())
-                        csv_writer.writeheader()
+
+                if csv_writer is None:
+                    csv_writer = csv.DictWriter(f, fieldnames=bulk_dicts[0].keys())
+                    csv_writer.writeheader()
 
                 csv_writer.writerows(bulk_dicts)
 
@@ -138,7 +138,7 @@ class BaseTransformer:
         neptune_client: BaseNeptuneClient,
         entity_type: EntityType,
         query_chunk_size: int,
-        sample_size: int = None,
+        sample_size: int | None = None,
     ):
         """
         Streams transformed entities (nodes or edges) directly into Neptune using multiple threads for parallel
@@ -175,7 +175,7 @@ class BaseTransformer:
         topic_arn: str,
         entity_type: EntityType,
         query_chunk_size: int,
-        sample_size: int = None,
+        sample_size: int | None = None,
     ):
         """
         Streams transformed entities (nodes or edges) into an SNS topic as openCypher queries, where they will be

@@ -22,7 +22,9 @@ class BaseNeptuneClient:
     def _get_client_url(self):
         raise NotImplementedError()
 
-    def _make_request(self, method: str, relative_url: str, payload: dict = None):
+    def _make_request(
+        self, method: str, relative_url: str, payload: dict | None = None
+    ):
         client_url = self._get_client_url()
 
         url = f"{client_url}{relative_url}"

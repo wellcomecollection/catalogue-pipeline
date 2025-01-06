@@ -26,4 +26,4 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
 
     def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
         # At the moment there are no edges to extract. Return an empty generator.
-        yield from []
+        yield from ()

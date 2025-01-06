@@ -27,7 +27,7 @@ class LibraryOfCongressLocationsTransformer(BaseTransformer):
         raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or not raw_concept.is_geographic:
-            return []
+            yield from ()
 
         for broader_id in raw_concept.broader_concept_ids:
             yield SourceConceptNarrowerThan(

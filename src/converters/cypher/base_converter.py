@@ -1,3 +1,6 @@
+import typing
+
+
 class CypherBaseConverter:
     """
     Converts various data types into a format compatible with openCypher.
@@ -12,11 +15,11 @@ class CypherBaseConverter:
     def _convert_none(self) -> str:
         return "null"
 
-    def _convert_list(self, raw_value: list[any]) -> str:
+    def _convert_list(self, raw_value: list[typing.Any]) -> str:
         # Neptune does not support lists, so we convert them to a single string with a `||` separator
         return self._raw_value_to_cypher_value("||".join(raw_value))
 
-    def _raw_value_to_cypher_value(self, raw_value: any) -> str:
+    def _raw_value_to_cypher_value(self, raw_value: typing.Any) -> str:
         if isinstance(raw_value, str):
             value = self._convert_str(raw_value)
         elif isinstance(raw_value, bool):
