@@ -186,7 +186,7 @@ class BatcherWorkerServiceTest
   }
 
   class MemoryDownstream(messageSender: MessageSender) extends Downstream {
-    override def notify(workId: Path): Try[Unit] = ???
+    override def notify(workId: String): Try[Unit] = ???
     override def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit] = messageSender.sendT(batch)
   }
 }
