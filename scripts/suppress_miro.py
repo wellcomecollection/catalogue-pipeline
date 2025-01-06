@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import click
 import httpx
+import os
 import sys
 
 from miro_updates import (
@@ -34,9 +35,21 @@ def suppress_miro(id_source, message, dry_run):
     suppress = print_suppression_command if dry_run else suppress_image
     update = print_update_command if dry_run else update_miro_image_suppressions_doc
 
+    # Run some pre-flight checks
+    check_gh_cli_installed()
+
     for miro_id in valid_ids(id_source):
         suppress(miro_id=miro_id, message=message)
+
+    # Run the update command
     update()
+
+
+def check_gh_cli_installed():
+    if os.system("gh --version > /dev/null") != 0:
+        raise click.ClickException(
+            "gh CLI not installed. Please install from https://cli.github.com/"
+        )
 
 
 def valid_ids(id_source):
