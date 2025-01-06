@@ -13,6 +13,8 @@ import os
 import boto3
 import httpx
 
+from botocore.exceptions import ClientError
+
 from _common import (
     git,
     get_api_es_client,
@@ -235,19 +237,29 @@ def _remove_image_from_dlcs(*, miro_id):
     resp = dlcs_api_client().delete(
         f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
     )
-    assert resp.status_code == 204, resp
+    if resp.status_code == 404:
+        print(
+            f"Failed to delete image {miro_id} from DLCS, image not found!",
+            file=sys.stderr,
+        )
+        return
+    else:
+        assert resp.status_code == 204, resp
 
 
 def _remove_image_from_cloudfront(*, miro_id):
     cloudfront_client = SESSION.client("cloudfront")
 
-    cloudfront_client.create_invalidation(
-        DistributionId="E1KKXGJWOADM2A",  # IIIF APIs prod
-        InvalidationBatch={
-            "Paths": {"Quantity": 1, "Items": [f"/image/{miro_id}*"]},
-            "CallerReference": f"{__file__} invalidating {miro_id}",
-        },
-    )
+    try:
+        cloudfront_client.create_invalidation(
+            DistributionId="E1KKXGJWOADM2A",  # IIIF APIs prod
+            InvalidationBatch={
+                "Paths": {"Quantity": 1, "Items": [f"/image/{miro_id}*"]},
+                "CallerReference": f"{__file__} invalidating {miro_id}",
+            },
+        )
+    except ClientError:
+        print(f"Failed to invalidate {miro_id} from CloudFront", file=sys.stderr)
 
 
 def suppress_image(*, miro_id, message: str):
