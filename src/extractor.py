@@ -1,11 +1,11 @@
 import argparse
-import typing
 import os
+import typing
 
-from utils.aws import get_neptune_client
-from transformers.base_transformer import BaseTransformer, EntityType, StreamDestination
+from transformers.base_transformer import (BaseTransformer, EntityType,
+                                           StreamDestination)
 from transformers.transformer_type import TransformerType
-
+from utils.aws import get_neptune_client
 
 CHUNK_SIZE = 256
 S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]

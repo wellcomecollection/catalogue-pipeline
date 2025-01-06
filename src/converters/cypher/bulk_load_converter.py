@@ -1,7 +1,9 @@
-from models.graph_node import BaseNode
-from models.graph_edge import BaseEdge
-from .base_converter import CypherBaseConverter
 from typing import Literal
+
+from models.graph_edge import BaseEdge
+from models.graph_node import BaseNode
+
+from .base_converter import CypherBaseConverter
 
 
 class CypherBulkLoadConverter(CypherBaseConverter):

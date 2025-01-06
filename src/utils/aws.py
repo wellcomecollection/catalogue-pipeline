@@ -1,5 +1,6 @@
-import boto3
 import json
+
+import boto3
 
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient

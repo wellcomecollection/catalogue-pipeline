@@ -1,18 +1,19 @@
+import concurrent.futures
+import csv
 from collections.abc import Generator
+from itertools import islice
+from typing import Literal
+
+import boto3
+import smart_open
+
+from clients.base_neptune_client import BaseNeptuneClient
+from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
-from sources.base_source import BaseSource
-from clients.base_neptune_client import BaseNeptuneClient
 from query_builders.cypher import construct_upsert_cypher_query
+from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
-from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
-
-import smart_open
-import concurrent.futures
-import boto3
-import csv
-from typing import Literal
-from itertools import islice
 
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["graph", "s3", "sns"]

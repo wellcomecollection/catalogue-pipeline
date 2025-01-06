@@ -1,5 +1,5 @@
-import json
 import argparse
+import json
 
 from utils.aws import get_neptune_client
 

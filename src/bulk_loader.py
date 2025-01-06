@@ -1,11 +1,10 @@
-import typing
 import argparse
 import os
+import typing
 
 from transformers.base_transformer import EntityType
 from transformers.transformer_type import TransformerType
 from utils.aws import get_neptune_client
-
 
 S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
 

@@ -1,6 +1,6 @@
+from converters.cypher.query_converter import CypherQueryConverter
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
-from converters.cypher.query_converter import CypherQueryConverter
 
 
 def construct_upsert_nodes_query(nodes: list[BaseNode]) -> str:

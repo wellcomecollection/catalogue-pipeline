@@ -1,8 +1,8 @@
 import enum
 
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
-from .loc.names_transformer import LibraryOfCongressNamesTransformer
 from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
+from .loc.names_transformer import LibraryOfCongressNamesTransformer
 
 LOC_SUBJECT_HEADINGS_URL = (
     "https://id.loc.gov/download/authorities/subjects.skosrdf.jsonld.gz"

@@ -1,8 +1,10 @@
+from collections.abc import Generator
+
+from models.graph_edge import SourceConceptNarrowerThan
+from models.graph_node import SourceConcept
 from sources.gzip_source import GZipSource
 from transformers.base_transformer import BaseTransformer
-from collections.abc import Generator
-from models.graph_node import SourceConcept
-from models.graph_edge import SourceConceptNarrowerThan
+
 from .raw_concept import RawLibraryOfCongressConcept
 
 

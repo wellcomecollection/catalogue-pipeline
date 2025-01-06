@@ -1,6 +1,6 @@
-from utils.aws import get_neptune_client
-
 import argparse
+
+from utils.aws import get_neptune_client
 
 
 def handler(load_id: str, is_local=False):

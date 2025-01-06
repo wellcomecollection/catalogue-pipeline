@@ -1,7 +1,9 @@
-import requests
-from collections.abc import Generator
 import gzip
 import json
+from collections.abc import Generator
+
+import requests
+
 from .base_source import BaseSource
 
 

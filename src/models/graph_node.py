@@ -1,7 +1,7 @@
 import datetime
+from typing import Literal, Optional
 
 from pydantic import BaseModel
-from typing import Literal, Optional
 
 
 # Each node must have a label and an id
