@@ -17,5 +17,5 @@ class LocalNeptuneClient(BaseNeptuneClient):
         self.neptune_endpoint = neptune_endpoint
         self.session = boto3.Session()
 
-    def _get_client_url(self):
+    def _get_client_url(self) -> str:
         return self.load_balancer_url

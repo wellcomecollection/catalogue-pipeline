@@ -4,7 +4,7 @@ import typing
 
 from transformers.base_transformer import (BaseTransformer, EntityType,
                                            StreamDestination)
-from transformers.transformer_type import TransformerType
+from transformers.create_transformer import TransformerType, create_transformer
 from utils.aws import get_neptune_client
 
 CHUNK_SIZE = 256
@@ -17,14 +17,14 @@ def handler(
     transformer_type: TransformerType,
     entity_type: EntityType,
     sample_size: int | None = None,
-    is_local=False,
-):
+    is_local: bool = False,
+) -> None:
     print(
         f"Transforming {sample_size or 'all'} {entity_type} using the {transformer_type} "
         f"transformer and streaming them into {stream_destination}."
     )
 
-    transformer: BaseTransformer = TransformerType[transformer_type.name].value
+    transformer: BaseTransformer = create_transformer(transformer_type)
 
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)
@@ -43,21 +43,21 @@ def handler(
         raise ValueError("Unsupported stream destination.")
 
 
-def lambda_handler(event: dict, context):
+def lambda_handler(event: dict, context: typing.Any) -> None:
     stream_destination = event["stream_destination"]
-    transformer_type = TransformerType.argparse(event["transformer_type"])
+    transformer_type = event["transformer_type"]
     entity_type = event["entity_type"]
     sample_size = event.get("sample_size")
 
     handler(stream_destination, transformer_type, entity_type, sample_size)
 
 
-def local_handler():
+def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
         "--transformer-type",
-        type=TransformerType.argparse,
-        choices=list(TransformerType),
+        type=str,
+        choices=typing.get_args(TransformerType),
         help="Which transformer to use for streaming.",
         required=True,
     )

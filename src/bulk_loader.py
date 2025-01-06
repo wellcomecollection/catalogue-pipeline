@@ -3,13 +3,15 @@ import os
 import typing
 
 from transformers.base_transformer import EntityType
-from transformers.transformer_type import TransformerType
+from transformers.create_transformer import TransformerType
 from utils.aws import get_neptune_client
 
 S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
 
 
-def handler(transformer_type: str, entity_type: EntityType, is_local=False):
+def handler(
+    transformer_type: TransformerType, entity_type: EntityType, is_local: bool = False
+) -> dict[str, str]:
     file_name = f"{transformer_type}__{entity_type}.csv"
     s3_file_uri = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
 
@@ -21,18 +23,18 @@ def handler(transformer_type: str, entity_type: EntityType, is_local=False):
     return {"loadId": load_id}
 
 
-def lambda_handler(event: dict, context):
-    transformer_type = TransformerType.argparse(event["transformer_type"])
+def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
+    transformer_type = event["transformer_type"]
     entity_type = event["entity_type"]
     return handler(transformer_type, entity_type)
 
 
-def local_handler():
+def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
         "--transformer-type",
-        type=TransformerType.argparse,
-        choices=list(TransformerType),
+        type=str,
+        choices=typing.get_args(TransformerType),
         help="Which transformer's output to bulk load.",
         required=True,
     )

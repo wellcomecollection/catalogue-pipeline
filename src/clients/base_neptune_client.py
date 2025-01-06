@@ -2,6 +2,7 @@ import datetime
 import json
 
 import backoff
+import boto3
 import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
@@ -15,17 +16,21 @@ class BaseNeptuneClient:
     cluster) or LocalNeptuneClient (when connecting to the cluster from outside the VPC).
     """
 
-    def __init__(self):
-        self.session = None
-        self.neptune_endpoint = None
-        self.verify_requests = True
+    def __init__(self) -> None:
+        self.session: boto3.Session | None = None
+        self.neptune_endpoint: str | None = None
+        self.verify_requests: bool = True
 
-    def _get_client_url(self):
+    def _get_client_url(self) -> str:
         raise NotImplementedError()
 
     def _make_request(
         self, method: str, relative_url: str, payload: dict | None = None
-    ):
+    ) -> dict:
+        assert self.session
+        credentials = self.session.get_credentials()
+        assert credentials is not None
+
         client_url = self._get_client_url()
 
         url = f"{client_url}{relative_url}"
@@ -34,36 +39,41 @@ class BaseNeptuneClient:
 
         # We use IAM database authentication, which means we need to authenticate the request using AWS Signature
         request = AWSRequest(method=method, url=url, data=data, headers=headers)
-        SigV4Auth(self.session.get_credentials(), "neptune-db", "eu-west-1").add_auth(
-            request
+        SigV4Auth(credentials, "neptune-db", "eu-west-1").add_auth(request)
+
+        raw_response = requests.request(
+            method,
+            url,
+            data=data,
+            headers=dict(request.headers),
+            verify=self.verify_requests,
         )
 
-        response = requests.request(
-            method, url, data=data, headers=request.headers, verify=self.verify_requests
-        )
+        if raw_response.status_code != 200:
+            raise Exception(raw_response.content)
 
-        if response.status_code != 200:
-            raise Exception(response.content)
-
-        return response.json()
+        response: dict = raw_response.json()
+        return response
 
     @backoff.on_exception(backoff.constant, Exception, max_tries=5, interval=1)
-    def run_open_cypher_query(self, query: str):
+    def run_open_cypher_query(self, query: str) -> dict:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
         payload = {"query": query}
         response = self._make_request("POST", "/openCypher", payload)
-        return response["results"]
+        results: dict = response["results"]
+        return results
 
-    def get_graph_summary(self):
+    def get_graph_summary(self) -> dict:
         """
         Returns a Neptune summary report about the graph.
         See https://docs.aws.amazon.com/neptune/latest/userguide/neptune-graph-summary.html for more info.
         """
         response = self._make_request("GET", "/propertygraph/statistics/summary")
-        return response["payload"]["graphSummary"]
+        graph_summary: dict = response["payload"]["graphSummary"]
+        return graph_summary
 
-    def _reset_database(self):
+    def _reset_database(self) -> dict:
         """Irreversibly wipes all data from the database. This method only exists for development purposes."""
         # TODO: Only keep this function for testing purposes. Remove before releasing.
         data = {"action": "initiateDatabaseReset"}
@@ -95,9 +105,11 @@ class BaseNeptuneClient:
                 "updateSingleCardinalityProperties": "TRUE",
             },
         )
-        return response["payload"]["loadId"]
 
-    def get_bulk_load_status(self, load_id: str):
+        load_id: str = response["payload"]["loadId"]
+        return load_id
+
+    def get_bulk_load_status(self, load_id: str) -> str:
         """
         Checks the status of a Neptune bulk load job and prints the results. Returns the overall status of the job.
         See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-requests.html for more info.
@@ -112,7 +124,7 @@ class BaseNeptuneClient:
         error_logs = payload["errors"]["errorLogs"]
 
         # Statuses: https://docs.aws.amazon.com/neptune/latest/userguide/loader-message.html
-        status = overall_status["status"]
+        status: str = overall_status["status"]
         processed_count = overall_status["totalRecords"]
 
         print(f"Bulk load status: {status}. (Processed {processed_count:,} records.)")
@@ -140,8 +152,8 @@ class BaseNeptuneClient:
 
         return status
 
-    def get_bulk_load_statuses(self):
+    def get_bulk_load_statuses(self) -> list[str]:
         """Returns the loadIDs of the last 5 Neptune bulk load jobs."""
         response = self._make_request("GET", "/loader")
-        payload = response["payload"]
+        payload: list[str] = response["payload"]
         return payload
