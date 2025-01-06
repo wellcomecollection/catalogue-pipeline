@@ -1,7 +1,5 @@
 package weco.pipeline.batcher
 import grizzled.slf4j.Logging
-import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.scaladsl.{Sink, Source}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
@@ -22,19 +20,25 @@ object PathsProcessor extends Logging {
     *   should build a map to work it out if it wants to)
     */
   def apply(maxBatchSize: Int, paths: Seq[Path], downstream: Downstream)(
-    implicit ec: ExecutionContext,
-    mat: Materializer
+    implicit ec: ExecutionContext
   ): Future[Seq[Path]] = {
     info(s"Processing ${paths.size} paths with max batch size $maxBatchSize")
 
-    Source(generateBatches(maxBatchSize, paths).toList)
-      .mapAsyncUnordered(10) {
-        case (batch, msgPaths) =>
-          notifyDownstream(downstream, batch, msgPaths)
+    Future
+      .sequence {
+        generateBatches(maxBatchSize, paths).map {
+          case (batch, msgPaths) =>
+            notifyDownstream(downstream, batch, msgPaths)
+        }
       }
-      .collect { case Some(failedPaths) => failedPaths }
-      .mapConcat(identity)
-      .runWith(Sink.seq)
+      .flatMap {
+        results =>
+          Future {
+            results.collect {
+              case Some(failedPaths) => failedPaths
+            }.flatten
+          }
+      }
   }
 
   private def notifyDownstream(
