@@ -151,19 +151,22 @@ class BaseTransformer:
             neptune_client.run_open_cypher_query(query)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Run the first 10 queries in parallel
             futures = {
                 executor.submit(run_query, chunk)
                 for i, chunk in enumerate(islice(chunks, 10))
             }
 
             while futures:
+                # Wait for one or more queries to complete
                 done, futures = concurrent.futures.wait(
                     futures, return_when=concurrent.futures.FIRST_COMPLETED
                 )
 
-                for fut in done:
-                    fut.result()
+                for future in done:
+                    future.result()
 
+                # Top up with new queries to keep the total number of parallel queries at 10
                 for chunk in islice(chunks, len(done)):
                     futures.add(executor.submit(run_query, chunk))
 

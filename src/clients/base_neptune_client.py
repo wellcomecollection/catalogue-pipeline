@@ -46,15 +46,22 @@ class BaseNeptuneClient:
 
     @backoff.on_exception(backoff.constant, Exception, max_tries=5, interval=1)
     def run_open_cypher_query(self, query: str):
+        """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
+        to mitigate transient errors."""
         payload = {"query": query}
         response = self._make_request("POST", "/openCypher", payload)
         return response["results"]
 
     def get_graph_summary(self):
+        """
+        Returns a Neptune summary report about the graph.
+        See https://docs.aws.amazon.com/neptune/latest/userguide/neptune-graph-summary.html for more info.
+        """
         response = self._make_request("GET", "/propertygraph/statistics/summary")
         return response["payload"]["graphSummary"]
 
-    def reset_database(self):
+    def _reset_database(self):
+        """Irreversibly wipes all data from the database. This method only exists for development purposes."""
         # TODO: Only keep this function for testing purposes. Remove before releasing.
         data = {"action": "initiateDatabaseReset"}
         response = self._make_request("POST", "/system", data)
@@ -66,6 +73,10 @@ class BaseNeptuneClient:
         return response
 
     def initiate_bulk_load(self, s3_file_uri: str) -> str:
+        """
+        Initiates a Neptune bulk load from an S3 file.
+        See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-load.html for more info.
+        """
         response = self._make_request(
             "POST",
             "/loader",
@@ -84,6 +95,10 @@ class BaseNeptuneClient:
         return response["payload"]["loadId"]
 
     def get_bulk_load_status(self, load_id: str):
+        """
+        Checks the status of a Neptune bulk load job and prints the results. Returns the overall status of the job.
+        See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-requests.html for more info.
+        """
         # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
         response = self._make_request(
             "GET", f"/loader?loadId={load_id}&errors=TRUE&details=TRUE"
@@ -123,6 +138,7 @@ class BaseNeptuneClient:
         return status
 
     def get_bulk_load_statuses(self):
+        """Returns the loadIDs of the last 5 Neptune bulk load jobs."""
         response = self._make_request("GET", "/loader")
         payload = response["payload"]
         return payload
