@@ -46,7 +46,8 @@ jobs:
 
       - name: Run isort
         run: |
-          isort src/    
+          # Set the profile to "black" to prevent conflicts between black and isort          
+          isort --profile=black src/    
 
       - name: Check for formatting changes
         id: check_formatting_changes
