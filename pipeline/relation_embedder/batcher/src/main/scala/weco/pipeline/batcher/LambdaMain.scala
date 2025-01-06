@@ -15,5 +15,5 @@ object LambdaMain
   )
 
   override def processT(t: List[String]): Future[String] =
-    pathsProcessor(t).map(_ => "Done")
+    pathsProcessor(t.map(PathFromString)).map(_ => "Done")
 }

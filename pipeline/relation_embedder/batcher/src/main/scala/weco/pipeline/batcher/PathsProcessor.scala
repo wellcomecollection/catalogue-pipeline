@@ -1,6 +1,5 @@
 package weco.pipeline.batcher
 import grizzled.slf4j.Logging
-import org.apache.pekko.stream.Materializer
 import weco.lambda.Downstream
 import weco.json.JsonUtil._
 
@@ -127,6 +126,6 @@ object PathsProcessor {
   def apply(
     downstream: Downstream,
     maxBatchSize: Int
-  )(implicit ec: ExecutionContext, mat: Materializer): PathsProcessor =
+  )(implicit ec: ExecutionContext): PathsProcessor =
     new PathsProcessor(downstream, maxBatchSize)
 }
