@@ -1,8 +1,9 @@
 package weco.pipeline.relation_embedder.lib
 
 import com.typesafe.config.Config
+import weco.lambda.ElasticBuilder.buildElasticClientConfig
+import weco.lambda._
 import weco.messaging.typesafe.SNSBuilder.buildSNSConfig
-import ElasticBuilder.buildElasticClientConfig
 
 case class RelationEmbedderConfig(
   mergedWorkIndex: String,

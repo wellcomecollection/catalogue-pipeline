@@ -10,6 +10,7 @@ import org.apache.pekko.stream.scaladsl.{
   StreamConverters
 }
 import org.apache.pekko.util.ByteString
+import weco.lambda.STDIODownstream
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,30 +20,26 @@ object CLIMain extends App {
   implicit val ec: ExecutionContext =
     actorSystem.dispatcher
 
-  val stdinSource: Source[ByteString, Future[IOResult]] =
+  private val stdinSource: Source[ByteString, Future[IOResult]] =
     StreamConverters.fromInputStream(() => System.in)
 
-  val lineDelimiter: Flow[ByteString, ByteString, NotUsed] =
+  private val lineDelimiter: Flow[ByteString, ByteString, NotUsed] =
     Framing.delimiter(
       ByteString("\n"),
       maximumFrameLength = 256,
       allowTruncation = true
     )
-  val toStringFlow: Flow[ByteString, String, NotUsed] =
+  private val toStringFlow: Flow[ByteString, String, NotUsed] =
     Flow[ByteString].map(_.utf8String)
 
-  val toPathFlow: Flow[String, Path, NotUsed] =
-    Flow[String].map(PathFromString)
-
-  val pathsProcessorFlow: Flow[Seq[Path], Future[Seq[Path]], NotUsed] =
+  private val pathsProcessor = new PathsProcessor(STDIODownstream, 40)
+  private val pathsProcessorFlow: Flow[Seq[Path], Future[Seq[Path]], NotUsed] =
     Flow[Seq[Path]].map {
-      paths: Seq[Path] =>
-        PathsProcessor(
-          40, // TODO: 40 is the number in the config used by Main, do this properly later
-          paths.toList,
-          STDIODownstream
-        )
+      paths: Seq[Path] => pathsProcessor(paths)
     }
+
+  private val toPathFlow: Flow[String, Path, NotUsed] =
+    Flow[String].map(PathFromString)
 
   stdinSource
     .via(lineDelimiter)
@@ -53,5 +50,6 @@ object CLIMain extends App {
     .grouped(10000)
     .via(pathsProcessorFlow)
     .runWith(Sink.seq)
+
   actorSystem.terminate()
 }

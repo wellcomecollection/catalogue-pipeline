@@ -1,10 +1,22 @@
 package weco.pipeline.batcher
 import grizzled.slf4j.Logging
+import weco.lambda.Downstream
+import weco.json.JsonUtil._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-object PathsProcessor extends Logging {
+/** Processes a list of paths by bundling them into Batches and sending them to
+  * a downstream service for processing.
+  *
+  * @param downstream
+  *   The downstream target to send the Batches to
+  * @param maxBatchSize
+  *   The maximum number of selectors to include in a single Batch
+  */
+class PathsProcessor(downstream: Downstream, maxBatchSize: Int)(
+  implicit ec: ExecutionContext
+) extends Logging {
 
   /** Takes a list of strings, each representing a path to be processed by
     * _downstream_
@@ -19,9 +31,7 @@ object PathsProcessor extends Logging {
     *   SQS/SNS-driven. Should just be the actual failed paths, and the caller
     *   should build a map to work it out if it wants to)
     */
-  def apply(maxBatchSize: Int, paths: Seq[Path], downstream: Downstream)(
-    implicit ec: ExecutionContext
-  ): Future[Seq[Path]] = {
+  def apply[T <: Path](paths: Seq[T]): Future[Seq[Path]] = {
     info(s"Processing ${paths.size} paths with max batch size $maxBatchSize")
 
     Future
@@ -110,4 +120,12 @@ object PathsProcessor extends Logging {
         )
     }
   }
+}
+
+object PathsProcessor {
+  def apply(
+    downstream: Downstream,
+    maxBatchSize: Int
+  )(implicit ec: ExecutionContext): PathsProcessor =
+    new PathsProcessor(downstream, maxBatchSize)
 }

@@ -1,8 +1,8 @@
-package weco.pipeline.relation_embedder.lib
+package weco.lambda
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.pipeline.relation_embedder.helpers.ConfigurationTestHelpers
+import weco.lambda.helpers.ConfigurationTestHelpers
 
 class ConfigurationTest
     extends AnyFunSpec

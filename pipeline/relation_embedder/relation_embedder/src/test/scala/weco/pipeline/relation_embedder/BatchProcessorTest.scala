@@ -1,5 +1,6 @@
 package weco.pipeline.relation_embedder
 
+import io.circe.Encoder
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.pekko.fixtures.Pekko
@@ -11,8 +12,8 @@ import org.apache.pekko.stream.Materializer
 import weco.catalogue.internal_model.work.{Availability, Relations, Work}
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.fixtures.TestWith
+import weco.lambda.Downstream
 import weco.messaging.memory.MemoryMessageSender
-import weco.pipeline.relation_embedder.lib.Downstream
 import weco.pipeline.relation_embedder.models.Batch
 import weco.pipeline.relation_embedder.models.Selector.{Descendents, Node, Tree}
 import weco.pipeline_storage.memory.MemoryIndexer
@@ -33,6 +34,8 @@ class BatchProcessorTest
 
     override def notify(workId: String): Try[Unit] =
       Try(msgSender.send(workId))
+    override def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit] =
+      ???
   }
 
   protected def withProcessedBatch[R](

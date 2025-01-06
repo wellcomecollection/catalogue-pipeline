@@ -13,7 +13,7 @@ if [ "$#" -eq 2 ] && [ "$2" == "--skip-build" ]; then
   SKIP_BUILD=true
 fi
 
-PROJECT_NAME="relation_embedder"
+PROJECT_NAME="batcher"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR"/..
 

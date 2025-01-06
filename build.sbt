@@ -50,6 +50,12 @@ lazy val display_model = setupProject(
   externalDependencies = CatalogueDependencies.displayModelDependencies
 )
 
+lazy val lambda = setupProject(
+  project,
+  "common/lambda",
+  externalDependencies = CatalogueDependencies.lambdaDependencies
+)
+
 lazy val flows = setupProject(
   project,
   "common/flows",
@@ -135,8 +141,7 @@ lazy val path_concatenator = setupProject(
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
-  externalDependencies = CatalogueDependencies.relationEmbedderDependencies
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe, lambda)
 )
 
 lazy val router = setupProject(
@@ -149,8 +154,7 @@ lazy val router = setupProject(
 lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",
-  localDependencies = Nil,
-  externalDependencies = CatalogueDependencies.batcherDependencies
+  localDependencies = Seq(lambda)
 )
 
 lazy val reindex_worker = setupProject(
