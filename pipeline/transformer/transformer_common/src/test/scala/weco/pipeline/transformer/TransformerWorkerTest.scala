@@ -451,7 +451,7 @@ class TransformerWorkerTest
             val worker = new TransformerWorker(
               transformer = transformer,
               pipelineStream = pipelineStream,
-              retriever = retriever,
+              transformedWorkRetriever = retriever,
               sourceDataRetriever =
                 new ExampleSourcePayloadLookup(sourceStore = store)
             )
