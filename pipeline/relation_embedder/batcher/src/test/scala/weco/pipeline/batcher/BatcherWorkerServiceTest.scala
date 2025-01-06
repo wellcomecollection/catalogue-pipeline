@@ -30,9 +30,16 @@ class BatcherWorkerServiceTest
   import Selector._
 
   /** The following tests use paths representing this tree:
-    *
-    * A \| \|------------- \| | | B C E \| |------ |--------- \| | | | | | | | D
-    * X Y Z 1 2 3 4
+    * {{{
+    * A
+    * |
+    * |-------------
+    * |  |         |
+    * B  C         E
+    * |  |------   |---------
+    * |  |  |  |   |  |  |  |
+    * D  X  Y  Z   1  2  3  4
+    * }}}
     */
   it("processes incoming paths into batches") {
     withWorkerService(visibilityTimeout = 2 seconds) {

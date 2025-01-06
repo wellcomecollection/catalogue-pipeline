@@ -28,14 +28,13 @@ class BatcherWorkerService[MsgDestination](
         source
           .map {
             case (msg: SQSMessage, notificationMessage: NotificationMessage) =>
-              (msg, notificationMessage.body)
+              PathFromSQS(notificationMessage.body, msg)
           }
           .groupedWithin(maxProcessedPaths, flushInterval)
-          .map(_.toList.unzip)
           .mapAsync(1) {
-            case (msgs, paths) =>
+            paths =>
               info(s"Processing ${paths.size} input paths")
-              processPaths(msgs, paths)
+              processPaths(paths)
           }
           .flatMapConcat(identity)
       }
@@ -46,16 +45,14 @@ class BatcherWorkerService[MsgDestination](
     * corresponding batches have been succesfully sent.
     */
   private def processPaths(
-    msgs: List[SQSMessage],
-    paths: List[String]
+    paths: Seq[PathFromSQS]
   ): Future[Source[SQSMessage, NotUsed]] =
     pathsProcessor(paths)
       .map {
-        failedIndices =>
-          val failedIdxSet = failedIndices.toSet
-          Source(msgs).zipWithIndex
-            .collect {
-              case (msg, idx) if !failedIdxSet.contains(idx) => msg
-            }
+        failedPaths =>
+          val failedPathSet = failedPaths.toSet
+          Source(paths.collect {
+            case path if !failedPathSet.contains(path) => path.referent
+          }.toList)
       }
 }

@@ -1,8 +1,6 @@
 package weco.pipeline.batcher
 import grizzled.slf4j.Logging
-import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import weco.lambda.Downstream
 import weco.json.JsonUtil._
 
@@ -18,8 +16,7 @@ import scala.util.{Failure, Success}
   *   The maximum number of selectors to include in a single Batch
   */
 class PathsProcessor(downstream: Downstream, maxBatchSize: Int)(
-  implicit ec: ExecutionContext,
-  materializer: Materializer
+  implicit ec: ExecutionContext
 ) extends Logging {
 
   /** Takes a list of strings, each representing a path to be processed by
@@ -35,24 +32,41 @@ class PathsProcessor(downstream: Downstream, maxBatchSize: Int)(
     *   SQS/SNS-driven. Should just be the actual failed paths, and the caller
     *   should build a map to work it out if it wants to)
     */
-  def apply(paths: List[String]): Future[Seq[Long]] = {
+  def apply[T <: Path](paths: Seq[T]): Future[Seq[Path]] = {
     info(s"Processing ${paths.size} paths with max batch size $maxBatchSize")
 
-    generateBatches(maxBatchSize, paths)
-      .mapAsyncUnordered(10) {
-        case (batch, msgIndices) =>
+    Future
+      .sequence {
+        generateBatches(maxBatchSize, paths).map {
+          case (batch, msgPaths) =>
+            notifyDownstream(downstream, batch, msgPaths)
+        }
+      }
+      .flatMap {
+        results =>
           Future {
-            downstream.notify(batch) match {
-              case Success(_) => None
-              case Failure(err) =>
-                error(s"Failed processing batch $batch with error: $err")
-                Some(msgIndices)
-            }
+            results.collect {
+              case Some(failedPaths) => failedPaths
+            }.flatten
           }
       }
-      .collect { case Some(failedIndices) => failedIndices }
-      .mapConcat(identity)
-      .runWith(Sink.seq)
+  }
+
+  private def notifyDownstream(
+    downstream: Downstream,
+    batch: Batch,
+    msgPaths: List[Path]
+  )(
+    implicit ec: ExecutionContext
+  ): Future[Option[List[Path]]] = {
+    Future {
+      downstream.notify(batch) match {
+        case Success(_) => None
+        case Failure(err) =>
+          error(s"Failed processing batch $batch with error: $err")
+          Some(msgPaths)
+      }
+    }
   }
 
   /** Given a list of input paths, generate the minimal set of selectors
@@ -61,10 +75,35 @@ class PathsProcessor(downstream: Downstream, maxBatchSize: Int)(
     */
   private def generateBatches(
     maxBatchSize: Int,
-    paths: List[String]
-  ): Source[(Batch, List[Long]), NotUsed] = {
+    paths: Seq[Path]
+  ): Seq[(Batch, List[Path])] = {
     val selectors = Selector.forPaths(paths)
     val groupedSelectors = selectors.groupBy(_._1.rootPath)
+
+    logSelectors(paths, selectors, groupedSelectors)
+
+    groupedSelectors.map {
+      case (rootPath, selectorsAndPaths) =>
+        // For batches consisting of a really large number of selectors, we
+        // should just send the whole tree: this avoids really long queries
+        // in the relation embedder, or duplicate work of creating the archives
+        // cache multiple times, and it is likely pretty much all the nodes will
+        // be denormalised anyway.
+        val (selectors, inputPaths) = selectorsAndPaths.unzip(identity)
+        val batch =
+          if (selectors.size > maxBatchSize)
+            Batch(rootPath, List(Selector.Tree(rootPath)))
+          else
+            Batch(rootPath, selectors)
+        batch -> inputPaths
+    }.toSeq
+  }
+
+  private def logSelectors(
+    paths: Seq[Path],
+    selectors: List[(Selector, Path)],
+    groupedSelectors: Map[String, List[(Selector, Path)]]
+  ): Unit = {
     info(
       s"Generated ${selectors.size} selectors spanning ${groupedSelectors.size} trees from ${paths.size} paths."
     )
@@ -80,21 +119,6 @@ class PathsProcessor(downstream: Downstream, maxBatchSize: Int)(
         info(
           s"Selectors for root path $rootPath: ${selectors.map(_._1).mkString(", ")}"
         )
-    }
-    Source(groupedSelectors.toList).map {
-      case (rootPath, selectorsAndIndices) =>
-        // For batches consisting of a really large number of selectors, we
-        // should just send the whole tree: this avoids really long queries
-        // in the relation embedder, or duplicate work of creating the archives
-        // cache multiple times, and it is likely pretty much all the nodes will
-        // be denormalised anyway.
-        val (selectors, msgIndices) = selectorsAndIndices.unzip(identity)
-        val batch =
-          if (selectors.size > maxBatchSize)
-            Batch(rootPath, List(Selector.Tree(rootPath)))
-          else
-            Batch(rootPath, selectors)
-        batch -> msgIndices
     }
   }
 }

@@ -33,18 +33,18 @@ object CLIMain extends App {
     Flow[ByteString].map(_.utf8String)
 
   private val pathsProcessor = new PathsProcessor(STDIODownstream, 40)
-  private val pathsProcessorFlow
-    : Flow[Seq[String], Future[Seq[Long]], NotUsed] =
-    Flow[Seq[String]].map {
-      paths: Seq[String] =>
-        pathsProcessor(
-          paths.toList
-        )
+  private val pathsProcessorFlow: Flow[Seq[Path], Future[Seq[Path]], NotUsed] =
+    Flow[Seq[Path]].map {
+      paths: Seq[Path] => pathsProcessor(paths)
     }
+
+    private val toPathFlow: Flow[String, Path, NotUsed] =
+      Flow[String].map(PathFromString)
 
   stdinSource
     .via(lineDelimiter)
     .via(toStringFlow)
+    .via(toPathFlow)
     // this number is pretty arbitrary, but grouping of some kind is needed in order to
     // provide a list to the next step, rather than individual paths
     .grouped(10000)
