@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, cast
 
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
@@ -49,9 +49,9 @@ class CypherQueryConverter(CypherBaseConverter):
         See https://neo4j.com/docs/cypher-manual/current/values-and-types/maps/.
         """
         if self.entity_type == "nodes":
-            return self._node_to_cypher_map(model)
+            return self._node_to_cypher_map(cast(BaseNode, model))
         elif self.entity_type == "edges":
-            return self._edge_to_cypher_map(model)
+            return self._edge_to_cypher_map(cast(BaseEdge, model))
         else:
             raise ValueError(
                 "Unsupported Pydantic model. Each model must subclass BaseEdge or BaseNode."

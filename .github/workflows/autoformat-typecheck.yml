@@ -1,5 +1,5 @@
-# Runs auto-formatting script on push to any branch
-name: "Python auto-formatting & code quality"
+# Runs auto-formatting and type checking on push to any branch
+name: "Python auto-formatting & type checking"
 
 on: push
 
@@ -8,7 +8,7 @@ permissions:
   contents: write
 
 jobs:
-  black:
+  typecheck:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,26 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install black isort mypy
+          pip install mypy
+          pip install -r src/requirements.txt
+
+      - name: Run mypy
+        run: |
+          mypy --config-file src/mypy.ini src/
+
+  autoformat:
+    runs-on: ubuntu-latest
+    needs: typecheck
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          pip install black isort
 
       - name: Run Black
         run: |
@@ -27,11 +46,7 @@ jobs:
 
       - name: Run isort
         run: |
-          isort src/
-
-      - name: Run mypy
-        run: |
-          mypy src/          
+          isort src/    
 
       - name: Check for formatting changes
         id: check_formatting_changes

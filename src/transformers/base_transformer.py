@@ -150,7 +150,7 @@ class BaseTransformer:
         chunks = self._stream_chunks(entity_type, query_chunk_size, sample_size)
 
         def run_query(chunk):
-            query = construct_upsert_cypher_query(chunk)
+            query = construct_upsert_cypher_query(chunk, entity_type)
             neptune_client.run_open_cypher_query(query)
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -188,7 +188,7 @@ class BaseTransformer:
         counter = 0
 
         for chunk in self._stream_chunks(entity_type, query_chunk_size, sample_size):
-            queries.append(construct_upsert_cypher_query(chunk))
+            queries.append(construct_upsert_cypher_query(chunk, entity_type))
 
             # SNS supports a maximum batch size of 10
             if len(queries) >= 10:
