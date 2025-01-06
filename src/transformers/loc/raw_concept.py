@@ -1,3 +1,5 @@
+from typing import Literal
+
 ID_PREFIXES_TO_REMOVE = (
     "/authorities/subjects/",
     "http://id.loc.gov/authorities/subjects/",
@@ -11,14 +13,14 @@ class RawLibraryOfCongressConcept:
         self._raw_concept_node = self._extract_concept_node()
 
     @staticmethod
-    def _remove_id_prefix(raw_id: str):
+    def _remove_id_prefix(raw_id: str) -> str:
         for prefix in ID_PREFIXES_TO_REMOVE:
             raw_id = raw_id.removeprefix(prefix)
 
         return raw_id
 
-    def _extract_concept_node(self):
-        graph = self.raw_concept["@graph"]
+    def _extract_concept_node(self) -> dict | None:
+        graph: list[dict] = self.raw_concept["@graph"]
 
         # Some LoC concepts (e.g. deprecated concepts) do not store a concept node in their graph.
         # When this happens, return `None` because there is no concept for us to extract.
@@ -26,7 +28,8 @@ class RawLibraryOfCongressConcept:
             (
                 node
                 for node in graph
-                if self.source_id in node.get("@id") and node["@type"] == "skos:Concept"
+                if self.source_id in node.get("@id", "")
+                and node["@type"] == "skos:Concept"
             ),
             None,
         )
@@ -34,7 +37,7 @@ class RawLibraryOfCongressConcept:
         return concept_node
 
     @staticmethod
-    def _extract_label(raw_label: str | dict):
+    def _extract_label(raw_label: str | dict[str, str] | list[str]) -> str:
         # Labels are either stored directly as strings, or as nested JSON objects with a `@value` property.
         if isinstance(raw_label, str):
             return raw_label
@@ -45,7 +48,7 @@ class RawLibraryOfCongressConcept:
 
         return raw_label["@value"]
 
-    def exclude(self):
+    def exclude(self) -> bool:
         if self._raw_concept_node is None:
             return True
 
@@ -57,16 +60,20 @@ class RawLibraryOfCongressConcept:
         return False
 
     @property
-    def source_id(self):
+    def source_id(self) -> str:
         return self._remove_id_prefix(self.raw_concept["@id"])
 
     @property
-    def label(self):
+    def label(self) -> str:
+        assert self._raw_concept_node is not None
+
         raw_preferred_label = self._raw_concept_node["skos:prefLabel"]
         return self._extract_label(raw_preferred_label)
 
     @property
-    def alternative_labels(self):
+    def alternative_labels(self) -> list[str]:
+        assert self._raw_concept_node is not None
+
         raw_alternative_labels = self._raw_concept_node.get("skos:altLabel", [])
 
         # Raw alternative labels are either returned in a list of labels, or as a single label
@@ -77,7 +84,9 @@ class RawLibraryOfCongressConcept:
         return [self._extract_label(raw_alternative_labels)]
 
     @property
-    def broader_concept_ids(self):
+    def broader_concept_ids(self) -> list[str]:
+        assert self._raw_concept_node is not None
+
         broader_concepts = self._raw_concept_node.get("skos:broader", [])
 
         # Sometimes broader concepts are returned as a list of concepts, and sometimes as just a single JSON
@@ -96,7 +105,7 @@ class RawLibraryOfCongressConcept:
         return broader_ids
 
     @property
-    def is_geographic(self):
+    def is_geographic(self) -> bool:
         if self._raw_concept_node is None:
             return False
 
@@ -110,7 +119,7 @@ class RawLibraryOfCongressConcept:
         return "http://id.loc.gov/datatypes/codes/gac" in notation_types
 
     @property
-    def source(self):
+    def source(self) -> Literal["lc-subjects", "lc-names"]:
         if "subjects" in self.raw_concept["@id"]:
             return "lc-subjects"
 

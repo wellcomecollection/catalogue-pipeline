@@ -39,7 +39,7 @@ class CypherQueryConverter(CypherBaseConverter):
 
         return "{" + ", ".join(properties) + "}"
 
-    def convert_to_cypher_map(self, model: BaseNode | BaseEdge):
+    def convert_to_cypher_map(self, model: BaseNode | BaseEdge) -> str:
         """
         Returns a string representing an openCypher Map of the entity (node or edge) for use with an `UNWIND` query.
 
