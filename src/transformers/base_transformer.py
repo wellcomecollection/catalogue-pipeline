@@ -83,6 +83,8 @@ class BaseTransformer:
     def _stream_entities(
         self, entity_type: EntityType, sample_size: int | None = None
     ) -> Generator[BaseNode | BaseEdge]:
+        entities: Generator[BaseNode | BaseEdge]  # Make mypy happy
+
         if entity_type == "nodes":
             entities = self._stream_nodes(sample_size)
         elif entity_type == "edges":

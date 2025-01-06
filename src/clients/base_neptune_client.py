@@ -39,7 +39,11 @@ class BaseNeptuneClient:
         )
 
         response = requests.request(
-            method, url, data=data, headers=request.headers, verify=self.verify_requests
+            method,
+            url,
+            data=data,
+            headers=dict(request.headers),
+            verify=self.verify_requests,
         )
 
         if response.status_code != 200:
