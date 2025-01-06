@@ -12,7 +12,7 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 object LambdaMain
     extends RequestHandler[SQSEvent, String]
     with Logging
-    with LambdaConfiguration {
+    with RelationEmbedderConfigurable {
 
   import SQSEventOps._
 

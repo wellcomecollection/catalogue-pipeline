@@ -22,7 +22,7 @@ import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.catalogue.internal_model.work._
 import weco.pipeline.relation_embedder.fixtures.SampleWorkTree
-
+import weco.pipeline.relation_embedder.lib.Downstream
 import weco.pipeline.relation_embedder.models._
 import weco.pipeline_storage.memory.MemoryIndexer
 

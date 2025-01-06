@@ -2,16 +2,13 @@ package weco.pipeline.relation_embedder
 
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.DurationInt
-
 import org.apache.pekko.actor.ActorSystem
-
 import com.typesafe.config.ConfigFactory
 import com.sksamuel.elastic4s.Index
-
 import weco.typesafe.config.builders.EnrichConfig._
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.json.JsonUtil._
-import weco.pipeline.relation_embedder.lib.StdInBatches
+import weco.pipeline.relation_embedder.lib.{STDIODownstream, StdInBatches}
 
 /** A main function providing a local CLI for the relation embedder. To invoke,
   * provide a list of Batch objects in NDJSON on StdIn.
