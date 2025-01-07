@@ -9,7 +9,7 @@ Eventually the contents of this repository might be merged into another reposito
 
 See the following RFCs for more context:
 * [RFC 062: Wellcome Collection Graph overview and next steps](https://github.com/wellcomecollection/docs/tree/main/rfcs/062-knowledge-graph)
-* [RFC 064: Graph data model](https://github.com/wellcomecollection/docs/blob/rfc-064-graph-model/rfcs/064-graph-data-model/README.md)
+* [RFC 064: Graph data model](https://github.com/wellcomecollection/docs/tree/main/rfcs/064-graph-data-model/README.md)
 
 ## Architecture overview
 
