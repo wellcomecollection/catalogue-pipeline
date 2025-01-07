@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-08-22T10:16:20.101413Z",
+  "createdAt" : "2024-11-25T15:15:12.420361Z",
   "id" : "p7zbfaov",
   "document" : {
     "debug" : {
@@ -142,18 +142,24 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"m\",\"label\":\"CD-Roms\",\"type\":\"Format\"}"
+        {
+          "id" : "m",
+          "label" : "CD-Roms"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"S4hioTvwQl\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : "S4hioTvwQl",
+          "label" : "S4hioTvwQl"
+        }
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -171,10 +177,20 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
         "S4hioTvwQl"
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "pYub9JXopb"

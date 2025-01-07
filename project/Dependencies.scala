@@ -87,6 +87,8 @@ object WellcomeDependencies {
 object ExternalDependencies {
   lazy val versions = new {
     val apacheCommons = "1.12.0"
+    val awsLambdaClient = "2.6.0"
+    val awsLambdaEvents = "3.14.0"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "3.1.1"
@@ -101,6 +103,7 @@ object ExternalDependencies {
     val logback = "1.5.8"
     val scalatestPlus = "3.2.12.0"
     val scalatestPlusMockitoArtifactId = "mockito-4-5"
+    val uPickle = "3.3.1"
   }
 
   val enumeratumDependencies = Seq(
@@ -110,6 +113,17 @@ object ExternalDependencies {
 
   val apacheCommonsDependencies = Seq(
     "org.apache.commons" % "commons-text" % versions.apacheCommons
+  )
+
+  val awsLambdaClient: Seq[ModuleID] = Seq(
+    "com.amazonaws" % "aws-lambda-java-runtime-interface-client" % versions.awsLambdaClient
+  )
+  val awsLambdaEvents = Seq(
+    "com.amazonaws" % "aws-lambda-java-events" % versions.awsLambdaEvents
+  )
+
+  val uPickle = Seq(
+    "com.lihaoyi" %% "upickle" % versions.uPickle
   )
 
   val circeOpticsDependencies = Seq(
@@ -183,6 +197,17 @@ object CatalogueDependencies {
   val flowDependencies: Seq[ModuleID] =
     WellcomeDependencies.typesafeLibrary
 
+  val lambdaDependencies: Seq[ModuleID] =
+    WellcomeDependencies.typesafeLibrary ++
+      WellcomeDependencies.messagingTypesafeLibrary ++
+      WellcomeDependencies.elasticsearchTypesafeLibrary ++
+      WellcomeDependencies.jsonLibrary ++
+      WellcomeDependencies.fixturesLibrary ++
+      ExternalDependencies.scalatestDependencies ++
+      ExternalDependencies.awsLambdaClient ++
+      ExternalDependencies.awsLambdaEvents ++
+      ExternalDependencies.uPickle
+
   val sourceModelDependencies: Seq[sbt.ModuleID] =
     WellcomeDependencies.storageLibrary ++
       WellcomeDependencies.fixturesLibrary ++
@@ -224,17 +249,8 @@ object CatalogueDependencies {
   val pathConcatenatorDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
 
-  val relationEmbedderDependencies: Seq[ModuleID] =
-    WellcomeDependencies.messagingTypesafeLibrary
-
   val routerDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
-
-  val batcherDependencies: Seq[ModuleID] =
-    ExternalDependencies.scalatestDependencies ++
-      WellcomeDependencies.typesafeLibrary ++
-      WellcomeDependencies.fixturesLibrary ++
-      WellcomeDependencies.messagingTypesafeLibrary
 
   val miroTransformerDependencies: Seq[ModuleID] =
     ExternalDependencies.apacheCommonsDependencies ++

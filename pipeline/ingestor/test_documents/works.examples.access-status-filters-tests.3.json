@@ -1,6 +1,6 @@
 {
   "description" : "examples for the access status tests",
-  "createdAt" : "2024-08-22T10:16:20.143870Z",
+  "createdAt" : "2024-11-25T15:15:12.482956Z",
   "id" : "f1p8iujf",
   "document" : {
     "debug" : {
@@ -172,21 +172,27 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
-        "{\"id\":\"cc-by\",\"label\":\"Attribution 4.0 International (CC BY 4.0)\",\"url\":\"http://creativecommons.org/licenses/by/4.0/\",\"type\":\"License\"}"
+        {
+          "id" : "cc-by",
+          "label" : "Attribution 4.0 International (CC BY 4.0)"
+        }
       ],
       "availabilities" : [
-        "{\"id\":\"online\",\"label\":\"Online\",\"type\":\"Availability\"}"
+        {
+          "id" : "online",
+          "label" : "Online"
+        }
       ]
     },
     "filterableValues" : {
@@ -200,9 +206,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "3dCafwzrSa"

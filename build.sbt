@@ -50,6 +50,12 @@ lazy val display_model = setupProject(
   externalDependencies = CatalogueDependencies.displayModelDependencies
 )
 
+lazy val lambda = setupProject(
+  project,
+  "common/lambda",
+  externalDependencies = CatalogueDependencies.lambdaDependencies
+)
+
 lazy val flows = setupProject(
   project,
   "common/flows",
@@ -135,8 +141,7 @@ lazy val path_concatenator = setupProject(
 lazy val relation_embedder = setupProject(
   project,
   "pipeline/relation_embedder/relation_embedder",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
-  externalDependencies = CatalogueDependencies.relationEmbedderDependencies
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe, lambda)
 )
 
 lazy val router = setupProject(
@@ -149,51 +154,7 @@ lazy val router = setupProject(
 lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",
-  localDependencies = Seq(
-    // Strictly speaking, the batcher doesn't need any of the internal model code,
-    // but for some reason the batcher tests fail if we don't include it in the
-    // class path:
-    //
-    //        Cause: software.amazon.awssdk.core.exception.SdkClientException: Unable to execute HTTP request: The connection was closed during the request. The request will usually succeed on a retry, but if it does not: consider disabling any proxies you have configured, enabling debug logging, or performing a TCP dump to identify the root cause. If this is a streaming operation, validate that data is being read or written in a timely manner. Channel Information: ChannelDiagnostics(channel=[id: 0x49117641, L:0.0.0.0/0.0.0.0:38210], channelAge=PT0.000813S, requestCount=1)
-    //        at software.amazon.awssdk.core.exception.SdkClientException$BuilderImpl.build(SdkClientException.java:111)
-    //        at software.amazon.awssdk.core.exception.SdkClientException.create(SdkClientException.java:47)
-    //        at software.amazon.awssdk.core.internal.http.pipeline.stages.utils.RetryableStageHelper.setLastException(RetryableStageHelper.java:223)
-    //        at software.amazon.awssdk.core.internal.http.pipeline.stages.utils.RetryableStageHelper.setLastException(RetryableStageHelper.java:218)
-    //        at software.amazon.awssdk.core.internal.http.pipeline.stages.AsyncRetryableStage$RetryingExecutor.maybeRetryExecute(AsyncRetryableStage.java:182)
-    //        at software.amazon.awssdk.core.internal.http.pipeline.stages.AsyncRetryableStage$RetryingExecutor.lambda$attemptExecute$1(AsyncRetryableStage.java:159)
-    //        at java.base/java.util.concurrent.CompletableFuture.uniWhenComplete(Unknown Source)
-    //        at java.base/java.util.concurrent.CompletableFuture$UniWhenComplete.tryFire(Unknown Source)
-    //        at java.base/java.util.concurrent.CompletableFuture.postComplete(Unknown Source)
-    //        at java.base/java.util.concurrent.CompletableFuture.completeExceptionally(Unknown Source)
-    //        ...
-    //        Cause: java.io.IOException: The connection was closed during the request. The request will usually succeed on a retry, but if it does not: consider disabling any proxies you have configured, enabling debug logging, or performing a TCP dump to identify the root cause. If this is a streaming operation, validate that data is being read or written in a timely manner. Channel Information: ChannelDiagnostics(channel=[id: 0x49117641, L:0.0.0.0/0.0.0.0:38210], channelAge=PT0.000813S, requestCount=1)
-    //        at software.amazon.awssdk.http.nio.netty.internal.NettyRequestExecutor.configurePipeline(NettyRequestExecutor.java:233)
-    //        at software.amazon.awssdk.http.nio.netty.internal.NettyRequestExecutor.lambda$makeRequestListener$10(NettyRequestExecutor.java:181)
-    //        at io.netty.util.concurrent.PromiseTask.runTask(PromiseTask.java:98)
-    //        at io.netty.util.concurrent.PromiseTask.run(PromiseTask.java:106)
-    //        at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:174)
-    //        at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:167)
-    //        at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:470)
-    //        at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:566)
-    //        at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997)
-    //        at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
-    //        ...
-    //
-    // We started seeing these issues when we upgraded our Buildkite CI Stack
-    // from 5.7.2 to 5.16.1.
-    //
-    // This is presumably an issue of dependency resolution somewhere, and the batcher
-    // is getting a different version of a dependency to all our other apps -- but
-    // I can't work out exactly where it is.
-    //
-    // You can see some experiments trying to find it in this PR, where I created a new
-    // copy of internal_model and started cutting bits out:
-    // https://github.com/wellcomecollection/catalogue-pipeline/pull/2327
-    //
-    // But ultimately it wasn't a good use of time to keep debugging this.
-    internal_model
-  ),
-  externalDependencies = CatalogueDependencies.batcherDependencies
+  localDependencies = Seq(lambda)
 )
 
 lazy val reindex_worker = setupProject(

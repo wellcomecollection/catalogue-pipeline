@@ -102,7 +102,7 @@ class SierraTransformerEndToEndTest
                 version: Int
               ) => SierraTransformer(transformable, version).toEither,
               pipelineStream = pipelineStream,
-              retriever = retriever,
+              transformedWorkRetriever = retriever,
               sourceDataRetriever = new SierraSourceDataRetriever(store)
             )
             worker.run()

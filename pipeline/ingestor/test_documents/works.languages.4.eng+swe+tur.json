@@ -1,6 +1,6 @@
 {
   "description" : "one of a list of works with a variety of languages",
-  "createdAt" : "2024-08-22T10:16:20.029237Z",
+  "createdAt" : "2024-11-25T15:15:12.327480Z",
   "id" : "oagougti",
   "document" : {
     "debug" : {
@@ -135,18 +135,27 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
-        "{\"id\":\"eng\",\"label\":\"English\",\"type\":\"Language\"}",
-        "{\"id\":\"swe\",\"label\":\"Swedish\",\"type\":\"Language\"}",
-        "{\"id\":\"tur\",\"label\":\"Turkish\",\"type\":\"Language\"}"
+        {
+          "id" : "eng",
+          "label" : "English"
+        },
+        {
+          "id" : "swe",
+          "label" : "Swedish"
+        },
+        {
+          "id" : "tur",
+          "label" : "Turkish"
+        }
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -167,9 +176,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "c67fbITZO5"

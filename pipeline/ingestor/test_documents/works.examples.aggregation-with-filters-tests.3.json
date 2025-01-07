@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-08-22T10:16:20.100011Z",
+  "createdAt" : "2024-11-25T15:15:12.418780Z",
   "id" : "z92kvukz",
   "document" : {
     "debug" : {
@@ -142,18 +142,24 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"e\",\"label\":\"Maps\",\"type\":\"Format\"}"
+        {
+          "id" : "e",
+          "label" : "Maps"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"6rJpSUKd2d\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : "6rJpSUKd2d",
+          "label" : "6rJpSUKd2d"
+        }
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -171,10 +177,20 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
         "6rJpSUKd2d"
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "8YItYtyWP3"

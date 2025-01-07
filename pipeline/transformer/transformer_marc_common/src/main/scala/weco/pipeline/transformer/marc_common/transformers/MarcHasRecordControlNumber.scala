@@ -29,16 +29,21 @@ import weco.pipeline.transformer.marc_common.models.MarcField
 trait MarcHasRecordControlNumber extends LabelDerivedIdentifiers with Logging {
   protected val defaultSecondIndicator: String = ""
   private val urlLocPrefix: String = "http://idlocgov/authorities/subjects/"
+  private val urlNlmPrefix: String = "https://idnlmnihgov/mesh/"
 
   protected def getLabel(field: MarcField): Option[String] =
     Option(field.subfields.filter(_.tag == "a").map(_.content).mkString(" "))
       .filter(_.isEmpty)
 
   protected def normalise(identifier: String): String = {
-    // Sort out dodgy punctuation and spacing and remove a URL prefix which exists on some otherwise valid LCSH IDs
     identifier
+      // Sort out dodgy punctuation and spacing
       .replaceAll("[,.\\s]", "")
+      // Remove URL prefixes which exist on some otherwise valid LCSH or MeSH IDs
       .stripPrefix(urlLocPrefix)
+      .stripPrefix(urlNlmPrefix)
+      // Remove "(DNLM)" prefixes from MeSH IDs, which are an artefact of the original Sierra import
+      .stripPrefix("(DNLM)")
   }
 
   private def getIdentifierSubfieldContents(field: MarcField): Seq[String] =

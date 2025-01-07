@@ -1,6 +1,6 @@
 {
   "description" : "examples for the aggregation-with-filters tests",
-  "createdAt" : "2024-08-22T10:16:20.103094Z",
+  "createdAt" : "2024-11-25T15:15:12.422085Z",
   "id" : "tbkbsxzf",
   "document" : {
     "debug" : {
@@ -142,18 +142,24 @@
     },
     "aggregatableValues" : {
       "workType" : [
-        "{\"id\":\"h\",\"label\":\"Archives and manuscripts\",\"type\":\"Format\"}"
+        {
+          "id" : "h",
+          "label" : "Archives and manuscripts"
+        }
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"fIbfVPkqaf\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : "fIbfVPkqaf",
+          "label" : "fIbfVPkqaf"
+        }
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -171,10 +177,20 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
         "fIbfVPkqaf"
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "5HlMPZzhLJ"

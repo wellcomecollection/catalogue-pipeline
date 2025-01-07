@@ -63,3 +63,9 @@ To create a new index configuration, follow these steps:
 > pipeline should be done carefully. Changes to the index configuration can
 > require a reindex, or recreate indices entirely, which may be undesirable
 > if the pipeline is already feeding an index in production use.
+
+> [!Warning]
+> When editing mapping files, refrain from using dot notation. The Elasticsearch terraform provider is not smart enough
+> to compare mappings created with dot notation to mappings created via full nested syntax, which leads to
+> an inaccurate terraform diff when running "terraform plan" or "terraform apply".
+> See [here](https://wellcome.slack.com/archives/C02ANCYL90E/p1715684204465519) for more information.

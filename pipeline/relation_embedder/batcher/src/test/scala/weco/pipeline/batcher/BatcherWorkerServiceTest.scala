@@ -1,21 +1,23 @@
 package weco.pipeline.batcher
 
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.{Failure, Try}
+import io.circe.Encoder
+import org.scalatest.concurrent.PatienceConfiguration.Timeout
+import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
-import org.scalatest.concurrent.PatienceConfiguration.Timeout
 import org.scalatest.time.{Seconds, Span}
-import io.circe.Encoder
 import weco.fixtures.TestWith
-import weco.pekko.fixtures.Pekko
+import weco.json.JsonUtil._
+import weco.lambda.Downstream
 import weco.messaging.fixtures.SQS
+import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
-import weco.json.JsonUtil._
-import SQS.QueuePair
+import weco.pekko.fixtures.Pekko
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
+import scala.util.{Failure, Try}
 
 class BatcherWorkerServiceTest
     extends AnyFunSpec
@@ -28,9 +30,16 @@ class BatcherWorkerServiceTest
   import Selector._
 
   /** The following tests use paths representing this tree:
-    *
-    * A \| \|------------- \| | | B C E \| |------ |--------- \| | | | | | | | D
-    * X Y Z 1 2 3 4
+    * {{{
+    * A
+    * |
+    * |-------------
+    * |  |         |
+    * B  C         E
+    * |  |------   |---------
+    * |  |  |  |   |  |  |  |
+    * D  X  Y  Z   1  2  3  4
+    * }}}
     */
   it("processes incoming paths into batches") {
     withWorkerService(visibilityTimeout = 2 seconds) {
@@ -147,18 +156,23 @@ class BatcherWorkerServiceTest
             withSQSStream[NotificationMessage, R](queuePair.queue) {
               msgStream =>
                 val msgSender = new MessageSender(brokenPaths)
+                val memoryDownstream = new MemoryDownstream(msgSender)
+                val pathsProcessor = new PathsProcessor(
+                  downstream = memoryDownstream,
+                  maxBatchSize = maxBatchSize
+                )
                 val workerService = new BatcherWorkerService[String](
                   msgStream = msgStream,
-                  msgSender = msgSender,
                   flushInterval = flushInterval,
                   maxProcessedPaths = 1000,
-                  maxBatchSize = maxBatchSize
+                  pathsProcessor = pathsProcessor
                 )
                 workerService.run()
                 testWith((queuePair, msgSender))
             }
         }
     }
+
 
   class MessageSender(brokenPaths: Set[String] = Set.empty)
       extends MemoryMessageSender {
@@ -169,5 +183,10 @@ class BatcherWorkerServiceTest
       else
         super.sendT(t)
     }
+  }
+
+  class MemoryDownstream(messageSender: MessageSender) extends Downstream {
+    override def notify(workId: String): Try[Unit] = ???
+    override def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit] = messageSender.sendT(batch)
   }
 }

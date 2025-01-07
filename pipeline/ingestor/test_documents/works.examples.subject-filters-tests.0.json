@@ -1,6 +1,6 @@
 {
   "description" : "examples for the subject filter tests",
-  "createdAt" : "2024-08-22T10:16:20.127607Z",
+  "createdAt" : "2024-11-25T15:15:12.455108Z",
   "id" : "kx6ceruj",
   "document" : {
     "debug" : {
@@ -159,16 +159,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
-        "{\"label\":\"Sanitation\",\"concepts\":[],\"type\":\"Subject\"}"
+      "subjects" : [
+        {
+          "id" : "sanitati",
+          "label" : "Sanitation"
+        }
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -186,10 +189,23 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
         "Sanitation"
       ],
+      "subjects.concepts.id" : [
+        "sanitati"
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+        "lcsh-sanitation",
+        "mesh-sanitation"
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "KEnxzBExh6"

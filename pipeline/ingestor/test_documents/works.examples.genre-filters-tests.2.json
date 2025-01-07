@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-08-22T10:16:20.122382Z",
+  "createdAt" : "2024-11-25T15:15:12.448349Z",
   "id" : "avugqd3s",
   "document" : {
     "debug" : {
@@ -140,16 +140,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
-        "{\"label\":\"Psychology, Pathological\",\"concepts\":[],\"type\":\"Genre\"}"
+      "genres" : [
+        {
+          "id" : "baadf00d",
+          "label" : "Psychology, Pathological"
+        }
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -169,9 +172,20 @@
       "genres.concepts.id" : [
         "baadf00d"
       ],
+      "genres.concepts.sourceIdentifier" : [
+        "um1qUlCcjg"
+      ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "WGGaiNvMk5"

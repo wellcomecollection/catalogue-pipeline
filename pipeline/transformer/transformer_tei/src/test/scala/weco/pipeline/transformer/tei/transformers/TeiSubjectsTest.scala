@@ -31,7 +31,7 @@ class TeiSubjectsTest
 
     result shouldBe List(
       Subject(
-        id = labelDerivedSubjectIdentifier("botany"),
+        id = labelDerivedConceptIdentifier("botany"),
         label = "Botany",
         concepts = List(Concept("Botany"))
       )
@@ -56,17 +56,17 @@ class TeiSubjectsTest
 
     result shouldBe List(
       Subject(
-        id = labelDerivedSubjectIdentifier("botany"),
+        id = labelDerivedConceptIdentifier("botany"),
         label = "Botany",
         concepts = List(Concept("Botany"))
       ),
       Subject(
-        id = labelDerivedSubjectIdentifier("computers"),
+        id = labelDerivedConceptIdentifier("computers"),
         label = "Computers",
         concepts = List(Concept("Computers"))
       ),
       Subject(
-        id = labelDerivedSubjectIdentifier("aliens"),
+        id = labelDerivedConceptIdentifier("aliens"),
         label = "Aliens",
         concepts = List(Concept("Aliens"))
       )
@@ -99,7 +99,7 @@ class TeiSubjectsTest
 
     result shouldBe List(
       Subject(
-        id = labelDerivedSubjectIdentifier("very fast cars"),
+        id = labelDerivedConceptIdentifier("very fast cars"),
         label = "Very fast cars",
         concepts = List(Concept("Very fast cars"))
       )
@@ -126,7 +126,7 @@ class TeiSubjectsTest
     result shouldBe List(
       Subject(
         id = Identifiable(
-          SourceIdentifier(IdentifierType.LCSubjects, "Subject", "sh12345")
+          SourceIdentifier(IdentifierType.LCSubjects, "Concept", "sh12345")
         ),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
@@ -156,7 +156,7 @@ class TeiSubjectsTest
     result shouldBe List(
       Subject(
         id = Identifiable(
-          SourceIdentifier(IdentifierType.LCSubjects, "Subject", "sh12345")
+          SourceIdentifier(IdentifierType.LCSubjects, "Concept", "sh12345")
         ),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
@@ -186,7 +186,7 @@ class TeiSubjectsTest
     result shouldBe List(
       Subject(
         id = Identifiable(
-          SourceIdentifier(IdentifierType.LCSubjects, "Subject", "sh12345")
+          SourceIdentifier(IdentifierType.LCSubjects, "Concept", "sh12345")
         ),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
@@ -215,7 +215,7 @@ class TeiSubjectsTest
     result shouldBe List(
       Subject(
         id = Identifiable(
-          SourceIdentifier(IdentifierType.LCSubjects, "Subject", "sh12345")
+          SourceIdentifier(IdentifierType.LCSubjects, "Concept", "sh12345")
         ),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
@@ -250,7 +250,7 @@ class TeiSubjectsTest
     result shouldBe List(
       Subject(
         id = Identifiable(
-          SourceIdentifier(IdentifierType.LCSubjects, "Subject", "sh85136100")
+          SourceIdentifier(IdentifierType.LCSubjects, "Concept", "sh85136100")
         ),
         label = "Torah scrolls",
         concepts = List(Concept(label = "Torah scrolls"))
@@ -279,7 +279,7 @@ class TeiSubjectsTest
     result shouldBe List(
       Subject(
         id = Identifiable(
-          SourceIdentifier(IdentifierType.MESH, "Subject", "D001901")
+          SourceIdentifier(IdentifierType.MESH, "Concept", "D001901")
         ),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
@@ -307,7 +307,7 @@ class TeiSubjectsTest
 
     result shouldBe List(
       Subject(
-        id = labelDerivedSubjectIdentifier("botany"),
+        id = labelDerivedConceptIdentifier("botany"),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
       )
@@ -333,7 +333,7 @@ class TeiSubjectsTest
 
     result shouldBe List(
       Subject(
-        id = labelDerivedSubjectIdentifier("botany"),
+        id = labelDerivedConceptIdentifier("botany"),
         label = "Botany",
         concepts = List(Concept(label = "Botany"))
       )
@@ -357,17 +357,17 @@ class TeiSubjectsTest
 
     result shouldBe List(
       Subject(
-        id = labelDerivedSubjectIdentifier("botany"),
+        id = labelDerivedConceptIdentifier("botany"),
         label = "Botany",
         concepts = List(Concept("Botany"))
       ),
       Subject(
-        id = labelDerivedSubjectIdentifier("computers"),
+        id = labelDerivedConceptIdentifier("computers"),
         label = "Computers",
         concepts = List(Concept("Computers"))
       ),
       Subject(
-        id = labelDerivedSubjectIdentifier("aliens"),
+        id = labelDerivedConceptIdentifier("aliens"),
         label = "Aliens",
         concepts = List(Concept("Aliens"))
       )

@@ -1,6 +1,6 @@
 {
   "description" : "works with different contributor",
-  "createdAt" : "2024-08-22T10:16:20.056357Z",
+  "createdAt" : "2024-11-25T15:15:12.360637Z",
   "id" : "mudchggm",
   "document" : {
     "debug" : {
@@ -139,17 +139,23 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
+      "genres" : [
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
-        "{\"label\":\"MI5\",\"type\":\"Organisation\"}",
-        "{\"label\":\"GCHQ\",\"type\":\"Organisation\"}"
+      "contributors.agent" : [
+        {
+          "id" : "MI5",
+          "label" : "MI5"
+        },
+        {
+          "id" : "GCHQ",
+          "label" : "GCHQ"
+        }
       ],
       "items.locations.license" : [
       ],
@@ -167,11 +173,21 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
+      ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
       ],
       "contributors.agent.label" : [
         "MI5",
         "GCHQ"
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "XCPwwavyjz"

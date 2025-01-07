@@ -47,7 +47,8 @@ module "scaling_service" {
 
     topic_arns = var.topic_arns
 
-    dlq_alarm_arn = var.dlq_alarm_topic_arn
+    dlq_alarm_arn                = var.dlq_alarm_topic_arn
+    main_q_age_alarm_action_arns = var.main_q_age_alarm_action_arns
 
     cooldown_period = "1m"
   }

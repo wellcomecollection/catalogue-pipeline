@@ -16,9 +16,6 @@ object Responses {
     s"""{
       "features_b64": "${Encoding.toLittleEndianBase64(
         randomFeatureVector(seed)
-      )}",
-      "reduced_features_b64": "${Encoding.toLittleEndianBase64(
-        randomFeatureVector(seed).slice(0, 1024)
       )}"
      }""".stripMargin
   )

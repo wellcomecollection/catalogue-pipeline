@@ -1,6 +1,6 @@
 {
   "description" : "examples for the genre tests",
-  "createdAt" : "2024-08-22T10:16:20.122118Z",
+  "createdAt" : "2024-11-25T15:15:12.448024Z",
   "id" : "yzj9dwdl",
   "document" : {
     "debug" : {
@@ -140,16 +140,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
-        "{\"label\":\"Pamphlets\",\"concepts\":[],\"type\":\"Genre\"}"
+      "genres" : [
+        {
+          "id" : "g00dcafe",
+          "label" : "Pamphlets"
+        }
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -169,9 +172,20 @@
       "genres.concepts.id" : [
         "g00dcafe"
       ],
+      "genres.concepts.sourceIdentifier" : [
+        "dmKTFidDls"
+      ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "AYys6jP7Ji"

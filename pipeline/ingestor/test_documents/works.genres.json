@@ -1,6 +1,6 @@
 {
   "description" : "a work with different concepts in the genre",
-  "createdAt" : "2024-08-22T10:16:20.041591Z",
+  "createdAt" : "2024-11-25T15:15:12.343141Z",
   "id" : "jlp05mgl",
   "document" : {
     "debug" : {
@@ -150,16 +150,19 @@
     "aggregatableValues" : {
       "workType" : [
       ],
-      "genres.label" : [
-        "{\"label\":\"Electronic books\",\"concepts\":[],\"type\":\"Genre\"}"
+      "genres" : [
+        {
+          "id" : "Electronic books",
+          "label" : "Electronic books"
+        }
       ],
       "production.dates" : [
       ],
-      "subjects.label" : [
+      "subjects" : [
       ],
       "languages" : [
       ],
-      "contributors.agent.label" : [
+      "contributors.agent" : [
       ],
       "items.locations.license" : [
       ],
@@ -178,9 +181,19 @@
       ],
       "genres.concepts.id" : [
       ],
+      "genres.concepts.sourceIdentifier" : [
+      ],
       "subjects.label" : [
       ],
+      "subjects.concepts.id" : [
+      ],
+      "subjects.concepts.sourceIdentifier" : [
+      ],
       "contributors.agent.label" : [
+      ],
+      "contributors.agent.id" : [
+      ],
+      "contributors.agent.sourceIdentifier" : [
       ],
       "identifiers.value" : [
         "iIjgaHUI5C"

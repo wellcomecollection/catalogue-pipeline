@@ -158,3 +158,8 @@ variable "dlq_alarm_topic_arn" {
   type    = string
   default = null
 }
+
+variable "main_q_age_alarm_action_arns" {
+  type    = list(string)
+  default = []
+}
