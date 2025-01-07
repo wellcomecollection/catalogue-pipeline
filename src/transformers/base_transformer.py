@@ -208,7 +208,7 @@ class BaseTransformer:
         entity_type: EntityType,
         query_chunk_size: int,
         sample_size: int | None = None,
-    ):
+    ) -> None:
         """
         Streams transformed entities (nodes or edges) into the void. Useful for development and testing purposes.
         """
