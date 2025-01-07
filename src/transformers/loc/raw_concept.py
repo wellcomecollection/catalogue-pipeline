@@ -41,9 +41,12 @@ class RawLibraryOfCongressConcept:
         # Labels are either stored directly as strings, or as nested JSON objects with a `@value` property.
         if isinstance(raw_label, str):
             return raw_label
-        # Very rarely, labels are returned as a list of strings. When this happens,
-        # we only return the first item in the list.
+
+        # In cases where an LoC Name has multiple labels written using different writing systems, labels are returned
+        # as a list. When this happens, we extract the first item in the list, which always stores the Latin script
+        # version of the label as a string.
         if isinstance(raw_label, list):
+            assert isinstance(raw_label[0], str)
             return raw_label[0]
 
         return raw_label["@value"]
