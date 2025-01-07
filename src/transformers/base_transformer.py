@@ -16,7 +16,7 @@ from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
 
 EntityType = Literal["nodes", "edges"]
-StreamDestination = Literal["graph", "s3", "sns"]
+StreamDestination = Literal["graph", "s3", "sns", "void"]
 
 
 def _generator_to_chunks(items: Generator, chunk_size: int) -> Generator:
@@ -202,3 +202,15 @@ class BaseTransformer:
         # Publish remaining messages (if any)
         if len(queries) > 0:
             publish_batch_to_sns(topic_arn, queries)
+
+    def stream_to_nowhere(
+        self,
+        entity_type: EntityType,
+        query_chunk_size: int,
+        sample_size: int | None = None,
+    ):
+        """
+        Streams transformed entities (nodes or edges) into the void. Useful for development and testing purposes.
+        """
+        for chunk in self._stream_chunks(entity_type, query_chunk_size, sample_size):
+            pass
