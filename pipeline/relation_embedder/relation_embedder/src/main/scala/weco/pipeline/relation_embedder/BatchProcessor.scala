@@ -8,17 +8,14 @@ import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Denormalised
-import weco.pipeline.relation_embedder.models.{
-  ArchiveRelationsCache,
-  Batch,
-  RelationWork
-}
+import weco.pipeline.relation_embedder.models.{ArchiveRelationsCache, Batch, RelationWork}
 import weco.pipeline_storage.elastic.ElasticIndexer
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import weco.catalogue.internal_model.Implicits._
-import weco.lambda.{Downstream, ElasticBuilder}
+import weco.elasticsearch.typesafe.ElasticBuilder
+import weco.lambda.Downstream
 import weco.pipeline.relation_embedder.lib.RelationEmbedderConfig
 
 class BatchProcessor(
