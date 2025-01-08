@@ -33,11 +33,13 @@ class BaseTransformer:
         self.source: BaseSource = BaseSource()
 
     def transform_node(self, raw_node: dict) -> BaseNode | None:
+        """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
         raise NotImplementedError(
             "Each transformer must implement a `transform_node` method."
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
+        """Accepts a raw node from the source dataset and returns a generator of extracted edges as Pydantic models."""
         raise NotImplementedError(
             "Each transformer must implement an `extract_edges` method."
         )

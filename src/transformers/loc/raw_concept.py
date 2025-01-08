@@ -52,6 +52,7 @@ class RawLibraryOfCongressConcept:
         return raw_label["@value"]
 
     def exclude(self) -> bool:
+        """Returns True if the concept should be excluded from the graph."""
         if self._raw_concept_node is None:
             return True
 
@@ -75,6 +76,7 @@ class RawLibraryOfCongressConcept:
 
     @property
     def alternative_labels(self) -> list[str]:
+        """Returns a list of alternative labels for the concept."""
         assert self._raw_concept_node is not None
 
         raw_alternative_labels = self._raw_concept_node.get("skos:altLabel", [])
@@ -88,6 +90,7 @@ class RawLibraryOfCongressConcept:
 
     @property
     def broader_concept_ids(self) -> list[str]:
+        """Returns a list of IDs representing concepts which are broader than the current concept."""
         assert self._raw_concept_node is not None
 
         broader_concepts = self._raw_concept_node.get("skos:broader", [])
@@ -109,6 +112,7 @@ class RawLibraryOfCongressConcept:
 
     @property
     def is_geographic(self) -> bool:
+        """Returns True if the node represents a geographic concept, as determined by `skos:notation`."""
         if self._raw_concept_node is None:
             return False
 
