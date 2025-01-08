@@ -1,7 +1,7 @@
 import sbt._
 import scala.language.reflectiveCalls
 object WellcomeDependencies {
-  lazy val defaultVersion = "32.43.4"
+  lazy val defaultVersion = "32.43.5"
   lazy val versions = new {
     val typesafe = defaultVersion
     val fixtures = defaultVersion
