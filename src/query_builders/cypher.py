@@ -1,3 +1,5 @@
+from typing import Literal, cast
+
 from converters.cypher.query_converter import CypherQueryConverter
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
@@ -54,7 +56,9 @@ def construct_upsert_edges_query(edges: list[BaseEdge]) -> str:
     return query
 
 
-def construct_upsert_cypher_query(entities: list[BaseNode | BaseEdge]) -> str:
+def construct_upsert_cypher_query(
+    entities: list[BaseNode | BaseEdge], entity_type: Literal["nodes", "edges"]
+) -> str:
     """
     Returns an openCypher `UNWIND` query which creates a graph node or edge for each item specified in `entities`,
     or updates an existing matching node or edge.
@@ -62,10 +66,10 @@ def construct_upsert_cypher_query(entities: list[BaseNode | BaseEdge]) -> str:
     All passed `entities` must be instances of the same Pydantic model because labels cannot be set dynamically
     in openCypher.
     """
-    if isinstance(entities[0], BaseNode):
-        return construct_upsert_nodes_query(entities)
-    elif isinstance(entities[0], BaseEdge):
-        return construct_upsert_edges_query(entities)
+    if entity_type == "nodes":
+        return construct_upsert_nodes_query(cast(list[BaseNode], entities))
+    elif entity_type == "edges":
+        return construct_upsert_edges_query(cast(list[BaseEdge], entities))
     else:
         raise ValueError(
             "Unsupported Pydantic model. Each model must subclass BaseEdge or BaseNode."
