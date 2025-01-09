@@ -2,7 +2,13 @@ package weco.pipeline.batcher.lib
 
 import com.typesafe.config.Config
 import weco.lambda.DownstreamBuilder.buildDownstreamTarget
-import weco.lambda.{ApplicationConfig, DownstreamTarget, LambdaConfigurable, SNS, StdOut}
+import weco.lambda.{
+  ApplicationConfig,
+  DownstreamTarget,
+  LambdaConfigurable,
+  SNS,
+  StdOut
+}
 import weco.messaging.typesafe.SNSBuilder.buildSNSConfig
 
 case class BatcherConfig(

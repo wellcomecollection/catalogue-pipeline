@@ -54,7 +54,7 @@ object DownstreamBuilder extends Logging {
 
   def buildDownstreamTarget(config: Config): DownstreamTarget = {
     config.getStringOption("downstream.target") match {
-      case Some("sns")   =>
+      case Some("sns") =>
         val snsConfig = buildSNSConfig(config)
         info(s"Building SNS downstream with config: $snsConfig")
         SNS(snsConfig)
@@ -62,7 +62,9 @@ object DownstreamBuilder extends Logging {
         info("Building StdOut downstream")
         StdOut
       case Some(unknownTarget) =>
-        throw new IllegalArgumentException(s"Invalid downstream target: $unknownTarget")
+        throw new IllegalArgumentException(
+          s"Invalid downstream target: $unknownTarget"
+        )
       case None =>
         warn("No downstream target specified, defaulting to StdOut")
         StdOut
