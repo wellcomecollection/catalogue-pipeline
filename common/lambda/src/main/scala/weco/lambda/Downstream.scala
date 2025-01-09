@@ -1,9 +1,12 @@
 package weco.lambda
 
+import com.typesafe.config.Config
+import grizzled.slf4j.Logging
 import io.circe.Encoder
 import software.amazon.awssdk.services.sns.SnsClient
 import weco.messaging.sns.{SNSConfig, SNSMessageSender}
 import weco.json.JsonUtil.toJson
+import weco.messaging.typesafe.SNSBuilder.buildSNSConfig
 
 import scala.util.Try
 
@@ -43,4 +46,26 @@ object Downstream {
     }
   }
   def apply(): Downstream = STDIODownstream
+}
+
+// Typesafe specific configuration builder
+object DownstreamBuilder extends Logging {
+  import weco.typesafe.config.builders.EnrichConfig._
+
+  def buildDownstreamTarget(config: Config): DownstreamTarget = {
+    config.getStringOption("downstream.target") match {
+      case Some("sns")   =>
+        val snsConfig = buildSNSConfig(config)
+        info(s"Building SNS downstream with config: $snsConfig")
+        SNS(snsConfig)
+      case Some("stdio") =>
+        info("Building StdOut downstream")
+        StdOut
+      case Some(unknownTarget) =>
+        throw new IllegalArgumentException(s"Invalid downstream target: $unknownTarget")
+      case None =>
+        warn("No downstream target specified, defaulting to StdOut")
+        StdOut
+    }
+  }
 }

@@ -2,9 +2,9 @@ package weco.pipeline.relation_embedder.lib
 
 import com.typesafe.config.Config
 import weco.elasticsearch.typesafe.ElasticBuilder.buildElasticClientConfig
+import weco.lambda.DownstreamBuilder.buildDownstreamTarget
 import weco.elasticsearch.typesafe.ElasticConfig
 import weco.lambda._
-import weco.messaging.typesafe.SNSBuilder.buildSNSConfig
 
 case class RelationEmbedderConfig(
   mergedWorkIndex: String,
@@ -31,11 +31,6 @@ trait RelationEmbedderConfigurable
       affectedWorksScroll =
         rawConfig.requireInt("es.works.scroll.affected_works"),
       elasticConfig = buildElasticClientConfig(rawConfig),
-      downstreamTarget = {
-        rawConfig.requireString("relation_embedder.use_downstream") match {
-          case "sns"   => SNS(buildSNSConfig(rawConfig))
-          case "stdio" => StdOut
-        }
-      }
+      downstreamTarget = buildDownstreamTarget(rawConfig)
     )
 }
