@@ -32,11 +32,11 @@ echo "[${LAMBDA_EXTENSION_NAME}] Initialization"
 get_secret() {
   local secret_name=$1
   local secret_value
-  echo "[${LAMBDA_EXTENSION_NAME}] Getting secret: $secret_name" > /dev/tty
+  echo "[${LAMBDA_EXTENSION_NAME}] Getting secret: $secret_name"
 
   secret_value=$(aws secretsmanager get-secret-value --secret-id "$secret_name" --query SecretString --output text)
   if [[ -z "$secret_value" ]]; then
-    echo "[${LAMBDA_EXTENSION_NAME}] Secret not found: $secret_name" > /dev/tty
+    echo "[${LAMBDA_EXTENSION_NAME}] Secret not found: $secret_name"
     exit 1
   fi
   echo "$secret_value"
