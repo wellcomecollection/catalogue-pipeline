@@ -4,13 +4,14 @@ from .base_transformer import BaseTransformer
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
 from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer
+from .wikidata.concepts_transformer import WikidataConceptsTransformer
 
 LOC_SUBJECT_HEADINGS_URL = (
     "https://id.loc.gov/download/authorities/subjects.skosrdf.jsonld.gz"
 )
 LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.skosrdf.jsonld.gz"
 
-TransformerType = Literal["loc_concepts", "loc_names", "loc_locations"]
+TransformerType = Literal["loc_concepts", "loc_names", "loc_locations", "wikidata"]
 
 
 def create_transformer(transformer_type: TransformerType) -> BaseTransformer:
@@ -22,5 +23,7 @@ def create_transformer(transformer_type: TransformerType) -> BaseTransformer:
         return LibraryOfCongressLocationsTransformer(
             LOC_SUBJECT_HEADINGS_URL, LOC_NAMES_URL
         )
+    if transformer_type == "wikidata":
+        return WikidataConceptsTransformer()
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")
