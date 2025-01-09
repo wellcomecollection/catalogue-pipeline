@@ -92,7 +92,7 @@ then
 
   echo "Deploying λ pipeline services to catalogue-$PIPELINE_DATE"
   "$ROOT/builds/deploy_lambda_services.sh" \
-    r_embed_batcher:batcher \
-    r_embed_embedder:relation_embedder
+    batcher:r_embed_batcher \
+    relation_embedder:r_embed_embedder
 fi
 

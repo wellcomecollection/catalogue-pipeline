@@ -9,8 +9,12 @@ REPOSITORY_URI="760097843905.dkr.ecr.eu-west-1.amazonaws.com"
 
 for FUNCTION_SUFFIX_IMAGE_NAME_PAIR in "$@"
 do
-  FUNCTION_SUFFIX="${FUNCTION_SUFFIX_IMAGE_NAME_PAIR%:*}"
-  IMAGE_NAME="${FUNCTION_SUFFIX_IMAGE_NAME_PAIR#*:}"
+  # See https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html
+  # for an explanation of the syntax used here.
+  # %:* removes the shortest matching pattern of "colon followed by any characters"
+  # #*: removes the shortest matching pattern of "any characters followed by a colon"
+  IMAGE_NAME="${FUNCTION_SUFFIX_IMAGE_NAME_PAIR%:*}"
+  FUNCTION_SUFFIX="${FUNCTION_SUFFIX_IMAGE_NAME_PAIR#*:}"
 
   IMAGE_URI="${REPOSITORY_URI}"/uk.ac.wellcome/"${IMAGE_NAME}":"env.${PIPELINE_DATE}"
   FUNCTION_NAME="${PIPELINE_NAMESPACE}"-"${FUNCTION_SUFFIX}"
