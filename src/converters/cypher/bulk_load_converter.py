@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, cast
 
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
@@ -33,16 +33,16 @@ class CypherBulkLoadConverter(CypherBaseConverter):
 
         return bulk_edge
 
-    def convert_to_bulk_cypher(self, model: BaseNode | BaseEdge) -> dict:
+    def convert_to_bulk_cypher(self, model: BaseNode | BaseEdge) -> dict[str, str]:
         """
         Returns a dictionary representing the entity (node or edge), converting all values into a format compatible
         with openCypher, and adding all required values for bulk upload, such as `:ID` or `:LABEL`.
         See https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-format-opencypher.html.
         """
         if self.entity_type == "nodes":
-            return self._node_to_bulk_cypher(model)
+            return self._node_to_bulk_cypher(cast(BaseNode, model))
         elif self.entity_type == "edges":
-            return self._edge_to_bulk_cypher(model)
+            return self._edge_to_bulk_cypher(cast(BaseEdge, model))
         else:
             raise ValueError(
                 "Unsupported Pydantic model. Each model must subclass BaseEdge or BaseNode."

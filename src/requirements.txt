@@ -10,10 +10,14 @@ backoff==2.2.1
     # via -r requirements.in
 boto3==1.35.77
     # via -r requirements.in
+boto3-stubs==1.35.92
+    # via -r requirements.in
 botocore==1.35.77
     # via
     #   boto3
     #   s3transfer
+botocore-stubs==1.35.92
+    # via boto3-stubs
 certifi==2024.8.30
     # via requests
 charset-normalizer==3.4.0
@@ -38,6 +42,12 @@ six==1.17.0
     # via python-dateutil
 smart-open==7.1.0
     # via -r requirements.in
+types-awscrt==0.23.6
+    # via botocore-stubs
+types-requests==2.32.0.20241016
+    # via -r requirements.in
+types-s3transfer==0.10.4
+    # via boto3-stubs
 typing-extensions==4.12.2
     # via
     #   pydantic
@@ -46,5 +56,6 @@ urllib3==2.2.3
     # via
     #   botocore
     #   requests
+    #   types-requests
 wrapt==1.17.0
     # via smart-open

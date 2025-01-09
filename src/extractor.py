@@ -2,8 +2,7 @@ import argparse
 import os
 import typing
 
-from transformers.base_transformer import (BaseTransformer, EntityType,
-                                           StreamDestination)
+from transformers.base_transformer import BaseTransformer, EntityType, StreamDestination
 from transformers.create_transformer import TransformerType, create_transformer
 from utils.aws import get_neptune_client
 

@@ -3,3 +3,6 @@ requests
 pydantic
 backoff
 smart-open
+
+boto3-stubs
+types-requests
