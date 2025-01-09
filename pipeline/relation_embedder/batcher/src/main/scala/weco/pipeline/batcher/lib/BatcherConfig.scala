@@ -6,10 +6,7 @@ import weco.lambda.{
   ApplicationConfig,
   DownstreamTarget,
   LambdaConfigurable,
-  SNS,
-  StdOut
 }
-import weco.messaging.typesafe.SNSBuilder.buildSNSConfig
 
 case class BatcherConfig(
   maxBatchSize: Int,
