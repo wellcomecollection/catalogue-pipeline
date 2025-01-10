@@ -1,7 +1,7 @@
 import gzip
 import json
 from collections.abc import Generator
-from typing import Literal, Union
+from typing import Literal
 
 import xml.etree.ElementTree as ET
 import requests
@@ -25,7 +25,7 @@ class GZipSource(BaseSource):
         for _, elem in events:
             yield elem
 
-    def stream_raw(self) -> Generator[Union[dict, ET.Element]]:
+    def stream_raw(self) -> Generator[dict | ET.Element]:
         response = requests.get(self.url, stream=True)
 
         if self.ftype == "json":
