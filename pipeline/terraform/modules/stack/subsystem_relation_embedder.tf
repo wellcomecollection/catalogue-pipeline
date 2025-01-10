@@ -20,4 +20,5 @@ module "relation_embedder_sub" {
   min_capacity                = var.min_capacity
   max_capacity                = var.reindexing_state.scale_up_tasks ? var.max_capacity : min(1, var.max_capacity)
   fargate_service_boilerplate = local.fargate_service_boilerplate
+  lambda_vpc_config           = local.lambda_vpc_config
 }

@@ -27,7 +27,7 @@ module "relation_embedder" {
   queue_visibility_timeout_seconds = 30 * 60
 
   env_vars = {
-    topic_arn = module.relation_embedder_output_topic.arn
+    output_topic_arn = module.relation_embedder_output_topic.arn
 
     es_merged_index       = local.es_works_merged_index
     es_denormalised_index = local.es_works_denormalised_index

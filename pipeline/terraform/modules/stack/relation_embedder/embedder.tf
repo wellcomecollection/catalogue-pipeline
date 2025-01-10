@@ -15,6 +15,8 @@ module "embedder_lambda" {
   pipeline_date = var.pipeline_date
   service_name  = "${var.namespace}_embedder"
 
+  vpc_config = var.lambda_vpc_config
+
   environment_variables = {
     output_topic_arn = module.embedder_lambda_output_topic.arn
 
