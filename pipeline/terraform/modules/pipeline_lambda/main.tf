@@ -8,6 +8,8 @@ module "pipeline_step" {
   memory_size  = var.memory_size
   description  = var.description
 
+  vpc_config = var.vpc_config
+
   environment = {
     variables = local.environment_variables_with_secrets
   }

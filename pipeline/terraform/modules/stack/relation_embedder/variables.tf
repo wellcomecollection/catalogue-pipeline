@@ -33,6 +33,14 @@ variable "pipeline_storage_es_service_secrets" {
   }))
 }
 
+variable "lambda_vpc_config" {
+  type = object({
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  default = null
+}
+
 variable "path_concatenator_image" {
   type = string
 }
