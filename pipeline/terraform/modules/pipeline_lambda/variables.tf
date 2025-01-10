@@ -31,6 +31,14 @@ variable "environment_variables" {
   default     = {}
 }
 
+variable vpc_config {
+  type = object({
+    subnet_ids         = list(string)
+    security_group_ids = list(string)
+  })
+  default = null
+}
+
 variable "timeout" {
   default     = 30
   description = "lambda function timeout"

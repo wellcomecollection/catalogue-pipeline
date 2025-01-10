@@ -200,6 +200,14 @@ locals {
     security_group_id = local.infra_critical.rds_access_security_group_id
   }
 
+  lambda_vpc_config = {
+    subnet_ids         = local.network_config.subnets
+    security_group_ids = [
+      aws_security_group.egress.id,
+      local.network_config.ec_privatelink_security_group_id,
+    ]
+  }
+
   fargate_service_boilerplate = {
     egress_security_group_id             = aws_security_group.egress.id
     elastic_cloud_vpce_security_group_id = local.network_config.ec_privatelink_security_group_id
