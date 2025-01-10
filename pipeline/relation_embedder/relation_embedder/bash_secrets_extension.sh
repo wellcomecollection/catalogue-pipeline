@@ -28,20 +28,6 @@ forward_sigterm_and_wait() {
 # To run any extension processes that need to start before the runtime initializes, run them before the /register
 echo "[${LAMBDA_EXTENSION_NAME}] Initialization"
 
-# Read secret from AWS Secrets Manager
-get_secret() {
-  local secret_name=$1
-  local secret_value
-  echo "[${LAMBDA_EXTENSION_NAME}] Getting secret: $secret_name"
-
-  secret_value=$(aws secretsmanager get-secret-value --secret-id "$secret_name" --query SecretString --output text)
-  if [[ -z "$secret_value" ]]; then
-    echo "[${LAMBDA_EXTENSION_NAME}] Secret not found: $secret_name"
-    exit 1
-  fi
-  echo "$secret_value"
-}
-
 # Extract secret value from environment variable and write to config file
 extract_secret_value_to_config() {
   local env_var=$1
@@ -54,14 +40,20 @@ extract_secret_value_to_config() {
   env_var_key=$(echo "$env_var" | cut -d= -f1)
 
   if [[ $env_var_value == "secret:"* ]]; then
+    echo "[${LAMBDA_EXTENSION_NAME}] Extracting secret value from environment variable: $env_var_key" > /dev/stdout
     secret_key=$(echo "$env_var_value" | cut -d: -f2)
-    secret_value=$(get_secret "$secret_key")
+    secret_value=$(aws secretsmanager get-secret-value --secret-id "$secret_key" --query SecretString --output text)
+    if [[ -z "$secret_value" ]]; then
+      echo "[${LAMBDA_EXTENSION_NAME}] Secret not found: $secret_key" > /dev/stdout
+      exit 1
+    fi
     echo "$env_var_key=\"$secret_value\"" >> /tmp/config
   fi
 }
 
 # Create a configuration file with secrets
 create_config_file() {
+  echo "[${LAMBDA_EXTENSION_NAME}] Creating config file :)" > /dev/stdout
   local env_vars
   local env_var
 
