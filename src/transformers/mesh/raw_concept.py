@@ -1,5 +1,5 @@
 import requests
-from typing import Literal
+from typing import Any, Literal
 import xml.etree.ElementTree as ET
 
 ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
@@ -8,10 +8,11 @@ ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
 class RawMeSHConcept:
     def __init__(self, raw_concept: ET.Element):
         self.raw_concept = raw_concept
+        self.source: Literal["nlm-mesh"] = "nlm-mesh"
 
     @staticmethod
     def _remove_id_prefix(raw_id: str) -> str:
-        """Removes prefix from MeSH descriptor (only present in JSON)."""
+        """Removes prefix from MeSH descriptor (only present in extra JSON)."""
         return raw_id.removeprefix(ID_PREFIX)
 
     @property
@@ -74,15 +75,15 @@ class RawMeSHConcept:
         return scope_note
 
     @staticmethod
-    def fetch_mesh(source_id: str) -> dict[str, str | list[str]]:
-        """Fetch JSON containing RDF data for a given MeSH concept."""
+    def fetch_mesh(source_id: str) -> Any:
+        """Fetches JSON containing RDF data for a given MeSH concept."""
 
         response = requests.get(f"https://id.nlm.nih.gov/mesh/{source_id}.json")
         return response.json()
 
     @property
     def parent_concept_ids(self) -> list[str]:
-        """Extract parent MeSH descriptors from JSON."""
+        """Extracts parent MeSH descriptors from JSON."""
 
         mesh_data = self.fetch_mesh(self.source_id)
         broader_desc = mesh_data.get("broaderDescriptor", [])
@@ -94,7 +95,7 @@ class RawMeSHConcept:
     
     @property
     def related_concept_ids(self) -> list[str]:
-        """Extract related MeSH descriptors."""
+        """Extracts related MeSH descriptors."""
 
         related_descriptors = []
         for desc_elem in self.raw_concept.findall("SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"):
@@ -110,7 +111,3 @@ class RawMeSHConcept:
         """Returns True if the node represents a geographic concept, as determined by `DescriptorClass`."""
         
         return self.raw_concept.attrib.get("DescriptorClass") == "4"
-    
-    @property
-    def source(self) -> Literal["nlm-mesh"]:
-        return "nlm-mesh"
