@@ -21,7 +21,7 @@ class RawMeSHConcept:
 
         assert(isinstance(desc_elem, ET.Element))
 
-        return self.raw_concept.find("DescriptorUI").text
+        return desc_elem.text
 
     @property
     def label(self) -> str:
@@ -30,17 +30,17 @@ class RawMeSHConcept:
 
         assert(isinstance(label_elem, ET.Element))
 
-        return self.raw_concept.find('DescriptorName//String').text
+        return label_elem.text
 
     @property
-    def alternative_labels(self) -> list[str] | None:
+    def alternative_labels(self) -> list[str]:
         """Returns a list of alternative labels for the concept."""
         altern_labels = []
 
         for altern_concept in self.raw_concept.findall("ConceptList//Concept[@PreferredConceptYN='N']"):
             altern_label = altern_concept.find("ConceptName//String")
-            assert(isinstance(altern_label, ET.Element))
-            altern_labels.append(altern_label.text)
+            if isinstance(altern_label, ET.Element):
+                altern_labels.append(altern_label.text)
         
         return altern_labels
 
@@ -49,8 +49,8 @@ class RawMeSHConcept:
         """Returns a list of MeSH tree numbers for the concept."""
         treenums = []
         for treenum_elem in self.raw_concept.findall("TreeNumberList//TreeNumber"):
-            assert(isinstance(treenum_elem, ET.Element))
-            treenums.append(treenum_elem.text)
+            if isinstance(treenum_elem, ET.Element):
+                treenums.append(treenum_elem.text)
 
         return treenums
 
@@ -59,13 +59,13 @@ class RawMeSHConcept:
         """Returns the preferred term's scope note (free-text narrative of its scope and meaning)."""
         
         scope_note = self.raw_concept.find("ConceptList//Concept[@PreferredConceptYN='Y']//ScopeNote")
-        if scope_note is not None:
-            return scope_note.text
+        if isinstance(scope_note, ET.Element):
+            scope_note = scope_note.text
         
         return scope_note
 
     @staticmethod
-    def fetch_mesh(source_id: str) -> dict[str, str | list]:
+    def fetch_mesh(source_id: str) -> dict[str, str | list[str]]:
         """Fetch JSON containing RDF data for a given MeSH concept."""
 
         response = requests.get(f"https://id.nlm.nih.gov/mesh/{source_id}.json")
@@ -89,8 +89,8 @@ class RawMeSHConcept:
 
         related_descriptors = []
         for desc in self.raw_concept.findall("SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"):
-            assert(isinstance(desc, ET.Element))
-            related_descriptors.append(desc.text)
+            if isinstance(desc, ET.Element):
+                related_descriptors.append(desc.text)
 
         return related_descriptors
 
