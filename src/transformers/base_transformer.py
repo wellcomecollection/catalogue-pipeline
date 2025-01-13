@@ -31,7 +31,7 @@ def _generator_to_chunks(items: Generator, chunk_size: int) -> Generator:
 
 class BaseTransformer:
     def __init__(self) -> None:
-        self.source: BaseSource = BaseSource()
+        self.source: BaseSource | JSONSource | XMLSource = BaseSource()
 
     def transform_node(self, raw_node: dict | ET.Element) -> BaseNode | None:
         """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
@@ -221,7 +221,32 @@ class BaseTransformer:
 class JSONTransformer(BaseTransformer):
     def __init__(self) -> None:
         self.source: JSONSource = JSONSource()
+    
+    def transform_node(self, raw_node: dict) -> BaseNode | None:
+        """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
+        raise NotImplementedError(
+            "Each transformer must implement a `transform_node` method."
+        )
+
+    def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
+        """Accepts a raw node from the source dataset and returns a generator of extracted edges as Pydantic models."""
+        raise NotImplementedError(
+            "Each transformer must implement an `extract_edges` method."
+        )
+
 
 class XMLTransformer(BaseTransformer):
     def __init__(self) -> None:
         self.source: XMLSource = XMLSource()
+
+    def transform_node(self, raw_node: ET.Element) -> BaseNode | None:
+        """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
+        raise NotImplementedError(
+            "Each transformer must implement a `transform_node` method."
+        )
+
+    def extract_edges(self, raw_node: ET.Element) -> Generator[BaseEdge]:
+        """Accepts a raw node from the source dataset and returns a generator of extracted edges as Pydantic models."""
+        raise NotImplementedError(
+            "Each transformer must implement an `extract_edges` method."
+        )
