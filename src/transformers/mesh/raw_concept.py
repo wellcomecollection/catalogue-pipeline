@@ -7,23 +7,28 @@ ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
 class RawMeSHConcept:
     def __init__(self, raw_concept: ET.Element):
         self.raw_concept = raw_concept
-        self.source = "mesh"
+        self.source = "nlm-mesh"
 
     @staticmethod
     def _remove_id_prefix(raw_id: str) -> str:
         """Removes prefix from MeSH descriptor (only present in JSON)."""
-
         return raw_id.removeprefix(ID_PREFIX)
 
     @property
     def source_id(self) -> str:
         """Returns MeSH descriptor (unique ID)."""
+        desc_elem = self.raw_concept.find("DescriptorUI")
+
+        assert(isinstance(desc_elem, ET.Element))
 
         return self.raw_concept.find("DescriptorUI").text
 
     @property
     def label(self) -> str:
         """Returns the concept label."""
+        label_elem = self.raw_concept.find('DescriptorName//String')
+
+        assert(isinstance(label_elem, ET.Element))
 
         return self.raw_concept.find('DescriptorName//String').text
 
@@ -33,15 +38,21 @@ class RawMeSHConcept:
         altern_labels = []
 
         for altern_concept in self.raw_concept.findall("ConceptList//Concept[@PreferredConceptYN='N']"):
-            altern_labels.append(altern_concept.find("ConceptName//String").text)
+            altern_label = altern_concept.find("ConceptName//String")
+            assert(isinstance(altern_label, ET.Element))
+            altern_labels.append(altern_label.text)
         
         return altern_labels
 
     @property
     def alternative_ids(self) -> list[str]:
         """Returns a list of MeSH tree numbers for the concept."""
+        treenums = []
+        for treenum_elem in self.raw_concept.findall("TreeNumberList//TreeNumber"):
+            assert(isinstance(treenum_elem, ET.Element))
+            treenums.append(treenum_elem.text)
 
-        return [treenum.text for treenum in self.raw_concept.findall("TreeNumberList//TreeNumber")]
+        return treenums
 
     @property
     def description(self) -> str | None:
@@ -54,7 +65,7 @@ class RawMeSHConcept:
         return scope_note
 
     @staticmethod
-    def fetch_mesh(source_id: str) -> dict:
+    def fetch_mesh(source_id: str) -> dict[str, str | list]:
         """Fetch JSON containing RDF data for a given MeSH concept."""
 
         response = requests.get(f"https://id.nlm.nih.gov/mesh/{source_id}.json")
@@ -76,12 +87,15 @@ class RawMeSHConcept:
     def related_concept_ids(self) -> list[str]:
         """Extract related MeSH descriptors."""
 
-        related_desc = self.raw_concept.findall("SeeRelatedDescriptor")
+        related_descriptors = []
+        for desc in self.raw_concept.findall("SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"):
+            assert(isinstance(desc, ET.Element))
+            related_descriptors.append(desc.text)
 
-        return [desc.find("DescriptorReferredTo//DescriptorUI").text for desc in related_desc]
+        return related_descriptors
 
     @property
     def is_geographic(self) -> bool:
         """Returns True if the node represents a geographic concept, as determined by `DescriptorClass`."""
         
-        return self.raw_concept.attrib["DescriptorClass"] == "4"
+        return self.raw_concept.attrib.get("DescriptorClass") == "4"
