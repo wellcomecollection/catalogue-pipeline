@@ -1,9 +1,9 @@
 import concurrent.futures
 import csv
+import xml.etree.ElementTree as ET
 from collections.abc import Generator
 from itertools import islice
 from typing import Any, Literal
-import xml.etree.ElementTree as ET
 
 import boto3
 import smart_open

@@ -1,6 +1,7 @@
-import requests
-from typing import Any, Literal
 import xml.etree.ElementTree as ET
+from typing import Any, Literal
+
+import requests
 
 ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
 
@@ -20,7 +21,7 @@ class RawMeSHConcept:
         """Returns MeSH descriptor (unique ID)."""
         desc_elem = self.raw_concept.find("DescriptorUI")
 
-        assert(isinstance(desc_elem, ET.Element))
+        assert isinstance(desc_elem, ET.Element)
         descriptor = desc_elem.text
         assert isinstance(descriptor, str)
 
@@ -29,9 +30,9 @@ class RawMeSHConcept:
     @property
     def label(self) -> str:
         """Returns the concept label."""
-        label_elem = self.raw_concept.find('DescriptorName//String')
+        label_elem = self.raw_concept.find("DescriptorName//String")
 
-        assert(isinstance(label_elem, ET.Element))
+        assert isinstance(label_elem, ET.Element)
         label = label_elem.text
         assert isinstance(label, str)
 
@@ -42,13 +43,15 @@ class RawMeSHConcept:
         """Returns a list of alternative labels for the concept."""
         altern_labels = []
 
-        for altern_concept in self.raw_concept.findall("ConceptList//Concept[@PreferredConceptYN='N']"):
+        for altern_concept in self.raw_concept.findall(
+            "ConceptList//Concept[@PreferredConceptYN='N']"
+        ):
             altern_label_elem = altern_concept.find("ConceptName//String")
             if isinstance(altern_label_elem, ET.Element):
                 altern_label = altern_label_elem.text
-                assert(isinstance(altern_label, str))
+                assert isinstance(altern_label, str)
                 altern_labels.append(altern_label)
-        
+
         return altern_labels
 
     @property
@@ -58,7 +61,7 @@ class RawMeSHConcept:
         for treenum_elem in self.raw_concept.findall("TreeNumberList//TreeNumber"):
             if isinstance(treenum_elem, ET.Element):
                 treenum = treenum_elem.text
-                assert(isinstance(treenum, str))
+                assert isinstance(treenum, str)
                 treenums.append(treenum)
 
         return treenums
@@ -68,10 +71,12 @@ class RawMeSHConcept:
         """Returns the preferred term's scope note (free-text narrative of its scope and meaning)."""
         scope_note = None
 
-        scope_note_elem = self.raw_concept.find("ConceptList//Concept[@PreferredConceptYN='Y']//ScopeNote")
+        scope_note_elem = self.raw_concept.find(
+            "ConceptList//Concept[@PreferredConceptYN='Y']//ScopeNote"
+        )
         if isinstance(scope_note_elem, ET.Element):
             scope_note = scope_note_elem.text
-        
+
         return scope_note
 
     @staticmethod
@@ -90,18 +95,20 @@ class RawMeSHConcept:
 
         if not isinstance(broader_desc, list):
             broader_desc = [broader_desc]
-        
+
         return [self._remove_id_prefix(desc) for desc in broader_desc]
-    
+
     @property
     def related_concept_ids(self) -> list[str]:
         """Extracts related MeSH descriptors."""
 
         related_descriptors = []
-        for desc_elem in self.raw_concept.findall("SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"):
+        for desc_elem in self.raw_concept.findall(
+            "SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"
+        ):
             if isinstance(desc_elem, ET.Element):
                 desc = desc_elem.text
-                assert(isinstance(desc, str))
+                assert isinstance(desc, str)
                 related_descriptors.append(desc)
 
         return related_descriptors
@@ -109,5 +116,5 @@ class RawMeSHConcept:
     @property
     def is_geographic(self) -> bool:
         """Returns True if the node represents a geographic concept, as determined by `DescriptorClass`."""
-        
+
         return self.raw_concept.attrib.get("DescriptorClass") == "4"

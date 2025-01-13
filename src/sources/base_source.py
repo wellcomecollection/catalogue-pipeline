@@ -1,6 +1,7 @@
+import xml.etree.ElementTree as ET
 from collections.abc import Generator
 from typing import Any
-import xml.etree.ElementTree as ET
+
 
 class BaseSource:
     def stream_raw(self) -> Generator[Any]:

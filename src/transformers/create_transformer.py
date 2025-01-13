@@ -14,7 +14,9 @@ LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.skosrdf.jsonld.gz
 
 MESH_URL = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2025.gz"
 
-TransformerType = Literal["loc_concepts", "loc_names", "loc_locations", "mesh_concepts", "mesh_locations"]
+TransformerType = Literal[
+    "loc_concepts", "loc_names", "loc_locations", "mesh_concepts", "mesh_locations"
+]
 
 
 def create_transformer(transformer_type: TransformerType) -> BaseTransformer:

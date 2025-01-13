@@ -1,8 +1,10 @@
-from collections.abc import Generator
-import requests
 import xml.etree.ElementTree as ET
+from collections.abc import Generator
+
+import requests
 
 from sources.base_source import BaseSource
+
 
 class MeSHConceptsSource(BaseSource):
     def __init__(self, url: str):
@@ -13,6 +15,4 @@ class MeSHConceptsSource(BaseSource):
         response.raw.decode_content = True
 
         events = ET.iterparse(response.raw)
-        return (
-            elem for _, elem in events if elem.tag == "DescriptorRecord"
-        )
+        return (elem for _, elem in events if elem.tag == "DescriptorRecord")

@@ -1,5 +1,5 @@
-from collections.abc import Generator
 import xml.etree.ElementTree as ET
+from collections.abc import Generator
 
 from models.graph_edge import BaseEdge
 from models.graph_node import SourceConcept
@@ -25,7 +25,7 @@ class MeSHLocationsTransformer(BaseTransformer):
             source=raw_concept.source,
             alternative_labels=raw_concept.alternative_labels,
             alternative_ids=raw_concept.alternative_ids,
-            description=raw_concept.description
+            description=raw_concept.description,
         )
 
     def extract_edges(self, raw_node: ET.Element) -> Generator[BaseEdge]:
