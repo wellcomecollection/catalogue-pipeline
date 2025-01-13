@@ -9,7 +9,7 @@ from transformers.base_transformer import BaseTransformer
 from .raw_concept import RawMeSHConcept
 
 
-class MeSHConceptsTransformer(BaseTransformer):
+class MeSHLocationsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = MeSHConceptsSource(url)
 
