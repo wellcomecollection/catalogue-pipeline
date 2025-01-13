@@ -20,8 +20,10 @@ class RawMeSHConcept:
         desc_elem = self.raw_concept.find("DescriptorUI")
 
         assert(isinstance(desc_elem, ET.Element))
+        descriptor = desc_elem.text
+        assert isinstance(descriptor, str)
 
-        return desc_elem.text
+        return descriptor
 
     @property
     def label(self) -> str:
@@ -29,8 +31,10 @@ class RawMeSHConcept:
         label_elem = self.raw_concept.find('DescriptorName//String')
 
         assert(isinstance(label_elem, ET.Element))
+        label = label_elem.text
+        assert isinstance(label, str)
 
-        return label_elem.text
+        return label
 
     @property
     def alternative_labels(self) -> list[str]:
@@ -38,9 +42,11 @@ class RawMeSHConcept:
         altern_labels = []
 
         for altern_concept in self.raw_concept.findall("ConceptList//Concept[@PreferredConceptYN='N']"):
-            altern_label = altern_concept.find("ConceptName//String")
-            if isinstance(altern_label, ET.Element):
-                altern_labels.append(altern_label.text)
+            altern_label_elem = altern_concept.find("ConceptName//String")
+            if isinstance(altern_label_elem, ET.Element):
+                altern_label = altern_label_elem.text
+                assert(isinstance(altern_label, str))
+                altern_labels.append(altern_label)
         
         return altern_labels
 
@@ -50,17 +56,20 @@ class RawMeSHConcept:
         treenums = []
         for treenum_elem in self.raw_concept.findall("TreeNumberList//TreeNumber"):
             if isinstance(treenum_elem, ET.Element):
-                treenums.append(treenum_elem.text)
+                treenum = treenum_elem.text
+                assert(isinstance(treenum, str))
+                treenums.append(treenum)
 
         return treenums
 
     @property
     def description(self) -> str | None:
         """Returns the preferred term's scope note (free-text narrative of its scope and meaning)."""
+        scope_note = None
         
-        scope_note = self.raw_concept.find("ConceptList//Concept[@PreferredConceptYN='Y']//ScopeNote")
-        if isinstance(scope_note, ET.Element):
-            scope_note = scope_note.text
+        scope_note_elem = self.raw_concept.find("ConceptList//Concept[@PreferredConceptYN='Y']//ScopeNote")
+        if isinstance(scope_note_elem, ET.Element):
+            scope_note = scope_note_elem.text
         
         return scope_note
 
@@ -88,9 +97,11 @@ class RawMeSHConcept:
         """Extract related MeSH descriptors."""
 
         related_descriptors = []
-        for desc in self.raw_concept.findall("SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"):
-            if isinstance(desc, ET.Element):
-                related_descriptors.append(desc.text)
+        for desc_elem in self.raw_concept.findall("SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"):
+            if isinstance(desc_elem, ET.Element):
+                desc = desc_elem.text
+                assert(isinstance(desc, str))
+                related_descriptors.append(desc)
 
         return related_descriptors
 
