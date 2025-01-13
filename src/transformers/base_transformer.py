@@ -13,7 +13,7 @@ from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
 from query_builders.cypher import construct_upsert_cypher_query
-from sources.base_source import BaseSource, JSONSource, XMLSource
+from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
 
 EntityType = Literal["nodes", "edges"]
