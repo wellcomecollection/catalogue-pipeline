@@ -1,4 +1,5 @@
 from collections.abc import Generator
+import xml.etree.ElementTree as ET
 
 from models.graph_edge import SourceConceptNarrowerThan
 from models.graph_node import SourceLocation
@@ -12,7 +13,7 @@ class LibraryOfCongressLocationsTransformer(BaseTransformer):
     def __init__(self, subject_headings_url: str, names_url: str):
         self.source = MultiGZipSource([subject_headings_url, names_url])
 
-    def transform_node(self, raw_node: dict) -> SourceLocation | None:
+    def transform_node(self, raw_node: dict | ET.Element) -> SourceLocation | None:
         raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or not raw_concept.is_geographic:
@@ -25,7 +26,7 @@ class LibraryOfCongressLocationsTransformer(BaseTransformer):
             alternative_labels=raw_concept.alternative_labels,
         )
 
-    def extract_edges(self, raw_node: dict) -> Generator[SourceConceptNarrowerThan]:
+    def extract_edges(self, raw_node: dict | ET.Element) -> Generator[SourceConceptNarrowerThan]:
         raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or not raw_concept.is_geographic:

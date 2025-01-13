@@ -1,4 +1,5 @@
 from collections.abc import Generator
+import xml.etree.ElementTree as ET
 
 from models.graph_edge import BaseEdge
 from models.graph_node import SourceName
@@ -12,7 +13,7 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = GZipSource(url)
 
-    def transform_node(self, raw_node: dict) -> SourceName | None:
+    def transform_node(self, raw_node: dict | ET.Element) -> SourceName | None:
         raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or raw_concept.is_geographic:
@@ -25,6 +26,6 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
             alternative_labels=raw_concept.alternative_labels,
         )
 
-    def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
+    def extract_edges(self, raw_node: dict | ET.Element) -> Generator[BaseEdge]:
         # At the moment there are no edges to extract. Return an empty generator.
         yield from ()
