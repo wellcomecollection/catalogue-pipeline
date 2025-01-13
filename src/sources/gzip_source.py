@@ -4,10 +4,10 @@ from collections.abc import Generator
 
 import requests
 
-from .base_source import BaseSource
+from .base_source import JSONSource
 
 
-class GZipSource(BaseSource):
+class GZipSource(JSONSource):
     def __init__(self, url: str):
         self.url = url
 
@@ -19,7 +19,7 @@ class GZipSource(BaseSource):
                 yield json.loads(line_bytes.decode("utf8"))
 
 
-class MultiGZipSource(BaseSource):
+class MultiGZipSource(JSONSource):
     def __init__(self, urls: list[str]):
         self.urls = urls
 

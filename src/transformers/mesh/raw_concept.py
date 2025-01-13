@@ -6,7 +6,7 @@ ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
 
 
 class RawMeSHConcept:
-    def __init__(self, raw_concept: dict | ET.Element):
+    def __init__(self, raw_concept: ET.Element):
         self.raw_concept = raw_concept
 
     @staticmethod

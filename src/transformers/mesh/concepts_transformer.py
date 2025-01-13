@@ -4,16 +4,16 @@ import xml.etree.ElementTree as ET
 from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
 from models.graph_node import SourceConcept
 from sources.mesh.concepts_source import MeSHConceptsSource
-from transformers.base_transformer import BaseTransformer
+from transformers.base_transformer import XMLTransformer
 
 from .raw_concept import RawMeSHConcept
 
 
-class MeSHConceptsTransformer(BaseTransformer):
+class MeSHConceptsTransformer(XMLTransformer):
     def __init__(self, url: str):
         self.source = MeSHConceptsSource(url)
 
-    def transform_node(self, raw_node: dict | ET.Element) -> SourceConcept | None:
+    def transform_node(self, raw_node: ET.Element) -> SourceConcept | None:
         raw_concept = RawMeSHConcept(raw_node)
 
         if raw_concept.is_geographic:
@@ -28,7 +28,7 @@ class MeSHConceptsTransformer(BaseTransformer):
             description=raw_concept.description
         )
 
-    def extract_edges(self, raw_node: dict | ET.Element) -> Generator[SourceConceptHasParent | SourceConceptRelatedTo]:
+    def extract_edges(self, raw_node: ET.Element) -> Generator[SourceConceptHasParent | SourceConceptRelatedTo]:
         raw_concept = RawMeSHConcept(raw_node)
 
         if raw_concept.is_geographic:

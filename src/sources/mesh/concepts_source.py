@@ -2,9 +2,9 @@ from collections.abc import Generator
 import requests
 import xml.etree.ElementTree as ET
 
-from sources.base_source import BaseSource
+from sources.base_source import XMLSource
 
-class MeSHConceptsSource(BaseSource):
+class MeSHConceptsSource(XMLSource):
     def __init__(self, url: str):
         self.url = url
 

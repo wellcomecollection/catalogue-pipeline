@@ -1,19 +1,18 @@
 from collections.abc import Generator
-import xml.etree.ElementTree as ET
 
 from models.graph_edge import SourceConceptNarrowerThan
 from models.graph_node import SourceConcept
 from sources.gzip_source import GZipSource
-from transformers.base_transformer import BaseTransformer
+from transformers.base_transformer import JSONTransformer
 
 from .raw_concept import RawLibraryOfCongressConcept
 
 
-class LibraryOfCongressConceptsTransformer(BaseTransformer):
+class LibraryOfCongressConceptsTransformer(JSONTransformer):
     def __init__(self, url: str):
         self.source = GZipSource(url)
 
-    def transform_node(self, raw_node: dict | ET.Element) -> SourceConcept | None:
+    def transform_node(self, raw_node: dict) -> SourceConcept | None:
         raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or raw_concept.is_geographic:
@@ -26,7 +25,7 @@ class LibraryOfCongressConceptsTransformer(BaseTransformer):
             alternative_labels=raw_concept.alternative_labels,
         )
 
-    def extract_edges(self, raw_node: dict | ET.Element) -> Generator[SourceConceptNarrowerThan]:
+    def extract_edges(self, raw_node: dict) -> Generator[SourceConceptNarrowerThan]:
         raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or raw_concept.is_geographic:

@@ -1,5 +1,4 @@
 from typing import Literal
-import xml.etree.ElementTree as ET
 
 ID_PREFIXES_TO_REMOVE = (
     "/authorities/subjects/",
@@ -9,7 +8,7 @@ ID_PREFIXES_TO_REMOVE = (
 
 
 class RawLibraryOfCongressConcept:
-    def __init__(self, raw_concept: dict | ET.Element):
+    def __init__(self, raw_concept: dict):
         self.raw_concept = raw_concept
         self._raw_concept_node = self._extract_concept_node()
 
