@@ -1,13 +1,13 @@
 import requests
+from typing import Literal
 import xml.etree.ElementTree as ET
 
 ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
 
 
 class RawMeSHConcept:
-    def __init__(self, raw_concept: ET.Element):
+    def __init__(self, raw_concept: dict | ET.Element):
         self.raw_concept = raw_concept
-        self.source = "nlm-mesh"
 
     @staticmethod
     def _remove_id_prefix(raw_id: str) -> str:
@@ -66,7 +66,7 @@ class RawMeSHConcept:
     def description(self) -> str | None:
         """Returns the preferred term's scope note (free-text narrative of its scope and meaning)."""
         scope_note = None
-        
+
         scope_note_elem = self.raw_concept.find("ConceptList//Concept[@PreferredConceptYN='Y']//ScopeNote")
         if isinstance(scope_note_elem, ET.Element):
             scope_note = scope_note_elem.text
@@ -110,3 +110,7 @@ class RawMeSHConcept:
         """Returns True if the node represents a geographic concept, as determined by `DescriptorClass`."""
         
         return self.raw_concept.attrib.get("DescriptorClass") == "4"
+    
+    @property
+    def source(self) -> Literal["nlm-mesh"]:
+        return "nlm-mesh"
