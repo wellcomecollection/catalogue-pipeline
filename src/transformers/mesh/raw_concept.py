@@ -71,6 +71,14 @@ class RawMeSHConcept:
             broader_desc = [broader_desc]
         
         return [self._remove_id_prefix(desc) for desc in broader_desc]
+    
+    @property
+    def related_concept_ids(self) -> list[str]:
+        """Extract related MeSH descriptors."""
+
+        related_desc = self.raw_concept.findall("SeeRelatedDescriptor")
+
+        return [desc.find("DescriptorReferredTo//DescriptorUI").text for desc in related_desc]
 
     @property
     def is_geographic(self) -> bool:
