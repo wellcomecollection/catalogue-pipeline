@@ -3,12 +3,12 @@ from collections.abc import Generator
 from models.graph_edge import BaseEdge
 from models.graph_node import SourceName
 from sources.gzip_source import GZipSource
-from transformers.base_transformer import JSONTransformer
+from transformers.base_transformer import BaseTransformer
 
 from .raw_concept import RawLibraryOfCongressConcept
 
 
-class LibraryOfCongressNamesTransformer(JSONTransformer):
+class LibraryOfCongressNamesTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = GZipSource(url)
 

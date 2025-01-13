@@ -6,12 +6,12 @@ class BaseSource:
         """Returns a generator of dictionaries or XML Elements, each corresponding to a raw entity extracted from the source."""
         raise NotImplementedError("Each source must implement a `stream_raw` method.")
 
-class JSONSource:
+class JSONSource(BaseSource):
     def stream_raw(self) -> Generator[dict]:
         """Returns a generator of dictionaries, each corresponding to a raw entity extracted from the source."""
         raise NotImplementedError("Each source must implement a `stream_raw` method.")
     
-class XMLSource:
+class XMLSource(BaseSource):
     def stream_raw(self) -> Generator[ET.Element]:
         """Returns a generator of XML Elements, each corresponding to a raw entity extracted from the source."""
         raise NotImplementedError("Each source must implement a `stream_raw` method.")

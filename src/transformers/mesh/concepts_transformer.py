@@ -4,12 +4,12 @@ import xml.etree.ElementTree as ET
 from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
 from models.graph_node import SourceConcept
 from sources.mesh.concepts_source import MeSHConceptsSource
-from transformers.base_transformer import XMLTransformer
+from transformers.base_transformer import BaseTransformer
 
 from .raw_concept import RawMeSHConcept
 
 
-class MeSHConceptsTransformer(XMLTransformer):
+class MeSHConceptsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = MeSHConceptsSource(url)
 
