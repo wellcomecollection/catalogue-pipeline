@@ -404,7 +404,9 @@ class WorkMatcherTest
                         _ == SubgraphId(idA, idB)
                       ) == 0
                     ) {
-                      while (!cHasReadGraph) {}
+                      eventually(timeout = timeout(5 seconds)) {
+                        if (!cHasReadGraph) throw new Exception("not yet")
+                      }
                     }
 
                     // (**) We don't let the update to 'C' start writing graph updates until
@@ -417,7 +419,10 @@ class WorkMatcherTest
                       )) &&
                       createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 1
                     ) {
-                      while (locks.contains(idA.underlying)) {}
+                      eventually(timeout = timeout(5 seconds)) {
+                        if (locks.contains(idA.underlying))
+                          throw new Exception("not yet")
+                      }
                     }
                     createdLocksHistory = createdLocksHistory :+ id
                   }
