@@ -89,47 +89,25 @@ class RawLibraryOfCongressConcept:
 
         return [self._extract_label(raw_alternative_labels)]
 
-    @property
-    def broader_concept_ids(self) -> list[str]:
-        """Returns a list of IDs representing concepts which are broader than the current concept."""
+    def linked_concepts_ids(self, sko_link: str) -> list[str]:
         assert self._raw_concept_node is not None
 
-        broader_concepts = self._raw_concept_node.get("skos:broader", [])
+        linked_concepts = self._raw_concept_node.get(f"skos:{sko_link}", [])
 
-        # Sometimes broader concepts are returned as a list of concepts, and sometimes as just a single JSON
-        if isinstance(broader_concepts, dict):
-            broader_concepts = [broader_concepts]
+        # Sometimes linked concepts are returned as a list of concepts, and sometimes as just a single JSON
+        if isinstance(linked_concepts, dict):
+            linked_concepts = [linked_concepts]
 
-        broader_ids = []
-        for concept in broader_concepts:
-            # Some broader concepts have IDs in the format `_:n<some_hexadecimal_string>`.
+        linked_ids = []
+        for concept in linked_concepts:
+            # Some linked concepts have IDs in the format `_:n<some_hexadecimal_string>`.
             # These IDs do not exist in the LoC source files or the LoC website, so we filter them out.
             if concept["@id"].startswith("_:n"):
                 continue
 
-            broader_ids.append(self._remove_id_prefix(concept["@id"]))
+            linked_ids.append(self._remove_id_prefix(concept["@id"]))
 
-        return broader_ids
-    
-    @property
-    def related_concept_ids(self) -> list[str]:
-        """Returns a list of IDs representing concepts which are related to the current concept."""
-        assert self._raw_concept_node is not None
-
-        related_concepts = self._raw_concept_node.get("skos:related", [])
-        # Sometimes related concepts are returned as a list of concepts, and sometimes as just a single JSON
-        if isinstance(related_concepts, dict):
-            related_concepts = [related_concepts]
-
-        related_ids = []
-        for concept in related_concepts:
-            # Some related concepts have IDs in the format `_:n<some_hexadecimal_string>`.
-            # These IDs do not exist in the LoC source files or the LoC website, so we filter them out.
-            if concept["@id"].startswith("_:n"):
-                continue
-
-            related_ids.append(self._remove_id_prefix(concept["@id"]))
-        return related_ids
+        return linked_ids
 
     @property
     def is_geographic(self) -> bool:

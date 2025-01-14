@@ -30,13 +30,13 @@ class LibraryOfCongressConceptsTransformer(BaseTransformer):
 
         if raw_concept.exclude() or raw_concept.is_geographic:
             return
-
-        for broader_id in raw_concept.broader_concept_ids:
+        
+        for broader_id in raw_concept.linked_concepts_ids("broader"):
             yield SourceConceptNarrowerThan(
                 from_id=raw_concept.source_id, to_id=broader_id
             )
 
-        for related_id in raw_concept.related_concept_ids:
+        for related_id in raw_concept.linked_concepts_ids("related"):
             yield SourceConceptRelatedTo(
                 from_id=raw_concept.source_id, to_id=related_id
             )
