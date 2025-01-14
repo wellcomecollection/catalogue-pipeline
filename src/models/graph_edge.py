@@ -10,7 +10,6 @@ class BaseEdge(BaseModel):
     directed: bool
     attributes: dict = {}
 
-
 class SourceConceptNarrowerThan(BaseEdge):
     from_type: str = "SourceConcept"
     to_type: str = "SourceConcept"

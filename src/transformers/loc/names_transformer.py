@@ -29,7 +29,7 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
         raw_concept = RawLibraryOfCongressConcept(raw_node)
         
         if raw_concept.exclude() or not raw_concept.is_geographic:
-            yield from ()
+            return
 
         for related_id in raw_concept.related_concept_ids:
             yield SourceConceptRelatedTo(
