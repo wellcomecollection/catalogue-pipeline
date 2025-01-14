@@ -33,9 +33,6 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
             yield from ()
 
         for related_id in raw_concept.related_concept_ids:
-            print(SourceConceptRelatedTo(
-                from_id=raw_concept.source_id, to_id=related_id
-            ))
             yield SourceConceptRelatedTo(
                 from_id=raw_concept.source_id, to_id=related_id
             )

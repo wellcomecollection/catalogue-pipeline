@@ -3,6 +3,7 @@ from typing import Literal
 ID_PREFIXES_TO_REMOVE = (
     "/authorities/subjects/",
     "http://id.loc.gov/authorities/subjects/",
+    "http://id.loc.gov/authorities/names/",
     "/authorities/names/",
 )
 
