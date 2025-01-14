@@ -380,13 +380,13 @@ class WorkMatcherTest
             //        do so until the update to 'A' is finished. (**)
             //
             var createdLocksHistory: List[String] = List()
-            var findAffectedWorksHistory: List[Set[CanonicalId]] = List()
+            var cHasReadGraph = false
 
             val workGraphStore = new WorkGraphStore(workNodeDao) {
               override def findAffectedWorks(
                 ids: Set[CanonicalId]
               ): Future[Set[WorkNode]] = {
-                findAffectedWorksHistory = findAffectedWorksHistory :+ ids
+                if (ids == Set(idB, idC)) cHasReadGraph = true
                 super.findAffectedWorks(ids)
               }
             }
@@ -401,7 +401,7 @@ class WorkMatcherTest
                       _ == SubgraphId(idA, idB)
                     ) == 1
                   ) {
-                    while (!findAffectedWorksHistory.contains(Set(idB, idC))) {}
+                    while (!cHasReadGraph) {}
                   }
 
                   // (**) We don't let the update to 'C' start writing graph updates until
