@@ -126,7 +126,6 @@ class RawLibraryOfCongressConcept:
             # Some related concepts have IDs in the format `_:n<some_hexadecimal_string>`.
             # These IDs do not exist in the LoC source files or the LoC website, so we filter them out.
             if concept["@id"].startswith("_:n"):
-                print("concept has IDs in the format `_:n<some_hexadecimal_string>`")
                 continue
 
             related_ids.append(self._remove_id_prefix(concept["@id"]))

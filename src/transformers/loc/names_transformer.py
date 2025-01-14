@@ -1,7 +1,6 @@
 from collections.abc import Generator
 
 from models.graph_edge import SourceConceptRelatedTo
-from models.graph_edge import BaseEdge
 from models.graph_node import SourceName
 from sources.gzip_source import GZipSource
 from transformers.base_transformer import BaseTransformer
