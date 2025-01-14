@@ -23,7 +23,7 @@ def handler(
         f"transformer and streaming them into {stream_destination}."
     )
 
-    transformer: BaseTransformer = create_transformer(transformer_type)
+    transformer: BaseTransformer = create_transformer(transformer_type, entity_type)
 
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)

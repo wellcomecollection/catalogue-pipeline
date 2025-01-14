@@ -1,13 +1,13 @@
 from models.graph_node import SourceConcept
-from sources.wikidata.concepts_source import WikidataConceptsSource
+from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from transformers.base_transformer import BaseTransformer
 
 from .raw_concept import RawWikidataConcept
 
 
 class WikidataConceptsTransformer(BaseTransformer):
-    def __init__(self):
-        self.source = WikidataConceptsSource("concepts", "loc")
+    def __init__(self, entity_type):
+        self.source = WikidataLinkedOntologySource("concepts", "loc", entity_type)
 
     def transform_node(self, raw_node: dict) -> SourceConcept | None:
         raw_concept = RawWikidataConcept(raw_node)
