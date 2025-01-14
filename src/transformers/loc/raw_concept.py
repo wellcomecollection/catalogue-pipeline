@@ -109,6 +109,27 @@ class RawLibraryOfCongressConcept:
             broader_ids.append(self._remove_id_prefix(concept["@id"]))
 
         return broader_ids
+    
+    @property
+    def related_concept_ids(self) -> list[str]:
+        """Returns a list of IDs representing concepts which are related to the current concept."""
+        assert self._raw_concept_node is not None
+
+        related_concepts = self._raw_concept_node.get("skos:related", [])
+        # Sometimes related concepts are returned as a list of concepts, and sometimes as just a single JSON
+        if isinstance(related_concepts, dict):
+            related_concepts = [related_concepts]
+
+        related_ids = []
+        for concept in related_concepts:
+            # Some related concepts have IDs in the format `_:n<some_hexadecimal_string>`.
+            # These IDs do not exist in the LoC source files or the LoC website, so we filter them out.
+            if concept["@id"].startswith("_:n"):
+                print("concept has IDs in the format `_:n<some_hexadecimal_string>`")
+                continue
+
+            related_ids.append(self._remove_id_prefix(concept["@id"]))
+        return related_ids
 
     @property
     def is_geographic(self) -> bool:

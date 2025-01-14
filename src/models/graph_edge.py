@@ -16,3 +16,9 @@ class SourceConceptNarrowerThan(BaseEdge):
     to_type: str = "SourceConcept"
     relationship: str = "NARROWER_THAN"
     directed: bool = True
+
+class SourceConceptRelatedTo(BaseEdge):
+    from_type: str = "SourceConcept"
+    to_type: str = "SourceConcept"
+    relationship: str = "RELATED_TO"
+    directed: bool = True
