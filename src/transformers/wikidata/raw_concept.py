@@ -93,13 +93,23 @@ class RawWikidataLocation(RawWikidataConcept):
 
 
 class RawWikidataName(RawWikidataConcept):
+    def _extract_date(self, field_name: str):
+        date_value = self._extract_optional_field_value(field_name)
+
+        # When a date is unknown, sometimes Wikidata returns a URL instead of a valid date, such as
+        # 'http://www.wikidata.org/.well-known/genid/42feb541ed97156abba749622d33f2d9'. When this happens, return None.
+        if date_value is None or date_value.startswith("http"):
+            return None
+
+        return date_value
+
     @property
     def date_of_birth(self) -> str | None:
-        return self._extract_optional_field_value("dateOfBirthLabel")
+        return self._extract_date("dateOfBirthLabel")
 
     @property
     def date_of_death(self) -> str | None:
-        return self._extract_optional_field_value("dateOfDeathLabel")
+        return self._extract_date("dateOfDeathLabel")
 
     @property
     def place_of_birth(self) -> str | None:
