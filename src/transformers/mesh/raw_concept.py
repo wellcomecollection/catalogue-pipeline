@@ -3,12 +3,15 @@ from typing import Any, Literal
 
 import requests
 
+from utils.xml import assert_get_text
+
 ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
 
 
 class RawMeSHConcept:
-    def __init__(self, raw_concept: ET.Element):
-        self.raw_concept = raw_concept
+    def __init__(self, raw_concept: tuple[ET.Element, dict[str,str]]):
+        self.raw_concept = raw_concept[0]
+        self.treenum_lookup = raw_concept[1]
         self.source: Literal["nlm-mesh"] = "nlm-mesh"
 
     @staticmethod
@@ -19,28 +22,22 @@ class RawMeSHConcept:
     @property
     def source_id(self) -> str:
         """Returns MeSH descriptor (unique ID)."""
-        desc_elem = self.raw_concept.find("DescriptorUI")
+        descriptor_elem = self.raw_concept.find("DescriptorUI")
+        source_id = assert_get_text(descriptor_elem)
 
-        assert isinstance(desc_elem, ET.Element)
-        descriptor = desc_elem.text
-        assert isinstance(descriptor, str)
-
-        return descriptor
+        return source_id
 
     @property
     def label(self) -> str:
         """Returns the concept label."""
         label_elem = self.raw_concept.find("DescriptorName//String")
-
-        assert isinstance(label_elem, ET.Element)
-        label = label_elem.text
-        assert isinstance(label, str)
+        label = assert_get_text(label_elem)
 
         return label
 
     @property
     def alternative_labels(self) -> list[str]:
-        """Returns a list of alternative labels for the concept."""
+        """Returns a list of alternative labels for the concept, if available."""
         altern_labels = []
 
         for altern_concept in self.raw_concept.findall(
@@ -49,8 +46,8 @@ class RawMeSHConcept:
             altern_label_elem = altern_concept.find("ConceptName//String")
             if isinstance(altern_label_elem, ET.Element):
                 altern_label = altern_label_elem.text
-                assert isinstance(altern_label, str)
-                altern_labels.append(altern_label)
+                if isinstance(altern_label, str):
+                    altern_labels.append(altern_label)
 
         return altern_labels
 
@@ -58,11 +55,9 @@ class RawMeSHConcept:
     def alternative_ids(self) -> list[str]:
         """Returns a list of MeSH tree numbers for the concept."""
         treenums = []
+
         for treenum_elem in self.raw_concept.findall("TreeNumberList//TreeNumber"):
-            if isinstance(treenum_elem, ET.Element):
-                treenum = treenum_elem.text
-                assert isinstance(treenum, str)
-                treenums.append(treenum)
+            treenums.append(assert_get_text(treenum_elem))
 
         return treenums
 
@@ -80,23 +75,27 @@ class RawMeSHConcept:
         return scope_note
 
     @staticmethod
-    def fetch_mesh(source_id: str) -> Any:
-        """Fetches JSON containing RDF data for a given MeSH concept."""
-
-        response = requests.get(f"https://id.nlm.nih.gov/mesh/{source_id}.json")
-        return response.json()
+    def _get_parent_treenum(treenum: str) -> str:
+        """
+        Extracts the parent tree number by removing all digits after
+        the child tree number's last "."
+        """
+        parent_treenum = treenum.split(".")[:-1]
+        return ".".join(parent_treenum)
 
     @property
     def parent_concept_ids(self) -> list[str]:
-        """Extracts parent MeSH descriptors from JSON."""
+        """Extracts parent MeSH descriptors from tree number lookup."""
+        parent_source_ids = set()
 
-        mesh_data = self.fetch_mesh(self.source_id)
-        broader_desc = mesh_data.get("broaderDescriptor", [])
-
-        if not isinstance(broader_desc, list):
-            broader_desc = [broader_desc]
-
-        return [self._remove_id_prefix(desc) for desc in broader_desc]
+        for treenum in self.alternative_ids:
+            # Make sure the child tree number is not at the top level of the hierarchy
+            if "." in treenum:
+                parent_treenum = self._get_parent_treenum(treenum)
+                parent_source_id = self.treenum_lookup[parent_treenum]
+                parent_source_ids.add(parent_source_id)
+        
+        return list(parent_source_ids)
 
     @property
     def related_concept_ids(self) -> list[str]:
@@ -106,10 +105,7 @@ class RawMeSHConcept:
         for desc_elem in self.raw_concept.findall(
             "SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"
         ):
-            if isinstance(desc_elem, ET.Element):
-                desc = desc_elem.text
-                assert isinstance(desc, str)
-                related_descriptors.append(desc)
+            related_descriptors.append(assert_get_text(desc_elem))
 
         return related_descriptors
 
