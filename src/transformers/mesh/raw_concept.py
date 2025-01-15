@@ -9,7 +9,7 @@ ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
 
 
 class RawMeSHConcept:
-    def __init__(self, raw_concept: tuple[ET.Element, dict[str,str]]):
+    def __init__(self, raw_concept: tuple[ET.Element, dict[str, str]]):
         self.raw_concept = raw_concept[0]
         self.treenum_lookup = raw_concept[1]
         self.source: Literal["nlm-mesh"] = "nlm-mesh"
@@ -88,7 +88,7 @@ class RawMeSHConcept:
         """
         Extracts parent MeSH descriptors from the tree number lookup.
         This is possible because each concept's MeSH tree number encodes
-        its hierarchical relationships, e.g.: The parent tree number 
+        its hierarchical relationships, e.g.: The parent tree number
         of a MeSH term with tree number "A10.690.552.500" is "A10.690.552"
         """
         parent_source_ids = set()
@@ -99,7 +99,7 @@ class RawMeSHConcept:
                 parent_treenum = self._get_parent_treenum(treenum)
                 parent_source_id = self.treenum_lookup[parent_treenum]
                 parent_source_ids.add(parent_source_id)
-        
+
         return list(parent_source_ids)
 
     @property

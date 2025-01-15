@@ -13,7 +13,9 @@ class MeSHLocationsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = MeSHConceptsSource(url)
 
-    def transform_node(self, raw_node: tuple[ET.Element, dict[str,str]]) -> SourceConcept | None:
+    def transform_node(
+        self, raw_node: tuple[ET.Element, dict[str, str]]
+    ) -> SourceConcept | None:
         raw_concept = RawMeSHConcept(raw_node)
 
         if not raw_concept.is_geographic:
@@ -28,6 +30,8 @@ class MeSHLocationsTransformer(BaseTransformer):
             description=raw_concept.description,
         )
 
-    def extract_edges(self, raw_node: tuple[ET.Element, dict[str,str]]) -> Generator[BaseEdge]:
+    def extract_edges(
+        self, raw_node: tuple[ET.Element, dict[str, str]]
+    ) -> Generator[BaseEdge]:
         """There are no edges to extract from MeSH Locations."""
         yield from ()

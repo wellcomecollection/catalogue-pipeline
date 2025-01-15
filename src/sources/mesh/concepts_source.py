@@ -24,7 +24,7 @@ class MeSHConceptsSource(BaseSource):
 
     def _treenum_lookup(self) -> dict[str, str]:
         """
-        Creates lookup for MeSH tree numbers. This is needed to extract parent MeSH IDs, 
+        Creates lookup for MeSH tree numbers. This is needed to extract parent MeSH IDs,
         which are not directly available in the XML DescriptorRecord.
         """
         treenum_lookup = {}
@@ -34,7 +34,7 @@ class MeSHConceptsSource(BaseSource):
                 treenum_lookup[assert_get_text(treenum)] = assert_get_text(desc_ui)
         return treenum_lookup
 
-    def stream_raw(self) -> Generator[tuple[ET.Element, dict[str,str]]]:
+    def stream_raw(self) -> Generator[tuple[ET.Element, dict[str, str]]]:
         """Streams raw nodes together with tree number lookup."""
         for elem in self.mesh_data.iter():
             if elem.tag == "DescriptorRecord":
