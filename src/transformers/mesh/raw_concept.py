@@ -85,7 +85,12 @@ class RawMeSHConcept:
 
     @property
     def parent_concept_ids(self) -> list[str]:
-        """Extracts parent MeSH descriptors from tree number lookup."""
+        """
+        Extracts parent MeSH descriptors from the tree number lookup.
+        This is possible because each concept's MeSH tree number encodes
+        its hierarchical relationships, e.g.: The parent tree number 
+        of a MeSH term with tree number "A10.690.552.500" is "A10.690.552"
+        """
         parent_source_ids = set()
 
         for treenum in self.alternative_ids:
