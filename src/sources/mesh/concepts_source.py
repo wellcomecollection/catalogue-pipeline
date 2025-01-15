@@ -33,7 +33,7 @@ class MeSHConceptsSource(BaseSource):
             desc_ui = descriptor.find("DescriptorUI")
             for treenum in descriptor.findall("TreeNumberList//TreeNumber"):
                 treenum_lookup[assert_get_text(treenum)] = assert_get_text(desc_ui)
-        
+
         return treenum_lookup
 
     def stream_raw(self) -> Generator[tuple[ET.Element, dict[str, str]]]:
