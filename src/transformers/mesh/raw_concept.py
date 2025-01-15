@@ -1,8 +1,6 @@
 import xml.etree.ElementTree as ET
 from typing import Any, Literal
 
-import requests
-
 from utils.xml import assert_get_text
 
 
@@ -11,11 +9,6 @@ class RawMeSHConcept:
         self.raw_concept = raw_concept[0]
         self.treenum_lookup = raw_concept[1]
         self.source: Literal["nlm-mesh"] = "nlm-mesh"
-
-    @staticmethod
-    def _remove_id_prefix(raw_id: str) -> str:
-        """Removes prefix from MeSH descriptor (only present in extra JSON)."""
-        return raw_id.removeprefix(ID_PREFIX)
 
     @property
     def source_id(self) -> str:
