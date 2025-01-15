@@ -5,8 +5,6 @@ import requests
 
 from utils.xml import assert_get_text
 
-ID_PREFIX = "http://id.nlm.nih.gov/mesh/"
-
 
 class RawMeSHConcept:
     def __init__(self, raw_concept: tuple[ET.Element, dict[str, str]]):
