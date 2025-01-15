@@ -32,17 +32,11 @@ class LibraryOfCongressLocationsTransformer(BaseTransformer):
             return
 
         for broader_id in raw_concept.broader_concept_ids:
-            print(SourceConceptNarrowerThan(
-                from_id=raw_concept.source_id, to_id=broader_id
-            ))
             yield SourceConceptNarrowerThan(
                 from_id=raw_concept.source_id, to_id=broader_id
             )
         
         for related_id in raw_concept.related_concept_ids:
-            print(SourceConceptRelatedTo(
-                from_id=raw_concept.source_id, to_id=related_id
-            ))
             yield SourceConceptRelatedTo(
                 from_id=raw_concept.source_id, to_id=related_id
             )
