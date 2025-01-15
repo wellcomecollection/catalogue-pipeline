@@ -1,6 +1,8 @@
 from models.graph_node import SourceConcept
+from models.graph_edge import SourceConceptSameAs
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from transformers.base_transformer import BaseTransformer
+from collections.abc import Generator
 
 from .raw_concept import RawWikidataConcept
 
@@ -18,4 +20,16 @@ class WikidataConceptsTransformer(BaseTransformer):
             source=raw_concept.source,
             alternative_labels=raw_concept.alternative_labels,
             description=raw_concept.description,
+        )
+
+    def extract_edges(self, raw_edge: dict) -> Generator[SourceConceptSameAs]:
+        yield SourceConceptSameAs(
+            from_id=raw_edge["linked_id"],
+            to_id=raw_edge["wikidata_id"],
+            attributes={"source": "wikidata"},
+        )
+        yield SourceConceptSameAs(
+            from_id=raw_edge["wikidata_id"],
+            to_id=raw_edge["linked_id"],
+            attributes={"source": "wikidata"},
         )

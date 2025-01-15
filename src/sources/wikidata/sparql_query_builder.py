@@ -56,15 +56,18 @@ class SparqlQueryBuilder:
 
     @staticmethod
     def get_all_ids_query(linked_ontology: OntologyType) -> str:
+        """
+        Return a query to retrieve the ids of _all_ Wikidata items referencing an id from the `linked_ontology`.
+        """
         if linked_ontology == "loc":
-            field_filter = "?item p:P244/ps:P244 ?linkedId."
+            field_filter = "?item wdt:P244 _:anyValueP244."
         elif linked_ontology == "mesh":
-            field_filter = "?item p:P486/ps:P486 ?linkedId."
+            field_filter = "?item wdt:P486 _:anyValueP486."
         else:
             raise ValueError(f"Invalid linked ontology type: {linked_ontology}")
 
         get_ids_query = f"""
-            SELECT ?item ?linkedId WHERE {{      
+            SELECT ?item WHERE {{      
                 {field_filter}
             }}
         """
@@ -73,6 +76,10 @@ class SparqlQueryBuilder:
 
     @classmethod
     def get_items_query(cls, item_ids: list[str], node_type: NodeType):
+        """
+        Given a list of Wikidata `item_ids`, return a query to retrieve all required Wikidata fields for each id
+        in the list.
+        """
         ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
 
         query = f"""
@@ -81,6 +88,31 @@ class SparqlQueryBuilder:
               SERVICE wikibase:label {{ bd:serviceParam wikibase:language "en". }}
               VALUES ?item {{ {ids_clause} }}
               {cls._get_formatted_field_mappings(node_type)}
+            }}
+        """
+
+        return query
+
+    @classmethod
+    def get_linked_ids_query(cls, item_ids: list[str], linked_ontology: OntologyType):
+        """
+        Given a list of Wikidata `item_ids`, return a query to retrieve all linked ontology ids referenced by each
+        item in the list.
+        """
+        if linked_ontology == "loc":
+            field_filter = "?item p:P244/ps:P244 ?linkedId."
+        elif linked_ontology == "mesh":
+            field_filter = "?item p:P486/ps:P486 ?linkedId."
+        else:
+            raise ValueError(f"Invalid linked ontology type: {linked_ontology}")
+
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+
+        query = f"""
+            SELECT DISTINCT ?item ?linkedId 
+            WHERE {{
+              VALUES ?item {{ {ids_clause} }}
+              {field_filter}
             }}
         """
 
