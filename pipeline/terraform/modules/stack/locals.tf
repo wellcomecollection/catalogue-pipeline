@@ -1,12 +1,11 @@
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
-  es_works_source_index              = "works-source-${var.pipeline_date}"
-  es_works_merged_index              = "works-merged-${var.pipeline_date}"
-  es_works_identified_index          = "works-identified-${var.pipeline_date}"
-  es_works_denormalised_index        = "works-denormalised-${var.pipeline_date}"
-  es_lambda_works_denormalised_index = "works-denormalised-lambda-${var.pipeline_date}"
-  es_works_index                     = "works-indexed-${var.pipeline_date}"
+  es_works_source_index       = "works-source-${var.pipeline_date}"
+  es_works_merged_index       = "works-merged-${var.pipeline_date}"
+  es_works_identified_index   = "works-identified-${var.pipeline_date}"
+  es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
+  es_works_index              = "works-indexed-${var.pipeline_date}"
 
   es_images_initial_index   = "images-initial-${var.pipeline_date}"
   es_images_augmented_index = "images-augmented-${var.pipeline_date}"
@@ -17,8 +16,6 @@ locals {
 
   # The max number of connections allowed by the instance.
   # specified at /infrastructure/critical/rds_id_minter.tf
-  base_rds_instances             = 1
-  id_minter_rds_max_connections  = local.base_rds_instances * 45
   id_minter_task_max_connections = min(9, local.max_capacity)
 
   # We don't want to overload our databases if we're not reindexing
