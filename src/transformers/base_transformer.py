@@ -1,8 +1,9 @@
 import concurrent.futures
 import csv
+import xml.etree.ElementTree as ET
 from collections.abc import Generator
 from itertools import islice
-from typing import Literal
+from typing import Any, Literal
 
 import boto3
 import smart_open
@@ -24,13 +25,13 @@ class BaseTransformer:
     def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
 
-    def transform_node(self, raw_node: dict) -> BaseNode | None:
+    def transform_node(self, raw_node: Any) -> BaseNode | None:
         """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
         raise NotImplementedError(
             "Each transformer must implement a `transform_node` method."
         )
 
-    def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
+    def extract_edges(self, raw_node: Any) -> Generator[BaseEdge]:
         """Accepts a raw node from the source dataset and returns a generator of extracted edges as Pydantic models."""
         raise NotImplementedError(
             "Each transformer must implement an `extract_edges` method."
