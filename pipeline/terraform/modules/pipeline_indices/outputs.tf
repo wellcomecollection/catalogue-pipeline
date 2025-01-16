@@ -2,7 +2,6 @@ output "indices" {
   value = {
     source              = module.source_index
     denormalised        = module.denormalised_index
-    lambda_denormalised = module.lambda_denormalised_index
     images_initial      = module.images_initial_index
     images_augmented    = module.images_augmented_index
     images_indexed      = module.images_indexed_index
@@ -16,7 +15,6 @@ output "index_names" {
   value = {
     source              = module.source_index.name
     denormalised        = module.denormalised_index.name
-    lambda_denormalised = module.lambda_denormalised_index.name
     images_initial      = module.images_initial_index.name
     images_augmented    = module.images_augmented_index.name
     images_indexed      = module.images_indexed_index.name

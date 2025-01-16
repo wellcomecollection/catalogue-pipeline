@@ -6,7 +6,7 @@ module "relation_embedder_sub" {
   reindexing_state = var.reindexing_state
 
   es_works_merged_index               = local.es_works_merged_index
-  es_works_denormalised_index         = local.es_lambda_works_denormalised_index
+  es_works_denormalised_index         = local.es_works_denormalised_index
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
 
   # path_concatenator
