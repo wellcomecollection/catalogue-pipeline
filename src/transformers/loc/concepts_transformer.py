@@ -30,7 +30,7 @@ class LibraryOfCongressConceptsTransformer(BaseTransformer):
 
         if raw_concept.exclude() or raw_concept.is_geographic:
             return
-        
+
         for broader_id in raw_concept.broader_concept_ids:
             yield SourceConceptNarrowerThan(
                 from_id=raw_concept.source_id, to_id=broader_id
