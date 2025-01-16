@@ -34,4 +34,4 @@ class MeSHLocationsTransformer(BaseTransformer):
         self, raw_node: tuple[ET.Element, dict[str, str]]
     ) -> Generator[BaseEdge]:
         """There are no edges to extract from MeSH Locations."""
-        yield from ()
+        return

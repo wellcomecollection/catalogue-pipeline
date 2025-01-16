@@ -36,7 +36,7 @@ class MeSHConceptsTransformer(BaseTransformer):
         raw_concept = RawMeSHConcept(raw_node)
 
         if raw_concept.is_geographic:
-            yield from ()
+            return
 
         for parent_id in raw_concept.parent_concept_ids:
             yield SourceConceptHasParent(from_id=raw_concept.source_id, to_id=parent_id)
