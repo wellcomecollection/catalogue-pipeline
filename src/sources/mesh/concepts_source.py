@@ -6,7 +6,6 @@ import requests
 from sources.base_source import BaseSource
 from utils.xml import assert_get_text
 
-
 RawMeshNode = tuple[ET.Element, dict[str, str]]
 
 

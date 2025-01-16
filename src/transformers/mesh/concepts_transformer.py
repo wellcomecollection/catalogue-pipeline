@@ -3,20 +3,17 @@ from collections.abc import Generator
 
 from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
 from models.graph_node import SourceConcept
-from sources.mesh.concepts_source import MeSHConceptsSource
+from sources.mesh.concepts_source import MeSHConceptsSource, RawMeshNode
 from transformers.base_transformer import BaseTransformer
 
 from .raw_concept import RawMeSHConcept
-from sources.mesh.concepts_source import RawMeshNode
 
 
 class MeSHConceptsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = MeSHConceptsSource(url)
 
-    def transform_node(
-        self, raw_node: RawMeshNode
-    ) -> SourceConcept | None:
+    def transform_node(self, raw_node: RawMeshNode) -> SourceConcept | None:
         raw_concept = RawMeSHConcept(raw_node)
 
         if raw_concept.is_geographic:

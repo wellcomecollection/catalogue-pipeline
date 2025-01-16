@@ -3,20 +3,17 @@ from collections.abc import Generator
 
 from models.graph_edge import BaseEdge
 from models.graph_node import SourceConcept
-from sources.mesh.concepts_source import MeSHConceptsSource
+from sources.mesh.concepts_source import MeSHConceptsSource, RawMeshNode
 from transformers.base_transformer import BaseTransformer
 
 from .raw_concept import RawMeSHConcept
-from sources.mesh.concepts_source import RawMeshNode
 
 
 class MeSHLocationsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = MeSHConceptsSource(url)
 
-    def transform_node(
-        self, raw_node: RawMeshNode
-    ) -> SourceConcept | None:
+    def transform_node(self, raw_node: RawMeshNode) -> SourceConcept | None:
         raw_concept = RawMeSHConcept(raw_node)
 
         if not raw_concept.is_geographic:
@@ -31,8 +28,6 @@ class MeSHLocationsTransformer(BaseTransformer):
             description=raw_concept.description,
         )
 
-    def extract_edges(
-        self, raw_node: RawMeshNode
-    ) -> Generator[BaseEdge]:
+    def extract_edges(self, raw_node: RawMeshNode) -> Generator[BaseEdge]:
         """There are no edges to extract from MeSH Locations."""
         yield from ()
