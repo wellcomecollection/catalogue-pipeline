@@ -75,7 +75,7 @@ class SparqlQueryBuilder:
         return get_ids_query
 
     @classmethod
-    def get_items_query(cls, item_ids: list[str], node_type: NodeType):
+    def get_items_query(cls, item_ids: list[str], node_type: NodeType) -> str:
         """
         Given a list of Wikidata `item_ids`, return a query to retrieve all required Wikidata fields for each id
         in the list.
@@ -94,7 +94,9 @@ class SparqlQueryBuilder:
         return query
 
     @classmethod
-    def get_linked_ids_query(cls, item_ids: list[str], linked_ontology: OntologyType):
+    def get_linked_ids_query(
+        cls, item_ids: list[str], linked_ontology: OntologyType
+    ) -> str:
         """
         Given a list of Wikidata `item_ids`, return a query to retrieve all linked ontology ids referenced by each
         item in the list.

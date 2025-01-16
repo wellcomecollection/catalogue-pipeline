@@ -7,6 +7,7 @@ class BaseEdge(BaseModel):
     from_id: str
     to_id: str
     relationship: str
+    directed: bool
     attributes: dict = {}
 
 
@@ -14,12 +15,14 @@ class SourceConceptNarrowerThan(BaseEdge):
     from_type: str = "SourceConcept"
     to_type: str = "SourceConcept"
     relationship: str = "NARROWER_THAN"
+    directed: bool = True
 
 
 class SourceConceptSameAs(BaseEdge):
     from_type: str = "SourceConcept"
     to_type: str = "SourceConcept"
     relationship: str = "SAME_AS"
+    directed: bool = False
 
 
 class SourceConceptRelatedTo(BaseEdge):
