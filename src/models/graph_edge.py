@@ -20,4 +20,4 @@ class SourceConceptRelatedTo(BaseEdge):
     from_type: str = "SourceConcept"
     to_type: str = "SourceConcept"
     relationship: str = "RELATED_TO"
-    directed: bool = True
+    directed: bool = False
