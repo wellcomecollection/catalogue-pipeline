@@ -88,7 +88,7 @@ class RawLibraryOfCongressConcept:
             return [self._extract_label(item) for item in raw_alternative_labels]
 
         return [self._extract_label(raw_alternative_labels)]
-    
+
     def linked_concepts_ids(self, sko_link: str) -> list[str]:
         """Returns a list of IDs representing concepts which are linked to the current concept"""
         assert self._raw_concept_node is not None
@@ -109,19 +109,19 @@ class RawLibraryOfCongressConcept:
             linked_ids.append(self._remove_id_prefix(concept["@id"]))
 
         return linked_ids
-    
+
     @property
     def broader_concept_ids(self) -> list[str]:
         """Returns a list of IDs representing concepts which are broader than the current concept."""
         sko_link_type = "broader"
         return self.linked_concepts_ids(sko_link_type)
-    
+
     @property
     def related_concept_ids(self) -> list[str]:
         """Returns a list of IDs representing concepts which are related to the current concept."""
         sko_link_type = "related"
         return self.linked_concepts_ids(sko_link_type)
-    
+
     @property
     def is_geographic(self) -> bool:
         """Returns True if the node represents a geographic concept, as determined by `skos:notation`."""

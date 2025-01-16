@@ -27,7 +27,7 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
 
     def extract_edges(self, raw_node: dict) -> Generator[SourceConceptRelatedTo]:
         raw_concept = RawLibraryOfCongressConcept(raw_node)
-        
+
         if raw_concept.exclude() or not raw_concept.is_geographic:
             return
 
