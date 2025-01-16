@@ -5,6 +5,8 @@ from .sparql_client import WikidataSparqlClient
 from .sparql_query_builder import SparqlQueryBuilder, NodeType, OntologyType
 import smart_open
 
+from transformers.base_transformer import EntityType
+
 from utils.streaming import process_stream_in_parallel
 import os
 from functools import lru_cache
@@ -18,16 +20,16 @@ S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
 
-def extract_wikidata_id(item: dict):
+def extract_wikidata_id(item: dict) -> str:
+    assert isinstance(item["item"]["value"], str)
     return item["item"]["value"].removeprefix(WIKIDATA_ID_PREFIX)
 
 
 class WikidataLinkedOntologySource(BaseSource):
     """
     A source for streaming selected Wikidata nodes/edges. There are _many_ Wikidata items, so we cannot store all of
-    them in the graph. Instead, we only include items which reference an id from a selected linked ontology
-    (LoC or MeSH). For example, if a combination of "LoC" and "locations" is selected,
-    only Wikidata items referencing LoC geographic nodes are streamed.
+    them in the graph. Instead, we only include items which reference an id from a selected linked ontology,
+    (LoC or MeSH), as defined by the `linked_ontology` parameter.
 
     Wikidata puts strict limits on the resources which can be consumed by a single query, and queries which include
     filters or do other expensive processing often time out or return a stack overflow error. This means we need
@@ -48,14 +50,19 @@ class WikidataLinkedOntologySource(BaseSource):
         3. Stream the filtered items as usual.
     """
 
-    def __init__(self, node_type: NodeType, linked_ontology: OntologyType, entity_type):
+    def __init__(
+        self,
+        node_type: NodeType,
+        linked_ontology: OntologyType,
+        entity_type: EntityType,
+    ):
         self.client = WikidataSparqlClient()
         self.node_type = node_type
         self.linked_ontology = linked_ontology
         self.entity_type = entity_type
 
     @lru_cache
-    def _get_linked_ontology_ids(self, node_type: NodeType):
+    def _get_linked_ontology_ids(self, node_type: NodeType) -> set[str]:
         linked_nodes_file_name = f"{self.linked_ontology}_{node_type}__nodes.csv"
         s3_url = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
@@ -67,7 +74,7 @@ class WikidataLinkedOntologySource(BaseSource):
 
         return ids
 
-    def _linked_id_exists_in_selected_node_type(self, linked_id: str):
+    def _linked_id_exists_in_selected_node_type(self, linked_id: str) -> bool:
         if self.linked_ontology == "mesh":
             return True
         elif self.linked_ontology == "loc":
@@ -75,9 +82,7 @@ class WikidataLinkedOntologySource(BaseSource):
                 return linked_id in self._get_linked_ontology_ids(self.node_type)
             elif self.node_type == "names":
                 location_ids = self._get_linked_ontology_ids("locations")
-
-                if linked_id not in location_ids and linked_id[0] == "n":
-                    return True
+                return linked_id not in location_ids and linked_id[0] == "n"
             else:
                 raise ValueError(f"Invalid node type: {self.linked_ontology}")
         else:
@@ -117,17 +122,17 @@ class WikidataLinkedOntologySource(BaseSource):
             if self._linked_id_exists_in_selected_node_type(mapping["linked_id"]):
                 yield mapping
 
-    def _stream_wikidata_ids(self) -> Generator[dict]:
+    def _stream_wikidata_ids(self) -> Generator[str]:
         """Streams filtered edges using the `_stream_raw_edges` method and extracts Wikidata ids from them."""
         seen = set()
         for item in self._stream_raw_edges():
-            wikidata_id = item["wikidata_id"]
+            wikidata_id: str = item["wikidata_id"]
             if wikidata_id not in seen:
                 seen.add(wikidata_id)
                 yield wikidata_id
 
     def _stream_raw_nodes(self) -> Generator[dict]:
-        def get_linked_items(chunk) -> list:
+        def get_linked_items(chunk: list[str]) -> list:
             query = SparqlQueryBuilder.get_items_query(chunk, self.node_type)
             return self.client.run_query(query)
 
@@ -145,3 +150,5 @@ class WikidataLinkedOntologySource(BaseSource):
             return self._stream_raw_nodes()
         elif self.entity_type == "edges":
             return self._stream_raw_edges()
+        else:
+            raise ValueError(f"Invalid entity type: {self.entity_type}")

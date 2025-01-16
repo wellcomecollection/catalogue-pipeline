@@ -12,6 +12,7 @@ class RawWikidataConcept:
     def _extract_field_value(self, field_name: str) -> str:
         field = self.raw_concept[field_name]
         assert field["type"] == "literal", self.raw_concept
+        assert isinstance(field["value"], str)
 
         return field["value"]
 
@@ -21,7 +22,7 @@ class RawWikidataConcept:
 
         return self._extract_field_value(field_name)
 
-    def _extract_english_field_value(self, field_name: str):
+    def _extract_english_field_value(self, field_name: str) -> str:
         assert self.raw_concept[field_name]["xml:lang"] == "en"
         return self._extract_field_value(field_name)
 
@@ -63,7 +64,7 @@ class RawWikidataConcept:
 
 class RawWikidataLocation(RawWikidataConcept):
     @lru_cache
-    def _get_coordinates(self) -> dict:
+    def _get_coordinates(self) -> dict[str, float | None]:
         """Extracts coordinates from a raw string in the format `Point(<float> <float>)` (e.g. `Point(9.83 53.54)`)"""
         # Some items do not return valid coordinates (e.g. Q17064702, whose coordinates just say 'unknown value' on the
         # Wikidata website). When this happens, the 'type' of the 'coordinates' property always appears to be 'uri'.
@@ -93,7 +94,7 @@ class RawWikidataLocation(RawWikidataConcept):
 
 
 class RawWikidataName(RawWikidataConcept):
-    def _extract_date(self, field_name: str):
+    def _extract_date(self, field_name: str) -> str | None:
         date_value = self._extract_optional_field_value(field_name)
 
         # When a date is unknown, sometimes Wikidata returns a URL instead of a valid date, such as

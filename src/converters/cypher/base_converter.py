@@ -15,8 +15,8 @@ class CypherBaseConverter:
     def _convert_none(self) -> str:
         return "null"
 
-    def _convert_float(self, raw_value: float) -> float:
-        return raw_value
+    def _convert_float(self, raw_value: float) -> str:
+        return str(raw_value)
 
     def _convert_list(self, raw_value: list[typing.Any]) -> str:
         # Neptune does not support lists, so we convert them to a single string with a `||` separator

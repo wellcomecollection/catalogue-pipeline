@@ -3,7 +3,7 @@ import requests
 
 class WikidataSparqlClient:
     @staticmethod
-    def _get_user_agent_header():
+    def _get_user_agent_header() -> str:
         """
         Return a User-Agent header value complying with Wikimedia's User-Agent policy:
         https://foundation.wikimedia.org/wiki/Policy:Wikimedia_Foundation_User-Agent_Policy
@@ -24,4 +24,5 @@ class WikidataSparqlClient:
         if r.status_code != 200:
             raise Exception(r.content)
 
-        return r.json()["results"]["bindings"]
+        results: list[dict] = r.json()["results"]["bindings"]
+        return results
