@@ -35,3 +35,6 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
             yield SourceConceptRelatedTo(
                 from_id=raw_concept.source_id, to_id=related_id
             )
+            yield SourceConceptRelatedTo(
+                from_id=related_id, to_id=raw_concept.source_id
+            )
