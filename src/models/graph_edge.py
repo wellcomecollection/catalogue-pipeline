@@ -20,3 +20,10 @@ class SourceConceptSameAs(BaseEdge):
     from_type: str = "SourceConcept"
     to_type: str = "SourceConcept"
     relationship: str = "SAME_AS"
+
+
+class SourceConceptRelatedTo(BaseEdge):
+    from_type: str = "SourceConcept"
+    to_type: str = "SourceConcept"
+    relationship: str = "RELATED_TO"
+    directed: bool = False

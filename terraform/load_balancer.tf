@@ -1,9 +1,8 @@
 # A Network Load Balancer for accessing the Neptune cluster from outside of the VPC.
 # See https://aws-samples.github.io/aws-dbs-refarch-graph/src/connecting-using-a-load-balancer/.
-# TODO: This only exists for testing purposes and should be destroyed before we switch to production.
 
-resource "aws_lb" "neptune_experimental_network_lb" {
-  name               = "neptune-test"
+resource "aws_lb" "neptune_network_load_balancer" {
+  name               = "catalogue-graph-neptune-nlb"
   internal           = false
   load_balancer_type = "network"
   security_groups    = [aws_security_group.neptune_lb_security_group.id]
@@ -12,9 +11,9 @@ resource "aws_lb" "neptune_experimental_network_lb" {
 
 # Create a new target group and attach the IP of the Neptune cluster
 resource "aws_lb_target_group" "neptune_instance" {
-  name        = "neptune-test-cluster"
+  name        = "neptune-catalogue-graph-cluster"
   port        = 8182
-  protocol    = "TCP"
+  protocol    = "TLS"
   vpc_id      = data.aws_vpc.vpc.id
   target_type = "ip"
 }
@@ -29,12 +28,30 @@ resource "aws_lb_target_group_attachment" "neptune_instance_attachment" {
   target_id        = "172.42.174.101"
 }
 
+locals {
+  catalogue_graph_nlb_url = "catalogue-graph.wellcomecollection.org"
+}
 
-# Forward traffic to the Neptune target group
+# A custom certificate which will be used for TLS termination
+module "catalogue_graph_nlb_certificate" {
+  source = "github.com/wellcomecollection/terraform-aws-acm-certificate?ref=v1.0.0"
+
+  domain_name = local.catalogue_graph_nlb_url
+  zone_id     = data.aws_route53_zone.weco_zone.id
+
+  providers = {
+    aws     = aws
+    aws.dns = aws.dns
+  }
+}
+
+# Terminate TLS using the custom certificate and forward traffic to the Neptune target group
 resource "aws_lb_listener" "listener" {
-  load_balancer_arn = aws_lb.neptune_experimental_network_lb.arn
-  port              = "8182"
-  protocol          = "TCP"
+  load_balancer_arn = aws_lb.neptune_network_load_balancer.arn
+  port              = "443"
+  protocol          = "TLS"
+
+  certificate_arn = module.catalogue_graph_nlb_certificate.arn
 
   default_action {
     type             = "forward"
@@ -66,6 +83,25 @@ resource "aws_secretsmanager_secret" "neptune_nlb_url" {
 
 resource "aws_secretsmanager_secret_version" "neptune_nlb_endpoint_url" {
   secret_id     = aws_secretsmanager_secret.neptune_nlb_url.id
-  secret_string = "https://${aws_lb.neptune_experimental_network_lb.dns_name}:8182"
+  secret_string = "https://${local.catalogue_graph_nlb_url}"
 }
 
+data "aws_route53_zone" "weco_zone" {
+  provider = aws.dns
+  name     = "wellcomecollection.org."
+}
+
+# Add an alias A record to the wellcomecollection.org hosted zone, which maps the catalogue graph domain name
+# to the NLB
+resource "aws_route53_record" "catalogue_graph_nlb_record" {
+  provider = aws.dns
+  zone_id  = data.aws_route53_zone.weco_zone.id
+  name     = local.catalogue_graph_nlb_url
+  type     = "A"
+
+  alias {
+    name                   = aws_lb.neptune_network_load_balancer.dns_name
+    zone_id                = aws_lb.neptune_network_load_balancer.zone_id
+    evaluate_target_health = false
+  }
+}

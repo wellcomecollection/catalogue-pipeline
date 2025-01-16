@@ -16,10 +16,9 @@ class BaseNeptuneClient:
     cluster) or LocalNeptuneClient (when connecting to the cluster from outside the VPC).
     """
 
-    def __init__(self) -> None:
+    def __init__(self, neptune_endpoint: str) -> None:
         self.session: boto3.Session | None = None
-        self.neptune_endpoint: str | None = None
-        self.verify_requests: bool = True
+        self.neptune_endpoint: str = neptune_endpoint
 
     def _get_client_url(self) -> str:
         raise NotImplementedError()
@@ -42,11 +41,7 @@ class BaseNeptuneClient:
         SigV4Auth(credentials, "neptune-db", "eu-west-1").add_auth(request)
 
         raw_response = requests.request(
-            method,
-            url,
-            data=data,
-            headers=dict(request.headers),
-            verify=self.verify_requests,
+            method, url, data=data, headers=dict(request.headers)
         )
 
         if raw_response.status_code != 200:

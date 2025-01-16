@@ -128,3 +128,27 @@ MATCH (n) RETURN count(*)
 result = neptune_client.run_open_cypher_query(query)
 print(result)
 ```
+
+Additionally, it is possible to connect to the cluster using [AWS graph notebook](https://github.com/aws/graph-notebook)
+with the following configuration:
+```
+%%graph_notebook_config
+{
+    "host": <value stored in AWS Secrets Manager under 'NeptuneTest/InstanceEndpoint' in the platform account>,
+    "neptune_service": "neptune-db",
+    "port": 8182,
+    "ssl": true,
+    "proxy_port": 443,
+    "proxy_host": "catalogue-graph.wellcomecollection.org",
+    "auth_mode": "IAM",
+    "aws_region": "eu-west-1",
+    "load_from_s3_arn": ""
+}  
+```
+
+To communicate with the cluster, the AWS_PROFILE environment variable first needs to be set like this in the same
+Jupyter notebook:
+```
+%env AWS_PROFILE=platform-developer
+```
+
