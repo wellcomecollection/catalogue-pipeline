@@ -35,4 +35,4 @@ class MeSHLocationsTransformer(BaseTransformer):
         self, raw_node: RawMeshNode
     ) -> Generator[BaseEdge]:
         """There are no edges to extract from MeSH Locations."""
-        return
+        yield from ()
