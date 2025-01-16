@@ -33,7 +33,6 @@ do
     --image-uri "${IMAGE_URI}" \
     --no-cli-pager
 
-
   echo "Updated lambda configuration, (waiting for update @ $(date)}):"
   aws lambda wait function-updated \
     --function-name "$FUNCTION_NAME" \

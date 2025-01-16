@@ -79,10 +79,8 @@ then
     merger \
     ingestor_images \
     ingestor_works \
-    router \
-    path_concatenator \
-    batcher \
-    relation_embedder \
+    r_embed_router \
+    r_embed_path_concatenator \
     transformer_calm \
     transformer_ebsco \
     transformer_mets \
