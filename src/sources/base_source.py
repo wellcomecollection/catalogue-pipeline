@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 from collections.abc import Generator
 from typing import Any
 
