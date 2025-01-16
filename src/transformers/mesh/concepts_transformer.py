@@ -7,6 +7,7 @@ from sources.mesh.concepts_source import MeSHConceptsSource
 from transformers.base_transformer import BaseTransformer
 
 from .raw_concept import RawMeSHConcept
+from sources.mesh.concepts_source import RawMeshNode
 
 
 class MeSHConceptsTransformer(BaseTransformer):
@@ -14,7 +15,7 @@ class MeSHConceptsTransformer(BaseTransformer):
         self.source = MeSHConceptsSource(url)
 
     def transform_node(
-        self, raw_node: tuple[ET.Element, dict[str, str]]
+        self, raw_node: RawMeshNode
     ) -> SourceConcept | None:
         raw_concept = RawMeSHConcept(raw_node)
 
@@ -31,7 +32,7 @@ class MeSHConceptsTransformer(BaseTransformer):
         )
 
     def extract_edges(
-        self, raw_node: tuple[ET.Element, dict[str, str]]
+        self, raw_node: RawMeshNode
     ) -> Generator[SourceConceptHasParent | SourceConceptRelatedTo]:
         raw_concept = RawMeSHConcept(raw_node)
 

@@ -7,6 +7,9 @@ from sources.base_source import BaseSource
 from utils.xml import assert_get_text
 
 
+RawMeshNode = tuple[ET.Element, dict[str, str]]
+
+
 class MeSHConceptsSource(BaseSource):
     def __init__(self, url: str):
         self.mesh_data = self._get_mesh_data(url)
@@ -36,7 +39,7 @@ class MeSHConceptsSource(BaseSource):
 
         return treenum_lookup
 
-    def stream_raw(self) -> Generator[tuple[ET.Element, dict[str, str]]]:
+    def stream_raw(self) -> Generator[RawMeshNode]:
         """Streams raw nodes together with tree number lookup."""
         for elem in self.mesh_data.iter():
             if elem.tag == "DescriptorRecord":

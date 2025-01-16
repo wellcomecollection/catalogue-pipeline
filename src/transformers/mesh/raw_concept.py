@@ -1,11 +1,12 @@
 import xml.etree.ElementTree as ET
 from typing import Any, Literal
 
+from sources.mesh.concepts_source import RawMeshNode
 from utils.xml import assert_get_text
 
 
 class RawMeSHConcept:
-    def __init__(self, raw_concept: tuple[ET.Element, dict[str, str]]):
+    def __init__(self, raw_concept: RawMeshNode):
         self.raw_concept = raw_concept[0]
         self.treenum_lookup = raw_concept[1]
         self.source: Literal["nlm-mesh"] = "nlm-mesh"
