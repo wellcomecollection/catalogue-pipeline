@@ -1,6 +1,7 @@
 import re
 from functools import lru_cache
 from typing import Literal
+
 from sources.wikidata.linked_ontology_source import extract_wikidata_id
 
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
