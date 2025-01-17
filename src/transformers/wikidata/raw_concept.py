@@ -1,6 +1,6 @@
-from typing import Literal
 import re
 from functools import lru_cache
+from typing import Literal
 
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 

@@ -2,7 +2,9 @@ from models.graph_node import SourceConcept
 from models.graph_edge import SourceConceptSameAs
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from transformers.base_transformer import BaseTransformer, EntityType
+
 from collections.abc import Generator
+
 
 from .raw_concept import RawWikidataConcept
 

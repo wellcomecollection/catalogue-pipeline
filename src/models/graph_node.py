@@ -1,4 +1,4 @@
-from typing import Literal, Optional, Annotated
+from typing import Annotated, Literal, Optional
 
 from pydantic import BaseModel, StringConstraints
 

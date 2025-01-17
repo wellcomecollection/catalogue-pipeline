@@ -1,17 +1,17 @@
+import os
 from collections.abc import Generator
+from functools import lru_cache
 
-from sources.base_source import BaseSource
-from .sparql_client import WikidataSparqlClient
-from .sparql_query_builder import SparqlQueryBuilder, NodeType, OntologyType
+import boto3
 import smart_open
 
+from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType
 
 from utils.streaming import process_stream_in_parallel
-import os
-from functools import lru_cache
-import boto3
 
+from .sparql_client import WikidataSparqlClient
+from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
 MAX_PARALLEL_SPARQL_QUERIES = 3
