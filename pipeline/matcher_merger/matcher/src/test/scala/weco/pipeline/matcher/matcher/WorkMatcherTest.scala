@@ -380,13 +380,15 @@ class WorkMatcherTest
             //        do so until the update to 'A' is finished. (**)
             //
             var createdLocksHistory: List[String] = List()
-            var findAffectedWorksHistory: List[Set[CanonicalId]] = List()
-
+            var cHasReadGraph = false
+            var specialLockingBehaviour = false
             val workGraphStore = new WorkGraphStore(workNodeDao) {
               override def findAffectedWorks(
                 ids: Set[CanonicalId]
               ): Future[Set[WorkNode]] = {
-                findAffectedWorksHistory = findAffectedWorksHistory :+ ids
+                if (specialLockingBehaviour) {
+                  if (ids == Set(idB, idC)) cHasReadGraph = true
+                }
                 super.findAffectedWorks(ids)
               }
             }
@@ -394,31 +396,51 @@ class WorkMatcherTest
             implicit val lockDao: MemoryLockDao[String, UUID] =
               new MemoryLockDao[String, UUID] {
                 override def lock(id: String, contextId: UUID): LockResult = {
-                  // (*) We don't let the update to 'A' start writing graph updates until
-                  // we know the update to 'C' has read the old state of the graph
-                  if (
-                    id == SubgraphId(idA, idB) && createdLocksHistory.count(
-                      _ == SubgraphId(idA, idB)
-                    ) == 1
-                  ) {
-                    while (!findAffectedWorksHistory.contains(Set(idB, idC))) {}
-                  }
+                  if (specialLockingBehaviour) {
+                    // (*) We don't let the update to 'A' start writing graph updates until
+                    // we know the update to 'C' has read the old state of the graph
+                    if (
+                      id == SubgraphId(idA, idB) && createdLocksHistory.count(
+                        _ == SubgraphId(idA, idB)
+                      ) == 0
+                    ) {
+                      // Lock before waiting for C, so that when the locks for C come in
+                      // at roughly the same time, the lock is already in place.
+                      // If we do not lock here, then the wait for A to unlock may
+                      // not take place.
+                      val lock = super.lock(id, contextId)
+                      createdLocksHistory = createdLocksHistory :+ id
 
-                  // (**) We don't let the update to 'C' start writing graph updates until
-                  // we know the update to 'A' is finished
-                  if (
-                    (id == SubgraphId(idA, idB) || id == SubgraphId(
-                      idA,
-                      idB,
-                      idC
-                    )) &&
-                    createdLocksHistory.count(_ == SubgraphId(idA, idB)) == 2
-                  ) {
-                    while (locks.contains(idA.underlying)) {}
-                  }
+                      eventually(timeout = timeout(5 seconds)) {
+                        if (!cHasReadGraph) throw new Exception("not yet")
+                      }
+                      lock
+                    }
 
-                  createdLocksHistory = createdLocksHistory :+ id
-                  super.lock(id, contextId)
+                    // (**) We don't let the update to 'C' start writing graph updates until
+                    // we know the update to 'A' is finished
+                    else {
+                      if (
+                        (id == SubgraphId(idA, idB) || id == SubgraphId(
+                          idA,
+                          idB,
+                          idC
+                        )) &&
+                        createdLocksHistory.count(
+                          _ == SubgraphId(idA, idB)
+                        ) == 1
+                      ) {
+                        eventually(timeout = timeout(5 seconds)) {
+                          if (locks.contains(idA.underlying))
+                            throw new Exception("not yet")
+                        }
+                      }
+                      createdLocksHistory = createdLocksHistory :+ id
+                      super.lock(id, contextId)
+                    }
+                  } else {
+                    super.lock(id, contextId)
+                  }
                 }
               }
 
@@ -439,7 +461,7 @@ class WorkMatcherTest
             //
             // This will put two nodes in the graph: a node for B, and a stub for A.
             Await.result(workMatcher.matchWork(workB), atMost = 5 seconds)
-
+            specialLockingBehaviour = true
             // Now try to store works A and C simultaneously.
             //
             // Here's how this can go wrong: when we get work C, we know we need
@@ -450,6 +472,13 @@ class WorkMatcherTest
             //
             // We need the locking to ensure we don't try to apply both updates at once.
             val futureA = workMatcher.matchWork(workA)
+            // Sleep briefly to ensure that A is first through the gate.
+            // This is just to ensure that when we execute the artificial waits in the mock
+            // lock DAO above, A waits C to start, then C waits for A to finish.
+            // If we do not do this, then it is nondeterministic as to which one locks first
+            // if C goes through first, then it will not wait for anything and the test
+            // will fail without proving anything useful.
+            Thread.sleep(100)
             val futureC = workMatcher.matchWork(workC)
 
             val resultA = Try {
