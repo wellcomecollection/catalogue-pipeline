@@ -40,7 +40,10 @@ class LinkedOntologyIdTypeChecker:
         transport_params = {"client": boto3.client("s3")}
         with smart_open.open(s3_url, "r", transport_params=transport_params) as f:
             # Loop through all items in the file and extract the id from each item
-            for line in f:
+            for i, line in enumerate(f):
+                # Skip header
+                if i == 0:
+                    continue
                 ids.add(line.split(",")[0])
 
         print(
