@@ -3,9 +3,6 @@ from typing import Literal
 NodeType = Literal["concepts", "names", "locations"]
 OntologyType = Literal["mesh", "loc"]
 
-# https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service/query_optimization
-#             "https://query.wikidata.org/bigdata/namespace/wdq/sparql?explain",
-
 
 class SparqlQueryBuilder:
     """

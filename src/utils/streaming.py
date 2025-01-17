@@ -28,9 +28,11 @@ def process_stream_in_parallel(
     thread_count: int,
 ) -> Generator[S]:
     """
-    Consume items from `stream` in chunks of size `chunk_size`. Apply the `process` function to each chunk in a new
-    thread. Keep the number of parallel threads under `thread_count`. Return a single generator streaming the processed
-    items.
+    Process items from a stream in parallel using multiple threads. Return a single generator streaming
+    the processed items.
+
+    Items are consumed from `stream` in chunks of size `chunk_size`. The `process` function is applied to each chunk in
+    a separate thread. The number of parallel threads is kept under `thread_count`.
     """
     chunks = generator_to_chunks(stream, chunk_size)
 

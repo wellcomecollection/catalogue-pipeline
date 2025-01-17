@@ -14,6 +14,10 @@ from .sparql_client import WikidataSparqlClient
 from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
+
+# Wikidata limits the number of parallel queries from a single IP address to 5.
+# See: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
+# However, experimentally, running more than 3 queries in parallel eventually results a '429 Too Many Requests' error.
 MAX_PARALLEL_SPARQL_QUERIES = 3
 
 S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
@@ -34,6 +38,8 @@ class WikidataLinkedOntologySource(BaseSource):
     Wikidata puts strict limits on the resources which can be consumed by a single query, and queries which include
     filters or do other expensive processing often time out or return a stack overflow error. This means we need
     to use a somewhat convoluted way for extracting the Wikidata nodes/edges we need.
+    See https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service/query_optimization for more information on how
+    to optimise SPARQL queries.
 
     To extract nodes:
         1. Run a SPARQL query which retrieves _all_ Wikidata ids referencing an id from the selected linked ontology.
