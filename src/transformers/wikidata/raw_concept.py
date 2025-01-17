@@ -96,6 +96,12 @@ class RawWikidataName(RawWikidataConcept):
         if date_value is None or date_value.startswith("http"):
             return None
 
+        # There is currently one case where a Wikidata item stores an invalid date (Wikidata id: Q10904907). The date
+        # is correctly formatted but references year 0, which does not exist. Neptune would throw an error if we tried
+        # to load it in, so we filter it out.
+        if date_value == "+0000-00-00T00:00:00Z":
+            return None
+
         return date_value
 
     @property
