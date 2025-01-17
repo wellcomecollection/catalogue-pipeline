@@ -1,14 +1,12 @@
 from collections.abc import Generator
 
-
 from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType
 from utils.streaming import process_stream_in_parallel
 
-from .sparql_client import WikidataSparqlClient, MAX_PARALLEL_SPARQL_QUERIES
-from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
-
 from .linked_ontology_id_extractor import LinkedOntologyIdTypeChecker
+from .sparql_client import MAX_PARALLEL_SPARQL_QUERIES, WikidataSparqlClient
+from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
 

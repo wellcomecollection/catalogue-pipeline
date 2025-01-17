@@ -4,9 +4,7 @@ from functools import lru_cache
 import boto3
 import smart_open
 
-
 from .sparql_query_builder import NodeType, OntologyType
-
 
 S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
 

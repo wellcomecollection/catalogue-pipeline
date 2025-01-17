@@ -1,5 +1,6 @@
-import requests
 import time
+
+import requests
 
 # Wikidata limits the number of parallel queries from a single IP address to 5.
 # See: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
