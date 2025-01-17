@@ -1,6 +1,7 @@
 import re
 from functools import lru_cache
 from typing import Literal
+from sources.wikidata.linked_ontology_source import extract_wikidata_id
 
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
@@ -26,15 +27,9 @@ class RawWikidataConcept:
         assert self.raw_concept[field_name]["xml:lang"] == "en"
         return self._extract_field_value(field_name)
 
-    @staticmethod
-    def _remove_id_prefix(raw_id: str) -> str:
-        return raw_id.removeprefix(WIKIDATA_ID_PREFIX)
-
     @property
     def source_id(self) -> str:
-        item_field = self.raw_concept["item"]
-        assert item_field["type"] == "uri"
-        return self._remove_id_prefix(item_field["value"])
+        return extract_wikidata_id(self.raw_concept)
 
     @property
     def label(self) -> str:

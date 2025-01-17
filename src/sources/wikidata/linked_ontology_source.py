@@ -24,7 +24,11 @@ WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
 
 def extract_wikidata_id(item: dict) -> str:
+    """
+    Accepts a raw `item` dictionary returned by the Wikidata SPARQL endpoint and returns the Wikidata id of the item.
+    """
     assert isinstance(item["item"]["value"], str)
+    assert item["item"]["type"] == "uri"
     return item["item"]["value"].removeprefix(WIKIDATA_ID_PREFIX)
 
 
