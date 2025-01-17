@@ -7,7 +7,6 @@ import smart_open
 
 from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType
-
 from utils.streaming import process_stream_in_parallel
 
 from .sparql_client import WikidataSparqlClient
