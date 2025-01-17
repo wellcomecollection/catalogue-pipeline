@@ -1,7 +1,8 @@
 from typing import Literal, cast
 
 from models.graph_edge import BaseEdge
-from models.graph_node import BaseNode
+from models.graph_node import BaseNode, SourceLocation, SourceName
+from pydantic import BaseModel
 
 from .base_converter import CypherBaseConverter
 
@@ -10,12 +11,29 @@ class CypherBulkLoadConverter(CypherBaseConverter):
     def __init__(self, entity_type: Literal["nodes", "edges"]):
         self.entity_type = entity_type
 
+    def _get_bulk_loader_column_header(self, model: BaseModel, field_name: str) -> str:
+        """
+        Return a Neptune bulk loader column header, defining the name and type of the column. See here for more info:
+        https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load-tutorial-format-opencypher.html#bulk-load-tutorial-format-opencypher-data-types
+        """
+        # Most fields are stored as strings
+        field_type = "String"
+        if isinstance(model, SourceLocation):
+            if field_name in {"longitude", "latitude"}:
+                field_type = "Float"
+        if isinstance(model, SourceName):
+            if field_name in {"date_of_birth", "date_of_death"}:
+                field_type = "DateTime"
+
+        return f"{field_name}:{field_type}"
+
     def _node_to_bulk_cypher(self, model: BaseNode) -> dict:
         bulk_node = {":ID": model.id, ":LABEL": type(model).__name__}
 
-        for key, raw_value in model.dict().items():
+        for field_name, raw_value in model.dict().items():
+            column_header = self._get_bulk_loader_column_header(model, field_name)
             value = self._raw_value_to_cypher_value(raw_value)
-            bulk_node[key] = value
+            bulk_node[column_header] = value
 
         return bulk_node
 
@@ -27,9 +45,10 @@ class CypherBulkLoadConverter(CypherBaseConverter):
             ":TYPE": model.relationship,
         }
 
-        for key, raw_value in model.attributes.items():
+        for field_name, raw_value in model.attributes.items():
+            column_header = self._get_bulk_loader_column_header(model, field_name)
             value = self._raw_value_to_cypher_value(raw_value)
-            bulk_edge[key] = value
+            bulk_edge[column_header] = value
 
         return bulk_edge
 

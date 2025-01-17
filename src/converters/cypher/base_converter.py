@@ -13,7 +13,7 @@ class CypherBaseConverter:
         return str(raw_value).lower()
 
     def _convert_none(self) -> str:
-        return "null"
+        return ""
 
     def _convert_float(self, raw_value: float) -> str:
         return str(raw_value)
