@@ -1,8 +1,8 @@
 from models.graph_node import SourceName
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from .concepts_transformer import WikidataConceptsTransformer
 from transformers.base_transformer import EntityType
 
+from .concepts_transformer import WikidataConceptsTransformer
 from .raw_concept import RawWikidataName
 
 

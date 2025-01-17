@@ -1,7 +1,7 @@
-from collections.abc import Iterator, Generator
-from itertools import islice
-from typing import Callable, TypeVar, Any
 import concurrent.futures
+from collections.abc import Generator, Iterator
+from itertools import islice
+from typing import Any, Callable, TypeVar
 
 T = TypeVar("T")
 S = TypeVar("S")
