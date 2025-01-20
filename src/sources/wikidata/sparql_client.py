@@ -15,7 +15,7 @@ class WikidataSparqlClient:
     so that we do not exceed Wikidata rate limits.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.parallel_query_semaphore = threading.Semaphore(MAX_PARALLEL_SPARQL_QUERIES)
         self.too_many_requests = False
         self.too_many_requests_lock = threading.Lock()
