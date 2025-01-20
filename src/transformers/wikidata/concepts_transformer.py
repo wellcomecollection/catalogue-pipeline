@@ -2,15 +2,20 @@ from collections.abc import Generator
 
 from models.graph_edge import SourceConceptSameAs
 from models.graph_node import SourceConcept
-from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from sources.wikidata.linked_ontology_source import (
+    WikidataLinkedOntologySource,
+    OntologyType,
+)
 from transformers.base_transformer import BaseTransformer, EntityType
 
 from .raw_concept import RawWikidataConcept
 
 
 class WikidataConceptsTransformer(BaseTransformer):
-    def __init__(self, entity_type: EntityType):
-        self.source = WikidataLinkedOntologySource("concepts", "loc", entity_type)
+    def __init__(self, entity_type: EntityType, linked_ontology: OntologyType):
+        self.source = WikidataLinkedOntologySource(
+            "concepts", linked_ontology, entity_type
+        )
 
     def transform_node(self, raw_node: dict) -> SourceConcept | None:
         raw_concept = RawWikidataConcept(raw_node)
