@@ -32,8 +32,8 @@ module "ingestor_works" {
   container_image = local.ingestor_works_image
 
   topic_arns = [
-    module.router_work_output_topic.arn,
-    module.relation_embedder_output_topic.arn,
+    module.relation_embedder_sub.router_work_output_topic_arn,
+    module.relation_embedder_sub.relation_embedder_output_topic_arn
   ]
 
   # The ingestor_works_flush_interval_seconds will wait for up to ingestor_works_flush_interval_seconds
