@@ -1,7 +1,7 @@
 from models.graph_node import SourceLocation
 from sources.wikidata.linked_ontology_source import (
-    WikidataLinkedOntologySource,
     OntologyType,
+    WikidataLinkedOntologySource,
 )
 from transformers.base_transformer import EntityType
 

@@ -3,8 +3,8 @@ from collections.abc import Generator
 from models.graph_edge import SourceConceptSameAs
 from models.graph_node import SourceConcept
 from sources.wikidata.linked_ontology_source import (
-    WikidataLinkedOntologySource,
     OntologyType,
+    WikidataLinkedOntologySource,
 )
 from transformers.base_transformer import BaseTransformer, EntityType
 
