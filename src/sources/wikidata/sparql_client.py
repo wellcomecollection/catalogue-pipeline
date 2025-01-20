@@ -1,4 +1,5 @@
 import time
+import threading
 
 import requests
 
@@ -10,12 +11,14 @@ MAX_PARALLEL_SPARQL_QUERIES = 4
 
 class WikidataSparqlClient:
     """
-    A client class for querying Wikidata via SPARQL queries. Automatically throttles requests so that we do not exceed
-    Wikidata rate limits.
+    A client class for querying Wikidata via SPARQL queries. Automatically throttles requests (in a thread-safe way)
+    so that we do not exceed Wikidata rate limits.
     """
 
-    parallel_query_count = 0
-    too_many_requests = False
+    def __init__(self):
+        self.parallel_query_semaphore = threading.Semaphore(MAX_PARALLEL_SPARQL_QUERIES)
+        self.too_many_requests = False
+        self.too_many_requests_lock = threading.Lock()
 
     @staticmethod
     def _get_user_agent_header() -> str:
@@ -31,26 +34,32 @@ class WikidataSparqlClient:
     def run_query(self, query: str) -> list[dict]:
         """Runs a query against Wikidata's SPARQL endpoint and returns the results as a list"""
 
-        # Make sure we don't exceed the rate limit.
-        while (
-            self.parallel_query_count >= MAX_PARALLEL_SPARQL_QUERIES
-            or self.too_many_requests
-        ):
+        while True:
+            with self.too_many_requests_lock:
+                if not self.too_many_requests:
+                    break
             time.sleep(2)
 
-        self.parallel_query_count += 1
-        r = requests.get(
-            "https://query.wikidata.org/sparql",
-            params={"format": "json", "query": query},
-            headers={"User-Agent": self._get_user_agent_header()},
-        )
-        self.parallel_query_count -= 1
+        # Use a semaphore to throttle the number of parallel requests
+        with self.parallel_query_semaphore:
+            r = requests.get(
+                "https://query.wikidata.org/sparql",
+                params={"format": "json", "query": query},
+                headers={"User-Agent": self._get_user_agent_header()},
+            )
 
+        # Even though we limit the number of requests, we might still occasionally get a 429 error.
+        # When this happens, set the `too_many_requests` flag to prevent other threads from making new requests
+        # and sleep for at least a minute.
         if r.status_code == 429:
-            self.too_many_requests = True
+            with self.too_many_requests_lock:
+                self.too_many_requests = True
+
             retry_after = int(r.headers["Retry-After"])
             time.sleep(max(60, retry_after))
-            self.too_many_requests = False
+
+            with self.too_many_requests_lock:
+                self.too_many_requests = False
 
             return self.run_query(query)
         elif r.status_code != 200:
