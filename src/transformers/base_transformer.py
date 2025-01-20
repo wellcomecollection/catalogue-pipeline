@@ -55,7 +55,7 @@ class BaseTransformer:
             if counter == number:
                 return
 
-        print(f"Streamed all {counter} nodes...")
+        print(f"Streamed all {counter} nodes.")
 
     def _stream_edges(self, number: int | None = None) -> Generator[BaseEdge]:
         """
@@ -76,7 +76,7 @@ class BaseTransformer:
                 if counter == number:
                     return
 
-        print(f"Streamed all {counter} edges...")
+        print(f"Streamed all {counter} edges.")
 
     def _stream_entities(
         self, entity_type: EntityType, sample_size: int | None = None
