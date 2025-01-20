@@ -1,5 +1,8 @@
 from models.graph_node import SourceName
-from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from sources.wikidata.linked_ontology_source import (
+    WikidataLinkedOntologySource,
+    OntologyType,
+)
 from transformers.base_transformer import EntityType
 
 from .concepts_transformer import WikidataConceptsTransformer
@@ -7,8 +10,8 @@ from .raw_concept import RawWikidataName
 
 
 class WikidataNamesTransformer(WikidataConceptsTransformer):
-    def __init__(self, entity_type: EntityType):
-        self.source = WikidataLinkedOntologySource("names", "loc", entity_type)
+    def __init__(self, entity_type: EntityType, ontology_type: OntologyType):
+        self.source = WikidataLinkedOntologySource("names", ontology_type, entity_type)
 
     def transform_node(self, raw_node: dict) -> SourceName | None:
         raw_concept = RawWikidataName(raw_node)

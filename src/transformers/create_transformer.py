@@ -22,9 +22,11 @@ TransformerType = Literal[
     "loc_locations",
     "mesh_concepts",
     "mesh_locations",
-    "wikidata_concepts",
-    "wikidata_locations",
-    "wikidata_names",
+    "wikidata_linked_loc_concepts",
+    "wikidata_linked_loc_locations",
+    "wikidata_linked_loc_names",
+    "wikidata_linked_mesh_concepts",
+    "wikidata_linked_mesh_locations",
 ]
 
 
@@ -43,11 +45,15 @@ def create_transformer(
         return MeSHConceptsTransformer(MESH_URL)
     if transformer_type == "mesh_locations":
         return MeSHLocationsTransformer(MESH_URL)
-    if transformer_type == "wikidata_concepts":
-        return WikidataConceptsTransformer(entity_type)
-    if transformer_type == "wikidata_locations":
-        return WikidataLocationsTransformer(entity_type)
-    if transformer_type == "wikidata_names":
-        return WikidataNamesTransformer(entity_type)
+    if transformer_type == "wikidata_linked_loc_concepts":
+        return WikidataConceptsTransformer(entity_type, "loc")
+    if transformer_type == "wikidata_linked_loc_locations":
+        return WikidataLocationsTransformer(entity_type, "loc")
+    if transformer_type == "wikidata_linked_loc_names":
+        return WikidataNamesTransformer(entity_type, "loc")
+    if transformer_type == "wikidata_linked_mesh_concepts":
+        return WikidataConceptsTransformer(entity_type, "mesh")
+    if transformer_type == "wikidata_linked_mesh_locations":
+        return WikidataLocationsTransformer(entity_type, "mesh")
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")

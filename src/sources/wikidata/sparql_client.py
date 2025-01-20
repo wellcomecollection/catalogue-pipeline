@@ -4,7 +4,7 @@ import requests
 
 # Wikidata limits the number of parallel queries from a single IP address to 5.
 # See: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
-# However, experimentally, running more than 4 queries in parallel consistently results '429 Too Many Requests' errors.
+# However, experimentally, running more than 4 queries in parallel consistently results in '429 Too Many Requests' errors.
 MAX_PARALLEL_SPARQL_QUERIES = 4
 
 

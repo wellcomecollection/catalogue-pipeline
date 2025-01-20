@@ -1,6 +1,5 @@
 import concurrent.futures
 import csv
-import xml.etree.ElementTree as ET
 from collections.abc import Generator
 from itertools import islice
 from typing import Any, Literal
@@ -56,6 +55,8 @@ class BaseTransformer:
             if counter == number:
                 return
 
+        print(f"Streamed all {counter} nodes...")
+
     def _stream_edges(self, number: int | None = None) -> Generator[BaseEdge]:
         """
         Extracts edges from the specified source and transforms them. The `source` must define a `stream_raw` method.
@@ -74,6 +75,8 @@ class BaseTransformer:
                     print(f"Streamed {counter} edges...")
                 if counter == number:
                     return
+
+        print(f"Streamed all {counter} edges...")
 
     def _stream_entities(
         self, entity_type: EntityType, sample_size: int | None = None
