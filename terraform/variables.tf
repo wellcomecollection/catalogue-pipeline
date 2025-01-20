@@ -28,5 +28,20 @@ variable "state_machine_inputs" {
       "transformer_type" : "loc_locations",
       "entity_type" : "edges"
     },
+    {
+      "label" : "MeSH Concept Nodes",
+      "transformer_type" : "mesh_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "MeSH Location Nodes",
+      "transformer_type" : "mesh_locations",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "MeSH Concept Edges",
+      "transformer_type" : "mesh_concepts",
+      "entity_type" : "edges"
+    }
   ]
 }
