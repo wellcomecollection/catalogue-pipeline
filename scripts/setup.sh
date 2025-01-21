@@ -22,8 +22,8 @@ if ! pyenv versions | grep -q "$PY_VERSION"; then
     pyenv install "$PY_VERSION"
 fi
 
-# set the shell to use the version specified
-pyenv shell "$PY_VERSION"
+# specify the python version to use for pyenv
+export PYENV_VERSION="$PY_VERSION"
 
 # check if venv exists otherwise create it
 if [ ! -d "$ROOT/venv" ]; then
