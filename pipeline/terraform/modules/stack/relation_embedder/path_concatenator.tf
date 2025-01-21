@@ -2,7 +2,7 @@
 module "path_concatenator_output_topic" {
   source = "../../topic"
 
-  name       = "${var.namespace}_path_concatenator_output_topic"
+  name       = "${local.topic_namespace}_path_concatenator_output_topic"
   role_names = [module.path_concatenator.task_role_name]
 }
 

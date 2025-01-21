@@ -22,7 +22,7 @@ locals {
 module "batcher_lambda_output_topic" {
   source = "../../topic"
 
-  name       = "${var.namespace}_batcher_lambda_output"
+  name       = "${local.topic_namespace}_batcher_lambda_output"
   role_names = [module.batcher_lambda.lambda_role_name]
 }
 
