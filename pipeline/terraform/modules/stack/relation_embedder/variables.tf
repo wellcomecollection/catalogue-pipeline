@@ -6,6 +6,9 @@ variable "pipeline_date" {
   type = string
 }
 
+locals {
+  topic_namespace = "catalogue-${var.pipeline_date}-${var.namespace}"
+}
 variable "reindexing_state" {
   type = object({
     listen_to_reindexer      = bool

@@ -5,7 +5,7 @@ locals {
 module "embedder_lambda_output_topic" {
   source = "../../topic"
 
-  name       = "${var.namespace}_embedder_lambda_output"
+  name       = "${local.topic_namespace}_embedder_lambda_output"
   role_names = [module.embedder_lambda.lambda_role_name]
 }
 

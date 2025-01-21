@@ -1,21 +1,21 @@
 module "router_path_output_topic" {
   source = "../../topic"
 
-  name       = "${var.namespace}_router_path_output"
+  name       = "${local.topic_namespace}_router_path_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_candidate_incomplete_paths_output_topic" {
   source = "../../topic"
 
-  name       = "${var.namespace}_router_candidate_incomplete_paths_output"
+  name       = "${local.topic_namespace}_router_candidate_incomplete_paths_output"
   role_names = [module.router.task_role_name]
 }
 
 module "router_work_output_topic" {
   source = "../../topic"
 
-  name       = "${var.namespace}_router_work_output"
+  name       = "${local.topic_namespace}_router_work_output"
   role_names = [module.router.task_role_name]
 }
 
