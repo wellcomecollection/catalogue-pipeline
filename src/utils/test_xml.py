@@ -2,7 +2,7 @@ from utils.xml import assert_get_text
 import xml.etree.ElementTree as ET
 import pytest
 
-def test_assert_get_text():
+def test_assert_get_text() -> None:
     elem = ET.Element("root")
     elem.text = "text"
 
@@ -12,6 +12,6 @@ def test_assert_get_text():
     with pytest.raises(AssertionError):
         assert_get_text(elem)
 
-    elem.text = 1
+    elem.text = 1 # type: ignore  # Deliberate type error to test assertion
     with pytest.raises(AssertionError):
         assert_get_text(elem)
