@@ -55,6 +55,7 @@ class WikidataSparqlClient:
             with self.too_many_requests_lock:
                 self.too_many_requests = True
 
+            print("Too many SPARQL requests. Sleeping...")
             retry_after = int(r.headers["Retry-After"])
             time.sleep(max(60, retry_after))
 

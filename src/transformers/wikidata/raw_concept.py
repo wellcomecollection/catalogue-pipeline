@@ -62,7 +62,10 @@ class RawWikidataLocation(RawWikidataConcept):
         """Extracts coordinates from a raw string in the format `Point(<float> <float>)` (e.g. `Point(9.83 53.54)`)"""
         # Some items do not return valid coordinates (e.g. Q17064702, whose coordinates just say 'unknown value' on the
         # Wikidata website). When this happens, the 'type' of the 'coordinates' property always appears to be 'uri'.
-        if self.raw_concept["coordinates"]["type"] == "uri":
+        if (
+            "coordinates" not in self.raw_concept
+            or self.raw_concept["coordinates"]["type"] == "uri"
+        ):
             return {"longitude": None, "latitude": None}
 
         raw_coordinates = self._extract_field_value("coordinates")
