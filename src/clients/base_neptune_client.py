@@ -1,12 +1,12 @@
 import datetime
 import json
+import typing
 
 import backoff
 import boto3
 import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
-import typing
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
