@@ -16,6 +16,9 @@ class CypherQueryConverter(CypherBaseConverter):
         escaped = raw_value.replace("'", "\\'")
         return f"'{escaped}'"
 
+    def _convert_none(self) -> str:
+        return "null"
+
     def _node_to_cypher_map(self, model: BaseNode) -> str:
         properties = []
 

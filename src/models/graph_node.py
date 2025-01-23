@@ -1,7 +1,10 @@
-import datetime
-from typing import Literal, Optional
+from typing import Annotated, Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, StringConstraints
+
+# Matches a Wikidata date, such as 1976-01-01T00:00:00Z or -0005-12-12T00:00:00Z
+WIKIDATA_DATE_PATTERN = r"-?\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ"
+FormattedDateString = Annotated[str, StringConstraints(pattern=WIKIDATA_DATE_PATTERN)]
 
 
 # Each node must have a label and an id
@@ -30,8 +33,8 @@ class SourceLocation(SourceConcept):
 
 # Represents a LoC or Wikidata name. Inherits all fields from SourceConcept, plus other optional fields.
 class SourceName(SourceConcept):
-    date_of_birth: Optional[datetime.date] = None
-    date_of_death: Optional[datetime.date] = None
+    date_of_birth: Optional[FormattedDateString] = None
+    date_of_death: Optional[FormattedDateString] = None
     place_of_birth: Optional[str] = None
 
 
