@@ -23,7 +23,7 @@ jobs:
 
       - name: Run typecheck
         run: |
-          ./scripts/typecheck.sh
+          ./scripts/typecheck.sh --check
 
   autoformat:
     runs-on: ubuntu-latest

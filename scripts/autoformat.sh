@@ -9,5 +9,14 @@ ROOT+="$(dirname "$DIR")"
 # change working directory to the root of the project
 cd "$ROOT"
 
-black src/
-isort --profile=black src/  
+CHECK=${1:-}
+
+if [ "$CHECK" == "--check" ]; then
+    echo "Checking code formatting (run ./scripts/autoformat.sh to fix any issues!)..."
+    black --check src/
+    isort --profile=black --check src/
+else
+    echo "Formatting code ..."
+    black src/
+    isort --profile=black src/
+fi
