@@ -1,14 +1,10 @@
 import argparse
 import os
 import typing
-
 from transformers.base_transformer import EntityType
 from transformers.create_transformer import TransformerType
 from utils.aws import get_neptune_client
-
 S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
-
-
 def handler(
     transformer_type: TransformerType, entity_type: EntityType, is_local: bool = False
 ) -> dict[str, str]:
