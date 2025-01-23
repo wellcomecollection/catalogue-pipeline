@@ -1,4 +1,6 @@
-pytest
 black
+coverage
 isort
 mypy
+pytest
+pytest-cov
