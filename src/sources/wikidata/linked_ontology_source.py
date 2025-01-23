@@ -3,6 +3,7 @@ from collections.abc import Generator
 from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType
 from utils.streaming import process_stream_in_parallel
+from typing import Callable
 
 from .linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
 from .sparql_client import MAX_PARALLEL_SPARQL_QUERIES, WikidataSparqlClient
@@ -13,20 +14,20 @@ SPARQL_ITEMS_CHUNK_SIZE = 400
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
 
-def extract_wikidata_id(item: dict) -> str:
+def extract_wikidata_id(item: dict, key: str = "item") -> str:
     """
     Accepts a raw `item` dictionary returned by the Wikidata SPARQL endpoint and returns the Wikidata id of the item.
     """
-    assert isinstance(item["item"]["value"], str)
-    assert item["item"]["type"] == "uri"
-    return item["item"]["value"].removeprefix(WIKIDATA_ID_PREFIX)
+    assert isinstance(item[key]["value"], str)
+    assert item[key]["type"] == "uri"
+    return item[key]["value"].removeprefix(WIKIDATA_ID_PREFIX)
 
 
 class WikidataLinkedOntologySource(BaseSource):
     """
     A source for streaming selected Wikidata nodes/edges. There are _many_ Wikidata items, so we cannot store all of
-    them in the graph. Instead, we only include items which reference an id from a selected linked ontology,
-    (LoC or MeSH), as defined by the `linked_ontology` parameter.
+    them in the graph. Instead, we only include items which reference an id from a selected linked ontology
+    (LoC or MeSH) and their parents.
 
     Wikidata puts strict limits on the resources which can be consumed by a single query, and queries which include
     filters or do other expensive processing often time out or return a stack overflow error. This means we need
@@ -66,9 +67,29 @@ class WikidataLinkedOntologySource(BaseSource):
         )
         return self.client.run_query(query)
 
-    def _get_linked_items(self, wikidata_ids: list[str]) -> list:
+    def _get_wikidata_items(self, wikidata_ids: list[str]) -> list:
         query = SparqlQueryBuilder.get_items_query(wikidata_ids, self.node_type)
         return self.client.run_query(query)
+
+    def _get_parent_id_mappings(self, child_wikidata_ids: list[str]) -> list[dict]:
+        query = SparqlQueryBuilder.get_filtered_parents_query(
+            child_wikidata_ids, self.linked_ontology
+        )
+        return self.client.run_query(query)
+
+    @staticmethod
+    def _parallelise_requests(
+        items: Generator, run_sparql_query: Callable[[list], list]
+    ) -> Generator:
+        """Accept an `items` generator and a `run_sparql_query` method. Split `items` chunks and apply
+        `run_sparql_query` to each chunk. Return a single generator of results."""
+        for raw_response_item in process_stream_in_parallel(
+            items,
+            run_sparql_query,
+            SPARQL_ITEMS_CHUNK_SIZE,
+            MAX_PARALLEL_SPARQL_QUERIES,
+        ):
+            yield raw_response_item
 
     def _stream_wikidata_ids(self) -> Generator[str]:
         """Streams filtered edges using the `_stream_raw_edges` method and extracts Wikidata ids from them."""
@@ -93,11 +114,8 @@ class WikidataLinkedOntologySource(BaseSource):
         all_ids = self._get_all_ids()
 
         # Parallelise the second query to retrieve the mappings faster.
-        for raw_mapping in process_stream_in_parallel(
-            all_ids,
-            self._get_linked_id_mappings,
-            SPARQL_ITEMS_CHUNK_SIZE,
-            MAX_PARALLEL_SPARQL_QUERIES,
+        for raw_mapping in self._parallelise_requests(
+            all_ids, self._get_linked_id_mappings
         ):
             linked_id = raw_mapping["linkedId"]["value"]
             wikidata_id = extract_wikidata_id(raw_mapping)
@@ -110,6 +128,16 @@ class WikidataLinkedOntologySource(BaseSource):
             if self.id_type_checker.id_included_in_selected_type(mapping["linked_id"]):
                 yield mapping
 
+        for raw_mapping in self._parallelise_requests(
+            all_ids, self._get_parent_id_mappings
+        ):
+            mapping = {
+                "child_id": extract_wikidata_id(raw_mapping, "child"),
+                "parent_id": extract_wikidata_id(raw_mapping),
+            }
+
+            yield mapping
+
     def _stream_raw_nodes(self) -> Generator[dict]:
         """
         Extract nodes via the following steps:
@@ -118,13 +146,7 @@ class WikidataLinkedOntologySource(BaseSource):
             Wikidata fields required to create a node.
         """
         all_ids = self._stream_wikidata_ids()
-
-        yield from process_stream_in_parallel(
-            all_ids,
-            self._get_linked_items,
-            SPARQL_ITEMS_CHUNK_SIZE,
-            MAX_PARALLEL_SPARQL_QUERIES,
-        )
+        yield from self._parallelise_requests(all_ids, self._get_wikidata_items)
 
     def stream_raw(self) -> Generator[dict]:
         if self.entity_type == "nodes":

@@ -1,6 +1,7 @@
 import threading
 import time
 import backoff
+from backoff._typing import Details
 
 import requests
 
@@ -10,7 +11,7 @@ import requests
 MAX_PARALLEL_SPARQL_QUERIES = 4
 
 
-def on_request_backoff(backoff_details: dict) -> None:
+def on_request_backoff(backoff_details: Details) -> None:
     exception_name = type(backoff_details["exception"]).__name__
     print(f"SPARQL request failed due to '{exception_name}'. Retrying...")
 
