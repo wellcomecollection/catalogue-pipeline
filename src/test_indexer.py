@@ -4,7 +4,7 @@ from indexer import lambda_handler
 from test_mocks import MockRequest
 
 
-def test_lambda_handler():
+def test_lambda_handler() -> None:
     MockRequest.responses = [
         {
             "method": "POST",

@@ -11,8 +11,13 @@ MOCK_CREDENTIALS = Credentials(
 )
 
 
-class MockSecretsManagerClient:
-    def get_secret_value(self, SecretId: str):
+class MockAwsService:
+    def __init__(self) -> None:
+        return None
+
+
+class MockSecretsManagerClient(MockAwsService):
+    def get_secret_value(self, SecretId: str) -> dict:
         if SecretId == LOAD_BALANCER_SECRET_NAME:
             secret_value = MOCK_API_KEY
         elif SecretId == INSTANCE_ENDPOINT_SECRET_NAME:
@@ -24,49 +29,49 @@ class MockSecretsManagerClient:
 
 
 class MockBoto3Session:
-    def __init__(self):
+    def __init__(self) -> None:
         self.clients = {
             "secretsmanager": MockSecretsManagerClient(),
         }
 
-    def client(self, client_name: str):
+    def client(self, client_name: str) -> MockAwsService:
         if client_name not in self.clients:
             raise KeyError("There is no mock client for the specified client_name.")
 
         return self.clients[client_name]
 
-    def get_credentials(self):
+    def get_credentials(self) -> Credentials:
         return MOCK_CREDENTIALS
 
 
 class MockResponse:
-    def __init__(self, json_data, status_code):
+    def __init__(self, json_data: dict, status_code: int) -> None:
         self.json_data = json_data
         self.status_code = status_code
 
-    def json(self):
+    def json(self) -> dict:
         return self.json_data
 
 
 class MockRequest:
-    responses = {}
-    calls = []
+    responses: list[dict] = []
+    calls: list[dict] = []
 
     @staticmethod
-    def clear_mock_responses():
-        MockRequest.responses = {}
+    def clear_mock_responses() -> None:
+        MockRequest.responses = []
 
     @staticmethod
-    def clear_mock_calls():
+    def clear_mock_calls() -> None:
         MockRequest.calls = []
 
     @staticmethod
-    def reset_mocks():
+    def reset_mocks() -> None:
         MockRequest.clear_mock_responses()
         MockRequest.clear_mock_calls()
 
     @staticmethod
-    def mock_response(method, url, status_code, json_data):
+    def mock_response(method: str, url: str, status_code: int, json_data: dict) -> None:
         MockRequest.responses.append(
             {
                 "method": method,
@@ -77,7 +82,7 @@ class MockRequest:
         )
 
     @staticmethod
-    def mock_responses(method, url, responses):
+    def mock_responses(method: str, url: str, responses: list[dict]) -> None:
         MockRequest.clear_mock_responses()
         for response in responses:
             MockRequest.mock_response(
@@ -85,10 +90,7 @@ class MockRequest:
             )
 
     @staticmethod
-    def request(method, url, **kwargs):
-        data = kwargs.get("data")
-        headers = kwargs.get("headers")
-
+    def request(method: str, url: str, data: dict, headers: dict) -> MockResponse:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
