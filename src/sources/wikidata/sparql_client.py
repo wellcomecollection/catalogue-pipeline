@@ -1,8 +1,8 @@
 import threading
 import time
-import backoff
 import typing
 
+import backoff
 import requests
 
 # Wikidata limits the number of parallel queries from a single IP address to 5.
