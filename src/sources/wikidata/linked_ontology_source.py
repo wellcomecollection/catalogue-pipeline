@@ -106,6 +106,7 @@ class WikidataLinkedOntologySource(BaseSource):
             # Only yield the mapping if the linked id corresponds to the selected `node_type`, as determined by the
             # linked ontology. For example, if we want to stream Wikidata 'names' edges, but we classify the referenced
             # LoC id is a 'locations' id, we skip it.
+            # This also removes mappings which include invalid LoC ids (of which there are several thousand).
             if self.id_type_checker.id_included_in_selected_type(mapping["linked_id"]):
                 yield mapping
 

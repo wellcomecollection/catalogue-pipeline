@@ -51,14 +51,8 @@ class LinkedOntologyIdTypeChecker:
         return ids
 
     def id_included_in_selected_type(self, linked_id: str) -> bool:
-        """Return `True` if a given linked ontology id is classified under the selected node type (concepts,
-        locations, or names)."""
-
-        # To check whether a Library of Congress id is classified under 'names', we could examine all the 'names' ids,
-        # but the corresponding file is large and it would take too long. Instead, it's better to check that the
-        # LoC id starts  with an 'n' and that it is not classified under 'locations'.
-        if self.linked_ontology == "loc" and self.node_type == "names":
-            location_ids = self._get_linked_ontology_ids("locations")
-            return linked_id not in location_ids and linked_id[0] == "n"
-
+        """
+        Return `True` if a given linked ontology id is classified under the selected node type (concepts,
+        locations, or names).
+        """
         return linked_id in self._get_linked_ontology_ids(self.node_type)
