@@ -155,7 +155,14 @@ class BaseNeptuneClient:
             for error_log in error_logs:
                 code = error_log["errorCode"]
                 message = error_log["errorMessage"]
-                print(f"         {code}: {message}")
+                record_num = error_log["recordNum"]
+                print(f"         {code}: {message}. (Row number: {record_num})")
+
+        failed_feeds = payload.get("failedFeeds")
+        if failed_feeds:
+            print("    Failed feed statuses:")
+            for failed_feed in failed_feeds:
+                print(f"         {failed_feed['status']}")
 
         return status
 

@@ -18,6 +18,13 @@ class SourceConceptNarrowerThan(BaseEdge):
     directed: bool = True
 
 
+class SourceConceptSameAs(BaseEdge):
+    from_type: str = "SourceConcept"
+    to_type: str = "SourceConcept"
+    relationship: str = "SAME_AS"
+    directed: bool = False
+
+
 class SourceConceptRelatedTo(BaseEdge):
     from_type: str = "SourceConcept"
     to_type: str = "SourceConcept"
