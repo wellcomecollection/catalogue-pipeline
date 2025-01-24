@@ -22,6 +22,7 @@ class MeSHConceptsSource(BaseSource):
         via a tree number lookup.
         """
         response = requests.get(url)
+
         return ET.fromstring(response.content)
 
     def _treenum_lookup(self) -> dict[str, str]:

@@ -12,6 +12,7 @@ def test_lambda_handler() -> None:
                 "url": "https://test-host.com:8182/openCypher",
                 "status_code": 200,
                 "json_data": {"results": {"foo": "bar"}},
+                "content_bytes": None,
             }
         ]
     )
