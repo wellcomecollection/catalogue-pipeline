@@ -6,6 +6,7 @@ from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer
 from .mesh.concepts_transformer import MeSHConceptsTransformer
 from .mesh.locations_transformer import MeSHLocationsTransformer
+from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 LOC_SUBJECT_HEADINGS_URL = (
     "https://id.loc.gov/download/authorities/subjects.skosrdf.jsonld.gz"
@@ -14,8 +15,10 @@ LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.skosrdf.jsonld.gz
 
 MESH_URL = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2025.gz"
 
+CATALOGUE_SNAPSHOT_URL = "https://data.wellcomecollection.org/catalogue/v2/works.json.gz"
+
 TransformerType = Literal[
-    "loc_concepts", "loc_names", "loc_locations", "mesh_concepts", "mesh_locations"
+    "loc_concepts", "loc_names", "loc_locations", "mesh_concepts", "mesh_locations", "catalogue_concepts"
 ]
 
 
@@ -32,5 +35,7 @@ def create_transformer(transformer_type: TransformerType) -> BaseTransformer:
         return MeSHConceptsTransformer(MESH_URL)
     if transformer_type == "mesh_locations":
         return MeSHLocationsTransformer(MESH_URL)
+    if transformer_type == "catalogue_concepts":
+        return CatalogueConceptsTransformer(CATALOGUE_SNAPSHOT_URL)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")
