@@ -1,10 +1,7 @@
-import gzip
-import json
 from collections.abc import Generator
 
-import requests
-
 from sources.base_source import BaseSource
+from sources.gzip_source import GZipSource
 
 CONCEPT_KEYS = ["subjects", "genres", "contributors"]
 
@@ -13,11 +10,9 @@ class CatalogueConceptSource(BaseSource):
         self.url = url
 
     def stream_raw(self) -> Generator[dict]:
-        response = requests.get(self.url, stream=True)
-
-        with gzip.GzipFile(fileobj=response.raw) as file:
-            for line_bytes in file:
-                work = json.loads(line_bytes.decode("utf8"))
-                for conecpt_key in CONCEPT_KEYS:
-                    for raw_concept in work.get(conecpt_key, []):
-                        yield raw_concept
+        """Streams raw concept nodes from a work's subjects, genres, and contributors."""
+        catalogue_source = GZipSource(self.url)
+        for work in catalogue_source.stream_raw():
+            for conecpt_key in CONCEPT_KEYS:
+                for raw_concept in work.get(conecpt_key, []):
+                    yield raw_concept
