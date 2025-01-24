@@ -34,10 +34,7 @@ class SourceName(SourceConcept):
     date_of_death: Optional[datetime.date] = None
     place_of_birth: Optional[str] = None
 
-
-# The `id` field stores a canonical Wellcome identifier
-class Concept(BaseNode):
-    type: Literal[
+ConceptType = Literal[
         "Person",
         "Concept",
         "Organisation",
@@ -47,6 +44,12 @@ class Concept(BaseNode):
         "Genre",
         "Period",
     ]
-    source: Literal[
+
+ConceptSource = Literal[
         "label-derived", "nlm-mesh", "lc-subjects", "lc-names", "viaf", "fihrist"
     ]
+
+# The `id` field stores a canonical Wellcome identifier
+class Concept(BaseNode):
+    type: ConceptType
+    source: ConceptSource
