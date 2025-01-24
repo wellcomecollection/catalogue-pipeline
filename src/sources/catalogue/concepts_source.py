@@ -5,7 +5,7 @@ from sources.gzip_source import GZipSource
 
 CONCEPT_KEYS = ["subjects", "genres", "contributors"]
 
-class CatalogueConceptSource(BaseSource):
+class CatalogueConceptsSource(BaseSource):
     def __init__(self, url: str):
         self.url = url
 
