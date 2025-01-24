@@ -1,14 +1,12 @@
 import argparse
-import os
 import typing
 
+from config import GRAPH_QUERIES_SNS_TOPIC_ARN, S3_BULK_LOAD_BUCKET_NAME
 from transformers.base_transformer import BaseTransformer, EntityType, StreamDestination
 from transformers.create_transformer import TransformerType, create_transformer
 from utils.aws import get_neptune_client
 
 CHUNK_SIZE = 256
-S3_BULK_LOAD_BUCKET_NAME = os.environ.get("S3_BULK_LOAD_BUCKET_NAME")
-GRAPH_QUERIES_SNS_TOPIC_ARN = os.environ.get("GRAPH_QUERIES_SNS_TOPIC_ARN")
 
 
 def handler(
@@ -24,6 +22,8 @@ def handler(
     )
 
     transformer: BaseTransformer = create_transformer(transformer_type, entity_type)
+
+    print(f"Transformer: {transformer}")
 
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)

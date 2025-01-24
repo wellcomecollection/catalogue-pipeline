@@ -9,7 +9,6 @@ from .sparql_client import MAX_PARALLEL_SPARQL_QUERIES, WikidataSparqlClient
 from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
-
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
 

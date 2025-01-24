@@ -45,12 +45,18 @@ class MockBoto3Session:
 
 
 class MockResponse:
-    def __init__(self, json_data: dict, status_code: int) -> None:
+    def __init__(
+        self, status_code: int, json_data: dict = None, content: bytes = None
+    ) -> None:
         self.json_data = json_data
         self.status_code = status_code
+        self.content = content
 
-    def json(self) -> dict:
+    def json(self) -> dict | None:
         return self.json_data
+
+    def content(self) -> bytes | None:
+        return self.content
 
 
 class MockRequest:
@@ -71,22 +77,30 @@ class MockRequest:
         MockRequest.clear_mock_calls()
 
     @staticmethod
-    def mock_response(method: str, url: str, status_code: int, json_data: dict) -> None:
+    def mock_response(
+        method: str,
+        url: str,
+        status_code: int,
+        json_data: dict = None,
+        content: bytes = None,
+    ) -> None:
         MockRequest.responses.append(
             {
                 "method": method,
                 "url": url,
-                "status_code": status_code,
-                "json_data": json_data,
+                "response": MockResponse(status_code, json_data, content),
             }
         )
 
     @staticmethod
-    def mock_responses(method: str, url: str, responses: list[dict]) -> None:
-        MockRequest.clear_mock_responses()
+    def mock_responses(responses: list[dict]) -> None:
         for response in responses:
             MockRequest.mock_response(
-                method, url, response["status_code"], response["json_data"]
+                response["method"],
+                response["url"],
+                response["status_code"],
+                response.get("json_data"),
+                response.get("content"),
             )
 
     @staticmethod
@@ -96,6 +110,17 @@ class MockRequest:
         )
         for response in MockRequest.responses:
             if response["method"] == method and response["url"] == url:
-                return MockResponse(response["json_data"], response["status_code"])
+                return response["response"]
 
         raise Exception(f"Unexpected request: {method} {url}")
+
+    @staticmethod
+    def get(url: str, data: dict = {}, headers: dict = {}) -> MockResponse:
+        MockRequest.calls.append(
+            {"method": "GET", "url": url, "data": data, "headers": headers}
+        )
+        for response in MockRequest.responses:
+            if response["method"] == "GET" and response["url"] == url:
+                return response["response"]
+
+        raise Exception(f"Unexpected request: GET {url}")
