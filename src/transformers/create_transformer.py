@@ -1,12 +1,12 @@
 from typing import Literal
 
 from .base_transformer import BaseTransformer, EntityType
+from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
 from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer
 from .mesh.concepts_transformer import MeSHConceptsTransformer
 from .mesh.locations_transformer import MeSHLocationsTransformer
-from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .wikidata.concepts_transformer import WikidataConceptsTransformer
 from .wikidata.locations_transformer import WikidataLocationsTransformer
 from .wikidata.names_transformer import WikidataNamesTransformer
@@ -17,7 +17,9 @@ LOC_SUBJECT_HEADINGS_URL = (
 LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.skosrdf.jsonld.gz"
 MESH_URL = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2025.gz"
 
-CATALOGUE_SNAPSHOT_URL = "https://data.wellcomecollection.org/catalogue/v2/works.json.gz"
+CATALOGUE_SNAPSHOT_URL = (
+    "https://data.wellcomecollection.org/catalogue/v2/works.json.gz"
+)
 
 TransformerType = Literal[
     "loc_concepts",
@@ -30,7 +32,7 @@ TransformerType = Literal[
     "wikidata_linked_loc_names",
     "wikidata_linked_mesh_concepts",
     "wikidata_linked_mesh_locations",
-    "catalogue_concepts"
+    "catalogue_concepts",
 ]
 
 
