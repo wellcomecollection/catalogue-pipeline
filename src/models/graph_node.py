@@ -34,6 +34,8 @@ class SourceName(SourceConcept):
     date_of_death: Optional[datetime.date] = None
     place_of_birth: Optional[str] = None
 
+
+# Catalogue concepts have a specific type and source
 ConceptType = Literal[
         "Person",
         "Concept",
