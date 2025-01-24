@@ -24,11 +24,11 @@ class MockSmartOpen:
         MockSmartOpen.file_lookup = {}
 
     @staticmethod
-    def get_mock_file(uri: str) -> io.StringIO:
+    def get_mock_file(uri: str) -> Any:
         return MockSmartOpen.file_lookup[uri]
 
     @staticmethod
-    def open(uri, mode, **kwargs: Any) -> Any:
+    def open(uri: str, mode: str, **kwargs: Any) -> Any:
         # Create an in-memory text stream
         mock_file = io.StringIO()
 
@@ -71,7 +71,7 @@ class MockSNSClient(MockAwsService):
     def __init__(self) -> None:
         return
 
-    def publish_batch(self, TopicArn: str, PublishBatchRequestEntries: list):
+    def publish_batch(self, TopicArn: str, PublishBatchRequestEntries: list) -> Any:
         MockSNSClient.publish_batch_request_entries.append(
             {
                 "TopicArn": TopicArn,
@@ -98,6 +98,10 @@ class MockBoto3Session:
         return MOCK_CREDENTIALS
 
 
+import gzip
+from io import BufferedRandom
+
+
 class MockResponse:
     def __init__(
         self,
@@ -108,6 +112,13 @@ class MockResponse:
         self.json_data = json_data
         self.status_code = status_code
         self.content = content
+        self.raw: Any = None
+
+        # Assume raw content is gzipped
+        if content is not None:
+            self.raw = io.BytesIO(gzip.compress(content))
+        else:
+            self.raw = None
 
     def json(self) -> dict | None:
         return self.json_data
@@ -137,7 +148,6 @@ class MockRequest:
 
     @staticmethod
     def clear_mock_calls() -> None:
-        print("Clearing mock calls")
         MockRequest.calls = []
 
     @staticmethod
@@ -184,7 +194,9 @@ class MockRequest:
         raise Exception(f"Unexpected request: {method} {url}")
 
     @staticmethod
-    def get(url: str, data: dict = {}, headers: dict = {}) -> MockResponse:
+    def get(
+        url: str, stream: bool = False, data: dict = {}, headers: dict = {}
+    ) -> MockResponse:
         MockRequest.calls.append(
             {"method": "GET", "url": url, "data": data, "headers": headers}
         )

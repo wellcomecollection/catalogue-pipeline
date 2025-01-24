@@ -3,7 +3,7 @@ from typing import Any, Generator
 import pytest
 from typing_extensions import get_args
 
-from config import MESH_URL
+from config import LOC_SUBJECT_HEADINGS_URL, MESH_URL
 from extractor import LambdaEvent, lambda_handler
 from test_mocks import MockRequest, MockResponseInput
 from test_utils import load_fixture
@@ -12,15 +12,22 @@ from transformers.create_transformer import TransformerType
 
 
 def mock_requests_lookup_table(
-    entity_type: EntityType,
     destination: StreamDestination,
     transformer_type: TransformerType,
-):
+) -> Any:
     mock_mesh_retrieval = {
         "method": "GET",
         "url": MESH_URL,
         "status_code": 200,
         "content_bytes": load_fixture("mesh_example.xml"),
+        "json_data": None,
+    }
+
+    mock_loc_subjects_retrieval = {
+        "method": "GET",
+        "url": LOC_SUBJECT_HEADINGS_URL,
+        "status_code": 200,
+        "content_bytes": load_fixture("loc_subjects_example.jsonld"),
         "json_data": None,
     }
 
@@ -37,9 +44,14 @@ def mock_requests_lookup_table(
             return [mock_mesh_retrieval]
         elif destination == "graph":
             return [mock_mesh_retrieval, mock_graph_post]
+    elif transformer_type == "loc_concepts":
+        if destination == "s3" or destination == "void" or destination == "sns":
+            return [mock_loc_subjects_retrieval]
+        elif destination == "graph":
+            return [mock_loc_subjects_retrieval, mock_graph_post]
 
     raise ValueError(
-        f"Unsupported entity_type: {entity_type}, destination: {destination}, transformer_type: {transformer_type}"
+        f"Unsupported destination: {destination}, transformer_type: {transformer_type}"
     )
 
 
@@ -51,7 +63,7 @@ def build_test_matrix() -> Generator[tuple[LambdaEvent, list[MockResponseInput]]
     transformer_types_to_test = [
         transformer_type
         for transformer_type in transformer_types
-        if transformer_type in ["mesh_concepts"]
+        if transformer_type in ["mesh_concepts", "loc_concepts"]
     ]
 
     stream_destination_to_test = [
@@ -74,9 +86,7 @@ def build_test_matrix() -> Generator[tuple[LambdaEvent, list[MockResponseInput]]
                         "stream_destination": stream_destination,
                         "sample_size": 1,
                     },
-                    mock_requests_lookup_table(
-                        entity_type, stream_destination, transformer_type
-                    ),
+                    mock_requests_lookup_table(stream_destination, transformer_type),
                 )
 
 
@@ -98,9 +108,7 @@ def test_lambda_handler(
 
     if transformer_type == "mesh_concepts":
         if destination == "void" or destination == "s3" or destination == "sns":
-            assert (
-                len(MockRequest.calls) == 1
-            ), f"Expected 1 request, got {len(MockRequest.calls)}, with config {entity_type}, {destination}: {MockRequest.calls}"
+            assert len(MockRequest.calls) == 1
             request = MockRequest.calls[0]
 
             assert request["method"] == "GET"
@@ -117,6 +125,26 @@ def test_lambda_handler(
 
             assert graph_request["method"] == "POST"
             assert graph_request["url"] == "https://test-host.com:8182/openCypher"
+    elif transformer_type == "loc_concepts":
+        if destination == "void" or destination == "s3" or destination == "sns":
+            assert len(MockRequest.calls) == 1
+            request = MockRequest.calls[0]
+
+            assert request["method"] == "GET"
+            assert request["url"] == LOC_SUBJECT_HEADINGS_URL
+
+        elif destination == "graph":
+            assert len(MockRequest.calls) == 2
+            loc_request = MockRequest.calls[0]
+
+            assert loc_request["method"] == "GET"
+            assert loc_request["url"] == LOC_SUBJECT_HEADINGS_URL
+
+            graph_request = MockRequest.calls[1]
+
+            assert graph_request["method"] == "POST"
+            assert graph_request["url"] == "https://test-host.com:8182/openCypher"
+
     else:
         raise ValueError(
             f"Unsupported entity_type: {entity_type}, destination: {destination}, transformer_type: {transformer_type}"
