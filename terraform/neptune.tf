@@ -1,8 +1,8 @@
 resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   cluster_identifier                   = "catalogue-graph"
   engine                               = "neptune"
-  engine_version                       = "1.3.2.1"
-  neptune_cluster_parameter_group_name = "default.neptune1.3"
+  engine_version                       = "1.4.2.0"
+  neptune_cluster_parameter_group_name = "default.neptune1.4"
   iam_database_authentication_enabled  = true
   apply_immediately                    = true
   storage_encrypted                    = true
@@ -57,7 +57,7 @@ resource "aws_iam_role_policy" "s3_read_only_policy_attachment" {
 resource "aws_neptune_cluster_instance" "catalogue_graph_instance" {
   cluster_identifier           = aws_neptune_cluster.catalogue_graph_cluster.cluster_identifier
   instance_class               = "db.serverless"
-  neptune_parameter_group_name = "default.neptune1.3"
+  neptune_parameter_group_name = "default.neptune1.4"
 }
 
 resource "aws_db_subnet_group" "neptune_subnet_group" {
