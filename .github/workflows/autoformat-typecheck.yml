@@ -23,7 +23,7 @@ jobs:
 
       - name: Run typecheck
         run: |
-          ./scripts/typecheck.sh --check
+          ./scripts/typecheck.sh
 
   autoformat:
     runs-on: ubuntu-latest
@@ -41,7 +41,7 @@ jobs:
 
       - name: Run autoformat
         run: |
-          ./scripts/autoformat.sh
+          ./scripts/autoformat.sh --check
 
       - name: Check for formatting changes
         id: check_formatting_changes
