@@ -14,7 +14,6 @@ def generator_to_chunks(items: Iterable[Any], chunk_size: int) -> Generator[list
     """
     while True:
         chunk = list(islice(items, chunk_size))
-        print(len(chunk))
         if chunk:
             yield chunk
         else:

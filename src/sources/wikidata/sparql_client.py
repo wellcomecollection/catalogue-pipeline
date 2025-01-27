@@ -1,8 +1,8 @@
 import threading
 import time
-import backoff
-from backoff._typing import Details
+import typing
 
+import backoff
 import requests
 
 # Wikidata limits the number of parallel queries from a single IP address to 5.
@@ -11,7 +11,7 @@ import requests
 MAX_PARALLEL_SPARQL_QUERIES = 4
 
 
-def on_request_backoff(backoff_details: Details) -> None:
+def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
     print(f"SPARQL request failed due to '{exception_name}'. Retrying...")
 

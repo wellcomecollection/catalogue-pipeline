@@ -150,8 +150,6 @@ class SparqlQueryBuilder:
                 f"Unknown parent/child relationship type: {relationship_type}"
             )
 
-        # We need to filter out items which link to the selected ontology as those items are added
-        # to the graph separately.
         query = f"""
             SELECT DISTINCT ?child ?item 
             WHERE {{
