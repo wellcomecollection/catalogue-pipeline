@@ -41,7 +41,7 @@ jobs:
 
       - name: Run autoformat
         run: |
-          ./scripts/autoformat.sh --check
+          ./scripts/autoformat.sh
 
       - name: Check for formatting changes
         id: check_formatting_changes
