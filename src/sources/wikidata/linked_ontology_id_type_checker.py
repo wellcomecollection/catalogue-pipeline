@@ -32,7 +32,11 @@ class LinkedOntologyIdTypeChecker:
         linked_nodes_file_name = f"{self.linked_ontology}_{node_type}__nodes.csv"
         s3_url = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
-        print(f"Retrieving {linked_nodes_file_name} from S3.")
+        print(
+            f"Retrieving ids of type '{node_type}' from ontology '{self.linked_ontology}' from S3.",
+            end=" ",
+            flush=True,
+        )
 
         ids = set()
         transport_params = {"client": boto3.client("s3")}
@@ -44,9 +48,7 @@ class LinkedOntologyIdTypeChecker:
                     continue
                 ids.add(line.split(",")[0])
 
-        print(
-            f"Retrieved {len(ids)} ids of type '{node_type}' from ontology '{self.linked_ontology}'."
-        )
+        print(f"({len(ids)} ids retrieved.)")
 
         return ids
 

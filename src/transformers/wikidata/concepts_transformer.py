@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.graph_edge import SourceConceptSameAs
+from models.graph_edge import SourceConceptSameAs, SourceConceptHasParent
 from models.graph_node import SourceConcept
 from sources.wikidata.linked_ontology_source import (
     OntologyType,
@@ -28,13 +28,21 @@ class WikidataConceptsTransformer(BaseTransformer):
             description=raw_concept.description,
         )
 
-    def extract_edges(self, raw_edge: dict) -> Generator[SourceConceptSameAs]:
-        linked_id, wikidata_id = raw_edge["linked_id"], raw_edge["wikidata_id"]
-        edge_attributes = {"source": "wikidata"}
-
-        yield SourceConceptSameAs(
-            from_id=linked_id, to_id=wikidata_id, attributes=edge_attributes
-        )
-        yield SourceConceptSameAs(
-            from_id=wikidata_id, to_id=linked_id, attributes=edge_attributes
-        )
+    def extract_edges(
+        self, raw_edge: dict
+    ) -> Generator[SourceConceptSameAs | SourceConceptHasParent]:
+        if raw_edge["type"] == "SAME_AS":
+            linked_id, wikidata_id = raw_edge["linked_id"], raw_edge["wikidata_id"]
+            edge_attributes = {"source": "wikidata"}
+            yield SourceConceptSameAs(
+                from_id=linked_id, to_id=wikidata_id, attributes=edge_attributes
+            )
+            yield SourceConceptSameAs(
+                from_id=wikidata_id, to_id=linked_id, attributes=edge_attributes
+            )
+        elif raw_edge["type"] == "HAS_PARENT":
+            yield SourceConceptHasParent(
+                from_id=raw_edge["child_id"], to_id=raw_edge["parent_id"]
+            )
+        else:
+            raise ValueError(f"Unknown edge type f{raw_edge['type']}")

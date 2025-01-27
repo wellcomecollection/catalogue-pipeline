@@ -35,7 +35,7 @@ class SparqlQueryBuilder:
         return " ".join(fields_with_aggregation)
 
     @staticmethod
-    def _get_linked_ontology_filter(linked_ontology: OntologyType):
+    def _get_linked_ontology_filter(linked_ontology: OntologyType) -> str:
         if linked_ontology == "loc":
             return "?item p:P244/ps:P244 ?linkedId."
         elif linked_ontology == "mesh":
@@ -130,15 +130,25 @@ class SparqlQueryBuilder:
         return query
 
     @classmethod
-    def get_filtered_parents_query(
-        cls, item_ids: list[str], linked_ontology: OntologyType
+    def get_parents_query(
+        cls,
+        item_ids: list[str],
+        relationship_type: Literal["instance_of", "subclass_of"],
     ) -> str:
         """
-        Given a list of Wikidata `item_ids`, return a query to retrieve all parents of each item in the list,
-        filtering out items which reference ids from `linked_ontology`.
-        Parents are determined based on the 'subclass of' (P279) and the 'instance of' (P31) fields.
+        Given a list of Wikidata `item_ids`, return a query to retrieve all parents of each item in the list.
+        Parents are determined based on the 'subclass of' (P279) or the 'instance of' (P31) fields.
         """
         ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+
+        if relationship_type == "instance_of":
+            relationship = "?child wdt:P31 ?item."
+        elif relationship_type == "subclass_of":
+            relationship = "?child wdt:P279 ?item."
+        else:
+            raise ValueError(
+                f"Unknown parent/child relationship type: {relationship_type}"
+            )
 
         # We need to filter out items which link to the selected ontology as those items are added
         # to the graph separately.
@@ -146,8 +156,7 @@ class SparqlQueryBuilder:
             SELECT DISTINCT ?child ?item 
             WHERE {{
               VALUES ?child {{ {ids_clause} }}
-              ?child wdt:P31 ?item.
-              FILTER NOT EXISTS {{ {cls._get_linked_ontology_filter(linked_ontology)} }}
+              {relationship}
             }}
         """
 

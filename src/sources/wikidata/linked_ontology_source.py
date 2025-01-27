@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 
 from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType
@@ -20,7 +20,7 @@ def extract_wikidata_id(item: dict, key: str = "item") -> str:
     """
     assert isinstance(item[key]["value"], str)
     assert item[key]["type"] == "uri"
-    return item[key]["value"].removeprefix(WIKIDATA_ID_PREFIX)
+    return str(item[key]["value"].removeprefix(WIKIDATA_ID_PREFIX))
 
 
 class WikidataLinkedOntologySource(BaseSource):
@@ -48,9 +48,13 @@ class WikidataLinkedOntologySource(BaseSource):
         self.entity_type = entity_type
         self.id_type_checker = LinkedOntologyIdTypeChecker(node_type, linked_ontology)
 
-    def _get_all_ids(self) -> Generator[str]:
+    def _get_all_ids(self) -> list[str]:
         """Return all Wikidata ids corresponding to Wikidata items referencing the selected linked ontology."""
-        print(f"Retrieving Wikidata ids linked to {self.linked_ontology} items.")
+        print(
+            f"Retrieving Wikidata ids linked to {self.linked_ontology} items.",
+            end=" ",
+            flush=True,
+        )
         ids_query = SparqlQueryBuilder.get_all_ids_query(self.linked_ontology)
         id_items = self.client.run_query(ids_query)
 
@@ -58,8 +62,8 @@ class WikidataLinkedOntologySource(BaseSource):
         # but that would make the query significantly slower. It's faster to deduplicate here.)
         all_ids = set(extract_wikidata_id(item) for item in id_items)
 
-        print(f"Retrieved a total of {len(all_ids)} Wikidata ids.")
-        yield from all_ids
+        print(f"({len(all_ids)} ids retrieved.)")
+        return list(all_ids)
 
     def _get_linked_id_mappings(self, wikidata_ids: list[str]) -> list[dict]:
         query = SparqlQueryBuilder.get_linked_ids_query(
@@ -72,14 +76,21 @@ class WikidataLinkedOntologySource(BaseSource):
         return self.client.run_query(query)
 
     def _get_parent_id_mappings(self, child_wikidata_ids: list[str]) -> list[dict]:
-        query = SparqlQueryBuilder.get_filtered_parents_query(
-            child_wikidata_ids, self.linked_ontology
+        subclass_of_query = SparqlQueryBuilder.get_parents_query(
+            child_wikidata_ids, "subclass_of"
         )
-        return self.client.run_query(query)
+        subclass_of_results = self.client.run_query(subclass_of_query)
+
+        instance_of_query = SparqlQueryBuilder.get_parents_query(
+            child_wikidata_ids, "instance_of"
+        )
+        instance_of_results = self.client.run_query(instance_of_query)
+
+        return subclass_of_results + instance_of_results
 
     @staticmethod
     def _parallelise_requests(
-        items: Generator, run_sparql_query: Callable[[list], list]
+        items: Iterable, run_sparql_query: Callable[[list], list]
     ) -> Generator:
         """Accept an `items` generator and a `run_sparql_query` method. Split `items` chunks and apply
         `run_sparql_query` to each chunk. Return a single generator of results."""
@@ -95,7 +106,14 @@ class WikidataLinkedOntologySource(BaseSource):
         """Streams filtered edges using the `_stream_raw_edges` method and extracts Wikidata ids from them."""
         seen = set()
         for item in self._stream_raw_edges():
-            wikidata_id: str = item["wikidata_id"]
+            wikidata_id: str
+            if item["type"] == "SAME_AS":
+                wikidata_id = item["wikidata_id"]
+            elif item["type"] == "HAS_PARENT":
+                wikidata_id = item["parent_id"]
+            else:
+                raise ValueError(f"Unknown raw edge type {item['type']}.")
+
             if wikidata_id not in seen:
                 seen.add(wikidata_id)
                 yield wikidata_id
@@ -111,15 +129,19 @@ class WikidataLinkedOntologySource(BaseSource):
             3. Filter the returned id pairs to only include Wikidata ids corresponding to the selected node type
             (i.e. concepts, locations, or names).
         """
-        all_ids = self._get_all_ids()
+        all_linked_ids = self._get_all_ids()
 
-        # Parallelise the second query to retrieve the mappings faster.
+        print("Streaming linked Wikidata ids...")
         for raw_mapping in self._parallelise_requests(
-            all_ids, self._get_linked_id_mappings
+            all_linked_ids, self._get_linked_id_mappings
         ):
             linked_id = raw_mapping["linkedId"]["value"]
             wikidata_id = extract_wikidata_id(raw_mapping)
-            mapping = {"wikidata_id": wikidata_id, "linked_id": linked_id}
+            mapping = {
+                "wikidata_id": wikidata_id,
+                "linked_id": linked_id,
+                "type": "SAME_AS",
+            }
 
             # Only yield the mapping if the linked id corresponds to the selected `node_type`, as determined by the
             # linked ontology. For example, if we want to stream Wikidata 'names' edges, but we classify the referenced
@@ -128,12 +150,15 @@ class WikidataLinkedOntologySource(BaseSource):
             if self.id_type_checker.id_included_in_selected_type(mapping["linked_id"]):
                 yield mapping
 
+        print("Streaming parent Wikidata ids...")
         for raw_mapping in self._parallelise_requests(
-            all_ids, self._get_parent_id_mappings
+            all_linked_ids, self._get_parent_id_mappings
         ):
+            parent_id = extract_wikidata_id(raw_mapping)
             mapping = {
                 "child_id": extract_wikidata_id(raw_mapping, "child"),
-                "parent_id": extract_wikidata_id(raw_mapping),
+                "parent_id": parent_id,
+                "type": "HAS_PARENT",
             }
 
             yield mapping
