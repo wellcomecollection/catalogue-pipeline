@@ -1,4 +1,4 @@
-from collections.abc import Generator, Iterable
+from collections.abc import Generator, Iterator
 from typing import Callable
 
 from sources.base_source import BaseSource
@@ -90,7 +90,7 @@ class WikidataLinkedOntologySource(BaseSource):
 
     @staticmethod
     def _parallelise_requests(
-        items: Iterable, run_sparql_query: Callable[[list], list]
+        items: Iterator, run_sparql_query: Callable[[list], list]
     ) -> Generator:
         """Accept an `items` generator and a `run_sparql_query` method. Split `items` chunks and apply
         `run_sparql_query` to each chunk. Return a single generator of results."""
@@ -133,7 +133,7 @@ class WikidataLinkedOntologySource(BaseSource):
 
         print("Streaming linked Wikidata ids...")
         for raw_mapping in self._parallelise_requests(
-            all_linked_ids, self._get_linked_id_mappings
+            iter(all_linked_ids), self._get_linked_id_mappings
         ):
             linked_id = raw_mapping["linkedId"]["value"]
             wikidata_id = extract_wikidata_id(raw_mapping)
@@ -152,7 +152,7 @@ class WikidataLinkedOntologySource(BaseSource):
 
         print("Streaming parent Wikidata ids...")
         for raw_mapping in self._parallelise_requests(
-            all_linked_ids, self._get_parent_id_mappings
+            iter(all_linked_ids), self._get_parent_id_mappings
         ):
             parent_id = extract_wikidata_id(raw_mapping)
             mapping = {
