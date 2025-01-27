@@ -105,7 +105,7 @@ from io import BufferedRandom
 class MockResponse:
     def __init__(
         self,
-        status_code: int,
+        status_code: int | None = None,
         json_data: dict | None = None,
         content: bytes | None = None,
     ) -> None:
@@ -127,6 +127,7 @@ class MockResponse:
 class MockRequestExpectation(TypedDict):
     method: str
     url: str
+    params: dict | None
     response: MockResponse
 
 
@@ -134,6 +135,7 @@ class MockResponseInput(TypedDict):
     method: str
     url: str
     status_code: int
+    params: dict | None
     content_bytes: bytes | None
     json_data: dict | None
 
@@ -159,7 +161,8 @@ class MockRequest:
     def mock_response(
         method: str,
         url: str,
-        status_code: int,
+        status_code: int | None = None,
+        params: dict | None = None,
         json_data: dict | None = None,
         content_bytes: bytes | None = None,
     ) -> None:
@@ -167,6 +170,7 @@ class MockRequest:
             {
                 "method": method,
                 "url": url,
+                "params": params,
                 "response": MockResponse(status_code, json_data, content_bytes),
             }
         )
@@ -177,7 +181,8 @@ class MockRequest:
             MockRequest.mock_response(
                 response["method"],
                 response["url"],
-                response["status_code"],
+                response.get("status_code", 200),
+                response.get("params"),
                 response.get("json_data"),
                 response.get("content_bytes"),
             )
@@ -195,13 +200,21 @@ class MockRequest:
 
     @staticmethod
     def get(
-        url: str, stream: bool = False, data: dict = {}, headers: dict = {}
+        url: str,
+        stream: bool = False,
+        data: dict = {},
+        headers: dict = {},
+        params: dict | None = None,
     ) -> MockResponse:
         MockRequest.calls.append(
             {"method": "GET", "url": url, "data": data, "headers": headers}
         )
         for response in MockRequest.responses:
-            if response["method"] == "GET" and response["url"] == url:
+            if (
+                response["method"] == "GET"
+                and response["url"] == url
+                and response["params"] == params
+            ):
                 return response["response"]
 
-        raise Exception(f"Unexpected request: GET {url}")
+        raise Exception(f"Unexpected request: GET {url}, params: {params}")

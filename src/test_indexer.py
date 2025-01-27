@@ -13,6 +13,7 @@ def test_lambda_handler() -> None:
                 "status_code": 200,
                 "json_data": {"results": {"foo": "bar"}},
                 "content_bytes": None,
+                "params": None,
             }
         ]
     )

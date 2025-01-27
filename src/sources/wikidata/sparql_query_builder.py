@@ -71,6 +71,9 @@ class SparqlQueryBuilder:
             }}
         """
 
+        # Remove all line breaks and extra spaces
+        get_ids_query = " ".join(get_ids_query.split())
+
         return get_ids_query
 
     @classmethod
