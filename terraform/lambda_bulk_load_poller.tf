@@ -4,6 +4,7 @@ module "bulk_load_poller_lambda" {
   name        = "catalogue-graph-bulk-load-poller"
   description = "Polls the status of a Neptune bulk load job."
   runtime     = "python3.13"
+  publish     = true
 
   filename = "../build.zip"
   source_code_hash = filesha256("../build.zip")

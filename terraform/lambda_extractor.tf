@@ -4,7 +4,8 @@ module "extractor_lambda" {
   name        = "catalogue-graph-extractor"
   description = "Extracts source concepts and turns them into Cypher queries."
   runtime     = "python3.13"
-
+  publish     = true
+  
   filename         = "../build.zip"
   source_code_hash = filesha256("../build.zip")
 

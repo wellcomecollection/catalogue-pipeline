@@ -1,3 +1,6 @@
+locals {
+  extractor_lambda = "${module.extractor_lambda.lambda.arn}:${module.extractor_lambda.lambda.version}"
+}
 resource "aws_sfn_state_machine" "catalogue_graph_extractors" {
   name     = "catalogue-graph-extractors"
   role_arn = aws_iam_role.state_machine_execution_role.arn
@@ -14,7 +17,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors" {
             States  = {
               "Extract ${task_input.label}" = {
                 Type       = "Task"
-                Resource   = module.extractor_lambda.lambda.arn
+                Resource   = local.extractor_lambda
                 Parameters = {
                   "transformer_type"   = task_input.transformer_type,
                   "entity_type"        = task_input.entity_type,

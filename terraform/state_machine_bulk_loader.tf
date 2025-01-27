@@ -1,3 +1,7 @@
+locals {
+  bulk_loader_lambda = "${module.bulk_loader_lambda.lambda.arn}:${module.bulk_loader_lambda.lambda.version}"
+  bulk_load_poller_lambda = "${module.bulk_load_poller_lambda.lambda.arn}:${module.bulk_load_poller_lambda.lambda.version}"
+}
 resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
   name     = "catalogue-graph-bulk-loader"
   role_arn = aws_iam_role.state_machine_execution_role.arn
@@ -12,7 +16,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
         "Resource" : "arn:aws:states:::lambda:invoke",
         "Output" : "{% $states.result.Payload %}",
         "Arguments" : {
-          "FunctionName" : module.bulk_loader_lambda.lambda.arn,
+          "FunctionName" : local.bulk_loader_lambda,
           "Payload" : "{% $states.input %}"
         },
         "Next" : "Wait 30 seconds"
@@ -27,7 +31,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
         "Resource" : "arn:aws:states:::lambda:invoke",
         "Output" : "{% $states.result.Payload %}",
         "Arguments" : {
-          "FunctionName" : module.bulk_load_poller_lambda.lambda.arn,
+          "FunctionName" : local.bulk_load_poller_lambda,
           "Payload" : "{% $states.input %}"
         },
         "Next" : "Load complete?"
