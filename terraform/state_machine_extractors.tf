@@ -21,8 +21,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors" {
                 Parameters = {
                   "transformer_type"   = task_input.transformer_type,
                   "entity_type"        = task_input.entity_type,
-                  "stream_destination" = "s3",
-                  "sample_size"        = 1000 # Only stream a small sample while testing
+                  "stream_destination" = "s3"
                 }
                 End = true
               }

@@ -42,6 +42,56 @@ variable "state_machine_inputs" {
       "label" : "MeSH Concept Edges",
       "transformer_type" : "mesh_concepts",
       "entity_type" : "edges"
-    }
+    },
+    {
+      "label" : "Wikidata Linked LoC Concept Nodes",
+      "transformer_type" : "wikidata_linked_loc_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked LoC Location Nodes",
+      "transformer_type" : "wikidata_linked_loc_locations",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked LoC Name Nodes",
+      "transformer_type" : "wikidata_linked_loc_names",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked LoC Concept Edges",
+      "transformer_type" : "wikidata_linked_loc_concepts",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked LoC Location Edges",
+      "transformer_type" : "wikidata_linked_loc_locations",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked LoC Name Edges",
+      "transformer_type" : "wikidata_linked_loc_names",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Concept Nodes",
+      "transformer_type" : "wikidata_linked_mesh_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Location Nodes",
+      "transformer_type" : "wikidata_linked_mesh_locations",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Concept Edges",
+      "transformer_type" : "wikidata_linked_mesh_concepts",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Location Edges",
+      "transformer_type" : "wikidata_linked_mesh_locations",
+      "entity_type" : "edges"
+    },
   ]
 }

@@ -47,7 +47,7 @@ def local_handler() -> None:
     )
     args = parser.parse_args()
 
-    handler(**args.__dict__, is_local=True)
+    print(handler(**args.__dict__, is_local=True))
 
 
 if __name__ == "__main__":
