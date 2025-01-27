@@ -10,4 +10,8 @@ ROOT+="$(dirname "$DIR")"
 cd "$ROOT"
 
 mypy --config-file ./mypy.ini src/
+<<<<<<< HEAD
 mypy --config-file ./mypy.ini tests/
+=======
+mypy --config-file ./mypy.ini tests/
+>>>>>>> aa95658 (fix formatting and typechecking)
