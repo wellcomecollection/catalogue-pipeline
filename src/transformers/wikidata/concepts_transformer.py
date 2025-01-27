@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.graph_edge import SourceConceptSameAs, SourceConceptHasParent
+from models.graph_edge import SourceConceptHasParent, SourceConceptSameAs
 from models.graph_node import SourceConcept
 from sources.wikidata.linked_ontology_source import (
     OntologyType,
