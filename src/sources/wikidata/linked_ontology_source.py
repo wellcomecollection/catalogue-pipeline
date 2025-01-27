@@ -14,13 +14,23 @@ SPARQL_ITEMS_CHUNK_SIZE = 400
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
 
-def extract_wikidata_id(item: dict, key: str = "item") -> str:
+def extract_wikidata_id(item: dict, key: str = "item") -> str | None:
     """
     Accepts a raw `item` dictionary returned by the Wikidata SPARQL endpoint and returns the Wikidata id of the item.
+    Returns `None` if the stored id is not valid.
     """
-    assert isinstance(item[key]["value"], str)
+    wikidata_id = item[key]["value"]
+    assert isinstance(wikidata_id, str)
     assert item[key]["type"] == "uri"
-    return str(item[key]["value"].removeprefix(WIKIDATA_ID_PREFIX))
+
+    if wikidata_id.startswith(WIKIDATA_ID_PREFIX):
+        return wikidata_id.removeprefix(WIKIDATA_ID_PREFIX)
+
+    # Very rarely, Wikidata returns an invalid ID in the format
+    # http://www.wikidata.org/.well-known/genid/<some hexadecimal string>.
+    # Log when this happens and return 'None'.
+    print(f"Encountered an invalid Wikidata id: {wikidata_id}")
+    return None
 
 
 class WikidataLinkedOntologySource(BaseSource):
@@ -61,9 +71,10 @@ class WikidataLinkedOntologySource(BaseSource):
         # Deduplicate. (We could deduplicate as part of the SPARQL query via the 'DISTINCT' keyword,
         # but that would make the query significantly slower. It's faster to deduplicate here.)
         all_ids = set(extract_wikidata_id(item) for item in id_items)
+        all_valid_ids = [i for i in all_ids if i is not None]
 
-        print(f"({len(all_ids)} ids retrieved.)")
-        return list(all_ids)
+        print(f"({len(all_valid_ids)} ids retrieved.)")
+        return list(all_valid_ids)
 
     def _get_linked_id_mappings(self, wikidata_ids: list[str]) -> list[dict]:
         query = SparqlQueryBuilder.get_linked_ids_query(
@@ -130,6 +141,7 @@ class WikidataLinkedOntologySource(BaseSource):
             (i.e. concepts, locations, or names).
         """
         all_linked_ids = self._get_all_ids()
+        selected_type_ids = set()
 
         print("Streaming linked Wikidata ids...")
         for raw_mapping in self._parallelise_requests(
@@ -137,31 +149,33 @@ class WikidataLinkedOntologySource(BaseSource):
         ):
             linked_id = raw_mapping["linkedId"]["value"]
             wikidata_id = extract_wikidata_id(raw_mapping)
-            mapping = {
-                "wikidata_id": wikidata_id,
-                "linked_id": linked_id,
-                "type": "SAME_AS",
-            }
 
             # Only yield the mapping if the linked id corresponds to the selected `node_type`, as determined by the
             # linked ontology. For example, if we want to stream Wikidata 'names' edges, but we classify the referenced
             # LoC id is a 'locations' id, we skip it.
             # This also removes mappings which include invalid LoC ids (of which there are several thousand).
-            if self.id_type_checker.id_included_in_selected_type(mapping["linked_id"]):
-                yield mapping
+            if self.id_type_checker.id_included_in_selected_type(linked_id):
+                selected_type_ids.add(wikidata_id)
+                yield {
+                    "wikidata_id": wikidata_id,
+                    "linked_id": linked_id,
+                    "type": "SAME_AS",
+                }
 
         print("Streaming parent Wikidata ids...")
         for raw_mapping in self._parallelise_requests(
             iter(all_linked_ids), self._get_parent_id_mappings
         ):
             parent_id = extract_wikidata_id(raw_mapping)
-            mapping = {
-                "child_id": extract_wikidata_id(raw_mapping, "child"),
-                "parent_id": parent_id,
-                "type": "HAS_PARENT",
-            }
+            child_id = extract_wikidata_id(raw_mapping, "child")
 
-            yield mapping
+            if parent_id is not None and child_id is not None:
+                if child_id in selected_type_ids:
+                    yield {
+                        "child_id": child_id,
+                        "parent_id": parent_id,
+                        "type": "HAS_PARENT",
+                    }
 
     def _stream_raw_nodes(self) -> Generator[dict]:
         """
