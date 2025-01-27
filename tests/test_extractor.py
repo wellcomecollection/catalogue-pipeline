@@ -1,6 +1,8 @@
 from typing import Any, Generator
 
 import pytest
+from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
+from test_utils import load_fixture
 from typing_extensions import get_args
 
 from config import (
@@ -10,8 +12,6 @@ from config import (
     WIKIDATA_SPARQL_URL,
 )
 from extractor import LambdaEvent, lambda_handler
-from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
-from test_utils import load_fixture
 from transformers.base_transformer import EntityType, StreamDestination
 from transformers.create_transformer import TransformerType
 
