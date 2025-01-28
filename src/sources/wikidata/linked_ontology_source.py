@@ -87,11 +87,18 @@ class WikidataLinkedOntologySource(BaseSource):
         return self.client.run_query(query)
 
     def _get_parent_id_mappings(self, child_wikidata_ids: list[str]) -> list[dict]:
+        """
+        Given a list of child wikidata ids, checks for all parents of each item in the list and returns a list
+        of mappings between child and parent ids.
+        """
+
+        # Get all parent ids referenced via the Wikidata 'subclass of' field
         subclass_of_query = SparqlQueryBuilder.get_parents_query(
             child_wikidata_ids, "subclass_of"
         )
         subclass_of_results = self.client.run_query(subclass_of_query)
 
+        # Get all parent ids referenced via the Wikidata 'instance of' field
         instance_of_query = SparqlQueryBuilder.get_parents_query(
             child_wikidata_ids, "instance_of"
         )
