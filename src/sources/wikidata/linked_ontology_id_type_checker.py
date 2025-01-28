@@ -58,3 +58,14 @@ class LinkedOntologyIdTypeChecker:
         locations, or names).
         """
         return linked_id in self._get_linked_ontology_ids(self.node_type)
+
+    def id_is_valid(self, linked_id: str) -> bool:
+        """Returns 'True' if the given id from the selected linked ontology is valid."""
+        is_valid = False
+        is_valid |= linked_id in self._get_linked_ontology_ids("concepts")
+        is_valid |= linked_id in self._get_linked_ontology_ids("locations")
+
+        if self.linked_ontology == "loc":
+            is_valid |= linked_id in self._get_linked_ontology_ids("names")
+
+        return is_valid
