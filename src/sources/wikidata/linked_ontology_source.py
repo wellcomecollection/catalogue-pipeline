@@ -1,10 +1,10 @@
 from collections.abc import Generator, Iterator
+from functools import lru_cache
 from typing import Callable
 
 from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType
 from utils.streaming import process_stream_in_parallel
-from functools import lru_cache
 
 from .linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
 from .sparql_client import MAX_PARALLEL_SPARQL_QUERIES, WikidataSparqlClient
