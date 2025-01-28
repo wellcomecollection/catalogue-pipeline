@@ -5,8 +5,8 @@ module "extractor_lambda" {
   description = "Extracts source concepts and turns them into Cypher queries."
   runtime     = "python3.13"
 
-  filename         = "../build.zip"
-  source_code_hash = filesha256("../build.zip")
+  filename = "../target/build.zip"
+  source_code_hash = filesha256("../target/build.zip")
 
   handler = "extractor.lambda_handler"
 
