@@ -1,4 +1,5 @@
 from collections.abc import Generator, Iterator
+from functools import lru_cache
 from typing import Callable
 
 from sources.base_source import BaseSource
