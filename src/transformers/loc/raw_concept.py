@@ -1,24 +1,10 @@
 from typing import Literal
-
-ID_PREFIXES_TO_REMOVE = (
-    "/authorities/subjects/",
-    "http://id.loc.gov/authorities/subjects/",
-    "/authorities/names/",
-    "http://id.loc.gov/authorities/names/",
-)
-
+from common import remove_id_prefix
 
 class RawLibraryOfCongressConcept:
     def __init__(self, raw_concept: dict):
         self.raw_concept = raw_concept
         self._raw_concept_node = self._extract_concept_node()
-
-    @staticmethod
-    def _remove_id_prefix(raw_id: str) -> str:
-        for prefix in ID_PREFIXES_TO_REMOVE:
-            raw_id = raw_id.removeprefix(prefix)
-
-        return raw_id
 
     def _extract_concept_node(self) -> dict | None:
         graph: list[dict] = self.raw_concept["@graph"]
@@ -66,7 +52,7 @@ class RawLibraryOfCongressConcept:
 
     @property
     def source_id(self) -> str:
-        return self._remove_id_prefix(self.raw_concept["@id"])
+        return remove_id_prefix(self.raw_concept["@id"])
 
     @property
     def label(self) -> str:
@@ -106,7 +92,7 @@ class RawLibraryOfCongressConcept:
             if concept["@id"].startswith("_:n"):
                 continue
 
-            linked_ids.append(self._remove_id_prefix(concept["@id"]))
+            linked_ids.append(self.remove_id_prefix(concept["@id"]))
 
         return linked_ids
 

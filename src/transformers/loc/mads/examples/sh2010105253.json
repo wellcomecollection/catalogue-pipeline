@@ -1,0 +1,128 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh99001366",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:GenreForm"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Early works to 1800"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b7"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b7",
+      "@type": "madsrdf:GenreFormElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Early works to 1800"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh85098685",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Pathology"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b5"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b5",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Pathology"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh2010105253",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:ComplexSubject"
+      ],
+      "bflc:marcKey": "150  $aPathology$vEarly works to 1800",
+      "identifiers:lccn": "sh2010105253",
+      "madsrdf:adminMetadata": {
+        "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b1"
+      },
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Pathology--Early works to 1800"
+      },
+      "madsrdf:componentList": {
+        "@list": [
+          {
+            "@id": "http://id.loc.gov/authorities/subjects/sh85098685"
+          },
+          {
+            "@id": "http://id.loc.gov/authorities/subjects/sh99001366"
+          }
+        ]
+      },
+      "madsrdf:editorialNote": "[Record generated for validation purposes.]",
+      "madsrdf:hasSource": {
+        "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b4"
+      },
+      "madsrdf:isMemberOfMADSCollection": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSHAuthorizedHeadings"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSH_General"
+        }
+      ],
+      "madsrdf:isMemberOfMADSScheme": {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      },
+      "owl:sameAs": [
+        {
+          "@id": "http://id.loc.gov/authorities/sh2010105253#concept"
+        },
+        {
+          "@id": "info:lc/authorities/sh2010105253"
+        }
+      ]
+    },
+    {
+      "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b1",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2010-03-30T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:n0d2f33cb1b0145e4a8a506c9472fe881b4",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationSource": "Work cat.: Concept of \u0100ma in \u0100yurveda, 2005",
+      "madsrdf:citationStatus": "found"
+    }
+  ],
+  "@id": "/authorities/subjects/sh2010105253"
+}
