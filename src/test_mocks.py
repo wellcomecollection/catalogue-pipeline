@@ -188,12 +188,23 @@ class MockRequest:
             )
 
     @staticmethod
-    def request(method: str, url: str, data: dict, headers: dict) -> MockResponse:
+    def request(
+        method: str,
+        url: str,
+        stream: bool = False,
+        data: dict | None = None,
+        headers: dict | None = None,
+        params: dict | None = None,
+    ) -> MockResponse:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
         for response in MockRequest.responses:
-            if response["method"] == method and response["url"] == url:
+            if (
+                response["method"] == method
+                and response["url"] == url
+                and response["params"] == params
+            ):
                 return response["response"]
 
         raise Exception(f"Unexpected request: {method} {url}")
@@ -202,19 +213,8 @@ class MockRequest:
     def get(
         url: str,
         stream: bool = False,
-        data: dict | None = None,
-        headers: dict | None = None,
+        data: dict = {},
+        headers: dict = {},
         params: dict | None = None,
     ) -> MockResponse:
-        MockRequest.calls.append(
-            {"method": "GET", "url": url, "data": data, "headers": headers}
-        )
-        for response in MockRequest.responses:
-            if (
-                response["method"] == "GET"
-                and response["url"] == url
-                and response["params"] == params
-            ):
-                return response["response"]
-
-        raise Exception(f"Unexpected request: GET {url}, params: {params}")
+        return MockRequest.request("GET", url, stream, data, headers, params)
