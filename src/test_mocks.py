@@ -202,8 +202,8 @@ class MockRequest:
     def get(
         url: str,
         stream: bool = False,
-        data: dict = {},
-        headers: dict = {},
+        data: dict | None = None,
+        headers: dict | None = None,
         params: dict | None = None,
     ) -> MockResponse:
         MockRequest.calls.append(
