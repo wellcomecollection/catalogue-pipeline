@@ -1,5 +1,5 @@
+import gzip
 import io
-import tempfile
 from typing import Any, TypedDict
 
 from botocore.credentials import Credentials
@@ -96,10 +96,6 @@ class MockBoto3Session:
 
     def get_credentials(self) -> Credentials:
         return MOCK_CREDENTIALS
-
-
-import gzip
-from io import BufferedRandom
 
 
 class MockResponse:
