@@ -2,7 +2,6 @@ from typing import Any, Generator
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-
 from test_mocks import MockBoto3Session, MockRequest, MockSmartOpen, MockSNSClient
 
 

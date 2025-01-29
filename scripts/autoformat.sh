@@ -13,8 +13,8 @@ CHECK=${1:-}
 
 if [ "$CHECK" == "--check" ]; then
     echo "Checking code formatting (run ./scripts/autoformat.sh to fix any issues!)..."
-    black --check src/
-    isort --profile=black --check src/
+    black --check src/ tests/
+    isort --profile=black --check src/ tests/
 else
     echo "Formatting code ..."
     black src/
