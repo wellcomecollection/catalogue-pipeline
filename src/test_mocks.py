@@ -179,12 +179,12 @@ class MockRequest:
     def mock_responses(responses: list[MockResponseInput]) -> None:
         for response in responses:
             MockRequest.mock_response(
-                response["method"],
-                response["url"],
-                response.get("status_code", 200),
-                response.get("params"),
-                response.get("json_data"),
-                response.get("content_bytes"),
+                method = response["method"],
+                url = response["url"],
+                status_code = response.get("status_code", 200),
+                params = response.get("params"),
+                json_data = response.get("json_data"),
+                content_bytes = response.get("content_bytes"),
             )
 
     @staticmethod
