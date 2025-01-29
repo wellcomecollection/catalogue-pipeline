@@ -52,7 +52,8 @@ def handler(
             config.GRAPH_QUERIES_SNS_TOPIC_ARN, entity_type, CHUNK_SIZE, sample_size
         )
     elif stream_destination == "void":
-        transformer.stream_to_nowhere(entity_type, CHUNK_SIZE, sample_size)
+        for _ in transformer.stream(entity_type, CHUNK_SIZE, sample_size):
+            pass
     else:
         raise ValueError("Unsupported stream destination.")
 

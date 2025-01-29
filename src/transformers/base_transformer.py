@@ -201,14 +201,14 @@ class BaseTransformer:
         if len(queries) > 0:
             publish_batch_to_sns(topic_arn, queries)
 
-    def stream_to_nowhere(
+    def stream(
         self,
         entity_type: EntityType,
         query_chunk_size: int,
         sample_size: int | None = None,
-    ) -> None:
+    ) -> Generator[Any, Any, Any]:
         """
-        Streams transformed entities (nodes or edges) into the void. Useful for development and testing purposes.
+        Streams transformed entities (nodes or edges) as a generator. Useful for development and testing purposes.
         """
         for chunk in self._stream_chunks(entity_type, query_chunk_size, sample_size):
-            pass
+            yield chunk
