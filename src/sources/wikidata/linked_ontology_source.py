@@ -134,6 +134,8 @@ class WikidataLinkedOntologySource(BaseSource):
             wikidata_id = item["wikidata_id"]
             linked_id = item["linked_id"]
             if self.id_type_checker.id_is_valid(linked_id) and wikidata_id not in seen:
+                # Add Wikidata id to `seen` no matter if it's part of the selected node type
+                # to make sure it is not processed again as a parent below.
                 seen.add(wikidata_id)
 
                 if self.id_type_checker.id_included_in_selected_type(linked_id):
