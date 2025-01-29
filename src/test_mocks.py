@@ -157,7 +157,7 @@ class MockRequest:
     def mock_response(
         method: str,
         url: str,
-        status_code: int | None = None,
+        status_code: int = 200,
         params: dict | None = None,
         json_data: dict | None = None,
         content_bytes: bytes | None = None,
@@ -174,14 +174,7 @@ class MockRequest:
     @staticmethod
     def mock_responses(responses: list[MockResponseInput]) -> None:
         for response in responses:
-            MockRequest.mock_response(
-                method=response["method"],
-                url=response["url"],
-                status_code=response.get("status_code", 200),
-                params=response.get("params"),
-                json_data=response.get("json_data"),
-                content_bytes=response.get("content_bytes"),
-            )
+            MockRequest.mock_response(**response)
 
     @staticmethod
     def request(
