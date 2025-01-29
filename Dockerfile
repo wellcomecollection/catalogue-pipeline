@@ -11,8 +11,4 @@ WORKDIR /app
 
 RUN scripts/ci-setup.sh
 
-FROM base AS extractor
 ENTRYPOINT [ "/app/src/extractor.py" ]
-
-FROM base AS indexer
-ENTRYPOINT [ "/app/src/indexer.py" ]

@@ -3,7 +3,6 @@ services:
     image: ${REPOSITORY_PREFIX:-}catalogue_graph_extractor:${TAG:-dev}
     platform: linux/amd64
     build:
-      target: extractor
       context: .
       args:
         - PYTHON_IMAGE_VERSION=${PYTHON_IMAGE_VERSION:-latest}
