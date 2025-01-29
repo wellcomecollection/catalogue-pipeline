@@ -113,9 +113,16 @@ def build_test_matrix() -> Generator[tuple[LambdaEvent, list[MockResponseInput]]
                 )
 
 
+def get_test_id(argvalue: Any) -> str:
+    if isinstance(argvalue, list):
+        return ""
+    return f"{argvalue['transformer_type']}-{argvalue['entity_type']}-{argvalue['stream_destination']}"
+
+
 @pytest.mark.parametrize(
     "lambda_event, mock_responses",
     build_test_matrix(),
+    ids=get_test_id,
 )
 def test_lambda_handler(
     lambda_event: LambdaEvent,
