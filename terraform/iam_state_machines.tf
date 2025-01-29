@@ -38,7 +38,10 @@ resource "aws_iam_policy" "state_machine_policy" {
       {
         Effect   = "Allow",
         Action   = ["iam:PassRole"],
-        Resource = [module.extractor_ecs_task.task_role_arn]
+        Resource = [
+          module.extractor_ecs_task.task_execution_role_arn,
+          module.extractor_ecs_task.task_role_arn
+          ]
       },
       # These EventBridge permissions are needed to allow state machines to perform the "startExecution.sync:2" action
       # (i.e. trigger another state machine and wait for it to complete)
