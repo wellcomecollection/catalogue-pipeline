@@ -28,3 +28,5 @@ def test_mesh_concepts_transformer() -> None:
     assert len(list(nodes)) == 12
     assert nodes[0][0].id == "s6s24vd7"
     assert nodes[0][0].label == "Human anatomy"
+    assert nodes[0][0].type == "Concept"
+    assert nodes[0][0].source == "lc-subjects"
