@@ -4,9 +4,9 @@ from functools import lru_cache
 import boto3
 import smart_open
 
-from .sparql_query_builder import NodeType, OntologyType
+from config import S3_BULK_LOAD_BUCKET_NAME
 
-S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
+from .sparql_query_builder import NodeType, OntologyType
 
 
 class LinkedOntologyIdTypeChecker:

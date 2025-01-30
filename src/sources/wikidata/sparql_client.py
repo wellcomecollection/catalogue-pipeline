@@ -5,10 +5,14 @@ import typing
 import backoff
 import requests
 
+from config import WIKIDATA_SPARQL_URL
+
 # Wikidata limits the number of parallel queries from a single IP address to 5.
 # See: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
 # However, experimentally, running more than 4 queries in parallel consistently results in '429 Too Many Requests' errors.
-MAX_PARALLEL_SPARQL_QUERIES = 4
+SPARQL_MAX_PARALLEL_QUERIES = 4
+SPARQL_BACKOFF_DEFAULT_RETRIES = 3
+SPARQL_BACKOFF_DEFAULT_INTERVAL = 10
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -23,7 +27,7 @@ class WikidataSparqlClient:
     """
 
     def __init__(self) -> None:
-        self.parallel_query_semaphore = threading.Semaphore(MAX_PARALLEL_SPARQL_QUERIES)
+        self.parallel_query_semaphore = threading.Semaphore(SPARQL_MAX_PARALLEL_QUERIES)
         self.too_many_requests = False
         self.too_many_requests_lock = threading.Lock()
 
@@ -41,8 +45,8 @@ class WikidataSparqlClient:
     @backoff.on_exception(
         backoff.constant,
         Exception,
-        max_tries=3,
-        interval=10,
+        max_tries=SPARQL_BACKOFF_DEFAULT_RETRIES,
+        interval=SPARQL_BACKOFF_DEFAULT_INTERVAL,
         on_backoff=on_request_backoff,
     )
     def run_query(self, query: str) -> list[dict]:
@@ -57,7 +61,7 @@ class WikidataSparqlClient:
         # Use a semaphore to throttle the number of parallel requests
         with self.parallel_query_semaphore:
             r = requests.get(
-                "https://query.wikidata.org/sparql",
+                WIKIDATA_SPARQL_URL,
                 params={"format": "json", "query": query},
                 headers={"User-Agent": self._get_user_agent_header()},
             )

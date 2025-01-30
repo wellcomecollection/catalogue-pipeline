@@ -5,8 +5,8 @@ module "indexer_lambda" {
   description = "Indexes nodes and edges into the Neptune catalogue graph cluster."
   runtime     = "python3.13"
 
-  filename         = "../build.zip"
-  source_code_hash = filesha256("../build.zip")
+  filename = "../target/build.zip"
+  source_code_hash = filesha256("../target/build.zip")
 
   handler     = "indexer.lambda_handler"
   memory_size = 128

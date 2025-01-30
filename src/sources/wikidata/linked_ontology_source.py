@@ -5,7 +5,7 @@ from transformers.base_transformer import EntityType
 from utils.streaming import process_stream_in_parallel
 
 from .linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
-from .sparql_client import MAX_PARALLEL_SPARQL_QUERIES, WikidataSparqlClient
+from .sparql_client import SPARQL_MAX_PARALLEL_QUERIES, WikidataSparqlClient
 from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
@@ -97,7 +97,7 @@ class WikidataLinkedOntologySource(BaseSource):
             all_ids,
             self._get_linked_id_mappings,
             SPARQL_ITEMS_CHUNK_SIZE,
-            MAX_PARALLEL_SPARQL_QUERIES,
+            SPARQL_MAX_PARALLEL_QUERIES,
         ):
             linked_id = raw_mapping["linkedId"]["value"]
             wikidata_id = extract_wikidata_id(raw_mapping)
@@ -123,7 +123,7 @@ class WikidataLinkedOntologySource(BaseSource):
             all_ids,
             self._get_linked_items,
             SPARQL_ITEMS_CHUNK_SIZE,
-            MAX_PARALLEL_SPARQL_QUERIES,
+            SPARQL_MAX_PARALLEL_QUERIES,
         )
 
     def stream_raw(self) -> Generator[dict]:

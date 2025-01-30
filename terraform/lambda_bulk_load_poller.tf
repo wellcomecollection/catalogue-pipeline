@@ -5,12 +5,12 @@ module "bulk_load_poller_lambda" {
   description = "Polls the status of a Neptune bulk load job."
   runtime     = "python3.13"
 
-  filename = "../build.zip"
-  source_code_hash = filesha256("../build.zip")
+  filename = "../target/build.zip"
+  source_code_hash = filesha256("../target/build.zip")
 
   handler     = "bulk_load_poller.lambda_handler"
   memory_size = 128
-  timeout     = 30 // 30 seconds
+  timeout     = 120 // 120 seconds
 
   vpc_config = {
     subnet_ids         = local.private_subnets
