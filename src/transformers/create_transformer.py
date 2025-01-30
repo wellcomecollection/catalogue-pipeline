@@ -3,12 +3,12 @@ from typing import Literal
 from config import LOC_NAMES_URL, LOC_SUBJECT_HEADINGS_URL, MESH_URL, CATALOGUE_SNAPSHOT_URL
 
 from .base_transformer import BaseTransformer, EntityType
+from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
 from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer
 from .mesh.concepts_transformer import MeSHConceptsTransformer
 from .mesh.locations_transformer import MeSHLocationsTransformer
-from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .wikidata.concepts_transformer import WikidataConceptsTransformer
 from .wikidata.locations_transformer import WikidataLocationsTransformer
 from .wikidata.names_transformer import WikidataNamesTransformer
@@ -24,7 +24,7 @@ TransformerType = Literal[
     "wikidata_linked_loc_names",
     "wikidata_linked_mesh_concepts",
     "wikidata_linked_mesh_locations",
-    "catalogue_concepts"
+    "catalogue_concepts",
 ]
 
 

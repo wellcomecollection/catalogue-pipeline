@@ -40,19 +40,20 @@ class SourceName(SourceConcept):
 
 # Catalogue concepts have a specific type and source
 ConceptType = Literal[
-        "Person",
-        "Concept",
-        "Organisation",
-        "Place",
-        "Agent",
-        "Meeting",
-        "Genre",
-        "Period",
-    ]
+    "Person",
+    "Concept",
+    "Organisation",
+    "Place",
+    "Agent",
+    "Meeting",
+    "Genre",
+    "Period",
+]
 
 ConceptSource = Literal[
-        "label-derived", "nlm-mesh", "lc-subjects", "lc-names", "viaf", "fihrist"
-    ]
+    "label-derived", "nlm-mesh", "lc-subjects", "lc-names", "viaf", "fihrist"
+]
+
 
 # The `id` field stores a canonical Wellcome identifier
 class Concept(BaseNode):
