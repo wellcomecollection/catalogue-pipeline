@@ -1,5 +1,5 @@
 from typing import Literal
-from common import remove_id_prefix
+from transformers.loc.common import remove_id_prefix
 
 class RawLibraryOfCongressConcept:
     def __init__(self, raw_concept: dict):
@@ -92,7 +92,7 @@ class RawLibraryOfCongressConcept:
             if concept["@id"].startswith("_:n"):
                 continue
 
-            linked_ids.append(self.remove_id_prefix(concept["@id"]))
+            linked_ids.append(remove_id_prefix(concept["@id"]))
 
         return linked_ids
 

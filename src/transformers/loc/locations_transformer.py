@@ -5,7 +5,7 @@ from models.graph_node import SourceLocation
 from sources.gzip_source import MultiGZipSource
 from transformers.base_transformer import BaseTransformer
 
-from .raw_concept import RawLibraryOfCongressConcept
+from transformers.loc.skos.raw_concept import RawLibraryOfCongressConcept
 
 
 class LibraryOfCongressLocationsTransformer(BaseTransformer):

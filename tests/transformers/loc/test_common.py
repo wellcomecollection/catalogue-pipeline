@@ -1,4 +1,5 @@
-from .common import remove_id_prefix
+from src.transformers.loc.common import remove_id_prefix
+
 
 def test_remove_prefix_noop():
     """
@@ -14,12 +15,14 @@ def test_remove_prefix_fully_qualified():
     assert remove_id_prefix("http://id.loc.gov/authorities/subjects/sh1234567890") == "sh1234567890"
     assert remove_id_prefix("http://id.loc.gov/authorities/names/sh0987654321") == "sh0987654321"
 
+
 def test_remove_prefix_relative():
     """
     remove_id_prefix removes relative/local prefixes
     """
     assert remove_id_prefix("/authorities/subjects/sh1234567890") == "sh1234567890"
     assert remove_id_prefix("/authorities/names/sh0987654321") == "sh0987654321"
+
 
 def test_remove_prefix_lookalikes():
     """
