@@ -134,7 +134,7 @@ print(result)
 
 ### AWS Graph Notebook
 
-Additionally, it is possible to connect to the cluster using [AWS graph notebook](https://github.com/aws/graph-notebook).The most straightforward option to do this locally is using [JupyterLab](https://jupyter.org/). To install `graph-notebook` and `jupyterlab` (note that this requires Python 3.9.x-3.10.14):
+Additionally, it is possible to connect to the cluster using [AWS graph notebook](https://github.com/aws/graph-notebook).The most straightforward option to do this locally is using [JupyterLab](https://jupyter.org/). To make this work, you need to set this up in a different virtual environment from the one in this project (this is because `graph-notebook` currently requires Python 3.9.x-3.10.14). Once you have created a new environment with the correct Python version, install the following:
 
 ```
 # install graph-notebook
