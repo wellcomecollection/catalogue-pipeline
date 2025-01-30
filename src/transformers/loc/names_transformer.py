@@ -4,7 +4,6 @@ from models.graph_edge import SourceConceptRelatedTo
 from models.graph_node import SourceName
 from sources.gzip_source import GZipSource
 from transformers.base_transformer import BaseTransformer
-
 from transformers.loc.skos.raw_concept import RawLibraryOfCongressConcept
 
 
