@@ -1,11 +1,11 @@
 from typing import Literal
 
-from transformers.loc.common import remove_id_prefix
+from transformers.loc.common import remove_id_prefix, RawLibraryOfCongressConcept
 
 
-class RawLibraryOfCongressConcept:
+class RawLibraryOfCongressSKOSConcept(RawLibraryOfCongressConcept):
     def __init__(self, raw_concept: dict):
-        self.raw_concept = raw_concept
+        super().__init__(raw_concept)
         self._raw_concept_node = self._extract_concept_node()
 
     def _extract_concept_node(self) -> dict | None:
@@ -51,10 +51,6 @@ class RawLibraryOfCongressConcept:
             return True
 
         return False
-
-    @property
-    def source_id(self) -> str:
-        return remove_id_prefix(self.raw_concept["@id"])
 
     @property
     def label(self) -> str:

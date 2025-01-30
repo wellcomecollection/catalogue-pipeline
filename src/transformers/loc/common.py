@@ -10,3 +10,12 @@ def remove_id_prefix(raw_id: str) -> str:
     for prefix in ID_PREFIXES_TO_REMOVE:
         raw_id = raw_id.removeprefix(prefix)
     return raw_id
+
+
+class RawLibraryOfCongressConcept:
+    def __init__(self, raw_concept: dict):
+        self.raw_concept = raw_concept
+
+    @property
+    def source_id(self) -> str:
+        return remove_id_prefix(self.raw_concept["@id"])
