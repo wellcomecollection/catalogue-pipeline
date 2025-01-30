@@ -23,33 +23,6 @@ class RawLibraryOfCongressSKOSConcept(RawLibraryOfCongressConcept):
 
         return concept_node
 
-    @staticmethod
-    def _extract_label(raw_label: str | dict[str, str] | list[str]) -> str:
-        # Labels are either stored directly as strings, or as nested JSON objects with a `@value` property.
-        if isinstance(raw_label, str):
-            return raw_label
-
-        # In cases where an LoC Name has multiple labels written using different writing systems, labels are returned
-        # as a list. When this happens, we extract the first item in the list, which always stores the Latin script
-        # version of the label as a string.
-        if isinstance(raw_label, list):
-            assert isinstance(raw_label[0], str)
-            return raw_label[0]
-
-        return raw_label["@value"]
-
-    def exclude(self) -> bool:
-        """Returns True if the concept should be excluded from the graph."""
-        if self._raw_concept_node is None:
-            return True
-
-        # Remove concepts whose IDs have the "-781" suffix. They are duplicates of concepts with non-suffixed IDs.
-        # The suffix represents the fact that the concept in question is part of the LCSH - Geographic collection.
-        if self.source_id.endswith("-781"):
-            return True
-
-        return False
-
     @property
     def label(self) -> str:
         assert self._raw_concept_node is not None
