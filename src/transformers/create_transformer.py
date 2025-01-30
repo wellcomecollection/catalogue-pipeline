@@ -1,6 +1,6 @@
 from typing import Literal
 
-from config import LOC_NAMES_URL, LOC_SUBJECT_HEADINGS_URL, MESH_URL
+from config import LOC_NAMES_URL, LOC_SUBJECT_HEADINGS_URL, MESH_URL, CATALOGUE_SNAPSHOT_URL
 
 from .base_transformer import BaseTransformer, EntityType
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
@@ -53,5 +53,7 @@ def create_transformer(
         return WikidataConceptsTransformer(entity_type, "mesh")
     if transformer_type == "wikidata_linked_mesh_locations":
         return WikidataLocationsTransformer(entity_type, "mesh")
+    if transformer_type == "catalogue_concepts":
+        return CatalogueConceptsTransformer(CATALOGUE_SNAPSHOT_URL)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")
