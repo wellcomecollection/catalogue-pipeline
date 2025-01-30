@@ -5,18 +5,18 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline" {
   definition = jsonencode({
     Comment = "Extract all concepts and load them into the catalogue graph."
     StartAt = "Extractors"
-    States  = {
+    States = {
       "Extractors" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractors.arn
         }
         Next = "Bulk loaders"
       },
       "Bulk loaders" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loaders.arn
         }
