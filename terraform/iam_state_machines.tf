@@ -28,12 +28,21 @@ resource "aws_iam_policy" "state_machine_policy" {
       {
         Effect   = "Allow",
         Action   = ["states:StartExecution"],
-        Resource = [aws_sfn_state_machine.catalogue_graph_bulk_loader.arn]
+        Resource = [
+          aws_sfn_state_machine.catalogue_graph_extractor.arn,
+          aws_sfn_state_machine.catalogue_graph_extractors.arn,
+          aws_sfn_state_machine.catalogue_graph_bulk_loader.arn,
+          aws_sfn_state_machine.catalogue_graph_bulk_loaders.arn
+        ]
       },
       {
         Effect   = "Allow",
         Action   = ["lambda:InvokeFunction"],
-        Resource = "*"
+        Resource = [
+          module.extractor_lambda.lambda.arn,
+          module.bulk_loader_lambda.lambda.arn,
+          module.bulk_load_poller_lambda.lambda.arn
+        ]
       },
       {
         Effect   = "Allow",
