@@ -1,3 +1,5 @@
+from typing import Literal
+
 ID_PREFIXES_TO_REMOVE = (
     "/authorities/subjects/",
     "http://id.loc.gov/authorities/subjects/",
@@ -19,3 +21,13 @@ class RawLibraryOfCongressConcept:
     @property
     def source_id(self) -> str:
         return remove_id_prefix(self.raw_concept["@id"])
+
+    @property
+    def source(self) -> Literal["lc-subjects", "lc-names"]:
+        if "subjects" in self.raw_concept["@id"]:
+            return "lc-subjects"
+
+        if "names" in self.raw_concept["@id"]:
+            return "lc-names"
+
+        raise ValueError("Unknown concept type.")

@@ -1,5 +1,6 @@
-from transformers.loc.common import remove_id_prefix
+import pytest
 
+from transformers.loc.common import remove_id_prefix, RawLibraryOfCongressConcept
 
 def test_remove_prefix_noop() -> None:
     """
@@ -43,3 +44,31 @@ def test_remove_prefix_lookalikes() -> None:
         remove_id_prefix("https://id.loc.gov.uk/authorities/subjects/sh1234567890")
         == "https://id.loc.gov.uk/authorities/subjects/sh1234567890"
     )
+
+
+def test_source_subjects() -> None:
+    """
+    Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
+    """
+    concept = RawLibraryOfCongressConcept(
+        {"@id": "/authorities/subjects/sh2010105253"}
+    )
+    assert concept.source == "lc-subjects"
+
+
+def test_source_names() -> None:
+    """
+    Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
+    """
+    concept = RawLibraryOfCongressConcept(
+        {"@id": "/authorities/names/sh2010105253"}
+    )
+    assert concept.source == "lc-names"
+
+
+def test_source_invalid() -> None:
+    with (pytest.raises(ValueError)):
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "authorities/childrensSubjects/sj2021051581"}
+        )
+        concept.source

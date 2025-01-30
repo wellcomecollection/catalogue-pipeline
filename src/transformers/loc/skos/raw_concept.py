@@ -1,6 +1,4 @@
-from typing import Literal
-
-from transformers.loc.common import remove_id_prefix, RawLibraryOfCongressConcept
+from transformers.loc.common import RawLibraryOfCongressConcept, remove_id_prefix
 
 
 class RawLibraryOfCongressSKOSConcept(RawLibraryOfCongressConcept):
@@ -120,13 +118,3 @@ class RawLibraryOfCongressSKOSConcept(RawLibraryOfCongressConcept):
 
         notation_types = {item.get("@type") for item in notation}
         return "http://id.loc.gov/datatypes/codes/gac" in notation_types
-
-    @property
-    def source(self) -> Literal["lc-subjects", "lc-names"]:
-        if "subjects" in self.raw_concept["@id"]:
-            return "lc-subjects"
-
-        if "names" in self.raw_concept["@id"]:
-            return "lc-names"
-
-        raise ValueError("Unknown concept type.")
