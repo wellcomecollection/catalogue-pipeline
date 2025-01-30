@@ -7,7 +7,7 @@ resource "aws_ecr_repository" "catalogue_graph_extractor" {
 // and the number of images to keep.
 resource "aws_ecr_lifecycle_policy" "expire_old_images" {
   repository = aws_ecr_repository.catalogue_graph_extractor.name
-  policy     = jsonencode({
+  policy = jsonencode({
     rules = [
       {
         rulePriority = 1

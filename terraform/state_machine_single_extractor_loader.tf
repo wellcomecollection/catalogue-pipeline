@@ -5,7 +5,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_single_extract_load" {
   definition = jsonencode({
     Comment = "Extract nodes/edges from a single source and load them into the catalogue graph."
     StartAt = "Extract"
-    States  = {
+    States = {
       "Extract" = {
         Type     = "Task"
         Resource = module.extractor_lambda.lambda.arn
@@ -18,8 +18,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_single_extract_load" {
         }
       }
       "Load" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
           "Input.$" : "$$.Execution.Input",
@@ -37,33 +37,34 @@ resource "aws_sfn_state_machine" "catalogue_graph_single_extract_load_ecs" {
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment = "Extract nodes/edges from a single source and load them into the catalogue graph using an ECS task."
-    StartAt = "Extract"
-    States  = {
-      "Extract" = {
-        "QueryLanguage" = "JSONata"
+    Comment       = "Extract nodes/edges from a single source and load them into the catalogue graph using an ECS task."
+    QueryLanguage = "JSONata"
+    StartAt       = "Extract"
+    States = {
+      Extract = {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.sync"
-        Next     = "Load"
-        "Arguments" : {
-          "Cluster" : aws_ecs_cluster.cluster.arn,
-          "TaskDefinition" : module.extractor_ecs_task.task_definition_arn,
-          "LaunchType" : "FARGATE",
-          "NetworkConfiguration" : {
-            "AwsvpcConfiguration" : {
-              "AssignPublicIp" : "DISABLED",
-              "Subnets" : local.private_subnets,
-              "SecurityGroups" : [
+        Output   = "{% $states.input %}"
+        Next     = "ShouldRunLoad"
+        Arguments = {
+          Cluster        = aws_ecs_cluster.cluster.arn
+          TaskDefinition = module.extractor_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = local.private_subnets
+              SecurityGroups = [
                 local.ec_privatelink_security_group_id,
                 aws_security_group.egress.id
               ]
             }
           },
-          "Overrides": {
-            "ContainerOverrides": [
+          Overrides = {
+            ContainerOverrides = [
               {
-                "Name": "catalogue-graph_extractor",
-                "Command": [
+                Name = "catalogue-graph_extractor"
+                Command = [
                   "--transformer-type",
                   "{% $states.input.transformer_type %}",
                   "--entity-type",
@@ -75,13 +76,26 @@ resource "aws_sfn_state_machine" "catalogue_graph_single_extract_load_ecs" {
             ]
           }
         }
-      }
-      "Load" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
-        Parameters = {
+      },
+      ShouldRunLoad = {
+        Type   = "Choice"
+        Output = "{% $states.input %}"
+        Choices = [
+          {
+            # This is how you do null coalescing in JSONata 
+            # https://github.com/jsonata-js/jsonata/issues/370#issuecomment-556995173
+            Condition = "{% [$states.input.run_bulk_load, false][0] %}",
+            Next      = "Load"
+          }
+        ]
+        Default = "Success"
+      },
+      Load = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2"
+        Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
-          "Input.$" : "$$.Execution.Input",
+          Input           = "{% $states.input %}"
         }
         Next = "Success"
       },

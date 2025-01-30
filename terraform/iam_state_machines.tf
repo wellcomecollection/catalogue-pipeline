@@ -1,12 +1,12 @@
 data "aws_caller_identity" "current" {}
 
 resource "aws_iam_role" "state_machine_execution_role" {
-  name               = "catalogue-graph-state-machine-execution-role"
+  name = "catalogue-graph-state-machine-execution-role"
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17",
+    Version = "2012-10-17",
     Statement = [
       {
-        Effect    = "Allow",
+        Effect = "Allow",
         Principal = {
           Service = "states.amazonaws.com"
         },
@@ -18,12 +18,17 @@ resource "aws_iam_role" "state_machine_execution_role" {
 
 resource "aws_iam_policy" "state_machine_policy" {
   policy = jsonencode({
-    Version   = "2012-10-17",
+    Version = "2012-10-17",
     Statement = [
       {
         Effect   = "Allow",
         Action   = ["logs:CreateLogStream", "logs:PutLogEvents"],
         Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = ["states:StartExecution"],
+        Resource = [aws_sfn_state_machine.catalogue_graph_bulk_loader.arn]
       },
       {
         Effect   = "Allow",
@@ -36,12 +41,12 @@ resource "aws_iam_policy" "state_machine_policy" {
         Resource = ["${local.extractor_task_definition_arn_latest}:*"]
       },
       {
-        Effect   = "Allow",
-        Action   = ["iam:PassRole"],
+        Effect = "Allow",
+        Action = ["iam:PassRole"],
         Resource = [
           module.extractor_ecs_task.task_execution_role_arn,
           module.extractor_ecs_task.task_role_arn
-          ]
+        ]
       },
       # These EventBridge permissions are needed to allow state machines to perform the "startExecution.sync:2" action
       # (i.e. trigger another state machine and wait for it to complete)

@@ -5,7 +5,7 @@ module "bulk_load_poller_lambda" {
   description = "Polls the status of a Neptune bulk load job."
   runtime     = "python3.13"
 
-  filename = "../target/build.zip"
+  filename         = "../target/build.zip"
   source_code_hash = filesha256("../target/build.zip")
 
   handler     = "bulk_load_poller.lambda_handler"
