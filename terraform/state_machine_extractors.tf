@@ -5,16 +5,16 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors" {
   definition = jsonencode({
     Comment = "Extract raw concepts from all sources, transform them into nodes and edges, and stream them into an S3 bucket."
     StartAt = "Trigger extractors"
-    States  = {
+    States = {
       "Trigger extractors" = {
-        Type     = "Parallel"
+        Type = "Parallel"
         Branches = flatten([
           for index, task_input in var.state_machine_inputs : {
             StartAt = "Extract ${task_input.label}"
-            States  = {
+            States = {
               "Extract ${task_input.label}" = {
-                Type       = "Task"
-                Resource   = module.extractor_lambda.lambda.arn
+                Type     = "Task"
+                Resource = module.extractor_lambda.lambda.arn
                 Parameters = {
                   "transformer_type"   = task_input.transformer_type,
                   "entity_type"        = task_input.entity_type,
@@ -33,4 +33,3 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors" {
     }
   })
 }
-
