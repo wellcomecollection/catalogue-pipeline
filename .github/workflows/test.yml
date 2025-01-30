@@ -1,0 +1,34 @@
+# Build deployment artifact 
+name: "Run tests"
+
+on: 
+    push:
+      branches:
+        - main
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup CI
+        run: |
+          ./scripts/ci-setup.sh
+
+      - name: Run tests & generate coverage report
+        run: |
+          ./scripts/test.sh
+
+      - name: Get Cover 
+        if : ${{ github.event_name == 'pull_request' }}
+        uses: orgoro/coverage@v3.2
+        with:
+          coverageFile: coverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}

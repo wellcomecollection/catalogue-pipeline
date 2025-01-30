@@ -1,0 +1,22 @@
+# Build deployment artifact 
+name: "Build deployment zip"
+
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Setup CI
+        run: |
+          ./scripts/ci-setup.sh
+
+      - name: Build zip
+        run: |
+          ./scripts/build.sh

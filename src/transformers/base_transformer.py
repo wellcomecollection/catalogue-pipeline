@@ -1,6 +1,5 @@
 import concurrent.futures
 import csv
-import xml.etree.ElementTree as ET
 from collections.abc import Generator
 from itertools import islice
 from typing import Any, Literal
@@ -15,18 +14,10 @@ from models.graph_node import BaseNode
 from query_builders.cypher import construct_upsert_cypher_query
 from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
+from utils.streaming import generator_to_chunks
 
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["graph", "s3", "sns", "void"]
-
-
-def _generator_to_chunks(items: Generator, chunk_size: int) -> Generator:
-    while True:
-        chunk = list(islice(items, chunk_size))
-        if chunk:
-            yield chunk
-        else:
-            return
 
 
 class BaseTransformer:
@@ -64,6 +55,8 @@ class BaseTransformer:
             if counter == number:
                 return
 
+        print(f"Streamed all {counter} nodes.")
+
     def _stream_edges(self, number: int | None = None) -> Generator[BaseEdge]:
         """
         Extracts edges from the specified source and transforms them. The `source` must define a `stream_raw` method.
@@ -82,6 +75,8 @@ class BaseTransformer:
                     print(f"Streamed {counter} edges...")
                 if counter == number:
                     return
+
+        print(f"Streamed all {counter} edges.")
 
     def _stream_entities(
         self, entity_type: EntityType, sample_size: int | None = None
@@ -108,7 +103,7 @@ class BaseTransformer:
         and returns the results stream in fixed-size chunks.
         """
         entities = self._stream_entities(entity_type, sample_size)
-        for chunk in _generator_to_chunks(entities, chunk_size):
+        for chunk in generator_to_chunks(entities, chunk_size):
             yield chunk
 
     def stream_to_s3(
@@ -206,14 +201,14 @@ class BaseTransformer:
         if len(queries) > 0:
             publish_batch_to_sns(topic_arn, queries)
 
-    def stream_to_nowhere(
+    def stream(
         self,
         entity_type: EntityType,
         query_chunk_size: int,
         sample_size: int | None = None,
-    ) -> None:
+    ) -> Generator[Any, Any, Any]:
         """
-        Streams transformed entities (nodes or edges) into the void. Useful for development and testing purposes.
+        Streams transformed entities (nodes or edges) as a generator. Useful for development and testing purposes.
         """
         for chunk in self._stream_chunks(entity_type, query_chunk_size, sample_size):
-            pass
+            yield chunk

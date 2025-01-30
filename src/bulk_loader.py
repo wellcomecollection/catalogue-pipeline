@@ -2,11 +2,10 @@ import argparse
 import os
 import typing
 
+from config import S3_BULK_LOAD_BUCKET_NAME
 from transformers.base_transformer import EntityType
 from transformers.create_transformer import TransformerType
 from utils.aws import get_neptune_client
-
-S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
 
 
 def handler(
@@ -47,7 +46,7 @@ def local_handler() -> None:
     )
     args = parser.parse_args()
 
-    handler(**args.__dict__, is_local=True)
+    print(handler(**args.__dict__, is_local=True))
 
 
 if __name__ == "__main__":

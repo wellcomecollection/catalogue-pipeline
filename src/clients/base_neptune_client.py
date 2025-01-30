@@ -1,11 +1,20 @@
 import datetime
 import json
+import typing
 
 import backoff
 import boto3
 import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
+
+NEPTUNE_BACKOFF_DEFAULT_RETRIES = 3
+NEPTUNE_BACKOFF_DEFAULT_INTERVAL = 10
+
+
+def on_request_backoff(backoff_details: typing.Any) -> None:
+    exception_name = type(backoff_details["exception"]).__name__
+    print(f"Neptune request failed due to '{exception_name}'. Retrying...")
 
 
 class BaseNeptuneClient:
@@ -23,6 +32,13 @@ class BaseNeptuneClient:
     def _get_client_url(self) -> str:
         raise NotImplementedError()
 
+    @backoff.on_exception(
+        backoff.constant,
+        Exception,
+        max_tries=NEPTUNE_BACKOFF_DEFAULT_RETRIES,
+        interval=NEPTUNE_BACKOFF_DEFAULT_INTERVAL,
+        on_backoff=on_request_backoff,
+    )
     def _make_request(
         self, method: str, relative_url: str, payload: dict | None = None
     ) -> dict:
@@ -50,7 +66,6 @@ class BaseNeptuneClient:
         response: dict = raw_response.json()
         return response
 
-    @backoff.on_exception(backoff.constant, Exception, max_tries=5, interval=1)
     def run_open_cypher_query(self, query: str) -> dict:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
@@ -143,7 +158,14 @@ class BaseNeptuneClient:
             for error_log in error_logs:
                 code = error_log["errorCode"]
                 message = error_log["errorMessage"]
-                print(f"         {code}: {message}")
+                record_num = error_log["recordNum"]
+                print(f"         {code}: {message}. (Row number: {record_num})")
+
+        failed_feeds = payload.get("failedFeeds")
+        if failed_feeds:
+            print("    Failed feed statuses:")
+            for failed_feed in failed_feeds:
+                print(f"         {failed_feed['status']}")
 
         return status
 
