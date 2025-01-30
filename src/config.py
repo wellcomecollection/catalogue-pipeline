@@ -9,4 +9,6 @@ LOC_SUBJECT_HEADINGS_URL = (
 LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.skosrdf.jsonld.gz"
 MESH_URL = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2025.gz"
 WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql"
-CATALOGUE_SNAPSHOT_URL = "https://data.wellcomecollection.org/catalogue/v2/works.json.gz"
+CATALOGUE_SNAPSHOT_URL = (
+    "https://data.wellcomecollection.org/catalogue/v2/works.json.gz"
+)

@@ -1,6 +1,11 @@
 from typing import Literal
 
-from config import LOC_NAMES_URL, LOC_SUBJECT_HEADINGS_URL, MESH_URL, CATALOGUE_SNAPSHOT_URL
+from config import (
+    CATALOGUE_SNAPSHOT_URL,
+    LOC_NAMES_URL,
+    LOC_SUBJECT_HEADINGS_URL,
+    MESH_URL,
+)
 
 from .base_transformer import BaseTransformer, EntityType
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
