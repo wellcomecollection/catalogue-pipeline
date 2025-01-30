@@ -10,6 +10,13 @@ class SparqlQueryBuilder:
     """
 
     @staticmethod
+    def _compact_format_query(query: str) -> str:
+        """
+        Remove all line breaks and extra spaces from the query.
+        """
+        return " ".join(query.split())
+
+    @staticmethod
     def _get_formatted_fields(node_type: NodeType) -> str:
         """
         Return the names of all fields to be retrieved via a SPARQL query based on node type.
@@ -80,7 +87,7 @@ class SparqlQueryBuilder:
             }}
         """
 
-        return get_ids_query
+        return SparqlQueryBuilder._compact_format_query(get_ids_query)
 
     @classmethod
     def get_items_query(cls, item_ids: list[str], node_type: NodeType) -> str:
@@ -107,7 +114,7 @@ class SparqlQueryBuilder:
             GROUP BY ?item
         """
 
-        return query
+        return SparqlQueryBuilder._compact_format_query(query)
 
     @classmethod
     def get_linked_ids_query(
@@ -158,4 +165,4 @@ class SparqlQueryBuilder:
             }}
         """
 
-        return query
+        return SparqlQueryBuilder._compact_format_query(query)

@@ -1,18 +1,23 @@
 import json
 
-from indexer import lambda_handler
 from test_mocks import MockRequest
+
+from indexer import lambda_handler
 
 
 def test_lambda_handler() -> None:
-    MockRequest.responses = [
-        {
-            "method": "POST",
-            "url": "https://test-host.com:8182/openCypher",
-            "status_code": 200,
-            "json_data": {"results": {"foo": "bar"}},
-        }
-    ]
+    MockRequest.mock_responses(
+        [
+            {
+                "method": "POST",
+                "url": "https://test-host.com:8182/openCypher",
+                "status_code": 200,
+                "json_data": {"results": {"foo": "bar"}},
+                "content_bytes": None,
+                "params": None,
+            }
+        ]
+    )
 
     event = {"Records": [{"body": json.dumps({"Message": "SOME_QUERY"})}]}
 

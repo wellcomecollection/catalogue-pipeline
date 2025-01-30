@@ -7,7 +7,7 @@ from transformers.base_transformer import EntityType
 from utils.streaming import process_stream_in_parallel
 
 from .linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
-from .sparql_client import MAX_PARALLEL_SPARQL_QUERIES, WikidataSparqlClient
+from .sparql_client import SPARQL_MAX_PARALLEL_QUERIES, WikidataSparqlClient
 from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
@@ -120,7 +120,7 @@ class WikidataLinkedOntologySource(BaseSource):
             items,
             run_sparql_query,
             SPARQL_ITEMS_CHUNK_SIZE,
-            MAX_PARALLEL_SPARQL_QUERIES,
+            SPARQL_MAX_PARALLEL_QUERIES,
         ):
             yield raw_response_item
 
