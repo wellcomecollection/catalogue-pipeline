@@ -1,6 +1,7 @@
 from typing import Literal
 from transformers.loc.common import remove_id_prefix
 
+
 class RawLibraryOfCongressConcept:
     def __init__(self, raw_concept: dict):
         self.raw_concept = raw_concept
