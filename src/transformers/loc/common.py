@@ -20,7 +20,9 @@ class RawLibraryOfCongressConcept:
         self._raw_concept_node = self._extract_concept_node()
 
     def _extract_concept_node(self) -> dict | None:
-        pass
+        raise NotImplementedError(
+            "Define a method to extract the corresponding node from the internal @graph in a LoC record"
+        )
 
     @property
     def source_id(self) -> str:
