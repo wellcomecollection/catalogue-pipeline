@@ -95,7 +95,7 @@ class SparqlQueryBuilder:
         Given a list of Wikidata `item_ids`, return a query to retrieve all required Wikidata fields for each id
         in the list.
         """
-        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
         query = f"""
             SELECT DISTINCT {cls._get_formatted_fields(node_type)}
@@ -124,7 +124,7 @@ class SparqlQueryBuilder:
         Given a list of Wikidata `item_ids`, return a query to retrieve all linked ontology ids referenced by each
         item in the list.
         """
-        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
         query = f"""
             SELECT DISTINCT ?item ?linkedId 
@@ -134,7 +134,7 @@ class SparqlQueryBuilder:
             }}
         """
 
-        return query
+        return SparqlQueryBuilder._compact_format_query(query)
 
     @classmethod
     def get_parents_query(
@@ -146,7 +146,7 @@ class SparqlQueryBuilder:
         Given a list of Wikidata `item_ids`, return a query to retrieve all parents of each item in the list.
         Parents are determined based on the 'subclass of' (P279) or the 'instance of' (P31) fields.
         """
-        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
         if relationship_type == "instance_of":
             relationship = "?child wdt:P31 ?item."

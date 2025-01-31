@@ -1,0 +1,26 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q1"
+        },
+        "linkedId": {
+          "type": "uri",
+          "value": "sh00000001"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        },
+        "linkedId": {
+          "type": "uri",
+          "value": "sh00000001"
+        }
+      }
+    ]
+  }
+}

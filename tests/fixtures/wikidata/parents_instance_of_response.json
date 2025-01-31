@@ -1,0 +1,26 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q1"
+        },
+        "child": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q3"
+        },
+        "child": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        }
+      }
+    ]
+  }
+}
