@@ -35,3 +35,13 @@ def test_do_not_exclude() -> None:
         json.loads(load_fixture("mads_concept.json"))
     )
     assert concept.exclude() == False
+
+
+def test_label() -> None:
+    """
+    Label is extracted from madsrdf:authoritativeLabel
+    """
+    concept = RawLibraryOfCongressMADSConcept(
+        json.loads(load_fixture("mads_concept.json"))
+    )
+    assert concept.label == "Stump work"

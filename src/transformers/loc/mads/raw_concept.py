@@ -18,3 +18,8 @@ class RawLibraryOfCongressMADSConcept(RawLibraryOfCongressConcept):
             ):
                 return node
         return None
+
+    @property
+    def label(self) -> str:
+        raw_preferred_label = self._raw_concept_node["madsrdf:authoritativeLabel"]
+        return self._extract_label(raw_preferred_label)

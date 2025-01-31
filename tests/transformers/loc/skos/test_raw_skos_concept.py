@@ -33,3 +33,13 @@ def test_do_not_exclude() -> None:
         json.loads(load_fixture("skos_concept.json"))
     )
     assert concept.exclude() == False
+
+
+def test_label() -> None:
+    """
+    Label is extracted from madsrdf:authoritativeLabel
+    """
+    concept = RawLibraryOfCongressSKOSConcept(
+        json.loads(load_fixture("skos_concept.json"))
+    )
+    assert concept.label == "Pickling"
