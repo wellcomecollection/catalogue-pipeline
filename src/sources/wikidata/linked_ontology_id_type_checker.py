@@ -4,6 +4,7 @@ import boto3
 import smart_open
 
 import config
+
 from .sparql_query_builder import NodeType, OntologyType
 
 
