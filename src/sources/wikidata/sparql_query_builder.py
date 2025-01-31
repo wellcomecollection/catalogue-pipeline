@@ -42,6 +42,15 @@ class SparqlQueryBuilder:
         return " ".join(fields_with_aggregation)
 
     @staticmethod
+    def _get_linked_ontology_filter(linked_ontology: OntologyType) -> str:
+        if linked_ontology == "loc":
+            return "?item p:P244/ps:P244 ?linkedId."
+        elif linked_ontology == "mesh":
+            return "?item p:P486/ps:P486 ?linkedId."
+
+        raise ValueError(f"Invalid linked ontology type: {linked_ontology}")
+
+    @staticmethod
     def _get_formatted_field_mappings(node_type: NodeType) -> str:
         """
         Returns SPARQL field definitions, mapping field names specified
@@ -115,20 +124,44 @@ class SparqlQueryBuilder:
         Given a list of Wikidata `item_ids`, return a query to retrieve all linked ontology ids referenced by each
         item in the list.
         """
-        if linked_ontology == "loc":
-            field_filter = "?item p:P244/ps:P244 ?linkedId."
-        elif linked_ontology == "mesh":
-            field_filter = "?item p:P486/ps:P486 ?linkedId."
-        else:
-            raise ValueError(f"Invalid linked ontology type: {linked_ontology}")
-
         ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
 
         query = f"""
             SELECT DISTINCT ?item ?linkedId 
             WHERE {{
               VALUES ?item {{ {ids_clause} }}
-              {field_filter}
+              {cls._get_linked_ontology_filter(linked_ontology)}
+            }}
+        """
+
+        return query
+
+    @classmethod
+    def get_parents_query(
+        cls,
+        item_ids: list[str],
+        relationship_type: Literal["instance_of", "subclass_of"],
+    ) -> str:
+        """
+        Given a list of Wikidata `item_ids`, return a query to retrieve all parents of each item in the list.
+        Parents are determined based on the 'subclass of' (P279) or the 'instance of' (P31) fields.
+        """
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+
+        if relationship_type == "instance_of":
+            relationship = "?child wdt:P31 ?item."
+        elif relationship_type == "subclass_of":
+            relationship = "?child wdt:P279 ?item."
+        else:
+            raise ValueError(
+                f"Unknown parent/child relationship type: {relationship_type}"
+            )
+
+        query = f"""
+            SELECT DISTINCT ?child ?item 
+            WHERE {{
+              VALUES ?child {{ {ids_clause} }}
+              {relationship}
             }}
         """
 

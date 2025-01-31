@@ -28,7 +28,9 @@ class RawWikidataConcept:
 
     @property
     def source_id(self) -> str:
-        return extract_wikidata_id(self.raw_concept)
+        wikidata_id = extract_wikidata_id(self.raw_concept)
+        assert wikidata_id is not None
+        return wikidata_id
 
     @property
     def label(self) -> str:
