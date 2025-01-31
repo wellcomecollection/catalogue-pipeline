@@ -8,7 +8,7 @@ class RawLibraryOfCongressMADSConcept(RawLibraryOfCongressConcept):
     def _extract_concept_node(self) -> dict | None:
         graph: list[dict] = self.raw_concept.get("@graph", [])
         for node in graph:
-            # madsrdf:Authority coresponds to the "idea or notion"
+            # madsrdf:Authority corresponds to the "idea or notion"
             # So the node we are after is the one whose id matches, and is an Authority
             # Ignore DeprecatedAuthority in this context, as they are to be excluded.
             # https://www.loc.gov/standards/mads/rdf/#t21
