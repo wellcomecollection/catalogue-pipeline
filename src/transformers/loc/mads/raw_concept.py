@@ -21,16 +21,19 @@ class RawLibraryOfCongressMADSConcept(RawLibraryOfCongressConcept):
 
     @property
     def label(self) -> str:
+        assert self._raw_concept_node is not None
         raw_preferred_label = self._raw_concept_node["madsrdf:authoritativeLabel"]
         return self._extract_label(raw_preferred_label)
 
     @property
     def is_geographic(self) -> bool:
+        assert self._raw_concept_node is not None
         """Returns True if the node represents a geographic concept, as determined by @type"""
         return "madsrdf:Geographic" in self._raw_concept_node.get("@type", [])
 
     @property
     def broader_concept_ids(self) -> list[str]:
+        assert self._raw_concept_node is not None
         return _filter_irrelevant_ids(
             [
                 remove_id_prefix(broader["@id"])
