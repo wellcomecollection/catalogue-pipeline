@@ -7,72 +7,94 @@ from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
 from transformers.loc.skos.raw_concept import RawLibraryOfCongressSKOSConcept
 
 
-class TestRemovePrefix:
-    def test_remove_prefix_noop(self) -> None:
+@pytest.mark.parametrize(
+    "sut_class", [RawLibraryOfCongressSKOSConcept, RawLibraryOfCongressMADSConcept]
+)
+class TestSourceId:
+    def test_remove_prefix_noop(
+        self, sut_class: Type[RawLibraryOfCongressConcept]
+    ) -> None:
         """
         If there is no prefix to remove, remove_id_prefix will do nothing
         """
-        assert remove_id_prefix("sh1234567890") == "sh1234567890"
+        assert sut_class({"@id": "sh1234567890"}).source_id == "sh1234567890"
 
-    def test_remove_prefix_fully_qualified(self) -> None:
+    def test_remove_prefix_fully_qualified(
+        self, sut_class: Type[RawLibraryOfCongressConcept]
+    ) -> None:
         """
         remove_id_prefix removes fully-qualified URL-style prefixes
         """
         assert (
-            remove_id_prefix("http://id.loc.gov/authorities/subjects/sh1234567890")
+            sut_class(
+                {"@id": "http://id.loc.gov/authorities/subjects/sh1234567890"}
+            ).source_id
             == "sh1234567890"
         )
         assert (
-            remove_id_prefix("http://id.loc.gov/authorities/names/sh0987654321")
+            sut_class(
+                {"@id": "http://id.loc.gov/authorities/names/sh0987654321"}
+            ).source_id
             == "sh0987654321"
         )
 
-    def test_remove_prefix_relative(self) -> None:
+    def test_remove_prefix_relative(
+        self, sut_class: Type[RawLibraryOfCongressConcept]
+    ) -> None:
         """
         remove_id_prefix removes relative/local prefixes
         """
-        assert remove_id_prefix("/authorities/subjects/sh1234567890") == "sh1234567890"
-        assert remove_id_prefix("/authorities/names/sh0987654321") == "sh0987654321"
+        assert (
+            sut_class({"@id": "/authorities/subjects/sh1234567890"}).source_id
+            == "sh1234567890"
+        )
+        assert (
+            sut_class({"@id": "/authorities/names/sh0987654321"}).source_id
+            == "sh0987654321"
+        )
 
-    def test_remove_prefix_lookalikes(self) -> None:
+    def test_remove_prefix_lookalikes(
+        self, sut_class: Type[RawLibraryOfCongressConcept]
+    ) -> None:
         """
         remove_id_prefix only removes specific known prefixes,
         not just things that look a bit like them
         """
         assert (
-            remove_id_prefix("/authorities/banana/sh1234567890")
+            sut_class({"@id": "/authorities/banana/sh1234567890"}).source_id
             == "/authorities/banana/sh1234567890"
         )
         assert (
-            remove_id_prefix("https://id.loc.gov.uk/authorities/subjects/sh1234567890")
+            sut_class(
+                {"@id": "https://id.loc.gov.uk/authorities/subjects/sh1234567890"}
+            ).source_id
             == "https://id.loc.gov.uk/authorities/subjects/sh1234567890"
         )
 
 
+@pytest.mark.parametrize(
+    "sut_class", [RawLibraryOfCongressSKOSConcept, RawLibraryOfCongressMADSConcept]
+)
 class TestSource:
-    def test_source_subjects(self) -> None:
+    def test_source_subjects(
+        self, sut_class: Type[RawLibraryOfCongressConcept]
+    ) -> None:
         """
         Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
         """
-        concept = RawLibraryOfCongressConcept(
-            {"@id": "/authorities/subjects/sh2010105253"}
-        )
+        concept = sut_class({"@id": "/authorities/subjects/sh2010105253"})
         assert concept.source == "lc-subjects"
 
-    def test_source_names(self) -> None:
+    def test_source_names(self, sut_class: Type[RawLibraryOfCongressConcept]) -> None:
         """
         Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
         """
-        concept = RawLibraryOfCongressConcept(
-            {"@id": "/authorities/names/sh2010105253"}
-        )
+        concept = sut_class({"@id": "/authorities/names/sh2010105253"})
         assert concept.source == "lc-names"
 
-    def test_source_invalid(self) -> None:
+    def test_source_invalid(self, sut_class: Type[RawLibraryOfCongressConcept]) -> None:
         with pytest.raises(ValueError):
-            concept = RawLibraryOfCongressConcept(
-                {"@id": "authorities/childrensSubjects/sj2021051581"}
-            )
+            concept = sut_class({"@id": "authorities/childrensSubjects/sj2021051581"})
             concept.source
 
 

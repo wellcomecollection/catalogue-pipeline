@@ -7,7 +7,7 @@ class RawLibraryOfCongressSKOSConcept(RawLibraryOfCongressConcept):
         self._raw_concept_node = self._extract_concept_node()
 
     def _extract_concept_node(self) -> dict | None:
-        graph: list[dict] = self.raw_concept["@graph"]
+        graph: list[dict] = self.raw_concept.get("@graph", [])
 
         # Some LoC concepts (e.g. deprecated concepts) do not store a concept node in their graph.
         # When this happens, return `None` because there is no concept for us to extract.
