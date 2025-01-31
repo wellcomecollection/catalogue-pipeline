@@ -1,5 +1,5 @@
 import pytest
-
+from typing import Type
 from transformers.loc.common import remove_id_prefix, RawLibraryOfCongressConcept
 from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
 from transformers.loc.skos.raw_concept import RawLibraryOfCongressSKOSConcept
@@ -80,17 +80,17 @@ class TestSource:
 
 @pytest.mark.parametrize("sut_class", [RawLibraryOfCongressSKOSConcept, RawLibraryOfCongressMADSConcept])
 class TestExclusion:
-    def test_do_not_exclude(self, sut_class):
+    def test_do_not_exclude(self, sut_class:Type[RawLibraryOfCongressConcept])->None:
         """
         A record with a corresponding node in its internal graph, and which is not a duplicate,
         should be included in the output
         """
         concept = sut_class( {"@id": "authorities/names/sh2010105253", "@graph":[]})
         # The SUT at this point doesn't actually care what the node is, just that it exists
-        concept._raw_concept_node = "Anything"
+        concept._raw_concept_node = {}
         assert concept.exclude() == False
 
-    def test_exclude_no_node(self, sut_class):
+    def test_exclude_no_node(self, sut_class:Type[RawLibraryOfCongressConcept])->None:
         """
         If a record does not contain a corresponding node in its internal graph
         then it should be excluded
@@ -98,12 +98,12 @@ class TestExclusion:
         concept = sut_class( {"@id": "authorities/names/sh2010105253", "@graph":[]})
         assert concept.exclude() == True
 
-    def test_exclude_marked_duplicates(self, sut_class):
+    def test_exclude_marked_duplicates(self, sut_class:Type[RawLibraryOfCongressConcept]) -> None:
         """
         If a record's identifier is suffixed with -781, this marks the entry as a duplicate
         which is to be excluded
         """
         concept = sut_class( {"@id": "authorities/names/sh2010105253-781", "@graph":[]})
-        concept._raw_concept_node = "Anything"
+        concept._raw_concept_node = {}
         assert concept.exclude() == True
 

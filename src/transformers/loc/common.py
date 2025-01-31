@@ -19,7 +19,7 @@ class RawLibraryOfCongressConcept:
         self.raw_concept = raw_concept
         self._raw_concept_node = self._extract_concept_node()
 
-    def _extract_concept_node(self):
+    def _extract_concept_node(self) -> dict | None:
         pass
 
     @property
