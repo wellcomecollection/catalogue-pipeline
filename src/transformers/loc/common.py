@@ -20,9 +20,7 @@ class RawLibraryOfCongressConcept:
         self._raw_concept_node = self._extract_concept_node()
 
     def _extract_concept_node(self) -> dict | None:
-        raise NotImplementedError(
-            "Define a method to extract the corresponding node from the internal @graph in a LoC record"
-        )
+        raise NotImplementedError
 
     @property
     def source_id(self) -> str:
@@ -37,6 +35,25 @@ class RawLibraryOfCongressConcept:
             return "lc-names"
 
         raise ValueError("Unknown concept type.")
+
+    @property
+    def label(self) -> str:
+        raise NotImplementedError
+
+    @property
+    def is_geographic(self) -> bool:
+        """Returns True if the node represents a geographic concept"""
+        raise NotImplementedError
+
+    @property
+    def broader_concept_ids(self) -> list[str]:
+        """Returns a list of IDs representing concepts which are broader than the current concept."""
+        raise NotImplementedError
+
+    @property
+    def related_concept_ids(self) -> list[str]:
+        """Returns a list of IDs representing concepts which are related to the current concept."""
+        raise NotImplementedError
 
     @staticmethod
     def _extract_label(raw_label: str | dict[str, str] | list[str]) -> str:

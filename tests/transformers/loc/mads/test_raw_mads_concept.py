@@ -4,38 +4,6 @@ from test_utils import load_fixture
 
 from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
 
-sh2010105253 = json.loads(load_fixture("mads_composite_concept.json"))
-
-
-def test_exclude_no_graph() -> None:
-    """
-    If there is no graph, then the concept is to be excluded
-    """
-    concept = RawLibraryOfCongressMADSConcept(
-        {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
-    )
-    assert concept.exclude() == True
-
-
-def test_exclude_no_matching_concept_node() -> None:
-    """
-    If the graph does not contain a node of type skos:Concept, it is to be excluded
-    """
-    concept = RawLibraryOfCongressMADSConcept(
-        json.loads(load_fixture("mads_deprecated_concept.json"))
-    )
-    assert concept.exclude() == True
-
-
-def test_do_not_exclude() -> None:
-    """
-    A complete, non-duplicate, non-deprecated record is to be included in the output
-    """
-    concept = RawLibraryOfCongressMADSConcept(
-        json.loads(load_fixture("mads_concept.json"))
-    )
-    assert concept.exclude() == False
-
 
 def test_label() -> None:
     """
@@ -45,3 +13,90 @@ def test_label() -> None:
         json.loads(load_fixture("mads_concept.json"))
     )
     assert concept.label == "Stump work"
+
+
+class TestExclude:
+    def test_exclude_no_graph(self) -> None:
+        """
+        If there is no graph, then the concept is to be excluded
+        """
+        concept = RawLibraryOfCongressMADSConcept(
+            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
+        )
+        assert concept.exclude() == True
+
+    def test_exclude_no_matching_concept_node(self) -> None:
+        """
+        If the graph does not contain a node of type skos:Concept, it is to be excluded
+        """
+        concept = RawLibraryOfCongressMADSConcept(
+            json.loads(load_fixture("mads_deprecated_concept.json"))
+        )
+        assert concept.exclude() == True
+
+    def test_do_not_exclude(self) -> None:
+        """
+        A complete, non-duplicate, non-deprecated record is to be included in the output
+        """
+        concept = RawLibraryOfCongressMADSConcept(
+            json.loads(load_fixture("mads_concept.json"))
+        )
+        assert concept.exclude() == False
+
+
+class TestGeographic:
+    def test_is_geographic(self) -> None:
+        """
+        A concept is geographic if its @type list contains madsrdf:Geographic
+        """
+        concept = RawLibraryOfCongressMADSConcept(
+            json.loads(load_fixture("mads_geographic_concept.json"))
+        )
+        assert concept.is_geographic == True
+
+    def test_is_not_geographic(self) -> None:
+        concept = RawLibraryOfCongressMADSConcept(
+            json.loads(load_fixture("mads_concept.json"))
+        )
+        assert concept.is_geographic == False
+
+
+class TestBroaderConcepts:
+    def test_real_example(self) -> None:
+        concept = RawLibraryOfCongressMADSConcept(
+            json.loads(load_fixture("mads_geographic_concept.json"))
+        )
+        assert concept.broader_concept_ids == ["sh85040229", "sh85053109", "sh92006359"]
+
+    def test_single_broader(self) -> None:
+        concept = RawLibraryOfCongressMADSConcept(
+            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
+        )
+        # exaample from sh00000014, Stuffed foods (Cooking)
+        concept._raw_concept_node = {
+            "madsrdf:hasBroaderAuthority": {
+                "@id": "http://id.loc.gov/authorities/subjects/sh85129334"
+            }
+        }
+        assert concept.broader_concept_ids == ["sh85129334"]
+
+    def test_no_broaders(self) -> None:
+        concept = RawLibraryOfCongressMADSConcept(
+            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
+        )
+        concept._raw_concept_node = {}
+        assert concept.broader_concept_ids == []
+
+    def test_ignore_underscore_n(self) -> None:
+        # _:nbunchanumbers identifiers are to be ignored.
+        # example from /authorities/subjects/sh00008764, Bintan Island (Indonesia)
+        concept = RawLibraryOfCongressMADSConcept(
+            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
+        )
+        concept._raw_concept_node = {
+            "madsrdf:hasBroaderAuthority": [
+                {"@id": "_:n428e364baf3942ff9c026b0033bac3d0b5"},
+                {"@id": "http://id.loc.gov/authorities/subjects/sh85068533"},
+            ]
+        }
+        assert concept.broader_concept_ids == ["sh85068533"]
