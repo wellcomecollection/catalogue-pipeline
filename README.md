@@ -132,8 +132,27 @@ result = neptune_client.run_open_cypher_query(query)
 print(result)
 ```
 
-Additionally, it is possible to connect to the cluster using [AWS graph notebook](https://github.com/aws/graph-notebook)
-with the following configuration:
+### AWS Graph Notebook
+
+Additionally, it is possible to connect to the cluster using [AWS graph notebook](https://github.com/aws/graph-notebook).The most straightforward option to do this locally is using [JupyterLab](https://jupyter.org/). To make this work, you need to set this up in a different virtual environment from the one in this project (this is because `graph-notebook` currently requires Python 3.9.x-3.10.14). Once you have created a new environment with the correct Python version, install the following:
+
+```
+# install graph-notebook
+pip install graph-notebook
+
+# install jupyterlab
+pip install "jupyterlab>=3,<4"
+
+# aws graph-notebook comes with some example notebooks, this creates copies in the notebooks directory
+python -m graph_notebook.notebooks.install --destination notebooks
+```
+
+Run the following command to open JupyterLab in your browser:
+
+`python -m graph_notebook.start_jupyterlab --jupyter-dir notebooks`
+
+
+To connect to the catalogue graph, add the following configuration into your Jupyter notebook:
 ```
 %%graph_notebook_config
 {
@@ -155,3 +174,4 @@ Jupyter notebook:
 %env AWS_PROFILE=platform-developer
 ```
 
+You can find an [example notebook](notebooks/graph_exploration.ipynb) in the notebooks folder with openCypher queries to explore the catalogue graph.

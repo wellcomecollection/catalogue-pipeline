@@ -378,3 +378,7 @@ tags
 # End of https://www.toptal.com/developers/gitignore/api/osx,vim,java,linux,python,intellij
 
 .terraform/
+
+# notebooks
+notebooks/*
+!notebooks/graph_exploration.ipynb
