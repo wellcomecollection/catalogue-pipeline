@@ -1,0 +1,57 @@
+from test_mocks import MockRequest, MockSmartOpen
+import json
+from typing import Literal
+from config import WIKIDATA_SPARQL_URL
+
+from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from test_utils import load_fixture
+
+
+def add_mock_wikidata_request(
+    query_type: Literal[
+        "all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of"
+    ]
+) -> None:
+    params = json.loads(load_fixture(f"wikidata/{query_type}_query.json"))
+    response = json.loads(load_fixture(f"wikidata/{query_type}_response.json"))
+    MockRequest.mock_response(
+        method="GET", url=WIKIDATA_SPARQL_URL, params=params, json_data=response
+    )
+
+
+def test_wikidata_concepts_source() -> None:
+    MockSmartOpen.mock_s3_file(
+        "s3://bulk_load_test_bucket/loc_concepts__nodes.csv",
+        load_fixture("loc_concepts_transformer_output.csv").decode(),
+    )
+    add_mock_wikidata_request("all_ids")
+    add_mock_wikidata_request("linked_ids")
+    add_mock_wikidata_request("parents_instance_of")
+    add_mock_wikidata_request("parents_subclass_of")
+
+    mesh_concepts_source = WikidataLinkedOntologySource(
+        node_type="concepts", linked_ontology="loc", entity_type="edges"
+    )
+
+    stream_result = list(mesh_concepts_source.stream_raw())
+
+    assert len(stream_result) == 5
+
+    same_as_edges = set()
+    has_parent_edges = set()
+    for edge in stream_result:
+        if edge["type"] == "SAME_AS":
+            same_as_edges.add((edge["wikidata_id"], edge["linked_id"]))
+        elif edge["type"] == "HAS_PARENT":
+            has_parent_edges.add((edge["child_id"], edge["parent_id"]))
+        else:
+            raise ValueError(f"Unknown edge type {edge['type']}")
+
+    assert len(same_as_edges) == 2
+    assert ("Q1", "sh00000001") in same_as_edges
+    assert ("Q2", "sh00000001") in same_as_edges
+
+    assert len(has_parent_edges) == 3
+    assert ("Q1", "Q4") in has_parent_edges
+    assert ("Q2", "Q1") in has_parent_edges
+    assert ("Q2", "Q3") in has_parent_edges

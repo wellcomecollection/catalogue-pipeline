@@ -1,11 +1,9 @@
-import os
 from functools import lru_cache
 
 import boto3
 import smart_open
 
-from config import S3_BULK_LOAD_BUCKET_NAME
-
+import config
 from .sparql_query_builder import NodeType, OntologyType
 
 
@@ -30,7 +28,7 @@ class LinkedOntologyIdTypeChecker:
         """Return all ids classified under a given `node_type` for the selected ontology."""
         # Retrieve the bulk load file outputted by the relevant transformer so that we can extract ids from it.
         linked_nodes_file_name = f"{self.linked_ontology}_{node_type}__nodes.csv"
-        s3_url = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
+        s3_url = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
         print(
             f"Retrieving ids of type '{node_type}' from ontology '{self.linked_ontology}' from S3.",
@@ -39,6 +37,7 @@ class LinkedOntologyIdTypeChecker:
         )
 
         ids = set()
+
         transport_params = {"client": boto3.client("s3")}
         with smart_open.open(s3_url, "r", transport_params=transport_params) as f:
             # Loop through all items in the file and extract the id from each item
