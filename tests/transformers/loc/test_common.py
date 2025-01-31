@@ -1,6 +1,8 @@
-import pytest
 from typing import Type
-from transformers.loc.common import remove_id_prefix, RawLibraryOfCongressConcept
+
+import pytest
+
+from transformers.loc.common import RawLibraryOfCongressConcept, remove_id_prefix
 from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
 from transformers.loc.skos.raw_concept import RawLibraryOfCongressSKOSConcept
 
