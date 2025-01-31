@@ -17,6 +17,6 @@ if [ "$CHECK" == "--check" ]; then
     isort --profile=black --check src/ tests/
 else
     echo "Formatting code ..."
-    black src/
-    isort --profile=black src/
+    black src/ tests/
+    isort --profile=black src/ tests/
 fi
