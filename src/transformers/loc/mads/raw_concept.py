@@ -43,6 +43,18 @@ class RawLibraryOfCongressMADSConcept(RawLibraryOfCongressConcept):
             ]
         )
 
+    @property
+    def related_concept_ids(self) -> list[str]:
+        assert self._raw_concept_node is not None
+        return _filter_irrelevant_ids(
+            [
+                remove_id_prefix(broader["@id"])
+                for broader in _as_list(
+                    self._raw_concept_node.get("madsrdf:hasReciprocalAuthority", [])
+                )
+            ]
+        )
+
 
 def _filter_irrelevant_ids(ids: list[str]) -> list[str]:
     return [concept_id for concept_id in ids if not concept_id.startswith("_:n")]
