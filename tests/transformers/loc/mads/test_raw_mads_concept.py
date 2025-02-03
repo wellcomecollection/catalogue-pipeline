@@ -167,57 +167,58 @@ class TestRelatedConcepts:
         }
         assert concept.related_concept_ids == ["sh123456789"]
 
+
 class TestNarrower:
 
-    def test_get_no_narrowers(self):
+    def test_get_no_narrowers(self) -> None:
         concept = RawLibraryOfCongressMADSConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
         )
         concept._raw_concept_node = {}
         assert concept.narrower_concept_ids == []
 
-
-    def test_get_narrowers_from_components(self):
+    def test_get_narrowers_from_components(self) -> None:
         concept = RawLibraryOfCongressMADSConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
         )
-        concept._raw_concept_node = { "madsrdf:componentList": {
-        "@list": [
-          {
-            "@id": "http://id.loc.gov/authorities/subjects/sh85098685"
-          },
-          {
-            "@id": "http://id.loc.gov/authorities/subjects/sh99001366"
-          }
-        ]
-      },}
+        concept._raw_concept_node = {
+            "madsrdf:componentList": {
+                "@list": [
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh85098685"},
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh99001366"},
+                ]
+            },
+        }
         assert concept.narrower_concept_ids == ["sh85098685", "sh99001366"]
 
-
-    def test_get_narrowers_from_narrower_authority(self):
+    def test_get_narrowers_from_narrower_authority(self) -> None:
         concept = RawLibraryOfCongressMADSConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
         )
-        concept._raw_concept_node = { "madsrdf:hasNarrowerAuthority": {
-        "@id": "http://id.loc.gov/authorities/subjects/sh00000029"
-        }}
+        concept._raw_concept_node = {
+            "madsrdf:hasNarrowerAuthority": {
+                "@id": "http://id.loc.gov/authorities/subjects/sh00000029"
+            }
+        }
         assert concept.narrower_concept_ids == ["sh00000029"]
 
-
-    def test_get_narrowers_from_both(self):
+    def test_get_narrowers_from_both(self) -> None:
         concept = RawLibraryOfCongressMADSConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
         )
-        concept._raw_concept_node = { "madsrdf:componentList": {
-        "@list": [
-          {
-            "@id": "http://id.loc.gov/authorities/subjects/sh85098685"
-          },
-          {
-            "@id": "http://id.loc.gov/authorities/subjects/sh99001366"
-          }
-        ]
-      },"madsrdf:hasNarrowerAuthority": {
-        "@id": "http://id.loc.gov/authorities/subjects/sh00000029"
-        }}
-        assert set(concept.narrower_concept_ids) == {"sh00000029", "sh85098685", "sh99001366"}
+        concept._raw_concept_node = {
+            "madsrdf:componentList": {
+                "@list": [
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh85098685"},
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh99001366"},
+                ]
+            },
+            "madsrdf:hasNarrowerAuthority": {
+                "@id": "http://id.loc.gov/authorities/subjects/sh00000029"
+            },
+        }
+        assert set(concept.narrower_concept_ids) == {
+            "sh00000029",
+            "sh85098685",
+            "sh99001366",
+        }
