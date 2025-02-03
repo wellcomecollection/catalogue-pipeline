@@ -10,6 +10,7 @@ from config import (
     LOC_SUBJECT_HEADINGS_URL,
     MESH_URL,
     WIKIDATA_SPARQL_URL,
+    CATALOGUE_SNAPSHOT_URL
 )
 from extractor import LambdaEvent, lambda_handler
 from transformers.base_transformer import EntityType, StreamDestination
@@ -93,6 +94,14 @@ def mock_requests_lookup_table(
                 "json_data": {"results": {"bindings": []}},
             }
         )
+    elif transformer_type == "catalogue_concepts":
+        mocked_responses.append(
+            {
+                "method": "GET",
+                "url": CATALOGUE_SNAPSHOT_URL,
+                "content_bytes": load_fixture("catalogue_example.json"),
+            }
+        )
 
     return mocked_responses
 
@@ -145,6 +154,7 @@ def test_lambda_handler(
         "wikidata_linked_loc_locations": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_mesh_concepts": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_mesh_locations": [WIKIDATA_SPARQL_URL],
+        "catalogue_concepts": [CATALOGUE_SNAPSHOT_URL]
     }
 
     assert transformer_type in transformer_types

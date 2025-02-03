@@ -93,5 +93,10 @@ variable "state_machine_inputs" {
       "transformer_type" : "wikidata_linked_mesh_locations",
       "entity_type" : "edges"
     },
+    {
+      "label" : "Catalogue Concept Nodes",
+      "transformer_type" : "catalogue_concepts",
+      "entity_type" : "nodes"
+    },
   ]
 }
