@@ -1,11 +1,11 @@
-from test_mocks import MockRequest, MockSmartOpen
 import json
 from typing import Literal
-from config import WIKIDATA_SPARQL_URL
 
-from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
 
+from config import WIKIDATA_SPARQL_URL
+from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 
 WikidataQueryType = Literal[
     "all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of", "items"

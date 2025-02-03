@@ -1,10 +1,10 @@
 from test_wikidata_concepts_source import (
-    _add_mock_wikidata_requests,
     _add_mock_loc_transformer_outputs,
+    _add_mock_wikidata_requests,
 )
 
-from models.graph_node import SourceConcept
 from models.graph_edge import SourceConceptSameAs
+from models.graph_node import SourceConcept
 from transformers.wikidata.concepts_transformer import WikidataConceptsTransformer
 
 

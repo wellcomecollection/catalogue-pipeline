@@ -6,11 +6,11 @@ from test_utils import load_fixture
 from typing_extensions import get_args
 
 from config import (
+    CATALOGUE_SNAPSHOT_URL,
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
     MESH_URL,
     WIKIDATA_SPARQL_URL,
-    CATALOGUE_SNAPSHOT_URL
 )
 from extractor import LambdaEvent, lambda_handler
 from transformers.base_transformer import EntityType, StreamDestination
@@ -154,7 +154,7 @@ def test_lambda_handler(
         "wikidata_linked_loc_locations": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_mesh_concepts": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_mesh_locations": [WIKIDATA_SPARQL_URL],
-        "catalogue_concepts": [CATALOGUE_SNAPSHOT_URL]
+        "catalogue_concepts": [CATALOGUE_SNAPSHOT_URL],
     }
 
     assert transformer_type in transformer_types
