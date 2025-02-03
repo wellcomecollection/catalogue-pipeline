@@ -7,32 +7,37 @@ from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from test_utils import load_fixture
 
 
-def add_mock_wikidata_request(
-    query_type: Literal[
-        "all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of", "items"
-    ]
-) -> None:
-    params = json.loads(load_fixture(f"wikidata/{query_type}_query.json"))
-    response = json.loads(load_fixture(f"wikidata/{query_type}_response.json"))
-    MockRequest.mock_response(
-        method="GET", url=WIKIDATA_SPARQL_URL, params=params, json_data=response
-    )
+WikidataQueryType = Literal[
+    "all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of", "items"
+]
+
+
+def add_mock_wikidata_requests(query_types: list[WikidataQueryType]) -> None:
+    for query_type in query_types:
+        params = json.loads(load_fixture(f"wikidata/{query_type}_query.json"))
+        response = json.loads(load_fixture(f"wikidata/{query_type}_response.json"))
+        MockRequest.mock_response(
+            method="GET", url=WIKIDATA_SPARQL_URL, params=params, json_data=response
+        )
+
+
+def add_mock_loc_transformer_outputs() -> None:
+    for node_type in ["concepts", "locations", "names"]:
+        MockSmartOpen.mock_s3_file(
+            f"s3://bulk_load_test_bucket/loc_{node_type}__nodes.csv",
+            load_fixture(f"loc/transformer_output_{node_type}_nodes.csv").decode(),
+        )
 
 
 def test_wikidata_concepts_source_edges() -> None:
-    MockSmartOpen.mock_s3_file(
-        "s3://bulk_load_test_bucket/loc_concepts__nodes.csv",
-        load_fixture("loc_concepts_transformer_output.csv").decode(),
+    add_mock_loc_transformer_outputs()
+    add_mock_wikidata_requests(
+        ["all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of"]
     )
-    add_mock_wikidata_request("all_ids")
-    add_mock_wikidata_request("linked_ids")
-    add_mock_wikidata_request("parents_instance_of")
-    add_mock_wikidata_request("parents_subclass_of")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
         node_type="concepts", linked_ontology="loc", entity_type="edges"
     )
-
     stream_result = list(mesh_concepts_source.stream_raw())
 
     assert len(stream_result) == 5
@@ -58,23 +63,10 @@ def test_wikidata_concepts_source_edges() -> None:
 
 
 def test_wikidata_concepts_source_nodes() -> None:
-    MockSmartOpen.mock_s3_file(
-        "s3://bulk_load_test_bucket/loc_concepts__nodes.csv",
-        load_fixture("loc_concepts_transformer_output.csv").decode(),
+    add_mock_loc_transformer_outputs()
+    add_mock_wikidata_requests(
+        ["all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of", "items"]
     )
-    MockSmartOpen.mock_s3_file(
-        "s3://bulk_load_test_bucket/loc_locations__nodes.csv",
-        load_fixture("loc_concepts_transformer_output.csv").decode(),
-    )
-    MockSmartOpen.mock_s3_file(
-        "s3://bulk_load_test_bucket/loc_names__nodes.csv",
-        load_fixture("loc_concepts_transformer_output.csv").decode(),
-    )
-    add_mock_wikidata_request("all_ids")
-    add_mock_wikidata_request("linked_ids")
-    add_mock_wikidata_request("parents_instance_of")
-    add_mock_wikidata_request("parents_subclass_of")
-    add_mock_wikidata_request("items")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
         node_type="concepts", linked_ontology="loc", entity_type="nodes"

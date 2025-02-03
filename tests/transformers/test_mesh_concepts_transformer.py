@@ -14,7 +14,7 @@ def test_mesh_concepts_transformer() -> None:
                 "url": test_url,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": load_fixture("mesh_example.xml"),
+                "content_bytes": load_fixture("mesh/raw_descriptors.xml"),
                 "params": None,
             }
         ]

@@ -24,7 +24,6 @@ def mock_requests_lookup_table(
     destination: StreamDestination,
     transformer_type: TransformerType,
 ) -> Any:
-
     mocked_responses: list[dict] = []
 
     if destination == "graph":
@@ -42,7 +41,7 @@ def mock_requests_lookup_table(
             {
                 "method": "GET",
                 "url": MESH_URL,
-                "content_bytes": load_fixture("mesh_example.xml"),
+                "content_bytes": load_fixture("mesh/raw_descriptors.xml"),
             }
         )
     elif transformer_type in ["loc_concepts", "loc_locations", "loc_names"]:
@@ -50,14 +49,14 @@ def mock_requests_lookup_table(
             {
                 "method": "GET",
                 "url": LOC_SUBJECT_HEADINGS_URL,
-                "content_bytes": load_fixture("loc_subjects_example.jsonld"),
+                "content_bytes": load_fixture("loc/raw_subject_headings.jsonld"),
             }
         )
         mocked_responses.append(
             {
                 "method": "GET",
                 "url": LOC_NAMES_URL,
-                "content_bytes": load_fixture("loc_names_example.jsonld"),
+                "content_bytes": load_fixture("loc/raw_names.jsonld"),
             }
         )
     elif transformer_type in [
@@ -128,7 +127,6 @@ def test_lambda_handler(
     lambda_event: LambdaEvent,
     mock_responses: list[MockResponseInput],
 ) -> None:
-
     MockRequest.mock_responses(mock_responses)
     lambda_handler(lambda_event, None)
 
