@@ -44,6 +44,33 @@ class RawLibraryOfCongressMADSConcept(RawLibraryOfCongressConcept):
         )
 
     @property
+    def narrower_concept_ids(self) -> list[str]:
+        return self._narrowers_from_narrower_authority() + self._narrowers_from_component_list()
+
+
+    def _narrowers_from_component_list(self):
+        assert self._raw_concept_node is not None
+        return _filter_irrelevant_ids(
+            [
+                remove_id_prefix(broader["@id"])
+                for broader in _as_list(
+                    self._raw_concept_node.get("madsrdf:componentList", {}).get("@list", [])
+                )
+            ]
+        )
+
+    def _narrowers_from_narrower_authority(self):
+        assert self._raw_concept_node is not None
+        return _filter_irrelevant_ids(
+            [
+                remove_id_prefix(broader["@id"])
+                for broader in _as_list(
+                    self._raw_concept_node.get("madsrdf:hasNarrowerAuthority", [])
+                )
+            ]
+        )
+
+    @property
     def related_concept_ids(self) -> list[str]:
         assert self._raw_concept_node is not None
         return _filter_irrelevant_ids(

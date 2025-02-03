@@ -51,6 +51,11 @@ class RawLibraryOfCongressConcept:
         raise NotImplementedError
 
     @property
+    def narrower_concept_ids(self) -> list[str]:
+        """Returns a list of IDs representing concepts which are narrower than the current concept."""
+        raise NotImplementedError
+
+    @property
     def related_concept_ids(self) -> list[str]:
         """Returns a list of IDs representing concepts which are related to the current concept."""
         raise NotImplementedError
