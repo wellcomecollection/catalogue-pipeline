@@ -2,10 +2,11 @@ import concurrent.futures
 import csv
 from collections.abc import Generator
 from itertools import islice
-from typing import Any, Literal
+from typing import Any, Literal, TextIO
 
 import boto3
 import smart_open
+import os
 
 from clients.base_neptune_client import BaseNeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
@@ -17,7 +18,9 @@ from utils.aws import publish_batch_to_sns
 from utils.streaming import generator_to_chunks
 
 EntityType = Literal["nodes", "edges"]
-StreamDestination = Literal["graph", "s3", "sns", "void"]
+StreamDestination = Literal["graph", "s3", "sns", "local", "void"]
+
+CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
 
 
 class BaseTransformer:
@@ -92,26 +95,38 @@ class BaseTransformer:
 
         yield from entities
 
+    def _stream_to_bulk_load_file(
+        self, file: TextIO, entity_type: EntityType, sample_size: int | None = None
+    ) -> None:
+        """Streams entities to a file in the openCypher format for Neptune bulk load."""
+        csv_writer = None
+        converter = CypherBulkLoadConverter(entity_type)
+
+        for chunk in self._stream_chunks(entity_type, sample_size):
+            bulk_dicts = []
+            for entity in chunk:
+                bulk_dict = converter.convert_to_bulk_cypher(entity)
+                bulk_dicts.append(bulk_dict)
+
+            if csv_writer is None:
+                csv_writer = csv.DictWriter(file, fieldnames=bulk_dicts[0].keys())
+                csv_writer.writeheader()
+
+            csv_writer.writerows(bulk_dicts)
+
     def _stream_chunks(
-        self,
-        entity_type: EntityType,
-        chunk_size: int,
-        sample_size: int | None = None,
+        self, entity_type: EntityType, sample_size: int | None = None
     ) -> Generator[list[BaseNode | BaseEdge]]:
         """
         Extracts the specified entity type (nodes or edges) from its source, transforms each entity,
         and returns the results stream in fixed-size chunks.
         """
         entities = self._stream_entities(entity_type, sample_size)
-        for chunk in generator_to_chunks(entities, chunk_size):
+        for chunk in generator_to_chunks(entities, CHUNK_SIZE):
             yield chunk
 
     def stream_to_s3(
-        self,
-        s3_uri: str,
-        entity_type: EntityType,
-        chunk_size: int,
-        sample_size: int | None = None,
+        self, s3_uri: str, entity_type: EntityType, sample_size: int | None = None
     ) -> None:
         """
         Streams transformed entities (nodes or edges) into an S3 bucket for bulk loading into the Neptune cluster.
@@ -119,33 +134,19 @@ class BaseTransformer:
         """
         transport_params = {"client": boto3.client("s3")}
         with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
-            csv_writer = None
-
-            converter = CypherBulkLoadConverter(entity_type)
-            for chunk in self._stream_chunks(entity_type, chunk_size, sample_size):
-                bulk_dicts = []
-                for entity in chunk:
-                    bulk_dict = converter.convert_to_bulk_cypher(entity)
-                    bulk_dicts.append(bulk_dict)
-
-                if csv_writer is None:
-                    csv_writer = csv.DictWriter(f, fieldnames=bulk_dicts[0].keys())
-                    csv_writer.writeheader()
-
-                csv_writer.writerows(bulk_dicts)
+            self._stream_to_bulk_load_file(f, entity_type, sample_size)
 
     def stream_to_graph(
         self,
         neptune_client: BaseNeptuneClient,
         entity_type: EntityType,
-        query_chunk_size: int,
         sample_size: int | None = None,
     ) -> None:
         """
         Streams transformed entities (nodes or edges) directly into Neptune using multiple threads for parallel
         processing. Suitable for local testing. Not recommended for indexing large numbers of entities.
         """
-        chunks = self._stream_chunks(entity_type, query_chunk_size, sample_size)
+        chunks = self._stream_chunks(entity_type, sample_size)
 
         def run_query(chunk: list[BaseNode | BaseEdge]) -> None:
             query = construct_upsert_cypher_query(chunk, entity_type)
@@ -172,11 +173,7 @@ class BaseTransformer:
                     futures.add(executor.submit(run_query, chunk))
 
     def stream_to_sns(
-        self,
-        topic_arn: str,
-        entity_type: EntityType,
-        query_chunk_size: int,
-        sample_size: int | None = None,
+        self, topic_arn: str, entity_type: EntityType, sample_size: int | None = None
     ) -> None:
         """
         Streams transformed entities (nodes or edges) into an SNS topic as openCypher queries, where they will be
@@ -185,7 +182,7 @@ class BaseTransformer:
         queries = []
         counter = 0
 
-        for chunk in self._stream_chunks(entity_type, query_chunk_size, sample_size):
+        for chunk in self._stream_chunks(entity_type, sample_size):
             queries.append(construct_upsert_cypher_query(chunk, entity_type))
 
             # SNS supports a maximum batch size of 10
@@ -202,13 +199,22 @@ class BaseTransformer:
             publish_batch_to_sns(topic_arn, queries)
 
     def stream(
-        self,
-        entity_type: EntityType,
-        query_chunk_size: int,
-        sample_size: int | None = None,
-    ) -> Generator[Any, Any, Any]:
+        self, entity_type: EntityType, sample_size: int | None = None
+    ) -> Generator:
         """
         Streams transformed entities (nodes or edges) as a generator. Useful for development and testing purposes.
         """
-        for chunk in self._stream_chunks(entity_type, query_chunk_size, sample_size):
+        for chunk in self._stream_chunks(entity_type, sample_size):
             yield chunk
+
+    def stream_to_local_file(
+        self, file_name: str, entity_type: EntityType, sample_size: int | None = None
+    ) -> None:
+        """
+        Streams transformed entities (nodes or edges) into the local `transformer_outputs` folder.
+        Useful for development and testing purposes.
+        """
+        file_path = f"../transformer_outputs/{file_name}"
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as f:
+            self._stream_to_bulk_load_file(f, entity_type, sample_size)
