@@ -10,9 +10,9 @@ from .raw_concept import RawWikidataLocation
 
 
 class WikidataLocationsTransformer(WikidataConceptsTransformer):
-    def __init__(self, entity_type: EntityType, ontology_type: OntologyType):
+    def __init__(self, entity_type: EntityType, linked_ontology: OntologyType):
         self.source = WikidataLinkedOntologySource(
-            "locations", ontology_type, entity_type
+            "locations", linked_ontology, entity_type
         )
 
     def transform_node(self, raw_node: dict) -> SourceLocation | None:

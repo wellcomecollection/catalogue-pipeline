@@ -20,7 +20,7 @@ def test_wikidata_concepts_nodes_transformer() -> None:
         entity_type="nodes", linked_ontology="loc"
     )
 
-    nodes = list(transformer.stream(entity_type="nodes", query_chunk_size=100))[0]
+    nodes = list(transformer._stream_entities(entity_type="nodes"))
 
     assert len(list(nodes)) == 4
 
@@ -42,8 +42,7 @@ def test_wikidata_concepts_edges_transformer() -> None:
         entity_type="edges", linked_ontology="loc"
     )
 
-    edges = list(transformer.stream(entity_type="edges", query_chunk_size=100))[0]
-    print(edges)
+    edges = list(transformer._stream_entities(entity_type="edges"))
     assert len(list(edges)) == 7
 
     assert edges[0] == SourceConceptSameAs(
@@ -57,15 +56,17 @@ def test_wikidata_concepts_edges_transformer() -> None:
     )
 
 
-def test_wikidata_raw_location():
+def test_wikidata_raw_location() -> None:
     raw_location_input = json.loads(load_fixture("wikidata/raw_location.json"))
     raw_location = RawWikidataLocation(raw_location_input)
 
+    assert raw_location.latitude is not None
+    assert raw_location.longitude is not None
     assert math.isclose(raw_location.latitude, 41.346111111)
     assert math.isclose(raw_location.longitude, -85.469166666)
 
 
-def test_wikidata_raw_name():
+def test_wikidata_raw_name() -> None:
     raw_name_input = json.loads(load_fixture("wikidata/raw_name.json"))
     raw_name = RawWikidataName(raw_name_input)
 

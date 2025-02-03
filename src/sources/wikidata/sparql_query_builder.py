@@ -72,9 +72,7 @@ class SparqlQueryBuilder:
     @staticmethod
     def _get_label_mappings(node_type: NodeType) -> str:
         """
-        
-        :param node_type: 
-        :return: 
+        Returns SPARQL label mappings using the `wikibase:label` service.
         """
         extra_mappings = []
         if node_type == "names":

@@ -88,7 +88,7 @@ def test_wikidata_concepts_source_nodes() -> None:
         assert "itemDescription" in raw_node
 
 
-def test_wikidata_linked_ontology_id_checker():
+def test_wikidata_linked_ontology_id_checker() -> None:
     _add_mock_loc_transformer_outputs()
     id_checker = LinkedOntologyIdTypeChecker("locations", "loc")
 
