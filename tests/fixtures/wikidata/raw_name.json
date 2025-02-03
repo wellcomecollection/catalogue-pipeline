@@ -1,0 +1,16 @@
+{
+  "item": {
+    "type": "uri",
+    "value": "http://www.wikidata.org/entity/Q12720393"
+  },
+  "itemLabel": {
+    "xml:lang": "en",
+    "type": "literal",
+    "value": "Alexandru Surdu"
+  },
+  "itemDescription": {
+    "xml:lang": "en",
+    "type": "literal",
+    "value": "Romanian philosopher (1938-2020)"
+  }
+}

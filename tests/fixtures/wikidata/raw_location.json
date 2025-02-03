@@ -1,0 +1,21 @@
+{
+  "item": {
+    "type": "uri",
+    "value": "http://www.wikidata.org/entity/Q33299614"
+  },
+  "itemLabel": {
+    "xml:lang": "en",
+    "type": "literal",
+    "value": "Pleasant Lake"
+  },
+  "itemDescription": {
+    "xml:lang": "en",
+    "type": "literal",
+    "value": "lake in Noble County, Indiana, United States"
+  },
+  "coordinates": {
+    "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+    "type": "literal",
+    "value": "Point(-85.469166666 41.346111111)"
+  }
+}

@@ -6,13 +6,15 @@ from test_wikidata_concepts_source import (
 from models.graph_edge import SourceConceptSameAs
 from models.graph_node import SourceConcept
 from transformers.wikidata.concepts_transformer import WikidataConceptsTransformer
+from transformers.wikidata.raw_concept import RawWikidataLocation. RawWikidataName
+from test_utils import load_fixture
+import json
+import math
 
 
 def test_wikidata_concepts_nodes_transformer() -> None:
     _add_mock_loc_transformer_outputs()
-    _add_mock_wikidata_requests(
-        ["all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of", "items"]
-    )
+    _add_mock_wikidata_requests("nodes")
 
     transformer = WikidataConceptsTransformer(
         entity_type="nodes", linked_ontology="loc"
@@ -34,9 +36,7 @@ def test_wikidata_concepts_nodes_transformer() -> None:
 
 def test_wikidata_concepts_edges_transformer() -> None:
     _add_mock_loc_transformer_outputs()
-    _add_mock_wikidata_requests(
-        ["all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of"]
-    )
+    _add_mock_wikidata_requests("edges")
 
     transformer = WikidataConceptsTransformer(
         entity_type="edges", linked_ontology="loc"
@@ -55,3 +55,15 @@ def test_wikidata_concepts_edges_transformer() -> None:
         directed=False,
         attributes={"source": "wikidata"},
     )
+
+
+def test_wikidata_raw_location():
+    raw_location_input = json.loads(load_fixture("wikidata/raw_location.json"))
+    raw_location = RawWikidataLocation(raw_location_input)
+
+    assert math.isclose(raw_location.latitude, 41.346111111)
+    assert math.isclose(raw_location.longitude, -85.469166666)
+
+def test_wikidata_raw_name():
+    raw_name_input = json.loads(load_fixture("wikidata/raw_name.json"))
+    raw_name = RawWikidataName(raw_name_input)    

@@ -12,6 +12,12 @@
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q2"
         }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        }
       }
     ]
   }
