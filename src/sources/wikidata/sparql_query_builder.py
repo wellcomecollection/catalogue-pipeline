@@ -24,7 +24,7 @@ class SparqlQueryBuilder:
         fields = ["?item", "?itemLabel", "?itemDescription", "?itemAltLabel"]
 
         if node_type == "names":
-            fields += ["?dateOfBirthLabel", "?dateOfDeathLabel", "?placeOfBirthLabel"]
+            fields += ["?dateOfBirth", "?dateOfDeath", "?placeOfBirthLabel"]
         elif node_type == "locations":
             fields += ["?coordinates"]
 
@@ -70,6 +70,31 @@ class SparqlQueryBuilder:
         return "\n".join(definitions)
 
     @staticmethod
+    def _get_label_mappings(node_type: NodeType) -> str:
+        """
+        
+        :param node_type: 
+        :return: 
+        """
+        extra_mappings = []
+        if node_type == "names":
+            extra_mappings.append("?placeOfBirth rdfs:label ?placeOfBirthLabel.")
+
+        label_mappings = f"""
+        OPTIONAL {{
+            SERVICE wikibase:label {{
+                bd:serviceParam wikibase:language "en".
+                ?item rdfs:label ?itemLabel.
+                ?item schema:description ?itemDescription.
+                ?item skos:altLabel ?itemAltLabel.
+                {'\n'.join(extra_mappings)}
+            }}                 
+        }}
+        """            
+
+        return label_mappings
+
+    @staticmethod
     def get_all_ids_query(linked_ontology: OntologyType) -> str:
         """
         Return a query to retrieve the ids of _all_ Wikidata items referencing an id from the `linked_ontology`.
@@ -100,16 +125,9 @@ class SparqlQueryBuilder:
         query = f"""
             SELECT DISTINCT {cls._get_formatted_fields(node_type)}
             WHERE {{
-              VALUES ?item {{ {ids_clause} }}
-              
-              {cls._get_formatted_field_mappings(node_type)}
-              
-              SERVICE wikibase:label {{
-                bd:serviceParam wikibase:language "en".
-                ?item rdfs:label ?itemLabel.
-                ?item schema:description ?itemDescription.
-                ?item skos:altLabel ?itemAltLabel.
-              }}         
+                VALUES ?item {{ {ids_clause} }}
+                {cls._get_formatted_field_mappings(node_type)}
+                {cls._get_label_mappings(node_type)}
             }}
             GROUP BY ?item
         """

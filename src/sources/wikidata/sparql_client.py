@@ -4,6 +4,7 @@ import typing
 
 import backoff
 import requests
+import os
 
 from config import WIKIDATA_SPARQL_URL
 
@@ -11,8 +12,8 @@ from config import WIKIDATA_SPARQL_URL
 # See: https://www.mediawiki.org/wiki/Wikidata_Query_Service/User_Manual#Query_limits
 # However, experimentally, running more than 4 queries in parallel consistently results in '429 Too Many Requests' errors.
 SPARQL_MAX_PARALLEL_QUERIES = 4
-SPARQL_BACKOFF_DEFAULT_RETRIES = 3
-SPARQL_BACKOFF_DEFAULT_INTERVAL = 10
+SPARQL_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
+SPARQL_REQUESTS_BACKOFF_INTERVAL = 10
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -45,8 +46,8 @@ class WikidataSparqlClient:
     @backoff.on_exception(
         backoff.constant,
         Exception,
-        max_tries=SPARQL_BACKOFF_DEFAULT_RETRIES,
-        interval=SPARQL_BACKOFF_DEFAULT_INTERVAL,
+        max_tries=SPARQL_REQUESTS_BACKOFF_RETRIES,
+        interval=SPARQL_REQUESTS_BACKOFF_INTERVAL,
         on_backoff=on_request_backoff,
     )
     def run_query(self, query: str) -> list[dict]:

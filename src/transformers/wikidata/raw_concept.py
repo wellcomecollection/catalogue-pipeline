@@ -111,11 +111,11 @@ class RawWikidataName(RawWikidataConcept):
 
     @property
     def date_of_birth(self) -> str | None:
-        return self._extract_date("dateOfBirthLabel")
+        return self._extract_date("dateOfBirth")
 
     @property
     def date_of_death(self) -> str | None:
-        return self._extract_date("dateOfDeathLabel")
+        return self._extract_date("dateOfDeath")
 
     @property
     def place_of_birth(self) -> str | None:

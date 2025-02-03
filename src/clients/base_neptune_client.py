@@ -7,9 +7,10 @@ import boto3
 import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
+import os
 
-NEPTUNE_BACKOFF_DEFAULT_RETRIES = 3
-NEPTUNE_BACKOFF_DEFAULT_INTERVAL = 10
+NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
+NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -35,8 +36,8 @@ class BaseNeptuneClient:
     @backoff.on_exception(
         backoff.constant,
         Exception,
-        max_tries=NEPTUNE_BACKOFF_DEFAULT_RETRIES,
-        interval=NEPTUNE_BACKOFF_DEFAULT_INTERVAL,
+        max_tries=NEPTUNE_REQUESTS_BACKOFF_RETRIES,
+        interval=NEPTUNE_REQUESTS_BACKOFF_INTERVAL,
         on_backoff=on_request_backoff,
     )
     def _make_request(

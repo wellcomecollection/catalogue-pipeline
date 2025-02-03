@@ -1,16 +1,36 @@
 {
   "item": {
     "type": "uri",
-    "value": "http://www.wikidata.org/entity/Q12720393"
+    "value": "http://www.wikidata.org/entity/Q15429764"
   },
   "itemLabel": {
     "xml:lang": "en",
     "type": "literal",
-    "value": "Alexandru Surdu"
+    "value": "Walter McCaffrey"
   },
   "itemDescription": {
     "xml:lang": "en",
     "type": "literal",
-    "value": "Romanian philosopher (1938-2020)"
+    "value": "American politician"
+  },
+  "dateOfBirth": {
+    "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+    "type": "literal",
+    "value": "1949-01-28T00:00:00Z"
+  },
+  "dateOfDeath": {
+    "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+    "type": "literal",
+    "value": "2013-07-10T00:00:00Z"
+  },
+  "placeOfBirthLabel": {
+    "xml:lang": "en",
+    "type": "literal",
+    "value": "Queens"
+  },
+  "itemAltLabel": {
+    "xml:lang": "en",
+    "type": "literal",
+    "value": "Walter Lawrence McCaffrey"
   }
 }

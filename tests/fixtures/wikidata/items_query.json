@@ -1,4 +1,4 @@
 {
   "format": "json",
-  "query": "SELECT DISTINCT ?item (SAMPLE(?itemLabel) as ?itemLabel) (SAMPLE(?itemDescription) as ?itemDescription) (SAMPLE(?itemAltLabel) as ?itemAltLabel) WHERE { VALUES ?item { wd:Q1 wd:Q2 wd:Q3 wd:Q4 } SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". ?item rdfs:label ?itemLabel. ?item schema:description ?itemDescription. ?item skos:altLabel ?itemAltLabel. } } GROUP BY ?item"
+  "query": "SELECT DISTINCT ?item (SAMPLE(?itemLabel) as ?itemLabel) (SAMPLE(?itemDescription) as ?itemDescription) (SAMPLE(?itemAltLabel) as ?itemAltLabel) WHERE { VALUES ?item { wd:Q1 wd:Q2 wd:Q3 wd:Q4 } OPTIONAL { SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". ?item rdfs:label ?itemLabel. ?item schema:description ?itemDescription. ?item skos:altLabel ?itemAltLabel. } } } GROUP BY ?item"
 }

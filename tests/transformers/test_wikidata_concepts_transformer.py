@@ -6,7 +6,7 @@ from test_wikidata_concepts_source import (
 from models.graph_edge import SourceConceptSameAs
 from models.graph_node import SourceConcept
 from transformers.wikidata.concepts_transformer import WikidataConceptsTransformer
-from transformers.wikidata.raw_concept import RawWikidataLocation. RawWikidataName
+from transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataName
 from test_utils import load_fixture
 import json
 import math
@@ -64,6 +64,13 @@ def test_wikidata_raw_location():
     assert math.isclose(raw_location.latitude, 41.346111111)
     assert math.isclose(raw_location.longitude, -85.469166666)
 
+
 def test_wikidata_raw_name():
     raw_name_input = json.loads(load_fixture("wikidata/raw_name.json"))
-    raw_name = RawWikidataName(raw_name_input)    
+    raw_name = RawWikidataName(raw_name_input)
+
+    assert raw_name.date_of_birth == "1949-01-28T00:00:00Z"
+    assert raw_name.date_of_death == "2013-07-10T00:00:00Z"
+    assert raw_name.place_of_birth == "Queens"
+    assert raw_name.label == "Walter McCaffrey"
+    assert raw_name.description == "American politician"
