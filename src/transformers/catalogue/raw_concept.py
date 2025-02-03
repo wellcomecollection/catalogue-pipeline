@@ -53,12 +53,8 @@ class RawCatalogueConcept:
     @property
     def type(self) -> ConceptType:
         """Returns the concept type (one of "Person", "Concept", "Genre", etc.)."""
-        concept_type = self.raw_concept.get("type")
-
-        if concept_type in get_args(ConceptType):
-            return cast(ConceptType, concept_type)
-
-        raise ValueError("Concept type not recognised.")
+        concept_type: ConceptType = self.raw_concept["type"]
+        return concept_type
 
     def _get_identifier(self) -> dict:
         """Returns metadata about the source identifier."""
@@ -73,11 +69,7 @@ class RawCatalogueConcept:
     @property
     def source(self) -> ConceptSource:
         """Returns the concept source (one of "lc-names", "label-derived", etc.)."""
-
         identifier = self._get_identifier()
 
-        source = identifier["identifierType"]["id"]
-        if source in get_args(ConceptSource):
-            return cast(ConceptSource, source)
-
-        raise ValueError("Concept source not recognised.")
+        source: ConceptSource = identifier["identifierType"]["id"]
+        return source
