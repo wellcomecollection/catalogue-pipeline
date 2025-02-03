@@ -12,7 +12,7 @@ WikidataQueryType = Literal[
 ]
 
 
-def add_mock_wikidata_requests(query_types: list[WikidataQueryType]) -> None:
+def _add_mock_wikidata_requests(query_types: list[WikidataQueryType]) -> None:
     for query_type in query_types:
         params = json.loads(load_fixture(f"wikidata/{query_type}_query.json"))
         response = json.loads(load_fixture(f"wikidata/{query_type}_response.json"))
@@ -21,7 +21,7 @@ def add_mock_wikidata_requests(query_types: list[WikidataQueryType]) -> None:
         )
 
 
-def add_mock_loc_transformer_outputs() -> None:
+def _add_mock_loc_transformer_outputs() -> None:
     for node_type in ["concepts", "locations", "names"]:
         MockSmartOpen.mock_s3_file(
             f"s3://bulk_load_test_bucket/loc_{node_type}__nodes.csv",
@@ -30,8 +30,8 @@ def add_mock_loc_transformer_outputs() -> None:
 
 
 def test_wikidata_concepts_source_edges() -> None:
-    add_mock_loc_transformer_outputs()
-    add_mock_wikidata_requests(
+    _add_mock_loc_transformer_outputs()
+    _add_mock_wikidata_requests(
         ["all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of"]
     )
 
@@ -63,8 +63,8 @@ def test_wikidata_concepts_source_edges() -> None:
 
 
 def test_wikidata_concepts_source_nodes() -> None:
-    add_mock_loc_transformer_outputs()
-    add_mock_wikidata_requests(
+    _add_mock_loc_transformer_outputs()
+    _add_mock_wikidata_requests(
         ["all_ids", "linked_ids", "parents_instance_of", "parents_subclass_of", "items"]
     )
 
