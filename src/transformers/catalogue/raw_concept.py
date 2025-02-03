@@ -1,4 +1,5 @@
-from typing import cast, get_args
+import re
+from typing import get_args
 
 from models.graph_node import ConceptSource, ConceptType
 
@@ -56,20 +57,40 @@ class RawCatalogueConcept:
         concept_type: ConceptType = self.raw_concept["type"]
         return concept_type
 
-    def _get_identifier(self) -> dict:
+    @property
+    def raw_identifier(self) -> dict | None:
         """Returns metadata about the source identifier."""
-        raw_identifier = self.raw_concept.get("identifiers", [])
+        identifier_metadata = self.raw_concept.get("identifiers", [])
         # There should be exactly one source identifier for each concept
-        assert len(raw_identifier) == 1
-        identifier = raw_identifier[0]
+        assert len(identifier_metadata) == 1
+        raw_identifier = identifier_metadata[0]
 
-        assert isinstance(identifier, dict)
-        return identifier
+        assert isinstance(raw_identifier, dict)
+        return raw_identifier
 
     @property
     def source(self) -> ConceptSource:
         """Returns the concept source (one of "lc-names", "label-derived", etc.)."""
-        identifier = self._get_identifier()
-
-        source: ConceptSource = identifier["identifierType"]["id"]
+        source: ConceptSource = self.raw_identifier["identifierType"]["id"]
         return source
+    
+    @property
+    def mesh_qualifier(self) -> str | None:
+        """Returns MeSH qualifier ID, if present."""
+        if self.source == "nlm-mesh":
+            qualifier = re.search(r'Q\d+', self.raw_identifier.get("value", ""))
+            if qualifier is not None:
+                return qualifier.group()
+
+        return None
+
+    @property
+    def source_concept_id(self) -> str | None:
+        """Returns ID of source concept, if present."""
+        source_id = self.raw_identifier.get("value")
+        if isinstance(source_id, str):
+            if isinstance(self.mesh_qualifier, str):
+                source_id = source_id.replace(self.mesh_qualifier, "")
+            return source_id
+
+        return None
