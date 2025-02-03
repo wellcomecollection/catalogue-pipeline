@@ -11,7 +11,7 @@ class RawCatalogueConcept:
     def _extract_concept_node(raw_concept: dict) -> dict:
         """
         Extracts raw concepts data from one of two formats:
-        Either as a dicitonary inside a list under "concepts", or as a dictionary under "agent".
+        Either as a dictionary inside a list under "concepts", or as a dictionary under "agent".
         """
         if len(raw_concept.get("concepts", [])) > 0:
             raw_concept_node = raw_concept["concepts"][0]
