@@ -86,6 +86,27 @@ class RawLibraryOfCongressMADSConcept(RawLibraryOfCongressConcept):
             ]
         )
 
+    @property
+    def alternative_labels(self) -> list[str]:
+        """Returns a list of alternative labels for the concept."""
+        assert self._raw_concept_node is not None
+
+        raw_alternative_identifiers = [
+            entry["@id"]
+            for entry in self._raw_concept_node.get("madsrdf:hasVariant", [])
+        ]
+        if raw_alternative_identifiers:
+            identifier_lookup = {
+                n["@id"]: n["madsrdf:variantLabel"]["@value"]
+                for n in self.raw_concept.get("@graph", [])
+                if "madsrdf:Variant" in n["@type"]
+            }
+            return [
+                identifier_lookup[identifier]
+                for identifier in raw_alternative_identifiers
+            ]
+        return []
+
 
 def _filter_irrelevant_ids(ids: list[str]) -> list[str]:
     return [concept_id for concept_id in ids if not concept_id.startswith("_:n")]

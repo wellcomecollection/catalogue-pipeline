@@ -37,6 +37,10 @@ class RawLibraryOfCongressConcept:
         raise ValueError("Unknown concept type.")
 
     @property
+    def alternative_labels(self) -> list[str]:
+        raise NotImplementedError
+
+    @property
     def label(self) -> str:
         raise NotImplementedError
 

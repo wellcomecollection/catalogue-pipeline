@@ -222,3 +222,14 @@ class TestNarrower:
             "sh85098685",
             "sh99001366",
         }
+
+
+def test_alternative_labels() -> None:
+    concept = RawLibraryOfCongressMADSConcept(
+        json.loads(load_fixture("mads_related_concept.json"))
+    )
+    assert set(concept.alternative_labels) == {
+        "Loop blocking (Computer science)",
+        "Blocking, Loop (Computer science)",
+        "Tiling, Loop (Computer science)",
+    }

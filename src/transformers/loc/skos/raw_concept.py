@@ -72,6 +72,10 @@ class RawLibraryOfCongressSKOSConcept(RawLibraryOfCongressConcept):
         return self.linked_concepts_ids(sko_link_type)
 
     @property
+    def narrower_concept_ids(self) -> list[str]:
+        return []
+
+    @property
     def related_concept_ids(self) -> list[str]:
         """Returns a list of IDs representing concepts which are related to the current concept."""
         sko_link_type = "related"

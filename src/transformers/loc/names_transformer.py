@@ -25,6 +25,9 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[SourceConceptRelatedTo]:
+        # Although there are some broader and narrower relationships specified
+        # in the MADS instance of the names export, there are not many that are likely
+        # to be relevant, so the names transformer uses the lighter-weight SKOS export.
         raw_concept = RawLibraryOfCongressSKOSConcept(raw_node)
 
         if raw_concept.exclude() or not raw_concept.is_geographic:

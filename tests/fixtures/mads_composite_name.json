@@ -1,0 +1,202 @@
+{
+  "@context": "http://v3/authorities/names/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/names/nr99036560",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:NameTitle"
+      ],
+      "identifiers:lccn": "nr 99036560",
+      "madsrdf:adminMetadata": [
+        {
+          "@id": "_:n5a7585822cbc434d8cb684ef6244012ab1"
+        },
+        {
+          "@id": "_:n5a7585822cbc434d8cb684ef6244012ab2"
+        }
+      ],
+      "madsrdf:authoritativeLabel": "Plutarch. Bioi Themistokleous kai Kamillou",
+      "madsrdf:componentList": {
+        "@list": [
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab3"
+          },
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab6"
+          }
+        ]
+      },
+      "madsrdf:hasExactExternalAuthority": {
+        "@id": "http://viaf.org/viaf/sourceID/LC%7Cnr+99036560#skos:Concept"
+      },
+      "madsrdf:hasNarrowerAuthority": {
+        "@id": "http://id.loc.gov/authorities/names/nr99036558"
+      },
+      "madsrdf:hasSource": [
+        {
+          "@id": "_:n5a7585822cbc434d8cb684ef6244012ab11"
+        },
+        {
+          "@id": "_:n5a7585822cbc434d8cb684ef6244012ab12"
+        }
+      ],
+      "madsrdf:isMemberOfMADSCollection": [
+        {
+          "@id": "http://id.loc.gov/authorities/names/collection_FRBRWork"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/names/collection_LCNAF"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/names/collection_NamesAuthorizedHeadings"
+        }
+      ],
+      "madsrdf:isMemberOfMADSScheme": {
+        "@id": "http://id.loc.gov/authorities/names"
+      }
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab1",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "1999-11-18T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/upb"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab2",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "1999-12-03T01:36:43"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/upb"
+      },
+      "ri:recordStatus": "revised"
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab3",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:PersonalName"
+      ],
+      "madsrdf:authoritativeLabel": "Plutarch.",
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab4"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab4",
+      "@type": "madsrdf:FullNameElement",
+      "madsrdf:elementValue": "Plutarch."
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab6",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Title"
+      ],
+      "madsrdf:authoritativeLabel": "Bioi Themistokleous kai Kamillou",
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab7"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab7",
+      "@type": "madsrdf:TitleElement",
+      "madsrdf:elementValue": "Bioi Themistokleous kai Kamillou"
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab11",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": "(hdg. for Italian & Greek ed.: Plutarch. Bioi Themistokleous kai Kamillou. Italian & Greek)",
+      "madsrdf:citationSource": "LC in NAF, Nov. 18, 1999",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab12",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationSource": "Life of Themistocles, 1998",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/names/nr99036558",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:NameTitle"
+      ],
+      "madsrdf:authoritativeLabel": "Plutarch. Themistocles",
+      "madsrdf:componentList": {
+        "@list": [
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab13"
+          },
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab16"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab13",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:PersonalName"
+      ],
+      "madsrdf:authoritativeLabel": "Plutarch.",
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab14"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab14",
+      "@type": "madsrdf:FullNameElement",
+      "madsrdf:elementValue": "Plutarch."
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab16",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Title"
+      ],
+      "madsrdf:authoritativeLabel": "Themistocles",
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5a7585822cbc434d8cb684ef6244012ab17"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n5a7585822cbc434d8cb684ef6244012ab17",
+      "@type": "madsrdf:TitleElement",
+      "madsrdf:elementValue": "Themistocles"
+    }
+  ],
+  "@id": "/authorities/names/nr99036560"
+}
