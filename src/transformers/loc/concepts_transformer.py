@@ -4,7 +4,7 @@ from models.graph_edge import SourceConceptNarrowerThan, SourceConceptRelatedTo
 from models.graph_node import SourceConcept
 from sources.gzip_source import GZipSource
 from transformers.base_transformer import BaseTransformer
-from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
+from transformers.loc.raw_concept import RawLibraryOfCongressMADSConcept
 
 
 class LibraryOfCongressConceptsTransformer(BaseTransformer):

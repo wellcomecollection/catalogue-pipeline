@@ -2,7 +2,7 @@ import json
 
 from test_utils import load_fixture
 
-from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
+from transformers.loc.raw_concept import RawLibraryOfCongressMADSConcept
 
 
 def test_label() -> None:

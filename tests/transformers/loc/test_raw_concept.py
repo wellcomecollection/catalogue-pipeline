@@ -2,9 +2,7 @@ from typing import Type
 
 import pytest
 
-from transformers.loc.common import RawLibraryOfCongressConcept, remove_id_prefix
-from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
-from transformers.loc.skos.raw_concept import RawLibraryOfCongressSKOSConcept
+from transformers.loc.raw_concept import RawLibraryOfCongressConcept, RawLibraryOfCongressMADSConcept, RawLibraryOfCongressSKOSConcept
 
 
 @pytest.mark.parametrize(

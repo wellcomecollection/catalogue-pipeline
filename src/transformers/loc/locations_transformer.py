@@ -4,7 +4,7 @@ from models.graph_edge import SourceConceptNarrowerThan, SourceConceptRelatedTo
 from models.graph_node import SourceLocation
 from sources.gzip_source import MultiGZipSource
 from transformers.base_transformer import BaseTransformer
-from transformers.loc.mads.raw_concept import RawLibraryOfCongressMADSConcept
+from transformers.loc.raw_concept import raw_loc_concept
 
 
 class LibraryOfCongressLocationsTransformer(BaseTransformer):
@@ -12,7 +12,7 @@ class LibraryOfCongressLocationsTransformer(BaseTransformer):
         self.source = MultiGZipSource([subject_headings_url, names_url])
 
     def transform_node(self, raw_node: dict) -> SourceLocation | None:
-        raw_concept = RawLibraryOfCongressMADSConcept(raw_node)
+        raw_concept = raw_loc_concept(raw_node)
 
         if raw_concept.exclude() or not raw_concept.is_geographic:
             return None
@@ -27,7 +27,7 @@ class LibraryOfCongressLocationsTransformer(BaseTransformer):
     def extract_edges(
         self, raw_node: dict
     ) -> Generator[SourceConceptNarrowerThan | SourceConceptRelatedTo]:
-        raw_concept = RawLibraryOfCongressMADSConcept(raw_node)
+        raw_concept = raw_loc_concept(raw_node)
 
         if raw_concept.exclude() or not raw_concept.is_geographic:
             return

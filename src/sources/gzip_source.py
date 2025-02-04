@@ -1,6 +1,7 @@
 import gzip
 import json
 from collections.abc import Generator
+from json import JSONDecodeError
 
 import requests
 
@@ -16,7 +17,10 @@ class GZipSource(BaseSource):
 
         with gzip.GzipFile(fileobj=response.raw) as file:
             for line_bytes in file:
-                yield json.loads(line_bytes.decode("utf8"))
+                try:
+                    yield json.loads(line_bytes.decode("utf8"))
+                except JSONDecodeError as e:
+                    print(e)
 
 
 class MultiGZipSource(BaseSource):
