@@ -7,7 +7,6 @@ from typing import Any, Literal, TextIO
 
 import boto3
 import smart_open
-import os
 
 from clients.base_neptune_client import BaseNeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
