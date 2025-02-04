@@ -58,7 +58,7 @@ class RawCatalogueConcept:
         return concept_type
 
     @property
-    def raw_identifier(self) -> dict | None:
+    def raw_identifier(self) -> dict:
         """Returns metadata about the source identifier."""
         identifier_metadata = self.raw_concept.get("identifiers", [])
         # There should be exactly one source identifier for each concept
