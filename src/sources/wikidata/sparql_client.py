@@ -1,10 +1,10 @@
+import os
 import threading
 import time
 import typing
 
 import backoff
 import requests
-import os
 
 from config import WIKIDATA_SPARQL_URL
 

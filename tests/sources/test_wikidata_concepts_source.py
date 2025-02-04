@@ -2,11 +2,11 @@ import json
 from typing import Literal
 
 from test_mocks import MockRequest, MockSmartOpen
-from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from sources.wikidata.linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
 from test_utils import load_fixture
 
 from config import WIKIDATA_SPARQL_URL
+from sources.wikidata.linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
+from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 
 
 def _add_mock_wikidata_requests(node_type: Literal["edges", "nodes"]) -> None:
