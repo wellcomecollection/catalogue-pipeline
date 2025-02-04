@@ -54,15 +54,9 @@ class RawLibraryOfCongressConcept:
 
     def exclude(self) -> bool:
         """Returns True if the concept should be excluded from the graph."""
-        if self._raw_concept_node is None:
-            return True
-
         # Remove concepts whose IDs have the "-781" suffix. They are duplicates of concepts with non-suffixed IDs.
         # The suffix represents the fact that the concept in question is part of the LCSH - Geographic collection.
-        if self.source_id.endswith("-781"):
-            return True
-
-        return False
+        return self._raw_concept_node is None or self.source_id.endswith("-781")
 
     @property
     def source_id(self) -> str:

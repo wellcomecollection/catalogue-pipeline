@@ -116,13 +116,12 @@ class WikidataLinkedOntologySource(BaseSource):
     ) -> Generator:
         """Accept an `items` generator and a `run_sparql_query` method. Split `items` chunks and apply
         `run_sparql_query` to each chunk. Return a single generator of results."""
-        for raw_response_item in process_stream_in_parallel(
+        yield from process_stream_in_parallel(
             items,
             run_sparql_query,
             SPARQL_ITEMS_CHUNK_SIZE,
             SPARQL_MAX_PARALLEL_QUERIES,
-        ):
-            yield raw_response_item
+        )
 
     def _stream_filtered_wikidata_ids(self) -> Generator[str]:
         """Streams all wikidata ids to be processed as nodes given the selected `node_type`."""

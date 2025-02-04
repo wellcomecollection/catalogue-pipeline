@@ -122,8 +122,7 @@ class BaseTransformer:
         and returns the results stream in fixed-size chunks.
         """
         entities = self._stream_entities(entity_type, sample_size)
-        for chunk in generator_to_chunks(entities, CHUNK_SIZE):
-            yield chunk
+        yield from generator_to_chunks(entities, CHUNK_SIZE)
 
     def stream_to_s3(
         self, s3_uri: str, entity_type: EntityType, sample_size: int | None = None
@@ -180,9 +179,8 @@ class BaseTransformer:
         consumed by the `indexer` Lambda function.
         """
         queries = []
-        counter = 0
 
-        for chunk in self._stream_chunks(entity_type, sample_size):
+        for i, chunk in enumerate(self._stream_chunks(entity_type, sample_size)):
             queries.append(construct_upsert_cypher_query(chunk, entity_type))
 
             # SNS supports a maximum batch size of 10
@@ -190,9 +188,8 @@ class BaseTransformer:
                 publish_batch_to_sns(topic_arn, queries)
                 queries = []
 
-            counter += 1
-            if counter % 100 == 0:
-                print(f"Published {counter} messages to SNS.")
+            if (i + 1) % 100 == 0:
+                print(f"Published {i + 1} messages to SNS.")
 
         # Publish remaining messages (if any)
         if len(queries) > 0:
@@ -204,8 +201,7 @@ class BaseTransformer:
         """
         Streams transformed entities (nodes or edges) as a generator. Useful for development and testing purposes.
         """
-        for chunk in self._stream_chunks(entity_type, sample_size):
-            yield chunk
+        yield from self._stream_chunks(entity_type, sample_size)
 
     def stream_to_local_file(
         self, file_name: str, entity_type: EntityType, sample_size: int | None = None

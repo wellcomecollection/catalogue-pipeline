@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Literal
+from typing import Literal
 
 from sources.mesh.concepts_source import RawMeshNode
 from utils.xml import assert_get_text

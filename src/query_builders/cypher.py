@@ -33,7 +33,7 @@ def construct_upsert_edges_query(edges: list[BaseEdge]) -> str:
     relationship = edges[0].relationship
     attributes = edges[0].attributes or dict()
 
-    field_set = [f"n.{f} = data.{f}" for f in attributes.keys()]
+    field_set = [f"n.{f} = data.{f}" for f in attributes]
     field_set_statement = ", ".join(field_set)
 
     if len(field_set_statement) == 0:

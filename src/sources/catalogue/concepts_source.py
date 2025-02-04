@@ -15,5 +15,4 @@ class CatalogueConceptsSource(BaseSource):
         catalogue_source = GZipSource(self.url)
         for work in catalogue_source.stream_raw():
             for concept_key in CONCEPT_KEYS:
-                for raw_concept in work.get(concept_key, []):
-                    yield raw_concept
+                yield from work.get(concept_key, [])

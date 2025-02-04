@@ -1,5 +1,4 @@
 import argparse
-import os
 import typing
 
 from config import S3_BULK_LOAD_BUCKET_NAME

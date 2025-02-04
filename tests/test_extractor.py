@@ -1,4 +1,5 @@
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 import pytest
 from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
