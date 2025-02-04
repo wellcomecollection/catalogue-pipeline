@@ -88,7 +88,7 @@ class SparqlQueryBuilder:
                 {'\n'.join(extra_mappings)}
             }}                 
         }}
-        """            
+        """
 
         return label_mappings
 
