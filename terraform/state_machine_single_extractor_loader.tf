@@ -5,21 +5,24 @@ resource "aws_sfn_state_machine" "catalogue_graph_single_extract_load" {
   definition = jsonencode({
     Comment = "Extract nodes/edges from a single source and load them into the catalogue graph."
     StartAt = "Extract"
-    States  = {
+    States = {
       "Extract" = {
         Type     = "Task"
-        Resource = module.extractor_lambda.lambda.arn
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Next     = "Load"
-        "Parameters" : {
-          "stream_destination" : "s3",
-          "transformer_type.$" : "$$.Execution.Input.transformer_type",
-          "entity_type.$" : "$$.Execution.Input.entity_type",
-          "sample_size.$" : "$$.Execution.Input.sample_size"
+        Parameters = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
+          Input = {
+            "stream_destination": "s3",
+            "transformer_type.$": "$$.Execution.Input.transformer_type",
+            "entity_type.$": "$$.Execution.Input.entity_type",
+            "sample_size.$": "$$.Execution.Input.sample_size"
+          }
         }
       }
       "Load" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
           "Input.$" : "$$.Execution.Input",

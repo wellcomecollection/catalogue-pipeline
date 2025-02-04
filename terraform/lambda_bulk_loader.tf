@@ -6,8 +6,8 @@ module "bulk_loader_lambda" {
   runtime     = "python3.13"
   publish     = true
 
-  filename         = "../build.zip"
-  source_code_hash = filesha256("../build.zip")
+  filename         = "../target/build.zip"
+  source_code_hash = filesha256("../target/build.zip")
 
   handler     = "bulk_loader.lambda_handler"
   memory_size = 128

@@ -4,9 +4,9 @@ from functools import lru_cache
 import boto3
 import smart_open
 
-from .sparql_query_builder import NodeType, OntologyType
+from config import S3_BULK_LOAD_BUCKET_NAME
 
-S3_BULK_LOAD_BUCKET_NAME = os.environ["S3_BULK_LOAD_BUCKET_NAME"]
+from .sparql_query_builder import NodeType, OntologyType
 
 
 class LinkedOntologyIdTypeChecker:
@@ -32,7 +32,11 @@ class LinkedOntologyIdTypeChecker:
         linked_nodes_file_name = f"{self.linked_ontology}_{node_type}__nodes.csv"
         s3_url = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
-        print(f"Retrieving {linked_nodes_file_name} from S3.")
+        print(
+            f"Retrieving ids of type '{node_type}' from ontology '{self.linked_ontology}' from S3.",
+            end=" ",
+            flush=True,
+        )
 
         ids = set()
         transport_params = {"client": boto3.client("s3")}
@@ -44,9 +48,7 @@ class LinkedOntologyIdTypeChecker:
                     continue
                 ids.add(line.split(",")[0])
 
-        print(
-            f"Retrieved {len(ids)} ids of type '{node_type}' from ontology '{self.linked_ontology}'."
-        )
+        print(f"({len(ids)} ids retrieved.)")
 
         return ids
 
@@ -56,3 +58,14 @@ class LinkedOntologyIdTypeChecker:
         locations, or names).
         """
         return linked_id in self._get_linked_ontology_ids(self.node_type)
+
+    def id_is_valid(self, linked_id: str) -> bool:
+        """Returns 'True' if the given id from the selected linked ontology is valid."""
+        is_valid = False
+        is_valid |= linked_id in self._get_linked_ontology_ids("concepts")
+        is_valid |= linked_id in self._get_linked_ontology_ids("locations")
+
+        if self.linked_ontology == "loc":
+            is_valid |= linked_id in self._get_linked_ontology_ids("names")
+
+        return is_valid

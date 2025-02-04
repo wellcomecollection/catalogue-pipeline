@@ -6,8 +6,8 @@ module "indexer_lambda" {
   runtime     = "python3.13"
   publish     = true
 
-  filename         = "../build.zip"
-  source_code_hash = filesha256("../build.zip")
+  filename         = "../target/build.zip"
+  source_code_hash = filesha256("../target/build.zip")
 
   handler     = "indexer.lambda_handler"
   memory_size = 128
@@ -23,7 +23,7 @@ module "indexer_lambda" {
 
 data "aws_iam_policy_document" "allow_secret_read" {
   statement {
-    actions   = ["secretsmanager:GetSecretValue"]
+    actions = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:NeptuneTest/*"
     ]

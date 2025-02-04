@@ -25,7 +25,7 @@ resource "aws_lb_target_group_attachment" "neptune_instance_attachment" {
   # this setup is still more convenient than only being able to connect from within the VPC.
   # If it starts bothering us, we can create a Lambda function for dynamically updating the target group IP, as outlined
   # here: https://aws-samples.github.io/aws-dbs-refarch-graph/src/connecting-using-a-load-balancer/
-  target_id        = "172.42.174.101"
+  target_id = "172.42.174.101"
 }
 
 locals {
