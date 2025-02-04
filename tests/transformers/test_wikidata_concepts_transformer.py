@@ -1,7 +1,7 @@
 import json
 import math
-import pytest
 
+import pytest
 from test_utils import load_fixture
 from test_wikidata_concepts_source import (
     _add_mock_loc_transformer_outputs,
