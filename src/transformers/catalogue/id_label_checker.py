@@ -1,6 +1,6 @@
 from typing import Any
 
-from utils.aws import fetch_from_s3, NodeType, OntologyType
+from utils.aws import NodeType, OntologyType, fetch_from_s3
 
 
 class IdLabelChecker(dict):
@@ -20,8 +20,8 @@ class IdLabelChecker(dict):
         id_label_dict = {}
 
         for row in fetch_from_s3(node_type, source):
-                    # Extract source id and label at position 0 and 3, respectively
-                    id_label_dict[row[0]] = row[3]
+            # Extract source id and label at position 0 and 3, respectively
+            id_label_dict[row[0]] = row[3]
 
         print(f"({len(id_label_dict)} ids and labels retrieved.)")
 

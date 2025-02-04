@@ -73,12 +73,12 @@ class RawCatalogueConcept:
         """Returns the concept source (one of "lc-names", "label-derived", etc.)."""
         source: ConceptSource = self.raw_identifier["identifierType"]["id"]
         return source
-    
+
     @property
     def mesh_qualifier(self) -> str | None:
         """Returns MeSH qualifier ID, if present."""
         if self.source == "nlm-mesh":
-            qualifier = re.search(r'Q\d+', self.raw_identifier.get("value", ""))
+            qualifier = re.search(r"Q\d+", self.raw_identifier.get("value", ""))
             if qualifier is not None:
                 return qualifier.group()
 

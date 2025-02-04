@@ -1,24 +1,24 @@
+import csv
 import json
 from collections.abc import Generator
+from functools import lru_cache
 from typing import Any, Literal
 
 import boto3
-from functools import lru_cache
-
-import csv
 import smart_open
 
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-
 from config import S3_BULK_LOAD_BUCKET_NAME
 
 LOAD_BALANCER_SECRET_NAME = "NeptuneTest/LoadBalancerUrl"
 INSTANCE_ENDPOINT_SECRET_NAME = "NeptuneTest/InstanceEndpoint"
 
 NodeType = Literal["concepts", "names", "locations"]
-OntologyType = Literal["mesh", "loc", "wikidata_linked_mesh_concepts", "wikidata_linked_loc_concepts"]
+OntologyType = Literal[
+    "mesh", "loc", "wikidata_linked_mesh_concepts", "wikidata_linked_loc_concepts"
+]
 
 
 def get_secret(secret_name: str) -> str:
@@ -76,7 +76,7 @@ def fetch_from_s3(node_type: NodeType, source: OntologyType) -> Generator[Any]:
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_url, "r", transport_params=transport_params) as f:
         csv_reader = csv.reader(f)
-        
+
         for i, row in enumerate(csv_reader):
             # Skip header
             if i == 0:

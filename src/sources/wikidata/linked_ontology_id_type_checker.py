@@ -1,4 +1,4 @@
-from utils.aws import fetch_from_s3, NodeType, OntologyType
+from utils.aws import NodeType, OntologyType, fetch_from_s3
 
 
 class LinkedOntologyIdTypeChecker:
