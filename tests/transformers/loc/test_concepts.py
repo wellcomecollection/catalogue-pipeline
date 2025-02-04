@@ -7,7 +7,7 @@ from transformers.loc.concepts_transformer import LibraryOfCongressConceptsTrans
 from transformers.loc.locations_transformer import LibraryOfCongressLocationsTransformer
 
 
-def jsons_to_ndjson(json_fixtures:list[str]) -> bytes:
+def jsons_to_ndjson(json_fixtures: list[str]) -> bytes:
     # Given a bunch of formatted JSON files, concatenate them into ndjson
     return "\n".join(
         json.dumps(json.loads(load_fixture(fixture))) for fixture in json_fixtures
@@ -92,7 +92,7 @@ def test_loc_location_transformer_resilience() -> None:
     assert len(list(nodes)) == 2
 
 
-def test_empty_source()->None:
+def test_empty_source() -> None:
     """If there is nothing to process, nothing is emitted"""
     MockRequest.mock_responses(
         [
