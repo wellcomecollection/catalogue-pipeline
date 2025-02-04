@@ -1,5 +1,6 @@
 import json
 import math
+import pytest
 
 from test_utils import load_fixture
 from test_wikidata_concepts_source import (
@@ -76,3 +77,40 @@ def test_wikidata_raw_name() -> None:
     assert raw_name.place_of_birth == "Queens"
     assert raw_name.label == "Walter McCaffrey"
     assert raw_name.description == "American politician"
+
+
+def test_wikidata_raw_location_invalid_coordinates() -> None:
+    raw_location = RawWikidataLocation({})
+    assert raw_location.latitude is None
+    assert raw_location.longitude is None
+
+    raw_location = RawWikidataLocation({"type": "uri", "value": "some-url"})
+    assert raw_location.latitude is None
+    assert raw_location.longitude is None
+
+    raw_location = RawWikidataLocation(
+        {
+            "item": {"type": "uri", "value": "some-id"},
+            "coordinates": {"type": "literal", "value": "invalid value"},
+        }
+    )
+    with pytest.raises(AssertionError):
+        _ = raw_location.latitude
+
+    with pytest.raises(AssertionError):
+        _ = raw_location.longitude
+
+
+def test_wikidata_raw_name_invalid_dates() -> None:
+    raw_name = RawWikidataName(
+        {"dateOfBirth": {"type": "literal", "value": "+0000-00-00T00:00:00Z"}}
+    )
+    assert raw_name.date_of_birth is None
+
+    raw_name = RawWikidataName({"dateOfBirth": {"type": "uri", "value": "some-uri"}})
+    assert raw_name.date_of_birth is None
+
+    raw_name = RawWikidataName(
+        {"dateOfBirth": {"type": "literal", "value": "https://some-url"}}
+    )
+    assert raw_name.date_of_birth is None
