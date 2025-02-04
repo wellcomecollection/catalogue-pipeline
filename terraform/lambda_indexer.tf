@@ -5,7 +5,7 @@ module "indexer_lambda" {
   description = "Indexes nodes and edges into the Neptune catalogue graph cluster."
   runtime     = "python3.13"
 
-  filename = "../target/build.zip"
+  filename         = "../target/build.zip"
   source_code_hash = filesha256("../target/build.zip")
 
   handler     = "indexer.lambda_handler"
@@ -22,7 +22,7 @@ module "indexer_lambda" {
 
 data "aws_iam_policy_document" "allow_secret_read" {
   statement {
-    actions   = ["secretsmanager:GetSecretValue"]
+    actions = ["secretsmanager:GetSecretValue"]
     resources = [
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:NeptuneTest/*"
     ]

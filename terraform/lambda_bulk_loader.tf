@@ -5,7 +5,7 @@ module "bulk_loader_lambda" {
   description = "Bulk loads entities from an S3 bucket into the Neptune database."
   runtime     = "python3.13"
 
-  filename = "../target/build.zip"
+  filename         = "../target/build.zip"
   source_code_hash = filesha256("../target/build.zip")
 
   handler     = "bulk_loader.lambda_handler"

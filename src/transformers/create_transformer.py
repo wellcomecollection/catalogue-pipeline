@@ -1,8 +1,14 @@
 from typing import Literal
 
-from config import LOC_NAMES_URL, LOC_SUBJECT_HEADINGS_URL, MESH_URL
+from config import (
+    CATALOGUE_SNAPSHOT_URL,
+    LOC_NAMES_URL,
+    LOC_SUBJECT_HEADINGS_URL,
+    MESH_URL,
+)
 
 from .base_transformer import BaseTransformer, EntityType
+from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
 from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
 from .loc.names_transformer import LibraryOfCongressNamesTransformer
@@ -23,6 +29,7 @@ TransformerType = Literal[
     "wikidata_linked_loc_names",
     "wikidata_linked_mesh_concepts",
     "wikidata_linked_mesh_locations",
+    "catalogue_concepts",
 ]
 
 
@@ -51,5 +58,7 @@ def create_transformer(
         return WikidataConceptsTransformer(entity_type, "mesh")
     if transformer_type == "wikidata_linked_mesh_locations":
         return WikidataLocationsTransformer(entity_type, "mesh")
+    if transformer_type == "catalogue_concepts":
+        return CatalogueConceptsTransformer(CATALOGUE_SNAPSHOT_URL)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")
