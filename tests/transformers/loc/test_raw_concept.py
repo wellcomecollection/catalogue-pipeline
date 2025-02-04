@@ -2,7 +2,11 @@ from typing import Type
 
 import pytest
 
-from transformers.loc.raw_concept import RawLibraryOfCongressConcept, RawLibraryOfCongressMADSConcept, RawLibraryOfCongressSKOSConcept
+from transformers.loc.raw_concept import (
+    RawLibraryOfCongressConcept,
+    RawLibraryOfCongressMADSConcept,
+    RawLibraryOfCongressSKOSConcept,
+)
 
 
 @pytest.mark.parametrize(

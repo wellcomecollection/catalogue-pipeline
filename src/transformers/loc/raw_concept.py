@@ -308,8 +308,9 @@ def _as_list(dict_or_list: dict | list[dict]) -> list[dict]:
         return [dict_or_list]
     return dict_or_list
 
+
 def raw_loc_concept(raw_concept: dict) -> RawLibraryOfCongressConcept:
-    for node in raw_concept.get("@graph"):
+    for node in raw_concept.get("@graph",[]):
         if "skos:changeNote" in node:
             return RawLibraryOfCongressSKOSConcept(raw_concept)
         if "madsrdf:adminMetadata" in node:
