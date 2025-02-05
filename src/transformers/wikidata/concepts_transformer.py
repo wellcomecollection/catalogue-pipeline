@@ -1,11 +1,14 @@
 from collections.abc import Generator
 
-from models.graph_edge import SourceConceptHasParent, SourceConceptSameAs
-from models.graph_node import SourceConcept
-from sources.wikidata.linked_ontology_source import (
-    OntologyType,
-    WikidataLinkedOntologySource,
+from models.graph_edge import (
+    SourceConceptHasFieldOfWork,
+    SourceConceptHasParent,
+    SourceConceptSameAs,
+    BaseEdge,
 )
+from models.graph_node import SourceConcept
+from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from utils.types import OntologyType
 from transformers.base_transformer import BaseTransformer, EntityType
 
 from .raw_concept import RawWikidataConcept
@@ -28,21 +31,28 @@ class WikidataConceptsTransformer(BaseTransformer):
             description=raw_concept.description,
         )
 
-    def extract_edges(
-        self, raw_edge: dict
-    ) -> Generator[SourceConceptSameAs | SourceConceptHasParent]:
+    def extract_edges(self, raw_edge: dict) -> Generator[BaseEdge]:
         if raw_edge["type"] == "SAME_AS":
-            linked_id, wikidata_id = raw_edge["linked_id"], raw_edge["wikidata_id"]
             edge_attributes = {"source": "wikidata"}
             yield SourceConceptSameAs(
-                from_id=linked_id, to_id=wikidata_id, attributes=edge_attributes
+                from_id=raw_edge["from_id"],
+                to_id=raw_edge["to_id"],
+                attributes=edge_attributes,
             )
             yield SourceConceptSameAs(
-                from_id=wikidata_id, to_id=linked_id, attributes=edge_attributes
+                from_id=raw_edge["to_id"],
+                to_id=raw_edge["from_id"],
+                attributes=edge_attributes,
             )
         elif raw_edge["type"] == "HAS_PARENT":
             yield SourceConceptHasParent(
-                from_id=raw_edge["child_id"], to_id=raw_edge["parent_id"]
+                from_id=raw_edge["from_id"],
+                to_id=raw_edge["to_id"],
+            )
+        elif raw_edge["type"] == "HAS_FIELD_OF_WORK":
+            yield SourceConceptHasFieldOfWork(
+                from_id=raw_edge["from_id"],
+                to_id=raw_edge["to_id"],
             )
         else:
-            raise ValueError(f"Unknown edge type f{raw_edge['type']}")
+            raise ValueError(f"Unknown edge type {raw_edge['type']}")

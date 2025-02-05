@@ -4,15 +4,30 @@ from typing import Callable
 
 from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType
+from utils.ontology_id_checker import is_id_classified_as_node_type, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
-
-from .linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
+from utils.types import NodeType, OntologyType
 from .sparql_client import SPARQL_MAX_PARALLEL_QUERIES, WikidataSparqlClient
-from .sparql_query_builder import NodeType, OntologyType, SparqlQueryBuilder
+from .sparql_query_builder import SparqlQueryBuilder, WikidataEdgeQueryType
+
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
 
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
+
+
+def _parallelise_sparql_requests(
+    items: Iterator, run_sparql_query: Callable[[list], list]
+) -> Generator:
+    """Accept an `items` generator and a `run_sparql_query` method. Split `items` chunks and apply
+    `run_sparql_query` to each chunk. Return a single generator of results."""
+    for raw_response_item in process_stream_in_parallel(
+        items,
+        run_sparql_query,
+        SPARQL_ITEMS_CHUNK_SIZE,
+        SPARQL_MAX_PARALLEL_QUERIES,
+    ):
+        yield raw_response_item
 
 
 def extract_wikidata_id(item: dict, key: str = "item") -> str | None:
@@ -57,7 +72,6 @@ class WikidataLinkedOntologySource(BaseSource):
         self.node_type = node_type
         self.linked_ontology = linked_ontology
         self.entity_type = entity_type
-        self.id_type_checker = LinkedOntologyIdTypeChecker(node_type, linked_ontology)
 
     @lru_cache
     def _get_all_ids(self) -> list[str]:
@@ -81,48 +95,50 @@ class WikidataLinkedOntologySource(BaseSource):
         print(f"({len(all_valid_ids)} ids retrieved.)")
         return list(all_valid_ids)
 
-    def _get_linked_id_mappings(self, wikidata_ids: list[str]) -> list[dict]:
-        query = SparqlQueryBuilder.get_linked_ids_query(
-            wikidata_ids, self.linked_ontology
-        )
-        return self.client.run_query(query)
-
     def _get_wikidata_items(self, wikidata_ids: list[str]) -> list:
         query = SparqlQueryBuilder.get_items_query(wikidata_ids, self.node_type)
         return self.client.run_query(query)
 
-    def _get_parent_id_mappings(self, child_wikidata_ids: list[str]) -> list[dict]:
+    def _stream_all_edges_by_type(
+        self, edge_type: WikidataEdgeQueryType
+    ) -> Generator[dict]:
         """
-        Given a list of child wikidata ids, checks for all parents of each item in the list and returns a list
-        of mappings between child and parent ids.
+        Given an `edge_type`, return a generator of all edges starting from all Wikidata items linking to the selected
+        ontology.
+
+        Edges are extracted via the following steps:
+            1. Run a SPARQL query which retrieves _all_ Wikidata items referencing an id from the linked ontology.
+            2. Split the returned ids into chunks. For each chunk, run a second SPARQL query to retrieve the requested
+            edges for all ids in the chunk. (It is possible to modify the query in step 1 to return the edges directly,
+            but this makes the query unreliable - sometimes it times out or returns invalid JSON. Getting the edges
+            in chunks is much slower, but it works every time.)
         """
-        # Get all parent ids referenced via the Wikidata 'subclass of' field
-        subclass_of_query = SparqlQueryBuilder.get_parents_query(
-            child_wikidata_ids, "subclass_of"
-        )
-        subclass_of_results = self.client.run_query(subclass_of_query)
 
-        # Get all parent ids referenced via the Wikidata 'instance of' field
-        instance_of_query = SparqlQueryBuilder.get_parents_query(
-            child_wikidata_ids, "instance_of"
-        )
-        instance_of_results = self.client.run_query(instance_of_query)
+        def get_edges(wikidata_ids: list[str]) -> list[dict]:
+            query = SparqlQueryBuilder.get_edge_query(wikidata_ids, edge_type)
+            return self.client.run_query(query)
 
-        return subclass_of_results + instance_of_results
+        all_ids = self._get_all_ids()
+        for raw_mapping in _parallelise_sparql_requests(iter(all_ids), get_edges):
+            from_id = extract_wikidata_id(raw_mapping, "fromItem")
 
-    @staticmethod
-    def _parallelise_requests(
-        items: Iterator, run_sparql_query: Callable[[list], list]
-    ) -> Generator:
-        """Accept an `items` generator and a `run_sparql_query` method. Split `items` chunks and apply
-        `run_sparql_query` to each chunk. Return a single generator of results."""
-        for raw_response_item in process_stream_in_parallel(
-            items,
-            run_sparql_query,
-            SPARQL_ITEMS_CHUNK_SIZE,
-            SPARQL_MAX_PARALLEL_QUERIES,
-        ):
-            yield raw_response_item
+            if edge_type in ("same_as_mesh", "same_as_loc"):
+                to_id = raw_mapping["toItem"]["value"]
+            else:
+                to_id = extract_wikidata_id(raw_mapping, "toItem")
+
+            if from_id is not None and to_id is not None:
+                yield {"from_id": from_id, "to_id": to_id}
+
+    def _stream_all_same_as_edges(self) -> Generator[dict]:
+        if self.linked_ontology == "loc":
+            yield from self._stream_all_edges_by_type("same_as_loc")
+        elif self.linked_ontology == "mesh":
+            yield from self._stream_all_edges_by_type("same_as_mesh")
+
+    def _stream_all_has_parent_edges(self) -> Generator[dict]:
+        yield from self._stream_all_edges_by_type("parent_instance_of")
+        yield from self._stream_all_edges_by_type("parent_subclass_of")
 
     def _stream_filtered_wikidata_ids(self) -> Generator[str]:
         """Streams all wikidata ids to be processed as nodes given the selected `node_type`."""
@@ -130,15 +146,20 @@ class WikidataLinkedOntologySource(BaseSource):
 
         # Stream all SAME_AS edges and extract Wikidata ids from them, making sure to deduplicate
         # (a given Wikidata id can appear in more than one edge).
-        for item in self._stream_all_same_as_edges():
-            wikidata_id = item["wikidata_id"]
-            linked_id = item["linked_id"]
-            if self.id_type_checker.id_is_valid(linked_id) and wikidata_id not in seen:
+        for edge in self._stream_all_same_as_edges():
+            wikidata_id = edge["from_id"]
+            linked_id = edge["to_id"]
+            if (
+                is_id_in_ontology(linked_id, self.linked_ontology)
+                and wikidata_id not in seen
+            ):
                 # Add Wikidata id to `seen` no matter if it's part of the selected node type
                 # to make sure it is not processed again as a parent below.
                 seen.add(wikidata_id)
 
-                if self.id_type_checker.id_included_in_selected_type(linked_id):
+                if is_id_classified_as_node_type(
+                    linked_id, self.linked_ontology, self.node_type
+                ):
                     yield wikidata_id
 
         # Stream HAS_PARENT edges and extract Wikidata ids of all parents (children are streamed above). Filter out
@@ -146,50 +167,11 @@ class WikidataLinkedOntologySource(BaseSource):
         # reference a MeSH/LoC id. We categorise all of them as _concepts_, no matter whether the children are
         # categorised as concepts, names, or locations.
         if self.node_type == "concepts":
-            for item in self._stream_all_has_parent_edges():
-                wikidata_id = item["parent_id"]
-                if wikidata_id not in seen:
-                    seen.add(wikidata_id)
-                    yield wikidata_id
-
-    def _stream_all_same_as_edges(self) -> Generator[dict]:
-        """
-        Stream raw 'SAME_AS' edges, mapping Wikidata ids to ids from the selected linked ontology.
-
-        Edges are extracted via the following steps:
-            1. Run a SPARQL query which retrieves _all_ Wikidata items referencing an id from the linked ontology.
-            2. Split the returned ids into chunks. For each chunk, run a second SPARQL query to retrieve a mapping
-            between Wikidata ids and ids from the linked ontology. (It is possible to modify the query in step 1 to
-            return all the mappings at once, but this makes the query unreliable - sometimes it times out or returns
-            invalid JSON. Getting the mappings in chunks is much slower, but it works every time.)
-        """
-        all_linked_ids = self._get_all_ids()
-        for raw_mapping in self._parallelise_requests(
-            iter(all_linked_ids), self._get_linked_id_mappings
-        ):
-            yield {
-                "wikidata_id": extract_wikidata_id(raw_mapping),
-                "linked_id": raw_mapping["linkedId"]["value"],
-                "type": "SAME_AS",
-            }
-
-    def _stream_all_has_parent_edges(self) -> Generator[dict]:
-        """
-        Stream raw 'HAS_PARENT' Wikidata edges, mapping child items to parent items.
-        """
-        all_linked_ids = self._get_all_ids()
-        for raw_mapping in self._parallelise_requests(
-            iter(all_linked_ids), self._get_parent_id_mappings
-        ):
-            parent_id = extract_wikidata_id(raw_mapping)
-            child_id = extract_wikidata_id(raw_mapping, "child")
-
-            if parent_id is not None and child_id is not None:
-                yield {
-                    "child_id": child_id,
-                    "parent_id": parent_id,
-                    "type": "HAS_PARENT",
-                }
+            for edge in self._stream_all_has_parent_edges():
+                parent_wikidata_id = edge["to_id"]
+                if parent_wikidata_id not in seen:
+                    seen.add(parent_wikidata_id)
+                    yield parent_wikidata_id
 
     def _stream_raw_edges(self) -> Generator[dict]:
         """
@@ -202,16 +184,24 @@ class WikidataLinkedOntologySource(BaseSource):
             # For example, if we are streaming Wikidata 'names' edges linked to LoC ids but the LoC id linked to some
             # Wikidata id is classified as a 'location', we skip it. This filtering process also removes mappings which
             # include invalid LoC ids (of which there are several thousand).
-            if self.id_type_checker.id_included_in_selected_type(edge["linked_id"]):
-                streamed_wikidata_ids.add(edge["wikidata_id"])
-                yield edge
+            if is_id_classified_as_node_type(
+                edge["to_id"], self.linked_ontology, self.node_type
+            ):
+                streamed_wikidata_ids.add(edge["from_id"])
+                yield {**edge, "type": "SAME_AS"}
 
         print("Streaming HAS_PARENT edges...")
         for edge in self._stream_all_has_parent_edges():
-            # Only include an edge if its `child_id` was already streamed in a SAME_AS edge, indicating that
+            # Only include an edge if its `from_id` was already streamed in a SAME_AS edge, indicating that
             # the child item belongs under the selected `node_type`.
-            if edge["child_id"] in streamed_wikidata_ids:
-                yield edge
+            if edge["from_id"] in streamed_wikidata_ids:
+                yield {**edge, "type": "HAS_PARENT"}
+
+        if self.node_type == "names":
+            print("Streaming HAS_FIELD_OF_WORK edges...")
+            for edge in self._stream_all_edges_by_type("field_of_work"):
+                if is_id_in_ontology(edge["to_id"], "wikidata"):
+                    yield {**edge, "type": "HAS_FIELD_OF_WORK"}
 
     def _stream_raw_nodes(self) -> Generator[dict]:
         """
@@ -221,7 +211,7 @@ class WikidataLinkedOntologySource(BaseSource):
             Wikidata fields required to create a node.
         """
         all_ids = self._stream_filtered_wikidata_ids()
-        yield from self._parallelise_requests(all_ids, self._get_wikidata_items)
+        yield from _parallelise_sparql_requests(all_ids, self._get_wikidata_items)
 
     def stream_raw(self) -> Generator[dict]:
         if self.entity_type == "nodes":

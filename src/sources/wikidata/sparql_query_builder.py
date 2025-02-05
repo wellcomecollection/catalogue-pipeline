@@ -1,7 +1,15 @@
 from typing import Literal
 
-NodeType = Literal["concepts", "names", "locations"]
-OntologyType = Literal["mesh", "loc"]
+from utils.types import NodeType, OntologyType
+
+
+WikidataEdgeQueryType = Literal[
+    "same_as_loc",
+    "same_as_mesh",
+    "parent_instance_of",
+    "parent_subclass_of",
+    "field_of_work"
+]
 
 
 class SparqlQueryBuilder:
@@ -40,15 +48,6 @@ class SparqlQueryBuilder:
                 fields_with_aggregation.append(f"(SAMPLE({field}) as {field})")
 
         return " ".join(fields_with_aggregation)
-
-    @staticmethod
-    def _get_linked_ontology_filter(linked_ontology: OntologyType) -> str:
-        if linked_ontology == "loc":
-            return "?item p:P244/ps:P244 ?linkedId."
-        elif linked_ontology == "mesh":
-            return "?item p:P486/ps:P486 ?linkedId."
-
-        raise ValueError(f"Invalid linked ontology type: {linked_ontology}")
 
     @staticmethod
     def _get_formatted_field_mappings(node_type: NodeType) -> str:
@@ -133,51 +132,31 @@ class SparqlQueryBuilder:
         return SparqlQueryBuilder._compact_format_query(query)
 
     @classmethod
-    def get_linked_ids_query(
-        cls, item_ids: list[str], linked_ontology: OntologyType
-    ) -> str:
+    def get_edge_query(cls, item_ids: list[str], edge_type: WikidataEdgeQueryType) -> str:
         """
-        Given a list of Wikidata `item_ids`, return a query to retrieve all linked ontology ids referenced by each
-        item in the list.
+        Given a list of Wikidata `item_ids`, return a query to retrieve all edges of type `edge_type` linking each
+        item in the list to a different Wikidata item.
         """
         ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
-        query = f"""
-            SELECT DISTINCT ?item ?linkedId 
-            WHERE {{
-              VALUES ?item {{ {ids_clause} }}
-              {cls._get_linked_ontology_filter(linked_ontology)}
-            }}
-        """
-
-        return SparqlQueryBuilder._compact_format_query(query)
-
-    @classmethod
-    def get_parents_query(
-        cls,
-        item_ids: list[str],
-        relationship_type: Literal["instance_of", "subclass_of"],
-    ) -> str:
-        """
-        Given a list of Wikidata `item_ids`, return a query to retrieve all parents of each item in the list.
-        Parents are determined based on the 'subclass of' (P279) or the 'instance of' (P31) fields.
-        """
-        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
-
-        if relationship_type == "instance_of":
-            relationship = "?child wdt:P31 ?item."
-        elif relationship_type == "subclass_of":
-            relationship = "?child wdt:P279 ?item."
+        if edge_type == "same_as_loc":
+            property_path = "p:P244/ps:P244"
+        elif edge_type == "same_as_mesh":
+            property_path = "p:P486/ps:P486"
+        elif edge_type == "parent_instance_of":
+            property_path = "wdt:P31"
+        elif edge_type == "parent_subclass_of":
+            property_path = "wdt:P279"
+        elif edge_type == "field_of_work":
+            property_path = "wdt:P101"
         else:
-            raise ValueError(
-                f"Unknown parent/child relationship type: {relationship_type}"
-            )
+            raise ValueError(f"Unknown edge type: {edge_type}")
 
         query = f"""
-            SELECT DISTINCT ?child ?item 
+            SELECT DISTINCT ?fromItem ?toItem 
             WHERE {{
-              VALUES ?child {{ {ids_clause} }}
-              {relationship}
+              VALUES ?fromItem {{ {ids_clause} }}
+              ?fromItem {property_path} ?toItem.
             }}
         """
 

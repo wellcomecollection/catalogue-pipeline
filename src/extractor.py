@@ -28,16 +28,16 @@ def handler(
         f"transformer and streaming them into {stream_destination}."
     )
 
+    assert (
+        config.S3_BULK_LOAD_BUCKET_NAME is not None
+    ), "the S3_BULK_LOAD_BUCKET_NAME environment variable must be defined."
+
     transformer: BaseTransformer = create_transformer(transformer_type, entity_type)
 
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)
         transformer.stream_to_graph(neptune_client, entity_type, sample_size)
     elif stream_destination == "s3":
-        assert (
-            config.S3_BULK_LOAD_BUCKET_NAME is not None
-        ), "To stream to S3, the S3_BULK_LOAD_BUCKET_NAME environment variable must be defined."
-
         file_name = f"{transformer_type}__{entity_type}.csv"
         s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
         transformer.stream_to_s3(s3_uri, entity_type, sample_size)
