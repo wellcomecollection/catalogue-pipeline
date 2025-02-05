@@ -15,24 +15,6 @@ def test_label() -> None:
     assert concept.label == "Stump work"
 
 
-
-class TestGeographic:
-    def test_is_geographic(self) -> None:
-        """
-        A concept is geographic if its @type list contains madsrdf:Geographic
-        """
-        concept = RawLibraryOfCongressMADSConcept(
-            json.loads(load_fixture("mads_geographic_concept.json"))
-        )
-        assert concept.is_geographic == True
-
-    def test_is_not_geographic(self) -> None:
-        concept = RawLibraryOfCongressMADSConcept(
-            json.loads(load_fixture("mads_concept.json"))
-        )
-        assert concept.is_geographic == False
-
-
 class TestBroaderConcepts:
     def test_real_example(self) -> None:
         concept = RawLibraryOfCongressMADSConcept(

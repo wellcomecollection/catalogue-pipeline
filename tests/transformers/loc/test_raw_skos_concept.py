@@ -15,23 +15,6 @@ def test_label() -> None:
     assert concept.label == "Pickling"
 
 
-class TestGeographic:
-    def test_is_geographic(self) -> None:
-        """
-        A concept is geographic if there exists skos:notation with a gac type
-        """
-        concept = RawLibraryOfCongressSKOSConcept(
-            json.loads(load_fixture("skos_geographic_concept.json"))
-        )
-        assert concept.is_geographic == True
-
-    def test_is_not_geographic(self) -> None:
-        concept = RawLibraryOfCongressSKOSConcept(
-            json.loads(load_fixture("skos_concept.json"))
-        )
-        assert concept.is_geographic == False
-
-
 def test_broader_concepts() -> None:
     concept = RawLibraryOfCongressSKOSConcept(
         json.loads(load_fixture("skos_geographic_concept.json"))

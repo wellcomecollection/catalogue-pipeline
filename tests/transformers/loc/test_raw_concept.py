@@ -1,6 +1,8 @@
+import json
 from typing import Type
 
 import pytest
+from test_utils import load_fixture
 
 from transformers.loc.raw_concept import (
     RawLibraryOfCongressConcept,
@@ -134,3 +136,29 @@ class TestExclusion:
         concept = sut_class({"@id": "authorities/names/sh2010105253-781", "@graph": []})
         concept._raw_concept_node = {}
         assert concept.exclude() == True
+
+
+@pytest.mark.parametrize(
+    "sut_class,format",
+    [
+        (RawLibraryOfCongressSKOSConcept, "skos"),
+        (RawLibraryOfCongressMADSConcept, "mads"),
+    ],
+)
+class TestGeographic:
+    def test_is_geographic(
+        self, sut_class: Type[RawLibraryOfCongressConcept], source_format: str
+    ) -> None:
+        """
+        A concept is geographic if its @type list contains madsrdf:Geographic or http://id.loc.gov/datatypes/codes/gac"
+        """
+        concept = sut_class(
+            json.loads(load_fixture(f"{source_format}_geographic_concept.json"))
+        )
+        assert concept.is_geographic == True
+
+    def test_is_not_geographic(
+        self, sut_class: Type[RawLibraryOfCongressConcept], source_format: str
+    ) -> None:
+        concept = sut_class(json.loads(load_fixture(f"{source_format}_concept.json")))
+        assert concept.is_geographic == False
