@@ -3,7 +3,6 @@ import io
 from typing import Any, TypedDict
 
 from botocore.credentials import Credentials
-from test_utils import load_fixture
 
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
@@ -19,24 +18,26 @@ MOCK_CREDENTIALS = Credentials(
 class MockSmartOpen:
     file_lookup: dict = {}
 
-    @staticmethod
-    def reset_mocks() -> None:
-        MockSmartOpen.file_lookup = {}
+    @classmethod
+    def reset_mocks(cls) -> None:
+        cls.file_lookup = {}
 
-    @staticmethod
-    def get_mock_file(uri: str) -> Any:
-        return MockSmartOpen.file_lookup[uri]
+    @classmethod
+    def mock_s3_file(cls, uri: str, content: str) -> None:
+        cls.file_lookup[uri] = io.StringIO(content)
 
-    @staticmethod
-    def open(uri: str, mode: str, **kwargs: Any) -> Any:
-        # Create an in-memory text stream
-        mock_file = io.StringIO()
+    @classmethod
+    def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
+        if mode == "w":
+            # Create an in-memory text stream and save the file object in the file lookup
+            cls.file_lookup[uri] = io.StringIO()
+        elif mode == "r":
+            if uri not in cls.file_lookup:
+                raise KeyError(f"Mock S3 file {uri} does not exist.")
+        else:
+            raise ValueError(f"Unsupported file mode: {mode}")
 
-        # Save the file object in the file lookup
-        MockSmartOpen.file_lookup[uri] = mock_file
-
-        # create temp file and open it with given mode
-        return mock_file
+        return cls.file_lookup[uri]
 
 
 class MockAwsService:
@@ -196,7 +197,7 @@ class MockRequest:
             ):
                 return response["response"]
 
-        raise Exception(f"Unexpected request: {method} {url}")
+        raise Exception(f"Unexpected request: {method} {url} {params}")
 
     @staticmethod
     def get(
