@@ -139,7 +139,7 @@ class TestExclusion:
 
 
 @pytest.mark.parametrize(
-    "sut_class,format",
+    "sut_class,source_format",
     [
         (RawLibraryOfCongressSKOSConcept, "skos"),
         (RawLibraryOfCongressMADSConcept, "mads"),
