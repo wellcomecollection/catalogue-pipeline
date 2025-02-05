@@ -214,8 +214,8 @@ class RawLibraryOfCongressMADSConcept(RawLibraryOfCongressConcept):
 
     @property
     def is_geographic(self) -> bool:
-        assert self._raw_concept_node is not None
         """Returns True if the node represents a geographic concept, as determined by @type"""
+        assert self._raw_concept_node is not None
         return "madsrdf:Geographic" in self._raw_concept_node.get("@type", [])
 
     @property
