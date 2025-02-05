@@ -95,7 +95,6 @@ class RawLibraryOfCongressConcept:
 class RawLibraryOfCongressSKOSConcept(RawLibraryOfCongressConcept):
     def __init__(self, raw_concept: dict):
         super().__init__(raw_concept)
-        self._raw_concept_node = self._extract_concept_node()
 
     def _extract_concept_node(self) -> dict | None:
         graph: list[dict] = self.raw_concept.get("@graph", [])

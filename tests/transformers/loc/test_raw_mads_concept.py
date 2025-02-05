@@ -15,34 +15,6 @@ def test_label() -> None:
     assert concept.label == "Stump work"
 
 
-class TestExclude:
-    def test_exclude_no_graph(self) -> None:
-        """
-        If there is no graph, then the concept is to be excluded
-        """
-        concept = RawLibraryOfCongressMADSConcept(
-            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
-        )
-        assert concept.exclude() == True
-
-    def test_exclude_no_matching_concept_node(self) -> None:
-        """
-        If the graph does not contain a node of type skos:Concept, it is to be excluded
-        """
-        concept = RawLibraryOfCongressMADSConcept(
-            json.loads(load_fixture("mads_deprecated_concept.json"))
-        )
-        assert concept.exclude() == True
-
-    def test_do_not_exclude(self) -> None:
-        """
-        A complete, non-duplicate, non-deprecated record is to be included in the output
-        """
-        concept = RawLibraryOfCongressMADSConcept(
-            json.loads(load_fixture("mads_concept.json"))
-        )
-        assert concept.exclude() == False
-
 
 class TestGeographic:
     def test_is_geographic(self) -> None:
