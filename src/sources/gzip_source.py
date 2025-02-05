@@ -17,10 +17,7 @@ class GZipSource(BaseSource):
 
         with gzip.GzipFile(fileobj=response.raw) as file:
             for line_bytes in file:
-                try:
-                    yield json.loads(line_bytes.decode("utf8"))
-                except JSONDecodeError as e:
-                    print(e)
+                yield json.loads(line_bytes.decode("utf8"))
 
 
 class MultiGZipSource(BaseSource):

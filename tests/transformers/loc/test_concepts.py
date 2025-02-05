@@ -24,10 +24,7 @@ def test_loc_concept_transformer_resilience() -> None:
                 "url": test_url,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": "\n[}{}[\n".encode(
-                    "utf-8"
-                )  # This line fails, but should not break the overall process
-                + jsons_to_ndjson(
+                "content_bytes": jsons_to_ndjson(
                     [
                         "mads_geographic_concept.json",  # geographic concepts are not included in the concepts transformer output
                         "mads_composite_concept.json",
@@ -57,10 +54,7 @@ def test_loc_location_transformer_resilience() -> None:
                 "url": test_url_subjects,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": "\n[}{}[\n".encode(
-                    "utf-8"
-                )  # This line fails, but should not break the overall process
-                + jsons_to_ndjson(
+                "content_bytes": jsons_to_ndjson(
                     [
                         "mads_geographic_concept.json",  # Only geographic concepts included in the location transformer output
                         "mads_composite_concept.json",
@@ -75,10 +69,7 @@ def test_loc_location_transformer_resilience() -> None:
                 "url": test_url_names,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": "\n[}{}[\n".encode(
-                    "utf-8"
-                )  # This line fails, but should not break the overall process
-                + load_fixture("loc_names_example.jsonld"),
+                "content_bytes": load_fixture("loc_names_example.jsonld"),
                 "params": None,
             },
         ]
