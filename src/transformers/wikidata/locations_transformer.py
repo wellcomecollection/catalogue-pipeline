@@ -22,6 +22,6 @@ class WikidataLocationsTransformer(WikidataConceptsTransformer):
             source=raw_concept.source,
             alternative_labels=raw_concept.alternative_labels,
             description=raw_concept.description,
-            latitude=raw_concept.latitude,
-            longitude=raw_concept.longitude,
+            latitude=raw_concept.coordinates["latitude"],
+            longitude=raw_concept.coordinates["longitude"],
         )

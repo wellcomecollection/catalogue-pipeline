@@ -19,12 +19,16 @@ class CypherBulkLoadConverter(CypherBaseConverter):
         """
         # Most fields are stored as strings
         field_type = "String"
-        if isinstance(model, SourceLocation):
-            if field_name in {"longitude", "latitude"}:
-                field_type = "Float"
-        if isinstance(model, SourceName):
-            if field_name in {"date_of_birth", "date_of_death"}:
-                field_type = "DateTime"
+        if isinstance(model, SourceLocation) and field_name in {
+            "longitude",
+            "latitude",
+        }:
+            field_type = "Float"
+        if isinstance(model, SourceName) and field_name in {
+            "date_of_birth",
+            "date_of_death",
+        }:
+            field_type = "DateTime"
 
         return f"{field_name}:{field_type}"
 
