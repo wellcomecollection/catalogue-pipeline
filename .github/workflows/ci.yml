@@ -1,0 +1,57 @@
+name: "Run CI pipeline"
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  test: 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: CI setup
+      run: |
+        ./scripts/ci-setup.sh
+      - name: Test
+      run: |
+        ./scripts/test.sh
+        
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    if: needs.test.result == "success"
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }} # to be created
+      - name: Build and push artefacts
+        run: |
+        ./scripts/build.sh --push
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: needs.build.result == "success"
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }} # to be created
+      - name: Deploy bulk-loader lambda
+        run: |
+        ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-loader
+      - name: Deploy bulk-load-poller lambda
+        run: |
+        ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-load-poller
+      - name: Deploy indexer lambda
+        run: |
+        ./scripts/deploy_lambda_zip.sh catalogue-graph-indexer 
+      - name: Deploy extractor lambda
+        run: |
+        ./scripts/deploy_lambda_service.sh catalogue-graph-extractor
