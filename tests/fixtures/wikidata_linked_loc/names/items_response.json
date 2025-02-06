@@ -1,0 +1,63 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q100"
+        },
+        "itemLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Emanuele Salce"
+        },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Italian actor"
+        },
+        "dateOfBirth": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type": "literal",
+          "value": "1966-08-07T00:00:00Z"
+        },
+        "placeOfBirthLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "London"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q101"
+        },
+        "itemLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Beata Obertyńska"
+        },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Polish writer"
+        },
+        "dateOfBirth": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type": "literal",
+          "value": "1898-07-18T00:00:00Z"
+        },
+        "placeOfBirthLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Skole"
+        },
+        "dateOfDeath": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type": "literal",
+          "value": "1980-05-21T00:00:00Z"
+        }
+      }
+    ]
+  }
+}

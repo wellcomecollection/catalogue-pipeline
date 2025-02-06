@@ -200,7 +200,9 @@ class WikidataLinkedOntologySource(BaseSource):
             print("Streaming HAS_FIELD_OF_WORK edges...")
             for edge in self._stream_all_edges_by_type("field_of_work"):
                 # Only include an edge if its `to_id` has a corresponding concept node in the graph
-                if is_id_in_ontology(edge["to_id"], "wikidata"):
+                if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
+                    edge["to_id"], "wikidata"
+                ):
                     yield {**edge, "type": "HAS_FIELD_OF_WORK"}
 
     def _stream_raw_nodes(self) -> Generator[dict]:
