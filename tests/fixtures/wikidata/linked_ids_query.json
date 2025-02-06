@@ -1,4 +1,0 @@
-{
-  "format": "json",
-  "query": "SELECT DISTINCT ?fromItem ?toItem WHERE { VALUES ?fromItem { wd:Q1 wd:Q2 } ?fromItem p:P244/ps:P244 ?toItem. }"
-}
