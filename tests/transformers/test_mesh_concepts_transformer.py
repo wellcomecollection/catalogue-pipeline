@@ -14,7 +14,7 @@ def test_mesh_concepts_transformer() -> None:
                 "url": test_url,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": load_fixture("mesh_example.xml"),
+                "content_bytes": load_fixture("mesh/raw_descriptors.xml"),
                 "params": None,
             }
         ]
@@ -22,17 +22,13 @@ def test_mesh_concepts_transformer() -> None:
     mesh_concepts_transformer = MeSHConceptsTransformer(test_url)
 
     # test transform_node
-    nodes = list(
-        mesh_concepts_transformer.stream(entity_type="nodes", query_chunk_size=1)
-    )
+    nodes = list(mesh_concepts_transformer._stream_nodes())
     assert len(list(nodes)) == 7
-    assert nodes[0][0].id == "D009930"
-    assert nodes[0][0].label == "Organic Chemicals"
+    assert nodes[0].id == "D009930"
+    assert nodes[0].label == "Organic Chemicals"
 
-    stream = mesh_concepts_transformer.stream(entity_type="edges", query_chunk_size=1)
-    # get first element, trying to get all of them will get edges we don't have in the test data
-    first_chunk = stream.__next__()
-    first_element = first_chunk[0]
+    stream = mesh_concepts_transformer._stream_edges()
+    first_element = stream.__next__()
 
     assert first_element.from_type == "SourceConcept"
     assert first_element.to_type == "SourceConcept"

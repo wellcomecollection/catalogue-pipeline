@@ -8,8 +8,6 @@ from transformers.base_transformer import BaseTransformer, EntityType, StreamDes
 from transformers.create_transformer import TransformerType, create_transformer
 from utils.aws import get_neptune_client
 
-CHUNK_SIZE = 256
-
 
 class LambdaEvent(typing.TypedDict):
     transformer_type: TransformerType
@@ -34,9 +32,7 @@ def handler(
 
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)
-        transformer.stream_to_graph(
-            neptune_client, entity_type, CHUNK_SIZE, sample_size
-        )
+        transformer.stream_to_graph(neptune_client, entity_type, sample_size)
     elif stream_destination == "s3":
         assert (
             config.S3_BULK_LOAD_BUCKET_NAME is not None
@@ -44,17 +40,19 @@ def handler(
 
         file_name = f"{transformer_type}__{entity_type}.csv"
         s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
-        transformer.stream_to_s3(s3_uri, entity_type, CHUNK_SIZE, sample_size)
+        transformer.stream_to_s3(s3_uri, entity_type, sample_size)
     elif stream_destination == "sns":
+        topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
         assert (
-            config.GRAPH_QUERIES_SNS_TOPIC_ARN is not None
+            topic_arn is not None
         ), "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
 
-        transformer.stream_to_sns(
-            config.GRAPH_QUERIES_SNS_TOPIC_ARN, entity_type, CHUNK_SIZE, sample_size
-        )
+        transformer.stream_to_sns(topic_arn, entity_type, sample_size)
+    elif stream_destination == "local":
+        file_name = f"{transformer_type}__{entity_type}.csv"
+        transformer.stream_to_local_file(file_name, entity_type, sample_size)
     elif stream_destination == "void":
-        for _ in transformer.stream(entity_type, CHUNK_SIZE, sample_size):
+        for _ in transformer.stream(entity_type, sample_size):
             pass
     else:
         raise ValueError("Unsupported stream destination.")

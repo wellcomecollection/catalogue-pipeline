@@ -153,12 +153,14 @@ class TestGeographic:
         A concept is geographic if its @type list contains madsrdf:Geographic or http://id.loc.gov/datatypes/codes/gac"
         """
         concept = sut_class(
-            json.loads(load_fixture(f"{source_format}_geographic_concept.json"))
+            json.loads(load_fixture(f"loc/{source_format}_geographic_concept.json"))
         )
         assert concept.is_geographic == True
 
     def test_is_not_geographic(
         self, sut_class: Type[RawLibraryOfCongressConcept], source_format: str
     ) -> None:
-        concept = sut_class(json.loads(load_fixture(f"{source_format}_concept.json")))
+        concept = sut_class(
+            json.loads(load_fixture(f"loc/{source_format}_concept.json"))
+        )
         assert concept.is_geographic == False

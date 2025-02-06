@@ -26,10 +26,10 @@ def test_loc_concept_transformer_resilience() -> None:
                 "json_data": None,
                 "content_bytes": jsons_to_ndjson(
                     [
-                        "mads_geographic_concept.json",  # geographic concepts are not included in the concepts transformer output
-                        "mads_composite_concept.json",
-                        "mads_deprecated_concept.json",  # This one is deprecated, so is not included in the output
-                        "mads_narrower_authority_concept.json",
+                        "loc/mads_geographic_concept.json",  # geographic concepts are not included in the concepts transformer output
+                        "loc/mads_composite_concept.json",
+                        "loc/mads_deprecated_concept.json",  # This one is deprecated, so is not included in the output
+                        "loc/mads_narrower_authority_concept.json",
                     ]
                 ),
                 "params": None,
@@ -38,7 +38,7 @@ def test_loc_concept_transformer_resilience() -> None:
     )
     concepts_transformer = LibraryOfCongressConceptsTransformer(test_url)
 
-    nodes = list(concepts_transformer.stream(entity_type="nodes", query_chunk_size=1))
+    nodes = concepts_transformer._stream_nodes()
     # mads_composite_concept and mads_narrower_authority_concept
     assert len(list(nodes)) == 2
 
@@ -56,10 +56,10 @@ def test_loc_location_transformer_resilience() -> None:
                 "json_data": None,
                 "content_bytes": jsons_to_ndjson(
                     [
-                        "mads_geographic_concept.json",  # Only geographic concepts included in the location transformer output
-                        "mads_composite_concept.json",
-                        "mads_deprecated_concept.json",
-                        "mads_narrower_authority_concept.json",
+                        "loc/mads_geographic_concept.json",  # Only geographic concepts included in the location transformer output
+                        "loc/mads_composite_concept.json",
+                        "loc/mads_deprecated_concept.json",
+                        "loc/mads_narrower_authority_concept.json",
                     ]
                 ),
                 "params": None,
@@ -69,7 +69,7 @@ def test_loc_location_transformer_resilience() -> None:
                 "url": test_url_names,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": load_fixture("loc_names_example.jsonld"),
+                "content_bytes": load_fixture("loc/raw_names.jsonld"),
                 "params": None,
             },
         ]
@@ -77,7 +77,7 @@ def test_loc_location_transformer_resilience() -> None:
     locations_transformer = LibraryOfCongressLocationsTransformer(
         test_url_subjects, test_url_names
     )
-    nodes = list(locations_transformer.stream(entity_type="nodes", query_chunk_size=1))
+    nodes = locations_transformer._stream_nodes()
     # Caversham Park from mads_geographic_concept
     # and Budapest (Hungary) from loc_names_example
     assert len(list(nodes)) == 2
@@ -98,4 +98,4 @@ def test_empty_source() -> None:
         ]
     )
     transformer = LibraryOfCongressConceptsTransformer("/dev/null")
-    assert list(transformer.stream(entity_type="nodes", query_chunk_size=1)) == []
+    assert list(transformer._stream_nodes()) == []

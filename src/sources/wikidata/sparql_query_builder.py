@@ -24,7 +24,7 @@ class SparqlQueryBuilder:
         fields = ["?item", "?itemLabel", "?itemDescription", "?itemAltLabel"]
 
         if node_type == "names":
-            fields += ["?dateOfBirthLabel", "?dateOfDeathLabel", "?placeOfBirthLabel"]
+            fields += ["?dateOfBirth", "?dateOfDeath", "?placeOfBirthLabel"]
         elif node_type == "locations":
             fields += ["?coordinates"]
 
@@ -70,6 +70,29 @@ class SparqlQueryBuilder:
         return "\n".join(definitions)
 
     @staticmethod
+    def _get_label_mappings(node_type: NodeType) -> str:
+        """
+        Returns SPARQL label mappings using the `wikibase:label` service.
+        """
+        extra_mappings = []
+        if node_type == "names":
+            extra_mappings.append("?placeOfBirth rdfs:label ?placeOfBirthLabel.")
+
+        label_mappings = f"""
+        OPTIONAL {{
+            SERVICE wikibase:label {{
+                bd:serviceParam wikibase:language "en".
+                ?item rdfs:label ?itemLabel.
+                ?item schema:description ?itemDescription.
+                ?item skos:altLabel ?itemAltLabel.
+                {'\n'.join(extra_mappings)}
+            }}                 
+        }}
+        """
+
+        return label_mappings
+
+    @staticmethod
     def get_all_ids_query(linked_ontology: OntologyType) -> str:
         """
         Return a query to retrieve the ids of _all_ Wikidata items referencing an id from the `linked_ontology`.
@@ -95,21 +118,14 @@ class SparqlQueryBuilder:
         Given a list of Wikidata `item_ids`, return a query to retrieve all required Wikidata fields for each id
         in the list.
         """
-        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
         query = f"""
             SELECT DISTINCT {cls._get_formatted_fields(node_type)}
             WHERE {{
-              VALUES ?item {{ {ids_clause} }}
-              
-              {cls._get_formatted_field_mappings(node_type)}
-              
-              SERVICE wikibase:label {{
-                bd:serviceParam wikibase:language "en".
-                ?item rdfs:label ?itemLabel.
-                ?item schema:description ?itemDescription.
-                ?item skos:altLabel ?itemAltLabel.
-              }}         
+                VALUES ?item {{ {ids_clause} }}
+                {cls._get_formatted_field_mappings(node_type)}
+                {cls._get_label_mappings(node_type)}
             }}
             GROUP BY ?item
         """
@@ -124,7 +140,7 @@ class SparqlQueryBuilder:
         Given a list of Wikidata `item_ids`, return a query to retrieve all linked ontology ids referenced by each
         item in the list.
         """
-        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
         query = f"""
             SELECT DISTINCT ?item ?linkedId 
@@ -134,7 +150,7 @@ class SparqlQueryBuilder:
             }}
         """
 
-        return query
+        return SparqlQueryBuilder._compact_format_query(query)
 
     @classmethod
     def get_parents_query(
@@ -146,7 +162,7 @@ class SparqlQueryBuilder:
         Given a list of Wikidata `item_ids`, return a query to retrieve all parents of each item in the list.
         Parents are determined based on the 'subclass of' (P279) or the 'instance of' (P31) fields.
         """
-        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in item_ids])
+        ids_clause = " ".join([f"wd:{wikidata_id}" for wikidata_id in sorted(item_ids)])
 
         if relationship_type == "instance_of":
             relationship = "?child wdt:P31 ?item."

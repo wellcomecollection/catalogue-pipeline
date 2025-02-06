@@ -10,7 +10,7 @@ def test_label() -> None:
     Label is extracted from madsrdf:authoritativeLabel
     """
     concept = RawLibraryOfCongressMADSConcept(
-        json.loads(load_fixture("mads_concept.json"))
+        json.loads(load_fixture("loc/mads_concept.json"))
     )
     assert concept.label == "Stump work"
 
@@ -18,7 +18,7 @@ def test_label() -> None:
 class TestBroaderConcepts:
     def test_real_example(self) -> None:
         concept = RawLibraryOfCongressMADSConcept(
-            json.loads(load_fixture("mads_geographic_concept.json"))
+            json.loads(load_fixture("loc/mads_geographic_concept.json"))
         )
         assert concept.broader_concept_ids == ["sh85040229", "sh85053109", "sh92006359"]
 
@@ -74,7 +74,7 @@ class TestRelatedConcepts:
         # This helps to give confidence that the whole test isn't just
         # passing due to a bogus assumption when making artificial test data.
         concept = RawLibraryOfCongressMADSConcept(
-            json.loads(load_fixture("mads_related_concept.json"))
+            json.loads(load_fixture("loc/mads_related_concept.json"))
         )
         assert concept.related_concept_ids == ["sh90003066"]
 
@@ -123,7 +123,6 @@ class TestRelatedConcepts:
 
 
 class TestNarrower:
-
     def test_get_no_narrowers(self) -> None:
         concept = RawLibraryOfCongressMADSConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
@@ -180,7 +179,7 @@ class TestNarrower:
 
 def test_alternative_labels() -> None:
     concept = RawLibraryOfCongressMADSConcept(
-        json.loads(load_fixture("mads_related_concept.json"))
+        json.loads(load_fixture("loc/mads_related_concept.json"))
     )
     assert set(concept.alternative_labels) == {
         "Loop blocking (Computer science)",

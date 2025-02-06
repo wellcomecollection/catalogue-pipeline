@@ -94,6 +94,13 @@ class RawWikidataLocation(RawWikidataConcept):
 
 class RawWikidataName(RawWikidataConcept):
     def _extract_date(self, field_name: str) -> str | None:
+        # Some Wikidata items store invalid dates of type 'uri', such as https://www.wikidata.org/wiki/Q20760409
+        if (
+            field_name in self.raw_concept
+            and self.raw_concept[field_name]["type"] == "uri"
+        ):
+            return None
+
         date_value = self._extract_optional_field_value(field_name)
 
         # When a date is unknown, sometimes Wikidata returns a URL instead of a valid date, such as
@@ -111,11 +118,11 @@ class RawWikidataName(RawWikidataConcept):
 
     @property
     def date_of_birth(self) -> str | None:
-        return self._extract_date("dateOfBirthLabel")
+        return self._extract_date("dateOfBirth")
 
     @property
     def date_of_death(self) -> str | None:
-        return self._extract_date("dateOfDeathLabel")
+        return self._extract_date("dateOfDeath")
 
     @property
     def place_of_birth(self) -> str | None:
