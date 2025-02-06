@@ -7,9 +7,9 @@ from transformers.base_transformer import EntityType
 from utils.ontology_id_checker import is_id_classified_as_node_type, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
 from utils.types import NodeType, OntologyType
+
 from .sparql_client import SPARQL_MAX_PARALLEL_QUERIES, WikidataSparqlClient
 from .sparql_query_builder import SparqlQueryBuilder, WikidataEdgeQueryType
-
 
 SPARQL_ITEMS_CHUNK_SIZE = 400
 
@@ -19,15 +19,14 @@ WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 def _parallelise_sparql_requests(
     items: Iterator, run_sparql_query: Callable[[list], list]
 ) -> Generator:
-    """Accept an `items` generator and a `run_sparql_query` method. Split `items` chunks and apply
+    """Accept an `items` generator and a `run_sparql_query` method. Split `items` into chunks and apply
     `run_sparql_query` to each chunk. Return a single generator of results."""
-    for raw_response_item in process_stream_in_parallel(
+    yield from process_stream_in_parallel(
         items,
         run_sparql_query,
         SPARQL_ITEMS_CHUNK_SIZE,
         SPARQL_MAX_PARALLEL_QUERIES,
-    ):
-        yield raw_response_item
+    )
 
 
 def extract_wikidata_id(item: dict, key: str = "item") -> str | None:
@@ -122,6 +121,8 @@ class WikidataLinkedOntologySource(BaseSource):
         for raw_mapping in _parallelise_sparql_requests(iter(all_ids), get_edges):
             from_id = extract_wikidata_id(raw_mapping, "fromItem")
 
+            # The 'toItem' ids of SAME_AS edges are MeSH/LoC ids, so we take the raw value instead of extracting
+            # the ids via the `extract_wikidata_id` function
             if edge_type in ("same_as_mesh", "same_as_loc"):
                 to_id = raw_mapping["toItem"]["value"]
             else:
@@ -147,12 +148,9 @@ class WikidataLinkedOntologySource(BaseSource):
         # Stream all SAME_AS edges and extract Wikidata ids from them, making sure to deduplicate
         # (a given Wikidata id can appear in more than one edge).
         for edge in self._stream_all_same_as_edges():
-            wikidata_id = edge["from_id"]
-            linked_id = edge["to_id"]
-            if (
-                is_id_in_ontology(linked_id, self.linked_ontology)
-                and wikidata_id not in seen
-            ):
+            wikidata_id, linked_id = edge["from_id"], edge["to_id"]
+            linked_id_is_valid = is_id_in_ontology(linked_id, self.linked_ontology)
+            if linked_id_is_valid and wikidata_id not in seen:
                 # Add Wikidata id to `seen` no matter if it's part of the selected node type
                 # to make sure it is not processed again as a parent below.
                 seen.add(wikidata_id)
@@ -197,9 +195,11 @@ class WikidataLinkedOntologySource(BaseSource):
             if edge["from_id"] in streamed_wikidata_ids:
                 yield {**edge, "type": "HAS_PARENT"}
 
+        # HAS_FIELD_OF_WORK edges only apply to people (SourceName) nodes
         if self.node_type == "names":
             print("Streaming HAS_FIELD_OF_WORK edges...")
             for edge in self._stream_all_edges_by_type("field_of_work"):
+                # Only include an edge if its `to_id` has a corresponding concept node in the graph
                 if is_id_in_ontology(edge["to_id"], "wikidata"):
                     yield {**edge, "type": "HAS_FIELD_OF_WORK"}
 

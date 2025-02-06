@@ -2,21 +2,21 @@
   "results": {
     "bindings": [
       {
-        "item": {
+        "fromItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q1"
         },
-        "linkedId": {
+        "toItem": {
           "type": "uri",
           "value": "sh00000001"
         }
       },
       {
-        "item": {
+        "fromItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q2"
         },
-        "linkedId": {
+        "toItem": {
           "type": "uri",
           "value": "sh00000001"
         }

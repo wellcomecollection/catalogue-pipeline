@@ -2,13 +2,12 @@ from typing import Literal
 
 from utils.types import NodeType, OntologyType
 
-
 WikidataEdgeQueryType = Literal[
     "same_as_loc",
     "same_as_mesh",
     "parent_instance_of",
     "parent_subclass_of",
-    "field_of_work"
+    "field_of_work",
 ]
 
 
@@ -132,7 +131,9 @@ class SparqlQueryBuilder:
         return SparqlQueryBuilder._compact_format_query(query)
 
     @classmethod
-    def get_edge_query(cls, item_ids: list[str], edge_type: WikidataEdgeQueryType) -> str:
+    def get_edge_query(
+        cls, item_ids: list[str], edge_type: WikidataEdgeQueryType
+    ) -> str:
         """
         Given a list of Wikidata `item_ids`, return a query to retrieve all edges of type `edge_type` linking each
         item in the list to a different Wikidata item.

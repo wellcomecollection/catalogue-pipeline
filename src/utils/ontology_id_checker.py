@@ -3,6 +3,7 @@ from functools import lru_cache
 from utils.aws import fetch_transformer_output_from_s3
 from utils.types import NodeType, OntologyType
 
+
 @lru_cache
 def _get_ids_for_ontology_and_node_type(
     ontology_type: OntologyType, node_type: NodeType

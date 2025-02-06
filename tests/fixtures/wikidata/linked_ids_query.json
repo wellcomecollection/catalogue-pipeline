@@ -1,4 +1,4 @@
 {
   "format": "json",
-  "query": "SELECT DISTINCT ?item ?linkedId WHERE { VALUES ?item { wd:Q1 wd:Q2 } ?item p:P244/ps:P244 ?linkedId. }"
+  "query": "SELECT DISTINCT ?fromItem ?toItem WHERE { VALUES ?fromItem { wd:Q1 wd:Q2 } ?fromItem p:P244/ps:P244 ?toItem. }"
 }

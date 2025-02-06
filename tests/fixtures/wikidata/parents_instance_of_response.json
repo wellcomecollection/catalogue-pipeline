@@ -2,21 +2,21 @@
   "results": {
     "bindings": [
       {
-        "item": {
+        "toItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q1"
         },
-        "child": {
+        "fromItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q2"
         }
       },
       {
-        "item": {
+        "toItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q3"
         },
-        "child": {
+        "fromItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q2"
         }

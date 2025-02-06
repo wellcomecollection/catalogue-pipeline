@@ -5,8 +5,8 @@ from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
 
 from config import WIKIDATA_SPARQL_URL
-from sources.wikidata.linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from utils.ontology_id_checker import is_id_classified_as_node_type, is_id_in_ontology
 
 
 def _add_mock_wikidata_requests(node_type: Literal["edges", "nodes"]) -> None:
@@ -30,7 +30,7 @@ def _add_mock_wikidata_requests(node_type: Literal["edges", "nodes"]) -> None:
 
 def _add_mock_loc_transformer_outputs() -> None:
     """
-    Add mock LoC transformer output files to S3 so that the LinkedOntologyIdTypeChecker class can extract ids from them.
+    Add mock LoC transformer output files to S3 so that we can extract ids from them.
     """
     for node_type in ["concepts", "locations", "names"]:
         MockSmartOpen.mock_s3_file(
@@ -54,9 +54,9 @@ def test_wikidata_concepts_source_edges() -> None:
     has_parent_edges = set()
     for edge in stream_result:
         if edge["type"] == "SAME_AS":
-            same_as_edges.add((edge["wikidata_id"], edge["linked_id"]))
+            same_as_edges.add((edge["from_id"], edge["to_id"]))
         elif edge["type"] == "HAS_PARENT":
-            has_parent_edges.add((edge["child_id"], edge["parent_id"]))
+            has_parent_edges.add((edge["from_id"], edge["to_id"]))
         else:
             raise ValueError(f"Unknown edge type {edge['type']}")
 
@@ -90,11 +90,10 @@ def test_wikidata_concepts_source_nodes() -> None:
 
 def test_wikidata_linked_ontology_id_checker() -> None:
     _add_mock_loc_transformer_outputs()
-    id_checker = LinkedOntologyIdTypeChecker("locations", "loc")
 
-    assert id_checker.id_is_valid("sh00000001")
-    assert not id_checker.id_is_valid("sh00000001000")
+    assert is_id_in_ontology("sh00000001", "loc")
+    assert not is_id_in_ontology("sh00000001000", "loc")
 
-    assert not id_checker.id_included_in_selected_type("sh00000001")
-    assert not id_checker.id_included_in_selected_type("tgrefwdw")
-    assert id_checker.id_included_in_selected_type("sh00000015")
+    assert not is_id_classified_as_node_type("sh00000001", "loc", "locations")
+    assert not is_id_classified_as_node_type("tgrefwdw", "loc", "locations")
+    assert is_id_classified_as_node_type("sh00000015", "loc", "locations")

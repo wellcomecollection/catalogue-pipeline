@@ -1,16 +1,17 @@
 import csv
 import json
+from collections.abc import Generator
 from functools import lru_cache
-from typing import Any, Generator
+from typing import Any
 
 import boto3
 import smart_open
 
-from utils.types import NodeType, OntologyType
+import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-from config import S3_BULK_LOAD_BUCKET_NAME
+from utils.types import NodeType, OntologyType
 
 LOAD_BALANCER_SECRET_NAME = "NeptuneTest/LoadBalancerUrl"
 INSTANCE_ENDPOINT_SECRET_NAME = "NeptuneTest/InstanceEndpoint"
@@ -66,7 +67,7 @@ def fetch_transformer_output_from_s3(
 ) -> Generator[list[Any]]:
     """Retrieves the bulk load file outputted by the relevant transformer so that we can extract data from it."""
     linked_nodes_file_name = f"{ontology_type}_{node_type}__nodes.csv"
-    s3_url = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
+    s3_url = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_url, "r", transport_params=transport_params) as f:

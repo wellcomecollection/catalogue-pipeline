@@ -50,6 +50,16 @@ def test_wikidata_concepts_edges_transformer() -> None:
     assert edges[0] == SourceConceptSameAs(
         from_type="SourceConcept",
         to_type="SourceConcept",
+        from_id="Q1",
+        to_id="sh00000001",
+        relationship="SAME_AS",
+        directed=False,
+        attributes={"source": "wikidata"},
+    )
+
+    assert edges[1] == SourceConceptSameAs(
+        from_type="SourceConcept",
+        to_type="SourceConcept",
         from_id="sh00000001",
         to_id="Q1",
         relationship="SAME_AS",

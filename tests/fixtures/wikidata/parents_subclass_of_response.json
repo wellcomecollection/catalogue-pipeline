@@ -2,11 +2,11 @@
   "results": {
     "bindings": [
       {
-        "item": {
+        "toItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q4"
         },
-        "child": {
+        "fromItem": {
           "type": "uri",
           "value": "http://www.wikidata.org/entity/Q1"
         }

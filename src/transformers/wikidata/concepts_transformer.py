@@ -1,15 +1,15 @@
 from collections.abc import Generator
 
 from models.graph_edge import (
+    BaseEdge,
     SourceConceptHasFieldOfWork,
     SourceConceptHasParent,
     SourceConceptSameAs,
-    BaseEdge,
 )
 from models.graph_node import SourceConcept
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from utils.types import OntologyType
 from transformers.base_transformer import BaseTransformer, EntityType
+from utils.types import OntologyType
 
 from .raw_concept import RawWikidataConcept
 
