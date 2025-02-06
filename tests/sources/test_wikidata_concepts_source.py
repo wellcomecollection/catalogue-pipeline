@@ -37,7 +37,7 @@ def _add_mock_wikidata_requests(
 
 
 def _add_mock_transformer_outputs(
-    ontology: Literal["loc", "wikidata_linked_loc"]
+    ontology: Literal["loc", "wikidata_linked_loc"],
 ) -> None:
     """
     Add mock transformer output files to S3 so that we can extract ids from them.
