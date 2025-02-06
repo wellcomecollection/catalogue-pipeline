@@ -1,5 +1,4 @@
 import json
-from typing import Type
 
 import pytest
 from test_utils import load_fixture
@@ -16,7 +15,7 @@ from transformers.loc.raw_concept import (
 )
 class TestSourceId:
     def test_remove_prefix_noop(
-        self, sut_class: Type[RawLibraryOfCongressConcept]
+        self, sut_class: type[RawLibraryOfCongressConcept]
     ) -> None:
         """
         If there is no prefix to remove, remove_id_prefix will do nothing
@@ -24,7 +23,7 @@ class TestSourceId:
         assert sut_class({"@id": "sh1234567890"}).source_id == "sh1234567890"
 
     def test_remove_prefix_fully_qualified(
-        self, sut_class: Type[RawLibraryOfCongressConcept]
+        self, sut_class: type[RawLibraryOfCongressConcept]
     ) -> None:
         """
         remove_id_prefix removes fully-qualified URL-style prefixes
@@ -43,7 +42,7 @@ class TestSourceId:
         )
 
     def test_remove_prefix_relative(
-        self, sut_class: Type[RawLibraryOfCongressConcept]
+        self, sut_class: type[RawLibraryOfCongressConcept]
     ) -> None:
         """
         remove_id_prefix removes relative/local prefixes
@@ -58,7 +57,7 @@ class TestSourceId:
         )
 
     def test_remove_prefix_lookalikes(
-        self, sut_class: Type[RawLibraryOfCongressConcept]
+        self, sut_class: type[RawLibraryOfCongressConcept]
     ) -> None:
         """
         remove_id_prefix only removes specific known prefixes,
@@ -81,7 +80,7 @@ class TestSourceId:
 )
 class TestSource:
     def test_source_subjects(
-        self, sut_class: Type[RawLibraryOfCongressConcept]
+        self, sut_class: type[RawLibraryOfCongressConcept]
     ) -> None:
         """
         Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
@@ -89,24 +88,24 @@ class TestSource:
         concept = sut_class({"@id": "/authorities/subjects/sh2010105253"})
         assert concept.source == "lc-subjects"
 
-    def test_source_names(self, sut_class: Type[RawLibraryOfCongressConcept]) -> None:
+    def test_source_names(self, sut_class: type[RawLibraryOfCongressConcept]) -> None:
         """
         Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
         """
         concept = sut_class({"@id": "/authorities/names/sh2010105253"})
         assert concept.source == "lc-names"
 
-    def test_source_invalid(self, sut_class: Type[RawLibraryOfCongressConcept]) -> None:
+    def test_source_invalid(self, sut_class: type[RawLibraryOfCongressConcept]) -> None:
         with pytest.raises(ValueError):
             concept = sut_class({"@id": "authorities/childrensSubjects/sj2021051581"})
-            concept.source
+            _ = concept.source
 
 
 @pytest.mark.parametrize(
     "sut_class", [RawLibraryOfCongressSKOSConcept, RawLibraryOfCongressMADSConcept]
 )
 class TestExclusion:
-    def test_do_not_exclude(self, sut_class: Type[RawLibraryOfCongressConcept]) -> None:
+    def test_do_not_exclude(self, sut_class: type[RawLibraryOfCongressConcept]) -> None:
         """
         A record with a corresponding node in its internal graph, and which is not a duplicate,
         should be included in the output
@@ -114,20 +113,20 @@ class TestExclusion:
         concept = sut_class({"@id": "authorities/names/sh2010105253", "@graph": []})
         # The SUT at this point doesn't actually care what the node is, just that it exists
         concept._raw_concept_node = {}
-        assert concept.exclude() == False
+        assert concept.exclude() is False
 
     def test_exclude_no_node(
-        self, sut_class: Type[RawLibraryOfCongressConcept]
+        self, sut_class: type[RawLibraryOfCongressConcept]
     ) -> None:
         """
         If a record does not contain a corresponding node in its internal graph
         then it should be excluded
         """
         concept = sut_class({"@id": "authorities/names/sh2010105253", "@graph": []})
-        assert concept.exclude() == True
+        assert concept.exclude()
 
     def test_exclude_marked_duplicates(
-        self, sut_class: Type[RawLibraryOfCongressConcept]
+        self, sut_class: type[RawLibraryOfCongressConcept]
     ) -> None:
         """
         If a record's identifier is suffixed with -781, this marks the entry as a duplicate
@@ -135,7 +134,7 @@ class TestExclusion:
         """
         concept = sut_class({"@id": "authorities/names/sh2010105253-781", "@graph": []})
         concept._raw_concept_node = {}
-        assert concept.exclude() == True
+        assert concept.exclude()
 
 
 @pytest.mark.parametrize(
@@ -147,7 +146,7 @@ class TestExclusion:
 )
 class TestGeographic:
     def test_is_geographic(
-        self, sut_class: Type[RawLibraryOfCongressConcept], source_format: str
+        self, sut_class: type[RawLibraryOfCongressConcept], source_format: str
     ) -> None:
         """
         A concept is geographic if its @type list contains madsrdf:Geographic or http://id.loc.gov/datatypes/codes/gac"
@@ -155,12 +154,12 @@ class TestGeographic:
         concept = sut_class(
             json.loads(load_fixture(f"loc/{source_format}_geographic_concept.json"))
         )
-        assert concept.is_geographic == True
+        assert concept.is_geographic
 
     def test_is_not_geographic(
-        self, sut_class: Type[RawLibraryOfCongressConcept], source_format: str
+        self, sut_class: type[RawLibraryOfCongressConcept], source_format: str
     ) -> None:
         concept = sut_class(
             json.loads(load_fixture(f"loc/{source_format}_concept.json"))
         )
-        assert concept.is_geographic == False
+        assert concept.is_geographic is False
