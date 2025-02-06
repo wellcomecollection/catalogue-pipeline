@@ -1,0 +1,354 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh92006359",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:ComplexSubject"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Office buildings--England"
+      },
+      "madsrdf:componentList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b23"
+          },
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b26"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b23",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Office buildings"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b24"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b24",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Office buildings"
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b26",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Geographic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "England"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b27"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b27",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "England"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh85053109",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:ComplexSubject"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Gardens--England"
+      },
+      "madsrdf:componentList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b15"
+          },
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b18"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b15",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Gardens"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b16"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b16",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Gardens"
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b18",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Geographic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "England"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b19"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b19",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "England"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh85040229",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:ComplexSubject"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Dwellings--England"
+      },
+      "madsrdf:componentList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b7"
+          },
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b10"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b7",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Dwellings"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b8"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b8",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Dwellings"
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b10",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Geographic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "England"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b11"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b11",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "England"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh2017003861",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Geographic"
+      ],
+      "bflc:marcKey": "151  $aCaversham Park (Reading, England)",
+      "identifiers:lccn": "sh2017003861",
+      "madsrdf:adminMetadata": [
+        {
+          "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b1"
+        },
+        {
+          "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b2"
+        }
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Caversham Park (Reading, England)"
+      },
+      "madsrdf:code": {
+        "@type": "http://id.loc.gov/datatypes/codes/gac",
+        "@value": "e-uk-en"
+      },
+      "madsrdf:editorialNote": "[This heading is not valid for use as a geographic subdivision.]",
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b3"
+          }
+        ]
+      },
+      "madsrdf:hasBroaderAuthority": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/sh85040229"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/sh85053109"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/sh92006359"
+        }
+      ],
+      "madsrdf:hasSource": [
+        {
+          "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b5"
+        },
+        {
+          "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b6"
+        }
+      ],
+      "madsrdf:isMemberOfMADSCollection": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSHAuthorizedHeadings"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSH_General"
+        }
+      ],
+      "madsrdf:isMemberOfMADSScheme": {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      },
+      "owl:sameAs": [
+        {
+          "@id": "http://id.loc.gov/authorities/sh2017003861#concept"
+        },
+        {
+          "@id": "info:lc/authorities/sh2017003861"
+        }
+      ]
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b1",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2017-10-13T11:41:51"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "revised"
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b2",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2017-07-06T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/ukcu"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b3",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Caversham Park (Reading, England)"
+      }
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b5",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "title page (Caversham Park) page 3 (first mentioned in the Domesday Book and its ownership can be traced back to 1164, when it was held by the Earl of Pembroke) page 6 (garden is the work of Capability Brown) page 15 (the estate was sold and split up in 1921) page 16 (since 1943 Caversham Park has been the HQ of BBC Monitoring and home of Radio Berkshire)"
+      },
+      "madsrdf:citationSource": "Work cat.: Viljoen, Ben. Lancelot Brown & the landscape of Caversham Park, 2016:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:ne7ebddd144ae4c6d9942e79e04d16e67b6",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "(Victorian stately home with parkland in the suburb of Caversham, on the outskirts of Reading; goes back to Norman times, a park and fortified manor house or castle which no longer exists; the current building inspired by Italian baroque palaces, was erected after a fire in 1850 by architect Horace Jones and is now home to the BBC's monitoring service)"
+      },
+      "madsrdf:citationSource": "Wikipedia (English), June 6, 2017",
+      "madsrdf:citationStatus": "found"
+    }
+  ],
+  "@id": "/authorities/subjects/sh2017003861"
+}
