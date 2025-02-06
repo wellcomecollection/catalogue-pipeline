@@ -62,10 +62,10 @@ def test_wikidata_raw_location() -> None:
     raw_location_input = json.loads(load_fixture("wikidata/raw_location.json"))
     raw_location = RawWikidataLocation(raw_location_input)
 
-    assert raw_location.latitude is not None
-    assert raw_location.longitude is not None
-    assert math.isclose(raw_location.latitude, 41.346111111)
-    assert math.isclose(raw_location.longitude, -85.469166666)
+    assert raw_location.coordinates["latitude"] is not None
+    assert raw_location.coordinates["longitude"] is not None
+    assert math.isclose(raw_location.coordinates["latitude"], 41.346111111)
+    assert math.isclose(raw_location.coordinates["longitude"], -85.469166666)
 
 
 def test_wikidata_raw_name() -> None:
@@ -81,14 +81,14 @@ def test_wikidata_raw_name() -> None:
 
 def test_wikidata_raw_location_empty_coordinates() -> None:
     raw_location = RawWikidataLocation({})
-    assert raw_location.latitude is None
-    assert raw_location.longitude is None
+    assert raw_location.coordinates["latitude"] is None
+    assert raw_location.coordinates["longitude"] is None
 
 
 def test_wikidata_raw_location_uri_type_coordinates() -> None:
     raw_location = RawWikidataLocation({"type": "uri", "value": "some-url"})
-    assert raw_location.latitude is None
-    assert raw_location.longitude is None
+    assert raw_location.coordinates["latitude"] is None
+    assert raw_location.coordinates["longitude"] is None
 
 
 def test_wikidata_raw_location_invalid_coordinates() -> None:
@@ -99,10 +99,10 @@ def test_wikidata_raw_location_invalid_coordinates() -> None:
         }
     )
     with pytest.raises(AssertionError):
-        _ = raw_location.latitude
+        _ = raw_location.coordinates["latitude"]
 
     with pytest.raises(AssertionError):
-        _ = raw_location.longitude
+        _ = raw_location.coordinates["longitude"]
 
 
 def test_wikidata_raw_name_invalid_date() -> None:

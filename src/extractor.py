@@ -34,18 +34,18 @@ def handler(
         neptune_client = get_neptune_client(is_local)
         transformer.stream_to_graph(neptune_client, entity_type, sample_size)
     elif stream_destination == "s3":
-        assert (
-            config.S3_BULK_LOAD_BUCKET_NAME is not None
-        ), "To stream to S3, the S3_BULK_LOAD_BUCKET_NAME environment variable must be defined."
+        assert config.S3_BULK_LOAD_BUCKET_NAME is not None, (
+            "To stream to S3, the S3_BULK_LOAD_BUCKET_NAME environment variable must be defined."
+        )
 
         file_name = f"{transformer_type}__{entity_type}.csv"
         s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
         transformer.stream_to_s3(s3_uri, entity_type, sample_size)
     elif stream_destination == "sns":
         topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
-        assert (
-            topic_arn is not None
-        ), "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
+        assert topic_arn is not None, (
+            "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
+        )
 
         transformer.stream_to_sns(topic_arn, entity_type, sample_size)
     elif stream_destination == "local":

@@ -1,7 +1,6 @@
 import gzip
 import json
 from collections.abc import Generator
-from json import JSONDecodeError
 
 import requests
 

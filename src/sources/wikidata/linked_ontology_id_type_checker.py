@@ -20,9 +20,9 @@ class LinkedOntologyIdTypeChecker:
 
         # MeSH only has concepts and locations, so make sure we don't attempt to extract names.
         if node_type == "names":
-            assert (
-                linked_ontology != "mesh"
-            ), "Invalid node_type for ontology type MeSH."
+            assert linked_ontology != "mesh", (
+                "Invalid node_type for ontology type MeSH."
+            )
 
     @lru_cache
     def _get_linked_ontology_ids(self, node_type: NodeType) -> set[str]:

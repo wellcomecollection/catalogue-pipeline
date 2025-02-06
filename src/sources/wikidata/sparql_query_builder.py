@@ -85,7 +85,7 @@ class SparqlQueryBuilder:
                 ?item rdfs:label ?itemLabel.
                 ?item schema:description ?itemDescription.
                 ?item skos:altLabel ?itemAltLabel.
-                {'\n'.join(extra_mappings)}
+                {"\n".join(extra_mappings)}
             }}                 
         }}
         """
