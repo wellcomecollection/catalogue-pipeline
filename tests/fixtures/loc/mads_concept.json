@@ -1,0 +1,188 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh85042701",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Embroidery"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n6689c63343524db7abe8d4543ce4b897b9"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b9",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Embroidery"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh85129340",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "bflc:marcKey": "150 0$aStump work",
+      "identifiers:lccn": "sh 85129340",
+      "madsrdf:adminMetadata": [
+        {
+          "@id": "_:n6689c63343524db7abe8d4543ce4b897b1"
+        },
+        {
+          "@id": "_:n6689c63343524db7abe8d4543ce4b897b2"
+        }
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Stump work"
+      },
+      "madsrdf:classification": {
+        "@id": "_:n6689c63343524db7abe8d4543ce4b897b3"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n6689c63343524db7abe8d4543ce4b897b4"
+          }
+        ]
+      },
+      "madsrdf:hasBroaderAuthority": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/sh85042701"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/sh85090601"
+        }
+      ],
+      "madsrdf:hasVariant": {
+        "@id": "_:n6689c63343524db7abe8d4543ce4b897b6"
+      },
+      "madsrdf:isMemberOfMADSCollection": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSHAuthorizedHeadings"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSH_General"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_SubdivideGeographically"
+        }
+      ],
+      "madsrdf:isMemberOfMADSScheme": {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      },
+      "owl:sameAs": [
+        {
+          "@id": "http://id.loc.gov/authorities/sh85129340#concept"
+        },
+        {
+          "@id": "info:lc/authorities/sh85129340"
+        }
+      ]
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b1",
+      "@type": "ri:RecordInfo",
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "1994-12-06T06:43:15"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "revised"
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b2",
+      "@type": "ri:RecordInfo",
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "1986-02-11T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b3",
+      "@type": "lcc:ClassNumber",
+      "madsrdf:code": "TT778.S75",
+      "madsrdf:hasExactExternalAuthority": {
+        "@id": "http://id.loc.gov/authorities/classification/TT778.S75"
+      }
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b4",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Stump work"
+      }
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b6",
+      "@type": [
+        "madsrdf:Topic",
+        "madsrdf:Variant"
+      ],
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n6689c63343524db7abe8d4543ce4b897b7"
+          }
+        ]
+      },
+      "madsrdf:variantLabel": {
+        "@language": "en",
+        "@value": "Stumpwork"
+      }
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b7",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Stumpwork"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh85090601",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Needlework"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n6689c63343524db7abe8d4543ce4b897b11"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n6689c63343524db7abe8d4543ce4b897b11",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Needlework"
+      }
+    }
+  ],
+  "@id": "/authorities/subjects/sh85129340"
+}

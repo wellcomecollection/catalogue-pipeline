@@ -79,15 +79,19 @@ def test_wikidata_raw_name() -> None:
     assert raw_name.description == "American politician"
 
 
-def test_wikidata_raw_location_invalid_coordinates() -> None:
+def test_wikidata_raw_location_empty_coordinates() -> None:
     raw_location = RawWikidataLocation({})
     assert raw_location.latitude is None
     assert raw_location.longitude is None
 
+
+def test_wikidata_raw_location_uri_type_coordinates() -> None:
     raw_location = RawWikidataLocation({"type": "uri", "value": "some-url"})
     assert raw_location.latitude is None
     assert raw_location.longitude is None
 
+
+def test_wikidata_raw_location_invalid_coordinates() -> None:
     raw_location = RawWikidataLocation(
         {
             "item": {"type": "uri", "value": "some-id"},
@@ -101,16 +105,34 @@ def test_wikidata_raw_location_invalid_coordinates() -> None:
         _ = raw_location.longitude
 
 
-def test_wikidata_raw_name_invalid_dates() -> None:
+def test_wikidata_raw_name_invalid_date() -> None:
     raw_name = RawWikidataName(
-        {"dateOfBirth": {"type": "literal", "value": "+0000-00-00T00:00:00Z"}}
+        {
+            "dateOfBirth": {"type": "literal", "value": "+0000-00-00T00:00:00Z"},
+            "dateOfDeath": {"type": "literal", "value": "+0000-00-00T00:00:00Z"},
+        },
     )
     assert raw_name.date_of_birth is None
+    assert raw_name.date_of_death is None
 
-    raw_name = RawWikidataName({"dateOfBirth": {"type": "uri", "value": "some-uri"}})
-    assert raw_name.date_of_birth is None
 
+def test_wikidata_raw_name_uri_type_date() -> None:
     raw_name = RawWikidataName(
-        {"dateOfBirth": {"type": "literal", "value": "https://some-url"}}
+        {
+            "dateOfBirth": {"type": "uri", "value": "some-uri"},
+            "dateOfDeath": {"type": "uri", "value": "some-uri"},
+        }
     )
     assert raw_name.date_of_birth is None
+    assert raw_name.date_of_death is None
+
+
+def test_wikidata_raw_name_uri_date() -> None:
+    raw_name = RawWikidataName(
+        {
+            "dateOfBirth": {"type": "literal", "value": "https://some-url"},
+            "dateOfDeath": {"type": "literal", "value": "https://some-url"},
+        }
+    )
+    assert raw_name.date_of_birth is None
+    assert raw_name.date_of_death is None

@@ -1,0 +1,204 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh2006001563",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Pitheciidae"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b11"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b11",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Pitheciidae"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh00000032",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "bflc:marcKey": "150  $aPithecia",
+      "identifiers:lccn": "sh 00000032",
+      "madsrdf:adminMetadata": [
+        {
+          "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b1"
+        },
+        {
+          "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b2"
+        }
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Pithecia"
+      },
+      "madsrdf:classification": {
+        "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b3"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b4"
+          }
+        ]
+      },
+      "madsrdf:hasBroaderAuthority": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh2006001563"
+      },
+      "madsrdf:hasNarrowerAuthority": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh00000029"
+      },
+      "madsrdf:hasSource": [
+        {
+          "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b6"
+        },
+        {
+          "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b7"
+        },
+        {
+          "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b8"
+        },
+        {
+          "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b9"
+        },
+        {
+          "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b10"
+        }
+      ],
+      "madsrdf:isMemberOfMADSCollection": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSHAuthorizedHeadings"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSH_General"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_SubdivideGeographically"
+        }
+      ],
+      "madsrdf:isMemberOfMADSScheme": {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      },
+      "owl:sameAs": [
+        {
+          "@id": "http://id.loc.gov/authorities/sh00000032#concept"
+        },
+        {
+          "@id": "info:lc/authorities/sh00000032"
+        }
+      ]
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b1",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2006-03-01T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b2",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2006-04-25T13:58:06"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "revised"
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b3",
+      "@type": "lcc:ClassNumber",
+      "madsrdf:code": "QL737.P959",
+      "madsrdf:hasExactExternalAuthority": {
+        "@id": "http://id.loc.gov/authorities/classification/QL737.P959"
+      }
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b4",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Pithecia"
+      }
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b6",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "p. 168 (Genus Pithecia Desmarest, 1804, in Family Pitheciidae, Saki Monkeys)"
+      },
+      "madsrdf:citationSource": "Groves, C. Primate taxonomy, 2001:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b7",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "p. 3 (Pithecia Desmarest 1804)"
+      },
+      "madsrdf:citationSource": "Work cat.: 98210231: Homburg, I. \u00d6kologie und Sozialverhalten von Weissgesicht-Sakis, 1998:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b8",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "p. 264 (Pithecia, Desmarest, 1804)"
+      },
+      "madsrdf:citationSource": "Napier, J.R. A handbook of living primates, 1967:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b9",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "v. 1, p. 452 (Primates; Cebidae; Genus Pithecia)"
+      },
+      "madsrdf:citationSource": "Walker's mammals world, 1991:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:n206a4e00dc5c4a9dbd1bf5bba8caab38b10",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "p. 17 (Family Pitheciidae. Sakis (Chiropotes spp. and Pithecia spp.))"
+      },
+      "madsrdf:citationSource": "Shumaker, R.W. Primates in question, 3002:",
+      "madsrdf:citationStatus": "found"
+    }
+  ],
+  "@id": "/authorities/subjects/sh00000032"
+}
