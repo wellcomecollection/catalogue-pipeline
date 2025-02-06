@@ -1,0 +1,56 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh99005104",
+      "@type": "skos:Concept",
+      "skos:changeNote": [
+        {
+          "@id": "_:n28dfff48bd194803959bb4d18b09c690b1"
+        },
+        {
+          "@id": "_:n28dfff48bd194803959bb4d18b09c690b2"
+        }
+      ],
+      "skos:inScheme": {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      },
+      "skos:note": "Use as a topical subdivision under individual materials and types of materials.",
+      "skos:prefLabel": {
+        "@language": "en",
+        "@value": "Pickling"
+      }
+    },
+    {
+      "@id": "_:n28dfff48bd194803959bb4d18b09c690b1",
+      "@type": "cs:ChangeSet",
+      "cs:changeReason": "revised",
+      "cs:createdDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2007-11-06T07:52:55"
+      },
+      "cs:creatorName": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "cs:subjectOfChange": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh99005104"
+      }
+    },
+    {
+      "@id": "_:n28dfff48bd194803959bb4d18b09c690b2",
+      "@type": "cs:ChangeSet",
+      "cs:changeReason": "new",
+      "cs:createdDate": {
+        "@type": "xsd:dateTime",
+        "@value": "1999-07-08T00:00:00"
+      },
+      "cs:creatorName": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/ien"
+      },
+      "cs:subjectOfChange": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh99005104"
+      }
+    }
+  ],
+  "@id": "/authorities/subjects/sh99005104"
+}
