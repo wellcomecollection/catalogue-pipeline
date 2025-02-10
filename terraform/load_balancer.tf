@@ -25,11 +25,15 @@ resource "aws_lb_target_group_attachment" "neptune_instance_attachment" {
   # this setup is still more convenient than only being able to connect from within the VPC.
   # If it starts bothering us, we can create a Lambda function for dynamically updating the target group IP, as outlined
   # here: https://aws-samples.github.io/aws-dbs-refarch-graph/src/connecting-using-a-load-balancer/
-  target_id = "172.42.174.101"
+  target_id = data.aws_secretsmanager_secret_version.neptune_cluster_private_ip.secret_string
 }
 
-locals {
-  catalogue_graph_nlb_url = "catalogue-graph.wellcomecollection.org"
+resource "aws_secretsmanager_secret" "neptune_cluster_private_ip" {
+  name = "${local.namespace}/neptune-nlb-private-ip"
+}
+
+data "aws_secretsmanager_secret_version" "neptune_cluster_private_ip" {
+  secret_id = aws_secretsmanager_secret.neptune_cluster_private_ip.id
 }
 
 # A custom certificate which will be used for TLS termination
@@ -78,7 +82,7 @@ resource "aws_vpc_security_group_egress_rule" "neptune_lb_egress" {
 }
 
 resource "aws_secretsmanager_secret" "neptune_nlb_url" {
-  name = "NeptuneTest/LoadBalancerUrl"
+  name = "${local.namespace}/neptune-nlb-url"
 }
 
 resource "aws_secretsmanager_secret_version" "neptune_nlb_endpoint_url" {

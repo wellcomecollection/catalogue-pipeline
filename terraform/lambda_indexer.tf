@@ -24,7 +24,7 @@ data "aws_iam_policy_document" "allow_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:NeptuneTest/*"
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:${local.namespace}/*"
     ]
   }
 }

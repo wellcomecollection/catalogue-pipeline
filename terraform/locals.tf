@@ -12,6 +12,8 @@ locals {
   public_subnets  = data.terraform_remote_state.aws_account_infrastructure.outputs.developer_vpc_public_subnets
 
   ec_privatelink_security_group_id = local.shared_infra["ec_developer_privatelink_sg_id"]
+
+  catalogue_graph_nlb_url = "catalogue-graph.wellcomecollection.org"
 }
 
 data "aws_vpc" "vpc" {
