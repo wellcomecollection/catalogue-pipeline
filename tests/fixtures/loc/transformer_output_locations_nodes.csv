@@ -1,0 +1,3 @@
+:ID,:LABEL,id,label,source,alternative_ids,alternative_labels,description,latitude,longitude
+sh00000015,SourceLocation,sh00000015,"Trail Creek Watershed (Jackson County, Or.)",lc-subjects,,,null,null,null
+sh00000016,SourceLocation,sh00000016,"Trail Creek (Jackson County, Or.)",lc-subjects,,,null,null,null

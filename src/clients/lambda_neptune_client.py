@@ -1,5 +1,3 @@
-import os
-
 import boto3
 
 from .base_neptune_client import BaseNeptuneClient

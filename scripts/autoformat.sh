@@ -12,11 +12,11 @@ cd "$ROOT"
 CHECK=${1:-}
 
 if [ "$CHECK" == "--check" ]; then
-    echo "Checking code formatting (run ./scripts/autoformat.sh to fix any issues!)..."
-    black --check src/ tests/
-    isort --profile=black --check src/ tests/
+    echo "Checking code formatting and linting (run ./scripts/autoformat.sh to fix any issues!)..."
+    ruff format src/ tests/ --check
+    ruff check src/ tests/
 else
-    echo "Formatting code ..."
-    black src/ tests/
-    isort --profile=black src/ tests/
+    echo "Formatting and linting code ..."
+    ruff format src/ tests/
+    ruff check src/ tests/ --fix
 fi

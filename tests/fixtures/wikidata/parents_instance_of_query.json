@@ -1,0 +1,4 @@
+{
+  "format": "json",
+  "query": "SELECT DISTINCT ?child ?item WHERE { VALUES ?child { wd:Q1 wd:Q2 } ?child wdt:P31 ?item. }"
+}

@@ -1,0 +1,70 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q1"
+        },
+        "itemLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Eustigmatophyceae"
+        },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "class of algae"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        },
+        "itemLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "American women in World War I"
+        },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "American women's role in World War I and effect of World War I in American women's life"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q3"
+        },
+        "itemLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "American women in World War I"
+        },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "American women's role in World War I and effect of World War I in American women's life"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q4"
+        },
+        "itemLabel": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "American women in World War I"
+        },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "American women's role in World War I and effect of World War I in American women's life"
+        }
+      }
+    ]
+  }
+}

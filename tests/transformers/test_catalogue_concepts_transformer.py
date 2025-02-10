@@ -22,11 +22,9 @@ def test_mesh_concepts_transformer() -> None:
     catalogue_concepts_transformer = CatalogueConceptsTransformer(test_url)
 
     # test transform_node
-    nodes = list(
-        catalogue_concepts_transformer.stream(entity_type="nodes", query_chunk_size=1)
-    )
+    nodes = list(catalogue_concepts_transformer.stream(entity_type="nodes"))[0]
     assert len(list(nodes)) == 12
-    assert nodes[0][0].id == "s6s24vd7"
-    assert nodes[0][0].label == "Human anatomy"
-    assert nodes[0][0].type == "Concept"
-    assert nodes[0][0].source == "lc-subjects"
+    assert nodes[0].id == "s6s24vd7"
+    assert nodes[0].label == "Human anatomy"
+    assert nodes[0].type == "Concept"
+    assert nodes[0].source == "lc-subjects"
