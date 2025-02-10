@@ -86,7 +86,7 @@ resource "aws_vpc_security_group_egress_rule" "neptune_egress" {
 }
 
 resource "aws_secretsmanager_secret" "neptune_cluster_endpoint" {
-  name = "NeptuneTest/InstanceEndpoint"
+  name = "${local.namespace}/neptune-cluster-endpoint"
 }
 
 resource "aws_secretsmanager_secret_version" "neptune_cluster_endpoint_value" {

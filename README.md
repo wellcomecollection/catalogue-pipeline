@@ -168,7 +168,7 @@ To connect to the catalogue graph, add the following configuration into your Jup
 ```
 %%graph_notebook_config
 {
-    "host": <value stored in AWS Secrets Manager under 'NeptuneTest/InstanceEndpoint' in the platform account>,
+    "host": <value stored in AWS Secrets Manager under 'catalogue-graph/neptune-cluster-endpoint' in the platform account>,
     "neptune_service": "neptune-db",
     "port": 8182,
     "ssl": true,
