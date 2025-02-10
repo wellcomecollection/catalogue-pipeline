@@ -28,12 +28,10 @@ class RawCatalogueConcept:
         Determines whether a given block of JSON represents a Concept as returned from the Catalogue API.
         A Concept is a block of JSON with a type property and a list of identifiers.
         """
-        if self.raw_concept.get("type") in get_args(
-            ConceptType
-        ) and self.raw_concept.get("identifiers"):
-            return True
-
-        return False
+        return (
+            self.raw_concept.get("type") in get_args(ConceptType)
+            and self.raw_concept.get("identifiers") is not None
+        )
 
     @property
     def wellcome_id(self) -> str:

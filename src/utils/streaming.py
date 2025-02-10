@@ -53,5 +53,4 @@ def process_stream_in_parallel(
 
             for future in done:
                 items = future.result()
-                for item in items:
-                    yield item
+                yield from items

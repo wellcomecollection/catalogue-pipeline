@@ -1,0 +1,56 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh2001009772",
+      "@type": "skosxl:Label",
+      "skos:changeNote": [
+        {
+          "@id": "_:ncbe2fbbca4484db9968d00b56091d840b1"
+        },
+        {
+          "@id": "_:ncbe2fbbca4484db9968d00b56091d840b2"
+        },
+        {
+          "@language": "en",
+          "@value": "This authority record has been deleted because he subject heading is covered by the name heading {Gummidge, Worzel (Fictitious character)} (DLC)nb2020011266"
+        }
+      ],
+      "skosxl:literalForm": {
+        "@language": "en",
+        "@value": "Worzel Gummidge (Fictitious character)"
+      }
+    },
+    {
+      "@id": "_:ncbe2fbbca4484db9968d00b56091d840b1",
+      "@type": "cs:ChangeSet",
+      "cs:changeReason": "new",
+      "cs:createdDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2001-12-06T00:00:00"
+      },
+      "cs:creatorName": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/uk"
+      },
+      "cs:subjectOfChange": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh2001009772"
+      }
+    },
+    {
+      "@id": "_:ncbe2fbbca4484db9968d00b56091d840b2",
+      "@type": "cs:ChangeSet",
+      "cs:changeReason": "deprecated",
+      "cs:createdDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2021-04-15T12:19:28"
+      },
+      "cs:creatorName": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/uk"
+      },
+      "cs:subjectOfChange": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh2001009772"
+      }
+    }
+  ],
+  "@id": "/authorities/subjects/sh2001009772"
+}

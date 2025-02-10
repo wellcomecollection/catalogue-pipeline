@@ -1,0 +1,83 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh2001009772",
+      "@type": [
+        "madsrdf:DeprecatedAuthority",
+        "madsrdf:Topic",
+        "madsrdf:Variant"
+      ],
+      "madsrdf:adminMetadata": [
+        {
+          "@id": "_:nfcf2ac8a60404d37aaa15836972ce73fb1"
+        },
+        {
+          "@id": "_:nfcf2ac8a60404d37aaa15836972ce73fb2"
+        }
+      ],
+      "madsrdf:deletionNote": {
+        "@language": "en",
+        "@value": "This authority record has been deleted because he subject heading is covered by the name heading {Gummidge, Worzel (Fictitious character)} (DLC)nb2020011266"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:nfcf2ac8a60404d37aaa15836972ce73fb3"
+          }
+        ]
+      },
+      "madsrdf:variantLabel": {
+        "@language": "en",
+        "@value": "Worzel Gummidge (Fictitious character)"
+      },
+      "owl:sameAs": [
+        {
+          "@id": "http://id.loc.gov/authorities/sh2001009772#concept"
+        },
+        {
+          "@id": "info:lc/authorities/sh2001009772"
+        }
+      ]
+    },
+    {
+      "@id": "_:nfcf2ac8a60404d37aaa15836972ce73fb1",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2021-04-15T12:19:28"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/uk"
+      },
+      "ri:recordStatus": "deprecated"
+    },
+    {
+      "@id": "_:nfcf2ac8a60404d37aaa15836972ce73fb2",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2001-12-06T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/uk"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:nfcf2ac8a60404d37aaa15836972ce73fb3",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Worzel Gummidge (Fictitious character)"
+      }
+    }
+  ],
+  "@id": "/authorities/subjects/sh2001009772"
+}

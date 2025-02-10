@@ -4,32 +4,18 @@
 #
 #    pip-compile dev_requirements.in
 #
-black==24.10.0
-    # via -r dev_requirements.in
-click==8.1.8
-    # via black
 coverage[toml]==7.6.10
     # via
     #   -r dev_requirements.in
     #   pytest-cov
 iniconfig==2.0.0
     # via pytest
-isort==5.13.2
-    # via -r dev_requirements.in
 mypy==1.14.1
     # via -r dev_requirements.in
 mypy-extensions==1.0.0
-    # via
-    #   black
-    #   mypy
+    # via mypy
 packaging==24.2
-    # via
-    #   black
-    #   pytest
-pathspec==0.12.1
-    # via black
-platformdirs==4.3.6
-    # via black
+    # via pytest
 pluggy==1.5.0
     # via pytest
 pytest==8.3.4
@@ -37,6 +23,8 @@ pytest==8.3.4
     #   -r dev_requirements.in
     #   pytest-cov
 pytest-cov==6.0.0
+    # via -r dev_requirements.in
+ruff==0.9.4
     # via -r dev_requirements.in
 typing-extensions==4.12.2
     # via mypy

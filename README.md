@@ -115,6 +115,18 @@ command line. For example, to check the status of a bulk load job, run the follo
 AWS_PROFILE=platform-developer python3.13 bulk_load_poller.py --load-id=<some_id>
 ```
 
+To run an extractor, use the following:
+
+```shell
+S3_BULK_LOAD_BUCKET_NAME=wellcomecollection-neptune-graph-loader \
+AWS_PROFILE=platform-developer \
+python3.13 extractor.py \
+  --transformer-type=wikidata_linked_loc_concepts \
+  --entity-type=nodes \
+  --stream-destination=void \
+  --sample-size=10
+```
+
 ## Local Neptune experimentation
 
 To run experimental Neptune queries locally, create a new Python file in the `src` directory, create a local Neptune
@@ -156,7 +168,7 @@ To connect to the catalogue graph, add the following configuration into your Jup
 ```
 %%graph_notebook_config
 {
-    "host": <value stored in AWS Secrets Manager under 'NeptuneTest/InstanceEndpoint' in the platform account>,
+    "host": <value stored in AWS Secrets Manager under 'catalogue-graph/neptune-cluster-endpoint' in the platform account>,
     "neptune_service": "neptune-db",
     "port": 8182,
     "ssl": true,
