@@ -45,7 +45,3 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
     ]
   }
 }
-
-output "gha_catalogue_graph_ci_role_arn" {
-  value = module.gha_catalogue_graph_ci_role.role_arn
-}
