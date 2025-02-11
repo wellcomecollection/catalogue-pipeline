@@ -4,6 +4,7 @@ module "bulk_loader_lambda" {
   name        = "catalogue-graph-bulk-loader"
   description = "Bulk loads entities from an S3 bucket into the Neptune database."
   runtime     = "python3.13"
+  publish     = true
 
   filename         = "../target/build.zip"
   source_code_hash = filesha256("../target/build.zip")
