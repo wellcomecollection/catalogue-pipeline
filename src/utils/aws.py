@@ -1,7 +1,6 @@
 import csv
 import json
 from collections.abc import Generator
-from functools import lru_cache
 from typing import Any
 
 import boto3
@@ -61,7 +60,6 @@ def get_neptune_client(is_local: bool) -> BaseNeptuneClient:
         return LambdaNeptuneClient(get_secret(INSTANCE_ENDPOINT_SECRET_NAME))
 
 
-@lru_cache
 def fetch_transformer_output_from_s3(
     ontology_type: OntologyType, node_type: NodeType
 ) -> Generator[list[Any]]:
