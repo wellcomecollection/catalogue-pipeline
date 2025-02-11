@@ -5,9 +5,9 @@ data "terraform_remote_state" "catalogue_infra_critical" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/catalogue/infrastructure/critical.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/catalogue/infrastructure/critical.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -18,9 +18,9 @@ data "terraform_remote_state" "shared_infra" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/platform-infrastructure/shared.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/platform-infrastructure/shared.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -61,9 +61,9 @@ data "terraform_remote_state" "sierra_adapter" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/sierra_adapter.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/sierra_adapter.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -74,9 +74,9 @@ data "terraform_remote_state" "mets_adapter" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/catalogue/mets_adapter.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/catalogue/mets_adapter.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -87,9 +87,9 @@ data "terraform_remote_state" "tei_adapter" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/tei_adapter.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/tei_adapter.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -100,9 +100,9 @@ data "terraform_remote_state" "ebsco_adapter" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/ebsco_adapter.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/ebsco_adapter.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -114,9 +114,9 @@ data "terraform_remote_state" "calm_adapter" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/calm_adapter.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/calm_adapter.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -127,9 +127,9 @@ data "terraform_remote_state" "reindexer" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/catalogue/reindexer.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/catalogue/reindexer.tfstate"
+    region = "eu-west-1"
   }
 }
 
@@ -140,9 +140,9 @@ data "terraform_remote_state" "inferrer" {
     assume_role = {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/catalogue-pipeline/pipeline/inferrer.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/catalogue-pipeline/pipeline/inferrer.tfstate"
+    region = "eu-west-1"
   }
 }
 

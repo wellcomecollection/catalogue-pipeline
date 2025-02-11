@@ -33,7 +33,7 @@ module "embedder_lambda" {
 
   # see comment on fargate service's queue_visibility_timeout_seconds
   # 15 minutes is the max for lambda, is it going to be enough?
-  timeout = 60 * 15 # 15 Minutes
+  timeout     = 60 * 15 # 15 Minutes
   memory_size = 2048
 
   queue_config = {
