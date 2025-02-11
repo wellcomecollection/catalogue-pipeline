@@ -39,7 +39,6 @@ resource "aws_iam_policy" "state_machine_policy" {
         Effect   = "Allow",
         Action   = ["lambda:InvokeFunction"],
         Resource = [
-          module.extractor_lambda.lambda.arn,
           module.bulk_loader_lambda.lambda.arn,
           module.bulk_load_poller_lambda.lambda.arn
         ]
