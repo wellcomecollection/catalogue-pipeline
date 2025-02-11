@@ -48,6 +48,7 @@ ConceptType = Literal[
     "Meeting",
     "Genre",
     "Period",
+    "Subject"
 ]
 
 ConceptSource = Literal[
