@@ -12,7 +12,7 @@ terraform {
   }
 }
 
-data "terraform_remote_state" "aws_account_infrastructure" {
+data "terraform_remote_state" "catalogue_aws_account_infrastructure" {
   backend = "s3"
 
   config = {
@@ -20,7 +20,7 @@ data "terraform_remote_state" "aws_account_infrastructure" {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
     bucket = "wellcomecollection-platform-infra"
-    key    = "terraform/aws-account-infrastructure/platform.tfstate"
+    key    = "terraform/aws-account-infrastructure/catalogue.tfstate"
     region = "eu-west-1"
   }
 }
