@@ -16,6 +16,7 @@ import weco.pipeline.id_minter.config.builders.{
   IdentifiersTableBuilder,
   RDSBuilder
 }
+import weco.pipeline.id_minter.config.models.RDSClientConfig
 import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.models.IdentifiersTable
 import weco.pipeline.id_minter.services.IdMinterWorkerService
@@ -29,9 +30,9 @@ object Main extends WellcomeTypesafeApp {
     config: Config =>
       implicit val executionContext: ExecutionContext =
         ActorSystem("main-actor-system").dispatcher
-
+      val rdsConfig = RDSClientConfig(config)
       val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
-      RDSBuilder.buildDB(config)
+      RDSBuilder.buildDB(rdsConfig)
 
       val identifierGenerator = new IdentifierGenerator(
         identifiersDao = new IdentifiersDao(
@@ -66,7 +67,7 @@ object Main extends WellcomeTypesafeApp {
         identifierGenerator = identifierGenerator,
         jsonRetriever = jsonRetriever,
         pipelineStream = pipelineStream,
-        rdsClientConfig = RDSBuilder.buildRDSClientConfig(config),
+        rdsClientConfig = rdsConfig,
         identifiersTableConfig = identifiersTableConfig
       )
   }
