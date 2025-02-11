@@ -1,3 +1,4 @@
+from itertools import product
 from typing import Any
 
 from utils.aws import NodeType, OntologyType, fetch_from_s3
@@ -15,13 +16,20 @@ class IdLabelChecker(dict):
             self.inverse.setdefault(value, []).append(key)
 
     @classmethod
-    def from_source(cls, node_type: NodeType, source: OntologyType) -> dict:
+    def from_source(cls, node_type: NodeType | list[NodeType], source: OntologyType | list[OntologyType]) -> dict:
         """Fetch source node data from s3 bulk upload files and create ID-label mapping."""
         id_label_dict = {}
 
-        for row in fetch_from_s3(node_type, source):
-            # Extract source id and label at position 0 and 3, respectively
-            id_label_dict[row[0]] = row[3]
+        if not isinstance(node_type, list):
+            node_type = [node_type]
+
+        if not isinstance(source, list):
+            source = [source]
+
+        for nt, s in product(node_type, source):
+            for row in fetch_from_s3(nt, s):
+                # Extract source id and label at position 0 and 3, respectively
+                id_label_dict[row[0]] = row[3].lower()
 
         print(f"({len(id_label_dict)} ids and labels retrieved.)")
 

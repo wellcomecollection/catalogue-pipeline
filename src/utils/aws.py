@@ -1,7 +1,6 @@
 import csv
 import json
 from collections.abc import Generator
-from functools import lru_cache
 from typing import Any, Literal
 
 import boto3
@@ -65,7 +64,6 @@ def get_neptune_client(is_local: bool) -> BaseNeptuneClient:
         return LambdaNeptuneClient(get_secret(INSTANCE_ENDPOINT_SECRET_NAME))
 
 
-@lru_cache
 def fetch_from_s3(node_type: NodeType, source: OntologyType) -> Generator[Any]:
     """Retrieves the bulk load file outputted by the relevant transformer so that we can extract data from it."""
     linked_nodes_file_name = f"{source}_{node_type}__nodes.csv"
