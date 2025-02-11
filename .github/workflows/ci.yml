@@ -29,7 +29,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
-          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }} # to be created
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - name: Build and push artefacts
         run: |
         ./scripts/build.sh --push
@@ -42,7 +42,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
-          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }} # to be created
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - name: Deploy bulk-loader lambda
         run: |
         ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-loader
@@ -52,6 +52,3 @@ jobs:
       - name: Deploy indexer lambda
         run: |
         ./scripts/deploy_lambda_zip.sh catalogue-graph-indexer 
-      - name: Deploy extractor lambda
-        run: |
-        ./scripts/deploy_lambda_service.sh catalogue-graph-extractor
