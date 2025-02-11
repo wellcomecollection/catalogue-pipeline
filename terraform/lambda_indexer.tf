@@ -4,6 +4,7 @@ module "indexer_lambda" {
   name        = "catalogue-graph-indexer"
   description = "Indexes nodes and edges into the Neptune catalogue graph cluster."
   runtime     = "python3.13"
+  publish     = true
 
   filename         = "../target/build.zip"
   source_code_hash = filesha256("../target/build.zip")
