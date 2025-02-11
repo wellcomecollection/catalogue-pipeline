@@ -73,10 +73,7 @@ def fetch_from_s3(node_type: NodeType, source: OntologyType) -> Generator[Any]:
 
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_url, "r", transport_params=transport_params) as f:
-        csv_reader = csv.reader(f)
+        csv_reader = csv.DictReader(f)
 
-        for i, row in enumerate(csv_reader):
-            # Skip header
-            if i == 0:
-                continue
+        for row in csv_reader:
             yield row

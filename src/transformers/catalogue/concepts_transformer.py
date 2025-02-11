@@ -35,35 +35,31 @@ class CatalogueConceptsTransformer(BaseTransformer):
         if not raw_concept.is_concept:
             return
 
-        else:
-            if (raw_concept.source == "label-derived") and (
-                raw_concept.type not in ["Person", "Organisation", "Agent"]
+        if (raw_concept.source == "label-derived") and (
+            raw_concept.type not in ["Person", "Organisation", "Agent"]
+        ):
+            # Generate edges via label
+            assert hasattr(self.id_label_checker, "inverse")
+            for source_concept_id in self.id_label_checker.inverse.get(
+                raw_concept.label.lower(), []
             ):
-                # Generate edges via label
-                assert hasattr(self.id_label_checker, "inverse")
-                for source_concept_id in self.id_label_checker.inverse.get(
-                    raw_concept.label.lower(), []
-                ):
-                    yield ConceptHasSourceConcept(
-                        from_id=raw_concept.wellcome_id,
-                        to_id=source_concept_id,
-                        attributes={"qualifier": None, "matched_by": "label"},
-                    )
+                yield ConceptHasSourceConcept(
+                    from_id=raw_concept.wellcome_id,
+                    to_id=source_concept_id,
+                    attributes={"qualifier": None, "matched_by": "label"},
+                )
 
-            elif raw_concept.has_valid_source_concept:
-                # Generate edges via ID
-                if (raw_concept.source != "nlm-mesh") or (
-                    self.id_label_checker.get(raw_concept.source_concept_id)
-                    == raw_concept.label.lower()
-                ):
-                    yield ConceptHasSourceConcept(
-                        from_id=raw_concept.wellcome_id,
-                        to_id=str(raw_concept.source_concept_id),
-                        attributes={
-                            "qualifier": raw_concept.mesh_qualifier,
-                            "matched_by": "identifier",
-                        },
-                    )
-
-            else:
-                return
+        if raw_concept.has_valid_source_concept:
+            # Generate edges via ID
+            if (raw_concept.source != "nlm-mesh") or (
+                self.id_label_checker.get(raw_concept.source_concept_id)
+                == raw_concept.label.lower()
+            ):
+                yield ConceptHasSourceConcept(
+                    from_id=raw_concept.wellcome_id,
+                    to_id=str(raw_concept.source_concept_id),
+                    attributes={
+                        "qualifier": raw_concept.mesh_qualifier,
+                        "matched_by": "identifier",
+                    },
+                )

@@ -33,7 +33,7 @@ class IdLabelChecker(dict):
         for nt, s in product(node_type, source):
             for row in fetch_from_s3(nt, s):
                 # Extract source id and label at position 0 and 3, respectively
-                id_label_dict[row[0]] = row[3].lower()
+                id_label_dict[row[":ID"]] = row["label:String"].lower()
 
         print(f"({len(id_label_dict)} ids and labels retrieved.)")
 

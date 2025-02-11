@@ -22,7 +22,7 @@ class LinkedOntologyIdTypeChecker:
         # Retrieve the bulk load file outputted by the relevant transformer so that we can extract ids from it.
         ids = set()
         for row in fetch_from_s3(node_type, self.linked_ontology):
-            ids.add(row[0])
+            ids.add(row[":ID"])
 
         print(f"({len(ids)} ids retrieved.)")
 
