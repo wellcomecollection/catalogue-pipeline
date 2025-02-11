@@ -5,7 +5,6 @@ import scala.collection.mutable
 import scala.concurrent.duration._
 import io.circe.Json
 import io.circe.syntax._
-import scalikejdbc.{ConnectionPool, ConnectionPoolSettings}
 
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
@@ -14,10 +13,7 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.{Identified, Source}
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.id_minter.config.models.IdentifiersTableConfig
-import weco.pipeline.id_minter.database.IdentifiersDao
-import weco.pipeline.id_minter.models.IdentifiersTable
 import weco.pipeline.id_minter.services.IdMinterWorkerService
-import weco.pipeline.id_minter.steps.IdentifierGenerator
 import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
@@ -27,7 +23,6 @@ trait WorkerServiceFixture
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
     queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1 seconds),
-    identifiersDao: IdentifiersDao,
     identifiersTableConfig: IdentifiersTableConfig,
     mergedIndex: Map[String, Json] = Map.empty,
     identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty
@@ -38,11 +33,8 @@ trait WorkerServiceFixture
       messageSender
     ) {
       stream =>
-        val identifierGenerator = new IdentifierGenerator(
-          identifiersDao = identifiersDao
-        )
         val workerService = new IdMinterWorkerService(
-          identifierGenerator = identifierGenerator,
+          maybeIdentifierGenerator = None,
           pipelineStream = stream,
           jsonRetriever =
             new MemoryRetriever(index = mutable.Map(mergedIndex.toSeq: _*)),
@@ -54,40 +46,33 @@ trait WorkerServiceFixture
 
         testWith(workerService)
     }
-
-  def withWorkerService[R](
-    messageSender: MemoryMessageSender,
-    queue: Queue,
-    identifiersTableConfig: IdentifiersTableConfig,
-    mergedIndex: Map[String, Json],
-    identifiedIndex: mutable.Map[String, Work[Identified]]
-  )(testWith: TestWith[IdMinterWorkerService[String], R]): R = {
-    Class.forName("com.mysql.cj.jdbc.Driver")
-    ConnectionPool.singleton(
-      s"jdbc:mysql://$rdsHost:$port",
-      rdsUsername,
-      rdsPassword,
-      settings = ConnectionPoolSettings(maxSize = rdsMaxPoolSize)
-    )
-
-    val identifiersDao = new IdentifiersDao(
-      identifiers = new IdentifiersTable(
-        identifiersTableConfig = identifiersTableConfig
-      )
-    )
-
-    withWorkerService(
-      messageSender,
-      queue,
-      identifiersDao,
-      identifiersTableConfig,
-      mergedIndex,
-      identifiedIndex
-    ) {
-      service =>
-        testWith(service)
-    }
-  }
+//
+//  def withWorkerService[R](
+//    messageSender: MemoryMessageSender,
+//    queue: Queue,
+//    identifiersTableConfig: IdentifiersTableConfig,
+//    mergedIndex: Map[String, Json],
+//    identifiedIndex: mutable.Map[String, Work[Identified]]
+//  )(testWith: TestWith[IdMinterWorkerService[String], R]): R = {
+//    Class.forName("com.mysql.cj.jdbc.Driver")
+//    ConnectionPool.singleton(
+//      s"jdbc:mysql://$rdsHost:$port",
+//      rdsUsername,
+//      rdsPassword,
+//      settings = ConnectionPoolSettings(maxSize = rdsMaxPoolSize)
+//    )
+//
+//    withWorkerService(
+//      messageSender,
+//      queue,
+//      identifiersTableConfig,
+//      mergedIndex,
+//      identifiedIndex
+//    ) {
+//      service =>
+//        testWith(service)
+//    }
+//  }
 
   def createIndex(works: List[Work[Source]]): Map[String, Json] =
     works.map(work => (work.id, work.asJson)).toMap

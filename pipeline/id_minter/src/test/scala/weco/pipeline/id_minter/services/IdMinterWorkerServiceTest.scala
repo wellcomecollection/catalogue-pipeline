@@ -3,9 +3,8 @@ package weco.pipeline.id_minter.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import scalikejdbc._
-import weco.pipeline.id_minter.database.{FieldDescription, IdentifiersDao}
+import weco.pipeline.id_minter.database.FieldDescription
 import weco.pipeline.id_minter.fixtures.WorkerServiceFixture
-import weco.pipeline.id_minter.models.IdentifiersTable
 
 class IdMinterWorkerServiceTest
     extends AnyFunSpec
@@ -15,12 +14,7 @@ class IdMinterWorkerServiceTest
   it("creates the Identifiers table in MySQL upon startup") {
     withIdentifiersTable {
       identifiersTableConfig =>
-        val identifiersDao = new IdentifiersDao(
-          identifiers = new IdentifiersTable(identifiersTableConfig)
-        )
-
         withWorkerService(
-          identifiersDao = identifiersDao,
           identifiersTableConfig = identifiersTableConfig
         ) {
           _ =>
