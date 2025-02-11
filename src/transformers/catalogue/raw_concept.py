@@ -92,18 +92,20 @@ class RawCatalogueConcept:
             return source_id
 
         return None
-    
+
     @property
     def has_valid_source_concept(self) -> bool:
         """Checks if the source concept ID format matches the specified source."""
         if isinstance(self.source_concept_id, str):
             if (self.source == "nlm-mesh") and self.source_concept_id.startswith("D"):
                 return True
-            
-            if (self.source == "lc-subjects") and self.source_concept_id.startswith("sh"):
+
+            if (self.source == "lc-subjects") and self.source_concept_id.startswith(
+                "sh"
+            ):
                 return True
-            
+
             if (self.source == "lc-names") and self.source_concept_id.startswith("n"):
                 return True
-        
+
         return False

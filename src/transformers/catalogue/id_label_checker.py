@@ -16,7 +16,11 @@ class IdLabelChecker(dict):
             self.inverse.setdefault(value, []).append(key)
 
     @classmethod
-    def from_source(cls, node_type: NodeType | list[NodeType], source: OntologyType | list[OntologyType]) -> dict:
+    def from_source(
+        cls,
+        node_type: NodeType | list[NodeType],
+        source: OntologyType | list[OntologyType],
+    ) -> dict:
         """Fetch source node data from s3 bulk upload files and create ID-label mapping."""
         id_label_dict = {}
 
