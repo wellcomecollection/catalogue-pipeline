@@ -12,8 +12,8 @@ from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
 from utils.types import NodeType, OntologyType
 
-LOAD_BALANCER_SECRET_NAME = "NeptuneTest/LoadBalancerUrl"
-INSTANCE_ENDPOINT_SECRET_NAME = "NeptuneTest/InstanceEndpoint"
+LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
+INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph/neptune-cluster-endpoint"
 
 
 def get_secret(secret_name: str) -> str:
