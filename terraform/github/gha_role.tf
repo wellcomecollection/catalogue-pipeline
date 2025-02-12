@@ -10,7 +10,8 @@ module "gha_catalogue_graph_ci_role" {
 data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
   statement {
     actions   = [
-      "s3:PutObject"
+      "s3:PutObject",
+      "s3:GetObject"
     ]
     resources = [
       "arn:aws:s3:::wellcomecollection-platform-infra/lambdas/catalogue_graph",
