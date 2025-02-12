@@ -1,9 +1,7 @@
 from models.graph_node import SourceLocation
-from sources.wikidata.linked_ontology_source import (
-    OntologyType,
-    WikidataLinkedOntologySource,
-)
+from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from transformers.base_transformer import EntityType
+from utils.types import OntologyType
 
 from .concepts_transformer import WikidataConceptsTransformer
 from .raw_concept import RawWikidataLocation
