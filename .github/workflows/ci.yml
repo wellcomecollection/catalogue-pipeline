@@ -32,7 +32,7 @@ jobs:
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - name: Build and push artefacts
         run: |
-        ./scripts/build.sh --push
+          ./scripts/build.sh --push
   
   deploy:
     runs-on: ubuntu-latest
@@ -45,10 +45,10 @@ jobs:
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - name: Deploy bulk-loader lambda
         run: |
-        ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-loader
+          ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-loader
       - name: Deploy bulk-load-poller lambda
         run: |
-        ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-load-poller
+          ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-load-poller
       - name: Deploy indexer lambda
         run: |
-        ./scripts/deploy_lambda_zip.sh catalogue-graph-indexer 
+          ./scripts/deploy_lambda_zip.sh catalogue-graph-indexer 
