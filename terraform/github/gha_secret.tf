@@ -8,7 +8,7 @@ terraform {
 }
 
 resource "github_actions_secret" "catalogue_graph_ci" {
-  repository       = "wellcomecollection/catalogue-graph"
+  repository       = "catalogue-graph"
   secret_name      = "CATALOGUE_GRAPH_CI_ROLE_ARN"
   plaintext_value  = module.gha_catalogue_graph_ci_role.role_arn
 }
