@@ -8,7 +8,7 @@ import weco.pipeline.relation_embedder.models._
 
 case class RelationsRequestBuilder(
   index: Index,
-  scrollKeepAlive: String = "2m"
+  scrollKeepAlive: String = "5m"
 ) {
 
   // To reduce response size and improve Elasticsearch performance we only
