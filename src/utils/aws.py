@@ -6,10 +6,10 @@ from typing import Any, Literal
 import boto3
 import smart_open
 
+import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-import config
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
 INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph/neptune-cluster-endpoint"

@@ -1,11 +1,13 @@
 from test_mocks import MockRequest
-from test_utils import load_fixture, add_mock_transformer_outputs
+from test_utils import add_mock_transformer_outputs, load_fixture
 
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
 def test_catalogue_concepts_transformer() -> None:
-    add_mock_transformer_outputs(sources=["loc", "mesh"], node_types=["concepts", "locations"])
+    add_mock_transformer_outputs(
+        sources=["loc", "mesh"], node_types=["concepts", "locations"]
+    )
 
     test_url = "https://example.com"
 

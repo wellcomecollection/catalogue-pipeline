@@ -10,7 +10,10 @@ def load_fixture(file_name: str) -> bytes:
         return f.read()
 
 
-def add_mock_transformer_outputs(sources: list[Literal["loc", "mesh"]], node_types: list[Literal["concepts", "locations", "names"]]) -> None:
+def add_mock_transformer_outputs(
+    sources: list[Literal["loc", "mesh"]],
+    node_types: list[Literal["concepts", "locations", "names"]],
+) -> None:
     """
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
     """

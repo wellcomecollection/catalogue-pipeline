@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
-from test_utils import load_fixture, add_mock_transformer_outputs
+from test_utils import add_mock_transformer_outputs, load_fixture
 from typing_extensions import get_args
 
 from config import (
@@ -138,7 +138,9 @@ def test_lambda_handler(
     mock_responses: list[MockResponseInput],
 ) -> None:
     MockRequest.mock_responses(mock_responses)
-    add_mock_transformer_outputs(sources=["loc", "mesh"], node_types=["concepts", "locations"])
+    add_mock_transformer_outputs(
+        sources=["loc", "mesh"], node_types=["concepts", "locations"]
+    )
     lambda_handler(lambda_event, None)
 
     transformer_type = lambda_event["transformer_type"]
