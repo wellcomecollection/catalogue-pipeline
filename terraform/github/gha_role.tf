@@ -13,6 +13,7 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "s3:PutObject"
     ]
     resources = [
+      "arn:aws:s3:::wellcomecollection-platform-infra/lambdas/catalogue_graph",
       "arn:aws:s3:::wellcomecollection-platform-infra/lambdas/catalogue_graph/*"
     ]
   }

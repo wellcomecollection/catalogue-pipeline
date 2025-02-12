@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-# Usage: ./deploy_lambda_zip.sh <project_name> <lambda_name>
-# Example: ./deploy_lambda_zip.sh monitoring/ingest_inspector_backend ingest_inspector_backend
-
 set -o errexit
 set -o nounset
 set -o pipefail
