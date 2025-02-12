@@ -84,7 +84,7 @@ class SparqlQueryBuilder:
                 ?item schema:description ?itemDescription.
                 ?item skos:altLabel ?itemAltLabel.
                 {"\n".join(extra_mappings)}
-            }}                 
+            }}
         }}
         """
 
@@ -103,7 +103,7 @@ class SparqlQueryBuilder:
             raise ValueError(f"Invalid linked ontology type: {linked_ontology}")
 
         get_ids_query = f"""
-            SELECT ?item WHERE {{      
+            SELECT ?item WHERE {{
                 {field_filter}
             }}
         """
@@ -154,7 +154,7 @@ class SparqlQueryBuilder:
             raise ValueError(f"Unknown edge type: {edge_type}")
 
         query = f"""
-            SELECT DISTINCT ?fromItem ?toItem 
+            SELECT DISTINCT ?fromItem ?toItem
             WHERE {{
               VALUES ?fromItem {{ {ids_clause} }}
               ?fromItem {property_path} ?toItem.
