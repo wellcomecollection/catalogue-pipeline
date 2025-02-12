@@ -2,7 +2,7 @@ import json
 from typing import Literal
 
 from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_fixture
+from test_utils import load_fixture, add_mock_transformer_outputs
 
 from config import WIKIDATA_SPARQL_URL
 from sources.wikidata.linked_ontology_id_type_checker import LinkedOntologyIdTypeChecker
@@ -28,19 +28,8 @@ def _add_mock_wikidata_requests(node_type: Literal["edges", "nodes"]) -> None:
         )
 
 
-def _add_mock_loc_transformer_outputs() -> None:
-    """
-    Add mock LoC transformer output files to S3 so that the LinkedOntologyIdTypeChecker class can extract ids from them.
-    """
-    for node_type in ["concepts", "locations", "names"]:
-        MockSmartOpen.mock_s3_file(
-            f"s3://bulk_load_test_bucket/loc_{node_type}__nodes.csv",
-            load_fixture(f"loc/transformer_output_{node_type}_nodes.csv").decode(),
-        )
-
-
 def test_wikidata_concepts_source_edges() -> None:
-    _add_mock_loc_transformer_outputs()
+    add_mock_transformer_outputs(sources=["loc"], node_types=["concepts", "locations", "names"])
     _add_mock_wikidata_requests("edges")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
@@ -71,7 +60,7 @@ def test_wikidata_concepts_source_edges() -> None:
 
 
 def test_wikidata_concepts_source_nodes() -> None:
-    _add_mock_loc_transformer_outputs()
+    add_mock_transformer_outputs(sources=["loc"], node_types=["concepts", "locations", "names"])
     _add_mock_wikidata_requests("nodes")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
@@ -89,7 +78,7 @@ def test_wikidata_concepts_source_nodes() -> None:
 
 
 def test_wikidata_linked_ontology_id_checker() -> None:
-    _add_mock_loc_transformer_outputs()
+    add_mock_transformer_outputs(sources=["loc"], node_types=["concepts", "locations", "names"])
     id_checker = LinkedOntologyIdTypeChecker("locations", "loc")
 
     assert id_checker.id_is_valid("sh00000001")

@@ -1,0 +1,7 @@
+:ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String
+D000001,SourceConcept,D000001,Calcimycin,nlm-mesh,D02.355.291.933.125||D02.540.576.625.125||D03.633.100.221.173||D04.345.241.654.125||D04.345.674.625.125,A-23187,"An ionophorous, polyether antibiotic from Streptomyces chartreusensis. It binds and transports CALCIUM and other divalent cations across membranes and uncouples oxidative phosphorylation while inhibiting ATPase of rat liver mitochondria. The substance is used mostly as a biochemical tool to study the role of divalent cations in various biological systems.
+    "
+D000002,SourceConcept,D000002,Temefos,nlm-mesh,D02.705.400.625.800||D02.705.539.345.800||D02.886.300.692.800,Difos||Abate,"An organothiophosphate insecticide.
+    "
+D000003,SourceConcept,D000003,Abattoirs,nlm-mesh,J01.576.423.200.700.100||J03.540.020,,"Places where animals are slaughtered and dressed for market.
+    "

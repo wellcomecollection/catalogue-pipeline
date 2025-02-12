@@ -2,11 +2,8 @@ import json
 import math
 
 import pytest
-from test_utils import load_fixture
-from test_wikidata_concepts_source import (
-    _add_mock_loc_transformer_outputs,
-    _add_mock_wikidata_requests,
-)
+from test_utils import load_fixture, add_mock_transformer_outputs
+from test_wikidata_concepts_source import _add_mock_wikidata_requests
 
 from models.graph_edge import SourceConceptSameAs
 from models.graph_node import SourceConcept
@@ -15,7 +12,7 @@ from transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataNa
 
 
 def test_wikidata_concepts_nodes_transformer() -> None:
-    _add_mock_loc_transformer_outputs()
+    add_mock_transformer_outputs(sources=["loc"], node_types=["concepts", "locations", "names"])
     _add_mock_wikidata_requests("nodes")
 
     transformer = WikidataConceptsTransformer(
@@ -37,7 +34,7 @@ def test_wikidata_concepts_nodes_transformer() -> None:
 
 
 def test_wikidata_concepts_edges_transformer() -> None:
-    _add_mock_loc_transformer_outputs()
+    add_mock_transformer_outputs(sources=["loc"], node_types=["concepts", "locations", "names"])
     _add_mock_wikidata_requests("edges")
 
     transformer = WikidataConceptsTransformer(

@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from utils.aws import NodeType, OntologyType, fetch_from_s3
 
 
@@ -17,6 +19,7 @@ class LinkedOntologyIdTypeChecker:
                 "Invalid node_type for ontology type MeSH."
             )
 
+    @lru_cache
     def _get_linked_ontology_ids(self, node_type: NodeType) -> set[str]:
         """Return all ids classified under a given `node_type` for the selected ontology."""
         # Retrieve the bulk load file outputted by the relevant transformer so that we can extract ids from it.
