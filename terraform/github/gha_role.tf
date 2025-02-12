@@ -10,9 +10,11 @@ module "gha_catalogue_graph_ci_role" {
 data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
   statement {
     actions   = [
-      "s3:PutObject"
+      "s3:PutObject",
+      "s3:GetObject"
     ]
     resources = [
+      "arn:aws:s3:::wellcomecollection-platform-infra/lambdas/catalogue_graph",
       "arn:aws:s3:::wellcomecollection-platform-infra/lambdas/catalogue_graph/*"
     ]
   }
@@ -30,6 +32,15 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
     ]
     resources = [
       "arn:aws:ecr:eu-west-1:760097843905:repository/uk.ac.wellcome/catalogue_graph_extractor"
+    ]
+  }
+
+  statement {
+    actions = [
+      "ecr:GetAuthorizationToken"
+    ]
+    resources = [
+      "*"
     ]
   }
   statement {

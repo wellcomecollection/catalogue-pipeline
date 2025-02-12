@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   test: 
     runs-on: ubuntu-latest
@@ -23,13 +27,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: test
-    if: needs.test.result == "success"
+    if: ${{ needs.test.result == 'success' }}
     steps:
       - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
       - name: Build and push artefacts
         run: |
           ./scripts/build.sh --push
@@ -37,8 +43,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    if: needs.build.result == "success"
+    if: ${{ needs.build.result == 'success' }}
     steps:
+      - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
