@@ -78,9 +78,9 @@ class RawWikidataLocation(RawWikidataConcept):
         pattern = r"Point\((.*)\s(.*)\)"
         matched_coordinates = re.search(pattern, raw_coordinates)
 
-        assert (
-            matched_coordinates is not None
-        ), f"Could not extract coordinates from raw value '{raw_coordinates}'. Wikidata id: {self.source_id}"
+        assert matched_coordinates is not None, (
+            f"Could not extract coordinates from raw value '{raw_coordinates}'. Wikidata id: {self.source_id}"
+        )
 
         longitude = float(matched_coordinates.group(1))
         latitude = float(matched_coordinates.group(2))
