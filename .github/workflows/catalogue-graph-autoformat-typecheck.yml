@@ -1,5 +1,5 @@
 # Runs auto-formatting and type checking on push to any branch
-name: "Python auto-formatting & type checking"
+name: "Catalogue graph: Auto-formatting & type checking"
 
 on:
   push:

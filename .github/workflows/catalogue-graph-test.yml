@@ -1,5 +1,5 @@
 # Build deployment artifact 
-name: "Run tests"
+name: "Catalogue graph: Run tests"
 
 on: 
     push:

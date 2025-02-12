@@ -8,7 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT+="$(dirname "$DIR")"
 
 # get python version from .python-version
-PY_VERSION=$(cat .python-version)
+PY_VERSION=$(cat catalogue_graph/.python-version)
 
 # set default values
 ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome"
