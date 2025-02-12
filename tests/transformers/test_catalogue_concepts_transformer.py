@@ -27,7 +27,7 @@ def test_catalogue_concepts_transformer() -> None:
 
     # test transform_node
     nodes = list(catalogue_concepts_transformer.stream(entity_type="nodes"))[0]
-    assert len(list(nodes)) == 12
+    assert len(list(nodes)) == 6
     assert nodes[0].id == "s6s24vd7"
     assert nodes[0].label == "Human anatomy"
     assert nodes[0].type == "Concept"

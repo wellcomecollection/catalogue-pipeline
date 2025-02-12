@@ -15,12 +15,18 @@ class CatalogueConceptsTransformer(BaseTransformer):
         self.id_label_checker = IdLabelChecker.from_source(
             node_type=["concepts", "locations"], source=["loc", "mesh"]
         )
+        self.id_lookup: set = set()
 
     def transform_node(self, raw_node: dict) -> Concept | None:
         raw_concept = RawCatalogueConcept(raw_node, self.id_label_checker)
 
         if not raw_concept.is_concept:
             return None
+        
+        if raw_concept.wellcome_id in self.id_lookup:
+            return None
+        
+        self.id_lookup.add(raw_concept.wellcome_id)
 
         return Concept(
             id=raw_concept.wellcome_id,
@@ -34,6 +40,11 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
         if not raw_concept.is_concept:
             return
+        
+        if raw_concept.wellcome_id in self.id_lookup:
+            return
+        
+        self.id_lookup.add(raw_concept.wellcome_id)
 
         if (raw_concept.source == "label-derived") and (
             raw_concept.type not in ["Person", "Organisation", "Agent"]
