@@ -75,5 +75,4 @@ def fetch_from_s3(node_type: NodeType, source: OntologyType) -> Generator[Any]:
     with smart_open.open(s3_url, "r", transport_params=transport_params) as f:
         csv_reader = csv.DictReader(f)
 
-        for row in csv_reader:
-            yield row
+        yield from csv_reader
