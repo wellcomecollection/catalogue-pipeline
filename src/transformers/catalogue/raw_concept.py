@@ -1,11 +1,15 @@
+import re
 from typing import get_args
 
 from models.graph_node import ConceptSource, ConceptType
 
+from .id_label_checker import IdLabelChecker
+
 
 class RawCatalogueConcept:
-    def __init__(self, raw_concept: dict):
+    def __init__(self, raw_concept: dict, id_label_checker: IdLabelChecker):
         self.raw_concept = self._extract_concept_node(raw_concept)
+        self.id_label_checker = id_label_checker
 
     @staticmethod
     def _extract_concept_node(raw_concept: dict) -> dict:
@@ -54,20 +58,70 @@ class RawCatalogueConcept:
         concept_type: ConceptType = self.raw_concept["type"]
         return concept_type
 
-    def _get_identifier(self) -> dict:
+    @property
+    def raw_identifier(self) -> dict:
         """Returns metadata about the source identifier."""
-        raw_identifier = self.raw_concept.get("identifiers", [])
+        identifier_metadata = self.raw_concept.get("identifiers", [])
         # There should be exactly one source identifier for each concept
-        assert len(raw_identifier) == 1
-        identifier = raw_identifier[0]
+        assert len(identifier_metadata) == 1
+        raw_identifier = identifier_metadata[0]
 
-        assert isinstance(identifier, dict)
-        return identifier
+        assert isinstance(raw_identifier, dict)
+        return raw_identifier
 
     @property
     def source(self) -> ConceptSource:
         """Returns the concept source (one of "lc-names", "label-derived", etc.)."""
-        identifier = self._get_identifier()
-
-        source: ConceptSource = identifier["identifierType"]["id"]
+        source: ConceptSource = self.raw_identifier["identifierType"]["id"]
         return source
+
+    @property
+    def mesh_qualifier(self) -> str | None:
+        """Returns MeSH qualifier ID, if present."""
+        if self.source == "nlm-mesh":
+            qualifier = re.search(r"Q\d+", self.raw_identifier.get("value", ""))
+            if qualifier is not None:
+                return qualifier.group()
+
+        return None
+
+    @property
+    def source_concept_id(self) -> str | None:
+        """Returns ID of source concept, if present."""
+        source_id = self.raw_identifier.get("value")
+        if isinstance(source_id, str):
+            if isinstance(self.mesh_qualifier, str):
+                source_id = source_id.replace(self.mesh_qualifier, "")
+            return source_id
+
+        return None
+
+    @property
+    def label_derived_source_concept_ids(self) -> list[str]:
+        label_derived_ids = self.id_label_checker.inverse.get(self.label.lower(), [])
+        assert isinstance(label_derived_ids, list)
+        return label_derived_ids
+
+    @property
+    def has_valid_source_concept(self) -> bool:
+        """Checks if the source concept ID format matches the specified source."""
+        if isinstance(self.source_concept_id, str):
+            if (
+                (self.source == "nlm-mesh")
+                and self.source_concept_id.startswith("D")
+                and (
+                    self.id_label_checker.get(self.source_concept_id)
+                    == self.label.lower()
+                )
+            ):
+                return True
+
+            if (self.source == "lc-subjects") and self.source_concept_id.startswith(
+                "sh"
+            ):
+                return True
+
+            if (self.source == "lc-names") and self.source_concept_id.startswith("n"):
+                return True
+
+        return False

@@ -1,3 +1,3 @@
-:ID,:LABEL,id,label,source,alternative_ids,alternative_labels,description
+:ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String
 sh00000001,SourceConcept,sh00000001,ActionScript (Computer program language),lc-subjects,,,null
 sh00000002,SourceConcept,sh00000002,Tacos,lc-subjects,,,null
