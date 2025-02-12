@@ -31,6 +31,8 @@ jobs:
         with:
           aws-region: eu-west-1
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
       - name: Build and push artefacts
         run: |
           ./scripts/build.sh --push
