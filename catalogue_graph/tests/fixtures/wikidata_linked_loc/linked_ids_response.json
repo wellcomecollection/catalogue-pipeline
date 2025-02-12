@@ -1,0 +1,46 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "fromItem": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q1"
+        },
+        "toItem": {
+          "type": "uri",
+          "value": "sh00000001"
+        }
+      },
+      {
+        "fromItem": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        },
+        "toItem": {
+          "type": "uri",
+          "value": "sh00000001"
+        }
+      },
+      {
+        "fromItem": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q100"
+        },
+        "toItem": {
+          "type": "uri",
+          "value": "n00000001"
+        }
+      },
+      {
+        "fromItem": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q101"
+        },
+        "toItem": {
+          "type": "uri",
+          "value": "n00000021"
+        }
+      }
+    ]
+  }
+}

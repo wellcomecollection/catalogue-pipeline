@@ -1,0 +1,36 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q1"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q100"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q101"
+        }
+      }
+    ]
+  }
+}

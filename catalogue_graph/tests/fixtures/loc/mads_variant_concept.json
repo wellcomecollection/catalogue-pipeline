@@ -1,0 +1,287 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh85074044",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:ComplexSubject"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Lakes--Argentina"
+      },
+      "madsrdf:componentList": {
+        "@list": [
+          {
+            "@id": "_:nf0e643dd3ad44ac48213787159c80818b15"
+          },
+          {
+            "@id": "_:nf0e643dd3ad44ac48213787159c80818b18"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b15",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Lakes"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:nf0e643dd3ad44ac48213787159c80818b16"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b16",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Lakes"
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b18",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Geographic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Argentina"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:nf0e643dd3ad44ac48213787159c80818b19"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b19",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Argentina"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh00000023",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Geographic"
+      ],
+      "bflc:marcKey": "151  $aChanchera Lake (Argentina)",
+      "identifiers:lccn": "sh 00000023",
+      "madsrdf:adminMetadata": [
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b1"
+        },
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b2"
+        }
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Chanchera Lake (Argentina)"
+      },
+      "madsrdf:code": {
+        "@type": "http://id.loc.gov/datatypes/codes/gac",
+        "@value": "s-ag---"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:nf0e643dd3ad44ac48213787159c80818b3"
+          }
+        ]
+      },
+      "madsrdf:hasBroaderAuthority": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh85074044"
+      },
+      "madsrdf:hasSource": [
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b5"
+        },
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b6"
+        },
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b7"
+        },
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b8"
+        }
+      ],
+      "madsrdf:hasVariant": [
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b9"
+        },
+        {
+          "@id": "_:nf0e643dd3ad44ac48213787159c80818b12"
+        }
+      ],
+      "madsrdf:isMemberOfMADSCollection": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSHAuthorizedHeadings"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSH_General"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_PatternHeadingH1145.5"
+        }
+      ],
+      "madsrdf:isMemberOfMADSScheme": {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      },
+      "madsrdf:usePatternCollection": {
+        "@id": "http://id.loc.gov/authorities/subjects/collection_PatternHeadingH1145.5"
+      },
+      "owl:sameAs": [
+        {
+          "@id": "http://id.loc.gov/authorities/sh00000023#concept"
+        },
+        {
+          "@id": "info:lc/authorities/sh00000023"
+        }
+      ]
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b1",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2000-03-22T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b2",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2024-09-25T14:01:14"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "revised"
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b3",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Chanchera Lake (Argentina)"
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b5",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "p. 9, etc. (laguna La Chanchera; C\u00f3rdoba Province, Argentina)"
+      },
+      "madsrdf:citationSource": "Work cat.: 99526422: La Chanchera, 1999:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b6",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "lake; 33\u00b049\u02b960\u02baS 063\u00b025\u02b960\u02baW"
+      },
+      "madsrdf:citationSource": "GeoNames [algorithmically matched]",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b7",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationSource": "Lippincott;Web. geog.;Argentina gaz.;Nat. Geog. atlas;Times atlas;Rand McNally new internat. atlas",
+      "madsrdf:citationStatus": "notfound"
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b8",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "(La Chanchera, Laguna)"
+      },
+      "madsrdf:citationSource": "GEOnet, March 22, 2000",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b9",
+      "@type": [
+        "madsrdf:Geographic",
+        "madsrdf:Variant"
+      ],
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:nf0e643dd3ad44ac48213787159c80818b10"
+          }
+        ]
+      },
+      "madsrdf:variantLabel": {
+        "@language": "en",
+        "@value": "La Chancera, Laguna (Argentina)"
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b10",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "La Chancera, Laguna (Argentina)"
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b12",
+      "@type": [
+        "madsrdf:Geographic",
+        "madsrdf:Variant"
+      ],
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:nf0e643dd3ad44ac48213787159c80818b13"
+          }
+        ]
+      },
+      "madsrdf:variantLabel": {
+        "@language": "en",
+        "@value": "Laguna La Chanchera (Argentina)"
+      }
+    },
+    {
+      "@id": "_:nf0e643dd3ad44ac48213787159c80818b13",
+      "@type": "madsrdf:GeographicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Laguna La Chanchera (Argentina)"
+      }
+    }
+  ],
+  "@id": "/authorities/subjects/sh00000023"
+}
