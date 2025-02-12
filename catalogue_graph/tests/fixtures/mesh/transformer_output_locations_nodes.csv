@@ -1,0 +1,7 @@
+:ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String,latitude:Float,longitude:Float
+D000346,SourceLocation,D000346,Afghanistan,nlm-mesh,Z01.252.245.782.250,,"Country located north and west of Pakistan, and east of Iran. The capital is Kabul.
+    ",,
+D000349,SourceLocation,D000349,Africa,nlm-mesh,Z01.058,,"The continent south of EUROPE, east of the ATLANTIC OCEAN and west of the INDIAN OCEAN.
+    ",,
+D000350,SourceLocation,D000350,"Africa, Central",nlm-mesh,Z01.058.290.100,,"The geographical area of Africa comprising CAMEROON; CENTRAL AFRICAN REPUBLIC; CHAD; CONGO; DEMOCRATIC REPUBLIC OF THE CONGO; EQUATORIAL GUINEA; GABON; RWANDA.and SAO TOME AND PRINCIPE.
+    ",,

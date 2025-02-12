@@ -1,8 +1,8 @@
 import json
 from typing import Literal
 
-from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_fixture
+from test_mocks import MockRequest
+from test_utils import add_mock_transformer_outputs, load_fixture
 
 from config import WIKIDATA_SPARQL_URL
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
@@ -36,23 +36,10 @@ def _add_mock_wikidata_requests(
         )
 
 
-def _add_mock_transformer_outputs(
-    ontology: Literal["loc", "wikidata_linked_loc"],
-) -> None:
-    """
-    Add mock transformer output files to S3 so that we can extract ids from them.
-    """
-    for node_type in ["concepts", "locations", "names"]:
-        MockSmartOpen.mock_s3_file(
-            f"s3://bulk_load_test_bucket/{ontology}_{node_type}__nodes.csv",
-            load_fixture(
-                f"{ontology}/transformer_output_{node_type}_nodes.csv"
-            ).decode(),
-        )
-
-
 def test_wikidata_concepts_source_edges() -> None:
-    _add_mock_transformer_outputs("loc")
+    add_mock_transformer_outputs(
+        sources=["loc"], node_types=["concepts", "locations", "names"]
+    )
     _add_mock_wikidata_requests("edges", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
@@ -83,7 +70,9 @@ def test_wikidata_concepts_source_edges() -> None:
 
 
 def test_wikidata_concepts_source_nodes() -> None:
-    _add_mock_transformer_outputs("loc")
+    add_mock_transformer_outputs(
+        sources=["loc"], node_types=["concepts", "locations", "names"]
+    )
     _add_mock_wikidata_requests("nodes", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
@@ -101,7 +90,9 @@ def test_wikidata_concepts_source_nodes() -> None:
 
 
 def test_wikidata_linked_ontology_id_checker() -> None:
-    _add_mock_transformer_outputs("loc")
+    add_mock_transformer_outputs(
+        sources=["loc"], node_types=["concepts", "locations", "names"]
+    )
 
     assert is_id_in_ontology("sh00000001", "loc")
     assert not is_id_in_ontology("sh00000001000", "loc")

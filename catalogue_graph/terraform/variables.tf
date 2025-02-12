@@ -98,5 +98,10 @@ variable "state_machine_inputs" {
       "transformer_type" : "catalogue_concepts",
       "entity_type" : "nodes"
     },
+    {
+      "label" : "Catalogue Concept Edges",
+      "transformer_type" : "catalogue_concepts",
+      "entity_type" : "edges"
+    },
   ]
 }
