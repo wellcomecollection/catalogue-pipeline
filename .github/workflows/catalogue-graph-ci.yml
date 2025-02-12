@@ -1,4 +1,4 @@
-name: "Run CI pipeline"
+name: "Catalogue graph: Run CI pipeline"
 
 on: 
   push:

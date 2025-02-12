@@ -1,5 +1,5 @@
-# Build deployment artifact 
-name: "Build deployment zip"
+# Build deployment artifact
+name: "Catalogue graph: Build deployment zip"
 
 on: push
 
