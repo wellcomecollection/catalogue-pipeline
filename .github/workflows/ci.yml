@@ -1,9 +1,9 @@
 name: "Run CI pipeline"
 
+on: push
+
 permissions:
   id-token: write
-  
-on: push
 
 jobs:
   test: 
