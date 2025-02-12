@@ -1,0 +1,4 @@
+{
+  "format": "json",
+  "query": "SELECT DISTINCT ?item (SAMPLE(?itemLabel) as ?itemLabel) (SAMPLE(?itemDescription) as ?itemDescription) (SAMPLE(?itemAltLabel) as ?itemAltLabel) (SAMPLE(?dateOfBirth) as ?dateOfBirth) (SAMPLE(?dateOfDeath) as ?dateOfDeath) (SAMPLE(?placeOfBirthLabel) as ?placeOfBirthLabel) WHERE { VALUES ?item { wd:Q100 wd:Q101 } OPTIONAL { ?item wdt:P569 ?dateOfBirth. } OPTIONAL { ?item wdt:P570 ?dateOfDeath. } OPTIONAL { ?item wdt:P19 ?placeOfBirth. } OPTIONAL { SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\". ?item rdfs:label ?itemLabel. ?item schema:description ?itemDescription. ?item skos:altLabel ?itemAltLabel. ?placeOfBirth rdfs:label ?placeOfBirthLabel. } } } GROUP BY ?item"
+}
