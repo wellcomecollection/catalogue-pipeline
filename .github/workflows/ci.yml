@@ -1,6 +1,9 @@
 name: "Run CI pipeline"
 
-on: push
+on: 
+  push:
+    branches:
+      - main
 
 permissions:
   contents: read
