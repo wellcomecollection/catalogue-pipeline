@@ -22,10 +22,10 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
         if not raw_concept.is_concept:
             return None
-        
+
         if raw_concept.wellcome_id in self.id_lookup:
             return None
-        
+
         self.id_lookup.add(raw_concept.wellcome_id)
 
         return Concept(
@@ -40,10 +40,10 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
         if not raw_concept.is_concept:
             return
-        
+
         if raw_concept.wellcome_id in self.id_lookup:
             return
-        
+
         self.id_lookup.add(raw_concept.wellcome_id)
 
         if (raw_concept.source == "label-derived") and (
