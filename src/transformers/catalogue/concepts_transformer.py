@@ -54,15 +54,11 @@ class CatalogueConceptsTransformer(BaseTransformer):
                 == raw_concept.label.lower()
             )):
             # Generate edges via ID
-            if (raw_concept.source != "nlm-mesh") or (
-                self.id_label_checker.get(raw_concept.source_concept_id)
-                == raw_concept.label.lower()
-            ):
-                yield ConceptHasSourceConcept(
-                    from_id=raw_concept.wellcome_id,
-                    to_id=str(raw_concept.source_concept_id),
-                    attributes={
-                        "qualifier": raw_concept.mesh_qualifier,
-                        "matched_by": "identifier",
-                    },
-                )
+            yield ConceptHasSourceConcept(
+                from_id=raw_concept.wellcome_id,
+                to_id=str(raw_concept.source_concept_id),
+                attributes={
+                    "qualifier": raw_concept.mesh_qualifier,
+                    "matched_by": "identifier",
+                },
+            )
