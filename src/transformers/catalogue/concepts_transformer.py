@@ -17,7 +17,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
         )
 
     def transform_node(self, raw_node: dict) -> Concept | None:
-        raw_concept = RawCatalogueConcept(raw_node)
+        raw_concept = RawCatalogueConcept(raw_node, self.id_label_checker)
 
         if not raw_concept.is_concept:
             return None
@@ -30,7 +30,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[ConceptHasSourceConcept]:
-        raw_concept = RawCatalogueConcept(raw_node)
+        raw_concept = RawCatalogueConcept(raw_node, self.id_label_checker)
 
         if not raw_concept.is_concept:
             return
@@ -39,23 +39,14 @@ class CatalogueConceptsTransformer(BaseTransformer):
             raw_concept.type not in ["Person", "Organisation", "Agent"]
         ):
             # Generate edges via label
-            assert hasattr(self.id_label_checker, "inverse")
-            for source_concept_id in self.id_label_checker.inverse.get(
-                raw_concept.label.lower(), []
-            ):
+            for source_concept_id in raw_concept.label_derived_source_concept_ids:
                 yield ConceptHasSourceConcept(
                     from_id=raw_concept.wellcome_id,
                     to_id=source_concept_id,
                     attributes={"qualifier": None, "matched_by": "label"},
                 )
 
-        if raw_concept.has_valid_source_concept and (
-            (raw_concept.source != "nlm-mesh")
-            or (
-                self.id_label_checker.get(raw_concept.source_concept_id)
-                == raw_concept.label.lower()
-            )
-        ):
+        if raw_concept.has_valid_source_concept:
             # Generate edges via ID
             yield ConceptHasSourceConcept(
                 from_id=raw_concept.wellcome_id,

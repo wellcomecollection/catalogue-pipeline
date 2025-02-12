@@ -1,12 +1,15 @@
 import re
 from typing import get_args
 
+from .id_label_checker import IdLabelChecker
+
 from models.graph_node import ConceptSource, ConceptType
 
 
 class RawCatalogueConcept:
-    def __init__(self, raw_concept: dict):
+    def __init__(self, raw_concept: dict, id_label_checker: IdLabelChecker):
         self.raw_concept = self._extract_concept_node(raw_concept)
+        self.id_label_checker = id_label_checker
 
     @staticmethod
     def _extract_concept_node(raw_concept: dict) -> dict:
@@ -92,12 +95,19 @@ class RawCatalogueConcept:
             return source_id
 
         return None
+    
+    @property
+    def label_derived_source_concept_ids(self) -> list[str]:
+        label_derived_ids = self.id_label_checker.inverse.get(self.label.lower(), [])
+        assert isinstance(label_derived_ids, list)
+        return label_derived_ids
 
     @property
     def has_valid_source_concept(self) -> bool:
         """Checks if the source concept ID format matches the specified source."""
         if isinstance(self.source_concept_id, str):
-            if (self.source == "nlm-mesh") and self.source_concept_id.startswith("D"):
+            if (self.source == "nlm-mesh") and self.source_concept_id.startswith("D") and (self.id_label_checker.get(self.source_concept_id)
+                == self.label.lower()):
                 return True
 
             if (self.source == "lc-subjects") and self.source_concept_id.startswith(
