@@ -100,7 +100,7 @@ class RawMeSHConcept:
 
         related_descriptors = []
         for desc_elem in self.raw_concept.findall(
-            "SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"
+            "SeeRelatedList//SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"
         ):
             related_descriptors.append(assert_get_text(desc_elem))
 
