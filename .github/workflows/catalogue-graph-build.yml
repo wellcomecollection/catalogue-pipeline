@@ -15,8 +15,8 @@ jobs:
 
       - name: Setup CI
         run: |
-          ./scripts/ci-setup.sh
+          ./catalogue_graph/scripts/ci-setup.sh
 
       - name: Build zip
         run: |
-          ./scripts/build.sh
+          ./catalogue_graph/scripts/build.sh

@@ -1,7 +1,9 @@
 # Runs auto-formatting and type checking on push to any branch
 name: "Python auto-formatting & type checking"
 
-on: push
+on:
+  push:
+    paths: 'catalogue_graph/**'
 
 permissions:
   id-token: write
@@ -19,11 +21,11 @@ jobs:
 
       - name: Setup CI
         run: |
-          ./scripts/ci-setup.sh
+          ./catalogue_graph/scripts/ci-setup.sh
 
       - name: Run typecheck
         run: |
-          ./scripts/typecheck.sh
+          ./catalogue_graph/scripts/typecheck.sh
 
   autoformat:
     runs-on: ubuntu-latest
@@ -37,11 +39,11 @@ jobs:
 
       - name: Setup CI
         run: |
-          ./scripts/ci-setup.sh
+          ./catalogue_graph/scripts/ci-setup.sh
 
       - name: Run autoformat
         run: |
-          ./scripts/autoformat.sh
+          ./catalogue_graph/scripts/autoformat.sh
 
       - name: Check for formatting changes
         id: check_formatting_changes
