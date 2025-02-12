@@ -42,6 +42,7 @@ jobs:
     needs: build
     if: ${{ needs.build.result == 'success' }}
     steps:
+      - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
