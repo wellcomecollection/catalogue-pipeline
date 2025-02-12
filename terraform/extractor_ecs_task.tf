@@ -59,13 +59,3 @@ data "aws_iam_policy_document" "stream_to_s3" {
     ]
   }
 }
-
-resource "aws_iam_role_policy" "stream_to_sns_policy" {
-  role   = module.extractor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.stream_to_sns.json
-}
-
-resource "aws_iam_role_policy" "stream_to_s3_policy" {
-  role   = module.extractor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.stream_to_s3.json
-}
