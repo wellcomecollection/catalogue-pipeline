@@ -1,7 +1,7 @@
 from itertools import product
 from typing import Any
 
-from utils.aws import NodeType, OntologyType, fetch_from_s3
+from utils.aws import NodeType, OntologyType, fetch_transformer_output_from_s3
 
 
 class IdLabelChecker(dict):
@@ -20,7 +20,7 @@ class IdLabelChecker(dict):
         cls,
         node_type: NodeType | list[NodeType],
         source: OntologyType | list[OntologyType],
-    ) -> dict:
+    ) -> "IdLabelChecker":
         """Fetch source node data from s3 bulk upload files and create ID-label mapping."""
         id_label_dict = {}
 
@@ -31,7 +31,7 @@ class IdLabelChecker(dict):
             source = [source]
 
         for nt, s in product(node_type, source):
-            for row in fetch_from_s3(nt, s):
+            for row in fetch_transformer_output_from_s3(nt, s):
                 # Extract source id and label at position 0 and 3, respectively
                 id_label_dict[row[":ID"]] = row["label:String"].lower()
 

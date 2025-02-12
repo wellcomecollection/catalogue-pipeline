@@ -44,3 +44,10 @@ class ConceptHasSourceConcept(BaseEdge):
     to_type: str = "SourceConcept"
     relationship: str = "HAS_SOURCE_CONCEPT"
     directed: bool = True
+
+
+class SourceConceptHasFieldOfWork(BaseEdge):
+    from_type: str = "SourceName"
+    to_type: str = "SourceConcept"
+    relationship: str = "HAS_FIELD_OF_WORK"
+    directed: bool = True

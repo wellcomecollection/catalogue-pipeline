@@ -15,7 +15,7 @@ def test_wikidata_concepts_nodes_transformer() -> None:
     add_mock_transformer_outputs(
         sources=["loc"], node_types=["concepts", "locations", "names"]
     )
-    _add_mock_wikidata_requests("nodes")
+    _add_mock_wikidata_requests("nodes", "concepts")
 
     transformer = WikidataConceptsTransformer(
         entity_type="nodes", linked_ontology="loc"
@@ -39,7 +39,7 @@ def test_wikidata_concepts_edges_transformer() -> None:
     add_mock_transformer_outputs(
         sources=["loc"], node_types=["concepts", "locations", "names"]
     )
-    _add_mock_wikidata_requests("edges")
+    _add_mock_wikidata_requests("edges", "concepts")
 
     transformer = WikidataConceptsTransformer(
         entity_type="edges", linked_ontology="loc"
@@ -51,6 +51,16 @@ def test_wikidata_concepts_edges_transformer() -> None:
     assert edges[0] == SourceConceptSameAs(
         from_type="SourceConcept",
         to_type="SourceConcept",
+        from_id="Q1",
+        to_id="sh00000001",
+        relationship="SAME_AS",
+        directed=False,
+        attributes={"source": "wikidata"},
+    )
+
+    assert edges[1] == SourceConceptSameAs(
+        from_type="SourceConcept",
+        to_type="SourceConcept",
         from_id="sh00000001",
         to_id="Q1",
         relationship="SAME_AS",
@@ -60,7 +70,9 @@ def test_wikidata_concepts_edges_transformer() -> None:
 
 
 def test_wikidata_raw_location() -> None:
-    raw_location_input = json.loads(load_fixture("wikidata/raw_location.json"))
+    raw_location_input = json.loads(
+        load_fixture("wikidata_linked_loc/raw_location.json")
+    )
     raw_location = RawWikidataLocation(raw_location_input)
 
     assert raw_location.coordinates["latitude"] is not None
@@ -70,7 +82,7 @@ def test_wikidata_raw_location() -> None:
 
 
 def test_wikidata_raw_name() -> None:
-    raw_name_input = json.loads(load_fixture("wikidata/raw_name.json"))
+    raw_name_input = json.loads(load_fixture("wikidata_linked_loc/raw_name.json"))
     raw_name = RawWikidataName(raw_name_input)
 
     assert raw_name.date_of_birth == "1949-01-28T00:00:00Z"
