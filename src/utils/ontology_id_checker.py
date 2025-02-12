@@ -17,7 +17,9 @@ def _get_ids_for_ontology_and_node_type(
         end=" ",
         flush=True,
     )
-    ids = {row[":ID"] for row in fetch_transformer_output_from_s3(node_type, ontology_type)}
+    ids = {
+        row[":ID"] for row in fetch_transformer_output_from_s3(node_type, ontology_type)
+    }
     print(f"({len(ids)} ids retrieved.)")
 
     return ids

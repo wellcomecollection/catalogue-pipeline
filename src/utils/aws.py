@@ -60,7 +60,9 @@ def get_neptune_client(is_local: bool) -> BaseNeptuneClient:
         return LambdaNeptuneClient(get_secret(INSTANCE_ENDPOINT_SECRET_NAME))
 
 
-def fetch_transformer_output_from_s3(node_type: NodeType, source: OntologyType) -> Generator[Any]:
+def fetch_transformer_output_from_s3(
+    node_type: NodeType, source: OntologyType
+) -> Generator[Any]:
     """Retrieves the bulk load file outputted by the relevant transformer so that we can extract data from it."""
     linked_nodes_file_name = f"{source}_{node_type}__nodes.csv"
     s3_url = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
