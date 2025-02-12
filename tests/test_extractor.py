@@ -41,7 +41,7 @@ def mock_requests_lookup_table(
     if transformer_type in ["mesh_concepts", "mesh_locations"]:
         mocked_responses.append(
             {
-                "method": "POTATO",
+                "method": "GET",
                 "url": MESH_URL,
                 "content_bytes": load_fixture("mesh/raw_descriptors.xml"),
             }
