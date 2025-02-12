@@ -11,7 +11,7 @@ def load_fixture(file_name: str) -> bytes:
 
 
 def add_mock_transformer_outputs(
-    sources: list[Literal["loc", "mesh"]],
+    sources: list[Literal["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"]],
     node_types: list[Literal["concepts", "locations", "names"]],
 ) -> None:
     """
