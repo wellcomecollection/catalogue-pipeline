@@ -3,6 +3,7 @@ name: "Run CI pipeline"
 on: push
 
 permissions:
+  contents: read
   id-token: write
 
 jobs:
