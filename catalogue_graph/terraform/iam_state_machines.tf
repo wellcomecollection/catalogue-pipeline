@@ -26,8 +26,8 @@ resource "aws_iam_policy" "state_machine_policy" {
         Resource = "*"
       },
       {
-        Effect   = "Allow",
-        Action   = ["states:StartExecution"],
+        Effect = "Allow",
+        Action = ["states:StartExecution"],
         Resource = [
           aws_sfn_state_machine.catalogue_graph_extractor.arn,
           aws_sfn_state_machine.catalogue_graph_extractors.arn,
@@ -36,8 +36,8 @@ resource "aws_iam_policy" "state_machine_policy" {
         ]
       },
       {
-        Effect   = "Allow",
-        Action   = ["lambda:InvokeFunction"],
+        Effect = "Allow",
+        Action = ["lambda:InvokeFunction"],
         Resource = [
           module.bulk_loader_lambda.lambda.arn,
           module.bulk_load_poller_lambda.lambda.arn
