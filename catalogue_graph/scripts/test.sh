@@ -6,6 +6,7 @@ set -o nounset
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT+="$(dirname "$DIR")"
 
-pytest catalogue_graph --cov src \
+pytest "$ROOT" --cov "$ROOT"/src \
     --cov-report term \
-    --cov-report xml:coverage.xml
+    --cov-report xml:"$ROOT"/coverage.xml
+

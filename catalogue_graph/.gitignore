@@ -2,6 +2,4 @@
 notebooks/*
 !notebooks/graph_exploration.ipynb
 
-!coverage.xml
-
 transformer_outputs/*
