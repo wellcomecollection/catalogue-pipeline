@@ -401,3 +401,8 @@ reindexer/scripts/ids
 
 # Ignore output miro links script
 scripts/mirolinks.csv
+
+catalogue_graph/notebooks/*
+!catalogue_graph/notebooks/graph_exploration.ipynb
+
+catalogue_graph/transformer_outputs/*
