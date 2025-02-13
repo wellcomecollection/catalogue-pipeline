@@ -1,0 +1,270 @@
+{
+  "@context": "http://v3/authorities/subjects/context.json",
+  "@graph": [
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh90003066",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Memory management (Computer science)"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b18"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b18",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Memory management (Computer science)"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh88007957",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Cache memory"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b16"
+          }
+        ]
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b16",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Cache memory"
+      }
+    },
+    {
+      "@id": "http://id.loc.gov/authorities/subjects/sh00000122",
+      "@type": [
+        "madsrdf:Authority",
+        "madsrdf:Topic"
+      ],
+      "bflc:marcKey": "150  $aLoop tiling (Computer science)",
+      "identifiers:lccn": "sh 00000122",
+      "madsrdf:adminMetadata": [
+        {
+          "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b1"
+        },
+        {
+          "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b2"
+        }
+      ],
+      "madsrdf:authoritativeLabel": {
+        "@language": "en",
+        "@value": "Loop tiling (Computer science)"
+      },
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b3"
+          }
+        ]
+      },
+      "madsrdf:hasBroaderAuthority": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh88007957"
+      },
+      "madsrdf:hasReciprocalAuthority": {
+        "@id": "http://id.loc.gov/authorities/subjects/sh90003066"
+      },
+      "madsrdf:hasSource": [
+        {
+          "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b5"
+        },
+        {
+          "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b6"
+        }
+      ],
+      "madsrdf:hasVariant": [
+        {
+          "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b7"
+        },
+        {
+          "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b10"
+        },
+        {
+          "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b13"
+        }
+      ],
+      "madsrdf:isMemberOfMADSCollection": [
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSHAuthorizedHeadings"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_LCSH_General"
+        },
+        {
+          "@id": "http://id.loc.gov/authorities/subjects/collection_SubdivideGeographically"
+        }
+      ],
+      "madsrdf:isMemberOfMADSScheme": {
+        "@id": "http://id.loc.gov/authorities/subjects"
+      },
+      "owl:sameAs": [
+        {
+          "@id": "http://id.loc.gov/authorities/sh00000122#concept"
+        },
+        {
+          "@id": "info:lc/authorities/sh00000122"
+        }
+      ]
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b1",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2000-06-27T00:00:00"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "new"
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b2",
+      "@type": "ri:RecordInfo",
+      "ri:languageOfCataloging": {
+        "@id": "http://id.loc.gov/vocabulary/iso639-2/eng"
+      },
+      "ri:recordChangeDate": {
+        "@type": "xsd:dateTime",
+        "@value": "2000-08-08T14:11:53"
+      },
+      "ri:recordContentSource": {
+        "@id": "http://id.loc.gov/vocabulary/organizations/dlc"
+      },
+      "ri:recordStatus": "revised"
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b3",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Loop tiling (Computer science)"
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b5",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "CIP galley (Loop tiling, as one of the most important compiler optimizations, is beneficial for both parallel machines and uniprocessors with a memory hierarchy)"
+      },
+      "madsrdf:citationSource": "Work cat.: 00057639: Xue, Jingling. Loop tiling for parallelism, c2000:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b6",
+      "@type": "madsrdf:Source",
+      "madsrdf:citationNote": {
+        "@language": "en",
+        "@value": "v. 48, no. 2, Feb., 1999 (Augmenting loop tiling with data alignment for improved cache performance. Loop blocking (tiling) is a well-known compiler optimization that helps improve cache performance by dividing the loop iteration space into smaller blocks (tiles))"
+      },
+      "madsrdf:citationSource": "IEEE transactions on Computers:",
+      "madsrdf:citationStatus": "found"
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b7",
+      "@type": [
+        "madsrdf:Topic",
+        "madsrdf:Variant"
+      ],
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b8"
+          }
+        ]
+      },
+      "madsrdf:variantLabel": {
+        "@language": "en",
+        "@value": "Loop blocking (Computer science)"
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b8",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Loop blocking (Computer science)"
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b10",
+      "@type": [
+        "madsrdf:Topic",
+        "madsrdf:Variant"
+      ],
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b11"
+          }
+        ]
+      },
+      "madsrdf:variantLabel": {
+        "@language": "en",
+        "@value": "Blocking, Loop (Computer science)"
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b11",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Blocking, Loop (Computer science)"
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b13",
+      "@type": [
+        "madsrdf:Topic",
+        "madsrdf:Variant"
+      ],
+      "madsrdf:elementList": {
+        "@list": [
+          {
+            "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b14"
+          }
+        ]
+      },
+      "madsrdf:variantLabel": {
+        "@language": "en",
+        "@value": "Tiling, Loop (Computer science)"
+      }
+    },
+    {
+      "@id": "_:n5c7514adfaab45d5bc99c13a2faadfc4b14",
+      "@type": "madsrdf:TopicElement",
+      "madsrdf:elementValue": {
+        "@language": "en",
+        "@value": "Tiling, Loop (Computer science)"
+      }
+    }
+  ],
+  "@id": "/authorities/subjects/sh00000122"
+}
+
