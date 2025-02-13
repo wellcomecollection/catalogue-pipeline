@@ -1,10 +1,11 @@
 # Build deployment artifact 
-name: "Run tests"
+name: "Catalogue graph: Run tests"
 
 on: 
     push:
       branches:
         - main
+      paths: 'catalogue_graph/**'
     pull_request:
     workflow_dispatch:
 
@@ -20,15 +21,15 @@ jobs:
 
       - name: Setup CI
         run: |
-          ./scripts/ci-setup.sh
+          ./catalogue_graph/scripts/ci-setup.sh
 
       - name: Run tests & generate coverage report
         run: |
-          ./scripts/test.sh
+          ./catalogue_graph/scripts/test.sh
 
       - name: Get Cover 
         if : ${{ github.event_name == 'pull_request' }}
         uses: orgoro/coverage@v3.2
         with:
-          coverageFile: coverage.xml
+          coverageFile: ./catalogue_graph/coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}

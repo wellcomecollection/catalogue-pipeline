@@ -20,4 +20,4 @@ docker run --tty --rm \
 	--volume "$ROOT:/repo" \
   --workdir /repo \
 	"$ECR_REGISTRY/pyfound/black" \
-  black --exclude ".lambda_zips/|.terraform/|target/" .
+  black --exclude ".lambda_zips/|.terraform/|target/|catalogue_graph/" .
