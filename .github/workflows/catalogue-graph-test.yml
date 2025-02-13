@@ -31,5 +31,5 @@ jobs:
         if : ${{ github.event_name == 'pull_request' }}
         uses: orgoro/coverage@v3.2
         with:
-          coverageFile: catalogue_graph/coverage.xml
+          coverageFile: ./catalogue_graph/coverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
