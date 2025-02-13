@@ -2,8 +2,6 @@ name: "Catalogue graph: Run CI pipeline"
 
 on: 
   push:
-    branches:
-      - main
     paths: 'catalogue_graph/**'
 
 permissions:
