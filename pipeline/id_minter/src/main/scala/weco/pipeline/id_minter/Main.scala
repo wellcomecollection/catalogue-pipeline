@@ -12,15 +12,9 @@ import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
-import weco.pipeline.id_minter.config.builders.{
-  IdentifiersTableBuilder,
-  RDSBuilder
-}
+import weco.pipeline.id_minter.config.builders.IdentifiersTableBuilder
 import weco.pipeline.id_minter.config.models.RDSClientConfig
-import weco.pipeline.id_minter.database.IdentifiersDao
-import weco.pipeline.id_minter.models.IdentifiersTable
 import weco.pipeline.id_minter.services.IdMinterWorkerService
-import weco.pipeline.id_minter.steps.IdentifierGenerator
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
 import weco.typesafe.config.builders.EnrichConfig._
@@ -32,15 +26,6 @@ object Main extends WellcomeTypesafeApp {
         ActorSystem("main-actor-system").dispatcher
       val rdsConfig = RDSClientConfig(config)
       val identifiersTableConfig = IdentifiersTableBuilder.buildConfig(config)
-      RDSBuilder.buildDB(rdsConfig)
-
-      val identifierGenerator = new IdentifierGenerator(
-        identifiersDao = new IdentifiersDao(
-          identifiers = new IdentifiersTable(
-            identifiersTableConfig = identifiersTableConfig
-          )
-        )
-      )
 
       val esClient = ElasticBuilder.buildElasticClient(config)
 
@@ -64,7 +49,7 @@ object Main extends WellcomeTypesafeApp {
         )
 
       new IdMinterWorkerService(
-        identifierGenerator = identifierGenerator,
+        maybeIdentifierGenerator = None,
         jsonRetriever = jsonRetriever,
         pipelineStream = pipelineStream,
         rdsClientConfig = rdsConfig,

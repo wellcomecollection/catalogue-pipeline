@@ -15,11 +15,15 @@ import weco.pipeline_storage.PipelineStorageStream.{
 }
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline.id_minter.config.builders.RDSBuilder
 import weco.pipeline.id_minter.config.models.{
   IdentifiersTableConfig,
   RDSClientConfig
 }
-import weco.pipeline.id_minter.database.TableProvisioner
+import weco.pipeline.id_minter.database.{
+  RDSIdentifierGenerator,
+  TableProvisioner
+}
 import weco.pipeline.id_minter.steps.{
   IdentifierGenerator,
   SourceIdentifierEmbedder
@@ -30,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 class IdMinterWorkerService[Destination](
-  identifierGenerator: IdentifierGenerator,
+  maybeIdentifierGenerator: Option[IdentifierGenerator],
   pipelineStream: PipelineStorageStream[NotificationMessage, Work[
     Identified
   ], Destination],
@@ -40,8 +44,15 @@ class IdMinterWorkerService[Destination](
 )(implicit ec: ExecutionContext)
     extends Runnable
     with Logging {
-
+  private val identifierGenerator = maybeIdentifierGenerator.getOrElse(
+    RDSIdentifierGenerator(
+      rdsClientConfig,
+      identifiersTableConfig
+    )
+  )
   def run(): Future[Done] = {
+    RDSBuilder.buildDB(rdsClientConfig)
+
     val tableProvisioner = new TableProvisioner(
       rdsClientConfig = rdsClientConfig
     )
