@@ -39,6 +39,18 @@ class MintingRequestProcessorTest
       Future.successful(applyResponse)
   }
 
+  it("returns nothing if everything was OK") {
+    val works = identifiedWorks(3)
+    val minter = new MintingRequestProcessor(
+      minter = new MockMinter(works.map(Right(_))),
+      workIndexer = new MockIndexer(Right(works))
+    )
+    whenReady(minter.process(works.map(_.sourceIdentifier.toString))) {
+      result =>
+        result shouldBe empty
+    }
+  }
+
   it("returns any failed ids from the minter") {
     val minter = new MintingRequestProcessor(
       minter = new MockMinter(Seq(Left("abc"), Left("def"))),
@@ -48,8 +60,8 @@ class MintingRequestProcessorTest
       result =>
         result should contain theSameElementsAs Seq("abc", "def")
     }
-
   }
+
   it("returns indexer failures") {
     val works = identifiedWorks(3)
     val minter = new MintingRequestProcessor(
@@ -68,7 +80,6 @@ class MintingRequestProcessorTest
     val works = identifiedWorks(4)
     val minterSuccess = works.tail
     val minterFail = works.head
-    val indexerSuccess = minterSuccess.tail
     val indexerFail = minterSuccess.head
 
     val minter = new MintingRequestProcessor(

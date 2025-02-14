@@ -18,7 +18,9 @@ class MintingRequestProcessor(
         val storageResults = workIndexer(successes.map(_.right.get).toSeq)
         storageResults.map {
           case Left(storageFailures) =>
-            storageFailures.map(_.sourceIdentifier.toString)
+            storageFailures.map(_.sourceIdentifier.toString) ++ mintingFailures
+              .map(_.left.get)
+              .toSeq
           case Right(_) => mintingFailures.map(_.left.get).toSeq
         }
     }
