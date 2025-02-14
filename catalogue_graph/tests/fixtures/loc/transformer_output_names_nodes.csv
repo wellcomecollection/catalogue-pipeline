@@ -1,0 +1,3 @@
+:ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String,date_of_birth:DateTime,date_of_death:DateTime,place_of_birth:String
+n00000001,SourceName,n00000001,"McQuerry, Maureen, 1955-",lc-names,,"MacQuerry, Maureen, 1955-||Makkvyri, Morin, 1955-||McQuerry, Maureen Doyle, 1955-",,,,
+n00000021,SourceName,n00000021,"Widmer, Thomas, 1962-",lc-names,,,,,,

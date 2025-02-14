@@ -46,34 +46,6 @@ trait WorkerServiceFixture
 
         testWith(workerService)
     }
-//
-//  def withWorkerService[R](
-//    messageSender: MemoryMessageSender,
-//    queue: Queue,
-//    identifiersTableConfig: IdentifiersTableConfig,
-//    mergedIndex: Map[String, Json],
-//    identifiedIndex: mutable.Map[String, Work[Identified]]
-//  )(testWith: TestWith[IdMinterWorkerService[String], R]): R = {
-//    Class.forName("com.mysql.cj.jdbc.Driver")
-//    ConnectionPool.singleton(
-//      s"jdbc:mysql://$rdsHost:$port",
-//      rdsUsername,
-//      rdsPassword,
-//      settings = ConnectionPoolSettings(maxSize = rdsMaxPoolSize)
-//    )
-//
-//    withWorkerService(
-//      messageSender,
-//      queue,
-//      identifiersTableConfig,
-//      mergedIndex,
-//      identifiedIndex
-//    ) {
-//      service =>
-//        testWith(service)
-//    }
-//  }
-
   def createIndex(works: List[Work[Source]]): Map[String, Json] =
     works.map(work => (work.id, work.asJson)).toMap
 }

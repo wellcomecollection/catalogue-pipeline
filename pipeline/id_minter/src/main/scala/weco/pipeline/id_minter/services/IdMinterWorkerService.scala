@@ -47,6 +47,7 @@ class IdMinterWorkerService[Destination](
     )
   )
   private val minter = new SingleDocumentIdMinter(identifierGenerator)
+
   def run(): Future[Done] = {
     RDSBuilder.buildDB(rdsClientConfig)
 

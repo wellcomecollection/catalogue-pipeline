@@ -1,0 +1,62 @@
+name: "Catalogue graph: Run CI pipeline"
+
+on: 
+  push:
+    branches:
+      - main
+    paths: 'catalogue_graph/**'
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  test: 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: CI setup
+        run: |
+          ./catalogue_graph/scripts/ci-setup.sh
+      - name: Test
+        run: |
+          ./catalogue_graph/scripts/test.sh
+        
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ needs.test.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build and push artefacts
+        run: |
+          ./catalogue_graph/scripts/build.sh --push
+  
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ needs.build.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - name: Deploy bulk-loader lambda
+        run: |
+          ./catalogue_graph/scripts/deploy_lambda_zip.sh catalogue-graph-bulk-loader
+      - name: Deploy bulk-load-poller lambda
+        run: |
+          ./catalogue_graph/scripts/deploy_lambda_zip.sh catalogue-graph-bulk-load-poller
+      - name: Deploy indexer lambda
+        run: |
+          ./catalogue_graph/scripts/deploy_lambda_zip.sh catalogue-graph-indexer 
