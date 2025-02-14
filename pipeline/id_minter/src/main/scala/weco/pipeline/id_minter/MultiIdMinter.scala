@@ -9,8 +9,17 @@ import weco.pipeline_storage.{Retriever, RetrieverMultiResult}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
+trait IdListMinter {
+  def processSourceIds(
+    identifiers: Seq[String]
+  )(
+    implicit ec: ExecutionContext
+  ): Future[Iterable[Either[String, Work[Identified]]]]
+}
+
 class MultiIdMinter(jsonRetriever: Retriever[Json], minter: IdMinter)
-    extends Logging {
+    extends IdListMinter
+    with Logging {
 
   /** Given some identifiers, fetches their corresponding records from the
     * upstream database, mint canonicalIdentifiers for and within each document.
