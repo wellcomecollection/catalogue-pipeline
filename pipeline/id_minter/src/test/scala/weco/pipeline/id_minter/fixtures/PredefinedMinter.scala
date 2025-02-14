@@ -2,7 +2,7 @@ package weco.pipeline.id_minter.fixtures
 
 import io.circe.Json
 import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
-import weco.pipeline.id_minter.{IdMinter, MultiIdMinter}
+import weco.pipeline.id_minter.{MultiIdMinter, SingleDocumentIdMinter}
 import weco.pipeline.id_minter.models.Identifier
 import weco.pipeline.id_minter.steps.CanonicalIdentifierGenerator
 import weco.pipeline_storage.Retriever
@@ -36,7 +36,7 @@ trait PredefinedMinter {
   }
 
   protected def singleMinter(idMap: Map[SourceIdentifier, String]) =
-    new IdMinter(
+    new SingleDocumentIdMinter(
       MockGenerator(idMap)
     )
   protected def multiMinter(

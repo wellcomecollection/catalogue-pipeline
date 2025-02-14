@@ -39,7 +39,10 @@ class LambdaMain
   )
 
   private val minter =
-    new MultiIdMinter(jsonRetriever, new IdMinter(identifierGenerator))
+    new MultiIdMinter(
+      jsonRetriever,
+      new SingleDocumentIdMinter(identifierGenerator)
+    )
   val processor = new MintingRequestProcessor(minter, workIndexer)
   override def processT(t: List[String]): Future[Seq[String]] = {
     processor.process(t)

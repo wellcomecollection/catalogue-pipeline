@@ -12,7 +12,9 @@ import weco.catalogue.internal_model.Implicits._
 
 import scala.util.Try
 
-class IdMinter(identifierGenerator: CanonicalIdentifierGenerator) {
+class SingleDocumentIdMinter(
+  identifierGenerator: CanonicalIdentifierGenerator
+) {
 
   def processJson(json: Json): Try[Work[Identified]] = {
     for {

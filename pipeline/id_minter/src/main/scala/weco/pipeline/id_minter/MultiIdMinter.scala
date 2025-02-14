@@ -17,11 +17,13 @@ trait IdListMinter {
   ): Future[Iterable[Either[String, Work[Identified]]]]
 }
 
-class MultiIdMinter(jsonRetriever: Retriever[Json], minter: IdMinter)
-    extends IdListMinter
+class MultiIdMinter(
+  jsonRetriever: Retriever[Json],
+  minter: SingleDocumentIdMinter
+) extends IdListMinter
     with Logging {
 
-  /** Given some identifiers, fetches their corresponding records from the
+  /** Given some identifiers, fetch their corresponding records from the
     * upstream database, mint canonicalIdentifiers for and within each document.
     * The nature of any failures are logged, and the failing ids are returned
     * @return

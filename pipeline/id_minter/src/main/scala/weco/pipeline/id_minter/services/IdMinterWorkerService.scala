@@ -13,7 +13,7 @@ import weco.pipeline_storage.PipelineStorageStream.{
 }
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
-import weco.pipeline.id_minter.IdMinter
+import weco.pipeline.id_minter.SingleDocumentIdMinter
 import weco.pipeline.id_minter.config.builders.RDSBuilder
 import weco.pipeline.id_minter.config.models.{
   IdentifiersTableConfig,
@@ -46,7 +46,7 @@ class IdMinterWorkerService[Destination](
       identifiersTableConfig
     )
   )
-  private val minter = new IdMinter(identifierGenerator)
+  private val minter = new SingleDocumentIdMinter(identifierGenerator)
   def run(): Future[Done] = {
     RDSBuilder.buildDB(rdsClientConfig)
 
