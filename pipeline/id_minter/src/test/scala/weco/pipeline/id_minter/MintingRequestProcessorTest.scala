@@ -1,5 +1,6 @@
 package weco.pipeline.id_minter
 
+import org.scalatest.LoneElement
 import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -15,6 +16,7 @@ class MintingRequestProcessorTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
+    with LoneElement
     with IntegrationPatience
     with WorkGenerators {
   class MockIndexer(
@@ -39,7 +41,19 @@ class MintingRequestProcessorTest
       Future.successful(applyResponse)
   }
 
-  it("returns nothing if everything was OK") {
+  it("does nothing if there is nothing to do") {
+    val work = identifiedWork()
+    val minter = new MintingRequestProcessor(
+      minter = new MockMinter(Seq(Left(work.sourceIdentifier.toString))),
+      workIndexer = new MockIndexer(Left(Seq(work)))
+    )
+    whenReady(minter.process(Nil)) {
+      result =>
+        result.failures shouldBe empty
+        result.successes shouldBe empty
+    }
+  }
+  describe("when everything is OK") {
     val works = identifiedWorks(3)
     val minter = new MintingRequestProcessor(
       minter = new MockMinter(works.map(Right(_))),
@@ -47,41 +61,64 @@ class MintingRequestProcessorTest
     )
     whenReady(minter.process(works.map(_.sourceIdentifier.toString))) {
       result =>
-        result shouldBe empty
+        it("does not report any failures") {
+          result.failures shouldBe empty
+        }
+        it("returns the canonical IDs of all the successes") {
+          result.successes should contain theSameElementsAs works.map(_.id)
+        }
     }
   }
-
-  it("returns any failed ids from the minter") {
+  describe("when there are failures in retrieval or minting") {
+    val successfulWork = identifiedWork()
     val minter = new MintingRequestProcessor(
-      minter = new MockMinter(Seq(Left("abc"), Left("def"))),
+      minter =
+        new MockMinter(Seq(Left("abc"), Left("def"), Right(successfulWork))),
       workIndexer = new MockIndexer(Right(Nil))
     )
     whenReady(minter.process(Seq("abc", "def", "ghi"))) {
       result =>
-        result should contain theSameElementsAs Seq("abc", "def")
+        it(
+          "returns the source identifiers of the records that failed to mint new ids"
+        ) {
+          result.failures should contain theSameElementsAs Seq("abc", "def")
+        }
+        it("returns the canonical identifiers of any successes") {
+          result.successes.loneElement shouldBe successfulWork.id
+        }
     }
   }
 
-  it("returns indexer failures") {
+  describe("when some records fail to be indexed") {
     val works = identifiedWorks(3)
     val minter = new MintingRequestProcessor(
       minter = new MockMinter(works.map(Right(_))),
       workIndexer = new MockIndexer(Left(works.tail))
     )
+    val successfulWork = works.head
+
     whenReady(minter.process(works.map(_.sourceIdentifier.toString))) {
       result =>
-        result should contain theSameElementsAs works.tail.map(
-          _.sourceIdentifier.toString
-        )
+        it(
+          "returns the source identifiers of the records that could not be stored"
+        ) {
+          result.failures should contain theSameElementsAs works.tail.map(
+            _.sourceIdentifier.toString
+          )
+        }
+        it("returns the canonical identifiers of any successes") {
+          result.successes.loneElement shouldBe successfulWork.id
+        }
     }
   }
-  it("returns all failures for any reason") {
+
+  describe("when there are failures in retrieval/minting and indexing") {
 
     val works = identifiedWorks(4)
     val minterSuccess = works.tail
     val minterFail = works.head
     val indexerFail = minterSuccess.head
-
+    val indexerSuccess = minterSuccess.tail
     val minter = new MintingRequestProcessor(
       minter = new MockMinter(
         minterSuccess.map(Right(_)) :+ Left(
@@ -92,8 +129,19 @@ class MintingRequestProcessorTest
     )
     whenReady(minter.process(works.map(_.sourceIdentifier.toString))) {
       result =>
-        result should contain theSameElementsAs Seq(minterFail, indexerFail)
-          .map(_.sourceIdentifier.toString)
+        it("returns the source IDs for any records that fail for any reason") {
+          result.failures should contain theSameElementsAs Seq(
+            minterFail,
+            indexerFail
+          )
+            .map(_.sourceIdentifier.toString)
+        }
+        it(
+          "returns the canonical ids for any successfully processed records"
+        ) {
+          result.successes should contain theSameElementsAs indexerSuccess
+            .map(_.id)
+        }
     }
   }
 }

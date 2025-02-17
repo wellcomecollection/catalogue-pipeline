@@ -3,7 +3,8 @@ package weco.pipeline.id_minter.config.models
 import com.typesafe.config.Config
 import weco.elasticsearch.typesafe.ElasticBuilder.buildElasticClientConfig
 import weco.elasticsearch.typesafe.ElasticConfig
-import weco.lambda.{ApplicationConfig, LambdaConfigurable}
+import weco.lambda.DownstreamBuilder.buildDownstreamTarget
+import weco.lambda.{ApplicationConfig, DownstreamTarget, LambdaConfigurable}
 import weco.messaging.sns.SNSConfig
 import weco.messaging.typesafe.SNSBuilder
 import weco.pipeline.id_minter.config.builders.IdentifiersTableBuilder
@@ -15,7 +16,8 @@ case class IdMinterConfig(
   elasticConfig: ElasticConfig,
   snsConfig: SNSConfig,
   sourceIndex: String,
-  targetIndex: String
+  targetIndex: String,
+  downstreamConfig: DownstreamTarget
 ) extends ApplicationConfig
 
 trait IdMinterConfigurable extends LambdaConfigurable[IdMinterConfig] {
@@ -26,6 +28,7 @@ trait IdMinterConfigurable extends LambdaConfigurable[IdMinterConfig] {
       elasticConfig = buildElasticClientConfig(rawConfig),
       snsConfig = SNSBuilder.buildSNSConfig(rawConfig),
       sourceIndex = rawConfig.requireString("es.source-works.index"),
-      targetIndex = rawConfig.requireString("es.identified-works.index")
+      targetIndex = rawConfig.requireString("es.identified-works.index"),
+      downstreamConfig = buildDownstreamTarget(rawConfig)
     )
 }

@@ -20,6 +20,7 @@ import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 trait WorkerServiceFixture
     extends IdentifiersDatabase
     with PipelineStorageStreamFixtures {
+
   def withWorkerService[R](
     messageSender: MemoryMessageSender = new MemoryMessageSender(),
     queue: Queue = Queue("url://q", "arn::q", visibilityTimeout = 1 seconds),
@@ -46,6 +47,7 @@ trait WorkerServiceFixture
 
         testWith(workerService)
     }
+
   def createIndex(works: List[Work[Source]]): Map[String, Json] =
     works.map(work => (work.id, work.asJson)).toMap
 }

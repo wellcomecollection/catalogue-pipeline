@@ -5,7 +5,7 @@ import io.circe.Json
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.lambda.SQSLambdaApp
+import weco.lambda.{Downstream, SQSBatchResponseLambdaApp}
 import weco.pipeline.id_minter.config.models.{
   IdMinterConfig,
   IdMinterConfigurable
@@ -17,7 +17,7 @@ import weco.pipeline.id_minter.database.RDSIdentifierGenerator
 import scala.concurrent.Future
 
 class LambdaMain
-    extends SQSLambdaApp[String, Seq[String], IdMinterConfig]
+    extends SQSBatchResponseLambdaApp[String, IdMinterConfig]
     with IdMinterConfigurable {
 
   private val identifierGenerator = RDSIdentifierGenerator(
@@ -44,7 +44,13 @@ class LambdaMain
       new SingleDocumentIdMinter(identifierGenerator)
     )
   val processor = new MintingRequestProcessor(minter, workIndexer)
+  val downstream = Downstream(config.downstreamConfig)
+
   override def processT(t: List[String]): Future[Seq[String]] = {
-    processor.process(t)
+    processor.process(t).map {
+      mintingResponse =>
+        downstream.notify(mintingResponse.successes)
+        mintingResponse.failures
+    }
   }
 }
