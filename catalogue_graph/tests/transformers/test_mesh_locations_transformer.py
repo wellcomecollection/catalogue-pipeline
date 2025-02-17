@@ -34,5 +34,5 @@ def test_mesh_concepts_transformer() -> None:
         alternative_labels=[],
         description="The capital of the United Kingdom. It is located in England.\n    ",
         latitude=None,
-        longitude=None
+        longitude=None,
     )

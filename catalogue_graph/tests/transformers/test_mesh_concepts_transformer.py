@@ -32,7 +32,11 @@ def test_mesh_concepts_transformer() -> None:
         label="Organic Chemicals",
         source="nlm-mesh",
         alternative_ids=["D02"],
-        alternative_labels=["Chemicals, Organic", "Organic Chemical", "Chemical, Organic"],
+        alternative_labels=[
+            "Chemicals, Organic",
+            "Organic Chemical",
+            "Chemical, Organic",
+        ],
         description="A broad class of substances containing carbon and its derivatives. Many of these chemicals will frequently contain hydrogen with or without oxygen, nitrogen, sulfur, phosphorus, and other elements. They exist in either carbon chain or carbon ring form.\n    ",
     )
 
