@@ -83,7 +83,8 @@ trait IdentifiersDatabase
     replicaHost = rdsHost,
     port = rdsPort,
     username = rdsUsername,
-    password = rdsPassword
+    password = rdsPassword,
+    maxConnections = rdsMaxPoolSize
   )
 
   def withIdentifiersTable[R](

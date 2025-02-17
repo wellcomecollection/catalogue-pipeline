@@ -1,9 +1,10 @@
-name: "Run CI pipeline"
+name: "Catalogue graph: Run CI pipeline"
 
 on: 
   push:
     branches:
       - main
+    paths: 'catalogue_graph/**'
 
 permissions:
   contents: read
@@ -19,10 +20,10 @@ jobs:
           python-version: '3.13'
       - name: CI setup
         run: |
-          ./scripts/ci-setup.sh
+          ./catalogue_graph/scripts/ci-setup.sh
       - name: Test
         run: |
-          ./scripts/test.sh
+          ./catalogue_graph/scripts/test.sh
         
   build:
     runs-on: ubuntu-latest
@@ -38,7 +39,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       - name: Build and push artefacts
         run: |
-          ./scripts/build.sh --push
+          ./catalogue_graph/scripts/build.sh --push
   
   deploy:
     runs-on: ubuntu-latest
@@ -52,10 +53,10 @@ jobs:
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - name: Deploy bulk-loader lambda
         run: |
-          ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-loader
+          ./catalogue_graph/scripts/deploy_lambda_zip.sh catalogue-graph-bulk-loader
       - name: Deploy bulk-load-poller lambda
         run: |
-          ./scripts/deploy_lambda_zip.sh catalogue-graph-bulk-load-poller
+          ./catalogue_graph/scripts/deploy_lambda_zip.sh catalogue-graph-bulk-load-poller
       - name: Deploy indexer lambda
         run: |
-          ./scripts/deploy_lambda_zip.sh catalogue-graph-indexer 
+          ./catalogue_graph/scripts/deploy_lambda_zip.sh catalogue-graph-indexer 

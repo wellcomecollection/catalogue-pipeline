@@ -2,7 +2,7 @@ module "gha_catalogue_graph_ci_role" {
   source = "github.com/wellcomecollection/terraform-aws-gha-role?ref=v1.0.0"
 
   policy_document          = data.aws_iam_policy_document.gha_catalogue_graph_ci.json
-  github_repository        = "wellcomecollection/catalogue-graph"
+  github_repository        = "wellcomecollection/catalogue-pipeline"
   role_name                = "catalogue-graph-ci"
   github_oidc_provider_arn = data.terraform_remote_state.aws_account_infrastructure.outputs.github_openid_connect_provider_arn
 }
