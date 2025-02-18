@@ -1,6 +1,7 @@
 package weco.pipeline.id_minter
 
 import com.sksamuel.elastic4s.Index
+import grizzled.slf4j.Logging
 import io.circe.Json
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
@@ -18,23 +19,27 @@ import scala.concurrent.Future
 
 class LambdaMain
     extends SQSBatchResponseLambdaApp[String, IdMinterConfig]
-    with IdMinterConfigurable {
+    with IdMinterConfigurable
+    with Logging {
 
   private val identifierGenerator = RDSIdentifierGenerator(
     config.rdsClientConfig,
     config.identifiersTableConfig
   )
 
-  private val esClient = ElasticBuilder.buildElasticClient(config.elasticConfig)
+  private val upstreamESClient =
+    ElasticBuilder.buildElasticClient(config.upstreamElasticConfig)
+  private val downstreamESClient =
+    ElasticBuilder.buildElasticClient(config.downstreamElasticConfig)
 
   private val workIndexer =
     new ElasticIndexer[Work[Identified]](
-      client = esClient,
+      client = downstreamESClient,
       index = Index(config.targetIndex)
     )
 
   private val jsonRetriever = new ElasticSourceRetriever[Json](
-    client = esClient,
+    client = upstreamESClient,
     index = Index(config.sourceIndex)
   )
 
@@ -43,12 +48,14 @@ class LambdaMain
       jsonRetriever,
       new SingleDocumentIdMinter(identifierGenerator)
     )
-  val processor = new MintingRequestProcessor(minter, workIndexer)
-  val downstream = Downstream(config.downstreamConfig)
+
+  private val processor = new MintingRequestProcessor(minter, workIndexer)
+  private val downstream = Downstream(config.downstreamConfig)
 
   override def processT(t: List[String]): Future[Seq[String]] = {
     processor.process(t).map {
       mintingResponse =>
+        error(mintingResponse)
         downstream.notify(mintingResponse.successes)
         mintingResponse.failures
     }

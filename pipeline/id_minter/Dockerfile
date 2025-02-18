@@ -1,12 +1,16 @@
-FROM public.ecr.aws/docker/library/eclipse-temurin:11-jre-alpine as base
+FROM public.ecr.aws/amazoncorretto/amazoncorretto:11 AS base
 
-LABEL maintainer = "Wellcome Collection <digital@wellcomecollection.org>"
+LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
-RUN apk add --no-cache bash
+RUN yum install awscli -y
+COPY bash_secrets_extension.sh /opt/extensions/bash_secrets_extension.sh
 
 ADD target/universal/stage /opt/docker
+ENV CLASSPATH="/opt/docker/lib/*"
+WORKDIR /opt/docker
 
 FROM base AS ecs
+
 ENTRYPOINT ["/opt/docker/bin/id_minter"]
 
 FROM base AS lambda_rie
@@ -19,7 +23,7 @@ ENV use_downstream=stdio
 
 CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.id_minter.LambdaMain::handleRequest"]
 
-FROM base as lambda_live
+FROM base AS lambda_live
 
 ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
 

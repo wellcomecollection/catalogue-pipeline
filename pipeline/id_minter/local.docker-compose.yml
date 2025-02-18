@@ -13,3 +13,47 @@ services:
       - AWS_PROFILE=platform-developer
       - metrics_namespace=catalogue-dev_id_minter
       - use_downstream=stdio
+      - cluster_url=mysql
+      - cluster_url_readonly=mysql
+      - db_port=3306
+      - db_username=pipeline-user
+      - db_password=pipeline-password
+      - max_connections=1
+      - es_downstream_host=elasticsearch-local
+      - es_downstream_port=9200
+      - es_downstream_protocol=http
+      - es_downstream_username=itsme
+      - es_downstream_password=itreallyis
+      - es_identified_index=local-works-identified
+    env_file:
+      - .env
+
+  mysql:
+    image: "public.ecr.aws/docker/library/mysql:8.0"
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: identifiers
+      MYSQL_USER: pipeline-user
+      MYSQL_PASSWORD: pipeline-password
+
+  localstack:
+    image: "public.ecr.aws/localstack/localstack:3.5.0"
+    environment:
+      - SERVICES=sqs
+      - ALLOW_NONSTANDARD_REGIONS=1
+    ports:
+      - "4566:4566"
+  elasticsearch-local:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:8.8.2"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - "http.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "cluster.name=wellcome"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "action.auto_create_index=true"

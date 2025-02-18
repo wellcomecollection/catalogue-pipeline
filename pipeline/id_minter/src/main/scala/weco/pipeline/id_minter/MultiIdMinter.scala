@@ -37,7 +37,7 @@ class MultiIdMinter(
   ): Future[Iterable[Either[String, Work[Identified]]]] = {
 
     // run through the happy path (logging, but otherwise ignoring exceptions as we go)
-    val futureSuccesses = jsonRetriever(identifiers)
+    val futureSuccesses = jsonRetriever(identifiers.map(_.strip()))
       .map {
         result: RetrieverMultiResult[Json] =>
           // At this point, it would be possible to collect the failed identifiers,
