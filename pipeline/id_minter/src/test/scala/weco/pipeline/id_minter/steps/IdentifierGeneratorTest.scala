@@ -8,7 +8,7 @@ import org.scalatest.{Inspectors, OptionValues}
 import scalikejdbc._
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.SourceIdentifier
+import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
 import weco.pipeline.id_minter.config.models.IdentifiersTableConfig
 import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.fixtures.IdentifiersDatabase
@@ -287,6 +287,82 @@ class IdentifierGeneratorTest
         maybeIdentifier.get shouldBe Identifier(
           canonicalId = id,
           sourceIdentifier = sourceIdentifier
+        )
+    }
+  }
+
+  it("converts concept ontologyType values to Concept") {
+    withIdentifierGenerator() {
+      case (identifierGenerator, identifiersTable) =>
+        implicit val session = NamedAutoSession('primary)
+
+        val sourceIdentifier = createSourceIdentifierWith(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Person"
+        )
+
+        val triedId = identifierGenerator.retrieveOrGenerateCanonicalIds(
+          List(sourceIdentifier)
+        )
+
+        val id = triedId.get.values.head.CanonicalId
+        id.underlying should not be empty
+
+        val i = identifiersTable.i
+        val maybeIdentifier = withSQL {
+
+          select
+            .from(identifiersTable as i)
+            .where
+            .eq(i.SourceId, sourceIdentifier.value)
+
+        }.map(Identifier(i)).single.apply()
+
+        maybeIdentifier shouldBe defined
+        maybeIdentifier.get shouldBe Identifier(
+          canonicalId = id,
+          sourceIdentifier = sourceIdentifier.copy(ontologyType = "Concept")
+        )
+    }
+  }
+
+  it("only mints one id for concepts with the same source identifier") {
+    withIdentifierGenerator() {
+      case (identifierGenerator, identifiersTable) =>
+        implicit val session = NamedAutoSession('primary)
+
+        val sourceIdentifierPerson = createSourceIdentifierWith(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Person",
+          value = "123"
+        )
+        val sourceIdentifierAgent = createSourceIdentifierWith(
+          identifierType = IdentifierType.LCNames,
+          ontologyType = "Agent",
+          value = "123"
+        )
+
+        val triedId = identifierGenerator.retrieveOrGenerateCanonicalIds(
+          List(sourceIdentifierAgent, sourceIdentifierPerson)
+        )
+
+        val id = triedId.get.values.head.CanonicalId
+        id.underlying should not be empty
+
+        val i = identifiersTable.i
+        val maybeIdentifier = withSQL {
+
+          select
+            .from(identifiersTable as i)
+            .where
+            .eq(i.SourceId, sourceIdentifierPerson.value)
+
+        }.map(Identifier(i)).single.apply()
+
+        maybeIdentifier shouldBe defined
+        maybeIdentifier.get shouldBe Identifier(
+          canonicalId = id,
+          sourceIdentifier = sourceIdentifierPerson.copy(ontologyType = "Concept")
         )
     }
   }
