@@ -34,7 +34,7 @@ def test_catalogue_concepts_transformer_nodes() -> None:
 
     nodes = list(catalogue_concepts_transformer._stream_nodes())
 
-    assert len(nodes) == 8
+    assert len(nodes) == 11
     assert nodes[0] == Concept(
         id="s6s24vd7", label="Human anatomy", type="Concept", source="lc-subjects"
     )

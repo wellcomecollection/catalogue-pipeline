@@ -23,5 +23,5 @@ def test_catalogue_concepts_source() -> None:
     stream_result = list(catalogue_concepts_source.stream_raw())
 
     # Do some simple checks on mesh source decoding based on known data
-    assert len(stream_result) == 12
+    assert len(stream_result) == 16
     assert stream_result[0]["label"] == "Human anatomy"
