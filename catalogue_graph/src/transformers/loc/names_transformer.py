@@ -4,7 +4,7 @@ from models.graph_edge import SourceConceptRelatedTo
 from models.graph_node import SourceName
 from sources.gzip_source import GZipSource
 from transformers.base_transformer import BaseTransformer
-from transformers.loc.raw_concept import RawLibraryOfCongressSKOSConcept
+from transformers.loc.raw_concept import RawLibraryOfCongressConcept
 
 
 class LibraryOfCongressNamesTransformer(BaseTransformer):
@@ -12,7 +12,7 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
         self.source = GZipSource(url)
 
     def transform_node(self, raw_node: dict) -> SourceName | None:
-        raw_concept = RawLibraryOfCongressSKOSConcept(raw_node)
+        raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or raw_concept.is_geographic:
             return None
@@ -28,9 +28,9 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
         # Although there are some broader and narrower relationships specified
         # in the MADS instance of the names export, there are not many that are likely
         # to be relevant, so the names transformer uses the lighter-weight SKOS export.
-        raw_concept = RawLibraryOfCongressSKOSConcept(raw_node)
+        raw_concept = RawLibraryOfCongressConcept(raw_node)
 
-        if raw_concept.exclude() or not raw_concept.is_geographic:
+        if raw_concept.exclude() or raw_concept.is_geographic:
             return
 
         for related_id in raw_concept.related_concept_ids:
