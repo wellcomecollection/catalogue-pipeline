@@ -36,26 +36,6 @@ object SQSEventOps {
     *   - a `Message`, which is the actual content we want
     */
   implicit class ExtractTFromSqsEvent(event: SQSEvent) {
-    def extract[T]()(implicit decoder: Decoder[T], ct: ClassTag[T]): List[T] =
-      event.getRecords.asScala.toList.flatMap(extractFromMessage[T](_))
-
-    def extractMap[T]()(
-      implicit decoder: Decoder[T],
-      ct: ClassTag[T]
-    ): Map[T, Seq[SQSMessage]] =
-      event.getRecords.asScala.toList
-        .flatMap(
-          message =>
-            extractFromMessage[T](message) match {
-              case None        => None
-              case Some(value) => Some(value -> message)
-            }
-        )
-        .groupBy(_._1)
-        .map {
-          case (k: T, v: Seq[(T, SQSMessage)]) => k -> v.map(_._2)
-        }
-
     def extractLambdaEvents[T]()(implicit decoder: Decoder[T], ct: ClassTag[T]): List[Either[SQSLambdaMessageFailedExtraction, SQSLambdaMessage[T]]] = {
       event.getRecords.asScala.toList.map { message =>
         (for {
@@ -87,6 +67,9 @@ object SQSEventOps {
         }
       }
     }
+
+    def extract[T]()(implicit decoder: Decoder[T], ct: ClassTag[T]): List[T] =
+      event.getRecords.asScala.toList.flatMap(extractFromMessage[T](_))
 
     private def extractFromMessage[T](
       message: SQSMessage
