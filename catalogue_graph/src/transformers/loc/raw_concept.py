@@ -29,6 +29,7 @@ class RawLibraryOfCongressConcept:
             if (
                 self.source_id in node.get("@id", "")
                 and "madsrdf:Authority" in node["@type"]
+                and node.get("madsrdf:authoritativeLabel")
             ):
                 return node
         return None
