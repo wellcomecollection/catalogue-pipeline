@@ -58,7 +58,7 @@ class RawLibraryOfCongressConcept:
         ]
         if raw_alternative_identifiers:
             identifier_lookup = {
-                n["@id"]: n["madsrdf:variantLabel"]["@value"]
+                n["@id"]: self._extract_value(n["madsrdf:variantLabel"])
                 for n in self.raw_concept.get("@graph", [])
                 if "madsrdf:Variant" in n["@type"]
             }
@@ -139,11 +139,15 @@ class RawLibraryOfCongressConcept:
         )
 
     @staticmethod
-    def _extract_label(raw_label: str | dict[str, str] | list[str]) -> str:
-        # Labels are either stored directly as strings, or as nested JSON objects with a `@value` property.
-        if isinstance(raw_label, str):
-            return raw_label
+    def _extract_value(dict_or_str: str | dict[str, str]) -> str:
+        """Returns value of a raw concept field which is either stored as a sting or dictionary "@value"."""
+        if isinstance(dict_or_str, str):
+            return dict_or_str
 
+        return dict_or_str["@value"]
+
+    def _extract_label(self, raw_label: str | dict[str, str] | list[str]) -> str:
+        # Labels are either stored directly as strings, or as nested JSON objects with a `@value` property.
         # In cases where an LoC Name has multiple labels written using different writing systems, labels are returned
         # as a list. When this happens, we extract the first item in the list, which always stores the Latin script
         # version of the label as a string.
@@ -151,7 +155,7 @@ class RawLibraryOfCongressConcept:
             assert isinstance(raw_label[0], str)
             return raw_label[0]
 
-        return raw_label["@value"]
+        return self._extract_value(raw_label)
 
     def exclude(self) -> bool:
         """Returns True if the concept should be excluded from the graph."""
