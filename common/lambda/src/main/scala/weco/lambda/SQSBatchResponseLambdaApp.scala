@@ -10,10 +10,7 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.reflect.ClassTag
 import com.amazonaws.services.lambda.runtime.events.SQSBatchResponse
-import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
-
 import scala.collection.JavaConverters._
-import scala.util.Failure
 
 // Unfortunately we can't have an intermediate abstraction here because of an interaction
 // of the AWS SDK with the Scala compiler.
@@ -25,8 +22,8 @@ abstract class SQSBatchResponseLambdaApp[
   implicit val decoder: Decoder[T],
   val ct: ClassTag[T]
 ) extends RequestHandler[SQSEvent, SQSBatchResponse]
-    with LambdaConfigurable[Config]
-    with Logging {
+  with LambdaConfigurable[Config]
+  with Logging {
 
   // 15 minutes is the maximum time allowed for a lambda to run, as of 2024-12-19
   protected val maximumExecutionTime: FiniteDuration = 15.minutes
@@ -41,17 +38,24 @@ abstract class SQSBatchResponseLambdaApp[
   def processT(t: List[T]): Future[Seq[T]]
 
   override def handleRequest(
-    event: SQSEvent,
-    context: Context
-  ): SQSBatchResponse = {
-    val messagesMap = event.extractLambdaEvents[T]
-    val (permanentFailures, toProcess) = messagesMap.partition(_.isFailure)
+                              event: SQSEvent,
+                              context: Context
+                            ): SQSBatchResponse = {
+    val extractedEvents = event.extractLambdaEvents[T]
 
-    permanentFailures.foreach {
-      case Failure(e) => error(s"Failed to extract message, not retrying (${e.getMessage})")
+    // Extracted event failures are presumed permanent so we do not include them in batch failures
+    extractedEvents.collect {
+      case Left(failure) =>
+        warn(s"Failed to extract message ${failure.messageId} with error ${failure.error.getMessage}")
+        debug(s"Failed message body for ${failure.messageId}: ${failure.messageBody}")
+        failure.messageId
     }
 
-
+    val messagesMap = extractedEvents.collect {
+      case Right(message) => message.message -> message
+    }.groupBy(_._1).map {
+      case (k: T, v: Seq[(T, SQSLambdaMessage[T])]) => k -> v.map(_._2)
+    }
 
     Await.result(
       processToBatchResponse(messagesMap),
@@ -60,18 +64,18 @@ abstract class SQSBatchResponseLambdaApp[
   }
 
   private def processToBatchResponse(
-    messagesMap: Map[T, Seq[SQSMessage]]
-  ): Future[SQSBatchResponse] = {
+                                      messagesMap: Map[T, Seq[SQSLambdaMessage[T]]]
+                                    ): Future[SQSBatchResponse] = {
     processT(messagesMap.keySet.toList) map {
       failures =>
         failures.flatMap {
           failure => messagesMap(failure)
         }
     } map {
-      failedMessages: Seq[SQSMessage] =>
+      failedMessages: Seq[SQSLambdaMessage[T]] =>
         new SQSBatchResponse(
           failedMessages
-            .map(msg => new SQSBatchResponse.BatchItemFailure(msg.getMessageId))
+            .map(msg => new SQSBatchResponse.BatchItemFailure(msg.messageId))
             .asJava
         )
     }

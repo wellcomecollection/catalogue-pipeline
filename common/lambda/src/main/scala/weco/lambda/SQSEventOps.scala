@@ -56,9 +56,9 @@ object SQSEventOps {
           case (k: T, v: Seq[(T, SQSMessage)]) => k -> v.map(_._2)
         }
 
-    def extractLambdaEvents[T]()(implicit decoder: Decoder[T], ct: ClassTag[T]): List[Try[SQSLambdaMessage[T]]] = {
+    def extractLambdaEvents[T]()(implicit decoder: Decoder[T], ct: ClassTag[T]): List[Either[SQSLambdaMessageFailedExtraction, SQSLambdaMessage[T]]] = {
       event.getRecords.asScala.toList.map { message =>
-        for {
+        (for {
           messageBodyJson <- Try(ujson.read(message.getBody)).recover {
             case e => throw new Error(s"Failed to parse message body: ${e.getMessage}")
           }
@@ -77,7 +77,14 @@ object SQSEventOps {
         } yield SQSLambdaMessage(
           messageId = message.getMessageId,
           message = decodedMessage
-        )
+        )) match {
+            case Success(value) => Right(value)
+            case Failure(e) => Left(SQSLambdaMessageFailedExtraction(
+                messageId = message.getMessageId,
+                messageBody = message.getBody,
+                error = e
+            ))
+        }
       }
     }
 

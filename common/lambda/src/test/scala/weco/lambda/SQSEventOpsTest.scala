@@ -8,8 +8,6 @@ import org.scalatest.matchers.should.Matchers
 import scala.collection.JavaConverters._
 import weco.json.JsonUtil._
 
-import scala.util.{Failure, Success}
-
 class SQSEventOpsTest extends AnyFunSpec with Matchers {
 
   import SQSEventOps._
@@ -106,7 +104,7 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val paths = fakeSQSEvent.extractLambdaEvents[String]()
 
         paths shouldBe List(
-          Success(
+          Right(
             SQSLambdaMessage(fakeMessageId, fakeMessageString)
           )
         )
@@ -128,7 +126,7 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
 
         paths shouldBe List(
-          Success(
+          Right(
             SQSLambdaMessage(fakeMessageId, TestMessage("A/C"))
           )
         )
@@ -151,7 +149,7 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val expectedPaths = fakeMessageStrings.map {
           message =>
             val id = fakeIDs(fakeMessageStrings.indexOf(message))
-            Success(SQSLambdaMessage(id, message))
+            Right(SQSLambdaMessage(id, message))
         }
 
         paths shouldBe expectedPaths
@@ -172,7 +170,7 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
 
         paths shouldBe List(
-          Success(
+          Right(
             SQSLambdaMessage(fakeMessageId, TestMessage("A/C"))
           )
         )
@@ -192,10 +190,15 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val paths = fakeSQSEvent.extractLambdaEvents[String]()
 
         paths.length shouldBe 1
-        paths.head shouldBe a[Failure[_]]
-        paths.head.failed.get.getMessage should startWith(
+        paths.head shouldBe a[Left[_, _]]
+
+        val failure = paths.head.left.get
+
+        failure.error.getMessage should startWith(
           "Failed to parse message body"
         )
+        failure.messageId shouldBe fakeMessageId
+        failure.messageBody shouldBe fakeMessageBrokenJson
       }
 
       // test failure mode where outer message is JSON, but doesn't contain a "Message" field
@@ -213,10 +216,15 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
 
         paths.length shouldBe 1
-        paths.head shouldBe a[Failure[_]]
-        paths.head.failed.get.getMessage should startWith(
+        paths.head shouldBe a[Left[_, _]]
+
+        val failure = paths.head.left.get
+
+        failure.error.getMessage should startWith(
           "Failed to extract Message object, incorrect format?"
         )
+        failure.messageId shouldBe fakeMessageId
+        failure.messageBody shouldBe fakeMessageJson
       }
 
       // test failure mode where inner message is not a JSON object
@@ -234,8 +242,11 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
 
         paths.length shouldBe 1
-        paths.head shouldBe a[Failure[_]]
-        paths.head.failed.get.getMessage should startWith(
+        paths.head shouldBe a[Left[_, _]]
+
+        val failure = paths.head.left.get
+
+        failure.error.getMessage should startWith(
           "Failed to decode inner message"
         )
       }
@@ -247,23 +258,32 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         val fakeMessageInnerJson = """{\"value\": \"A/C\"}"""
         val fakeMessageJson = s"""{"Message":"$fakeMessageInnerJson"}"""
         val fakeMessageBrokenJson = "invalid json"
-        val fakeMessageId = java.util.UUID.randomUUID().toString
+        val fakeMessageIdSuccess = java.util.UUID.randomUUID().toString
+        val fakeMessageIdFailure = java.util.UUID.randomUUID().toString
 
         val fakeSQSEvent = createSQSEvents(
           List(
-            (fakeMessageJson, fakeMessageId),
-            (fakeMessageBrokenJson, fakeMessageId)
+            (fakeMessageJson, fakeMessageIdSuccess),
+            (fakeMessageBrokenJson, fakeMessageIdFailure)
           )
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
 
         paths.length shouldBe 2
-        paths.head shouldBe a[Success[_]]
-        paths(1) shouldBe a[Failure[_]]
-        paths(1).failed.get.getMessage should startWith(
+        paths.head shouldBe a[Right[_, _]]
+
+        val success = paths.head.right.get
+        success.messageId shouldBe fakeMessageIdSuccess
+        success.message shouldBe TestMessage("A/C")
+
+        paths(1) shouldBe a[Left[_, _]]
+        val failure = paths(1).left.get
+        failure.error.getMessage should startWith(
           "Failed to parse message body"
         )
+        failure.messageId shouldBe fakeMessageIdFailure
+        failure.messageBody shouldBe fakeMessageBrokenJson
       }
     }
   }
