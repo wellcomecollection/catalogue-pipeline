@@ -11,7 +11,10 @@ class TestSourceId:
         """
         If there is no prefix to remove, remove_id_prefix will do nothing
         """
-        assert RawLibraryOfCongressConcept({"@id": "sh1234567890"}).source_id == "sh1234567890"
+        assert (
+            RawLibraryOfCongressConcept({"@id": "sh1234567890"}).source_id
+            == "sh1234567890"
+        )
 
     def test_remove_prefix_fully_qualified(self) -> None:
         """
@@ -35,11 +38,15 @@ class TestSourceId:
         remove_id_prefix removes relative/local prefixes
         """
         assert (
-            RawLibraryOfCongressConcept({"@id": "/authorities/subjects/sh1234567890"}).source_id
+            RawLibraryOfCongressConcept(
+                {"@id": "/authorities/subjects/sh1234567890"}
+            ).source_id
             == "sh1234567890"
         )
         assert (
-            RawLibraryOfCongressConcept({"@id": "/authorities/names/sh0987654321"}).source_id
+            RawLibraryOfCongressConcept(
+                {"@id": "/authorities/names/sh0987654321"}
+            ).source_id
             == "sh0987654321"
         )
 
@@ -49,7 +56,9 @@ class TestSourceId:
         not just things that look a bit like them
         """
         assert (
-            RawLibraryOfCongressConcept({"@id": "/authorities/banana/sh1234567890"}).source_id
+            RawLibraryOfCongressConcept(
+                {"@id": "/authorities/banana/sh1234567890"}
+            ).source_id
             == "/authorities/banana/sh1234567890"
         )
         assert (
@@ -65,19 +74,25 @@ class TestSource:
         """
         Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
         """
-        concept = RawLibraryOfCongressConcept({"@id": "/authorities/subjects/sh2010105253"})
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "/authorities/subjects/sh2010105253"}
+        )
         assert concept.source == "lc-subjects"
 
     def test_source_names(self) -> None:
         """
         Given an id with the prefix /authorities/subjects/, the source will be lc-subjects
         """
-        concept = RawLibraryOfCongressConcept({"@id": "/authorities/names/sh2010105253"})
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "/authorities/names/sh2010105253"}
+        )
         assert concept.source == "lc-names"
 
     def test_source_invalid(self) -> None:
         with pytest.raises(ValueError):
-            concept = RawLibraryOfCongressConcept({"@id": "authorities/childrensSubjects/sj2021051581"})
+            concept = RawLibraryOfCongressConcept(
+                {"@id": "authorities/childrensSubjects/sj2021051581"}
+            )
             _ = concept.source
 
 
@@ -87,7 +102,9 @@ class TestExclusion:
         A record with a corresponding node in its internal graph, and which is not a duplicate,
         should be included in the output
         """
-        concept = RawLibraryOfCongressConcept({"@id": "authorities/names/sh2010105253", "@graph": []})
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "authorities/names/sh2010105253", "@graph": []}
+        )
         # The SUT at this point doesn't actually care what the node is, just that it exists
         concept._raw_concept_node = {}
         assert concept.exclude() is False
@@ -97,7 +114,9 @@ class TestExclusion:
         If a record does not contain a corresponding node in its internal graph
         then it should be excluded
         """
-        concept = RawLibraryOfCongressConcept({"@id": "authorities/names/sh2010105253", "@graph": []})
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "authorities/names/sh2010105253", "@graph": []}
+        )
         assert concept.exclude()
 
     def test_exclude_marked_duplicates(self) -> None:
@@ -105,7 +124,9 @@ class TestExclusion:
         If a record's identifier is suffixed with -781, this marks the entry as a duplicate
         which is to be excluded
         """
-        concept = RawLibraryOfCongressConcept({"@id": "authorities/names/sh2010105253-781", "@graph": []})
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "authorities/names/sh2010105253-781", "@graph": []}
+        )
         concept._raw_concept_node = {}
         assert concept.exclude()
 
@@ -116,13 +137,13 @@ class TestGeographic:
         A concept is geographic if its @type list contains madsrdf:Geographic or http://id.loc.gov/datatypes/codes/gac"
         """
         concept = RawLibraryOfCongressConcept(
-            json.loads(load_fixture(f"loc/mads_geographic_concept.json"))
+            json.loads(load_fixture("loc/mads_geographic_concept.json"))
         )
         assert concept.is_geographic
 
     def test_is_not_geographic(self) -> None:
         concept = RawLibraryOfCongressConcept(
-            json.loads(load_fixture(f"loc/mads_concept.json"))
+            json.loads(load_fixture("loc/mads_concept.json"))
         )
         assert concept.is_geographic is False
 
