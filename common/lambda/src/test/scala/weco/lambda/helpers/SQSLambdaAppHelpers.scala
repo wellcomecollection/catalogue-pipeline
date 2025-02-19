@@ -2,9 +2,9 @@ package weco.lambda.helpers
 
 import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.typesafe.config.Config
-import weco.lambda.{ApplicationConfig, SQSLambdaApp}
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import weco.lambda.{ApplicationConfig, SQSBatchResponseLambdaApp, SQSLambdaApp}
 
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.Future
 import collection.JavaConverters._
 
@@ -14,6 +14,30 @@ trait SQSLambdaAppHelpers {
 
   case class TestLambdaAppConfiguration(configString: String)
     extends ApplicationConfig
+
+  class TestBatchResponseLambdaApp
+    extends SQSBatchResponseLambdaApp[String, TestLambdaAppConfiguration] {
+    override protected val maximumExecutionTime: FiniteDuration = 200.millis
+
+    // Config is available in this scope
+    val configString: String = config.configString
+
+    // Function to convert typesafe config to application config is required
+    override def build(rawConfig: Config): TestLambdaAppConfiguration =
+      TestLambdaAppConfiguration(
+        configString = rawConfig.getString("configString")
+      )
+
+    override def processT(t: List[String]): Future[Seq[String]] =
+      Future.successful(List(t.mkString + configString))
+  }
+
+  class SleepingTestBatchResponseLambdaApp extends TestLambdaApp {
+    override def processT(t: List[String]): Future[String] = Future {
+      Thread.sleep(500)
+      t.head + configString
+    }
+  }
 
   class TestLambdaApp
     extends SQSLambdaApp[String, String, TestLambdaAppConfiguration] {

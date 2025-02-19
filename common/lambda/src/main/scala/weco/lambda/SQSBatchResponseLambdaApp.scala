@@ -11,7 +11,9 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.reflect.ClassTag
 import com.amazonaws.services.lambda.runtime.events.SQSBatchResponse
 import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
+
 import scala.collection.JavaConverters._
+import scala.util.Failure
 
 // Unfortunately we can't have an intermediate abstraction here because of an interaction
 // of the AWS SDK with the Scala compiler.
@@ -42,12 +44,21 @@ abstract class SQSBatchResponseLambdaApp[
     event: SQSEvent,
     context: Context
   ): SQSBatchResponse = {
-    val messagesMap = event.extractMap[T]
+    val messagesMap = event.extractLambdaEvents[T]
+    val (permanentFailures, toProcess) = messagesMap.partition(_.isFailure)
+
+    permanentFailures.foreach {
+      case Failure(e) => error(s"Failed to extract message, not retrying (${e.getMessage})")
+    }
+
+
+
     Await.result(
       processToBatchResponse(messagesMap),
       maximumExecutionTime
     )
   }
+
   private def processToBatchResponse(
     messagesMap: Map[T, Seq[SQSMessage]]
   ): Future[SQSBatchResponse] = {
