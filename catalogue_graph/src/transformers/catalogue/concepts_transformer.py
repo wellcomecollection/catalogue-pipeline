@@ -46,7 +46,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
         self.id_lookup.add(raw_concept.wellcome_id)
 
-        if (raw_concept.source == "label-derived"):
+        if raw_concept.source == "label-derived":
             # Generate edges via label
             for source_concept_id in raw_concept.label_derived_source_concept_ids:
                 yield ConceptHasSourceConcept(
