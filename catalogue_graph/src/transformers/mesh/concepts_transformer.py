@@ -39,7 +39,7 @@ class MeSHConceptsTransformer(BaseTransformer):
             yield SourceConceptHasParent(from_id=raw_concept.source_id, to_id=parent_id)
 
         # RELATED_TO edges are undirected, but we are only creating one edge here to avoid
-        # duplicates due to both MeSH concepts referencing each other in the source data 
+        # duplicates due to both MeSH concepts referencing each other in the source data
         for related_id in raw_concept.related_concept_ids:
             yield SourceConceptRelatedTo(
                 from_id=raw_concept.source_id, to_id=related_id
