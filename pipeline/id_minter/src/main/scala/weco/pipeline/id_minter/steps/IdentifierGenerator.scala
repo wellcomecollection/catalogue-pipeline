@@ -11,6 +11,7 @@ import scala.util.{Failure, Success, Try}
 class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
   import IdentifiersDao._
 
+  // This list should be kept in sync with the one defined in `catalogue_graph/src/models/graph_node.py`
   private val conceptSubTypes = List(
     "Person",
     "Organisation",
@@ -18,8 +19,7 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
     "Agent",
     "Meeting",
     "Genre",
-    "Period",
-    "Subject"
+    "Period"
   )
 
   /*

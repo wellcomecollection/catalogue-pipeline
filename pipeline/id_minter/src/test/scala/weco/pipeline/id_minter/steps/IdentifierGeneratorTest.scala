@@ -331,38 +331,60 @@ class IdentifierGeneratorTest
       case (identifierGenerator, identifiersTable) =>
         implicit val session = NamedAutoSession('primary)
 
-        val sourceIdentifierPerson = createSourceIdentifierWith(
-          identifierType = IdentifierType.LCNames,
-          ontologyType = "Person",
-          value = "123"
+        val conceptSubTypes = List(
+          "Person",
+          "Organisation",
+          "Place",
+          "Agent",
+          "Meeting",
+          "Genre",
+          "Period",
         )
-        val sourceIdentifierAgent = createSourceIdentifierWith(
+
+        // Create the same source identifier for every possible concept type
+        val sourceIdentifiers = conceptSubTypes.map(
+          value =>
+            createSourceIdentifierWith(
+              identifierType = IdentifierType.LCNames,
+              ontologyType = value,
+              value = "123"
+            )
+        )
+
+        val conceptSourceIdentifier = createSourceIdentifierWith(
           identifierType = IdentifierType.LCNames,
-          ontologyType = "Agent",
+          ontologyType = "Concept",
           value = "123"
         )
 
         val triedId = identifierGenerator.retrieveOrGenerateCanonicalIds(
-          List(sourceIdentifierAgent, sourceIdentifierPerson)
+          sourceIdentifiers
         )
 
         val id = triedId.get.values.head.CanonicalId
         id.underlying should not be empty
 
         val i = identifiersTable.i
-        val maybeIdentifier = withSQL {
 
-          select
-            .from(identifiersTable as i)
-            .where
-            .eq(i.SourceId, sourceIdentifierPerson.value)
+        // For each created identifier, check that the same single row is returned
+        // and that its type is 'Concept'
+        sourceIdentifiers.foreach(
+          sourceIdentifier => {
+            val maybeIdentifier = withSQL {
 
-        }.map(Identifier(i)).single.apply()
+              select
+                .from(identifiersTable as i)
+                .where
+                .eq(i.SourceId, sourceIdentifier.value)
 
-        maybeIdentifier shouldBe defined
-        maybeIdentifier.get shouldBe Identifier(
-          canonicalId = id,
-          sourceIdentifier = sourceIdentifierPerson.copy(ontologyType = "Concept")
+            }.map(Identifier(i)).single.apply()
+
+            maybeIdentifier shouldBe defined
+            maybeIdentifier.get shouldBe Identifier(
+              canonicalId = id,
+              sourceIdentifier = conceptSourceIdentifier
+            )
+          }
         )
     }
   }
