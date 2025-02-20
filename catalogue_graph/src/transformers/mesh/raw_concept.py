@@ -33,9 +33,9 @@ class RawMeSHConcept:
         altern_labels = []
 
         for altern_concept in self.raw_concept.findall(
-            "ConceptList//Concept[@PreferredConceptYN='N']"
+            "ConceptList//TermList//Term[@ConceptPreferredTermYN='N']"
         ):
-            altern_label_elem = altern_concept.find("ConceptName//String")
+            altern_label_elem = altern_concept.find("String")
             if isinstance(altern_label_elem, ET.Element):
                 altern_label = altern_label_elem.text
                 if isinstance(altern_label, str):
@@ -100,7 +100,7 @@ class RawMeSHConcept:
 
         related_descriptors = []
         for desc_elem in self.raw_concept.findall(
-            "SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"
+            "SeeRelatedList//SeeRelatedDescriptor//DescriptorReferredTo//DescriptorUI"
         ):
             related_descriptors.append(assert_get_text(desc_elem))
 

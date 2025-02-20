@@ -570,9 +570,9 @@
   </ConceptList>
  </DescriptorRecord>
 <DescriptorRecord DescriptorClass = "1">
-  <DescriptorUI>D004988</DescriptorUI>
+  <DescriptorUI>D000009</DescriptorUI>
   <DescriptorName>
-   <String>Ethers, Cyclic</String>
+   <String>Abdominal Muscles</String>
   </DescriptorName>
   <DateCreated>
    <Year>1999</Year>
@@ -580,105 +580,87 @@
    <Day>01</Day>
   </DateCreated>
   <DateRevised>
-   <Year>2020</Year>
+   <Year>2016</Year>
    <Month>05</Month>
-   <Day>27</Day>
+   <Day>31</Day>
   </DateRevised>
   <DateEstablished>
-   <Year>1966</Year>
+   <Year>1993</Year>
    <Month>01</Month>
    <Day>01</Day>
   </DateEstablished>
   <AllowableQualifiersList>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000008</QualifierUI>
+     <QualifierUI>Q000002</QualifierUI>
       <QualifierName>
-      <String>administration &amp; dosage</String>
+      <String>abnormalities</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>AD</Abbreviation>
+    <Abbreviation>AB</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000009</QualifierUI>
+     <QualifierUI>Q000033</QualifierUI>
       <QualifierName>
-      <String>adverse effects</String>
+      <String>anatomy &amp; histology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>AE</Abbreviation>
+    <Abbreviation>AH</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000032</QualifierUI>
+     <QualifierUI>Q000098</QualifierUI>
       <QualifierName>
-      <String>analysis</String>
+      <String>blood supply</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>AN</Abbreviation>
+    <Abbreviation>BS</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000037</QualifierUI>
+     <QualifierUI>Q000166</QualifierUI>
       <QualifierName>
-      <String>antagonists &amp; inhibitors</String>
+      <String>cytology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>AI</Abbreviation>
+    <Abbreviation>CY</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000097</QualifierUI>
+     <QualifierUI>Q000187</QualifierUI>
       <QualifierName>
-      <String>blood</String>
+      <String>drug effects</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>BL</Abbreviation>
+    <Abbreviation>DE</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000134</QualifierUI>
+     <QualifierUI>Q000196</QualifierUI>
       <QualifierName>
-      <String>cerebrospinal fluid</String>
+      <String>embryology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>CF</Abbreviation>
+    <Abbreviation>EM</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000138</QualifierUI>
+     <QualifierUI>Q000201</QualifierUI>
       <QualifierName>
-      <String>chemical synthesis</String>
+      <String>enzymology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>CS</Abbreviation>
+    <Abbreviation>EN</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000145</QualifierUI>
+     <QualifierUI>Q000254</QualifierUI>
       <QualifierName>
-      <String>classification</String>
+      <String>growth &amp; development</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>CL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000191</QualifierUI>
-      <QualifierName>
-      <String>economics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>EC</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000266</QualifierUI>
-      <QualifierName>
-      <String>history</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>HI</Abbreviation>
+    <Abbreviation>GD</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
@@ -691,12 +673,21 @@
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000302</QualifierUI>
+     <QualifierUI>Q000293</QualifierUI>
       <QualifierName>
-      <String>isolation &amp; purification</String>
+      <String>injuries</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>IP</Abbreviation>
+    <Abbreviation>IN</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000294</QualifierUI>
+      <QualifierName>
+      <String>innervation</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>IR</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
@@ -709,30 +700,48 @@
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000493</QualifierUI>
+     <QualifierUI>Q000382</QualifierUI>
       <QualifierName>
-      <String>pharmacokinetics</String>
+      <String>microbiology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>PK</Abbreviation>
+    <Abbreviation>MI</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000494</QualifierUI>
+     <QualifierUI>Q000469</QualifierUI>
       <QualifierName>
-      <String>pharmacology</String>
+      <String>parasitology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>PD</Abbreviation>
+    <Abbreviation>PS</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000506</QualifierUI>
+     <QualifierUI>Q000473</QualifierUI>
       <QualifierName>
-      <String>poisoning</String>
+      <String>pathology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>PO</Abbreviation>
+    <Abbreviation>PA</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000502</QualifierUI>
+      <QualifierName>
+      <String>physiology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PH</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000503</QualifierUI>
+      <QualifierName>
+      <String>physiopathology</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>PP</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
@@ -745,48 +754,30 @@
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000592</QualifierUI>
+     <QualifierUI>Q000601</QualifierUI>
       <QualifierName>
-      <String>standards</String>
+      <String>surgery</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>ST</Abbreviation>
+    <Abbreviation>SU</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000600</QualifierUI>
+     <QualifierUI>Q000637</QualifierUI>
       <QualifierName>
-      <String>supply &amp; distribution</String>
+      <String>transplantation</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>SD</Abbreviation>
+    <Abbreviation>TR</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000627</QualifierUI>
+     <QualifierUI>Q000648</QualifierUI>
       <QualifierName>
-      <String>therapeutic use</String>
+      <String>ultrastructure</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>TU</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000633</QualifierUI>
-      <QualifierName>
-      <String>toxicity</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000652</QualifierUI>
-      <QualifierName>
-      <String>urine</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>UR</Abbreviation>
+    <Abbreviation>UL</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
@@ -799,33 +790,75 @@
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000819</QualifierUI>
+     <QualifierUI>Q000821</QualifierUI>
       <QualifierName>
-      <String>agonists</String>
+      <String>virology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>AG</Abbreviation>
+    <Abbreviation>VI</Abbreviation>
+   </AllowableQualifier>
+   <AllowableQualifier>
+    <QualifierReferredTo>
+     <QualifierUI>Q000000981</QualifierUI>
+      <QualifierName>
+      <String>diagnostic imaging</String>
+      </QualifierName>
+    </QualifierReferredTo>
+    <Abbreviation>DG</Abbreviation>
    </AllowableQualifier>
   </AllowableQualifiersList>
+  <Annotation>/growth: coordinate with MUSCLE DEVELOPMENT; /embryol: coordinate with MUSCLE DEVELOPMENT if pertinent
+  </Annotation>
+  <HistoryNote>93; was ABDOMINAL WALL 1966-92
+  </HistoryNote>
+  <NLMClassificationNumber>WE 757</NLMClassificationNumber>
+  <OnlineNote>use ABDOMINAL MUSCLES to search ABDOMINAL WALL 1966-92
+  </OnlineNote>
+  <PublicMeSHNote>93; was ABDOMINAL WALL 1963-92
+  </PublicMeSHNote>
+  <SeeRelatedList>
+   <SeeRelatedDescriptor>
+    <DescriptorReferredTo>
+     <DescriptorUI>D034861</DescriptorUI>
+     <DescriptorName>
+      <String>Abdominal Wall</String>
+     </DescriptorName>
+    </DescriptorReferredTo>
+   </SeeRelatedDescriptor>
+  </SeeRelatedList>
   <TreeNumberList>
-   <TreeNumber>D02.355.291</TreeNumber>
-   <TreeNumber>D04.345.241</TreeNumber>
+   <TreeNumber>A02</TreeNumber>
   </TreeNumberList>
   <ConceptList>
    <Concept PreferredConceptYN="Y">
-    <ConceptUI>M0007829</ConceptUI>
+    <ConceptUI>M0000009</ConceptUI>
     <ConceptName>
-     <String>Ethers, Cyclic</String>
+     <String>Abdominal Muscles</String>
     </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>0</RegistryNumber>
-    </RegistryNumberList>
-    <ScopeNote>Compounds of the general formula R-O-R arranged in a ring or crown formation.
+    <ScopeNote>Muscles forming the ABDOMINAL WALL including RECTUS ABDOMINIS; ABDOMINAL OBLIQUE MUSCLES, transversus abdominis, pyramidalis muscles and quadratus abdominis.
     </ScopeNote>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000615203</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000615216</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000615276</Concept2UI>
+     </ConceptRelation>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000616776</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
     <TermList>
      <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
-      <TermUI>T015222</TermUI>
-      <String>Ethers, Cyclic</String>
+      <TermUI>T000018</TermUI>
+      <String>Abdominal Muscles</String>
       <DateCreated>
        <Year>1999</Year>
        <Month>01</Month>
@@ -836,1413 +869,249 @@
       </ThesaurusIDlist>
      </Term>
      <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T015222</TermUI>
-      <String>Cyclic Ethers</String>
+      <TermUI>T000018</TermUI>
+      <String>Abdominal Muscle</String>
      </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T000998163</TermUI>
-      <String>Cyclic Ether</String>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000018</TermUI>
+      <String>Muscle, Abdominal</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000018</TermUI>
+      <String>Muscles, Abdominal</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000615203</ConceptUI>
+    <ConceptName>
+     <String>Transversus Abdominis</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000615203</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896092</TermUI>
+      <String>Transversus Abdominis</String>
       <DateCreated>
-       <Year>2019</Year>
-       <Month>11</Month>
-       <Day>20</Day>
+       <Year>2016</Year>
+       <Month>02</Month>
+       <Day>29</Day>
       </DateCreated>
       <ThesaurusIDlist>
-       <ThesaurusID>NLM (2021)</ThesaurusID>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896094</TermUI>
+      <String>Transverse Abdominal</String>
+      <DateCreated>
+       <Year>2016</Year>
+       <Month>02</Month>
+       <Day>29</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
       </ThesaurusIDlist>
      </Term>
      <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T000998163</TermUI>
-      <String>Ether, Cyclic</String>
+      <TermUI>T000896094</TermUI>
+      <String>Abdominals, Transverse</String>
      </Term>
-    </TermList>
-   </Concept>
-  </ConceptList>
- </DescriptorRecord>
-<DescriptorRecord DescriptorClass = "1">
-  <DescriptorUI>D000095662</DescriptorUI>
-  <DescriptorName>
-   <String>Polyether Polyketides</String>
-  </DescriptorName>
-  <DateCreated>
-   <Year>2023</Year>
-   <Month>07</Month>
-   <Day>26</Day>
-  </DateCreated>
-  <DateRevised>
-   <Year>2023</Year>
-   <Month>02</Month>
-   <Day>26</Day>
-  </DateRevised>
-  <DateEstablished>
-   <Year>2024</Year>
-   <Month>01</Month>
-   <Day>01</Day>
-  </DateEstablished>
-  <AllowableQualifiersList>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000008</QualifierUI>
-      <QualifierName>
-      <String>administration &amp; dosage</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000009</QualifierUI>
-      <QualifierName>
-      <String>adverse effects</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000031</QualifierUI>
-      <QualifierName>
-      <String>analogs &amp; derivatives</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AA</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000032</QualifierUI>
-      <QualifierName>
-      <String>analysis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AN</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000037</QualifierUI>
-      <QualifierName>
-      <String>antagonists &amp; inhibitors</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000097</QualifierUI>
-      <QualifierName>
-      <String>blood</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>BL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000134</QualifierUI>
-      <QualifierName>
-      <String>cerebrospinal fluid</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CF</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000138</QualifierUI>
-      <QualifierName>
-      <String>chemical synthesis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CS</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000145</QualifierUI>
-      <QualifierName>
-      <String>classification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000191</QualifierUI>
-      <QualifierName>
-      <String>economics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>EC</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000266</QualifierUI>
-      <QualifierName>
-      <String>history</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>HI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000276</QualifierUI>
-      <QualifierName>
-      <String>immunology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IM</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000302</QualifierUI>
-      <QualifierName>
-      <String>isolation &amp; purification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IP</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000378</QualifierUI>
-      <QualifierName>
-      <String>metabolism</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ME</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000493</QualifierUI>
-      <QualifierName>
-      <String>pharmacokinetics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PK</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000494</QualifierUI>
-      <QualifierName>
-      <String>pharmacology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000506</QualifierUI>
-      <QualifierName>
-      <String>poisoning</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000528</QualifierUI>
-      <QualifierName>
-      <String>radiation effects</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>RE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000592</QualifierUI>
-      <QualifierName>
-      <String>standards</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ST</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000600</QualifierUI>
-      <QualifierName>
-      <String>supply &amp; distribution</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>SD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000627</QualifierUI>
-      <QualifierName>
-      <String>therapeutic use</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TU</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000633</QualifierUI>
-      <QualifierName>
-      <String>toxicity</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000652</QualifierUI>
-      <QualifierName>
-      <String>urine</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>UR</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000737</QualifierUI>
-      <QualifierName>
-      <String>chemistry</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CH</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000819</QualifierUI>
-      <QualifierName>
-      <String>agonists</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AG</Abbreviation>
-   </AllowableQualifier>
-  </AllowableQualifiersList>
-  <HistoryNote>2024
-  </HistoryNote>
-  <PublicMeSHNote>2024
-  </PublicMeSHNote>
-  <TreeNumberList>
-   <TreeNumber>D02.355.291.933</TreeNumber>
-   <TreeNumber>D02.540.576.625</TreeNumber>
-   <TreeNumber>D04.345.241.654</TreeNumber>
-   <TreeNumber>D04.345.674.625</TreeNumber>
-  </TreeNumberList>
-  <ConceptList>
-   <Concept PreferredConceptYN="Y">
-    <ConceptUI>M000758735</ConceptUI>
-    <ConceptName>
-     <String>Polyether Polyketides</String>
-    </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>0</RegistryNumber>
-    </RegistryNumberList>
-    <ScopeNote>Polycyclic polyketides with distinctive ladder shaped multiple polyether motifs. In STREPTOMYCES polycyclic polyketide backbones are assembled by type I modular polyketide synthases which then are modified by epoxidase and epoxide hydrolase to achieve their stereochemistry. Polyether ionophore antibiotics coordinate alkali metal cations with their multiple oxygen atoms which disturbs sodium/potassium concentration gradient. They are widely used to treat and control COCCIDIOSIS. Structurally related MARINE LADDER POLYETHERS are neurotoxins.
-    </ScopeNote>
-    <ConceptRelationList>
-     <ConceptRelation RelationName="NRW">
-     <Concept1UI>M000758735</Concept1UI>
-     <Concept2UI>M000758734</Concept2UI>
-     </ConceptRelation>
-     <ConceptRelation RelationName="NRW">
-     <Concept1UI>M000758735</Concept1UI>
-     <Concept2UI>M000758795</Concept2UI>
-     </ConceptRelation>
-    </ConceptRelationList>
-    <TermList>
-     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
-      <TermUI>T001124911</TermUI>
-      <String>Polyether Polyketides</String>
-      <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>21</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896094</TermUI>
+      <String>Abdominal, Transverse</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896094</TermUI>
+      <String>Transverse Abdominals</String>
      </Term>
     </TermList>
    </Concept>
    <Concept PreferredConceptYN="N">
-    <ConceptUI>M000758734</ConceptUI>
+    <ConceptUI>M000615216</ConceptUI>
     <ConceptName>
-     <String>Polyether Antibiotics</String>
+     <String>Pyramidalis Muscle</String>
     </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>0</RegistryNumber>
-    </RegistryNumberList>
     <ConceptRelationList>
      <ConceptRelation RelationName="NRW">
-     <Concept1UI>M000758735</Concept1UI>
-     <Concept2UI>M000758734</Concept2UI>
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000615216</Concept2UI>
      </ConceptRelation>
     </ConceptRelationList>
     <TermList>
      <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T001124909</TermUI>
-      <String>Polyether Antibiotics</String>
+      <TermUI>T000896111</TermUI>
+      <String>Pyramidalis Muscle</String>
       <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>21</Day>
+       <Year>2016</Year>
+       <Month>02</Month>
+       <Day>29</Day>
       </DateCreated>
       <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
       </ThesaurusIDlist>
      </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T001124907</TermUI>
-      <String>Polyether Ionophore Antibiotics</String>
-      <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>21</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896111</TermUI>
+      <String>Muscle, Pyramidalis</String>
      </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T001124908</TermUI>
-      <String>Polyether Ionophores</String>
-      <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>21</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896111</TermUI>
+      <String>Muscles, Pyramidalis</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896111</TermUI>
+      <String>Pyramidalis Muscles</String>
      </Term>
     </TermList>
    </Concept>
    <Concept PreferredConceptYN="N">
-    <ConceptUI>M000758795</ConceptUI>
+    <ConceptUI>M000615276</ConceptUI>
     <ConceptName>
-     <String>Marine Ladder Polyethers</String>
+     <String>Cremaster Muscle</String>
     </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>0</RegistryNumber>
-    </RegistryNumberList>
     <ConceptRelationList>
      <ConceptRelation RelationName="NRW">
-     <Concept1UI>M000758735</Concept1UI>
-     <Concept2UI>M000758795</Concept2UI>
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000615276</Concept2UI>
      </ConceptRelation>
     </ConceptRelationList>
     <TermList>
      <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T001125008</TermUI>
-      <String>Marine Ladder Polyethers</String>
+      <TermUI>T000896272</TermUI>
+      <String>Cremaster Muscle</String>
       <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>23</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-    </TermList>
-   </Concept>
-  </ConceptList>
- </DescriptorRecord>
-<DescriptorRecord DescriptorClass = "1">
-  <DescriptorUI>D000095702</DescriptorUI>
-  <DescriptorName>
-   <String>Polyether Toxins</String>
-  </DescriptorName>
-  <DateCreated>
-   <Year>2023</Year>
-   <Month>07</Month>
-   <Day>26</Day>
-  </DateCreated>
-  <DateRevised>
-   <Year>2023</Year>
-   <Month>06</Month>
-   <Day>07</Day>
-  </DateRevised>
-  <DateEstablished>
-   <Year>2024</Year>
-   <Month>01</Month>
-   <Day>01</Day>
-  </DateEstablished>
-  <AllowableQualifiersList>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000008</QualifierUI>
-      <QualifierName>
-      <String>administration &amp; dosage</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000009</QualifierUI>
-      <QualifierName>
-      <String>adverse effects</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000031</QualifierUI>
-      <QualifierName>
-      <String>analogs &amp; derivatives</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AA</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000032</QualifierUI>
-      <QualifierName>
-      <String>analysis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AN</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000037</QualifierUI>
-      <QualifierName>
-      <String>antagonists &amp; inhibitors</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000096</QualifierUI>
-      <QualifierName>
-      <String>biosynthesis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>BI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000097</QualifierUI>
-      <QualifierName>
-      <String>blood</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>BL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000134</QualifierUI>
-      <QualifierName>
-      <String>cerebrospinal fluid</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CF</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000138</QualifierUI>
-      <QualifierName>
-      <String>chemical synthesis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CS</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000145</QualifierUI>
-      <QualifierName>
-      <String>classification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000191</QualifierUI>
-      <QualifierName>
-      <String>economics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>EC</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000266</QualifierUI>
-      <QualifierName>
-      <String>history</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>HI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000276</QualifierUI>
-      <QualifierName>
-      <String>immunology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IM</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000302</QualifierUI>
-      <QualifierName>
-      <String>isolation &amp; purification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IP</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000378</QualifierUI>
-      <QualifierName>
-      <String>metabolism</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ME</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000493</QualifierUI>
-      <QualifierName>
-      <String>pharmacokinetics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PK</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000494</QualifierUI>
-      <QualifierName>
-      <String>pharmacology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000506</QualifierUI>
-      <QualifierName>
-      <String>poisoning</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000528</QualifierUI>
-      <QualifierName>
-      <String>radiation effects</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>RE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000592</QualifierUI>
-      <QualifierName>
-      <String>standards</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ST</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000600</QualifierUI>
-      <QualifierName>
-      <String>supply &amp; distribution</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>SD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000627</QualifierUI>
-      <QualifierName>
-      <String>therapeutic use</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TU</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000633</QualifierUI>
-      <QualifierName>
-      <String>toxicity</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000652</QualifierUI>
-      <QualifierName>
-      <String>urine</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>UR</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000737</QualifierUI>
-      <QualifierName>
-      <String>chemistry</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CH</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000819</QualifierUI>
-      <QualifierName>
-      <String>agonists</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AG</Abbreviation>
-   </AllowableQualifier>
-  </AllowableQualifiersList>
-  <HistoryNote>2024
-  </HistoryNote>
-  <PublicMeSHNote>2024
-  </PublicMeSHNote>
-  <PreviousIndexingList>
-   <PreviousIndexing>Marine Toxins (1992-2023)</PreviousIndexing>
-  </PreviousIndexingList>
-  <TreeNumberList>
-   <TreeNumber>D02.355.291.933.875</TreeNumber>
-   <TreeNumber>D02.540.576.625.937</TreeNumber>
-   <TreeNumber>D04.345.241.654.937</TreeNumber>
-   <TreeNumber>D04.345.674.625.937</TreeNumber>
-   <TreeNumber>D23.946.580.800</TreeNumber>
-  </TreeNumberList>
-  <ConceptList>
-   <Concept PreferredConceptYN="Y">
-    <ConceptUI>M000758736</ConceptUI>
-    <ConceptName>
-     <String>Polyether Toxins</String>
-    </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>0</RegistryNumber>
-    </RegistryNumberList>
-    <ScopeNote>Polycyclic polyether polyketides most often produced by marine organisms, e.g., DINOFLAGELLATES. Many polyether marine toxins are ionophores and neurotoxins and responsible for seafood poisoning.
-    </ScopeNote>
-    <TermList>
-     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
-      <TermUI>T001124915</TermUI>
-      <String>Polyether Toxins</String>
-      <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>21</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T001124914</TermUI>
-      <String>Marine Polyether Toxins</String>
-      <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>21</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-    </TermList>
-   </Concept>
-  </ConceptList>
- </DescriptorRecord>
-<DescriptorRecord DescriptorClass = "1">
-  <DescriptorUI>D000095722</DescriptorUI>
-  <DescriptorName>
-   <String>Amphidinols</String>
-  </DescriptorName>
-  <DateCreated>
-   <Year>2023</Year>
-   <Month>07</Month>
-   <Day>26</Day>
-  </DateCreated>
-  <DateRevised>
-   <Year>2023</Year>
-   <Month>04</Month>
-   <Day>14</Day>
-  </DateRevised>
-  <DateEstablished>
-   <Year>2024</Year>
-   <Month>01</Month>
-   <Day>01</Day>
-  </DateEstablished>
-  <AllowableQualifiersList>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000008</QualifierUI>
-      <QualifierName>
-      <String>administration &amp; dosage</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000009</QualifierUI>
-      <QualifierName>
-      <String>adverse effects</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000031</QualifierUI>
-      <QualifierName>
-      <String>analogs &amp; derivatives</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AA</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000032</QualifierUI>
-      <QualifierName>
-      <String>analysis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AN</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000037</QualifierUI>
-      <QualifierName>
-      <String>antagonists &amp; inhibitors</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000097</QualifierUI>
-      <QualifierName>
-      <String>blood</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>BL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000134</QualifierUI>
-      <QualifierName>
-      <String>cerebrospinal fluid</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CF</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000138</QualifierUI>
-      <QualifierName>
-      <String>chemical synthesis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CS</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000145</QualifierUI>
-      <QualifierName>
-      <String>classification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000191</QualifierUI>
-      <QualifierName>
-      <String>economics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>EC</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000266</QualifierUI>
-      <QualifierName>
-      <String>history</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>HI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000276</QualifierUI>
-      <QualifierName>
-      <String>immunology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IM</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000302</QualifierUI>
-      <QualifierName>
-      <String>isolation &amp; purification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IP</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000378</QualifierUI>
-      <QualifierName>
-      <String>metabolism</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ME</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000493</QualifierUI>
-      <QualifierName>
-      <String>pharmacokinetics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PK</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000494</QualifierUI>
-      <QualifierName>
-      <String>pharmacology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000506</QualifierUI>
-      <QualifierName>
-      <String>poisoning</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000528</QualifierUI>
-      <QualifierName>
-      <String>radiation effects</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>RE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000592</QualifierUI>
-      <QualifierName>
-      <String>standards</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ST</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000600</QualifierUI>
-      <QualifierName>
-      <String>supply &amp; distribution</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>SD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000627</QualifierUI>
-      <QualifierName>
-      <String>therapeutic use</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TU</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000633</QualifierUI>
-      <QualifierName>
-      <String>toxicity</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000652</QualifierUI>
-      <QualifierName>
-      <String>urine</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>UR</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000737</QualifierUI>
-      <QualifierName>
-      <String>chemistry</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CH</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000819</QualifierUI>
-      <QualifierName>
-      <String>agonists</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AG</Abbreviation>
-   </AllowableQualifier>
-  </AllowableQualifiersList>
-  <HistoryNote>2024
-  </HistoryNote>
-  <PublicMeSHNote>2024
-  </PublicMeSHNote>
-  <PreviousIndexingList>
-   <PreviousIndexing>Macrolides (1991-2023)</PreviousIndexing>
-  </PreviousIndexingList>
-  <TreeNumberList>
-   <TreeNumber>D02.355.291.933.063</TreeNumber>
-   <TreeNumber>D02.540.576.625.063</TreeNumber>
-   <TreeNumber>D04.345.241.654.063</TreeNumber>
-   <TreeNumber>D04.345.674.625.063</TreeNumber>
-   <TreeNumber>D23.946.580.080</TreeNumber>
-  </TreeNumberList>
-  <ConceptList>
-   <Concept PreferredConceptYN="Y">
-    <ConceptUI>M000758793</ConceptUI>
-    <ConceptName>
-     <String>Amphidinols</String>
-    </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>0</RegistryNumber>
-    </RegistryNumberList>
-    <ScopeNote>Long linear polyketides with polyol groups and polyolefins and core motifs of two tetrahydropyran rings produced by marine dinoflagellates such as AMPHIDINIUM. Many amphidinols are hemolytic toxins with antifungal and other cytotoxic activities.
-    </ScopeNote>
-    <TermList>
-     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
-      <TermUI>T001125006</TermUI>
-      <String>Amphidinols</String>
-      <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>23</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T001135668</TermUI>
-      <String>Amphidinol</String>
-      <DateCreated>
-       <Year>2023</Year>
+       <Year>2016</Year>
        <Month>03</Month>
-       <Day>30</Day>
+       <Day>02</Day>
       </DateCreated>
       <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
       </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896272</TermUI>
+      <String>Cremaster Muscles</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896272</TermUI>
+      <String>Muscle, Cremaster</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000896272</TermUI>
+      <String>Muscles, Cremaster</String>
+     </Term>
+    </TermList>
+   </Concept>
+   <Concept PreferredConceptYN="N">
+    <ConceptUI>M000616776</ConceptUI>
+    <ConceptName>
+     <String>Quadratus Abdominis</String>
+    </ConceptName>
+    <ConceptRelationList>
+     <ConceptRelation RelationName="NRW">
+     <Concept1UI>M0000009</Concept1UI>
+     <Concept2UI>M000616776</Concept2UI>
+     </ConceptRelation>
+    </ConceptRelationList>
+    <TermList>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000898967</TermUI>
+      <String>Quadratus Abdominis</String>
+      <DateCreated>
+       <Year>2016</Year>
+       <Month>04</Month>
+       <Day>15</Day>
+      </DateCreated>
+      <ThesaurusIDlist>
+       <ThesaurusID>NLM (2017)</ThesaurusID>
+      </ThesaurusIDlist>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000898967</TermUI>
+      <String>Abdomini, Quadratus</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000898967</TermUI>
+      <String>Abdominis, Quadratus</String>
+     </Term>
+     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
+      <TermUI>T000898967</TermUI>
+      <String>Quadratus Abdomini</String>
      </Term>
     </TermList>
    </Concept>
   </ConceptList>
  </DescriptorRecord>
-<DescriptorRecord DescriptorClass = "1">
-  <DescriptorUI>D000001</DescriptorUI>
+<DescriptorRecord DescriptorClass = "4">
+  <DescriptorUI>D008131</DescriptorUI>
   <DescriptorName>
-   <String>Calcimycin</String>
+   <String>London</String>
   </DescriptorName>
   <DateCreated>
-   <Year>1974</Year>
-   <Month>11</Month>
-   <Day>19</Day>
+   <Year>1999</Year>
+   <Month>01</Month>
+   <Day>01</Day>
   </DateCreated>
   <DateRevised>
-   <Year>2023</Year>
-   <Month>02</Month>
-   <Day>26</Day>
+   <Year>2016</Year>
+   <Month>12</Month>
+   <Day>22</Day>
   </DateRevised>
   <DateEstablished>
-   <Year>1984</Year>
+   <Year>1966</Year>
    <Month>01</Month>
    <Day>01</Day>
   </DateEstablished>
   <AllowableQualifiersList>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000008</QualifierUI>
+     <QualifierUI>Q000208</QualifierUI>
       <QualifierName>
-      <String>administration &amp; dosage</String>
+      <String>ethnology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>AD</Abbreviation>
+    <Abbreviation>EH</Abbreviation>
    </AllowableQualifier>
    <AllowableQualifier>
     <QualifierReferredTo>
-     <QualifierUI>Q000009</QualifierUI>
+     <QualifierUI>Q000453</QualifierUI>
       <QualifierName>
-      <String>adverse effects</String>
+      <String>epidemiology</String>
       </QualifierName>
     </QualifierReferredTo>
-    <Abbreviation>AE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000031</QualifierUI>
-      <QualifierName>
-      <String>analogs &amp; derivatives</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AA</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000032</QualifierUI>
-      <QualifierName>
-      <String>analysis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AN</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000037</QualifierUI>
-      <QualifierName>
-      <String>antagonists &amp; inhibitors</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000096</QualifierUI>
-      <QualifierName>
-      <String>biosynthesis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>BI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000097</QualifierUI>
-      <QualifierName>
-      <String>blood</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>BL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000134</QualifierUI>
-      <QualifierName>
-      <String>cerebrospinal fluid</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CF</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000138</QualifierUI>
-      <QualifierName>
-      <String>chemical synthesis</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CS</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000145</QualifierUI>
-      <QualifierName>
-      <String>classification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CL</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000191</QualifierUI>
-      <QualifierName>
-      <String>economics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>EC</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000266</QualifierUI>
-      <QualifierName>
-      <String>history</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>HI</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000276</QualifierUI>
-      <QualifierName>
-      <String>immunology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IM</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000302</QualifierUI>
-      <QualifierName>
-      <String>isolation &amp; purification</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>IP</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000378</QualifierUI>
-      <QualifierName>
-      <String>metabolism</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ME</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000493</QualifierUI>
-      <QualifierName>
-      <String>pharmacokinetics</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PK</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000494</QualifierUI>
-      <QualifierName>
-      <String>pharmacology</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000506</QualifierUI>
-      <QualifierName>
-      <String>poisoning</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>PO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000528</QualifierUI>
-      <QualifierName>
-      <String>radiation effects</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>RE</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000592</QualifierUI>
-      <QualifierName>
-      <String>standards</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>ST</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000600</QualifierUI>
-      <QualifierName>
-      <String>supply &amp; distribution</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>SD</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000627</QualifierUI>
-      <QualifierName>
-      <String>therapeutic use</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TU</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000633</QualifierUI>
-      <QualifierName>
-      <String>toxicity</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>TO</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000652</QualifierUI>
-      <QualifierName>
-      <String>urine</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>UR</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000737</QualifierUI>
-      <QualifierName>
-      <String>chemistry</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>CH</Abbreviation>
-   </AllowableQualifier>
-   <AllowableQualifier>
-    <QualifierReferredTo>
-     <QualifierUI>Q000819</QualifierUI>
-      <QualifierName>
-      <String>agonists</String>
-      </QualifierName>
-    </QualifierReferredTo>
-    <Abbreviation>AG</Abbreviation>
+    <Abbreviation>EP</Abbreviation>
    </AllowableQualifier>
   </AllowableQualifiersList>
-  <HistoryNote>91(75); was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
-  </HistoryNote>
-  <OnlineNote>use CALCIMYCIN to search A 23187 1975-90
-  </OnlineNote>
-  <PublicMeSHNote>91; was A 23187 1975-90 (see under ANTIBIOTICS 1975-83)
-  </PublicMeSHNote>
-  <PreviousIndexingList>
-   <PreviousIndexing>Antibiotics (1973-1974)</PreviousIndexing>
-   <PreviousIndexing>Carboxylic Acids (1973-1974)</PreviousIndexing>
-  </PreviousIndexingList>
-    <PharmacologicalActionList>
-     <PharmacologicalAction>
-      <DescriptorReferredTo>
-       <DescriptorUI>D000900</DescriptorUI>
-        <DescriptorName>
-         <String>Anti-Bacterial Agents</String>
-        </DescriptorName>
-      </DescriptorReferredTo>
-     </PharmacologicalAction>
-     <PharmacologicalAction>
-      <DescriptorReferredTo>
-       <DescriptorUI>D061207</DescriptorUI>
-        <DescriptorName>
-         <String>Calcium Ionophores</String>
-        </DescriptorName>
-      </DescriptorReferredTo>
-     </PharmacologicalAction>
-    </PharmacologicalActionList>
+  <Annotation>early &amp; modern LONDON
+  </Annotation>
   <TreeNumberList>
-   <TreeNumber>D02.355.291.933.125</TreeNumber>
-   <TreeNumber>D02.540.576.625.125</TreeNumber>
-   <TreeNumber>D03.633.100.221.173</TreeNumber>
-   <TreeNumber>D04.345.241.654.125</TreeNumber>
-   <TreeNumber>D04.345.674.625.125</TreeNumber>
+   <TreeNumber>Z01</TreeNumber>
   </TreeNumberList>
   <ConceptList>
    <Concept PreferredConceptYN="Y">
-    <ConceptUI>M0000001</ConceptUI>
+    <ConceptUI>M0012680</ConceptUI>
     <ConceptName>
-     <String>Calcimycin</String>
+     <String>London</String>
     </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>37H9VM9WZL</RegistryNumber>
-    </RegistryNumberList>
-    <ScopeNote>An ionophorous, polyether antibiotic from Streptomyces chartreusensis. It binds and transports CALCIUM and other divalent cations across membranes and uncouples oxidative phosphorylation while inhibiting ATPase of rat liver mitochondria. The substance is used mostly as a biochemical tool to study the role of divalent cations in various biological systems.
+    <ScopeNote>The capital of the United Kingdom. It is located in England.
     </ScopeNote>
-    <RelatedRegistryNumberList>
-     <RelatedRegistryNumber>52665-69-7 (Calcimycin)</RelatedRegistryNumber>
-    </RelatedRegistryNumberList>
-    <ConceptRelationList>
-     <ConceptRelation RelationName="NRW">
-     <Concept1UI>M0000001</Concept1UI>
-     <Concept2UI>M0353609</Concept2UI>
-     </ConceptRelation>
-    </ConceptRelationList>
     <TermList>
-     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="Y">
-      <TermUI>T000002</TermUI>
-      <String>Calcimycin</String>
+     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="NAM"  RecordPreferredTermYN="Y">
+      <TermUI>T024257</TermUI>
+      <String>London</String>
       <DateCreated>
        <Year>1999</Year>
        <Month>01</Month>
        <Day>01</Day>
       </DateCreated>
       <ThesaurusIDlist>
-       <ThesaurusID>FDA SRS (2014)</ThesaurusID>
-       <ThesaurusID>NLM (1975)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T001124965</TermUI>
-      <String>4-Benzoxazolecarboxylic acid, 5-(methylamino)-2-((3,9,11-trimethyl-8-(1-methyl-2-oxo-2-(1H-pyrrol-2-yl)ethyl)-1,7-dioxaspiro(5.5)undec-2-yl)methyl)-, (6S-(6alpha(2S*,3S*),8beta(R*),9beta,11alpha))-</String>
-      <DateCreated>
-       <Year>2022</Year>
-       <Month>09</Month>
-       <Day>22</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (2024)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-    </TermList>
-   </Concept>
-   <Concept PreferredConceptYN="N">
-    <ConceptUI>M0353609</ConceptUI>
-    <ConceptName>
-     <String>A-23187</String>
-    </ConceptName>
-    <RegistryNumberList>
-    <RegistryNumber>0</RegistryNumber>
-    </RegistryNumberList>
-    <ConceptRelationList>
-     <ConceptRelation RelationName="NRW">
-     <Concept1UI>M0000001</Concept1UI>
-     <Concept2UI>M0353609</Concept2UI>
-     </ConceptRelation>
-    </ConceptRelationList>
-    <TermList>
-     <Term  ConceptPreferredTermYN="Y"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
-      <TermUI>T000001</TermUI>
-      <String>A-23187</String>
-      <DateCreated>
-       <Year>1990</Year>
-       <Month>03</Month>
-       <Day>08</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (1991)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="LAB"  RecordPreferredTermYN="N">
-      <TermUI>T000001</TermUI>
-      <String>A 23187</String>
-     </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T000003</TermUI>
-      <String>Antibiotic A23187</String>
-      <DateCreated>
-       <Year>1990</Year>
-       <Month>03</Month>
-       <Day>08</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>NLM (1991)</ThesaurusID>
-      </ThesaurusIDlist>
-     </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="Y"  LexicalTag="NON"  RecordPreferredTermYN="N">
-      <TermUI>T000003</TermUI>
-      <String>A23187, Antibiotic</String>
-     </Term>
-     <Term  ConceptPreferredTermYN="N"  IsPermutedTermYN="N"  LexicalTag="LAB"  RecordPreferredTermYN="N">
-      <TermUI>T000004</TermUI>
-      <String>A23187</String>
-      <DateCreated>
-       <Year>1974</Year>
-       <Month>11</Month>
-       <Day>11</Day>
-      </DateCreated>
-      <ThesaurusIDlist>
-       <ThesaurusID>UNK (19XX)</ThesaurusID>
+       <ThesaurusID>NLM (1966)</ThesaurusID>
       </ThesaurusIDlist>
      </Term>
     </TermList>
