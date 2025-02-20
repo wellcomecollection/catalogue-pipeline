@@ -3,10 +3,6 @@ from typing import Any
 
 from utils.aws import NodeType, OntologyType, fetch_transformer_output_from_s3
 
-VALID_SOURCE_FILES = [("concepts", "mesh"), ("concepts", "loc"), ("locations", "mesh"), ("locations", "loc"),
-                      ("names", "loc"), ("concepts", "wikidata_linked_mesh"), ("concepts", "wikidata_linked_loc"), 
-                      ("locations", "wikidata_linked_mesh"), ("locations", "wikidata_linked_loc"), ("names", "wikidata_linked_loc")]
-
 
 class IdLabelChecker(dict):
     """
@@ -36,12 +32,11 @@ class IdLabelChecker(dict):
             source = [source]
 
         for nt, s in product(node_type, source):
-            if (nt, s) in VALID_SOURCE_FILES:
-                for row in fetch_transformer_output_from_s3(nt, s):
-                    source_id = row[":ID"]
-                    labels = [row["label:String"]]
-                    labels.extend([l for l in row["alternative_labels:String"].split("||") if l != ""])
-                    id_label_dict[source_id] = [l.lower() for l in labels]
+            for row in fetch_transformer_output_from_s3(nt, s):
+                source_id = row[":ID"]
+                labels = [row["label:String"]]
+                labels.extend([l for l in row["alternative_labels:String"].split("||") if l != ""])
+                id_label_dict[source_id] = [l.lower() for l in labels]
 
         print(f"({len(id_label_dict)} ids and labels retrieved.)")
 
