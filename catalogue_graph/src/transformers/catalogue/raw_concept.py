@@ -110,8 +110,8 @@ class RawCatalogueConcept:
                 (self.source == "nlm-mesh")
                 and self.source_concept_id.startswith("D")
                 and (
-                    self.label.lower() in
-                    self.id_label_checker.get(self.source_concept_id, [])
+                    self.label.lower()
+                    in self.id_label_checker.get(self.source_concept_id, [])
                 )
             ):
                 return True

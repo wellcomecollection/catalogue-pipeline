@@ -2,9 +2,9 @@ import os
 from itertools import product
 from typing import Literal
 
-from utils.aws import VALID_SOURCE_FILES
-
 from test_mocks import MockSmartOpen
+
+from utils.aws import VALID_SOURCE_FILES
 
 
 def load_fixture(file_name: str) -> bytes:
@@ -25,5 +25,7 @@ def add_mock_transformer_outputs(
         if (node_type, source) in VALID_SOURCE_FILES:
             MockSmartOpen.mock_s3_file(
                 f"s3://bulk_load_test_bucket/{source}_{node_type}__nodes.csv",
-                load_fixture(f"{source}/transformer_output_{node_type}_nodes.csv").decode(),
+                load_fixture(
+                    f"{source}/transformer_output_{node_type}_nodes.csv"
+                ).decode(),
             )
