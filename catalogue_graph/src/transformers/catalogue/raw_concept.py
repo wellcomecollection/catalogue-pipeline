@@ -111,7 +111,7 @@ class RawCatalogueConcept:
                 and self.source_concept_id.startswith("D")
                 and (
                     self.label.lower() in
-                    self.id_label_checker.get(self.source_concept_id)
+                    self.id_label_checker.get(self.source_concept_id, [])
                 )
             ):
                 print(self.id_label_checker.get(self.source_concept_id))
