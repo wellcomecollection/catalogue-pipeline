@@ -1,8 +1,8 @@
 from test_mocks import MockRequest
 from test_utils import load_fixture
 
-from transformers.mesh.locations_transformer import MeSHLocationsTransformer
 from models.graph_node import SourceLocation
+from transformers.mesh.locations_transformer import MeSHLocationsTransformer
 
 
 def test_mesh_concepts_transformer() -> None:
