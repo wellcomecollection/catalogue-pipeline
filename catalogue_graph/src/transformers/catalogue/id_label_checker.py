@@ -3,6 +3,10 @@ from typing import Any
 
 from utils.aws import NodeType, OntologyType, fetch_transformer_output_from_s3
 
+VALID_SOURCE_FILES = [("concepts", "mesh"), ("concepts", "loc"), ("locations", "mesh"), ("locations", "loc"),
+                      ("names", "loc"), ("concepts", "wikidata_linked_mesh"), ("concepts", "wikidata_linked_loc"), 
+                      ("locations", "wikidata_linked_mesh"), ("locations", "wikidata_linked_loc"), ("names", "wikidata_linked_loc")]
+
 
 class IdLabelChecker(dict):
     """
@@ -12,8 +16,9 @@ class IdLabelChecker(dict):
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.inverse: dict = {}
-        for key, value in self.items():
-            self.inverse.setdefault(value, []).append(key)
+        for key, values in self.items():
+            for value in values:
+                self.inverse.setdefault(value, []).append(key)
 
     @classmethod
     def from_source(
@@ -31,9 +36,12 @@ class IdLabelChecker(dict):
             source = [source]
 
         for nt, s in product(node_type, source):
-            for row in fetch_transformer_output_from_s3(nt, s):
-                # Extract source id and label at position 0 and 3, respectively
-                id_label_dict[row[":ID"]] = row["label:String"].lower()
+            if (nt, s) in VALID_SOURCE_FILES:
+                for row in fetch_transformer_output_from_s3(nt, s):
+                    source_id = row[":ID"]
+                    labels = [row["label:String"]]
+                    labels.extend([l for l in row["alternative_labels:String"].split("||") if l != ""])
+                    id_label_dict[source_id] = [l.lower() for l in labels]
 
         print(f"({len(id_label_dict)} ids and labels retrieved.)")
 
