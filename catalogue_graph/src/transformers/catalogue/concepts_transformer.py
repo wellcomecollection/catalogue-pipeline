@@ -13,7 +13,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = CatalogueConceptsSource(url)
         self.id_label_checker = IdLabelChecker.from_source(
-            node_type=["concepts", "locations"], source=["loc", "mesh"]
+            node_type=["concepts", "locations", "names"], source=["loc", "mesh"]
         )
         self.id_lookup: set = set()
 
@@ -46,9 +46,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
         self.id_lookup.add(raw_concept.wellcome_id)
 
-        if (raw_concept.source == "label-derived") and (
-            raw_concept.type not in ["Person", "Organisation", "Agent"]
-        ):
+        if (raw_concept.source == "label-derived"):
             # Generate edges via label
             for source_concept_id in raw_concept.label_derived_source_concept_ids:
                 yield ConceptHasSourceConcept(
