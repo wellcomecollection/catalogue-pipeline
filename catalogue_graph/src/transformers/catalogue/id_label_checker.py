@@ -35,8 +35,8 @@ class IdLabelChecker(dict):
             for row in fetch_transformer_output_from_s3(nt, s):
                 source_id = row[":ID"]
                 labels = [row["label:String"]]
-                labels.extend([l for l in row["alternative_labels:String"].split("||") if l != ""])
-                id_label_dict[source_id] = [l.lower() for l in labels]
+                labels.extend([label for label in row["alternative_labels:String"].split("||") if label != ""])
+                id_label_dict[source_id] = [label.lower() for label in labels]
 
         print(f"({len(id_label_dict)} ids and labels retrieved.)")
 

@@ -114,8 +114,6 @@ class RawCatalogueConcept:
                     self.id_label_checker.get(self.source_concept_id, [])
                 )
             ):
-                print(self.id_label_checker.get(self.source_concept_id))
-                print(self.label)
                 return True
 
             if (self.source == "lc-subjects") and self.source_concept_id.startswith(
