@@ -8,7 +8,10 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.lambda.Downstream
-import weco.pipeline.id_minter.config.models.{IdMinterConfig, IdMinterConfigurable}
+import weco.pipeline.id_minter.config.models.{
+  IdMinterConfig,
+  IdMinterConfigurable
+}
 import weco.pipeline.id_minter.database.RDSIdentifierGenerator
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
@@ -44,6 +47,7 @@ class LambdaMain
       new SingleDocumentIdMinter(identifierGenerator)
     )
 
-  override protected val processor = new MintingRequestProcessor(minter, workIndexer)
+  override protected val processor =
+    new MintingRequestProcessor(minter, workIndexer)
   override protected val downstream = Downstream(config.downstreamConfig)
 }

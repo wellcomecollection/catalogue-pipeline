@@ -16,11 +16,14 @@ trait SQSLambdaMessageHandle {
 
 trait SQSLambdaExtractedMessage extends SQSLambdaMessageHandle
 
-case class SQSLambdaMessageFailedExtraction(messageId: String, messageBody: String, error: Throwable)
-  extends SQSLambdaExtractedMessage
+case class SQSLambdaMessageFailedExtraction(
+  messageId: String,
+  messageBody: String,
+  error: Throwable
+) extends SQSLambdaExtractedMessage
 
 case class SQSLambdaMessage[T](messageId: String, message: T)
-  extends SQSLambdaExtractedMessage
+    extends SQSLambdaExtractedMessage
 
 trait SQSLambdaMessageResult extends SQSLambdaMessageHandle
 
@@ -29,13 +32,13 @@ trait SQSLambdaMessageFailure extends SQSLambdaMessageResult {
 }
 
 case class SQSLambdaMessageFailedRetryable(messageId: String, error: Throwable)
-  extends SQSLambdaMessageFailure
+    extends SQSLambdaMessageFailure
 
 case class SQSLambdaMessageFailedPermanent(messageId: String, error: Throwable)
-  extends SQSLambdaMessageFailure
+    extends SQSLambdaMessageFailure
 
 case class SQSLambdaMessageProcessed(messageId: String)
-  extends SQSLambdaMessageResult
+    extends SQSLambdaMessageResult
 
 object SQSEventOps {
 
@@ -50,35 +53,56 @@ object SQSEventOps {
     *   - a `Message`, which is the actual content we want
     */
   implicit class ExtractTFromSqsEvent(event: SQSEvent) {
-    def extractLambdaEvents[T]()(implicit decoder: Decoder[T], ct: ClassTag[T]): List[Either[SQSLambdaMessageFailedExtraction, SQSLambdaMessage[T]]] = {
-      event.getRecords.asScala.toList.map { message =>
-        (for {
-          messageBodyJson <- Try(ujson.read(message.getBody)).recover {
-            case e => throw new Error(s"Failed to parse message body: ${e.getMessage}")
-          }
-          messageValue <- (for {
-            obj <- messageBodyJson.objOpt
-            messageJson <- obj.get("Message")
-          } yield messageJson).map(Success(_)).getOrElse(
-            Failure(new Error("Failed to extract Message object, incorrect format?"))
-          )
-          decodedMessage <- ct.runtimeClass match {
-            case c if c == classOf[String] => Success(messageValue.str.asInstanceOf[T])
-            case _ => fromJson[T](messageValue.str).toEither.toTry.recover {
-                case e => throw new Error(s"Failed to decode inner message: ${e.getMessage}")
+    def extractLambdaEvents[T]()(
+      implicit decoder: Decoder[T],
+      ct: ClassTag[T]
+    ): List[Either[SQSLambdaMessageFailedExtraction, SQSLambdaMessage[T]]] = {
+      event.getRecords.asScala.toList.map {
+        message =>
+          (for {
+            messageBodyJson <- Try(ujson.read(message.getBody)).recover {
+              case e =>
+                throw new Error(
+                  s"Failed to parse message body: ${e.getMessage}"
+                )
             }
-          }
-        } yield SQSLambdaMessage(
-          messageId = message.getMessageId,
-          message = decodedMessage
-        )) match {
+            messageValue <- (for {
+              obj <- messageBodyJson.objOpt
+              messageJson <- obj.get("Message")
+            } yield messageJson)
+              .map(Success(_))
+              .getOrElse(
+                Failure(
+                  new Error(
+                    "Failed to extract Message object, incorrect format?"
+                  )
+                )
+              )
+            decodedMessage <- ct.runtimeClass match {
+              case c if c == classOf[String] =>
+                Success(messageValue.str.asInstanceOf[T])
+              case _ =>
+                fromJson[T](messageValue.str).toEither.toTry.recover {
+                  case e =>
+                    throw new Error(
+                      s"Failed to decode inner message: ${e.getMessage}"
+                    )
+                }
+            }
+          } yield SQSLambdaMessage(
+            messageId = message.getMessageId,
+            message = decodedMessage
+          )) match {
             case Success(value) => Right(value)
-            case Failure(e) => Left(SQSLambdaMessageFailedExtraction(
-                messageId = message.getMessageId,
-                messageBody = message.getBody,
-                error = e
-            ))
-        }
+            case Failure(e) =>
+              Left(
+                SQSLambdaMessageFailedExtraction(
+                  messageId = message.getMessageId,
+                  messageBody = message.getBody,
+                  error = e
+                )
+              )
+          }
       }
     }
 
