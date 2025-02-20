@@ -1,6 +1,8 @@
 from test_mocks import MockRequest
 from test_utils import load_fixture
 
+from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
+from models.graph_node import SourceConcept
 from transformers.mesh.concepts_transformer import MeSHConceptsTransformer
 
 
@@ -23,15 +25,39 @@ def test_mesh_concepts_transformer() -> None:
 
     # test transform_node
     nodes = list(mesh_concepts_transformer._stream_nodes())
-    assert len(list(nodes)) == 7
-    assert nodes[0].id == "D009930"
-    assert nodes[0].label == "Organic Chemicals"
 
-    stream = mesh_concepts_transformer._stream_edges()
-    first_element = stream.__next__()
+    assert len(list(nodes)) == 3
+    assert nodes[0] == SourceConcept(
+        id="D009930",
+        label="Organic Chemicals",
+        source="nlm-mesh",
+        alternative_ids=["D02"],
+        alternative_labels=[
+            "Chemicals, Organic",
+            "Organic Chemical",
+            "Chemical, Organic",
+        ],
+        description="A broad class of substances containing carbon and its derivatives. Many of these chemicals will frequently contain hydrogen with or without oxygen, nitrogen, sulfur, phosphorus, and other elements. They exist in either carbon chain or carbon ring form.\n    ",
+    )
 
-    assert first_element.from_type == "SourceConcept"
-    assert first_element.to_type == "SourceConcept"
-    assert first_element.from_id == "D004987"
-    assert first_element.to_id == "D009930"
-    assert first_element.relationship == "HAS_PARENT"
+    edges = list(mesh_concepts_transformer._stream_edges())
+
+    assert edges[0] == SourceConceptHasParent(
+        from_type="SourceConcept",
+        to_type="SourceConcept",
+        from_id="D004987",
+        to_id="D009930",
+        relationship="HAS_PARENT",
+        directed=True,
+        attributes={},
+    )
+
+    assert edges[-1] == SourceConceptRelatedTo(
+        from_type="SourceConcept",
+        to_type="SourceConcept",
+        from_id="D000009",
+        to_id="D034861",
+        relationship="RELATED_TO",
+        directed=False,
+        attributes={},
+    )

@@ -23,7 +23,7 @@ def test_mesh_concepts_source() -> None:
     stream_result = list(mesh_concepts_source.stream_raw())
 
     # Do some simple checks on mesh source decoding based on known data
-    assert len(stream_result) == 7
+    assert len(stream_result) == 4
     xml_elem, treenum_lookup = stream_result[0]
 
     assert xml_elem.tag == "DescriptorRecord"
