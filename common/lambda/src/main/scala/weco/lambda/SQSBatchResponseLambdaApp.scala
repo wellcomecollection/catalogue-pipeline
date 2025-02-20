@@ -22,8 +22,8 @@ abstract class SQSBatchResponseLambdaApp[
   implicit val decoder: Decoder[T],
   val ct: ClassTag[T]
 ) extends RequestHandler[SQSEvent, SQSBatchResponse]
-  with LambdaConfigurable[Config]
-  with Logging {
+    with LambdaConfigurable[Config]
+    with Logging {
 
   // 15 minutes is the maximum time allowed for a lambda to run, as of 2024-12-19
   protected val maximumExecutionTime: FiniteDuration = 15.minutes
@@ -35,49 +35,56 @@ abstract class SQSBatchResponseLambdaApp[
 
   import weco.lambda.SQSEventOps._
 
-  def processT(t: List[T]): Future[Seq[T]]
+  def processMessages(
+    messages: Seq[SQSLambdaMessage[T]]
+  ): Future[Seq[SQSLambdaMessageResult]]
 
   override def handleRequest(
-                              event: SQSEvent,
-                              context: Context
-                            ): SQSBatchResponse = {
+    event: SQSEvent,
+    context: Context
+  ): SQSBatchResponse = {
     val extractedEvents = event.extractLambdaEvents[T]
 
     // Extracted event failures are presumed permanent so we do not include them in batch failures
     extractedEvents.collect {
       case Left(failure) =>
-        warn(s"Failed to extract message ${failure.messageId} with error ${failure.error.getMessage}")
-        debug(s"Failed message body for ${failure.messageId}: ${failure.messageBody}")
-        failure.messageId
-    }
-
-    val messagesMap = extractedEvents.collect {
-      case Right(message) => message.message -> message
-    }.groupBy(_._1).map {
-      case (k: T, v: Seq[(T, SQSLambdaMessage[T])]) => k -> v.map(_._2)
+        error(
+          s"Failed to extract message ${failure.messageId} with error ${failure.error.getMessage}"
+        )
+        debug(
+          s"Failed message body for ${failure.messageId}: ${failure.messageBody}"
+        )
     }
 
     Await.result(
-      processToBatchResponse(messagesMap),
+      processMessages(extractedEvents.collect {
+        case Right(message) => message
+      }) map {
+        results =>
+          results.collect {
+            case failure: SQSLambdaMessageFailedRetryable =>
+              error(
+                s"Failed to process message ${failure.messageId} with error ${failure.error.getMessage}"
+              )
+              Some(failure)
+            case permanentFailure: SQSLambdaMessageFailedPermanent =>
+              error(
+                s"Failed to process message ${permanentFailure.messageId} with error ${permanentFailure.error.getMessage}"
+              )
+              None
+            case success: SQSLambdaMessageProcessed =>
+              info(s"Successfully processed message ${success.messageId}")
+              None
+          } flatten
+      } map {
+        _.map {
+          case failure: SQSLambdaMessageFailedRetryable =>
+            new SQSBatchResponse.BatchItemFailure(failure.messageId)
+        }.asJava
+      } map {
+        new SQSBatchResponse(_)
+      },
       maximumExecutionTime
     )
-  }
-
-  private def processToBatchResponse(
-                                      messagesMap: Map[T, Seq[SQSLambdaMessage[T]]]
-                                    ): Future[SQSBatchResponse] = {
-    processT(messagesMap.keySet.toList) map {
-      failures =>
-        failures.flatMap {
-          failure => messagesMap(failure)
-        }
-    } map {
-      failedMessages: Seq[SQSLambdaMessage[T]] =>
-        new SQSBatchResponse(
-          failedMessages
-            .map(msg => new SQSBatchResponse.BatchItemFailure(msg.messageId))
-            .asJava
-        )
-    }
   }
 }

@@ -7,32 +7,14 @@ import org.scalatest.matchers.should.Matchers
 
 import scala.collection.JavaConverters._
 import weco.json.JsonUtil._
+import weco.lambda.helpers.SQSMessageHelpers
 
-class SQSEventOpsTest extends AnyFunSpec with Matchers {
+class SQSEventOpsTest
+  extends AnyFunSpec
+    with Matchers
+    with SQSMessageHelpers {
 
   import SQSEventOps._
-
-  def createSQSMessage(
-    body: String,
-    messageId: String
-  ): SQSMessage = {
-    val message = new SQSMessage()
-
-    message.setMessageId(messageId)
-    message.setBody(body)
-    message
-  }
-
-  def createSQSEvents(messages: List[(String, String)]): SQSEvent = {
-    val sqsMessages = messages.map {
-      case (body, messageId) =>
-        createSQSMessage(body, messageId)
-    }
-    val sqsEvent = new SQSEvent()
-
-    sqsEvent.setRecords(sqsMessages.asJava)
-    sqsEvent
-  }
 
   describe("Using the implicit class SQSEventOps") {
     describe("extract") {
@@ -94,11 +76,10 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
     describe("extractLambdaEvent") {
       it("extracts values from an SQSEvent where the message is a String") {
         val fakeMessageString = "A/C"
-        val fakeMessageJson = s"""{"Message":"$fakeMessageString"}"""
-        val fakeMessageId = java.util.UUID.randomUUID().toString
+        val fakeMessageId = randomUUID.toString
 
-        val fakeSQSEvent = createSQSEvents(
-          List((fakeMessageJson, fakeMessageId))
+        val fakeSQSEvent = createSQSEventsWithId(
+          List((fakeMessageString, fakeMessageId))
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[String]()
@@ -116,11 +97,10 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         "extracts values from an SQSEvent where the message is a JSON object"
       ) {
         val fakeMessageInnerJson = """{\"value\": \"A/C\"}"""
-        val fakeMessageJson = s"""{"Message":"$fakeMessageInnerJson"}"""
-        val fakeMessageId = java.util.UUID.randomUUID().toString
+        val fakeMessageId = randomUUID.toString
 
-        val fakeSQSEvent = createSQSEvents(
-          List((fakeMessageJson, fakeMessageId))
+        val fakeSQSEvent = createSQSEventsWithId(
+          List((fakeMessageInnerJson, fakeMessageId))
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
@@ -134,14 +114,10 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
 
       it("extracts multiple values from an SQSEvent") {
         val fakeMessageStrings = List("A/C", "A/E", "A/F")
-        val fakeMessages = fakeMessageStrings.map {
-          m =>
-            s"""{"Message":"$m"}"""
-        }
         val fakeIDs =
-          fakeMessages.map(_ => java.util.UUID.randomUUID().toString)
-        val fakeSQSEvent = createSQSEvents(
-          fakeMessages.zip(fakeIDs)
+          fakeMessageStrings.map(_ => randomUUID.toString)
+        val fakeSQSEvent = createSQSEventsWithId(
+          fakeMessageStrings.zip(fakeIDs)
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[String]()
@@ -160,11 +136,10 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
       ) {
         val fakeMessageInnerJson =
           """{\"value\": \"A/C\", \"other\": \"D/E\"}"""
-        val fakeMessageJson = s"""{"Message":"$fakeMessageInnerJson"}"""
-        val fakeMessageId = java.util.UUID.randomUUID().toString
+        val fakeMessageId = randomUUID.toString
 
-        val fakeSQSEvent = createSQSEvents(
-          List((fakeMessageJson, fakeMessageId))
+        val fakeSQSEvent = createSQSEventsWithId(
+          List((fakeMessageInnerJson, fakeMessageId))
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
@@ -181,10 +156,11 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         "fails to extract values from an SQSEvent where the message is not a JSON object"
       ) {
         val fakeMessageBrokenJson = "invalid json"
-        val fakeMessageId = java.util.UUID.randomUUID().toString
+        val fakeMessageId = randomUUID.toString
 
-        val fakeSQSEvent = createSQSEvents(
-          List((fakeMessageBrokenJson, fakeMessageId))
+        val fakeSQSEvent = createSQSEventsWithId(
+          messages = List((fakeMessageBrokenJson, fakeMessageId)),
+          wrapMessage = false
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[String]()
@@ -207,10 +183,11 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
       ) {
         val fakeMessageInnerJson = """{\"value\": \"A/C\"}"""
         val fakeMessageJson = s"""{"NotMessage":"$fakeMessageInnerJson"}"""
-        val fakeMessageId = java.util.UUID.randomUUID().toString
+        val fakeMessageId = randomUUID.toString
 
-        val fakeSQSEvent = createSQSEvents(
-          List((fakeMessageJson, fakeMessageId))
+        val fakeSQSEvent = createSQSEventsWithId(
+          messages = List((fakeMessageJson, fakeMessageId)),
+          wrapMessage = false
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
@@ -232,11 +209,10 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         "fails to extract values from an SQSEvent where the message is a JSON object with a non-JSON Message field"
       ) {
         val fakeMessageInnerJson = "not json"
-        val fakeMessageJson = s"""{"Message":"$fakeMessageInnerJson"}"""
-        val fakeMessageId = java.util.UUID.randomUUID().toString
+        val fakeMessageId = randomUUID.toString
 
-        val fakeSQSEvent = createSQSEvents(
-          List((fakeMessageJson, fakeMessageId))
+        val fakeSQSEvent = createSQSEventsWithId(
+          List((fakeMessageInnerJson, fakeMessageId))
         )
 
         val paths = fakeSQSEvent.extractLambdaEvents[TestMessage]()
@@ -256,15 +232,14 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         "fails to extract values from an SQSEvent where one message is valid and one is not"
       ) {
         val fakeMessageInnerJson = """{\"value\": \"A/C\"}"""
-        val fakeMessageJson = s"""{"Message":"$fakeMessageInnerJson"}"""
-        val fakeMessageBrokenJson = "invalid json"
-        val fakeMessageIdSuccess = java.util.UUID.randomUUID().toString
-        val fakeMessageIdFailure = java.util.UUID.randomUUID().toString
+        val fakeMessageBrokenInnerJson = "invalid json"
+        val fakeMessageIdSuccess = randomUUID.toString
+        val fakeMessageIdFailure = randomUUID.toString
 
-        val fakeSQSEvent = createSQSEvents(
+        val fakeSQSEvent = createSQSEventsWithId(
           List(
-            (fakeMessageJson, fakeMessageIdSuccess),
-            (fakeMessageBrokenJson, fakeMessageIdFailure)
+            (fakeMessageInnerJson, fakeMessageIdSuccess),
+            (fakeMessageBrokenInnerJson, fakeMessageIdFailure)
           )
         )
 
@@ -280,10 +255,10 @@ class SQSEventOpsTest extends AnyFunSpec with Matchers {
         paths(1) shouldBe a[Left[_, _]]
         val failure = paths(1).left.get
         failure.error.getMessage should startWith(
-          "Failed to parse message body"
+          "Failed to decode inner message"
         )
         failure.messageId shouldBe fakeMessageIdFailure
-        failure.messageBody shouldBe fakeMessageBrokenJson
+        failure.messageBody should include(fakeMessageBrokenInnerJson)
       }
     }
   }

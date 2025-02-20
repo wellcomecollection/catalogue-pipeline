@@ -22,6 +22,20 @@ case class SQSLambdaMessageFailedExtraction(messageId: String, messageBody: Stri
 case class SQSLambdaMessage[T](messageId: String, message: T)
   extends SQSLambdaExtractedMessage
 
+trait SQSLambdaMessageResult extends SQSLambdaMessageHandle
+
+trait SQSLambdaMessageFailure extends SQSLambdaMessageResult {
+  val error: Throwable
+}
+
+case class SQSLambdaMessageFailedRetryable(messageId: String, error: Throwable)
+  extends SQSLambdaMessageFailure
+
+case class SQSLambdaMessageFailedPermanent(messageId: String, error: Throwable)
+  extends SQSLambdaMessageFailure
+
+case class SQSLambdaMessageProcessed(messageId: String)
+  extends SQSLambdaMessageResult
 
 object SQSEventOps {
 

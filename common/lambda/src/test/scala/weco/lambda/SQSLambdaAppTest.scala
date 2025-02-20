@@ -3,12 +3,17 @@ package weco.lambda
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.must.Matchers
 import weco.fixtures.RandomGenerators
-import weco.lambda.helpers.{ConfigurationTestHelpers, SQSLambdaAppHelpers}
+import weco.lambda.helpers.{
+  ConfigurationTestHelpers,
+  SQSLambdaAppHelpers,
+  SQSMessageHelpers
+}
 
 class SQSLambdaAppTest
     extends AnyFunSpec
     with ConfigurationTestHelpers
     with SQSLambdaAppHelpers
+    with SQSMessageHelpers
     with RandomGenerators
     with Matchers {
 
@@ -18,7 +23,8 @@ class SQSLambdaAppTest
     val lambdaApp = new TestLambdaApp()
     val eventString = randomAlphanumeric()
 
-    lambdaApp.handleRequest(createSqsEvent(List(eventString)),
+    lambdaApp.handleRequest(
+      createSQSEvents(List(eventString)),
       null
     ) mustBe eventString + expectedConfigString
   }
@@ -30,7 +36,8 @@ class SQSLambdaAppTest
     val eventString1 = randomAlphanumeric()
     val eventString2 = randomAlphanumeric()
 
-    lambdaApp.handleRequest(createSqsEvent(List(eventString1, eventString2)),
+    lambdaApp.handleRequest(
+      createSQSEvents(List(eventString1, eventString2)),
       null
     ) mustBe eventString1 + eventString2 + expectedConfigString
   }
@@ -40,7 +47,7 @@ class SQSLambdaAppTest
     val eventString = randomAlphanumeric()
 
     a[Throwable] shouldBe thrownBy {
-      lambdaApp.handleRequest(createSqsEvent(List(eventString)), null)
+      lambdaApp.handleRequest(createSQSEvents(List(eventString)), null)
     }
   }
 
@@ -49,7 +56,7 @@ class SQSLambdaAppTest
     val eventString = randomAlphanumeric()
 
     a[Throwable] shouldBe thrownBy {
-      lambdaApp.handleRequest(createSqsEvent(List(eventString)), null)
+      lambdaApp.handleRequest(createSQSEvents(List(eventString)), null)
     }
   }
 }

@@ -3,22 +3,17 @@ package weco.pipeline.id_minter
 import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
 import io.circe.Json
+import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.lambda.{Downstream, SQSBatchResponseLambdaApp}
-import weco.pipeline.id_minter.config.models.{
-  IdMinterConfig,
-  IdMinterConfigurable
-}
-import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
-import weco.catalogue.internal_model.Implicits._
+import weco.lambda.Downstream
+import weco.pipeline.id_minter.config.models.{IdMinterConfig, IdMinterConfigurable}
 import weco.pipeline.id_minter.database.RDSIdentifierGenerator
-
-import scala.concurrent.Future
+import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 class LambdaMain
-    extends SQSBatchResponseLambdaApp[String, IdMinterConfig]
+    extends IdMinterSqsLambda[IdMinterConfig]
     with IdMinterConfigurable
     with Logging {
 
@@ -49,15 +44,6 @@ class LambdaMain
       new SingleDocumentIdMinter(identifierGenerator)
     )
 
-  private val processor = new MintingRequestProcessor(minter, workIndexer)
-  private val downstream = Downstream(config.downstreamConfig)
-
-  override def processT(t: List[String]): Future[Seq[String]] = {
-    processor.process(t).map {
-      mintingResponse =>
-        error(mintingResponse)
-        downstream.notify(mintingResponse.successes)
-        mintingResponse.failures
-    }
-  }
+  override protected val processor = new MintingRequestProcessor(minter, workIndexer)
+  override protected val downstream = Downstream(config.downstreamConfig)
 }
