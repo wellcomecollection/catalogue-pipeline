@@ -2,6 +2,8 @@ import os
 from itertools import product
 from typing import Literal
 
+from utils.aws import VALID_SOURCE_FILES
+
 from test_mocks import MockSmartOpen
 
 
@@ -20,7 +22,8 @@ def add_mock_transformer_outputs(
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
     """
     for source, node_type in product(sources, node_types):
-        MockSmartOpen.mock_s3_file(
-            f"s3://bulk_load_test_bucket/{source}_{node_type}__nodes.csv",
-            load_fixture(f"{source}/transformer_output_{node_type}_nodes.csv").decode(),
-        )
+        if (node_type, source) in VALID_SOURCE_FILES:
+            MockSmartOpen.mock_s3_file(
+                f"s3://bulk_load_test_bucket/{source}_{node_type}__nodes.csv",
+                load_fixture(f"{source}/transformer_output_{node_type}_nodes.csv").decode(),
+            )
