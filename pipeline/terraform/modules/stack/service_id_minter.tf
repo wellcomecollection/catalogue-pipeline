@@ -11,6 +11,13 @@ module "id_minter" {
   name            = "id_minter"
   container_image = local.id_minter_image
 
+  // Override entrypoint & command to dual use lambda container image
+  // This should be removed once we have a dedicated batcher_lambda image
+  entrypoint = [
+    "/opt/docker/bin/main"
+  ]
+  command = null
+
   security_group_ids = [
     local.rds_config.security_group_id,
   ]
@@ -45,8 +52,46 @@ module "id_minter" {
   cpu    = 2048
   memory = 4096
 
-  min_capacity = var.min_capacity
-  max_capacity = local.max_capacity
+  // TODO: Temporary disable the ECS id_minter, while we ensure the lambda is working
+  // Delete this block once we are confident the lambda is working.
+  min_capacity = 0 //var.min_capacity
+  max_capacity = 0 //local.max_capacity
 
   fargate_service_boilerplate = local.fargate_service_boilerplate
+}
+
+module "id_minter_lambda" {
+  source = "../pipeline_lambda"
+
+  pipeline_date = var.pipeline_date
+  service_name  = "${local.namespace}_batcher"
+
+  environment_variables = {
+    topic_arn                     = module.id_minter_output_topic.arn
+    max_connections               = local.id_minter_task_max_connections
+    es_source_index               = local.es_works_source_index
+    es_identified_index           = local.es_works_identified_index
+  }
+
+  secret_env_vars = merge({
+    cluster_url          = "rds/identifiers-serverless/endpoint"
+    cluster_url_readonly = "rds/identifiers-serverless/reader_endpoint"
+    db_port              = "rds/identifiers-serverless/port"
+    db_username          = "catalogue/id_minter/rds_user"
+    db_password          = "catalogue/id_minter/rds_password"
+  }, local.pipeline_storage_es_service_secrets["id_minter"])
+
+  timeout = 60 * 5 # 10 Minutes
+
+  queue_config = {
+    topic_arns = local.transformer_output_topic_arns
+    max_receive_count   = 3
+    maximum_concurrency = 10
+    batch_size          = 75
+
+    visibility_timeout_seconds = 60 * 5 # 10 Minutes, same or higher than lambda timeout
+    batching_window_seconds    = 60     # How long to wait to accumulate message: 1 minute
+  }
+
+  ecr_repository_name = "uk.ac.wellcome/id_minter"
 }
