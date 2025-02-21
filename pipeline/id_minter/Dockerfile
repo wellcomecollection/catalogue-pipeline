@@ -2,9 +2,6 @@ FROM public.ecr.aws/l7a1d1z4/jvm_container_lambda:v1 AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
-RUN yum install awscli -y
-COPY bash_secrets_extension.sh /opt/extensions/bash_secrets_extension.sh
-
 ADD target/universal/stage /opt/docker
 ENV CLASSPATH="/opt/docker/lib/*"
 WORKDIR /opt/docker
