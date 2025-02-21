@@ -1,4 +1,4 @@
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:11 AS base
+FROM public.ecr.aws/l7a1d1z4/jvm_container_lambda:v1 AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
