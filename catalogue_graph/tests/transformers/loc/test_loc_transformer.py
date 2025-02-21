@@ -69,7 +69,7 @@ def test_loc_location_transformer_resilience() -> None:
                 "url": test_url_names,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": load_fixture("loc/raw_names.jsonld"),
+                "content_bytes": load_fixture("loc/names_example.jsonld"),
                 "params": None,
             },
         ]
