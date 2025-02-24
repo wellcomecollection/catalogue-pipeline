@@ -15,7 +15,7 @@ module "extractor_ecs_task" {
   }
 
   cpu    = 2048
-  memory = 4096
+  memory = 8192
 }
 
 resource "aws_iam_role_policy" "ecs_stream_to_sns_policy" {
