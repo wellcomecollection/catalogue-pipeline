@@ -8,7 +8,7 @@ module "bulk_load_poller_lambda" {
 
   // New versions are automatically deployed through a GitHub action.
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
-  filename    = data.archive_file.empty_zip.output_path
+  filename = data.archive_file.empty_zip.output_path
 
   handler     = "bulk_load_poller.lambda_handler"
   memory_size = 128
