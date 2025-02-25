@@ -27,7 +27,8 @@ case class MintingResponse(successes: Seq[String], failures: Seq[String])
 class MintingRequestProcessor(
   minter: IdListMinter,
   workIndexer: Indexer[Work[Identified]]
-)(implicit ec: ExecutionContext) extends Logging {
+)(implicit ec: ExecutionContext)
+    extends Logging {
 
   def process(sourceIdentifiers: Seq[String]): Future[MintingResponse] = {
     sourceIdentifiers match {
@@ -54,7 +55,9 @@ class MintingRequestProcessor(
                   .map(_.left.get)
                   .toSeq
               case Right(successes) =>
-                info(s"Successfully stored ${successes.size}/${ids.size} records: ${successes.map(_.id).mkString(", ")}")
+                info(
+                  s"Successfully stored ${successes.size}/${ids.size} records: ${successes.map(_.id).mkString(", ")}"
+                )
                 mintingFailures.map(_.left.get).toSeq
             } map {
               failures =>
