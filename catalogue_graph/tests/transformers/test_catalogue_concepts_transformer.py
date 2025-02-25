@@ -24,7 +24,7 @@ def _add_catalogue_request() -> None:
 
 def test_catalogue_concepts_transformer_nodes() -> None:
     add_mock_transformer_outputs(
-        sources=["loc", "mesh"], node_types=["concepts", "locations"]
+        sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
     )
     _add_catalogue_request()
 
@@ -42,7 +42,7 @@ def test_catalogue_concepts_transformer_nodes() -> None:
 
 def test_catalogue_concepts_transformer_edges() -> None:
     add_mock_transformer_outputs(
-        sources=["loc", "mesh"], node_types=["concepts", "locations"]
+        sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
     )
     _add_catalogue_request()
 
@@ -51,6 +51,7 @@ def test_catalogue_concepts_transformer_edges() -> None:
     )
 
     edges = list(catalogue_concepts_transformer._stream_edges())
+    print(edges)
 
     assert len(edges) == 7
     assert edges[0] == ConceptHasSourceConcept(

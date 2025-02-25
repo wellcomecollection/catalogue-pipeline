@@ -12,8 +12,9 @@ class IdLabelChecker(dict):
     def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
         self.inverse: dict = {}
-        for key, value in self.items():
-            self.inverse.setdefault(value, []).append(key)
+        for key, values in self.items():
+            for value in values:
+                self.inverse.setdefault(value, []).append(key)
 
     @classmethod
     def from_source(
@@ -32,8 +33,16 @@ class IdLabelChecker(dict):
 
         for nt, s in product(node_type, source):
             for row in fetch_transformer_output_from_s3(nt, s):
-                # Extract source id and label at position 0 and 3, respectively
-                id_label_dict[row[":ID"]] = row["label:String"].lower()
+                source_id = row[":ID"]
+                labels = [row["label:String"]]
+                labels.extend(
+                    [
+                        label
+                        for label in row["alternative_labels:String"].split("||")
+                        if label != ""
+                    ]
+                )
+                id_label_dict[source_id] = [label.lower() for label in labels]
 
         print(f"({len(id_label_dict)} ids and labels retrieved.)")
 

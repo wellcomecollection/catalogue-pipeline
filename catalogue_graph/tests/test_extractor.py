@@ -139,7 +139,7 @@ def test_lambda_handler(
 ) -> None:
     MockRequest.mock_responses(mock_responses)
     add_mock_transformer_outputs(
-        sources=["loc", "mesh"], node_types=["concepts", "locations"]
+        sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
     )
     lambda_handler(lambda_event, None)
 
