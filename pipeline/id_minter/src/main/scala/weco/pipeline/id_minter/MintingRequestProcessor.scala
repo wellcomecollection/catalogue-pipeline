@@ -1,5 +1,6 @@
 package weco.pipeline.id_minter
 
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.pipeline_storage.Indexer
@@ -26,7 +27,7 @@ case class MintingResponse(successes: Seq[String], failures: Seq[String])
 class MintingRequestProcessor(
   minter: IdListMinter,
   workIndexer: Indexer[Work[Identified]]
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext) extends Logging {
 
   def process(sourceIdentifiers: Seq[String]): Future[MintingResponse] = {
     sourceIdentifiers match {
@@ -52,7 +53,9 @@ class MintingRequestProcessor(
                 ) ++ mintingFailures
                   .map(_.left.get)
                   .toSeq
-              case Right(_) => mintingFailures.map(_.left.get).toSeq
+              case Right(successes) =>
+                info(s"Successfully stored ${successes.size}/${ids.size} records: ${successes.map(_.id).mkString(", ")}")
+                mintingFailures.map(_.left.get).toSeq
             } map {
               failures =>
                 // Indexer is not guaranteed to return all successful documents.
