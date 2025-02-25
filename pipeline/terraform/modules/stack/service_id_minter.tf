@@ -64,7 +64,7 @@ module "id_minter_lambda" {
   source = "../pipeline_lambda"
 
   pipeline_date = var.pipeline_date
-  service_name  = "${local.namespace}_batcher"
+  service_name  = "${local.namespace}_id_minter"
 
   environment_variables = {
     topic_arn                     = module.id_minter_output_topic.arn
