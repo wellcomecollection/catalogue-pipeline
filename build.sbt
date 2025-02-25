@@ -94,7 +94,7 @@ lazy val pipeline_storage_typesafe = setupProject(
 lazy val id_minter = setupProject(
   project,
   "pipeline/id_minter",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, pipeline_storage_typesafe, lambda),
   externalDependencies = CatalogueDependencies.idminterDependencies
 )
 

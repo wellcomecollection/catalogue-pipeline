@@ -5,9 +5,7 @@ import org.apache.pekko.stream.scaladsl.Flow
 import grizzled.slf4j.Logging
 import io.circe.Json
 import software.amazon.awssdk.services.sqs.model.Message
-import weco.json.JsonUtil.fromJson
 import weco.messaging.sns.NotificationMessage
-import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.pipeline_storage.PipelineStorageStream.{
   batchRetrieveFlow,
@@ -15,6 +13,7 @@ import weco.pipeline_storage.PipelineStorageStream.{
 }
 import weco.typesafe.Runnable
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline.id_minter.SingleDocumentIdMinter
 import weco.pipeline.id_minter.config.builders.RDSBuilder
 import weco.pipeline.id_minter.config.models.{
   IdentifiersTableConfig,
@@ -24,14 +23,11 @@ import weco.pipeline.id_minter.database.{
   RDSIdentifierGenerator,
   TableProvisioner
 }
-import weco.pipeline.id_minter.steps.{
-  IdentifierGenerator,
-  SourceIdentifierEmbedder
-}
+import weco.pipeline.id_minter.steps.IdentifierGenerator
 import weco.pipeline_storage.{PipelineStorageStream, Retriever}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class IdMinterWorkerService[Destination](
   maybeIdentifierGenerator: Option[IdentifierGenerator],
@@ -50,6 +46,8 @@ class IdMinterWorkerService[Destination](
       identifiersTableConfig
     )
   )
+  private val minter = new SingleDocumentIdMinter(identifierGenerator)
+
   def run(): Future[Done] = {
     RDSBuilder.buildDB(rdsClientConfig)
 
@@ -76,26 +74,8 @@ class IdMinterWorkerService[Destination](
   }
 
   def processMessage(json: Json): Try[List[Work[Identified]]] =
-    for {
-      updatedJson <- embedIds(json)
-      work <- decodeWork(updatedJson)
-    } yield List(work)
-
-  private def embedIds(json: Json): Try[Json] =
-    for {
-      sourceIdentifiers <- SourceIdentifierEmbedder.scan(json)
-      mintedIdentifiers <- identifierGenerator.retrieveOrGenerateCanonicalIds(
-        sourceIdentifiers
-      )
-
-      canonicalIdentifiers = mintedIdentifiers.map {
-        case (sourceIdentifier, identifier) =>
-          (sourceIdentifier, identifier.CanonicalId)
-      }
-
-      updatedJson <- SourceIdentifierEmbedder.update(json, canonicalIdentifiers)
-    } yield updatedJson
-
-  private def decodeWork(json: Json): Try[Work[Identified]] =
-    fromJson[Work[Identified]](json.noSpaces)
+    minter.processJson(json) match {
+      case Failure(exception) => Failure(exception)
+      case Success(value)     => Success(List(value))
+    }
 }

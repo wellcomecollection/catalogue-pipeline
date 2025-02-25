@@ -6,6 +6,7 @@ import io.circe.Encoder
 import software.amazon.awssdk.services.sns.SnsClient
 import weco.messaging.sns.{SNSConfig, SNSMessageSender}
 import weco.json.JsonUtil.toJson
+import weco.messaging.MessageSender
 import weco.messaging.typesafe.SNSBuilder.buildSNSConfig
 
 import scala.util.Try
@@ -16,7 +17,7 @@ trait Downstream {
 }
 
 class SNSDownstream(snsConfig: SNSConfig) extends Downstream {
-  protected val msgSender = new SNSMessageSender(
+  protected val msgSender: MessageSender[_] = new SNSMessageSender(
     snsClient = SnsClient.builder().build(),
     snsConfig = snsConfig,
     subject = "Sent from relation_embedder"

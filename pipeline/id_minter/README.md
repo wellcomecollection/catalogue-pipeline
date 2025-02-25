@@ -67,6 +67,18 @@ Then, it adds a `canonicalId` field with the ID to the JSON:
 
 It updates all SourceIdentifier objects in the JSON, even if they're deeply nested; e.g. it also adds canonical IDs to items and subjects.
 
+## Running locally
+
+You can run the Lambda version locally from the repository root thus:
+
+`./scripts/run_local.sh <PROJECT_ID> [<PIPELINE_DATE>] [--skip-build]`
+
+You can now post JSON SQS messages to it. Because SQS-fed-by-SNS is so awkwardly verbose,
+a convenience script will fill out the boilerplate for you. As with CLIMain, you can pipe some
+paths to it, from scripts folder in this project directory:
+
+`cat scripts/source_ids.txt | python scripts/post_to_rie.py`
+
 ## Connecting to the ID minter database
 
 If you need to connect to the ID minter database, there are [some notes on how to do so](./connect-to-the-database.md).

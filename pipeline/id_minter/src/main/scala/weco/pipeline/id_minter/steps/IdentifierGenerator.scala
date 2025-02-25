@@ -8,7 +8,15 @@ import weco.pipeline.id_minter.utils.Identifiable
 
 import scala.util.{Failure, Success, Try}
 
-class IdentifierGenerator(identifiersDao: IdentifiersDao) extends Logging {
+trait CanonicalIdentifierGenerator {
+  def retrieveOrGenerateCanonicalIds(
+    sourceIdentifiers: Seq[SourceIdentifier]
+  ): Try[Map[SourceIdentifier, Identifier]]
+}
+
+class IdentifierGenerator(identifiersDao: IdentifiersDao)
+    extends CanonicalIdentifierGenerator
+    with Logging {
   import IdentifiersDao._
 
   /*
