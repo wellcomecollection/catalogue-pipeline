@@ -82,29 +82,6 @@ module "id_minter_lambda" {
     ]
   }
 
-  # es.upstream.host=${?es_upstream_host}
-  # es.upstream.port=${?es_upstream_port}
-  # es.upstream.protocol=${?es_upstream_protocol}
-  # es.upstream.apikey=${?es_apikey}
-  # es.upstream.index=${?es_source_index}
-  #
-  # es.downstream.host=${?es_downstream_host}
-  # es.downstream.port=${?es_downstream_port}
-  # es.downstream.protocol=${?es_downstream_protocol}
-  # es.downstream.apikey=${?es_downstream_apikey}
-  # es.downstream.username=${?es_downstream_username}
-  # es.downstream.password=${?es_downstream_password}
-  # es.downstream.index=${?es_identified_index}
-
-  # pipeline_storage_es_service_secrets = {
-  #   for service in keys(local.service_index_permissions) : service => {
-  #     es_host     = local.pipeline_storage_private_host
-  #     es_port     = local.pipeline_storage_port
-  #     es_protocol = local.pipeline_storage_protocol
-  #     es_apikey   = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key"
-  #   }
-  # }
-
   secret_env_vars = merge({
     cluster_url          = "rds/identifiers-serverless/endpoint"
     cluster_url_readonly = "rds/identifiers-serverless/reader_endpoint"
