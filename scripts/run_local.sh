@@ -71,6 +71,7 @@ pushd "$PROJECT_DIR"
 # Read template.env, substitute variables, and write to .env
 if [ -f template.env ]; then
   echo "Substituting variables in template.env, creating .env"
+  export PIPELINE_DATE
   envsubst < template.env > .env
 fi
 
