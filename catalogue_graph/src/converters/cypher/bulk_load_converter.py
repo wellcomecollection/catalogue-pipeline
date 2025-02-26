@@ -1,9 +1,8 @@
 from typing import Literal, cast
 
-from pydantic import BaseModel
-
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode, SourceLocation, SourceName
+from pydantic import BaseModel
 
 from .base_converter import CypherBaseConverter
 

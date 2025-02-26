@@ -7,7 +7,7 @@ from .id_label_checker import IdLabelChecker
 
 
 class RawCatalogueConcept:
-    def __init__(self, raw_concept: dict, id_label_checker: IdLabelChecker):
+    def __init__(self, raw_concept: dict, id_label_checker: IdLabelChecker | None = None):
         self.raw_concept = self._extract_concept_node(raw_concept)
         self.id_label_checker = id_label_checker
 
