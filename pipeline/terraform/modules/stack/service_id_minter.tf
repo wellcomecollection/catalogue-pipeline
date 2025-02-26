@@ -12,7 +12,7 @@ module "id_minter" {
   container_image = local.id_minter_image
 
   // Override entrypoint & command to dual use lambda container image
-  // This should be removed once we have a dedicated batcher_lambda image
+  // This should be removed once we have a dedicated lambda image
   entrypoint = [
     "/opt/docker/bin/main"
   ]
