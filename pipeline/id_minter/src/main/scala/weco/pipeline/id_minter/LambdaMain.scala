@@ -15,7 +15,7 @@ import weco.pipeline.id_minter.config.models.{
 import weco.pipeline.id_minter.database.RDSIdentifierGenerator
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
-class LambdaMain
+object LambdaMain
     extends IdMinterSqsLambda[IdMinterConfig]
     with IdMinterConfigurable
     with Logging {
