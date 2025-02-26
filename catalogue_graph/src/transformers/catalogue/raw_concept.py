@@ -7,7 +7,9 @@ from .id_label_checker import IdLabelChecker
 
 
 class RawCatalogueConcept:
-    def __init__(self, raw_concept: dict, id_label_checker: IdLabelChecker | None = None):
+    def __init__(
+        self, raw_concept: dict, id_label_checker: IdLabelChecker | None = None
+    ):
         self.raw_concept = self._extract_concept_node(raw_concept)
         self.id_label_checker = id_label_checker
 
@@ -98,6 +100,8 @@ class RawCatalogueConcept:
 
     @property
     def label_derived_source_concept_ids(self) -> list[str]:
+        assert self.id_label_checker is not None
+        
         label_derived_ids = self.id_label_checker.inverse.get(self.label.lower(), [])
         assert isinstance(label_derived_ids, list)
         return label_derived_ids
@@ -105,29 +109,26 @@ class RawCatalogueConcept:
     @property
     def has_valid_source_concept(self) -> bool:
         """Checks if the source concept ID format matches the specified source."""
-        if isinstance(self.source_concept_id, str):
-            if (
-                (self.source == "nlm-mesh")
-                and self.source_concept_id.startswith("D")
-                and (
-                    any(
-                        [
-                            source_label in self.label.lower()
-                            for source_label in self.id_label_checker.get(
-                                self.source_concept_id, []
-                            )
-                        ]
-                    )
-                )
-            ):
-                return True
+        if not isinstance(self.source_concept_id, str):
+            return False
 
-            if (self.source == "lc-subjects") and self.source_concept_id.startswith(
-                "sh"
-            ):
-                return True
+        assert self.id_label_checker is not None        
+        
+        # For MeSH, we not only require that the source identifier has a corresponding node in the graph, 
+        # but also that the label of the node matches the label of the catalogue concept
+        if self.source == "nlm-mesh" and self.source_concept_id.startswith("D"):
+            source_labels = self.id_label_checker.get(self.source_concept_id, [])
+            normalised_label = self.label.lower()
 
-            if (self.source == "lc-names") and self.source_concept_id.startswith("n"):
-                return True
+            return any(
+                source_label in normalised_label for source_label in source_labels
+            )
+        
+        # For LoC, we only require that the referenced source identifier exists in the graph.
+        if self.source == "lc-subjects" and self.source_concept_id.startswith("sh"):
+            return self.source_concept_id in self.id_label_checker
+
+        if (self.source == "lc-names") and self.source_concept_id.startswith("n"):
+            return self.source_concept_id in self.id_label_checker
 
         return False

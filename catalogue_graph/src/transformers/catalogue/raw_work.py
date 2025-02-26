@@ -27,7 +27,9 @@ class RawCatalogueWork:
 
     @property
     def alternative_labels(self) -> list[str]:
-        return self.raw_work["alternativeTitles"]
+        alternative_titles = self.raw_work["alternativeTitles"]
+        assert isinstance(alternative_titles, list)
+        return alternative_titles
     
     @property
     def concept_ids(self) -> list[str]:
