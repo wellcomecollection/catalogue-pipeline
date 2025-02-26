@@ -119,6 +119,8 @@ module "pipeline_indices" {
   es_works_denormalised_index = local.es_works_denormalised_index
   es_works_index              = local.es_works_index
 
+  es_concepts_index           = local.es_concepts_index
+
   es_images_initial_index   = local.es_images_initial_index
   es_images_augmented_index = local.es_images_augmented_index
   es_images_index           = local.es_images_index
