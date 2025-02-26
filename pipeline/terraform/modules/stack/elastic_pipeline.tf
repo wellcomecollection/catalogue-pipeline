@@ -178,12 +178,20 @@ locals {
       read  = [local.indices.images_augmented]
       write = [local.indices.images_indexed]
     }
+    concept_ingestor = {
+      read  = [local.indices.concepts_indexed]
+      write = [local.indices.concepts_indexed]
+    }
     snapshot_generator = {
       read  = [local.indices.works_indexed, local.indices.images_indexed]
       write = []
     }
     catalogue_api = {
       read  = [local.indices.works_indexed, local.indices.images_indexed]
+      write = []
+    }
+    concepts_api = {
+      read  = [local.indices.concepts_indexed]
       write = []
     }
   }
