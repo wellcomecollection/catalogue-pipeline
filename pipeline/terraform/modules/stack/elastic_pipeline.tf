@@ -119,6 +119,8 @@ module "pipeline_indices" {
   es_works_denormalised_index = local.es_works_denormalised_index
   es_works_index              = local.es_works_index
 
+  es_concepts_index = local.es_concepts_index
+
   es_images_initial_index   = local.es_images_initial_index
   es_images_augmented_index = local.es_images_augmented_index
   es_images_index           = local.es_images_index
@@ -176,12 +178,20 @@ locals {
       read  = [local.indices.images_augmented]
       write = [local.indices.images_indexed]
     }
+    concept_ingestor = {
+      read  = [local.indices.concepts_indexed]
+      write = [local.indices.concepts_indexed]
+    }
     snapshot_generator = {
       read  = [local.indices.works_indexed, local.indices.images_indexed]
       write = []
     }
     catalogue_api = {
       read  = [local.indices.works_indexed, local.indices.images_indexed]
+      write = []
+    }
+    concepts_api = {
+      read  = [local.indices.concepts_indexed]
       write = []
     }
   }

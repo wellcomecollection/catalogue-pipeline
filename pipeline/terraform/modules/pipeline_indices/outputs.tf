@@ -8,6 +8,7 @@ output "indices" {
     works_identified = module.works_identified_index
     works_merged     = module.works_merged_index
     works_indexed    = module.works_indexed_index
+    concepts_indexed = module.concepts_indexed_index
   }
 }
 
@@ -21,5 +22,6 @@ output "index_names" {
     works_identified = module.works_identified_index.name
     works_merged     = module.works_merged_index.name
     works_indexed    = module.works_indexed_index.name
+    concepts_indexed = module.concepts_indexed_index.name
   }
 }
