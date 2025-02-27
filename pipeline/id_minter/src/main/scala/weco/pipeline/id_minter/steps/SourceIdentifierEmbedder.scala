@@ -11,7 +11,7 @@ import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
-object SourceIdentifierEmbedder extends Logging {
+object SourceIdentifierEmbedder extends Logging with ConceptsSourceIdentifierAdjuster {
 
   /** Find all the source identifiers within this JSON.
     *
@@ -124,7 +124,7 @@ object SourceIdentifierEmbedder extends Logging {
     sourceIdentifierJson: Json
   ): SourceIdentifier = {
     sourceIdentifierJson.as[SourceIdentifier].toTry match {
-      case Success(sourceIdentifier) => sourceIdentifier
+      case Success(sourceIdentifier) => adjustSourceIdentifier(sourceIdentifier)
       case Failure(exception) =>
         error(
           s"Error parsing JSON as SourceIdentifier: ${sourceIdentifierJson.spaces2}"

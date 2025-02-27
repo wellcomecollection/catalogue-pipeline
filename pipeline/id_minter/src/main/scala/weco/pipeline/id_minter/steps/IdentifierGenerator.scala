@@ -8,17 +8,7 @@ import weco.pipeline.id_minter.utils.Identifiable
 
 import scala.util.{Failure, Success, Try}
 
-trait CanonicalIdentifierGenerator {
-  def retrieveOrGenerateCanonicalIds(
-    sourceIdentifiers: Seq[SourceIdentifier]
-  ): Try[Map[SourceIdentifier, Identifier]]
-}
-
-class IdentifierGenerator(identifiersDao: IdentifiersDao)
-    extends CanonicalIdentifierGenerator
-    with Logging {
-  import IdentifiersDao._
-
+trait ConceptsSourceIdentifierAdjuster {
   // This list should be kept in sync with the one defined in `catalogue_graph/src/models/graph_node.py`
   private val conceptSubTypes = List(
     "Person",
@@ -29,6 +19,29 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao)
     "Genre",
     "Period"
   )
+
+  def adjustSourceIdentifier(identifier: SourceIdentifier): SourceIdentifier = {
+    // When minting ids for concepts, we don't care about ontology types. For example, an 'Agent' with a given
+    // Library of Congress source identifier should have the same id as a 'Person' with the same source identifier.
+    if (conceptSubTypes.contains(identifier.ontologyType))
+      identifier.copy(ontologyType = "Concept")
+    else
+      identifier
+  }
+}
+
+trait CanonicalIdentifierGenerator {
+  def retrieveOrGenerateCanonicalIds(
+    sourceIdentifiers: Seq[SourceIdentifier]
+  ): Try[Map[SourceIdentifier, Identifier]]
+}
+
+class IdentifierGenerator(identifiersDao: IdentifiersDao)
+    extends CanonicalIdentifierGenerator
+      with ConceptsSourceIdentifierAdjuster
+    with Logging {
+  import IdentifiersDao._
+
 
   /*
    * Fetch canonicalIds for any existing sourceIdentifiers, generate
@@ -72,13 +85,7 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao)
   ): Try[Map[SourceIdentifier, Identifier]] = {
 
     val adjustedSourceIdentifiers = sourceIdentifiers.map {
-      identifier =>
-        // When minting ids for concepts, we don't care about ontology types. For example, an 'Agent' with a given
-        // Library of Congress source identifier should have the same id as a 'Person' with the same source identifier.
-        if (conceptSubTypes.contains(identifier.ontologyType))
-          identifier.copy(ontologyType = "Concept")
-        else
-          identifier
+      identifier => adjustSourceIdentifier(identifier)
     }
 
     identifiersDao
