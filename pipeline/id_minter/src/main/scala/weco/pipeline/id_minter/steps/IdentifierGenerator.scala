@@ -19,6 +19,17 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao)
     with Logging {
   import IdentifiersDao._
 
+  // This list should be kept in sync with the one defined in `catalogue_graph/src/models/graph_node.py`
+  private val conceptSubTypes = List(
+    "Person",
+    "Organisation",
+    "Place",
+    "Agent",
+    "Meeting",
+    "Genre",
+    "Period"
+  )
+
   /*
    * Fetch canonicalIds for any existing sourceIdentifiers, generate
    * canonicalIds for any new ones and save them.  Retrying if
@@ -58,9 +69,20 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao)
    */
   private def retrieveOrGenerateCanonicalIdsOnce(
     sourceIdentifiers: Seq[SourceIdentifier]
-  ): Try[Map[SourceIdentifier, Identifier]] =
+  ): Try[Map[SourceIdentifier, Identifier]] = {
+
+    val adjustedSourceIdentifiers = sourceIdentifiers.map {
+      identifier =>
+        // When minting ids for concepts, we don't care about ontology types. For example, an 'Agent' with a given
+        // Library of Congress source identifier should have the same id as a 'Person' with the same source identifier.
+        if (conceptSubTypes.contains(identifier.ontologyType))
+          identifier.copy(ontologyType = "Concept")
+        else
+          identifier
+    }
+
     identifiersDao
-      .lookupIds(sourceIdentifiers)
+      .lookupIds(adjustedSourceIdentifiers)
       .flatMap {
         case LookupResult(existingIdentifiersMap, unmintedIdentifiers) =>
           generateAndSaveCanonicalIds(unmintedIdentifiers).map {
@@ -70,6 +92,7 @@ class IdentifierGenerator(identifiersDao: IdentifiersDao)
               existingIdentifiersMap ++ newIdentifiersMap
           }
       }
+  }
 
   private def generateAndSaveCanonicalIds(
     unmintedIdentifiers: List[SourceIdentifier]

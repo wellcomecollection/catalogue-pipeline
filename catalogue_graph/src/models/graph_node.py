@@ -39,6 +39,8 @@ class SourceName(SourceConcept):
 
 
 # Catalogue concepts have a specific type and source
+# This list should be kept in sync with the one defined in
+# `pipeline/id_minter/src/main/scala/weco/pipeline/id_minter/steps/IdentifierGenerator.scala`
 ConceptType = Literal[
     "Person",
     "Concept",
