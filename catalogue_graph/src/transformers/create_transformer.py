@@ -31,7 +31,7 @@ TransformerType = Literal[
     "wikidata_linked_mesh_concepts",
     "wikidata_linked_mesh_locations",
     "catalogue_concepts",
-    "catalogue_works"
+    "catalogue_works",
 ]
 
 

@@ -30,16 +30,15 @@ class RawCatalogueWork:
         alternative_titles = self.raw_work["alternativeTitles"]
         assert isinstance(alternative_titles, list)
         return alternative_titles
-    
+
     @property
     def concept_ids(self) -> list[str]:
         concept_ids = []
         for concept_key in CONCEPT_KEYS:
             for concept in self.raw_work.get(concept_key, []):
                 raw_concept = RawCatalogueConcept(concept)
-                
+
                 if raw_concept.is_concept:
                     concept_ids.append(raw_concept.wellcome_id)
-            
-        return concept_ids
 
+        return concept_ids

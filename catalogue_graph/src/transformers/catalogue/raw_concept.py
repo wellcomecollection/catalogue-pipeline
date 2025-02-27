@@ -101,7 +101,7 @@ class RawCatalogueConcept:
     @property
     def label_derived_source_concept_ids(self) -> list[str]:
         assert self.id_label_checker is not None
-        
+
         label_derived_ids = self.id_label_checker.inverse.get(self.label.lower(), [])
         assert isinstance(label_derived_ids, list)
         return label_derived_ids
@@ -112,9 +112,9 @@ class RawCatalogueConcept:
         if not isinstance(self.source_concept_id, str):
             return False
 
-        assert self.id_label_checker is not None        
-        
-        # For MeSH, we not only require that the source identifier has a corresponding node in the graph, 
+        assert self.id_label_checker is not None
+
+        # For MeSH, we not only require that the source identifier has a corresponding node in the graph,
         # but also that the label of the node matches the label of the catalogue concept
         if self.source == "nlm-mesh" and self.source_concept_id.startswith("D"):
             source_labels = self.id_label_checker.get(self.source_concept_id, [])
@@ -123,7 +123,7 @@ class RawCatalogueConcept:
             return any(
                 source_label in normalised_label for source_label in source_labels
             )
-        
+
         # For LoC, we only require that the referenced source identifier exists in the graph.
         if self.source == "lc-subjects" and self.source_concept_id.startswith("sh"):
             return self.source_concept_id in self.id_label_checker
