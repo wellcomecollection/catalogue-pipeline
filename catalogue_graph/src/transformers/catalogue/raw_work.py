@@ -1,7 +1,15 @@
+from typing import TypedDict
+
 from models.graph_node import WorkType
 from sources.catalogue.concepts_source import CONCEPT_KEYS
 
 from .raw_concept import RawCatalogueConcept
+
+
+class WorkConcept(TypedDict):
+    id: str
+    referenced_in: str
+
 
 
 class RawCatalogueWork:
@@ -32,13 +40,13 @@ class RawCatalogueWork:
         return alternative_titles
 
     @property
-    def concept_ids(self) -> list[str]:
-        concept_ids = []
+    def concepts(self) -> list[WorkConcept]:
+        work_concepts: list[WorkConcept] = []
         for concept_key in CONCEPT_KEYS:
             for concept in self.raw_work.get(concept_key, []):
                 raw_concept = RawCatalogueConcept(concept)
 
                 if raw_concept.is_concept:
-                    concept_ids.append(raw_concept.wellcome_id)
-
-        return concept_ids
+                    work_concepts.append({'id': raw_concept.wellcome_id, 'referenced_in': concept_key})
+            
+        return work_concepts

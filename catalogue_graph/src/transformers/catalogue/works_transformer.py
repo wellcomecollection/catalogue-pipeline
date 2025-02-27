@@ -3,6 +3,7 @@ from collections.abc import Generator
 from models.graph_edge import WorkHasConcept
 from models.graph_node import Work
 from sources.gzip_source import GZipSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -25,8 +26,9 @@ class CatalogueWorksTransformer(BaseTransformer):
     def extract_edges(self, raw_node: dict) -> Generator[WorkHasConcept]:
         raw_work = RawCatalogueWork(raw_node)
 
-        for concept_id in raw_work.concept_ids:
+        for concept in raw_work.concepts:
             yield WorkHasConcept(
                 from_id=raw_work.wellcome_id,
-                to_id=concept_id,
+                to_id=concept["id"],
+                attributes={"referenced_in": concept["referenced_in"]},
             )
