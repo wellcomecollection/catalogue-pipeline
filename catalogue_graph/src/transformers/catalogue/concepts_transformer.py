@@ -3,6 +3,7 @@ from collections.abc import Generator
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .id_label_checker import IdLabelChecker
@@ -50,7 +51,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
             # Generate edges via label
             for source_concept_id in raw_concept.label_derived_source_concept_ids:
                 attributes = ConceptHasSourceConceptAttributes(
-                    {"qualifier": None, "matched_by": "label"}
+                    qualifier=None, matched_by="label"
                 )
                 yield ConceptHasSourceConcept(
                     from_id=raw_concept.wellcome_id,
@@ -61,10 +62,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
         if raw_concept.has_valid_source_concept:
             # Generate edges via ID
             attributes = ConceptHasSourceConceptAttributes(
-                {
-                    "qualifier": raw_concept.mesh_qualifier,
-                    "matched_by": "identifier",
-                }
+                qualifier=raw_concept.mesh_qualifier, matched_by="identifier"
             )
             yield ConceptHasSourceConcept(
                 from_id=raw_concept.wellcome_id,

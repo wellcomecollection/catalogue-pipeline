@@ -1,11 +1,9 @@
-from typing import TypedDict
 
 from pydantic import BaseModel
-
 from utils.types import WorkConceptKey
 
 
-class EdgeAttributes(TypedDict):
+class EdgeAttributes(BaseModel):
     pass
 
 
@@ -39,7 +37,6 @@ def get_all_edge_attributes() -> set[str]:
     for attribute_class in attribute_classes:
         for annotation in attribute_class.__annotations__:
             attributes.add(annotation)
-
     return attributes
 
 
@@ -50,7 +47,7 @@ class BaseEdge(BaseModel):
     to_id: str
     relationship: str
     directed: bool
-    attributes: EdgeAttributes = {}
+    attributes: EdgeAttributes = EdgeAttributes()
 
 
 class SourceConceptNarrowerThan(BaseEdge):

@@ -1,8 +1,7 @@
-from test_mocks import MockRequest
-from test_utils import load_fixture
-
 from models.graph_edge import SourceConceptHasParent, SourceConceptRelatedTo
 from models.graph_node import SourceConcept
+from test_mocks import MockRequest
+from test_utils import load_fixture
 from transformers.mesh.concepts_transformer import MeSHConceptsTransformer
 
 
@@ -48,8 +47,7 @@ def test_mesh_concepts_transformer() -> None:
         from_id="D004987",
         to_id="D009930",
         relationship="HAS_PARENT",
-        directed=True,
-        attributes={},
+        directed=True
     )
 
     assert edges[-1] == SourceConceptRelatedTo(
@@ -58,6 +56,5 @@ def test_mesh_concepts_transformer() -> None:
         from_id="D000009",
         to_id="D034861",
         relationship="RELATED_TO",
-        directed=False,
-        attributes={},
+        directed=False
     )
