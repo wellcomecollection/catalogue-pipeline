@@ -37,8 +37,9 @@ def format_message(source_id):
 
 
 payload = {
-    "Records": [format_message(source_id) for source_id in sys.stdin.readlines()]
+    "Records": [format_message(source_id.strip()) for source_id in sys.stdin.readlines()]
 }
+
 requests.post(
     "http://localhost:9000/2015-03-31/functions/function/invocations",
     data=json.dumps(payload),
