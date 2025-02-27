@@ -1,8 +1,9 @@
+from test_mocks import MockRequest
+from test_utils import add_mock_transformer_outputs, load_fixture
+
 from config import CATALOGUE_SNAPSHOT_URL
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
-from test_mocks import MockRequest
-from test_utils import add_mock_transformer_outputs, load_fixture
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
@@ -59,7 +60,9 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="sh85004839",
         relationship="HAS_SOURCE_CONCEPT",
         directed=True,
-        attributes=ConceptHasSourceConceptAttributes({"qualifier": None, "matched_by": "identifier"}),
+        attributes=ConceptHasSourceConceptAttributes(
+            {"qualifier": None, "matched_by": "identifier"}
+        ),
     )
     assert edges[2] == ConceptHasSourceConcept(
         from_type="Concept",
@@ -68,7 +71,9 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="sh85045046",
         relationship="HAS_SOURCE_CONCEPT",
         directed=True,
-        attributes=ConceptHasSourceConceptAttributes({"qualifier": None, "matched_by": "label"}),
+        attributes=ConceptHasSourceConceptAttributes(
+            {"qualifier": None, "matched_by": "label"}
+        ),
     )
     assert edges[3] == ConceptHasSourceConcept(
         from_type="Concept",
@@ -77,7 +82,9 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="sh00005643",
         relationship="HAS_SOURCE_CONCEPT",
         directed=True,
-        attributes=ConceptHasSourceConceptAttributes({"qualifier": None, "matched_by": "label"}),
+        attributes=ConceptHasSourceConceptAttributes(
+            {"qualifier": None, "matched_by": "label"}
+        ),
     )
     assert edges[5] == ConceptHasSourceConcept(
         from_type="Concept",
@@ -86,7 +93,9 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="D000715",
         relationship="HAS_SOURCE_CONCEPT",
         directed=True,
-        attributes=ConceptHasSourceConceptAttributes({"qualifier": None, "matched_by": "identifier"}),
+        attributes=ConceptHasSourceConceptAttributes(
+            {"qualifier": None, "matched_by": "identifier"}
+        ),
     )
     assert edges[6] == ConceptHasSourceConcept(
         from_type="Concept",
@@ -95,5 +104,7 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="D000715",
         relationship="HAS_SOURCE_CONCEPT",
         directed=True,
-        attributes=ConceptHasSourceConceptAttributes({"qualifier": "Q000266", "matched_by": "identifier"}),
+        attributes=ConceptHasSourceConceptAttributes(
+            {"qualifier": "Q000266", "matched_by": "identifier"}
+        ),
     )
