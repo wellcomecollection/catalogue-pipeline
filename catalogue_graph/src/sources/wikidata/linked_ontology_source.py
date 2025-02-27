@@ -15,6 +15,14 @@ SPARQL_ITEMS_CHUNK_SIZE = 400
 
 WIKIDATA_ID_PREFIX = "http://www.wikidata.org/entity/"
 
+PEOPLE_RELATIONSHIP_TYPES: list[WikidataEdgeQueryType] = [
+    "has_father",
+    "has_mother",
+    "has_sibling",
+    "has_spouse",
+    "has_child",
+]
+
 
 def _parallelise_sparql_requests(
     items: Iterator, run_sparql_query: Callable[[list], list]
@@ -138,8 +146,8 @@ class WikidataLinkedOntologySource(BaseSource):
             yield from self._stream_all_edges_by_type("same_as_mesh")
 
     def _stream_all_has_parent_edges(self) -> Generator[dict]:
-        yield from self._stream_all_edges_by_type("parent_instance_of")
-        yield from self._stream_all_edges_by_type("parent_subclass_of")
+        yield from self._stream_all_edges_by_type("instance_of")
+        yield from self._stream_all_edges_by_type("subclass_of")
 
     def _stream_filtered_wikidata_ids(self) -> Generator[str]:
         """Streams all wikidata ids to be processed as nodes given the selected `node_type`."""
@@ -193,17 +201,31 @@ class WikidataLinkedOntologySource(BaseSource):
             # Only include an edge if its `from_id` was already streamed in a SAME_AS edge, indicating that
             # the child item belongs under the selected `node_type`.
             if edge["from_id"] in streamed_wikidata_ids:
+                streamed_wikidata_ids.add(edge["to_id"])
                 yield {**edge, "type": "HAS_PARENT"}
 
-        # HAS_FIELD_OF_WORK edges only apply to people (SourceName) nodes
+        # The following edges only apply to people (SourceName) nodes
         if self.node_type == "names":
             print("Streaming HAS_FIELD_OF_WORK edges...")
-            for edge in self._stream_all_edges_by_type("field_of_work"):
+            for edge in self._stream_all_edges_by_type("has_field_of_work"):
                 # Only include an edge if its `to_id` has a corresponding concept node in the graph
                 if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
                     edge["to_id"], "wikidata"
                 ):
                     yield {**edge, "type": "HAS_FIELD_OF_WORK"}
+
+            print("Streaming RELATED_TO edges...")
+            for relationship_type in PEOPLE_RELATIONSHIP_TYPES:
+                for edge in self._stream_all_edges_by_type(relationship_type):
+                    if (
+                        edge["from_id"] in streamed_wikidata_ids
+                        and edge["to_id"] in streamed_wikidata_ids
+                    ):
+                        yield {
+                            **edge,
+                            "type": "RELATED_TO",
+                            "subtype": relationship_type,
+                        }
 
     def _stream_raw_nodes(self) -> Generator[dict]:
         """
