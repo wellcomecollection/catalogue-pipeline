@@ -11,7 +11,6 @@ class WorkConcept(TypedDict):
     referenced_in: str
 
 
-
 class RawCatalogueWork:
     def __init__(self, raw_work: dict):
         self.raw_work = raw_work
@@ -47,6 +46,8 @@ class RawCatalogueWork:
                 raw_concept = RawCatalogueConcept(concept)
 
                 if raw_concept.is_concept:
-                    work_concepts.append({'id': raw_concept.wellcome_id, 'referenced_in': concept_key})
-            
+                    work_concepts.append(
+                        {"id": raw_concept.wellcome_id, "referenced_in": concept_key}
+                    )
+
         return work_concepts
