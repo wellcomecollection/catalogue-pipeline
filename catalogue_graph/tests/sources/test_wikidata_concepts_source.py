@@ -16,8 +16,13 @@ def _add_mock_wikidata_requests(
     query_types = [
         "all_ids",
         "linked_ids",
-        "parents_instance_of",
-        "parents_subclass_of",
+        "instance_of",
+        "subclass_of",
+        "has_father",
+        "has_mother",
+        "has_sibling",
+        "has_spouse",
+        "has_child",
     ]
     if entity_type == "nodes":
         query_types.append(f"{node_type}/items")
