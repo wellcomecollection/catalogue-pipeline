@@ -31,7 +31,7 @@ class CypherQueryConverter(CypherBaseConverter):
     def _edge_to_cypher_map(self, model: BaseEdge) -> str:
         properties = []
 
-        for key, raw_value in model.attributes.items():
+        for key, raw_value in model.attributes.dict().items():
             value = self._raw_value_to_cypher_value(raw_value)
             properties.append(f"{key}: {value}")
 
