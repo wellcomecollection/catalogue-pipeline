@@ -31,7 +31,7 @@ def get_all_edge_attributes() -> set[str]:
         SourceNameRelatedToAttributes,
         SourceConceptSameAsAttributes,
         ConceptHasSourceConceptAttributes,
-        WorkHasConceptAttributes
+        WorkHasConceptAttributes,
     ]
 
     attributes = set()

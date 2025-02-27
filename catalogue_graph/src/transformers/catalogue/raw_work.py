@@ -3,7 +3,7 @@ from typing import TypedDict
 from models.graph_node import WorkType
 from sources.catalogue.concepts_source import CONCEPT_KEYS
 from utils.types import WorkConceptKey
- 
+
 from .raw_concept import RawCatalogueConcept
 
 
