@@ -66,7 +66,5 @@ WorkType = Literal["Work", "Series", "Section", "Collection"]
 
 
 class Work(BaseNode):
-    # description: str
-    # physical_description: str
     type: WorkType
     alternative_labels: list[str]

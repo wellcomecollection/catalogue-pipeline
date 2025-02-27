@@ -1,6 +1,7 @@
 from typing import TypedDict
 
 from pydantic import BaseModel
+from utils.types import WorkConceptKey
 
 
 class EdgeAttributes(TypedDict):
@@ -20,12 +21,17 @@ class ConceptHasSourceConceptAttributes(EdgeAttributes):
     matched_by: str
 
 
+class WorkHasConceptAttributes(EdgeAttributes):
+    referenced_in: WorkConceptKey
+
+
 def get_all_edge_attributes() -> set[str]:
     """Returns a set of all possible edge attributes from all edge types."""
     attribute_classes: list[type[EdgeAttributes]] = [
         SourceNameRelatedToAttributes,
         SourceConceptSameAsAttributes,
         ConceptHasSourceConceptAttributes,
+        WorkHasConceptAttributes
     ]
 
     attributes = set()
