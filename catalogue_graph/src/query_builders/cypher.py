@@ -31,7 +31,7 @@ def construct_upsert_edges_query(edges: list[BaseEdge]) -> str:
     from_type = edges[0].from_type
     to_type = edges[0].to_type
     relationship = edges[0].relationship
-    attributes = edges[0].attributes or dict()
+    attributes = edges[0].attributes.dict()
 
     field_set = [f"n.{f} = data.{f}" for f in attributes]
     field_set_statement = ", ".join(field_set)

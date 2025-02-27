@@ -2,6 +2,10 @@ from collections.abc import Generator
 from typing import Any
 
 import pytest
+from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
+from test_utils import add_mock_transformer_outputs, load_fixture
+from typing_extensions import get_args
+
 from config import (
     CATALOGUE_SNAPSHOT_URL,
     LOC_NAMES_URL,
@@ -10,11 +14,8 @@ from config import (
     WIKIDATA_SPARQL_URL,
 )
 from extractor import LambdaEvent, lambda_handler
-from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
-from test_utils import add_mock_transformer_outputs, load_fixture
 from transformers.base_transformer import EntityType, StreamDestination
 from transformers.create_transformer import TransformerType
-from typing_extensions import get_args
 
 transformer_types = get_args(TransformerType)
 entity_types = get_args(EntityType)
