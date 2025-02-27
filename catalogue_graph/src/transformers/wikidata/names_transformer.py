@@ -1,3 +1,11 @@
+from collections.abc import Generator
+
+from models.graph_edge import (
+    BaseEdge,
+    SourceConceptHasFieldOfWork,
+    SourceNameRelatedTo,
+    SourceNameRelatedToAttributes,
+)
 from models.graph_node import SourceName
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from transformers.base_transformer import EntityType
@@ -26,3 +34,21 @@ class WikidataNamesTransformer(WikidataConceptsTransformer):
             date_of_death=raw_concept.date_of_death,
             place_of_birth=raw_concept.place_of_birth,
         )
+
+    def extract_edges(self, raw_edge: dict) -> Generator[BaseEdge]:
+        if raw_edge["type"] == "HAS_FIELD_OF_WORK":
+            yield SourceConceptHasFieldOfWork(
+                from_id=raw_edge["from_id"],
+                to_id=raw_edge["to_id"],
+            )
+        elif raw_edge["type"] == "RELATED_TO":
+            attributes = SourceNameRelatedToAttributes(
+                relationship_type=raw_edge["subtype"]
+            )
+            yield SourceNameRelatedTo(
+                from_id=raw_edge["from_id"],
+                to_id=raw_edge["to_id"],
+                attributes=attributes,
+            )
+        else:
+            yield from super().extract_edges(raw_edge)

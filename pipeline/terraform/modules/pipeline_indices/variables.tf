@@ -14,6 +14,9 @@ variable "es_works_denormalised_index" {
 variable "es_works_index" {
   type = string
 }
+variable "es_concepts_index" {
+  type = string
+}
 variable "es_images_initial_index" {
   type = string
 }
@@ -35,6 +38,10 @@ variable "index_config" {
       identified = string
       merged     = string
       indexed    = string
+    })
+
+    concepts = object({
+      indexed = string
     })
 
     images = object({

@@ -1,4 +1,39 @@
+from typing import TypedDict
+
 from pydantic import BaseModel
+
+
+class EdgeAttributes(TypedDict):
+    pass
+
+
+class SourceConceptSameAsAttributes(EdgeAttributes):
+    source: str
+
+
+class SourceNameRelatedToAttributes(EdgeAttributes):
+    relationship_type: str
+
+
+class ConceptHasSourceConceptAttributes(EdgeAttributes):
+    qualifier: str | None
+    matched_by: str
+
+
+def get_all_edge_attributes() -> set[str]:
+    """Returns a set of all possible edge attributes from all edge types."""
+    attribute_classes: list[type[EdgeAttributes]] = [
+        SourceNameRelatedToAttributes,
+        SourceConceptSameAsAttributes,
+        ConceptHasSourceConceptAttributes,
+    ]
+
+    attributes = set()
+    for attribute_class in attribute_classes:
+        for annotation in attribute_class.__annotations__:
+            attributes.add(annotation)
+
+    return attributes
 
 
 class BaseEdge(BaseModel):
@@ -8,7 +43,7 @@ class BaseEdge(BaseModel):
     to_id: str
     relationship: str
     directed: bool
-    attributes: dict = {}
+    attributes: EdgeAttributes = {}
 
 
 class SourceConceptNarrowerThan(BaseEdge):
@@ -30,6 +65,13 @@ class SourceConceptRelatedTo(BaseEdge):
     to_type: str = "SourceConcept"
     relationship: str = "RELATED_TO"
     directed: bool = False
+
+
+class SourceNameRelatedTo(BaseEdge):
+    from_type: str = "SourceName"
+    to_type: str = "SourceName"
+    relationship: str = "RELATED_TO"
+    directed: bool = True
 
 
 class SourceConceptHasParent(BaseEdge):
