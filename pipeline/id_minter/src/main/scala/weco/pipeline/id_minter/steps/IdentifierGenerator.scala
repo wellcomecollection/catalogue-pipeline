@@ -38,10 +38,9 @@ trait CanonicalIdentifierGenerator {
 
 class IdentifierGenerator(identifiersDao: IdentifiersDao)
     extends CanonicalIdentifierGenerator
-      with ConceptsSourceIdentifierAdjuster
+    with ConceptsSourceIdentifierAdjuster
     with Logging {
   import IdentifiersDao._
-
 
   /*
    * Fetch canonicalIds for any existing sourceIdentifiers, generate

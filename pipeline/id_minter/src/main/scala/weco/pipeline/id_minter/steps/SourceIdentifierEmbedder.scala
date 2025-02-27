@@ -11,7 +11,9 @@ import weco.catalogue.internal_model.identifiers.{CanonicalId, SourceIdentifier}
 import scala.annotation.tailrec
 import scala.util.{Failure, Success, Try}
 
-object SourceIdentifierEmbedder extends Logging with ConceptsSourceIdentifierAdjuster {
+object SourceIdentifierEmbedder
+    extends Logging
+    with ConceptsSourceIdentifierAdjuster {
 
   /** Find all the source identifiers within this JSON.
     *
