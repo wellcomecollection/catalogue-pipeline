@@ -1,9 +1,8 @@
 from collections.abc import Generator
 
-from utils.types import WorkConceptKey
-
 from sources.base_source import BaseSource
 from sources.gzip_source import GZipSource
+from utils.types import WorkConceptKey
 
 CONCEPT_KEYS: list[WorkConceptKey] = ["subjects", "genres", "contributors"]
 
