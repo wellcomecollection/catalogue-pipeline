@@ -15,7 +15,7 @@ module "ingestor_indexer_lambda" {
   timeout     = 300
 
   vpc_config = {
-    subnet_ids         = local.private_subnets
+    subnet_ids = local.private_subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.ec_privatelink_security_group_id
@@ -24,8 +24,8 @@ module "ingestor_indexer_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
-      INGESTOR_S3_PREFIX = "ingestor"
+      INGESTOR_S3_BUCKET     = aws_s3_bucket.catalogue_graph_bucket.bucket
+      INGESTOR_S3_PREFIX     = "ingestor"
       INGESTOR_PIPELINE_DATE = local.pipeline_date
     }
   }
@@ -63,7 +63,7 @@ module "ingestor_loader_lambda" {
   timeout     = 300
 
   vpc_config = {
-    subnet_ids         = local.private_subnets
+    subnet_ids = local.private_subnets
     security_group_ids = [
       aws_security_group.egress.id,
       aws_security_group.neptune_service_security_group.id
@@ -110,7 +110,7 @@ module "ingestor_trigger_lambda" {
   timeout     = 300
 
   vpc_config = {
-    subnet_ids         = local.private_subnets
+    subnet_ids = local.private_subnets
     security_group_ids = [
       aws_security_group.egress.id,
       aws_security_group.neptune_service_security_group.id

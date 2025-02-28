@@ -27,14 +27,14 @@ resource "aws_security_group" "neptune_service_security_group" {
 
 # Self-referencing ingress rule security group for the Neptune cluster
 resource "aws_vpc_security_group_ingress_rule" "neptune_service_ingress" {
-  security_group_id = aws_security_group.neptune_security_group.id
+  security_group_id            = aws_security_group.neptune_security_group.id
   referenced_security_group_id = aws_security_group.neptune_service_security_group.id
-  ip_protocol       = "-1"
+  ip_protocol                  = "-1"
 }
 
 # Self-referencing egress rule security group for the Neptune cluster
 resource "aws_vpc_security_group_egress_rule" "neptune_service_egress" {
-  security_group_id = aws_security_group.neptune_security_group.id
+  security_group_id            = aws_security_group.neptune_security_group.id
   referenced_security_group_id = aws_security_group.neptune_service_security_group.id
-  ip_protocol       = "-1"
+  ip_protocol                  = "-1"
 }
