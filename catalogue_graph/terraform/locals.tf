@@ -16,7 +16,7 @@ locals {
   catalogue_graph_nlb_url = "catalogue-graph.wellcomecollection.org"
 
   # This is a hint, the ingestors might need to be in the pipeline stack!
-  pipeline_date ="2024-11-18"
+  pipeline_date = "2024-11-18"
 }
 
 data "aws_vpc" "vpc" {

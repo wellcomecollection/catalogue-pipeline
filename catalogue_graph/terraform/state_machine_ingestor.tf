@@ -4,8 +4,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
 
   definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment = "Ingest catalogue concept data into the pipeline cluster."
-    StartAt = "Trigger ingest"
+    Comment       = "Ingest catalogue concept data into the pipeline cluster."
+    StartAt       = "Trigger ingest"
     States = {
       "Trigger ingest" : {
         "Type" : "Task",
@@ -18,82 +18,82 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         "Next" : "Map load to s3"
       },
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
-      "Map load to s3": {
-        "Type": "Map",
-        "ItemProcessor": {
-          "ProcessorConfig": {
-            "Mode": "DISTRIBUTED",
-            "ExecutionType": "STANDARD"
+      "Map load to s3" : {
+        "Type" : "Map",
+        "ItemProcessor" : {
+          "ProcessorConfig" : {
+            "Mode" : "DISTRIBUTED",
+            "ExecutionType" : "STANDARD"
           },
-          "StartAt": "Load shard to s3",
-          "States": {
-            "Load shard to s3": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::lambda:invoke",
-              "Output": "{% $states.result.Payload %}",
-              "Arguments": {
-                "FunctionName": module.ingestor_loader_lambda.lambda.arn,
-                "Payload": "{% $states.input %}"
+          "StartAt" : "Load shard to s3",
+          "States" : {
+            "Load shard to s3" : {
+              "Type" : "Task",
+              "Resource" : "arn:aws:states:::lambda:invoke",
+              "Output" : "{% $states.result.Payload %}",
+              "Arguments" : {
+                "FunctionName" : module.ingestor_loader_lambda.lambda.arn,
+                "Payload" : "{% $states.input %}"
               },
-              "Retry": [
+              "Retry" : [
                 {
-                  "ErrorEquals": [
+                  "ErrorEquals" : [
                     "Lambda.ServiceException",
                     "Lambda.AWSLambdaException",
                     "Lambda.SdkClientException",
                     "Lambda.TooManyRequestsException"
                   ],
-                  "IntervalSeconds": 1,
-                  "MaxAttempts": 3,
-                  "BackoffRate": 2,
-                  "JitterStrategy": "FULL"
+                  "IntervalSeconds" : 1,
+                  "MaxAttempts" : 3,
+                  "BackoffRate" : 2,
+                  "JitterStrategy" : "FULL"
                 }
               ],
-              "End": true
+              "End" : true
             }
           }
         },
-        "Next": "Map index to ES"
-        "MaxConcurrency": 50
+        "Next" : "Map index to ES"
+        "MaxConcurrency" : 50
       },
-      "Map index to ES": {
-        "Type": "Map",
-        "ItemProcessor": {
-          "ProcessorConfig": {
-            "Mode": "DISTRIBUTED",
-            "ExecutionType": "STANDARD"
+      "Map index to ES" : {
+        "Type" : "Map",
+        "ItemProcessor" : {
+          "ProcessorConfig" : {
+            "Mode" : "DISTRIBUTED",
+            "ExecutionType" : "STANDARD"
           },
-          "StartAt": "Index shard to ES",
-          "States": {
-            "Index shard to ES": {
-              "Type": "Task",
-              "Resource": "arn:aws:states:::lambda:invoke",
-              "Output": "{% $states.result.Payload %}",
-              "Arguments": {
-                "FunctionName": module.ingestor_indexer_lambda.lambda.arn,
-                "Payload": "{% $states.input %}"
+          "StartAt" : "Index shard to ES",
+          "States" : {
+            "Index shard to ES" : {
+              "Type" : "Task",
+              "Resource" : "arn:aws:states:::lambda:invoke",
+              "Output" : "{% $states.result.Payload %}",
+              "Arguments" : {
+                "FunctionName" : module.ingestor_indexer_lambda.lambda.arn,
+                "Payload" : "{% $states.input %}"
               },
-              "Retry": [
+              "Retry" : [
                 {
-                  "ErrorEquals": [
+                  "ErrorEquals" : [
                     "Lambda.ServiceException",
                     "Lambda.AWSLambdaException",
                     "Lambda.SdkClientException",
                     "Lambda.TooManyRequestsException"
                   ],
-                  "IntervalSeconds": 300,
+                  "IntervalSeconds" : 300,
                   # Don't try again yet!
-                  "MaxAttempts": 1,
-                  "BackoffRate": 2,
-                  "JitterStrategy": "FULL"
+                  "MaxAttempts" : 1,
+                  "BackoffRate" : 2,
+                  "JitterStrategy" : "FULL"
                 }
               ],
-              "End": true
+              "End" : true
             }
           }
         },
-        "Next": "Success"
-        "MaxConcurrency": 1
+        "Next" : "Success"
+        "MaxConcurrency" : 1
       },
       Success = {
         Type = "Succeed"
