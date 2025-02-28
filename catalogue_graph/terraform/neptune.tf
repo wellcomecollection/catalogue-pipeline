@@ -6,7 +6,10 @@ resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   iam_database_authentication_enabled  = true
   apply_immediately                    = true
   storage_encrypted                    = true
-  vpc_security_group_ids               = [aws_security_group.neptune_security_group.id]
+  vpc_security_group_ids               = [
+    aws_security_group.neptune_security_group.id,
+    aws_security_group.neptune_service_security_group.id
+  ]
   neptune_subnet_group_name            = aws_db_subnet_group.neptune_subnet_group.name
   iam_roles                            = [aws_iam_role.catalogue_graph_cluster.arn]
 

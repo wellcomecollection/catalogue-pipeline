@@ -3,6 +3,8 @@ requests
 pydantic
 backoff
 smart-open
+polars
+elasticsearch
 
 boto3-stubs
 types-requests
