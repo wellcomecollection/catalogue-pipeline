@@ -10,6 +10,7 @@ from config import INGESTOR_ES_INDEX, INGESTOR_PIPELINE_DATE
 
 from polars import DataFrame
 from pydantic import BaseModel
+from typing import Generator
 
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
@@ -20,7 +21,7 @@ class IngestorIndexerLambdaEvent(BaseModel):
     s3_url: str
 
 class IngestorIndexerConfig(BaseModel):
-    pipeline_date: str = INGESTOR_PIPELINE_DATE
+    pipeline_date: str | None = INGESTOR_PIPELINE_DATE
     is_local: bool = False
 
 def extract_data(s3_url: str) -> DataFrame:
@@ -43,7 +44,7 @@ def load_data(concepts: list[IndexableConcept], pipeline_date: str | None, is_lo
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
     es = elasticsearch.get_client(pipeline_date, is_local)
 
-    def generate_data():
+    def generate_data() -> Generator[dict]:
         for concept in concepts:
             yield {
                 '_index': index_name,
