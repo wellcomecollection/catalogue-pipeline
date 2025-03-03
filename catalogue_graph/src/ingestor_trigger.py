@@ -48,7 +48,7 @@ def transform_data(
     print("Transforming record count to shard ranges ...")
 
     if job_id is None:
-        # generate a job_id based on th current time using an iso8601 format like 20210701T1300
+        # generate a job_id based on the current time using an iso8601 format like 20210701T1300
         job_id = datetime.datetime.now().strftime("%Y%m%dT%H%M")
 
     # generate shard ranges based on the record count and shard size
