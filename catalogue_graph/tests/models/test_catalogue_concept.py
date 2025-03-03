@@ -4,10 +4,15 @@ from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifie
 def test_catalogue_concept_from_neptune_result() -> None:
     neptune_result = {
         "source": {"~properties": {"id": "id", "label": "label", "type": "type"}},
-        "targets": [{"~properties": {"id": "id", "source": "source"}}],
-        "~properties": {
-            "alternative_labels": "alternativeLabels||moreAlternativeLabels"
-        },
+        "targets": [
+            {
+                "~properties": {
+                    "id": "id",
+                    "source": "source",
+                    "alternative_labels": "alternativeLabels||moreAlternativeLabels",
+                }
+            }
+        ],
     }
 
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
