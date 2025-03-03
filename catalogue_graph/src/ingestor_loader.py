@@ -1,31 +1,31 @@
 #!/usr/bin/env python
 
-import typing
 import argparse
 import pprint
+import typing
 
 import boto3
 import polars as pl
 import smart_open
 from pydantic import BaseModel
 
-from config import INGESTOR_S3_PREFIX, INGESTOR_S3_BUCKET
-
+from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from ingestor_indexer import IngestorIndexerLambdaEvent
+from models.catalogue_concept import CatalogueConcept
 from utils.aws import get_neptune_client
 
-from models.catalogue_concept import CatalogueConcept
-
-from ingestor_indexer import IngestorIndexerLambdaEvent
 
 class IngestorLoaderLambdaEvent(BaseModel):
     job_id: str
     start_offset: int
     end_index: int
 
+
 class IngestorLoaderConfig(BaseModel):
     loader_s3_bucket: str = INGESTOR_S3_BUCKET
     loader_s3_prefix: str = INGESTOR_S3_PREFIX
     is_local: bool = False
+
 
 def extract_data(start_offset: int, end_index: int, is_local: bool) -> list[dict]:
     print("Extracting data from Neptune ...")
@@ -52,9 +52,11 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> list[dict
 
     return result
 
+
 def transform_data(neptune_data: list[dict]) -> list[CatalogueConcept]:
     print("Transforming data to CatalogueConcept ...")
     return [CatalogueConcept.from_neptune_result(row) for row in neptune_data]
+
 
 def load_data(s3_url: str, data: list[CatalogueConcept]) -> None:
     print(f"Loading data to {s3_url} ...")
@@ -66,19 +68,33 @@ def load_data(s3_url: str, data: list[CatalogueConcept]) -> None:
         df = pl.DataFrame([e.model_dump() for e in data])
         df.write_parquet(f)
 
-def handler(event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig) -> IngestorIndexerLambdaEvent:
+
+def handler(
+    event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
+) -> IngestorIndexerLambdaEvent:
     print(f"Received event: {event} with config {config}")
-    filename = f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}.parquet"
+    filename = (
+        f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}.parquet"
+    )
     s3_object_key = f"{event.job_id}/{filename}"
     s3_url = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
 
-    load_data(s3_url, transform_data(extract_data(event.start_offset, event.end_index, config.is_local)))
+    load_data(
+        s3_url,
+        transform_data(
+            extract_data(event.start_offset, event.end_index, config.is_local)
+        ),
+    )
     print("Data loaded successfully.")
 
     return IngestorIndexerLambdaEvent(s3_url=s3_url)
 
+
 def lambda_handler(event: IngestorLoaderLambdaEvent, context: typing.Any) -> dict:
-    return handler(IngestorLoaderLambdaEvent.model_validate(event), IngestorLoaderConfig()).model_dump()
+    return handler(
+        IngestorLoaderLambdaEvent.model_validate(event), IngestorLoaderConfig()
+    ).model_dump()
+
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
@@ -87,21 +103,21 @@ def local_handler() -> None:
         type=int,
         help="The start index of the records to process.",
         required=False,
-        default=0
+        default=0,
     )
     parser.add_argument(
         "--end-index",
         type=int,
         help="The end index of the records to process.",
         required=False,
-        default=100
+        default=100,
     )
     parser.add_argument(
         "--job-id",
         type=str,
-        help="The job identifier used in the S3 path, will default to \"dev\".",
+        help='The job identifier used in the S3 path, will default to "dev".',
         required=False,
-        default="dev"
+        default="dev",
     )
     args = parser.parse_args()
 
