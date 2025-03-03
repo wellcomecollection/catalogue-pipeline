@@ -1,23 +1,25 @@
 #!/usr/bin/env python
 
-import typing
 import argparse
-import pprint
 import datetime
+import pprint
+import typing
 
 from pydantic import BaseModel
 
-from utils.aws import get_neptune_client
-
 from config import INGESTOR_SHARD_SIZE
 from ingestor_loader import IngestorLoaderLambdaEvent
+from utils.aws import get_neptune_client
+
 
 class IngestorTriggerLambdaEvent(BaseModel):
     job_id: str | None = None
 
+
 class IngestorTriggerConfig(BaseModel):
     shard_size: int = INGESTOR_SHARD_SIZE
     is_local: bool = False
+
 
 def extract_data(is_local: bool) -> int:
     print("Extracting record count from Neptune ...")
@@ -33,13 +35,16 @@ def extract_data(is_local: bool) -> int:
     print(open_cypher_count_query)
 
     count_result = client.run_open_cypher_query(open_cypher_count_query)
-    number_records = int(count_result[0]['count'])
+    number_records = int(count_result[0]["count"])
 
     print(f"Retrieved record count: {number_records}")
 
     return number_records
 
-def transform_data(record_count: int, shard_size: int, job_id: str | None) -> list[IngestorLoaderLambdaEvent]:
+
+def transform_data(
+    record_count: int, shard_size: int, job_id: str | None
+) -> list[IngestorLoaderLambdaEvent]:
     print("Transforming record count to shard ranges ...")
 
     if job_id is None:
@@ -53,9 +58,7 @@ def transform_data(record_count: int, shard_size: int, job_id: str | None) -> li
         end_index = min(start_offset + shard_size, record_count)
         shard_ranges.append(
             IngestorLoaderLambdaEvent(
-                job_id=job_id,
-                start_offset=start_offset,
-                end_index=end_index
+                job_id=job_id, start_offset=start_offset, end_index=end_index
             )
         )
 
@@ -63,17 +66,27 @@ def transform_data(record_count: int, shard_size: int, job_id: str | None) -> li
 
     return shard_ranges
 
-def handler(event: IngestorTriggerLambdaEvent, config: IngestorTriggerConfig) -> list[dict]:
+
+def handler(
+    event: IngestorTriggerLambdaEvent, config: IngestorTriggerConfig
+) -> list[dict]:
     print(f"Received event: {event} with config {config}")
 
-    result = transform_data(extract_data(config.is_local), config.shard_size, event.job_id)
+    result = transform_data(
+        extract_data(config.is_local), config.shard_size, event.job_id
+    )
 
     print("Shard ranges generated successfully.")
     return [e.model_dump() for e in result]
 
 
-def lambda_handler(event: IngestorTriggerLambdaEvent, context: typing.Any) -> list[dict]:
-    return handler(IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig())
+def lambda_handler(
+    event: IngestorTriggerLambdaEvent, context: typing.Any
+) -> list[dict]:
+    return handler(
+        IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
+    )
+
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
