@@ -32,7 +32,8 @@ resource "aws_iam_policy" "state_machine_policy" {
           aws_sfn_state_machine.catalogue_graph_extractor.arn,
           aws_sfn_state_machine.catalogue_graph_extractors.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loader.arn,
-          aws_sfn_state_machine.catalogue_graph_bulk_loaders.arn
+          aws_sfn_state_machine.catalogue_graph_bulk_loaders.arn,
+          aws_sfn_state_machine.catalogue_graph_ingestor.arn
         ]
       },
       {
@@ -40,7 +41,10 @@ resource "aws_iam_policy" "state_machine_policy" {
         Action = ["lambda:InvokeFunction"],
         Resource = [
           module.bulk_loader_lambda.lambda.arn,
-          module.bulk_load_poller_lambda.lambda.arn
+          module.bulk_load_poller_lambda.lambda.arn,
+          module.ingestor_trigger_lambda.lambda.arn,
+          module.ingestor_loader_lambda.lambda.arn,
+          module.ingestor_indexer_lambda.lambda.arn
         ]
       },
       {

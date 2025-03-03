@@ -22,15 +22,6 @@ module "indexer_lambda" {
   #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 }
 
-data "aws_iam_policy_document" "allow_secret_read" {
-  statement {
-    actions = ["secretsmanager:GetSecretValue"]
-    resources = [
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:${local.namespace}/*"
-    ]
-  }
-}
-
 resource "aws_iam_role_policy" "indexer_lambda_read_secrets_policy" {
   role   = module.indexer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_secret_read.json

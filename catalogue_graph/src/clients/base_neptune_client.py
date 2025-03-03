@@ -67,12 +67,12 @@ class BaseNeptuneClient:
         response: dict = raw_response.json()
         return response
 
-    def run_open_cypher_query(self, query: str) -> dict:
+    def run_open_cypher_query(self, query: str) -> list[dict]:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
         payload = {"query": query}
         response = self._make_request("POST", "/openCypher", payload)
-        results: dict = response["results"]
+        results: list[dict] = response["results"]
         return results
 
     def get_graph_summary(self) -> dict:

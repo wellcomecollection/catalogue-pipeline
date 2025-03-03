@@ -2,4 +2,5 @@ coverage
 mypy
 pytest
 pytest-cov
+freezegun
 ruff
