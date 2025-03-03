@@ -24,6 +24,12 @@ graph database (running in Amazon Neptune). It consists of several Lambda functi
 * `indexer`: Consumes openCypher queries from the SNS topic populated by the `extractor` Lambda function and runs them
   against the Neptune cluster. (There is an SQS queue between the SNS topic and the Lambda function and queries are
   consumed via an event source mapping).
+* Elasticsearch "Ingestor" Lambda functions:
+  * `ingestor_trigger`: Queries the graph database for catalogue originated concepts and returns a count of the results.
+  * `ingestor_loader`: Queries the graph database for for a subset of catalogue originated concepts and loads them into
+    S3 as a parquet file.
+  * `ingestor_indexer`: Consumes the parquet file from S3 and loads the data into Elasticsearch for retrieval by the 
+    Concepts API.
 
 Lambda function execution is orchestrated via AWS Step Functions (see `terraform` directory). Several state machines are
 utilised for this purpose:
@@ -39,6 +45,10 @@ utilised for this purpose:
 * `catalogue-graph-single-extract-load`: Not part of the full pipeline. Extracts and loads a single entity type by
   invoking the `extractor` Lambda function, followed by the `catalogue-graph-bulk-loader` state machine. Useful for
   updating the graph after a change in a single source/transformer without having to run the full pipeline.
+* `catalogue-graph-ingestor`: Represents the Elasticsearch ingestor pipeline. Triggers the `catalogue-graph-ingestor-trigger`
+  function, followed by the `catalogue-graph-ingestor-loader` and `catalogue-graph-ingestor-indexer` functions as [state
+  map steps](https://docs.aws.amazon.com/step-functions/latest/dg/state-map.html), allowing for parallelisation of the 
+  ingestor process.
 
 ## Running the pipeline
 
@@ -139,6 +149,15 @@ MATCH (n) RETURN count(*)
 result = neptune_client.run_open_cypher_query(query)
 print(result)
 ```
+
+## Running with local Elasticsearch
+
+To run Elasticsearch locally, you can use `elasticsearch.docker-compose.yml` to start a local Elasticsearch instance.
+
+`docker compose -f elasticsearch.docker-compose.yml up`
+
+This will start Elasticsearch on `localhost:9200`, and Kibana on `localhost:5601`. Lambda functions can be configured to
+use this Elasticsearch instance by setting the relevant environment variables when starting the Lambda function locally.
 
 ### AWS Graph Notebook
 
