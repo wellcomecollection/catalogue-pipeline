@@ -1,9 +1,12 @@
-from pydantic import BaseModel
 from dataclasses import field
+
+from pydantic import BaseModel
+
 
 class CatalogueConceptIdentifier(BaseModel):
     value: str
     identifierType: str
+
 
 class CatalogueConcept(BaseModel):
     id: str
@@ -15,17 +18,22 @@ class CatalogueConcept(BaseModel):
     @classmethod
     def from_neptune_result(cls, data: dict) -> "CatalogueConcept":
         alternative_labels = []
-        identifiers = [CatalogueConceptIdentifier(
-            value=target["~properties"]["id"],
-            identifierType=target["~properties"]["source"]
-        ) for target in data["targets"]]
+        identifiers = [
+            CatalogueConceptIdentifier(
+                value=target["~properties"]["id"],
+                identifierType=target["~properties"]["source"],
+            )
+            for target in data["targets"]
+        ]
 
         if "~properties" in data and "alternative_labels" in data["~properties"]:
-            alternative_labels.extend(data["~properties"]["alternative_labels"].split("||"))
+            alternative_labels.extend(
+                data["~properties"]["alternative_labels"].split("||")
+            )
         return CatalogueConcept(
             id=data["source"]["~properties"]["id"],
             label=data["source"]["~properties"]["label"],
             type=data["source"]["~properties"]["type"],
             alternativeLabels=alternative_labels,
-            identifiers = identifiers
+            identifiers=identifiers,
         )

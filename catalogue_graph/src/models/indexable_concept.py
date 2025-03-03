@@ -1,14 +1,16 @@
-from pydantic import BaseModel
 from dataclasses import field
+
+from pydantic import BaseModel
 
 from models.catalogue_concept import CatalogueConcept
 
-
 # Query
+
 
 class ConceptQueryIdentifier(BaseModel):
     value: str
     identifierType: str
+
 
 class ConceptQuery(BaseModel):
     id: str
@@ -17,12 +19,15 @@ class ConceptQuery(BaseModel):
     alternativeLabels: list[str] = field(default_factory=list)
     type: str
 
+
 # Display
+
 
 class ConceptDisplayIdentifier(BaseModel):
     id: str
     label: str
     type: str = "IdentifierType"
+
 
 class ConceptDisplay(BaseModel):
     id: str
@@ -30,6 +35,7 @@ class ConceptDisplay(BaseModel):
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
     type: str
+
 
 # Indexable concept - for indexing in elasticsearch
 class IndexableConcept(BaseModel):
@@ -42,22 +48,26 @@ class IndexableConcept(BaseModel):
         return IndexableConcept(
             query=ConceptQuery(
                 id=concept.id,
-                identifiers=[ConceptQueryIdentifier(
-                    value=identifier.value,
-                    identifierType=identifier.identifierType
-                ) for identifier in concept.identifiers],
+                identifiers=[
+                    ConceptQueryIdentifier(
+                        value=identifier.value, identifierType=identifier.identifierType
+                    )
+                    for identifier in concept.identifiers
+                ],
                 label=concept.label,
                 alternativeLabels=concept.alternativeLabels,
-                type=concept.type
+                type=concept.type,
             ),
             display=ConceptDisplay(
                 id=concept.id,
-                identifiers=[ConceptDisplayIdentifier(
-                    id=identifier.value,
-                    label=identifier.identifierType
-                ) for identifier in concept.identifiers],
+                identifiers=[
+                    ConceptDisplayIdentifier(
+                        id=identifier.value, label=identifier.identifierType
+                    )
+                    for identifier in concept.identifiers
+                ],
                 label=concept.label,
                 alternativeLabels=concept.alternativeLabels,
-                type=concept.type
-            )
+                type=concept.type,
+            ),
         )
