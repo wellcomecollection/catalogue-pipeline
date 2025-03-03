@@ -62,3 +62,11 @@ ConceptSource = Literal[
 class Concept(BaseNode):
     type: ConceptType
     source: ConceptSource
+
+
+WorkType = Literal["Work", "Series", "Section", "Collection"]
+
+
+class Work(BaseNode):
+    type: WorkType
+    alternative_labels: list[str]

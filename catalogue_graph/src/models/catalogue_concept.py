@@ -17,7 +17,6 @@ class CatalogueConcept(BaseModel):
 
     @classmethod
     def from_neptune_result(cls, data: dict) -> "CatalogueConcept":
-        alternative_labels = []
         identifiers = [
             CatalogueConceptIdentifier(
                 value=target["~properties"]["id"],
@@ -26,10 +25,13 @@ class CatalogueConcept(BaseModel):
             for target in data["targets"]
         ]
 
-        if "~properties" in data and "alternative_labels" in data["~properties"]:
-            alternative_labels.extend(
-                data["~properties"]["alternative_labels"].split("||")
-            )
+        alternative_labels = [
+            label
+            for target in data["targets"]
+            if "~properties" in target and "alternative_labels" in target["~properties"]
+            for label in target["~properties"]["alternative_labels"].split("||")
+        ]
+
         return CatalogueConcept(
             id=data["source"]["~properties"]["id"],
             label=data["source"]["~properties"]["label"],

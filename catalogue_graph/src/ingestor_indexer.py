@@ -45,7 +45,7 @@ def transform_data(df: DataFrame) -> list[IndexableConcept]:
 
 def load_data(
     concepts: list[IndexableConcept], pipeline_date: str | None, is_local: bool
-) -> None:
+) -> int:
     index_name = (
         "concepts-indexed"
         if pipeline_date is None
@@ -65,20 +65,25 @@ def load_data(
     success_count, _ = bulk(es, generate_data())
 
     print(f"Successfully indexed {success_count} documents.")
+    return success_count
 
 
-def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> None:
+def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
     print(f"Received event: {event} with config {config}")
-    load_data(
+    success_count = load_data(
         transform_data(extract_data(event.s3_url)),
         config.pipeline_date,
         config.is_local,
     )
     print("Data loaded successfully.")
 
+    return success_count
 
-def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> None:
-    handler(IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig())
+
+def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> int:
+    return handler(
+        IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
+    )
 
 
 def local_handler() -> None:

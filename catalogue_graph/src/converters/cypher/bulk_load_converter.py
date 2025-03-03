@@ -55,7 +55,7 @@ class CypherBulkLoadConverter(CypherBaseConverter):
             column_header = self._get_bulk_loader_column_header(
                 model, edge_attribute_name
             )
-            raw_value = model.attributes.get(edge_attribute_name, None)
+            raw_value = model.attributes.dict().get(edge_attribute_name, None)
             value = self._raw_value_to_cypher_value(raw_value)
             bulk_edge[column_header] = value
 

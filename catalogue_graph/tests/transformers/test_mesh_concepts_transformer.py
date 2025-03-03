@@ -49,7 +49,6 @@ def test_mesh_concepts_transformer() -> None:
         to_id="D009930",
         relationship="HAS_PARENT",
         directed=True,
-        attributes={},
     )
 
     assert edges[-1] == SourceConceptRelatedTo(
@@ -59,5 +58,4 @@ def test_mesh_concepts_transformer() -> None:
         to_id="D034861",
         relationship="RELATED_TO",
         directed=False,
-        attributes={},
     )

@@ -1,9 +1,9 @@
-from typing import TypedDict
-
 from pydantic import BaseModel
 
+from utils.types import WorkConceptKey
 
-class EdgeAttributes(TypedDict):
+
+class EdgeAttributes(BaseModel):
     pass
 
 
@@ -20,19 +20,23 @@ class ConceptHasSourceConceptAttributes(EdgeAttributes):
     matched_by: str
 
 
+class WorkHasConceptAttributes(EdgeAttributes):
+    referenced_in: WorkConceptKey
+
+
 def get_all_edge_attributes() -> set[str]:
     """Returns a set of all possible edge attributes from all edge types."""
     attribute_classes: list[type[EdgeAttributes]] = [
         SourceNameRelatedToAttributes,
         SourceConceptSameAsAttributes,
         ConceptHasSourceConceptAttributes,
+        WorkHasConceptAttributes,
     ]
 
     attributes = set()
     for attribute_class in attribute_classes:
         for annotation in attribute_class.__annotations__:
             attributes.add(annotation)
-
     return attributes
 
 
@@ -43,7 +47,7 @@ class BaseEdge(BaseModel):
     to_id: str
     relationship: str
     directed: bool
-    attributes: EdgeAttributes = {}
+    attributes: EdgeAttributes = EdgeAttributes()
 
 
 class SourceConceptNarrowerThan(BaseEdge):
@@ -92,4 +96,11 @@ class SourceConceptHasFieldOfWork(BaseEdge):
     from_type: str = "SourceName"
     to_type: str = "SourceConcept"
     relationship: str = "HAS_FIELD_OF_WORK"
+    directed: bool = True
+
+
+class WorkHasConcept(BaseEdge):
+    from_type: str = "Work"
+    to_type: str = "Concept"
+    relationship: str = "HAS_CONCEPT"
     directed: bool = True
