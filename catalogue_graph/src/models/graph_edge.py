@@ -1,5 +1,5 @@
-
 from pydantic import BaseModel
+
 from utils.types import WorkConceptKey
 
 

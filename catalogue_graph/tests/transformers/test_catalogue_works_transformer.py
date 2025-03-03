@@ -1,8 +1,9 @@
+from test_mocks import MockRequest
+from test_utils import load_fixture
+
 from config import CATALOGUE_SNAPSHOT_URL
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
-from test_mocks import MockRequest
-from test_utils import load_fixture
 from transformers.catalogue.works_transformer import CatalogueWorksTransformer
 
 
@@ -52,9 +53,7 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="s6s24vd7",
         relationship="HAS_CONCEPT",
         directed=True,
-        attributes=WorkHasConceptAttributes(
-            referenced_in="subjects"
-        ),
+        attributes=WorkHasConceptAttributes(referenced_in="subjects"),
     )
     assert edges[5] == WorkHasConcept(
         from_type="Work",
@@ -63,9 +62,7 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="s6s24vd8",
         relationship="HAS_CONCEPT",
         directed=True,
-        attributes=WorkHasConceptAttributes(
-            referenced_in="subjects"
-        ),
+        attributes=WorkHasConceptAttributes(referenced_in="subjects"),
     )
     assert edges[6] == WorkHasConcept(
         from_type="Work",
@@ -74,9 +71,7 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="yfqryj26",
         relationship="HAS_CONCEPT",
         directed=True,
-        attributes=WorkHasConceptAttributes(
-            referenced_in="genres"
-        ),
+        attributes=WorkHasConceptAttributes(referenced_in="genres"),
     )
     assert edges[7] == WorkHasConcept(
         from_type="Work",
@@ -85,7 +80,5 @@ def test_catalogue_concepts_transformer_edges() -> None:
         to_id="uykuavkt",
         relationship="HAS_CONCEPT",
         directed=True,
-        attributes=WorkHasConceptAttributes(
-            referenced_in="contributors"
-        ),
-    )    
+        attributes=WorkHasConceptAttributes(referenced_in="contributors"),
+    )
