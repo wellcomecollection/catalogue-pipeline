@@ -16,7 +16,7 @@ class IngestorTriggerLambdaEvent(BaseModel):
     job_id: str | None = None
 
 class IngestorTriggerConfig(BaseModel):
-    shard_size: int = int(INGESTOR_SHARD_SIZE)
+    shard_size: int = INGESTOR_SHARD_SIZE
     is_local: bool = False
 
 def extract_data(is_local: bool) -> int:

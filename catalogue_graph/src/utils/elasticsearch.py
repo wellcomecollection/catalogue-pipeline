@@ -13,7 +13,7 @@ class ElasticsearchConfig(BaseModel):
     host: str = "localhost" if INGESTOR_ES_HOST is None else INGESTOR_ES_HOST
     port: int = 9200 if INGESTOR_ES_PORT is None else int(INGESTOR_ES_PORT)
     scheme: str = "http" if INGESTOR_ES_SCHEME is None else INGESTOR_ES_SCHEME
-    apikey: str = INGESTOR_ES_API_KEY
+    apikey: str | None = INGESTOR_ES_API_KEY
 
 class ElasticsearchClient:
     def __init__(self, config: ElasticsearchConfig) -> None:
@@ -26,7 +26,7 @@ def get_pipeline_config(pipeline_date: str, is_local:bool) -> ElasticsearchConfi
 
     return ElasticsearchConfig(
         host=get_secret(f"elasticsearch/pipeline_storage_{pipeline_date}/{es_host_type}"),
-        port=get_secret(f"elasticsearch/pipeline_storage_{pipeline_date}/port"),
+        port=int(get_secret(f"elasticsearch/pipeline_storage_{pipeline_date}/port")),
         scheme=get_secret(f"elasticsearch/pipeline_storage_{pipeline_date}/protocol"),
         apikey=get_secret(f"elasticsearch/pipeline_storage_{pipeline_date}/concept_ingestor/api_key")
     )

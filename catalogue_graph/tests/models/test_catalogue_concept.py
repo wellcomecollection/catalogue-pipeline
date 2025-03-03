@@ -1,6 +1,6 @@
 from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifier
 
-def test_catalogue_concept_from_neptune_result():
+def test_catalogue_concept_from_neptune_result() -> None:
     neptune_result = {
         "source": {
             "~properties": {
