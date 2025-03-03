@@ -13,7 +13,7 @@ class CatalogueConcept(BaseModel):
     type: str
 
     @classmethod
-    def from_neptune_result(cls, data: dict):
+    def from_neptune_result(cls, data: dict) -> "CatalogueConcept":
         alternative_labels = []
         identifiers = [CatalogueConceptIdentifier(
             value=target["~properties"]["id"],

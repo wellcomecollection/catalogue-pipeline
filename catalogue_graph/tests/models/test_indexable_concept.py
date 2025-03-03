@@ -1,7 +1,7 @@
 from models.indexable_concept import IndexableConcept, ConceptQuery, ConceptQueryIdentifier, ConceptDisplay, ConceptDisplayIdentifier
 from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifier
 
-def test_indexable_concept_from_catalogue_concept():
+def test_indexable_concept_from_catalogue_concept() -> None:
     catalogue_concept = CatalogueConcept(
         id="id",
         identifiers=[
@@ -32,8 +32,8 @@ def test_indexable_concept_from_catalogue_concept():
             id="id",
             identifiers=[
                 ConceptDisplayIdentifier(
-                    value="value",
-                    identifierType="identifierType"
+                    id="value",
+                    label="identifierType"
                 )
             ],
             label="label",

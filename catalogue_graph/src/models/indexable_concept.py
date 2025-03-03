@@ -24,11 +24,6 @@ class ConceptDisplayIdentifier(BaseModel):
     label: str
     type: str = "IdentifierType"
 
-class ConceptDisplayIdentifier(BaseModel):
-    value: str
-    identifierType: str
-    type: str = "Identifier"
-
 class ConceptDisplay(BaseModel):
     id: str
     identifiers: list[ConceptDisplayIdentifier]
@@ -37,14 +32,13 @@ class ConceptDisplay(BaseModel):
     type: str
 
 # Indexable concept - for indexing in elasticsearch
-
 class IndexableConcept(BaseModel):
     query: ConceptQuery
     display: ConceptDisplay
 
     # static method to create this model from a catalogue concept
     @classmethod
-    def from_concept(cls, concept: CatalogueConcept):
+    def from_concept(cls, concept: CatalogueConcept) -> "IndexableConcept":
         return IndexableConcept(
             query=ConceptQuery(
                 id=concept.id,
@@ -59,8 +53,8 @@ class IndexableConcept(BaseModel):
             display=ConceptDisplay(
                 id=concept.id,
                 identifiers=[ConceptDisplayIdentifier(
-                    value=identifier.value,
-                    identifierType=identifier.identifierType
+                    id=identifier.value,
+                    label=identifier.identifierType
                 ) for identifier in concept.identifiers],
                 label=concept.label,
                 alternativeLabels=concept.alternativeLabels,
