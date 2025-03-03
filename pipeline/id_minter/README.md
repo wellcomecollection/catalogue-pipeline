@@ -81,4 +81,4 @@ paths to it, from scripts folder in this project directory:
 
 ## Connecting to the ID minter database
 
-If you need to connect to the ID minter database, there are [some notes on how to do so](./connect-to-the-database.md).
+If you need to connect to the ID minter database, there are [some notes on how to do so](./connect_to_the_database.md).
