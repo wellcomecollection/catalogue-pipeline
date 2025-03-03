@@ -2,9 +2,27 @@
 
 import argparse
 
-from ingestor_trigger import handler as trigger_handler, IngestorTriggerLambdaEvent, IngestorTriggerConfig
-from ingestor_loader import handler as loader_handler, IngestorLoaderLambdaEvent, IngestorLoaderConfig
-from ingestor_indexer import handler as indexer_handler, IngestorIndexerLambdaEvent, IngestorIndexerConfig
+from ingestor_indexer import (
+    IngestorIndexerConfig,
+    IngestorIndexerLambdaEvent,
+)
+from ingestor_indexer import (
+    handler as indexer_handler,
+)
+from ingestor_loader import (
+    IngestorLoaderConfig,
+    IngestorLoaderLambdaEvent,
+)
+from ingestor_loader import (
+    handler as loader_handler,
+)
+from ingestor_trigger import (
+    IngestorTriggerConfig,
+    IngestorTriggerLambdaEvent,
+)
+from ingestor_trigger import (
+    handler as trigger_handler,
+)
 
 
 # Run the whole pipeline locally, Usage: python src/ingestor_local.py --pipeline-date 2021-07-01 --job-id 123
@@ -33,8 +51,12 @@ def main() -> None:
     loader_config = IngestorLoaderConfig(is_local=True)
     loader_results = [loader_handler(e, loader_config) for e in loader_events]
 
-    indexer_events = [IngestorIndexerLambdaEvent(s3_url=e.s3_url) for e in loader_results]
-    indexer_config = IngestorIndexerConfig(pipeline_date=args.pipeline_date ,is_local=True)
+    indexer_events = [
+        IngestorIndexerLambdaEvent(s3_url=e.s3_url) for e in loader_results
+    ]
+    indexer_config = IngestorIndexerConfig(
+        pipeline_date=args.pipeline_date, is_local=True
+    )
     success_counts = [indexer_handler(e, indexer_config) for e in indexer_events]
 
     total_success_count = sum(success_counts)
@@ -43,5 +65,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
