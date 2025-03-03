@@ -187,5 +187,6 @@ def test_ingestor_trigger(
             assert len(catalogue_concepts) == 1
             assert catalogue_concepts[0] == expected_concept
     else:
-        with pytest.raises(LookupError):
+        # This line is reachable, but mypy doesn't know that
+        with pytest.raises(LookupError): # type: ignore[unreachable]
             handler(event, config)
