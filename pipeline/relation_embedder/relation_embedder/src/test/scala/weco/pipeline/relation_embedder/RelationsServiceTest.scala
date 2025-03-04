@@ -25,7 +25,7 @@ class RelationsServiceTest
     index: Index,
     completeTreeScroll: Int = 20,
     affectedWorksScroll: Int = 20
-  )(implicit as: ActorSystem) =
+  ) =
     new PathQueryRelationsService(
       elasticClient = elasticClient,
       index = index,

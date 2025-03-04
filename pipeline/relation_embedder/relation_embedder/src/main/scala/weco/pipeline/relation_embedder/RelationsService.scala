@@ -1,7 +1,6 @@
 package weco.pipeline.relation_embedder
 
 import org.apache.pekko.NotUsed
-import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.scaladsl.Source
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
@@ -9,10 +8,12 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
-import com.sksamuel.elastic4s.pekko.streams._
+import com.sksamuel.elastic4s.requests.searches.SearchIterator
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.relation_embedder.models.{Batch, RelationWork}
+
+import scala.concurrent.duration.{Duration, DurationInt}
 
 trait RelationsService {
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed]
@@ -25,8 +26,7 @@ class PathQueryRelationsService(
   index: Index,
   completeTreeScroll: Int = 1000,
   affectedWorksScroll: Int = 250
-)(implicit as: ActorSystem)
-    extends RelationsService
+) extends RelationsService
     with Logging {
 
   private val requestBuilder = RelationsRequestBuilder(index)
@@ -36,17 +36,17 @@ class PathQueryRelationsService(
     debug(
       s"Querying affected works with ES request: ${elasticClient.show(request)}"
     )
-    val sourceSettings = SourceSettings(
-      search = request,
-      maxItems = Long.MaxValue,
-      fetchThreshold = affectedWorksScroll,
-      warm = true
+    // Arbitrary timeout value, it has to exist for SearchIterator,
+    // but it has not been derived either through experimentation or calculation,
+    implicit val timeout: Duration = 5 minutes
+
+    Source.fromIterator(
+      () =>
+        SearchIterator.iterate[Work[Merged]](
+          elasticClient,
+          request
+        )
     )
-    Source
-      .fromGraph(
-        new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)
-      )
-      .map(searchHit => searchHit.safeTo[Work[Merged]].get)
   }
 
   def getRelationTree(batch: Batch): Source[RelationWork, NotUsed] = {
@@ -54,16 +54,15 @@ class PathQueryRelationsService(
     debug(
       s"Querying complete tree with ES request: ${elasticClient.show(request)}"
     )
-    val sourceSettings = SourceSettings(
-      search = request,
-      maxItems = Long.MaxValue,
-      fetchThreshold = affectedWorksScroll,
-      warm = true
+
+    implicit val timeout: Duration = 5 minutes
+
+    Source.fromIterator(
+      () =>
+        SearchIterator.iterate[RelationWork](
+          elasticClient,
+          request
+        )
     )
-    Source
-      .fromGraph(
-        new ElasticSource(elasticClient, sourceSettings)(as.dispatcher)
-      )
-      .map(searchHit => searchHit.safeTo[RelationWork].get)
   }
 }
