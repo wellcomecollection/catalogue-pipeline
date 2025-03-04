@@ -2,7 +2,7 @@ module "id_minter_output_topic" {
   source = "../topic"
 
   name       = "${local.namespace}_id_minter_output"
-  role_names = [ module.id_minter_lambda.lambda_role_name]
+  role_names = [module.id_minter_lambda.lambda_role_name]
 }
 
 module "id_minter_lambda" {
