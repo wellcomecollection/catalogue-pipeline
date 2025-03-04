@@ -38,7 +38,7 @@ class PathQueryRelationsService(
     )
     // Arbitrary timeout value, it has to exist for SearchIterator,
     // but it has not been derived either through experimentation or calculation,
-q    implicit val timeout: Duration = 5 minutes
+    implicit val timeout: Duration = 5 minutes
 
     Source.fromIterator(
       () =>
