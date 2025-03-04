@@ -3,7 +3,6 @@ package weco.pipeline.relation_embedder
 import com.sksamuel.elastic4s.Index
 import grizzled.slf4j.Logging
 import org.apache.pekko.NotUsed
-import org.apache.pekko.actor.ActorSystem
 import org.apache.pekko.stream.Materializer
 import org.apache.pekko.stream.scaladsl.{Sink, Source}
 import weco.catalogue.internal_model.work.Work
@@ -79,6 +78,7 @@ class BatchProcessor(
       .getAffectedWorks(batch)
       .map {
         work =>
+          info(s"transitioning ${work.id}")
           val relations = relationsCache(work)
           work.transition[Denormalised](relations)
       }
@@ -105,8 +105,7 @@ object BatchProcessor {
   def apply(
     config: RelationEmbedderConfig
   )(
-    implicit actorSystem: ActorSystem,
-    ec: ExecutionContext,
+    implicit ec: ExecutionContext,
     materializer: Materializer
   ): BatchProcessor = {
 
