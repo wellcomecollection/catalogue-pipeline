@@ -78,7 +78,7 @@ class BatchProcessor(
       .getAffectedWorks(batch)
       .map {
         work =>
-          info(s"transitioning ${work.id}")
+          debug(s"transitioning ${work.id}")
           val relations = relationsCache(work)
           work.transition[Denormalised](relations)
       }

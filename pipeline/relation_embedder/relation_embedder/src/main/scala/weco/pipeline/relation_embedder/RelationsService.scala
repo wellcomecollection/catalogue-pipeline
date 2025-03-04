@@ -36,8 +36,9 @@ class PathQueryRelationsService(
     debug(
       s"Querying affected works with ES request: ${elasticClient.show(request)}"
     )
-
-    implicit val timeout: Duration = 5 minutes
+    // Arbitrary timeout value, it has to exist for SearchIterator,
+    // but it has not been derived either through experimentation or calculation,
+q    implicit val timeout: Duration = 5 minutes
 
     Source.fromIterator(
       () =>
