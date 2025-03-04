@@ -9,7 +9,7 @@ module "id_minter_lambda" {
   source = "../pipeline_lambda"
 
   pipeline_date = var.pipeline_date
-  service_name  = "id_minter_lambda"
+  service_name  = "id_minter"
 
   environment_variables = {
     topic_arn           = module.id_minter_output_topic.arn
