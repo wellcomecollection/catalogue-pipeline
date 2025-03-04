@@ -5,9 +5,14 @@ from utils.types import NodeType, OntologyType
 WikidataEdgeQueryType = Literal[
     "same_as_loc",
     "same_as_mesh",
-    "parent_instance_of",
-    "parent_subclass_of",
-    "field_of_work",
+    "instance_of",
+    "subclass_of",
+    "has_field_of_work",
+    "has_father",
+    "has_mother",
+    "has_sibling",
+    "has_spouse",
+    "has_child",
 ]
 
 
@@ -144,12 +149,22 @@ class SparqlQueryBuilder:
             property_path = "p:P244/ps:P244"
         elif edge_type == "same_as_mesh":
             property_path = "p:P486/ps:P486"
-        elif edge_type == "parent_instance_of":
+        elif edge_type == "instance_of":
             property_path = "wdt:P31"
-        elif edge_type == "parent_subclass_of":
+        elif edge_type == "subclass_of":
             property_path = "wdt:P279"
-        elif edge_type == "field_of_work":
+        elif edge_type == "has_field_of_work":
             property_path = "wdt:P101"
+        elif edge_type == "has_father":
+            property_path = "wdt:P22"
+        elif edge_type == "has_mother":
+            property_path = "wdt:P25"
+        elif edge_type == "has_sibling":
+            property_path = "wdt:P3373"
+        elif edge_type == "has_spouse":
+            property_path = "wdt:P26"
+        elif edge_type == "has_child":
+            property_path = "wdt:P40"
         else:
             raise ValueError(f"Unknown edge type: {edge_type}")
 
@@ -158,6 +173,7 @@ class SparqlQueryBuilder:
             WHERE {{
               VALUES ?fromItem {{ {ids_clause} }}
               ?fromItem {property_path} ?toItem.
+              FILTER (!wikibase:isSomeValue(?toItem))
             }}
         """
 

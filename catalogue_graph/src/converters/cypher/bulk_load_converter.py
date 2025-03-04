@@ -2,7 +2,7 @@ from typing import Literal, cast
 
 from pydantic import BaseModel
 
-from models.graph_edge import BaseEdge
+from models.graph_edge import BaseEdge, get_all_edge_attributes
 from models.graph_node import BaseNode, SourceLocation, SourceName
 
 from .base_converter import CypherBaseConverter
@@ -51,8 +51,11 @@ class CypherBulkLoadConverter(CypherBaseConverter):
             ":TYPE": model.relationship,
         }
 
-        for field_name, raw_value in model.attributes.items():
-            column_header = self._get_bulk_loader_column_header(model, field_name)
+        for edge_attribute_name in get_all_edge_attributes():
+            column_header = self._get_bulk_loader_column_header(
+                model, edge_attribute_name
+            )
+            raw_value = model.attributes.dict().get(edge_attribute_name, None)
             value = self._raw_value_to_cypher_value(raw_value)
             bulk_edge[column_header] = value
 

@@ -1,9 +1,6 @@
-FROM public.ecr.aws/amazoncorretto/amazoncorretto:11 AS base
+FROM public.ecr.aws/l7a1d1z4/jvm_container_lambda:v1 AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
-
-RUN yum install awscli -y
-COPY bash_secrets_extension.sh /opt/extensions/bash_secrets_extension.sh
 
 ADD target/universal/stage /opt/docker
 ENV CLASSPATH="/opt/docker/lib/*"
@@ -23,10 +20,8 @@ ENV use_downstream=stdio
 
 CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.id_minter.LambdaMain::handleRequest"]
 
-FROM base AS lambda_live
+FROM base
 
 ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
 
 CMD ["weco.pipeline.id_minter.LambdaMain::handleRequest"]
-
-FROM ecs

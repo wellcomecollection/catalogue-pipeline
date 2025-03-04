@@ -64,6 +64,10 @@ variable "index_config" {
       indexed    = string
     })
 
+    concepts = object({
+      indexed = string
+    })
+
     images = object({
       indexed        = string
       works_analysis = string

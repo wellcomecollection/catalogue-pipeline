@@ -1,3 +1,7 @@
 :ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String
 sh00000001,SourceConcept,sh00000001,ActionScript (Computer program language),lc-subjects,,,null
 sh00000002,SourceConcept,sh00000002,Tacos,lc-subjects,,,null
+sh85045046,SourceConcept,sh85045046,Etchings,lc-subjects,,Etching||Etching_s,null
+sh00005643,SourceConcept,sh00005643,Etching,lc-subjects,,,null
+sh85004839,SourceConcept,sh00005643,Example concept 1,lc-subjects,,,null
+sh85123237,SourceConcept,sh00005643,Example concept 2,lc-subjects,,,null

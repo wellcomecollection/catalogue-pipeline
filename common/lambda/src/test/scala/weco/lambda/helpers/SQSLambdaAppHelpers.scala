@@ -1,22 +1,69 @@
 package weco.lambda.helpers
 
-import com.amazonaws.services.lambda.runtime.events.SQSEvent
 import com.typesafe.config.Config
-import weco.lambda.{ApplicationConfig, SQSLambdaApp}
-import scala.concurrent.duration.{DurationInt, FiniteDuration}
+import weco.lambda.{
+  ApplicationConfig,
+  SQSBatchResponseLambdaApp,
+  SQSLambdaApp,
+  SQSLambdaMessage,
+  SQSLambdaMessageResult
+}
 
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.Future
-import collection.JavaConverters._
 
 trait SQSLambdaAppHelpers {
   // This value is from application.conf in test resources
   val expectedConfigString = "knownConfigValue"
 
   case class TestLambdaAppConfiguration(configString: String)
-    extends ApplicationConfig
+      extends ApplicationConfig
+
+  class TestBatchResponseLambdaApp(
+    messageResults: Seq[SQSLambdaMessageResult] = Seq.empty
+  ) extends SQSBatchResponseLambdaApp[String, TestLambdaAppConfiguration] {
+    override protected val maximumExecutionTime: FiniteDuration = 200.millis
+
+    val messageResultsMap = messageResults.map {
+      message =>
+        message.messageId -> message
+    }.toMap
+
+    // Config is available in this scope
+    val configString: String = config.configString
+
+    // Function to convert typesafe config to application config is required
+    override def build(rawConfig: Config): TestLambdaAppConfiguration =
+      TestLambdaAppConfiguration(
+        configString = rawConfig.getString("configString")
+      )
+
+    override def processMessages(
+      messages: Seq[SQSLambdaMessage[String]]
+    ): Future[Seq[SQSLambdaMessageResult]] = Future {
+      messages.map {
+        message =>
+          messageResultsMap.getOrElse(
+            message.messageId,
+            throw new RuntimeException(
+              s"Message ${message.messageId} not found in messageResults"
+            )
+          )
+      }
+    }
+  }
+
+  class SleepingTestBatchResponseLambdaApp extends TestBatchResponseLambdaApp {
+    override def processMessages(
+      messages: Seq[SQSLambdaMessage[String]]
+    ): Future[Seq[SQSLambdaMessageResult]] = {
+      Thread.sleep(500)
+      super.processMessages(messages)
+    }
+  }
 
   class TestLambdaApp
-    extends SQSLambdaApp[String, String, TestLambdaAppConfiguration] {
+      extends SQSLambdaApp[String, String, TestLambdaAppConfiguration] {
     override protected val maximumExecutionTime: FiniteDuration = 200.millis
 
     // Config is available in this scope
@@ -33,7 +80,8 @@ trait SQSLambdaAppHelpers {
   }
 
   class FailingTestLambdaApp extends TestLambdaApp {
-    override def processT(t: List[String]): Future[String] = Future.failed(new Throwable("Failed"))
+    override def processT(t: List[String]): Future[String] =
+      Future.failed(new Throwable("Failed"))
   }
 
   class SleepingTestLambdaApp extends TestLambdaApp {
@@ -41,15 +89,5 @@ trait SQSLambdaAppHelpers {
       Thread.sleep(500)
       t.head + configString
     }
-  }
-
-  def createSqsEvent(eventString: List[String]): SQSEvent = {
-    val sqsEvent = new SQSEvent()
-    sqsEvent.setRecords(eventString.map { record =>
-      val sqsRecord = new SQSEvent.SQSMessage()
-      sqsRecord.setBody(s"""{"Message": "$record"}""")
-      sqsRecord
-    }.asJava)
-    sqsEvent
   }
 }

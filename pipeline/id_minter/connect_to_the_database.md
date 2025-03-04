@@ -2,67 +2,42 @@
 
 Occasionally it's useful to connect to the ID minter database to correct a record, but we do it very sparingly.
 
-You can't connect to the ID minter directly from the outside world – you have to use a bastion host.
+The database is located in a private subnet and cannot be accessed from the outside world. However, it is possible
+to connect to the instance via an existing bastion host following these steps:
 
-These are some loose notes I wrote the last time I had to do it; there may be gaps in these instructions because I didn't have time to test them fully, but hopefully they're a useful guide.
+1. In the RDS console, create a [manual snapshot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html) of the ID minter database before you start.
 
-1.  In the RDS console, create a [manual snapshot](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_CreateSnapshot.html) of the ID minter database before you start.
+   Depending on what you're doing, you may also want to turn off any running ID minter tasks to prevent interference.
 
-    Depending on what you're doing, you may also want to turn off any running ID minter tasks to prevent interference.
+2. In the AWS platform account, locate an EC2 instance with the `id-minter-bastion` Instance ID (see [here](https://eu-west-1.console.aws.amazon.com/ec2/home?region=eu-west-1#Instances:search=:id-minter-bastion))
+   and start it. (Make sure to stop the instance when you're done!)
 
-2.  Launch an EC2 instance which can connect to the ID minter database (the "bastion instance").
+3. Locate the security group attached to the EC2 instance (named `id-minter-bastion`) and add a new inbound rule 
+   to allow SSH traffic from your IP address.
 
-    This means launching the smallest EC2 instance you can get, with the following settings:
+4. Locate the `ssh/wellcomedigitalplatform` secret in Secrets Manager and save the secret value to your local machine
+   as a `.pem` file.
 
-    -   In the catalogue VPC
-    -   In a private subnet
-    -   In the `id_minter_bastion_ssh_access`, `id_minter_instance_ssh_access` and `identifiers_database_sg` security groups
-    -   An SSH key that you have access to
+5. Locate and note down the Public IPv4 DNS value of the EC2 instance.
 
-3.  Launch an EC2 instance which you can connect to (the "externally visible instance").
+6. Locate and note down the endpoint name of the id minter database in RDS.
 
-    This means launching the smallest EC2 instance you can get, with the following settings:
+7. Create an SSH tunnel between your local machine and the database via the following command, replacing placeholders
+   with values retrieved in previous steps:
 
-    -   In the catalogue VPC
-    -   In a public subnet and public IP
-    -   The same security groups as the previous step
-    -   An SSH key that you have access to
+   ```sh
+   ssh -i "<path to .pem file>" -f -N -L 3306:<database cluster endpoint name>:3306 ec2-user@<bastion host public DNS> -v
+   ```
 
-4.  Update the security group `id_minter_instance_ssh_access` to allow traffic on port 22 from your local IP address.
+8. Install MySQL and connect to the RDS instance via localhost:
 
-    Update the security group `identifiers_database_sg` to allow traffic on Aurora/MySQL from your bastion instance.
-    
-    In both cases, label the new inbound rules with your name/date so they can be identified later.
+   ```sh
+   brew install mysql@8.4
+   mysql -h 127.0.0.1 -P 3306 -u wellcome -p
+   ```
 
-5.  Connect to the externally visible host using your SSH key.
-    Upload your SSH key to this host:
-
-    ```console
-    $ scp -i <LOCAL_SSH_KEY> <LOCAL_SSH_KEY> ec2-user@<EXTERNALLY_VISIBLE_INSTANCE_DNS>:id_rsa
-    ```
-    
-6.  Connect to the externally visible instance using your SSH key:
-    
-    ```
-    $ ssh -i <LOCAL_SSH_KEY ec2-user@<EXTERNALLY_VISIBLE_INSTANCE_DNS>
-    ```
-
-7.  From the externally visible instance, connect to the bastion host using your SSH key:
-
-    ```console
-    $ ssh -i id_rsa ec2-user@<BASTION_INSTANCE_DNS>
-    ```
-
-8.  Install MySQL and connect to the RDS instance:
-
-    ```console
-    $ sudo yum install -y mysql
-    $ mysql --host=$HOST --port=3306 --user=$USERNAME --password=$PASSWORD
-    ```
-
-    You can get the host/username/password values from the RDS and Secrets Manager consoles, respectively.
-    
-    If this connection hangs, check the rules you added to `identifiers_database_sg` in the previous step.
+9. Stop the bastion instance when you are done and consider removing your IP address from the inbound rules of
+   the `id-minter-bastion` security group.
 
 ## Modifying the ID minter database
 
@@ -71,12 +46,15 @@ Here are some useful commands:
 ```mysql
 USE identifiers;
 
-SELECT * FROM identifiers WHERE CanonicalId = 'w62ubcaw';
+SELECT *
+FROM identifiers
+WHERE CanonicalId = 'w62ubcaw';
 
-UPDATE identifiers SET SourceId = 'b20442506/FILE_0518_OBJECTS'
+UPDATE identifiers
+SET SourceId = 'b20442506/FILE_0518_OBJECTS'
 WHERE SourceId = 'B20442506/FILE_0518_OBJECTS'
-AND OntologyType = 'Image'
-AND SourceSystem = 'mets-image';
+  AND OntologyType = 'Image'
+  AND SourceSystem = 'mets-image';
 
 DEL/ETE FROM identifiers WHERE SourceSystem = 'made-up-example';
 ```

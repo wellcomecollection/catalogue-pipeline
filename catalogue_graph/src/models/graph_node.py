@@ -39,6 +39,8 @@ class SourceName(SourceConcept):
 
 
 # Catalogue concepts have a specific type and source
+# This list should be kept in sync with the one defined in
+# `pipeline/id_minter/src/main/scala/weco/pipeline/id_minter/steps/IdentifierGenerator.scala`
 ConceptType = Literal[
     "Person",
     "Concept",
@@ -60,3 +62,11 @@ ConceptSource = Literal[
 class Concept(BaseNode):
     type: ConceptType
     source: ConceptSource
+
+
+WorkType = Literal["Work", "Series", "Section", "Collection"]
+
+
+class Work(BaseNode):
+    type: WorkType
+    alternative_labels: list[str]

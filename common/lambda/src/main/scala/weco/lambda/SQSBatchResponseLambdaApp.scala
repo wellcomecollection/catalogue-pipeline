@@ -10,7 +10,6 @@ import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.reflect.ClassTag
 import com.amazonaws.services.lambda.runtime.events.SQSBatchResponse
-import com.amazonaws.services.lambda.runtime.events.SQSEvent.SQSMessage
 import scala.collection.JavaConverters._
 
 // Unfortunately we can't have an intermediate abstraction here because of an interaction
@@ -36,33 +35,56 @@ abstract class SQSBatchResponseLambdaApp[
 
   import weco.lambda.SQSEventOps._
 
-  def processT(t: List[T]): Future[Seq[T]]
+  def processMessages(
+    messages: Seq[SQSLambdaMessage[T]]
+  ): Future[Seq[SQSLambdaMessageResult]]
 
   override def handleRequest(
     event: SQSEvent,
     context: Context
   ): SQSBatchResponse = {
-    val messagesMap = event.extractMap[T]
-    Await.result(
-      processToBatchResponse(messagesMap),
-      maximumExecutionTime
-    )
-  }
-  private def processToBatchResponse(
-    messagesMap: Map[T, Seq[SQSMessage]]
-  ): Future[SQSBatchResponse] = {
-    processT(messagesMap.keySet.toList) map {
-      failures =>
-        failures.flatMap {
-          failure => messagesMap(failure)
-        }
-    } map {
-      failedMessages: Seq[SQSMessage] =>
-        new SQSBatchResponse(
-          failedMessages
-            .map(msg => new SQSBatchResponse.BatchItemFailure(msg.getMessageId))
-            .asJava
+    val extractedEvents = event.extractLambdaEvents[T]
+
+    // Extracted event failures are presumed permanent so we do not include them in batch failures
+    extractedEvents.collect {
+      case Left(failure) =>
+        error(
+          s"Failed to extract message ${failure.messageId} with error ${failure.error.getMessage}"
+        )
+        debug(
+          s"Failed message body for ${failure.messageId}: ${failure.messageBody}"
         )
     }
+
+    Await.result(
+      processMessages(extractedEvents.collect {
+        case Right(message) => message
+      }) map {
+        results =>
+          results.collect {
+            case failure: SQSLambdaMessageFailedRetryable =>
+              error(
+                s"Failed to process message ${failure.messageId} with error ${failure.error.getMessage}"
+              )
+              Some(failure)
+            case permanentFailure: SQSLambdaMessageFailedPermanent =>
+              error(
+                s"Failed to process message ${permanentFailure.messageId} with error ${permanentFailure.error.getMessage}"
+              )
+              None
+            case success: SQSLambdaMessageProcessed =>
+              info(s"Successfully processed message ${success.messageId}")
+              None
+          } flatten
+      } map {
+        _.map {
+          case failure: SQSLambdaMessageFailedRetryable =>
+            new SQSBatchResponse.BatchItemFailure(failure.messageId)
+        }.asJava
+      } map {
+        new SQSBatchResponse(_)
+      },
+      maximumExecutionTime
+    )
   }
 }
