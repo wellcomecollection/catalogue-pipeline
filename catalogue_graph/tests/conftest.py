@@ -3,7 +3,13 @@ from typing import Any
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from test_mocks import MockBoto3Session, MockRequest, MockSmartOpen, MockSNSClient, MockElasticsearchClient
+from test_mocks import (
+    MockBoto3Session,
+    MockElasticsearchClient,
+    MockRequest,
+    MockSmartOpen,
+    MockSNSClient,
+)
 
 
 @pytest.fixture(autouse=True)

@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 
 import argparse
-import json
 import typing
 from collections.abc import Generator
 
 import boto3
+import elasticsearch.helpers
 import polars as pl
 import smart_open
-import elasticsearch.helpers
 from polars import DataFrame
 from pydantic import BaseModel
 
+import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
-import utils.elasticsearch
 
 
 class IngestorIndexerLambdaEvent(BaseModel):
     s3_url: str
+
 
 class IngestorIndexerConfig(BaseModel):
     pipeline_date: str | None = INGESTOR_PIPELINE_DATE
@@ -70,7 +70,7 @@ def load_data(
 
 def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
     print(f"Received event: {event} with config {config}")
-    
+
     extracted_data = extract_data(event.s3_url)
     transformed_data = transform_data(extracted_data)
     success_count = load_data(
