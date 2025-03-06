@@ -64,7 +64,6 @@ def load_data(
 
     success_count, _ = elasticsearch.helpers.bulk(es, generate_data())
 
-    print(f"Successfully indexed {success_count} documents.")
     return success_count
 
 
@@ -79,7 +78,7 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
         is_local=config.is_local,
     )
 
-    print("Data loaded successfully.")
+    print(f"Successfully indexed {success_count} documents.")
 
     return success_count
 
