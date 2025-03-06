@@ -74,9 +74,7 @@ def handler(
 
     extracted_data = extract_data(config.is_local)
     transformed_data = transform_data(
-        record_count=extracted_data, 
-        shard_size=config.shard_size, 
-        job_id=event.job_id
+        record_count=extracted_data, shard_size=config.shard_size, job_id=event.job_id
     )
     result = [e.model_dump() for e in transformed_data]
 

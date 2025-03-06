@@ -81,15 +81,12 @@ def handler(
     s3_url = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
 
     extracted_data = extract_data(
-        start_offset=event.start_offset, 
-        end_index=event.end_index, 
-        is_local=config.is_local
+        start_offset=event.start_offset,
+        end_index=event.end_index,
+        is_local=config.is_local,
     )
     transformed_data = transform_data(extracted_data)
-    result = load_data(
-        s3_url=s3_url, 
-        data=transformed_data
-    )
+    result = load_data(s3_url=s3_url, data=transformed_data)
 
     print(f"Data loaded successfully, wrote {len(result)} records to {s3_url}.")
 
