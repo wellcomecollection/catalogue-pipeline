@@ -21,7 +21,6 @@ import utils.elasticsearch
 class IngestorIndexerLambdaEvent(BaseModel):
     s3_url: str
 
-
 class IngestorIndexerConfig(BaseModel):
     pipeline_date: str | None = INGESTOR_PIPELINE_DATE
     is_local: bool = False

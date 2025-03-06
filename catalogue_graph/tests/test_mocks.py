@@ -37,8 +37,6 @@ class MockSmartOpen:
         else:
             raise ValueError(f"Unsupported content type!")
 
-
-
     @classmethod
     def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
         print(f"Opening {uri} in mode {mode}")
