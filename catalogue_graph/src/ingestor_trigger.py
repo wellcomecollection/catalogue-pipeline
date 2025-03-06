@@ -72,12 +72,15 @@ def handler(
 ) -> list[dict]:
     print(f"Received event: {event} with config {config}")
 
-    result = transform_data(
-        extract_data(config.is_local), config.shard_size, event.job_id
+    extracted_data = extract_data(config.is_local)
+    transformed_data = transform_data(
+        record_count=extracted_data, shard_size=config.shard_size, job_id=event.job_id
     )
+    result = [e.model_dump() for e in transformed_data]
 
-    print("Shard ranges generated successfully.")
-    return [e.model_dump() for e in result]
+    print(f"Shard ranges ({len(result)}) generated successfully.")
+
+    return result
 
 
 def lambda_handler(

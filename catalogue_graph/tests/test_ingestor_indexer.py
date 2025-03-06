@@ -17,7 +17,7 @@ def test_ingestor_indexer_success() -> None:
     
     result = handler(event, config)
 
-    expected_bulk_data = [{
+    expected_bulk_input = [{
       "_index": "concepts-indexed",
       "_id": "a2233f9d",
       "_source": {
@@ -123,9 +123,7 @@ def test_ingestor_indexer_success() -> None:
 
     assert len(MockElasticsearchClient.inputs) == 4
     assert result == 4 # success count 
-    assert MockElasticsearchClient.inputs == expected_bulk_data
-
-    # MockElasticsearchClient.bulk.called_once_with(expected_bulk_data)
+    assert MockElasticsearchClient.inputs == expected_bulk_input
 
 def build_test_matrix() -> list[tuple]:
     return [
