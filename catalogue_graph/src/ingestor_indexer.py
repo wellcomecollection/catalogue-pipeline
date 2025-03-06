@@ -70,11 +70,15 @@ def load_data(
 
 def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
     print(f"Received event: {event} with config {config}")
+    
+    extracted_data = extract_data(event.s3_url)
+    transformed_data = transform_data(extracted_data)
     success_count = load_data(
-        transform_data(extract_data(event.s3_url)),
-        config.pipeline_date,
-        config.is_local,
+        concepts=transformed_data, 
+        pipeline_date=config.pipeline_date, 
+        is_local=config.is_local
     )
+
     print("Data loaded successfully.")
 
     return success_count
