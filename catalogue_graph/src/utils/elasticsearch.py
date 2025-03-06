@@ -1,4 +1,4 @@
-from elasticsearch import Elasticsearch
+import elasticsearch
 from pydantic import BaseModel
 
 from config import (
@@ -21,7 +21,7 @@ class ElasticsearchClient:
     def __init__(self, config: ElasticsearchConfig) -> None:
         host_config = f"{config.scheme}://{config.host}:{config.port}"
         print(f"Creating Elasticsearch client for {host_config}")
-        self.client = Elasticsearch(host_config, api_key=config.apikey)
+        self.client = elasticsearch.Elasticsearch(host_config, api_key=config.apikey)
 
 
 def get_pipeline_config(pipeline_date: str, is_local: bool) -> ElasticsearchConfig:
@@ -41,7 +41,7 @@ def get_pipeline_config(pipeline_date: str, is_local: bool) -> ElasticsearchConf
 
 def get_client(
     pipeline_date: str | None = None, is_local: bool = False
-) -> Elasticsearch:
+) -> elasticsearch.Elasticsearch:
     config = (
         ElasticsearchConfig()
         if pipeline_date is None

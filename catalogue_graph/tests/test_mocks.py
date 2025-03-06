@@ -2,6 +2,7 @@ import gzip
 import io
 import os
 import tempfile
+import json
 from typing import Any, TypedDict
 
 from botocore.credentials import Credentials
@@ -29,8 +30,15 @@ class MockSmartOpen:
         cls.file_lookup = {}
 
     @classmethod
-    def mock_s3_file(cls, uri: str, content: str = "") -> None:
-        cls.file_lookup[uri] = io.StringIO(content)
+    def mock_s3_file(cls, uri: str, content: str | bytes) -> None:
+        if isinstance(content, str):
+            cls.file_lookup[uri] = io.StringIO(content)
+        elif isinstance(content, bytes):
+            cls.file_lookup[uri] = io.BytesIO(content)
+        else:
+            raise ValueError(f"Unsupported content type!")
+
+
 
     @classmethod
     def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
@@ -55,7 +63,6 @@ class MockSmartOpen:
             raise ValueError(f"Unsupported file mode: {mode}")
 
         return cls.file_lookup[uri]
-
 
 class MockAwsService:
     def __init__(self) -> None:
@@ -225,3 +232,30 @@ class MockRequest:
         params: dict | None = None,
     ) -> MockResponse:
         return MockRequest.request("GET", url, stream, data, headers, params)
+
+class MockBulkResponse:
+    def __init__(
+        self,
+        data
+    ) -> None:
+        self.body = {
+            "items": data
+        }
+
+class MockElasticsearchClient():
+    inputs: list[dict] = []
+
+    def __init__(self, config, api_key):
+        pass
+        
+    @classmethod
+    def bulk(cls, _, operations):
+        print("!!!!!!!!!!!!!", operations)
+        # cls.inputs.append(list(operations))
+        for op in operations:
+            cls.inputs.append(op)
+        return (len(cls.inputs), None)
+
+    @classmethod
+    def reset_mocks(cls) -> None:
+        cls.inputs = [] 

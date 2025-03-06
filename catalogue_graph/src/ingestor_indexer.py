@@ -1,20 +1,21 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import typing
 from collections.abc import Generator
 
 import boto3
 import polars as pl
 import smart_open
-from elasticsearch.helpers import bulk
+import elasticsearch.helpers
 from polars import DataFrame
 from pydantic import BaseModel
 
 from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
-from utils import elasticsearch
+import utils.elasticsearch
 
 
 class IngestorIndexerLambdaEvent(BaseModel):
@@ -52,17 +53,17 @@ def load_data(
         else f"concepts-indexed-{pipeline_date}"
     )
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
-    es = elasticsearch.get_client(pipeline_date, is_local)
+    es = utils.elasticsearch.get_client(pipeline_date, is_local)
 
     def generate_data() -> Generator[dict]:
         for concept in concepts:
             yield {
                 "_index": index_name,
                 "_id": concept.query.id,
-                "_source": concept.model_dump_json(),
+                "_source": json.loads(concept.model_dump_json()),
             }
 
-    success_count, _ = bulk(es, generate_data())
+    success_count, _ = elasticsearch.helpers.bulk(es, generate_data())
 
     print(f"Successfully indexed {success_count} documents.")
     return success_count
