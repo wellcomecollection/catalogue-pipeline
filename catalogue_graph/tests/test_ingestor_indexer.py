@@ -1,6 +1,7 @@
 import pytest
 import polars
 
+from typing import Any
 from test_utils import load_fixture
 from test_mocks import MockElasticsearchClient, MockSmartOpen
 from ingestor_indexer import handler, IngestorIndexerLambdaEvent, IngestorIndexerConfig
@@ -133,6 +134,7 @@ def build_test_matrix() -> list[tuple]:
             IngestorIndexerLambdaEvent(
                 s3_url="s3://test-catalogue-graph/ghost-file"
             ),
+            None,
             KeyError,
             'Mock S3 file s3://test-catalogue-graph/ghost-file does not exist.'
         ),
@@ -141,6 +143,7 @@ def build_test_matrix() -> list[tuple]:
             IngestorIndexerLambdaEvent(
                 s3_url="s3://test-catalogue-graph/catalogue_example.json"
             ),
+            "catalogue_example.json",
             polars.exceptions.ComputeError,
             'parquet: File out of specification: The file must end with PAR1'
         )
@@ -150,25 +153,26 @@ def get_test_id(argvalue: str) -> str:
     return argvalue
 
 @pytest.mark.parametrize(
-    "description,event,expected_error,error_message",
+    "description,event,fixture,expected_error,error_message",
     build_test_matrix(),
     ids=get_test_id,
 )
 
 def test_ingestor_indexer_failure(
-    description,
-    event,
-    expected_error,
-    error_message
+    description: str,
+    event: IngestorIndexerLambdaEvent,
+    fixture: str,
+    expected_error: Any | tuple,
+    error_message: str
 ) -> None:
     config = IngestorIndexerConfig()
     
 
-    with pytest.raises(expected_exception=expected_error, match=error_message):  # type: ignore[unreachable]
+    with pytest.raises(expected_exception=expected_error, match=error_message):
         if description != "the file at s3_url doesn't exist":
             MockSmartOpen.mock_s3_file(
               event.s3_url,
-              load_fixture("catalogue_example.json")
+              load_fixture(fixture)
             )
         MockSmartOpen.open(event.s3_url, "r")
         

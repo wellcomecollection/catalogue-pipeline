@@ -2,8 +2,7 @@ import gzip
 import io
 import os
 import tempfile
-import json
-from typing import Any, TypedDict
+from typing import Any, TypedDict, Generator
 
 from botocore.credentials import Credentials
 
@@ -234,10 +233,7 @@ class MockRequest:
         return MockRequest.request("GET", url, stream, data, headers, params)
 
 class MockBulkResponse:
-    def __init__(
-        self,
-        data
-    ) -> None:
+    def __init__(self, data: Any ) -> None:
         self.body = {
             "items": data
         }
@@ -245,13 +241,11 @@ class MockBulkResponse:
 class MockElasticsearchClient():
     inputs: list[dict] = []
 
-    def __init__(self, config, api_key):
+    def __init__(self, config: dict, api_key: str) -> None:
         pass
         
     @classmethod
-    def bulk(cls, _, operations):
-        print("!!!!!!!!!!!!!", operations)
-        # cls.inputs.append(list(operations))
+    def bulk(cls, _: Any, operations: Generator[dict]) -> tuple[int, None]:
         for op in operations:
             cls.inputs.append(op)
         return (len(cls.inputs), None)
