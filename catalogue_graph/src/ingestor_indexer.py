@@ -59,7 +59,7 @@ def load_data(
             yield {
                 "_index": index_name,
                 "_id": concept.query.id,
-                "_source": json.loads(concept.model_dump_json()),
+                "_source": concept.model_dump(),
             }
 
     success_count, _ = elasticsearch.helpers.bulk(es, generate_data())
@@ -78,7 +78,7 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
         pipeline_date=config.pipeline_date,
         is_local=config.is_local,
     )
-    
+
     print("Data loaded successfully.")
 
     return success_count
