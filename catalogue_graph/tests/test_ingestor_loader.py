@@ -150,7 +150,7 @@ def test_ingestor_trigger(
     expected_concept: CatalogueConcept,
 ) -> None:
     if expected_output is not None:
-        MockSmartOpen.mock_s3_file(expected_output.s3_url)
+        MockSmartOpen.mock_s3_file(expected_output.s3_url, "")
 
     MockRequest.mock_responses(
         [
