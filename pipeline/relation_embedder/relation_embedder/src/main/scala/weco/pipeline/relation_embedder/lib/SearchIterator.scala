@@ -1,6 +1,11 @@
 package weco.pipeline.relation_embedder.lib
 
-import com.sksamuel.elastic4s.{ElasticClient, HitReader, RequestFailure, RequestSuccess}
+import com.sksamuel.elastic4s.{
+  ElasticClient,
+  HitReader,
+  RequestFailure,
+  RequestSuccess
+}
 import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchRequest}
 
 import scala.concurrent.Await
@@ -10,17 +15,22 @@ import scala.concurrent.duration.Duration
 // It is modified to allow the scroll context to be closed when the iterator is exhausted
 object SearchIterator {
 
-  /**
-   * Creates a new Iterator for instances of SearchHit by wrapping the given HTTP client.
-   */
-  def hits(client: ElasticClient, searchreq: SearchRequest)(implicit timeout: Duration): Iterator[SearchHit] =
+  /** Creates a new Iterator for instances of SearchHit by wrapping the given
+    * HTTP client.
+    */
+  def hits(client: ElasticClient, searchreq: SearchRequest)(
+    implicit timeout: Duration
+  ): Iterator[SearchHit] =
     new Iterator[SearchHit] {
-      require(searchreq.keepAlive.isDefined, "Search request must define keep alive value")
+      require(
+        searchreq.keepAlive.isDefined,
+        "Search request must define keep alive value"
+      )
 
       import com.sksamuel.elastic4s.ElasticDsl._
 
       private var internalIterator: Iterator[SearchHit] = Iterator.empty
-      private var scrollId: Option[String]      = None
+      private var scrollId: Option[String] = None
 
       override def hasNext: Boolean = {
         val hasNext = internalIterator.hasNext || {
@@ -38,9 +48,10 @@ object SearchIterator {
       override def next(): SearchHit = internalIterator.next()
 
       private def closeScroll(): Unit = {
-        scrollId.foreach { id =>
-          val f = client.execute(clearScroll(id))
-          Await.result(f, timeout)
+        scrollId.foreach {
+          id =>
+            val f = client.execute(clearScroll(id))
+            Await.result(f, timeout)
         }
       }
 
@@ -48,8 +59,9 @@ object SearchIterator {
 
         // we're either advancing a scroll id or issuing the first query w/ the keep alive set
         val f = scrollId match {
-          case Some(id) => client.execute(searchScroll(id, searchreq.keepAlive.get))
-          case None     => client.execute(searchreq)
+          case Some(id) =>
+            client.execute(searchScroll(id, searchreq.keepAlive.get))
+          case None => client.execute(searchreq)
         }
 
         val resp = Await.result(f, timeout)
@@ -65,13 +77,13 @@ object SearchIterator {
       }
     }
 
-  /**
-   * Creates a new Iterator for type T by wrapping the given HTTP client.
-   * A typeclass HitReader[T] must be provided for marshalling of the search
-   * responses into instances of type T.
-   */
-  def iterate[T](client: ElasticClient, searchreq: SearchRequest)(implicit
-                                                                  reader: HitReader[T],
-                                                                  timeout: Duration): Iterator[T] =
+  /** Creates a new Iterator for type T by wrapping the given HTTP client. A
+    * typeclass HitReader[T] must be provided for marshalling of the search
+    * responses into instances of type T.
+    */
+  def iterate[T](client: ElasticClient, searchreq: SearchRequest)(
+    implicit reader: HitReader[T],
+    timeout: Duration
+  ): Iterator[T] =
     hits(client, searchreq).map(_.to[T])
 }
