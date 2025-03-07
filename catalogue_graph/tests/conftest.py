@@ -3,7 +3,13 @@ from typing import Any
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from test_mocks import MockBoto3Session, MockRequest, MockSmartOpen, MockSNSClient
+from test_mocks import (
+    MockBoto3Session,
+    MockElasticsearchClient,
+    MockRequest,
+    MockSmartOpen,
+    MockSNSClient,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -13,6 +19,8 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     monkeypatch.setattr("requests.request", MockRequest.request)
     monkeypatch.setattr("requests.get", MockRequest.get)
     monkeypatch.setattr("smart_open.open", MockSmartOpen.open)
+    monkeypatch.setattr("elasticsearch.Elasticsearch", MockElasticsearchClient)
+    monkeypatch.setattr("elasticsearch.helpers.bulk", MockElasticsearchClient.bulk)
 
     monkeypatch.setattr("config.S3_BULK_LOAD_BUCKET_NAME", "bulk_load_test_bucket")
     monkeypatch.setattr(
@@ -23,5 +31,6 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     MockRequest.reset_mocks()
     MockSmartOpen.reset_mocks()
     MockSNSClient.reset_mocks()
+    MockElasticsearchClient.reset_mocks()
     yield
     # Run any cleanup code here

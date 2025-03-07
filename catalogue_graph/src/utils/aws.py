@@ -80,12 +80,12 @@ def fetch_transformer_output_from_s3(
         return
 
     linked_nodes_file_name = f"{source}_{node_type}__nodes.csv"
-    s3_url = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
+    s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
     print(f"Retrieving ids of type '{node_type}' from ontology '{source}' from S3.")
 
     transport_params = {"client": boto3.client("s3")}
-    with smart_open.open(s3_url, "r", transport_params=transport_params) as f:
+    with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
         csv_reader = csv.DictReader(f)
 
         yield from csv_reader

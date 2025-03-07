@@ -1,5 +1,8 @@
 import gzip
 import io
+import os
+import tempfile
+from collections.abc import Generator
 from typing import Any, TypedDict
 
 from botocore.credentials import Credentials
@@ -20,20 +23,40 @@ class MockSmartOpen:
 
     @classmethod
     def reset_mocks(cls) -> None:
+        # delete any temp files created
+        for file_path in cls.file_lookup.values():
+            if isinstance(file_path, str):
+                os.remove(file_path)
         cls.file_lookup = {}
 
     @classmethod
-    def mock_s3_file(cls, uri: str, content: str) -> None:
-        cls.file_lookup[uri] = io.StringIO(content)
+    def mock_s3_file(cls, uri: str, content: str | bytes) -> None:
+        if isinstance(content, str):
+            cls.file_lookup[uri] = io.StringIO(content)
+        elif isinstance(content, bytes):
+            cls.file_lookup[uri] = io.BytesIO(content)
+        else:
+            raise ValueError("Unsupported content type!")
 
     @classmethod
     def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
+        print(f"Opening {uri} in mode {mode}")
         if mode == "w":
             # Create an in-memory text stream and save the file object in the file lookup
             cls.file_lookup[uri] = io.StringIO()
+        elif mode == "wb":
+            # Create a temporary file, return a handle and save the location in the file lookup
+            # We're ignoring "SIM115 Use a context manager for opening files" as we need to keep
+            # the file around for the duration of the test, cleaning it up in reset_mocks.
+            temp_file = tempfile.NamedTemporaryFile(delete=False)  # noqa: SIM115
+            cls.file_lookup[uri] = temp_file.name
+            return temp_file
         elif mode == "r":
             if uri not in cls.file_lookup:
                 raise KeyError(f"Mock S3 file {uri} does not exist.")
+            # if the file lookup is a str, then it's a file path and we should open it
+            if isinstance(cls.file_lookup[uri], str):
+                return open(cls.file_lookup[uri], mode)
         else:
             raise ValueError(f"Unsupported file mode: {mode}")
 
@@ -208,3 +231,25 @@ class MockRequest:
         params: dict | None = None,
     ) -> MockResponse:
         return MockRequest.request("GET", url, stream, data, headers, params)
+
+
+class MockBulkResponse:
+    def __init__(self, data: Any) -> None:
+        self.body = {"items": data}
+
+
+class MockElasticsearchClient:
+    inputs: list[dict] = []
+
+    def __init__(self, config: dict, api_key: str) -> None:
+        pass
+
+    @classmethod
+    def bulk(cls, _: Any, operations: Generator[dict]) -> tuple[int, None]:
+        for op in operations:
+            cls.inputs.append(op)
+        return (len(cls.inputs), None)
+
+    @classmethod
+    def reset_mocks(cls) -> None:
+        cls.inputs = []
