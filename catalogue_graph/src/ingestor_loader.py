@@ -58,13 +58,13 @@ def transform_data(neptune_data: list[dict]) -> list[CatalogueConcept]:
     return [CatalogueConcept.from_neptune_result(row) for row in neptune_data]
 
 
-def load_data(s3_url: str, data: list[CatalogueConcept]) -> pl.DataFrame:
-    print(f"Loading data to {s3_url} ...")
+def load_data(s3_uri: str, data: list[CatalogueConcept]) -> pl.DataFrame:
+    print(f"Loading data to {s3_uri} ...")
 
     # using polars write to parquet in S3 using smart_open
     transport_params = {"client": boto3.client("s3")}
 
-    with smart_open.open(s3_url, "wb", transport_params=transport_params) as f:
+    with smart_open.open(s3_uri, "wb", transport_params=transport_params) as f:
         df = pl.DataFrame([e.model_dump() for e in data])
         df.write_parquet(f)
         return df
@@ -78,7 +78,7 @@ def handler(
         f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}.parquet"
     )
     s3_object_key = f"{event.job_id}/{filename}"
-    s3_url = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
+    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
 
     extracted_data = extract_data(
         start_offset=event.start_offset,
@@ -86,11 +86,11 @@ def handler(
         is_local=config.is_local,
     )
     transformed_data = transform_data(extracted_data)
-    result = load_data(s3_url=s3_url, data=transformed_data)
+    result = load_data(s3_uri=s3_uri, data=transformed_data)
 
-    print(f"Data loaded successfully, wrote {len(result)} records to {s3_url}.")
+    print(f"Data loaded successfully, wrote {len(result)} records to {s3_uri}.")
 
-    return IngestorIndexerLambdaEvent(s3_url=s3_url)
+    return IngestorIndexerLambdaEvent(s3_uri=s3_uri)
 
 
 def lambda_handler(event: IngestorLoaderLambdaEvent, context: typing.Any) -> dict:

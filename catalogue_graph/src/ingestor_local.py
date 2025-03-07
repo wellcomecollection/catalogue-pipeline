@@ -52,7 +52,7 @@ def main() -> None:
     loader_results = [loader_handler(e, loader_config) for e in loader_events]
 
     indexer_events = [
-        IngestorIndexerLambdaEvent(s3_url=e.s3_url) for e in loader_results
+        IngestorIndexerLambdaEvent(s3_uri=e.s3_uri) for e in loader_results
     ]
     indexer_config = IngestorIndexerConfig(
         pipeline_date=args.pipeline_date, is_local=True

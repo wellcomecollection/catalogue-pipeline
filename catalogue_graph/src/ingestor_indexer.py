@@ -18,7 +18,7 @@ from models.indexable_concept import IndexableConcept
 
 
 class IngestorIndexerLambdaEvent(BaseModel):
-    s3_url: str
+    s3_uri: str
 
 
 class IngestorIndexerConfig(BaseModel):
@@ -26,11 +26,11 @@ class IngestorIndexerConfig(BaseModel):
     is_local: bool = False
 
 
-def extract_data(s3_url: str) -> DataFrame:
+def extract_data(s3_uri: str) -> DataFrame:
     print("Extracting data from S3 ...")
     transport_params = {"client": boto3.client("s3")}
 
-    with smart_open.open(s3_url, "r", transport_params=transport_params) as f:
+    with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
         df = pl.read_parquet(f)
         print(f"Extracted {len(df)} records.")
 
@@ -70,7 +70,7 @@ def load_data(
 def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
     print(f"Received event: {event} with config {config}")
 
-    extracted_data = extract_data(event.s3_url)
+    extracted_data = extract_data(event.s3_uri)
     transformed_data = transform_data(extracted_data)
     success_count = load_data(
         concepts=transformed_data,
@@ -92,9 +92,9 @@ def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> in
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
-        "--s3-url",
+        "--s3-uri",
         type=str,
-        help="The location of the shard to process.",
+        help="The location of the shard to process, e.g. s3://mybukkit/path/key.parquet",
         required=True,
     )
     args = parser.parse_args()

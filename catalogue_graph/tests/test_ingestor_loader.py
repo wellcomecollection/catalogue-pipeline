@@ -44,7 +44,7 @@ def build_test_matrix() -> list[tuple]:
                 ]
             },
             IngestorIndexerLambdaEvent(
-                s3_url="s3://test-bucket/test-prefix/123/00000000-00000001.parquet",
+                s3_uri="s3://test-bucket/test-prefix/123/00000000-00000001.parquet",
             ),
             CatalogueConcept(
                 id="source_id",
@@ -93,7 +93,7 @@ def build_test_matrix() -> list[tuple]:
                 ]
             },
             IngestorIndexerLambdaEvent(
-                s3_url="s3://test-bucket/test-prefix/123/00000000-00000001.parquet",
+                s3_uri="s3://test-bucket/test-prefix/123/00000000-00000001.parquet",
             ),
             CatalogueConcept(
                 id="source_id",
@@ -150,7 +150,7 @@ def test_ingestor_trigger(
     expected_concept: CatalogueConcept,
 ) -> None:
     if expected_output is not None:
-        MockSmartOpen.mock_s3_file(expected_output.s3_url, "")
+        MockSmartOpen.mock_s3_file(expected_output.s3_uri, "")
 
     MockRequest.mock_responses(
         [
@@ -176,7 +176,7 @@ def test_ingestor_trigger(
         assert request["method"] == "POST"
         assert request["url"] == "https://test-host.com:8182/openCypher"
 
-        with MockSmartOpen.open(expected_output.s3_url, "r") as f:
+        with MockSmartOpen.open(expected_output.s3_uri, "r") as f:
             df = pl.read_parquet(f)
             assert len(df) == 1
 

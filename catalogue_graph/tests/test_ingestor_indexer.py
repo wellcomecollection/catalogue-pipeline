@@ -11,13 +11,13 @@ from ingestor_indexer import IngestorIndexerConfig, IngestorIndexerLambdaEvent, 
 def test_ingestor_indexer_success() -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
-        s3_url="s3://test-catalogue-graph/00000000-00000004.parquet"
+        s3_uri="s3://test-catalogue-graph/00000000-00000004.parquet"
     )
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000004.parquet",
         load_fixture("00000000-00000004.parquet"),
     )
-    MockSmartOpen.open(event.s3_url, "r")
+    MockSmartOpen.open(event.s3_uri, "r")
 
     result = handler(event, config)
 
@@ -128,8 +128,8 @@ def test_ingestor_indexer_success() -> None:
 def build_test_matrix() -> list[tuple]:
     return [
         (
-            "the file at s3_url doesn't exist",
-            IngestorIndexerLambdaEvent(s3_url="s3://test-catalogue-graph/ghost-file"),
+            "the file at s3_uri doesn't exist",
+            IngestorIndexerLambdaEvent(s3_uri="s3://test-catalogue-graph/ghost-file"),
             None,
             KeyError,
             "Mock S3 file s3://test-catalogue-graph/ghost-file does not exist.",
@@ -137,7 +137,7 @@ def build_test_matrix() -> list[tuple]:
         (
             "the S3 file doesn't contain valid data",
             IngestorIndexerLambdaEvent(
-                s3_url="s3://test-catalogue-graph/catalogue_example.json"
+                s3_uri="s3://test-catalogue-graph/catalogue_example.json"
             ),
             "catalogue_example.json",
             polars.exceptions.ComputeError,
@@ -165,8 +165,8 @@ def test_ingestor_indexer_failure(
     config = IngestorIndexerConfig()
 
     with pytest.raises(expected_exception=expected_error, match=error_message):
-        if description != "the file at s3_url doesn't exist":
-            MockSmartOpen.mock_s3_file(event.s3_url, load_fixture(fixture))
-        MockSmartOpen.open(event.s3_url, "r")
+        if description != "the file at s3_uri doesn't exist":
+            MockSmartOpen.mock_s3_file(event.s3_uri, load_fixture(fixture))
+        MockSmartOpen.open(event.s3_uri, "r")
 
         handler(event, config)
