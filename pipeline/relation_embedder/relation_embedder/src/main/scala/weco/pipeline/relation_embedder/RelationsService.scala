@@ -4,17 +4,15 @@ import org.apache.pekko.NotUsed
 import org.apache.pekko.stream.scaladsl.Source
 import com.sksamuel.elastic4s.ElasticDsl._
 import com.sksamuel.elastic4s.circe._
-import com.sksamuel.elastic4s.{ElasticClient, HitReader, Index, RequestFailure, RequestSuccess}
+import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
-import com.sksamuel.elastic4s.requests.searches.{SearchHit, SearchRequest}
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.relation_embedder.lib.SearchIterator
 import weco.pipeline.relation_embedder.models.{Batch, RelationWork}
 
-import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, DurationInt}
 
 trait RelationsService {
