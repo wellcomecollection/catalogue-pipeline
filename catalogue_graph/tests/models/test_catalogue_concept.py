@@ -3,7 +3,14 @@ from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifie
 
 def test_catalogue_concept_from_neptune_result() -> None:
     neptune_result = {
-        "source": {"~properties": {"id": "id", "label": "label", "type": "type", "description": "description"}},
+        "source": {
+            "~properties": {
+                "id": "id",
+                "label": "label",
+                "type": "type",
+                "description": "description",
+            }
+        },
         "targets": [
             {
                 "~properties": {
@@ -27,7 +34,14 @@ def test_catalogue_concept_from_neptune_result() -> None:
 
 def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
     neptune_result = {
-        "source": {"~properties": {"id": "id", "label": "label", "type": "type", "description":"description"}},
+        "source": {
+            "~properties": {
+                "id": "id",
+                "label": "label",
+                "type": "type",
+                "description": "description",
+            }
+        },
         "targets": [
             {
                 "~properties": {

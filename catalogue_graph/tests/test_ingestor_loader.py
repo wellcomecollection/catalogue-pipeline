@@ -1,9 +1,10 @@
 import polars as pl
 import pytest
+from test_mocks import MockRequest, MockSmartOpen
+
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import IngestorLoaderConfig, IngestorLoaderLambdaEvent, handler
 from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifier
-from test_mocks import MockRequest, MockSmartOpen
 
 
 def build_test_matrix() -> list[tuple]:
@@ -27,7 +28,7 @@ def build_test_matrix() -> list[tuple]:
                                 "id": "source_id",
                                 "label": "label",
                                 "type": "type",
-                                "description": "description"
+                                "description": "description",
                             }
                         },
                         "relationships": [],

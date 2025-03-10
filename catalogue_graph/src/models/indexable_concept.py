@@ -70,6 +70,6 @@ class IndexableConcept(BaseModel):
                 label=concept.label,
                 alternativeLabels=concept.alternativeLabels,
                 type=concept.type,
-                description=concept.description
+                description=concept.description,
             ),
         )
