@@ -52,7 +52,7 @@ module "id_minter_lambda" {
   queue_config = {
     topic_arns          = local.transformer_output_topic_arns
     max_receive_count   = 3
-    maximum_concurrency = 10
+    maximum_concurrency = 30
     batch_size          = 75
 
     visibility_timeout_seconds = 60 * 5 # 10 Minutes, same or higher than lambda timeout
