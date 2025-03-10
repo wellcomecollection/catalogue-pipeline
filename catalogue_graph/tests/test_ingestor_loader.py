@@ -28,6 +28,7 @@ def build_test_matrix() -> list[tuple]:
                                 "id": "source_id",
                                 "label": "label",
                                 "type": "type",
+                                "description": "description",
                             }
                         },
                         "relationships": [],
@@ -51,6 +52,7 @@ def build_test_matrix() -> list[tuple]:
                 label="label",
                 type="type",
                 alternativeLabels=["alternative_label", "another_alternative_label"],
+                description="description",
                 identifiers=[
                     CatalogueConceptIdentifier(
                         value="456",
@@ -77,6 +79,7 @@ def build_test_matrix() -> list[tuple]:
                             "~properties": {
                                 "id": "source_id",
                                 "label": "label",
+                                "description": "description",
                                 "type": "type",
                             }
                         },
@@ -98,6 +101,7 @@ def build_test_matrix() -> list[tuple]:
             CatalogueConcept(
                 id="source_id",
                 label="label",
+                description="description",
                 type="type",
                 alternativeLabels=[],
                 identifiers=[

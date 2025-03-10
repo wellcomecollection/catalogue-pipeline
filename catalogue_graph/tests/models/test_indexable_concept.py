@@ -16,6 +16,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         ],
         label="label",
         alternativeLabels=["alternativeLabels"],
+        description="description",
         type="type",
     )
 
@@ -34,6 +35,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             identifiers=[ConceptDisplayIdentifier(id="value", label="identifierType")],
             label="label",
             alternativeLabels=["alternativeLabels"],
+            description="description",
             type="type",
         ),
     )

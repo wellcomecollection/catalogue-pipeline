@@ -1,4 +1,5 @@
 from dataclasses import field
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -34,6 +35,7 @@ class ConceptDisplay(BaseModel):
     identifiers: list[ConceptDisplayIdentifier]
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
+    description: Optional[str]
     type: str
 
 
@@ -69,5 +71,6 @@ class IndexableConcept(BaseModel):
                 label=concept.label,
                 alternativeLabels=concept.alternativeLabels,
                 type=concept.type,
+                description=concept.description,
             ),
         )
