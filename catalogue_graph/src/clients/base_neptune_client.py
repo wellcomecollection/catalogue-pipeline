@@ -12,6 +12,7 @@ from botocore.awsrequest import AWSRequest
 NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
 
+DELETE_BATCH_SIZE = 10000
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
@@ -175,3 +176,22 @@ class BaseNeptuneClient:
         response = self._make_request("GET", "/loader")
         payload: list[str] = response["payload"]
         return payload
+
+    def count_nodes_wih_label(self, label: str) -> int:
+        """Returns the number of nodes which have the specified label."""
+        count_query = f"""
+            MATCH (n:{label}) RETURN COUNT(*) AS count;
+        """
+        count: int = self.run_open_cypher_query(count_query)[0]["count"]
+        return count
+
+    def delete_all_nodes_with_label(self, label: str) -> None:
+        """Removes all nodes with the specified label from the graph in batches."""
+        while (c := self.count_nodes_wih_label(label)) > 0:
+            print(f"Remaining nodes with label '{label}': {c}.")
+            delete_query = f"""
+                MATCH (n:{label}) WITH n ORDER BY n.id LIMIT {DELETE_BATCH_SIZE} DETACH DELETE n;
+            """
+            self.run_open_cypher_query(delete_query)
+    
+        print(f"Removed all nodes with label '{label}'.")
