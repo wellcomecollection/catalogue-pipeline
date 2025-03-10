@@ -14,6 +14,7 @@ NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
 
 DELETE_BATCH_SIZE = 10000
 
+
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
     print(f"Neptune request failed due to '{exception_name}'. Retrying...")
@@ -193,5 +194,5 @@ class BaseNeptuneClient:
                 MATCH (n:{label}) WITH n ORDER BY n.id LIMIT {DELETE_BATCH_SIZE} DETACH DELETE n;
             """
             self.run_open_cypher_query(delete_query)
-    
+
         print(f"Removed all nodes with label '{label}'.")
