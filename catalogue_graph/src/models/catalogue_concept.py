@@ -13,6 +13,7 @@ class CatalogueConcept(BaseModel):
     identifiers: list[CatalogueConceptIdentifier] = field(default_factory=list)
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
+    description: str
     type: str
 
     @classmethod
@@ -37,5 +38,6 @@ class CatalogueConcept(BaseModel):
             label=data["source"]["~properties"]["label"],
             type=data["source"]["~properties"]["type"],
             alternativeLabels=alternative_labels,
+            description=data["source"]["~properties"]["description"],
             identifiers=identifiers,
         )

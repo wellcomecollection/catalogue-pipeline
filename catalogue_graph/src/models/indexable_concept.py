@@ -34,6 +34,7 @@ class ConceptDisplay(BaseModel):
     identifiers: list[ConceptDisplayIdentifier]
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
+    description: str
     type: str
 
 
@@ -69,5 +70,6 @@ class IndexableConcept(BaseModel):
                 label=concept.label,
                 alternativeLabels=concept.alternativeLabels,
                 type=concept.type,
+                description=concept.description
             ),
         )
