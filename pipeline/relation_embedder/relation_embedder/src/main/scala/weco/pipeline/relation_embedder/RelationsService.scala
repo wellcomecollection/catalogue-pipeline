@@ -8,9 +8,9 @@ import com.sksamuel.elastic4s.{ElasticClient, Index}
 import grizzled.slf4j.Logging
 import weco.json.JsonUtil._
 import weco.catalogue.internal_model.Implicits._
-import com.sksamuel.elastic4s.requests.searches.SearchIterator
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.Work
+import weco.pipeline.relation_embedder.lib.SearchIterator
 import weco.pipeline.relation_embedder.models.{Batch, RelationWork}
 
 import scala.concurrent.duration.{Duration, DurationInt}
