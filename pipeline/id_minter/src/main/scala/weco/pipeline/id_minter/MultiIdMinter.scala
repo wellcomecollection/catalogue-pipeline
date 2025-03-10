@@ -36,8 +36,11 @@ class MultiIdMinter(
     implicit ec: ExecutionContext
   ): Future[Iterable[Either[String, Work[Identified]]]] = {
 
+    // clean up the identifiers
+    val cleanIdentifiers = identifiers.map(_.strip())
+
     // run through the happy path (logging, but otherwise ignoring exceptions as we go)
-    val futureSuccesses = jsonRetriever(identifiers.map(_.strip()))
+    val futureSuccesses = jsonRetriever(cleanIdentifiers)
       .map {
         result: RetrieverMultiResult[Json] =>
           // At this point, it would be possible to collect the failed identifiers,
@@ -65,7 +68,7 @@ class MultiIdMinter(
         val successfulIds =
           seqWorks.map(_.right.get.sourceIdentifier.toString)
         // populate a Seq of Lefts with any input identifier that is not in the successful set
-        val failedIds = identifiers.toSet -- successfulIds
+        val failedIds = cleanIdentifiers.toSet -- successfulIds
         // bang together the Rights and the Lefts and return the lot.
         seqWorks ++ failedIds.map(Left(_))
     }

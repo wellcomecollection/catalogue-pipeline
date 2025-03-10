@@ -62,6 +62,20 @@ class MultiIdMinterTest
           ) should contain theSameElementsAs idMap.keys
       }
     }
+
+    it("ignores spaces in identifiers passed to processSourceIds") {
+      val idsWithSpaces = allUpstreamIds.map(" " + _ + " ")
+
+      whenReady(
+        multiMinter(jsonRetriever, idMap).processSourceIds(idsWithSpaces)
+      ) {
+        result =>
+          val r = result.toSeq
+          r.map(
+            _.right.get.sourceIdentifier
+          ) should contain theSameElementsAs idMap.keys
+      }
+    }
   }
 
   describe(
