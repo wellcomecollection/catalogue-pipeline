@@ -5,10 +5,11 @@ resource "aws_sfn_state_machine" "concepts_pipeline" {
   definition = jsonencode({
     Comment = "Build the catalogue graph and ingest concepts into ES",
     QueryLanguage = "JSONata"
-    StartAt = "Extractors"
+    StartAt = "Build graph"
     States = {
-      "Extractors" = {
+      "Build graph" = {
         Type           = "Map",
+        MaxConcurrency = 1 # ensures nodes and edges are extarcted and loaded in the desired order
         ItemProcessor  = {
           StartAt = "Extract nodes and edges from source",
           States = {
@@ -18,19 +19,12 @@ resource "aws_sfn_state_machine" "concepts_pipeline" {
               Arguments = {
                 StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn,
                 Payload = "{% $states.input %}"
+                Input = {
+                  stream_destination = "s3"
+                }
               },
-              End = true
-            }
-          }
-        } 
-        Next = "Bulk loaders"
-      },
-      "Bulk loaders" = {
-        Type           = "Map",
-        MaxConcurrency = 1 # ensures nodes and edges are loaded in the desired order
-        ItemProcessor  = {
-          StartAt = "Load Neptune graph from S3",
-          States = {
+              Next = "Load Neptune graph from S3"
+            },
             "Load Neptune graph from S3" = {
               Type = "Task",
               Resource = "arn:aws:states:::states:startExecution.sync:2",
@@ -55,6 +49,6 @@ resource "aws_sfn_state_machine" "concepts_pipeline" {
       Success = {
         Type = "Succeed"
       }
-    },
+    }
   })
 }
