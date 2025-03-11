@@ -20,7 +20,7 @@ resource "aws_sfn_state_machine" "concepts_pipeline" {
                 StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn,
                 Payload = "{% $states.input %}"
                 Input = {
-                  stream_destination = "s3"
+                  "stream_destination" : "s3"
                 }
               },
               Next = "Load Neptune graph from S3"
