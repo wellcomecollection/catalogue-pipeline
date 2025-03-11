@@ -33,7 +33,8 @@ resource "aws_iam_policy" "state_machine_policy" {
           aws_sfn_state_machine.catalogue_graph_extractors.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loader.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loaders.arn,
-          aws_sfn_state_machine.catalogue_graph_ingestor.arn
+          aws_sfn_state_machine.catalogue_graph_ingestor.arn,
+          aws_sfn_state_machine.concepts_pipeline.arn
         ]
       },
       {

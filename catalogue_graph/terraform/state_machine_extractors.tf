@@ -14,10 +14,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors" {
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
           Input = {
-            "stream_destination" : "s3",
             "transformer_type.$" : "$$.Execution.Input.transformer_type",
             "entity_type.$" : "$$.Execution.Input.entity_type",
-            "sample_size.$" : "$$.Execution.Input.sample_size"
           }
         }
         Next = index == length(var.state_machine_inputs) - 1 ? "Success" : "Extract ${var.state_machine_inputs[index + 1].label}"
