@@ -8,6 +8,7 @@ from models.catalogue_concept import CatalogueConcept
 # Query
 
 
+
 class ConceptQueryIdentifier(BaseModel):
     value: str
     identifierType: str
@@ -24,10 +25,38 @@ class ConceptQuery(BaseModel):
 # Display
 
 
-class ConceptDisplayIdentifier(BaseModel):
+class ConceptDisplayIdentifierType(BaseModel):
     id: str
     label: str
     type: str = "IdentifierType"
+
+    @classmethod
+    def from_source_type(cls, source_type: str) -> "ConceptDisplayIdentifierType":
+        if source_type == "label-derived":
+            label = "Identifier derived from the label of the referent"
+        elif source_type == "nlm-mesh":
+            label = "Medical Subject Headings (MeSH) identifier"
+        elif source_type == "lc-names":
+            label = "Library of Congress Name authority records"
+        elif source_type == "lc-subjects":
+            label = "Library of Congress Subject Headings (LCSH)"
+        elif source_type == "viaf":
+            label = "VIAF: The Virtual International Authority File"
+        elif source_type == "fihrist":
+            label = "Fihrist Authority"
+        else:
+            raise ValueError(f"Unknown source concept type: {source_type}.")
+
+        return ConceptDisplayIdentifierType(
+            id=source_type,
+            label=label
+        )
+
+
+class ConceptDisplayIdentifier(BaseModel):
+    value: str
+    type: str = "Identifier"
+    identifierType: ConceptDisplayIdentifierType
 
 
 class ConceptDisplay(BaseModel):
@@ -52,7 +81,8 @@ class IndexableConcept(BaseModel):
                 id=concept.id,
                 identifiers=[
                     ConceptQueryIdentifier(
-                        value=identifier.value, identifierType=identifier.identifierType
+                        value=identifier.value,
+                        identifierType=identifier.identifierType
                     )
                     for identifier in concept.identifiers
                 ],
@@ -64,7 +94,7 @@ class IndexableConcept(BaseModel):
                 id=concept.id,
                 identifiers=[
                     ConceptDisplayIdentifier(
-                        id=identifier.value, label=identifier.identifierType
+                        value=identifier.value, identifierType=ConceptDisplayIdentifierType.from_source_type(identifier.identifierType)
                     )
                     for identifier in concept.identifiers
                 ],

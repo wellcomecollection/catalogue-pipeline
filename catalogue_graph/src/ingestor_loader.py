@@ -7,11 +7,10 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.catalogue_concept import CatalogueConcept
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -36,8 +35,8 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> list[dict
 
     open_cypher_match_query = f"""
     MATCH (concept:Concept)
-    OPTIONAL MATCH (concept)-[r:HAS_SOURCE_CONCEPT]->(source_concept)
-    RETURN concept, collect(source_concept) as source_concepts
+    OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
+    RETURN concept, collect(DISTINCT source_concept) AS source_concepts
     ORDER BY concept.id
     SKIP {start_offset} LIMIT {limit}
     """

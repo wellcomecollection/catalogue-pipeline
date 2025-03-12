@@ -28,7 +28,7 @@ class CatalogueConcept(BaseModel):
     def from_neptune_result(cls, data: dict) -> "CatalogueConcept":
         descriptions = {}
         identifiers = []
-        alternative_labels = set()
+        alternative_labels = []
         for source_concept in data["source_concepts"]:
             properties = source_concept["~properties"]
             source = properties["source"]
@@ -44,13 +44,13 @@ class CatalogueConcept(BaseModel):
 
             for label in properties.get("alternative_labels", "").split("||"):
                 if len(label) > 0:
-                    alternative_labels.add(label)
+                    alternative_labels.append(label)
 
         return CatalogueConcept(
             id=data["concept"]["~properties"]["id"],
             label=data["concept"]["~properties"].get("label", ""),
             type=data["concept"]["~properties"]["type"],
-            alternativeLabels=list(alternative_labels),
+            alternativeLabels=alternative_labels,
             description=get_priority_source_concept_value(descriptions),
             identifiers=identifiers,
         )
