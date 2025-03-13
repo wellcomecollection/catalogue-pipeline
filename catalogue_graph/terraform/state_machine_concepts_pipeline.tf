@@ -4,7 +4,6 @@ resource "aws_sfn_state_machine" "concepts_pipeline_monthly" {
 
   definition = jsonencode({
     Comment = "Extract raw concepts from external sources, transform them into nodes and edges, and load them into the graph",
-    QueryLanguage = "JSONata"
     StartAt = "Extractors"
     States = {
       "Extractors" = {
@@ -36,7 +35,6 @@ resource "aws_sfn_state_machine" "concepts_pipeline_daily" {
 
   definition = jsonencode({
     Comment = "Extract concepts from catalogue works, load them into the graph, and ingests into ES index.",
-    QueryLanguage = "JSONata"
     StartAt = "Extractors"
     States = {
       "Extractors" = {
@@ -58,7 +56,7 @@ resource "aws_sfn_state_machine" "concepts_pipeline_daily" {
       "Concepts ingestor" = {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
-        Arguments = {
+        Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_ingestor.arn,
         }
         Next = "Success"
