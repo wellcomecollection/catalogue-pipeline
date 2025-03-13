@@ -110,7 +110,7 @@ def build_test_matrix() -> list[tuple]:
                                     "description": "description",
                                 }
                             }
-                        ],                        
+                        ],
                     }
                 ]
             },

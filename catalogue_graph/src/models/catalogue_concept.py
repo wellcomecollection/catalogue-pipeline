@@ -38,7 +38,7 @@ class CatalogueConcept(BaseModel):
         for source_concept in data["linked_source_concepts"]:
             properties = source_concept["~properties"]
             source = properties["source"]
-            
+
             labels[source] = properties.get("label")
             identifiers.append(
                 CatalogueConceptIdentifier(
@@ -56,7 +56,7 @@ class CatalogueConcept(BaseModel):
             properties = source_concept["~properties"]
             source = properties["source"]
             descriptions[source] = properties.get("description")
-                
+
         return CatalogueConcept(
             id=data["concept"]["~properties"]["id"],
             type=data["concept"]["~properties"]["type"],
