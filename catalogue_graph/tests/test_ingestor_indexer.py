@@ -2,9 +2,10 @@ from typing import Any
 
 import polars
 import pytest
-from ingestor_indexer import IngestorIndexerConfig, IngestorIndexerLambdaEvent, handler
 from test_mocks import MockElasticsearchClient, MockSmartOpen
 from test_utils import load_fixture
+
+from ingestor_indexer import IngestorIndexerConfig, IngestorIndexerLambdaEvent, handler
 
 
 def test_ingestor_indexer_success() -> None:
@@ -38,7 +39,7 @@ def test_ingestor_indexer_success() -> None:
                     "label": "Circle of State Librarians Conference 1979 : Kew, England)",
                     "alternativeLabels": [],
                     "type": "Meeting",
-                    "description": None
+                    "description": None,
                 },
             },
         },
@@ -64,14 +65,14 @@ def test_ingestor_indexer_success() -> None:
                             "identifierType": {
                                 "id": "lc-names",
                                 "label": "Library of Congress Name authority records",
-                                "type": "IdentifierType"
+                                "type": "IdentifierType",
                             },
                         }
                     ],
                     "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
                     "alternativeLabels": [],
                     "type": "Person",
-                    "description": "Some description 1"
+                    "description": "Some description 1",
                 },
             },
         },
@@ -92,7 +93,7 @@ def test_ingestor_indexer_success() -> None:
                     "label": "Wolff, G.",
                     "alternativeLabels": [],
                     "type": "Person",
-                    "description": "Some description 2"                    
+                    "description": "Some description 2",
                 },
             },
         },
@@ -118,15 +119,15 @@ def test_ingestor_indexer_success() -> None:
                             "identifierType": {
                                 "id": "lc-names",
                                 "label": "Library of Congress Name authority records",
-                                "type": "IdentifierType"
-                            },                            
+                                "type": "IdentifierType",
+                            },
                         }
                     ],
                     "label": "Jones, John E.",
                     "alternativeLabels": [],
                     "type": "Person",
-                    "description": None
-    },
+                    "description": None,
+                },
             },
         },
     ]

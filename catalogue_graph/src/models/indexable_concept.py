@@ -8,7 +8,6 @@ from models.catalogue_concept import CatalogueConcept
 # Query
 
 
-
 class ConceptQueryIdentifier(BaseModel):
     value: str
     identifierType: str
@@ -47,10 +46,7 @@ class ConceptDisplayIdentifierType(BaseModel):
         else:
             raise ValueError(f"Unknown source concept type: {source_type}.")
 
-        return ConceptDisplayIdentifierType(
-            id=source_type,
-            label=label
-        )
+        return ConceptDisplayIdentifierType(id=source_type, label=label)
 
 
 class ConceptDisplayIdentifier(BaseModel):
@@ -81,8 +77,7 @@ class IndexableConcept(BaseModel):
                 id=concept.id,
                 identifiers=[
                     ConceptQueryIdentifier(
-                        value=identifier.value,
-                        identifierType=identifier.identifierType
+                        value=identifier.value, identifierType=identifier.identifierType
                     )
                     for identifier in concept.identifiers
                 ],
@@ -94,7 +89,10 @@ class IndexableConcept(BaseModel):
                 id=concept.id,
                 identifiers=[
                     ConceptDisplayIdentifier(
-                        value=identifier.value, identifierType=ConceptDisplayIdentifierType.from_source_type(identifier.identifierType)
+                        value=identifier.value,
+                        identifierType=ConceptDisplayIdentifierType.from_source_type(
+                            identifier.identifierType
+                        ),
                     )
                     for identifier in concept.identifiers
                 ],

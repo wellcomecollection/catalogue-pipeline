@@ -1,6 +1,7 @@
-from sources.catalogue.concepts_source import CatalogueConceptsSource
 from test_mocks import MockRequest
 from test_utils import load_fixture
+
+from sources.catalogue.concepts_source import CatalogueConceptsSource
 
 
 def test_catalogue_concepts_source() -> None:

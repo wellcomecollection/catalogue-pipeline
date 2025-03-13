@@ -3,13 +3,7 @@ from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifie
 
 def test_catalogue_concept_from_neptune_result() -> None:
     neptune_result = {
-        "concept": {
-            "~properties": {
-                "id": "id",
-                "label": "label",
-                "type": "type"
-            }
-        },
+        "concept": {"~properties": {"id": "id", "label": "label", "type": "type"}},
         "source_concepts": [
             {
                 "~properties": {
@@ -24,7 +18,9 @@ def test_catalogue_concept_from_neptune_result() -> None:
 
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
         id="id",
-        identifiers=[CatalogueConceptIdentifier(value="id", identifierType="lc-subjects")],
+        identifiers=[
+            CatalogueConceptIdentifier(value="id", identifierType="lc-subjects")
+        ],
         label="label",
         alternativeLabels=["alternativeLabels", "moreAlternativeLabels"],
         description="description",

@@ -28,7 +28,7 @@ class RawCatalogueConcept:
     def wellcome_id(self) -> str:
         """Returns the canonical Wellcome identifier."""
         wellcome_id = self.raw_concept.get("id")
-        
+
         assert isinstance(wellcome_id, str)
         return wellcome_id
 

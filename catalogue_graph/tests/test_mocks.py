@@ -6,6 +6,7 @@ from collections.abc import Generator
 from typing import Any, TypedDict
 
 from botocore.credentials import Credentials
+
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"

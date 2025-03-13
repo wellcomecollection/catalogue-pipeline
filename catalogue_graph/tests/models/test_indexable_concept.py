@@ -33,11 +33,16 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         ),
         display=ConceptDisplay(
             id="id",
-            identifiers=[ConceptDisplayIdentifier(value="value", identifierType=ConceptDisplayIdentifierType(
-                id="nlm-mesh",
-                label="Medical Subject Headings (MeSH) identifier",
-                type= "IdentifierType"
-            ))],
+            identifiers=[
+                ConceptDisplayIdentifier(
+                    value="value",
+                    identifierType=ConceptDisplayIdentifierType(
+                        id="nlm-mesh",
+                        label="Medical Subject Headings (MeSH) identifier",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
             label="label",
             alternativeLabels=["alternativeLabels"],
             description="description",
