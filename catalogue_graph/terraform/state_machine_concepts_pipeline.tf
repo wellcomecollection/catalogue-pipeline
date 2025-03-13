@@ -1,41 +1,58 @@
-resource "aws_sfn_state_machine" "concepts_pipeline" {
-  name     = "concepts-pipeline"
+resource "aws_sfn_state_machine" "concepts_pipeline_monthly" {
+  name     = "concepts-pipeline_monthly"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment = "Build the catalogue graph and ingest concepts into ES",
+    Comment = "Extract raw concepts from external sources, transform them into nodes and edges, and load load them into the graph",
     QueryLanguage = "JSONata"
-    StartAt = "Build graph"
+    StartAt = "Extractors"
     States = {
-      "Build graph" = {
-        Type           = "Map",
-        MaxConcurrency = 1 # ensures nodes and edges are extarcted and loaded in the desired order
-        ItemProcessor  = {
-          StartAt = "Extract nodes and edges from source",
-          States = {
-            "Extract nodes and edges from source" = {
-              Type = "Task",
-              Resource = "arn:aws:states:::states:startExecution.sync:2",
-              Arguments = {
-                StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn,
-                Payload = "{% $states.input %}"
-                Input = {
-                  "stream_destination" : "s3"
-                }
-              },
-              Next = "Load Neptune graph from S3"
-            },
-            "Load Neptune graph from S3" = {
-              Type = "Task",
-              Resource = "arn:aws:states:::states:startExecution.sync:2",
-              Arguments = {
-                StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
-                Payload = "{% $states.input %}"
-              },
-              End = true
-            }
-          }
-        } 
+      "Extractors" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Parameters = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractors_monthly.arn
+        }
+        Next = "Bulk loaders"
+      },
+      "Bulk loaders" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Parameters = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loaders_monthly.arn
+        }
+        Next = "Success"
+      },
+      Success = {
+        Type = "Succeed"
+      }
+    }
+  })
+}
+
+resource "aws_sfn_state_machine" "concepts_pipeline_daily" {
+  name     = "concepts-pipeline_daily"
+  role_arn = aws_iam_role.state_machine_execution_role.arn
+
+  definition = jsonencode({
+    Comment = "Extract concepts from catalogue works, load load them into the graph, and ingests into ES index.",
+    QueryLanguage = "JSONata"
+    StartAt = "Extractors"
+    States = {
+      "Extractors" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Parameters = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractors_daily.arn
+        }
+        Next = "Bulk loaders"
+      },
+      "Bulk loaders" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Parameters = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loaders_daily.arn
+        }
         Next = "Concepts ingestor"
       },
       "Concepts ingestor" = {
@@ -52,3 +69,6 @@ resource "aws_sfn_state_machine" "concepts_pipeline" {
     }
   })
 }
+
+
+

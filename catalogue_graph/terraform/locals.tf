@@ -17,6 +17,123 @@ locals {
 
   # This is a hint, the ingestors might need to be in the pipeline stack!
   pipeline_date = "2024-11-18"
+
+  concepts_pipeline_inputs_monthly = [ 
+    {
+      "label" : "LoC Concept Nodes",
+      "transformer_type" : "loc_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "LoC Location Nodes",
+      "transformer_type" : "loc_locations",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "LoC Name Nodes",
+      "transformer_type" : "loc_names",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "LoC Concept Edges",
+      "transformer_type" : "loc_concepts",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "LoC Location Edges",
+      "transformer_type" : "loc_locations",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "MeSH Concept Nodes",
+      "transformer_type" : "mesh_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "MeSH Location Nodes",
+      "transformer_type" : "mesh_locations",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "MeSH Concept Edges",
+      "transformer_type" : "mesh_concepts",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked LoC Concept Nodes",
+      "transformer_type" : "wikidata_linked_loc_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked LoC Location Nodes",
+      "transformer_type" : "wikidata_linked_loc_locations",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked LoC Name Nodes",
+      "transformer_type" : "wikidata_linked_loc_names",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked LoC Concept Edges",
+      "transformer_type" : "wikidata_linked_loc_concepts",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked LoC Location Edges",
+      "transformer_type" : "wikidata_linked_loc_locations",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked LoC Name Edges",
+      "transformer_type" : "wikidata_linked_loc_names",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Concept Nodes",
+      "transformer_type" : "wikidata_linked_mesh_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Location Nodes",
+      "transformer_type" : "wikidata_linked_mesh_locations",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Concept Edges",
+      "transformer_type" : "wikidata_linked_mesh_concepts",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Location Edges",
+      "transformer_type" : "wikidata_linked_mesh_locations",
+      "entity_type" : "edges"
+    },
+    {
+      "label" : "Catalogue Concept Nodes",
+      "transformer_type" : "catalogue_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Catalogue Concept Edges",
+      "transformer_type" : "catalogue_concepts",
+      "entity_type" : "edges"
+    },
+    
+  ]
+
+  concepts_pipeline_inputs_daily = [
+    {
+      "label" : "Catalogue Work Nodes",
+      "transformer_type" : "catalogue_works",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Catalogue Work Edges",
+      "transformer_type" : "catalogue_works",
+      "entity_type" : "edges"
+    },
+  ]
 }
 
 data "aws_vpc" "vpc" {
