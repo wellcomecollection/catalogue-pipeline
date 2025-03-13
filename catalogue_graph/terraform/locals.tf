@@ -18,7 +18,7 @@ locals {
   # This is a hint, the ingestors might need to be in the pipeline stack!
   pipeline_date = "2024-11-18"
 
-  concepts_pipeline_inputs_monthly = [ 
+  concepts_pipeline_inputs_monthly = [
     {
       "label" : "LoC Concept Nodes",
       "transformer_type" : "loc_concepts",

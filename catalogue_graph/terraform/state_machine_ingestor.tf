@@ -8,33 +8,33 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
     StartAt       = "Trigger ingest"
     States = {
       "Trigger ingest" = {
-        Type        = "Task"
-        Resource    = "arn:aws:states:::lambda:invoke",
-        Output      = "{% $states.result.Payload %}",
-        Arguments   = {
-          FunctionName  = module.ingestor_trigger_lambda.lambda.arn,
-          Payload       = "{}"
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
+        Arguments = {
+          FunctionName = module.ingestor_trigger_lambda.lambda.arn,
+          Payload      = "{}"
         },
-        Next        = "Map load to s3"
+        Next = "Map load to s3"
       },
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
       "Map load to s3" = {
-        Type = "Map",
+        Type           = "Map",
         MaxConcurrency = 50
         ItemProcessor = {
           ProcessorConfig = {
-            Mode = "DISTRIBUTED",
+            Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Load shard to s3",
           States = {
             "Load shard to s3" = {
-              Type = "Task",
+              Type     = "Task",
               Resource = "arn:aws:states:::lambda:invoke",
-              Output = "{% $states.result.Payload %}",
+              Output   = "{% $states.result.Payload %}",
               Arguments = {
                 FunctionName = module.ingestor_loader_lambda.lambda.arn,
-                Payload = "{% $states.input %}"
+                Payload      = "{% $states.input %}"
               },
               Retry = [
                 {
@@ -45,9 +45,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
                     "Lambda.TooManyRequestsException"
                   ],
                   IntervalSeconds = 1,
-                  MaxAttempts = 3,
-                  BackoffRate = 2,
-                  JitterStrategy = "FULL"
+                  MaxAttempts     = 3,
+                  BackoffRate     = 2,
+                  JitterStrategy  = "FULL"
                 }
               ],
               End = true
@@ -57,22 +57,22 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next = "Map index to ES"
       },
       "Map index to ES" = {
-        Type = "Map",
+        Type           = "Map",
         MaxConcurrency = 1
         ItemProcessor = {
           ProcessorConfig = {
-            Mode = "DISTRIBUTED",
+            Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Index shard to ES",
           States = {
             "Index shard to ES" = {
-              Type = "Task",
+              Type     = "Task",
               Resource = "arn:aws:states:::lambda:invoke",
-              Output = "{% $states.result.Payload %}",
+              Output   = "{% $states.result.Payload %}",
               Arguments = {
                 FunctionName = module.ingestor_indexer_lambda.lambda.arn,
-                Payload = "{% $states.input %}"
+                Payload      = "{% $states.input %}"
               },
               Retry = [
                 {
@@ -84,8 +84,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
                   ],
                   IntervalSeconds = 300,
                   # Don't try again yet!
-                  MaxAttempts = 1,
-                  BackoffRate = 2,
+                  MaxAttempts    = 1,
+                  BackoffRate    = 2,
                   JitterStrategy = "FULL"
                 }
               ],

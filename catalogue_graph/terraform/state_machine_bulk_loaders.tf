@@ -74,7 +74,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_daily" {
             "transformer_type" = task_input.transformer_type,
             "entity_type"      = task_input.entity_type
           }
-        }  
+        }
         Next = index == length(local.concepts_pipeline_inputs_daily) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_daily[index + 1].label}"
       }
       }), {

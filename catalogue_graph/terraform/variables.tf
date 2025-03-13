@@ -2,7 +2,7 @@
 # Lambda function will output a single S3 file, which will be loaded into the database via the `bulk_loader` Lambda function.
 variable "state_machine_inputs" {
   type = list(object({ label : string, transformer_type : string, entity_type : string }))
-  default = [ 
+  default = [
     {
       "label" : "LoC Concept Nodes",
       "transformer_type" : "loc_concepts",
