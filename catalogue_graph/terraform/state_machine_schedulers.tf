@@ -1,5 +1,5 @@
-resource "aws_scheduler_schedule" "concept_pipeline_monthly" {
-  name = "concept_pipeline_monthly_run"
+resource "aws_scheduler_schedule" "concepts_pipeline_monthly" {
+  name = "concepts_pipeline_monthly_run"
 
   flexible_time_window {
     mode = "OFF"
@@ -13,8 +13,8 @@ resource "aws_scheduler_schedule" "concept_pipeline_monthly" {
   }
 }
 
-resource "aws_scheduler_schedule" "concept_pipeline_daily" {
-  name = "concept_pipeline_daily_run"
+resource "aws_scheduler_schedule" "concepts_pipeline_daily" {
+  name = "concepts_pipeline_daily_run"
 
   flexible_time_window {
     mode = "OFF"
