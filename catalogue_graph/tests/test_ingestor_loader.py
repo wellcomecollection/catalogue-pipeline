@@ -41,6 +41,16 @@ def build_test_matrix() -> list[tuple]:
                                 }
                             }
                         ],
+                        "linked_source_concepts": [
+                            {
+                                "~properties": {
+                                    "id": "456",
+                                    "source": "lc-names",
+                                    "alternative_labels": "alternative_label||another_alternative_label",
+                                    "description": "description",
+                                }
+                            }
+                        ],
                     }
                 ]
             },
@@ -92,6 +102,15 @@ def build_test_matrix() -> list[tuple]:
                                 }
                             }
                         ],
+                        "linked_source_concepts": [
+                            {
+                                "~properties": {
+                                    "id": "456",
+                                    "source": "lc-names",
+                                    "description": "description",
+                                }
+                            }
+                        ],                        
                     }
                 ]
             },
