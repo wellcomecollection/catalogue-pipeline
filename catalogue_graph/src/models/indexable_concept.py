@@ -1,4 +1,5 @@
 from dataclasses import field
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -23,10 +24,35 @@ class ConceptQuery(BaseModel):
 # Display
 
 
-class ConceptDisplayIdentifier(BaseModel):
+class ConceptDisplayIdentifierType(BaseModel):
     id: str
     label: str
     type: str = "IdentifierType"
+
+    @classmethod
+    def from_source_type(cls, source_type: str) -> "ConceptDisplayIdentifierType":
+        if source_type == "label-derived":
+            label = "Identifier derived from the label of the referent"
+        elif source_type == "nlm-mesh":
+            label = "Medical Subject Headings (MeSH) identifier"
+        elif source_type == "lc-names":
+            label = "Library of Congress Name authority records"
+        elif source_type == "lc-subjects":
+            label = "Library of Congress Subject Headings (LCSH)"
+        elif source_type == "viaf":
+            label = "VIAF: The Virtual International Authority File"
+        elif source_type == "fihrist":
+            label = "Fihrist Authority"
+        else:
+            raise ValueError(f"Unknown source concept type: {source_type}.")
+
+        return ConceptDisplayIdentifierType(id=source_type, label=label)
+
+
+class ConceptDisplayIdentifier(BaseModel):
+    value: str
+    type: str = "Identifier"
+    identifierType: ConceptDisplayIdentifierType
 
 
 class ConceptDisplay(BaseModel):
@@ -34,6 +60,7 @@ class ConceptDisplay(BaseModel):
     identifiers: list[ConceptDisplayIdentifier]
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
+    description: Optional[str]
     type: str
 
 
@@ -62,12 +89,16 @@ class IndexableConcept(BaseModel):
                 id=concept.id,
                 identifiers=[
                     ConceptDisplayIdentifier(
-                        id=identifier.value, label=identifier.identifierType
+                        value=identifier.value,
+                        identifierType=ConceptDisplayIdentifierType.from_source_type(
+                            identifier.identifierType
+                        ),
                     )
                     for identifier in concept.identifiers
                 ],
                 label=concept.label,
                 alternativeLabels=concept.alternativeLabels,
                 type=concept.type,
+                description=concept.description,
             ),
         )

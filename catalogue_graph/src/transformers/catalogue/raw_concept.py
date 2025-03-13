@@ -10,22 +10,8 @@ class RawCatalogueConcept:
     def __init__(
         self, raw_concept: dict, id_label_checker: IdLabelChecker | None = None
     ):
-        self.raw_concept = self._extract_concept_node(raw_concept)
+        self.raw_concept = raw_concept
         self.id_label_checker = id_label_checker
-
-    @staticmethod
-    def _extract_concept_node(raw_concept: dict) -> dict:
-        """
-        Extracts raw concepts data from one of two formats:
-        Either as a dictionary inside a list under "concepts", or as a dictionary under "agent".
-        """
-        if len(raw_concept.get("concepts", [])) > 0:
-            raw_concept_node = raw_concept["concepts"][0]
-        else:
-            raw_concept_node = raw_concept.get("agent")
-
-        assert isinstance(raw_concept_node, dict)
-        return raw_concept_node
 
     @property
     def is_concept(self) -> bool:
