@@ -3,7 +3,7 @@ resource "aws_sfn_state_machine" "concepts_pipeline_monthly" {
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment = "Extract raw concepts from external sources, transform them into nodes and edges, and load load them into the graph",
+    Comment = "Extract raw concepts from external sources, transform them into nodes and edges, and load them into the graph",
     QueryLanguage = "JSONata"
     StartAt = "Extractors"
     States = {
@@ -35,7 +35,7 @@ resource "aws_sfn_state_machine" "concepts_pipeline_daily" {
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment = "Extract concepts from catalogue works, load load them into the graph, and ingests into ES index.",
+    Comment = "Extract concepts from catalogue works, load them into the graph, and ingests into ES index.",
     QueryLanguage = "JSONata"
     StartAt = "Extractors"
     States = {

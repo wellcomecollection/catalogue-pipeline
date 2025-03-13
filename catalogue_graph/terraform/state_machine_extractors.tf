@@ -3,7 +3,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment = "Extract raw concepts from external sources, transform them into nodes and edges, and load load them into the graph"
+    Comment = "Extract raw concepts from external sources, transform them into nodes and edges, and stream them into an S3 bucket."
     StartAt = "Extract ${local.concepts_pipeline_inputs_monthly[0].label}"
 
     States = merge(tomap({
@@ -35,7 +35,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_daily" {
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment = "Extract raw concepts from all sources, transform them into nodes and edges, and stream them into an S3 bucket."
+    Comment = "Extract concepts from catalogue works, transform them into nodes and edges, and stream them into an S3 bucket."
     StartAt = "Extract ${local.concepts_pipeline_inputs_daily[0].label}"
 
     States = merge(tomap({
