@@ -108,7 +108,10 @@ locals {
       "label" : "Wikidata Linked MeSH Location Edges",
       "transformer_type" : "wikidata_linked_mesh_locations",
       "entity_type" : "edges"
-    },
+    }
+  ]
+
+  concepts_pipeline_inputs_daily = [
     {
       "label" : "Catalogue Concept Nodes",
       "transformer_type" : "catalogue_concepts",
@@ -119,10 +122,6 @@ locals {
       "transformer_type" : "catalogue_concepts",
       "entity_type" : "edges"
     },
-    
-  ]
-
-  concepts_pipeline_inputs_daily = [
     {
       "label" : "Catalogue Work Nodes",
       "transformer_type" : "catalogue_works",
