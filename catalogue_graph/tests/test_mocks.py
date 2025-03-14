@@ -17,6 +17,9 @@ MOCK_CREDENTIALS = Credentials(
     token="test_token",
 )
 
+class MockBotoS3Object:
+    def __init__(self) -> None:
+        self.content_length = 1
 
 class MockBotoS3Object:
     def __init__(self) -> None:
@@ -111,6 +114,10 @@ class MockSNSClient(MockAwsService):
                 "PublishBatchRequestEntries": PublishBatchRequestEntries,
             }
         )
+
+class MockBoto3Resource:
+    def __init__(self, resourceName: str) -> None:
+        return None
 
 
 class MockBoto3Resource:

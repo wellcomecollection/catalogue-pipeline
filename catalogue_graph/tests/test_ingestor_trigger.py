@@ -4,6 +4,7 @@ from test_mocks import MockRequest
 
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger import IngestorTriggerConfig, IngestorTriggerLambdaEvent, handler
+from ingestor_loader import IngestorLoaderLambdaEvent
 
 
 def build_test_matrix() -> list[tuple]:

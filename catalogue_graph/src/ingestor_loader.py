@@ -69,7 +69,7 @@ def load_data(s3_uri: str, data: list[CatalogueConcept]) -> IngestorIndexerObjec
         df = pl.DataFrame([e.model_dump() for e in data])
         df.write_parquet(f)
 
-    boto_s3_object = f.to_boto3(boto3.resource("s3"))
+    boto_s3_object = f.to_boto3(boto3.resource('s3'))
     content_length = boto_s3_object.content_length
 
     print(f"Data loaded to {s3_uri} with content length {content_length}")

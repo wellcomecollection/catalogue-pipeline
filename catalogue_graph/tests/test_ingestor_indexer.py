@@ -151,7 +151,7 @@ def build_test_matrix() -> list[tuple]:
                 pipeline_date="2021-07-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/catalogue_example.json"
-                ),
+                )
             ),
             "catalogue_example.json",
             polars.exceptions.ComputeError,
@@ -180,9 +180,7 @@ def test_ingestor_indexer_failure(
 
     with pytest.raises(expected_exception=expected_error, match=error_message):
         if description != "the file at s3_uri doesn't exist":
-            MockSmartOpen.mock_s3_file(
-                event.object_to_index.s3_uri, load_fixture(fixture)
-            )
+            MockSmartOpen.mock_s3_file(event.object_to_index.s3_uri, load_fixture(fixture))
         MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
         handler(event, config)

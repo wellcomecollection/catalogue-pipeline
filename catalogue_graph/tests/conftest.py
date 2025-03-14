@@ -6,6 +6,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from test_mocks import (
     MockBoto3Resource,
     MockBoto3Session,
+    MockBoto3Resource,
     MockElasticsearchClient,
     MockRequest,
     MockSmartOpen,
