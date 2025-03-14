@@ -1,0 +1,3 @@
+:ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String,latitude:Float,longitude:Float
+D008131,SourceLocation,D008131,London,nlm-mesh,Z01,,"The capital of the United Kingdom. It is located in England.
+    ",,

@@ -1,0 +1,2 @@
+:ID,:START_ID,:END_ID,:TYPE,referenced_in:String,source:String,matched_by:String,relationship_type:String,qualifier:String
+HAS_PARENT:D004987-->D009930,D004987,D009930,HAS_PARENT,,,,,

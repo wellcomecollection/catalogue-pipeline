@@ -1,0 +1,3 @@
+:ID,:LABEL,id:String,label:String,source:String,alternative_ids:String,alternative_labels:String,description:String
+D009930,SourceConcept,D009930,Organic Chemicals,nlm-mesh,D02,"Chemicals, Organic||Organic Chemical||Chemical, Organic","A broad class of substances containing carbon and its derivatives. Many of these chemicals will frequently contain hydrogen with or without oxygen, nitrogen, sulfur, phosphorus, and other elements. They exist in either carbon chain or carbon ring form.
+    "
