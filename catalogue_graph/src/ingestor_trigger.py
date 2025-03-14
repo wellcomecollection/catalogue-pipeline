@@ -59,10 +59,10 @@ def transform_data(
         end_index = min(start_offset + shard_size, record_count)
         shard_ranges.append(
             IngestorLoaderLambdaEvent(
-                job_id=job_id, 
-                start_offset=start_offset, 
-                end_index=end_index, 
-                pipeline_date=pipeline_date
+                job_id=job_id,
+                start_offset=start_offset,
+                end_index=end_index,
+                pipeline_date=pipeline_date,
             )
         )
 
@@ -78,10 +78,10 @@ def handler(
 
     extracted_data = extract_data(config.is_local)
     transformed_data = transform_data(
-        record_count=extracted_data, 
-        shard_size=config.shard_size, 
+        record_count=extracted_data,
+        shard_size=config.shard_size,
         job_id=event.job_id,
-        pipeline_date=event.pipeline_date
+        pipeline_date=event.pipeline_date,
     )
 
     print(f"Shard ranges ({len(transformed_data)}) generated successfully.")
@@ -92,9 +92,12 @@ def handler(
 def lambda_handler(
     event: IngestorTriggerLambdaEvent, context: typing.Any
 ) -> list[dict]:
-    return [e.model_dump() for e in handler(
-        IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
-    )]
+    return [
+        e.model_dump()
+        for e in handler(
+            IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
+        )
+    ]
 
 
 def local_handler() -> None:
@@ -112,7 +115,6 @@ def local_handler() -> None:
         required=False,
         default="dev",
     )
-
 
     args = parser.parse_args()
 
