@@ -5,6 +5,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from test_mocks import (
     MockBoto3Session,
+    MockBoto3Resource,
     MockElasticsearchClient,
     MockRequest,
     MockSmartOpen,
@@ -16,6 +17,7 @@ from test_mocks import (
 def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     # Replaces boto3 and Elasticsearch with fake clients
     monkeypatch.setattr("boto3.Session", MockBoto3Session)
+    monkeypatch.setattr("boto3.resource", MockBoto3Resource)
     monkeypatch.setattr("requests.request", MockRequest.request)
     monkeypatch.setattr("requests.get", MockRequest.get)
     monkeypatch.setattr("smart_open.open", MockSmartOpen.open)

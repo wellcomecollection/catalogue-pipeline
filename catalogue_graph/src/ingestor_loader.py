@@ -10,13 +10,14 @@ import smart_open
 from pydantic import BaseModel
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor_indexer import IngestorIndexerLambdaEvent
+from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import CatalogueConcept
 from utils.aws import get_neptune_client
 
 
 class IngestorLoaderLambdaEvent(BaseModel):
     job_id: str
+    pipeline_date: str | None
     start_offset: int
     end_index: int
 
@@ -58,7 +59,7 @@ def transform_data(neptune_data: list[dict]) -> list[CatalogueConcept]:
     return [CatalogueConcept.from_neptune_result(row) for row in neptune_data]
 
 
-def load_data(s3_uri: str, data: list[CatalogueConcept]) -> pl.DataFrame:
+def load_data(s3_uri: str, data: list[CatalogueConcept]) -> IngestorIndexerObject:
     print(f"Loading data to {s3_uri} ...")
 
     # using polars write to parquet in S3 using smart_open
@@ -67,7 +68,20 @@ def load_data(s3_uri: str, data: list[CatalogueConcept]) -> pl.DataFrame:
     with smart_open.open(s3_uri, "wb", transport_params=transport_params) as f:
         df = pl.DataFrame([e.model_dump() for e in data])
         df.write_parquet(f)
-        return df
+
+    boto_s3_object = f.to_boto3(boto3.resource('s3'))
+    content_length = boto_s3_object.content_length
+
+    print(f"Data loaded to {s3_uri} with content length {content_length}")
+
+    assert content_length is not None, "Content length should not be None"
+    assert len(df) == len(data), "DataFrame length should match data length"
+
+    return IngestorIndexerObject(
+        s3_uri=s3_uri,
+        content_length=content_length,
+        record_count=len(df),
+    )
 
 
 def handler(
@@ -77,7 +91,7 @@ def handler(
     filename = (
         f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}.parquet"
     )
-    s3_object_key = f"{event.job_id}/{filename}"
+    s3_object_key = f"{event.pipeline_date}/{event.job_id}/{filename}"
     s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
 
     extracted_data = extract_data(
@@ -88,9 +102,12 @@ def handler(
     transformed_data = transform_data(extracted_data)
     result = load_data(s3_uri=s3_uri, data=transformed_data)
 
-    print(f"Data loaded successfully, wrote {len(result)} records to {s3_uri}.")
+    print(f"Data loaded successfully: {result}")
 
-    return IngestorIndexerLambdaEvent(s3_uri=s3_uri)
+    return IngestorIndexerLambdaEvent(
+        pipeline_date=event.pipeline_date,
+        object_to_index=result,
+    )
 
 
 def lambda_handler(event: IngestorLoaderLambdaEvent, context: typing.Any) -> dict:
@@ -119,6 +136,13 @@ def local_handler() -> None:
         "--job-id",
         type=str,
         help='The job identifier used in the S3 path, will default to "dev".',
+        required=False,
+        default="dev",
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help='The pipeline that is being ingested to, will default to "dev".',
         required=False,
         default="dev",
     )

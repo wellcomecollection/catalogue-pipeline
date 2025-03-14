@@ -4,14 +4,12 @@ import argparse
 
 from ingestor_indexer import (
     IngestorIndexerConfig,
-    IngestorIndexerLambdaEvent,
 )
 from ingestor_indexer import (
     handler as indexer_handler,
 )
 from ingestor_loader import (
     IngestorLoaderConfig,
-    IngestorLoaderLambdaEvent,
 )
 from ingestor_loader import (
     handler as loader_handler,
@@ -38,7 +36,13 @@ def main() -> None:
         "--pipeline-date",
         type=str,
         help="The date to use for the pipeline, required.",
-        required=True,
+        required=False,
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="The number of shards to process, will process all if not specified.",
+        required=False,
     )
 
     args = parser.parse_args()
@@ -47,17 +51,13 @@ def main() -> None:
     config = IngestorTriggerConfig(is_local=True)
     trigger_result = trigger_handler(trigger_event, config)
 
-    loader_events = [IngestorLoaderLambdaEvent(**e) for e in trigger_result]
-    loader_config = IngestorLoaderConfig(is_local=True)
-    loader_results = [loader_handler(e, loader_config) for e in loader_events]
+    trigger_result = trigger_result[: args.limit] if args.limit else trigger_result
 
-    indexer_events = [
-        IngestorIndexerLambdaEvent(s3_uri=e.s3_uri) for e in loader_results
-    ]
-    indexer_config = IngestorIndexerConfig(
-        pipeline_date=args.pipeline_date, is_local=True
-    )
-    success_counts = [indexer_handler(e, indexer_config) for e in indexer_events]
+    loader_config = IngestorLoaderConfig(is_local=True)
+    loader_results = [loader_handler(e, loader_config) for e in trigger_result]
+
+    indexer_config = IngestorIndexerConfig(is_local=True)
+    success_counts = [indexer_handler(e, indexer_config) for e in loader_results]
 
     total_success_count = sum(success_counts)
     print(f"Indexed {total_success_count} documents.")

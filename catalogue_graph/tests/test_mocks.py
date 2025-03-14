@@ -17,6 +17,9 @@ MOCK_CREDENTIALS = Credentials(
     token="test_token",
 )
 
+class MockBotoS3Object:
+    def __init__(self) -> None:
+        self.content_length = 1
 
 class MockSmartOpen:
     file_lookup: dict = {}
@@ -49,6 +52,10 @@ class MockSmartOpen:
             # We're ignoring "SIM115 Use a context manager for opening files" as we need to keep
             # the file around for the duration of the test, cleaning it up in reset_mocks.
             temp_file = tempfile.NamedTemporaryFile(delete=False)  # noqa: SIM115
+            # Insert the to_boto3 method to simulate the method provided by smart_open
+            # https://github.com/piskvorky/smart_open/blob/develop/howto.md#how-to-access-s3-object-properties
+            temp_file.to_boto3 = lambda _: MockBotoS3Object()  # type: ignore[attr-defined]
+
             cls.file_lookup[uri] = temp_file.name
             return temp_file
         elif mode == "r":
@@ -102,6 +109,10 @@ class MockSNSClient(MockAwsService):
                 "PublishBatchRequestEntries": PublishBatchRequestEntries,
             }
         )
+
+class MockBoto3Resource:
+    def __init__(self, resourceName: str) -> None:
+        return None
 
 
 class MockBoto3Session:
