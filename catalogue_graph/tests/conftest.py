@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from test_mocks import (
+    MockBoto3Resource,
     MockBoto3Session,
     MockElasticsearchClient,
     MockRequest,
@@ -16,6 +17,7 @@ from test_mocks import (
 def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     # Replaces boto3 and Elasticsearch with fake clients
     monkeypatch.setattr("boto3.Session", MockBoto3Session)
+    monkeypatch.setattr("boto3.resource", MockBoto3Resource)
     monkeypatch.setattr("requests.request", MockRequest.request)
     monkeypatch.setattr("requests.get", MockRequest.get)
     monkeypatch.setattr("smart_open.open", MockSmartOpen.open)
