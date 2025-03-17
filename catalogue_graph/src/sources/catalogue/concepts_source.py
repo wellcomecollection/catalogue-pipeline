@@ -1,23 +1,22 @@
 from collections.abc import Generator
 
-from utils.types import WorkConceptKey
-
 from sources.base_source import BaseSource
 from sources.gzip_source import GZipSource
+from utils.types import WorkConceptKey
 
 
 def extract_concepts_from_work(
     raw_work: dict,
 ) -> Generator[tuple[dict, WorkConceptKey]]:
     """Returns all concepts associated with the given work. Does not deduplicate."""
-    
+
     # We need to return all concepts stored in each subject, and also the subject itself.
     # This will sometimes result in duplicates being returned.
     for subject in raw_work.get("subjects", []):
         for concept in subject.get("concepts", []):
             yield concept, "subjects"
         yield subject, "subjects"
-    
+
     # Return all contributors
     for contributor in raw_work.get("contributors", []):
         yield contributor["agent"], "contributors"
