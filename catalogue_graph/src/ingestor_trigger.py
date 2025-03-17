@@ -14,7 +14,7 @@ from ingestor_trigger_monitor import (
     IngestorTriggerMonitorLambdaEvent,
 )
 from ingestor_trigger_monitor import (
-    handler as monitor_handler,
+    handler as trigger_monitor_handler,
 )
 from utils.aws import get_neptune_client
 
@@ -139,7 +139,7 @@ def local_handler() -> None:
     result = handler(event, config)
 
     if args.monitoring:
-        monitor_handler(
+        trigger_monitor_handler(
             result,
             IngestorTriggerMonitorConfig(
                 is_local=True, force_pass=bool(args.force_pass)

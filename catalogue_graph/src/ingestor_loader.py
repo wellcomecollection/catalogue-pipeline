@@ -106,6 +106,7 @@ def handler(
 
     return IngestorIndexerLambdaEvent(
         pipeline_date=event.pipeline_date,
+        job_id=event.job_id,
         object_to_index=result,
     )
 
@@ -146,6 +147,7 @@ def local_handler() -> None:
         required=False,
         default="dev",
     )
+
     args = parser.parse_args()
 
     event = IngestorLoaderLambdaEvent(**args.__dict__)
@@ -153,7 +155,7 @@ def local_handler() -> None:
 
     result = handler(event, config)
 
-    pprint.pprint(result)
+    pprint.pprint(result.model_dump())
 
 
 if __name__ == "__main__":

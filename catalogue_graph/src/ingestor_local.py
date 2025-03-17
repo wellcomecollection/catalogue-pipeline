@@ -4,28 +4,25 @@ import argparse
 
 from ingestor_indexer import (
     IngestorIndexerConfig,
-)
-from ingestor_indexer import (
     handler as indexer_handler,
 )
 from ingestor_loader import (
     IngestorLoaderConfig,
+    handler as loader_handler
 )
-from ingestor_loader import (
-    handler as loader_handler,
+from ingestor_loader_monitor import (
+    IngestorLoaderMonitorConfig,
+    IngestorLoaderMonitorLambdaEvent,
+    handler as loader_monitor_handler,
 )
 from ingestor_trigger import (
     IngestorTriggerConfig,
     IngestorTriggerLambdaEvent,
-)
-from ingestor_trigger import (
     handler as trigger_handler,
 )
 from ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
-)
-from ingestor_trigger_monitor import (
-    handler as monitor_handler,
+    handler as trigger_monitor_handler,
 )
 
 
@@ -63,7 +60,10 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    trigger_event = IngestorTriggerLambdaEvent(**args.__dict__)
+    trigger_event = IngestorTriggerLambdaEvent(
+        job_id=args.job_id,
+        pipeline_date=args.pipeline_date,
+    )
     config = IngestorTriggerConfig(is_local=True)
     trigger_result = trigger_handler(trigger_event, config)
 
@@ -75,10 +75,18 @@ def main() -> None:
         trigger_monitor_config = IngestorTriggerMonitorConfig(
             is_local=True, force_pass=bool(args.force_pass)
         )
-        monitor_handler(trigger_result, trigger_monitor_config)
+        trigger_monitor_handler(trigger_result, trigger_monitor_config)
 
     loader_config = IngestorLoaderConfig(is_local=True)
     loader_results = [loader_handler(e, loader_config) for e in trigger_result_events]
+
+    if args.monitoring:
+        loader_monitor_config = IngestorLoaderMonitorConfig(is_local=True)
+        loader_monitor_event = IngestorLoaderMonitorLambdaEvent(
+            events=loader_results,
+            force_pass=bool(args.force_pass),
+        )
+        loader_monitor_handler(loader_monitor_event, loader_monitor_config)
 
     indexer_config = IngestorIndexerConfig(is_local=True)
     success_counts = [indexer_handler(e, indexer_config) for e in loader_results]
