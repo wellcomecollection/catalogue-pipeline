@@ -46,7 +46,7 @@ class RawCatalogueWork:
         for concept, referenced_in in extract_concepts_from_work(self.raw_work):
             raw_concept = RawCatalogueConcept(concept)
 
-            if raw_concept.is_concept and raw_concept.wellcome_id not in processed:
+            if raw_concept.is_concept and raw_concept.wellcome_id not in processed:           
                 processed.add(raw_concept.wellcome_id)
                 work_concepts.append(
                     {"id": raw_concept.wellcome_id, "referenced_in": referenced_in}
