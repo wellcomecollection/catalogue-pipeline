@@ -8,7 +8,10 @@ resource "aws_iam_role" "state_machine_execution_role" {
       {
         Effect = "Allow",
         Principal = {
-          Service = "states.amazonaws.com"
+          Service = [
+            "states.amazonaws.com",
+            "scheduler.amazonaws.com"
+          ]
         },
         Action = "sts:AssumeRole"
       }
@@ -31,9 +34,15 @@ resource "aws_iam_policy" "state_machine_policy" {
         Resource = [
           aws_sfn_state_machine.catalogue_graph_extractor.arn,
           aws_sfn_state_machine.catalogue_graph_extractors.arn,
+          aws_sfn_state_machine.catalogue_graph_extractors_monthly.arn,
+          aws_sfn_state_machine.catalogue_graph_extractors_daily.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loader.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loaders.arn,
-          aws_sfn_state_machine.catalogue_graph_ingestor.arn
+          aws_sfn_state_machine.catalogue_graph_bulk_loaders_monthly.arn,
+          aws_sfn_state_machine.catalogue_graph_bulk_loaders_daily.arn,
+          aws_sfn_state_machine.catalogue_graph_ingestor.arn,
+          aws_sfn_state_machine.concepts_pipeline_monthly.arn,
+          aws_sfn_state_machine.concepts_pipeline_daily.arn
         ]
       },
       {
