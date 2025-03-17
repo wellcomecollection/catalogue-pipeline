@@ -14,6 +14,7 @@ from utils.aws import get_neptune_client
 
 class IngestorTriggerLambdaEvent(BaseModel):
     job_id: str | None = None
+    pipeline_date: str | None = None
 
 
 class IngestorTriggerConfig(BaseModel):
@@ -43,7 +44,7 @@ def extract_data(is_local: bool) -> int:
 
 
 def transform_data(
-    record_count: int, shard_size: int, job_id: str | None
+    record_count: int, shard_size: int, job_id: str | None, pipeline_date: str | None
 ) -> list[IngestorLoaderLambdaEvent]:
     print("Transforming record count to shard ranges ...")
 
@@ -58,7 +59,10 @@ def transform_data(
         end_index = min(start_offset + shard_size, record_count)
         shard_ranges.append(
             IngestorLoaderLambdaEvent(
-                job_id=job_id, start_offset=start_offset, end_index=end_index
+                job_id=job_id,
+                start_offset=start_offset,
+                end_index=end_index,
+                pipeline_date=pipeline_date,
             )
         )
 
@@ -69,26 +73,31 @@ def transform_data(
 
 def handler(
     event: IngestorTriggerLambdaEvent, config: IngestorTriggerConfig
-) -> list[dict]:
+) -> list[IngestorLoaderLambdaEvent]:
     print(f"Received event: {event} with config {config}")
 
     extracted_data = extract_data(config.is_local)
     transformed_data = transform_data(
-        record_count=extracted_data, shard_size=config.shard_size, job_id=event.job_id
+        record_count=extracted_data,
+        shard_size=config.shard_size,
+        job_id=event.job_id,
+        pipeline_date=event.pipeline_date,
     )
-    result = [e.model_dump() for e in transformed_data]
 
-    print(f"Shard ranges ({len(result)}) generated successfully.")
+    print(f"Shard ranges ({len(transformed_data)}) generated successfully.")
 
-    return result
+    return transformed_data
 
 
 def lambda_handler(
     event: IngestorTriggerLambdaEvent, context: typing.Any
 ) -> list[dict]:
-    return handler(
-        IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
-    )
+    return [
+        e.model_dump()
+        for e in handler(
+            IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
+        )
+    ]
 
 
 def local_handler() -> None:
@@ -98,6 +107,13 @@ def local_handler() -> None:
         type=str,
         help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
         required=False,
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help='The pipeline that is being ingested to, will default to "dev".',
+        required=False,
+        default="dev",
     )
 
     args = parser.parse_args()
