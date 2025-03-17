@@ -106,23 +106,14 @@ def local_handler() -> None:
     parser.add_argument(
         "--pipeline-date",
         type=str,
-<<<<<<< HEAD
         help="The pipeline that is being ingested to, will default to None.",
-=======
-        help='The pipeline that is being ingested to, will default to None.',
->>>>>>> 4d6a93816 (Parameterise the catalogue-graph ingestor trigger with pipeline date)
         required=False,
     )
     args = parser.parse_args()
 
     event = IngestorIndexerLambdaEvent(
-<<<<<<< HEAD
         pipeline_date=args.pipeline_date,
-        object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri),
-=======
-        pipeline_date=args.pipeline_date, 
         object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri)
->>>>>>> 4d6a93816 (Parameterise the catalogue-graph ingestor trigger with pipeline date)
     )
     config = IngestorIndexerConfig(is_local=True)
 

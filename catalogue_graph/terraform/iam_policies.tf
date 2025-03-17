@@ -66,3 +66,16 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
     ]
   }
 }
+
+# write cloudwatch metrics to the "catalogue_graph_ingestor" namespace
+data "aws_iam_policy_document" "cloudwatch_write" {
+  statement {
+    actions = [
+      "cloudwatch:PutMetricData"
+    ]
+
+    resources = [
+      "*"
+    ]
+  }
+}

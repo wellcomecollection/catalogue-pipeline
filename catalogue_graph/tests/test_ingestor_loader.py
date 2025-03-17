@@ -110,7 +110,7 @@ def build_test_matrix() -> list[tuple]:
                     s3_uri="s3://test-bucket/test-prefix/2021-07-01/123/00000000-00000001.parquet",
                     content_length=1,
                     record_count=1,
-                )
+                ),
             ),
             CatalogueConcept(
                 id="source_id",

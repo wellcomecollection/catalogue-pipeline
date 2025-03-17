@@ -1,3 +1,20 @@
+locals {
+
+  DefaultErrorEquals = [
+    "Lambda.ServiceException",
+    "Lambda.AWSLambdaException",
+    "Lambda.SdkClientException",
+    "Lambda.TooManyRequestsException"
+  ]
+  DefaultRetry = [{
+    ErrorEquals = local.DefaultErrorEquals
+    IntervalSeconds = 1
+    MaxAttempts     = 3
+    BackoffRate     = 2
+    JitterStrategy  = "FULL"
+  }]
+}
+
 resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
   name     = "catalogue-graph-ingestor"
   role_arn = aws_iam_role.state_machine_execution_role.arn
@@ -17,6 +34,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         },
         Next = "Map load to s3"
       },
+      "Monitor trigger ingest" = {
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
+        Arguments = {
+          FunctionName = module.ingestor_trigger_monitor_lambda.lambda.arn,
+          Payload      = "{% $states.input %}"
+        },
+        Retry = local.DefaultRetry,
+        Next = "Map load to s3"
+      }
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
       "Map load to s3" = {
         Type           = "Map",
@@ -36,20 +64,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
                 FunctionName = module.ingestor_loader_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
               },
-              Retry = [
-                {
-                  ErrorEquals = [
-                    "Lambda.ServiceException",
-                    "Lambda.AWSLambdaException",
-                    "Lambda.SdkClientException",
-                    "Lambda.TooManyRequestsException"
-                  ],
-                  IntervalSeconds = 1,
-                  MaxAttempts     = 3,
-                  BackoffRate     = 2,
-                  JitterStrategy  = "FULL"
-                }
-              ],
+              Retry = local.DefaultRetry,
               End = true
             }
           }
@@ -76,12 +91,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
               },
               Retry = [
                 {
-                  ErrorEquals = [
-                    "Lambda.ServiceException",
-                    "Lambda.AWSLambdaException",
-                    "Lambda.SdkClientException",
-                    "Lambda.TooManyRequestsException"
-                  ],
+                  ErrorEquals = local.DefaultErrorEquals,
                   IntervalSeconds = 300,
                   # Don't try again yet!
                   MaxAttempts    = 1,

@@ -6,7 +6,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from test_mocks import (
     MockBoto3Resource,
     MockBoto3Session,
-    MockBoto3Resource,
+    MockCloudwatchClient,
     MockElasticsearchClient,
     MockRequest,
     MockSmartOpen,
@@ -35,5 +35,6 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     MockSmartOpen.reset_mocks()
     MockSNSClient.reset_mocks()
     MockElasticsearchClient.reset_mocks()
+    MockCloudwatchClient.reset_mocks()
     yield
     # Run any cleanup code here

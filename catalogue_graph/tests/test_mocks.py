@@ -17,9 +17,6 @@ MOCK_CREDENTIALS = Credentials(
     token="test_token",
 )
 
-class MockBotoS3Object:
-    def __init__(self) -> None:
-        self.content_length = 1
 
 class MockBotoS3Object:
     def __init__(self) -> None:
@@ -49,14 +46,11 @@ class MockSmartOpen:
     @classmethod
     def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
         print(f"Opening {uri} in mode {mode}")
-        if mode == "w":
-            # Create an in-memory text stream and save the file object in the file lookup
-            cls.file_lookup[uri] = io.StringIO()
-        elif mode == "wb":
+        if mode == "w" or mode == "wb":
             # Create a temporary file, return a handle and save the location in the file lookup
             # We're ignoring "SIM115 Use a context manager for opening files" as we need to keep
             # the file around for the duration of the test, cleaning it up in reset_mocks.
-            temp_file = tempfile.NamedTemporaryFile(delete=False)  # noqa: SIM115
+            temp_file = tempfile.NamedTemporaryFile(delete=False, mode=mode)  # noqa: SIM115
             # Insert the to_boto3 method to simulate the method provided by smart_open
             # https://github.com/piskvorky/smart_open/blob/develop/howto.md#how-to-access-s3-object-properties
             temp_file.to_boto3 = lambda _: MockBotoS3Object()  # type: ignore[attr-defined]
@@ -97,6 +91,33 @@ class MockS3Client(MockAwsService):
         return
 
 
+class MockCloudwatchClient(MockAwsService):
+    metrics_reported: list[dict] = []
+
+    def __init__(self) -> None:
+        return
+
+    @staticmethod
+    def reset_mocks() -> None:
+        MockCloudwatchClient.metrics_reported = []
+
+    def put_metric_data(
+        self,
+        Namespace: str,
+        MetricData: list[dict],
+    ) -> None:
+        for metric in MetricData:
+            dimensions = {d["Name"]: d["Value"] for d in metric["Dimensions"]}
+            self.metrics_reported.append(
+                {
+                    "namespace": Namespace,
+                    "metric_name": metric["MetricName"],
+                    "value": metric["Value"],
+                    "dimensions": dimensions,
+                }
+            )
+
+
 class MockSNSClient(MockAwsService):
     publish_batch_request_entries: list[dict] = []
 
@@ -115,10 +136,6 @@ class MockSNSClient(MockAwsService):
             }
         )
 
-class MockBoto3Resource:
-    def __init__(self, resourceName: str) -> None:
-        return None
-
 
 class MockBoto3Resource:
     def __init__(self, resourceName: str) -> None:
@@ -131,6 +148,7 @@ class MockBoto3Session:
             "secretsmanager": MockSecretsManagerClient(),
             "s3": MockS3Client(),
             "sns": MockSNSClient(),
+            "cloudwatch": MockCloudwatchClient(),
         }
 
     def client(self, client_name: str) -> MockAwsService:

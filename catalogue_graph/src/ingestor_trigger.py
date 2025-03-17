@@ -9,6 +9,13 @@ from pydantic import BaseModel
 
 from config import INGESTOR_SHARD_SIZE
 from ingestor_loader import IngestorLoaderLambdaEvent
+from ingestor_trigger_monitor import (
+    IngestorTriggerMonitorConfig,
+    IngestorTriggerMonitorLambdaEvent,
+)
+from ingestor_trigger_monitor import (
+    handler as monitor_handler,
+)
 from utils.aws import get_neptune_client
 
 
@@ -59,10 +66,10 @@ def transform_data(
         end_index = min(start_offset + shard_size, record_count)
         shard_ranges.append(
             IngestorLoaderLambdaEvent(
-                job_id=job_id, 
-                start_offset=start_offset, 
-                end_index=end_index, 
-                pipeline_date=pipeline_date
+                job_id=job_id,
+                start_offset=start_offset,
+                end_index=end_index,
+                pipeline_date=pipeline_date,
             )
         )
 
@@ -73,28 +80,29 @@ def transform_data(
 
 def handler(
     event: IngestorTriggerLambdaEvent, config: IngestorTriggerConfig
-) -> list[IngestorLoaderLambdaEvent]:
+) -> IngestorTriggerMonitorLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
     extracted_data = extract_data(config.is_local)
     transformed_data = transform_data(
-        record_count=extracted_data, 
-        shard_size=config.shard_size, 
+        record_count=extracted_data,
+        shard_size=config.shard_size,
         job_id=event.job_id,
-        pipeline_date=event.pipeline_date
+        pipeline_date=event.pipeline_date,
     )
 
     print(f"Shard ranges ({len(transformed_data)}) generated successfully.")
 
-    return transformed_data
+    return IngestorTriggerMonitorLambdaEvent(
+        pipeline_date=event.pipeline_date,
+        events=transformed_data,
+    )
 
 
-def lambda_handler(
-    event: IngestorTriggerLambdaEvent, context: typing.Any
-) -> list[dict]:
-    return [e.model_dump() for e in handler(
+def lambda_handler(event: IngestorTriggerLambdaEvent, context: typing.Any) -> dict:
+    return handler(
         IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
-    )]
+    ).model_dump()
 
 
 def local_handler() -> None:
@@ -112,6 +120,16 @@ def local_handler() -> None:
         required=False,
         default="dev",
     )
+    parser.add_argument(
+        "--monitoring",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to enable monitoring, will default to False.",
+    )
+    parser.add_argument(
+        "--force-pass",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to force pass monitoring checks, will default to False.",
+    )
 
     args = parser.parse_args()
 
@@ -120,7 +138,15 @@ def local_handler() -> None:
 
     result = handler(event, config)
 
-    pprint.pprint(result)
+    if args.monitoring:
+        monitor_handler(
+            result,
+            IngestorTriggerMonitorConfig(
+                is_local=True, force_pass=bool(args.force_pass)
+            ),
+        )
+
+    pprint.pprint(result.model_dump())
 
 
 if __name__ == "__main__":
