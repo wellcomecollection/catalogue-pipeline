@@ -113,7 +113,7 @@ def local_handler() -> None:
 
     event = IngestorIndexerLambdaEvent(
         pipeline_date=args.pipeline_date,
-        object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri)
+        object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri),
     )
     config = IngestorIndexerConfig(is_local=True)
 
