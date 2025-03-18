@@ -89,7 +89,7 @@ resource "aws_iam_role_policy" "ingestor_loader_monitor_lambda_s3_read_policy" {
 
 resource "aws_iam_role_policy" "ingestor_loader_monitor_lambda_cloudwatch_write_policy" {
   role   = module.ingestor_loader_monitor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_cloudwatch_write.json
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
 }
 
 module "ingestor_loader_lambda" {
@@ -182,7 +182,7 @@ resource "aws_iam_role_policy" "ingestor_trigger_monitor_lambda_s3_read_policy" 
 
 resource "aws_iam_role_policy" "ingestor_trigger_monitor_cloudwatch_write_policy" {
   role   = module.ingestor_trigger_monitor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_cloudwatch_write.json
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
 }
 
 module "ingestor_trigger_lambda" {
