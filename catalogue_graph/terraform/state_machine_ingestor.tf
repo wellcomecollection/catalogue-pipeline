@@ -30,9 +30,11 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_trigger_lambda.lambda.arn,
-          Payload      = "{}"
+          Payload      = {
+            pipeline_date = local.pipeline_date
+          }
         },
-        Next = "Map load to s3"
+        Next = "Monitor trigger ingest"
       },
       "Monitor trigger ingest" = {
         Type     = "Task",

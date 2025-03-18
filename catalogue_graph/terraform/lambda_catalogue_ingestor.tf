@@ -26,7 +26,6 @@ module "ingestor_indexer_lambda" {
     variables = {
       INGESTOR_S3_BUCKET     = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX     = "ingestor"
-      INGESTOR_PIPELINE_DATE = local.pipeline_date
     }
   }
 }
