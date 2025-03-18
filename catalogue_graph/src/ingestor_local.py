@@ -44,7 +44,7 @@ def main() -> None:
     parser.add_argument(
         "--pipeline-date",
         type=str,
-        help="The date to use for the pipeline, required.",
+        help='The pipeline that is being ingested to, will default to "None".',
         required=False,
     )
     parser.add_argument(
@@ -70,6 +70,8 @@ def main() -> None:
         job_id=args.job_id,
         pipeline_date=args.pipeline_date,
     )
+    print(f"Processing pipeline for {trigger_event.pipeline_date}.")
+
     config = IngestorTriggerConfig(is_local=True)
     trigger_result = trigger_handler(trigger_event, config)
 

@@ -47,12 +47,14 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         }
     ]
 
+    expected_report = {"end_index": 1, "job_id": "123", "pipeline_date": "2025-01-01"}
+
     # assert reports are written in s3
     with MockSmartOpen.open(current_job_s3_url, "r") as f:
-        assert json.load(f) == {"end_index": 1, "job_id": "123"}
+        assert json.load(f) == expected_report
 
     with MockSmartOpen.open(latest_s3_url, "r") as f:
-        assert json.load(f) == {"end_index": 1, "job_id": "123"}
+        assert json.load(f) == expected_report
 
 
 def test_ingestor_trigger_monitor_success_with_previous() -> None:
@@ -66,6 +68,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
                 "end_index": 100,
                 # Test this get overwritten
                 "job_id": "XXX",
+                "pipeline_date": "XXX",
             }
         ),
     )
@@ -101,12 +104,14 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         }
     ]
 
+    expected_report = {"end_index": 110, "job_id": "123", "pipeline_date": "2025-01-01"}
+
     # assert reports are written in s3
     with MockSmartOpen.open(current_job_s3_url, "r") as f:
-        assert json.load(f) == {"end_index": 110, "job_id": "123"}
+        assert json.load(f) == expected_report
 
     with MockSmartOpen.open(latest_s3_url, "r") as f:
-        assert json.load(f) == {"end_index": 110, "job_id": "123"}
+        assert json.load(f) == expected_report
 
 
 def test_ingestor_trigger_monitor_failure_with_previous() -> None:

@@ -31,7 +31,7 @@ def run_check(
     event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
 ) -> LoaderReport:
     pipeline_date = event.events[0].pipeline_date or "dev"
-    assert all([e.pipeline_date == pipeline_date for e in event.events]), (
+    assert all([(e.pipeline_date or "dev") == pipeline_date for e in event.events]), (
         "pipeline_date mismatch! Stopping."
     )
     job_id = event.events[0].job_id

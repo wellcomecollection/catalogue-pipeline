@@ -118,7 +118,6 @@ def local_handler() -> None:
         type=str,
         help='The pipeline that is being ingested to, will default to "dev".',
         required=False,
-        default="dev",
     )
     parser.add_argument(
         "--monitoring",
@@ -133,7 +132,7 @@ def local_handler() -> None:
 
     args = parser.parse_args()
 
-    event = IngestorTriggerLambdaEvent(**args.__dict__)
+    event = IngestorTriggerLambdaEvent(job_id=args.job_id, pipeline_date=args.pipeline)
     config = IngestorTriggerConfig(is_local=True)
 
     result = handler(event, config)
