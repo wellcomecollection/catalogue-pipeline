@@ -46,6 +46,7 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
   statement {
     actions = [
       "s3:GetObject",
+      "s3:HeadObject",
     ]
 
     resources = [
@@ -58,7 +59,7 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
 data "aws_iam_policy_document" "ingestor_s3_write" {
   statement {
     actions = [
-      "s3:PutObject"
+      "s3:PutObject",
     ]
 
     resources = [

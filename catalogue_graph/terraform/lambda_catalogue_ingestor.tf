@@ -128,6 +128,11 @@ resource "aws_iam_role_policy" "ingestor_loader_lambda_read_secrets_policy" {
   policy = data.aws_iam_policy_document.allow_secret_read.json
 }
 
+resource "aws_iam_role_policy" "ingestor_loader_lambda_s3_read_policy" {
+  role   = module.ingestor_loader_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.ingestor_s3_read.json
+}
+
 resource "aws_iam_role_policy" "ingestor_loader_lambda_s3_write_policy" {
   role   = module.ingestor_loader_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.ingestor_s3_write.json

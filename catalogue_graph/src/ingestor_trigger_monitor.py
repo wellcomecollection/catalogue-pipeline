@@ -141,9 +141,10 @@ def handler(
 def lambda_handler(
     event: IngestorTriggerMonitorLambdaEvent, context: typing.Any
 ) -> list[dict]:
+    validated_event = IngestorTriggerMonitorLambdaEvent.model_validate(event)
     handler(
-        IngestorTriggerMonitorLambdaEvent.model_validate(event),
+        validated_event,
         IngestorTriggerMonitorConfig(),
     )
 
-    return [e.model_dump() for e in event.events]
+    return [e.model_dump() for e in validated_event.events]

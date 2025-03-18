@@ -34,7 +34,7 @@ class CatalogueConcept(BaseModel):
 
         return CatalogueConcept(
             id=data["source"]["~properties"]["id"],
-            label=data["source"]["~properties"]["label"],
+            label=data["source"]["~properties"].get("label", ""),
             type=data["source"]["~properties"]["type"],
             alternativeLabels=alternative_labels,
             identifiers=identifiers,
