@@ -21,6 +21,12 @@ from ingestor_trigger import (
 from ingestor_trigger import (
     handler as trigger_handler,
 )
+from ingestor_trigger_monitor import (
+    IngestorTriggerMonitorConfig,
+)
+from ingestor_trigger_monitor import (
+    handler as monitor_handler,
+)
 
 
 # Run the whole pipeline locally, Usage: python src/ingestor_local.py --pipeline-date 2021-07-01 --job-id 123
@@ -44,6 +50,16 @@ def main() -> None:
         help="The number of shards to process, will process all if not specified.",
         required=False,
     )
+    parser.add_argument(
+        "--monitoring",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to enable monitoring, will default to False.",
+    )
+    parser.add_argument(
+        "--force-pass",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to force pass monitoring checks, will default to False.",
+    )
 
     args = parser.parse_args()
 
@@ -51,10 +67,18 @@ def main() -> None:
     config = IngestorTriggerConfig(is_local=True)
     trigger_result = trigger_handler(trigger_event, config)
 
-    trigger_result = trigger_result[: args.limit] if args.limit else trigger_result
+    trigger_result_events = (
+        trigger_result.events[: args.limit] if args.limit else trigger_result.events
+    )
+
+    if args.monitoring:
+        trigger_monitor_config = IngestorTriggerMonitorConfig(
+            is_local=True, force_pass=bool(args.force_pass)
+        )
+        monitor_handler(trigger_result, trigger_monitor_config)
 
     loader_config = IngestorLoaderConfig(is_local=True)
-    loader_results = [loader_handler(e, loader_config) for e in trigger_result]
+    loader_results = [loader_handler(e, loader_config) for e in trigger_result_events]
 
     indexer_config = IngestorIndexerConfig(is_local=True)
     success_counts = [indexer_handler(e, indexer_config) for e in loader_results]

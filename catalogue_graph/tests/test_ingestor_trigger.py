@@ -4,6 +4,7 @@ from test_mocks import MockRequest
 
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger import IngestorTriggerConfig, IngestorTriggerLambdaEvent, handler
+from ingestor_trigger_monitor import IngestorTriggerMonitorLambdaEvent
 
 
 def build_test_matrix() -> list[tuple]:
@@ -13,89 +14,119 @@ def build_test_matrix() -> list[tuple]:
             IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
             IngestorTriggerConfig(shard_size=100, is_local=False),
             {"results": [{"count": 1}]},
-            [
-                IngestorLoaderLambdaEvent(
-                    pipeline_date="2025-01-01",
-                    job_id="123",
-                    start_offset=0,
-                    end_index=1,
-                )
-            ],
+            IngestorTriggerMonitorLambdaEvent(
+                pipeline_date="2025-01-01",
+                force_pass=False,
+                report_results=True,
+                events=[
+                    IngestorLoaderLambdaEvent(
+                        pipeline_date="2025-01-01",
+                        job_id="123",
+                        start_offset=0,
+                        end_index=1,
+                    )
+                ],
+            ),
         ),
         (
             "job_id set, shard_size < results count",
             IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
             IngestorTriggerConfig(shard_size=1, is_local=False),
             {"results": [{"count": 2}]},
-            [
-                IngestorLoaderLambdaEvent(
-                    pipeline_date="2025-01-01",
-                    job_id="123",
-                    start_offset=0,
-                    end_index=1,
-                ),
-                IngestorLoaderLambdaEvent(
-                    pipeline_date="2025-01-01",
-                    job_id="123",
-                    start_offset=1,
-                    end_index=2,
-                ),
-            ],
+            IngestorTriggerMonitorLambdaEvent(
+                pipeline_date="2025-01-01",
+                force_pass=False,
+                report_results=True,
+                events=[
+                    IngestorLoaderLambdaEvent(
+                        pipeline_date="2025-01-01",
+                        job_id="123",
+                        start_offset=0,
+                        end_index=1,
+                    ),
+                    IngestorLoaderLambdaEvent(
+                        pipeline_date="2025-01-01",
+                        job_id="123",
+                        start_offset=1,
+                        end_index=2,
+                    ),
+                ],
+            ),
         ),
         (
             "job_id set, shard_size == results count",
             IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
             IngestorTriggerConfig(shard_size=1),
             {"results": [{"count": 1}]},
-            [
-                IngestorLoaderLambdaEvent(
-                    pipeline_date="2025-01-01",
-                    job_id="123",
-                    start_offset=0,
-                    end_index=1,
-                )
-            ],
+            IngestorTriggerMonitorLambdaEvent(
+                pipeline_date="2025-01-01",
+                force_pass=False,
+                report_results=True,
+                events=[
+                    IngestorLoaderLambdaEvent(
+                        pipeline_date="2025-01-01",
+                        job_id="123",
+                        start_offset=0,
+                        end_index=1,
+                    )
+                ],
+            ),
         ),
         (
             "job_id set, results count == 0",
             IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
             IngestorTriggerConfig(shard_size=100),
             {"pipeline_date": "2025-01-01", "results": [{"count": 0}]},
-            [],
+            IngestorTriggerMonitorLambdaEvent(
+                pipeline_date="2025-01-01",
+                force_pass=False,
+                report_results=True,
+                events=[],
+            ),
         ),
         (
             "job_id set, shard_size unset (default 1k) > results count",
             IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
             IngestorTriggerConfig(),
             {"pipeline_date": "2025-01-01", "results": [{"count": 1001}]},
-            [
-                IngestorLoaderLambdaEvent(
-                    pipeline_date="2025-01-01",
-                    job_id="123",
-                    start_offset=0,
-                    end_index=1000,
-                ),
-                IngestorLoaderLambdaEvent(
-                    pipeline_date="2025-01-01",
-                    job_id="123",
-                    start_offset=1000,
-                    end_index=1001,
-                ),
-            ],
+            IngestorTriggerMonitorLambdaEvent(
+                pipeline_date="2025-01-01",
+                force_pass=False,
+                report_results=True,
+                events=[
+                    IngestorLoaderLambdaEvent(
+                        pipeline_date="2025-01-01",
+                        job_id="123",
+                        start_offset=0,
+                        end_index=1000,
+                    ),
+                    IngestorLoaderLambdaEvent(
+                        pipeline_date="2025-01-01",
+                        job_id="123",
+                        start_offset=1000,
+                        end_index=1001,
+                    ),
+                ],
+            ),
         ),
         (
             "job_id not set, shard_size > results count",
             IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id=None),
             IngestorTriggerConfig(shard_size=100),
             {"results": [{"count": 1}]},
-            [
-                IngestorLoaderLambdaEvent(
-                    pipeline_date="2025-01-01",
-                    job_id="20120101T0000",
-                    start_offset=0,
-                    end_index=1,
-                )
-            ],
+            IngestorTriggerMonitorLambdaEvent(
+                pipeline_date="2025-01-01",
+                force_pass=False,
+                report_results=True,
+                events=[
+                    IngestorLoaderLambdaEvent(
+                        pipeline_date="2025-01-01",
+                        job_id="20120101T0000",
+                        start_offset=0,
+                        end_index=1,
+                    )
+                ],
+            ),
         ),
     ]
 
@@ -115,7 +146,7 @@ def test_ingestor_trigger(
     event: IngestorTriggerLambdaEvent,
     config: IngestorTriggerConfig,
     neptune_response: dict,
-    expected_output: list[IngestorLoaderLambdaEvent],
+    expected_output: IngestorTriggerMonitorLambdaEvent,
 ) -> None:
     MockRequest.mock_responses(
         [
