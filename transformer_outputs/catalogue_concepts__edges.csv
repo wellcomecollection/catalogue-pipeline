@@ -1,2 +1,0 @@
-:ID,:START_ID,:END_ID,:TYPE,referenced_in:String,source:String,qualifier:String,relationship_type:String,matched_by:String
-HAS_SOURCE_CONCEPT:s6s24vd7-->sh85004839,s6s24vd7,sh85004839,HAS_SOURCE_CONCEPT,,,,,identifier
