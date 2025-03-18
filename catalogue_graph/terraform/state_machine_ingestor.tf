@@ -7,7 +7,7 @@ locals {
     "Lambda.TooManyRequestsException"
   ]
   DefaultRetry = [{
-    ErrorEquals = local.DefaultErrorEquals
+    ErrorEquals     = local.DefaultErrorEquals
     IntervalSeconds = 1
     MaxAttempts     = 3
     BackoffRate     = 2
@@ -43,7 +43,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           Payload      = "{% $states.input %}"
         },
         Retry = local.DefaultRetry,
-        Next = "Map load to s3"
+        Next  = "Map load to s3"
       }
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
       "Map load to s3" = {
@@ -65,7 +65,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
                 Payload      = "{% $states.input %}"
               },
               Retry = local.DefaultRetry,
-              End = true
+              End   = true
             }
           }
         },
@@ -91,7 +91,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
               },
               Retry = [
                 {
-                  ErrorEquals = local.DefaultErrorEquals,
+                  ErrorEquals     = local.DefaultErrorEquals,
                   IntervalSeconds = 300,
                   # Don't try again yet!
                   MaxAttempts    = 1,
