@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 def get_priority_source_concept_value(values: dict) -> Any:
     # Sources sorted by priority
-    for source in ["nlm-mesh", "lc-names", "lc-subjects", "wikidata", "label-derived"]:
+    for source in ["nlm-mesh", "lc-subjects", "lc-names", "wikidata", "label-derived"]:
         if (value := values.get(source)) is not None:
             return value
 
@@ -33,7 +33,7 @@ class CatalogueConcept(BaseModel):
 
         labels["label-derived"] = data["concept"]["~properties"].get("label", "")
 
-        # For now, only extract labels and alternative labels only from source concepts which are explicitly linked
+        # For now, only extract labels and alternative labels from source concepts which are explicitly linked
         # to the concept via HAS_SOURCE_CONCEPT edges
         for source_concept in data["linked_source_concepts"]:
             properties = source_concept["~properties"]
