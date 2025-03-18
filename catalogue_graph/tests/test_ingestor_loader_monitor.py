@@ -12,7 +12,9 @@ from ingestor_loader_monitor import (
 
 
 def test_ingestor_loader_monitor_success_no_previous() -> None:
-    latest_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    latest_s3_url = (
+        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    )
     current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
 
     event = IngestorLoaderMonitorLambdaEvent(
@@ -22,18 +24,18 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
-                    content_length=1000, 
-                    record_count=100
-                )
+                    content_length=1000,
+                    record_count=100,
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
-                    content_length=2000, 
-                    record_count=200
-                )            
+                    content_length=2000,
+                    record_count=200,
+                ),
             ),
         ]
     )
@@ -72,7 +74,9 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
 
 
 def test_ingestor_loader_monitor_success_with_previous() -> None:
-    latest_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    latest_s3_url = (
+        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    )
     current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
 
     MockSmartOpen.mock_s3_file(
@@ -95,8 +99,8 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
                     content_length=1100,
-                    record_count=110
-                )
+                    record_count=110,
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -104,8 +108,8 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
                     content_length=2100,
-                    record_count=210
-                )
+                    record_count=210,
+                ),
             ),
         ]
     )
@@ -144,7 +148,9 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
 
 
 def test_ingestor_loader_monitor_failure_with_previous() -> None:
-    latest_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    latest_s3_url = (
+        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    )
     current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
 
     MockSmartOpen.mock_s3_file(
@@ -169,8 +175,8 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
                     content_length=800,
-                    record_count=80
-                )
+                    record_count=80,
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -178,8 +184,8 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
                     content_length=1200,
-                    record_count=120
-                )
+                    record_count=120,
+                ),
             ),
         ]
     )
@@ -198,7 +204,9 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
 
 
 def test_ingestor_loader_monitor_force_pass() -> None:
-    latest_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    latest_s3_url = (
+        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
+    )
     current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
 
     MockSmartOpen.mock_s3_file(
@@ -224,8 +232,8 @@ def test_ingestor_loader_monitor_force_pass() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
                     content_length=800,
-                    record_count=80
-                )
+                    record_count=80,
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -233,10 +241,10 @@ def test_ingestor_loader_monitor_force_pass() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
                     content_length=1200,
-                    record_count=120
-                )
+                    record_count=120,
+                ),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -264,7 +272,7 @@ def test_ingestor_loader_monitor_force_pass() -> None:
             },
         }
     ]
-    
+
     # Reports should be written to S3
     with MockSmartOpen.open(current_job_s3_url, "r") as f:
         assert json.load(f) == expected_report
@@ -282,8 +290,8 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
                     content_length=1000,
-                    record_count=100
-                )
+                    record_count=100,
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-02",  # Different pipeline date
@@ -291,8 +299,8 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-02/123/file2.parquet",
                     content_length=2000,
-                    record_count=200
-                )
+                    record_count=200,
+                ),
             ),
         ]
     )
@@ -313,8 +321,8 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
                     content_length=1000,
-                    record_count=100
-                )
+                    record_count=100,
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -322,8 +330,8 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/456/file2.parquet",
                     content_length=2000,
-                    record_count=200
-                )
+                    record_count=200,
+                ),
             ),
         ]
     )
@@ -344,8 +352,8 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
                     content_length=None,  # Empty content length
-                    record_count=100
-                )
+                    record_count=100,
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -353,8 +361,8 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
                     content_length=2000,
-                    record_count=200
-                )
+                    record_count=200,
+                ),
             ),
         ]
     )
@@ -375,8 +383,8 @@ def test_ingestor_loader_monitor_empty_record_count() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
                     content_length=1000,
-                    record_count=None  # Empty record count
-                )
+                    record_count=None,  # Empty record count
+                ),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -384,8 +392,8 @@ def test_ingestor_loader_monitor_empty_record_count() -> None:
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
                     content_length=2000,
-                    record_count=200
-                )
+                    record_count=200,
+                ),
             ),
         ]
     )
