@@ -50,9 +50,7 @@ def run_check(
     end_index = max([e.end_index for e in loader_events])
 
     current_report = TriggerReport(
-        end_index=end_index, 
-        job_id=job_id,
-        pipeline_date=pipeline_date
+        end_index=end_index, job_id=job_id, pipeline_date=pipeline_date
     )
 
     s3_report_name = "report.trigger.json"

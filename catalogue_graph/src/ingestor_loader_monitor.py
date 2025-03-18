@@ -1,10 +1,12 @@
+import boto3
+import smart_open
+from pydantic import BaseModel, typing
+
+from clients.metric_reporter import MetricReporter
+from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
-import smart_open
-import boto3
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from clients.metric_reporter import MetricReporter
-from pydantic import typing, BaseModel
+
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
     events: list[IngestorIndexerLambdaEvent]
@@ -24,6 +26,7 @@ class LoaderReport(BaseModel):
     record_count: int
     total_file_size: int
 
+
 def run_check(
     event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
 ) -> LoaderReport:
@@ -32,9 +35,7 @@ def run_check(
         "pipeline_date mismatch! Stopping."
     )
     job_id = event.events[0].job_id
-    assert all([e.job_id == job_id for e in event.events]), (
-        "job_id mismatch! Stopping."
-    )
+    assert all([e.job_id == job_id for e in event.events]), "job_id mismatch! Stopping."
     force_pass = config.force_pass or event.force_pass
 
     print(
@@ -51,7 +52,9 @@ def run_check(
     assert all([e.object_to_index.record_count for e in event.events]), (
         "Empty record count found! Stopping."
     )
-    sum_record_count = sum([(e.object_to_index.record_count or 0) for e in event.events])
+    sum_record_count = sum(
+        [(e.object_to_index.record_count or 0) for e in event.events]
+    )
 
     current_report = LoaderReport(
         pipeline_date=pipeline_date,
@@ -69,7 +72,7 @@ def run_check(
     try:
         with smart_open.open(s3_url_latest, "r") as f:
             latest_report = LoaderReport.model_validate_json(f.read())
-        
+
     # if file does not exist, ignore
     except (OSError, KeyError) as e:
         print(f"No latest report found: {e}")
@@ -105,6 +108,7 @@ def run_check(
 
     return current_report
 
+
 def report_results(
     report: LoaderReport,
     report_results: bool,
@@ -119,7 +123,9 @@ def report_results(
     if report_results:
         reporter = MetricReporter("catalogue_graph_ingestor")
         reporter.put_metric_data(
-            metric_name="total_file_size", value=report.total_file_size, dimensions=dimensions
+            metric_name="total_file_size",
+            value=report.total_file_size,
+            dimensions=dimensions,
         )
     else:
         print("Skipping sending report metrics.")
@@ -147,9 +153,9 @@ def handler(
 
 
 def lambda_handler(
-    event: list[IngestorIndexerLambdaEvent] | IngestorLoaderMonitorLambdaEvent, context: typing.Any
+    event: list[IngestorIndexerLambdaEvent] | IngestorLoaderMonitorLambdaEvent,
+    context: typing.Any,
 ) -> list[dict]:
-    
     handler_event = None
     if isinstance(event, list):
         handler_event = IngestorLoaderMonitorLambdaEvent(events=event)
