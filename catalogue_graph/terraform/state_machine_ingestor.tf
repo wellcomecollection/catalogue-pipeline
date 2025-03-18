@@ -69,7 +69,18 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
             }
           }
         },
-        Next = "Map index to ES"
+        Next = "Monitor loader output"
+      },
+      "Monitor loader output" = {
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
+        Arguments = {
+          FunctionName = module.ingestor_loader_monitor_lambda.lambda.arn,
+          Payload      = "{% $states.input %}"
+        },
+        Retry = local.DefaultRetry,
+        Next  = "Map index to ES"
       },
       "Map index to ES" = {
         Type           = "Map",
