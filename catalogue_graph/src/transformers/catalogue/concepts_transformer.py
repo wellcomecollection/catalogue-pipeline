@@ -3,9 +3,8 @@ from collections.abc import Generator
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
-from utils.types import WorkConceptKey
-
 from transformers.base_transformer import BaseTransformer
+from utils.types import WorkConceptKey
 
 from .id_label_checker import IdLabelChecker
 from .raw_concept import RawCatalogueConcept
