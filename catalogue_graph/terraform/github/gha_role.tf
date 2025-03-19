@@ -49,10 +49,7 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "lambda:UpdateFunctionCode"
     ]
     resources = [
-      "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-graph-extractor",
-      "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-graph-bulk-loader",
-      "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-graph-bulk-load-poller",
-      "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-graph-indexer"
+      "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-graph-*",
     ]
   }
 }
