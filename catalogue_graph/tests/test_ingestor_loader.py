@@ -1,5 +1,7 @@
 import polars as pl
 import pytest
+from test_mocks import MockRequest, MockSmartOpen
+
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     IngestorIndexerObject,
@@ -8,7 +10,6 @@ from ingestor_loader import (
     handler,
 )
 from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifier
-from test_mocks import MockRequest, MockSmartOpen
 
 
 def build_test_matrix() -> list[tuple]:
