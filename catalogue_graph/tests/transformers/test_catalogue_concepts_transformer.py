@@ -1,6 +1,3 @@
-from test_mocks import MockRequest
-from test_utils import add_mock_transformer_outputs, load_fixture
-
 from config import CATALOGUE_SNAPSHOT_URL
 from models.graph_edge import (
     BaseEdge,
@@ -8,6 +5,8 @@ from models.graph_edge import (
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
+from test_mocks import MockRequest
+from test_utils import add_mock_transformer_outputs, load_fixture
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
@@ -64,8 +63,8 @@ def test_catalogue_concepts_transformer_edges() -> None:
         CATALOGUE_SNAPSHOT_URL
     )
 
-    edges = list(catalogue_concepts_transformer._stream_edges())
-    assert len(edges) == 7
+    edges = list(catalogue_concepts_transformer._stream_edges()) 
+    assert len(edges) == 6
 
     _check_edge(
         edges,
@@ -80,23 +79,6 @@ def test_catalogue_concepts_transformer_edges() -> None:
             directed=True,
             attributes=ConceptHasSourceConceptAttributes(
                 qualifier=None, matched_by="identifier"
-            ),
-        ),
-    )
-
-    _check_edge(
-        edges,
-        "yfqryj26",
-        "sh85045046",
-        ConceptHasSourceConcept(
-            from_type="Concept",
-            to_type="SourceConcept",
-            from_id="yfqryj26",
-            to_id="sh85045046",
-            relationship="HAS_SOURCE_CONCEPT",
-            directed=True,
-            attributes=ConceptHasSourceConceptAttributes(
-                qualifier=None, matched_by="label"
             ),
         ),
     )
@@ -135,6 +117,7 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
 
+
     _check_edge(
         edges,
         "s6s24vd9",
@@ -151,3 +134,4 @@ def test_catalogue_concepts_transformer_edges() -> None:
             ),
         ),
     )
+

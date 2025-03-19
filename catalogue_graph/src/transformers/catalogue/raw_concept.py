@@ -102,16 +102,23 @@ class RawCatalogueConcept:
         # For MeSH, we not only require that the source identifier has a corresponding node in the graph,
         # but also that the label of the node matches the label of the catalogue concept
         if self.source == "nlm-mesh":
-            source_label = self.id_label_checker.get_label(self.source_concept_id, self.source)
-            source_alternative_labels = self.id_label_checker.get_alternative_labels(self.source_concept_id, self.source)
-            normalised_label = self.label.lower()
-            
-            return source_label == normalised_label or any(
-                source_label in normalised_label for source_label in source_alternative_labels
+            source_label = self.id_label_checker.get_label(
+                self.source_concept_id, self.source
             )
+            source_alternative_labels = self.id_label_checker.get_alternative_labels(
+                self.source_concept_id, self.source
+            )
+            
+            all_source_labels = source_alternative_labels + [source_label]
+            normalised_label = self.label.lower()
+
+            return any(label in normalised_label for label in all_source_labels)
 
         # For LoC, we only require that the referenced source identifier exists in the graph.
         if self.source in ("lc-subjects", "lc-names"):
-            return self.id_label_checker.get_label(self.source_concept_id, self.source) is not None
+            return (
+                self.id_label_checker.get_label(self.source_concept_id, self.source)
+                is not None
+            )
 
         return False
