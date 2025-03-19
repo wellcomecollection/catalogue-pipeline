@@ -29,5 +29,4 @@ echo "Revision id: $REVISION_ID"
 echo "Awaiting function update"
 aws lambda wait function-updated \
     --function-name $LAMBDA_NAME
-
 echo "Done"

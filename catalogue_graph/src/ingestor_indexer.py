@@ -25,6 +25,7 @@ class IngestorIndexerObject(BaseModel):
 
 class IngestorIndexerLambdaEvent(BaseModel):
     pipeline_date: str | None = INGESTOR_PIPELINE_DATE
+    job_id: str | None = None
     object_to_index: IngestorIndexerObject
 
 

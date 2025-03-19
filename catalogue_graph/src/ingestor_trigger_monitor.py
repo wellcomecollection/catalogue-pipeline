@@ -7,30 +7,25 @@ from pydantic import BaseModel
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_loader import IngestorLoaderLambdaEvent
+from models.step_events import IngestorMonitorStepEvent
 
 
-class MonitorStepEvent(BaseModel):
+class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
     pipeline_date: str | None = None
-    force_pass: bool = False
-    report_results: bool = True
-
-
-class IngestorTriggerMonitorLambdaEvent(MonitorStepEvent):
     events: list[IngestorLoaderLambdaEvent]
 
 
-class IngestorTriggerMonitorConfig(BaseModel):
+class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
     loader_s3_bucket: str = INGESTOR_S3_BUCKET
     loader_s3_prefix: str = INGESTOR_S3_PREFIX
     percentage_threshold: float = 0.1
-    force_pass: bool = False
-    report_results: bool = True
 
     is_local: bool = False
 
 
 class TriggerReport(BaseModel):
-    end_index: int
+    record_count: int
+    pipeline_date: str
     job_id: str
 
 
@@ -40,20 +35,23 @@ def run_check(
     pipeline_date = event.pipeline_date or "dev"
     force_pass = config.force_pass or event.force_pass
 
-    print(
-        f"Checking loader events for pipeline_date: {pipeline_date}, force_pass: {force_pass} ..."
-    )
-
     loader_events = event.events
     # assert all job_ids are the same
     job_id = loader_events[0].job_id
     assert all([e.job_id == job_id for e in loader_events]), (
         "job_id mismatch! Stopping."
     )
-    # get the highest end_index
-    end_index = max([e.end_index for e in loader_events])
 
-    current_report = TriggerReport(end_index=end_index, job_id=job_id)
+    print(
+        f"Checking loader events for pipeline_date: {pipeline_date}:{job_id}, force_pass: {force_pass} ..."
+    )
+
+    # get the highest end_index
+    record_count = max([e.end_index for e in loader_events])
+
+    current_report = TriggerReport(
+        record_count=record_count, job_id=job_id, pipeline_date=pipeline_date
+    )
 
     s3_report_name = "report.trigger.json"
     s3_url_current_job = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{job_id}/{s3_report_name}"
@@ -69,9 +67,9 @@ def run_check(
         print(f"No latest report found: {e}")
 
     if latest_report is not None:
-        # check if the end_index has changed by more than the threshold
-        delta = current_report.end_index - latest_report.end_index
-        percentage = abs(delta) / latest_report.end_index
+        # check if the record_count has changed by more than the threshold
+        delta = current_report.record_count - latest_report.record_count
+        percentage = abs(delta) / latest_report.record_count
 
         if percentage > config.percentage_threshold:
             error_message = f"Percentage change {percentage} exceeds threshold {config.percentage_threshold}!"
@@ -81,7 +79,7 @@ def run_check(
                 raise ValueError(error_message)
         else:
             print(
-                f"Percentage change {percentage} ({delta}/{latest_report.end_index}) is within threshold {config.percentage_threshold}."
+                f"Percentage change {percentage} ({delta}/{latest_report.record_count}) is within threshold {config.percentage_threshold}."
             )
 
     transport_params = {"client": boto3.client("s3")}
@@ -100,21 +98,20 @@ def run_check(
 
 
 def report_results(
-    event: IngestorTriggerMonitorLambdaEvent,
-    config: IngestorTriggerMonitorConfig,
     report: TriggerReport,
+    send_report: bool,
 ) -> None:
     dimensions = {
-        "pipeline_date": event.pipeline_date or "dev",
+        "pipeline_date": report.pipeline_date,
         "step": "ingestor_trigger_monitor",
         "job_id": report.job_id,
     }
 
     print(f"Reporting results {report}, {dimensions} ...")
-    if config.report_results:
+    if send_report:
         reporter = MetricReporter("catalogue_graph_ingestor")
         reporter.put_metric_data(
-            metric_name="end_index", value=report.end_index, dimensions=dimensions
+            metric_name="record_count", value=report.record_count, dimensions=dimensions
         )
     else:
         print("Skipping sending report metrics.")
@@ -125,17 +122,15 @@ def report_results(
 def handler(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> None:
-    print("Checking output of ingestor_trigger ...")
+    print("Checking output of ingestor_loader ...")
+    send_report = event.report_results or config.report_results
 
-    report = None
     try:
         report = run_check(event, config)
+        report_results(report, send_report)
     except ValueError as e:
         print(f"Check failed: {e}")
         raise e
-
-    if report is not None and event.report_results:
-        report_results(event, config, report)
 
     print("Check complete.")
     return
@@ -144,9 +139,10 @@ def handler(
 def lambda_handler(
     event: IngestorTriggerMonitorLambdaEvent, context: typing.Any
 ) -> list[dict]:
+    validated_event = IngestorTriggerMonitorLambdaEvent.model_validate(event)
     handler(
-        IngestorTriggerMonitorLambdaEvent.model_validate(event),
+        validated_event,
         IngestorTriggerMonitorConfig(),
     )
 
-    return [e.model_dump() for e in event.events]
+    return [e.model_dump() for e in validated_event.events]

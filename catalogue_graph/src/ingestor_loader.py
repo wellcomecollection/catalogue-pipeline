@@ -93,7 +93,7 @@ def handler(
     filename = (
         f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}.parquet"
     )
-    s3_object_key = f"{event.pipeline_date}/{event.job_id}/{filename}"
+    s3_object_key = f"{event.pipeline_date or 'dev'}/{event.job_id}/{filename}"
     s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
 
     extracted_data = extract_data(
@@ -108,6 +108,7 @@ def handler(
 
     return IngestorIndexerLambdaEvent(
         pipeline_date=event.pipeline_date,
+        job_id=event.job_id,
         object_to_index=result,
     )
 
@@ -148,6 +149,7 @@ def local_handler() -> None:
         required=False,
         default="dev",
     )
+
     args = parser.parse_args()
 
     event = IngestorLoaderLambdaEvent(**args.__dict__)
@@ -155,7 +157,7 @@ def local_handler() -> None:
 
     result = handler(event, config)
 
-    pprint.pprint(result)
+    pprint.pprint(result.model_dump())
 
 
 if __name__ == "__main__":

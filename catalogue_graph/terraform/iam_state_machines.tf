@@ -30,7 +30,7 @@ resource "aws_iam_policy" "state_machine_policy" {
       },
       {
         Effect = "Allow",
-        Action = ["states:StartExecution"],
+        Action = ["states:StartExecution", "states:RedriveExecution"],
         Resource = [
           aws_sfn_state_machine.catalogue_graph_extractor.arn,
           aws_sfn_state_machine.catalogue_graph_extractors.arn,
@@ -53,7 +53,9 @@ resource "aws_iam_policy" "state_machine_policy" {
           module.bulk_load_poller_lambda.lambda.arn,
           module.ingestor_trigger_lambda.lambda.arn,
           module.ingestor_loader_lambda.lambda.arn,
-          module.ingestor_indexer_lambda.lambda.arn
+          module.ingestor_indexer_lambda.lambda.arn,
+          module.ingestor_loader_monitor_lambda.lambda.arn,
+          module.ingestor_trigger_monitor_lambda.lambda.arn,
         ]
       },
       {
