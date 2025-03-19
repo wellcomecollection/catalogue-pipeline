@@ -46,6 +46,7 @@ def test_ingestor_indexer_success() -> None:
                     "label": "Circle of State Librarians Conference 1979 : Kew, England)",
                     "alternativeLabels": [],
                     "type": "Meeting",
+                    "description": None,
                 },
             },
         },
@@ -66,14 +67,19 @@ def test_ingestor_indexer_success() -> None:
                     "id": "a223f5a6",
                     "identifiers": [
                         {
-                            "id": "no2001062332",
-                            "label": "lc-names",
-                            "type": "IdentifierType",
+                            "value": "no2001062332",
+                            "type": "Identifier",
+                            "identifierType": {
+                                "id": "lc-names",
+                                "label": "Library of Congress Name authority records",
+                                "type": "IdentifierType",
+                            },
                         }
                     ],
                     "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
                     "alternativeLabels": [],
                     "type": "Person",
+                    "description": "Some description 1",
                 },
             },
         },
@@ -94,6 +100,7 @@ def test_ingestor_indexer_success() -> None:
                     "label": "Wolff, G.",
                     "alternativeLabels": [],
                     "type": "Person",
+                    "description": "Some description 2",
                 },
             },
         },
@@ -114,14 +121,19 @@ def test_ingestor_indexer_success() -> None:
                     "id": "a224b9mp",
                     "identifiers": [
                         {
-                            "id": "n79066466",
-                            "label": "lc-names",
-                            "type": "IdentifierType",
+                            "value": "n79066466",
+                            "type": "Identifier",
+                            "identifierType": {
+                                "id": "lc-names",
+                                "label": "Library of Congress Name authority records",
+                                "type": "IdentifierType",
+                            },
                         }
                     ],
                     "label": "Jones, John E.",
                     "alternativeLabels": [],
                     "type": "Person",
+                    "description": None,
                 },
             },
         },

@@ -52,7 +52,7 @@ class MockSmartOpen:
 
             cls.file_lookup[uri] = temp_file.name
             return temp_file
-        elif mode == "r":
+        elif mode in ["r", "rb"]:
             if uri not in cls.file_lookup:
                 raise KeyError(f"Mock S3 file {uri} does not exist.")
             # if the file lookup is a str, then it's a file path and we should open it
