@@ -117,7 +117,6 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
 
-
     _check_edge(
         edges,
         "s6s24vd9",

@@ -109,7 +109,10 @@ class RawCatalogueConcept:
                 self.source_concept_id, self.source
             )
             
-            all_source_labels = source_alternative_labels + [source_label]
+            all_source_labels = source_alternative_labels 
+            if source_label is not None:
+                all_source_labels.append(source_label)
+                
             normalised_label = self.label.lower()
 
             return any(label in normalised_label for label in all_source_labels)

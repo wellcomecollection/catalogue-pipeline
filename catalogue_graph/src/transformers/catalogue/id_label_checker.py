@@ -6,12 +6,11 @@ from models.graph_node import ConceptSource, ConceptType
 from utils.aws import NodeType, OntologyType, fetch_transformer_output_from_s3
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
-
 SOURCES_BY_PRIORITY: list[ConceptSource] = ["nlm-mesh", "lc-subjects", "lc-names"]
 AMBIGUITY_THRESHOLD = 1
 
-with open(f"{os.path.dirname(__file__)}/data/blacklisted_concept_labels.txt") as f:
-    BLACKLISTED_CONCEPT_LABELS = [line.strip() for line in f]
+with open(f"{os.path.dirname(__file__)}/data/concept_label_deny_list.txt") as f:
+    CONCEPT_DENY_LIST = [line.strip() for line in f]
 
 
 def _concept_source_from_id(source_id: str) -> ConceptSource:
@@ -29,26 +28,16 @@ class IdLabelChecker:
     """
     A bidirectional dictionary for checking catalogue concepts against data from source ontologies.
     """
-
-    ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(
-        lambda: defaultdict(str)
-    )
-    ids_to_alternative_labels: dict[ConceptSource, dict[str, list[str]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
-
-    labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
-    alternative_labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = defaultdict(
-        lambda: defaultdict(list)
-    )
-
     def __init__(
         self,
         node_type: NodeType | list[NodeType],
         source: OntologyType | list[OntologyType],
     ):
+        self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(lambda: defaultdict(str))
+        self.ids_to_alternative_labels: dict[ConceptSource, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+        self.labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+        self.alternative_labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
+            
         if not isinstance(node_type, list):
             node_type = [node_type]
         if not isinstance(source, list):
@@ -63,26 +52,27 @@ class IdLabelChecker:
                     for label in row["alternative_labels:String"].split("||")
                     if label != ""
                 ]
-
+                
                 concept_source = _concept_source_from_id(source_id)
+                self._add_label_mapping(label, source_id, concept_source)
+                self._add_alternative_label_mappings(alternative_labels, source_id, concept_source)
+                    
+    def _add_label_mapping(self, label: str, source_id: str, concept_source: ConceptSource) -> None:
+        self.ids_to_labels[concept_source][source_id] = label
+        self.labels_to_ids[concept_source][label].append(source_id)
 
-                self.ids_to_labels[concept_source][source_id] = label
-                self.ids_to_alternative_labels[concept_source][source_id] = (
-                    alternative_labels
-                )
+    def _add_alternative_label_mappings(self, labels: list[str], source_id: str, concept_source: ConceptSource) -> None:
+        self.ids_to_alternative_labels[concept_source][source_id] = labels
+        for label in labels:
+            self.alternative_labels_to_ids[concept_source][label].append(source_id)
 
-                self.labels_to_ids[concept_source][label].append(source_id)
-                for label in alternative_labels:
-                    self.alternative_labels_to_ids[concept_source][label].append(
-                        source_id
-                    )
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:
         """
         Given some label, return exactly one closest-matching source concept id (or 'None' if no match found).
         """
         # Do not attempt to match blacklisted concept labels.
-        if label in BLACKLISTED_CONCEPT_LABELS:
+        if label in CONCEPT_DENY_LIST:
             return None
 
         # First, try to match the concept label to a 'main' source concept label, in order of priority.
