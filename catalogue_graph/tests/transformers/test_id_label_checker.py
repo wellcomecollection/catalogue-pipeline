@@ -1,5 +1,4 @@
 from test_utils import add_mock_transformer_outputs
-
 from transformers.catalogue.id_label_checker import IdLabelChecker
 
 
@@ -8,7 +7,7 @@ def test_id_label_matcher() -> None:
         sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
     )
     id_label_checker = IdLabelChecker(
-        node_type=["concepts", "locations", "names"], source=["loc", "mesh"]
+        node_types=["concepts", "locations", "names"], sources=["loc", "mesh"]
     )
 
     # Do not match blacklisted concept labels

@@ -18,11 +18,6 @@ MOCK_CREDENTIALS = Credentials(
 )
 
 
-class MockBotoS3Object:
-    def __init__(self) -> None:
-        self.content_length = 1
-
-
 class MockSmartOpen:
     file_lookup: dict = {}
 
@@ -140,6 +135,11 @@ class MockSNSClient(MockAwsService):
 class MockBoto3Resource:
     def __init__(self, resourceName: str) -> None:
         return None
+
+
+class MockBotoS3Object:
+    def __init__(self) -> None:
+        self.content_length = 1
 
 
 class MockBoto3Session:

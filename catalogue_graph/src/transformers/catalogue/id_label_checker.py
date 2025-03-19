@@ -26,14 +26,16 @@ def _concept_source_from_id(source_id: str) -> ConceptSource:
 
 class IdLabelChecker:
     """
-    A bidirectional dictionary for checking catalogue concepts against data from source ontologies.
+    A set of methods for checking catalogue concepts against data from source ontologies.
     """
 
     def __init__(
         self,
-        node_type: NodeType | list[NodeType],
-        source: OntologyType | list[OntologyType],
-    ):
+        node_types: list[NodeType],
+        sources: list[OntologyType],
+    ): 
+        # Nested dictionaries mapping source ids to labels/alternative labels and vice versa.
+        # The dictionaries are nested to group ids/labels by source ontology.
         self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(
             lambda: defaultdict(str)
         )
@@ -47,13 +49,8 @@ class IdLabelChecker:
             defaultdict(lambda: defaultdict(list))
         )
 
-        if not isinstance(node_type, list):
-            node_type = [node_type]
-        if not isinstance(source, list):
-            source = [source]
-
-        for nt, s in product(node_type, source):
-            for row in fetch_transformer_output_from_s3(nt, s):
+        for node_type, source in product(node_types, sources):
+            for row in fetch_transformer_output_from_s3(node_type, source):
                 source_id = row[":ID"]
                 label = row["label:String"].lower()
                 alternative_labels = [

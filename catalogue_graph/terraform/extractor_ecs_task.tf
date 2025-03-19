@@ -14,8 +14,8 @@ module "extractor_ecs_task" {
     GRAPH_QUERIES_SNS_TOPIC_ARN = module.catalogue_graph_queries_topic.arn
   }
 
-  cpu    = 2048
-  memory = 4096
+  cpu    = 4096
+  memory = 16384
 }
 
 resource "aws_iam_role_policy" "ecs_stream_to_sns_policy" {

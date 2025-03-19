@@ -14,7 +14,7 @@ from ingestor_trigger_monitor import (
     IngestorTriggerMonitorLambdaEvent,
 )
 from ingestor_trigger_monitor import (
-    handler as monitor_handler,
+    handler as trigger_monitor_handler,
 )
 from utils.aws import get_neptune_client
 
@@ -118,7 +118,16 @@ def local_handler() -> None:
         type=str,
         help='The pipeline that is being ingested to, will default to "dev".',
         required=False,
-        default="dev",
+    )
+    parser.add_argument(
+        "--monitoring",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to enable monitoring, will default to False.",
+    )
+    parser.add_argument(
+        "--force-pass",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to force pass monitoring checks, will default to False.",
     )
     parser.add_argument(
         "--monitoring",
@@ -133,13 +142,13 @@ def local_handler() -> None:
 
     args = parser.parse_args()
 
-    event = IngestorTriggerLambdaEvent(**args.__dict__)
+    event = IngestorTriggerLambdaEvent(job_id=args.job_id, pipeline_date=args.pipeline)
     config = IngestorTriggerConfig(is_local=True)
 
     result = handler(event, config)
 
     if args.monitoring:
-        monitor_handler(
+        trigger_monitor_handler(
             result,
             IngestorTriggerMonitorConfig(
                 is_local=True, force_pass=bool(args.force_pass)

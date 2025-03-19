@@ -18,6 +18,7 @@ S3_PREFIX="lambdas/catalogue_graph"
 ZIP_TARGET="${ROOT}/target/build.zip"
 TAG_DEFAULT="dev"
 PUSH=false
+SKIP_CONTAINER_BUILD=false
 
 # parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -25,12 +26,15 @@ while [[ $# -gt 0 ]]; do
     -t|--tag)
       TAG=${2:-$TAG_DEFAULT}
       echo "Using tag: $TAG"
-      shift
+      shift 
       ;;
     -p|--push)
       PUSH=true
       echo "Will push build artifacts to AWS"
-      shift
+      ;;
+    -s|--skip-container-build)
+      SKIP_CONTAINER_BUILD=true
+      echo "Will skip building the container"
       ;;
     *)
       echo "Unknown option: $1"
@@ -46,6 +50,10 @@ cd "$ROOT"
 
 function build_zip() {( set -e
     local ZIP_TARGET=$1
+    # Ensure the target directory is clean
+    rm -rf target/tmp
+    rm -f $ZIP_TARGET
+
     mkdir -p target/tmp
 
     cp -r src/* target/tmp
@@ -83,9 +91,14 @@ function docker_compose {( set -e
 )}
 
 build_zip "$ZIP_TARGET"
-docker_compose "build" "extractor"
+
+if [ "$SKIP_CONTAINER_BUILD" == false ]; then
+    docker_compose "build" "extractor"
+fi
 
 if [ "$PUSH" == true ]; then
     upload_zip "$ZIP_TARGET" 
-    docker_compose "push" "extractor" 
+    if [ "$SKIP_CONTAINER_BUILD" == false ]; then
+        docker_compose "push" "extractor"
+    fi
 fi

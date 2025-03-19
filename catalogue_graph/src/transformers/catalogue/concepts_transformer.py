@@ -3,8 +3,9 @@ from collections.abc import Generator
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
-from transformers.base_transformer import BaseTransformer
 from utils.types import WorkConceptKey
+
+from transformers.base_transformer import BaseTransformer
 
 from .id_label_checker import IdLabelChecker
 from .raw_concept import RawCatalogueConcept
@@ -14,7 +15,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = CatalogueConceptsSource(url)
         self.id_label_checker = IdLabelChecker(
-            node_type=["concepts", "locations", "names"], source=["loc", "mesh"]
+            node_types=["concepts", "locations", "names"], sources=["loc", "mesh"]
         )
         self.id_lookup: set = set()
 
