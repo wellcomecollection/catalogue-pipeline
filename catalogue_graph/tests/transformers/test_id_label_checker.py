@@ -1,4 +1,5 @@
 from test_utils import add_mock_transformer_outputs
+
 from transformers.catalogue.id_label_checker import IdLabelChecker
 
 
@@ -68,5 +69,3 @@ def test_id_label_checker_source_priority() -> None:
 
     # Prioritise matching on MeSH rather than LoC
     assert id_label_checker.get_id("anatomy", "Concept") == "D000715"
-
-
