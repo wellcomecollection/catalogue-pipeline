@@ -47,7 +47,11 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         }
     ]
 
-    expected_report = {"record_count": 1, "job_id": "123", "pipeline_date": "2025-01-01"}
+    expected_report = {
+        "record_count": 1,
+        "job_id": "123",
+        "pipeline_date": "2025-01-01",
+    }
 
     # assert reports are written in s3
     with MockSmartOpen.open(current_job_s3_url, "r") as f:
@@ -104,7 +108,11 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         }
     ]
 
-    expected_report = {"record_count": 110, "job_id": "123", "pipeline_date": "2025-01-01"}
+    expected_report = {
+        "record_count": 110,
+        "job_id": "123",
+        "pipeline_date": "2025-01-01",
+    }
 
     # assert reports are written in s3
     with MockSmartOpen.open(current_job_s3_url, "r") as f:

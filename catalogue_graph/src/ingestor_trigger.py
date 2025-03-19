@@ -129,6 +129,16 @@ def local_handler() -> None:
         action=argparse.BooleanOptionalAction,
         help="Whether to force pass monitoring checks, will default to False.",
     )
+    parser.add_argument(
+        "--monitoring",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to enable monitoring, will default to False.",
+    )
+    parser.add_argument(
+        "--force-pass",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to force pass monitoring checks, will default to False.",
+    )
 
     args = parser.parse_args()
 
