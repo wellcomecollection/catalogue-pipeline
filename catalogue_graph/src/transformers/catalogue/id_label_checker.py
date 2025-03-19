@@ -10,7 +10,7 @@ SOURCES_BY_PRIORITY: list[ConceptSource] = ["nlm-mesh", "lc-subjects", "lc-names
 AMBIGUITY_THRESHOLD = 1
 
 with open(f"{os.path.dirname(__file__)}/data/concept_label_deny_list.txt") as f:
-    CONCEPT_DENY_LIST = [line.strip() for line in f]
+    CONCEPT_DENY_LIST = [line.strip().lower() for line in f]
 
 
 def _concept_source_from_id(source_id: str) -> ConceptSource:
