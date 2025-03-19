@@ -36,12 +36,14 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> list[dict
     print(f"Processing records from {start_offset} to {end_index} ({limit} records)")
 
     open_cypher_match_query = f"""
-    MATCH (s:Concept)
-    OPTIONAL MATCH (s)-[r]->(t)
-    WITH s as source, collect(r) as relationships, collect(t) as targets 
-    ORDER BY source.id
-    RETURN source, relationships, targets
+    MATCH (concept:Concept)
+    WITH concept ORDER BY concept.id
     SKIP {start_offset} LIMIT {limit}
+    OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
+    RETURN 
+        concept,
+        collect(DISTINCT linked_source_concept) AS linked_source_concepts,
+        collect(DISTINCT source_concept) AS source_concepts
     """
 
     print("Running query:")

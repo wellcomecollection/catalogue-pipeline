@@ -29,7 +29,7 @@ def build_test_matrix() -> list[tuple]:
             {
                 "results": [
                     {
-                        "source": {
+                        "concept": {
                             "~properties": {
                                 "id": "source_id",
                                 "label": "label",
@@ -37,12 +37,23 @@ def build_test_matrix() -> list[tuple]:
                             }
                         },
                         "relationships": [],
-                        "targets": [
+                        "source_concepts": [
                             {
                                 "~properties": {
                                     "id": "456",
-                                    "source": "source",
+                                    "source": "lc-names",
                                     "alternative_labels": "alternative_label||another_alternative_label",
+                                    "description": "description",
+                                }
+                            }
+                        ],
+                        "linked_source_concepts": [
+                            {
+                                "~properties": {
+                                    "id": "456",
+                                    "source": "lc-names",
+                                    "alternative_labels": "alternative_label||another_alternative_label",
+                                    "description": "description",
                                 }
                             }
                         ],
@@ -63,10 +74,11 @@ def build_test_matrix() -> list[tuple]:
                 label="label",
                 type="type",
                 alternativeLabels=["alternative_label", "another_alternative_label"],
+                description="description",
                 identifiers=[
                     CatalogueConceptIdentifier(
                         value="456",
-                        identifierType="source",
+                        identifierType="lc-names",
                     )
                 ],
             ),
@@ -86,7 +98,7 @@ def build_test_matrix() -> list[tuple]:
             {
                 "results": [
                     {
-                        "source": {
+                        "concept": {
                             "~properties": {
                                 "id": "source_id",
                                 "label": "label",
@@ -94,11 +106,21 @@ def build_test_matrix() -> list[tuple]:
                             }
                         },
                         "relationships": [],
-                        "targets": [
+                        "source_concepts": [
                             {
                                 "~properties": {
                                     "id": "456",
-                                    "source": "source",
+                                    "source": "lc-names",
+                                    "description": "description",
+                                }
+                            }
+                        ],
+                        "linked_source_concepts": [
+                            {
+                                "~properties": {
+                                    "id": "456",
+                                    "source": "lc-names",
+                                    "description": "description",
                                 }
                             }
                         ],
@@ -117,12 +139,13 @@ def build_test_matrix() -> list[tuple]:
             CatalogueConcept(
                 id="source_id",
                 label="label",
+                description="description",
                 type="type",
                 alternativeLabels=[],
                 identifiers=[
                     CatalogueConceptIdentifier(
                         value="456",
-                        identifierType="source",
+                        identifierType="lc-names",
                     )
                 ],
             ),
@@ -193,7 +216,7 @@ def test_ingestor_loader(
         assert request["method"] == "POST"
         assert request["url"] == "https://test-host.com:8182/openCypher"
 
-        with MockSmartOpen.open(expected_output.object_to_index.s3_uri, "r") as f:
+        with MockSmartOpen.open(expected_output.object_to_index.s3_uri, "rb") as f:
             df = pl.read_parquet(f)
             assert len(df) == 1
 
