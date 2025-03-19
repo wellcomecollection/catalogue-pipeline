@@ -55,6 +55,7 @@ jobs:
           catalogue-graph-ingestor-trigger-monitor,
           catalogue-graph-ingestor-indexer,
           catalogue-graph-ingestor-loader,
+          catalogue-graph-ingestor-loader-monitor,
         ]
     steps:
       - uses: actions/checkout@v3
