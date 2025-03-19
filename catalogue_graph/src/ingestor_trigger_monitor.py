@@ -24,7 +24,7 @@ class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
 
 
 class TriggerReport(BaseModel):
-    end_index: int
+    record_count: int
     pipeline_date: str
     job_id: str
 
@@ -47,10 +47,10 @@ def run_check(
     )
 
     # get the highest end_index
-    end_index = max([e.end_index for e in loader_events])
+    record_count = max([e.end_index for e in loader_events])
 
     current_report = TriggerReport(
-        end_index=end_index, job_id=job_id, pipeline_date=pipeline_date
+        record_count=record_count, job_id=job_id, pipeline_date=pipeline_date
     )
 
     s3_report_name = "report.trigger.json"
@@ -67,9 +67,9 @@ def run_check(
         print(f"No latest report found: {e}")
 
     if latest_report is not None:
-        # check if the end_index has changed by more than the threshold
-        delta = current_report.end_index - latest_report.end_index
-        percentage = abs(delta) / latest_report.end_index
+        # check if the record_count has changed by more than the threshold
+        delta = current_report.record_count - latest_report.record_count
+        percentage = abs(delta) / latest_report.record_count
 
         if percentage > config.percentage_threshold:
             error_message = f"Percentage change {percentage} exceeds threshold {config.percentage_threshold}!"
@@ -79,7 +79,7 @@ def run_check(
                 raise ValueError(error_message)
         else:
             print(
-                f"Percentage change {percentage} ({delta}/{latest_report.end_index}) is within threshold {config.percentage_threshold}."
+                f"Percentage change {percentage} ({delta}/{latest_report.record_count}) is within threshold {config.percentage_threshold}."
             )
 
     transport_params = {"client": boto3.client("s3")}
@@ -111,7 +111,7 @@ def report_results(
     if report_results:
         reporter = MetricReporter("catalogue_graph_ingestor")
         reporter.put_metric_data(
-            metric_name="end_index", value=report.end_index, dimensions=dimensions
+            metric_name="record_count", value=report.record_count, dimensions=dimensions
         )
     else:
         print("Skipping sending report metrics.")

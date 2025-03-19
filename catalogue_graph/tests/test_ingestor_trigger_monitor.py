@@ -38,7 +38,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         {
             "namespace": "catalogue_graph_ingestor",
             "value": 1,
-            "metric_name": "end_index",
+            "metric_name": "record_count",
             "dimensions": {
                 "pipeline_date": "2025-01-01",
                 "job_id": "123",
@@ -47,7 +47,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         }
     ]
 
-    expected_report = {"end_index": 1, "job_id": "123", "pipeline_date": "2025-01-01"}
+    expected_report = {"record_count": 1, "job_id": "123", "pipeline_date": "2025-01-01"}
 
     # assert reports are written in s3
     with MockSmartOpen.open(current_job_s3_url, "r") as f:
@@ -65,7 +65,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         latest_s3_url,
         json.dumps(
             {
-                "end_index": 100,
+                "record_count": 100,
                 # Test this get overwritten
                 "job_id": "XXX",
                 "pipeline_date": "XXX",
@@ -95,7 +95,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         {
             "namespace": "catalogue_graph_ingestor",
             "value": 110,
-            "metric_name": "end_index",
+            "metric_name": "record_count",
             "dimensions": {
                 "pipeline_date": "2025-01-01",
                 "job_id": "123",
@@ -104,7 +104,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         }
     ]
 
-    expected_report = {"end_index": 110, "job_id": "123", "pipeline_date": "2025-01-01"}
+    expected_report = {"record_count": 110, "job_id": "123", "pipeline_date": "2025-01-01"}
 
     # assert reports are written in s3
     with MockSmartOpen.open(current_job_s3_url, "r") as f:
@@ -118,7 +118,7 @@ def test_ingestor_trigger_monitor_failure_with_previous() -> None:
     latest_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.trigger.json"
     current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.trigger.json"
 
-    latest_content = {"end_index": 100, "job_id": "XXX"}
+    latest_content = {"record_count": 100, "job_id": "XXX"}
 
     MockSmartOpen.mock_s3_file(latest_s3_url, json.dumps(latest_content))
 
