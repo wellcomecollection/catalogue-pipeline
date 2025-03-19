@@ -46,7 +46,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
           Input = {
             "stream_destination" : "s3",
-             "transformer_type" : "${task_input.transformer_type}",
+            "transformer_type" : "${task_input.transformer_type}",
             "entity_type" : "${task_input.entity_type}",
             # "sample_size.$" : "$$.Execution.Input.sample_size"
           }

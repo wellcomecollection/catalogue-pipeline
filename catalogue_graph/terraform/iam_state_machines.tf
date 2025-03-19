@@ -30,7 +30,7 @@ resource "aws_iam_policy" "state_machine_policy" {
       },
       {
         Effect = "Allow",
-        Action = ["states:StartExecution","states:RedriveExecution"],
+        Action = ["states:StartExecution", "states:RedriveExecution"],
         Resource = [
           aws_sfn_state_machine.catalogue_graph_extractor.arn,
           aws_sfn_state_machine.catalogue_graph_extractors.arn,
