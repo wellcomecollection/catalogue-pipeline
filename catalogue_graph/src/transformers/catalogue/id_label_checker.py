@@ -33,7 +33,7 @@ class IdLabelChecker:
         self,
         node_types: list[NodeType],
         sources: list[OntologyType],
-    ): 
+    ):
         # Nested dictionaries mapping source ids to labels/alternative labels and vice versa.
         # The dictionaries are nested to group ids/labels by source ontology.
         self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(
@@ -77,11 +77,16 @@ class IdLabelChecker:
         self.ids_to_alternative_labels[concept_source][source_id] = labels
         for label in labels:
             self.alternative_labels_to_ids[concept_source][label].append(source_id)
+            
+    def _normalise_label(self, label: str):
+        return label.lower()
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:
         """
         Given some label, return exactly one closest-matching source concept id (or 'None' if no match found).
         """
+        label = self._normalise_label(label)
+
         # Do not attempt to match blacklisted concept labels.
         if label in CONCEPT_DENY_LIST:
             return None

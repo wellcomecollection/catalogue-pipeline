@@ -88,7 +88,7 @@ class RawCatalogueConcept:
     def label_matched_source_concept_id(self) -> str | None:
         assert self.id_label_checker is not None
 
-        matched_id = self.id_label_checker.get_id(self.label.lower(), self.type)
+        matched_id = self.id_label_checker.get_id(self.label, self.type)
         return matched_id
 
     @property

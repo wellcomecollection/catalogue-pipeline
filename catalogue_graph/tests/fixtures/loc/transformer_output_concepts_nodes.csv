@@ -3,5 +3,6 @@ sh00000001,SourceConcept,sh00000001,ActionScript (Computer program language),lc-
 sh00000002,SourceConcept,sh00000002,Tacos,lc-subjects,,,null
 sh85045046,SourceConcept,sh85045046,Etchings,lc-subjects,,Etching||Etching_s,null
 sh00005643,SourceConcept,sh00005643,Etching,lc-subjects,,,null
-sh85004839,SourceConcept,sh00005643,Example concept 1,lc-subjects,,,null
-sh85123237,SourceConcept,sh00005643,Example concept 2,lc-subjects,,,null
+sh85004839,SourceConcept,sh85004839,Example concept,lc-subjects,,Another example concept,null
+sh85123237,SourceConcept,sh85123237,Another example concept,lc-subjects,,Some example concept||Example concept,null
+sh00000003,SourceConcept,sh00000003,anatomy,lc-subjects,,,null

@@ -16,9 +16,13 @@ def test_id_label_checker_label_matching() -> None:
     
     # Match on label
     assert id_label_checker.get_id("tacos", "Concept") == "sh00000002"
-    
+
+    # Match on uppercase label
+    assert id_label_checker.get_id("TACOS", "Concept") == "sh00000002"
+
     # Match on alternative label
     assert id_label_checker.get_id("etching_s", "Concept") == "sh85045046"
+    assert id_label_checker.get_id("Some example concept", "Concept") == "sh85123237"
 
 
 def test_id_label_checker_denylist() -> None:
@@ -49,3 +53,20 @@ def test_id_label_checker_people_to_things() -> None:
     
     # But we are not as strict when it comes to main labels
     assert id_label_checker.get_id("anatomy", "Person") == "D000715"
+
+
+def test_id_label_checker_label_priority() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # Prioritise matching on main label rather than alternative label
+    assert id_label_checker.get_id("Example concept", "Genre") == "sh85004839"
+    assert id_label_checker.get_id("Another example concept", "Genre") == "sh85123237"
+
+
+def test_id_label_checker_source_priority() -> None:
+    id_label_checker = _setup_id_label_checker()
+
+    # Prioritise matching on MeSH rather than LoC
+    assert id_label_checker.get_id("anatomy", "Concept") == "D000715"
+
+
