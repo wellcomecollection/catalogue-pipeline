@@ -85,12 +85,11 @@ class RawCatalogueConcept:
         return None
 
     @property
-    def label_derived_source_concept_ids(self) -> list[str]:
+    def label_matched_source_concept_id(self) -> str | None:
         assert self.id_label_checker is not None
 
-        label_derived_ids = self.id_label_checker.inverse.get(self.label.lower(), [])
-        assert isinstance(label_derived_ids, list)
-        return label_derived_ids
+        matched_id = self.id_label_checker.get_id(self.label.lower(), self.type)
+        return matched_id
 
     @property
     def has_valid_source_concept(self) -> bool:
@@ -102,19 +101,17 @@ class RawCatalogueConcept:
 
         # For MeSH, we not only require that the source identifier has a corresponding node in the graph,
         # but also that the label of the node matches the label of the catalogue concept
-        if self.source == "nlm-mesh" and self.source_concept_id.startswith("D"):
-            source_labels = self.id_label_checker.get(self.source_concept_id, [])
+        if self.source == "nlm-mesh":
+            source_label = self.id_label_checker.get_label(self.source_concept_id, self.source)
+            source_alternative_labels = self.id_label_checker.get_alternative_labels(self.source_concept_id, self.source)
             normalised_label = self.label.lower()
-
-            return any(
-                source_label in normalised_label for source_label in source_labels
+            
+            return source_label == normalised_label or any(
+                source_label in normalised_label for source_label in source_alternative_labels
             )
 
         # For LoC, we only require that the referenced source identifier exists in the graph.
-        if self.source == "lc-subjects" and self.source_concept_id.startswith("sh"):
-            return self.source_concept_id in self.id_label_checker
-
-        if (self.source == "lc-names") and self.source_concept_id.startswith("n"):
-            return self.source_concept_id in self.id_label_checker
+        if self.source in ("lc-subjects", "lc-names"):
+            return self.id_label_checker.get_label(self.source_concept_id, self.source) is not None
 
         return False

@@ -3,8 +3,9 @@ from collections.abc import Generator
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
-from transformers.base_transformer import BaseTransformer
 from utils.types import WorkConceptKey
+
+from transformers.base_transformer import BaseTransformer
 
 from .id_label_checker import IdLabelChecker
 from .raw_concept import RawCatalogueConcept
@@ -13,7 +14,7 @@ from .raw_concept import RawCatalogueConcept
 class CatalogueConceptsTransformer(BaseTransformer):
     def __init__(self, url: str):
         self.source = CatalogueConceptsSource(url)
-        self.id_label_checker = IdLabelChecker.from_source(
+        self.id_label_checker = IdLabelChecker(
             node_type=["concepts", "locations", "names"], source=["loc", "mesh"]
         )
         self.id_lookup: set = set()
@@ -49,20 +50,19 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
         self.id_lookup.add(raw_concept.wellcome_id)
 
-        if raw_concept.source == "label-derived":
-            # Generate edges via label
-            for source_concept_id in raw_concept.label_derived_source_concept_ids:
+        # Generate edge via label
+        if raw_concept.source == "label-derived" and (source_id := raw_concept.label_matched_source_concept_id) is not None:
                 attributes = ConceptHasSourceConceptAttributes(
                     qualifier=None, matched_by="label"
                 )
                 yield ConceptHasSourceConcept(
                     from_id=raw_concept.wellcome_id,
-                    to_id=source_concept_id,
+                    to_id=source_id,
                     attributes=attributes,
                 )
 
+        # Generate edge via ID
         if raw_concept.has_valid_source_concept:
-            # Generate edges via ID
             attributes = ConceptHasSourceConceptAttributes(
                 qualifier=raw_concept.mesh_qualifier, matched_by="identifier"
             )
