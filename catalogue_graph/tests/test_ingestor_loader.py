@@ -1,10 +1,14 @@
 import polars as pl
 import pytest
-from test_mocks import MockRequest, MockSmartOpen
-
 from ingestor_indexer import IngestorIndexerLambdaEvent
-from ingestor_loader import IngestorLoaderConfig, IngestorLoaderLambdaEvent, handler
+from ingestor_loader import (
+    IngestorIndexerObject,
+    IngestorLoaderConfig,
+    IngestorLoaderLambdaEvent,
+    handler,
+)
 from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifier
+from test_mocks import MockRequest, MockSmartOpen
 
 
 def build_test_matrix() -> list[tuple]:
@@ -12,6 +16,7 @@ def build_test_matrix() -> list[tuple]:
         (
             "happy path, with alternative labels",
             IngestorLoaderLambdaEvent(
+                pipeline_date="2021-07-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -55,7 +60,12 @@ def build_test_matrix() -> list[tuple]:
                 ]
             },
             IngestorIndexerLambdaEvent(
-                s3_uri="s3://test-bucket/test-prefix/123/00000000-00000001.parquet",
+                pipeline_date="2021-07-01",
+                object_to_index=IngestorIndexerObject(
+                    s3_uri="s3://test-bucket/test-prefix/2021-07-01/123/00000000-00000001.parquet",
+                    content_length=1,
+                    record_count=1,
+                ),
             ),
             CatalogueConcept(
                 id="source_id",
@@ -74,6 +84,7 @@ def build_test_matrix() -> list[tuple]:
         (
             "happy path, with NO alternative labels",
             IngestorLoaderLambdaEvent(
+                pipeline_date="2021-07-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -115,7 +126,12 @@ def build_test_matrix() -> list[tuple]:
                 ]
             },
             IngestorIndexerLambdaEvent(
-                s3_uri="s3://test-bucket/test-prefix/123/00000000-00000001.parquet",
+                pipeline_date="2021-07-01",
+                object_to_index=IngestorIndexerObject(
+                    s3_uri="s3://test-bucket/test-prefix/2021-07-01/123/00000000-00000001.parquet",
+                    content_length=1,
+                    record_count=1,
+                ),
             ),
             CatalogueConcept(
                 id="source_id",
@@ -134,6 +150,7 @@ def build_test_matrix() -> list[tuple]:
         (
             "badly formed response",
             IngestorLoaderLambdaEvent(
+                pipeline_date="2021-07-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -164,7 +181,7 @@ def get_test_id(argvalue: str) -> str:
     build_test_matrix(),
     ids=get_test_id,
 )
-def test_ingestor_trigger(
+def test_ingestor_loader(
     description: str,
     event: IngestorLoaderLambdaEvent,
     config: IngestorLoaderConfig,
@@ -172,9 +189,6 @@ def test_ingestor_trigger(
     expected_output: IngestorIndexerLambdaEvent,
     expected_concept: CatalogueConcept,
 ) -> None:
-    if expected_output is not None:
-        MockSmartOpen.mock_s3_file(expected_output.s3_uri, "")
-
     MockRequest.mock_responses(
         [
             {
@@ -199,7 +213,7 @@ def test_ingestor_trigger(
         assert request["method"] == "POST"
         assert request["url"] == "https://test-host.com:8182/openCypher"
 
-        with MockSmartOpen.open(expected_output.s3_uri, "rb") as f:
+        with MockSmartOpen.open(expected_output.object_to_index.s3_uri, "rb") as f:
             df = pl.read_parquet(f)
             assert len(df) == 1
 

@@ -17,12 +17,18 @@ from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
 
 
-class IngestorIndexerLambdaEvent(BaseModel):
+class IngestorIndexerObject(BaseModel):
     s3_uri: str
+    content_length: int | None = None
+    record_count: int | None = None
+
+
+class IngestorIndexerLambdaEvent(BaseModel):
+    pipeline_date: str | None = INGESTOR_PIPELINE_DATE
+    object_to_index: IngestorIndexerObject
 
 
 class IngestorIndexerConfig(BaseModel):
-    pipeline_date: str | None = INGESTOR_PIPELINE_DATE
     is_local: bool = False
 
 
@@ -70,11 +76,11 @@ def load_data(
 def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
     print(f"Received event: {event} with config {config}")
 
-    extracted_data = extract_data(event.s3_uri)
+    extracted_data = extract_data(event.object_to_index.s3_uri)
     transformed_data = transform_data(extracted_data)
     success_count = load_data(
         concepts=transformed_data,
-        pipeline_date=config.pipeline_date,
+        pipeline_date=event.pipeline_date,
         is_local=config.is_local,
     )
 
@@ -97,9 +103,18 @@ def local_handler() -> None:
         help="The location of the shard to process, e.g. s3://mybukkit/path/key.parquet",
         required=True,
     )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help="The pipeline that is being ingested to, will default to None.",
+        required=False,
+    )
     args = parser.parse_args()
 
-    event = IngestorIndexerLambdaEvent(**args.__dict__)
+    event = IngestorIndexerLambdaEvent(
+        pipeline_date=args.pipeline_date,
+        object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri),
+    )
     config = IngestorIndexerConfig(is_local=True)
 
     handler(event, config)
