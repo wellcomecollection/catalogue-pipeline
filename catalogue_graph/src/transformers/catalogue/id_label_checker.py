@@ -28,16 +28,25 @@ class IdLabelChecker:
     """
     A bidirectional dictionary for checking catalogue concepts against data from source ontologies.
     """
+
     def __init__(
         self,
         node_type: NodeType | list[NodeType],
         source: OntologyType | list[OntologyType],
     ):
-        self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(lambda: defaultdict(str))
-        self.ids_to_alternative_labels: dict[ConceptSource, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
-        self.labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
-        self.alternative_labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = defaultdict(lambda: defaultdict(list))
-            
+        self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(
+            lambda: defaultdict(str)
+        )
+        self.ids_to_alternative_labels: dict[ConceptSource, dict[str, list[str]]] = (
+            defaultdict(lambda: defaultdict(list))
+        )
+        self.labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
+        self.alternative_labels_to_ids: dict[ConceptSource, dict[str, list[str]]] = (
+            defaultdict(lambda: defaultdict(list))
+        )
+
         if not isinstance(node_type, list):
             node_type = [node_type]
         if not isinstance(source, list):
@@ -52,20 +61,25 @@ class IdLabelChecker:
                     for label in row["alternative_labels:String"].split("||")
                     if label != ""
                 ]
-                
+
                 concept_source = _concept_source_from_id(source_id)
                 self._add_label_mapping(label, source_id, concept_source)
-                self._add_alternative_label_mappings(alternative_labels, source_id, concept_source)
-                    
-    def _add_label_mapping(self, label: str, source_id: str, concept_source: ConceptSource) -> None:
+                self._add_alternative_label_mappings(
+                    alternative_labels, source_id, concept_source
+                )
+
+    def _add_label_mapping(
+        self, label: str, source_id: str, concept_source: ConceptSource
+    ) -> None:
         self.ids_to_labels[concept_source][source_id] = label
         self.labels_to_ids[concept_source][label].append(source_id)
 
-    def _add_alternative_label_mappings(self, labels: list[str], source_id: str, concept_source: ConceptSource) -> None:
+    def _add_alternative_label_mappings(
+        self, labels: list[str], source_id: str, concept_source: ConceptSource
+    ) -> None:
         self.ids_to_alternative_labels[concept_source][source_id] = labels
         for label in labels:
             self.alternative_labels_to_ids[concept_source][label].append(source_id)
-
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:
         """

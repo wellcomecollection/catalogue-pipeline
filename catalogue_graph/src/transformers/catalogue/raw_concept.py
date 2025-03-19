@@ -108,11 +108,11 @@ class RawCatalogueConcept:
             source_alternative_labels = self.id_label_checker.get_alternative_labels(
                 self.source_concept_id, self.source
             )
-            
-            all_source_labels = source_alternative_labels 
+
+            all_source_labels = source_alternative_labels
             if source_label is not None:
                 all_source_labels.append(source_label)
-                
+
             normalised_label = self.label.lower()
 
             return any(label in normalised_label for label in all_source_labels)
