@@ -78,7 +78,7 @@ class IdLabelChecker:
         for label in labels:
             self.alternative_labels_to_ids[concept_source][label].append(source_id)
             
-    def _normalise_label(self, label: str):
+    def _normalise_label(self, label: str) -> str:
         return label.lower()
 
     def get_id(self, label: str, concept_type: ConceptType) -> str | None:

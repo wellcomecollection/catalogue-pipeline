@@ -13,7 +13,7 @@ def _setup_id_label_checker() -> IdLabelChecker:
 
 def test_id_label_checker_label_matching() -> None:
     id_label_checker = _setup_id_label_checker()
-    
+
     # Match on label
     assert id_label_checker.get_id("tacos", "Concept") == "sh00000002"
 
@@ -27,7 +27,7 @@ def test_id_label_checker_label_matching() -> None:
 
 def test_id_label_checker_denylist() -> None:
     id_label_checker = _setup_id_label_checker()
-    
+
     # Do not match blacklisted concept labels
     assert id_label_checker.get_id("consumption", "Concept") is None
     assert id_label_checker.get_id("consumption", "Person") is None
@@ -50,7 +50,7 @@ def test_id_label_checker_people_to_things() -> None:
     # Do not use alternative labels to match people to things
     assert id_label_checker.get_id("consumer price index", "Person") is None
     assert id_label_checker.get_id("consumer price index", "Concept") == "D004467"
-    
+
     # But we are not as strict when it comes to main labels
     assert id_label_checker.get_id("anatomy", "Person") == "D000715"
 
