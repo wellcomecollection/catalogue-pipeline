@@ -48,7 +48,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
             "stream_destination" : "s3",
             "transformer_type" : "${task_input.transformer_type}",
             "entity_type" : "${task_input.entity_type}",
-            # "sample_size.$" : "$$.Execution.Input.sample_size"
+            "sample_size" : contains(keys(task_input), "sample_size") ? "${task_input.sample_size}" : null,
           }
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Extract ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
@@ -80,7 +80,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_daily" {
             "stream_destination" : "s3",
             "transformer_type" : "${task_input.transformer_type}",
             "entity_type" : "${task_input.entity_type}",
-            # "sample_size" : "${task_input.sample_size}"
+            "sample_size" : contains(keys(task_input), "sample_size") ? "${task_input.sample_size}" : null
           }
         }
         Next = index == length(local.concepts_pipeline_inputs_daily) - 1 ? "Success" : "Extract ${local.concepts_pipeline_inputs_daily[index + 1].label}"

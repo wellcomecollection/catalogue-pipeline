@@ -99,7 +99,7 @@ def run_check(
 
 def report_results(
     report: TriggerReport,
-    report_results: bool,
+    send_report: bool,
 ) -> None:
     dimensions = {
         "pipeline_date": report.pipeline_date,
@@ -108,7 +108,7 @@ def report_results(
     }
 
     print(f"Reporting results {report}, {dimensions} ...")
-    if report_results:
+    if send_report:
         reporter = MetricReporter("catalogue_graph_ingestor")
         reporter.put_metric_data(
             metric_name="record_count", value=report.record_count, dimensions=dimensions
@@ -122,17 +122,15 @@ def report_results(
 def handler(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> None:
-    print("Checking output of ingestor_trigger ...")
+    print("Checking output of ingestor_loader ...")
+    send_report = event.report_results or config.report_results
 
-    report = None
     try:
         report = run_check(event, config)
+        report_results(report, send_report)
     except ValueError as e:
         print(f"Check failed: {e}")
         raise e
-
-    if report is not None and event.report_results:
-        report_results(report, config.report_results)
 
     print("Check complete.")
     return
