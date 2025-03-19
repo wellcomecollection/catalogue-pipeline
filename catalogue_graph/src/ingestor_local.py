@@ -4,14 +4,12 @@ import argparse
 
 from ingestor_indexer import (
     IngestorIndexerConfig,
-    IngestorIndexerLambdaEvent,
 )
 from ingestor_indexer import (
     handler as indexer_handler,
 )
 from ingestor_loader import (
     IngestorLoaderConfig,
-    IngestorLoaderLambdaEvent,
 )
 from ingestor_loader import (
     handler as loader_handler,
@@ -22,6 +20,12 @@ from ingestor_trigger import (
 )
 from ingestor_trigger import (
     handler as trigger_handler,
+)
+from ingestor_trigger_monitor import (
+    IngestorTriggerMonitorConfig,
+)
+from ingestor_trigger_monitor import (
+    handler as monitor_handler,
 )
 
 
@@ -38,7 +42,23 @@ def main() -> None:
         "--pipeline-date",
         type=str,
         help="The date to use for the pipeline, required.",
-        required=True,
+        required=False,
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="The number of shards to process, will process all if not specified.",
+        required=False,
+    )
+    parser.add_argument(
+        "--monitoring",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to enable monitoring, will default to False.",
+    )
+    parser.add_argument(
+        "--force-pass",
+        action=argparse.BooleanOptionalAction,
+        help="Whether to force pass monitoring checks, will default to False.",
     )
 
     args = parser.parse_args()
@@ -47,17 +67,21 @@ def main() -> None:
     config = IngestorTriggerConfig(is_local=True)
     trigger_result = trigger_handler(trigger_event, config)
 
-    loader_events = [IngestorLoaderLambdaEvent(**e) for e in trigger_result]
-    loader_config = IngestorLoaderConfig(is_local=True)
-    loader_results = [loader_handler(e, loader_config) for e in loader_events]
-
-    indexer_events = [
-        IngestorIndexerLambdaEvent(s3_uri=e.s3_uri) for e in loader_results
-    ]
-    indexer_config = IngestorIndexerConfig(
-        pipeline_date=args.pipeline_date, is_local=True
+    trigger_result_events = (
+        trigger_result.events[: args.limit] if args.limit else trigger_result.events
     )
-    success_counts = [indexer_handler(e, indexer_config) for e in indexer_events]
+
+    if args.monitoring:
+        trigger_monitor_config = IngestorTriggerMonitorConfig(
+            is_local=True, force_pass=bool(args.force_pass)
+        )
+        monitor_handler(trigger_result, trigger_monitor_config)
+
+    loader_config = IngestorLoaderConfig(is_local=True)
+    loader_results = [loader_handler(e, loader_config) for e in trigger_result_events]
+
+    indexer_config = IngestorIndexerConfig(is_local=True)
+    success_counts = [indexer_handler(e, indexer_config) for e in loader_results]
 
     total_success_count = sum(success_counts)
     print(f"Indexed {total_success_count} documents.")
