@@ -2,7 +2,11 @@ from test_mocks import MockRequest
 from test_utils import add_mock_transformer_outputs, load_fixture
 
 from config import CATALOGUE_SNAPSHOT_URL
-from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
+from models.graph_edge import (
+    BaseEdge,
+    ConceptHasSourceConcept,
+    ConceptHasSourceConceptAttributes,
+)
 from models.graph_node import Concept
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
@@ -20,6 +24,16 @@ def _add_catalogue_request() -> None:
             }
         ]
     )
+
+
+def _check_edge(
+    all_edges: list[BaseEdge], from_id: str, to_id: str, expected_edge: BaseEdge
+) -> None:
+    filtered_edges = [
+        edge for edge in all_edges if edge.from_id == from_id and edge.to_id == to_id
+    ]
+    assert len(filtered_edges) == 1
+    assert filtered_edges[0] == expected_edge
 
 
 def test_catalogue_concepts_transformer_nodes() -> None:
@@ -51,60 +65,89 @@ def test_catalogue_concepts_transformer_edges() -> None:
     )
 
     edges = list(catalogue_concepts_transformer._stream_edges())
-
     assert len(edges) == 7
-    assert edges[0] == ConceptHasSourceConcept(
-        from_type="Concept",
-        to_type="SourceConcept",
-        from_id="s6s24vd7",
-        to_id="sh85004839",
-        relationship="HAS_SOURCE_CONCEPT",
-        directed=True,
-        attributes=ConceptHasSourceConceptAttributes(
-            qualifier=None, matched_by="identifier"
+
+    _check_edge(
+        edges,
+        "s6s24vd7",
+        "sh85004839",
+        ConceptHasSourceConcept(
+            from_type="Concept",
+            to_type="SourceConcept",
+            from_id="s6s24vd7",
+            to_id="sh85004839",
+            relationship="HAS_SOURCE_CONCEPT",
+            directed=True,
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="identifier"
+            ),
         ),
     )
-    assert edges[2] == ConceptHasSourceConcept(
-        from_type="Concept",
-        to_type="SourceConcept",
-        from_id="yfqryj26",
-        to_id="sh85045046",
-        relationship="HAS_SOURCE_CONCEPT",
-        directed=True,
-        attributes=ConceptHasSourceConceptAttributes(
-            qualifier=None, matched_by="label"
+
+    _check_edge(
+        edges,
+        "yfqryj26",
+        "sh85045046",
+        ConceptHasSourceConcept(
+            from_type="Concept",
+            to_type="SourceConcept",
+            from_id="yfqryj26",
+            to_id="sh85045046",
+            relationship="HAS_SOURCE_CONCEPT",
+            directed=True,
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="label"
+            ),
         ),
     )
-    assert edges[3] == ConceptHasSourceConcept(
-        from_type="Concept",
-        to_type="SourceConcept",
-        from_id="yfqryj26",
-        to_id="sh00005643",
-        relationship="HAS_SOURCE_CONCEPT",
-        directed=True,
-        attributes=ConceptHasSourceConceptAttributes(
-            qualifier=None, matched_by="label"
+
+    _check_edge(
+        edges,
+        "yfqryj26",
+        "sh00005643",
+        ConceptHasSourceConcept(
+            from_type="Concept",
+            to_type="SourceConcept",
+            from_id="yfqryj26",
+            to_id="sh00005643",
+            relationship="HAS_SOURCE_CONCEPT",
+            directed=True,
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="label"
+            ),
         ),
     )
-    assert edges[5] == ConceptHasSourceConcept(
-        from_type="Concept",
-        to_type="SourceConcept",
-        from_id="s6s24vd8",
-        to_id="D000715",
-        relationship="HAS_SOURCE_CONCEPT",
-        directed=True,
-        attributes=ConceptHasSourceConceptAttributes(
-            qualifier=None, matched_by="identifier"
+
+    _check_edge(
+        edges,
+        "s6s24vd8",
+        "D000715",
+        ConceptHasSourceConcept(
+            from_type="Concept",
+            to_type="SourceConcept",
+            from_id="s6s24vd8",
+            to_id="D000715",
+            relationship="HAS_SOURCE_CONCEPT",
+            directed=True,
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier=None, matched_by="identifier"
+            ),
         ),
     )
-    assert edges[6] == ConceptHasSourceConcept(
-        from_type="Concept",
-        to_type="SourceConcept",
-        from_id="s6s24vd9",
-        to_id="D000715",
-        relationship="HAS_SOURCE_CONCEPT",
-        directed=True,
-        attributes=ConceptHasSourceConceptAttributes(
-            qualifier="Q000266", matched_by="identifier"
+
+    _check_edge(
+        edges,
+        "s6s24vd9",
+        "D000715",
+        ConceptHasSourceConcept(
+            from_type="Concept",
+            to_type="SourceConcept",
+            from_id="s6s24vd9",
+            to_id="D000715",
+            relationship="HAS_SOURCE_CONCEPT",
+            directed=True,
+            attributes=ConceptHasSourceConceptAttributes(
+                qualifier="Q000266", matched_by="identifier"
+            ),
         ),
     )

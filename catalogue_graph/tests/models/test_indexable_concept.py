@@ -2,6 +2,7 @@ from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifie
 from models.indexable_concept import (
     ConceptDisplay,
     ConceptDisplayIdentifier,
+    ConceptDisplayIdentifierType,
     ConceptQuery,
     ConceptQueryIdentifier,
     IndexableConcept,
@@ -12,10 +13,11 @@ def test_indexable_concept_from_catalogue_concept() -> None:
     catalogue_concept = CatalogueConcept(
         id="id",
         identifiers=[
-            CatalogueConceptIdentifier(value="value", identifierType="identifierType")
+            CatalogueConceptIdentifier(value="value", identifierType="nlm-mesh")
         ],
         label="label",
         alternativeLabels=["alternativeLabels"],
+        description="description",
         type="type",
     )
 
@@ -23,7 +25,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         query=ConceptQuery(
             id="id",
             identifiers=[
-                ConceptQueryIdentifier(value="value", identifierType="identifierType")
+                ConceptQueryIdentifier(value="value", identifierType="nlm-mesh")
             ],
             label="label",
             alternativeLabels=["alternativeLabels"],
@@ -31,9 +33,19 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         ),
         display=ConceptDisplay(
             id="id",
-            identifiers=[ConceptDisplayIdentifier(id="value", label="identifierType")],
+            identifiers=[
+                ConceptDisplayIdentifier(
+                    value="value",
+                    identifierType=ConceptDisplayIdentifierType(
+                        id="nlm-mesh",
+                        label="Medical Subject Headings (MeSH) identifier",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
             label="label",
             alternativeLabels=["alternativeLabels"],
+            description="description",
             type="type",
         ),
     )
