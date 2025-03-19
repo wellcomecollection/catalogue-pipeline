@@ -67,9 +67,9 @@ class IdLabelChecker:
                 concept_source = _concept_source_from_id(source_id)
 
                 self.ids_to_labels[concept_source][source_id] = label
-                self.ids_to_alternative_labels[concept_source][
-                    source_id
-                ] = alternative_labels
+                self.ids_to_alternative_labels[concept_source][source_id] = (
+                    alternative_labels
+                )
 
                 self.labels_to_ids[concept_source][label].append(source_id)
                 for label in alternative_labels:
@@ -106,10 +106,7 @@ class IdLabelChecker:
                     continue
 
                 # Try not to match things to people/organisations
-                if (
-                    concept_type not in AGENT_TYPES
-                    and source == "lc-names"
-                ):
+                if concept_type not in AGENT_TYPES and source == "lc-names":
                     continue
 
                 return source_ids[0]
