@@ -33,7 +33,7 @@ class IdLabelChecker:
         self,
         node_types: list[NodeType],
         sources: list[OntologyType],
-    ): 
+    ):
         # Nested dictionaries mapping source ids to labels/alternative labels and vice versa.
         # The dictionaries are nested to group ids/labels by source ontology.
         self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(

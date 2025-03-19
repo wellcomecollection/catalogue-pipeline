@@ -1,4 +1,5 @@
 from test_utils import add_mock_transformer_outputs
+
 from transformers.catalogue.id_label_checker import IdLabelChecker
 
 
