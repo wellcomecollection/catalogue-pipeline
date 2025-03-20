@@ -6,7 +6,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_aborted_alarm" {
   namespace           = "AWS/States"
   period              = 300
   statistic           = "Sum"
-  threshold           = 1
+  threshold           = 0
   actions_enabled     = true
   alarm_description   = "Alarm when ExecutionsAborted exceeds 1"
   dimensions = {
@@ -23,7 +23,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_failed_alarm" {
   namespace           = "AWS/States"
   period              = 300
   statistic           = "Sum"
-  threshold           = 1
+  threshold           = 0
   actions_enabled     = true
   alarm_description   = "Alarm when ExecutionsFailed exceeds 1"
   dimensions = {
@@ -40,7 +40,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_timedout_alarm" {
   namespace           = "AWS/States"
   period              = 300
   statistic           = "Sum"
-  threshold           = 1
+  threshold           = 0
   actions_enabled     = true
   alarm_description   = "Alarm when ExecutionsTimedOut exceeds 1"
   dimensions = {
@@ -57,7 +57,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_aborted_alarm" {
   namespace           = "AWS/States"
   period              = 300
   statistic           = "Sum"
-  threshold           = 1
+  threshold           = 0
   actions_enabled     = true
   alarm_description   = "Alarm when ExecutionsAborted exceeds 1"
   dimensions = {
@@ -74,7 +74,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_failed_alarm" {
   namespace           = "AWS/States"
   period              = 300
   statistic           = "Sum"
-  threshold           = 1
+  threshold           = 0
   actions_enabled     = true
   alarm_description   = "Alarm when ExecutionsFailed exceeds 1"
   dimensions = {
@@ -91,7 +91,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_timedout_alarm" {
   namespace           = "AWS/States"
   period              = 300
   statistic           = "Sum"
-  threshold           = 1
+  threshold           = 0
   actions_enabled     = true
   alarm_description   = "Alarm when ExecutionsTimedOut exceeds 1"
   dimensions = {
