@@ -59,7 +59,8 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_no_success_alarm" {
   statistic           = "Sum"
   threshold           = 0
   actions_enabled     = true
-  alarm_description   = "No successful run of the daily concept pipeline for 48 hours."
+  # this accounts for the fact that the pipeline doesn't run FRI-SAT-SUN
+  alarm_description   = "No successful run of the daily concept pipeline for 98 hours."
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
   }
