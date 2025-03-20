@@ -29,7 +29,7 @@ def test_id_label_checker_label_matching() -> None:
 def test_id_label_checker_denylist() -> None:
     id_label_checker = _setup_id_label_checker()
 
-    # Do not match blacklisted concept labels
+    # Do not match denylisted concept labels
     assert id_label_checker.get_id("consumption", "Concept") is None
     assert id_label_checker.get_id("consumption", "Person") is None
 
