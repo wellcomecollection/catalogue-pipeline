@@ -12,7 +12,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_aborted_alarm" {
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
   }
-  alarm_actions = [ data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn ]
+  alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_failed_alarm" {
@@ -29,7 +29,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_failed_alarm" {
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
   }
-  alarm_actions = [ data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn ]
+  alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_timedout_alarm" {
@@ -46,7 +46,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_timedout_alarm" {
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
   }
-  alarm_actions = [ data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn ]
+  alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_no_success_alarm" {
@@ -60,12 +60,12 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_no_success_alarm" {
   threshold           = 0
   actions_enabled     = true
   # this accounts for the fact that the pipeline doesn't run FRI-SAT-SUN
-  alarm_description   = "No successful run of the daily concept pipeline for 98 hours."
+  alarm_description = "No successful run of the daily concept pipeline for 98 hours."
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
   }
-  treat_missing_data  = "breaching" 
-  alarm_actions       = [ data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn ]
+  treat_missing_data = "breaching"
+  alarm_actions      = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_aborted_alarm" {
@@ -82,7 +82,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_aborted_alarm" {
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_monthly"
   }
-  alarm_actions = [ data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn ]
+  alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_failed_alarm" {
@@ -99,7 +99,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_failed_alarm" {
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_monthly"
   }
-  alarm_actions = [ data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn ]
+  alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
 resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_timedout_alarm" {
@@ -116,5 +116,5 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_timedout_alarm" {
   dimensions = {
     StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_monthly"
   }
-  alarm_actions = [ data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn ]
+  alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
