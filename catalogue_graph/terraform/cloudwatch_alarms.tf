@@ -52,7 +52,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_timedout_alarm" {
 resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_no_success_alarm" {
   alarm_name          = "concepts_daily_run_no_success_seen_alarm"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods  = 576
+  evaluation_periods  = 1152
   metric_name         = "ExecutionsSucceeded"
   namespace           = "AWS/States"
   period              = 300
