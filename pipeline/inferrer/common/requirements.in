@@ -1,5 +1,5 @@
 fastapi==0.109.1
-gunicorn==22.0.0
+gunicorn==23.0.0
 uvicorn==0.11.7
 
 aiofile>=3.8.8
