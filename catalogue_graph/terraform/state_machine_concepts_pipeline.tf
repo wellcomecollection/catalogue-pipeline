@@ -59,6 +59,17 @@ resource "aws_sfn_state_machine" "concepts_pipeline_daily" {
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_ingestor.arn,
         }
+        Next = "Generate report"
+      },
+      "Generate report" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Arguments = {
+          FunctionName = module.reporter_lambda.lambda.arn,
+          Payload = {
+            pipeline_date = local.pipeline_date
+          }
+        },
         Next = "Success"
       },
       Success = {
