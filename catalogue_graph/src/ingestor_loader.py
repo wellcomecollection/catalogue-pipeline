@@ -33,6 +33,37 @@ class IngestorLoaderConfig(BaseModel):
     is_local: bool = False
 
 
+def get_related_query(edge_type: str, start_offset: int, limit: int, source_concept_label_types: list[str] | None = None) -> str:
+    label_filter = ""
+    if source_concept_label_types is not None and len(source_concept_label_types) > 0:
+        label_filter = "WHERE " + " OR ".join([f"linked_source_concept:{c}" for c in source_concept_label_types])
+
+    return f"""
+        MATCH (concept:Concept)
+        WITH concept ORDER BY concept.id
+        SKIP {start_offset} LIMIT {limit}
+        MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
+        MATCH (source_concept)-[rel:{edge_type}]->(linked_related_source_concept)
+        MATCH (linked_related_source_concept)-[:SAME_AS*0..]->(related_source_concept)
+        MATCH (related_source_concept)<-[:HAS_SOURCE_CONCEPT]-(related_concept)
+        {label_filter}
+        WITH concept, 
+             linked_related_source_concept,
+             collect(DISTINCT related_source_concept) AS related_source_concepts,
+             head(collect(related_concept)) AS selected_related_concept,
+             head(collect(rel)) AS selected_related_edge      
+        WITH concept,
+             collect({{
+                 concept_node: selected_related_concept,
+                 source_concept_nodes: related_source_concepts,
+                 edge: selected_related_edge
+             }}) AS related             
+        RETURN 
+            concept.id AS id,
+            related
+    """
+
+
 def extract_data(start_offset: int, end_index: int, is_local: bool) -> QueryResult:
     print("Extracting data from Neptune ...")
     client = get_neptune_client(is_local)
@@ -53,64 +84,11 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> QueryResu
         collect(DISTINCT same_as_concept.id) AS same_as_concept_ids        
     """
 
-    field_of_work_query = f"""
-    MATCH (concept:Concept)
-    WITH concept ORDER BY concept.id
-    SKIP {start_offset} LIMIT {limit}
-    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
-    MATCH (source_concept)-[:HAS_FIELD_OF_WORK]->(linked_fow_source_concept)
-    MATCH (linked_fow_source_concept)-[:SAME_AS*0..]->(fow_source_concept)
-    MATCH (fow_source_concept)<-[:HAS_SOURCE_CONCEPT]-(field_of_work_concept)
+    field_of_work_query = get_related_query("HAS_FIELD_OF_WORK", start_offset, limit)
+    related_to_query = get_related_query("RELATED_TO", start_offset, limit)
 
-    WITH concept, 
-         linked_fow_source_concept,
-         head(collect(field_of_work_concept)) AS field_of_work_concept
-    RETURN 
-        concept.id AS id,
-        collect(DISTINCT field_of_work_concept) AS fields_of_work
-    """
-
-    related_to_query = f"""
-    MATCH (concept:Concept)
-    WITH concept ORDER BY concept.id
-    SKIP {start_offset} LIMIT {limit}
-    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
-    MATCH (source_concept)-[rel:RELATED_TO]->(linked_related_to_source_concept)
-    MATCH (linked_related_to_source_concept)-[:SAME_AS*0..]->(related_to_source_concept)
-    MATCH (related_to_source_concept)<-[:HAS_SOURCE_CONCEPT]-(related_to_concept)
-
-    WITH concept, 
-         linked_related_to_source_concept,
-         head(collect(related_to_concept)) AS selected_related_to,
-         head(collect(rel)) AS selected_related_to_edge
-    WITH concept,
-         collect({{
-             node: selected_related_to,
-             relationship_type: selected_related_to_edge.relationship_type
-         }}) AS related_to
-         
-    RETURN 
-        concept.id AS id,
-        related_to
-    """
-    
-    # Filter out 'Human' matches
-    narrower_than_query = f"""
-        MATCH (concept:Concept)
-        WITH concept ORDER BY concept.id
-        SKIP {start_offset} LIMIT {limit}
-        MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
-        MATCH (source_concept)-[:NARROWER_THAN]->(linked_broader_source_concept)
-        MATCH (linked_broader_source_concept)-[:SAME_AS*0..]->(broader_source_concept)
-        MATCH (broader_source_concept)<-[:HAS_SOURCE_CONCEPT]-(broader_concept)
-        WHERE linked_source_concept:SourceConcept OR linked_source_concept:SourceLocation
-        WITH concept, 
-             linked_broader_source_concept,
-             head(collect(broader_concept)) AS broader_concept
-        RETURN 
-            concept.id AS id,
-            collect(DISTINCT broader_concept) AS narrower_than
-    """    
+    # Apply label filter to filter out 'Human' matches
+    narrower_than_query = get_related_query("NARROWER_THAN", start_offset, limit, ["SourceConcept", "SourceLocation"])
 
     print("Running concept query...")
     concept_result = client.run_open_cypher_query(open_cypher_concept_query)
@@ -139,9 +117,9 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> QueryResu
 
 def transform_data(neptune_data: QueryResult) -> list[CatalogueConcept]:
     print("Transforming data to CatalogueConcept ...")    
-    related_to = {item['id']: item['related_to'] for item in neptune_data.related_to}
-    fields_of_work = {item['id']: item['fields_of_work'] for item in neptune_data.fields_of_work}
-    narrower_than = {item['id']: item['narrower_than'] for item in neptune_data.narrower_than}
+    related_to = {item['id']: item['related'] for item in neptune_data.related_to}
+    fields_of_work = {item['id']: item['related'] for item in neptune_data.fields_of_work}
+    narrower_than = {item['id']: item['related'] for item in neptune_data.narrower_than}
 
     return [
         CatalogueConcept.from_neptune_result(
