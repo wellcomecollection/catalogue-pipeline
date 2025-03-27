@@ -68,7 +68,9 @@ class ConceptDisplay(BaseModel):
     type: str
     relatedTo: list[CatalogueConceptRelatedTo]
     fieldsOfWork: list[CatalogueConceptLink]
+    people: list[CatalogueConceptLink]
     narrowerThan: list[CatalogueConceptLink]
+    broaderThan: list[CatalogueConceptLink]
     sameAs: list[str]
 
 
@@ -110,7 +112,9 @@ class IndexableConcept(BaseModel):
                 description=concept.description,
                 relatedTo=concept.relatedTo,
                 fieldsOfWork=concept.fieldsOfWork,
+                people=concept.people,
                 sameAs=concept.sameAs,
-                narrowerThan=concept.narrowerThan
+                narrowerThan=concept.narrowerThan,
+                broaderThan=concept.broaderThan
             ),
         )

@@ -52,10 +52,12 @@ class CatalogueConcept(BaseModel):
     relatedTo: list[CatalogueConceptRelatedTo]
     fieldsOfWork: list[CatalogueConceptLink]
     narrowerThan: list[CatalogueConceptLink]
+    broaderThan: list[CatalogueConceptLink]
+    people: list[CatalogueConceptLink]
     sameAs: list[str]
 
     @classmethod
-    def from_neptune_result(cls, data: dict, related_to: list[dict], fields_of_work: list[dict], narrower_than: list[dict]) -> "CatalogueConcept":
+    def from_neptune_result(cls, data: dict, related_to: list[dict], fields_of_work: list[dict], narrower_than: list[dict], broader_than: list[dict], people: list[dict]) -> "CatalogueConcept":
         identifiers = []
         alternative_labels = []
 
@@ -79,7 +81,7 @@ class CatalogueConcept(BaseModel):
         for source_concept in data["source_concepts"]:
             for alternative_label in source_concept["~properties"].get("alternative_labels", "").split("||"):
                 if len(alternative_label) > 0:
-                    alternative_labels.append(alternative_label)            
+                    alternative_labels.append(alternative_label)
         
         return CatalogueConcept(
             id=data["concept"]["~properties"]["id"],
@@ -95,5 +97,7 @@ class CatalogueConcept(BaseModel):
             ) for item in related_to],
             fieldsOfWork=[get_concept_link(item) for item in fields_of_work],
             narrowerThan=[get_concept_link(item) for item in narrower_than],
+            broaderThan=[get_concept_link(item) for item in broader_than],
+            people=[get_concept_link(item) for item in people],
             sameAs=data["same_as_concept_ids"]
         )
