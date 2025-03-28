@@ -15,7 +15,7 @@ import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
-
+from models.step_events import ReporterEvent
 
 class IngestorIndexerObject(BaseModel):
     s3_uri: str
@@ -87,8 +87,10 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
 
     print(f"Successfully indexed {success_count} documents.")
 
-    return success_count
-
+    return ReporterEvent(
+        job_id=event.job_id,
+        success_count=success_count
+    )
 
 def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> int:
     return handler(

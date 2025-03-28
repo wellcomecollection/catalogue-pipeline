@@ -6,6 +6,8 @@
 #
 annotated-types==0.7.0
     # via pydantic
+anyio==4.9.0
+    # via httpx
 backoff==2.2.1
     # via -r requirements.in
 boto3==1.35.77
@@ -21,6 +23,8 @@ botocore-stubs==1.35.92
 certifi==2024.8.30
     # via
     #   elastic-transport
+    #   httpcore
+    #   httpx
     #   requests
 charset-normalizer==3.4.0
     # via requests
@@ -28,8 +32,17 @@ elastic-transport==8.17.0
     # via elasticsearch
 elasticsearch==8.17.1
     # via -r requirements.in
+h11==0.14.0
+    # via httpcore
+httpcore==1.0.7
+    # via httpx
+httpx==0.28.1
+    # via -r requirements.in
 idna==3.10
-    # via requests
+    # via
+    #   anyio
+    #   httpx
+    #   requests
 jmespath==1.0.1
     # via
     #   boto3
@@ -50,6 +63,8 @@ six==1.17.0
     # via python-dateutil
 smart-open==7.1.0
     # via -r requirements.in
+sniffio==1.3.1
+    # via anyio
 types-awscrt==0.23.6
     # via botocore-stubs
 types-requests==2.32.0.20241016

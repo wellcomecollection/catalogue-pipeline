@@ -1,3 +1,6 @@
+locals {
+  slack_webhook = "catalogue_graph_reporter/slack_webhook"
+}
 module "reporter_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
@@ -18,9 +21,24 @@ module "reporter_lambda" {
     variables = {
       INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
-      SLACK_SECRET_ID = "reporting/slack_webhook_url"
+      SLACK_SECRET_ID = local.slack_webhook
     }
   }
+}
+data "aws_iam_policy_document" "read_secrets" {
+  statement {
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:${local.slack_webhook}*",
+    ]
+  }
+}
+resource "aws_iam_role_policy" "reporter_lambda_read_secrets" {
+  role   = module.reporter_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.read_secrets.json
 }
 
 resource "aws_iam_role_policy" "reporter_lambda_s3_read_policy" {
