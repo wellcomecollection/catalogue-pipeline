@@ -4,13 +4,14 @@ import polars
 import pytest
 from test_mocks import MockElasticsearchClient, MockSmartOpen
 from test_utils import load_fixture
-from models.step_events import ReporterEvent
+
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
+from models.step_events import ReporterEvent
 
 
 def test_ingestor_indexer_success() -> None:
@@ -19,7 +20,7 @@ def test_ingestor_indexer_success() -> None:
         job_id="jobby_1",
         object_to_index=IngestorIndexerObject(
             s3_uri="s3://test-catalogue-graph/00000000-00000004.parquet"
-        )
+        ),
     )
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000004.parquet",
@@ -141,7 +142,7 @@ def test_ingestor_indexer_success() -> None:
     ]
 
     assert len(MockElasticsearchClient.inputs) == 4
-    assert result == ReporterEvent(job_id="jobby_1", success_count= 4)
+    assert result == ReporterEvent(job_id="jobby_1", success_count=4)
     assert MockElasticsearchClient.inputs == expected_bulk_input
 
 

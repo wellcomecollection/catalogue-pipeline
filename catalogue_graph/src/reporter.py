@@ -1,22 +1,24 @@
-import typing
 import argparse
+import typing
+from datetime import datetime, timedelta
 
 import boto3
 import httpx
 import smart_open
-from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX, SLACK_SECRET_ID
-from ingestor_trigger_monitor import TriggerReport
 from ingestor_loader_monitor import LoaderReport
+from ingestor_trigger_monitor import TriggerReport
 from models.step_events import ReporterEvent
+
 
 class ReporterConfig(BaseModel):
     s3_bucket: str = INGESTOR_S3_BUCKET
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     slack_secret: str | None = SLACK_SECRET_ID
     is_local: bool = False
+
 
 class FinalReport(BaseModel):
     pipeline_date: str
@@ -36,10 +38,9 @@ def dateTimeFromJobId(job_id: str) -> str:
         return start_datetime.strftime("yesterday at %-I:%M %p %Z")
     else:
         return start_datetime.strftime("on %A, %B %-d at %-I:%M %p %Z")
-    
-def get_report(
-    event: ReporterEvent, config: ReporterConfig
-) -> list[typing.Any]:
+
+
+def get_report(event: ReporterEvent, config: ReporterConfig) -> list[typing.Any]:
     pipeline_date = event.pipeline_date or "dev"
     job_id = event.job_id
 
@@ -50,14 +51,14 @@ def get_report(
                 "text": {
                     "type": "plain_text",
                     "emoji": True,
-                    "text": f":rotating_light: Concepts ",
+                    "text": ":rotating_light: Concepts ",
                 },
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*Could not produce report*: job_id not supplied.",
+                    "text": "*Could not produce report*: job_id not supplied.",
                 },
             },
         ]
@@ -79,23 +80,30 @@ def get_report(
         print(f"Report not found: {e}")
 
     final_report = FinalReport(
-      pipeline_date=pipeline_date,
-      job_id=job_id,
-      neptune_record_count=trigger_report.record_count,
-      es_record_count=loader_report.record_count,
-      success_count=event.success_count,
-      previous_es_record_count=previous_loader_report.record_count,
-      previous_job_id=previous_loader_report.job_id
+        pipeline_date=pipeline_date,
+        job_id=job_id,
+        neptune_record_count=trigger_report.record_count,
+        es_record_count=loader_report.record_count,
+        success_count=event.success_count,
+        previous_es_record_count=previous_loader_report.record_count,
+        previous_job_id=previous_loader_report.job_id,
     )
 
     start_datetime = dateTimeFromJobId(job_id)
     previous_start_datetime = dateTimeFromJobId(final_report.previous_job_id)
-    time_delta = round(divmod((datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds(), 60)[0])
+    time_delta = round(
+        divmod(
+            (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds(),
+            60,
+        )[0]
+    )
 
     if final_report.neptune_record_count == final_report.success_count:
-      graph_index_comparison = "_(the same as the graph)_"
+        graph_index_comparison = "_(the same as the graph)_"
     else:
-      graph_index_comparison = f":warning: _compared to {final_report.neptune_record_count} in the graph_"
+        graph_index_comparison = (
+            f":warning: _compared to {final_report.neptune_record_count} in the graph_"
+        )
 
     return [
         {
@@ -116,7 +124,7 @@ def get_report(
                         f"- Pipeline started *{start_datetime}*",
                         f"- It contains *{final_report.success_count}* documents {graph_index_comparison}.",
                         f"- Pipeline took *{time_delta} minutes* to complete.",
-                        f"- The last update was {previous_start_datetime}when {final_report.previous_es_record_count} documents were indexed."
+                        f"- The last update was {previous_start_datetime}when {final_report.previous_es_record_count} documents were indexed.",
                     ]
                 ),
             },
@@ -124,18 +132,16 @@ def get_report(
     ]
 
 
-def publish_report(
-    report: list[typing.Any],
-    config: ReporterConfig
-) -> None:
+def publish_report(report: list[typing.Any], config: ReporterConfig) -> None:
     secretsmanager = boto3.Session().client("secretsmanager")
-    slack_endpoint = secretsmanager.get_secret_value(SecretId=config.slack_secret)["SecretString"]
+    slack_endpoint = secretsmanager.get_secret_value(SecretId=config.slack_secret)[
+        "SecretString"
+    ]
 
-    httpx.post(slack_endpoint, json={ "blocks": report })
+    httpx.post(slack_endpoint, json={"blocks": report})
 
-def handler(
-    event: ReporterEvent, context: typing.Any
-) -> None:
+
+def handler(event: ReporterEvent, context: typing.Any) -> None:
     print("Preparing concepts pipeline report ...")
     config = ReporterConfig()
 
@@ -148,6 +154,7 @@ def handler(
 
     print("Report complete.")
     return
+
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
@@ -174,11 +181,12 @@ def local_handler() -> None:
     event = ReporterEvent(
         pipeline_date=args.pipeline_date,
         job_id=args.job_id,
-        success_count=args.success_count
+        success_count=args.success_count,
     )
     config = ReporterConfig(is_local=True)
 
     handler(event, config)
+
 
 if __name__ == "__main__":
     local_handler()

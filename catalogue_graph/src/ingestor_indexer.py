@@ -17,6 +17,7 @@ from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
 from models.step_events import ReporterEvent
 
+
 class IngestorIndexerObject(BaseModel):
     s3_uri: str
     content_length: int | None = None
@@ -74,7 +75,9 @@ def load_data(
     return success_count
 
 
-def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> ReporterEvent:
+def handler(
+    event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
+) -> ReporterEvent:
     print(f"Received event: {event} with config {config}")
 
     extracted_data = extract_data(event.object_to_index.s3_uri)
@@ -87,12 +90,12 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
 
     print(f"Successfully indexed {success_count} documents.")
 
-    return ReporterEvent(
-        job_id=event.job_id,
-        success_count=success_count
-    )
+    return ReporterEvent(job_id=event.job_id, success_count=success_count)
 
-def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> ReporterEvent:
+
+def lambda_handler(
+    event: IngestorIndexerLambdaEvent, context: typing.Any
+) -> ReporterEvent:
     return handler(
         IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
     )
