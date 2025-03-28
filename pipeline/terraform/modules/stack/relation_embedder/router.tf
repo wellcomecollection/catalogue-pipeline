@@ -49,8 +49,8 @@ module "router" {
 
   secret_env_vars = var.pipeline_storage_es_service_secrets["router"]
 
-  cpu    = 1024
-  memory = 2048
+  cpu    = 2048
+  memory = 8192
 
   min_capacity = var.min_capacity
   max_capacity = var.max_capacity
