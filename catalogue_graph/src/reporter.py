@@ -15,19 +15,20 @@ from models.step_events import ReporterEvent
 class ReporterConfig(BaseModel):
     s3_bucket: str = INGESTOR_S3_BUCKET
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
-    slack_secret: str = SLACK_SECRET_ID
+    slack_secret: str | None = SLACK_SECRET_ID
     is_local: bool = False
 
 class FinalReport(BaseModel):
     pipeline_date: str
-    job_id: str
+    job_id: str | None = None
     neptune_record_count: int
     es_record_count: int
     success_count: int
     previous_es_record_count: int
     previous_job_id: str
 
-def dateTimeFromJobId(job_id: str):
+
+def dateTimeFromJobId(job_id: str) -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
     if start_datetime.date() == datetime.now().date():
         return start_datetime.strftime("today at %-I:%M %p %Z")
@@ -38,17 +39,33 @@ def dateTimeFromJobId(job_id: str):
     
 def get_report(
     event: ReporterEvent, config: ReporterConfig
-) -> FinalReport:
+) -> list[typing.Any]:
     pipeline_date = event.pipeline_date or "dev"
     job_id = event.job_id
+
+    if job_id is None:
+        return [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "emoji": True,
+                    "text": f":rotating_light: Concepts ",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"*Could not produce report*: job_id not supplied.",
+                },
+            },
+        ]
 
     trigger_report_url = f"s3://{config.s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{job_id}/report.trigger.json"
     loader_report_url = f"s3://{config.s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{job_id}/report.loader.json"
     previous_loader_report_url = f"s3://{config.s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/report.loader.json"
 
-    trigger_report = None
-    loader_report = None
-    previous_loader_report = None
     # open with smart_open, check for file existence
     try:
         with smart_open.open(trigger_report_url, "r") as f:
@@ -108,7 +125,7 @@ def get_report(
 
 
 def publish_report(
-    report: str,
+    report: list[typing.Any],
     config: ReporterConfig
 ) -> None:
     secretsmanager = boto3.Session().client("secretsmanager")

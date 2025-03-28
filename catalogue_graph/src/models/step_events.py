@@ -7,5 +7,5 @@ class IngestorMonitorStepEvent(BaseModel):
 
 class ReporterEvent(BaseModel):
     pipeline_date: str | None = None
-    job_id: str
+    job_id: str | None = None
     success_count: int

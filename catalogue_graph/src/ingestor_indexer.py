@@ -74,7 +74,7 @@ def load_data(
     return success_count
 
 
-def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
+def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> ReporterEvent:
     print(f"Received event: {event} with config {config}")
 
     extracted_data = extract_data(event.object_to_index.s3_uri)
@@ -92,7 +92,7 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
         success_count=success_count
     )
 
-def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> int:
+def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> ReporterEvent:
     return handler(
         IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
     )
