@@ -13,7 +13,7 @@ module "reporter_lambda" {
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "reporter.handler"
+  handler     = "reporter.lambda_handler"
   memory_size = 128
   timeout     = 300
 

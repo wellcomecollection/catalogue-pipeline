@@ -6,6 +6,7 @@ from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
+from reporter import build_final_report
 
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -13,8 +14,8 @@ class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
 
 
 class IngestorLoaderMonitorConfig(IngestorMonitorStepEvent):
-    loader_s3_bucket: str = INGESTOR_S3_BUCKET
-    loader_s3_prefix: str = INGESTOR_S3_PREFIX
+    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
+    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     percentage_threshold: float = 0.1
 
     is_local: bool = False
@@ -64,8 +65,8 @@ def run_check(
     )
 
     s3_report_name = "report.loader.json"
-    s3_url_current_job = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{job_id}/{s3_report_name}"
-    s3_url_latest = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{s3_report_name}"
+    s3_url_current_job = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{job_id}/{s3_report_name}"
+    s3_url_latest = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{s3_report_name}"
 
     # open with smart_open, check for file existence
     latest_report = None
@@ -93,6 +94,9 @@ def run_check(
             print(
                 f"Percentage change {percentage} ({delta}/{latest_report.total_file_size}) is within threshold {config.percentage_threshold}."
             )
+        
+        build_final_report(current_report, latest_report, config)
+
 
     transport_params = {"client": boto3.client("s3")}
 
