@@ -94,7 +94,9 @@ def handler(
         f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}.parquet"
     )
     s3_object_key = f"{event.pipeline_date or 'dev'}/{event.job_id}/{filename}"
-    s3_uri = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{s3_object_key}"
+    s3_uri = (
+        f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{s3_object_key}"
+    )
 
     extracted_data = extract_data(
         start_offset=event.start_offset,

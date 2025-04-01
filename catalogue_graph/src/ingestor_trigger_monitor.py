@@ -82,9 +82,8 @@ def run_check(
             print(
                 f"Percentage change {percentage} ({delta}/{latest_report.record_count}) is within threshold {config.percentage_threshold}."
             )
-        
+
         build_final_report(current_report, latest_report, config)
-        
 
     transport_params = {"client": boto3.client("s3")}
 

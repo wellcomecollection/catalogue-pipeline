@@ -97,7 +97,9 @@ def main() -> None:
         loader_monitor_handler(loader_monitor_event, loader_monitor_config)
 
     indexer_config = IngestorIndexerConfig(is_local=True)
-    indexer_handler_responses = [indexer_handler(e, indexer_config) for e in loader_results]
+    indexer_handler_responses = [
+        indexer_handler(e, indexer_config) for e in loader_results
+    ]
 
     total_success_count = sum(res.success_count for res in indexer_handler_responses)
     print(f"Indexed {total_success_count} documents.")

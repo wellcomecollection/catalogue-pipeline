@@ -1,22 +1,24 @@
-import typing
 import argparse
+import typing
+from datetime import datetime, timedelta
 
 import boto3
 import httpx
 import smart_open
-from datetime import datetime, timedelta
 from pydantic import BaseModel
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX, SLACK_SECRET_ID
-from ingestor_trigger_monitor import TriggerReport, IngestorTriggerMonitorConfig
-from ingestor_loader_monitor import LoaderReport, IngestorLoaderMonitorConfig
+from ingestor_loader_monitor import IngestorLoaderMonitorConfig, LoaderReport
+from ingestor_trigger_monitor import IngestorTriggerMonitorConfig, TriggerReport
 from models.step_events import ReporterEvent
+
 
 class ReporterConfig(BaseModel):
     ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     slack_secret: str | None = SLACK_SECRET_ID
     is_local: bool = False
+
 
 class FinalReport(BaseModel):
     pipeline_date: str
@@ -27,15 +29,16 @@ class FinalReport(BaseModel):
     es_record_count: int | None
     previous_es_record_count: int | None
 
+
 def build_final_report(
-    current_report: TriggerReport | LoaderReport, 
+    current_report: TriggerReport | LoaderReport,
     latest_report: TriggerReport | LoaderReport,
-    config: IngestorTriggerMonitorConfig | IngestorLoaderMonitorConfig
+    config: IngestorTriggerMonitorConfig | IngestorLoaderMonitorConfig,
 ) -> None:
     report_name = "report.final.json"
     s3_url_final_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"
     transport_params = {"client": boto3.client("s3")}
-    
+
     final_report = None
     try:
         with smart_open.open(s3_url_final_report, "r") as f:
@@ -52,9 +55,11 @@ def build_final_report(
             neptune_record_count=current_report.record_count,
             previous_neptune_record_count=latest_report.record_count,
             es_record_count=None,
-            previous_es_record_count=None
+            previous_es_record_count=None,
         )
-        with smart_open.open(s3_url_final_report, "w", transport_params=transport_params) as f:
+        with smart_open.open(
+            s3_url_final_report, "w", transport_params=transport_params
+        ) as f:
             f.write(final_report.model_dump_json())
 
     else:
@@ -67,9 +72,11 @@ def build_final_report(
             es_record_count=current_report.record_count,
             previous_es_record_count=latest_report.record_count,
         )
-        with smart_open.open(s3_url_final_report, "w", transport_params=transport_params) as f:
+        with smart_open.open(
+            s3_url_final_report, "w", transport_params=transport_params
+        ) as f:
             f.write(updated_final_report.model_dump_json())
-    
+
 
 def dateTimeFromJobId(job_id: str) -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
@@ -79,10 +86,9 @@ def dateTimeFromJobId(job_id: str) -> str:
         return start_datetime.strftime("yesterday at %-I:%M %p %Z")
     else:
         return start_datetime.strftime("on %A, %B %-d at %-I:%M %p %Z")
-    
-def get_report(
-    event: ReporterEvent, config: ReporterConfig
-) -> list[typing.Any]:
+
+
+def get_report(event: ReporterEvent, config: ReporterConfig) -> list[typing.Any]:
     pipeline_date = event.pipeline_date or "dev"
     job_id = event.job_id
     success_count = event.success_count
@@ -94,14 +100,14 @@ def get_report(
                 "text": {
                     "type": "plain_text",
                     "emoji": True,
-                    "text": f":rotating_light: Concepts ",
+                    "text": ":rotating_light: Concepts ",
                 },
             },
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*Could not produce report*: job_id not supplied.",
+                    "text": "*Could not produce report*: job_id not supplied.",
                 },
             },
         ]
@@ -117,12 +123,19 @@ def get_report(
 
     start_datetime = dateTimeFromJobId(job_id)
     previous_start_datetime = dateTimeFromJobId(final_report.previous_job_id)
-    current_run_duration = round(divmod((datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds(), 60)[0])
+    current_run_duration = round(
+        divmod(
+            (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds(),
+            60,
+        )[0]
+    )
 
     if final_report.neptune_record_count == success_count:
-      graph_index_comparison = "_(the same as the graph)_"
+        graph_index_comparison = "_(the same as the graph)_"
     else:
-      graph_index_comparison = f":warning: _compared to {final_report.neptune_record_count} in the graph_"
+        graph_index_comparison = (
+            f":warning: _compared to {final_report.neptune_record_count} in the graph_"
+        )
 
     return [
         {
@@ -143,7 +156,7 @@ def get_report(
                         f"- Pipeline started *{start_datetime}*",
                         f"- It contains *{success_count}* documents {graph_index_comparison}.",
                         f"- Pipeline took *{current_run_duration} minutes* to complete.",
-                        f"- The last update was {previous_start_datetime}when {final_report.previous_es_record_count} documents were indexed."
+                        f"- The last update was {previous_start_datetime}when {final_report.previous_es_record_count} documents were indexed.",
                     ]
                 ),
             },
@@ -151,18 +164,16 @@ def get_report(
     ]
 
 
-def publish_report(
-    report: list[typing.Any],
-    config: ReporterConfig
-) -> None:
+def publish_report(report: list[typing.Any], config: ReporterConfig) -> None:
     secretsmanager = boto3.Session().client("secretsmanager")
-    slack_endpoint = secretsmanager.get_secret_value(SecretId=config.slack_secret)["SecretString"]
+    slack_endpoint = secretsmanager.get_secret_value(SecretId=config.slack_secret)[
+        "SecretString"
+    ]
 
-    httpx.post(slack_endpoint, json={ "blocks": report })
+    httpx.post(slack_endpoint, json={"blocks": report})
 
-def handler(
-    event: ReporterEvent, config: ReporterConfig
-) -> None:
+
+def handler(event: ReporterEvent, config: ReporterConfig) -> None:
     print("Preparing concepts pipeline report ...")
 
     try:
@@ -175,13 +186,13 @@ def handler(
     print("Report complete.")
     return
 
-def lambda_handler(
-    event: ReporterEvent, context: typing.Any
-) -> None:
+
+def lambda_handler(event: ReporterEvent, context: typing.Any) -> None:
     validated_event = ReporterEvent.model_validate(event)
     config = ReporterConfig()
 
     handler(validated_event, config)
+
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
@@ -208,11 +219,12 @@ def local_handler() -> None:
     event = ReporterEvent(
         pipeline_date=args.pipeline_date,
         job_id=args.job_id,
-        success_count=args.success_count
+        success_count=args.success_count,
     )
     config = ReporterConfig(is_local=True)
 
     handler(event, config)
+
 
 if __name__ == "__main__":
     local_handler()
