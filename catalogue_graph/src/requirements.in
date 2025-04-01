@@ -5,6 +5,7 @@ backoff
 smart-open
 polars
 elasticsearch
+httpx
 
 boto3-stubs
 types-requests

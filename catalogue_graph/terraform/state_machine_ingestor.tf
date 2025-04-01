@@ -116,6 +116,15 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
             }
           }
         },
+        Next = "Generate report"
+      },
+      "Generate final report" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Arguments = {
+          FunctionName = module.reporter_lambda.lambda.arn,
+          Payload = "{% $states.input %}"
+        },
         Next = "Success"
       },
       Success = {
