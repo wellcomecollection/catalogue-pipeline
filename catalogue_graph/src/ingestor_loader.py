@@ -9,7 +9,11 @@ import polars as pl
 import smart_open
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
-from models.catalogue_concept import CatalogueConcept
+from models.catalogue_concept import (
+    CatalogueConcept,
+    ConceptsQueryResult,
+    ConceptsQuerySingleResult,
+)
 from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
@@ -19,15 +23,6 @@ RELATED_TO_LIMIT = 10
 # We need to filter them out when running queries to get related nodes. 
 # Q5 -> 'human', Q151885 -> 'concept'
 IGNORED_WIKIDATA_IDS = ['Q5', 'Q151885']
-
-
-class QueryResult(BaseModel):
-    concepts: list[dict]
-    related_to: list[dict]
-    fields_of_work: list[dict]
-    narrower_than: list[dict]
-    broader_than: list[dict]
-    people: list[dict]
 
 
 class IngestorLoaderLambdaEvent(BaseModel):
@@ -45,8 +40,6 @@ class IngestorLoaderConfig(BaseModel):
 
 def get_related_query(
     edge_type: str,
-    start_offset: int,
-    limit: int,
     direction: str = 'right',         
     source_concept_label_types: list[str] | None = None,
 ) -> str:
@@ -62,12 +55,13 @@ def get_related_query(
     return f"""
         MATCH (concept:Concept)
         WITH concept ORDER BY concept.id
-        SKIP {start_offset} LIMIT {limit}
+        SKIP $start_offset LIMIT $limit
         MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
-        WHERE NOT source_concept.id IN {IGNORED_WIKIDATA_IDS}
+        WHERE NOT source_concept.id IN $ignored_wikidata_ids
         MATCH (source_concept){left_arrow}-[rel:{edge_type}]-{right_arrow}(linked_related_source_concept)
         MATCH (linked_related_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
-        WHERE NOT related_source_concept.id IN {IGNORED_WIKIDATA_IDS}
+        WHERE NOT related_source_concept.id IN $ignored_wikidata_ids
+            AND NOT (linked_source_concept)-[:SAME_AS*0..2]-(related_source_concept)        
         MATCH (related_source_concept)<-[:HAS_SOURCE_CONCEPT]-(related_concept)
         MATCH (work)-[:HAS_CONCEPT]->(related_concept)
         {label_filter}
@@ -83,24 +77,19 @@ def get_related_query(
                  concept_node: selected_related_concept,
                  source_concept_nodes: related_source_concepts,
                  edge: selected_related_edge
-             }})[0..{RELATED_TO_LIMIT}] AS related             
+             }})[0..$related_to_limit] AS related             
         RETURN 
             concept.id AS id,
             related
     """
 
 
-def extract_data(start_offset: int, end_index: int, is_local: bool) -> QueryResult:
-    print("Extracting data from Neptune ...")
-    client = get_neptune_client(is_local)
+NOT_AGENT = ["SourceConcept", "SourceLocation"]
 
-    limit = end_index - start_offset
-    print(f"Processing records from {start_offset} to {end_index} ({limit} records)")
-
-    open_cypher_concept_query = f"""
+CONCEPT_QUERY = """
     MATCH (concept:Concept)
     WITH concept ORDER BY concept.id
-    SKIP {start_offset} LIMIT {limit}
+    SKIP $start_offset LIMIT $limit
     OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
     OPTIONAL MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)
     RETURN 
@@ -110,74 +99,114 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> QueryResu
         collect(DISTINCT same_as_concept.id) AS same_as_concept_ids        
     """
 
-    field_of_work_query = get_related_query("HAS_FIELD_OF_WORK", start_offset, limit)
-    related_to_query = get_related_query("RELATED_TO", start_offset, limit)
+CLOSENESS_QUERY = """
+        MATCH (concept:Concept)
+        WITH concept ORDER BY concept.id
+        SKIP $start_offset LIMIT $limit
+        MATCH (concept)<-[:HAS_CONCEPT]-(w:Work)-[:HAS_CONCEPT]->(other:Concept),
+              (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]-(other_source_concept)
+        WHERE NOT other_source_concept.id IN $ignored_wikidata_ids
+        WITH DISTINCT concept, linked_other_source_concept, other, other_source_concept, count(w) AS number_of_works
+        WITH concept,
+             linked_other_source_concept,
+             head(collect(other)) AS selected_other,
+             collect(other_source_concept) AS related_source_concepts,
+             SUM(number_of_works) AS number_of_works
+        ORDER BY number_of_works DESC
+        WHERE number_of_works >= 10
+        WITH concept,
+            collect({
+                concept_node: selected_other,
+                source_concept_nodes: related_source_concepts
+            })[0..$related_to_limit] AS related        
+        RETURN
+            concept.id AS id,
+            related
+    """
 
-    # Apply label filter to filter out 'Human' matches
-    narrower_than_query = get_related_query(
-        "NARROWER_THAN", start_offset, limit, 'right', ["SourceConcept", "SourceLocation"]
-    )
-    broader_than_query = get_related_query(
-        "NARROWER_THAN|HAS_PARENT", start_offset, limit, 'left', ["SourceConcept", "SourceLocation"]
-    )    
 
-    people_query = get_related_query("HAS_FIELD_OF_WORK", start_offset, limit, 'left')
+def related_query_result_to_dict(related_to: list[dict]) -> dict[str, list[dict]]:
+    return {item["id"]: item["related"] for item in related_to}
 
+
+def extract_data(start_offset: int, end_index: int, is_local: bool) -> ConceptsQueryResult:
+    print("Extracting data from Neptune ...")
+    client = get_neptune_client(is_local)
+
+    limit = end_index - start_offset
+    print(f"Processing records from {start_offset} to {end_index} ({limit} records)")
+
+    field_of_work_query = get_related_query("HAS_FIELD_OF_WORK")
+    related_to_query = get_related_query("RELATED_TO")
+    narrower_than_query = get_related_query("NARROWER_THAN", 'right', NOT_AGENT)
+    broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", 'left', NOT_AGENT)
+    people_query = get_related_query("HAS_FIELD_OF_WORK",'left')
+    
+    params = {
+        "start_offset": start_offset,
+        "limit": limit,
+        "ignored_wikidata_ids": IGNORED_WIKIDATA_IDS,
+        "related_to_limit": RELATED_TO_LIMIT
+    }
+    
     print("Running concept query...")
-    concept_result = client.run_open_cypher_query(open_cypher_concept_query)
+    concept_result = client.run_open_cypher_query(CONCEPT_QUERY, params)
     print(f"Retrieved {len(concept_result)} records")
 
     print("Running related to query...")
-    related_to_result = client.run_open_cypher_query(related_to_query)
+    related_to_result = client.run_open_cypher_query(related_to_query, params)
     print(f"Retrieved {len(related_to_result)} records")
 
     print("Running field of work query...")
-    field_of_work_result = client.run_open_cypher_query(field_of_work_query)
+    field_of_work_result = client.run_open_cypher_query(field_of_work_query, params)
     print(f"Retrieved {len(field_of_work_result)} records")
 
     print("Running narrower than query...")
-    narrower_than_result = client.run_open_cypher_query(narrower_than_query)
+    narrower_than_result = client.run_open_cypher_query(narrower_than_query, params)
     print(f"Retrieved {len(narrower_than_result)} records")
 
     print("Running broader than query...")
-    broader_than_result = client.run_open_cypher_query(broader_than_query)
+    broader_than_result = client.run_open_cypher_query(broader_than_query, params)
     print(f"Retrieved {len(broader_than_result)} records")
 
     print("Running people query...")
-    people_result = client.run_open_cypher_query(people_query)
-    print(f"Retrieved {len(people_result)} records")    
+    people_result = client.run_open_cypher_query(people_query, params)
+    print(f"Retrieved {len(people_result)} records")
 
-    return QueryResult(
+    print("Running referenced together query...")
+    referenced_together_result = client.run_open_cypher_query(CLOSENESS_QUERY, params)
+    print(f"Retrieved {len(referenced_together_result)} records")
+
+    return ConceptsQueryResult(
         concepts=concept_result,
-        related_to=related_to_result,
-        fields_of_work=field_of_work_result,
-        narrower_than=narrower_than_result,
-        broader_than=broader_than_result,
-        people=people_result,
+        related_to=related_query_result_to_dict(related_to_result),
+        fields_of_work=related_query_result_to_dict(field_of_work_result),
+        narrower_than=related_query_result_to_dict(narrower_than_result),
+        broader_than=related_query_result_to_dict(broader_than_result),
+        people=related_query_result_to_dict(people_result),
+        referenced_together=related_query_result_to_dict(referenced_together_result)
     )
 
 
-def transform_data(neptune_data: QueryResult) -> list[CatalogueConcept]:
+def transform_data(neptune_data: ConceptsQueryResult) -> list[CatalogueConcept]:
     print("Transforming data to CatalogueConcept ...")
-    related_to = {item["id"]: item["related"] for item in neptune_data.related_to}
-    fields_of_work = {
-        item["id"]: item["related"] for item in neptune_data.fields_of_work
-    }
-    narrower_than = {item["id"]: item["related"] for item in neptune_data.narrower_than}
-    broader_than = {item["id"]: item["related"] for item in neptune_data.broader_than}
-    people = {item["id"]: item["related"] for item in neptune_data.people}
 
-    return [
-        CatalogueConcept.from_neptune_result(
-            concept,
-            related_to.get(concept["concept"]["~properties"]["id"], []),
-            fields_of_work.get(concept["concept"]["~properties"]["id"], []),
-            narrower_than.get(concept["concept"]["~properties"]["id"], []),
-            broader_than.get(concept["concept"]["~properties"]["id"], []),
-            people.get(concept["concept"]["~properties"]["id"], []),
+    transformed = []
+    for concept_data in neptune_data.concepts:
+        concept_id = concept_data["concept"]["~properties"]["id"]
+
+        result = ConceptsQuerySingleResult(
+            concept=concept_data,
+            related_to=neptune_data.related_to.get(concept_id, []),
+            fields_of_work=neptune_data.fields_of_work.get(concept_id, []),
+            narrower_than=neptune_data.narrower_than.get(concept_id, []),
+            broader_than=neptune_data.broader_than.get(concept_id, []),
+            people=neptune_data.people.get(concept_id, []),
+            referenced_together=neptune_data.referenced_together.get(concept_id, []),
         )
-        for concept in neptune_data.concepts
-    ]
+        transformed.append(CatalogueConcept.from_neptune_result(result))
+    
+    return transformed
 
 
 def load_data(s3_uri: str, data: list[CatalogueConcept]) -> IngestorIndexerObject:

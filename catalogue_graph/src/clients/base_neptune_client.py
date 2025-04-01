@@ -69,10 +69,13 @@ class BaseNeptuneClient:
         response: dict = raw_response.json()
         return response
 
-    def run_open_cypher_query(self, query: str) -> list[dict]:
+    def run_open_cypher_query(self, query: str, parameters: dict[str, typing.Any] | None = None) -> list[dict]:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
-        payload = {"query": query}
+        payload: dict[str, typing.Any] = {"query": query}        
+        if parameters is not None:
+            payload["parameters"] = parameters
+
         response = self._make_request("POST", "/openCypher", payload)
         results: list[dict] = response["results"]
         return results
