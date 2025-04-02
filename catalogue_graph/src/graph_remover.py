@@ -12,7 +12,7 @@ from utils.aws import (
     get_neptune_client,
 )
 
-DELETED_IDS_LOG_SCHEMA = {
+DELETED_IDS_LOG_SCHEMA: dict = {
     "timestamp": pl.Date(),
     "id": pl.Utf8
 }
@@ -38,13 +38,13 @@ def get_current_ids(transformer_type: TransformerType, entity_type: EntityType) 
     return ids
 
 
-def update_node_ids(transformer_type: TransformerType, entity_type: EntityType, ids: set[str]):
+def update_node_ids(transformer_type: TransformerType, entity_type: EntityType, ids: set[str]) -> None:
     s3_file_uri = f"s3://{INGESTOR_S3_BUCKET}/{PREVIOUS_IDS_FOLDER}/{transformer_type}__{entity_type}.parquet"
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
 
 
-def log_deleted_ids(transformer_type: TransformerType, entity_type: EntityType, ids: set[str]):
+def log_deleted_ids(transformer_type: TransformerType, entity_type: EntityType, ids: set[str]) -> None:
     s3_file_uri = f"s3://{INGESTOR_S3_BUCKET}/{DELETED_IDS_FOLDER}/{transformer_type}__{entity_type}.parquet"
 
     try:
@@ -63,7 +63,7 @@ def log_deleted_ids(transformer_type: TransformerType, entity_type: EntityType, 
     df_to_s3_parquet(df, s3_file_uri)
         
     
-def handler(transformer_type: TransformerType, entity_type: EntityType, is_local=False):
+def handler(transformer_type: TransformerType, entity_type: EntityType, is_local: bool =False) -> None:
     try:
         # Retrieve a list of all ids which were loaded into the graph as part of the previous run  
         previous_ids = get_previous_ids(transformer_type, entity_type)
@@ -93,7 +93,7 @@ def handler(transformer_type: TransformerType, entity_type: EntityType, is_local
     print("Successfully updated bulk loaded ids.")
 
 
-def lambda_handler(event: dict, context: typing.Any):
+def lambda_handler(event: dict, context: typing.Any) -> None:
     transformer_type = event["transformer_type"]
     entity_type = event["entity_type"]
     handler(transformer_type, entity_type)

@@ -72,7 +72,7 @@ class BaseNeptuneClient:
     def run_open_cypher_query(self, query: str, parameters: dict[str, typing.Any] | None = None) -> list[dict]:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
-        payload = {"query": query}
+        payload: dict = {"query": query}
         if parameters is not None:
             payload["parameters"] = parameters
             
@@ -200,7 +200,7 @@ class BaseNeptuneClient:
 
         print(f"Removed all nodes with label '{label}'.")
     
-    def delete_nodes_by_id(self, ids: list[str]):
+    def delete_nodes_by_id(self, ids: list[str]) -> None:
         delete_query = """
             MATCH (n)
             WHERE n.id IN $nodeIds
@@ -219,7 +219,7 @@ class BaseNeptuneClient:
         else:
             print(f"Successfully deleted {deleted_count} nodes from the graph.")
 
-    def delete_edges_by_id(self, ids: list[str]):
+    def delete_edges_by_id(self, ids: list[str]) -> None:
         delete_query = """
             MATCH ()-[edge]-()
             WHERE edge.id IN $edgeIds

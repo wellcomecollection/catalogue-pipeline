@@ -93,10 +93,10 @@ def fetch_transformer_output_from_s3(
     s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
     print(f"Retrieving ids of type '{node_type}' from ontology '{source}' from S3.")
-    return get_csv_from_s3(s3_uri)
+    yield from get_csv_from_s3(s3_uri)
 
 
-def df_from_s3_parquet(s3_file_uri: str):
+def df_from_s3_parquet(s3_file_uri: str) -> pl.DataFrame:
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_file_uri, "rb", transport_params=transport_params) as f:
         df = pl.read_parquet(f)
@@ -104,7 +104,7 @@ def df_from_s3_parquet(s3_file_uri: str):
     return df
 
 
-def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str):
+def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_file_uri, "wb", transport_params=transport_params) as f:
         df.write_parquet(f)
