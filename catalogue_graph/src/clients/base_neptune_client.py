@@ -69,10 +69,13 @@ class BaseNeptuneClient:
         response: dict = raw_response.json()
         return response
 
-    def run_open_cypher_query(self, query: str) -> list[dict]:
+    def run_open_cypher_query(self, query: str, parameters: dict[str, typing.Any] | None = None) -> list[dict]:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
         payload = {"query": query}
+        if parameters is not None:
+            payload["parameters"] = parameters
+            
         response = self._make_request("POST", "/openCypher", payload)
         results: list[dict] = response["results"]
         return results
@@ -196,3 +199,22 @@ class BaseNeptuneClient:
             self.run_open_cypher_query(delete_query)
 
         print(f"Removed all nodes with label '{label}'.")
+    
+    def delete_nodes_with_ids(self, ids: list[str]):
+        delete_query = """
+            MATCH (n)
+            WHERE n.id IN $nodeIds
+            WITH collect(n) AS nodes, count(n) AS deletedCount
+            UNWIND nodes AS node
+            DETACH DELETE node
+            WITH max(deletedCount) AS deletedCount
+            RETURN deletedCount
+        """
+        response = self.run_open_cypher_query(delete_query, {'nodeIds': ids})
+        
+        deleted_count = response[0]["deletedCount"]
+        
+        if deleted_count is None:
+            print("No matching ids found in the graph.")
+        else:
+            print(f"Successfully deleted {deleted_count} nodes from the graph.")
