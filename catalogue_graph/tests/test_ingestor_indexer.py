@@ -2,15 +2,14 @@ from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-from test_utils import load_fixture
-
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
+from test_mocks import MockElasticsearchClient, MockSmartOpen
+from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:
@@ -22,7 +21,7 @@ def test_ingestor_indexer_success() -> None:
     )
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000004.parquet",
-        load_fixture("00000000-00000004.parquet"),
+        load_fixture("ingestor/00000000-00000004.parquet"),
     )
     MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
@@ -162,10 +161,10 @@ def build_test_matrix() -> list[tuple]:
             IngestorIndexerLambdaEvent(
                 pipeline_date="2021-07-01",
                 object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://test-catalogue-graph/catalogue_example.json"
+                    s3_uri="s3://test-catalogue-graph/catalogue/works_snapshot_example.json"
                 ),
             ),
-            "catalogue_example.json",
+            "catalogue/works_snapshot_example.json",
             polars.exceptions.ComputeError,
             "parquet: File out of specification: The file must end with PAR1",
         ),

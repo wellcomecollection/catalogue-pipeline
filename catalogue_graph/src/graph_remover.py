@@ -2,9 +2,8 @@ import argparse
 import typing
 from datetime import datetime
 
+import config
 import polars as pl
-
-from config import INGESTOR_S3_BUCKET, S3_BULK_LOAD_BUCKET_NAME
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -23,7 +22,7 @@ ADDED_IDS_FOLDER = "graph_remover/added_ids"
 def get_previous_ids(
     transformer_type: TransformerType, entity_type: EntityType
 ) -> set[str]:
-    s3_file_uri = f"s3://{INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
@@ -35,8 +34,10 @@ def get_current_ids(
     transformer_type: TransformerType, entity_type: EntityType
 ) -> set[str]:
     s3_file_uri = (
-        f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{transformer_type}__{entity_type}.csv"
+        f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{transformer_type}__{entity_type}.csv"
     )
+
+    print("OPENING URI", s3_file_uri)
 
     ids = set(row[":ID"] for row in get_csv_from_s3(s3_file_uri))
     print(f"Retrieved {len(ids)} ids from the current bulk loader file.")
@@ -46,7 +47,7 @@ def get_current_ids(
 def update_node_ids_snapshot(
     transformer_type: TransformerType, entity_type: EntityType, ids: set[str]
 ) -> None:
-    s3_file_uri = f"s3://{INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
 
@@ -57,13 +58,11 @@ def log_ids(
     entity_type: EntityType,
     folder: str,
 ) -> None:
-    s3_file_uri = (
-        f"s3://{INGESTOR_S3_BUCKET}/{folder}/{transformer_type}__{entity_type}.parquet"
-    )
+    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{folder}/{transformer_type}__{entity_type}.parquet"
 
     try:
         df = df_from_s3_parquet(s3_file_uri)
-    except OSError:
+    except (OSError, KeyError):
         print(
             "File storing previously added/deleted ids not found. This should only happen on the first run."
         )
@@ -93,7 +92,7 @@ def handler(
         # Retrieve a list of all ids which were loaded into the graph as part of the previous run
         previous_ids = get_previous_ids(transformer_type, entity_type)
         is_first_run = False
-    except OSError:
+    except (OSError, KeyError):
         print(
             "File storing archived ids not found. This should only happen on the first run."
         )
@@ -102,28 +101,37 @@ def handler(
 
     # Retrieve a list of ids which were loaded into the graph as part of the current run
     current_ids = get_current_ids(transformer_type, entity_type)
+    deleted_ids = set()
+    added_ids = set()
 
     if not is_first_run:
-        # IDs which were removed from the transformer CSV output since the last time we ran the graph remover
+        # IDs which were removed from/added to the transformer CSV output since the last time we ran the graph remover
         deleted_ids = previous_ids.difference(current_ids)
-        print(
-            f"{len(deleted_ids)} ids were removed from the bulk loader file since the last run."
-        )
-
-        if len(deleted_ids) > 0:
-            # Delete the corresponding items from the graph
-            delete_ids_from_neptune(deleted_ids, entity_type, is_local)
-
-        # IDs which were removed from the transformer CSV output since the last time we ran the graph remover
         added_ids = current_ids.difference(previous_ids)
+
         print(
-            f"{len(added_ids)} ids were added to the bulk loader file since the last run."
+            "Bulk loader file changes since the last run:\n",
+            f"   Deleted ids: {len(deleted_ids)}\n",
+            f"   Added ids: {len(added_ids)}",
         )
 
-        # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
-        log_ids(deleted_ids, transformer_type, entity_type, DELETED_IDS_FOLDER)
-        log_ids(added_ids, transformer_type, entity_type, ADDED_IDS_FOLDER)
-        print("Successfully logged added and deleted ids.")
+    # Works:
+    # Deleted: {'sgw3eg8x', 'ec4j7m5y', 'umnsvyjn', 'mgux7g9b', 'fkm46z2a', 'p4v524g7'}
+    # Added: {'m4y2vvb8', 'x3uuyg46', 'xgkd8utr', 'v4fh5z8q', 'xdtc52k2', 'bttp76g5', 'ufvtstw4', 'wmtjy2uh', 'h2xwkjnw', 'ax9hc7zw', 'k75tnxe5', 'kt6w398r', 'kkcaq46j', 'qf893pea', 'qz7a6zpz'}
+    # Concepts:
+    # Deleted: {'u6jve2vb', 'amzfbrbz'}
+    # Added: {'qhtp4mjv', 'j4smr5gb', 'jd7xrn4q'}
+    
+    # TODO: Check edges too!
+
+    if len(deleted_ids) > 0:
+        # Delete the corresponding items from the graph
+        delete_ids_from_neptune(deleted_ids, entity_type, is_local)
+
+    # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
+    log_ids(deleted_ids, transformer_type, entity_type, DELETED_IDS_FOLDER)
+    log_ids(added_ids, transformer_type, entity_type, ADDED_IDS_FOLDER)
+    print("Successfully logged added and deleted ids.")
 
     # Update the list of all ids which have been loaded into the graph
     update_node_ids_snapshot(transformer_type, entity_type, current_ids)
