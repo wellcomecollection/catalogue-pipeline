@@ -100,7 +100,7 @@ def mock_requests_lookup_table(
             {
                 "method": "GET",
                 "url": CATALOGUE_SNAPSHOT_URL,
-                "content_bytes": load_fixture("catalogue_example.json"),
+                "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
             }
         )
 

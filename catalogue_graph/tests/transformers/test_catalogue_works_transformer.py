@@ -25,7 +25,7 @@ def _add_catalogue_request() -> None:
                 "url": CATALOGUE_SNAPSHOT_URL,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": load_fixture("catalogue_example.json"),
+                "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
                 "params": None,
             }
         ]
