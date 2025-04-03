@@ -3,6 +3,7 @@ import typing
 from datetime import datetime
 
 import polars as pl
+
 from config import INGESTOR_S3_BUCKET, S3_BULK_LOAD_BUCKET_NAME
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
@@ -105,16 +106,20 @@ def handler(
     if not is_first_run:
         # IDs which were removed from the transformer CSV output since the last time we ran the graph remover
         deleted_ids = previous_ids.difference(current_ids)
-        print(f"{len(deleted_ids)} ids were removed from the bulk loader file since the last run.")
-        
+        print(
+            f"{len(deleted_ids)} ids were removed from the bulk loader file since the last run."
+        )
+
         if len(deleted_ids) > 0:
             # Delete the corresponding items from the graph
             delete_ids_from_neptune(deleted_ids, entity_type, is_local)
-    
+
         # IDs which were removed from the transformer CSV output since the last time we ran the graph remover
         added_ids = current_ids.difference(previous_ids)
-        print(f"{len(added_ids)} ids were added to the bulk loader file since the last run.")
-    
+        print(
+            f"{len(added_ids)} ids were added to the bulk loader file since the last run."
+        )
+
         # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
         log_ids(deleted_ids, transformer_type, entity_type, DELETED_IDS_FOLDER)
         log_ids(added_ids, transformer_type, entity_type, ADDED_IDS_FOLDER)
