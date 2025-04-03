@@ -2,8 +2,9 @@ import argparse
 import typing
 from datetime import datetime
 
-import config
 import polars as pl
+
+import config
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -121,7 +122,7 @@ def handler(
     # Concepts:
     # Deleted: {'u6jve2vb', 'amzfbrbz'}
     # Added: {'qhtp4mjv', 'j4smr5gb', 'jd7xrn4q'}
-    
+
     # TODO: Check edges too!
 
     if len(deleted_ids) > 0:

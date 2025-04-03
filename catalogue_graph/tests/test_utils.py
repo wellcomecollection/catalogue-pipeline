@@ -3,6 +3,7 @@ from itertools import product
 from typing import Literal
 
 from test_mocks import MockSmartOpen
+
 from utils.aws import VALID_SOURCE_FILES
 
 
