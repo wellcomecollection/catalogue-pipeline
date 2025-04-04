@@ -39,6 +39,7 @@ def test_mesh_concepts_transformer() -> None:
         ],
         description="A broad class of substances containing carbon and its derivatives. Many of these chemicals will frequently contain hydrogen with or without oxygen, nitrogen, sulfur, phosphorus, and other elements. They exist in either carbon chain or carbon ring form.\n    ",
     )
+    assert len(nodes[2].alternative_labels) == 20
 
     edges = list(mesh_concepts_transformer._stream_edges())
 
