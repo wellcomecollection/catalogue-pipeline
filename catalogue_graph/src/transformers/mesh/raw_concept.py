@@ -30,16 +30,13 @@ class RawMeSHConcept:
     @property
     def alternative_labels(self) -> list[str]:
         """Returns a list of alternative labels for the concept, if available."""
-        altern_labels = []
-
-        for altern_concept in self.raw_concept.findall(
-            "ConceptList//TermList//Term[@ConceptPreferredTermYN='N']"
-        ):
-            altern_label_elem = altern_concept.find("String")
-            if isinstance(altern_label_elem, ET.Element):
-                altern_label = altern_label_elem.text
-                if isinstance(altern_label, str):
-                    altern_labels.append(altern_label)
+        altern_labels = [
+            assert_get_text(altern_label)
+            for altern_label in self.raw_concept.findall(
+                "ConceptList//Concept//TermList//Term//String"
+            )
+        ]
+        altern_labels.remove(self.label)
 
         return altern_labels
 
