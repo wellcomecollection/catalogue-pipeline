@@ -50,14 +50,22 @@ resource "aws_iam_role_policy" "graph_remover_lambda_s3_bulk_load_policy" {
 }
 
 # Read and write ID snapshots and files storing added/deleted nodes/edges
-resource "aws_iam_role_policy" "graph_remover_lambda_s3_read_policy" {
+resource "aws_iam_role_policy" "graph_remover_lambda_s3_policy" {
   role   = module.graph_remover_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.ingestor_s3_read.json
+  policy = data.aws_iam_policy_document.graph_remover_s3_policy.json
 }
 
-resource "aws_iam_role_policy" "graph_remover_lambda_s3_write_policy" {
-  role   = module.graph_remover_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.ingestor_s3_write.json
-}
+data "aws_iam_policy_document" "graph_remover_s3_policy" {
+  statement {
+    actions = [
+      "s3:PutObject",
+      "s3:HeadObject",
+      "s3:GetObject"
+    ]
 
+    resources = [
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
+    ]
+  }
+}
 
