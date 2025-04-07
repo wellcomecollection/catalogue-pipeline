@@ -4,13 +4,13 @@ from collections.abc import Generator
 from typing import Any
 
 import boto3
+import config
 import polars as pl
 import smart_open
-
-import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
+
 from utils.types import NodeType, OntologyType
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
@@ -89,7 +89,7 @@ def fetch_transformer_output_from_s3(
         print(
             f"Invalid source and node_type combination: ({source}, {node_type}). Returning an empty generator."
         )
-        yield from ()
+        return
 
     linked_nodes_file_name = f"{source}_{node_type}__nodes.csv"
     s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
