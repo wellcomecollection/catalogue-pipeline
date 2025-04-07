@@ -95,15 +95,15 @@ class BaseNeptuneClient:
 
     def _reset_database(self) -> dict | None:
         """Irreversibly wipes all data from the database. This method only exists for development purposes."""
-        
+
         if ALLOW_DATABASE_RESET:
             data = {"action": "initiateDatabaseReset"}
             response = self._make_request("POST", "/system", data)
             reset_token = response["payload"]["token"]
-    
+
             data = {"action": "performDatabaseReset", "token": reset_token}
             return self._make_request("POST", "/system", data)
-        
+
         print("Cannot reset the database due to an active safety switch.")
         return None
 

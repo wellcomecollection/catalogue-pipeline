@@ -2,8 +2,9 @@ import argparse
 import typing
 from datetime import datetime
 
-import config
 import polars as pl
+
+import config
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
