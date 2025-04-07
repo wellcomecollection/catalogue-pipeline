@@ -2,9 +2,10 @@ from datetime import datetime
 
 import polars as pl
 import pytest
-from graph_remover import lambda_handler
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
+
+from graph_remover import lambda_handler
 
 CATALOGUE_CONCEPTS_SNAPSHOT_URI = "s3://wellcomecollection-catalogue-graph/graph_remover/previous_ids_snapshot/catalogue_concepts__nodes.parquet"
 CATALOGUE_CONCEPTS_REMOVED_IDS_URI = "s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/catalogue_concepts__nodes.parquet"
@@ -39,7 +40,7 @@ def test_graph_remover_subsequent_run() -> None:
         CATALOGUE_CONCEPTS_SNAPSHOT_URI,
         load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes.parquet"),
     )
-    
+
     add_bulk_load_file_mocks()
 
     MockRequest.mock_responses(
@@ -57,7 +58,7 @@ def test_graph_remover_subsequent_run() -> None:
 
     event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
     lambda_handler(event, None)
-    
+
     # Verify that the correct IDs are listed in the 'added IDs' file
     with MockSmartOpen.open(CATALOGUE_CONCEPTS_ADDED_IDS_URI, "rb") as f:
         df = pl.read_parquet(f)
@@ -79,7 +80,7 @@ def test_graph_remover_subsequent_run() -> None:
         assert timestamps[0] == datetime.today().date()
 
         assert set(ids) == {"byzuqyr5"}
-    
+
     # Verify that the snapshot file was correctly updated
     with MockSmartOpen.open(CATALOGUE_CONCEPTS_SNAPSHOT_URI, "rb") as f:
         df = pl.read_parquet(f)

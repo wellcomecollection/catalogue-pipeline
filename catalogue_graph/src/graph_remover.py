@@ -2,9 +2,8 @@ import argparse
 import typing
 from datetime import datetime
 
-import polars as pl
-
 import config
+import polars as pl
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -23,6 +22,7 @@ ADDED_IDS_FOLDER = "graph_remover/added_ids"
 def get_previous_ids(
     transformer_type: TransformerType, entity_type: EntityType
 ) -> set[str]:
+    """Return all IDs from the latest snapshot for the specified transformer and entity type."""
     s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
     df = df_from_s3_parquet(s3_file_uri)
 
@@ -34,6 +34,7 @@ def get_previous_ids(
 def get_current_ids(
     transformer_type: TransformerType, entity_type: EntityType
 ) -> set[str]:
+    """Return all IDs from the latest bulk load file for the specified transformer and entity type."""
     s3_file_uri = (
         f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{transformer_type}__{entity_type}.csv"
     )
@@ -48,6 +49,7 @@ def get_current_ids(
 def update_node_ids_snapshot(
     transformer_type: TransformerType, entity_type: EntityType, ids: set[str]
 ) -> None:
+    """Update the IDs snapshot with the latest IDs."""
     s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
@@ -59,6 +61,7 @@ def log_ids(
     entity_type: EntityType,
     folder: str,
 ) -> None:
+    """Append IDs which were added/removed as part of this run to the corresponding log file."""
     s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{folder}/{transformer_type}__{entity_type}.parquet"
 
     try:
@@ -79,6 +82,7 @@ def log_ids(
 def delete_ids_from_neptune(
     deleted_ids: set[str], entity_type: EntityType, is_local: bool
 ) -> None:
+    """Delete all nodes/edges with matching IDs from the Neptune cluster"""
     client = get_neptune_client(is_local)
     if entity_type == "nodes":
         client.delete_nodes_by_id(list(deleted_ids))
