@@ -2,9 +2,8 @@ import argparse
 import typing
 from datetime import datetime
 
-import polars as pl
-
 import config
+import polars as pl
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -115,16 +114,7 @@ def handler(
             f"   Deleted ids: {len(deleted_ids)}\n",
             f"   Added ids: {len(added_ids)}",
         )
-
-    # Works:
-    # Deleted: {'sgw3eg8x', 'ec4j7m5y', 'umnsvyjn', 'mgux7g9b', 'fkm46z2a', 'p4v524g7'}
-    # Added: {'m4y2vvb8', 'x3uuyg46', 'xgkd8utr', 'v4fh5z8q', 'xdtc52k2', 'bttp76g5', 'ufvtstw4', 'wmtjy2uh', 'h2xwkjnw', 'ax9hc7zw', 'k75tnxe5', 'kt6w398r', 'kkcaq46j', 'qf893pea', 'qz7a6zpz'}
-    # Concepts:
-    # Deleted: {'u6jve2vb', 'amzfbrbz'}
-    # Added: {'qhtp4mjv', 'j4smr5gb', 'jd7xrn4q'}
-
-    # TODO: Check edges too!
-
+    
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
         delete_ids_from_neptune(deleted_ids, entity_type, is_local)

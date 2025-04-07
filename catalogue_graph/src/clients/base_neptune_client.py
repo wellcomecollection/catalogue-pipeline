@@ -224,7 +224,7 @@ class BaseNeptuneClient:
     def delete_edges_by_id(self, ids: list[str]) -> None:
         delete_query = """
             MATCH ()-[edge]-()
-            WHERE edge.id IN $edgeIds
+            WHERE id(edge) IN $edgeIds
             WITH collect(edge) AS edges, count(edge) AS deletedCount
             UNWIND edges AS edge
             DELETE edge
