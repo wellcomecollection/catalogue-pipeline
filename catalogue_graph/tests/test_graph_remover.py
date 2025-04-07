@@ -2,10 +2,9 @@ from datetime import datetime
 
 import polars as pl
 import pytest
+from graph_remover import lambda_handler
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
-
-from graph_remover import lambda_handler
 
 CATALOGUE_CONCEPTS_SNAPSHOT_URI = "s3://wellcomecollection-catalogue-graph/graph_remover/previous_ids_snapshot/catalogue_concepts__nodes.parquet"
 CATALOGUE_CONCEPTS_REMOVED_IDS_URI = "s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/catalogue_concepts__nodes.parquet"
@@ -29,7 +28,7 @@ def test_graph_remover_first_run() -> None:
     with MockSmartOpen.open(CATALOGUE_CONCEPTS_SNAPSHOT_URI, "rb") as f:
         df = pl.read_parquet(f)
         ids = pl.Series(df.select(pl.first())).to_list()
-        assert len(set(ids)) == 19
+        assert len(set(ids)) == 23
         assert "vjfb76xy" in ids
 
 
@@ -67,7 +66,7 @@ def test_graph_remover_next_run() -> None:
         timestamps = pl.Series(df.select(pl.col("timestamp"))).to_list()
         assert len(set(timestamps)) == 1
         assert timestamps[0] == datetime.today().date()
-
+        
         assert set(ids) == {"fqe7m83w", "pnpsyqp8", "drypfe3u"}
 
     # Verify that the correct IDs are listed in the 'removed IDs' file
@@ -85,7 +84,7 @@ def test_graph_remover_next_run() -> None:
     with MockSmartOpen.open(CATALOGUE_CONCEPTS_SNAPSHOT_URI, "rb") as f:
         df = pl.read_parquet(f)
         ids = pl.Series(df.select(pl.first())).to_list()
-        assert len(set(ids)) == 19
+        assert len(set(ids)) == 23
         assert "vjfb76xy" in ids
         assert "byzuqyr5" not in ids
         assert "fqe7m83w" in ids
