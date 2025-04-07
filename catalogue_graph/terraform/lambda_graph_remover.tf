@@ -11,8 +11,8 @@ module "graph_remover_lambda" {
   filename = data.archive_file.empty_zip.output_path
 
   handler     = "graph_remover.lambda_handler"
-  memory_size = 512
-  timeout     = 60 // 60 seconds
+  memory_size = 4096
+  timeout     = 300 // 5 minutes
 
   vpc_config = {
     subnet_ids         = local.private_subnets
