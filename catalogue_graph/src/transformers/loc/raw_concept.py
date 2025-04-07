@@ -5,7 +5,7 @@ ID_PREFIXES_TO_REMOVE = (
     "http://id.loc.gov/authorities/subjects/",
     "/authorities/names/",
     "http://id.loc.gov/authorities/names/",
-    'http://id.loc.gov/authorities/childrensSubjects/'
+    "http://id.loc.gov/authorities/childrensSubjects/",
 )
 
 
@@ -168,7 +168,11 @@ class RawLibraryOfCongressConcept:
 
 def _filter_irrelevant_ids(ids: list[str]) -> list[str]:
     # IDs starting with 'sj' are for Children's Subject Headings. We don't want to include those.
-    return [concept_id for concept_id in ids if not concept_id.startswith("_:n") and not concept_id.startswith("sj")]
+    return [
+        concept_id
+        for concept_id in ids
+        if not concept_id.startswith("_:n") and not concept_id.startswith("sj")
+    ]
 
 
 def _as_list(dict_or_list: dict | list[dict]) -> list[dict]:
