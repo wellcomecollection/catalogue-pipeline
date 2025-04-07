@@ -4,13 +4,13 @@ from collections.abc import Generator
 from typing import Any
 
 import boto3
-import config
 import polars as pl
 import smart_open
+
+import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-
 from utils.types import NodeType, OntologyType
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
