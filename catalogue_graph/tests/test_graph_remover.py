@@ -2,10 +2,9 @@ from datetime import datetime
 
 import polars as pl
 import pytest
+from graph_remover import lambda_handler
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
-
-from graph_remover import lambda_handler
 
 CATALOGUE_CONCEPTS_SNAPSHOT_URI = "s3://wellcomecollection-catalogue-graph/graph_remover/previous_ids_snapshot/catalogue_concepts__nodes.parquet"
 CATALOGUE_CONCEPTS_REMOVED_IDS_URI = "s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/catalogue_concepts__nodes.parquet"
@@ -33,7 +32,7 @@ def test_graph_remover_first_run() -> None:
         assert "vjfb76xy" in ids
 
 
-def test_graph_remover_subsequent_run() -> None:
+def test_graph_remover_next_run() -> None:
     # Mock a previous concept IDs snapshot which purposefully omits some IDs from the bulk load file mock
     # and includes some IDs not in the bulk load file mock.
     MockSmartOpen.mock_s3_file(
@@ -49,7 +48,7 @@ def test_graph_remover_subsequent_run() -> None:
                 "method": "POST",
                 "url": "https://test-host.com:8182/openCypher",
                 "status_code": 200,
-                "json_data": {"results": [{"deletedCount": 0}]},
+                "json_data": {"results": [{"deletedCount": 1}]},
                 "content_bytes": None,
                 "params": None,
             }

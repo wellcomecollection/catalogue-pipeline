@@ -105,6 +105,7 @@ class BaseNeptuneClient:
             return self._make_request("POST", "/system", data)
         
         print("Cannot reset the database due to an active safety switch.")
+        return None
 
     def initiate_bulk_load(self, s3_file_uri: str) -> str:
         """
