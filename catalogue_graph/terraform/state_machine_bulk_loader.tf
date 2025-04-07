@@ -10,10 +10,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
       "Trigger bulk load" : {
         "Type" : "Task",
         "Resource" : "arn:aws:states:::lambda:invoke",
-        "OutputPath": "$.Payload",
+        "OutputPath" : "$.Payload",
         "Parameters" : {
           "FunctionName" : module.bulk_loader_lambda.lambda.arn,
-          "Payload.$": "$"
+          "Payload.$" : "$"
         },
         "Next" : "Wait 30 seconds"
       },
@@ -25,20 +25,20 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
       "Check load status" : {
         "Type" : "Task",
         "Resource" : "arn:aws:states:::lambda:invoke",
-        "OutputPath": "$.Payload",
+        "OutputPath" : "$.Payload",
         "Parameters" : {
           "FunctionName" : module.bulk_load_poller_lambda.lambda.arn,
-          "Payload.$": "$"
+          "Payload.$" : "$"
         },
         "Next" : "Load complete?"
       },
       "Load complete?" : {
         "Type" : "Choice",
-        "Choices": [
+        "Choices" : [
           {
-            "Variable": "$.status",
-            "StringEquals": "SUCCEEDED",
-            "Next": "Remove unused entities"
+            "Variable" : "$.status",
+            "StringEquals" : "SUCCEEDED",
+            "Next" : "Remove unused entities"
           }
         ],
         "Default" : "Wait 30 seconds"
@@ -46,10 +46,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
       "Remove unused entities" : {
         "Type" : "Task",
         "Resource" : "arn:aws:states:::lambda:invoke",
-        "OutputPath": "$.Payload",
+        "OutputPath" : "$.Payload",
         "Parameters" : {
-            "FunctionName" : module.graph_remover_lambda.lambda.arn,
-            "Payload.$": "$$.Execution.Input",
+          "FunctionName" : module.graph_remover_lambda.lambda.arn,
+          "Payload.$" : "$$.Execution.Input",
         },
         "Next" : "Success"
       },
