@@ -14,6 +14,8 @@ NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
 
 DELETE_BATCH_SIZE = 10000
 
+ALLOW_DATABASE_RESET = False
+
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
@@ -91,17 +93,18 @@ class BaseNeptuneClient:
         graph_summary: dict = response["payload"]["graphSummary"]
         return graph_summary
 
-    def _reset_database(self) -> dict:
+    def _reset_database(self) -> dict | None:
         """Irreversibly wipes all data from the database. This method only exists for development purposes."""
-        # TODO: Only keep this function for testing purposes. Remove before releasing.
-        data = {"action": "initiateDatabaseReset"}
-        response = self._make_request("POST", "/system", data)
-        reset_token = response["payload"]["token"]
-
-        data = {"action": "performDatabaseReset", "token": reset_token}
-        response = self._make_request("POST", "/system", data)
-
-        return response
+        
+        if ALLOW_DATABASE_RESET:
+            data = {"action": "initiateDatabaseReset"}
+            response = self._make_request("POST", "/system", data)
+            reset_token = response["payload"]["token"]
+    
+            data = {"action": "performDatabaseReset", "token": reset_token}
+            return self._make_request("POST", "/system", data)
+        
+        print("Cannot reset the database due to an active safety switch.")
 
     def initiate_bulk_load(self, s3_file_uri: str) -> str:
         """
@@ -203,6 +206,7 @@ class BaseNeptuneClient:
         print(f"Removed all nodes with label '{label}'.")
 
     def delete_nodes_by_id(self, ids: list[str]) -> None:
+        """Removes all nodes with the specified ids from the graph."""
         delete_query = """
             MATCH (n)
             WHERE n.id IN $nodeIds
@@ -222,6 +226,7 @@ class BaseNeptuneClient:
             print(f"Successfully deleted {deleted_count} nodes from the graph.")
 
     def delete_edges_by_id(self, ids: list[str]) -> None:
+        """Removes all edges with the specified ids from the graph."""
         delete_query = """
             MATCH ()-[edge]-()
             WHERE id(edge) IN $edgeIds
