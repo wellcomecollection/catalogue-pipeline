@@ -2,8 +2,9 @@ import argparse
 import typing
 from datetime import datetime
 
-import config
 import polars as pl
+
+import config
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -83,7 +84,7 @@ def log_ids(
 
 
 def delete_ids_from_neptune(
-    deleted_ids: set[str], entity_type: EntityType,  is_local: bool
+    deleted_ids: set[str], entity_type: EntityType, is_local: bool
 ) -> None:
     """Delete all nodes/edges with matching IDs from the Neptune cluster"""
     client = get_neptune_client(is_local)
@@ -94,7 +95,10 @@ def delete_ids_from_neptune(
 
 
 def handler(
-    transformer_type: TransformerType, entity_type: EntityType, disable_safety_check: bool, is_local: bool = False
+    transformer_type: TransformerType,
+    entity_type: EntityType,
+    disable_safety_check: bool,
+    is_local: bool = False,
 ) -> None:
     try:
         # Retrieve a list of all ids which were loaded into the graph as part of the previous run
@@ -122,10 +126,16 @@ def handler(
             f"   Deleted ids: {len(deleted_ids)}\n",
             f"   Added ids: {len(added_ids)}",
         )
-        
-    if len(previous_ids) > 0 and len(deleted_ids) / len(previous_ids) > ACCEPTABLE_DIFF_THRESHOLD and not disable_safety_check:
-        raise ValueError(f"Attempted to remove {len(deleted_ids)} items (out of a total of {len(previous_ids)}), which is above the safety threshold.")
-    
+
+    if (
+        len(previous_ids) > 0
+        and len(deleted_ids) / len(previous_ids) > ACCEPTABLE_DIFF_THRESHOLD
+        and not disable_safety_check
+    ):
+        raise ValueError(
+            f"Attempted to remove {len(deleted_ids)} items (out of a total of {len(previous_ids)}), which is above the safety threshold."
+        )
+
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
         delete_ids_from_neptune(deleted_ids, entity_type, is_local)
@@ -144,7 +154,7 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
     transformer_type = event["transformer_type"]
     entity_type = event["entity_type"]
     override_safety_check = event.get("override_safety_check", False)
-    
+
     handler(transformer_type, entity_type, override_safety_check)
 
 
@@ -168,9 +178,9 @@ def local_handler() -> None:
         "--disable-safety-check",
         type=bool,
         help="Whether to override a safety check which prevents node/edge removal if the percentage of removed entities is above a certain threshold.",
-        default=False
+        default=False,
     )
-    
+
     args = parser.parse_args()
 
     handler(**args.__dict__, is_local=True)
