@@ -91,6 +91,21 @@ def test_graph_remover_next_run() -> None:
         assert "drypfe3u" in ids
 
 
+def test_graph_remover_safety_check() -> None:
+    # Mock a snapshot with a large number of nodes, most of which are not in the mock bulk load file.
+    # This would result in a large number of deletions and should therefore trigger the safety check
+    MockSmartOpen.mock_s3_file(
+        CATALOGUE_CONCEPTS_SNAPSHOT_URI,
+        load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes_large.parquet"),
+    )
+
+    add_bulk_load_file_mocks()
+
+    event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
+    with pytest.raises(ValueError):
+        lambda_handler(event, None)
+
+
 def test_graph_remover_missing_bulk_load_file() -> None:
     event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
 
