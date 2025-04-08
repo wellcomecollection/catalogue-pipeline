@@ -15,6 +15,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           "FunctionName" : module.bulk_loader_lambda.lambda.arn,
           "Payload" : "{% $states.input %}"
         },
+        Retry = local.DefaultRetry,
         "Next" : "Wait 30 seconds"
       },
       "Wait 30 seconds" : {
@@ -30,6 +31,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           "FunctionName" : module.bulk_load_poller_lambda.lambda.arn,
           "Payload" : "{% $states.input %}"
         },
+        Retry = local.DefaultRetry,
         "Next" : "Load complete?"
       },
       "Load complete?" : {

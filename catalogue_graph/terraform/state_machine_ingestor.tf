@@ -1,5 +1,4 @@
 locals {
-
   DefaultErrorEquals = [
     "Lambda.ServiceException",
     "Lambda.AWSLambdaException",
