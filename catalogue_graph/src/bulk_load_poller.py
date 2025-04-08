@@ -1,20 +1,61 @@
 import argparse
 import datetime
+import json
 import typing
 
+import config
+import smart_open
 from utils.aws import get_neptune_client
 
 INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
-def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
-    neptune_client = get_neptune_client(is_local)
+def log_payload(payload: dict) -> None:
+    """ Log the bulk load result into a JSON file which stores all results from the latest pipeline run"""
+    # Extract the name of the bulk load file to use as a key in the JSON log.
+    bulk_load_file_uri = payload['overallStatus']['fullUri']
+    bulk_load_file_name = bulk_load_file_uri.split("/")[-1].split(".")[0]
+    log_file_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/bulk_load_log.json"
+    
+    try:
+        with smart_open.open(log_file_uri, "r") as f:
+            bulk_load_log = json.loads(f.read())
+    except (OSError, KeyError):
+        # On the first run, the log file might not exist
+        bulk_load_log = {}
+    
+    # Overwrite the existing result (from the last bulk load) with the current one 
+    bulk_load_log[bulk_load_file_name] = payload
+    
+    # Save the log file back to S3
+    with smart_open.open(log_file_uri, "w") as f:
+        f.write(json.dumps(bulk_load_log, indent=2))
 
-    # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
-    payload = neptune_client.get_bulk_load_status(load_id)
-    overall_status = payload["overallStatus"]
+
+def print_detailed_bulk_load_errors(payload: dict) -> None:
     error_logs = payload["errors"]["errorLogs"]
+    failed_feeds = payload.get("failedFeeds")
 
+    if error_logs:
+        print("    First 10 errors:")
+
+    for error_log in error_logs:
+        code = error_log["errorCode"]
+        message = error_log["errorMessage"]
+        record_num = error_log["recordNum"]
+        print(f"         {code}: {message}. (Row number: {record_num})")
+
+    if failed_feeds:
+        print("    Failed feed statuses:")
+        for failed_feed in failed_feeds:
+            print(f"         {failed_feed['status']}")
+
+
+def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
+    # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
+    payload = get_neptune_client(is_local).get_bulk_load_status(load_id)
+    overall_status = payload["overallStatus"]
+   
     # Statuses: https://docs.aws.amazon.com/neptune/latest/userguide/loader-message.html
     status: str = overall_status["status"]
     processed_count = overall_status["totalRecords"]
@@ -37,20 +78,7 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
     print(f"    Data type mismatch errors: {data_type_error_count:,}")
     print(f"    Total time spent: {formatted_time}")
 
-    if error_logs:
-        print("    First 10 errors:")
-
-        for error_log in error_logs:
-            code = error_log["errorCode"]
-            message = error_log["errorMessage"]
-            record_num = error_log["recordNum"]
-            print(f"         {code}: {message}. (Row number: {record_num})")
-
-    failed_feeds = payload.get("failedFeeds")
-    if failed_feeds:
-        print("    Failed feed statuses:")
-        for failed_feed in failed_feeds:
-            print(f"         {failed_feed['status']}")
+    print_detailed_bulk_load_errors(payload)
 
     failed_below_insert_error_threshold = (
         status == "LOAD_FAILED"
@@ -63,6 +91,9 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
         print(
             "Bulk load failed due to a very small number of insert errors. Marking as successful."
         )
+    
+    if not is_local:
+        log_payload(payload)
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
         return {
