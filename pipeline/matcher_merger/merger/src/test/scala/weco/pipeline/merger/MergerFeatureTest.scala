@@ -12,6 +12,7 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
+import weco.pipeline.merger.services.WorkRouter
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import java.time.Instant
@@ -79,11 +80,9 @@ class MergerFeatureTest
       )
     )
 
-    val workSender = new MemoryMessageSender
-
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withMergerService(retriever, queue, workSender, index = index) {
+        withMergerService(retriever, queue, workRouter[String], index = index) {
           _ =>
             // 2) Now we update all four works at times t=1, t=2, t=3 and t=4.
             // However, due to best-effort ordering, we don't process these updates

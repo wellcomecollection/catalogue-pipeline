@@ -18,7 +18,7 @@ abstract class Indexer[T: Indexable] {
     *   The documents to be indexed
     * @return
     *   A future either containing a Left with the failed documents or a Right
-    *   with the succesfully indexed documents
+    *   with the successfully indexed documents
     */
   def apply(documents: Seq[T]): Future[Either[Seq[T], Seq[T]]]
 

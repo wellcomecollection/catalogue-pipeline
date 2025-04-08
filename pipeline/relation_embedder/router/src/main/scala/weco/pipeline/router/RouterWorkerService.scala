@@ -16,9 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Try}
 
 class RouterWorkerService[MsgDestination](
-  pipelineStream: PipelineStorageStream[NotificationMessage, Work[
-    Denormalised
-  ], MsgDestination],
+  pipelineStream: PipelineStorageStream[NotificationMessage, Work[Denormalised], MsgDestination],
   pathsMsgSender: MessageSender[MsgDestination],
   pathConcatenatorMsgSender: MessageSender[MsgDestination],
   workRetriever: Retriever[Work[Merged]]

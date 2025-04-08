@@ -405,7 +405,7 @@ class MergerWorkerServiceTest
     }
   }
 
-  case class Senders(works: MemoryMessageSender, images: MemoryMessageSender)
+  case class Senders(works: WorkRouter[String], images: MemoryMessageSender)
 
   def withMergerWorkerServiceFixtures[R](
     testWith: TestWith[
@@ -421,7 +421,11 @@ class MergerWorkerServiceTest
   ): R =
     withLocalSqsQueuePair(visibilityTimeout = 1 second) {
       case queuePair @ QueuePair(queue, _) =>
-        val workSender = new MemoryMessageSender()
+        val workRouter = new WorkRouter(
+          new MemoryMessageSender(),
+          new MemoryMessageSender(),
+          new MemoryMessageSender()
+        )
         val imageSender = new MemoryMessageSender()
 
         val retriever = new MemoryRetriever[Work[Identified]]()
@@ -432,7 +436,7 @@ class MergerWorkerServiceTest
         withMergerService(
           retriever,
           queue,
-          workSender,
+          workRouter,
           imageSender,
           metrics,
           index
@@ -442,7 +446,7 @@ class MergerWorkerServiceTest
               (
                 retriever,
                 queuePair,
-                Senders(workSender, imageSender),
+                Senders(workRouter, imageSender),
                 metrics,
                 index
               )
