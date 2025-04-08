@@ -130,9 +130,8 @@ class BaseNeptuneClient:
             "GET", f"/loader?loadId={load_id}&errors=TRUE&details=TRUE"
         )
 
-        payload: dict = response["payload"] 
-        return payload 
-
+        payload: dict = response["payload"]
+        return payload
 
     def get_bulk_load_statuses(self) -> list[str]:
         """Returns the loadIDs of the last 5 Neptune bulk load jobs."""

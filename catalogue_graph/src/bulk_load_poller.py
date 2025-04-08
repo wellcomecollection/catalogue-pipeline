@@ -4,8 +4,8 @@ import typing
 
 from utils.aws import get_neptune_client
 
-INSERT_ERROR_THRESHOLD = 1/10000
-    
+INSERT_ERROR_THRESHOLD = 1 / 10000
+
 
 def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
     neptune_client = get_neptune_client(is_local)
@@ -52,18 +52,26 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
         for failed_feed in failed_feeds:
             print(f"         {failed_feed['status']}")
 
-    failed_below_insert_error_threshold = (status == "LOAD_FAILED" and parsing_error_count == 0 and data_type_error_count == 0 and (insert_error_count / processed_count < INSERT_ERROR_THRESHOLD))
-    
+    failed_below_insert_error_threshold = (
+        status == "LOAD_FAILED"
+        and parsing_error_count == 0
+        and data_type_error_count == 0
+        and (insert_error_count / processed_count < INSERT_ERROR_THRESHOLD)
+    )
+
     if failed_below_insert_error_threshold:
-        print("Bulk load failed due to a very small number of insert errors. Marking as successful.")
-        
+        print(
+            "Bulk load failed due to a very small number of insert errors. Marking as successful."
+        )
+
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
         return {
             "loadId": load_id,
             "status": "SUCCEEDED",
         }
-    
+
     raise Exception("Load failed. See error log above.")
+
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
     load_id = event["loadId"]
