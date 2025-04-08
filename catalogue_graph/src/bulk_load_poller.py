@@ -3,30 +3,31 @@ import datetime
 import json
 import typing
 
-import config
 import smart_open
+
+import config
 from utils.aws import get_neptune_client
 
 INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
 def log_payload(payload: dict) -> None:
-    """ Log the bulk load result into a JSON file which stores all results from the latest pipeline run"""
+    """Log the bulk load result into a JSON file which stores all results from the latest pipeline run"""
     # Extract the name of the bulk load file to use as a key in the JSON log.
-    bulk_load_file_uri = payload['overallStatus']['fullUri']
+    bulk_load_file_uri = payload["overallStatus"]["fullUri"]
     bulk_load_file_name = bulk_load_file_uri.split("/")[-1].split(".")[0]
     log_file_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/bulk_load_log.json"
-    
+
     try:
         with smart_open.open(log_file_uri, "r") as f:
             bulk_load_log = json.loads(f.read())
     except (OSError, KeyError):
         # On the first run, the log file might not exist
         bulk_load_log = {}
-    
-    # Overwrite the existing result (from the last bulk load) with the current one 
+
+    # Overwrite the existing result (from the last bulk load) with the current one
     bulk_load_log[bulk_load_file_name] = payload
-    
+
     # Save the log file back to S3
     with smart_open.open(log_file_uri, "w") as f:
         f.write(json.dumps(bulk_load_log, indent=2))
@@ -55,7 +56,7 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
     # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
     payload = get_neptune_client(is_local).get_bulk_load_status(load_id)
     overall_status = payload["overallStatus"]
-   
+
     # Statuses: https://docs.aws.amazon.com/neptune/latest/userguide/loader-message.html
     status: str = overall_status["status"]
     processed_count = overall_status["totalRecords"]
@@ -91,7 +92,7 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
         print(
             "Bulk load failed due to a very small number of insert errors. Marking as successful."
         )
-    
+
     if not is_local:
         log_payload(payload)
 
