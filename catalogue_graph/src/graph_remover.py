@@ -19,7 +19,7 @@ IDS_SNAPSHOT_FOLDER = "graph_remover/previous_ids_snapshot"
 DELETED_IDS_FOLDER = "graph_remover/deleted_ids"
 ADDED_IDS_FOLDER = "graph_remover/added_ids"
 
-# This is a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
+# This is part of a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
 ACCEPTABLE_DIFF_THRESHOLD = 0.05
 
 
