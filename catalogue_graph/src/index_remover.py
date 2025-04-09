@@ -10,7 +10,7 @@ import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from utils.aws import df_from_s3_parquet
 
-# This is a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
+# This is part of a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
 ACCEPTABLE_DIFF_THRESHOLD = 0.05
 
 
