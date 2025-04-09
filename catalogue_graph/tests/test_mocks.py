@@ -7,6 +7,7 @@ from collections.abc import Generator
 from typing import Any, TypedDict
 
 from botocore.credentials import Credentials
+
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -301,14 +302,14 @@ class MockElasticsearchClient:
     @classmethod
     def reset_mocks(cls) -> None:
         cls.inputs = []
-    
+
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:
         cls.indexed_documents[index][id] = document
 
     def delete_by_query(self, index: str, body: dict) -> dict:
         deleted_ids = body["query"]["ids"]["values"]
-        
+
         new_indexed_documents = {}
 
         deleted_count = 0
@@ -323,4 +324,4 @@ class MockElasticsearchClient:
         return {"deleted": deleted_count}
 
     def count(self, index: str) -> dict:
-        return {"count": len(self.indexed_documents.get(index, {}).values())}        
+        return {"count": len(self.indexed_documents.get(index, {}).values())}
