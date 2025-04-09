@@ -2,9 +2,8 @@ import argparse
 import typing
 from datetime import datetime
 
-import polars as pl
-
 import config
+import polars as pl
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -19,7 +18,7 @@ IDS_SNAPSHOT_FOLDER = "graph_remover/previous_ids_snapshot"
 DELETED_IDS_FOLDER = "graph_remover/deleted_ids"
 ADDED_IDS_FOLDER = "graph_remover/added_ids"
 
-# This is a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
+# This is part of a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
 ACCEPTABLE_DIFF_THRESHOLD = 0.05
 
 
