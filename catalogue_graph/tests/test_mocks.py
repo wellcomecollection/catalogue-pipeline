@@ -2,11 +2,11 @@ import gzip
 import io
 import os
 import tempfile
+from collections import defaultdict
 from collections.abc import Generator
 from typing import Any, TypedDict
 
 from botocore.credentials import Credentials
-
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -70,13 +70,21 @@ class MockAwsService:
 
 
 class MockSecretsManagerClient(MockAwsService):
+    secrets: dict[str, Any] = {}
+
+    @classmethod
+    def add_mock_secret(cls, secret_id: str, value: Any) -> None:
+        cls.secrets[secret_id] = value
+
     def get_secret_value(self, SecretId: str) -> dict:
         if SecretId == LOAD_BALANCER_SECRET_NAME:
             secret_value = MOCK_API_KEY
         elif SecretId == INSTANCE_ENDPOINT_SECRET_NAME:
             secret_value = MOCK_INSTANCE_ENDPOINT
+        elif SecretId in self.secrets:
+            secret_value = self.secrets[SecretId]
         else:
-            raise KeyError("Secret value does not exist.")
+            raise KeyError(f"Secret value '{SecretId}' does not exist.")
 
         return {"SecretString": secret_value}
 
@@ -278,6 +286,7 @@ class MockBulkResponse:
 
 
 class MockElasticsearchClient:
+    indexed_documents: dict = defaultdict(dict[str, dict])
     inputs: list[dict] = []
 
     def __init__(self, config: dict, api_key: str) -> None:
@@ -292,3 +301,26 @@ class MockElasticsearchClient:
     @classmethod
     def reset_mocks(cls) -> None:
         cls.inputs = []
+    
+    @classmethod
+    def index(cls, index: str, id: str, document: dict) -> None:
+        cls.indexed_documents[index][id] = document
+
+    def delete_by_query(self, index: str, body: dict) -> dict:
+        deleted_ids = body["query"]["ids"]["values"]
+        
+        new_indexed_documents = {}
+
+        deleted_count = 0
+        for _id, document in self.indexed_documents[index].items():
+            if _id not in deleted_ids:
+                new_indexed_documents[_id] = document
+            else:
+                deleted_count += 1
+
+        self.indexed_documents[index] = new_indexed_documents
+
+        return {"deleted": deleted_count}
+
+    def count(self, index: str) -> dict:
+        return {"count": len(self.indexed_documents.get(index, {}).values())}        
