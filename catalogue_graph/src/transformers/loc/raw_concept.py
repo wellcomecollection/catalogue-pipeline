@@ -5,6 +5,7 @@ ID_PREFIXES_TO_REMOVE = (
     "http://id.loc.gov/authorities/subjects/",
     "/authorities/names/",
     "http://id.loc.gov/authorities/names/",
+    "https://id.loc.gov/authorities/names/",
     "http://id.loc.gov/authorities/childrensSubjects/",
 )
 
