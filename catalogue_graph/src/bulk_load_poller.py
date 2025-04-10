@@ -3,8 +3,9 @@ import datetime
 import json
 import typing
 
-import config
 import smart_open
+
+import config
 from utils.aws import get_neptune_client
 
 INSERT_ERROR_THRESHOLD = 1 / 10000
@@ -15,7 +16,9 @@ def log_payload(payload: dict) -> None:
     # Extract the name of the bulk load file to use as a key in the JSON log.
     bulk_load_file_uri = payload["overallStatus"]["fullUri"]
     bulk_load_file_name = bulk_load_file_uri.split("/")[-1].split(".")[0]
-    log_file_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/report.neptune_bulk_loader.json"
+    log_file_uri = (
+        f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/report.neptune_bulk_loader.json"
+    )
 
     try:
         with smart_open.open(log_file_uri, "r") as f:
