@@ -52,7 +52,11 @@ def transform_data(df: DataFrame) -> list[IndexableConcept]:
 def load_data(
     concepts: list[IndexableConcept], pipeline_date: str | None, is_local: bool
 ) -> int:
-    index_name = "concepts-indexed-experimental"
+    index_name = (
+        "concepts-indexed"
+        if pipeline_date is None
+        else f"concepts-indexed-{pipeline_date}"
+    )
 
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
     es = utils.elasticsearch.get_client(pipeline_date, is_local)

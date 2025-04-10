@@ -17,13 +17,6 @@ from models.catalogue_concept import (
 from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
-RELATED_TO_LIMIT = 10
-
-# There are a few Wikidata supernodes which cause performance issues in queries. 
-# We need to filter them out when running queries to get related nodes. 
-# Q5 -> 'human', Q151885 -> 'concept'
-IGNORED_WIKIDATA_IDS = ['Q5', 'Q151885']
-
 
 class IngestorLoaderLambdaEvent(BaseModel):
     job_id: str
@@ -36,6 +29,15 @@ class IngestorLoaderConfig(BaseModel):
     loader_s3_bucket: str = INGESTOR_S3_BUCKET
     loader_s3_prefix: str = INGESTOR_S3_PREFIX
     is_local: bool = False
+
+
+# Maximum number of related nodes to return for each relationship type
+RELATED_TO_LIMIT = 10
+
+# There are a few Wikidata supernodes which cause performance issues in queries. 
+# We need to filter them out when running queries to get related nodes. 
+# Q5 -> 'human', Q151885 -> 'concept'
+IGNORED_WIKIDATA_IDS = ['Q5', 'Q151885']
 
 
 def get_related_query(
@@ -60,7 +62,8 @@ def get_related_query(
         WHERE NOT source_concept.id IN $ignored_wikidata_ids
         MATCH (source_concept){left_arrow}-[rel:{edge_type}]-{right_arrow}(linked_related_source_concept)
         MATCH (linked_related_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
-        WHERE NOT related_source_concept.id IN $ignored_wikidata_ids
+        WHERE NOT linked_related_source_concept.id IN $ignored_wikidata_ids
+            AND NOT related_source_concept.id IN $ignored_wikidata_ids
             AND NOT (linked_source_concept)-[:SAME_AS*0..2]-(related_source_concept)        
         MATCH (related_source_concept)<-[:HAS_SOURCE_CONCEPT]-(related_concept)
         MATCH (work)-[:HAS_CONCEPT]->(related_concept)
@@ -84,8 +87,6 @@ def get_related_query(
     """
 
 
-NOT_AGENT = ["SourceConcept", "SourceLocation"]
-
 CONCEPT_QUERY = """
     MATCH (concept:Concept)
     WITH concept ORDER BY concept.id
@@ -99,7 +100,7 @@ CONCEPT_QUERY = """
         collect(DISTINCT same_as_concept.id) AS same_as_concept_ids        
     """
 
-CLOSENESS_QUERY = """
+REFERENCED_TOGETHER_QUERY = """
         MATCH (concept:Concept)
         WITH concept ORDER BY concept.id
         SKIP $start_offset LIMIT $limit
@@ -126,6 +127,10 @@ CLOSENESS_QUERY = """
 
 
 def related_query_result_to_dict(related_to: list[dict]) -> dict[str, list[dict]]:
+    """
+    Transform a list of dictionaries mapping a concept ID to a list of related concepts into a single dictionary
+    (with concept IDs as keys and related concepts as values).
+    """
     return {item["id"]: item["related"] for item in related_to}
 
 
@@ -138,8 +143,8 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> ConceptsQ
 
     field_of_work_query = get_related_query("HAS_FIELD_OF_WORK")
     related_to_query = get_related_query("RELATED_TO")
-    narrower_than_query = get_related_query("NARROWER_THAN", 'right', NOT_AGENT)
-    broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", 'left', NOT_AGENT)
+    narrower_than_query = get_related_query("NARROWER_THAN")
+    broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", 'left')
     people_query = get_related_query("HAS_FIELD_OF_WORK",'left')
     
     params = {
@@ -174,7 +179,7 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> ConceptsQ
     print(f"Retrieved {len(people_result)} records")
 
     print("Running referenced together query...")
-    referenced_together_result = client.run_open_cypher_query(CLOSENESS_QUERY, params)
+    referenced_together_result = client.run_open_cypher_query(REFERENCED_TOGETHER_QUERY, params)
     print(f"Retrieved {len(referenced_together_result)} records")
 
     return ConceptsQueryResult(
