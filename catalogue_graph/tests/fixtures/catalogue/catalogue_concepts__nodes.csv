@@ -1,0 +1,24 @@
+:ID,:LABEL,id:String,label:String,type:String,source:String
+vjfb76xy,Concept,vjfb76xy,Biological Evolution,Concept,label-derived
+zacdk477,Concept,zacdk477,ethics,Concept,label-derived
+s6msz274,Concept,s6msz274,Biological Evolution - ethics,Subject,nlm-mesh
+hteg45gd,Concept,hteg45gd,"Rachels, James, 1941-2003.",Person,lc-names
+u3hxmmdj,Concept,u3hxmmdj,Apes,Concept,label-derived
+xdndcdz7,Concept,xdndcdz7,Reproduction,Concept,label-derived
+fqe7m83w,Concept,fqe7m83w,Apes - Reproduction,Subject,lc-subjects
+vg6npe7s,Concept,vg6npe7s,Mammals,Concept,label-derived
+nns59ukt,Concept,nns59ukt,Mammals - Reproduction,Subject,lc-subjects
+drypfe3u,Concept,drypfe3u,Hominidae,Concept,label-derived
+bczubyr6,Concept,bczubyr6,physiology,Concept,label-derived
+dsxyshz9,Concept,dsxyshz9,Hominidae - physiology,Subject,nlm-mesh
+fawjawyj,Concept,fawjawyj,Reproduction,Concept,nlm-mesh
+gymg3vep,Concept,gymg3vep,"Graham, Charles E.",Person,lc-names
+jabdn5j8,Concept,jabdn5j8,"Bernagie, Pieter 1656-1699",Person,label-derived
+kqkakf66,Concept,kqkakf66,Electronic books,Genre,label-derived
+pnpsyqp8,Concept,pnpsyqp8,Science,Concept,label-derived
+m7x7qxg6,Concept,m7x7qxg6,history,Concept,label-derived
+wf4bgw2z,Concept,wf4bgw2z,Science - history,Subject,nlm-mesh
+t9gz4u45,Concept,t9gz4u45,"Höhn, Elfriede, 1915-",Person,lc-names
+pqv54b4e,Concept,pqv54b4e,"Schäfer, Eckhard.",Person,lc-names
+qmgtv26w,Concept,qmgtv26w,Pregnancy Complications,Concept,label-derived
+fpcr2j4m,Concept,fpcr2j4m,Labor Complications,Concept,label-derived
