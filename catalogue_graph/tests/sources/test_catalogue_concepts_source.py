@@ -13,7 +13,7 @@ def test_catalogue_concepts_source() -> None:
                 "url": test_url,
                 "status_code": 200,
                 "json_data": None,
-                "content_bytes": load_fixture("catalogue_example.json"),
+                "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
                 "params": None,
             }
         ]

@@ -25,7 +25,6 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     monkeypatch.setattr("elasticsearch.Elasticsearch", MockElasticsearchClient)
     monkeypatch.setattr("elasticsearch.helpers.bulk", MockElasticsearchClient.bulk)
 
-    monkeypatch.setattr("config.S3_BULK_LOAD_BUCKET_NAME", "bulk_load_test_bucket")
     monkeypatch.setattr(
         "config.GRAPH_QUERIES_SNS_TOPIC_ARN",
         "arn:aws:sns:us-east-1:123456789012:graph_queries_test_topic",

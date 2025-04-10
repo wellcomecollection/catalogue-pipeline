@@ -16,7 +16,7 @@ resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   # Set minimum capacity to 1 NCU, and maximum capacity to 16 NCUs. These are the minimum possible values.
   serverless_v2_scaling_configuration {
     min_capacity = 1
-    max_capacity = 16
+    max_capacity = 32
   }
 }
 

@@ -14,6 +14,8 @@ NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
 
 DELETE_BATCH_SIZE = 10000
 
+ALLOW_DATABASE_RESET = False
+
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
@@ -69,10 +71,12 @@ class BaseNeptuneClient:
         response: dict = raw_response.json()
         return response
 
-    def run_open_cypher_query(self, query: str, parameters: dict[str, typing.Any] | None = None) -> list[dict]:
+    def run_open_cypher_query(
+        self, query: str, parameters: dict[str, typing.Any] | None = None
+    ) -> list[dict]:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
-        payload: dict[str, typing.Any] = {"query": query}        
+        payload: dict = {"query": query}
         if parameters is not None:
             payload["parameters"] = parameters
 
@@ -89,17 +93,19 @@ class BaseNeptuneClient:
         graph_summary: dict = response["payload"]["graphSummary"]
         return graph_summary
 
-    def _reset_database(self) -> dict:
+    def _reset_database(self) -> dict | None:
         """Irreversibly wipes all data from the database. This method only exists for development purposes."""
-        # TODO: Only keep this function for testing purposes. Remove before releasing.
-        data = {"action": "initiateDatabaseReset"}
-        response = self._make_request("POST", "/system", data)
-        reset_token = response["payload"]["token"]
 
-        data = {"action": "performDatabaseReset", "token": reset_token}
-        response = self._make_request("POST", "/system", data)
+        if ALLOW_DATABASE_RESET:
+            data = {"action": "initiateDatabaseReset"}
+            response = self._make_request("POST", "/system", data)
+            reset_token = response["payload"]["token"]
 
-        return response
+            data = {"action": "performDatabaseReset", "token": reset_token}
+            return self._make_request("POST", "/system", data)
+
+        print("Cannot reset the database due to an active safety switch.")
+        return None
 
     def initiate_bulk_load(self, s3_file_uri: str) -> str:
         """
@@ -199,3 +205,43 @@ class BaseNeptuneClient:
             self.run_open_cypher_query(delete_query)
 
         print(f"Removed all nodes with label '{label}'.")
+
+    def delete_nodes_by_id(self, ids: list[str]) -> None:
+        """Removes all nodes with the specified ids from the graph."""
+        delete_query = """
+            MATCH (n)
+            WHERE n.id IN $nodeIds
+            WITH collect(n) AS nodes, count(n) AS deletedCount
+            UNWIND nodes AS node
+            DETACH DELETE node
+            WITH max(deletedCount) AS deletedCount
+            RETURN deletedCount
+        """
+        response = self.run_open_cypher_query(delete_query, {"nodeIds": ids})
+
+        deleted_count = response[0]["deletedCount"]
+
+        if deleted_count is None:
+            print("No matching node ids found in the graph.")
+        else:
+            print(f"Successfully deleted {deleted_count} nodes from the graph.")
+
+    def delete_edges_by_id(self, ids: list[str]) -> None:
+        """Removes all edges with the specified ids from the graph."""
+        delete_query = """
+            MATCH ()-[edge]-()
+            WHERE id(edge) IN $edgeIds
+            WITH collect(edge) AS edges, count(edge) AS deletedCount
+            UNWIND edges AS edge
+            DELETE edge
+            WITH max(deletedCount) AS deletedCount
+            RETURN deletedCount
+        """
+        response = self.run_open_cypher_query(delete_query, {"edgeIds": ids})
+
+        deleted_count = response[0]["deletedCount"]
+
+        if deleted_count is None:
+            print("No matching edge ids found in the graph.")
+        else:
+            print(f"Successfully deleted {deleted_count} edges from the graph.")
