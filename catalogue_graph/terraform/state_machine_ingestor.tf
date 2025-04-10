@@ -115,7 +115,20 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
             }
           }
         },
-        Next = "Success"
+        Next = "Remove documents"
+      },
+      "Remove documents" = {
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
+        Arguments = {
+          FunctionName = module.index_remover_lambda.lambda.arn,
+          Payload = {
+            pipeline_date = local.pipeline_date
+          }
+        },
+        Retry = local.DefaultRetry,
+        Next  = "Success"
       },
       Success = {
         Type = "Succeed"
