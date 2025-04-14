@@ -5,13 +5,12 @@ from models.catalogue_concept import (
     RelatedConcepts,
 )
 from test_ingestor_loader import (
-    MockNeptuneResponseItem,
     get_mock_neptune_concept_query_response,
 )
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
-    mock_concept_response = get_mock_neptune_concept_query_response([MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS])
+    mock_concept_response = get_mock_neptune_concept_query_response(True)
     concept = mock_concept_response["results"][0]
 
     neptune_result = ConceptsQuerySingleResult(
@@ -48,7 +47,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
 
 
 def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
-    mock_concept_response = get_mock_neptune_concept_query_response([])
+    mock_concept_response = get_mock_neptune_concept_query_response(False)
     concept = mock_concept_response["results"][0]
 
     neptune_result = ConceptsQuerySingleResult(

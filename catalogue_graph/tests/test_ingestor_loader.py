@@ -100,7 +100,7 @@ def get_mock_neptune_concept_query_response(include_alternative_labels: bool) ->
 EXPECTED_NEPTUNE_PARAMS = {"start_offset": 0, "limit": 1, "ignored_wikidata_ids": ["Q5", "Q151885"], "related_to_limit": 10}
 
 
-def add_neptune_mock_response(request_data: dict, response_data: dict):
+def add_neptune_mock_response(request_data: dict, response_data: dict) -> None:
     request_data["query"] = " ".join(request_data["query"].split())
 
     MockRequest.mock_response(
@@ -111,7 +111,7 @@ def add_neptune_mock_response(request_data: dict, response_data: dict):
     )
 
 
-def mock_neptune_responses(include: list[MockNeptuneResponseItem]):
+def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     include_alternative_labels = MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include
 
     add_neptune_mock_response(
@@ -227,7 +227,7 @@ def test_ingestor_loader(
         assert catalogue_concepts[0] == expected_concept
 
 
-def test_ingestor_loader_bad_neptune_response():
+def test_ingestor_loader_bad_neptune_response() -> None:
     MockRequest.mock_response(
         method="POST",
         url="https://test-host.com:8182/openCypher",
