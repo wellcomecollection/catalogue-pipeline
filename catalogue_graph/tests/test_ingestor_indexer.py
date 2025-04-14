@@ -1,147 +1,37 @@
+import json
 from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-from test_utils import load_fixture
-
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
+from test_mocks import MockElasticsearchClient, MockSmartOpen
+from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
         object_to_index=IngestorIndexerObject(
-            s3_uri="s3://test-catalogue-graph/00000000-00000004.parquet"
+            s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
         )
     )
     MockSmartOpen.mock_s3_file(
-        "s3://test-catalogue-graph/00000000-00000004.parquet",
-        load_fixture("ingestor/00000000-00000004.parquet"),
+        "s3://test-catalogue-graph/00000000-00000010.parquet",
+        load_fixture("ingestor/00000000-00000010.parquet"),
     )
     MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
+    expected_inputs = json.loads(load_fixture("ingestor/mock_es_inputs.json"))
+
     result = handler(event, config)
-
-    expected_bulk_input = [
-        {
-            "_index": "concepts-indexed",
-            "_id": "a2233f9d",
-            "_source": {
-                "query": {
-                    "id": "a2233f9d",
-                    "identifiers": [],
-                    "label": "Circle of State Librarians Conference 1979 : Kew, England)",
-                    "alternativeLabels": [],
-                    "type": "Meeting",
-                },
-                "display": {
-                    "id": "a2233f9d",
-                    "identifiers": [],
-                    "label": "Circle of State Librarians Conference 1979 : Kew, England)",
-                    "alternativeLabels": [],
-                    "type": "Meeting",
-                    "description": None,
-                },
-            },
-        },
-        {
-            "_index": "concepts-indexed",
-            "_id": "a223f5a6",
-            "_source": {
-                "query": {
-                    "id": "a223f5a6",
-                    "identifiers": [
-                        {"value": "no2001062332", "identifierType": "lc-names"}
-                    ],
-                    "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
-                    "alternativeLabels": [],
-                    "type": "Person",
-                },
-                "display": {
-                    "id": "a223f5a6",
-                    "identifiers": [
-                        {
-                            "value": "no2001062332",
-                            "type": "Identifier",
-                            "identifierType": {
-                                "id": "lc-names",
-                                "label": "Library of Congress Name authority records",
-                                "type": "IdentifierType",
-                            },
-                        }
-                    ],
-                    "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
-                    "alternativeLabels": [],
-                    "type": "Person",
-                    "description": "Some description 1",
-                },
-            },
-        },
-        {
-            "_index": "concepts-indexed",
-            "_id": "a2249bxm",
-            "_source": {
-                "query": {
-                    "id": "a2249bxm",
-                    "identifiers": [],
-                    "label": "Wolff, G.",
-                    "alternativeLabels": [],
-                    "type": "Person",
-                },
-                "display": {
-                    "id": "a2249bxm",
-                    "identifiers": [],
-                    "label": "Wolff, G.",
-                    "alternativeLabels": [],
-                    "type": "Person",
-                    "description": "Some description 2",
-                },
-            },
-        },
-        {
-            "_index": "concepts-indexed",
-            "_id": "a224b9mp",
-            "_source": {
-                "query": {
-                    "id": "a224b9mp",
-                    "identifiers": [
-                        {"value": "n79066466", "identifierType": "lc-names"}
-                    ],
-                    "label": "Jones, John E.",
-                    "alternativeLabels": [],
-                    "type": "Person",
-                },
-                "display": {
-                    "id": "a224b9mp",
-                    "identifiers": [
-                        {
-                            "value": "n79066466",
-                            "type": "Identifier",
-                            "identifierType": {
-                                "id": "lc-names",
-                                "label": "Library of Congress Name authority records",
-                                "type": "IdentifierType",
-                            },
-                        }
-                    ],
-                    "label": "Jones, John E.",
-                    "alternativeLabels": [],
-                    "type": "Person",
-                    "description": None,
-                },
-            },
-        },
-    ]
-
-    assert len(MockElasticsearchClient.inputs) == 4
-    assert result == 4  # success count
-    assert MockElasticsearchClient.inputs == expected_bulk_input
+    assert len(MockElasticsearchClient.inputs) == 10
+    assert result == 10  # success count
+    assert MockElasticsearchClient.inputs == expected_inputs
 
 
 def build_test_matrix() -> list[tuple]:

@@ -3,10 +3,9 @@ import io
 import os
 import tempfile
 from collections.abc import Generator
-from typing import Any, TypedDict
+from typing import Any, Optional, TypedDict
 
 from botocore.credentials import Credentials
-
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -188,6 +187,7 @@ class MockRequestExpectation(TypedDict):
     url: str
     params: dict | None
     response: MockResponse
+    data: Optional[dict | str]
 
 
 class MockResponseInput(TypedDict):
@@ -222,6 +222,7 @@ class MockRequest:
         url: str,
         status_code: int = 200,
         params: dict | None = None,
+        body: dict | str | None = None,
         json_data: dict | None = None,
         content_bytes: bytes | None = None,
     ) -> None:
@@ -230,6 +231,7 @@ class MockRequest:
                 "method": method,
                 "url": url,
                 "params": params,
+                "data": body,
                 "response": MockResponse(status_code, json_data, content_bytes),
             }
         )
@@ -244,18 +246,20 @@ class MockRequest:
         method: str,
         url: str,
         stream: bool = False,
-        data: dict | None = None,
+        data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None,
     ) -> MockResponse:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
+
         for response in MockRequest.responses:
             if (
                 response["method"] == method
                 and response["url"] == url
                 and response["params"] == params
+                and (response.get("data") is None or response["data"] == data)
             ):
                 return response["response"]
 

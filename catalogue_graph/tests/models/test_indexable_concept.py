@@ -6,6 +6,7 @@ from models.indexable_concept import (
     ConceptQuery,
     ConceptQueryIdentifier,
     IndexableConcept,
+    RelatedConcepts,
 )
 
 
@@ -19,6 +20,15 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         alternativeLabels=["alternativeLabels"],
         description="description",
         type="type",
+        sameAs=[],
+        relatedConcepts=RelatedConcepts(
+            relatedTo = [],
+            fieldsOfWork = [],
+            narrowerThan = [],
+            broaderThan = [],
+            people = [],
+            referencedTogether = []
+        )
     )
 
     assert IndexableConcept.from_concept(catalogue_concept) == IndexableConcept(
@@ -47,5 +57,14 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             alternativeLabels=["alternativeLabels"],
             description="description",
             type="type",
+            sameAs=[],
+            relatedConcepts=RelatedConcepts(
+                relatedTo = [],
+                fieldsOfWork = [],
+                narrowerThan = [],
+                broaderThan = [],
+                people = [],
+                referencedTogether = []
+            )
         ),
     )
