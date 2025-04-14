@@ -22,13 +22,13 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         type="type",
         sameAs=[],
         relatedConcepts=RelatedConcepts(
-            relatedTo = [],
-            fieldsOfWork = [],
-            narrowerThan = [],
-            broaderThan = [],
-            people = [],
-            referencedTogether = []
-        )
+            relatedTo=[],
+            fieldsOfWork=[],
+            narrowerThan=[],
+            broaderThan=[],
+            people=[],
+            referencedTogether=[],
+        ),
     )
 
     assert IndexableConcept.from_concept(catalogue_concept) == IndexableConcept(
@@ -59,12 +59,12 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             type="type",
             sameAs=[],
             relatedConcepts=RelatedConcepts(
-                relatedTo = [],
-                fieldsOfWork = [],
-                narrowerThan = [],
-                broaderThan = [],
-                people = [],
-                referencedTogether = []
-            )
+                relatedTo=[],
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=[],
+                people=[],
+                referencedTogether=[],
+            ),
         ),
     )

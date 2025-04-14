@@ -106,6 +106,6 @@ class IndexableConcept(BaseModel):
                 type=concept.type,
                 description=concept.description,
                 relatedConcepts=concept.relatedConcepts,
-                sameAs=concept.sameAs
+                sameAs=concept.sameAs,
             ),
         )

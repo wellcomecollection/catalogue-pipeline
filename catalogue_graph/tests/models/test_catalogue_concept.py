@@ -1,11 +1,12 @@
+from test_ingestor_loader import (
+    get_mock_neptune_concept_query_response,
+)
+
 from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
     ConceptsQuerySingleResult,
     RelatedConcepts,
-)
-from test_ingestor_loader import (
-    get_mock_neptune_concept_query_response,
 )
 
 
@@ -29,20 +30,24 @@ def test_catalogue_concept_from_neptune_result() -> None:
             CatalogueConceptIdentifier(value="456", identifierType="lc-names")
         ],
         label="label",
-        alternativeLabels=["Alternative label", "Another alternative label", "MeSH alternative label"],
+        alternativeLabels=[
+            "Alternative label",
+            "Another alternative label",
+            "MeSH alternative label",
+        ],
         description="Mesh description",
         type="type",
         sameAs=[],
         relatedConcepts=RelatedConcepts(
-            relatedTo = [
+            relatedTo=[
                 # CatalogueConceptRelatedTo(label='related label', id='123', relationshipType='')
             ],
-            fieldsOfWork = [],
-            narrowerThan = [],
-            broaderThan = [],
-            people = [],
-            referencedTogether = []
-        )
+            fieldsOfWork=[],
+            narrowerThan=[],
+            broaderThan=[],
+            people=[],
+            referencedTogether=[],
+        ),
     )
 
 
@@ -62,18 +67,20 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
 
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
         id="id",
-        identifiers=[CatalogueConceptIdentifier(value="456", identifierType="lc-names")],
+        identifiers=[
+            CatalogueConceptIdentifier(value="456", identifierType="lc-names")
+        ],
         label="label",
         alternativeLabels=[],
         description="Mesh description",
         type="type",
         sameAs=[],
         relatedConcepts=RelatedConcepts(
-            relatedTo = [],
-            fieldsOfWork = [],
-            narrowerThan = [],
-            broaderThan = [],
-            people = [],
-            referencedTogether = []
-        )
+            relatedTo=[],
+            fieldsOfWork=[],
+            narrowerThan=[],
+            broaderThan=[],
+            people=[],
+            referencedTogether=[],
+        ),
     )

@@ -7,6 +7,8 @@ import typing
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -14,7 +16,6 @@ from models.catalogue_concept import (
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
 )
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -34,15 +35,15 @@ class IngestorLoaderConfig(BaseModel):
 # Maximum number of related nodes to return for each relationship type
 RELATED_TO_LIMIT = 10
 
-# There are a few Wikidata supernodes which cause performance issues in queries. 
-# We need to filter them out when running queries to get related nodes. 
+# There are a few Wikidata supernodes which cause performance issues in queries.
+# We need to filter them out when running queries to get related nodes.
 # Q5 -> 'human', Q151885 -> 'concept'
-IGNORED_WIKIDATA_IDS = ['Q5', 'Q151885']
+IGNORED_WIKIDATA_IDS = ["Q5", "Q151885"]
 
 
 def get_related_query(
     edge_type: str,
-    direction: str = 'right',         
+    direction: str = "right",
     source_concept_label_types: list[str] | None = None,
 ) -> str:
     label_filter = ""
@@ -50,9 +51,9 @@ def get_related_query(
         label_filter = "WHERE " + " OR ".join(
             [f"linked_source_concept:{c}" for c in source_concept_label_types]
         )
-        
-    left_arrow = "<" if direction == 'left' else ''
-    right_arrow = ">" if direction == 'right' else ''
+
+    left_arrow = "<" if direction == "left" else ""
+    right_arrow = ">" if direction == "right" else ""
 
     return f"""
         MATCH (concept:Concept)
@@ -134,7 +135,9 @@ def related_query_result_to_dict(related_to: list[dict]) -> dict[str, list[dict]
     return {item["id"]: item["related"] for item in related_to}
 
 
-def extract_data(start_offset: int, end_index: int, is_local: bool) -> ConceptsQueryResult:
+def extract_data(
+    start_offset: int, end_index: int, is_local: bool
+) -> ConceptsQueryResult:
     print("Extracting data from Neptune ...")
     client = get_neptune_client(is_local)
 
@@ -144,16 +147,16 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> ConceptsQ
     field_of_work_query = get_related_query("HAS_FIELD_OF_WORK")
     related_to_query = get_related_query("RELATED_TO")
     narrower_than_query = get_related_query("NARROWER_THAN")
-    broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", 'left')
-    people_query = get_related_query("HAS_FIELD_OF_WORK",'left')
-    
+    broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", "left")
+    people_query = get_related_query("HAS_FIELD_OF_WORK", "left")
+
     params = {
         "start_offset": start_offset,
         "limit": limit,
         "ignored_wikidata_ids": IGNORED_WIKIDATA_IDS,
-        "related_to_limit": RELATED_TO_LIMIT
+        "related_to_limit": RELATED_TO_LIMIT,
     }
-    
+
     print("Running concept query...")
     concept_result = client.run_open_cypher_query(CONCEPT_QUERY, params)
     print(f"Retrieved {len(concept_result)} records")
@@ -179,7 +182,9 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> ConceptsQ
     print(f"Retrieved {len(people_result)} records")
 
     print("Running referenced together query...")
-    referenced_together_result = client.run_open_cypher_query(REFERENCED_TOGETHER_QUERY, params)
+    referenced_together_result = client.run_open_cypher_query(
+        REFERENCED_TOGETHER_QUERY, params
+    )
     print(f"Retrieved {len(referenced_together_result)} records")
 
     return ConceptsQueryResult(
@@ -189,7 +194,7 @@ def extract_data(start_offset: int, end_index: int, is_local: bool) -> ConceptsQ
         narrower_than=related_query_result_to_dict(narrower_than_result),
         broader_than=related_query_result_to_dict(broader_than_result),
         people=related_query_result_to_dict(people_result),
-        referenced_together=related_query_result_to_dict(referenced_together_result)
+        referenced_together=related_query_result_to_dict(referenced_together_result),
     )
 
 
@@ -210,7 +215,7 @@ def transform_data(neptune_data: ConceptsQueryResult) -> list[CatalogueConcept]:
             referenced_together=neptune_data.referenced_together.get(concept_id, []),
         )
         transformed.append(CatalogueConcept.from_neptune_result(result))
-    
+
     return transformed
 
 

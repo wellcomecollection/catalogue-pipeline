@@ -1,9 +1,8 @@
 from collections.abc import Generator
 
-from utils.types import WorkConceptKey
-
 from sources.base_source import BaseSource
 from sources.gzip_source import GZipSource
+from utils.types import WorkConceptKey
 
 
 def extract_concepts_from_work(

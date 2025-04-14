@@ -2,6 +2,10 @@ from collections.abc import Generator
 from typing import Any
 
 import pytest
+from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
+from test_utils import add_mock_transformer_outputs, load_fixture
+from typing_extensions import get_args
+
 from config import (
     CATALOGUE_SNAPSHOT_URL,
     LOC_NAMES_URL,
@@ -10,11 +14,8 @@ from config import (
     WIKIDATA_SPARQL_URL,
 )
 from extractor import LambdaEvent, lambda_handler
-from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
-from test_utils import add_mock_transformer_outputs, load_fixture
 from transformers.base_transformer import EntityType, StreamDestination
 from transformers.create_transformer import TransformerType
-from typing_extensions import get_args
 
 transformer_types = get_args(TransformerType)
 entity_types = get_args(EntityType)
@@ -79,7 +80,7 @@ SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[dict]] = {
     "wikidata_linked_mesh_concepts": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
     "wikidata_linked_mesh_locations": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
     "catalogue_concepts": [CATALOGUE_SOURCE_MOCK_RESPONSE],
-    "catalogue_works": [CATALOGUE_SOURCE_MOCK_RESPONSE]
+    "catalogue_works": [CATALOGUE_SOURCE_MOCK_RESPONSE],
 }
 
 
@@ -98,7 +99,7 @@ def mock_requests_lookup_table(
                 "method": "POST",
                 "url": f"https://{MOCK_INSTANCE_ENDPOINT}:8182/openCypher",
                 "content_bytes": None,
-                "json_data": {"results": {}}
+                "json_data": {"results": {}},
             }
         )
 

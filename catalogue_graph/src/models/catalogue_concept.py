@@ -38,10 +38,10 @@ class CatalogueConceptRelatedTo(BaseModel):
 def standardise_label(label: str | None) -> str | None:
     if label is None or len(label) < 1:
         return label
-    
+
     capitalised = label[:1].upper() + label[1:]
-    return capitalised.replace('--', ' - ')
-    
+    return capitalised.replace("--", " - ")
+
 
 def get_priority_source_concept_value(
     concept_node: dict | None, source_concept_nodes: list[dict], key: str
@@ -62,18 +62,22 @@ def get_priority_source_concept_value(
             return value
 
 
-def transform_related_concepts(related_items: list[dict], used_labels: set[str]) -> list[CatalogueConceptRelatedTo]:
+def transform_related_concepts(
+    related_items: list[dict], used_labels: set[str]
+) -> list[CatalogueConceptRelatedTo]:
     processed_items = []
 
     for related_item in related_items:
         concept_id = related_item["concept_node"]["~properties"]["id"]
         label = get_priority_source_concept_value(
             related_item["concept_node"], related_item["source_concept_nodes"], "label"
-        )  
+        )
 
         relationship_type = ""
         if "edge" in related_item:
-            relationship_type = related_item["edge"]["~properties"].get("relationship_type", "")
+            relationship_type = related_item["edge"]["~properties"].get(
+                "relationship_type", ""
+            )
 
         if label.lower() not in used_labels:
             used_labels.add(label.lower())
@@ -109,7 +113,7 @@ class CatalogueConcept(BaseModel):
     def from_neptune_result(cls, data: ConceptsQuerySingleResult) -> "CatalogueConcept":
         identifiers = []
         alternative_labels = set()
-        
+
         concept_data: dict = data.concept
 
         # For now, only extract labels from source concepts which are explicitly linked
@@ -141,7 +145,7 @@ class CatalogueConcept(BaseModel):
                     standardised_label = standardise_label(alternative_label)
                     if standardised_label is not None:
                         alternative_labels.add(standardised_label)
-        
+
         # Store seen labels as we process related concepts so that the same concept is not included in multiple
         # categories. Processing order matters!
         used_labels = {label.lower()}
@@ -154,11 +158,17 @@ class CatalogueConcept(BaseModel):
             identifiers=identifiers,
             sameAs=concept_data["same_as_concept_ids"],
             relatedConcepts=RelatedConcepts(
-                fieldsOfWork=transform_related_concepts(data.fields_of_work, used_labels),
+                fieldsOfWork=transform_related_concepts(
+                    data.fields_of_work, used_labels
+                ),
                 people=transform_related_concepts(data.people, used_labels),
-                narrowerThan=transform_related_concepts(data.narrower_than, used_labels),
+                narrowerThan=transform_related_concepts(
+                    data.narrower_than, used_labels
+                ),
                 broaderThan=transform_related_concepts(data.broader_than, used_labels),
                 relatedTo=transform_related_concepts(data.related_to, used_labels),
-                referencedTogether=transform_related_concepts(data.referenced_together, used_labels),
-            )
+                referencedTogether=transform_related_concepts(
+                    data.referenced_together, used_labels
+                ),
+            ),
         )
