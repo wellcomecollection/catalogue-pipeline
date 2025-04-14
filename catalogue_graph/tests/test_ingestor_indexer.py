@@ -2,27 +2,26 @@ from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-from test_utils import load_fixture
-
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
+from test_mocks import MockElasticsearchClient, MockSmartOpen
+from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
         object_to_index=IngestorIndexerObject(
-            s3_uri="s3://test-catalogue-graph/00000000-00000004.parquet"
+            s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
         )
     )
     MockSmartOpen.mock_s3_file(
-        "s3://test-catalogue-graph/00000000-00000004.parquet",
-        load_fixture("ingestor/00000000-00000004.parquet"),
+        "s3://test-catalogue-graph/00000000-00000010.parquet",
+        load_fixture("ingestor/00000000-00000010.parquet"),
     )
     MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 

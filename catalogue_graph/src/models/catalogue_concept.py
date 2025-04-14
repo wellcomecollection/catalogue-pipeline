@@ -132,7 +132,7 @@ class CatalogueConcept(BaseModel):
                 )
             )
 
-        # Extract descriptions from _all_ source concepts (utilising both HAS_SOURCE_CONCEPT and SAME_AS edges)
+        # Extract alternative labels from _all_ source concepts (utilising both HAS_SOURCE_CONCEPT and SAME_AS edges)
         for source_concept in concept_data["source_concepts"]:
             for alternative_label in (
                 source_concept["~properties"].get("alternative_labels", "").split("||")
@@ -149,7 +149,7 @@ class CatalogueConcept(BaseModel):
             id=concept_data["concept"]["~properties"]["id"],
             type=concept_data["concept"]["~properties"]["type"],
             label=label,
-            alternativeLabels=list(alternative_labels),
+            alternativeLabels=sorted(list(alternative_labels)),
             description=description,
             identifiers=identifiers,
             sameAs=concept_data["same_as_concept_ids"],
