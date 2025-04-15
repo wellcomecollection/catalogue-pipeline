@@ -23,8 +23,8 @@ def build_test_matrix() -> list[tuple]:
                 end_index=1,
             ),
             IngestorLoaderConfig(
-                loader_s3_bucket="test-bucket",
-                loader_s3_prefix="test-prefix",
+                ingestor_s3_bucket="test-bucket",
+                ingestor_s3_prefix="test-prefix",
             ),
             {
                 "results": [
@@ -92,8 +92,8 @@ def build_test_matrix() -> list[tuple]:
                 end_index=1,
             ),
             IngestorLoaderConfig(
-                loader_s3_bucket="test-bucket",
-                loader_s3_prefix="test-prefix",
+                ingestor_s3_bucket="test-bucket",
+                ingestor_s3_prefix="test-prefix",
             ),
             {
                 "results": [
@@ -159,8 +159,8 @@ def build_test_matrix() -> list[tuple]:
                 end_index=1,
             ),
             IngestorLoaderConfig(
-                loader_s3_bucket="test-bucket",
-                loader_s3_prefix="test-prefix",
+                ingestor_s3_bucket="test-bucket",
+                ingestor_s3_prefix="test-prefix",
             ),
             {
                 "results": [
