@@ -327,6 +327,7 @@ trait WorkGenerators
 
   private def initData[State <: DataState]: WorkData[State] =
     WorkData(
-      title = Some(s"title-${randomAlphanumeric(length = 10)}")
+      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+//      collectionPath = Some(CollectionPath(path = s"${randomAlphanumeric(length = 2)}/${randomAlphanumeric(length = 3)}"))
     )
 }

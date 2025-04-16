@@ -22,7 +22,7 @@ trait MergerFixtures extends PipelineStorageStreamFixtures {
 
   type WorkOrImage = Either[Either[Work[Merged], Work[Denormalised]], Image[Initial]]
 
-  val workRouter = new WorkRouter(
+  val workRouter = new MemoryWorkRouter(
     new MemoryMessageSender(): MemoryMessageSender,
     new MemoryMessageSender(): MemoryMessageSender,
     new MemoryMessageSender(): MemoryMessageSender
@@ -31,7 +31,7 @@ trait MergerFixtures extends PipelineStorageStreamFixtures {
   def withMergerService[R](
     retriever: MemoryRetriever[Work[Identified]],
     queue: Queue,
-    workRouter: WorkRouter[String],
+    workRouter: MemoryWorkRouter,
     imageSender: MemoryMessageSender = new MemoryMessageSender(),
     metrics: Metrics[Future] = new MemoryMetrics,
     index: mutable.Map[String, WorkOrImage] = mutable.Map.empty
@@ -56,9 +56,47 @@ trait MergerFixtures extends PipelineStorageStreamFixtures {
         }
     }
 
-  def getWorksSent(workSender: MemoryMessageSender): Seq[String] =
+  class MemoryWorkRouter (
+    val workSender: MemoryMessageSender,
+    val pathSender: MemoryMessageSender,
+    val pathConcatenatorSender: MemoryMessageSender
+    ) extends WorkRouter[String](
+      workSender = workSender,
+      pathSender = pathSender,
+      pathConcatenatorSender = pathConcatenatorSender
+    )
+
+  def getWorksSent(workSender: MemoryMessageSender): Seq[String] = {
     workSender.messages.map { _.body }
+  }
+
+  def getPathsSent(pathSender: MemoryMessageSender): Seq[String] =
+    pathSender.messages.map { _.body }
+
+  def getIncompletePathSent(incompletePathSender: MemoryMessageSender): Seq[String] = {
+    incompletePathSender.messages.map { _.body }
+  }
 
   def getImagesSent(imageSender: MemoryMessageSender): Seq[String] =
     imageSender.messages.map { _.body }
 }
+
+
+
+  //  def getWorksSent(workSender: MemoryMessageSender): Seq[String] =
+//    workSender.messages.map { _.body }
+
+
+
+//def getWorksSent(
+//                  workRouter: MemoryWorkRouter,
+//                ): Seq[(String, String)] = {
+//  workRouter(_: Either[Work[Merged], Work[Denormalised]]) =
+//  {
+//    case Left(work: Work[Merged]) => work.sourceIdentifier.identifierType match {
+//      case SierraSystemNumber => workRouter.pathConcatenatorSender.messages.map { msg => ("pathConcatenatorSender", msg.body) }
+//      case _ => workRouter.pathSender.messages.map { msg => ("pathSender", msg.body) }
+//    }
+//    case Right(work: Work[Denormalised]) => workRouter.workSender.messages.map { msg => ("workSender", msg.body) }
+//  }
+//}

@@ -51,7 +51,7 @@ trait IntegrationTestHelpers
     def getMerged(
       originalWork: Work[WorkState.Identified]
     ): Work[WorkState.Merged] =
-      index(originalWork.state.canonicalId.underlying).left.value
+      index(originalWork.state.canonicalId.underlying).left.value.left.value
 
     def imageData: Seq[ImageData[IdState.Identified]] =
       index.values.collect {
@@ -102,11 +102,11 @@ trait IntegrationTestHelpers
               }
             }
 
-            val workRouter = new WorkRouter(
+            val workRouter = new MemoryWorkRouter(
               new MemoryMessageSender(): MemoryMessageSender,
               new MemoryMessageSender(): MemoryMessageSender,
-              new MemoryMessageSender(): MemoryMessageSender
-            )
+              new MemoryMessageSender(): MemoryMessageSender)
+
             val imageSender = new MemoryMessageSender()
 
             val mergerIndex = mutable.Map[String, WorkOrImage]()
