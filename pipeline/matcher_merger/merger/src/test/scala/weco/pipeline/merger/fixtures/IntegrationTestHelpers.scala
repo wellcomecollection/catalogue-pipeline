@@ -13,7 +13,6 @@ import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.WorkStub
-import weco.pipeline.merger.services.WorkRouter
 import weco.pipeline_storage.RetrieverMultiResult
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -37,7 +36,7 @@ trait IntegrationTestHelpers
     MemoryRetriever[Work[WorkState.Identified]],
     QueuePair,
     QueuePair,
-    WorkRouter[String],
+    MemoryWorkRouter,
     MemoryMessageSender,
     MergerIndex
   )
@@ -52,6 +51,11 @@ trait IntegrationTestHelpers
       originalWork: Work[WorkState.Identified]
     ): Work[WorkState.Merged] =
       index(originalWork.state.canonicalId.underlying).left.value.left.value
+
+//    def getDenormalised(
+//      originalWork: Work[WorkState.Merged]
+//    ): Work[WorkState.Denormalised] =
+//      index(originalWork.state.canonicalId.underlying).left.value.right.value
 
     def imageData: Seq[ImageData[IdState.Identified]] =
       index.values.collect {
@@ -103,9 +107,9 @@ trait IntegrationTestHelpers
             }
 
             val workRouter = new MemoryWorkRouter(
-              new MemoryMessageSender(): MemoryMessageSender,
-              new MemoryMessageSender(): MemoryMessageSender,
-              new MemoryMessageSender(): MemoryMessageSender)
+              workSender = new MemoryMessageSender(): MemoryMessageSender,
+              pathSender = new MemoryMessageSender(): MemoryMessageSender,
+              pathConcatenatorSender = new MemoryMessageSender(): MemoryMessageSender)
 
             val imageSender = new MemoryMessageSender()
 
@@ -178,9 +182,13 @@ trait IntegrationTestHelpers
 
         // Check that the merger has notified the next application about everything
         // in the index.  This check could be more robust, but it'll do for now.
-//        val idsSentByTheMerger =
-//          (workRouter.messages ++ imageSender.messages).map(_.body).toSet
-//        mergerIndex.keySet -- idsSentByTheMerger shouldBe empty
+        val idsSentByTheMerger = (
+            workRouter.workSender.messages ++
+            workRouter.pathSender.messages ++
+            workRouter.pathConcatenatorSender.messages ++
+            imageSender.messages
+            ).map(_.body).toSet
+        mergerIndex.keySet -- idsSentByTheMerger shouldBe empty
     }
   }
 

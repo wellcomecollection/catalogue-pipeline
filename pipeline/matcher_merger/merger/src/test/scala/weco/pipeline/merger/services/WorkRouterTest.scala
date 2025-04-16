@@ -2,7 +2,7 @@ package weco.pipeline.merger.services
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.catalogue.internal_model.identifiers.CanonicalId
+import weco.catalogue.internal_model.identifiers.{CanonicalId, IdentifierType, SourceIdentifier}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.merger.fixtures.MergerFixtures
 
@@ -12,18 +12,34 @@ class WorkRouterSpec
     with Matchers
     with WorkGenerators
     with MergerFixtures {
+
   it("uses pathConcatenatorSender for Merged works with a SierraSystemNumber") {
-    val work_sierra = mergedWork(canonicalId = CanonicalId("sierra_1"))
+    val work_sierra = mergedWork(
+      sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.SierraSystemNumber,
+        value = "sierra_id_1",
+        ontologyType = "Work"
+      ),
+      collectionPath = Some("send/to/pathConcatenator")
+    )
 
     workRouter(Left(work_sierra))
-    getIncompletePathSent(workRouter.pathConcatenatorSender) shouldBe Seq(work_sierra.data.collectionPath.map(_.path).toString)
+    getIncompletePathSent(workRouter.pathConcatenatorSender) shouldBe Seq("send/to/pathConcatenator")
   }
 
   it("uses pathSender for other Merged works") {
-    val work_calm = mergedWork(canonicalId = CanonicalId("calm_123"))
+    val work_calm = mergedWork(
+      sourceIdentifier = SourceIdentifier(
+        identifierType = IdentifierType.CalmRecordIdentifier,
+        value = "calm_id_1",
+        ontologyType = "Work"
+      ),
+      collectionPath = Some("send/to/pathSender")
+//      collectionPath = Some(CollectionPath(path = "send/to/pathSender"))
+    )
 
     workRouter(Left(work_calm))
-    getPathsSent(workRouter.pathSender) shouldBe Seq(work_calm.data.collectionPath.map(_.path).toString)
+    getPathsSent(workRouter.pathSender) shouldBe Seq("send/to/pathSender")
   }
 
   it("uses workSender for Denormalised works") {

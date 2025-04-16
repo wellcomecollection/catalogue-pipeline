@@ -18,7 +18,7 @@ class WorkRouter[WorkDestination] (
           case SierraSystemNumber => pathConcatenatorSender
           case _                  => pathSender
         }
-        sender.send(work.data.collectionPath.map(_.path).toString).map(_ => Nil)
+        sender.send(work.data.collectionPath.head.path)
 
       case Right(work: Work[Denormalised]) =>
         workSender.send(work.id)
