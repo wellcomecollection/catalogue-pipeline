@@ -7,6 +7,8 @@ import typing
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -14,7 +16,6 @@ from models.catalogue_concept import (
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
 )
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 

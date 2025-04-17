@@ -3,7 +3,7 @@ from typing import Any, Optional
 
 from pydantic import BaseModel
 
- 
+
 class ConceptsQueryResult(BaseModel):
     concepts: list[dict]
     related_to: dict[str, list]
@@ -40,7 +40,7 @@ def standardise_label(label: str | None) -> str | None:
         return label
 
     capitalised = label[:1].upper() + label[1:]
-    
+
     # Normalise LoC labels. (e.g. 'Sanitation--history' -> 'Sanitation - history').
     return capitalised.replace("--", " - ")
 
@@ -51,8 +51,8 @@ def get_priority_source_concept_value(
     """
     Given a concept, its source concepts, and a key (e.g. 'label' or 'description'), extract the corresponding
     values (where available) and return the highest-priority one.
-    
-    (For example, if a `description` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.) 
+
+    (For example, if a `description` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.)
     """
     values = {}
 
@@ -89,7 +89,7 @@ def transform_related_concepts(
             relationship_type = related_item["edge"]["~properties"].get(
                 "relationship_type", ""
             )
-        
+
         if label.lower() not in used_labels:
             used_labels.add(label.lower())
             processed_items.append(
@@ -157,8 +157,8 @@ class CatalogueConcept(BaseModel):
                     if standardised_label is not None:
                         alternative_labels.add(standardised_label)
 
-        # The `used_labels` set is used to ensure that a given related concept is only listed once. For example, 
-        # if a given concept is listed in both `broader_than` and `referenced_together`, we only want to keep 
+        # The `used_labels` set is used to ensure that a given related concept is only listed once. For example,
+        # if a given concept is listed in both `broader_than` and `referenced_together`, we only want to keep
         # one of those references to prevent duplication in the frontend.
         used_labels = {label.lower()}
         return CatalogueConcept(
