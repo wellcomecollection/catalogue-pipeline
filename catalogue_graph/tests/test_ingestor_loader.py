@@ -3,8 +3,6 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
-from test_mocks import MockRequest, MockSmartOpen
-
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     CONCEPT_QUERY,
@@ -20,6 +18,8 @@ from models.catalogue_concept import (
     CatalogueConceptIdentifier,
     RelatedConcepts,
 )
+from test_mocks import MockRequest, MockSmartOpen
+from test_utils import load_fixture
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -49,75 +49,30 @@ class MockNeptuneResponseItem(Enum):
     CONCEPT_RELATED_TO = auto()
 
 
-def get_mock_neptune_concept_query_response(include_alternative_labels: bool) -> dict:
-    data: dict = {
-        "results": [
-            {
-                "concept": {
-                    "~properties": {
-                        "id": "id",
-                        "label": "label",
-                        "type": "type",
-                    }
-                },
-                "relationships": [],
-                "source_concepts": [
-                    {
-                        "~properties": {
-                            "id": "456",
-                            "source": "lc-names",
-                            "description": "description",
-                        }
-                    },
-                    {
-                        "~properties": {
-                            "id": "789",
-                            "source": "nlm-mesh",
-                            "description": "mesh description",
-                        }
-                    },
-                ],
-                "linked_source_concepts": [
-                    {
-                        "~properties": {
-                            "id": "456",
-                            "source": "lc-names",
-                            "description": "description",
-                        }
-                    }
-                ],
-                "same_as_concept_ids": [],
-            }
-        ]
-    }
-
+def get_mock_neptune_concept(include_alternative_labels: bool) -> dict:
     if include_alternative_labels:
-        data["results"][0]["source_concepts"][0]["~properties"][
-            "alternative_labels"
-        ] = "alternative label||another alternative label"
-        data["results"][0]["source_concepts"][1]["~properties"][
-            "alternative_labels"
-        ] = "MeSH alternative label"
-
-    return data
+        mock_concept = load_fixture("neptune/concept_query_single_alternative_labels.json")
+    else:
+        mock_concept = load_fixture("neptune/concept_query_single.json")
+    
+    return json.loads(mock_concept.decode())
 
 
-EXPECTED_NEPTUNE_PARAMS = {
-    "start_offset": 0,
-    "limit": 1,
-    "ignored_wikidata_ids": ["Q5", "Q151885"],
-    "related_to_limit": 10,
-}
-
-
-def add_neptune_mock_response(request_data: dict, response_data: dict) -> None:
-    request_data["query"] = " ".join(request_data["query"].split())
+def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> None:
+    query = " ".join(expected_query.split()) # normalise query
+    
+    expected_params = {
+        "start_offset": 0,
+        "limit": 1,
+        "ignored_wikidata_ids": ["Q5", "Q151885"],
+        "related_to_limit": 10,
+    }
 
     MockRequest.mock_response(
         method="POST",
         url="https://test-host.com:8182/openCypher",
-        json_data=response_data,
-        body=json.dumps(request_data),
+        json_data={"results": mock_results},
+        body=json.dumps({"query": query, "parameters": expected_params}),
     )
 
 
@@ -127,58 +82,38 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        request_data={"query": CONCEPT_QUERY, "parameters": EXPECTED_NEPTUNE_PARAMS},
-        response_data=get_mock_neptune_concept_query_response(
-            include_alternative_labels
-        ),
+        expected_query=CONCEPT_QUERY,
+        mock_results=[get_mock_neptune_concept(include_alternative_labels)]
     )
 
     add_neptune_mock_response(
-        request_data={
-            "query": get_related_query("RELATED_TO"),
-            "parameters": EXPECTED_NEPTUNE_PARAMS,
-        },
-        response_data={"results": []},
+        expected_query=get_related_query("RELATED_TO"),
+        mock_results=[],
     )
 
     add_neptune_mock_response(
-        request_data={
-            "query": get_related_query("HAS_FIELD_OF_WORK"),
-            "parameters": EXPECTED_NEPTUNE_PARAMS,
-        },
-        response_data={"results": []},
+        expected_query=get_related_query("HAS_FIELD_OF_WORK"),
+        mock_results=[],
     )
 
     add_neptune_mock_response(
-        request_data={
-            "query": get_related_query("NARROWER_THAN|HAS_PARENT", "left"),
-            "parameters": EXPECTED_NEPTUNE_PARAMS,
-        },
-        response_data={"results": []},
+        expected_query=get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
+        mock_results=[],
     )
 
     add_neptune_mock_response(
-        request_data={
-            "query": get_related_query("HAS_FIELD_OF_WORK", "left"),
-            "parameters": EXPECTED_NEPTUNE_PARAMS,
-        },
-        response_data={"results": []},
+        expected_query=get_related_query("HAS_FIELD_OF_WORK", "to"),
+        mock_results=[],
     )
 
     add_neptune_mock_response(
-        request_data={
-            "query": get_related_query("NARROWER_THAN"),
-            "parameters": EXPECTED_NEPTUNE_PARAMS,
-        },
-        response_data={"results": []},
+        expected_query=get_related_query("NARROWER_THAN"),
+        mock_results=[],
     )
 
     add_neptune_mock_response(
-        request_data={
-            "query": REFERENCED_TOGETHER_QUERY,
-            "parameters": EXPECTED_NEPTUNE_PARAMS,
-        },
-        response_data={"results": []},
+        expected_query=REFERENCED_TOGETHER_QUERY,
+        mock_results=[],
     )
 
 

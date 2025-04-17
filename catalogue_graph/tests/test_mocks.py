@@ -6,7 +6,6 @@ from collections.abc import Generator
 from typing import Any, Optional, TypedDict
 
 from botocore.credentials import Credentials
-
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -260,6 +259,8 @@ class MockRequest:
                 response["method"] == method
                 and response["url"] == url
                 and response["params"] == params
+                # If the expected response also specifies the body of the request, make sure it matches
+                # the actual response. If not, ignore it.
                 and (response.get("data") is None or response["data"] == data)
             ):
                 return response["response"]
