@@ -1,4 +1,8 @@
-from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifier
+from models.catalogue_concept import (
+    CatalogueConcept,
+    CatalogueConceptIdentifier,
+    CatalogueConceptRelatedTo,
+)
 from models.indexable_concept import (
     ConceptDisplay,
     ConceptDisplayIdentifier,
@@ -20,10 +24,12 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         alternativeLabels=["alternativeLabels"],
         description="description",
         type="type",
-        sameAs=[],
+        sameAs=["1234"],
         relatedConcepts=RelatedConcepts(
             relatedTo=[],
-            fieldsOfWork=[],
+            fieldsOfWork=[
+                CatalogueConceptRelatedTo(label="some label", id="5678", relationshipType="type")
+            ],
             narrowerThan=[],
             broaderThan=[],
             people=[],
@@ -57,10 +63,12 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             alternativeLabels=["alternativeLabels"],
             description="description",
             type="type",
-            sameAs=[],
+            sameAs=["1234"],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
-                fieldsOfWork=[],
+                fieldsOfWork=[
+                    CatalogueConceptRelatedTo(label="some label", id="5678", relationshipType="type")
+                ],
                 narrowerThan=[],
                 broaderThan=[],
                 people=[],
