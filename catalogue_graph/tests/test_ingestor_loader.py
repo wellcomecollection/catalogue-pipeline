@@ -16,10 +16,11 @@ from ingestor_loader import (
 from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
+    CatalogueConceptRelatedTo,
     RelatedConcepts,
 )
 from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_fixture
+from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -47,16 +48,19 @@ MOCK_INGESTOR_INDEXER_EVENT = IngestorIndexerLambdaEvent(
 class MockNeptuneResponseItem(Enum):
     SOURCE_ALTERNATIVE_LABELS = auto()
     CONCEPT_RELATED_TO = auto()
+    CONCEPT_BROADER_THAN = auto()
+    CONCEPT_PEOPLE = auto()
 
 
-def get_mock_neptune_concept(include_alternative_labels: bool) -> dict:
-    if include_alternative_labels:
-        mock_concept = load_fixture("neptune/concept_query_single_alternative_labels.json")
+def get_mock_neptune_concept(include: list[MockNeptuneResponseItem]) -> dict:
+    fixture: dict
+    if MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include:
+        fixture = load_json_fixture("neptune/concept_query_single_alternative_labels.json")
     else:
-        mock_concept = load_fixture("neptune/concept_query_single.json")
-    
-    return json.loads(mock_concept.decode())
+        fixture = load_json_fixture("neptune/concept_query_single.json")
 
+    return fixture
+    
 
 def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> None:
     query = " ".join(expected_query.split()) # normalise query
@@ -77,18 +81,25 @@ def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> 
 
 
 def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
-    include_alternative_labels = (
-        MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include
-    )
+    broader_than_results = []
+    people_results = []
+    related_to_results = []
+
+    if MockNeptuneResponseItem.CONCEPT_BROADER_THAN in include:
+        broader_than_results = [load_json_fixture("neptune/broader_than_query_single.json")]
+    if MockNeptuneResponseItem.CONCEPT_PEOPLE in include:
+        people_results = [load_json_fixture("neptune/people_query_single.json")]
+    if MockNeptuneResponseItem.CONCEPT_RELATED_TO in include:
+        related_to_results = [load_json_fixture("neptune/related_to_query_single.json")]
 
     add_neptune_mock_response(
         expected_query=CONCEPT_QUERY,
-        mock_results=[get_mock_neptune_concept(include_alternative_labels)]
+        mock_results=[get_mock_neptune_concept(include)]
     )
 
     add_neptune_mock_response(
         expected_query=get_related_query("RELATED_TO"),
-        mock_results=[],
+        mock_results=related_to_results,
     )
 
     add_neptune_mock_response(
@@ -98,12 +109,12 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
 
     add_neptune_mock_response(
         expected_query=get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
-        mock_results=[],
+        mock_results=broader_than_results,
     )
 
     add_neptune_mock_response(
         expected_query=get_related_query("HAS_FIELD_OF_WORK", "to"),
-        mock_results=[],
+        mock_results=people_results,
     )
 
     add_neptune_mock_response(
@@ -117,14 +128,35 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
 
-def get_catalogue_concept_mock(include_alternative_labels: bool) -> CatalogueConcept:
+def get_catalogue_concept_mock(include: list[MockNeptuneResponseItem]) -> CatalogueConcept:
     alternative_labels = []
-    if include_alternative_labels:
+    if MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include:
         alternative_labels = [
             "Alternative label",
             "Another alternative label",
             "MeSH alternative label",
         ]
+        
+    broader_than = []
+    if MockNeptuneResponseItem.CONCEPT_BROADER_THAN in include:
+        broader_than = [
+            CatalogueConceptRelatedTo(label='Electromagnetic Radiation', id='hstuwwsu', relationshipType=''), 
+            CatalogueConceptRelatedTo(label='Wave mechanics', id='hv6pemej', relationshipType=''),
+            CatalogueConceptRelatedTo(label='Electric waves', id='ugcgqepy', relationshipType='')
+        ]
+
+    people = []
+    if MockNeptuneResponseItem.CONCEPT_PEOPLE in include:
+        people = [
+            CatalogueConceptRelatedTo(label='Tegart, W. J. McG.', id='vc6xrky5', relationshipType=''),
+            CatalogueConceptRelatedTo(label='Bube, Richard H., 1927-', id='garjbvhe', relationshipType='')
+        ]
+
+    related_to = []
+    if MockNeptuneResponseItem.CONCEPT_RELATED_TO in include:
+        related_to = [
+            CatalogueConceptRelatedTo(label='Hilton, Violet, 1908-1969', id='tzrtx26u', relationshipType='has_sibling')
+        ]        
 
     return CatalogueConcept(
         id="id",
@@ -140,11 +172,11 @@ def get_catalogue_concept_mock(include_alternative_labels: bool) -> CatalogueCon
         ],
         sameAs=[],
         relatedConcepts=RelatedConcepts(
-            relatedTo=[],
+            relatedTo=related_to,
             fieldsOfWork=[],
             narrowerThan=[],
-            broaderThan=[],
-            people=[],
+            broaderThan=broader_than,
+            people=people,
             referencedTogether=[],
         ),
     )
@@ -154,27 +186,37 @@ def build_test_matrix() -> list[tuple]:
     return [
         (
             "happy path, with alternative labels",
-            [MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS],
-            get_catalogue_concept_mock(True),
+            [MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS]
         ),
         (
             "happy path, with NO alternative labels",
-            [],
-            get_catalogue_concept_mock(False),
+            []
         ),
+        (
+            "happy path, with broader concepts",
+            [MockNeptuneResponseItem.CONCEPT_BROADER_THAN]
+        ),
+        (
+            "happy path, with people concepts",
+            [MockNeptuneResponseItem.CONCEPT_PEOPLE]
+        ),
+        (
+            "happy path, with related concepts",
+            [MockNeptuneResponseItem.CONCEPT_RELATED_TO]
+        ), 
     ]
 
 
 @pytest.mark.parametrize(
-    "description,included_response_items,expected_concept",
+    "description,included_response_items",
     build_test_matrix(),
     ids=lambda argvalue: argvalue,
 )
 def test_ingestor_loader(
     description: str,
-    included_response_items: list[MockNeptuneResponseItem],
-    expected_concept: CatalogueConcept,
+    included_response_items: list[MockNeptuneResponseItem]
 ) -> None:
+    expected_concept = get_catalogue_concept_mock(included_response_items)
     mock_neptune_responses(included_response_items)
 
     result = handler(MOCK_INGESTOR_LOADER_EVENT, MOCK_INGESTOR_LOADER_CONFIG)

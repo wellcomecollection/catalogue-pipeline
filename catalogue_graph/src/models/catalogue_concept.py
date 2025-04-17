@@ -161,6 +161,7 @@ class CatalogueConcept(BaseModel):
         # if a given concept is listed in both `broader_than` and `referenced_together`, we only want to keep
         # one of those references to prevent duplication in the frontend.
         used_labels = {label.lower()}
+
         return CatalogueConcept(
             id=concept_data["concept"]["~properties"]["id"],
             type=concept_data["concept"]["~properties"]["type"],

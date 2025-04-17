@@ -1,0 +1,45 @@
+
+{
+  "id": "id",
+  "related": [
+    {
+      "concept_node": {
+        "~id": "tzrtx26u",
+        "~entityType": "node",
+        "~labels": [
+          "Concept"
+        ],
+        "~properties": {
+          "id": "tzrtx26u",
+          "label": "Hilton, Violet, 1908-1969.",
+          "source": "lc-names",
+          "type": "Person"
+        }
+      },
+      "edge": {
+        "~id": "RELATED_TO:Q26255666-->Q26257473",
+        "~entityType": "relationship",
+        "~start": "Q26255666",
+        "~end": "Q26257473",
+        "~type": "RELATED_TO",
+        "~properties": {
+          "relationship_type": "has_sibling"
+        }
+      },
+      "source_concept_nodes": [
+        {
+          "~id": "n2006095131",
+          "~entityType": "node",
+          "~labels": [
+            "SourceName"
+          ],
+          "~properties": {
+            "id": "n2006095131",
+            "label": "Hilton, Violet, 1908-1969",
+            "source": "lc-names"
+          }
+        }
+      ]
+    }
+  ]
+}

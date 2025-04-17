@@ -1,6 +1,3 @@
-from test_ingestor_loader import (
-    get_mock_neptune_concept_query_response,
-)
 
 from models.catalogue_concept import (
     CatalogueConcept,
@@ -8,14 +5,14 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
     RelatedConcepts,
 )
+from test_utils import load_json_fixture
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
-    mock_concept_response = get_mock_neptune_concept_query_response(True)
-    concept = mock_concept_response["results"][0]
+    mock_concept = load_json_fixture("neptune/concept_query_single_alternative_labels.json")
 
     neptune_result = ConceptsQuerySingleResult(
-        concept=concept,
+        concept=mock_concept,
         related_to=[],
         fields_of_work=[],
         narrower_than=[],
@@ -52,11 +49,10 @@ def test_catalogue_concept_from_neptune_result() -> None:
 
 
 def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
-    mock_concept_response = get_mock_neptune_concept_query_response(False)
-    concept = mock_concept_response["results"][0]
+    mock_concept = load_json_fixture("neptune/concept_query_single.json")
 
     neptune_result = ConceptsQuerySingleResult(
-        concept=concept,
+        concept=mock_concept,
         related_to=[],
         fields_of_work=[],
         narrower_than=[],

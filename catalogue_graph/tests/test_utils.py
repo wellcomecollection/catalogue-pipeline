@@ -1,9 +1,9 @@
+import json
 import os
 from itertools import product
-from typing import Literal
+from typing import Any, Literal
 
 from test_mocks import MockSmartOpen
-
 from utils.aws import VALID_SOURCE_FILES
 
 
@@ -11,6 +11,11 @@ def load_fixture(file_name: str) -> bytes:
     with open(f"{os.path.dirname(__file__)}/fixtures/{file_name}", "rb") as f:
         return f.read()
 
+
+def load_json_fixture(file_name: str) -> Any:
+    with open(f"{os.path.dirname(__file__)}/fixtures/{file_name}", "rb") as f:
+        fixture = json.loads(f.read().decode())
+        return fixture
 
 def add_mock_transformer_outputs(
     sources: list[
