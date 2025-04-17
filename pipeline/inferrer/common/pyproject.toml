@@ -2,7 +2,7 @@
 name = "inferrer-common"
 version = "0.1.0"
 description = "Common code for the catalogue pipeline image inferrers"
-requires-python = ">=3.10"
+requires-python = ">=3.10,<3.20"
 dependencies = [
     "fastapi==0.109.1",
     "gunicorn==22.0.0",
