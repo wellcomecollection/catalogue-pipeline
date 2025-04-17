@@ -28,7 +28,9 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         relatedConcepts=RelatedConcepts(
             relatedTo=[],
             fieldsOfWork=[
-                CatalogueConceptRelatedTo(label="some label", id="5678", relationshipType="type")
+                CatalogueConceptRelatedTo(
+                    label="some label", id="5678", relationshipType="type"
+                )
             ],
             narrowerThan=[],
             broaderThan=[],
@@ -67,7 +69,9 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[
-                    CatalogueConceptRelatedTo(label="some label", id="5678", relationshipType="type")
+                    CatalogueConceptRelatedTo(
+                        label="some label", id="5678", relationshipType="type"
+                    )
                 ],
                 narrowerThan=[],
                 broaderThan=[],
