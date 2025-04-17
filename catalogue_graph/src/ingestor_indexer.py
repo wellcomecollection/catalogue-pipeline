@@ -58,6 +58,7 @@ def load_data(
         if pipeline_date is None
         else f"concepts-indexed-{pipeline_date}"
     )
+
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
     es = utils.elasticsearch.get_client(pipeline_date, is_local)
 

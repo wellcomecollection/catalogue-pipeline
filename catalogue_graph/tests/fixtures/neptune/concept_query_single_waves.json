@@ -1,0 +1,63 @@
+{
+  "concept": {
+    "~id": "a2584ttj",
+    "~entityType": "node",
+    "~labels": [
+      "Concept"
+    ],
+    "~properties": {
+      "id": "a2584ttj",
+      "label": "Waves",
+      "source": "lc-subjects",
+      "type": "Concept"
+    }
+  },
+  "linked_source_concepts": [
+    {
+      "~id": "sh85145789",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "sh85145789",
+        "label": "Waves",
+        "source": "lc-subjects",
+        "alternative_labels": "Mechanical waves"
+      }
+    }
+  ],
+  "source_concepts": [
+    {
+      "~id": "sh85145789",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "sh85145789",
+        "label": "Waves",
+        "source": "lc-subjects",
+        "alternative_labels": "Mechanical waves"
+      }
+    },
+    {
+      "~id": "Q37172",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "Q37172",
+        "label": "wave",
+        "source": "wikidata",
+        "alternative_labels": "waves",
+        "description": "repeated oscillation about a stable equilibrium"
+      }
+    }
+  ],
+  "same_as_concept_ids": [
+    "gcmn66yk",
+    "a2584ttj"
+  ]
+}
