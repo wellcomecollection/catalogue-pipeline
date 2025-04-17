@@ -1,3 +1,4 @@
+from test_utils import load_json_fixture
 
 from models.catalogue_concept import (
     CatalogueConcept,
@@ -5,11 +6,12 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
     RelatedConcepts,
 )
-from test_utils import load_json_fixture
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_alternative_labels.json")
+    mock_concept = load_json_fixture(
+        "neptune/concept_query_single_alternative_labels.json"
+    )
 
     neptune_result = ConceptsQuerySingleResult(
         concept=mock_concept,
