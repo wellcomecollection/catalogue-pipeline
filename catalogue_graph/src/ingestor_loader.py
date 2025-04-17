@@ -52,7 +52,7 @@ def get_related_query(
         (e.g. `edge_type="NARROWER_THAN"` combined with `direction="from"` would yield broader concepts)
         to find related `SourceConcept` nodes.
         3. Get the Wellcome concept(s) associated with each related `SourceConcept`, deduplicate with a `WITH`
-        clause and return the most popular concepts (determined by the number of Works in which they appear).      
+        clause and return the most popular concepts (determined by the number of Works in which they appear).
     """
     label_filter = ""
     if source_concept_label_types is not None and len(source_concept_label_types) > 0:
