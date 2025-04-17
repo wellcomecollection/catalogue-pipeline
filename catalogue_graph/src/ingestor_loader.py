@@ -7,6 +7,8 @@ import typing
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -14,7 +16,6 @@ from models.catalogue_concept import (
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
 )
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -52,7 +53,7 @@ def get_related_query(
         (e.g. `edge_type="NARROWER_THAN"` combined with `direction="from"` would yield broader concepts)
         to find related `SourceConcept` nodes.
         3. Get the Wellcome concept(s) associated with each related `SourceConcept`, deduplicate with a `WITH`
-        clause and return the most popular concepts (determined by the number of Works in which they appear).      
+        clause and return the most popular concepts (determined by the number of Works in which they appear).
     """
     label_filter = ""
     if source_concept_label_types is not None and len(source_concept_label_types) > 0:
