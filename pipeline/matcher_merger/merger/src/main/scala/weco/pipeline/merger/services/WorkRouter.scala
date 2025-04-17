@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.messaging.MessageSender
 import scala.util.Try
 
-class WorkRouter[WorkDestination] (
+class WorkRouter[WorkDestination](
   workSender: MessageSender[WorkDestination],
   pathSender: MessageSender[WorkDestination],
   pathConcatenatorSender: MessageSender[WorkDestination]

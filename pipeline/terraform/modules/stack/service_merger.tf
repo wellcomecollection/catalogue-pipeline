@@ -42,10 +42,10 @@ module "merger" {
   queue_visibility_timeout_seconds = 20 * 60
 
   env_vars = {
-    merger_works_topic_arn              = module.merger_works_output_topic.arn
-    merger_paths_topic_arn              = module.merger_works_path_output_topic
-    merger_path_concatenator_topic_arn  = module.merger_works_incomplete_path_output_topic
-    merger_images_topic_arn             = module.merger_images_output_topic.arn
+    merger_works_topic_arn             = module.merger_works_output_topic.arn
+    merger_paths_topic_arn             = module.merger_works_path_output_topic
+    merger_path_concatenator_topic_arn = module.merger_works_incomplete_path_output_topic
+    merger_images_topic_arn            = module.merger_images_output_topic.arn
 
     es_identified_works_index = local.es_works_identified_index
     es_merged_works_index     = local.es_works_merged_index
