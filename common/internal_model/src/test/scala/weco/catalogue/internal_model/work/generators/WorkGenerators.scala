@@ -101,17 +101,26 @@ trait WorkGenerators
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
-    sourceModifiedTime: Instant = randomInstant
-  ): Work.Visible[Identified] =
+    sourceModifiedTime: Instant = randomInstant,
+    collectionPath: Option[String] = None
+  ): Work.Visible[Identified] = {
+    val data = collectionPath match {
+      case None => initData[DataState.Identified]
+      case Some(collectionPath )=> WorkData[DataState.Identified](
+        title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+        collectionPath = Some(CollectionPath(path = collectionPath))
+      )
+    }
     Work.Visible[Identified](
       state = Identified(
         sourceIdentifier = sourceIdentifier,
         canonicalId = canonicalId,
         sourceModifiedTime = sourceModifiedTime
       ),
-      data = initData,
+      data = data,
       version = createVersion
     )
+  }
 
   def sourceWorks(count: Int): List[Work.Visible[Source]] =
     (1 to count).map(_ => sourceWork()).toList
@@ -334,16 +343,7 @@ trait WorkGenerators
 
   private def initData[State <: DataState]: WorkData[State] = {
     WorkData(
-      title = Some(s"title-${randomAlphanumeric(length = 10)}"),
+      title = Some(s"title-${randomAlphanumeric(length = 10)}")
     )
-//    collectionPath match {
-//      case None => WorkData(
-//        title = Some(s"title-${randomAlphanumeric(length = 10)}"),
-//      )
-//      case Some(collectionPath) => WorkData(
-//        title = Some(s"title-${randomAlphanumeric(length = 10)}"),
-//        collectionPath = Some(CollectionPath(path = collectionPath))
-//      )
-//    }
   }
 }

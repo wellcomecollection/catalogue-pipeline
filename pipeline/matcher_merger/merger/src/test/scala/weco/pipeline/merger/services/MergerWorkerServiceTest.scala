@@ -201,10 +201,10 @@ class MergerWorkerServiceTest
           index should have size 2
 
           val redirectedWorks = index.collect {
-            case (_, Left(Left(work: Work.Redirected[Merged]))) => work
+            case (_, Left(Right(work: Work.Redirected[Denormalised]))) => work
           }
           val mergedWorks = index.collect {
-            case (_, Left(Left(work: Work.Visible[Merged]))) => work
+            case (_, Left(Right(work: Work.Visible[Denormalised]))) => work
           }
 
           redirectedWorks should have size 1
@@ -251,10 +251,10 @@ class MergerWorkerServiceTest
           imagesSent should have size 1
 
           val redirectedWorks = index.collect {
-            case (_, Left(Left(work: Work.Redirected[Merged]))) => work
+            case (_, Left(Right(work: Work.Redirected[Denormalised]))) => work
           }
           val mergedWorks = index.collect {
-            case (_, Left(Left(work: Work.Visible[Merged]))) => work
+            case (_, Left(Right(work: Work.Visible[Denormalised]))) => work
           }
           val images = index.collect {
             case (_, Right(image)) => image
@@ -315,10 +315,10 @@ class MergerWorkerServiceTest
           getWorksSent(senders.workSender) should have size 4
 
           val redirectedWorks = index.collect {
-            case (_, Left(Left(work: Work.Redirected[Merged]))) => work
+            case (_, Left(Right(work: Work.Redirected[Denormalised]))) => work
           }
           val mergedWorks = index.collect {
-            case (_, Left(Left(work: Work.Visible[Merged]))) => work
+            case (_, Left(Right(work: Work.Visible[Denormalised]))) => work
           }
 
           redirectedWorks should have size 2
@@ -354,10 +354,10 @@ class MergerWorkerServiceTest
           getWorksSent(senders.workSender) should have size 2
 
           val visibleWorks = index.collect {
-            case (_, Left(Left(work: Work.Visible[Merged]))) => work
+            case (_, Left(Right(work: Work.Visible[Denormalised]))) => work
           }
           val deletedWorks = index.collect {
-            case (_, Left(Left(work: Work.Deleted[Merged]))) => work
+            case (_, Left(Right(work: Work.Deleted[Denormalised]))) => work
           }
 
           visibleWorks.map { _.id } shouldBe Seq(visibleWork.id)

@@ -52,10 +52,10 @@ trait IntegrationTestHelpers
     ): Work[WorkState.Merged] =
       index(originalWork.state.canonicalId.underlying).left.value.left.value
 
-//    def getDenormalised(
-//      originalWork: Work[WorkState.Merged]
-//    ): Work[WorkState.Denormalised] =
-//      index(originalWork.state.canonicalId.underlying).left.value.right.value
+    def getDenormalised(
+      originalWork: Work[WorkState.Identified]
+    ): Work[WorkState.Denormalised] =
+      index(originalWork.state.canonicalId.underlying).left.value.right.value
 
     def imageData: Seq[ImageData[IdState.Identified]] =
       index.values.collect {
@@ -209,15 +209,32 @@ trait IntegrationTestHelpers
       )
 
   class StateMatcher(right: WorkState.Identified)
-      extends Matcher[WorkState.Merged] {
-    def apply(left: WorkState.Merged): MatchResult =
-      MatchResult(
-        left.sourceIdentifier == right.sourceIdentifier &&
-          left.canonicalId == right.canonicalId &&
-          left.sourceModifiedTime == right.sourceModifiedTime,
-        s"${left.canonicalId} has different state to ${right.canonicalId}",
-        s"${left.canonicalId} has similar state to ${right.canonicalId}"
-      )
+      extends Matcher[Either[WorkState.Merged, WorkState.Denormalised]] {
+    def apply(left: Either[WorkState.Merged, WorkState.Denormalised]): MatchResult = {
+      left match {
+        case Left(left: WorkState.Merged) => MatchResult(
+          left.sourceIdentifier == right.sourceIdentifier &&
+            left.canonicalId == right.canonicalId &&
+            left.sourceModifiedTime == right.sourceModifiedTime,
+          s"${left.canonicalId} has different state to ${right.canonicalId}",
+          s"${left.canonicalId} has similar state to ${right.canonicalId}"
+        )
+        case Right(left: WorkState.Denormalised) => MatchResult(
+          left.sourceIdentifier == right.sourceIdentifier &&
+            left.canonicalId == right.canonicalId &&
+            left.sourceModifiedTime == right.sourceModifiedTime,
+          s"${left.canonicalId} has different state to ${right.canonicalId}",
+          s"${left.canonicalId} has similar state to ${right.canonicalId}"
+        )
+      }
+//      MatchResult(
+//        left.sourceIdentifier == right.sourceIdentifier &&
+//          left.canonicalId == right.canonicalId &&
+//          left.sourceModifiedTime == right.sourceModifiedTime,
+//        s"${left.canonicalId} has different state to ${right.canonicalId}",
+//        s"${left.canonicalId} has similar state to ${right.canonicalId}"
+//      )
+    }
   }
 
   def beSimilarTo(expectedRedirectTo: WorkState.Identified) =
