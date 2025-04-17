@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -16,6 +14,7 @@ from models.catalogue_concept import (
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
 )
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -43,17 +42,26 @@ IGNORED_WIKIDATA_IDS = ["Q5", "Q151885"]
 
 def get_related_query(
     edge_type: str,
-    direction: str = "right",
+    direction: str = "from",
     source_concept_label_types: list[str] | None = None,
 ) -> str:
+    """
+    Return a parameterized Neptune query to fetch related Wellcome concepts:
+        1. For each Wellcome concept (`Concept` node), retrieve its associated `SourceConcept` nodes.
+        2. For each `SourceConcept`, traverse edges of type `edge_type` in the specified `direction`
+        (e.g. `edge_type="NARROWER_THAN"` combined with `direction="from"` would yield broader concepts)
+        to find related `SourceConcept` nodes.
+        3. Get the Wellcome concept(s) associated with each related `SourceConcept`, deduplicate with a `WITH`
+        clause and return the most popular concepts (determined by the number of Works in which they appear).      
+    """
     label_filter = ""
     if source_concept_label_types is not None and len(source_concept_label_types) > 0:
         label_filter = "WHERE " + " OR ".join(
             [f"linked_source_concept:{c}" for c in source_concept_label_types]
         )
 
-    left_arrow = "<" if direction == "left" else ""
-    right_arrow = ">" if direction == "right" else ""
+    left_arrow = "<" if direction == "to" else ""
+    right_arrow = ">" if direction == "from" else ""
 
     return f"""
         MATCH (concept:Concept)
@@ -88,6 +96,7 @@ def get_related_query(
     """
 
 
+# A query returning all Wellcome concepts and the corresponding `SourceConcepts`.
 CONCEPT_QUERY = """
     MATCH (concept:Concept)
     WITH concept ORDER BY concept.id
@@ -101,6 +110,7 @@ CONCEPT_QUERY = """
         collect(DISTINCT same_as_concept.id) AS same_as_concept_ids        
     """
 
+# For every Wellcome concept, this query returns a list of concepts most frequently co‑occurring with it in Works.
 REFERENCED_TOGETHER_QUERY = """
         MATCH (concept:Concept)
         WITH concept ORDER BY concept.id
@@ -147,8 +157,8 @@ def extract_data(
     field_of_work_query = get_related_query("HAS_FIELD_OF_WORK")
     related_to_query = get_related_query("RELATED_TO")
     narrower_than_query = get_related_query("NARROWER_THAN")
-    broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", "left")
-    people_query = get_related_query("HAS_FIELD_OF_WORK", "left")
+    broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
+    people_query = get_related_query("HAS_FIELD_OF_WORK", "to")
 
     params = {
         "start_offset": start_offset,
