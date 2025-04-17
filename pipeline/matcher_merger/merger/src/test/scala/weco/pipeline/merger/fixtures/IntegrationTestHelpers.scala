@@ -36,7 +36,7 @@ trait IntegrationTestHelpers
     MemoryRetriever[Work[WorkState.Identified]],
     QueuePair,
     QueuePair,
-    MemoryMessageSender,
+    MemoryWorkRouter,
     MemoryMessageSender,
     MergerIndex
   )
@@ -50,7 +50,12 @@ trait IntegrationTestHelpers
     def getMerged(
       originalWork: Work[WorkState.Identified]
     ): Work[WorkState.Merged] =
-      index(originalWork.state.canonicalId.underlying).left.value
+      index(originalWork.state.canonicalId.underlying).left.value.left.value
+
+    def getDenormalised(
+      originalWork: Work[WorkState.Identified]
+    ): Work[WorkState.Denormalised] =
+      index(originalWork.state.canonicalId.underlying).left.value.right.value
 
     def imageData: Seq[ImageData[IdState.Identified]] =
       index.values.collect {
@@ -101,7 +106,11 @@ trait IntegrationTestHelpers
               }
             }
 
-            val workSender = new MemoryMessageSender()
+            val workRouter = new MemoryWorkRouter(
+              workSender = new MemoryMessageSender(): MemoryMessageSender,
+              pathSender = new MemoryMessageSender(): MemoryMessageSender,
+              pathConcatenatorSender = new MemoryMessageSender(): MemoryMessageSender)
+
             val imageSender = new MemoryMessageSender()
 
             val mergerIndex = mutable.Map[String, WorkOrImage]()
@@ -115,7 +124,7 @@ trait IntegrationTestHelpers
                 withMergerService(
                   retriever,
                   mergerQueuePair.queue,
-                  workSender,
+                  workRouter,
                   imageSender,
                   index = mergerIndex
                 ) {
@@ -125,7 +134,7 @@ trait IntegrationTestHelpers
                         retriever,
                         matcherQueuePair,
                         mergerQueuePair,
-                        workSender,
+                        workRouter,
                         imageSender,
                         mergerIndex
                       )
@@ -143,7 +152,7 @@ trait IntegrationTestHelpers
       retriever,
       matcherQueuePair,
       mergerQueuePair,
-      workSender,
+      workRouter,
       imageSender,
       mergerIndex
     ) = context
@@ -173,8 +182,12 @@ trait IntegrationTestHelpers
 
         // Check that the merger has notified the next application about everything
         // in the index.  This check could be more robust, but it'll do for now.
-        val idsSentByTheMerger =
-          (workSender.messages ++ imageSender.messages).map(_.body).toSet
+        val idsSentByTheMerger = (
+            workRouter.workSender.messages ++
+            workRouter.pathSender.messages ++
+            workRouter.pathConcatenatorSender.messages ++
+            imageSender.messages
+            ).map(_.body).toSet
         mergerIndex.keySet -- idsSentByTheMerger shouldBe empty
     }
   }
@@ -196,15 +209,32 @@ trait IntegrationTestHelpers
       )
 
   class StateMatcher(right: WorkState.Identified)
-      extends Matcher[WorkState.Merged] {
-    def apply(left: WorkState.Merged): MatchResult =
-      MatchResult(
-        left.sourceIdentifier == right.sourceIdentifier &&
-          left.canonicalId == right.canonicalId &&
-          left.sourceModifiedTime == right.sourceModifiedTime,
-        s"${left.canonicalId} has different state to ${right.canonicalId}",
-        s"${left.canonicalId} has similar state to ${right.canonicalId}"
-      )
+      extends Matcher[Either[WorkState.Merged, WorkState.Denormalised]] {
+    def apply(left: Either[WorkState.Merged, WorkState.Denormalised]): MatchResult = {
+      left match {
+        case Left(left: WorkState.Merged) => MatchResult(
+          left.sourceIdentifier == right.sourceIdentifier &&
+            left.canonicalId == right.canonicalId &&
+            left.sourceModifiedTime == right.sourceModifiedTime,
+          s"${left.canonicalId} has different state to ${right.canonicalId}",
+          s"${left.canonicalId} has similar state to ${right.canonicalId}"
+        )
+        case Right(left: WorkState.Denormalised) => MatchResult(
+          left.sourceIdentifier == right.sourceIdentifier &&
+            left.canonicalId == right.canonicalId &&
+            left.sourceModifiedTime == right.sourceModifiedTime,
+          s"${left.canonicalId} has different state to ${right.canonicalId}",
+          s"${left.canonicalId} has similar state to ${right.canonicalId}"
+        )
+      }
+//      MatchResult(
+//        left.sourceIdentifier == right.sourceIdentifier &&
+//          left.canonicalId == right.canonicalId &&
+//          left.sourceModifiedTime == right.sourceModifiedTime,
+//        s"${left.canonicalId} has different state to ${right.canonicalId}",
+//        s"${left.canonicalId} has similar state to ${right.canonicalId}"
+//      )
+    }
   }
 
   def beSimilarTo(expectedRedirectTo: WorkState.Identified) =

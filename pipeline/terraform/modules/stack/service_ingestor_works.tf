@@ -32,7 +32,7 @@ module "ingestor_works" {
   container_image = local.ingestor_works_image
 
   topic_arns = [
-    module.relation_embedder_sub.router_work_output_topic_arn,
+    module.merger_works_output_topic,
     module.relation_embedder_sub.relation_embedder_output_topic_arn
   ]
 
