@@ -19,5 +19,5 @@ jobs:
           pip install uv
       - run:
           uvx ruff check  ${{inputs.folder}}
-      - run: uv run pytest
+      - run: uv add pytest && uv run pytest
         working-directory: ${{inputs.folder}}
