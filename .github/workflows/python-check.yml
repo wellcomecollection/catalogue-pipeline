@@ -7,23 +7,17 @@ on:
         type: string
         required: true
 jobs:
-  run-ruff:
+  lint-and-test:
     runs-on: ubuntu-latest
-    name: Lint
+    name: Lint and test
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
         with:
           python-version-file: ${{ inputs.folder}}/.python-version
       - run:
-          uvx ruff check  ${{ inputs.folder}}
-  run-pytest:
-    runs-on: ubuntu-latest
-    name: Test
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v5
-        with:
-          python-version-file: ${{ inputs.folder}}/.python-version
+          pip install uv
+      - run:
+          uvx ruff check  ${{inputs.folder}}
       - run: uv run pytest
         working-directory: ${{inputs.folder}}
