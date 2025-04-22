@@ -1,8 +1,8 @@
 name: "Inferrers: Run checks"
 on:
+  workflow_dispatch:
   push:
     paths: [ 'pipeline/inferrer/**', '.github' ]
-  workflow_dispatch:
 jobs:
   python-inferrers-checks:
     strategy:
