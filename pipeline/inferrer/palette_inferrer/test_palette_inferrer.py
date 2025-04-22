@@ -5,5 +5,6 @@ import app.main  # noqa: F401
 # a) the code is compilable
 # b) all the imports work
 
+
 def test_hello():
     assert True
