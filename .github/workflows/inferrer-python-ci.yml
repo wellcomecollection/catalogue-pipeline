@@ -1,3 +1,4 @@
+name: "Inferrers: Run checks"
 on:
   push:
     paths: [ 'pipeline/inferrer/**', '.github' ]
