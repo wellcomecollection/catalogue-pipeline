@@ -22,6 +22,7 @@ jobs:
       - name: test
         id: test
         run: |
+          set +e
           uv add pytest
           uv run pytest
           TEST_OUTPUT=$?
