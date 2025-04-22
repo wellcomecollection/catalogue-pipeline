@@ -1,0 +1,29 @@
+name: "Python check"
+
+on:
+  workflow_call:
+    inputs:
+      folder:
+        type: string
+        required: true
+jobs:
+  run-ruff:
+    runs-on: ubuntu-latest
+    name: Lint
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ${{ inputs.folder}}.python-version
+      - run:
+          uvx ruff check  ${{ inputs.folder}}
+  run-pytest:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ${{ inputs.folder}}.python-version
+      - run: uv run pytest
+        working-directory: ${{inputs.folder}}

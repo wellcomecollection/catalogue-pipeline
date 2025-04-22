@@ -1,0 +1,12 @@
+name: "Python docker image"
+
+on:
+  workflow_call:
+    inputs:
+      folder:
+        type: string
+        required: true
+      tag:
+        type: string
+        required: false
+        default: ${{GITHUB_SHA}}
