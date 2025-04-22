@@ -21,9 +21,10 @@ jobs:
         run: uvx ruff check  ${{inputs.folder}}
       - name: test
         id: test
-        run: uv add pytest && uv run pytest
+        run: |
+          uv add pytest
+          uv run pytest
+          TEST_OUTPUT=$?
+          if [[ TEST_OUTPUT -eq 5 ]]; then TEST_OUTPUT=0; fi
+          exit $TEST_OUTPUT
         working-directory: ${{inputs.folder}}
-        continue-on-error: true
-      - name: examine test output
-        if: ${{ steps.test.outcome != 5}}
-        run: exit ${{ steps.test.outcome }}
