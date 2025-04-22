@@ -17,7 +17,13 @@ jobs:
           python-version-file: ${{ inputs.folder}}/.python-version
       - run:
           pip install uv
-      - run:
-          uvx ruff check  ${{inputs.folder}}
-      - run: uv add pytest && uv run pytest
+      - name: lint
+        run: uvx ruff check  ${{inputs.folder}}
+      - name: test
+        id: test
+        run: uv add pytest && uv run pytest
         working-directory: ${{inputs.folder}}
+        continue-on-error: true
+      - name: examine test output
+        if: ${{ steps.test.outcome != 5}}
+        run: exit ${{ steps.test.outcome }}
