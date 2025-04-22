@@ -6,6 +6,6 @@ jobs:
     strategy:
       matrix:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
-    uses: actions/python-check.yml
+    uses: ./.github/actions/python-check.yml
     with:
       folder: pipeline/inferrer/${{matrix.project}}
