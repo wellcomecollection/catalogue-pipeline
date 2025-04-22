@@ -1,6 +1,6 @@
 on:
   push:
-    paths: [ 'pipeline/inferrer/**' '.github' ]
+    paths: [ 'pipeline/inferrer/**', '.github' ]
   workflow_dispatch:
 jobs:
   python-inferrers-checks:
