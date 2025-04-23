@@ -2,10 +2,11 @@ import io
 
 import polars as pl
 import pytest
-from graph_remover import IDS_LOG_SCHEMA
-from index_remover import lambda_handler
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
+
+from graph_remover import IDS_LOG_SCHEMA
+from index_remover import lambda_handler
 
 
 def index_concepts(ids: list[str], index_name: str = "concepts-indexed") -> None:
