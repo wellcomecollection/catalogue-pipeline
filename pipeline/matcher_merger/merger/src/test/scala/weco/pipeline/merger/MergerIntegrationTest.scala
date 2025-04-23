@@ -484,12 +484,13 @@ class MergerIntegrationTest
         Given("a Tei, a Sierra physical record and a Sierra digital record")
         val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
         val firstInternalWork =
-          teiIdentifiedWork().collectionPath(CollectionPath("1"))
+          teiIdentifiedWork().collectionPath(CollectionPath("TEI_1"))
         val secondInternalWork =
-          teiIdentifiedWork().collectionPath(CollectionPath("2"))
+          teiIdentifiedWork().collectionPath(CollectionPath("TEI_2"))
 
         val teiWork = teiIdentifiedWork()
           .title("A tei work")
+          .collectionPath(CollectionPath("TEI"))
           .internalWorks(List(firstInternalWork, secondInternalWork))
           .mergeCandidates(
             List(createTeiBnumberMergeCandidateFor(physicalSierra))
@@ -504,22 +505,22 @@ class MergerIntegrationTest
 
         And("the tei work has the Sierra works' items")
         context
-          .getDenormalised(teiWork)
+          .getMerged(teiWork)
           .data
           .items should contain allElementsOf digitalSierra.data.items
         context
-          .getDenormalised(teiWork)
+          .getMerged(teiWork)
           .data
           .items should contain allElementsOf physicalSierra.data.items
 
         And("the tei work has the Sierra works' identifiers")
         context
-          .getDenormalised(teiWork)
+          .getMerged(teiWork)
           .data
           .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
           .filter(_.identifierType == IdentifierType.SierraIdentifier)
         context
-          .getDenormalised(teiWork)
+          .getMerged(teiWork)
           .data
           .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
           .filter(_.identifierType == IdentifierType.SierraIdentifier)
