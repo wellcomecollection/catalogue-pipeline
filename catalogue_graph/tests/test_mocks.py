@@ -6,8 +6,8 @@ from collections import defaultdict
 from collections.abc import Generator
 from typing import Any, TypedDict
 
+import polars as pl
 from botocore.credentials import Credentials
-
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -38,6 +38,13 @@ class MockSmartOpen:
             cls.file_lookup[uri] = io.BytesIO(content)
         else:
             raise ValueError("Unsupported content type!")
+
+    @classmethod
+    def mock_s3_parquet_file(cls, uri: str, content: pl.DataFrame) -> None:
+        """Creates a parquet mock file from a polars dataframe."""
+        buffer = io.BytesIO()
+        content.write_parquet(buffer)
+        cls.file_lookup[uri] = buffer
 
     @classmethod
     def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
