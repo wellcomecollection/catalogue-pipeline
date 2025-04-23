@@ -31,3 +31,14 @@ resource "aws_iam_role_policy" "bulk_load_poller_lambda_neptune_policy" {
   role   = module.bulk_load_poller_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.neptune_load_poll.json
 }
+
+resource "aws_iam_role_policy" "bulk_load_poller_s3_write" {
+  role   = module.bulk_load_poller_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.s3_bulk_load_write.json
+}
+
+resource "aws_iam_role_policy" "bulk_load_poller_s3_red" {
+  role   = module.bulk_load_poller_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.s3_bulk_load_read.json
+}
+
