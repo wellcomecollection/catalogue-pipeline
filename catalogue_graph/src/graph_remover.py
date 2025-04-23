@@ -2,8 +2,9 @@ import argparse
 import typing
 from datetime import datetime, timedelta
 
-import config
 import polars as pl
+
+import config
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -79,7 +80,7 @@ def log_ids(
     new_data = pl.DataFrame(ids_with_timestamp, schema=IDS_LOG_SCHEMA)
 
     df = pl.concat([df, new_data], how="vertical")
-    
+
     # Remove all IDs older than 1 year to prevent the file from getting too large
     one_year_ago = datetime.now() - timedelta(days=365)
     df = df.filter(pl.col("timestamp") >= one_year_ago)

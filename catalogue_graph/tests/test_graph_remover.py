@@ -2,9 +2,10 @@ from datetime import date, datetime, timedelta
 
 import polars as pl
 import pytest
-from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
+
+from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 
 REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
 CATALOGUE_CONCEPTS_SNAPSHOT_URI = (
@@ -97,7 +98,7 @@ def test_graph_remover_next_run() -> None:
         CATALOGUE_CONCEPTS_ADDED_IDS_URI,
         {today},
         {"fqe7m83w", "pnpsyqp8", "drypfe3u"},
-    )        
+    )
 
     # Verify that the correct IDs are listed in the 'removed IDs' file
     almost_year_ago = datetime.today().date() - timedelta(days=364)
@@ -124,14 +125,14 @@ def test_graph_remover_old_id_removal() -> None:
     )
 
     add_bulk_load_file_mocks()
-    
-    # Mock a file with existing deleted IDs which are 1+ year old 
+
+    # Mock a file with existing deleted IDs which are 1+ year old
     mock_deleted_ids_log_file(age_in_days=365)
     mock_neptune_removal_response()
 
     event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
     lambda_handler(event, None)
-    
+
     # The old deleted IDs (and corresponding timestamps) should no longer be in the file
     today = datetime.today().date()
     _check_added_removed_ids(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, {today}, {"byzuqyr5"})

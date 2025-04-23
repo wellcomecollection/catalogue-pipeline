@@ -1,4 +1,3 @@
-
 import polars as pl
 import pytest
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
@@ -19,10 +18,7 @@ def mock_deleted_ids_log_file() -> None:
         "id": ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"],
     }
     df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
-    MockSmartOpen.mock_s3_parquet_file(
-        CATALOGUE_CONCEPTS_REMOVED_IDS_URI,
-        df
-    )
+    MockSmartOpen.mock_s3_parquet_file(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, df)
 
 
 def test_index_remover_first_run() -> None:
