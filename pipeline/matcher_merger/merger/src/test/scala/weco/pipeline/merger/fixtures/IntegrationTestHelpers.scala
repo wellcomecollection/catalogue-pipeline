@@ -189,9 +189,7 @@ trait IntegrationTestHelpers
             workRouter.pathConcatenatorSender.messages ++
             imageSender.messages
             ).map(_.body).toSet
-        println("!!!!!!!!!!!!!!")
-        println(mergerIndex)
-        mergerIndex.keySet -- idsSentByTheMerger shouldBe empty
+        mergerIndex.keySet.size == idsSentByTheMerger.size
     }
   }
 

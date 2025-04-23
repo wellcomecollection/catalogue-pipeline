@@ -4,10 +4,10 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
-import weco.catalogue.internal_model.identifiers.IdentifierType
+//import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.{
-//  CollectionPath,
+  CollectionPath,
   Format,
   InvisibilityReason,
   MergeCandidate
@@ -499,8 +499,8 @@ class MergerIntegrationTest
 //        processWorks(digitalSierra, physicalSierra, teiWork)
 //
 //        Then("the Sierra works are redirected to the tei")
-//        Left(context.getMerged(digitalSierra)) should beRedirectedTo(teiWork)
-//        Left(context.getMerged(physicalSierra)) should beRedirectedTo(teiWork)
+//        Right(context.getDenormalised(digitalSierra)) should beRedirectedTo(teiWork)
+//        Right(context.getDenormalised(physicalSierra)) should beRedirectedTo(teiWork)
 //
 //        And("the tei work has the Sierra works' items")
 //        context
@@ -579,53 +579,53 @@ class MergerIntegrationTest
     }
   }
 
-//  Scenario(
-//    "CollectionPath is prepended to internal tei works if the work is not merged"
-//  ) {
-//    withContext {
-//      implicit context =>
-//        Given("a Tei")
-//        val internalWork1 =
-//          teiIdentifiedWork().collectionPath(CollectionPath("id/1"))
-//        val internalWork2 =
-//          teiIdentifiedWork().collectionPath(CollectionPath("id/2"))
-//        val teiWork = teiIdentifiedWork()
-//          .title("A tei work")
-//          .internalWorks(List(internalWork1, internalWork2))
-//          .collectionPath(CollectionPath("id"))
-//
-//        When("the work is processed by the matcher/merger")
-//        processWork(teiWork)
-//
-//        Then("the tei work should be a TEI work")
-//        val expectedInternalWork1 = updateInternalWork(internalWork1, teiWork)
-//          .collectionPath(CollectionPath("id/1"))
-//        val expectedInternalWork2 = updateInternalWork(internalWork2, teiWork)
-//          .collectionPath(CollectionPath("id/2"))
-//
-//        context
-//          .getMerged(internalWork1)
-//          .data shouldBe expectedInternalWork1.data
-//        Left(context.getMerged(internalWork1).state) should beSimilarTo(
-//          expectedInternalWork1.state
-//        )
-//
-//        context
-//          .getMerged(internalWork2)
-//          .data shouldBe expectedInternalWork2.data
-//        Left(context.getMerged(internalWork2).state) should beSimilarTo(
-//          expectedInternalWork2.state
-//        )
-//
-//        val expectedTeiWork = teiWork.internalWorks(
-//          List(expectedInternalWork1, expectedInternalWork2)
-//        )
-//        context.getMerged(teiWork).data shouldBe expectedTeiWork.data
-//        Left(context.getMerged(teiWork).state) should beSimilarTo(
-//          expectedTeiWork.state
-//        )
-//    }
-//  }
+  Scenario(
+    "CollectionPath is prepended to internal tei works if the work is not merged"
+  ) {
+    withContext {
+      implicit context =>
+        Given("a Tei")
+        val internalWork1 =
+          teiIdentifiedWork().collectionPath(CollectionPath("id/1"))
+        val internalWork2 =
+          teiIdentifiedWork().collectionPath(CollectionPath("id/2"))
+        val teiWork = teiIdentifiedWork()
+          .title("A tei work")
+          .internalWorks(List(internalWork1, internalWork2))
+          .collectionPath(CollectionPath("id"))
+
+        When("the work is processed by the matcher/merger")
+        processWork(teiWork)
+
+        Then("the tei work should be a TEI work")
+        val expectedInternalWork1 = updateInternalWork(internalWork1, teiWork)
+          .collectionPath(CollectionPath("id/1"))
+        val expectedInternalWork2 = updateInternalWork(internalWork2, teiWork)
+          .collectionPath(CollectionPath("id/2"))
+
+        context
+          .getMerged(internalWork1)
+          .data shouldBe expectedInternalWork1.data
+        Left(context.getMerged(internalWork1).state) should beSimilarTo(
+          expectedInternalWork1.state
+        )
+
+        context
+          .getMerged(internalWork2)
+          .data shouldBe expectedInternalWork2.data
+        Left(context.getMerged(internalWork2).state) should beSimilarTo(
+          expectedInternalWork2.state
+        )
+
+        val expectedTeiWork = teiWork.internalWorks(
+          List(expectedInternalWork1, expectedInternalWork2)
+        )
+        context.getMerged(teiWork).data shouldBe expectedTeiWork.data
+        Left(context.getMerged(teiWork).state) should beSimilarTo(
+          expectedTeiWork.state
+        )
+    }
+  }
 
   Scenario("A TEI work, a Calm work, a Sierra work and a METS work") {
     withContext {

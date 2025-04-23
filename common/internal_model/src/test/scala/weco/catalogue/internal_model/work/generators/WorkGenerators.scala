@@ -53,15 +53,8 @@ trait WorkGenerators
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
     modifiedTime: Instant = randomInstant,
-    collectionPath: Option[String] = None
   ): Work.Visible[Merged] = {
-    val data = collectionPath match {
-      case None => initData[DataState.Identified]
-      case Some(collectionPath )=> WorkData[DataState.Identified](
-        title = Some(s"title-${randomAlphanumeric(length = 10)}"),
-        collectionPath = Some(CollectionPath(path = collectionPath))
-      )
-    }
+    val data = initData[DataState.Identified]
     Work.Visible[Merged](
       state = Merged(
         sourceIdentifier = sourceIdentifier,
@@ -102,15 +95,8 @@ trait WorkGenerators
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
     sourceModifiedTime: Instant = randomInstant,
-    collectionPath: Option[String] = None
   ): Work.Visible[Identified] = {
-    val data = collectionPath match {
-      case None => initData[DataState.Identified]
-      case Some(collectionPath )=> WorkData[DataState.Identified](
-        title = Some(s"title-${randomAlphanumeric(length = 10)}"),
-        collectionPath = Some(CollectionPath(path = collectionPath))
-      )
-    }
+    val data = initData[DataState.Identified]
     Work.Visible[Identified](
       state = Identified(
         sourceIdentifier = sourceIdentifier,

@@ -3,6 +3,7 @@ package weco.pipeline.merger.services
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{CanonicalId, IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.work.CollectionPath
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.merger.fixtures.MergerFixtures
 
@@ -20,8 +21,7 @@ class WorkRouterSpec
         value = "sierra_id_1",
         ontologyType = "Work"
       ),
-      collectionPath = Some("send/to/pathConcatenator")
-    )
+    ).collectionPath(CollectionPath("send/to/pathConcatenator"))
 
     workRouter(Left(work_sierra))
     getIncompletePathSent(workRouter.pathConcatenatorSender) shouldBe Seq("send/to/pathConcatenator")
@@ -33,9 +33,8 @@ class WorkRouterSpec
         identifierType = IdentifierType.CalmRecordIdentifier,
         value = "calm_id_1",
         ontologyType = "Work"
-      ),
-      collectionPath = Some("send/to/pathSender")
-    )
+      )
+    ).collectionPath(CollectionPath("send/to/pathSender"))
 
     workRouter(Left(work_calm))
     getPathsSent(workRouter.pathSender) shouldBe Seq("send/to/pathSender")
