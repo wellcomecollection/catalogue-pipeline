@@ -119,7 +119,7 @@ module "pipeline_indices" {
   es_works_denormalised_index = local.es_works_denormalised_index
   es_works_index              = local.es_works_index
 
-  es_concepts_index = local.es_concepts_index
+  es_concepts_index_dates = local.es_concepts_index_dates
 
   es_images_initial_index   = local.es_images_initial_index
   es_images_augmented_index = local.es_images_augmented_index
@@ -179,8 +179,8 @@ locals {
       write = [local.indices.images_indexed]
     }
     concept_ingestor = {
-      read  = [local.indices.concepts_indexed]
-      write = [local.indices.concepts_indexed]
+      read  = ["${local.es_concepts_index_prefix}*"]
+      write = ["${local.es_concepts_index_prefix}*"]
     }
     snapshot_generator = {
       read  = [local.indices.works_indexed, local.indices.images_indexed]
@@ -191,7 +191,7 @@ locals {
       write = []
     }
     concepts_api = {
-      read  = [local.indices.concepts_indexed]
+      read  = ["${local.es_concepts_index_prefix}*"]
       write = []
     }
   }
@@ -233,7 +233,7 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   name = "read_only"
 
   indices {
-    names      = [for idx in module.pipeline_indices.indices : idx.name]
+    names      = ["*"]
     privileges = ["read"]
   }
 }

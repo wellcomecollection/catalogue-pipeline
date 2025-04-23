@@ -14,8 +14,8 @@ variable "es_works_denormalised_index" {
 variable "es_works_index" {
   type = string
 }
-variable "es_concepts_index" {
-  type = string
+variable "es_concepts_index_dates" {
+  type = list(string)
 }
 variable "es_images_initial_index" {
   type = string

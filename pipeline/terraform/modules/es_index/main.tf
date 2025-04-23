@@ -25,4 +25,8 @@ resource "elasticstack_elasticsearch_index" "the_index" {
   analysis_tokenizer   = local.analysis.tokenizer
 
   deletion_protection = !var.allow_delete
+
+#  alias {
+#    name = "test-alias"
+#  }
 }
