@@ -8,7 +8,7 @@ locals {
   es_works_index              = "works-indexed-${var.pipeline_date}"
 
   es_concepts_index_prefix = "concepts-indexed"
-  es_concepts_index_dates = [var.pipeline_date, "2025-04-23"]
+  es_concepts_index_dates  = [var.pipeline_date, "2025-04-23"]
 
   es_images_initial_index   = "images-initial-${var.pipeline_date}"
   es_images_augmented_index = "images-augmented-${var.pipeline_date}"

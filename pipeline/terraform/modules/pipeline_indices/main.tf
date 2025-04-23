@@ -60,7 +60,7 @@ module "works_indexed_index" {
 }
 
 module "es_index" {
-  for_each      = toset(var.es_concepts_index_dates)
+  for_each = toset(var.es_concepts_index_dates)
 
   source        = "../es_index"
   name          = "concepts-indexed-${each.key}"

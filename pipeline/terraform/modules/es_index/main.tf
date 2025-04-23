@@ -26,7 +26,7 @@ resource "elasticstack_elasticsearch_index" "the_index" {
 
   deletion_protection = !var.allow_delete
 
-#  alias {
-#    name = "test-alias"
-#  }
+  #  alias {
+  #    name = "test-alias"
+  #  }
 }
