@@ -23,7 +23,7 @@ jobs:
         id: test
         run: |
           set +e
-          uv add pytest
+          uv sync --all-groups
           uv run pytest
           TEST_OUTPUT=$?
           if [[ TEST_OUTPUT -eq 5 ]]; then TEST_OUTPUT=0; fi

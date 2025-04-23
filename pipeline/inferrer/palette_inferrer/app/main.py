@@ -5,7 +5,7 @@ from common.image import get_image_from_url
 from common.logging import get_logger
 import base64
 
-from .palette_encoder import PaletteEncoder
+from palette_encoder import PaletteEncoder
 
 logger = get_logger(__name__)
 

@@ -762,6 +762,10 @@ dependencies = [
     { name = "inferrer-common" },
     { name = "joblib" },
     { name = "numpy" },
+]
+
+[package.dev-dependencies]
+dev = [
     { name = "pytest" },
 ]
 
@@ -770,8 +774,10 @@ requires-dist = [
     { name = "inferrer-common", directory = "../common" },
     { name = "joblib", specifier = "==1.2.0" },
     { name = "numpy", specifier = "==1.26.4" },
-    { name = "pytest", specifier = ">=8.3.5" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=8.3.5" }]
 
 [[package]]
 name = "piffle"
