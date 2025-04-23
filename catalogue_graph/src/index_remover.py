@@ -2,9 +2,10 @@ import argparse
 import typing
 from datetime import date, datetime
 
-import config
 import polars as pl
 import smart_open
+
+import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from utils.aws import df_from_s3_parquet
@@ -93,7 +94,7 @@ def handler(
     ids_to_delete = get_ids_to_delete(pipeline_date)
     current_id_count = get_current_id_count(pipeline_date, is_local)
     delete_proportion = len(ids_to_delete) / current_id_count
-    
+
     if (
         current_id_count > 0
         and delete_proportion > ACCEPTABLE_DIFF_THRESHOLD
