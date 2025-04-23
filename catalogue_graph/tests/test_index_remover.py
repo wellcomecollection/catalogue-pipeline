@@ -1,4 +1,3 @@
-import io
 
 import polars as pl
 import pytest
@@ -20,12 +19,9 @@ def mock_deleted_ids_log_file() -> None:
         "id": ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"],
     }
     df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
-    buffer = io.BytesIO()
-    df.write_parquet(buffer)
-
-    MockSmartOpen.mock_s3_file(
+    MockSmartOpen.mock_s3_parquet_file(
         CATALOGUE_CONCEPTS_REMOVED_IDS_URI,
-        buffer.getvalue(),
+        df
     )
 
 
