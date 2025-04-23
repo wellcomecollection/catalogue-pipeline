@@ -1,9 +1,11 @@
+import io
+
+import polars as pl
 import pytest
+from graph_remover import IDS_LOG_SCHEMA
+from index_remover import lambda_handler
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
-from test_utils import load_fixture
-
-from index_remover import lambda_handler
 
 
 def index_concepts(ids: list[str], index_name: str = "concepts-indexed") -> None:
@@ -12,9 +14,17 @@ def index_concepts(ids: list[str], index_name: str = "concepts-indexed") -> None
 
 
 def mock_deleted_ids_log_file() -> None:
+    mock_data = {
+        "timestamp": ["2025-04-03", "2025-04-03", "2025-04-07", "2025-04-07"],
+        "id": ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"],
+    }
+    df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
+    buffer = io.BytesIO()
+    df.write_parquet(buffer)
+
     MockSmartOpen.mock_s3_file(
         CATALOGUE_CONCEPTS_REMOVED_IDS_URI,
-        load_fixture("catalogue/deleted_ids_log_catalogue_concepts__nodes.parquet"),
+        buffer.getvalue(),
     )
 
 
