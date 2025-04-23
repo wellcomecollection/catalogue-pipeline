@@ -2,11 +2,10 @@ import io
 
 import polars as pl
 import pytest
-from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
-from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
-
 from graph_remover import IDS_LOG_SCHEMA
 from index_remover import lambda_handler
+from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
+from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 
 
 def index_concepts(ids: list[str], index_name: str = "concepts-indexed") -> None:
@@ -100,4 +99,12 @@ def test_index_remover_safety_check() -> None:
 
     event = {"pipeline_date": None}
     with pytest.raises(ValueError):
+        lambda_handler(event, None)
+
+
+def test_index_remover_no_deleted_ids_file() -> None:
+    index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
+
+    event = {"pipeline_date": None}
+    with pytest.raises(KeyError):
         lambda_handler(event, None)
