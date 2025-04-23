@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import polars as pl
 import pytest
@@ -52,7 +52,7 @@ def mock_neptune_removal_response() -> None:
 
 
 def _check_added_removed_ids(
-    s3_uri: str, expected_timestamps: set[datetime.date], expected_ids: set[str]
+    s3_uri: str, expected_timestamps: set[date], expected_ids: set[str]
 ) -> None:
     with MockSmartOpen.open(s3_uri, "rb") as f:
         df = pl.read_parquet(f)
