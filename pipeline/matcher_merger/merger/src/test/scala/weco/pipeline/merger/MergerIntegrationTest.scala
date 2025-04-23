@@ -476,79 +476,79 @@ class MergerIntegrationTest
     }
   }
 
-//  Scenario(
-//    "A Tei with internal works and a Sierra digital and a sierra physical work are merged"
-//  ) {
-//    withContext {
-//      implicit context =>
-//        Given("a Tei, a Sierra physical record and a Sierra digital record")
-//        val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
-//        val firstInternalWork =
-//          teiIdentifiedWork().collectionPath(CollectionPath("1"))
-//        val secondInternalWork =
-//          teiIdentifiedWork().collectionPath(CollectionPath("2"))
-//
-//        val teiWork = teiIdentifiedWork()
-//          .title("A tei work")
-//          .internalWorks(List(firstInternalWork, secondInternalWork))
-//          .mergeCandidates(
-//            List(createTeiBnumberMergeCandidateFor(physicalSierra))
-//          )
-//
-//        When("the works are processed by the matcher/merger")
-//        processWorks(digitalSierra, physicalSierra, teiWork)
-//
-//        Then("the Sierra works are redirected to the tei")
-//        Right(context.getDenormalised(digitalSierra)) should beRedirectedTo(teiWork)
-//        Right(context.getDenormalised(physicalSierra)) should beRedirectedTo(teiWork)
-//
-//        And("the tei work has the Sierra works' items")
-//        context
-//          .getMerged(teiWork)
-//          .data
-//          .items should contain allElementsOf digitalSierra.data.items
-//        context
-//          .getMerged(teiWork)
-//          .data
-//          .items should contain allElementsOf physicalSierra.data.items
-//
-//        And("the tei work has the Sierra works' identifiers")
-//        context
-//          .getMerged(teiWork)
-//          .data
-//          .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
-//          .filter(_.identifierType == IdentifierType.SierraIdentifier)
-//        context
-//          .getMerged(teiWork)
-//          .data
-//          .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
-//          .filter(_.identifierType == IdentifierType.SierraIdentifier)
-//
-//        And("the internal tei works are returned")
-//        Left(context.getMerged(firstInternalWork)) should beVisible
-//        Left(context.getMerged(secondInternalWork)) should beVisible
-//
-//        And("the tei internal works contain the sierra item")
-//        context
-//          .getMerged(firstInternalWork)
-//          .data
-//          .items should contain allElementsOf physicalSierra.data.items
-//        context
-//          .getDenormalised(secondInternalWork)
-//          .data
-//          .items should contain allElementsOf physicalSierra.data.items
-//
-//        And("the tei internal works retain their collectionsPath")
-//        context
-//          .getMerged(firstInternalWork)
-//          .data
-//          .collectionPath shouldBe firstInternalWork.data.collectionPath
-//        context
-//          .getMerged(secondInternalWork)
-//          .data
-//          .collectionPath shouldBe secondInternalWork.data.collectionPath
-//    }
-//  }
+  Scenario(
+    "A Tei with internal works and a Sierra digital and a sierra physical work are merged"
+  ) {
+    withContext {
+      implicit context =>
+        Given("a Tei, a Sierra physical record and a Sierra digital record")
+        val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
+        val firstInternalWork =
+          teiIdentifiedWork().collectionPath(CollectionPath("1"))
+        val secondInternalWork =
+          teiIdentifiedWork().collectionPath(CollectionPath("2"))
+
+        val teiWork = teiIdentifiedWork()
+          .title("A tei work")
+          .internalWorks(List(firstInternalWork, secondInternalWork))
+          .mergeCandidates(
+            List(createTeiBnumberMergeCandidateFor(physicalSierra))
+          )
+
+        When("the works are processed by the matcher/merger")
+        processWorks(digitalSierra, physicalSierra, teiWork)
+
+        Then("the Sierra works are redirected to the tei")
+        Right(context.getDenormalised(digitalSierra)) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(physicalSierra)) should beRedirectedTo(teiWork)
+
+        And("the tei work has the Sierra works' items")
+        context
+          .getDenormalised(teiWork)
+          .data
+          .items should contain allElementsOf digitalSierra.data.items
+        context
+          .getDenormalised(teiWork)
+          .data
+          .items should contain allElementsOf physicalSierra.data.items
+
+        And("the tei work has the Sierra works' identifiers")
+        context
+          .getDenormalised(teiWork)
+          .data
+          .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
+          .filter(_.identifierType == IdentifierType.SierraIdentifier)
+        context
+          .getDenormalised(teiWork)
+          .data
+          .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
+          .filter(_.identifierType == IdentifierType.SierraIdentifier)
+
+        And("the internal tei works are returned")
+        Left(context.getMerged(firstInternalWork)) should beVisible
+        Left(context.getMerged(secondInternalWork)) should beVisible
+
+        And("the tei internal works contain the sierra item")
+        context
+          .getMerged(firstInternalWork)
+          .data
+          .items should contain allElementsOf physicalSierra.data.items
+        context
+          .getMerged(secondInternalWork)
+          .data
+          .items should contain allElementsOf physicalSierra.data.items
+
+        And("the tei internal works retain their collectionsPath")
+        context
+          .getMerged(firstInternalWork)
+          .data
+          .collectionPath shouldBe firstInternalWork.data.collectionPath
+        context
+          .getMerged(secondInternalWork)
+          .data
+          .collectionPath shouldBe secondInternalWork.data.collectionPath
+    }
+  }
 
   Scenario("A Tei work passes through unchanged") {
     withContext {
