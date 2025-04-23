@@ -35,7 +35,6 @@ class WorkRouterSpec
         ontologyType = "Work"
       ),
       collectionPath = Some("send/to/pathSender")
-//      collectionPath = Some(CollectionPath(path = "send/to/pathSender"))
     )
 
     workRouter(Left(work_calm))

@@ -80,23 +80,3 @@ trait MergerFixtures extends PipelineStorageStreamFixtures {
   def getImagesSent(imageSender: MemoryMessageSender): Seq[String] =
     imageSender.messages.map { _.body }
 }
-
-
-
-  //  def getWorksSent(workSender: MemoryMessageSender): Seq[String] =
-//    workSender.messages.map { _.body }
-
-
-
-//def getWorksSent(
-//                  workRouter: MemoryWorkRouter,
-//                ): Seq[(String, String)] = {
-//  workRouter(_: Either[Work[Merged], Work[Denormalised]]) =
-//  {
-//    case Left(work: Work[Merged]) => work.sourceIdentifier.identifierType match {
-//      case SierraSystemNumber => workRouter.pathConcatenatorSender.messages.map { msg => ("pathConcatenatorSender", msg.body) }
-//      case _ => workRouter.pathSender.messages.map { msg => ("pathSender", msg.body) }
-//    }
-//    case Right(work: Work[Denormalised]) => workRouter.workSender.messages.map { msg => ("workSender", msg.body) }
-//  }
-//}
