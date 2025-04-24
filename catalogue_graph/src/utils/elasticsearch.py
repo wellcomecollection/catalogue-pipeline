@@ -35,7 +35,6 @@ def get_pipeline_config(pipeline_date: str, is_local: bool) -> ElasticsearchConf
         scheme=get_secret(f"elasticsearch/pipeline_storage_{pipeline_date}/protocol"),
         apikey=get_secret(
             f"elasticsearch/pipeline_storage_{pipeline_date}/concept_ingestor/api_key"
-            #f"elasticsearch/pipeline_storage_{pipeline_date}/concept_ingestor/experimental_api_key"
         ),
     )
 

@@ -9,6 +9,7 @@ import elasticsearch.helpers
 import polars as pl
 import smart_open
 import utils.elasticsearch
+from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
 from polars import DataFrame
@@ -22,8 +23,7 @@ class IngestorIndexerObject(BaseModel):
 
 
 class IngestorIndexerLambdaEvent(BaseModel):
-    pipeline_date: str | None
-     index_date: str | None
+    pipeline_date: str | None = INGESTOR_PIPELINE_DATE
     job_id: str | None = None
     object_to_index: IngestorIndexerObject
 
@@ -50,21 +50,15 @@ def transform_data(df: DataFrame) -> list[IndexableConcept]:
 
 
 def load_data(
-        concepts: list[IndexableConcept],
-        pipeline_date: str | None,
-        index_date: str | None,
-        is_local: bool,
+    concepts: list[IndexableConcept], pipeline_date: str | None, is_local: bool
 ) -> int:
     index_name = (
         "concepts-indexed"
         if pipeline_date is None
-        else f"concepts-indexed-{index_date}"
+        else f"concepts-indexed-{pipeline_date}"
     )
-    # index_name = "concepts-indexed-experimental"
-
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
     es = utils.elasticsearch.get_client(pipeline_date, is_local)
-    # es = utils.elasticsearch.get_client("2025-03-06", is_local)
 
     def generate_data() -> Generator[dict]:
         for concept in concepts:
@@ -87,7 +81,6 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
     success_count = load_data(
         concepts=transformed_data,
         pipeline_date=event.pipeline_date,
-        index_date=event.index_date,
         is_local=config.is_local,
     )
 
@@ -116,17 +109,10 @@ def local_handler() -> None:
         help="The pipeline that is being ingested to, will default to None.",
         required=False,
     )
-    parser.add_argument(
-        "--index-date",
-        type=str,
-        help="The index date that is being ingested to, will default to None.",
-        required=False,
-    )
     args = parser.parse_args()
 
     event = IngestorIndexerLambdaEvent(
         pipeline_date=args.pipeline_date,
-        index_date=args.index_date,
         object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri),
     )
     config = IngestorIndexerConfig(is_local=True)

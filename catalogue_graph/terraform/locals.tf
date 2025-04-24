@@ -16,8 +16,7 @@ locals {
   catalogue_graph_nlb_url = "catalogue-graph.wellcomecollection.org"
 
   # This is a hint that the ingestors might need to be in the pipeline stack!
-  pipeline_date       = "2025-03-06"
-  concepts_index_date = "2025-03-06"
+  pipeline_date = "2025-03-06"
 
   concepts_pipeline_inputs_monthly = [
     {
