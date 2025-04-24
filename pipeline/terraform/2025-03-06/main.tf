@@ -38,7 +38,7 @@ module "pipeline" {
 }
 
 moved {
-  from =  module.pipeline.module.pipeline_indices.module.concepts_indexed_index.elasticstack_elasticsearch_index.the_index
+  from = module.pipeline.module.pipeline_indices.module.concepts_indexed_index.elasticstack_elasticsearch_index.the_index
   to   = module.pipeline.module.pipeline_indices.module.concepts_indexed_indexes["2025-03-06"].elasticstack_elasticsearch_index.the_index
 }
 
