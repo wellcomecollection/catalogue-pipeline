@@ -1,7 +1,5 @@
 import polars as pl
 import pytest
-from test_mocks import MockRequest, MockSmartOpen
-
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     IngestorIndexerObject,
@@ -10,6 +8,7 @@ from ingestor_loader import (
     handler,
 )
 from models.catalogue_concept import CatalogueConcept, CatalogueConceptIdentifier
+from test_mocks import MockRequest, MockSmartOpen
 
 
 def build_test_matrix() -> list[tuple]:
@@ -18,6 +17,7 @@ def build_test_matrix() -> list[tuple]:
             "happy path, with alternative labels",
             IngestorLoaderLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -62,6 +62,7 @@ def build_test_matrix() -> list[tuple]:
             },
             IngestorIndexerLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-bucket/test-prefix/2021-07-01/123/00000000-00000001.parquet",
@@ -87,6 +88,7 @@ def build_test_matrix() -> list[tuple]:
             "happy path, with NO alternative labels",
             IngestorLoaderLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -129,6 +131,7 @@ def build_test_matrix() -> list[tuple]:
             },
             IngestorIndexerLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-bucket/test-prefix/2021-07-01/123/00000000-00000001.parquet",
@@ -154,6 +157,7 @@ def build_test_matrix() -> list[tuple]:
             "badly formed response",
             IngestorLoaderLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,

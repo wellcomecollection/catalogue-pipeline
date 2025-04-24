@@ -1,10 +1,9 @@
 import pytest
 from freezegun import freeze_time
-from test_mocks import MockRequest
-
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger import IngestorTriggerConfig, IngestorTriggerLambdaEvent, handler
 from ingestor_trigger_monitor import IngestorTriggerMonitorLambdaEvent
+from test_mocks import MockRequest
 
 
 def build_test_matrix() -> list[tuple]:
@@ -16,11 +15,13 @@ def build_test_matrix() -> list[tuple]:
             {"results": [{"count": 1}]},
             IngestorTriggerMonitorLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 force_pass=False,
                 report_results=True,
                 events=[
                     IngestorLoaderLambdaEvent(
                         pipeline_date="2025-01-01",
+                        index_date="2025-01-01",
                         job_id="123",
                         start_offset=0,
                         end_index=1,
@@ -35,17 +36,20 @@ def build_test_matrix() -> list[tuple]:
             {"results": [{"count": 2}]},
             IngestorTriggerMonitorLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 force_pass=False,
                 report_results=True,
                 events=[
                     IngestorLoaderLambdaEvent(
                         pipeline_date="2025-01-01",
+                        index_date="2025-01-01",
                         job_id="123",
                         start_offset=0,
                         end_index=1,
                     ),
                     IngestorLoaderLambdaEvent(
                         pipeline_date="2025-01-01",
+                        index_date="2025-01-01",
                         job_id="123",
                         start_offset=1,
                         end_index=2,
@@ -60,11 +64,13 @@ def build_test_matrix() -> list[tuple]:
             {"results": [{"count": 1}]},
             IngestorTriggerMonitorLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 force_pass=False,
                 report_results=True,
                 events=[
                     IngestorLoaderLambdaEvent(
                         pipeline_date="2025-01-01",
+                        index_date="2025-01-01",
                         job_id="123",
                         start_offset=0,
                         end_index=1,
@@ -79,6 +85,7 @@ def build_test_matrix() -> list[tuple]:
             {"pipeline_date": "2025-01-01", "results": [{"count": 0}]},
             IngestorTriggerMonitorLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 force_pass=False,
                 report_results=True,
                 events=[],
@@ -91,17 +98,20 @@ def build_test_matrix() -> list[tuple]:
             {"pipeline_date": "2025-01-01", "results": [{"count": 1001}]},
             IngestorTriggerMonitorLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 force_pass=False,
                 report_results=True,
                 events=[
                     IngestorLoaderLambdaEvent(
                         pipeline_date="2025-01-01",
+                        index_date="2025-01-01",
                         job_id="123",
                         start_offset=0,
                         end_index=1000,
                     ),
                     IngestorLoaderLambdaEvent(
                         pipeline_date="2025-01-01",
+                        index_date="2025-01-01",
                         job_id="123",
                         start_offset=1000,
                         end_index=1001,
@@ -116,11 +126,13 @@ def build_test_matrix() -> list[tuple]:
             {"results": [{"count": 1}]},
             IngestorTriggerMonitorLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 force_pass=False,
                 report_results=True,
                 events=[
                     IngestorLoaderLambdaEvent(
                         pipeline_date="2025-01-01",
+                        index_date="2025-01-01",
                         job_id="20120101T0000",
                         start_offset=0,
                         end_index=1,

@@ -1,14 +1,13 @@
 import json
 
 import pytest
-from test_mocks import MockCloudwatchClient, MockSmartOpen
-
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
     IngestorTriggerMonitorLambdaEvent,
     handler,
 )
+from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 
 def test_ingestor_trigger_monitor_success_no_previous() -> None:
@@ -22,6 +21,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         events=[
             IngestorLoaderLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -84,6 +84,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         events=[
             IngestorLoaderLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=110,
@@ -137,6 +138,7 @@ def test_ingestor_trigger_monitor_failure_with_previous() -> None:
         events=[
             IngestorLoaderLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=111,

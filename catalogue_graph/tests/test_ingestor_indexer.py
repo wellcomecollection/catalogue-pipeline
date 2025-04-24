@@ -2,20 +2,20 @@ from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-from test_utils import load_fixture
-
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
+from test_mocks import MockElasticsearchClient, MockSmartOpen
+from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
+        index_date="2025-01-01",
         object_to_index=IngestorIndexerObject(
             s3_uri="s3://test-catalogue-graph/00000000-00000004.parquet"
         )
@@ -149,6 +149,7 @@ def build_test_matrix() -> list[tuple]:
         (
             "the file at s3_uri doesn't exist",
             IngestorIndexerLambdaEvent(
+                index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/ghost-file"
                 )
@@ -161,6 +162,7 @@ def build_test_matrix() -> list[tuple]:
             "the S3 file doesn't contain valid data",
             IngestorIndexerLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/catalogue/works_snapshot_example.json"
                 ),

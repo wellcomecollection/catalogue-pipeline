@@ -1,14 +1,13 @@
 import json
 
 import pytest
-from test_mocks import MockCloudwatchClient, MockSmartOpen
-
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from ingestor_loader_monitor import (
     IngestorLoaderMonitorConfig,
     IngestorLoaderMonitorLambdaEvent,
     handler,
 )
+from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 
 def test_ingestor_loader_monitor_success_no_previous() -> None:
@@ -21,6 +20,7 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
@@ -30,6 +30,7 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
@@ -95,6 +96,7 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
@@ -104,6 +106,7 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
@@ -171,6 +174,7 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
@@ -180,6 +184,7 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
@@ -228,6 +233,7 @@ def test_ingestor_loader_monitor_force_pass() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
@@ -237,6 +243,8 @@ def test_ingestor_loader_monitor_force_pass() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
+                
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
@@ -286,6 +294,7 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
@@ -295,6 +304,7 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-02",  # Different pipeline date
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-02/123/file2.parquet",
@@ -317,6 +327,7 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
@@ -326,6 +337,7 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="456",  # Different job ID
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/456/file2.parquet",
@@ -348,6 +360,7 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
@@ -357,6 +370,7 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
@@ -379,6 +393,7 @@ def test_ingestor_loader_monitor_empty_record_count() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
@@ -388,6 +403,7 @@ def test_ingestor_loader_monitor_empty_record_count() -> None:
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
