@@ -1,0 +1,539 @@
+[
+  {
+    "_index": "concepts-indexed",
+    "_id": "a2233f9d",
+    "_source": {
+      "query": {
+        "id": "a2233f9d",
+        "identifiers": [],
+        "label": "Circle of State Librarians Conference 1979 : Kew, England)",
+        "alternativeLabels": [],
+        "type": "Meeting"
+      },
+      "display": {
+        "id": "a2233f9d",
+        "identifiers": [],
+        "label": "Circle of State Librarians Conference 1979 : Kew, England)",
+        "alternativeLabels": [],
+        "description": null,
+        "type": "Meeting",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": []
+        },
+        "sameAs": []
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a223f5a6",
+    "_source": {
+      "query": {
+        "id": "a223f5a6",
+        "identifiers": [
+          {
+            "value": "no2001062332",
+            "identifierType": "lc-names"
+          }
+        ],
+        "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
+        "alternativeLabels": [],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a223f5a6",
+        "identifiers": [
+          {
+            "value": "no2001062332",
+            "type": "Identifier",
+            "identifierType": {
+              "id": "lc-names",
+              "label": "Library of Congress Name authority records",
+              "type": "IdentifierType"
+            }
+          }
+        ],
+        "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
+        "alternativeLabels": [],
+        "description": null,
+        "type": "Person",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": [
+            {
+              "label": "Housing",
+              "id": "uk4ekp5c",
+              "relationshipType": ""
+            }
+          ]
+        },
+        "sameAs": [
+          "a223f5a6"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a2249bxm",
+    "_source": {
+      "query": {
+        "id": "a2249bxm",
+        "identifiers": [],
+        "label": "Wolff, G.",
+        "alternativeLabels": [],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a2249bxm",
+        "identifiers": [],
+        "label": "Wolff, G.",
+        "alternativeLabels": [],
+        "description": null,
+        "type": "Person",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": []
+        },
+        "sameAs": []
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a224b9mp",
+    "_source": {
+      "query": {
+        "id": "a224b9mp",
+        "identifiers": [
+          {
+            "value": "n79066466",
+            "identifierType": "lc-names"
+          }
+        ],
+        "label": "Jones, John E.",
+        "alternativeLabels": [],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a224b9mp",
+        "identifiers": [
+          {
+            "value": "n79066466",
+            "type": "Identifier",
+            "identifierType": {
+              "id": "lc-names",
+              "label": "Library of Congress Name authority records",
+              "type": "IdentifierType"
+            }
+          }
+        ],
+        "label": "Jones, John E.",
+        "alternativeLabels": [],
+        "description": null,
+        "type": "Person",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": []
+        },
+        "sameAs": [
+          "a224b9mp"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a224rx5x",
+    "_source": {
+      "query": {
+        "id": "a224rx5x",
+        "identifiers": [],
+        "label": "Hulverscheidt, Marion, 1970-",
+        "alternativeLabels": [],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a224rx5x",
+        "identifiers": [],
+        "label": "Hulverscheidt, Marion, 1970-",
+        "alternativeLabels": [],
+        "description": null,
+        "type": "Person",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": [
+            {
+              "label": "History, 19th Century",
+              "id": "dtr393ay",
+              "relationshipType": ""
+            }
+          ]
+        },
+        "sameAs": []
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a224tns9",
+    "_source": {
+      "query": {
+        "id": "a224tns9",
+        "identifiers": [
+          {
+            "value": "n83031315",
+            "identifierType": "lc-names"
+          }
+        ],
+        "label": "Zimmermann, Wilhelm",
+        "alternativeLabels": [],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a224tns9",
+        "identifiers": [
+          {
+            "value": "n83031315",
+            "type": "Identifier",
+            "identifierType": {
+              "id": "lc-names",
+              "label": "Library of Congress Name authority records",
+              "type": "IdentifierType"
+            }
+          }
+        ],
+        "label": "Zimmermann, Wilhelm",
+        "alternativeLabels": [],
+        "description": null,
+        "type": "Person",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": []
+        },
+        "sameAs": [
+          "a224tns9"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a2258t8s",
+    "_source": {
+      "query": {
+        "id": "a2258t8s",
+        "identifiers": [
+          {
+            "value": "no2001010355",
+            "identifierType": "lc-names"
+          }
+        ],
+        "label": "Gaur, June",
+        "alternativeLabels": [
+          "June Gaur"
+        ],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a2258t8s",
+        "identifiers": [
+          {
+            "value": "no2001010355",
+            "type": "Identifier",
+            "identifierType": {
+              "id": "lc-names",
+              "label": "Library of Congress Name authority records",
+              "type": "IdentifierType"
+            }
+          }
+        ],
+        "label": "Gaur, June",
+        "alternativeLabels": [
+          "June Gaur"
+        ],
+        "description": null,
+        "type": "Person",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": []
+        },
+        "sameAs": [
+          "a2258t8s"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a229u886",
+    "_source": {
+      "query": {
+        "id": "a229u886",
+        "identifiers": [
+          {
+            "value": "D007649",
+            "identifierType": "nlm-mesh"
+          }
+        ],
+        "label": "Ketamine",
+        "alternativeLabels": [
+          "KETAMINE",
+          "DL-ketamine",
+          "Ketaset",
+          "Ketamina",
+          "Ketaminum",
+          "Purple",
+          "Ketanest",
+          "Ketamine Hydrochloride",
+          "2-(2-Chloro-phenyl)-2-methylamino-cyclohexanone",
+          "K",
+          "(\u00b1)-ketamine",
+          "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
+          "Calipsol",
+          "Jet",
+          "Super Acid",
+          "Cat Valium",
+          "(+-)-Ketamine",
+          "Super K",
+          "Keta",
+          "Special La Coke",
+          "Vitamin K",
+          "CI-581",
+          "Special K",
+          "Kit Kat",
+          "Ketalar",
+          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone"
+        ],
+        "type": "Concept"
+      },
+      "display": {
+        "id": "a229u886",
+        "identifiers": [
+          {
+            "value": "D007649",
+            "type": "Identifier",
+            "identifierType": {
+              "id": "nlm-mesh",
+              "label": "Medical Subject Headings (MeSH) identifier",
+              "type": "IdentifierType"
+            }
+          }
+        ],
+        "label": "Ketamine",
+        "alternativeLabels": [
+          "KETAMINE",
+          "DL-ketamine",
+          "Ketaset",
+          "Ketamina",
+          "Ketaminum",
+          "Purple",
+          "Ketanest",
+          "Ketamine Hydrochloride",
+          "2-(2-Chloro-phenyl)-2-methylamino-cyclohexanone",
+          "K",
+          "(\u00b1)-ketamine",
+          "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
+          "Calipsol",
+          "Jet",
+          "Super Acid",
+          "Cat Valium",
+          "(+-)-Ketamine",
+          "Super K",
+          "Keta",
+          "Special La Coke",
+          "Vitamin K",
+          "CI-581",
+          "Special K",
+          "Kit Kat",
+          "Ketalar",
+          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone"
+        ],
+        "description": "A cyclohexanone derivative used for induction of anesthesia. Its mechanism of action is not well understood, but ketamine can block NMDA receptors (RECEPTORS, N-METHYL-D-ASPARTATE) and may interact with sigma receptors.\n    ",
+        "type": "Concept",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [
+            {
+              "label": "Amines",
+              "id": "m6ek9fgg",
+              "relationshipType": ""
+            }
+          ],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": []
+        },
+        "sameAs": [
+          "ufz7k5zq",
+          "t77hfer4",
+          "a229u886",
+          "fgvb8zzh",
+          "mtsv24xk"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a22auf32",
+    "_source": {
+      "query": {
+        "id": "a22auf32",
+        "identifiers": [
+          {
+            "value": "n77000627",
+            "identifierType": "lc-names"
+          }
+        ],
+        "label": "South Cambridgeshire (England)",
+        "alternativeLabels": [
+          "South Cambridgeshire, Eng.",
+          "South Cambridgeshire (Cambridgeshire)"
+        ],
+        "type": "Place"
+      },
+      "display": {
+        "id": "a22auf32",
+        "identifiers": [
+          {
+            "value": "n77000627",
+            "type": "Identifier",
+            "identifierType": {
+              "id": "lc-names",
+              "label": "Library of Congress Name authority records",
+              "type": "IdentifierType"
+            }
+          }
+        ],
+        "label": "South Cambridgeshire (England)",
+        "alternativeLabels": [
+          "South Cambridgeshire, Eng.",
+          "South Cambridgeshire (Cambridgeshire)"
+        ],
+        "description": null,
+        "type": "Place",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": [
+            {
+              "label": "Public Health",
+              "id": "uj4hz4ct",
+              "relationshipType": ""
+            },
+            {
+              "label": "Sanitation",
+              "id": "eva7r2dw",
+              "relationshipType": ""
+            },
+            {
+              "label": "Water Supply",
+              "id": "gtf5s7h7",
+              "relationshipType": ""
+            },
+            {
+              "label": "Disease Outbreaks",
+              "id": "d6jhgxuc",
+              "relationshipType": ""
+            },
+            {
+              "label": "Electronic books",
+              "id": "kqkakf66",
+              "relationshipType": ""
+            }
+          ]
+        },
+        "sameAs": [
+          "a22auf32"
+        ]
+      }
+    }
+  },
+  {
+    "_index": "concepts-indexed",
+    "_id": "a22d6ehy",
+    "_source": {
+      "query": {
+        "id": "a22d6ehy",
+        "identifiers": [
+          {
+            "value": "n50002094",
+            "identifierType": "lc-names"
+          }
+        ],
+        "label": "Orel, Harold, 1926-2017",
+        "alternativeLabels": [],
+        "type": "Person"
+      },
+      "display": {
+        "id": "a22d6ehy",
+        "identifiers": [
+          {
+            "value": "n50002094",
+            "type": "Identifier",
+            "identifierType": {
+              "id": "lc-names",
+              "label": "Library of Congress Name authority records",
+              "type": "IdentifierType"
+            }
+          }
+        ],
+        "label": "Orel, Harold, 1926-2017",
+        "alternativeLabels": [],
+        "description": null,
+        "type": "Person",
+        "relatedConcepts": {
+          "relatedTo": [],
+          "fieldsOfWork": [],
+          "narrowerThan": [],
+          "broaderThan": [],
+          "people": [],
+          "referencedTogether": [
+            {
+              "label": "History, 19th Century",
+              "id": "dtr393ay",
+              "relationshipType": ""
+            }
+          ]
+        },
+        "sameAs": [
+          "a22d6ehy"
+        ]
+      }
+    }
+  }
+]

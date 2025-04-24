@@ -75,7 +75,8 @@ class BaseNeptuneClient:
     ) -> list[dict]:
         """Runs an openCypher query against the Neptune cluster. Automatically retries up to 5 times
         to mitigate transient errors."""
-        payload: dict = {"query": query}
+        compact_query = " ".join(query.split())
+        payload: dict = {"query": compact_query}
         if parameters is not None:
             payload["parameters"] = parameters
 
