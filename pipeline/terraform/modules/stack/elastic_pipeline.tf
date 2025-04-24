@@ -132,7 +132,6 @@ module "pipeline_indices" {
 }
 
 locals {
-  indices = module.pipeline_indices.index_names
   service_index_permissions = {
     read_only = {
       read  = ["*"]
@@ -140,54 +139,54 @@ locals {
     }
     transformer = {
       read  = []
-      write = [local.indices.source]
+      write = [local.es_works_source_index]
     }
     id_minter = {
-      read  = [local.indices.source]
-      write = [local.indices.works_identified]
+      read  = [local.es_works_source_index]
+      write = [local.es_works_identified_index]
     }
     matcher = {
-      read  = [local.indices.works_identified]
+      read  = [local.es_works_identified_index]
       write = []
     }
     merger = {
-      read  = [local.indices.works_identified]
-      write = [local.indices.works_merged, local.indices.images_initial]
+      read  = [local.es_works_identified_index]
+      write = [local.es_works_merged_index, local.es_images_initial_index]
     }
     router = {
-      read  = [local.indices.works_merged]
-      write = [local.indices.denormalised]
+      read  = [local.es_works_merged_index]
+      write = [local.es_works_denormalised_index]
     }
     path_concatenator = {
-      read  = [local.indices.works_merged]
-      write = [local.indices.works_merged]
+      read  = [local.es_works_merged_index]
+      write = [local.es_works_merged_index]
     }
     relation_embedder = {
-      read  = [local.indices.works_merged]
-      write = [local.indices.denormalised]
+      read  = [local.es_works_merged_index]
+      write = [local.es_works_denormalised_index]
     }
     work_ingestor = {
-      read  = [local.indices.denormalised]
-      write = [local.indices.works_indexed]
+      read  = [local.es_works_denormalised_index]
+      write = [local.es_works_index]
     }
     inferrer = {
-      read  = [local.indices.images_initial]
-      write = [local.indices.images_augmented]
+      read  = [local.es_images_initial_index]
+      write = [local.es_images_augmented_index]
     }
     image_ingestor = {
-      read  = [local.indices.images_augmented]
-      write = [local.indices.images_indexed]
+      read  = [local.es_images_augmented_index]
+      write = [local.es_images_index]
     }
     concept_ingestor = {
       read  = ["${local.es_concepts_index_prefix}*"]
       write = ["${local.es_concepts_index_prefix}*"]
     }
     snapshot_generator = {
-      read  = [local.indices.works_indexed, local.indices.images_indexed]
+      read  = [local.es_works_index, local.es_images_index]
       write = []
     }
     catalogue_api = {
-      read  = [local.indices.works_indexed, local.indices.images_indexed]
+      read  = [local.es_works_index, local.es_images_index]
       write = []
     }
     concepts_api = {

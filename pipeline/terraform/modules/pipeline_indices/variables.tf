@@ -7,7 +7,6 @@ variable "es_works_merged_index" {
 variable "es_works_identified_index" {
   type = string
 }
-
 variable "es_works_denormalised_index" {
   type = string
 }
@@ -26,11 +25,9 @@ variable "es_images_augmented_index" {
 variable "es_images_index" {
   type = string
 }
-
 variable "es_config_path" {
   type = string
 }
-
 
 variable "index_config" {
   type = object({
