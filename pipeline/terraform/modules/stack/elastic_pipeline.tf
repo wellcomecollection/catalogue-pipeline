@@ -190,6 +190,10 @@ locals {
       write = []
     }
     concepts_api = {
+      read  = ["${local.es_concepts_index_prefix}-2025-03-06"]
+      write = []
+    }
+    concepts_api_new = {
       read  = ["${local.es_concepts_index_prefix}*"]
       write = []
     }
