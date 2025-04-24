@@ -1,6 +1,6 @@
 import argparse
 import typing
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import polars as pl
 
@@ -80,6 +80,11 @@ def log_ids(
     new_data = pl.DataFrame(ids_with_timestamp, schema=IDS_LOG_SCHEMA)
 
     df = pl.concat([df, new_data], how="vertical")
+
+    # Remove all IDs older than 1 year to prevent the file from getting too large
+    one_year_ago = datetime.now() - timedelta(days=365)
+    df = df.filter(pl.col("timestamp") >= one_year_ago)
+
     df_to_s3_parquet(df, s3_file_uri)
 
 
