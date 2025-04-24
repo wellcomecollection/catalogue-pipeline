@@ -236,7 +236,7 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   name = "read_only"
 
   indices {
-    names      = ["*"]
+    names      = ["images*", "concepts*", "works*"]
     privileges = ["read"]
   }
 }
