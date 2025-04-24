@@ -27,6 +27,7 @@ resource "aws_iam_role_policy" "index_remover_lambda_read_secrets_policy" {
   policy = data.aws_iam_policy_document.allow_secret_read.json
 }
 
+# Allow the Lambda to write the 'last_index_remover_run_date.txt' file
 resource "aws_iam_role_policy" "index_remover_lambda_s3_write_policy" {
   role   = module.index_remover_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.ingestor_s3_write.json
@@ -55,4 +56,3 @@ data "aws_iam_policy_document" "index_remover_s3_policy" {
     ]
   }
 }
-
