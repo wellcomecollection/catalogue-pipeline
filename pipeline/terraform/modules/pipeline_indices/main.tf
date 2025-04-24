@@ -59,6 +59,7 @@ module "works_indexed_index" {
   allow_delete  = var.allow_delete
 }
 
+# For each concepts index date, create a separate index with the corresponding mappings name
 module "concepts_indexed_indexes" {
   for_each = var.index_config.concepts.indexed
 
