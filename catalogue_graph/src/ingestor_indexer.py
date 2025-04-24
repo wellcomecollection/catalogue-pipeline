@@ -8,12 +8,13 @@ import boto3
 import elasticsearch.helpers
 import polars as pl
 import smart_open
+from polars import DataFrame
+from pydantic import BaseModel
+
 import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
-from polars import DataFrame
-from pydantic import BaseModel
 
 
 class IngestorIndexerObject(BaseModel):
@@ -51,10 +52,10 @@ def transform_data(df: DataFrame) -> list[IndexableConcept]:
 
 
 def load_data(
-        concepts: list[IndexableConcept],
-        pipeline_date: str | None,
-        index_date: str | None,
-        is_local: bool,
+    concepts: list[IndexableConcept],
+    pipeline_date: str | None,
+    index_date: str | None,
+    is_local: bool,
 ) -> int:
     index_name = (
         "concepts-indexed"

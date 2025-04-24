@@ -1,13 +1,14 @@
 import json
 
 import pytest
+from test_mocks import MockCloudwatchClient, MockSmartOpen
+
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
     IngestorTriggerMonitorLambdaEvent,
     handler,
 )
-from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 
 def test_ingestor_trigger_monitor_success_no_previous() -> None:

@@ -1,9 +1,10 @@
 import pytest
 from freezegun import freeze_time
+from test_mocks import MockRequest
+
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger import IngestorTriggerConfig, IngestorTriggerLambdaEvent, handler
 from ingestor_trigger_monitor import IngestorTriggerMonitorLambdaEvent
-from test_mocks import MockRequest
 
 
 def build_test_matrix() -> list[tuple]:

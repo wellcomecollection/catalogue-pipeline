@@ -2,14 +2,15 @@ from typing import Any
 
 import polars
 import pytest
+from test_mocks import MockElasticsearchClient, MockSmartOpen
+from test_utils import load_fixture
+
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:
@@ -18,7 +19,7 @@ def test_ingestor_indexer_success() -> None:
         index_date="2025-01-01",
         object_to_index=IngestorIndexerObject(
             s3_uri="s3://test-catalogue-graph/00000000-00000004.parquet"
-        )
+        ),
     )
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000004.parquet",
@@ -152,7 +153,7 @@ def build_test_matrix() -> list[tuple]:
                 index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/ghost-file"
-                )
+                ),
             ),
             None,
             KeyError,

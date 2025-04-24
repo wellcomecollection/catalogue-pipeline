@@ -1,13 +1,14 @@
 import json
 
 import pytest
+from test_mocks import MockCloudwatchClient, MockSmartOpen
+
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from ingestor_loader_monitor import (
     IngestorLoaderMonitorConfig,
     IngestorLoaderMonitorLambdaEvent,
     handler,
 )
-from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 
 def test_ingestor_loader_monitor_success_no_previous() -> None:
@@ -244,7 +245,6 @@ def test_ingestor_loader_monitor_force_pass() -> None:
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
                 index_date="2025-01-01",
-                
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",

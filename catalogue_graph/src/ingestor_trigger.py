@@ -5,6 +5,8 @@ import datetime
 import pprint
 import typing
 
+from pydantic import BaseModel
+
 from config import INGESTOR_SHARD_SIZE
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
@@ -14,7 +16,6 @@ from ingestor_trigger_monitor import (
 from ingestor_trigger_monitor import (
     handler as trigger_monitor_handler,
 )
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -51,7 +52,11 @@ def extract_data(is_local: bool) -> int:
 
 
 def transform_data(
-    record_count: int, shard_size: int, job_id: str | None, pipeline_date: str | None, index_date: str | None
+    record_count: int,
+    shard_size: int,
+    job_id: str | None,
+    pipeline_date: str | None,
+    index_date: str | None,
 ) -> list[IngestorLoaderLambdaEvent]:
     print("Transforming record count to shard ranges ...")
 
@@ -152,7 +157,9 @@ def local_handler() -> None:
 
     args = parser.parse_args()
 
-    event = IngestorTriggerLambdaEvent(job_id=args.job_id, pipeline_date=args.pipeline, index_date=args.index_date)
+    event = IngestorTriggerLambdaEvent(
+        job_id=args.job_id, pipeline_date=args.pipeline, index_date=args.index_date
+    )
     config = IngestorTriggerConfig(is_local=True)
 
     result = handler(event, config)
