@@ -1,7 +1,7 @@
 module "index_remover_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-index-remover"
+  name        = "catalogue-graph-index-remover"
   description = "Removes concepts which no longer exist in the catalogue graph from the Elasticsearch index."
   runtime     = "python3.13"
   publish     = true
