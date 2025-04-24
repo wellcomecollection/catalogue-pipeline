@@ -211,7 +211,8 @@ locals {
   catalogue_account_services = toset([
     "catalogue_api",
     "snapshot_generator",
-    "concepts_api"
+    "concepts_api",
+    "concepts_api_new"
   ])
 }
 
