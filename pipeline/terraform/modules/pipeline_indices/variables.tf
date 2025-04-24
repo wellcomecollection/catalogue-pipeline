@@ -14,8 +14,8 @@ variable "es_works_denormalised_index" {
 variable "es_works_index" {
   type = string
 }
-variable "es_concepts_index_dates" {
-  type = list(string)
+variable "es_concepts_index_prefix" {
+  type = string
 }
 variable "es_images_initial_index" {
   type = string
@@ -41,7 +41,7 @@ variable "index_config" {
     })
 
     concepts = object({
-      indexed = string
+      indexed = map(string)
     })
 
     images = object({

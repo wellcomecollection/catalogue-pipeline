@@ -20,7 +20,10 @@ module "pipeline" {
       works_analysis = "works_indexed.2024-11-06"
     }
     concepts = {
-      indexed = "concepts_indexed.2025-03-10"
+      indexed = {
+        "2025-03-06" = "concepts_indexed.2025-03-10"
+        "2025-04-24" = "concepts_indexed.2025-03-10"
+      }
     }
   }
 
@@ -33,3 +36,9 @@ module "pipeline" {
     aws.catalogue = aws.catalogue
   }
 }
+
+moved {
+  from =  module.pipeline.module.pipeline_indices.module.concepts_indexed_index.elasticstack_elasticsearch_index.the_index
+  to   = module.pipeline.module.pipeline_indices.module.concepts_indexed_indexes["2025-03-06"].elasticstack_elasticsearch_index.the_index
+}
+

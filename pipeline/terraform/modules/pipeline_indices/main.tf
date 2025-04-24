@@ -59,12 +59,12 @@ module "works_indexed_index" {
   allow_delete  = var.allow_delete
 }
 
-module "es_index" {
-  for_each = toset(var.es_concepts_index_dates)
+module "concepts_indexed_indexes" {
+  for_each = var.index_config.concepts.indexed
 
   source        = "../es_index"
-  name          = "concepts-indexed-${each.key}"
-  mappings_name = var.index_config["concepts"]["indexed"]
+  name          = "${var.es_concepts_index_prefix}-${each.key}"
+  mappings_name = each.value
   config_path   = var.es_config_path
   allow_delete  = var.allow_delete
 }
