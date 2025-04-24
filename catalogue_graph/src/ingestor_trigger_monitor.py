@@ -2,16 +2,16 @@ import typing
 
 import boto3
 import smart_open
-from pydantic import BaseModel
-
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_loader import IngestorLoaderLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
+from pydantic import BaseModel
 
 
 class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
     pipeline_date: str | None = None
+    index_date: str | None = None
     events: list[IngestorLoaderLambdaEvent]
 
 
@@ -26,6 +26,7 @@ class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
 class TriggerReport(BaseModel):
     record_count: int
     pipeline_date: str
+    index_date: str
     job_id: str
 
 
@@ -33,6 +34,7 @@ def run_check(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> TriggerReport:
     pipeline_date = event.pipeline_date or "dev"
+    index_date = event.index_date or "dev"
     force_pass = config.force_pass or event.force_pass
 
     loader_events = event.events
@@ -50,7 +52,7 @@ def run_check(
     record_count = max([e.end_index for e in loader_events])
 
     current_report = TriggerReport(
-        record_count=record_count, job_id=job_id, pipeline_date=pipeline_date
+        record_count=record_count, job_id=job_id, pipeline_date=pipeline_date, index_date=index_date
     )
 
     s3_report_name = "report.trigger.json"

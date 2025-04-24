@@ -108,6 +108,7 @@ def handler(
 
     return IngestorIndexerLambdaEvent(
         pipeline_date=event.pipeline_date,
+        index_date=event.index_date,
         job_id=event.job_id,
         object_to_index=result,
     )
@@ -146,6 +147,13 @@ def local_handler() -> None:
         "--pipeline-date",
         type=str,
         help='The pipeline that is being ingested to, will default to "dev".',
+        required=False,
+        default="dev",
+    )
+    parser.add_argument(
+        "--index-date",
+        type=str,
+        help='"The concepts index date that is being ingested to, will default to "dev".',
         required=False,
         default="dev",
     )

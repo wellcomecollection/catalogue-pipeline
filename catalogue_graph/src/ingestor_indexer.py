@@ -118,7 +118,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The index date that is being ingested to, will default to None.",
+        help="The concepts index date that is being ingested to, will default to None.",
         required=False,
     )
     args = parser.parse_args()

@@ -5,8 +5,6 @@ import datetime
 import pprint
 import typing
 
-from pydantic import BaseModel
-
 from config import INGESTOR_SHARD_SIZE
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
@@ -16,12 +14,14 @@ from ingestor_trigger_monitor import (
 from ingestor_trigger_monitor import (
     handler as trigger_monitor_handler,
 )
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
 class IngestorTriggerLambdaEvent(BaseModel):
     job_id: str | None = None
     pipeline_date: str | None = None
+    index_date: str | None = None
 
 
 class IngestorTriggerConfig(BaseModel):
@@ -51,7 +51,7 @@ def extract_data(is_local: bool) -> int:
 
 
 def transform_data(
-    record_count: int, shard_size: int, job_id: str | None, pipeline_date: str | None
+    record_count: int, shard_size: int, job_id: str | None, pipeline_date: str | None, index_date: str | None
 ) -> list[IngestorLoaderLambdaEvent]:
     print("Transforming record count to shard ranges ...")
 
@@ -70,6 +70,7 @@ def transform_data(
                 start_offset=start_offset,
                 end_index=end_index,
                 pipeline_date=pipeline_date,
+                index_date=index_date,
             )
         )
 
@@ -89,12 +90,14 @@ def handler(
         shard_size=config.shard_size,
         job_id=event.job_id,
         pipeline_date=event.pipeline_date,
+        index_date=event.index_date,
     )
 
     print(f"Shard ranges ({len(transformed_data)}) generated successfully.")
 
     return IngestorTriggerMonitorLambdaEvent(
         pipeline_date=event.pipeline_date,
+        index_date=event.index_date,
         events=transformed_data,
     )
 
@@ -120,6 +123,13 @@ def local_handler() -> None:
         required=False,
     )
     parser.add_argument(
+        "--index-date",
+        type=str,
+        help='"The concepts index date that is being ingested to, will default to "dev".',
+        required=False,
+        default="dev",
+    )
+    parser.add_argument(
         "--monitoring",
         action=argparse.BooleanOptionalAction,
         help="Whether to enable monitoring, will default to False.",
@@ -142,7 +152,7 @@ def local_handler() -> None:
 
     args = parser.parse_args()
 
-    event = IngestorTriggerLambdaEvent(job_id=args.job_id, pipeline_date=args.pipeline)
+    event = IngestorTriggerLambdaEvent(job_id=args.job_id, pipeline_date=args.pipeline, index_date=args.index_date)
     config = IngestorTriggerConfig(is_local=True)
 
     result = handler(event, config)
