@@ -6,7 +6,6 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Identified, Merged}
-//import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.TestWith
