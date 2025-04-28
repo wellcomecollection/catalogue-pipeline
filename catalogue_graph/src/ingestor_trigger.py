@@ -5,6 +5,8 @@ import datetime
 import pprint
 import typing
 
+from pydantic import BaseModel
+
 from config import INGESTOR_SHARD_SIZE
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
@@ -14,7 +16,6 @@ from ingestor_trigger_monitor import (
 from ingestor_trigger_monitor import (
     handler as trigger_monitor_handler,
 )
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
