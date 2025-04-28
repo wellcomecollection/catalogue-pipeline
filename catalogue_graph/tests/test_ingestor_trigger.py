@@ -1,9 +1,10 @@
 import pytest
 from freezegun import freeze_time
+from test_mocks import MockRequest
+
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger import IngestorTriggerConfig, IngestorTriggerLambdaEvent, handler
 from ingestor_trigger_monitor import IngestorTriggerMonitorLambdaEvent
-from test_mocks import MockRequest
 
 
 def get_mock_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
@@ -12,7 +13,9 @@ def get_mock_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
     )
 
 
-def get_mock_loader_event(job_id: str | None, start_offset: int, end_index: int) -> IngestorLoaderLambdaEvent:
+def get_mock_loader_event(
+    job_id: str | None, start_offset: int, end_index: int
+) -> IngestorLoaderLambdaEvent:
     return IngestorLoaderLambdaEvent(
         **dict(get_mock_trigger_event(job_id)),
         start_offset=start_offset,
@@ -67,19 +70,21 @@ def build_test_matrix() -> list[tuple]:
             get_mock_trigger_event("123"),
             IngestorTriggerConfig(),
             {"pipeline_date": "2025-01-01", "results": [{"count": 1001}]},
-            get_mock_trigger_monitor_event([
-                get_mock_loader_event("123", 0, 1000),
-                get_mock_loader_event("123", 1000, 1001)
-            ]),
+            get_mock_trigger_monitor_event(
+                [
+                    get_mock_loader_event("123", 0, 1000),
+                    get_mock_loader_event("123", 1000, 1001),
+                ]
+            ),
         ),
         (
             "job_id not set, shard_size > results count",
             get_mock_trigger_event(None),
             IngestorTriggerConfig(shard_size=100),
             {"results": [{"count": 1}]},
-            get_mock_trigger_monitor_event([
-                get_mock_loader_event("20120101T0000", 0, 1)
-            ]),
+            get_mock_trigger_monitor_event(
+                [get_mock_loader_event("20120101T0000", 0, 1)]
+            ),
         ),
     ]
 
