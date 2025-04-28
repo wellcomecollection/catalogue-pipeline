@@ -27,9 +27,12 @@ class LoaderReport(BaseModel):
     total_file_size: int
 
 
-def validate_events(events: list[IngestorIndexerLambdaEvent]):
+def validate_events(events: list[IngestorIndexerLambdaEvent]) -> None:
     distinct_pipeline_dates = {e.pipeline_date or "dev" for e in events}
     assert len(distinct_pipeline_dates) == 1, "pipeline_date mismatch! Stopping."
+
+    distinct_index_dates = {e.index_date or "dev" for e in events}
+    assert len(distinct_index_dates) == 1, "index_date mismatch! Stopping."
 
     distinct_job_ids = {e.job_id for e in events}
     assert len(distinct_job_ids) == 1, "job_id mismatch! Stopping."
@@ -58,8 +61,8 @@ def run_check(
 
     validate_events(event.events)
 
-    sum_file_size = sum([e.object_to_index.content_length for e in event.events])
-    sum_record_count = sum([e.object_to_index.record_count for e in event.events])
+    sum_file_size = sum((e.object_to_index.content_length or 0) for e in event.events)
+    sum_record_count = sum((e.object_to_index.record_count or 0) for e in event.events)
 
     current_report = LoaderReport(
         pipeline_date=pipeline_date,
@@ -104,6 +107,7 @@ def report_results(
 ) -> None:
     dimensions = {
         "pipeline_date": report.pipeline_date,
+        "index_date": report.index_date,
         "step": "ingestor_loader_monitor",
         "job_id": report.job_id,
     }

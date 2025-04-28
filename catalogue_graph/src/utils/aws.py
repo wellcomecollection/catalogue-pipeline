@@ -130,6 +130,6 @@ def pydantic_from_s3_json(model_type: Type[PydanticModelType] , s3_uri: str, ign
         # if file does not exist, ignore
         if ignore_missing:
             print(f"S3 file not found: {e}")
-            return
+            return None
         
         raise
