@@ -2,6 +2,7 @@ import json
 
 import pytest
 from test_utils import load_fixture
+
 from transformers.loc.raw_concept import RawLibraryOfCongressConcept
 
 
@@ -237,7 +238,7 @@ class TestBroaderConcepts:
             "madsrdf:hasBroaderAuthority": [
                 {"@id": "http://id.loc.gov/authorities/subjects/sh85129334"},
                 {"@id": "http://id.loc.gov/authorities/subjects/sh85068533"},
-            ]
+            ],
         }
         assert set(concept.broader_concept_ids) == {
             "sh85129334",
@@ -245,7 +246,6 @@ class TestBroaderConcepts:
             "sh85098685",
             "sh99001366",
         }
-        
 
 
 class TestRelatedConcepts:
@@ -320,6 +320,7 @@ class TestNarrower:
             }
         }
         assert concept.narrower_concept_ids == ["sh00000029"]
+
 
 def test_alternative_labels() -> None:
     concept = RawLibraryOfCongressConcept(
