@@ -104,6 +104,7 @@ def report_results(
 ) -> None:
     dimensions = {
         "pipeline_date": report.pipeline_date,
+        "index_date": report.index_date,
         "step": "ingestor_loader_monitor",
         "job_id": report.job_id,
     }
