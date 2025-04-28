@@ -1,6 +1,7 @@
 import json
 import os
 import typing
+from itertools import batched
 
 import backoff
 import boto3
@@ -12,6 +13,9 @@ NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES"
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
 
 DELETE_BATCH_SIZE = 10000
+
+# Deleting by ID is more costly than deleting by label, so we need to use a smaller batch size to make it work.
+ID_DELETE_BATCH_SIZE = 1000
 
 ALLOW_DATABASE_RESET = False
 
@@ -51,7 +55,6 @@ class BaseNeptuneClient:
         assert credentials is not None
 
         client_url = self._get_client_url()
-
         url = f"{client_url}{relative_url}"
         headers = {"Host": self.neptune_endpoint, "Content-Type": "application/json"}
         data = json.dumps(payload or {})
@@ -170,39 +173,45 @@ class BaseNeptuneClient:
     def delete_nodes_by_id(self, ids: list[str]) -> None:
         """Removes all nodes with the specified ids from the graph."""
         delete_query = """
-            MATCH (n)
-            WHERE n.id IN $nodeIds
-            WITH collect(n) AS nodes, count(n) AS deletedCount
-            UNWIND nodes AS node
-            DETACH DELETE node
-            WITH max(deletedCount) AS deletedCount
-            RETURN deletedCount
+            MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE node
         """
-        response = self.run_open_cypher_query(delete_query, {"nodeIds": ids})
 
-        deleted_count = response[0]["deletedCount"]
+        previous_node_count = self.get_total_node_count()
+        
+        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
+            self.run_open_cypher_query(delete_query, {"nodeIds": batch})
+            print(f"Deleted a batch of nodes. Batch size: {ID_DELETE_BATCH_SIZE}")
 
-        if deleted_count is None:
-            print("No matching node ids found in the graph.")
-        else:
-            print(f"Successfully deleted {deleted_count} nodes from the graph.")
+        total_deleted = previous_node_count - self.get_total_node_count()
+        print(f"Successfully deleted a total of {total_deleted} nodes from the graph.")
 
     def delete_edges_by_id(self, ids: list[str]) -> None:
         """Removes all edges with the specified ids from the graph."""
         delete_query = """
-            MATCH ()-[edge]-()
-            WHERE id(edge) IN $edgeIds
-            WITH collect(edge) AS edges, count(edge) AS deletedCount
-            UNWIND edges AS edge
-            DELETE edge
-            WITH max(deletedCount) AS deletedCount
-            RETURN deletedCount
+            MATCH ()-[edge]-() WHERE id(edge) IN $edgeIds DELETE edge
         """
-        response = self.run_open_cypher_query(delete_query, {"edgeIds": ids})
+        
+        previous_edge_count = self.get_total_edge_count()
+        
+        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
+            self.run_open_cypher_query(delete_query, {"edgeIds": list(batch)})
+            print(f"Deleted a batch of edges. Batch size: {ID_DELETE_BATCH_SIZE}")
 
-        deleted_count = response[0]["deletedCount"]
+        total_deleted = previous_edge_count - self.get_total_edge_count()
+        print(f"Successfully deleted a total of {total_deleted} edges from the graph.")        
+    
+    def get_total_edge_count(self) -> int:
+        query = """
+            MATCH ()-[e]-() RETURN count(e) AS edgeCount
+        """
 
-        if deleted_count is None:
-            print("No matching edge ids found in the graph.")
-        else:
-            print(f"Successfully deleted {deleted_count} edges from the graph.")
+        edge_count: int = self.run_open_cypher_query(query)[0]["edgeCount"]
+        return edge_count
+
+    def get_total_node_count(self) -> int:
+        query = """
+            MATCH (n) RETURN count(n) AS nodeCount
+        """
+
+        node_count: int = self.run_open_cypher_query(query)[0]["nodeCount"]
+        return node_count
