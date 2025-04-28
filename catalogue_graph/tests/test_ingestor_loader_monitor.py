@@ -1,14 +1,13 @@
 import json
 
 import pytest
-from test_mocks import MockCloudwatchClient, MockSmartOpen
-
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from ingestor_loader_monitor import (
     IngestorLoaderMonitorConfig,
     IngestorLoaderMonitorLambdaEvent,
     handler,
 )
+from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 
 def test_ingestor_loader_monitor_success_no_previous() -> None:
@@ -86,6 +85,7 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
         json.dumps(
             {
                 "pipeline_date": "XXX",
+                "index_date": "XXX",
                 "job_id": "XXX",
                 "record_count": 300,
                 "total_file_size": 3000,
@@ -162,6 +162,7 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
         json.dumps(
             {
                 "pipeline_date": "XXX",
+                "index_date": "XXX",
                 "job_id": "XXX",
                 "record_count": 300,
                 "total_file_size": 3000,
@@ -220,6 +221,7 @@ def test_ingestor_loader_monitor_force_pass() -> None:
         json.dumps(
             {
                 "pipeline_date": "XXX",
+                "index_date": "XXX",
                 "job_id": "XXX",
                 "record_count": 300,
                 "total_file_size": 3000,
