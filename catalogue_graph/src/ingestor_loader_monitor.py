@@ -4,6 +4,7 @@ from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
 from pydantic import BaseModel, typing
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
+from utils.safety import validate_fractional_change
 
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -72,25 +73,21 @@ def run_check(
     s3_url_current_job = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
     s3_url_latest = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
 
-    # open with smart_open, check for file existence
-    latest_report = pydantic_from_s3_json(LoaderReport, s3_url_latest, ignore_missing=True)
+    # Load the latest report
+    latest_report = pydantic_from_s3_json(
+        LoaderReport, s3_url_latest, ignore_missing=True
+    )
 
     if latest_report is not None:
         # check if the sum file size has changed by more than the threshold,
         # we are ignoring the record count for now, as this will be the same as the trigger step
         delta = current_report.total_file_size - latest_report.total_file_size
-        percentage = abs(delta) / latest_report.total_file_size
-
-        if percentage > config.percentage_threshold:
-            error_message = f"Percentage change {percentage} exceeds threshold {config.percentage_threshold}!"
-            if force_pass:
-                print(f"Force pass enabled: {error_message}, but continuing.")
-            else:
-                raise ValueError(error_message)
-        else:
-            print(
-                f"Percentage change {percentage} ({delta}/{latest_report.total_file_size}) is within threshold {config.percentage_threshold}."
-            )
+        validate_fractional_change(
+            modified_size=delta,
+            total_size=latest_report.total_file_size,
+            fractional_threshold=config.percentage_threshold,
+            force_pass=force_pass,
+        )
 
     # write the current report to s3 as latest
     pydantic_to_s3_json(current_report, s3_url_latest)

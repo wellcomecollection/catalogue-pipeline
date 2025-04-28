@@ -6,6 +6,7 @@ from ingestor_loader import IngestorLoaderLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
 from pydantic import BaseModel
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
+from utils.safety import validate_fractional_change
 
 
 class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -67,18 +68,12 @@ def run_check(
     if latest_report is not None:
         # check if the record_count has changed by more than the threshold
         delta = current_report.record_count - latest_report.record_count
-        percentage = abs(delta) / latest_report.record_count
-
-        if percentage > config.percentage_threshold:
-            error_message = f"Percentage change {percentage} exceeds threshold {config.percentage_threshold}!"
-            if force_pass:
-                print(f"Force pass enabled: {error_message}, but continuing.")
-            else:
-                raise ValueError(error_message)
-        else:
-            print(
-                f"Percentage change {percentage} ({delta}/{latest_report.record_count}) is within threshold {config.percentage_threshold}."
-            )
+        validate_fractional_change(
+            modified_size=delta,
+            total_size=latest_report.record_count,
+            fractional_threshold=config.percentage_threshold,
+            force_pass=force_pass,
+        )
 
     # write the current report to s3 as latest
     pydantic_to_s3_json(current_report, s3_url_latest)
