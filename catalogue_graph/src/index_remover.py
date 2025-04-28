@@ -2,9 +2,10 @@ import argparse
 import typing
 from datetime import date, datetime
 
-import config
 import polars as pl
 import smart_open
+
+import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from utils.aws import df_from_s3_parquet

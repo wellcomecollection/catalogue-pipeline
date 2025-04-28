@@ -2,8 +2,9 @@ import argparse
 import typing
 from datetime import datetime, timedelta
 
-import config
 import polars as pl
+
+import config
 from transformers.create_transformer import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
@@ -131,11 +132,11 @@ def handler(
             f"   Deleted ids: {len(deleted_ids)}\n",
             f"   Added ids: {len(added_ids)}",
         )
-    
+
     if len(previous_ids) > 0:
         validate_fractional_change(
             modified_size=len(deleted_ids),
-            total_size= len(previous_ids),
+            total_size=len(previous_ids),
             fractional_threshold=ACCEPTABLE_DIFF_THRESHOLD,
             force_pass=disable_safety_check,
         )

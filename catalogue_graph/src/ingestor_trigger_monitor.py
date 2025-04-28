@@ -1,10 +1,11 @@
 import typing
 
+from pydantic import BaseModel
+
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_loader import IngestorLoaderLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
-from pydantic import BaseModel
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
 
@@ -28,7 +29,7 @@ class TriggerReport(BaseModel):
     pipeline_date: str
     index_date: str
     job_id: str
-    
+
 
 def run_check(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
@@ -63,7 +64,9 @@ def run_check(
     s3_url_latest = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
 
     # open with smart_open, check for file existence
-    latest_report = pydantic_from_s3_json(TriggerReport, s3_url_latest, ignore_missing=True)
+    latest_report = pydantic_from_s3_json(
+        TriggerReport, s3_url_latest, ignore_missing=True
+    )
 
     if latest_report is not None:
         # check if the record_count has changed by more than the threshold

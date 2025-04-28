@@ -1,8 +1,11 @@
 def validate_fractional_change(
-        modified_size: int, total_size: int, fractional_threshold: float, force_pass: bool = False
+    modified_size: int,
+    total_size: int,
+    fractional_threshold: float,
+    force_pass: bool = False,
 ) -> None:
     """
-    Check whether the modified fraction is within the `fractional_threshold`. 
+    Check whether the modified fraction is within the `fractional_threshold`.
     If not, raise an error unless `force_pass` is enabled.
     """
     fractional_diff = abs(modified_size) / total_size

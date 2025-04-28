@@ -1,13 +1,14 @@
 import json
 
 import pytest
+from test_mocks import MockCloudwatchClient, MockSmartOpen
+
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
     IngestorTriggerMonitorLambdaEvent,
     handler,
 )
-from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.trigger.json"
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.trigger.json"
@@ -120,9 +121,7 @@ def test_ingestor_trigger_monitor_failure_with_previous() -> None:
         index_date="2025-03-01",
         force_pass=False,
         report_results=True,
-        events=[
-            get_mock_ingestor_loader_event(0, 111)
-        ],
+        events=[get_mock_ingestor_loader_event(0, 111)],
     )
 
     config = IngestorTriggerMonitorConfig(percentage_threshold=0.1, is_local=True)

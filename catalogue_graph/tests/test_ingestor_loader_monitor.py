@@ -1,13 +1,14 @@
 import json
 
 import pytest
+from test_mocks import MockCloudwatchClient, MockSmartOpen
+
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from ingestor_loader_monitor import (
     IngestorLoaderMonitorConfig,
     IngestorLoaderMonitorLambdaEvent,
     handler,
 )
-from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.loader.json"
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.loader.json"
@@ -150,7 +151,7 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
                 pipeline_date="2025-01-01",
                 index_date="2025-03-01",
                 job_id="123",
-                object_to_index=get_mock_ingestor_indexer_object("file1", 800, 800),                
+                object_to_index=get_mock_ingestor_indexer_object("file1", 800, 800),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -233,7 +234,7 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
                 pipeline_date="2025-01-02",  # Different pipeline date
                 index_date="2025-03-01",
                 job_id="123",
-                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),   
+                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
         ]
     )
@@ -252,7 +253,7 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
                 pipeline_date="2025-01-01",
                 index_date="2025-03-01",
                 job_id="123",
-                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100), 
+                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
@@ -284,7 +285,7 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
                 pipeline_date="2025-01-01",
                 index_date="2025-03-01",
                 job_id="123",
-                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),                
+                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
         ]
     )
@@ -305,13 +306,12 @@ def test_ingestor_loader_monitor_empty_record_count() -> None:
                 job_id="123",
                 # Empty record count
                 object_to_index=get_mock_ingestor_indexer_object("file1", 1000, None),
-
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
                 index_date="2025-03-01",
                 job_id="123",
-                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200), 
+                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
         ]
     )

@@ -4,17 +4,17 @@ from collections.abc import Generator
 from typing import Any, TypeVar
 
 import boto3
-import config
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
+import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-from pydantic import BaseModel
-
 from utils.types import NodeType, OntologyType
 
-PydanticModelType = TypeVar('PydanticModelType', bound=BaseModel)
+PydanticModelType = TypeVar("PydanticModelType", bound=BaseModel)
 
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
@@ -114,15 +114,17 @@ def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_file_uri, "wb", transport_params=transport_params) as f:
         df.write_parquet(f)
- 
- 
+
+
 def pydantic_to_s3_json(model: BaseModel, s3_uri: str) -> None:
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
         f.write(model.model_dump_json())
 
 
-def pydantic_from_s3_json(model_type: type[PydanticModelType] , s3_uri: str, ignore_missing: bool = False) -> PydanticModelType | None:
+def pydantic_from_s3_json(
+    model_type: type[PydanticModelType], s3_uri: str, ignore_missing: bool = False
+) -> PydanticModelType | None:
     try:
         with smart_open.open(s3_uri, "r") as f:
             return model_type.model_validate_json(f.read())
@@ -131,5 +133,5 @@ def pydantic_from_s3_json(model_type: type[PydanticModelType] , s3_uri: str, ign
         if ignore_missing:
             print(f"S3 file not found: {e}")
             return None
-        
+
         raise
