@@ -1,14 +1,13 @@
 import json
 
 import pytest
-from test_mocks import MockCloudwatchClient, MockSmartOpen
-
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
     IngestorTriggerMonitorLambdaEvent,
     handler,
 )
+from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 
 def test_ingestor_trigger_monitor_success_no_previous() -> None:
@@ -17,6 +16,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
 
     event = IngestorTriggerMonitorLambdaEvent(
         pipeline_date="2025-01-01",
+        index_date="2025-01-01",
         force_pass=False,
         report_results=True,
         events=[
@@ -52,6 +52,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         "record_count": 1,
         "job_id": "123",
         "pipeline_date": "2025-01-01",
+        "index_date": "2025-01-01",
     }
 
     # assert reports are written in s3
@@ -74,12 +75,14 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
                 # Test this get overwritten
                 "job_id": "XXX",
                 "pipeline_date": "XXX",
+                "index_date": "XXX",
             }
         ),
     )
 
     event = IngestorTriggerMonitorLambdaEvent(
         pipeline_date="2025-01-01",
+        index_date="2025-01-01",
         force_pass=False,
         report_results=True,
         events=[
@@ -114,6 +117,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         "record_count": 110,
         "job_id": "123",
         "pipeline_date": "2025-01-01",
+        "index_date": "2025-01-01",
     }
 
     # assert reports are written in s3
