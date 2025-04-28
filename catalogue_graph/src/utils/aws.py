@@ -1,7 +1,7 @@
 import csv
 import json
 from collections.abc import Generator
-from typing import Any, Type, TypeVar
+from typing import Any, TypeVar
 
 import boto3
 import config
@@ -122,7 +122,7 @@ def pydantic_to_s3_json(model: BaseModel, s3_uri: str) -> None:
         f.write(model.model_dump_json())
 
 
-def pydantic_from_s3_json(model_type: Type[PydanticModelType] , s3_uri: str, ignore_missing: bool = False) -> PydanticModelType | None:
+def pydantic_from_s3_json(model_type: type[PydanticModelType] , s3_uri: str, ignore_missing: bool = False) -> PydanticModelType | None:
     try:
         with smart_open.open(s3_uri, "r") as f:
             return model_type.model_validate_json(f.read())
