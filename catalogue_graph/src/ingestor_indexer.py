@@ -4,17 +4,14 @@ import argparse
 import typing
 from collections.abc import Generator
 
-import boto3
 import elasticsearch.helpers
-import polars as pl
-import smart_open
-from polars import DataFrame
-from pydantic import BaseModel
-
 import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
+from polars import DataFrame
+from pydantic import BaseModel
+from utils.aws import df_from_s3_parquet
 
 
 class IngestorIndexerObject(BaseModel):
@@ -32,17 +29,6 @@ class IngestorIndexerLambdaEvent(BaseModel):
 
 class IngestorIndexerConfig(BaseModel):
     is_local: bool = False
-
-
-def extract_data(s3_uri: str) -> DataFrame:
-    print("Extracting data from S3 ...")
-    transport_params = {"client": boto3.client("s3")}
-
-    with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
-        df = pl.read_parquet(f)
-        print(f"Extracted {len(df)} records.")
-
-    return df
 
 
 def transform_data(df: DataFrame) -> list[IndexableConcept]:
@@ -82,7 +68,9 @@ def load_data(
 def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
     print(f"Received event: {event} with config {config}")
 
-    extracted_data = extract_data(event.object_to_index.s3_uri)
+    extracted_data = df_from_s3_parquet(event.object_to_index.s3_uri)
+    print(f"Extracted {len(extracted_data)} records.")
+
     transformed_data = transform_data(extracted_data)
     success_count = load_data(
         concepts=transformed_data,

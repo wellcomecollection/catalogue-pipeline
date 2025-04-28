@@ -1,13 +1,11 @@
 import typing
 
-import boto3
-import smart_open
-from pydantic import BaseModel
-
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_loader import IngestorLoaderLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
+from pydantic import BaseModel
+from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 
 
 class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -29,7 +27,7 @@ class TriggerReport(BaseModel):
     pipeline_date: str
     index_date: str
     job_id: str
-
+    
 
 def run_check(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
@@ -60,17 +58,11 @@ def run_check(
     )
 
     s3_report_name = "report.trigger.json"
-    s3_url_current_job = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{job_id}/{s3_report_name}"
-    s3_url_latest = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{s3_report_name}"
+    s3_url_current_job = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
+    s3_url_latest = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
 
     # open with smart_open, check for file existence
-    latest_report = None
-    try:
-        with smart_open.open(s3_url_latest, "r") as f:
-            latest_report = TriggerReport.model_validate_json(f.read())
-    # if file does not exist, ignore
-    except (OSError, KeyError) as e:
-        print(f"No latest report found: {e}")
+    latest_report = pydantic_from_s3_json(TriggerReport, s3_url_latest, ignore_missing=True)
 
     if latest_report is not None:
         # check if the record_count has changed by more than the threshold
@@ -88,17 +80,11 @@ def run_check(
                 f"Percentage change {percentage} ({delta}/{latest_report.record_count}) is within threshold {config.percentage_threshold}."
             )
 
-    transport_params = {"client": boto3.client("s3")}
-
     # write the current report to s3 as latest
-    with smart_open.open(s3_url_latest, "w", transport_params=transport_params) as f:
-        f.write(current_report.model_dump_json())
+    pydantic_to_s3_json(current_report, s3_url_latest)
 
     # write the current report to s3 as job_id
-    with smart_open.open(
-        s3_url_current_job, "w", transport_params=transport_params
-    ) as f:
-        f.write(current_report.model_dump_json())
+    pydantic_to_s3_json(current_report, s3_url_current_job)
 
     return current_report
 
@@ -109,6 +95,7 @@ def report_results(
 ) -> None:
     dimensions = {
         "pipeline_date": report.pipeline_date,
+        "index_date": report.index_date,
         "step": "ingestor_trigger_monitor",
         "job_id": report.job_id,
     }
