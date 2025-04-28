@@ -5,8 +5,6 @@ import datetime
 import pprint
 import typing
 
-from pydantic import BaseModel
-
 from config import INGESTOR_SHARD_SIZE
 from ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor_trigger_monitor import (
@@ -16,6 +14,7 @@ from ingestor_trigger_monitor import (
 from ingestor_trigger_monitor import (
     handler as trigger_monitor_handler,
 )
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -130,7 +129,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--index-date",
         type=str,
-        help='"The concepts index date that is being ingested to, will default to "dev".',
+        help='The concepts index date that is being ingested to, will default to "dev".',
         required=False,
         default="dev",
     )
