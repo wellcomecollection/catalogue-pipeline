@@ -10,32 +10,68 @@ from ingestor_loader_monitor import (
     handler,
 )
 
+MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.loader.json"
+MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.loader.json"
+
+
+def get_mock_expected_report(record_count: int, file_size: int) -> dict:
+    return {
+        "pipeline_date": "2025-01-01",
+        "index_date": "2025-03-01",
+        "job_id": "123",
+        "record_count": record_count,
+        "total_file_size": file_size,
+    }
+
+
+def get_mock_expected_metric(file_size: int) -> dict:
+    return {
+        "namespace": "catalogue_graph_ingestor",
+        "value": file_size,
+        "metric_name": "total_file_size",
+        "dimensions": {
+            "pipeline_date": "2025-01-01",
+            "index_date": "2025-03-01",
+            "job_id": "123",
+            "step": "ingestor_loader_monitor",
+        },
+    }
+
+
+def get_mock_ingestor_indexer_object(
+    file_name: str, content_length: int | None, record_count: int | None
+) -> IngestorIndexerObject:
+    return IngestorIndexerObject(
+        s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/{file_name}.parquet",
+        content_length=content_length,
+        record_count=record_count,
+    )
+
+
+def verify_s3_reports(record_count: int, file_size: int) -> None:
+    expected_report = get_mock_expected_report(record_count, file_size)
+
+    with MockSmartOpen.open(MOCK_CURRENT_JOB_S3_URI, "r") as f:
+        assert json.load(f) == expected_report
+
+    with MockSmartOpen.open(MOCK_LATEST_S3_URI, "r") as f:
+        assert json.load(f) == expected_report
+
 
 def test_ingestor_loader_monitor_success_no_previous() -> None:
-    latest_s3_url = (
-        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
-    )
-    current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
-
     event = IngestorLoaderMonitorLambdaEvent(
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
-                    content_length=1000,
-                    record_count=100,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file", 1000, 100),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
-                    content_length=2000,
-                    record_count=200,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file", 2000, 200),
             ),
         ]
     )
@@ -45,45 +81,19 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
     handler(event, config)
 
     # assert metrics are reported
-    assert MockCloudwatchClient.metrics_reported == [
-        {
-            "namespace": "catalogue_graph_ingestor",
-            "value": 3000,
-            "metric_name": "total_file_size",
-            "dimensions": {
-                "pipeline_date": "2025-01-01",
-                "job_id": "123",
-                "step": "ingestor_loader_monitor",
-            },
-        }
-    ]
-
-    expected_report = {
-        "pipeline_date": "2025-01-01",
-        "job_id": "123",
-        "record_count": 300,
-        "total_file_size": 3000,
-    }
+    assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(3000)]
 
     # assert reports are written in s3
-    with MockSmartOpen.open(current_job_s3_url, "r") as f:
-        assert json.load(f) == expected_report
-
-    with MockSmartOpen.open(latest_s3_url, "r") as f:
-        assert json.load(f) == expected_report
+    verify_s3_reports(300, 3000)
 
 
 def test_ingestor_loader_monitor_success_with_previous() -> None:
-    latest_s3_url = (
-        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
-    )
-    current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
-
     MockSmartOpen.mock_s3_file(
-        latest_s3_url,
+        MOCK_LATEST_S3_URI,
         json.dumps(
             {
                 "pipeline_date": "XXX",
+                "index_date": "XXX",
                 "job_id": "XXX",
                 "record_count": 300,
                 "total_file_size": 3000,
@@ -95,21 +105,15 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
-                    content_length=1100,
-                    record_count=110,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file", 1100, 110),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file.parquet",
-                    content_length=2100,
-                    record_count=210,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file", 2100, 210),
             ),
         ]
     )
@@ -119,45 +123,19 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
     handler(event, config)
 
     # assert metrics are reported
-    assert MockCloudwatchClient.metrics_reported == [
-        {
-            "namespace": "catalogue_graph_ingestor",
-            "value": 3200,
-            "metric_name": "total_file_size",
-            "dimensions": {
-                "pipeline_date": "2025-01-01",
-                "job_id": "123",
-                "step": "ingestor_loader_monitor",
-            },
-        }
-    ]
-
-    expected_report = {
-        "pipeline_date": "2025-01-01",
-        "job_id": "123",
-        "record_count": 320,
-        "total_file_size": 3200,
-    }
+    assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(3200)]
 
     # assert reports are written in s3
-    with MockSmartOpen.open(current_job_s3_url, "r") as f:
-        assert json.load(f) == expected_report
-
-    with MockSmartOpen.open(latest_s3_url, "r") as f:
-        assert json.load(f) == expected_report
+    verify_s3_reports(320, 3200)
 
 
 def test_ingestor_loader_monitor_failure_with_previous() -> None:
-    latest_s3_url = (
-        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
-    )
-    current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
-
     MockSmartOpen.mock_s3_file(
-        latest_s3_url,
+        MOCK_LATEST_S3_URI,
         json.dumps(
             {
                 "pipeline_date": "XXX",
+                "index_date": "XXX",
                 "job_id": "XXX",
                 "record_count": 300,
                 "total_file_size": 3000,
@@ -171,21 +149,15 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
-                    content_length=800,
-                    record_count=80,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file1", 800, 800),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
-                    content_length=1200,
-                    record_count=120,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file2", 1200, 120),
             ),
         ]
     )
@@ -193,27 +165,23 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
 
     # assert this raises a ValueError due to percentage change exceeding threshold
-    with pytest.raises(ValueError, match="Percentage change .* exceeds threshold"):
+    with pytest.raises(ValueError, match="Fractional change .* exceeds threshold"):
         handler(event, config)
 
     # assert no metrics are reported
     assert MockCloudwatchClient.metrics_reported == []
 
     # assert current report is not written in s3
-    assert current_job_s3_url not in MockSmartOpen.file_lookup
+    assert MOCK_CURRENT_JOB_S3_URI not in MockSmartOpen.file_lookup
 
 
 def test_ingestor_loader_monitor_force_pass() -> None:
-    latest_s3_url = (
-        "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/report.loader.json"
-    )
-    current_job_s3_url = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/report.loader.json"
-
     MockSmartOpen.mock_s3_file(
-        latest_s3_url,
+        MOCK_LATEST_S3_URI,
         json.dumps(
             {
                 "pipeline_date": "XXX",
+                "index_date": "XXX",
                 "job_id": "XXX",
                 "record_count": 300,
                 "total_file_size": 3000,
@@ -228,21 +196,15 @@ def test_ingestor_loader_monitor_force_pass() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
-                    content_length=800,
-                    record_count=80,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file1", 800, 80),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
-                    content_length=1200,
-                    record_count=120,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file2", 1200, 120),
             ),
         ],
     )
@@ -252,33 +214,11 @@ def test_ingestor_loader_monitor_force_pass() -> None:
     # This should not raise an exception due to force_pass=True
     handler(event, config)
 
-    expected_report = {
-        "pipeline_date": "2025-01-01",
-        "job_id": "123",
-        "record_count": 200,
-        "total_file_size": 2000,
-    }
-
     # Metrics should still be reported
-    assert MockCloudwatchClient.metrics_reported == [
-        {
-            "namespace": "catalogue_graph_ingestor",
-            "value": 2000,
-            "metric_name": "total_file_size",
-            "dimensions": {
-                "pipeline_date": "2025-01-01",
-                "job_id": "123",
-                "step": "ingestor_loader_monitor",
-            },
-        }
-    ]
+    assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(2000)]
 
-    # Reports should be written to S3
-    with MockSmartOpen.open(current_job_s3_url, "r") as f:
-        assert json.load(f) == expected_report
-
-    with MockSmartOpen.open(latest_s3_url, "r") as f:
-        assert json.load(f) == expected_report
+    # assert reports are written in s3
+    verify_s3_reports(200, 2000)
 
 
 def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
@@ -286,21 +226,15 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
-                    content_length=1000,
-                    record_count=100,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-02",  # Different pipeline date
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-02/123/file2.parquet",
-                    content_length=2000,
-                    record_count=200,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
         ]
     )
@@ -317,21 +251,15 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
-                    content_length=1000,
-                    record_count=100,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="456",  # Different job ID
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/456/file2.parquet",
-                    content_length=2000,
-                    record_count=200,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
         ]
     )
@@ -348,21 +276,16 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
-                    content_length=None,  # Empty content length
-                    record_count=100,
-                ),
+                # Empty content length
+                object_to_index=get_mock_ingestor_indexer_object("file1", None, 100),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
-                    content_length=2000,
-                    record_count=200,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
         ]
     )
@@ -379,21 +302,16 @@ def test_ingestor_loader_monitor_empty_record_count() -> None:
         events=[
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file1.parquet",
-                    content_length=1000,
-                    record_count=None,  # Empty record count
-                ),
+                # Empty record count
+                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, None),
             ),
             IngestorIndexerLambdaEvent(
                 pipeline_date="2025-01-01",
+                index_date="2025-03-01",
                 job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/123/file2.parquet",
-                    content_length=2000,
-                    record_count=200,
-                ),
+                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
         ]
     )

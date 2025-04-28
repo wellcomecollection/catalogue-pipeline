@@ -7,125 +7,83 @@ from ingestor_trigger import IngestorTriggerConfig, IngestorTriggerLambdaEvent, 
 from ingestor_trigger_monitor import IngestorTriggerMonitorLambdaEvent
 
 
+def get_mock_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
+    return IngestorTriggerLambdaEvent(
+        pipeline_date="2025-01-01", index_date="2025-03-01", job_id=job_id
+    )
+
+
+def get_mock_loader_event(
+    job_id: str | None, start_offset: int, end_index: int
+) -> IngestorLoaderLambdaEvent:
+    return IngestorLoaderLambdaEvent(
+        **dict(get_mock_trigger_event(job_id)),
+        start_offset=start_offset,
+        end_index=end_index,
+    )
+
+
+def get_mock_trigger_monitor_event(events: list) -> IngestorTriggerMonitorLambdaEvent:
+    return IngestorTriggerMonitorLambdaEvent(
+        pipeline_date="2025-01-01",
+        index_date="2025-03-01",
+        force_pass=False,
+        report_results=True,
+        events=events,
+    )
+
+
 def build_test_matrix() -> list[tuple]:
     return [
         (
             "job_id set, shard_size > results count",
-            IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
+            get_mock_trigger_event("123"),
             IngestorTriggerConfig(shard_size=100, is_local=False),
             {"results": [{"count": 1}]},
-            IngestorTriggerMonitorLambdaEvent(
-                pipeline_date="2025-01-01",
-                force_pass=False,
-                report_results=True,
-                events=[
-                    IngestorLoaderLambdaEvent(
-                        pipeline_date="2025-01-01",
-                        job_id="123",
-                        start_offset=0,
-                        end_index=1,
-                    )
-                ],
-            ),
+            get_mock_trigger_monitor_event([get_mock_loader_event("123", 0, 1)]),
         ),
         (
             "job_id set, shard_size < results count",
-            IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
+            get_mock_trigger_event("123"),
             IngestorTriggerConfig(shard_size=1, is_local=False),
             {"results": [{"count": 2}]},
-            IngestorTriggerMonitorLambdaEvent(
-                pipeline_date="2025-01-01",
-                force_pass=False,
-                report_results=True,
-                events=[
-                    IngestorLoaderLambdaEvent(
-                        pipeline_date="2025-01-01",
-                        job_id="123",
-                        start_offset=0,
-                        end_index=1,
-                    ),
-                    IngestorLoaderLambdaEvent(
-                        pipeline_date="2025-01-01",
-                        job_id="123",
-                        start_offset=1,
-                        end_index=2,
-                    ),
-                ],
+            get_mock_trigger_monitor_event(
+                [get_mock_loader_event("123", 0, 1), get_mock_loader_event("123", 1, 2)]
             ),
         ),
         (
             "job_id set, shard_size == results count",
-            IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
+            get_mock_trigger_event("123"),
             IngestorTriggerConfig(shard_size=1),
             {"results": [{"count": 1}]},
-            IngestorTriggerMonitorLambdaEvent(
-                pipeline_date="2025-01-01",
-                force_pass=False,
-                report_results=True,
-                events=[
-                    IngestorLoaderLambdaEvent(
-                        pipeline_date="2025-01-01",
-                        job_id="123",
-                        start_offset=0,
-                        end_index=1,
-                    )
-                ],
-            ),
+            get_mock_trigger_monitor_event([get_mock_loader_event("123", 0, 1)]),
         ),
         (
             "job_id set, results count == 0",
-            IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
+            get_mock_trigger_event("123"),
             IngestorTriggerConfig(shard_size=100),
-            {"pipeline_date": "2025-01-01", "results": [{"count": 0}]},
-            IngestorTriggerMonitorLambdaEvent(
-                pipeline_date="2025-01-01",
-                force_pass=False,
-                report_results=True,
-                events=[],
-            ),
+            {"results": [{"count": 0}]},
+            get_mock_trigger_monitor_event([]),
         ),
         (
             "job_id set, shard_size unset (default 1k) > results count",
-            IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id="123"),
+            get_mock_trigger_event("123"),
             IngestorTriggerConfig(),
-            {"pipeline_date": "2025-01-01", "results": [{"count": 1001}]},
-            IngestorTriggerMonitorLambdaEvent(
-                pipeline_date="2025-01-01",
-                force_pass=False,
-                report_results=True,
-                events=[
-                    IngestorLoaderLambdaEvent(
-                        pipeline_date="2025-01-01",
-                        job_id="123",
-                        start_offset=0,
-                        end_index=1000,
-                    ),
-                    IngestorLoaderLambdaEvent(
-                        pipeline_date="2025-01-01",
-                        job_id="123",
-                        start_offset=1000,
-                        end_index=1001,
-                    ),
-                ],
+            {"results": [{"count": 1001}]},
+            get_mock_trigger_monitor_event(
+                [
+                    get_mock_loader_event("123", 0, 1000),
+                    get_mock_loader_event("123", 1000, 1001),
+                ]
             ),
         ),
         (
             "job_id not set, shard_size > results count",
-            IngestorTriggerLambdaEvent(pipeline_date="2025-01-01", job_id=None),
+            get_mock_trigger_event(None),
             IngestorTriggerConfig(shard_size=100),
             {"results": [{"count": 1}]},
-            IngestorTriggerMonitorLambdaEvent(
-                pipeline_date="2025-01-01",
-                force_pass=False,
-                report_results=True,
-                events=[
-                    IngestorLoaderLambdaEvent(
-                        pipeline_date="2025-01-01",
-                        job_id="20120101T0000",
-                        start_offset=0,
-                        end_index=1,
-                    )
-                ],
+            get_mock_trigger_monitor_event(
+                [get_mock_loader_event("20120101T0000", 0, 1)]
             ),
         ),
     ]

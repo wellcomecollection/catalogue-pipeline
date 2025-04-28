@@ -12,6 +12,7 @@ from utils.aws import (
     get_csv_from_s3,
     get_neptune_client,
 )
+from utils.safety import validate_fractional_change
 
 IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
 
@@ -132,13 +133,12 @@ def handler(
             f"   Added ids: {len(added_ids)}",
         )
 
-    if (
-        len(previous_ids) > 0
-        and len(deleted_ids) / len(previous_ids) > ACCEPTABLE_DIFF_THRESHOLD
-        and not disable_safety_check
-    ):
-        raise ValueError(
-            f"Attempted to remove {len(deleted_ids)} items (out of a total of {len(previous_ids)}), which is above the safety threshold."
+    if len(previous_ids) > 0:
+        validate_fractional_change(
+            modified_size=len(deleted_ids),
+            total_size=len(previous_ids),
+            fractional_threshold=ACCEPTABLE_DIFF_THRESHOLD,
+            force_pass=disable_safety_check,
         )
 
     if len(deleted_ids) > 0:

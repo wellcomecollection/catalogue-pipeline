@@ -15,8 +15,11 @@ module "index_remover_lambda" {
   timeout     = 60 // 1 minute
 
   vpc_config = {
-    subnet_ids         = local.private_subnets
-    security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+    subnet_ids = local.private_subnets
+    security_group_ids = [
+      aws_security_group.egress.id,
+      local.ec_privatelink_security_group_id
+    ]
   }
 
   #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
@@ -25,6 +28,11 @@ module "index_remover_lambda" {
 resource "aws_iam_role_policy" "index_remover_lambda_read_secrets_policy" {
   role   = module.index_remover_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_secret_read.json
+}
+
+resource "aws_iam_role_policy" "index_remover_lambda_read_pipeline_secrets_policy" {
+  role   = module.index_remover_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read.json
 }
 
 # Allow the Lambda to write the 'last_index_remover_run_date.txt' file

@@ -259,10 +259,14 @@ def handler(
     event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
 ) -> IngestorIndexerLambdaEvent:
     print(f"Received event: {event} with config {config}")
+
+    pipeline_date = event.pipeline_date or "dev"
+    index_date = event.index_date or "dev"
+
     filename = (
         f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}.parquet"
     )
-    s3_object_key = f"{event.pipeline_date or 'dev'}/{event.job_id}/{filename}"
+    s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{filename}"
     s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
 
     extracted_data = extract_data(
@@ -276,8 +280,8 @@ def handler(
     print(f"Data loaded successfully: {result}")
 
     return IngestorIndexerLambdaEvent(
-        pipeline_date=event.pipeline_date,
-        index_date=event.index_date,
+        pipeline_date=pipeline_date,
+        index_date=index_date,
         job_id=event.job_id,
         object_to_index=result,
     )
@@ -322,7 +326,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--index-date",
         type=str,
-        help='"The concepts index date that is being ingested to, will default to "dev".',
+        help='The concepts index date that is being ingested to, will default to "dev".',
         required=False,
         default="dev",
     )
