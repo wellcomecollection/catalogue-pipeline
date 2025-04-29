@@ -16,9 +16,10 @@ from ingestor_indexer import (
 def test_ingestor_indexer_success() -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
+        index_date="2025-01-01",
         object_to_index=IngestorIndexerObject(
             s3_uri="s3://test-catalogue-graph/00000000-00000004.parquet"
-        )
+        ),
     )
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000004.parquet",
@@ -149,9 +150,10 @@ def build_test_matrix() -> list[tuple]:
         (
             "the file at s3_uri doesn't exist",
             IngestorIndexerLambdaEvent(
+                index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/ghost-file"
-                )
+                ),
             ),
             None,
             KeyError,
@@ -161,6 +163,7 @@ def build_test_matrix() -> list[tuple]:
             "the S3 file doesn't contain valid data",
             IngestorIndexerLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/catalogue/works_snapshot_example.json"
                 ),

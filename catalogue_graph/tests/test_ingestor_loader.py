@@ -18,6 +18,7 @@ def build_test_matrix() -> list[tuple]:
             "happy path, with alternative labels",
             IngestorLoaderLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -62,9 +63,10 @@ def build_test_matrix() -> list[tuple]:
             },
             IngestorIndexerLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://test-bucket/test-prefix/2021-07-01/123/00000000-00000001.parquet",
+                    s3_uri="s3://test-bucket/test-prefix/2021-07-01/2025-01-01/123/00000000-00000001.parquet",
                     content_length=1,
                     record_count=1,
                 ),
@@ -87,6 +89,7 @@ def build_test_matrix() -> list[tuple]:
             "happy path, with NO alternative labels",
             IngestorLoaderLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
@@ -129,9 +132,10 @@ def build_test_matrix() -> list[tuple]:
             },
             IngestorIndexerLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://test-bucket/test-prefix/2021-07-01/123/00000000-00000001.parquet",
+                    s3_uri="s3://test-bucket/test-prefix/2021-07-01/2025-01-01/123/00000000-00000001.parquet",
                     content_length=1,
                     record_count=1,
                 ),
@@ -154,6 +158,7 @@ def build_test_matrix() -> list[tuple]:
             "badly formed response",
             IngestorLoaderLambdaEvent(
                 pipeline_date="2021-07-01",
+                index_date="2025-01-01",
                 job_id="123",
                 start_offset=0,
                 end_index=1,
