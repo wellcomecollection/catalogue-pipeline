@@ -59,7 +59,6 @@ steps:
       - "path_concatenator"
       - "reindex_worker"
       - "relation_embedder"
-      - "router"
       - "sierra_indexer"
       - "sierra_linker"
       - "sierra_merger"

@@ -52,7 +52,7 @@ object Main extends WellcomeTypesafeApp {
           .buildSNSMessageSender(
             config,
             namespace = "path-sender",
-            subject = "Sent from the router"
+            subject = "Sent by the merger"
           )
 
       val pathConcatenatorSender =
@@ -60,7 +60,7 @@ object Main extends WellcomeTypesafeApp {
           .buildSNSMessageSender(
             config,
             namespace = "path-concatenator-sender",
-            subject = "Sent from the router"
+            subject = "Sent by the merger"
           )
 
       val workRouter = new WorkRouter(

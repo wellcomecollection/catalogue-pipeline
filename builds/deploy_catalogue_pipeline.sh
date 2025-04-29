@@ -57,7 +57,6 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
   uk.ac.wellcome/merger \
   uk.ac.wellcome/ingestor_images \
   uk.ac.wellcome/ingestor_works \
-  uk.ac.wellcome/router \
   uk.ac.wellcome/path_concatenator \
   uk.ac.wellcome/batcher \
   uk.ac.wellcome/relation_embedder \
@@ -77,7 +76,6 @@ then
     merger \
     ingestor_images \
     ingestor_works \
-    r_embed_router \
     r_embed_path_concatenator \
     transformer_calm \
     transformer_ebsco \
