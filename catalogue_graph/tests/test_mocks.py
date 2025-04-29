@@ -4,7 +4,7 @@ import os
 import tempfile
 from collections import defaultdict
 from collections.abc import Generator
-from typing import Any, TypedDict
+from typing import Any, Optional, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
@@ -205,6 +205,7 @@ class MockRequestExpectation(TypedDict):
     url: str
     params: dict | None
     response: MockResponse
+    data: Optional[dict | str]
 
 
 class MockResponseInput(TypedDict):
@@ -239,6 +240,7 @@ class MockRequest:
         url: str,
         status_code: int = 200,
         params: dict | None = None,
+        body: dict | str | None = None,
         json_data: dict | None = None,
         content_bytes: bytes | None = None,
     ) -> None:
@@ -247,6 +249,7 @@ class MockRequest:
                 "method": method,
                 "url": url,
                 "params": params,
+                "data": body,
                 "response": MockResponse(status_code, json_data, content_bytes),
             }
         )
@@ -261,18 +264,22 @@ class MockRequest:
         method: str,
         url: str,
         stream: bool = False,
-        data: dict | None = None,
+        data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None,
     ) -> MockResponse:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
+
         for response in MockRequest.responses:
             if (
                 response["method"] == method
                 and response["url"] == url
                 and response["params"] == params
+                # If the expected response also specifies the body of the request, make sure it matches
+                # the actual response. If not, ignore it.
+                and (response.get("data") is None or response["data"] == data)
             ):
                 return response["response"]
 
