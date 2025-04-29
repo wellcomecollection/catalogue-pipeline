@@ -16,3 +16,4 @@ jobs:
     uses: ./.github/workflows/python-docker.yml
     with:
       folder: pipeline/inferrer/${{matrix.project}}
+      target: ${{matrix.project}}
