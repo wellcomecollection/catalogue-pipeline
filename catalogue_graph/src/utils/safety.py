@@ -1,7 +1,9 @@
+DEFAULT_THRESHOLD = 0.1
+
 def validate_fractional_change(
     modified_size: int,
     total_size: int,
-    fractional_threshold: float,
+    fractional_threshold: float = DEFAULT_THRESHOLD,
     force_pass: bool = False,
 ) -> None:
     """
