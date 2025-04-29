@@ -9,3 +9,10 @@ jobs:
     uses: ./.github/workflows/python-check.yml
     with:
       folder: pipeline/inferrer/${{matrix.project}}
+  python-inferrers-builds:
+    strategy:
+      matrix:
+        project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
+    uses: ./.github/workflows/python-docker.yml
+    with:
+      folder: pipeline/inferrer/${{matrix.project}}
