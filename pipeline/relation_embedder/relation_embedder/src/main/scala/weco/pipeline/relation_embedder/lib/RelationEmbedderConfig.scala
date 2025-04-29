@@ -7,7 +7,6 @@ import weco.elasticsearch.typesafe.ElasticConfig
 import weco.lambda._
 
 case class RelationEmbedderConfig(
-  mergedWorkIndex: String,
   denormalisedWorkIndex: String,
   maxBatchWeight: Int,
   completeTreeScroll: Int,
@@ -22,7 +21,6 @@ trait RelationEmbedderConfigurable
 
   def build(rawConfig: Config): RelationEmbedderConfig =
     RelationEmbedderConfig(
-      mergedWorkIndex = rawConfig.requireString("es.merged-works.index"),
       denormalisedWorkIndex =
         rawConfig.requireString("es.denormalised-works.index"),
       maxBatchWeight = rawConfig.requireInt("es.works.batch_size"),

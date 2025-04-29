@@ -81,7 +81,7 @@ object Main extends WellcomeTypesafeApp {
           leftIndexer = new EitherIndexer[Work[Merged], Work[Denormalised]](
             leftIndexer = new ElasticIndexer[Work[Merged]](
               client = esClient,
-              index = Index(config.requireString("es.merged-works.index"))
+              index = Index(config.requireString("es.denormalised-works.index"))
             ),
             rightIndexer = new ElasticIndexer[Work[Denormalised]](
               client = esClient,

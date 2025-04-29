@@ -5,7 +5,6 @@ module "relation_embedder_sub" {
   pipeline_date    = var.pipeline_date
   reindexing_state = var.reindexing_state
 
-  es_works_merged_index               = local.es_works_merged_index
   es_works_denormalised_index         = local.es_works_denormalised_index
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
 

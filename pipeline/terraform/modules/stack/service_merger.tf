@@ -47,9 +47,9 @@ module "merger" {
     merger_path_concatenator_topic_arn  = module.merger_works_incomplete_path_output_topic
     merger_images_topic_arn             = module.merger_images_output_topic.arn
 
-    es_identified_works_index = local.es_works_identified_index
-    es_merged_works_index     = local.es_works_merged_index
-    es_initial_images_index   = local.es_images_initial_index
+    es_identified_works_index     = local.es_works_identified_index
+    es_denormalised_works_index  = local.es_works_denormalised_index
+    es_initial_images_index      = local.es_images_initial_index
 
     batch_size             = 50
     flush_interval_seconds = 120
