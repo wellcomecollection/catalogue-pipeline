@@ -1,0 +1,35 @@
+name: "Python docker image"
+
+on:
+  workflow_call:
+    inputs:
+      project-directory:
+        type: string
+        required: true
+      docker-directory:
+        type: string
+        required: false
+        default: ${{inputs.project-directory}}
+      target:
+        type: string
+        required: true
+      tag:
+        type: string
+        required: false
+        default: ${{GITHUB_SHA}}
+
+jobs:
+  build-docker-image:
+    runs-on: ubuntu-latest
+    name: Build Docker Image
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ${{ inputs.folder}}/.python-version
+      - name: build-docker
+        run: |
+          docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
+        working-directory: ${{inputs.folder}}
+
+          
