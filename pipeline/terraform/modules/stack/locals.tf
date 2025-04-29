@@ -7,7 +7,7 @@ locals {
   es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
   es_works_index              = "works-indexed-${var.pipeline_date}"
 
-  es_concepts_index = "concepts-indexed-${var.pipeline_date}"
+  es_concepts_index_prefix = "concepts-indexed"
 
   es_images_initial_index   = "images-initial-${var.pipeline_date}"
   es_images_augmented_index = "images-augmented-${var.pipeline_date}"
