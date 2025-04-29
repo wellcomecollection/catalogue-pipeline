@@ -1,4 +1,4 @@
-DEFAULT_THRESHOLD = 0.1
+DEFAULT_THRESHOLD = 0.05
 
 
 def validate_fractional_change(
@@ -11,6 +11,10 @@ def validate_fractional_change(
     Check whether the modified fraction is within the `fractional_threshold`.
     If not, raise an error unless `force_pass` is enabled.
     """
+    if total_size == 0:
+        print("Cannot perform fractional change check due to a total size of 0.")
+        return
+
     fractional_diff = abs(modified_size) / total_size
 
     if fractional_diff > fractional_threshold:
