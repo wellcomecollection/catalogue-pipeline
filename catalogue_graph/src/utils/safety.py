@@ -1,5 +1,6 @@
 DEFAULT_THRESHOLD = 0.1
 
+
 def validate_fractional_change(
     modified_size: int,
     total_size: int,
