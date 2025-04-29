@@ -15,5 +15,5 @@ jobs:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
     uses: ./.github/workflows/python-docker.yml
     with:
-      folder: pipeline/inferrer/${{matrix.project}}
+      folder: pipeline/inferrer
       target: ${{matrix.project}}
