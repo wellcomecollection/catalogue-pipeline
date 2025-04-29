@@ -9,7 +9,7 @@ module "relation_embedder_sub" {
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
 
   # path_concatenator
-  path_concatenator_image = local.path_concatenator_image
+  path_concatenator_image           = local.path_concatenator_image
   path_concatenator_input_topic_arn = module.merger_works_incomplete_path_output_topic.arn
 
   # batcher

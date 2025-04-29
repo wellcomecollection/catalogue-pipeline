@@ -25,7 +25,8 @@ object Main extends WellcomeTypesafeApp {
 
       val esClient = ElasticBuilder.buildElasticClient(config)
 
-      val denormalisedIndex = Index(config.requireString("es.denormalised.index"))
+      val denormalisedIndex =
+        Index(config.requireString("es.denormalised.index"))
 
       val pathsModifier = PathsModifier(
         pathsService = new PathsService(
