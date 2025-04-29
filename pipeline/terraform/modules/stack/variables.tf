@@ -65,7 +65,7 @@ variable "index_config" {
     })
 
     concepts = object({
-      indexed = string
+      indexed = map(string)
     })
 
     images = object({
