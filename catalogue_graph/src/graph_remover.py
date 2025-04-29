@@ -12,15 +12,13 @@ from utils.aws import (
     get_csv_from_s3,
     get_neptune_client,
 )
+from utils.safety import validate_fractional_change
 
 IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
 
 IDS_SNAPSHOT_FOLDER = "graph_remover/previous_ids_snapshot"
 DELETED_IDS_FOLDER = "graph_remover/deleted_ids"
 ADDED_IDS_FOLDER = "graph_remover/added_ids"
-
-# This is part of a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
-ACCEPTABLE_DIFF_THRESHOLD = 0.05
 
 
 def get_previous_ids(
@@ -132,14 +130,13 @@ def handler(
             f"   Added ids: {len(added_ids)}",
         )
 
-    if (
-        len(previous_ids) > 0
-        and len(deleted_ids) / len(previous_ids) > ACCEPTABLE_DIFF_THRESHOLD
-        and not disable_safety_check
-    ):
-        raise ValueError(
-            f"Attempted to remove {len(deleted_ids)} items (out of a total of {len(previous_ids)}), which is above the safety threshold."
-        )
+    # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
+    # (set to 5%), an exception will be raised.
+    validate_fractional_change(
+        modified_size=len(deleted_ids),
+        total_size=len(previous_ids),
+        force_pass=disable_safety_check,
+    )
 
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
