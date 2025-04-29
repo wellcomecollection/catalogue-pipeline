@@ -48,11 +48,11 @@ variable "path_concatenator_image" {
   type = string
 }
 
-variable "router_image" {
+variable "path_concatenator_input_topic_arn" {
   type = string
 }
 
-variable "router_input_topic_arn" {
+variable "batcher_input_topic_arn" {
   type = string
 }
 

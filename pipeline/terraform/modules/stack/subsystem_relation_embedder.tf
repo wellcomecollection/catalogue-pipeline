@@ -11,10 +11,10 @@ module "relation_embedder_sub" {
 
   # path_concatenator
   path_concatenator_image = local.path_concatenator_image
+  path_concatenator_input_topic_arn = module.merger_works_incomplete_path_output_topic.arn
 
-  # router
-  router_image           = local.router_image
-  router_input_topic_arn = module.merger_works_output_topic.arn
+  # batcher
+  batcher_input_topic_arn = module.merger_works_path_output_topic.arn
 
   # ecs services config
   min_capacity                = var.min_capacity

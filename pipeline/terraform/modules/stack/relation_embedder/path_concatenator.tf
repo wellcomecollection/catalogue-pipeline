@@ -13,7 +13,7 @@ module "path_concatenator" {
   container_image = var.path_concatenator_image
 
   topic_arns = [
-    module.router_candidate_incomplete_paths_output_topic.arn,
+    var.path_concatenator_input_topic_arn
   ]
 
   env_vars = {

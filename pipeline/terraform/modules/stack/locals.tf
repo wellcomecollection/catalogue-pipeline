@@ -62,7 +62,6 @@ locals {
     "feature_inferrer",
     "palette_inferrer",
     "aspect_ratio_inferrer",
-    "router",
     "path_concatenator",
     "batcher",
     "relation_embedder",

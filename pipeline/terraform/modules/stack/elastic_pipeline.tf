@@ -153,10 +153,6 @@ locals {
       read  = [local.es_works_identified_index]
       write = [local.es_works_merged_index, local.es_images_initial_index]
     }
-    router = {
-      read  = [local.es_works_merged_index]
-      write = [local.es_works_denormalised_index]
-    }
     path_concatenator = {
       read  = [local.es_works_merged_index]
       write = [local.es_works_merged_index]
