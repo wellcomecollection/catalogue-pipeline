@@ -9,9 +9,7 @@ import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from utils.aws import df_from_s3_parquet
-
-# This is part of a safety mechanism. If two sets of IDs differ by more than 5%, an exception will be raised.
-ACCEPTABLE_DIFF_THRESHOLD = 0.05
+from utils.safety import validate_fractional_change
 
 
 def _get_last_index_remover_run_file_uri(pipeline_date: str | None) -> str:
@@ -93,16 +91,14 @@ def handler(
 ) -> None:
     ids_to_delete = get_ids_to_delete(pipeline_date)
     current_id_count = get_current_id_count(pipeline_date, is_local)
-    delete_proportion = len(ids_to_delete) / current_id_count
 
-    if (
-        current_id_count > 0
-        and delete_proportion > ACCEPTABLE_DIFF_THRESHOLD
-        and not disable_safety_check
-    ):
-        raise ValueError(
-            f"Attempted to remove {len(ids_to_delete)} documents (out of a total of {current_id_count}), which is above the safety threshold."
-        )
+    # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
+    # (set to 5%), an exception will be raised.
+    validate_fractional_change(
+        modified_size=len(ids_to_delete),
+        total_size=current_id_count,
+        force_pass=disable_safety_check,
+    )
 
     if len(ids_to_delete) > 0:
         # Delete the corresponding items from the graph
