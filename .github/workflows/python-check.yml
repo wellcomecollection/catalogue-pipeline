@@ -1,5 +1,5 @@
 name: "Python check"
-
+# TODO: This belongs in .github repo
 on:
   workflow_call:
     inputs:

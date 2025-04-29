@@ -1,4 +1,5 @@
 name: "Python docker image"
+# TODO: This belongs in .github repo
 
 on:
   workflow_call:
@@ -23,9 +24,22 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version-file: ${{inputs.folder}}/.python-version
-      - name: build-docker
+      - name: build docker image
         run: |
           docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
         working-directory: ${{inputs.folder}}
+      - name: publish versioned container to registry
+        run: |
+          ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome"
+          REGISTRY_TAG="$ECR_REGISTRY/${{inputs.target}}:${{inputs.tag}}"
+          docker tag "${{inputs.target}}:${{inputs.tag}}" "$REGISTRY_TAG"
+          docker push $REGISTRY_TAG
 
+      - name: publish latest container to registry
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome"
+          REGISTRY_TAG="$ECR_REGISTRY/${{inputs.target}}:latest_not_really_just_in_case"
+          docker tag "${{inputs.target}}:${{inputs.tag}}" "$REGISTRY_TAG"
+          docker push $REGISTRY_TAG
           
