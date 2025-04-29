@@ -172,7 +172,7 @@ class TestBroaderConcepts:
         concept._raw_concept_node = {}
         assert concept.broader_concept_ids == []
 
-    def test_single(self) -> None:
+    def test_single_from_authority(self) -> None:
         concept = RawLibraryOfCongressConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
         )
@@ -184,7 +184,7 @@ class TestBroaderConcepts:
         }
         assert concept.broader_concept_ids == ["sh85129334"]
 
-    def test_multiple(self) -> None:
+    def test_multiple_from_authority(self) -> None:
         concept = RawLibraryOfCongressConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
         )
@@ -209,6 +209,43 @@ class TestBroaderConcepts:
             ]
         }
         assert concept.broader_concept_ids == ["sh85068533"]
+
+    def test_get_broader_concepts_from_components(self) -> None:
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
+        )
+        concept._raw_concept_node = {
+            "madsrdf:componentList": {
+                "@list": [
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh85098685"},
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh99001366"},
+                ]
+            },
+        }
+        assert concept.broader_concept_ids == ["sh85098685", "sh99001366"]
+
+    def test_get_broader_concepts_from_authority_and_components(self) -> None:
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
+        )
+        concept._raw_concept_node = {
+            "madsrdf:componentList": {
+                "@list": [
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh85098685"},
+                    {"@id": "http://id.loc.gov/authorities/subjects/sh99001366"},
+                ]
+            },
+            "madsrdf:hasBroaderAuthority": [
+                {"@id": "http://id.loc.gov/authorities/subjects/sh85129334"},
+                {"@id": "http://id.loc.gov/authorities/subjects/sh85068533"},
+            ],
+        }
+        assert set(concept.broader_concept_ids) == {
+            "sh85129334",
+            "sh85068533",
+            "sh85098685",
+            "sh99001366",
+        }
 
 
 class TestRelatedConcepts:
@@ -273,20 +310,6 @@ class TestNarrower:
         concept._raw_concept_node = {}
         assert concept.narrower_concept_ids == []
 
-    def test_get_narrowers_from_components(self) -> None:
-        concept = RawLibraryOfCongressConcept(
-            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
-        )
-        concept._raw_concept_node = {
-            "madsrdf:componentList": {
-                "@list": [
-                    {"@id": "http://id.loc.gov/authorities/subjects/sh85098685"},
-                    {"@id": "http://id.loc.gov/authorities/subjects/sh99001366"},
-                ]
-            },
-        }
-        assert concept.narrower_concept_ids == ["sh85098685", "sh99001366"]
-
     def test_get_narrowers_from_narrower_authority(self) -> None:
         concept = RawLibraryOfCongressConcept(
             {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
@@ -297,27 +320,6 @@ class TestNarrower:
             }
         }
         assert concept.narrower_concept_ids == ["sh00000029"]
-
-    def test_get_narrowers_from_both(self) -> None:
-        concept = RawLibraryOfCongressConcept(
-            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
-        )
-        concept._raw_concept_node = {
-            "madsrdf:componentList": {
-                "@list": [
-                    {"@id": "http://id.loc.gov/authorities/subjects/sh85098685"},
-                    {"@id": "http://id.loc.gov/authorities/subjects/sh99001366"},
-                ]
-            },
-            "madsrdf:hasNarrowerAuthority": {
-                "@id": "http://id.loc.gov/authorities/subjects/sh00000029"
-            },
-        }
-        assert set(concept.narrower_concept_ids) == {
-            "sh00000029",
-            "sh85098685",
-            "sh99001366",
-        }
 
 
 def test_alternative_labels() -> None:
