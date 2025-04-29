@@ -10,7 +10,6 @@ jobs:
   lint-and-test:
     runs-on: ubuntu-latest
     name: Lint and test
-
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
