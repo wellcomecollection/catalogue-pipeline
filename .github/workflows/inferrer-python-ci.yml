@@ -18,13 +18,14 @@ jobs:
         with:
           folder: pipeline/inferrer/${{matrix.project}}
   python-inferrers-builds:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
-    uses: ./.github/workflows/python-docker.yml
-    with:
-      folder: pipeline/inferrer
-      target: ${{matrix.project}}
-      tag: ${{github.sha}}
-    secrets:
-      role-to-assume: ${{secrets.GHA_ECR_PUSH_ROLE_ARN}}
+    steps:
+      - uses: ./.github/actions/python-docker
+        with:
+          folder: pipeline/inferrer
+          target: ${{matrix.project}}
+          tag: ${{github.sha}}
+          role_to_assume: ${{secrets.GHA_ECR_PUSH_ROLE_ARN}}
