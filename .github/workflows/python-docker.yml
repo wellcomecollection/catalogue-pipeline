@@ -28,7 +28,7 @@ jobs:
           docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
         working-directory: ${{inputs.folder}}
         env:
-          TAG: ${{ inputs.tag || github.sha }}
+          TAG: ${{ inputs.tag || $GITHUB_SHA }}
       #
       #      - uses: aws-actions/configure-aws-credentials@v4
       #        with:
