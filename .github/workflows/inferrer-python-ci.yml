@@ -8,12 +8,14 @@ permissions:
 
 jobs:
   python-inferrers-checks:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
-    uses: ./.github/workflows/python-check.yml
-    with:
-      folder: pipeline/inferrer/${{matrix.project}}
+    steps:
+      - uses: ./.github/actions/python_check
+        with:
+          folder: pipeline/inferrer/${{matrix.project}}
   python-inferrers-builds:
     strategy:
       matrix:

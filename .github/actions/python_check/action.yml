@@ -1,0 +1,36 @@
+name: 'Python Check'
+description: "Runs checks (linting, tests) on the python code within the given folder"
+inputs:
+  folder:
+    description: folder to check
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version-file: ${{ inputs.folder}}/.python-version
+    - name: setup dependencies
+      run: |
+        pip install uv
+        uv sync --all-groups
+      working-directory: ${{inputs.folder}}
+      shell: sh
+    - name: lint
+      run: uvx ruff check $FOLDER
+      shell: sh
+      env:
+        FOLDER: ${{inputs.folder}}
+    - name: test
+      id: test
+      run: |
+        set +e
+        uv run pytest
+        TEST_OUTPUT=$?
+        # 5 = No Tests Run.  Ideally, this would be a failure, but we 
+        # do have some projects with no tests, where it is still beneficial
+        # to "run the tests", as that proves that the code can be run.
+        if [[ TEST_OUTPUT -eq 5 ]]; then TEST_OUTPUT=0; fi
+        exit $TEST_OUTPUT
+      working-directory: ${{inputs.folder}}
+      shell: sh
