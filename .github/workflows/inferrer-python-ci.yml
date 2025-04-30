@@ -1,5 +1,5 @@
 name: "Inferrers: Run checks and build"
-on: [ workflow_dispatch, push ]
+on: [ push ]
 # paths: [ 'pipeline/inferrer/**' ]
 jobs:
   python-inferrers-checks:
@@ -19,4 +19,4 @@ jobs:
       target: ${{matrix.project}}
       tag: ${{github.sha}}
     secrets:
-      role-to-assume: ${{secrets.GHA_ECR_PUSH_ROLE_ARN}}
+      role-to-assume: ${{secrets.CATALOGUE_GRAPH_CI_ROLE_ARN}}
