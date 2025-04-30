@@ -1,6 +1,9 @@
 name: 'Python Docker'
-description: "Builds and publishes a Docker image"
+description: "Builds and publishes a Docker image to ECR"
 inputs:
+  registry:
+    description: "ECR registry where the image is to be published"
+    required: true
   folder:
     description: "working folder"
     required: true
@@ -30,15 +33,15 @@ runs:
     - name: publish versioned container to registry
       uses: ./.github/actions/push_to_ecr
       with:
-        registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+        registry: ${{inputs.registry}}
         image_name: ${{inputs.target}}
         local_tag: ${{inputs.tag}}
         registry_tag: ${{inputs.tag}}
 
     - name: publish latest container to registry
       uses: ./.github/actions/push_to_ecr
+      if: ${{ github.ref == 'refs/heads/main' }}
       with:
-        if: ${{ github.ref == 'refs/heads/main' }}
         registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
         image_name: ${{inputs.target}}
         local_tag: ${{inputs.tag}}
