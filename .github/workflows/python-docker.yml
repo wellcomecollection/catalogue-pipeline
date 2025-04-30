@@ -17,9 +17,9 @@ on:
       tag:
         type: string
         required: true
+    secrets:
       role-to-assume:
         required: true
-        type: string
 
 jobs:
   build-docker-image:

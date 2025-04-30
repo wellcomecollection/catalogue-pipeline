@@ -18,4 +18,5 @@ jobs:
       folder: pipeline/inferrer
       target: ${{matrix.project}}
       tag: ${{github.sha}}
+    secrets:
       role-to-assume: ${{secrets.GHA_ECR_PUSH_ROLE_ARN}}
