@@ -17,6 +17,9 @@ on:
       tag:
         type: string
         required: true
+      role-to-assume:
+        required: true
+        type: string
 
 jobs:
   build-docker-image:
@@ -35,7 +38,7 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
-          role-to-assume: ${{ secrets.GHA_ECR_PUSH_ROLE_ARN }}
+          role-to-assume: ${{ inputs.role_to_assume }}
 
       - name: publish versioned container to registry
         uses: ./.github/actions/push_to_ecr
