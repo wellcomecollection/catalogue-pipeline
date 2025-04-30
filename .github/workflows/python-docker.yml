@@ -28,22 +28,25 @@ jobs:
         run: |
           docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
         working-directory: ${{inputs.folder}}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.GHA_ECR_PUSH_ROLE_ARN }}
+
       - name: publish versioned container to registry
         uses: ./.github/actions/push_to_ecr
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           image_name: ${{inputs.target}}
           local_tag: ${{inputs.tag}}
-          #      - uses: aws-actions/configure-aws-credentials@v4
-          #        with:
-          #          aws-region: eu-west-1
-          #          role-to-assume: ${{ secrets.GHA_ECR_PUSH_ROLE_ARN }}
-          #
-          #      - name: publish latest container to registry
-          #        if: ${{ github.ref == 'refs/heads/main' }}
-          #        run: |
-          #          ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome"
-          #          REGISTRY_TAG="$ECR_REGISTRY/${{inputs.target}}:latest_not_really_just_in_case"
-          #          docker tag "${{inputs.target}}:${{inputs.tag}}" "$REGISTRY_TAG"
-          #          docker push $REGISTRY_TAG
-          
+          registry_tag: ${{inputs.tag}}
+
+      - name: publish latest container to registry
+        uses: ./.github/actions/push_to_ecr
+        with:
+          if: ${{ github.ref == 'refs/heads/main' }}
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          image_name: ${{inputs.target}}
+          local_tag: ${{inputs.tag}}
+          registry_tag: latest

@@ -11,15 +11,16 @@ inputs:
     description: "Tag of the local image"
     required: true
   registry_tag:
-    description: "Tag to be used for the image on the registry, defaults to same as local"
-    required: false
-    default: ${{inputs.local_tag}}
+    description: "Tag to be used for the image on the registry"
+    required: true
 runs:
   using: "composite"
   steps:
     - name: Push to ECR
       shell: bash
       run: |
-        TARGET_FULLNAME="${{inputs.registry}}/${{inputs.image_name}}:${{inputs.registry_tag}}"
-        docker tag "${{inputs.image_name}}:${{inputs.local_tag}}" "$TARGET_FULLNAME"
+        docker tag "$LOCAL_FULLNAME" "$TARGET_FULLNAME"
         docker push $TARGET_FULLNAME
+      env:
+        TARGET_FULLNAME: "${{inputs.registry}}/${{inputs.image_name}}:${{inputs.registry_tag}}"
+        LOCAL_FULLNAME: "${{inputs.image_name}}:${{inputs.local_tag}}"
