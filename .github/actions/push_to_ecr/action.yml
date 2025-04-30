@@ -16,6 +16,9 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
     - name: Push to ECR
       shell: bash
       run: |
