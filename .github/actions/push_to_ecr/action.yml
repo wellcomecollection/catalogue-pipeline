@@ -1,16 +1,16 @@
 name: 'Push to ECR'
 inputs:
   registry:
-    type: string
+    description: "URL of registry where the image will be pushed"
     required: true
   image_name:
-    type: string
+    description: "Name of the image to push"
     required: true
   local_tag:
-    type: string
+    description: "Tag of the local image"
     required: true
   registry_tag:
-    type: string
+    description: "Tag to be used for the image on the registry, defaults to same as local"
     required: false
     default: ${{inputs.local_tag}}
 runs:
