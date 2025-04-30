@@ -23,6 +23,7 @@ jobs:
       matrix:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
     steps:
+      - uses: actions/checkout@v3
       - uses: ./.github/actions/python-docker
         with:
           folder: pipeline/inferrer
