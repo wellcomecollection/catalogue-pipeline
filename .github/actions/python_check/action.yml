@@ -15,10 +15,10 @@ runs:
         pip install uv
         uv sync --all-groups
       working-directory: ${{inputs.folder}}
-      shell: sh
+      shell: bash
     - name: lint
       run: uvx ruff check $FOLDER
-      shell: sh
+      shell: bash
       env:
         FOLDER: ${{inputs.folder}}
     - name: test
@@ -33,4 +33,4 @@ runs:
         if [[ TEST_OUTPUT -eq 5 ]]; then TEST_OUTPUT=0; fi
         exit $TEST_OUTPUT
       working-directory: ${{inputs.folder}}
-      shell: sh
+      shell: bash
