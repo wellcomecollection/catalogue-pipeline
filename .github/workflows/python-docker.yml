@@ -1,6 +1,10 @@
 name: "Python docker image"
 # TODO: This belongs in .github repo
 
+permissions:
+  contents: read
+  id-token: write
+
 on:
   workflow_call:
     inputs:
