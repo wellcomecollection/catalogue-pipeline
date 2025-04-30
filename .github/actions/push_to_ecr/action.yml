@@ -1,4 +1,5 @@
 name: 'Push to ECR'
+description: "Pushes a Docker image to an amazon ECR repository"
 inputs:
   registry:
     description: "URL of registry where the image will be pushed"
