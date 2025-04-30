@@ -1,0 +1,24 @@
+name: 'Push to ECR'
+inputs:
+  registry:
+    type: string
+    required: true
+  image_name:
+    type: string
+    required: true
+  local_tag:
+    type: string
+    required: true
+  registry_tag:
+    type: string
+    required: false
+    default: ${{inputs.local_tag}}
+runs:
+  using: "composite"
+  steps:
+    - name: Push to ECR
+      shell: bash
+      run: |
+        TARGET_FULLNAME="${{inputs.registry}}/${{inputs.image_name}}:${{inputs.registry_tag}}"
+        docker tag "${{inputs.image_name}}:${{inputs.local_tag}}" "$TARGET_FULLNAME"
+        docker push $TARGET_FULLNAME
