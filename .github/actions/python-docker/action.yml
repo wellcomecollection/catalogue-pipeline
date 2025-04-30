@@ -19,7 +19,7 @@ runs:
     - uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: eu-west-1
-        role-to-assume: ${{ secrets.role_to_assume }}
+        role-to-assume: ${{ inputs.role_to_assume }}
 
     - name: build docker image
       run: |
