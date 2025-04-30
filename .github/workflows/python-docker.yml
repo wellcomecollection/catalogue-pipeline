@@ -13,7 +13,6 @@ on:
       tag:
         type: string
         required: false
-        default: ${{env.GITHUB_SHA}}
 
 jobs:
   build-docker-image:
