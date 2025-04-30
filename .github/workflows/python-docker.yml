@@ -27,11 +27,11 @@ jobs:
         run: |
           docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
         working-directory: ${{inputs.folder}}
-      #
-      #      - uses: aws-actions/configure-aws-credentials@v4
-      #        with:
-      #          aws-region: eu-west-1
-      #          role-to-assume: ${{ secrets.GHA_ECR_PUSH_ROLE_ARN }}
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.GHA_ECR_PUSH_ROLE_ARN }}
 
       - name: publish versioned container to registry
         uses: ./.github/actions/push_to_ecr
