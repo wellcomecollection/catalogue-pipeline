@@ -2,7 +2,7 @@ module "pipeline" {
   source = "../modules/stack"
 
   reindexing_state = {
-    listen_to_reindexer      = true
+    listen_to_reindexer      = false
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
@@ -45,4 +45,5 @@ moved {
   from = module.pipeline.module.pipeline_indices.module.concepts_indexed_index.elasticstack_elasticsearch_index.the_index
   to   = module.pipeline.module.pipeline_indices.module.concepts_indexed_indexes["2025-03-06"].elasticstack_elasticsearch_index.the_index
 }
+
 
