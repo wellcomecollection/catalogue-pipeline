@@ -1,7 +1,7 @@
 steps:
   - command: |
       ./builds/run_linting.sh
-#      cat .reports/scalafmt.out | .buildkite/scripts/report_sbt_warnings.sh
+    #      cat .reports/scalafmt.out | .buildkite/scripts/report_sbt_warnings.sh
     label: "linting"
     soft_fail:
       - exit_status: 2
@@ -106,24 +106,6 @@ steps:
       then
         ./builds/publish_sbt_image_to_ecr.sh inference_manager "$BUILDKITE_COMMIT"
       fi
-
-    agents:
-      queue: "scala"
-
-  - label: "{{ matrix }} (app)"
-    command: |
-      ./builds/run_inferrer_tests.sh {{ matrix }}
-      ./builds/build_inferrer_image.sh {{ matrix }} "$BUILDKITE_COMMIT"
-
-      if [[ "$BUILDKITE_BRANCH" == "main" ]]
-      then
-        ./builds/publish_inferrer_image_to_ecr.sh {{ matrix }} "$BUILDKITE_COMMIT"
-      fi
-
-    matrix:
-      - "aspect_ratio_inferrer"
-      - "feature_inferrer"
-      - "palette_inferrer"
 
     agents:
       queue: "scala"
