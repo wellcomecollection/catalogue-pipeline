@@ -21,7 +21,17 @@ object TeiOps {
         Right(
           Some(
             node.text.trim
+              // First, strip out any attributes in paragraph tags
+              // This allows the next replacement to simply leave in
+              // any paragraph tags without worrying about what to do
+              // about attributes that we don't want to show.
               .replaceAll("""<p(\s+\S+=".+?")+\s*(/)?>""", "<p$2>")
+              // Then, strip out any XML other than paragraph tags
+              // The initial negative lookahead matches
+              // opening, closing, and self-closing paragraph tags.
+              // <p> </p> <p /> <p/>
+              // It also matches the poorly-formed </p/>, but we do not
+              // expect to find anything like that.
               .replaceAll("""(?!</?p\s*/?>)<.*?>""", "")
           )
         )
