@@ -32,7 +32,7 @@ runs:
         image_name: ${{inputs.target}}
         local_tag: ${{inputs.tag}}
         registry_tag: ${{inputs.tag}}
-        role_to_assume: ${{role_to_assume}}
+        role_to_assume: ${{inputs.role_to_assume}}
 
     - name: publish latest container to registry
       uses: ./.github/actions/push_to_ecr
