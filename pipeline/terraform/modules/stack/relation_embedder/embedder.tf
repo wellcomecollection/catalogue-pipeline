@@ -20,7 +20,6 @@ module "embedder_lambda" {
   environment_variables = {
     output_topic_arn = module.embedder_lambda_output_topic.arn
 
-    es_merged_index       = var.es_works_merged_index
     es_denormalised_index = var.es_works_denormalised_index
 
     affected_works_scroll_size   = 50 // NOTE: limit to avoid memory errors

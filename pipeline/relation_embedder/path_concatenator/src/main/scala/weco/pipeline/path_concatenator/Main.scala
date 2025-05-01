@@ -25,17 +25,20 @@ object Main extends WellcomeTypesafeApp {
 
       val esClient = ElasticBuilder.buildElasticClient(config)
 
+      val denormalisedIndex =
+        Index(config.requireString("es.denormalised.index"))
+
       val pathsModifier = PathsModifier(
         pathsService = new PathsService(
           elasticClient = esClient,
-          index = Index(config.requireString("es.read-from.index"))
+          index = denormalisedIndex
         )
       )
 
       val workIndexer =
         new ElasticIndexer[Work[Merged]](
           client = esClient,
-          index = Index(config.requireString(s"es.write-to.index"))
+          index = denormalisedIndex
         )
 
       val downstreamSender =

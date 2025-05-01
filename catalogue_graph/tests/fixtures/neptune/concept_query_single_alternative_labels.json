@@ -1,0 +1,38 @@
+{
+  "concept": {
+    "~properties": {
+      "id": "id",
+      "label": "label",
+      "type": "type"
+    }
+  },
+  "relationships": [],
+  "source_concepts": [
+    {
+      "~properties": {
+        "id": "456",
+        "source": "lc-names",
+        "description": "description",
+        "alternative_labels": "alternative label||another alternative label"
+      }
+    },
+    {
+      "~properties": {
+        "id": "789",
+        "source": "nlm-mesh",
+        "description": "mesh description",
+        "alternative_labels": "MeSH alternative label"
+      }
+    }
+  ],
+  "linked_source_concepts": [
+    {
+      "~properties": {
+        "id": "456",
+        "source": "lc-names",
+        "description": "description"
+      }
+    }
+  ],
+  "same_as_concept_ids": []
+}

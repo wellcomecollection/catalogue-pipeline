@@ -3,7 +3,10 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from models.catalogue_concept import CatalogueConcept
+from models.catalogue_concept import (
+    CatalogueConcept,
+    RelatedConcepts,
+)
 
 # Query
 
@@ -62,6 +65,8 @@ class ConceptDisplay(BaseModel):
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[str]
     type: str
+    relatedConcepts: RelatedConcepts
+    sameAs: list[str]
 
 
 # Indexable concept - for indexing in elasticsearch
@@ -100,5 +105,7 @@ class IndexableConcept(BaseModel):
                 alternativeLabels=concept.alternativeLabels,
                 type=concept.type,
                 description=concept.description,
+                relatedConcepts=concept.relatedConcepts,
+                sameAs=concept.sameAs,
             ),
         )

@@ -2,9 +2,11 @@ import gzip
 import io
 import os
 import tempfile
+from collections import defaultdict
 from collections.abc import Generator
-from typing import Any, TypedDict
+from typing import Any, Optional, TypedDict
 
+import polars as pl
 from botocore.credentials import Credentials
 
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
@@ -39,6 +41,13 @@ class MockSmartOpen:
             raise ValueError("Unsupported content type!")
 
     @classmethod
+    def mock_s3_parquet_file(cls, uri: str, content: pl.DataFrame) -> None:
+        """Creates a parquet mock file from a polars dataframe."""
+        buffer = io.BytesIO()
+        content.write_parquet(buffer)
+        cls.file_lookup[uri] = buffer
+
+    @classmethod
     def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
         print(f"Opening {uri} in mode {mode}")
         if mode == "w" or mode == "wb":
@@ -70,13 +79,21 @@ class MockAwsService:
 
 
 class MockSecretsManagerClient(MockAwsService):
+    secrets: dict[str, Any] = {}
+
+    @classmethod
+    def add_mock_secret(cls, secret_id: str, value: Any) -> None:
+        cls.secrets[secret_id] = value
+
     def get_secret_value(self, SecretId: str) -> dict:
         if SecretId == LOAD_BALANCER_SECRET_NAME:
             secret_value = MOCK_API_KEY
         elif SecretId == INSTANCE_ENDPOINT_SECRET_NAME:
             secret_value = MOCK_INSTANCE_ENDPOINT
+        elif SecretId in self.secrets:
+            secret_value = self.secrets[SecretId]
         else:
-            raise KeyError("Secret value does not exist.")
+            raise KeyError(f"Secret value '{SecretId}' does not exist.")
 
         return {"SecretString": secret_value}
 
@@ -188,6 +205,7 @@ class MockRequestExpectation(TypedDict):
     url: str
     params: dict | None
     response: MockResponse
+    data: Optional[dict | str]
 
 
 class MockResponseInput(TypedDict):
@@ -222,6 +240,7 @@ class MockRequest:
         url: str,
         status_code: int = 200,
         params: dict | None = None,
+        body: dict | str | None = None,
         json_data: dict | None = None,
         content_bytes: bytes | None = None,
     ) -> None:
@@ -230,6 +249,7 @@ class MockRequest:
                 "method": method,
                 "url": url,
                 "params": params,
+                "data": body,
                 "response": MockResponse(status_code, json_data, content_bytes),
             }
         )
@@ -244,18 +264,22 @@ class MockRequest:
         method: str,
         url: str,
         stream: bool = False,
-        data: dict | None = None,
+        data: dict | str | None = None,
         headers: dict | None = None,
         params: dict | None = None,
     ) -> MockResponse:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
+
         for response in MockRequest.responses:
             if (
                 response["method"] == method
                 and response["url"] == url
                 and response["params"] == params
+                # If the expected response also specifies the body of the request, make sure it matches
+                # the actual response. If not, ignore it.
+                and (response.get("data") is None or response["data"] == data)
             ):
                 return response["response"]
 
@@ -278,6 +302,7 @@ class MockBulkResponse:
 
 
 class MockElasticsearchClient:
+    indexed_documents: dict = defaultdict(dict[str, dict])
     inputs: list[dict] = []
 
     def __init__(self, config: dict, api_key: str) -> None:
@@ -292,3 +317,26 @@ class MockElasticsearchClient:
     @classmethod
     def reset_mocks(cls) -> None:
         cls.inputs = []
+
+    @classmethod
+    def index(cls, index: str, id: str, document: dict) -> None:
+        cls.indexed_documents[index][id] = document
+
+    def delete_by_query(self, index: str, body: dict) -> dict:
+        deleted_ids = body["query"]["ids"]["values"]
+
+        new_indexed_documents = {}
+
+        deleted_count = 0
+        for _id, document in self.indexed_documents[index].items():
+            if _id not in deleted_ids:
+                new_indexed_documents[_id] = document
+            else:
+                deleted_count += 1
+
+        self.indexed_documents[index] = new_indexed_documents
+
+        return {"deleted": deleted_count}
+
+    def count(self, index: str) -> dict:
+        return {"count": len(self.indexed_documents.get(index, {}).values())}

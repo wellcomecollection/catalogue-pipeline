@@ -67,7 +67,6 @@ flowchart TB
 See individual stages for more detail:
 * [matcher](./matcher/README.md)
 * [merger](./merger/README.md)
-* [router](./relation_embedder/router/README.md)
 * [path_concatenator](./relation_embedder/path_concatenator/README.md)
 
 

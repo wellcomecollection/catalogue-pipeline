@@ -5,10 +5,9 @@ import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.messaging.fixtures.SQS.QueuePair
-import weco.messaging.memory.MemoryMessageSender
 import weco.catalogue.internal_model.identifiers.CanonicalId
-import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.{Relations, Work}
+import weco.catalogue.internal_model.work.WorkState.{Denormalised, Identified, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
@@ -63,10 +62,10 @@ class MergerFeatureTest
       identifiedWork(canonicalId = idD, sourceModifiedTime = time(t = 0))
 
     val index = mutable.Map[String, WorkOrImage](
-      idA.underlying -> Left(workA_t0.transition[Merged](time(t = 0))),
-      idB.underlying -> Left(workB_t0.transition[Merged](time(t = 0))),
-      idC.underlying -> Left(workC_t0.transition[Merged](time(t = 0))),
-      idD.underlying -> Left(workD_t0.transition[Merged](time(t = 0)))
+      idA.underlying -> Left(Right(workA_t0.transition[Merged](time(t = 0)).transition[Denormalised](Relations.none))),
+      idB.underlying -> Left(Right(workB_t0.transition[Merged](time(t = 0)).transition[Denormalised](Relations.none))),
+      idC.underlying -> Left(Right(workC_t0.transition[Merged](time(t = 0)).transition[Denormalised](Relations.none))),
+      idD.underlying -> Left(Right(workD_t0.transition[Merged](time(t = 0)).transition[Denormalised](Relations.none)))
     )
 
     // TODO: Can we use a CanonicalId in the retriever?
@@ -79,11 +78,9 @@ class MergerFeatureTest
       )
     )
 
-    val workSender = new MemoryMessageSender
-
     withLocalSqsQueuePair() {
       case QueuePair(queue, dlq) =>
-        withMergerService(retriever, queue, workSender, index = index) {
+        withMergerService(retriever, queue, workRouter, index = index) {
           _ =>
             // 2) Now we update all four works at times t=1, t=2, t=3 and t=4.
             // However, due to best-effort ordering, we don't process these updates
@@ -145,7 +142,7 @@ class MergerFeatureTest
                 storedTimes_t5(id) shouldBe >(time)
             }
 
-            index(idD.underlying).left.value.data.title shouldBe Some(
+            index(idD.underlying).left.value.right.value.data.title shouldBe Some(
               "I was updated at t = 4"
             )
 
@@ -183,10 +180,10 @@ class MergerFeatureTest
                 storedTimes_t6(id) shouldBe >(time)
             }
 
-            index(idA.underlying).left.value.data.title shouldBe Some(
+            index(idA.underlying).left.value.right.value.data.title shouldBe Some(
               "I was updated at t = 1"
             )
-            index(idC.underlying).left.value.data.title shouldBe Some(
+            index(idC.underlying).left.value.right.value.data.title shouldBe Some(
               "I was updated at t = 3"
             )
 
@@ -213,7 +210,7 @@ class MergerFeatureTest
             storedTimes_t7(idB) shouldBe >(existingTimes_t7(idB))
             storedTimes_t7(idC) shouldBe >(existingTimes_t7(idC))
 
-            index(idB.underlying).left.value.data.title shouldBe Some(
+            index(idB.underlying).left.value.right.value.data.title shouldBe Some(
               "I was updated at t = 2"
             )
         }
@@ -230,6 +227,6 @@ class MergerFeatureTest
     index: mutable.Map[String, WorkOrImage]
   ): Map[CanonicalId, Instant] =
     index.values.collect {
-      case Left(work) => work.state.canonicalId -> work.state.mergedTime
+      case Left(Right(work)) => work.state.canonicalId -> work.state.mergedTime
     }.toMap
 }

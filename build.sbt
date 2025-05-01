@@ -144,13 +144,6 @@ lazy val relation_embedder = setupProject(
   localDependencies = Seq(internal_model, pipeline_storage_typesafe, lambda)
 )
 
-lazy val router = setupProject(
-  project,
-  "pipeline/relation_embedder/router",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
-  externalDependencies = CatalogueDependencies.routerDependencies
-)
-
 lazy val batcher = setupProject(
   project,
   "pipeline/relation_embedder/batcher",

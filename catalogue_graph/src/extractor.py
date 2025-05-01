@@ -28,10 +28,6 @@ def handler(
         f"transformer and streaming them into {stream_destination}."
     )
 
-    assert config.S3_BULK_LOAD_BUCKET_NAME is not None, (
-        "The S3_BULK_LOAD_BUCKET_NAME environment variable must be defined."
-    )
-
     transformer: BaseTransformer = create_transformer(transformer_type, entity_type)
 
     if stream_destination == "graph":

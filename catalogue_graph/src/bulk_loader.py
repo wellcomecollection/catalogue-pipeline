@@ -1,7 +1,7 @@
 import argparse
 import typing
 
-from config import S3_BULK_LOAD_BUCKET_NAME
+import config
 from transformers.base_transformer import EntityType
 from transformers.create_transformer import TransformerType
 from utils.aws import get_neptune_client
@@ -11,7 +11,7 @@ def handler(
     transformer_type: TransformerType, entity_type: EntityType, is_local: bool = False
 ) -> dict[str, str]:
     file_name = f"{transformer_type}__{entity_type}.csv"
-    s3_file_uri = f"s3://{S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
+    s3_file_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
 
     print(f"Initiating bulk load from {s3_file_uri}.")
 

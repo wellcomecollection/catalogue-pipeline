@@ -25,9 +25,13 @@ resource "aws_iam_role_policy" "ecs_stream_to_sns_policy" {
 
 resource "aws_iam_role_policy" "ecs_stream_to_s3_policy" {
   role   = module.extractor_ecs_task.task_role_name
-  policy = data.aws_iam_policy_document.stream_to_s3.json
+  policy = data.aws_iam_policy_document.s3_bulk_load_write.json
 }
 
+resource "aws_iam_role_policy" "ecs_read_s3_policy" {
+  role   = module.extractor_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.s3_bulk_load_read.json
+}
 
 # openCypher queries will be streamed to this SNS topic (when SNS is chosen as the streaming destination)
 module "catalogue_graph_queries_topic" {
@@ -43,19 +47,6 @@ data "aws_iam_policy_document" "stream_to_sns" {
 
     resources = [
       module.catalogue_graph_queries_topic.arn
-    ]
-  }
-}
-
-data "aws_iam_policy_document" "stream_to_s3" {
-  statement {
-    actions = [
-      "s3:PutObject",
-      "s3:GetObject"
-    ]
-
-    resources = [
-      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
     ]
   }
 }

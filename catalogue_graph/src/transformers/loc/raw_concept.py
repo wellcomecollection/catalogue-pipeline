@@ -5,6 +5,7 @@ ID_PREFIXES_TO_REMOVE = (
     "http://id.loc.gov/authorities/subjects/",
     "/authorities/names/",
     "http://id.loc.gov/authorities/names/",
+    "https://id.loc.gov/authorities/names/",
     "http://id.loc.gov/authorities/childrensSubjects/",
 )
 
@@ -86,45 +87,32 @@ class RawLibraryOfCongressConcept:
     def broader_concept_ids(self) -> list[str]:
         """Returns a list of IDs representing concepts which are broader than the current concept."""
         assert self._raw_concept_node is not None
+
+        broader_items = _as_list(
+            self._raw_concept_node.get("madsrdf:hasBroaderAuthority", [])
+        )
+        component_items = _as_list(
+            self._raw_concept_node.get("madsrdf:componentList", {}).get("@list", [])
+        )
+
         return _filter_irrelevant_ids(
             [
                 remove_id_prefix(broader["@id"])
-                for broader in _as_list(
-                    self._raw_concept_node.get("madsrdf:hasBroaderAuthority", [])
-                )
+                for broader in (broader_items + component_items)
             ]
         )
 
     @property
     def narrower_concept_ids(self) -> list[str]:
         """Returns a list of IDs representing concepts which are narrower than the current concept."""
-        return (
-            self._narrowers_from_narrower_authority()
-            + self._narrowers_from_component_list()
+        assert self._raw_concept_node is not None
+
+        narrower_terms = _as_list(
+            self._raw_concept_node.get("madsrdf:hasNarrowerAuthority", [])
         )
 
-    def _narrowers_from_component_list(self) -> list[str]:
-        assert self._raw_concept_node is not None
         return _filter_irrelevant_ids(
-            [
-                remove_id_prefix(broader["@id"])
-                for broader in _as_list(
-                    self._raw_concept_node.get("madsrdf:componentList", {}).get(
-                        "@list", []
-                    )
-                )
-            ]
-        )
-
-    def _narrowers_from_narrower_authority(self) -> list[str]:
-        assert self._raw_concept_node is not None
-        return _filter_irrelevant_ids(
-            [
-                remove_id_prefix(broader["@id"])
-                for broader in _as_list(
-                    self._raw_concept_node.get("madsrdf:hasNarrowerAuthority", [])
-                )
-            ]
+            [remove_id_prefix(narrower["@id"]) for narrower in narrower_terms]
         )
 
     @property

@@ -114,12 +114,11 @@ module "pipeline_indices" {
   allow_delete = var.allow_delete_indices
 
   es_works_source_index       = local.es_works_source_index
-  es_works_merged_index       = local.es_works_merged_index
   es_works_identified_index   = local.es_works_identified_index
   es_works_denormalised_index = local.es_works_denormalised_index
   es_works_index              = local.es_works_index
 
-  es_concepts_index = local.es_concepts_index
+  es_concepts_index_prefix = local.es_concepts_index_prefix
 
   es_images_initial_index   = local.es_images_initial_index
   es_images_augmented_index = local.es_images_augmented_index
@@ -132,7 +131,6 @@ module "pipeline_indices" {
 }
 
 locals {
-  indices = module.pipeline_indices.index_names
   service_index_permissions = {
     read_only = {
       read  = ["*"]
@@ -140,58 +138,58 @@ locals {
     }
     transformer = {
       read  = []
-      write = [local.indices.source]
+      write = [local.es_works_source_index]
     }
     id_minter = {
-      read  = [local.indices.source]
-      write = [local.indices.works_identified]
+      read  = [local.es_works_source_index]
+      write = [local.es_works_identified_index]
     }
     matcher = {
-      read  = [local.indices.works_identified]
+      read  = [local.es_works_identified_index]
       write = []
     }
     merger = {
-      read  = [local.indices.works_identified]
-      write = [local.indices.works_merged, local.indices.images_initial]
-    }
-    router = {
-      read  = [local.indices.works_merged]
-      write = [local.indices.denormalised]
+      read  = [local.es_works_identified_index]
+      write = [local.es_works_denormalised_index, local.es_images_initial_index]
     }
     path_concatenator = {
-      read  = [local.indices.works_merged]
-      write = [local.indices.works_merged]
+      read  = [local.es_works_denormalised_index]
+      write = [local.es_works_denormalised_index]
     }
     relation_embedder = {
-      read  = [local.indices.works_merged]
-      write = [local.indices.denormalised]
+      read  = [local.es_works_denormalised_index]
+      write = [local.es_works_denormalised_index]
     }
     work_ingestor = {
-      read  = [local.indices.denormalised]
-      write = [local.indices.works_indexed]
+      read  = [local.es_works_denormalised_index]
+      write = [local.es_works_index]
     }
     inferrer = {
-      read  = [local.indices.images_initial]
-      write = [local.indices.images_augmented]
+      read  = [local.es_images_initial_index]
+      write = [local.es_images_augmented_index]
     }
     image_ingestor = {
-      read  = [local.indices.images_augmented]
-      write = [local.indices.images_indexed]
+      read  = [local.es_images_augmented_index]
+      write = [local.es_images_index]
     }
     concept_ingestor = {
-      read  = [local.indices.concepts_indexed]
-      write = [local.indices.concepts_indexed]
+      read  = ["${local.es_concepts_index_prefix}*"]
+      write = ["${local.es_concepts_index_prefix}*"]
     }
     snapshot_generator = {
-      read  = [local.indices.works_indexed, local.indices.images_indexed]
+      read  = [local.es_works_index, local.es_images_index]
       write = []
     }
     catalogue_api = {
-      read  = [local.indices.works_indexed, local.indices.images_indexed]
+      read  = [local.es_works_index, local.es_images_index]
       write = []
     }
     concepts_api = {
-      read  = [local.indices.concepts_indexed]
+      read  = ["${local.es_concepts_index_prefix}-2025-03-06"]
+      write = []
+    }
+    concepts_api_new = {
+      read  = ["${local.es_concepts_index_prefix}*"]
       write = []
     }
   }
@@ -208,7 +206,8 @@ locals {
   catalogue_account_services = toset([
     "catalogue_api",
     "snapshot_generator",
-    "concepts_api"
+    "concepts_api",
+    "concepts_api_new"
   ])
 }
 
@@ -233,7 +232,7 @@ resource "elasticstack_elasticsearch_security_role" "read_only" {
   name = "read_only"
 
   indices {
-    names      = [for idx in module.pipeline_indices.indices : idx.name]
+    names      = ["images*", "concepts*", "works*"]
     privileges = ["read"]
   }
 }

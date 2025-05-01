@@ -4,6 +4,7 @@ import org.scalatest.GivenWhenThen
 import org.scalatest.featurespec.AnyFeatureSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{IdState, IdentifierType}
+//import weco.catalogue.internal_model.identifiers.IdentifierType
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
 import weco.catalogue.internal_model.work.{
   CollectionPath,
@@ -47,10 +48,10 @@ class MergerIntegrationTest
         processWork(work)
 
         Then("the work is returned")
-        val mergedWork = context.getMerged(work)
-        mergedWork.data shouldBe work.data
-        mergedWork.state should beSimilarTo(work.state)
-        mergedWork.state.mergedTime should beRecent()
+        val denormalisedWork = context.getDenormalised(work)
+        denormalisedWork.data shouldBe work.data
+        Right(denormalisedWork.state) should beSimilarTo(work.state)
+        denormalisedWork.state.mergedTime should beRecent()
     }
   }
 
@@ -70,9 +71,9 @@ class MergerIntegrationTest
         processWorks(sierra, miro1, miro2, miro3)
 
         Then("the Miro works are redirected to the Sierra work")
-        context.getMerged(miro1) should beRedirectedTo(sierra)
-        context.getMerged(miro2) should beRedirectedTo(sierra)
-        context.getMerged(miro3) should beRedirectedTo(sierra)
+        Right(context.getDenormalised(miro1)) should beRedirectedTo(sierra)
+        Right(context.getDenormalised(miro2)) should beRedirectedTo(sierra)
+        Right(context.getDenormalised(miro3)) should beRedirectedTo(sierra)
 
         And("images are created from the Miro works")
         context.imageData should contain(miro1.singleImage)
@@ -80,10 +81,10 @@ class MergerIntegrationTest
         context.imageData should contain(miro3.singleImage)
 
         And("the merged Sierra work's images contain all of the images")
-        val mergedImages = context.getMerged(sierra).data.imageData
-        mergedImages should contain(miro1.singleImage)
-        mergedImages should contain(miro2.singleImage)
-        mergedImages should contain(miro3.singleImage)
+        val denormalisedWorkImages = context.getDenormalised(sierra).data.imageData
+        denormalisedWorkImages should contain(miro1.singleImage)
+        denormalisedWorkImages should contain(miro2.singleImage)
+        denormalisedWorkImages should contain(miro3.singleImage)
     }
   }
 
@@ -99,14 +100,14 @@ class MergerIntegrationTest
         processWorks(sierra, miro)
 
         Then("the Miro work is redirected to the Sierra work")
-        context.getMerged(miro) should beRedirectedTo(sierra)
+        Right(context.getDenormalised(miro)) should beRedirectedTo(sierra)
 
         And("an image is created from the Miro work")
         context.imageData should contain only miro.singleImage
 
         And("the merged Sierra work contains the image")
         context
-          .getMerged(sierra)
+          .getDenormalised(sierra)
           .data
           .imageData should contain only miro.singleImage
     }
@@ -122,10 +123,10 @@ class MergerIntegrationTest
         processWorks(sierra, ebsco)
 
         Then("the Sierra work is redirected to the Ebsco work")
-        context.getMerged(sierra) should beRedirectedTo(ebsco)
+        Right(context.getDenormalised(sierra)) should beRedirectedTo(ebsco)
 
         And("the Ebsco work should be unmodified")
-        context.getMerged(ebsco).data shouldBe ebsco.data
+        context.getDenormalised(ebsco).data shouldBe ebsco.data
     }
   }
 
@@ -143,14 +144,14 @@ class MergerIntegrationTest
         processWorks(sierraPicture, mets)
 
         Then("the METS work is redirected to the Sierra work")
-        context.getMerged(mets) should beRedirectedTo(sierraPicture)
+        Right(context.getDenormalised(mets)) should beRedirectedTo(sierraPicture)
 
         And("an image is created from the METS work")
         context.imageData should contain only mets.singleImage
 
         And("the merged Sierra work contains no images")
         context
-          .getMerged(sierraPicture)
+          .getDenormalised(sierraPicture)
           .data
           .imageData shouldBe empty
 
@@ -158,7 +159,7 @@ class MergerIntegrationTest
           "the merged Sierra work contains the locations from both works"
         )
         context
-          .getMerged(sierraPicture)
+          .getDenormalised(sierraPicture)
           .data
           .items
           .flatMap(_.locations) should contain theSameElementsAs (
@@ -182,14 +183,14 @@ class MergerIntegrationTest
         processWorks(sierraEphemera, mets)
 
         Then("the METS work is redirected to the Sierra work")
-        context.getMerged(mets) should beRedirectedTo(sierraEphemera)
+        Right(context.getDenormalised(mets)) should beRedirectedTo(sierraEphemera)
 
         And("an image is created from the METS work")
         context.imageData should contain only mets.singleImage
 
         And("the merged Sierra work contains the image")
         context
-          .getMerged(sierraEphemera)
+          .getDenormalised(sierraEphemera)
           .data
           .imageData shouldBe empty
 
@@ -197,7 +198,7 @@ class MergerIntegrationTest
           "the merged Sierra work contains the locations from both works"
         )
         context
-          .getMerged(sierraEphemera)
+          .getDenormalised(sierraEphemera)
           .data
           .items
           .flatMap(_.locations) should contain theSameElementsAs (
@@ -235,19 +236,19 @@ class MergerIntegrationTest
         Then(
           "the METS work and the Miro work are redirected to the Sierra work"
         )
-        context.getMerged(mets) should beRedirectedTo(sierraDigaidsPicture)
-        context.getMerged(miro) should beRedirectedTo(sierraDigaidsPicture)
+        Right(context.getDenormalised(mets)) should beRedirectedTo(sierraDigaidsPicture)
+        Right(context.getDenormalised(miro)) should beRedirectedTo(sierraDigaidsPicture)
 
         And("the Sierra work contains no images")
         context
-          .getMerged(sierraDigaidsPicture)
+          .getDenormalised(sierraDigaidsPicture)
           .data
           .imageData shouldBe empty
         And(
           "the merged Sierra work contains the locations from both works"
         )
         context
-          .getMerged(sierraDigaidsPicture)
+          .getDenormalised(sierraDigaidsPicture)
           .data
           .items
           .flatMap(_.locations) should contain theSameElementsAs (
@@ -267,10 +268,10 @@ class MergerIntegrationTest
         processWorks(physicalSierra, digitalSierra)
 
         Then("the digital work is redirected to the physical work")
-        context.getMerged(digitalSierra) should beRedirectedTo(physicalSierra)
+        Right(context.getDenormalised(digitalSierra)) should beRedirectedTo(physicalSierra)
 
         And("the physical work contains the digitised work's identifiers")
-        val physicalIdentifiers = context.getMerged(physicalSierra).identifiers
+        val physicalIdentifiers = context.getDenormalised(physicalSierra).identifiers
         physicalIdentifiers should contain allElementsOf digitalSierra.identifiers
     }
   }
@@ -293,8 +294,8 @@ class MergerIntegrationTest
         processWorks(physicalVideo, digitisedVideo)
 
         Then("both original works remain visible")
-        context.getMerged(physicalVideo) should beVisible
-        context.getMerged(digitisedVideo) should beVisible
+        Right(context.getDenormalised(physicalVideo)) should beVisible
+        Right(context.getDenormalised(digitisedVideo)) should beVisible
     }
   }
 
@@ -310,10 +311,10 @@ class MergerIntegrationTest
         processWorks(sierra, calm)
 
         Then("the Sierra work is redirected to the Calm work")
-        context.getMerged(sierra) should beRedirectedTo(calm)
+        Right(context.getDenormalised(sierra)) should beRedirectedTo(calm)
 
         And("the Calm work contains the Sierra item ID")
-        val calmItem = context.getMerged(calm).data.items.head
+        val calmItem = context.getDenormalised(calm).data.items.head
         calmItem.id shouldBe sierra.data.items.head.id
     }
   }
@@ -336,16 +337,16 @@ class MergerIntegrationTest
         processWorks(sierra, calm, miro)
 
         Then("the Sierra work is redirected to the Calm work")
-        context.getMerged(sierra) should beRedirectedTo(calm)
+        Right(context.getDenormalised(sierra)) should beRedirectedTo(calm)
 
         And("the Miro work is redirected to the Calm work")
-        context.getMerged(miro) should beRedirectedTo(calm)
+        Right(context.getDenormalised(miro)) should beRedirectedTo(calm)
 
         And("the Calm work contains the Miro location")
-        context.getMerged(calm).data.items.flatMap(_.locations) should
+        context.getDenormalised(calm).data.items.flatMap(_.locations) should
           contain(miro.data.items.head.locations.head)
         And("the Calm work contains the Miro image")
-        context.getMerged(calm).data.imageData should contain(miro.singleImage)
+        context.getDenormalised(calm).data.imageData should contain(miro.singleImage)
     }
   }
 
@@ -365,17 +366,17 @@ class MergerIntegrationTest
         processWorks(sierraPicture, calm, mets)
 
         Then("the Sierra work is redirected to the Calm work")
-        context.getMerged(sierraPicture) should beRedirectedTo(calm)
+        Right(context.getDenormalised(sierraPicture)) should beRedirectedTo(calm)
 
         And("the METS work is redirected to the Calm work")
-        context.getMerged(mets) should beRedirectedTo(calm)
+        Right(context.getDenormalised(mets)) should beRedirectedTo(calm)
 
         And("the Calm work contains the METS location")
-        context.getMerged(calm).data.items.flatMap(_.locations) should
+        context.getDenormalised(calm).data.items.flatMap(_.locations) should
           contain(mets.data.items.head.locations.head)
 
         And("the Calm work contains the METS image")
-        context.getMerged(calm).data.imageData shouldBe empty
+        context.getDenormalised(calm).data.imageData shouldBe empty
     }
   }
 
@@ -416,21 +417,21 @@ class MergerIntegrationTest
         processWorks(workWithPhysicalVideoFormats, workForEbib, workForMets)
 
         Then("the METS work is redirected to the Sierra e-bib")
-        context.getMerged(workForMets) should beRedirectedTo(workForEbib)
+        Right(context.getDenormalised(workForMets)) should beRedirectedTo(workForEbib)
 
         And("the Sierra e-bib gets the items from the METS work")
         context
-          .getMerged(workForEbib)
+          .getDenormalised(workForEbib)
           .data
           .items shouldBe workForMets.data.items
 
         And("the Sierra physical work is unaffected")
         context
-          .getMerged(workWithPhysicalVideoFormats)
+          .getDenormalised(workWithPhysicalVideoFormats)
           .data shouldBe workWithPhysicalVideoFormats.data
-        context
-          .getMerged(workWithPhysicalVideoFormats)
-          .state should beSimilarTo(workWithPhysicalVideoFormats.state)
+        Right(context
+          .getDenormalised(workWithPhysicalVideoFormats)
+          .state) should beSimilarTo(workWithPhysicalVideoFormats.state)
     }
   }
 
@@ -448,27 +449,27 @@ class MergerIntegrationTest
         processWorks(digitalSierra, physicalSierra, teiWork)
 
         Then("the Sierra works are redirected to the tei")
-        context.getMerged(digitalSierra) should beRedirectedTo(teiWork)
-        context.getMerged(physicalSierra) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(digitalSierra)) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(physicalSierra)) should beRedirectedTo(teiWork)
 
         And("the tei work has the Sierra works' items")
         context
-          .getMerged(teiWork)
+          .getDenormalised(teiWork)
           .data
           .items should contain allElementsOf digitalSierra.data.items
         context
-          .getMerged(teiWork)
+          .getDenormalised(teiWork)
           .data
           .items should contain allElementsOf physicalSierra.data.items
 
         And("the tei work has the Sierra works' identifiers")
         context
-          .getMerged(teiWork)
+          .getDenormalised(teiWork)
           .data
           .otherIdentifiers should contain allElementsOf physicalSierra.data.otherIdentifiers
           .filter(_.identifierType == IdentifierType.SierraIdentifier)
         context
-          .getMerged(teiWork)
+          .getDenormalised(teiWork)
           .data
           .otherIdentifiers should contain allElementsOf digitalSierra.data.otherIdentifiers
           .filter(_.identifierType == IdentifierType.SierraIdentifier)
@@ -483,12 +484,13 @@ class MergerIntegrationTest
         Given("a Tei, a Sierra physical record and a Sierra digital record")
         val (digitalSierra, physicalSierra) = sierraIdentifiedWorkPair()
         val firstInternalWork =
-          teiIdentifiedWork().collectionPath(CollectionPath("1"))
+          teiIdentifiedWork().collectionPath(CollectionPath("TEI_1"))
         val secondInternalWork =
-          teiIdentifiedWork().collectionPath(CollectionPath("2"))
+          teiIdentifiedWork().collectionPath(CollectionPath("TEI_2"))
 
         val teiWork = teiIdentifiedWork()
           .title("A tei work")
+          .collectionPath(CollectionPath("TEI"))
           .internalWorks(List(firstInternalWork, secondInternalWork))
           .mergeCandidates(
             List(createTeiBnumberMergeCandidateFor(physicalSierra))
@@ -498,8 +500,8 @@ class MergerIntegrationTest
         processWorks(digitalSierra, physicalSierra, teiWork)
 
         Then("the Sierra works are redirected to the tei")
-        context.getMerged(digitalSierra) should beRedirectedTo(teiWork)
-        context.getMerged(physicalSierra) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(digitalSierra)) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(physicalSierra)) should beRedirectedTo(teiWork)
 
         And("the tei work has the Sierra works' items")
         context
@@ -524,8 +526,8 @@ class MergerIntegrationTest
           .filter(_.identifierType == IdentifierType.SierraIdentifier)
 
         And("the internal tei works are returned")
-        context.getMerged(firstInternalWork) should beVisible
-        context.getMerged(secondInternalWork) should beVisible
+        Left(context.getMerged(firstInternalWork)) should beVisible
+        Left(context.getMerged(secondInternalWork)) should beVisible
 
         And("the tei internal works contain the sierra item")
         context
@@ -563,17 +565,17 @@ class MergerIntegrationTest
         processWork(teiWork)
 
         Then("the tei work should be a TEI work")
-        val mergedWork = context.getMerged(teiWork)
-        mergedWork.data shouldBe teiWork.data
-        mergedWork.state should beSimilarTo(teiWork.state)
+        val denormalisedWork = context.getDenormalised(teiWork)
+        denormalisedWork.data shouldBe teiWork.data
+        Right(denormalisedWork.state) should beSimilarTo(teiWork.state)
 
         And("the the tei inner works should be returned")
         Seq(internalWork1, internalWork2).foreach {
           w =>
             val expectedWork = updateInternalWork(w, teiWork)
 
-            context.getMerged(w).data shouldBe expectedWork.data
-            context.getMerged(w).state should beSimilarTo(expectedWork.state)
+            context.getDenormalised(w).data shouldBe expectedWork.data
+            Right(context.getDenormalised(w).state) should beSimilarTo(expectedWork.state)
         }
     }
   }
@@ -605,14 +607,14 @@ class MergerIntegrationTest
         context
           .getMerged(internalWork1)
           .data shouldBe expectedInternalWork1.data
-        context.getMerged(internalWork1).state should beSimilarTo(
+        Left(context.getMerged(internalWork1).state) should beSimilarTo(
           expectedInternalWork1.state
         )
 
         context
           .getMerged(internalWork2)
           .data shouldBe expectedInternalWork2.data
-        context.getMerged(internalWork2).state should beSimilarTo(
+        Left(context.getMerged(internalWork2).state) should beSimilarTo(
           expectedInternalWork2.state
         )
 
@@ -620,7 +622,7 @@ class MergerIntegrationTest
           List(expectedInternalWork1, expectedInternalWork2)
         )
         context.getMerged(teiWork).data shouldBe expectedTeiWork.data
-        context.getMerged(teiWork).state should beSimilarTo(
+        Left(context.getMerged(teiWork).state) should beSimilarTo(
           expectedTeiWork.state
         )
     }
@@ -675,14 +677,14 @@ class MergerIntegrationTest
         processWorks(teiWork, sierraWork, metsWork, calmWork)
 
         Then("Everything should be redirected to the TEI work")
-        context.getMerged(sierraWork) should beRedirectedTo(teiWork)
-        context.getMerged(metsWork) should beRedirectedTo(teiWork)
-        context.getMerged(calmWork) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(sierraWork)) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(metsWork)) should beRedirectedTo(teiWork)
+        Right(context.getDenormalised(calmWork)) should beRedirectedTo(teiWork)
 
         And("the TEI work gets all the CALM and Sierra identifiers")
         val teiMergedIdentifiers =
           context
-            .getMerged(teiWork)
+            .getDenormalised(teiWork)
             .data
             .otherIdentifiers
 
@@ -697,7 +699,7 @@ class MergerIntegrationTest
         And("it only has two items (one physical, one digital)")
         val teiItems =
           context
-            .getMerged(teiWork)
+            .getDenormalised(teiWork)
             .data
             .items
 
@@ -707,7 +709,7 @@ class MergerIntegrationTest
 
         And("it gets the METS thumbnail")
         context
-          .getMerged(teiWork)
+          .getDenormalised(teiWork)
           .data
           .thumbnail shouldBe metsWork.data.thumbnail
     }
@@ -748,7 +750,7 @@ class MergerIntegrationTest
         processWorks(miro, calm, sierra)
 
         Then("the Sierra work is redirected to the Calm work")
-        context.getMerged(sierra) should beRedirectedTo(calm)
+        Right(context.getDenormalised(sierra)) should beRedirectedTo(calm)
     }
   }
 
@@ -778,8 +780,8 @@ class MergerIntegrationTest
         processWorks(calm, sierra)
 
         Then("the Sierra work is redirected to the Calm work")
-        context.getMerged(sierra) should beRedirectedTo(calm)
-        context.getMerged(calm) should beVisible
+        Right(context.getDenormalised(sierra)) should beRedirectedTo(calm)
+        Right(context.getDenormalised(calm)) should beVisible
     }
   }
 
@@ -823,7 +825,7 @@ class MergerIntegrationTest
           processWork(sierraSuppressedEbib)
           processWork(sierraUnsuppressedEbib)
 
-          context.getMerged(metsWork) should beRedirectedTo(
+          Right(context.getDenormalised(metsWork)) should beRedirectedTo(
             sierraUnsuppressedEbib
           )
       }
@@ -836,7 +838,7 @@ class MergerIntegrationTest
           processWork(metsWork)
           processWork(sierraUnsuppressedEbib)
 
-          context.getMerged(metsWork) should beRedirectedTo(
+          Right(context.getDenormalised(metsWork)) should beRedirectedTo(
             sierraUnsuppressedEbib
           )
       }
@@ -849,7 +851,7 @@ class MergerIntegrationTest
           processWork(sierraUnsuppressedEbib)
           processWork(metsWork)
 
-          context.getMerged(metsWork) should beRedirectedTo(
+          Right(context.getDenormalised(metsWork)) should beRedirectedTo(
             sierraUnsuppressedEbib
           )
       }

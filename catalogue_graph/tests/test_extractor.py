@@ -22,11 +22,76 @@ entity_types = get_args(EntityType)
 stream_destinations = get_args(StreamDestination)
 
 
+MESH_SOURCE_MOCK_RESPONSE = {
+    "method": "GET",
+    "url": MESH_URL,
+    "content_bytes": load_fixture("mesh/raw_descriptors.xml"),
+}
+
+LOC_SH_SOURCE_MOCK_RESPONSE = {
+    "method": "GET",
+    "url": LOC_SUBJECT_HEADINGS_URL,
+    "content_bytes": load_fixture("loc/raw_subject_headings.jsonld"),
+}
+
+LOC_NAMES_SOURCE_MOCK_RESPONSE = {
+    "method": "GET",
+    "url": LOC_NAMES_URL,
+    "content_bytes": load_fixture("loc/raw_names.jsonld"),
+}
+
+CATALOGUE_SOURCE_MOCK_RESPONSE = {
+    "method": "GET",
+    "url": CATALOGUE_SNAPSHOT_URL,
+    "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
+}
+
+WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE = {
+    "method": "GET",
+    "url": WIKIDATA_SPARQL_URL,
+    "params": {
+        "format": "json",
+        "query": "SELECT ?item WHERE { ?item wdt:P244 _:anyValueP244. }",
+    },
+    "content_bytes": None,
+    "json_data": {"results": {"bindings": []}},
+}
+
+WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE = {
+    "method": "GET",
+    "url": WIKIDATA_SPARQL_URL,
+    "params": {
+        "format": "json",
+        "query": "SELECT ?item WHERE { ?item wdt:P486 _:anyValueP486. }",
+    },
+    "content_bytes": None,
+    "json_data": {"results": {"bindings": []}},
+}
+
+SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[dict]] = {
+    "mesh_concepts": [MESH_SOURCE_MOCK_RESPONSE],
+    "mesh_locations": [MESH_SOURCE_MOCK_RESPONSE],
+    "loc_concepts": [LOC_SH_SOURCE_MOCK_RESPONSE],
+    "loc_locations": [LOC_SH_SOURCE_MOCK_RESPONSE, LOC_NAMES_SOURCE_MOCK_RESPONSE],
+    "loc_names": [LOC_NAMES_SOURCE_MOCK_RESPONSE],
+    "wikidata_linked_loc_names": [WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE],
+    "wikidata_linked_loc_concepts": [WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE],
+    "wikidata_linked_loc_locations": [WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE],
+    "wikidata_linked_mesh_concepts": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
+    "wikidata_linked_mesh_locations": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
+    "catalogue_concepts": [CATALOGUE_SOURCE_MOCK_RESPONSE],
+    "catalogue_works": [CATALOGUE_SOURCE_MOCK_RESPONSE],
+}
+
+
 def mock_requests_lookup_table(
     destination: StreamDestination,
     transformer_type: TransformerType,
 ) -> Any:
     mocked_responses: list[dict] = []
+
+    # Add all relevant source mock responses
+    mocked_responses.extend(SOURCE_MOCK_RESPONSE_MAPPING[transformer_type])
 
     if destination == "graph":
         mocked_responses.append(
@@ -35,72 +100,6 @@ def mock_requests_lookup_table(
                 "url": f"https://{MOCK_INSTANCE_ENDPOINT}:8182/openCypher",
                 "content_bytes": None,
                 "json_data": {"results": {}},
-            }
-        )
-
-    if transformer_type in ["mesh_concepts", "mesh_locations"]:
-        mocked_responses.append(
-            {
-                "method": "GET",
-                "url": MESH_URL,
-                "content_bytes": load_fixture("mesh/raw_descriptors.xml"),
-            }
-        )
-    elif transformer_type in ["loc_concepts", "loc_locations", "loc_names"]:
-        mocked_responses.append(
-            {
-                "method": "GET",
-                "url": LOC_SUBJECT_HEADINGS_URL,
-                "content_bytes": load_fixture("loc/raw_subject_headings.jsonld"),
-            }
-        )
-        mocked_responses.append(
-            {
-                "method": "GET",
-                "url": LOC_NAMES_URL,
-                "content_bytes": load_fixture("loc/raw_names.jsonld"),
-            }
-        )
-    elif transformer_type in [
-        "wikidata_linked_loc_names",
-        "wikidata_linked_loc_concepts",
-        "wikidata_linked_loc_locations",
-        "wikidata_linked_loc_names",
-    ]:
-        mocked_responses.append(
-            {
-                "method": "GET",
-                "url": WIKIDATA_SPARQL_URL,
-                "params": {
-                    "format": "json",
-                    "query": "SELECT ?item WHERE { ?item wdt:P244 _:anyValueP244. }",
-                },
-                "content_bytes": None,
-                "json_data": {"results": {"bindings": []}},
-            }
-        )
-    elif transformer_type in [
-        "wikidata_linked_mesh_concepts",
-        "wikidata_linked_mesh_locations",
-    ]:
-        mocked_responses.append(
-            {
-                "method": "GET",
-                "url": WIKIDATA_SPARQL_URL,
-                "params": {
-                    "format": "json",
-                    "query": "SELECT ?item WHERE { ?item wdt:P486 _:anyValueP486. }",
-                },
-                "content_bytes": None,
-                "json_data": {"results": {"bindings": []}},
-            }
-        )
-    elif transformer_type in ["catalogue_concepts", "catalogue_works"]:
-        mocked_responses.append(
-            {
-                "method": "GET",
-                "url": CATALOGUE_SNAPSHOT_URL,
-                "content_bytes": load_fixture("catalogue_example.json"),
             }
         )
 

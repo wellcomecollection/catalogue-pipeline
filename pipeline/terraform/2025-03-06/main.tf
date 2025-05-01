@@ -2,7 +2,7 @@ module "pipeline" {
   source = "../modules/stack"
 
   reindexing_state = {
-    listen_to_reindexer      = true
+    listen_to_reindexer      = false
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
@@ -20,7 +20,11 @@ module "pipeline" {
       works_analysis = "works_indexed.2024-11-06"
     }
     concepts = {
-      indexed = "concepts_indexed.2025-03-10"
+      # Define a set of concept indexes, each with its own config definition
+      indexed = {
+        "2025-03-06" = "concepts_indexed.2025-03-10"
+        "2025-04-24" = "concepts_indexed.2025-03-10"
+      }
     }
   }
 
@@ -33,3 +37,13 @@ module "pipeline" {
     aws.catalogue = aws.catalogue
   }
 }
+
+# To prevent the 2025-03-06 concepts index from being destroyed and recreated, we need to explicitly tell Terraform
+# it has moved to a different address.
+# This bit won't be necessary in any newly created pipeline stacks.
+moved {
+  from = module.pipeline.module.pipeline_indices.module.concepts_indexed_index.elasticstack_elasticsearch_index.the_index
+  to   = module.pipeline.module.pipeline_indices.module.concepts_indexed_indexes["2025-03-06"].elasticstack_elasticsearch_index.the_index
+}
+
+

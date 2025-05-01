@@ -5,16 +5,15 @@ module "relation_embedder_sub" {
   pipeline_date    = var.pipeline_date
   reindexing_state = var.reindexing_state
 
-  es_works_merged_index               = local.es_works_merged_index
   es_works_denormalised_index         = local.es_works_denormalised_index
   pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
 
   # path_concatenator
-  path_concatenator_image = local.path_concatenator_image
+  path_concatenator_image           = local.path_concatenator_image
+  path_concatenator_input_topic_arn = module.merger_works_incomplete_path_output_topic.arn
 
-  # router
-  router_image           = local.router_image
-  router_input_topic_arn = module.merger_works_output_topic.arn
+  # batcher
+  batcher_input_topic_arn = module.merger_works_path_output_topic.arn
 
   # ecs services config
   min_capacity                = var.min_capacity

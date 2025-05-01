@@ -45,7 +45,7 @@ module "batcher_lambda" {
 
   queue_config = {
     topic_arns = [
-      module.router_path_output_topic.arn,
+      var.batcher_input_topic_arn,
       module.path_concatenator_output_topic.arn,
     ]
     max_receive_count   = 1

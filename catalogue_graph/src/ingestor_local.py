@@ -32,7 +32,7 @@ from ingestor_trigger_monitor import (
 )
 
 
-# Run the whole pipeline locally, Usage: python src/ingestor_local.py --pipeline-date 2021-07-01 --job-id 123
+# Run the whole pipeline locally, Usage: python src/ingestor_local.py --pipeline-date 2021-07-01 --index-date 2021-07-01 --job-id 123
 def main() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
@@ -45,6 +45,12 @@ def main() -> None:
         "--pipeline-date",
         type=str,
         help='The pipeline that is being ingested to, will default to "None".',
+        required=False,
+    )
+    parser.add_argument(
+        "--index-date",
+        type=str,
+        help="The concepts index date that is being ingested to, will default to None.",
         required=False,
     )
     parser.add_argument(
@@ -69,6 +75,7 @@ def main() -> None:
     trigger_event = IngestorTriggerLambdaEvent(
         job_id=args.job_id,
         pipeline_date=args.pipeline_date,
+        index_date=args.index_date,
     )
     print(f"Processing pipeline for {trigger_event.pipeline_date}.")
 

@@ -9,7 +9,6 @@ def extract_concepts_from_work(
     raw_work: dict,
 ) -> Generator[tuple[dict, WorkConceptKey]]:
     """Returns all concepts associated with the given work. Does not deduplicate."""
-
     # We need to return all concepts stored in each subject, and also the subject itself.
     # This will sometimes result in duplicates being returned.
     for subject in raw_work.get("subjects", []):

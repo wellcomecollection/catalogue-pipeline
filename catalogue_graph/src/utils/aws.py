@@ -1,16 +1,21 @@
 import csv
 import json
 from collections.abc import Generator
-from typing import Any
+from typing import Any, TypeVar
 
 import boto3
+import polars as pl
 import smart_open
+from pydantic import BaseModel
 
 import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
 from utils.types import NodeType, OntologyType
+
+PydanticModelType = TypeVar("PydanticModelType", bound=BaseModel)
+
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
 INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph/neptune-cluster-endpoint"
@@ -72,20 +77,63 @@ def get_neptune_client(is_local: bool) -> BaseNeptuneClient:
         return LambdaNeptuneClient(get_secret(INSTANCE_ENDPOINT_SECRET_NAME))
 
 
+def get_csv_from_s3(s3_uri: str) -> Generator[Any]:
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
+        csv_reader = csv.DictReader(f)
+
+        yield from csv_reader
+
+
 def fetch_transformer_output_from_s3(
     node_type: NodeType, source: OntologyType
 ) -> Generator[Any]:
     """Retrieves the bulk load file outputted by the relevant transformer so that we can extract data from it."""
     if (node_type, source) not in VALID_SOURCE_FILES:
+        print(
+            f"Invalid source and node_type combination: ({source}, {node_type}). Returning an empty generator."
+        )
         return
 
     linked_nodes_file_name = f"{source}_{node_type}__nodes.csv"
     s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
 
     print(f"Retrieving ids of type '{node_type}' from ontology '{source}' from S3.")
+    yield from get_csv_from_s3(s3_uri)
 
+
+def df_from_s3_parquet(s3_file_uri: str) -> pl.DataFrame:
     transport_params = {"client": boto3.client("s3")}
-    with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
-        csv_reader = csv.DictReader(f)
+    with smart_open.open(s3_file_uri, "rb", transport_params=transport_params) as f:
+        df = pl.read_parquet(f)
 
-        yield from csv_reader
+    return df
+
+
+def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_file_uri, "wb", transport_params=transport_params) as f:
+        df.write_parquet(f)
+
+
+def pydantic_to_s3_json(model: BaseModel, s3_uri: str) -> None:
+    """Create a JSON file from a Pydantic model and save it to S3."""
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
+        f.write(model.model_dump_json())
+
+
+def pydantic_from_s3_json(
+    model_type: type[PydanticModelType], s3_uri: str, ignore_missing: bool = False
+) -> PydanticModelType | None:
+    """Create a Pydantic model of type `model_type` from a JSON file stored in S3."""
+    try:
+        with smart_open.open(s3_uri, "r") as f:
+            return model_type.model_validate_json(f.read())
+    except (OSError, KeyError) as e:
+        # if file does not exist, ignore
+        if ignore_missing:
+            print(f"S3 file not found: {e}")
+            return None
+
+        raise

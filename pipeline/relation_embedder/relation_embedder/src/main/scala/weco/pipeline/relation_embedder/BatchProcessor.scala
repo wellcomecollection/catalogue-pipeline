@@ -109,8 +109,8 @@ object BatchProcessor {
     materializer: Materializer
   ): BatchProcessor = {
 
-    val identifiedIndex =
-      Index(config.mergedWorkIndex)
+    val denormalisedIndex =
+      Index(config.denormalisedWorkIndex)
 
     val esClient = ElasticBuilder.buildElasticClient(config.elasticConfig)
 
@@ -128,7 +128,7 @@ object BatchProcessor {
     new BatchProcessor(
       relationsService = new PathQueryRelationsService(
         esClient,
-        identifiedIndex,
+        denormalisedIndex,
         completeTreeScroll = config.completeTreeScroll,
         affectedWorksScroll = config.affectedWorksScroll
       ),

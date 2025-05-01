@@ -41,6 +41,19 @@ data "aws_iam_policy_document" "neptune_read" {
   }
 }
 
+# neptune delete policy
+data "aws_iam_policy_document" "neptune_delete" {
+  statement {
+    actions = [
+      "neptune-db:Delete*"
+    ]
+
+    resources = [
+      local.cluster_data_access_arn
+    ]
+  }
+}
+
 # read from catalogue_graph_bucket s3 bucket
 data "aws_iam_policy_document" "ingestor_s3_read" {
   statement {
@@ -64,6 +77,31 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
 
     resources = [
       "${aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "s3_bulk_load_read" {
+  statement {
+    actions = [
+      "s3:HeadObject",
+      "s3:GetObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
+    ]
+  }
+}
+
+data "aws_iam_policy_document" "s3_bulk_load_write" {
+  statement {
+    actions = [
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
     ]
   }
 }
