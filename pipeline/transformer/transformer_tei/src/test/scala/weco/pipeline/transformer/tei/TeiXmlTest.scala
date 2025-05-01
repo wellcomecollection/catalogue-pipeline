@@ -125,6 +125,21 @@ class TeiXmlTest
       xml.value.description shouldBe Some("a manuscript about stuff")
     }
 
+    it("retains paragraph tags in the summary") {
+      val description =
+        "a <note>delightful <p>manuscript</p></note> <p /><p/> about <p>stuff</p>"
+
+      val xml = TeiXml(
+        id,
+        teiXml(id = id, summary = Some(summary(description)))
+          .toString()
+      ).flatMap(_.parse)
+
+      xml.value.description shouldBe Some(
+        "a delightful <p>manuscript</p> <p /><p/> about <p>stuff</p>"
+      )
+    }
+
     it("fails parsing if there's more than one summary node") {
       val bnumber = createSierraBibNumber.withCheckDigit
 

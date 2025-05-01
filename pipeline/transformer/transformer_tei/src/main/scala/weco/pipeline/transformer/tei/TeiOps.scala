@@ -18,7 +18,9 @@ object TeiOps {
     (nodeSeq \ "msContents" \ "summary").toList match {
       case List(node) =>
         // some summary nodes can contain TEI specific xml tags, so we remove them
-        Right(Some(node.text.trim.replaceAll("<.*?>", "")))
+        Right(
+          Some(node.text.trim.replaceAll("(?!<\\/?p\\ ?\\/?>)<.*?>", ""))
+        )
       case Nil => Right(None)
       case _   => Left(new RuntimeException("More than one summary node!"))
     }
