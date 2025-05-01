@@ -34,6 +34,6 @@ module "pipeline" {
   release_label = local.pipeline_date
 
   providers = {
-    aws.catalogue           = aws.catalogue
+    aws.catalogue = aws.catalogue
   }
 }
