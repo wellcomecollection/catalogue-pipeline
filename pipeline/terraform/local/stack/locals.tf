@@ -1,6 +1,5 @@
 locals {
   es_works_source_index       = "works-source-${var.local_pipeline_name}"
-  es_works_merged_index       = "works-merged-${var.local_pipeline_name}"
   es_works_identified_index   = "works-identified-${var.local_pipeline_name}"
   es_works_denormalised_index = "works-denormalised-${var.local_pipeline_name}"
   es_works_index              = "works-indexed-${var.local_pipeline_name}"

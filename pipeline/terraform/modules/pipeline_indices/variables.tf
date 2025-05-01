@@ -1,9 +1,7 @@
 variable "es_works_source_index" {
   type = string
 }
-variable "es_works_merged_index" {
-  type = string
-}
+
 variable "es_works_identified_index" {
   type = string
 }

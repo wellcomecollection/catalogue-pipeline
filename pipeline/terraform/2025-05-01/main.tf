@@ -35,6 +35,5 @@ module "pipeline" {
 
   providers = {
     aws.catalogue           = aws.catalogue
-    aws.additional_provider = aws.additional_provider
   }
 }

@@ -3,7 +3,6 @@ module "pipeline_indices" {
   source = "../../modules/pipeline_indices"
 
   es_works_source_index       = local.es_works_source_index
-  es_works_merged_index       = local.es_works_merged_index
   es_works_identified_index   = local.es_works_identified_index
   es_works_denormalised_index = local.es_works_denormalised_index
   es_works_index              = local.es_works_index

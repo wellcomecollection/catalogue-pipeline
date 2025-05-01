@@ -19,10 +19,6 @@ variable "reindexing_state" {
   })
 }
 
-variable "es_works_merged_index" {
-  type = string
-}
-
 variable "es_works_denormalised_index" {
   type = string
 }

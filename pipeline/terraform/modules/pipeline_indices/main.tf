@@ -42,15 +42,6 @@ module "works_identified_index" {
   allow_delete  = var.allow_delete
 }
 
-
-module "works_merged_index" {
-  source        = "../es_index"
-  name          = var.es_works_merged_index
-  mappings_name = var.index_config["works"]["merged"]
-  config_path   = var.es_config_path
-  allow_delete  = var.allow_delete
-}
-
 module "works_indexed_index" {
   source        = "../es_index"
   name          = var.es_works_index

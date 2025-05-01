@@ -13,7 +13,7 @@ terraform {
     }
 
     bucket         = "wellcomecollection-platform-infra"
-    key            = "terraform/catalogue-pipeline/pipeline/2025-03-06.tfstate"
+    key            = "terraform/catalogue-pipeline/pipeline/2025-05-01.tfstate"
     dynamodb_table = "terraform-locktable"
     region         = "eu-west-1"
   }
