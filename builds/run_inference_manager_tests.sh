@@ -13,7 +13,7 @@ do
     --file "$ROOT/pipeline/inferrer/Dockerfile" \
     --tag "$PROJECT" \
     --target "$PROJECT" \
-    --build-arg pythonversion="$(cat .python-version)" \
+    --build-arg pythonversion="$(cat $ROOT/pipeline/inferrer/.python-version)" \
     "$ROOT/pipeline/inferrer"
 done
 
