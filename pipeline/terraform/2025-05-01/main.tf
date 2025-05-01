@@ -11,8 +11,8 @@ module "pipeline" {
 
   index_config = {
     works = {
-      identified = "works_identified.2023-05-26"
-      merged     = "works_merged.2023-05-26"
+      identified  = "works_identified.2023-05-26"
+      merged     = "works_denormalised.2023-05-26"
       indexed    = "works_indexed.2024-11-14"
     }
     images = {
