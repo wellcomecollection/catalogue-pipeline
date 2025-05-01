@@ -1,4 +1,4 @@
-name: 'Python Docker'
+name: 'Docker build and push'
 description: "Builds and publishes a Docker image to ECR"
 inputs:
   registry:
@@ -8,13 +8,13 @@ inputs:
     description: "working folder"
     required: true
   target:
-    description: "target of a multistage build"
+    description: "target to build in a multistage docker"
     required: true
   tag:
     description: "tag for the image"
     required: true
   role_to_assume:
-    description: "role to assume when "
+    description: "role to assume when pushing the image to ECR"
     required: true
 runs:
   using: "composite"
