@@ -19,11 +19,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: eu-west-1
-        role-to-assume: ${{ inputs.role_to_assume }}
-
     - name: build docker image
       run: |
         docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
@@ -37,6 +32,7 @@ runs:
         image_name: ${{inputs.target}}
         local_tag: ${{inputs.tag}}
         registry_tag: ${{inputs.tag}}
+        role_to_assume: ${{role_to_assume}}
 
     - name: publish latest container to registry
       uses: ./.github/actions/push_to_ecr
@@ -46,3 +42,4 @@ runs:
         image_name: ${{inputs.target}}
         local_tag: ${{inputs.tag}}
         registry_tag: latest
+        role_to_assume: ${{role_to_assume}}

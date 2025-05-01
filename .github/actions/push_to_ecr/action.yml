@@ -13,9 +13,16 @@ inputs:
   registry_tag:
     description: "Tag to be used for the image on the registry"
     required: true
+  role_to_assume:
+    description: "role to assume when pushing the image to ECR"
+    required: true
 runs:
   using: "composite"
   steps:
+    - uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: eu-west-1
+        role-to-assume: ${{ inputs.role_to_assume }}
     - name: Login to Amazon ECR
       id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
