@@ -287,16 +287,6 @@ trait IntegrationTestHelpers
     }
   }
 
-//
-//  def beVisible = new Matcher[Work[Merged]] {
-//    override def apply(left: Work[Merged]): MatchResult =
-//      MatchResult(
-//        left.isInstanceOf[Work.Visible[Merged]],
-//        s"${left.id} is not visible",
-//        s"${left.id} is visible"
-//      )
-//  }
-
   implicit class VisibleWorkOps(val work: Work.Visible[Identified]) {
     def singleImage: ImageData[IdState.Identified] =
       work.data.imageData.head
