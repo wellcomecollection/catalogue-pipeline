@@ -36,10 +36,10 @@ class BatchExecutionQueue(Generic[Input, Result]):
     """
 
     def __init__(
-            self,
-            sync_batch_processor: Callable[[List[Input]], List[Result]],
-            batch_size: int,
-            timeout: float,
+        self,
+        sync_batch_processor: Callable[[List[Input]], List[Result]],
+        batch_size: int,
+        timeout: float,
     ):
         self.sync_batch_processor = sync_batch_processor
         self.batch_size = batch_size
@@ -143,6 +143,7 @@ class BatchExecutionQueue(Generic[Input, Result]):
                 pass
             except Exception:
                 import traceback
+
                 log.error(f"Unexpected error consuming queue {traceback.format_exc()}")
                 raise e from None
 
