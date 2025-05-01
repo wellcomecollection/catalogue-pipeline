@@ -11,7 +11,7 @@ dependencies = [
     "aiohttp[speedups]>=3.9.5",
     "Pillow>=10.3.0",
     "piffle>=0.5.0",
-    "async-timeout>=4.0.3",
+    "async-timeout==4.0.3",
 ]
 
 [tool.uv]

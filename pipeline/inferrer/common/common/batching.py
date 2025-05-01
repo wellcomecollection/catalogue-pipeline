@@ -36,10 +36,10 @@ class BatchExecutionQueue(Generic[Input, Result]):
     """
 
     def __init__(
-        self,
-        sync_batch_processor: Callable[[List[Input]], List[Result]],
-        batch_size: int,
-        timeout: float,
+            self,
+            sync_batch_processor: Callable[[List[Input]], List[Result]],
+            batch_size: int,
+            timeout: float,
     ):
         self.sync_batch_processor = sync_batch_processor
         self.batch_size = batch_size
@@ -141,8 +141,9 @@ class BatchExecutionQueue(Generic[Input, Result]):
                         batch.append(item)
             except (asyncio.TimeoutError, asyncio.CancelledError):
                 pass
-            except Exception as e:
-                log.error("Unexpected error consuming queue", e)
+            except Exception:
+                import traceback
+                log.error(f"Unexpected error consuming queue {traceback.format_exc()}")
                 raise e from None
 
             if batch:
