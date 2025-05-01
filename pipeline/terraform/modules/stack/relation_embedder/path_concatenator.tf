@@ -13,7 +13,7 @@ module "path_concatenator" {
   container_image = var.path_concatenator_image
 
   topic_arns = [
-    module.router_candidate_incomplete_paths_output_topic.arn,
+    var.path_concatenator_input_topic_arn
   ]
 
   env_vars = {
@@ -21,7 +21,7 @@ module "path_concatenator" {
 
     downstream_topic_arn = module.path_concatenator_output_topic.arn
 
-    es_merged_index = var.es_works_merged_index
+    es_denormalised_index = var.es_works_denormalised_index
   }
 
   secret_env_vars = var.pipeline_storage_es_service_secrets["path_concatenator"]

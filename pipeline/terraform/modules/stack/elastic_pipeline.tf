@@ -114,7 +114,6 @@ module "pipeline_indices" {
   allow_delete = var.allow_delete_indices
 
   es_works_source_index       = local.es_works_source_index
-  es_works_merged_index       = local.es_works_merged_index
   es_works_identified_index   = local.es_works_identified_index
   es_works_denormalised_index = local.es_works_denormalised_index
   es_works_index              = local.es_works_index
@@ -151,18 +150,14 @@ locals {
     }
     merger = {
       read  = [local.es_works_identified_index]
-      write = [local.es_works_merged_index, local.es_images_initial_index]
-    }
-    router = {
-      read  = [local.es_works_merged_index]
-      write = [local.es_works_denormalised_index]
+      write = [local.es_works_denormalised_index, local.es_images_initial_index]
     }
     path_concatenator = {
-      read  = [local.es_works_merged_index]
-      write = [local.es_works_merged_index]
+      read  = [local.es_works_denormalised_index]
+      write = [local.es_works_denormalised_index]
     }
     relation_embedder = {
-      read  = [local.es_works_merged_index]
+      read  = [local.es_works_denormalised_index]
       write = [local.es_works_denormalised_index]
     }
     work_ingestor = {

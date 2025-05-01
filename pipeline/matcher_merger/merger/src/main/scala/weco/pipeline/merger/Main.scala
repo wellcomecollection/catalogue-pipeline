@@ -7,7 +7,11 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
+import weco.catalogue.internal_model.work.WorkState.{
+  Denormalised,
+  Identified,
+  Merged
+}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
@@ -15,7 +19,8 @@ import weco.pipeline.merger.services.{
   IdentifiedWorkLookup,
   MergerManager,
   MergerWorkerService,
-  PlatformMerger
+  PlatformMerger,
+  WorkRouter
 }
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
@@ -45,12 +50,34 @@ object Main extends WellcomeTypesafeApp {
 
       val mergerManager = new MergerManager(PlatformMerger)
 
-      val workMsgSender =
+      val workSender =
         SNSBuilder.buildSNSMessageSender(
           config,
           namespace = "work-sender",
           subject = "Sent by the merger"
         )
+
+      val pathSender =
+        SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            namespace = "path-sender",
+            subject = "Sent by the merger"
+          )
+
+      val pathConcatenatorSender =
+        SNSBuilder
+          .buildSNSMessageSender(
+            config,
+            namespace = "path-concatenator-sender",
+            subject = "Sent by the merger"
+          )
+
+      val workRouter = new WorkRouter(
+        workSender = workSender,
+        pathSender = pathSender,
+        pathConcatenatorSender = pathConcatenatorSender
+      )
 
       val imageMsgSender =
         SNSBuilder.buildSNSMessageSender(
@@ -60,10 +87,18 @@ object Main extends WellcomeTypesafeApp {
         )
 
       val workOrImageIndexer =
-        new EitherIndexer[Work[Merged], Image[Initial]](
-          leftIndexer = new ElasticIndexer[Work[Merged]](
-            client = esClient,
-            index = Index(config.requireString("es.merged-works.index"))
+        new EitherIndexer[Either[Work[Merged], Work[Denormalised]], Image[
+          Initial
+        ]](
+          leftIndexer = new EitherIndexer[Work[Merged], Work[Denormalised]](
+            leftIndexer = new ElasticIndexer[Work[Merged]](
+              client = esClient,
+              index = Index(config.requireString("es.denormalised-works.index"))
+            ),
+            rightIndexer = new ElasticIndexer[Work[Denormalised]](
+              client = esClient,
+              index = Index(config.requireString("es.denormalised-works.index"))
+            )
           ),
           rightIndexer = new ElasticIndexer[Image[Initial]](
             client = esClient,
@@ -76,7 +111,7 @@ object Main extends WellcomeTypesafeApp {
         sourceWorkLookup = sourceWorkLookup,
         mergerManager = mergerManager,
         workOrImageIndexer = workOrImageIndexer,
-        workMsgSender = workMsgSender,
+        workRouter = workRouter,
         imageMsgSender = imageMsgSender,
         config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
       )

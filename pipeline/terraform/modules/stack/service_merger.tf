@@ -5,6 +5,20 @@ module "merger_works_output_topic" {
   role_names = [module.merger.task_role_name]
 }
 
+module "merger_works_path_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_merger_works_with_path_output"
+  role_names = [module.merger.task_role_name]
+}
+
+module "merger_works_incomplete_path_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_merger_works_incomplete_path_output"
+  role_names = [module.merger.task_role_name]
+}
+
 module "merger_images_output_topic" {
   source = "../topic"
 
@@ -28,12 +42,14 @@ module "merger" {
   queue_visibility_timeout_seconds = 20 * 60
 
   env_vars = {
-    merger_works_topic_arn  = module.merger_works_output_topic.arn
-    merger_images_topic_arn = module.merger_images_output_topic.arn
+    merger_works_topic_arn             = module.merger_works_output_topic.arn
+    merger_paths_topic_arn             = module.merger_works_path_output_topic
+    merger_path_concatenator_topic_arn = module.merger_works_incomplete_path_output_topic
+    merger_images_topic_arn            = module.merger_images_output_topic.arn
 
-    es_identified_works_index = local.es_works_identified_index
-    es_merged_works_index     = local.es_works_merged_index
-    es_initial_images_index   = local.es_images_initial_index
+    es_identified_works_index   = local.es_works_identified_index
+    es_denormalised_works_index = local.es_works_denormalised_index
+    es_initial_images_index     = local.es_images_initial_index
 
     batch_size             = 50
     flush_interval_seconds = 120
