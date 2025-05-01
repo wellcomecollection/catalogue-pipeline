@@ -127,7 +127,7 @@ class TeiXmlTest
 
     it("retains paragraph tags in the summary") {
       val description =
-        "a <note>delightful <p>manuscript</p></note> <p /><p/> about <p>stuff</p>"
+        """a <pppp/><note>delightful <p>manu<xp></xp>script</p></note> <p /><p/> about <p>stuff</p><pb />"""
 
       val xml = TeiXml(
         id,
@@ -137,6 +137,21 @@ class TeiXmlTest
 
       xml.value.description shouldBe Some(
         "a delightful <p>manuscript</p> <p /><p/> about <p>stuff</p>"
+      )
+    }
+
+    it("discards paragraph attributes from the summary") {
+      val description =
+        """a <note>delightful <p hand="reza_abbasi">manu<xp></xp>script</p></note> <p a="b" /> <p a="b" c="d"/> about stuff"""
+
+      val xml = TeiXml(
+        id,
+        teiXml(id = id, summary = Some(summary(description)))
+          .toString()
+      ).flatMap(_.parse)
+
+      xml.value.description shouldBe Some(
+        "a delightful <p>manuscript</p> <p/> <p/> about stuff"
       )
     }
 

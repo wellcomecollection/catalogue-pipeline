@@ -19,7 +19,11 @@ object TeiOps {
       case List(node) =>
         // some summary nodes can contain TEI specific xml tags, so we remove them
         Right(
-          Some(node.text.trim.replaceAll("(?!<\\/?p\\ ?\\/?>)<.*?>", ""))
+          Some(
+            node.text.trim
+              .replaceAll("""<p(\s+\S+=".+?")+\s*(/)?>""", "<p$2>")
+              .replaceAll("""(?!</?p\s*/?>)<.*?>""", "")
+          )
         )
       case Nil => Right(None)
       case _   => Left(new RuntimeException("More than one summary node!"))
