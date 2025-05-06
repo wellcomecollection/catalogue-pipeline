@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -16,6 +14,7 @@ from models.catalogue_concept import (
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
 )
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -105,11 +104,13 @@ CONCEPT_QUERY = """
     SKIP $start_offset LIMIT $limit
     OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
     OPTIONAL MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)
+    OPTIONAL MATCH (work)-[has_concept:HAS_CONCEPT]-(concept)
     RETURN 
         concept,
         collect(DISTINCT linked_source_concept) AS linked_source_concepts,
         collect(DISTINCT source_concept) AS source_concepts,
-        collect(DISTINCT same_as_concept.id) AS same_as_concept_ids        
+        collect(DISTINCT same_as_concept.id) AS same_as_concept_ids,
+        collect(DISTINCT has_concept.referenced_type) AS concept_types        
     """
 
 # For every Wellcome concept, this query returns a list of concepts most frequently co‑occurring with it in Works.
