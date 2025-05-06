@@ -3,6 +3,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel
 
+from models.graph_node import ConceptType
+
 
 class ConceptsQueryResult(BaseModel):
     concepts: list[dict]
@@ -101,6 +103,36 @@ def transform_related_concepts(
     return processed_items
 
 
+def are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
+    # 'Concept' and 'Subject' types are consistent with all other types, so we filter them out when determining consistency
+    filtered_types = [concept_type for concept_type in concept_types if concept_type not in ('Concept', 'Subject')]
+    
+    if len(filtered_types) <= 1:
+        return True
+    
+    # Of all remaining types, only Agent/Org and Agent/Person are compatible. All other combinations are invalid.
+    compatible_combinations = [{'Agent', 'Organisation'}, {'Person', 'Organisation'}]
+    return set(filtered_types) in compatible_combinations
+
+    
+def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
+    concept_types_by_priority = [
+        "Genre",
+        "Person",
+        "Organisation",
+        "Place",
+        "Period",
+        "Meeting",
+        "Agent",
+        "Subject",
+        "Concept",
+    ]
+    
+    for concept_type in concept_types_by_priority:
+        if concept_type in concept_types:
+            return concept_type
+
+
 class RelatedConcepts(BaseModel):
     relatedTo: list[CatalogueConceptRelatedTo]
     fieldsOfWork: list[CatalogueConceptRelatedTo]
@@ -116,7 +148,7 @@ class CatalogueConcept(BaseModel):
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[str]
-    type: list[str]
+    type: ConceptType
     sameAs: list[str]
     relatedConcepts: RelatedConcepts
 
@@ -162,9 +194,11 @@ class CatalogueConcept(BaseModel):
         # one of those references to prevent duplication in the frontend.
         used_labels = {label.lower()}
 
+        concept_type = get_most_specific_concept_type(concept_data["concept_types"])
+
         return CatalogueConcept(
             id=concept_data["concept"]["~properties"]["id"],
-            type=concept_data["concept_types"],
+            type=concept_type,
             label=label,
             alternativeLabels=sorted(list(alternative_labels)),
             description=description,

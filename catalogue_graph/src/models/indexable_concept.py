@@ -7,6 +7,7 @@ from models.catalogue_concept import (
     CatalogueConcept,
     RelatedConcepts,
 )
+from models.graph_node import ConceptType
 
 # Query
 
@@ -21,7 +22,7 @@ class ConceptQuery(BaseModel):
     identifiers: list[ConceptQueryIdentifier]
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
-    type: list[str]
+    type: ConceptType
 
 
 # Display
@@ -64,7 +65,7 @@ class ConceptDisplay(BaseModel):
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[str]
-    type: list[str]
+    type: ConceptType
     relatedConcepts: RelatedConcepts
     sameAs: list[str]
 
