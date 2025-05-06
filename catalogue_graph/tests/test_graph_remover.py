@@ -3,10 +3,9 @@ from datetime import date, datetime, timedelta
 
 import polars as pl
 import pytest
+from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
-
-from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 
 REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
 CATALOGUE_CONCEPTS_SNAPSHOT_URI = (
@@ -50,7 +49,7 @@ def mock_neptune_response(request_data: dict, response_data: dict) -> None:
 def mock_neptune_removal_response(node_ids: list) -> None:
     mock_neptune_response(
         request_data={
-            "query": "MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE node",
+            "query": "MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE n",
             "parameters": {"nodeIds": node_ids},
         },
         response_data={"results": [{"deletedCount": 1}]},
