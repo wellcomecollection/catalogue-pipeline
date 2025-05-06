@@ -1,7 +1,9 @@
+import csv
+
 from models.graph_node import ConceptType
 from utils.aws import get_neptune_client
 
-LIMIT = 10000
+LIMIT = 20000
 
 client = get_neptune_client(True)
 
@@ -26,9 +28,12 @@ def are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
 count_query = "MATCH (c:Concept) RETURN count(c) AS count"
 concepts_count = client.run_open_cypher_query(count_query)[0]["count"]
 
-print(concepts_count)
+with open("invalid.csv", "w") as f:
+    csv_writer = csv.DictWriter(
+        f, fieldnames=["concept_id", "concept_label", "concept_types"]
+    )
+    csv_writer.writeheader()
 
-with open("invalid.txt", "w") as f:
     start_offset = 0
     while start_offset < concepts_count:
         query = """
@@ -50,8 +55,12 @@ with open("invalid.txt", "w") as f:
         )
         for concept in concept_result:
             if not are_concept_types_consistent(concept["concept_types"]):
-                f.write(
-                    f"{concept['concept']['id']} {concept['concept']['label']} {concept['concept_types']}\n"
+                csv_writer.writerow(
+                    {
+                        "concept_id": concept["concept"]["~properties"]["id"],
+                        "concept_label": concept["concept"]["~properties"]["label"],
+                        "concept_types": concept['concept_types']
+                    }
                 )
         f.flush()
         start_offset += LIMIT
