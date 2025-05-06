@@ -174,14 +174,14 @@ class BaseNeptuneClient:
     def delete_nodes_by_id(self, ids: list[str]) -> None:
         """Removes all nodes with the specified ids from the graph."""
         delete_query = """
-            MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE node
+            MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE n
         """
 
         previous_node_count = self.get_total_node_count()
 
         for batch in batched(ids, ID_DELETE_BATCH_SIZE):
             self.run_open_cypher_query(delete_query, {"nodeIds": list(batch)})
-            print(f"Deleted a batch of nodes. Batch size: {ID_DELETE_BATCH_SIZE}")
+            print(f"Deleted a batch of nodes. (Batch size: {ID_DELETE_BATCH_SIZE})")
 
         total_deleted = previous_node_count - self.get_total_node_count()
         print(f"Successfully deleted a total of {total_deleted} nodes from the graph.")
@@ -189,14 +189,14 @@ class BaseNeptuneClient:
     def delete_edges_by_id(self, ids: list[str]) -> None:
         """Removes all edges with the specified ids from the graph."""
         delete_query = """
-            MATCH ()-[edge]-() WHERE id(edge) IN $edgeIds DELETE edge
+            MATCH ()-[e]-() WHERE id(e) IN $edgeIds DELETE e
         """
 
         previous_edge_count = self.get_total_edge_count()
 
         for batch in batched(ids, ID_DELETE_BATCH_SIZE):
             self.run_open_cypher_query(delete_query, {"edgeIds": list(batch)})
-            print(f"Deleted a batch of edges. Batch size: {ID_DELETE_BATCH_SIZE}")
+            print(f"Deleted a batch of edges. (Batch size: {ID_DELETE_BATCH_SIZE})")
 
         total_deleted = previous_edge_count - self.get_total_edge_count()
         print(f"Successfully deleted a total of {total_deleted} edges from the graph.")
