@@ -17,7 +17,7 @@ inferrer-common = { path = "../common" }
 
 [tool.pytest.ini_options]
 pythonpath = "app"
-addopts = ["--import-mode=importlib"]
+
 
 [dependency-groups]
 dev = [
