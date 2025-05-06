@@ -1,5 +1,11 @@
-ARG pythonversion=2.7
-FROM  public.ecr.aws/docker/library/python:${pythonversion}-slim  AS builder
+# Set the default pythonversion to an invalid value. This is because:
+# * A default is needed, otherwise Docker warns about an invalid base image name, even when you provide a value.
+# * Docker has no way to specify required build args,
+#   so a caller could forget to provide the value,
+#   or (worse) might have a typo in "--build-arg pythonversion=".
+#   Setting the default to 2.7 will cause an obvious failure if this arg is not provided.
+ARG pythonversion=A_VERSION_THAT_DOES_NOT_EXIST
+FROM public.ecr.aws/docker/library/python:${pythonversion}-slim  AS builder
 
 RUN apt-get update && apt-get -y install gcc g++ libffi-dev curl
 
