@@ -3,6 +3,7 @@
 Code and infrastructure for building the catalogue graph.
 
 See the following RFCs for more context:
+
 * [RFC 062: Wellcome Collection Graph overview and next steps](https://github.com/wellcomecollection/docs/tree/main/rfcs/062-knowledge-graph)
 * [RFC 064: Graph data model](https://github.com/wellcomecollection/docs/tree/main/rfcs/064-graph-data-model/README.md)
 * [RFC 066: Catalogue graph pipeline](https://github.com/wellcomecollection/docs/blob/main/rfcs/066-graph_pipeline/README.md)
@@ -23,13 +24,20 @@ graph database (running in Amazon Neptune). It consists of several Lambda functi
 * `bulk_load_poller`: Checks the status of a bulk load job.
 * `indexer`: Consumes openCypher queries from the SNS topic populated by the `extractor` Lambda function and runs them
   against the Neptune cluster. (There is an SQS queue between the SNS topic and the Lambda function and queries are
-  consumed via an event source mapping).
+  consumed via an event source mapping). (This Lambda function is not in use at the moment.)
 * Elasticsearch "Ingestor" Lambda functions:
-  * `ingestor_trigger`: Queries the graph database for catalogue originated concepts and returns a count of the results.
-  * `ingestor_loader`: Queries the graph database for for a subset of catalogue originated concepts and loads them into
-    S3 as a parquet file.
-  * `ingestor_indexer`: Consumes the parquet file from S3 and loads the data into Elasticsearch for retrieval by the 
-    Concepts API.
+    * `ingestor_trigger`: Queries the graph database for catalogue originated concepts and returns a count of the
+      results.
+    * `ingestor_loader`: Queries the graph database for a subset of catalogue originated concepts and loads them into
+      S3 as a parquet file.
+    * `ingestor_indexer`: Consumes the parquet file from S3 and loads the data into Elasticsearch for retrieval by the
+      Concepts API.
+* `graph_remover`: Removes nodes and edges from the Neptune cluster. Nodes/edges are removed if they existed in a
+  previous bulk load file but no longer exist in the latest one. The Lambda also keeps an append-only log of deleted
+  and added nodes/edges (with a retention period of one year) for debugging purposes.
+* `index_remover`: Removes indexed concepts from Elasticsearch if corresponding 'Concept' nodes were removed from the
+  catalogue graph. The Lambda uses the append-only log of deleted IDs created by the `graph_remover` to decide which
+  documents to remove.
 
 Lambda function execution is orchestrated via AWS Step Functions (see `terraform` directory). Several state machines are
 utilised for this purpose:
@@ -45,10 +53,11 @@ utilised for this purpose:
 * `catalogue-graph-single-extract-load`: Not part of the full pipeline. Extracts and loads a single entity type by
   invoking the `extractor` Lambda function, followed by the `catalogue-graph-bulk-loader` state machine. Useful for
   updating the graph after a change in a single source/transformer without having to run the full pipeline.
-* `catalogue-graph-ingestor`: Represents the Elasticsearch ingestor pipeline. Triggers the `catalogue-graph-ingestor-trigger`
-  function, followed by the `catalogue-graph-ingestor-loader` and `catalogue-graph-ingestor-indexer` functions as [state
-  map steps](https://docs.aws.amazon.com/step-functions/latest/dg/state-map.html), allowing for parallelisation of the 
-  ingestor process.
+* `catalogue-graph-ingestor`: Represents the Elasticsearch ingestor pipeline. Triggers
+  the `catalogue-graph-ingestor-trigger` function, followed by the `catalogue-graph-ingestor-loader`
+  and `catalogue-graph-ingestor-indexer` functions
+  as [state map steps](https://docs.aws.amazon.com/step-functions/latest/dg/state-map.html), allowing for
+  parallelisation of the ingestor process.
 
 ## Running the pipeline
 
@@ -161,7 +170,11 @@ use this Elasticsearch instance by setting the relevant environment variables wh
 
 ### AWS Graph Notebook
 
-Additionally, it is possible to connect to the cluster using [AWS graph notebook](https://github.com/aws/graph-notebook).The most straightforward option to do this locally is using [JupyterLab](https://jupyter.org/). To make this work, you need to set this up in a different virtual environment from the one in this project (this is because `graph-notebook` currently requires Python 3.9.x-3.10.14). Once you have created a new environment with the correct Python version, install the following:
+Additionally, it is possible to connect to the cluster
+using [AWS graph notebook](https://github.com/aws/graph-notebook). The most straightforward option to do this locally is
+using [JupyterLab](https://jupyter.org/). To make this work, you need to set this up in a different virtual environment
+from the one in this project (this is because `graph-notebook` currently requires Python 3.9.x-3.10.14). Once you have
+created a new environment with the correct Python version, install the following:
 
 ```
 # install graph-notebook
@@ -178,8 +191,8 @@ Run the following command to open JupyterLab in your browser:
 
 `python -m graph_notebook.start_jupyterlab --jupyter-dir notebooks`
 
-
 To connect to the catalogue graph, add the following configuration into your Jupyter notebook:
+
 ```
 %%graph_notebook_config
 {
@@ -197,8 +210,10 @@ To connect to the catalogue graph, add the following configuration into your Jup
 
 To communicate with the cluster, the AWS_PROFILE environment variable first needs to be set like this in the same
 Jupyter notebook:
+
 ```
 %env AWS_PROFILE=platform-developer
 ```
 
-You can find an [example notebook](notebooks/graph_exploration.ipynb) in the notebooks folder with openCypher queries to explore the catalogue graph.
+You can find an [example notebook](notebooks/graph_exploration.ipynb) in the notebooks folder with openCypher queries to
+explore the catalogue graph.
