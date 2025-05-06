@@ -11,7 +11,7 @@ module "source_index" {
 module "denormalised_index" {
   source        = "../es_index"
   name          = var.es_works_denormalised_index
-  mappings_name = "empty"
+  mappings_name = var.index_config["works"]["denormalised"]
   config_path   = var.es_config_path
   allow_delete  = var.allow_delete
 }
