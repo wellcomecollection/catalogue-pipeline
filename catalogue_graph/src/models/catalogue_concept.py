@@ -102,18 +102,6 @@ def transform_related_concepts(
 
     return processed_items
 
-
-def are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
-    # 'Concept' and 'Subject' types are consistent with all other types, so we filter them out when determining consistency
-    filtered_types = [concept_type for concept_type in concept_types if concept_type not in ('Concept', 'Subject')]
-    
-    if len(filtered_types) <= 1:
-        return True
-    
-    # Of all remaining types, only Agent/Org and Agent/Person are compatible. All other combinations are invalid.
-    compatible_combinations = [{'Agent', 'Organisation'}, {'Person', 'Organisation'}]
-    return set(filtered_types) in compatible_combinations
-
     
 def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
     concept_types_by_priority: list[ConceptType] = [
