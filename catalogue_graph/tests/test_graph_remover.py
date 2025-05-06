@@ -1,11 +1,11 @@
+import json
 from datetime import date, datetime, timedelta
 
 import polars as pl
 import pytest
+from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
-
-from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 
 REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
 CATALOGUE_CONCEPTS_SNAPSHOT_URI = (
@@ -37,18 +37,29 @@ def mock_deleted_ids_log_file(age_in_days: int) -> None:
     MockSmartOpen.mock_s3_parquet_file(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, df)
 
 
-def mock_neptune_removal_response() -> None:
-    MockRequest.mock_responses(
-        [
-            {
-                "method": "POST",
-                "url": "https://test-host.com:8182/openCypher",
-                "status_code": 200,
-                "json_data": {"results": [{"deletedCount": 1}]},
-                "content_bytes": None,
-                "params": None,
-            }
-        ]
+def mock_neptune_response(request_data: dict, response_data: dict) -> None:
+    MockRequest.mock_response(
+        method="POST",
+        url="https://test-host.com:8182/openCypher",
+        json_data=response_data,
+        body=json.dumps(request_data),
+    )
+
+
+def mock_neptune_removal_response(node_ids: list) -> None:
+    mock_neptune_response(
+        request_data={
+            "query": "MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE node",
+            "parameters": {"nodeIds": node_ids},
+        },
+        response_data={"results": [{"deletedCount": 1}]},
+    )
+
+
+def mock_neptune_count_response() -> None:
+    mock_neptune_response(
+        request_data={"query": "MATCH (n) RETURN count(n) AS nodeCount"},
+        response_data={"results": [{"nodeCount": 1}]},
     )
 
 
@@ -87,7 +98,8 @@ def test_graph_remover_next_run() -> None:
 
     add_bulk_load_file_mocks()
     mock_deleted_ids_log_file(age_in_days=364)
-    mock_neptune_removal_response()
+    mock_neptune_removal_response(["byzuqyr5"])
+    mock_neptune_count_response()
 
     event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
     lambda_handler(event, None)
@@ -128,7 +140,8 @@ def test_graph_remover_old_id_removal() -> None:
 
     # Mock a file with existing deleted IDs which are 1+ year old
     mock_deleted_ids_log_file(age_in_days=365)
-    mock_neptune_removal_response()
+    mock_neptune_removal_response(["byzuqyr5"])
+    mock_neptune_count_response()
 
     event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
     lambda_handler(event, None)

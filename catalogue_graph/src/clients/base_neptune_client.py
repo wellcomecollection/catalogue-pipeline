@@ -180,7 +180,7 @@ class BaseNeptuneClient:
         previous_node_count = self.get_total_node_count()
 
         for batch in batched(ids, ID_DELETE_BATCH_SIZE):
-            self.run_open_cypher_query(delete_query, {"nodeIds": batch})
+            self.run_open_cypher_query(delete_query, {"nodeIds": list(batch)})
             print(f"Deleted a batch of nodes. Batch size: {ID_DELETE_BATCH_SIZE}")
 
         total_deleted = previous_node_count - self.get_total_node_count()
