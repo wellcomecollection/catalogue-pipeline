@@ -1,3 +1,5 @@
+from test_utils import load_json_fixture
+
 from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
@@ -5,7 +7,6 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
     RelatedConcepts,
 )
-from test_utils import load_json_fixture
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
