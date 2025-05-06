@@ -21,7 +21,7 @@ class ConceptQuery(BaseModel):
     identifiers: list[ConceptQueryIdentifier]
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
-    type: str
+    type: list[str]
 
 
 # Display
@@ -64,7 +64,7 @@ class ConceptDisplay(BaseModel):
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[str]
-    type: str
+    type: list[str]
     relatedConcepts: RelatedConcepts
     sameAs: list[str]
 

@@ -116,7 +116,7 @@ class CatalogueConcept(BaseModel):
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[str]
-    type: str
+    type: list[str]
     sameAs: list[str]
     relatedConcepts: RelatedConcepts
 
@@ -164,7 +164,7 @@ class CatalogueConcept(BaseModel):
 
         return CatalogueConcept(
             id=concept_data["concept"]["~properties"]["id"],
-            type=concept_data["concept"]["~properties"]["type"],
+            type=concept_data["concept_types"],
             label=label,
             alternativeLabels=sorted(list(alternative_labels)),
             description=description,
