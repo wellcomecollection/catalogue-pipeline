@@ -1,3 +1,6 @@
+from test_mocks import MockRequest
+from test_utils import add_mock_transformer_outputs, load_fixture
+
 from config import CATALOGUE_SNAPSHOT_URL
 from models.graph_edge import (
     BaseEdge,
@@ -5,8 +8,6 @@ from models.graph_edge import (
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
-from test_mocks import MockRequest
-from test_utils import add_mock_transformer_outputs, load_fixture
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
