@@ -3,9 +3,10 @@ from datetime import date, datetime, timedelta
 
 import polars as pl
 import pytest
-from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_fixture
+
+from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 
 REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
 CATALOGUE_CONCEPTS_SNAPSHOT_URI = (
