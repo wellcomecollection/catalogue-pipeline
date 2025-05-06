@@ -116,7 +116,7 @@ def are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
 
     
 def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
-    concept_types_by_priority = [
+    concept_types_by_priority: list[ConceptType] = [
         "Genre",
         "Person",
         "Organisation",
@@ -131,6 +131,8 @@ def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptT
     for concept_type in concept_types_by_priority:
         if concept_type in concept_types:
             return concept_type
+    
+    raise ValueError(f"Invalid set of concept types: {concept_types}.")
 
 
 class RelatedConcepts(BaseModel):
