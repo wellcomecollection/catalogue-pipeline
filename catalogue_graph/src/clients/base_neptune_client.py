@@ -208,6 +208,7 @@ class BaseNeptuneClient:
         edge_count: int = self.run_open_cypher_query(query)[0]["edgeCount"]
         return edge_count
 
+
     def get_total_node_count(self) -> int:
         query = """
             MATCH (n) RETURN count(n) AS nodeCount
