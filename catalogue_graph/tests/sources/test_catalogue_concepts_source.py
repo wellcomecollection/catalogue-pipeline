@@ -1,22 +1,14 @@
+from sources.catalogue.concepts_source import CatalogueConceptsSource
 from test_mocks import MockRequest
 from test_utils import load_fixture
-
-from sources.catalogue.concepts_source import CatalogueConceptsSource
 
 
 def test_catalogue_concepts_source() -> None:
     test_url = "https://example.com"
-    MockRequest.mock_responses(
-        [
-            {
-                "method": "GET",
-                "url": test_url,
-                "status_code": 200,
-                "json_data": None,
-                "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
-                "params": None,
-            }
-        ]
+    MockRequest.mock_response(
+        method="GET",
+        url=test_url,
+        content_bytes=load_fixture("catalogue/works_snapshot_example.json"),
     )
 
     catalogue_concepts_source = CatalogueConceptsSource(test_url)
