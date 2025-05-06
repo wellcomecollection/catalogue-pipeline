@@ -59,7 +59,7 @@ with open("invalid.csv", "w") as f:
                     {
                         "concept_id": concept["concept"]["~properties"]["id"],
                         "concept_label": concept["concept"]["~properties"]["label"],
-                        "concept_types": concept['concept_types']
+                        "concept_types": concept["concept_types"],
                     }
                 )
         f.flush()
