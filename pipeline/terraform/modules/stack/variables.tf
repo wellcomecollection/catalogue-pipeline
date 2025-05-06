@@ -59,9 +59,9 @@ locals {
 variable "index_config" {
   type = object({
     works = object({
-      identified = string
-      merged     = string
-      indexed    = string
+      identified   = string
+      denormalised = string
+      indexed      = string
     })
 
     concepts = object({
