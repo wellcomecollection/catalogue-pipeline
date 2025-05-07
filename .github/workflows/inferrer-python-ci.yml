@@ -1,0 +1,38 @@
+name: "Inferrers: Run checks and build"
+on: [ push ]
+# paths: [ 'pipeline/inferrer/**' ]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  python-inferrers-checks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/python_check
+        with:
+          folder: pipeline/inferrer/${{matrix.project}}
+  python-inferrers-builds:
+    # Only build and push the images if ALL the inferrers are OK.
+    # If we had this as another step in the matrix (check 1, build1| check 2, build 2 etc.)
+    # then we could see a situation where the overall build fails, (e.g. because feature inferrer is broken)
+    # but the other inferrers have been deployed.
+    needs: python-inferrers-checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/docker-build-and-push
+        with:
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          folder: pipeline/inferrer
+          target: ${{matrix.project}}
+          tag: ${{github.sha}}
+          role_to_assume: ${{secrets.GHA_ECR_PUSH_ROLE_ARN}}
