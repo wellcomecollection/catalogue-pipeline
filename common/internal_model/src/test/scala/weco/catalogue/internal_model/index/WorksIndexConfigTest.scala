@@ -64,7 +64,7 @@ class WorksIndexConfigTest
     }
 
     it("WorkState.Merged") {
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         implicit index =>
           forAll {
             mergedWork: Work[WorkState.Merged] =>

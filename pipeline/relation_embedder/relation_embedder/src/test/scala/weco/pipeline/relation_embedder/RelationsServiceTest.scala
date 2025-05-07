@@ -69,7 +69,7 @@ class RelationsServiceTest
       work3,
       work4
     )
-  protected def withLocalMergedWorksIndexContaining[R](
+  protected def withLocalDenormalisedWorksIndexContaining[R](
     indexedWorks: Seq[Work[Merged]]
   )(
     testWith: TestWith[
@@ -77,7 +77,7 @@ class RelationsServiceTest
       R
     ]
   ): R = {
-    withLocalMergedWorksIndex {
+    withLocalDenormalisedWorksIndex {
       index =>
         insertIntoElasticsearch(index, indexedWorks: _*)
         testWith(index)
@@ -107,7 +107,7 @@ class RelationsServiceTest
     }
 
     it("Retrieves all affected works when batch consists of a complete tree") {
-      withLocalMergedWorksIndexContaining(works) {
+      withLocalDenormalisedWorksIndexContaining(works) {
         index =>
           queryAffectedWorks(
             index,
@@ -117,7 +117,7 @@ class RelationsServiceTest
     }
 
     it("Retrieves all affected works when batch consists of single node") {
-      withLocalMergedWorksIndexContaining(works) {
+      withLocalDenormalisedWorksIndexContaining(works) {
         index =>
           queryAffectedWorks(
             index,
@@ -127,7 +127,7 @@ class RelationsServiceTest
     }
 
     it("Retrieves all affected works when batch consists of a nodes children") {
-      withLocalMergedWorksIndexContaining(works) {
+      withLocalDenormalisedWorksIndexContaining(works) {
         index =>
           queryAffectedWorks(
             index,
@@ -139,7 +139,7 @@ class RelationsServiceTest
     it(
       "Retrieves all affected works when batch consists of a nodes descendents"
     ) {
-      withLocalMergedWorksIndexContaining(works) {
+      withLocalDenormalisedWorksIndexContaining(works) {
         index =>
           queryAffectedWorks(
             index,
@@ -157,7 +157,7 @@ class RelationsServiceTest
     it(
       "Retrieves all affected works when batch consists of a mixture of selectors"
     ) {
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           val batch = Batch(
@@ -182,7 +182,7 @@ class RelationsServiceTest
     }
 
     it("Retrieves all affected works across multiple scroll pages") {
-      withLocalMergedWorksIndexContaining(works) {
+      withLocalDenormalisedWorksIndexContaining(works) {
         index =>
           queryAffectedWorks(
             index,
@@ -194,7 +194,7 @@ class RelationsServiceTest
 
     it("Returns invisible works") {
       val invisibleWork = work("A/C/X/5").invisible()
-      withLocalMergedWorksIndexContaining(invisibleWork :: works) {
+      withLocalDenormalisedWorksIndexContaining(invisibleWork :: works) {
         index =>
           val batch = Batch(
             rootPath = "A",
@@ -219,7 +219,7 @@ class RelationsServiceTest
     val batch = Batch("A", List(Children("A/B"), Node("A/C/X")))
 
     it("Retrieves all works in archive") {
-      withLocalMergedWorksIndexContaining(works) {
+      withLocalDenormalisedWorksIndexContaining(works) {
         index =>
           queryRelationTree(index, batch) should contain theSameElementsAs works
             .map(toRelationWork)
@@ -227,7 +227,7 @@ class RelationsServiceTest
     }
 
     it("Ignores works in other archives") {
-      withLocalMergedWorksIndexContaining(work("other/archive") :: works) {
+      withLocalDenormalisedWorksIndexContaining(work("other/archive") :: works) {
         index =>
           queryRelationTree(index, batch) should contain theSameElementsAs works
             .map(toRelationWork)
@@ -235,7 +235,7 @@ class RelationsServiceTest
     }
 
     it("Ignores invisible works") {
-      withLocalMergedWorksIndexContaining(
+      withLocalDenormalisedWorksIndexContaining(
         work("A/Invisible").invisible() :: works
       ) {
         index =>
@@ -258,7 +258,7 @@ class RelationsServiceTest
         selectors = List(Tree("x"))
       )
       val expected = works.map(toRelationWork)
-      withLocalMergedWorksIndexContaining(works) {
+      withLocalDenormalisedWorksIndexContaining(works) {
         index =>
           queryRelationTree(
             index,

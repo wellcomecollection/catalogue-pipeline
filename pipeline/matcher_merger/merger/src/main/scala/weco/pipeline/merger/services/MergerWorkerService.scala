@@ -5,12 +5,8 @@ import org.apache.pekko.{Done, NotUsed}
 import software.amazon.awssdk.services.sqs.model.Message
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
-import weco.catalogue.internal_model.work.{Relations, Work}
-import weco.catalogue.internal_model.work.WorkState.{
-  Denormalised,
-  Identified,
-  Merged
-}
+import weco.catalogue.internal_model.work.Work
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.flows.FlowOps
 import weco.pipeline.matcher.models.MatcherResult._
 import weco.json.JsonUtil.fromJson
@@ -30,7 +26,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
   workOrImageIndexer: Indexer[
-    Either[Either[Work[Merged], Work[Denormalised]], Image[Initial]]
+    Either[Work[Merged], Image[Initial]]
   ],
   workRouter: WorkRouter[WorkDestination],
   imageMsgSender: MessageSender[ImageDestination],
@@ -42,8 +38,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   import weco.pipeline_storage.Indexable._
   import weco.pipeline_storage.PipelineStorageStream._
 
-  type WorkOrImage =
-    Either[Either[Work[Merged], Work[Denormalised]], Image[Initial]]
+  type WorkOrImage = Either[Work[Merged], Image[Initial]]
 
   type WorkSet = Seq[Option[Work[Identified]]]
 
@@ -110,15 +105,6 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     mergerManager
       .applyMerge(maybeWorks = workSet)
       .mergedWorksAndImagesWithTime(matcherResultTime)
-      .map {
-        case Left(work) =>
-          work.data.collectionPath match {
-            case None =>
-              Left(Right(work.transition[Denormalised](Relations.none)))
-            case _ => Left(Left(work))
-          }
-        case Right(image) => Right(image)
-      }
 
   private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {

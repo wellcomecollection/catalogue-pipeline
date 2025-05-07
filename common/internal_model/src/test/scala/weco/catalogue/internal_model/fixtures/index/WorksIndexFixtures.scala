@@ -16,17 +16,14 @@ trait WorksIndexFixtures extends IndexFixturesBase {
     )
   }
 
-  def withLocalMergedWorksIndex[R]: Fixture[Index, R] = {
+  def withLocalDenormalisedWorksIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =
       getConfig(
-        mappings = "mappings.works_merged.2023-05-26.json",
-        analysis = "analysis.works_merged.2023-05-26.json"
+        mappings = "mappings.works_denormalised.2023-05-26.json",
+        analysis = "analysis.works_denormalised.2023-05-26.json"
       )
     )
   }
-
-  def withLocalDenormalisedWorksIndex[R]: Fixture[Index, R] =
-    withLocalUnanalysedJsonStore[R]
 
   def withLocalWorksIndex[R]: Fixture[Index, R] = {
     withLocalElasticSearchIndex[R](config =

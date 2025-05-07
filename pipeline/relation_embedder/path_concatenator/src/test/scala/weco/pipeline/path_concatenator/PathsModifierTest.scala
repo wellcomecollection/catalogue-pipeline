@@ -30,7 +30,7 @@ class PathsModifierTest
   private def withContext[R](
     works: List[Work[Merged]]
   )(testWith: TestWith[PathsModifier, R]): R =
-    withLocalMergedWorksIndex {
+    withLocalDenormalisedWorksIndex {
       index =>
         insertIntoElasticsearch(index, works: _*)
         val pathModifier = PathsModifier(

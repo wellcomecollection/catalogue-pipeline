@@ -5,7 +5,7 @@ import org.scalatest.EitherValues
 import org.scalatest.matchers.{MatchResult, Matcher}
 import weco.catalogue.internal_model.identifiers.IdState
 import weco.catalogue.internal_model.image.ImageData
-import weco.catalogue.internal_model.work.WorkState.{Denormalised, Identified, Merged}
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.catalogue.internal_model.work.{Work, WorkState}
 import weco.fixtures.TestWith
@@ -50,12 +50,7 @@ trait IntegrationTestHelpers
     def getMerged(
       originalWork: Work[WorkState.Identified]
     ): Work[WorkState.Merged] =
-      index(originalWork.state.canonicalId.underlying).left.value.left.value
-
-    def getDenormalised(
-      originalWork: Work[WorkState.Identified]
-    ): Work[WorkState.Denormalised] =
-      index(originalWork.state.canonicalId.underlying).left.value.right.value
+      index(originalWork.state.canonicalId.underlying).left.value
 
     def imageData: Seq[ImageData[IdState.Identified]] =
       index.values.collect {
@@ -183,11 +178,11 @@ trait IntegrationTestHelpers
         // Check that the merger has notified the next application about everything
         // in the index.  This check could be more robust, but it'll do for now.
         val idsSentByTheMerger = (
-            workRouter.workSender.messages ++
-            workRouter.pathSender.messages ++
-            workRouter.pathConcatenatorSender.messages ++
-            imageSender.messages
-            ).map(_.body).toSet
+          workRouter.workSender.messages ++
+          workRouter.pathSender.messages ++
+          workRouter.pathConcatenatorSender.messages ++
+          imageSender.messages
+          ).map(_.body).toSet
         mergerIndex.keySet.size == idsSentByTheMerger.size
     }
   }
@@ -198,9 +193,9 @@ trait IntegrationTestHelpers
     processWorks(work)
 
   def updateInternalWork(
-    internalWork: Work.Visible[WorkState.Identified],
-    teiWork: Work.Visible[WorkState.Identified]
-  ) =
+                          internalWork: Work.Visible[WorkState.Identified],
+                          teiWork: Work.Visible[WorkState.Identified]
+                        ) =
     internalWork
       .copy(version = teiWork.version)
       .mapState(
@@ -209,58 +204,36 @@ trait IntegrationTestHelpers
       )
 
   class StateMatcher(right: WorkState.Identified)
-      extends Matcher[Either[WorkState.Merged, WorkState.Denormalised]] {
-    def apply(left: Either[WorkState.Merged, WorkState.Denormalised]): MatchResult = {
-      left match {
-        case Left(left: WorkState.Merged) => MatchResult(
-          left.sourceIdentifier == right.sourceIdentifier &&
-            left.canonicalId == right.canonicalId &&
-            left.sourceModifiedTime == right.sourceModifiedTime,
-          s"${left.canonicalId} has different state to ${right.canonicalId}",
-          s"${left.canonicalId} has similar state to ${right.canonicalId}"
-        )
-        case Right(left: WorkState.Denormalised) => MatchResult(
-          left.sourceIdentifier == right.sourceIdentifier &&
-            left.canonicalId == right.canonicalId &&
-            left.sourceModifiedTime == right.sourceModifiedTime,
-          s"${left.canonicalId} has different state to ${right.canonicalId}",
-          s"${left.canonicalId} has similar state to ${right.canonicalId}"
-        )
-      }
-    }
+    extends Matcher[WorkState.Merged] {
+    def apply(left: WorkState.Merged): MatchResult =
+      MatchResult(
+        left.sourceIdentifier == right.sourceIdentifier &&
+          left.canonicalId == right.canonicalId &&
+          left.sourceModifiedTime == right.sourceModifiedTime,
+        s"${left.canonicalId} has different state to ${right.canonicalId}",
+        s"${left.canonicalId} has similar state to ${right.canonicalId}"
+      )
   }
 
   def beSimilarTo(expectedRedirectTo: WorkState.Identified) =
     new StateMatcher(expectedRedirectTo)
 
   class RedirectMatcher(expectedRedirectTo: Work.Visible[Identified])
-    extends Matcher[Either[Work[Merged], Work[Denormalised]]] {
-
-    def apply(left: Either[Work[Merged], Work[Denormalised]]): MatchResult = {
+    extends Matcher[Work[Merged]] {
+    def apply(left: Work[Merged]): MatchResult = {
       left match {
-        case Left(w: Work.Redirected[Merged]) =>
+        case w: Work.Redirected[Merged] =>
           MatchResult(
             w.redirectTarget.sourceIdentifier == expectedRedirectTo.sourceIdentifier,
-            s"${w.sourceIdentifier} was redirected to ${w.redirectTarget.sourceIdentifier}, not ${expectedRedirectTo.sourceIdentifier}",
-            s"${w.sourceIdentifier} was redirected correctly"
+            s"${left.sourceIdentifier} was redirected to ${w.redirectTarget.sourceIdentifier}, not ${expectedRedirectTo.sourceIdentifier}",
+            s"${left.sourceIdentifier} was redirected correctly"
           )
-        case Right(w: Work.Redirected[Denormalised]) =>
-          MatchResult(
-            w.redirectTarget.sourceIdentifier == expectedRedirectTo.sourceIdentifier,
-            s"${w.sourceIdentifier} was redirected to ${w.redirectTarget.sourceIdentifier}, not ${expectedRedirectTo.sourceIdentifier}",
-            s"${w.sourceIdentifier} was redirected correctly"
-          )
-        case Left(w: Work[Merged]) =>
+
+        case _ =>
           MatchResult(
             matches = false,
-            s"${w.sourceIdentifier} was not redirected at all",
-            s"${w.sourceIdentifier} was redirected correctly"
-          )
-        case Right(w: Work[Denormalised]) =>
-          MatchResult(
-            matches = false,
-            s"${w.sourceIdentifier} was not redirected at all",
-            s"${w.sourceIdentifier} was redirected correctly"
+            s"${left.sourceIdentifier} was not redirected at all",
+            s"${left.sourceIdentifier} was redirected correctly"
           )
       }
     }
@@ -269,22 +242,13 @@ trait IntegrationTestHelpers
   def beRedirectedTo(expectedRedirectTo: Work.Visible[Identified]) =
     new RedirectMatcher(expectedRedirectTo)
 
-  def beVisible: Matcher[Either[Work[Merged], Work[Denormalised]]] = new Matcher[Either[Work[Merged], Work[Denormalised]]] {
-    override def apply(left: Either[Work[Merged], Work[Denormalised]]): MatchResult = {
-      left match {
-        case Left(w: Work[Merged]) => MatchResult(
-          w.isInstanceOf[Work.Visible[Merged]],
-          s"${w.id} is not visible",
-          s"${w.id} is visible"
-        )
-        case Right(w: Work[Denormalised]) => MatchResult(
-          w.isInstanceOf[Work.Visible[Denormalised]],
-          s"${w.id} is not visible",
-          s"${w.id} is visible"
-        )
-      }
-
-    }
+  def beVisible = new Matcher[Work[Merged]] {
+    override def apply(left: Work[Merged]): MatchResult =
+      MatchResult(
+        left.isInstanceOf[Work.Visible[Merged]],
+        s"${left.id} is not visible",
+        s"${left.id} is visible"
+      )
   }
 
   implicit class VisibleWorkOps(val work: Work.Visible[Identified]) {
