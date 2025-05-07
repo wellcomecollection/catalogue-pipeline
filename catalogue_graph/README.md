@@ -15,13 +15,14 @@ The catalogue graph pipeline extracts concepts from various sources (e.g. LoC, M
 graph database (running in Amazon Neptune). It consists of several Lambda functions:
 
 * `extractor`: Extracts a single entity type (nodes or edges) from a single source (e.g. LoC Names) and streams the
-  transformed entities into the specified destination. Supported destinations include S3, SNS, and Neptune:
+  transformed entities into the specified destination. To support longer execution times, the `extractor` is also
+  available as an ECS task.
+  Supported destinations include S3, SNS, and Neptune:
     * S3 is used when loading many entities in bulk via the Neptune bulk loader.
     * Neptune is used when loading a smaller number of entities directly into the cluster using openCypher queries.
     * SNS is used when loading entities using openCypher queries via the `indexer` Lambda function. This method was
       originally used for loading large numbers of entities into the cluster, but has since been superseded by the bulk
       load method and might be removed in the future.
-  To support longer execution times, the `extractor` is also available as an ECS task.   
 * `bulk_loader`: Triggers a Neptune bulk load of a single S3 file created by the `extractor` Lambda function.
 * `bulk_load_poller`: Checks the status of a bulk load job.
 * `indexer`: Consumes openCypher queries from the SNS topic populated by the `extractor` Lambda function and runs them
@@ -49,7 +50,7 @@ machines are utilised for this purpose:
 * `concepts-pipeline_monthly`: Extracts source concepts (from Wikidata, MeSH, and LoC) and loads them into the
   Neptune cluster. Scheduled to run monthly.
 * `catalogue-graph-pipeline`: Extracts all graph entities from their source and loads them into the Neptune cluster.
-  Triggers the `catalogue-graph-extractors` state machine, followed by the `catalogue-graph-bulk_loaders` state
+  Triggers the `catalogue-graph-extractors` state machine, followed by the `catalogue-graph-bulk-loaders` state
   machine.
 * `catalogue-graph-extractors`: Runs `extractor` ECS tasks in sequence, one for each combination of
   source type and entity type (e.g. one for LoC Concept nodes, one for LoC Concept edges, etc.). (Note that individual
@@ -119,17 +120,11 @@ Run `./scripts/setup.sh` to install the project dependencies.
 
 ## Deployment
 
-The pipeline has an automated deployment process 
+The pipeline deploys automatically on push to main via
+the [catalogue-graph-ci](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/.github/workflows/catalogue-graph-ci.yml)
+GitHub action. This action deploys the latest code to all Lambda functions and publishes a new image to ECR.
 
-not currently have an automated deployment process in place. To deploy a new version of the source
-code to all Lambda functions, run the `create_zip.sh` script (to create a new `build.zip` file), followed by
-a `terraform apply` command (to upload the new zip file to all Lambda functions):
-
-```sh
-sh create_zip.sh
-cd terraform
-terraform apply
-```
+To deploy manually, see `scripts/deploy_lambda_zip.sh` and `scripts/build.sh`.
 
 ## Local execution
 
