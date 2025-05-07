@@ -48,7 +48,6 @@ with open("invalid.csv", "w") as f:
                 concept,
                 concept_types        
         """
-        print(start_offset)
 
         concept_result = client.run_open_cypher_query(
             query, {"start_offset": start_offset, "limit": LIMIT}
@@ -59,7 +58,7 @@ with open("invalid.csv", "w") as f:
                     {
                         "concept_id": concept["concept"]["~properties"]["id"],
                         "concept_label": concept["concept"]["~properties"]["label"],
-                        "concept_types": concept["concept_types"],
+                        "concept_types": "||".join(concept["concept_types"]),
                     }
                 )
         f.flush()
