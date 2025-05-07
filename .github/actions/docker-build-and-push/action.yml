@@ -1,0 +1,45 @@
+name: 'Docker build and push'
+description: "Builds and publishes a Docker image to ECR"
+inputs:
+  registry:
+    description: "ECR registry where the image is to be published"
+    required: true
+  folder:
+    description: "working folder"
+    required: true
+  target:
+    description: "target to build in a multistage docker"
+    required: true
+  tag:
+    description: "tag for the image"
+    required: true
+  role_to_assume:
+    description: "role to assume when pushing the image to ECR"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: build docker image
+      run: |
+        docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
+      working-directory: ${{inputs.folder}}
+      shell: bash
+
+    - name: publish versioned container to registry
+      uses: ./.github/actions/push_to_ecr
+      with:
+        registry: ${{inputs.registry}}
+        image_name: ${{inputs.target}}
+        local_tag: ${{inputs.tag}}
+        registry_tag: ${{inputs.tag}}
+        role_to_assume: ${{inputs.role_to_assume}}
+
+    - name: publish latest container to registry
+      uses: ./.github/actions/push_to_ecr
+      if: ${{ github.ref == 'refs/heads/main' }}
+      with:
+        registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+        image_name: ${{inputs.target}}
+        local_tag: ${{inputs.tag}}
+        registry_tag: latest
+        role_to_assume: ${{inputs.role_to_assume}}

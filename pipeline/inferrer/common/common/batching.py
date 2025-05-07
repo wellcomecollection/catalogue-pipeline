@@ -142,7 +142,9 @@ class BatchExecutionQueue(Generic[Input, Result]):
             except (asyncio.TimeoutError, asyncio.CancelledError):
                 pass
             except Exception as e:
-                log.error("Unexpected error consuming queue", e)
+                import traceback
+
+                log.error(f"Unexpected error consuming queue {traceback.format_exc()}")
                 raise e from None
 
             if batch:

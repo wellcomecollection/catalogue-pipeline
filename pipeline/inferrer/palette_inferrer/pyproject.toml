@@ -1,0 +1,25 @@
+[project]
+name = "palette_inferrer"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.10"
+dependencies = [
+    "inferrer-common",
+    "joblib==1.2.0",
+    "numpy==1.26.4",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+inferrer-common = { path = "../common" }
+
+[tool.pytest.ini_options]
+pythonpath = "app"
+
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
