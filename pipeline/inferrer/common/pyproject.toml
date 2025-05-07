@@ -1,0 +1,18 @@
+[project]
+name = "inferrer-common"
+version = "0.1.0"
+description = "Common code for the catalogue pipeline image inferrers"
+requires-python = ">=3.10,<3.20"
+dependencies = [
+    "fastapi==0.109.1",
+    "gunicorn==22.0.0",
+    "uvicorn==0.11.7",
+    "aiofile>=3.8.8",
+    "aiohttp[speedups]>=3.9.5",
+    "Pillow>=10.3.0",
+    "piffle>=0.5.0",
+    "async-timeout==4.0.3",
+]
+
+[tool.uv]
+package = true
