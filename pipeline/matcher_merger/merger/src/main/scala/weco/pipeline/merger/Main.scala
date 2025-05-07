@@ -7,21 +7,11 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.WorkState.{
-  Denormalised,
-  Identified,
-  Merged
-}
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.messaging.sns.NotificationMessage
 import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.pipeline.merger.services.{
-  IdentifiedWorkLookup,
-  MergerManager,
-  MergerWorkerService,
-  PlatformMerger,
-  WorkRouter
-}
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, MergerWorkerService, PlatformMerger, WorkRouter}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
@@ -87,18 +77,10 @@ object Main extends WellcomeTypesafeApp {
         )
 
       val workOrImageIndexer =
-        new EitherIndexer[Either[Work[Merged], Work[Denormalised]], Image[
-          Initial
-        ]](
-          leftIndexer = new EitherIndexer[Work[Merged], Work[Denormalised]](
-            leftIndexer = new ElasticIndexer[Work[Merged]](
-              client = esClient,
-              index = Index(config.requireString("es.denormalised-works.index"))
-            ),
-            rightIndexer = new ElasticIndexer[Work[Denormalised]](
-              client = esClient,
-              index = Index(config.requireString("es.denormalised-works.index"))
-            )
+        new EitherIndexer[Work[Merged], Image[Initial]](
+          leftIndexer = new ElasticIndexer[Work[Merged]](
+            client = esClient,
+            index = Index(config.requireString("es.denormalised-works.index"))
           ),
           rightIndexer = new ElasticIndexer[Image[Initial]](
             client = esClient,
