@@ -105,13 +105,13 @@ def transform_related_concepts(
 
 def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
     """If a concept is classified under more than one type, pick the most specific one and return it."""
-    
+
     # Prioritise concepts, with more specific ones (e.g. 'Person') above less specific ones (e.g. 'Agent').
-    # Sometimes a concept is classified under types which are mutually exclusive. For example, there are 
+    # Sometimes a concept is classified under types which are mutually exclusive. For example, there are
     # several hundred concepts categorised as both a 'Person' and an 'Organisation'. These inconsistencies
     # arise upstream, and we cannot easily resolve them here. To mitigate this issue, the priority list below
     # is ordered to maximise the probability of choosing the right type based on an analysis of current inconsistencies.
-    # (For example, when a concept is categorised as both an 'Organisation' and a 'Place', the 'Place' type is almost 
+    # (For example, when a concept is categorised as both an 'Organisation' and a 'Place', the 'Place' type is almost
     # always the correct one, which is why 'Place' is higher in the priority list than 'Organisation').
     concept_types_by_priority: list[ConceptType] = [
         "Genre",
