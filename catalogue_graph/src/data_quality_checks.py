@@ -1,13 +1,8 @@
-import csv
-
-import boto3
-import smart_open
-
 import config
 from models.graph_node import ConceptType
-from utils.aws import get_neptune_client
+from utils.aws import get_neptune_client, write_csv_to_s3
 
-LIMIT = 20000
+S3_DATA_QUALITY_CHECKS_PREFIX = f"s3://{config.INGESTOR_S3_BUCKET}/data_quality_checks"
 
 CONCEPT_TYPES_QUERY = """
     MATCH (concept:Concept)
@@ -22,16 +17,14 @@ CONCEPT_TYPES_QUERY = """
         concept_types        
 """
 
+CONCEPT_TYPES_QUERY_LIMIT = 20000
+
 
 def are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
     """Return `True` if all provided concept types are mutually compatible. Otherwise, return `False`."""
     # 'Concept' and 'Subject' types are consistent with all other types,
     # so we filter them out when determining consistency
-    filtered_types = [
-        concept_type
-        for concept_type in concept_types
-        if concept_type not in ("Concept", "Subject")
-    ]
+    filtered_types = [c for c in concept_types if c not in ("Concept", "Subject")]
 
     if len(filtered_types) <= 1:
         return True
@@ -41,39 +34,35 @@ def are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
     return set(filtered_types) in compatible_combinations
 
 
-def check_concept_type_consistency() -> None:
+def get_concepts_count():
     count_query = "MATCH (c:Concept) RETURN count(c) AS count"
+    response = get_neptune_client(True).client.run_open_cypher_query(count_query)
+    return response[0]["count"]
+
+
+def check_concept_type_consistency() -> None:
     client = get_neptune_client(True)
-    concepts_count = client.run_open_cypher_query(count_query)[0]["count"]
+    invalid_items = []
 
-    transport_params = {"client": boto3.client("s3")}
-    s3_uri = f"s3://{config.INGESTOR_S3_BUCKET}/data_quality_checks/inconsistent_concept_types.csv"
-    with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
-        csv_writer = None
+    start_offset = 0
+    while start_offset < get_concepts_count():
+        params = {"start_offset": start_offset, "limit": CONCEPT_TYPES_QUERY_LIMIT}
+        response = client.run_open_cypher_query(CONCEPT_TYPES_QUERY, params)
 
-        start_offset = 0
-        while start_offset < concepts_count:
-            params = {"start_offset": start_offset, "limit": LIMIT}
-            response = client.run_open_cypher_query(CONCEPT_TYPES_QUERY, params)
-
-            for concept in response:
-                concept_properties = concept["concept"]["~properties"]
-                concept_types = concept["concept_types"]
-
-                if not are_concept_types_consistent(concept_types):
-                    invalid_item = {
-                        "concept_id": concept_properties["id"],
-                        "concept_label": concept_properties["label"],
-                        "concept_types": "||".join(concept_types),
+        for concept in response:
+            if not are_concept_types_consistent(concept["concept_types"]):
+                invalid_items.append(
+                    {
+                        "concept_id": concept["concept"]["~properties"]["id"],
+                        "concept_label": concept["concept"]["~properties"]["label"],
+                        "concept_types": "||".join(concept["concept_types"]),
                     }
+                )
 
-                    if csv_writer is None:
-                        csv_writer = csv.DictWriter(f, fieldnames=invalid_item.keys())
-                        csv_writer.writeheader()
+        start_offset += CONCEPT_TYPES_QUERY_LIMIT
 
-                    csv_writer.writerow(invalid_item)
-
-            start_offset += LIMIT
+    s3_uri = f"{S3_DATA_QUALITY_CHECKS_PREFIX}/inconsistent_concept_types.csv"
+    write_csv_to_s3(s3_uri, invalid_items)
 
 
 if __name__ == "__main__":
