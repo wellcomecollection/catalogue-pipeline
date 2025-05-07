@@ -1,9 +1,8 @@
 import csv
 
 import boto3
-import smart_open
-
 import config
+import smart_open
 from models.graph_node import ConceptType
 from utils.aws import get_neptune_client
 
@@ -27,11 +26,7 @@ def are_concept_types_consistent(concept_types: list[ConceptType]) -> bool:
     """Return `True` if all provided concept types are mutually compatible. Otherwise, return `False`."""
     # 'Concept' and 'Subject' types are consistent with all other types,
     # so we filter them out when determining consistency
-    filtered_types = [
-        concept_type
-        for concept_type in concept_types
-        if concept_type not in ("Concept", "Subject")
-    ]
+    filtered_types = [c for c in concept_types if c not in ("Concept", "Subject")]
 
     if len(filtered_types) <= 1:
         return True
