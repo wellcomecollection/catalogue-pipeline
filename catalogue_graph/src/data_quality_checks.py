@@ -48,7 +48,6 @@ with open("invalid.csv", "w") as f:
                 concept,
                 concept_types        
         """
-        print(start_offset)
 
         concept_result = client.run_open_cypher_query(
             query, {"start_offset": start_offset, "limit": LIMIT}
