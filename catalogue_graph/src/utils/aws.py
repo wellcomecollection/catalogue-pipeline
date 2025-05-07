@@ -4,14 +4,14 @@ from collections.abc import Generator
 from typing import Any, TypeVar
 
 import boto3
+import config
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
-import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
+from pydantic import BaseModel
+
 from utils.types import NodeType, OntologyType
 
 PydanticModelType = TypeVar("PydanticModelType", bound=BaseModel)
@@ -83,6 +83,19 @@ def get_csv_from_s3(s3_uri: str) -> Generator[Any]:
         csv_reader = csv.DictReader(f)
 
         yield from csv_reader
+
+
+def write_csv_to_s3(s3_uri: str, items: list[dict]) -> None:
+    if len(items) == 0:
+        raise ValueError("Cannot create a CSV file from an empty list.")
+
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
+        csv_writer = csv.DictWriter(f, fieldnames=items[0].keys())
+        csv_writer.writeheader()
+
+        for item in items:
+            csv_writer.writerow(item)
 
 
 def fetch_transformer_output_from_s3(
