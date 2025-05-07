@@ -1,8 +1,9 @@
 import csv
 
 import boto3
-import config
 import smart_open
+
+import config
 from models.graph_node import ConceptType
 from utils.aws import get_neptune_client
 
