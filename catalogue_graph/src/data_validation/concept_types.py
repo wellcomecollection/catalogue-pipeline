@@ -1,4 +1,4 @@
-from typing import Generator
+from collections.abc import Generator
 
 from models.graph_node import ConceptType
 from utils.aws import get_neptune_client
@@ -37,7 +37,7 @@ def _get_concepts_count() -> int:
     response = get_neptune_client(True).run_open_cypher_query(count_query)
     count: int = response[0]["count"]
     return count
-    
+
 
 def get_concepts_with_inconsistent_types() -> Generator[dict]:
     """Return all concepts whose combination of types is not consistent."""
