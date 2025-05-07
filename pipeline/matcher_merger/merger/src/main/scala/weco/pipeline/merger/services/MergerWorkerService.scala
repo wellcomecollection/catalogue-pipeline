@@ -105,15 +105,6 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     mergerManager
       .applyMerge(maybeWorks = workSet)
       .mergedWorksAndImagesWithTime(matcherResultTime)
-//      .map {
-//        case Left(work) =>
-//          work.data.collectionPath match {
-//            case None =>
-//              Left(Right(work.transition[Denormalised](Relations.none)))
-//            case _ => Left(Left(work))
-//          }
-//        case Right(image) => Right(image)
-//      }
 
   private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {
