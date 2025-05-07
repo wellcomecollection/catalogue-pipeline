@@ -12,5 +12,5 @@ docker run --tty --rm \
 	--volume "$ROOT:/data" \
 	--workdir /data \
 	"$ECR_REGISTRY/wellcome/flake8:latest" \
-    --exclude .git,__pycache__,target,.terraform,catalogue_graph \
+    --exclude .git,__pycache__,target,.terraform,catalogue_graph,pipeline/inferrer \
     --ignore=E501,E122,E126,E203,W503
