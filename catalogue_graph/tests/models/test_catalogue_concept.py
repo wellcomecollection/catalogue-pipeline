@@ -1,3 +1,5 @@
+from test_utils import load_json_fixture
+
 from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
@@ -6,7 +8,6 @@ from models.catalogue_concept import (
     RelatedConcepts,
     get_most_specific_concept_type,
 )
-from test_utils import load_json_fixture
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
@@ -147,8 +148,8 @@ def test_concept_type_agent_precedence() -> None:
 
 
 def test_concept_type_genre_precedence() -> None:
-    # Genre has precedence over everything else. The presence of the 'Genre' type determines whether the 
-    # "Using this Type/Technique" tab shows in the frontend, so we err on the side of showing it on pages where 
+    # Genre has precedence over everything else. The presence of the 'Genre' type determines whether the
+    # "Using this Type/Technique" tab shows in the frontend, so we err on the side of showing it on pages where
     # it shouldn't be shown rather than hiding it on pages where it should be.
     assert get_most_specific_concept_type(["Concept", "Subject", "Genre"]) == "Genre"
     assert get_most_specific_concept_type(["Agent", "Genre", "Person"]) == "Genre"
@@ -174,25 +175,28 @@ def test_concept_type_genre_precedence() -> None:
 def test_concept_type_place_precedence() -> None:
     # Place has precedence over everything (except for Genre).
     assert (
-            get_most_specific_concept_type(
-                [
-                    "Place",
-                    "Person",
-                    "Organisation",
-                    "Period",
-                    "Meeting",
-                    "Agent",
-                    "Subject",
-                    "Concept",
-                ]
-            )
-            == "Place"
+        get_most_specific_concept_type(
+            [
+                "Place",
+                "Person",
+                "Organisation",
+                "Period",
+                "Meeting",
+                "Agent",
+                "Subject",
+                "Concept",
+            ]
+        )
+        == "Place"
     )
-    
+
     assert get_most_specific_concept_type(["Concept", "Subject", "Place"]) == "Place"
-    
+
     # Place/Organisation and Place/Person combinations are quite common (even though they are mutually exclusive).
-    # We should always pick Place as it's usually the correct one. 
+    # We should always pick Place as it's usually the correct one.
     assert get_most_specific_concept_type(["Place", "Person"]) == "Place"
     assert get_most_specific_concept_type(["Place", "Organisation"]) == "Place"
-    assert get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"]) == "Place"
+    assert (
+        get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
+        == "Place"
+    )
