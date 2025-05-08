@@ -192,8 +192,13 @@ class CatalogueConcept(BaseModel):
         # if a given concept is listed in both `broader_than` and `referenced_together`, we only want to keep
         # one of those references to prevent duplication in the frontend.
         used_labels = {label.lower()}
-
-        concept_type = get_most_specific_concept_type(concept_data["concept_types"])
+        
+        # Concepts which are not connected to any Works will not have any types associated with them. We periodically
+        # remove such concepts from the graph, but there might be a few of them at any given point.
+        if not concept_data["concept_types"]:
+            concept_type: ConceptType = "Concept" 
+        else:
+            concept_type = get_most_specific_concept_type(concept_data["concept_types"])
 
         return CatalogueConcept(
             id=concept_data["concept"]["~properties"]["id"],
