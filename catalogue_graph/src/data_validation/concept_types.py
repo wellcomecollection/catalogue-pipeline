@@ -44,7 +44,8 @@ def get_concepts_with_inconsistent_types() -> Generator[dict]:
     client = get_neptune_client(True)
 
     start_offset = 0
-    while start_offset < _get_concepts_count():
+    concepts_count = _get_concepts_count()
+    while start_offset < concepts_count:
         params = {"start_offset": start_offset, "limit": CONCEPT_TYPES_QUERY_LIMIT}
         response = client.run_open_cypher_query(CONCEPT_TYPES_QUERY, params)
 
