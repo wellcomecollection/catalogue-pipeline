@@ -85,6 +85,19 @@ def get_csv_from_s3(s3_uri: str) -> Generator[Any]:
         yield from csv_reader
 
 
+def write_csv_to_s3(s3_uri: str, items: list[dict]) -> None:
+    if not items:
+        raise ValueError("Cannot create a CSV file from an empty list.")
+
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
+        csv_writer = csv.DictWriter(f, fieldnames=items[0].keys())
+        csv_writer.writeheader()
+
+        for item in items:
+            csv_writer.writerow(item)
+
+
 def fetch_transformer_output_from_s3(
     node_type: NodeType, source: OntologyType
 ) -> Generator[Any]:

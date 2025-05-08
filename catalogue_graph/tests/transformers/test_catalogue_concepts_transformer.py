@@ -12,17 +12,10 @@ from transformers.catalogue.concepts_transformer import CatalogueConceptsTransfo
 
 
 def _add_catalogue_request() -> None:
-    MockRequest.mock_responses(
-        [
-            {
-                "method": "GET",
-                "url": CATALOGUE_SNAPSHOT_URL,
-                "status_code": 200,
-                "json_data": None,
-                "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
-                "params": None,
-            }
-        ]
+    MockRequest.mock_response(
+        method="GET",
+        url=CATALOGUE_SNAPSHOT_URL,
+        content_bytes=load_fixture("catalogue/works_snapshot_example.json"),
     )
 
 
@@ -50,7 +43,7 @@ def test_catalogue_concepts_transformer_nodes() -> None:
 
     assert len(nodes) == 11
     assert nodes[0] == Concept(
-        id="s6s24vd7", label="Human anatomy", type="Concept", source="lc-subjects"
+        id="s6s24vd7", label="Human anatomy", source="lc-subjects"
     )
 
 

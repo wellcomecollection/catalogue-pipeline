@@ -23,7 +23,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         label="label",
         alternativeLabels=["alternativeLabels"],
         description="description",
-        type="type",
+        type="Concept",
         sameAs=["1234"],
         relatedConcepts=RelatedConcepts(
             relatedTo=[],
@@ -47,7 +47,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             ],
             label="label",
             alternativeLabels=["alternativeLabels"],
-            type="type",
+            type="Concept",
         ),
         display=ConceptDisplay(
             id="id",
@@ -64,7 +64,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             label="label",
             alternativeLabels=["alternativeLabels"],
             description="description",
-            type="type",
+            type="Concept",
             sameAs=["1234"],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
