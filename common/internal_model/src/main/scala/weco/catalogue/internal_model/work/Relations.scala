@@ -66,6 +66,7 @@ object RelationSet {
     existingRelations: List[Relation],
     newRelations: List[Relation]
   ): List[Relation] = {
+    // Retain any unidentified relations that do not have a replacement in the new list.
     val retainedRelations = existingRelations filter {
       oldRelation =>
         oldRelation.id.isEmpty && !newRelations.exists(

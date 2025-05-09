@@ -127,6 +127,7 @@ class RelationsTest
       eve, // Eve is the only unidentified non-matching entry
       newMum, // mum is replaced by newMum, matching on title
       newGranny
+      // great grandma is removed, because it has an id in the old list, but is not in the new list.
     )
   }
 
