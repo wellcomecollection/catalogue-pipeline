@@ -1,10 +1,16 @@
 package weco.catalogue.internal_model.work
 
+import org.scalatest.LoneElement
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.catalogue.internal_model.generators.IdentifiersGenerators
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 
-class RelationsTest extends AnyFunSpec with Matchers {
+class RelationsTest
+    extends AnyFunSpec
+    with Matchers
+    with LoneElement
+    with IdentifiersGenerators {
   it("has zero size when empty") {
     Relations.none.size shouldBe 0
   }
@@ -55,6 +61,87 @@ class RelationsTest extends AnyFunSpec with Matchers {
       siblingsSucceeding =
         List(SeriesRelation("Little Sister"), SeriesRelation("Little Brother"))
     )
+  }
+
+  it("replaces unidentified relations when they match by title") {
+    val granny = SeriesRelation("Granny")
+    val newGranny = granny.copy(id = Some(createCanonicalId))
+
+    val r1 = Relations(
+      ancestors = List(granny),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    val r2 = Relations(
+      ancestors = List(newGranny),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    (r1 + r2).ancestors.loneElement shouldBe newGranny
+  }
+
+  it("replaces relations when they match by identifier") {
+    val granny = SeriesRelation("Granny").copy(id = Some(createCanonicalId))
+    val newGranny = granny.copy(title = Some("Grandma"))
+
+    val r1 = Relations(
+      ancestors = List(granny),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    val r2 = Relations(
+      ancestors = List(newGranny),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    (r1 + r2).ancestors.loneElement shouldBe newGranny
+  }
+
+  it("preserves the order of relations when they are replaced") {
+    val granny = SeriesRelation("Granny").copy(id = Some(createCanonicalId))
+    val newGranny = granny.copy(title = Some("Grandma"))
+    val mum = SeriesRelation("Mum")
+    val great = SeriesRelation("Great Grandma")
+    val eve = SeriesRelation("Mitochondrial Eve")
+    val r1 = Relations(
+      ancestors = List(mum, granny, great),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    val r2 = Relations(
+      ancestors = List(newGranny, eve),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    (r1 + r2).ancestors shouldBe List(mum, newGranny, great, eve)
+  }
+
+  it("replaces matching relations, even when title and id are the same") {
+    val granny = SeriesRelation("Granny").copy(
+      id = Some(createCanonicalId),
+      numDescendents = 1
+    )
+    val newGranny = granny.copy(numDescendents = 99)
+
+    val r1 = Relations(
+      ancestors = List(granny),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    val r2 = Relations(
+      ancestors = List(newGranny),
+      children = Nil,
+      siblingsPreceding = Nil,
+      siblingsSucceeding = Nil
+    )
+    (r1 + r2).ancestors.loneElement.numDescendents shouldBe 99
   }
 }
 

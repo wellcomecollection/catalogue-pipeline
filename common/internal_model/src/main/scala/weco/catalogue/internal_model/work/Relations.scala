@@ -66,18 +66,37 @@ object RelationSet {
     existingRelations: List[Relation],
     newRelations: List[Relation]
   ): List[Relation] = {
-    val newTitles =
-      newRelations.map(relation => removeTerminalPunctuation(relation.title))
+    def relationsMatch(oldRelation: Relation, newRelation: Relation): Boolean =
+      sameId(
+        oldRelation,
+        newRelation
+      ) || oldRelation.id.isEmpty && sameTitle(oldRelation, newRelation)
 
-    // duplicated if it shares a title, but not if it already has an identifier.
-    def isRelationDuplicated(relation: Relation): Boolean =
-      relation.id.isEmpty && newTitles.contains(
-        removeTerminalPunctuation(relation.title)
-      )
+    def sameId(oldRelation: Relation, newRelation: Relation): Boolean =
+      oldRelation.id.isDefined && oldRelation.id == newRelation.id
 
-    val relationsToKeep =
-      existingRelations.filter(r => !isRelationDuplicated(r))
-    relationsToKeep ++ newRelations
+    def sameTitle(oldRelation: Relation, newRelation: Relation): Boolean =
+      removeTerminalPunctuation(
+        newRelation.title
+      ) == removeTerminalPunctuation(oldRelation.title)
+
+    val (replacementRelations, relationsToAppend) = newRelations partition {
+      newRelation =>
+        existingRelations.exists(
+          oldRelation => relationsMatch(oldRelation, newRelation)
+        )
+    }
+    val updatedRelations = existingRelations map {
+      oldRelation: Relation =>
+        replacementRelations.find(
+          newRelation => relationsMatch(oldRelation, newRelation)
+        ) match {
+          case Some(replacement) => replacement
+          case None              => oldRelation
+        }
+    }
+
+    updatedRelations ++ relationsToAppend
   }
 
   /** The title used in a relation may come from one of two places:
