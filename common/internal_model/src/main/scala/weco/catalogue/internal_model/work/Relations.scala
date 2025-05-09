@@ -66,38 +66,19 @@ object RelationSet {
     existingRelations: List[Relation],
     newRelations: List[Relation]
   ): List[Relation] = {
-    def relationsMatch(oldRelation: Relation, newRelation: Relation): Boolean =
-      sameId(
-        oldRelation,
-        newRelation
-      ) || oldRelation.id.isEmpty && sameTitle(oldRelation, newRelation)
-
-    def sameId(oldRelation: Relation, newRelation: Relation): Boolean =
-      oldRelation.id.isDefined && oldRelation.id == newRelation.id
-
-    def sameTitle(oldRelation: Relation, newRelation: Relation): Boolean =
-      removeTerminalPunctuation(
-        newRelation.title
-      ) == removeTerminalPunctuation(oldRelation.title)
-
-    val (replacementRelations, relationsToAppend) = newRelations partition {
-      newRelation =>
-        existingRelations.exists(
-          oldRelation => relationsMatch(oldRelation, newRelation)
+    val retainedRelations = existingRelations filter {
+      oldRelation =>
+        oldRelation.id.isEmpty && !newRelations.exists(
+          newRelation => sameTitle(oldRelation, newRelation)
         )
     }
-    val updatedRelations = existingRelations map {
-      oldRelation: Relation =>
-        replacementRelations.find(
-          newRelation => relationsMatch(oldRelation, newRelation)
-        ) match {
-          case Some(replacement) => replacement
-          case None              => oldRelation
-        }
-    }
-
-    updatedRelations ++ relationsToAppend
+    retainedRelations ++ newRelations
   }
+
+  private def sameTitle(oldRelation: Relation, newRelation: Relation): Boolean =
+    removeTerminalPunctuation(
+      newRelation.title
+    ) == removeTerminalPunctuation(oldRelation.title)
 
   /** The title used in a relation may come from one of two places:
     *   1. The title of the related document 2. The title of the link to the

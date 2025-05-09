@@ -82,7 +82,7 @@ class RelationsTest
     (r1 + r2).ancestors.loneElement shouldBe newGranny
   }
 
-  it("replaces relations when they match by identifier") {
+  it("replaces identified relations") {
     val granny = SeriesRelation("Granny").copy(id = Some(createCanonicalId))
     val newGranny = granny.copy(title = Some("Grandma"))
 
@@ -101,25 +101,33 @@ class RelationsTest
     (r1 + r2).ancestors.loneElement shouldBe newGranny
   }
 
-  it("preserves the order of relations when they are replaced") {
-    val granny = SeriesRelation("Granny").copy(id = Some(createCanonicalId))
-    val newGranny = granny.copy(title = Some("Grandma"))
+  it(
+    "replaces all relations other than unidentified ones that do not have a replacement in the new set"
+  ) {
+    val grandma = SeriesRelation("Grandma").copy(id = Some(createCanonicalId))
+    val newGranny = grandma.copy(title = Some("Granny"))
     val mum = SeriesRelation("Mum")
-    val great = SeriesRelation("Great Grandma")
+    val newMum = mum.copy(id = Some(createCanonicalId))
+    val greatGrandma =
+      SeriesRelation("Great Grandma").copy(id = Some(createCanonicalId))
     val eve = SeriesRelation("Mitochondrial Eve")
     val r1 = Relations(
-      ancestors = List(mum, granny, great),
+      ancestors = List(mum, grandma, greatGrandma, eve),
       children = Nil,
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil
     )
     val r2 = Relations(
-      ancestors = List(newGranny, eve),
+      ancestors = List(newMum, newGranny),
       children = Nil,
       siblingsPreceding = Nil,
       siblingsSucceeding = Nil
     )
-    (r1 + r2).ancestors shouldBe List(mum, newGranny, great, eve)
+    (r1 + r2).ancestors shouldBe List(
+      eve, // Eve is the only unidentified non-matching entry
+      newMum, // mum is replaced by newMum, matching on title
+      newGranny
+    )
   }
 
   it("replaces matching relations, even when title and id are the same") {
