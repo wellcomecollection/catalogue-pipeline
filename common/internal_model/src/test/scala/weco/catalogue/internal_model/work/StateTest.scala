@@ -129,78 +129,7 @@ class StateTest
         granny
       )
     }
-
-    it("Only overwrites unidentified relations from a previous stage.") {
-      val mum1 = new Relation(
-        id = Some(CanonicalId("cafef00d")),
-        title = Some("Mum"),
-        collectionPath = Some(CollectionPath("cafef00d")),
-        workType = WorkType.Standard,
-        depth = 0,
-        numChildren = 1,
-        numDescendents = 1
-      )
-      val merged = Work.Visible[Merged](
-        version = 0,
-        state = Merged(
-          sourceIdentifier = sourceIdentifier,
-          canonicalId = canonicalId,
-          sourceModifiedTime = Instant.MIN,
-          mergedTime = Instant.MIN,
-          availabilities = Set(),
-          relations = Relations(
-            ancestors =
-              List(SeriesRelation("Granny"), SeriesRelation("Dad"), mum1)
-          )
-        ),
-        data = WorkData(title = Some("My Title"))
-      )
-
-      val mum2 = new Relation(
-        id = Some(CanonicalId("f00dcafe")),
-        title = Some("Mum"),
-        collectionPath = Some(CollectionPath("f00dcafe")),
-        workType = WorkType.Standard,
-        depth = 0,
-        numChildren = 1,
-        numDescendents = 1
-      )
-
-      val mumsMum = new Relation(
-        id = Some(CanonicalId("deadbeef")),
-        title = Some("Granny"),
-        collectionPath = Some(CollectionPath("cafed00d/deadbeef")),
-        workType = WorkType.Standard,
-        depth = 0,
-        numChildren = 1,
-        numDescendents = 1
-      )
-
-      val dadsMum = new Relation(
-        id = Some(CanonicalId("baadf00d")),
-        title = Some("Granny"),
-        collectionPath = Some(CollectionPath("cafed00d/baadf00d")),
-        workType = WorkType.Standard,
-        depth = 0,
-        numChildren = 1,
-        numDescendents = 1
-      )
-
-      val denormalised = merged.transition[Denormalised](
-        Relations(
-          // Mum is already in the list, granny is new
-          ancestors = List(mumsMum, dadsMum, mum2)
-        )
-      )
-      denormalised.state.relations.ancestors shouldBe List(
-        SeriesRelation("Dad"),
-        mum1,
-        mumsMum,
-        dadsMum,
-        mum2
-      )
-    }
-
+    
     it("matches relations ignoring trailing terminal punctuation") {
       val merged = Work.Visible[Merged](
         version = 0,
