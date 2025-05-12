@@ -3,7 +3,7 @@ package weco.pipeline.merger.fixtures
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.WorkState.{Denormalised, Identified, Merged}
+import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS.Queue
 import weco.messaging.memory.MemoryMessageSender
@@ -20,7 +20,7 @@ import scala.concurrent.Future
 
 trait MergerFixtures extends PipelineStorageStreamFixtures {
 
-  type WorkOrImage = Either[Either[Work[Merged], Work[Denormalised]], Image[Initial]]
+  type WorkOrImage = Either[Work[Merged], Image[Initial]]
 
   val workRouter = new MemoryWorkRouter(
     new MemoryMessageSender(): MemoryMessageSender,

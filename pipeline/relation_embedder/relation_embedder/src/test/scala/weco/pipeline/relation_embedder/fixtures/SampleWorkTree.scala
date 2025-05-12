@@ -91,10 +91,10 @@ trait SampleWorkTree extends IndexFixtures with RelationGenerators {
       R
     ]
   ): R = {
-    withLocalMergedWorksIndex {
-      mergedIndex: Index =>
-        storeWorks(mergedIndex, works)
-        testWith(mergedIndex)
+    withLocalDenormalisedWorksIndex {
+      denormalisedIndex: Index =>
+        storeWorks(denormalisedIndex, works)
+        testWith(denormalisedIndex)
     }
   }
 }
