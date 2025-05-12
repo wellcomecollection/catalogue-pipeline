@@ -139,9 +139,9 @@ class PathConcatenatorWorkerServiceTest
       R
     ]
   ): R =
-    withLocalMergedWorksIndex {
-      mergedIndex =>
-        storeWorks(mergedIndex, works)
+    withLocalDenormalisedWorksIndex {
+      denormalisedIndex =>
+        storeWorks(denormalisedIndex, works)
         withLocalSqsQueuePair(visibilityTimeout = 5.seconds) {
           queuePair =>
             withActorSystem {
@@ -151,7 +151,7 @@ class PathConcatenatorWorkerServiceTest
                     val messageSender = new MemoryMessageSender
                     val pathsService = new PathsService(
                       elasticClient = elasticClient,
-                      index = mergedIndex
+                      index = denormalisedIndex
                     )
                     val outputIndex =
                       mutable.Map.empty[String, Work[Merged]]

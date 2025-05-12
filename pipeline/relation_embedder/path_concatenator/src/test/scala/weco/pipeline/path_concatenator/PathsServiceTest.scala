@@ -42,7 +42,7 @@ class PathsServiceTest
         work(path = "grandparent/parent"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getParentPath("parent/child")) {
@@ -60,7 +60,7 @@ class PathsServiceTest
         work(path = "grandparent/parent/brother"),
         work(path = "parent/sister")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getParentPath("parent/sister")) {
@@ -78,7 +78,7 @@ class PathsServiceTest
         work(path = "parent"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getParentPath("parent/child")) {
@@ -92,7 +92,7 @@ class PathsServiceTest
         work(path = "a/b/c/d/e"),
         work(path = "e/f/g/h/i")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getParentPath("e/f/g/h/i")) {
@@ -110,7 +110,7 @@ class PathsServiceTest
         work(path = "parent"),
         work(path = "a/completely/different/tree/")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getParentPath("parent")) {
@@ -125,7 +125,7 @@ class PathsServiceTest
         work(path = "grandfather/parent"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
 
@@ -146,7 +146,7 @@ class PathsServiceTest
         expectedWork,
         work(path = "parent/child/grandchild")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getWorkWithPath("parent/child")) {
@@ -160,7 +160,7 @@ class PathsServiceTest
         work(path = "parent/child"),
         work(path = "parent/child")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
 
@@ -175,7 +175,7 @@ class PathsServiceTest
       val works: List[Work[Merged]] = List(
         work(path = "hello/world")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
 
@@ -201,7 +201,7 @@ class PathsServiceTest
           "child/grandchild3"
         ) // ignored - could be child of a different parent
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getChildWorks("grandparent/parent")) {
@@ -214,7 +214,7 @@ class PathsServiceTest
         work(path = "grandparent"),
         work(path = "grandparent/parent")
       )
-      withLocalMergedWorksIndex {
+      withLocalDenormalisedWorksIndex {
         index =>
           insertIntoElasticsearch(index, works: _*)
           whenReady(service(index).getChildWorks("grandparent/parent")) {
