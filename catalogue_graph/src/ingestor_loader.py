@@ -7,6 +7,8 @@ import typing
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -14,7 +16,6 @@ from models.catalogue_concept import (
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
 )
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -228,7 +229,7 @@ def extract_data(
         "limit": limit,
         "ignored_wikidata_ids": IGNORED_WIKIDATA_IDS,
         "related_to_limit": RELATED_TO_LIMIT,
-        "number_of_shared_works_threshold": NUMBER_OF_SHARED_WORKS_THRESHOLD
+        "number_of_shared_works_threshold": NUMBER_OF_SHARED_WORKS_THRESHOLD,
     }
 
     print("Running concept query...")
