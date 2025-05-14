@@ -33,8 +33,7 @@ else
 fi
 
 echo "*** Publishing Docker image to ECR"
-
-eval $(aws ecr get-login --no-include-email)
+# Login to ECR in the platform account is handled by the Buildkite runner
 
 docker tag "$PROJECT_NAME:$IMAGE_TAG" "$ECR_REGISTRY/$PROJECT_NAME:$IMAGE_TAG"
 docker push "$ECR_REGISTRY/$PROJECT_NAME:$IMAGE_TAG"
