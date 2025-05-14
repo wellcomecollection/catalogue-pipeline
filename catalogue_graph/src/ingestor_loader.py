@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -16,6 +14,8 @@ from models.catalogue_concept import (
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
 )
+from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -119,6 +119,86 @@ def get_related_query(
     """
 
 
+def get_referenced_together_query(
+    referenced_concept_types: list[ConceptType] | None = None,
+) -> str:
+    """Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works."""
+    referenced_type_filter = ""
+    if referenced_concept_types is not None and len(referenced_concept_types) > 0:
+        concept_types = ", ".join([f"'{t}'" for t in referenced_concept_types])
+        referenced_type_filter = f"AND e1.referenced_type IN [{concept_types}] AND e2.referenced_type IN [{concept_types}]"
+    
+    # TODO: Handle label-derived
+    return f"""
+        /* Get a chunk of `Concept` nodes of size `limit` */
+        MATCH (concept:Concept {{id: 'a25a9xxc'}})
+        WITH concept ORDER BY concept.id 
+        SKIP $start_offset LIMIT $limit
+    
+        /* 
+        For each `concept`, retrieve all identical ('same as') concepts by traversing its source concepts
+        */
+        MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
+        WHERE NOT source_concept.id IN $ignored_wikidata_ids
+        MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)  
+        
+        /* Deduplicate */
+        WITH DISTINCT concept, linked_source_concept, same_as_concept
+    
+        /*
+        Next, for each `same_as_concept`, get all co-occurring concepts `other` (i.e. find all combinations of `other` and
+        `same_as_concept` for which there is at least one work listing both `other` and `same_as_concept`).
+        */
+        MATCH (same_as_concept)<-[e1:HAS_CONCEPT]-(w:Work)-[e2:HAS_CONCEPT]->(other)
+        WHERE same_as_concept.id <> other.id
+        
+        {referenced_type_filter}
+        
+        /*
+        For each `other` concept, count the number of works in which it co-occurs with each `same_as_concept`, 
+        and link the results back to the original `concept` (discarding `same_as_concept` nodes).
+        */
+        WITH DISTINCT concept, linked_source_concept, other, COUNT(w) as number_of_shared_works
+        ORDER BY number_of_shared_works DESC
+        
+        /*
+        Filter out `other` concepts which do not meet the minimum threshold for the number of shared works.
+        */        
+        WHERE number_of_shared_works >= $number_of_shared_works_threshold
+                
+        /* Match each `other` concept with all of its source concepts. */
+        MATCH (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]-(other_source_concept)
+            WHERE NOT other_source_concept.id IN $ignored_wikidata_ids
+            AND NOT (linked_source_concept)-[:SAME_AS*0..2]-(linked_other_source_concept)
+        
+        /*
+        Group the results into buckets, with one bucket for each combination of concept and co-occurring source concept.
+        (Note that we do not create groups based on each `other` concept, as that would cause duplicates in cases
+        where two `other` concepts have the same source concept.)
+        */
+        WITH concept,
+             linked_other_source_concept,
+             head(collect(other)) AS selected_other,
+             collect(other_source_concept) AS related_source_concepts,
+             number_of_shared_works
+             
+        /*
+        Group the results again to ensure that only one row is returned for each `concept. Limit the number of results
+        based on the value of the `related_to_limit` parameter.
+        */
+        WITH concept,
+            collect({{
+                concept_node: selected_other,
+                linked_other_source_concept: linked_other_source_concept,
+                source_concept_nodes: related_source_concepts,
+                number_of_shared_works: number_of_shared_works
+            }})[0..$related_to_limit] AS related        
+        RETURN
+            concept.id AS id,
+            related
+        """
+
+
 # A query returning all Wellcome concepts and the corresponding `SourceConcepts`.
 CONCEPT_QUERY = """
     MATCH (concept:Concept)
@@ -131,73 +211,6 @@ CONCEPT_QUERY = """
         collect(DISTINCT linked_source_concept) AS linked_source_concepts,
         collect(DISTINCT source_concept) AS source_concepts,
         collect(DISTINCT same_as_concept.id) AS same_as_concept_ids        
-    """
-
-# For every Wellcome concept, this query returns a list of concepts most frequently co‑occurring with it in Works.
-REFERENCED_TOGETHER_QUERY = """
-    /* Get a chunk of `Concept` nodes of size `limit` */
-    MATCH (concept:Concept)
-    WITH concept ORDER BY concept.id 
-    SKIP $start_offset LIMIT $limit
-
-    /* 
-    For each `concept`, retrieve all identical ('same as') concepts by traversing its source concepts
-    */
-    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
-    WHERE NOT source_concept.id IN $ignored_wikidata_ids
-    MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)  
-    
-    /* Deduplicate */
-    WITH DISTINCT concept, linked_source_concept, same_as_concept
-
-    /*
-    Next, for each `same_as_concept`, get all co-occurring concepts `other` (i.e. find all combinations of `other` and
-    `same_as_concept` for which there is at least one work listing both `other` and `same_as_concept`).
-    */
-    MATCH (same_as_concept)<-[:HAS_CONCEPT]-(w:Work)-[:HAS_CONCEPT]->(other)
-    WHERE same_as_concept.id <> other.id
-    
-    /*
-    For each `other` concept, count the number of works in which it co-occurs with each `same_as_concept`, 
-    and link the results back to the original `concept` (discarding `same_as_concept` nodes).
-    */
-    WITH DISTINCT concept, linked_source_concept, other, COUNT(w) as number_of_shared_works
-    ORDER BY number_of_shared_works DESC
-    
-    /*
-    Filter out `other` concepts which do not meet the minimum threshold for the number of shared works.
-    */        
-    WHERE number_of_shared_works >= $number_of_shared_works_threshold
-            
-    /* Match each `other` concept with all of its source concepts. */
-    OPTIONAL MATCH (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]-(other_source_concept)
-        WHERE NOT other_source_concept.id IN $ignored_wikidata_ids
-        AND NOT (linked_source_concept)-[:SAME_AS*0..2]-(linked_other_source_concept)
-    
-    /*
-    Group the results into buckets, with one bucket for each combination of concept and co-occurring source concept.
-    (Note that we do not create groups based on each `other` concept, as that would cause duplicates in cases
-    where two `other` concepts have the same source concept.)
-    */
-    WITH concept,
-         linked_other_source_concept,
-         head(collect(other)) AS selected_other,
-         collect(other_source_concept) AS related_source_concepts,
-         number_of_shared_works
-         
-    /*
-    Group the results again to ensure that only one row is returned for each `concept. Limit the number of results
-    based on the value of the `related_to_limit` parameter.
-    */
-    WITH concept,
-        collect({
-            concept_node: selected_other,
-            source_concept_nodes: related_source_concepts,
-            number_of_shared_works: number_of_shared_works
-        })[0..$related_to_limit] AS related        
-    RETURN
-        concept.id AS id,
-        related
     """
 
 
@@ -223,6 +236,7 @@ def extract_data(
     narrower_than_query = get_related_query("NARROWER_THAN")
     broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
     people_query = get_related_query("HAS_FIELD_OF_WORK", "to")
+    referenced_together_query = get_referenced_together_query()
 
     params = {
         "start_offset": start_offset,
@@ -258,7 +272,7 @@ def extract_data(
 
     print("Running referenced together query...")
     referenced_together_result = client.run_open_cypher_query(
-        REFERENCED_TOGETHER_QUERY, params
+        referenced_together_query, params
     )
     print(f"Retrieved {len(referenced_together_result)} records")
 
