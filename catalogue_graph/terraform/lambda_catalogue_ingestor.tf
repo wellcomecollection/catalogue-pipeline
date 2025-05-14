@@ -215,7 +215,7 @@ module "ingestor_trigger_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_SHARD_SIZE = 20000
+      INGESTOR_SHARD_SIZE = 10000
     }
   }
 }
