@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -129,26 +128,31 @@ def get_referenced_together_query(
         concept_types = ", ".join([f"'{t}'" for t in referenced_concept_types])
         referenced_type_filter = f"AND e1.referenced_type IN [{concept_types}] AND e2.referenced_type IN [{concept_types}]"
 
-    # TODO: Handle label-derived
     return f"""
         /* Get a chunk of `Concept` nodes of size `limit` */
-        MATCH (concept:Concept {{id: 'a25a9xxc'}})
+        MATCH (concept:Concept {{id: 'a2rv29pe'}})
         WITH concept ORDER BY concept.id 
         SKIP $start_offset LIMIT $limit
     
         /* 
         For each `concept`, retrieve all identical ('same as') concepts by traversing its source concepts
         */
-        MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
+        OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
         WHERE NOT source_concept.id IN $ignored_wikidata_ids
-        MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)  
+        OPTIONAL MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)  
         
-        /* Deduplicate */
-        WITH DISTINCT concept, linked_source_concept, same_as_concept
+        /* 
+        Deduplicate and coalesce `same_as_concept` with `concept` to handle label-derived concepts not connected to 
+        a source concept.
+        */
+        WITH DISTINCT
+            concept,
+            linked_source_concept,
+            coalesce(same_as_concept, concept) AS same_as_concept
     
         /*
-        Next, for each `same_as_concept`, get all co-occurring concepts `other` (i.e. find all combinations of `other` and
-        `same_as_concept` for which there is at least one work listing both `other` and `same_as_concept`).
+        Next, for each `same_as_concept`, get all co-occurring concepts `other` (i.e. find all combinations of `other`
+        and `same_as_concept` for which there is at least one work listing both `other` and `same_as_concept`).
         */
         MATCH (same_as_concept)<-[e1:HAS_CONCEPT]-(w:Work)-[e2:HAS_CONCEPT]->(other)
         WHERE same_as_concept.id <> other.id
@@ -168,7 +172,7 @@ def get_referenced_together_query(
         WHERE number_of_shared_works >= $number_of_shared_works_threshold
                 
         /* Match each `other` concept with all of its source concepts. */
-        MATCH (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]-(other_source_concept)
+        OPTIONAL MATCH (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]-(other_source_concept)
             WHERE NOT other_source_concept.id IN $ignored_wikidata_ids
             AND NOT (linked_source_concept)-[:SAME_AS*0..2]-(linked_other_source_concept)
         
@@ -178,19 +182,18 @@ def get_referenced_together_query(
         where two `other` concepts have the same source concept.)
         */
         WITH concept,
-             linked_other_source_concept,
+             coalesce(linked_other_source_concept, other) AS linked_other_source_concept,
              head(collect(other)) AS selected_other,
              collect(other_source_concept) AS related_source_concepts,
              number_of_shared_works
              
         /*
-        Group the results again to ensure that only one row is returned for each `concept. Limit the number of results
+        Group the results again to ensure that only one row is returned for each `concept`. Limit the number of results
         based on the value of the `related_to_limit` parameter.
         */
         WITH concept,
             collect({{
                 concept_node: selected_other,
-                linked_other_source_concept: linked_other_source_concept,
                 source_concept_nodes: related_source_concepts,
                 number_of_shared_works: number_of_shared_works
             }})[0..$related_to_limit] AS related        
