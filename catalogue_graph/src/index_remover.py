@@ -2,43 +2,47 @@ import argparse
 import typing
 from datetime import date, datetime
 
+import config
 import polars as pl
 import smart_open
-
-import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from utils.aws import df_from_s3_parquet
 from utils.safety import validate_fractional_change
 
 
-def _get_last_index_remover_run_file_uri(pipeline_date: str | None) -> str:
-    return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/last_index_remover_run_date.txt"
+def _get_last_index_remover_run_file_uri(
+    pipeline_date: str | None, index_date: str | None
+) -> str:
+    return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/{index_date or 'dev'}/last_index_remover_run_date.txt"
 
 
-def _get_concepts_index_name(pipeline_date: str | None) -> str:
+def _get_concepts_index_name(index_date: str | None) -> str:
     return (
-        "concepts-indexed"
-        if pipeline_date is None
-        else f"concepts-indexed-{pipeline_date}"
+        "concepts-indexed" if index_date is None else f"concepts-indexed-{index_date}"
     )
 
 
-def get_current_id_count(pipeline_date: str | None, is_local: bool) -> int:
+def get_current_id_count(
+    pipeline_date: str | None, index_date: str | None, is_local: bool
+) -> int:
     """Return the number of documents currently stored in ES in the concepts index."""
     es = utils.elasticsearch.get_client(pipeline_date, is_local)
 
-    response = es.count(index=_get_concepts_index_name(pipeline_date))
+    response = es.count(index=_get_concepts_index_name(index_date))
     count: int = response.get("count", 0)
     return count
 
 
 def delete_concepts_from_elasticsearch(
-    deleted_ids: set[str], pipeline_date: str | None, is_local: bool
+    deleted_ids: set[str],
+    pipeline_date: str | None,
+    index_date: str | None,
+    is_local: bool,
 ) -> None:
     """Remove documents matching `deleted_ids` from the concepts ES index."""
     es = utils.elasticsearch.get_client(pipeline_date, is_local)
-    index_name = _get_concepts_index_name(pipeline_date)
+    index_name = _get_concepts_index_name(index_date)
 
     response = es.delete_by_query(
         index=index_name, body={"query": {"ids": {"values": list(deleted_ids)}}}
@@ -48,7 +52,7 @@ def delete_concepts_from_elasticsearch(
     print(f"Deleted {deleted_count} documents from the {index_name} index.")
 
 
-def get_ids_to_delete(pipeline_date: str | None) -> set[str]:
+def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
     s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{DELETED_IDS_FOLDER}/catalogue_concepts__nodes.parquet"
 
@@ -57,28 +61,31 @@ def get_ids_to_delete(pipeline_date: str | None) -> set[str]:
 
     try:
         # Filter for IDs which were added to the log file since the last run of the index_remover.
-        cutoff_date = get_last_run_date(pipeline_date)
+        cutoff_date = get_last_run_date(pipeline_date, index_date)
         df = df.filter(pl.col("timestamp") >= cutoff_date)
     except (OSError, KeyError):
-        # The file might not exist on the first run, which implies that no filter should be applied.
-        pass
+        # The file might not exist on the first run, implying we did not run the index remover on the current index yet.
+        # In this case, we can use the index date as a filter (since all other IDs were removed from the graph before 
+        # the index was created, and therefore cannot exist in the index).
+        if index_date:
+            df = df.filter(pl.col("timestamp") >= index_date)
 
     ids = pl.Series(df.select(pl.col("id"))).to_list()
     return set(ids)
 
 
-def get_last_run_date(pipeline_date: str | None) -> date:
+def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date:
     """Return a date corresponding to the last time we ran the index_remover Lambda."""
-    s3_uri = _get_last_index_remover_run_file_uri(pipeline_date)
+    s3_uri = _get_last_index_remover_run_file_uri(pipeline_date, index_date)
     with smart_open.open(s3_uri, "r") as f:
         formatted_date = f.read()
 
     return datetime.strptime(formatted_date, "%Y-%m-%d").date()
 
 
-def update_last_run_date(pipeline_date: str | None) -> None:
+def update_last_run_date(pipeline_date: str | None, index_date: str | None) -> None:
     """Update the S3 file storing the date of the last index_remover run with today's date."""
-    s3_uri = _get_last_index_remover_run_file_uri(pipeline_date)
+    s3_uri = _get_last_index_remover_run_file_uri(pipeline_date, index_date)
     formatted_today = datetime.today().strftime("%Y-%m-%d")
     with smart_open.open(s3_uri, "w") as f:
         f.write(formatted_today)
@@ -86,11 +93,12 @@ def update_last_run_date(pipeline_date: str | None) -> None:
 
 def handler(
     pipeline_date: str | None,
+    index_date: str | None,
     disable_safety_check: bool,
     is_local: bool = False,
 ) -> None:
-    ids_to_delete = get_ids_to_delete(pipeline_date)
-    current_id_count = get_current_id_count(pipeline_date, is_local)
+    ids_to_delete = get_ids_to_delete(pipeline_date, index_date)
+    current_id_count = get_current_id_count(pipeline_date, index_date, is_local)
 
     # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
     # (set to 5%), an exception will be raised.
@@ -102,16 +110,17 @@ def handler(
 
     if len(ids_to_delete) > 0:
         # Delete the corresponding items from the graph
-        delete_concepts_from_elasticsearch(ids_to_delete, pipeline_date, is_local)
+        delete_concepts_from_elasticsearch(ids_to_delete, pipeline_date, index_date, is_local)
 
-    update_last_run_date(pipeline_date)
+    update_last_run_date(pipeline_date, index_date)
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
     pipeline_date = event["pipeline_date"]
+    index_date = event["index_date"]
     override_safety_check = event.get("override_safety_check", False)
 
-    handler(pipeline_date, override_safety_check)
+    handler(pipeline_date, index_date, override_safety_check)
 
 
 def local_handler() -> None:
@@ -127,6 +136,13 @@ def local_handler() -> None:
         type=str,
         help="The pipeline date corresponding to the concepts index to remove from.",
         required=False,
+    )
+    parser.add_argument(
+        "--index-date",
+        type=str,
+        help='The concepts index date that is being ingested to, will default to "dev".',
+        required=False,
+        default="dev",
     )
 
     args = parser.parse_args()
