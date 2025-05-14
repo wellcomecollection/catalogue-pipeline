@@ -16,12 +16,17 @@ inputs:
   role_to_assume:
     description: "role to assume when pushing the image to ECR"
     required: true
+  platform:
+    description: "platform to build for"
+    required: true
 runs:
   using: "composite"
   steps:
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
     - name: build docker image
       run: |
-        docker build . --build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
+        docker buildx . --platform ${{inputs.platform}}--build-arg pythonversion=$(cat .python-version) --tag "${{inputs.target}}:${{inputs.tag}}" --target "${{inputs.target}}"
       working-directory: ${{inputs.folder}}
       shell: bash
 

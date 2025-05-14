@@ -36,3 +36,4 @@ jobs:
           target: ${{matrix.project}}
           tag: ${{github.sha}}
           role_to_assume: ${{secrets.GHA_ECR_PUSH_ROLE_ARN}}
+          platform: linux/amd64
