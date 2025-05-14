@@ -2,10 +2,9 @@ import argparse
 import typing
 from datetime import date, datetime
 
+import config
 import polars as pl
 import smart_open
-
-import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from utils.aws import df_from_s3_parquet
@@ -53,6 +52,14 @@ def delete_concepts_from_elasticsearch(
     print(f"Deleted {deleted_count} documents from the {index_name} index.")
 
 
+def _is_valid_date(index_date: str) -> bool:
+    try:
+        datetime.strptime(index_date, "%Y-%m-%d")
+        return True
+    except ValueError:
+        return False
+
+
 def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
     s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{DELETED_IDS_FOLDER}/catalogue_concepts__nodes.parquet"
@@ -68,7 +75,7 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
         # The file might not exist on the first run, implying we did not run the index remover on the current index yet.
         # In this case, we can use the index date as a filter (since all IDs which were removed from the graph before
         # the index was created cannot exist in the index).
-        if index_date:
+        if index_date and _is_valid_date(index_date):
             df = df.filter(
                 pl.col("timestamp") >= datetime.strptime(index_date, "%Y-%m-%d").date()
             )
