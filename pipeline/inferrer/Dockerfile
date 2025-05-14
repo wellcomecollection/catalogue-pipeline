@@ -77,3 +77,4 @@ COPY feature_inferrer/app app
 FROM base AS palette_inferrer
 COPY --from=palette_inferrer_builder /venv /venv
 COPY palette_inferrer/app app
+HEALTHCHECK NONE
