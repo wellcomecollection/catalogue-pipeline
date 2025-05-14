@@ -7,6 +7,8 @@ import typing
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -15,7 +17,6 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -127,7 +128,7 @@ def get_referenced_together_query(
     if referenced_concept_types is not None and len(referenced_concept_types) > 0:
         concept_types = ", ".join([f"'{t}'" for t in referenced_concept_types])
         referenced_type_filter = f"AND e1.referenced_type IN [{concept_types}] AND e2.referenced_type IN [{concept_types}]"
-    
+
     # TODO: Handle label-derived
     return f"""
         /* Get a chunk of `Concept` nodes of size `limit` */
