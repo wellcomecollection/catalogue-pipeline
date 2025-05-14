@@ -110,7 +110,9 @@ def handler(
 
     if len(ids_to_delete) > 0:
         # Delete the corresponding items from the graph
-        delete_concepts_from_elasticsearch(ids_to_delete, pipeline_date, index_date, is_local)
+        delete_concepts_from_elasticsearch(
+            ids_to_delete, pipeline_date, index_date, is_local
+        )
 
     update_last_run_date(pipeline_date, index_date)
 

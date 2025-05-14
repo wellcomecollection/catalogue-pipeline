@@ -6,7 +6,7 @@ from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 
 
-def _mock_es_secrets():
+def _mock_es_secrets() -> None:
     # Using a non-null pipeline_date connects to the production ES cluster, so we need to mock some secrets
     MockSecretsManagerClient.add_mock_secret(
         "elasticsearch/pipeline_storage_2025-01-01/private_host", "test"
