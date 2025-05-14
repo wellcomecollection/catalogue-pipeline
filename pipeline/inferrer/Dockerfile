@@ -52,6 +52,7 @@ RUN --mount=type=cache,target=/root/.cache/uv  \
 
 FROM  public.ecr.aws/docker/library/python:${pythonversion}-slim  AS base
 
+# curl is used by the Container HEALTHCHECK on AWS
 RUN apt-get -y install curl
 
 ENV PYTHONPATH=/app
