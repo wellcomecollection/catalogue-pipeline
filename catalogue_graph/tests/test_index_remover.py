@@ -1,9 +1,10 @@
 import polars as pl
 import pytest
-from graph_remover import IDS_LOG_SCHEMA
-from index_remover import lambda_handler
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
+
+from graph_remover import IDS_LOG_SCHEMA
+from index_remover import lambda_handler
 
 
 def _mock_es_secrets() -> None:
@@ -20,6 +21,7 @@ def _mock_es_secrets() -> None:
     MockSecretsManagerClient.add_mock_secret(
         "elasticsearch/pipeline_storage_2025-01-01/concept_ingestor/api_key", ""
     )
+
 
 def index_concepts(ids: list[str], index_name: str = "concepts-indexed") -> None:
     for _id in ids:
@@ -77,7 +79,11 @@ def test_index_remover_next_run() -> None:
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]
     assert len(indexed_concepts) == 5
 
-    event = {"pipeline_date": pipeline_date, "index_date": index_date, "override_safety_check": True}
+    event = {
+        "pipeline_date": pipeline_date,
+        "index_date": index_date,
+        "override_safety_check": True,
+    }
     lambda_handler(event, None)
 
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]
@@ -100,7 +106,7 @@ def test_index_remover_safety_check() -> None:
 
 def test_index_remover_no_deleted_ids_file() -> None:
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
-    
+
     # If the file storing deleted IDs does not exist, something went wrong and an exception should be thrown.
     event = {"pipeline_date": None, "index_date": None}
     with pytest.raises(KeyError):
@@ -109,7 +115,7 @@ def test_index_remover_no_deleted_ids_file() -> None:
 
 def test_index_remover_new_index_run() -> None:
     mock_deleted_ids_log_file()
-    
+
     # Mock an index which was created *after* some IDs were deleted from the graph
     pipeline_date = "2025-01-01"
     index_date = "2025-04-07"
@@ -117,14 +123,16 @@ def test_index_remover_new_index_run() -> None:
 
     _mock_es_secrets()
 
-    index_concepts(
-        ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], index_name
-    )
+    index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], index_name)
 
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]
     assert len(indexed_concepts) == 4
 
-    event = {"pipeline_date": pipeline_date, "index_date": index_date, "override_safety_check": True}
+    event = {
+        "pipeline_date": pipeline_date,
+        "index_date": index_date,
+        "override_safety_check": True,
+    }
     lambda_handler(event, None)
 
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]

@@ -2,9 +2,10 @@ import argparse
 import typing
 from datetime import date, datetime
 
-import config
 import polars as pl
 import smart_open
+
+import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from utils.aws import df_from_s3_parquet
@@ -65,10 +66,12 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
         df = df.filter(pl.col("timestamp") >= cutoff_date)
     except (OSError, KeyError):
         # The file might not exist on the first run, implying we did not run the index remover on the current index yet.
-        # In this case, we can use the index date as a filter (since all IDs which were removed from the graph before 
+        # In this case, we can use the index date as a filter (since all IDs which were removed from the graph before
         # the index was created cannot exist in the index).
         if index_date:
-            df = df.filter(pl.col("timestamp") >= datetime.strptime(index_date, "%Y-%m-%d").date())
+            df = df.filter(
+                pl.col("timestamp") >= datetime.strptime(index_date, "%Y-%m-%d").date()
+            )
 
     ids = pl.Series(df.select(pl.col("id"))).to_list()
     return set(ids)
