@@ -131,7 +131,7 @@ def get_referenced_together_query(
 
     return f"""
         /* Get a chunk of `Concept` nodes of size `limit` */
-        MATCH (concept:Concept {{id: 'a2rv29pe'}})
+        MATCH (concept:Concept)
         WITH concept ORDER BY concept.id 
         SKIP $start_offset LIMIT $limit
     
