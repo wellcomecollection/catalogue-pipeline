@@ -7,7 +7,7 @@
 ARG pythonversion=A_VERSION_THAT_DOES_NOT_EXIST
 FROM public.ecr.aws/docker/library/python:${pythonversion}-slim  AS builder
 
-RUN apt-get update && apt-get -y install gcc g++ libffi-dev curl
+RUN apt-get update && apt-get -y install gcc g++ libffi-dev
 
 COPY --from=ghcr.io/astral-sh/uv:0.6.17 /uv /uvx /bin/
 
@@ -51,6 +51,9 @@ RUN --mount=type=cache,target=/root/.cache/uv  \
     uv sync --frozen --no-dev
 
 FROM  public.ecr.aws/docker/library/python:${pythonversion}-slim  AS base
+
+# curl is used by the Container HEALTHCHECK on AWS
+RUN apt-get update && apt-get -y install curl
 
 ENV PYTHONPATH=/app
 ENV PATH="/venv/bin:$PATH"
