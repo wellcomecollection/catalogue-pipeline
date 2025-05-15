@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -192,8 +191,18 @@ def get_referenced_together_query(
         (Note: We could do this in one step using `COUNT(DISTINCT w)`, but this would incur a significant performance
         penalty.)
         */
-        WITH DISTINCT concept, linked_source_concept, other, w.id AS work_id
-        WITH concept, linked_source_concept, other, COUNT(work_id) AS number_of_shared_works
+        WITH DISTINCT
+            concept,
+            linked_source_concept,
+            other,
+            w.id AS work_id,
+            e2.referenced_type as other_type
+        WITH
+            concept,
+            linked_source_concept,
+            other,
+            COUNT(work_id) AS number_of_shared_works,
+            other_type
         
         /*
         Filter out `other` concepts which do not meet the minimum threshold for the number of shared works.
@@ -222,9 +231,18 @@ def get_referenced_together_query(
         WITH concept,
              coalesce(linked_other_source_concept, other) AS linked_other_source_concept,
              head(collect(other)) AS selected_other,
+             other_type,
              collect(other_source_concept) AS related_source_concepts,
              number_of_shared_works
         ORDER BY number_of_shared_works DESC
+        
+        /* Collect distinct types of each `other` source concept */
+        WITH concept,
+             linked_other_source_concept,
+             selected_other,
+             collect(other_type) AS other_type,
+             related_source_concepts,
+             number_of_shared_works        
         
         /*
         Group the results again to ensure that only one row is returned for each `concept`. Limit the number of results
@@ -234,7 +252,8 @@ def get_referenced_together_query(
             collect({{
                 concept_node: selected_other,
                 source_concept_nodes: related_source_concepts,
-                number_of_shared_works: number_of_shared_works
+                number_of_shared_works: number_of_shared_works,
+                concept_type: other_type 
             }})[0..$related_to_limit] AS related        
         RETURN
             concept.id AS id,
@@ -290,7 +309,8 @@ def extract_data(
         related_referenced_in=["contributors"],
     )
     related_topics_query = get_referenced_together_query(
-        related_referenced_types=["Concept", "Subject"],
+        related_referenced_types=["Concept", "Subject", "Place", "Meeting", "Period"],
+        related_referenced_in=["subjects"],
     )
 
     params = {
