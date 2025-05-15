@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -124,7 +123,7 @@ def get_related_query(
 def _get_referenced_together_filter(
     property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
 ) -> str:
-    """Return a Cypher filter in the form `AND property_key IN ['some allowed value1', 'another value']`."""
+    """Return a Cypher filter in the form `AND property_key IN ['some allowed value', 'another value']`."""
     if allowed_values is not None and len(allowed_values) > 0:
         comma_separated_values = ", ".join([f"'{t}'" for t in allowed_values])
         return f"AND {property_key} IN [{comma_separated_values}]"
