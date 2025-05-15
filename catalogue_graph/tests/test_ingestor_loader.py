@@ -3,9 +3,6 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
-from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_json_fixture
-
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     CONCEPT_QUERY,
@@ -22,6 +19,8 @@ from models.catalogue_concept import (
     CatalogueConceptRelatedTo,
     RelatedConcepts,
 )
+from test_mocks import MockRequest, MockSmartOpen
+from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -75,7 +74,7 @@ def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> 
         "limit": 1,
         "ignored_wikidata_ids": ["Q5", "Q151885"],
         "related_to_limit": 10,
-        "number_of_shared_works_threshold": 2,
+        "number_of_shared_works_threshold": 3,
     }
 
     MockRequest.mock_response(
@@ -184,7 +183,7 @@ def get_catalogue_concept_mock(
     return CatalogueConcept(
         id="id",
         label="label",
-        type="type",
+        type="Person",
         alternativeLabels=alternative_labels,
         description="Mesh description",
         identifiers=[
