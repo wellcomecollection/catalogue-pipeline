@@ -14,25 +14,31 @@ from concurrent.futures import ThreadPoolExecutor
 
 def build_sns_batch(messages):
     for m in messages:
-        yield {
-            "Id": str(uuid4()),
-            "Message": m,
-            "MessageStructure": "string"
-        }
+        yield {"Id": str(uuid4()), "Message": m, "MessageStructure": "string"}
+
 
 def publish_batch_to_sns(sns, topic_arn, messages):
     batch_messages = build_sns_batch(messages)
     response = sns.publish_batch(
-        TopicArn=topic_arn,
-        PublishBatchRequestEntries=list(batch_messages)
+        TopicArn=topic_arn, PublishBatchRequestEntries=list(batch_messages)
     )
     return response
 
-def publish_to_sns_threaded(sns, topic_arn, doc_ids, sns_batch_size = 10):
+
+def publish_to_sns_threaded(sns, topic_arn, doc_ids, sns_batch_size=10):
     with ThreadPoolExecutor(max_workers=10) as executor:
-        batched_messages  = [doc_ids[i:i + sns_batch_size] for i in range(0, len(doc_ids), sns_batch_size)]
-        results = list(executor.map(lambda batch: publish_batch_to_sns(sns, topic_arn, batch), batched_messages))
+        batched_messages = [
+            doc_ids[i : i + sns_batch_size]
+            for i in range(0, len(doc_ids), sns_batch_size)
+        ]
+        results = list(
+            executor.map(
+                lambda batch: publish_batch_to_sns(sns, topic_arn, batch),
+                batched_messages,
+            )
+        )
     return results
+
 
 def inject_id_messages(session, *, destination_name, reindex_date, ids):
     sns = session.client("sns")
@@ -40,12 +46,12 @@ def inject_id_messages(session, *, destination_name, reindex_date, ids):
     topic_arn = f"arn:aws:sns:eu-west-1:760097843905:catalogue-{reindex_date}_{destination_name}"
 
     chunk_size = 10000
-    chunks = [ids[i:i + chunk_size] for i in range(0, len(ids), chunk_size)]
+    chunks = [ids[i : i + chunk_size] for i in range(0, len(ids), chunk_size)]
 
     for chunk in tqdm(chunks):
         results = publish_to_sns_threaded(sns, topic_arn, chunk)
         for result in results:
-            if result['ResponseMetadata']['HTTPStatusCode'] != 200:
+            if result["ResponseMetadata"]["HTTPStatusCode"] != 200:
                 print(f"Failed to publish!")
 
 
