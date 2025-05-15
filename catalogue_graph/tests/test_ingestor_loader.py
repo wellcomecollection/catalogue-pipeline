@@ -9,10 +9,10 @@ from test_utils import load_json_fixture
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     CONCEPT_QUERY,
-    REFERENCED_TOGETHER_QUERY,
     IngestorIndexerObject,
     IngestorLoaderConfig,
     IngestorLoaderLambdaEvent,
+    get_referenced_together_query,
     get_related_query,
     handler,
 )
@@ -75,6 +75,7 @@ def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> 
         "limit": 1,
         "ignored_wikidata_ids": ["Q5", "Q151885"],
         "related_to_limit": 10,
+        "number_of_shared_works_threshold": 3,
     }
 
     MockRequest.mock_response(
@@ -129,7 +130,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=REFERENCED_TOGETHER_QUERY,
+        expected_query=get_referenced_together_query(),
         mock_results=[],
     )
 
