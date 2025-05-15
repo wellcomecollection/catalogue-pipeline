@@ -3,7 +3,6 @@ from collections.abc import Generator
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from sources.gzip_source import GZipSource
-
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -28,7 +27,7 @@ class CatalogueWorksTransformer(BaseTransformer):
         for concept in raw_work.concepts:
             attributes = WorkHasConceptAttributes(
                 referenced_in=concept["referenced_in"],
-                referenced_type=concept["referenced_type"]
+                referenced_type=concept["referenced_type"],
             )
             yield WorkHasConcept(
                 from_id=raw_work.wellcome_id,
