@@ -290,7 +290,8 @@ def extract_data(
         related_referenced_in=["contributors"],
     )
     related_topics_query = get_referenced_together_query(
-        related_referenced_types=["Concept", "Subject"],
+        related_referenced_types=["Concept", "Subject", "Place", "Meeting", "Period"],
+        related_referenced_in=["subjects"],
     )
 
     params = {
