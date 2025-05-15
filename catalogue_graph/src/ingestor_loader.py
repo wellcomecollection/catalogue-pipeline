@@ -7,6 +7,8 @@ import typing
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -15,7 +17,6 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -346,7 +347,9 @@ def extract_data(
         broader_than=related_query_result_to_dict(broader_than_result),
         people=related_query_result_to_dict(people_result),
         referenced_together=related_query_result_to_dict(referenced_together_result),
-        frequent_collaborators=related_query_result_to_dict(frequent_collaborators_result),
+        frequent_collaborators=related_query_result_to_dict(
+            frequent_collaborators_result
+        ),
         related_topics=related_query_result_to_dict(related_topics_result),
     )
 
@@ -366,7 +369,9 @@ def transform_data(neptune_data: ConceptsQueryResult) -> list[CatalogueConcept]:
             broader_than=neptune_data.broader_than.get(concept_id, []),
             people=neptune_data.people.get(concept_id, []),
             referenced_together=neptune_data.referenced_together.get(concept_id, []),
-            frequent_collaborators=neptune_data.frequent_collaborators.get(concept_id, []),
+            frequent_collaborators=neptune_data.frequent_collaborators.get(
+                concept_id, []
+            ),
             related_topics=neptune_data.related_topics.get(concept_id, []),
         )
         transformed.append(CatalogueConcept.from_neptune_result(result))

@@ -37,7 +37,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             people=[],
             referencedTogether=[],
             frequentCollaborators=[],
-            relatedTopics=[]
+            relatedTopics=[],
         ),
     )
 
@@ -80,7 +80,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
                 people=[],
                 referencedTogether=[],
                 frequentCollaborators=[],
-                relatedTopics=[]
+                relatedTopics=[],
             ),
         ),
     )
