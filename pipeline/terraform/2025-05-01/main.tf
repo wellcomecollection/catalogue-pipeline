@@ -2,7 +2,7 @@ module "pipeline" {
   source = "../modules/stack"
 
   reindexing_state = {
-    listen_to_reindexer      = true
+    listen_to_reindexer      = false
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
@@ -24,6 +24,7 @@ module "pipeline" {
       indexed = {
         "2025-03-06" = "concepts_indexed.2025-03-10"
         "2025-04-24" = "concepts_indexed.2025-03-10"
+        "2025-05-15" = "concepts_indexed.2025-03-10"
       }
     }
   }
