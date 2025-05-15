@@ -201,6 +201,8 @@ def get_catalogue_concept_mock(
             broaderThan=broader_than,
             people=people,
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[],
         ),
     )
 
