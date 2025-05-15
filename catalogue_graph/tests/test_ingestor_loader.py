@@ -183,7 +183,7 @@ def get_catalogue_concept_mock(
     return CatalogueConcept(
         id="id",
         label="label",
-        type="type",
+        type="Person",
         alternativeLabels=alternative_labels,
         description="Mesh description",
         identifiers=[

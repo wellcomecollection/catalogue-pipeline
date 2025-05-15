@@ -26,7 +26,8 @@ class CatalogueWorksTransformer(BaseTransformer):
 
         for concept in raw_work.concepts:
             attributes = WorkHasConceptAttributes(
-                referenced_in=concept["referenced_in"]
+                referenced_in=concept["referenced_in"],
+                referenced_type=concept["referenced_type"],
             )
             yield WorkHasConcept(
                 from_id=raw_work.wellcome_id,

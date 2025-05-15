@@ -32,5 +32,6 @@
       }
     }
   ],
-  "same_as_concept_ids": []
+  "same_as_concept_ids": [],
+  "concept_types": ["Concept", "Person"]
 }
