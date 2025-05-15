@@ -60,7 +60,6 @@ ConceptSource = Literal[
 
 # The `id` field stores a canonical Wellcome identifier
 class Concept(BaseNode):
-    type: ConceptType
     source: ConceptSource
 
 

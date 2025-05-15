@@ -68,7 +68,9 @@ def test_catalogue_works_transformer_edges() -> None:
             to_id="s6s24vd7",
             relationship="HAS_CONCEPT",
             directed=True,
-            attributes=WorkHasConceptAttributes(referenced_in="subjects"),
+            attributes=WorkHasConceptAttributes(
+                referenced_in="subjects", referenced_type="Concept"
+            ),
         ),
     )
 
@@ -83,7 +85,9 @@ def test_catalogue_works_transformer_edges() -> None:
             to_id="s6s24vd8",
             relationship="HAS_CONCEPT",
             directed=True,
-            attributes=WorkHasConceptAttributes(referenced_in="subjects"),
+            attributes=WorkHasConceptAttributes(
+                referenced_in="subjects", referenced_type="Concept"
+            ),
         ),
     )
 
@@ -98,7 +102,9 @@ def test_catalogue_works_transformer_edges() -> None:
             to_id="yfqryj26",
             relationship="HAS_CONCEPT",
             directed=True,
-            attributes=WorkHasConceptAttributes(referenced_in="genres"),
+            attributes=WorkHasConceptAttributes(
+                referenced_in="genres", referenced_type="Genre"
+            ),
         ),
     )
 
@@ -113,6 +119,8 @@ def test_catalogue_works_transformer_edges() -> None:
             to_id="uykuavkt",
             relationship="HAS_CONCEPT",
             directed=True,
-            attributes=WorkHasConceptAttributes(referenced_in="contributors"),
+            attributes=WorkHasConceptAttributes(
+                referenced_in="contributors", referenced_type="Person"
+            ),
         ),
     )
