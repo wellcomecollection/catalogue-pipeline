@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -38,7 +37,7 @@ class IngestorLoaderConfig(BaseModel):
 RELATED_TO_LIMIT = 10
 
 # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
-NUMBER_OF_SHARED_WORKS_THRESHOLD = 2
+NUMBER_OF_SHARED_WORKS_THRESHOLD = 3
 
 # There are a few Wikidata supernodes which cause performance issues in queries.
 # We need to filter them out when running queries to get related nodes.
@@ -79,7 +78,7 @@ def get_related_query(
         MATCH (linked_related_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
         WHERE NOT linked_related_source_concept.id IN $ignored_wikidata_ids
             AND NOT related_source_concept.id IN $ignored_wikidata_ids
-            AND NOT (linked_source_concept)-[:SAME_AS*0..2]-(related_source_concept)
+            AND NOT (linked_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
         
         /* Get the Wellcome concept(s) associated with each related source concept. */
         MATCH (related_source_concept)<-[:HAS_SOURCE_CONCEPT]-(related_concept)
@@ -128,7 +127,7 @@ def get_referenced_together_query(
     if referenced_concept_types is not None and len(referenced_concept_types) > 0:
         concept_types = ", ".join([f"'{t}'" for t in referenced_concept_types])
         referenced_type_filter = f"AND e1.referenced_type IN [{concept_types}] AND e2.referenced_type IN [{concept_types}]"
-
+    
     return f"""
         /* Get a chunk of `Concept` nodes of size `limit` */
         MATCH (concept:Concept)
@@ -163,19 +162,29 @@ def get_referenced_together_query(
         /*
         For each `other` concept, count the number of works in which it co-occurs with each `same_as_concept`, 
         and link the results back to the original `concept` (discarding `same_as_concept` nodes).
+        Note: Works which reference the same concept more than once (e.g. https://wellcomecollection.org/works/spm9pav8)
+        will get counted multiple times. Counting `DISTINCT` works fixes this but is too expensive in practice.  
         */
         WITH DISTINCT concept, linked_source_concept, other, COUNT(w) as number_of_shared_works
-        ORDER BY number_of_shared_works DESC
         
         /*
         Filter out `other` concepts which do not meet the minimum threshold for the number of shared works.
         */        
         WHERE number_of_shared_works >= $number_of_shared_works_threshold
-                
+        AND concept.id <> other.id
+                        
         /* Match each `other` concept with all of its source concepts. */
-        OPTIONAL MATCH (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]-(other_source_concept)
+        OPTIONAL MATCH (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]->(other_source_concept)
             WHERE NOT other_source_concept.id IN $ignored_wikidata_ids
-            AND NOT (linked_source_concept)-[:SAME_AS*0..2]-(linked_other_source_concept)
+            AND NOT (linked_source_concept)-[:SAME_AS*0..2]->(linked_other_source_concept)
+        
+        /*
+        We need to distinguish between cases where `linked_other_source_concept` is null because `other` is
+        a label-derived concept (in which case we should proceed and return it), and cases where it's null because it
+        was filtered out by the WHERE clause above (in which case we should not).
+        */ 
+        WITH *
+        WHERE size((other)-[:HAS_SOURCE_CONCEPT]->()) = 0 OR linked_other_source_concept IS NOT NULL
         
         /*
         Group the results into buckets, with one bucket for each combination of concept and co-occurring source concept.
@@ -187,7 +196,8 @@ def get_referenced_together_query(
              head(collect(other)) AS selected_other,
              collect(other_source_concept) AS related_source_concepts,
              number_of_shared_works
-             
+        ORDER BY number_of_shared_works DESC
+        
         /*
         Group the results again to ensure that only one row is returned for each `concept`. Limit the number of results
         based on the value of the `related_to_limit` parameter.
