@@ -1,5 +1,3 @@
-from test_utils import load_json_fixture
-
 from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
@@ -7,6 +5,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
     RelatedConcepts,
 )
+from test_utils import load_json_fixture
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
@@ -22,6 +21,8 @@ def test_catalogue_concept_from_neptune_result() -> None:
         broader_than=[],
         people=[],
         referenced_together=[],
+        frequent_collaborators=[],
+        related_topics=[],
     )
 
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
@@ -45,6 +46,8 @@ def test_catalogue_concept_from_neptune_result() -> None:
             broaderThan=[],
             people=[],
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[]
         ),
     )
 
@@ -60,6 +63,8 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         broader_than=[],
         people=[],
         referenced_together=[],
+        frequent_collaborators=[],
+        related_topics=[]
     )
 
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
@@ -79,6 +84,8 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             broaderThan=[],
             people=[],
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[]
         ),
     )
 
@@ -97,6 +104,8 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         broader_than=[],
         people=[],
         referenced_together=[],
+        frequent_collaborators=[],
+        related_topics=[]
     )
 
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
@@ -122,5 +131,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             broaderThan=[],
             people=[],
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[]
         ),
     )

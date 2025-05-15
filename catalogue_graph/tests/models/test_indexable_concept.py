@@ -36,6 +36,8 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             broaderThan=[],
             people=[],
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[]
         ),
     )
 
@@ -77,6 +79,8 @@ def test_indexable_concept_from_catalogue_concept() -> None:
                 broaderThan=[],
                 people=[],
                 referencedTogether=[],
+                frequentCollaborators=[],
+                relatedTopics=[]
             ),
         ),
     )

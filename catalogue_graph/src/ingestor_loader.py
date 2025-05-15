@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,7 +15,9 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
+from utils.types import WorkConceptKey
 
 
 class IngestorLoaderLambdaEvent(BaseModel):
@@ -120,14 +120,36 @@ def get_related_query(
     """
 
 
+def _get_referenced_together_filter(
+    property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
+) -> str:
+    """Return a Cypher filter in the form `AND property_key IN ['some allowed value1', 'another value']`."""
+    if allowed_values is not None and len(allowed_values) > 0:
+        comma_separated_values = ", ".join([f"'{t}'" for t in allowed_values])
+        return f"AND {property_key} IN [{comma_separated_values}]"
+
+    return ""
+
+
 def get_referenced_together_query(
-    referenced_concept_types: list[ConceptType] | None = None,
+    source_referenced_types: list[ConceptType] | None = None,
+    related_referenced_types: list[ConceptType] | None = None,
+    source_referenced_in: list[WorkConceptKey] | None = None,
+    related_referenced_in: list[WorkConceptKey] | None = None,
 ) -> str:
     """Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works."""
-    referenced_type_filter = ""
-    if referenced_concept_types is not None and len(referenced_concept_types) > 0:
-        concept_types = ", ".join([f"'{t}'" for t in referenced_concept_types])
-        referenced_type_filter = f"AND e1.referenced_type IN [{concept_types}] AND e2.referenced_type IN [{concept_types}]"
+    source_referenced_type_filter = _get_referenced_together_filter(
+        "e1.referenced_type", source_referenced_types
+    )
+    related_referenced_type_filter = _get_referenced_together_filter(
+        "e2.referenced_type", related_referenced_types
+    )
+    source_referenced_in_filter = _get_referenced_together_filter(
+        "e1.referenced_in", source_referenced_in
+    )
+    related_referenced_in_filter = _get_referenced_together_filter(
+        "e2.referenced_in", related_referenced_in
+    )
 
     return f"""
         /* Get a chunk of `Concept` nodes of size `limit` */
@@ -158,7 +180,10 @@ def get_referenced_together_query(
         MATCH (same_as_concept)<-[e1:HAS_CONCEPT]-(w:Work)-[e2:HAS_CONCEPT]->(other)
         WHERE same_as_concept.id <> other.id
         
-        {referenced_type_filter}
+        {source_referenced_type_filter}
+        {related_referenced_type_filter}
+        {source_referenced_in_filter}
+        {related_referenced_in_filter}
         
         /*
         For each `other` concept, count the number of works in which it co-occurs with each `same_as_concept`, 
@@ -253,7 +278,17 @@ def extract_data(
     narrower_than_query = get_related_query("NARROWER_THAN")
     broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
     people_query = get_related_query("HAS_FIELD_OF_WORK", "to")
+
     referenced_together_query = get_referenced_together_query()
+    frequent_collaborators_query = get_referenced_together_query(
+        source_referenced_types=["Person"],
+        related_referenced_types=["Person"],
+        source_referenced_in=["contributors"],
+        related_referenced_in=["contributors"],
+    )
+    related_topics_query = get_referenced_together_query(
+        related_referenced_types=["Concept", "Subject"],
+    )
 
     params = {
         "start_offset": start_offset,
@@ -293,6 +328,16 @@ def extract_data(
     )
     print(f"Retrieved {len(referenced_together_result)} records")
 
+    print("Running frequent collaborators query...")
+    frequent_collaborators_result = client.run_open_cypher_query(
+        frequent_collaborators_query, params
+    )
+    print(f"Retrieved {len(frequent_collaborators_result)} records")
+
+    print("Running related topics query...")
+    related_topics_result = client.run_open_cypher_query(related_topics_query, params)
+    print(f"Retrieved {len(related_topics_result)} records")
+
     return ConceptsQueryResult(
         concepts=concept_result,
         related_to=related_query_result_to_dict(related_to_result),
@@ -301,6 +346,8 @@ def extract_data(
         broader_than=related_query_result_to_dict(broader_than_result),
         people=related_query_result_to_dict(people_result),
         referenced_together=related_query_result_to_dict(referenced_together_result),
+        frequent_collaborators=related_query_result_to_dict(frequent_collaborators_result),
+        related_topics=related_query_result_to_dict(related_topics_result),
     )
 
 
@@ -319,6 +366,8 @@ def transform_data(neptune_data: ConceptsQueryResult) -> list[CatalogueConcept]:
             broader_than=neptune_data.broader_than.get(concept_id, []),
             people=neptune_data.people.get(concept_id, []),
             referenced_together=neptune_data.referenced_together.get(concept_id, []),
+            frequent_collaborators=neptune_data.frequent_collaborators.get(concept_id, []),
+            related_topics=neptune_data.related_topics.get(concept_id, []),
         )
         transformed.append(CatalogueConcept.from_neptune_result(result))
 
