@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 
 
@@ -163,10 +162,11 @@ def get_referenced_together_query(
         /*
         For each `other` concept, count the number of works in which it co-occurs with each `same_as_concept`, 
         and link the results back to the original `concept` (discarding `same_as_concept` nodes).
-        Note: Works which reference the same concept more than once (e.g. https://wellcomecollection.org/works/spm9pav8)
-        will get counted multiple times. Counting `DISTINCT` works fixes this but is too expensive in practice.  
+        (Note: We could do this in one step using `COUNT(DISTINCT w)`, but this would incur a significant performance
+        penalty.)
         */
-        WITH DISTINCT concept, linked_source_concept, other, COUNT(w) as number_of_shared_works
+        WITH DISTINCT concept, linked_source_concept, other, w.id AS work_id
+        WITH concept, linked_source_concept, other, COUNT(work_id) AS number_of_shared_works
         
         /*
         Filter out `other` concepts which do not meet the minimum threshold for the number of shared works.
