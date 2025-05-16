@@ -3,6 +3,8 @@ package weco.pipeline.matcher.matcher
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
+import org.scanamo.DynamoFormat
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
@@ -10,8 +12,11 @@ import weco.pipeline.matcher.models.{
   WorkNode,
   WorkStub
 }
-import weco.pipeline.matcher.storage.WorkGraphStore
+import weco.pipeline.matcher.services.LockingBuilder
+import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
+import weco.storage.dynamo.DynamoConfig
+import weco.storage.locking.dynamo.DynamoLockDaoConfig
 import weco.storage.locking.{
   FailedLockingServiceOp,
   FailedProcess,
@@ -154,4 +159,30 @@ class WorkMatcher(
       }
       .filter { _.identifiers.nonEmpty }
       .toSet
+}
+
+object WorkMatcher {
+  def apply(
+    dynamoConfig: DynamoConfig,
+    dynamoLockDaoConfig: DynamoLockDaoConfig
+  )(
+    implicit ec: ExecutionContext,
+    format: DynamoFormat[WorkNode]
+  ): WorkMatcher = {
+    val workGraphStore = new WorkGraphStore(
+      workNodeDao = new WorkNodeDao(
+        dynamoClient = DynamoDbClient.builder().build(),
+        dynamoConfig = dynamoConfig
+      )
+    )
+
+    val lockingService =
+      LockingBuilder
+        .buildDynamoLockingService[MatcherResult, Future](
+          dynamoLockDaoConfig
+        )
+
+    new WorkMatcher(workGraphStore, lockingService)
+  }
+
 }
