@@ -3,15 +3,14 @@ from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-from test_utils import load_fixture
-
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
+from test_mocks import MockElasticsearchClient, MockSmartOpen
+from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:
@@ -22,6 +21,10 @@ def test_ingestor_indexer_success() -> None:
             s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
         ),
     )
+
+    # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
+    # from the `wellcomecollection-catalogue-graph` S3 bucket:
+    # INGESTOR_SHARD_SIZE=10 AWS_PROFILE=platform-developer python3.13 ingestor_local.py --limit=1
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000010.parquet",
         load_fixture("ingestor/00000000-00000010.parquet"),
