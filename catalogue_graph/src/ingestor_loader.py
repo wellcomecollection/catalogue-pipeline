@@ -7,6 +7,8 @@ import typing
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -15,7 +17,6 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
-from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -141,13 +142,13 @@ def get_referenced_together_query(
     Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works.
 
     Args:
-        source_referenced_types: 
+        source_referenced_types:
             Optional list of concept types for filtering 'main' concepts (for which related concepts will be retrieved)
-        related_referenced_types: 
+        related_referenced_types:
             Optional list of concept types for filtering related concepts
-        source_referenced_in: 
+        source_referenced_in:
             Optional list of work concept keys (e.g. 'genre', 'subject') for filtering 'main' concepts
-        related_referenced_in: 
+        related_referenced_in:
             Optional list of work concept keys (e.g. 'genre', 'subject') for filtering related concepts
     """
     source_referenced_type_filter = _get_referenced_together_filter(
