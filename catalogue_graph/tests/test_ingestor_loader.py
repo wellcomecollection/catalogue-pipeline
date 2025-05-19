@@ -3,6 +3,9 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
+from test_mocks import MockRequest, MockSmartOpen
+from test_utils import load_json_fixture
+
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     CONCEPT_QUERY,
@@ -19,8 +22,6 @@ from models.catalogue_concept import (
     CatalogueConceptRelatedTo,
     RelatedConcepts,
 )
-from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -145,7 +146,13 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
 
     add_neptune_mock_response(
         expected_query=get_referenced_together_query(
-            related_referenced_types=["Concept", "Subject", "Place", "Meeting", "Period"],
+            related_referenced_types=[
+                "Concept",
+                "Subject",
+                "Place",
+                "Meeting",
+                "Period",
+            ],
             related_referenced_in=["subjects"],
         ),
         mock_results=[],
@@ -167,13 +174,22 @@ def get_catalogue_concept_mock(
     if MockNeptuneResponseItem.CONCEPT_BROADER_THAN in include:
         broader_than = [
             CatalogueConceptRelatedTo(
-                label="Electromagnetic Radiation", id="hstuwwsu", relationshipType="", conceptType="Concept"
+                label="Electromagnetic Radiation",
+                id="hstuwwsu",
+                relationshipType="",
+                conceptType="Concept",
             ),
             CatalogueConceptRelatedTo(
-                label="Wave mechanics", id="hv6pemej", relationshipType="", conceptType="Concept"
+                label="Wave mechanics",
+                id="hv6pemej",
+                relationshipType="",
+                conceptType="Concept",
             ),
             CatalogueConceptRelatedTo(
-                label="Electric waves", id="ugcgqepy", relationshipType="", conceptType="Concept"
+                label="Electric waves",
+                id="ugcgqepy",
+                relationshipType="",
+                conceptType="Concept",
             ),
         ]
 
@@ -181,10 +197,16 @@ def get_catalogue_concept_mock(
     if MockNeptuneResponseItem.CONCEPT_PEOPLE in include:
         people = [
             CatalogueConceptRelatedTo(
-                label="Tegart, W. J. McG.", id="vc6xrky5", relationshipType="", conceptType="Person"
+                label="Tegart, W. J. McG.",
+                id="vc6xrky5",
+                relationshipType="",
+                conceptType="Person",
             ),
             CatalogueConceptRelatedTo(
-                label="Bube, Richard H., 1927-", id="garjbvhe", relationshipType="", conceptType="Person"
+                label="Bube, Richard H., 1927-",
+                id="garjbvhe",
+                relationshipType="",
+                conceptType="Person",
             ),
         ]
 
@@ -195,7 +217,7 @@ def get_catalogue_concept_mock(
                 label="Hilton, Violet, 1908-1969",
                 id="tzrtx26u",
                 relationshipType="has_sibling",
-                conceptType="Person"
+                conceptType="Person",
             )
         ]
 
