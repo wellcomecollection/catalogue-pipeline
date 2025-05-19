@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -328,7 +327,7 @@ def extract_data(
     referenced_together_query = get_referenced_together_query()
     frequent_collaborators_query = get_referenced_together_query(
         source_referenced_types=["Person"],
-        related_referenced_types=["Person"],
+        related_referenced_types=["Person", "Organisation"],
         source_referenced_in=["contributors"],
         related_referenced_in=["contributors"],
     )
