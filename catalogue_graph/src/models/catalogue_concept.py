@@ -97,10 +97,10 @@ def transform_related_concepts(
                 "relationship_type", ""
             )
 
-        if "concept_types" in related_item:
-            concept_type = get_most_specific_concept_type(related_item["concept_types"])
+        if not related_item["concept_types"]:
+            concept_type: ConceptType = "Concept"
         else:
-            concept_type = "Concept"
+            concept_type = get_most_specific_concept_type(related_item["concept_types"])
 
         if label.lower() not in used_labels:
             used_labels.add(label.lower())
