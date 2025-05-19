@@ -97,7 +97,7 @@ def transform_related_concepts(
                 "relationship_type", ""
             )
 
-        if not related_item["concept_types"]:
+        if not related_item.get("concept_types"):
             concept_type: ConceptType = "Concept"
         else:
             concept_type = get_most_specific_concept_type(related_item["concept_types"])
@@ -210,7 +210,7 @@ class CatalogueConcept(BaseModel):
 
         # Concepts which are not connected to any Works will not have any types associated with them. We periodically
         # remove such concepts from the graph, but there might be a few of them at any given point.
-        if not concept_data["concept_types"]:
+        if not concept_data.get("concept_types"):
             concept_type: ConceptType = "Concept"
         else:
             concept_type = get_most_specific_concept_type(concept_data["concept_types"])
