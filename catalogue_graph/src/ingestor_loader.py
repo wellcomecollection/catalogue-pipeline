@@ -137,7 +137,19 @@ def get_referenced_together_query(
     source_referenced_in: list[WorkConceptKey] | None = None,
     related_referenced_in: list[WorkConceptKey] | None = None,
 ) -> str:
-    """Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works."""
+    """
+    Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works.
+
+    Args:
+        source_referenced_types: 
+            Optional list of concept types for filtering 'main' concepts (for which related concepts will be retrieved)
+        related_referenced_types: 
+            A list of concept types for filtering related concepts
+        source_referenced_in: 
+            A list of work concept keys (e.g. 'genre', 'subject') for filtering 'main' concepts
+        related_referenced_in: 
+            A list of work concept keys (e.g. 'genre', 'subject') for filtering related concepts
+    """
     source_referenced_type_filter = _get_referenced_together_filter(
         "e1.referenced_type", source_referenced_types
     )
