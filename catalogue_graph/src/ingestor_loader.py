@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -324,14 +323,21 @@ def extract_data(
     narrower_than_query = get_related_query("NARROWER_THAN")
     broader_than_query = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
     people_query = get_related_query("HAS_FIELD_OF_WORK", "to")
-
-    referenced_together_query = get_referenced_together_query()
+    
+    # Include all concept types except for genres
+    referenced_together_query = get_referenced_together_query(
+        related_referenced_types=["Concept", "Subject", "Place", "Meeting", "Period", "Agent", "Person", "Organisation"],
+    )
+    
+    # Retrieve people and organisations which are commonly referenced together as collaborators with a given person
     frequent_collaborators_query = get_referenced_together_query(
         source_referenced_types=["Person"],
         related_referenced_types=["Person", "Organisation"],
         source_referenced_in=["contributors"],
         related_referenced_in=["contributors"],
     )
+
+    # Do not include genres and agents/people/orgs in the list of related topics.
     related_topics_query = get_referenced_together_query(
         related_referenced_types=["Concept", "Subject", "Place", "Meeting", "Period"],
         related_referenced_in=["subjects"],
