@@ -8,7 +8,6 @@ from typing import Any, Optional, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
-
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -283,7 +282,7 @@ class MockRequest:
             ):
                 return response["response"]
 
-        raise Exception(f"Unexpected request: {method} {url} {params}")
+        raise Exception(f"Unexpected request: {method} {url} {params} {data}")
 
     @staticmethod
     def get(

@@ -39,6 +39,7 @@ class CatalogueConceptRelatedTo(BaseModel):
     label: str
     id: str
     relationshipType: str | None
+    conceptType: str
 
 
 def standardise_label(label: str | None) -> str | None:
@@ -96,11 +97,16 @@ def transform_related_concepts(
                 "relationship_type", ""
             )
 
+        if "concept_types" in related_item:
+            concept_type = get_most_specific_concept_type(related_item["concept_types"])
+        else:
+            concept_type = "Concept"            
+
         if label.lower() not in used_labels:
             used_labels.add(label.lower())
             processed_items.append(
                 CatalogueConceptRelatedTo(
-                    id=concept_id, label=label, relationshipType=relationship_type
+                    id=concept_id, label=label, relationshipType=relationship_type, conceptType=concept_type
                 )
             )
 

@@ -7,8 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +15,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -84,7 +83,7 @@ def get_related_query(
         
         /* Get the Wellcome concept(s) associated with each related source concept. */
         MATCH (related_source_concept)<-[:HAS_SOURCE_CONCEPT]-(related_concept)
-        MATCH (work)-[:HAS_CONCEPT]->(related_concept)
+        MATCH (work)-[work_edge:HAS_CONCEPT]->(related_concept)
 
         {label_filter}
         
@@ -96,12 +95,22 @@ def get_related_query(
         WITH concept,
              linked_related_source_concept,
              COUNT(work) AS number_of_works,
+             work_edge.referenced_type AS related_type,
              collect(DISTINCT related_source_concept) AS related_source_concepts,
              head(collect(related_concept)) AS selected_related_concept,
              head(collect(rel)) AS selected_related_edge
              
         /* Order the resulting related concepts based on popularity (i.e. the number of works in which they appear). */
         ORDER BY number_of_works DESC
+        
+        /* Collect distinct types of each `related` concept */
+        WITH concept,
+             linked_related_source_concept,
+             number_of_works,
+             collect(related_type) AS related_types,
+             related_source_concepts,
+             selected_related_concept,
+             selected_related_edge        
         
         /*
         Group the results again to ensure that only one row is returned for each `concept. Limit the number of results
@@ -111,7 +120,8 @@ def get_related_query(
              collect({{
                  concept_node: selected_related_concept,
                  source_concept_nodes: related_source_concepts,
-                 edge: selected_related_edge
+                 edge: selected_related_edge,
+                 concept_types: related_types
              }})[0..$related_to_limit] AS related
              
         /* Return the ID of each concept and a corresponding list of related concepts. */
@@ -152,16 +162,16 @@ def get_referenced_together_query(
             Optional list of work concept keys (e.g. 'genre', 'subject') for filtering related concepts
     """
     source_referenced_type_filter = _get_referenced_together_filter(
-        "e1.referenced_type", source_referenced_types
+        "work_edge_1.referenced_type", source_referenced_types
     )
     related_referenced_type_filter = _get_referenced_together_filter(
-        "e2.referenced_type", related_referenced_types
+        "work_edge_2.referenced_type", related_referenced_types
     )
     source_referenced_in_filter = _get_referenced_together_filter(
-        "e1.referenced_in", source_referenced_in
+        "work_edge_1.referenced_in", source_referenced_in
     )
     related_referenced_in_filter = _get_referenced_together_filter(
-        "e2.referenced_in", related_referenced_in
+        "work_edge_2.referenced_in", related_referenced_in
     )
 
     return f"""
@@ -190,7 +200,7 @@ def get_referenced_together_query(
         Next, for each `same_as_concept`, get all co-occurring concepts `other` (i.e. find all combinations of `other`
         and `same_as_concept` for which there is at least one work listing both `other` and `same_as_concept`).
         */
-        MATCH (same_as_concept)<-[e1:HAS_CONCEPT]-(w:Work)-[e2:HAS_CONCEPT]->(other)
+        MATCH (same_as_concept)<-[work_edge_1:HAS_CONCEPT]-(w:Work)-[work_edge_2:HAS_CONCEPT]->(other)
         WHERE same_as_concept.id <> other.id
         
         {source_referenced_type_filter}
@@ -209,7 +219,7 @@ def get_referenced_together_query(
             linked_source_concept,
             other,
             w.id AS work_id,
-            e2.referenced_type as other_type
+            work_edge_2.referenced_type as other_type
         WITH
             concept,
             linked_source_concept,
@@ -249,11 +259,11 @@ def get_referenced_together_query(
              number_of_shared_works
         ORDER BY number_of_shared_works DESC
         
-        /* Collect distinct types of each `other` source concept */
+        /* Collect distinct types of each `other` concept */
         WITH concept,
              linked_other_source_concept,
              selected_other,
-             collect(other_type) AS other_type,
+             collect(other_type) AS other_types,
              related_source_concepts,
              number_of_shared_works        
         
@@ -266,7 +276,7 @@ def get_referenced_together_query(
                 concept_node: selected_other,
                 source_concept_nodes: related_source_concepts,
                 number_of_shared_works: number_of_shared_works,
-                concept_type: other_type 
+                concept_types: other_types 
             }})[0..$related_to_limit] AS related        
         RETURN
             concept.id AS id,

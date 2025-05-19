@@ -1,5 +1,3 @@
-from test_utils import load_json_fixture
-
 from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
@@ -8,6 +6,7 @@ from models.catalogue_concept import (
     RelatedConcepts,
     get_most_specific_concept_type,
 )
+from test_utils import load_json_fixture
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
@@ -126,6 +125,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
                     label="Hilton, Violet, 1908-1969",
                     id="tzrtx26u",
                     relationshipType="has_sibling",
+                    conceptType="Person",
                 )
             ],
             fieldsOfWork=[],

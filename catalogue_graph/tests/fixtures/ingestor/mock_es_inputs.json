@@ -23,7 +23,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": []
       }
@@ -72,9 +74,12 @@
             {
               "label": "Housing",
               "id": "uk4ekp5c",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             }
-          ]
+          ],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a223f5a6"
@@ -106,7 +111,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": []
       }
@@ -151,7 +158,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a224b9mp"
@@ -187,9 +196,12 @@
             {
               "label": "History, 19th Century",
               "id": "dtr393ay",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Period"
             }
-          ]
+          ],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": []
       }
@@ -234,7 +246,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a224tns9"
@@ -285,7 +299,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a2258t8s"
@@ -387,12 +403,15 @@
             {
               "label": "Amines",
               "id": "m6ek9fgg",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             }
           ],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "ufz7k5zq",
@@ -453,29 +472,36 @@
             {
               "label": "Public Health",
               "id": "uj4hz4ct",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             },
             {
               "label": "Sanitation",
               "id": "eva7r2dw",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             },
             {
               "label": "Water Supply",
               "id": "gtf5s7h7",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             },
             {
               "label": "Disease Outbreaks",
               "id": "d6jhgxuc",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             },
             {
               "label": "Electronic books",
               "id": "kqkakf66",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Genre"
             }
-          ]
+          ],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a22auf32"
@@ -526,9 +552,12 @@
             {
               "label": "History, 19th Century",
               "id": "dtr393ay",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Period"
             }
-          ]
+          ],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a22d6ehy"
