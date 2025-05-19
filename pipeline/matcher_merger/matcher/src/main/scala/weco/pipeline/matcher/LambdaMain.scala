@@ -1,11 +1,11 @@
 package weco.pipeline.matcher
 import grizzled.slf4j.Logging
-import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.lambda._
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
 import weco.pipeline.matcher.matcher.StoredWorksMatcher
 
 import org.scanamo.generic.auto._
+import scala.language.higherKinds
 
 object LambdaMain
     extends MatcherSQSLambda[MatcherConfig]
@@ -18,5 +18,7 @@ object LambdaMain
     config.dynamoConfig,
     config.dynamoLockDAOConfig
   )
-  override protected val downstream: Downstream = ???
+  override protected val downstream: Downstream = Downstream(
+    config.downstreamConfig
+  )
 }

@@ -1,13 +1,9 @@
 package weco.pipeline.matcher.matcher
 
 import grizzled.slf4j.Logging
-import io.circe.Json
 import org.scanamo.DynamoFormat
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.elasticsearch.typesafe.{ElasticBuilder, ElasticConfig}
 import weco.pipeline.matcher.models.{MatcherResult, WorkNode, WorkStub}
-import weco.pipeline.matcher.services.LockingBuilder
-import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
 import weco.pipeline_storage.RetrieverMultiResult
 import weco.storage.dynamo.DynamoConfig
@@ -16,14 +12,20 @@ import weco.storage.locking.dynamo.DynamoLockDaoConfig
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-/** Performs the matching for a bundle of works that are currently stored in
-  * Elasticsearch.
-  */
+trait WorksMatcher {
+
+  /** retrieves stubs for a collection of unrelated works that are currently
+    * stored in a database and performs matching for each of them.
+    */
+  def matchWorks(workIds: Seq[String]): Future[Iterable[MatcherResult]]
+}
+
 class StoredWorksMatcher(
   retriever: ElasticWorkStubRetriever,
-  workMatcher: WorkMatcher
+  workMatcher: WorkStubMatcher
 )(implicit ec: ExecutionContext)
-    extends Logging {
+    extends WorksMatcher
+    with Logging {
 
   def matchWorks(workIds: Seq[String]): Future[Iterable[MatcherResult]] =
     retrieveWorks(workIds).map(matchWorks).flatMap(collectSuccessfulResults)
@@ -34,7 +36,15 @@ class StoredWorksMatcher(
    * retrieved, and logs any that were not found.
    *
    * There is no need to action any missing works at this point,
-   * because the caller
+   * because the caller will check whether all expected works are in the output
+   * list.
+   *
+   * This is simpler than having to gather failures from the various places
+   * where a failure may occur.
+   *
+   * This will always return a successful Future, even if nothing works,
+   *  - This allows us to deal with partial successes
+   *  - the proof of success/failure is in the
    * */
   private def retrieveWorks(workIds: Seq[String]): Future[Iterable[WorkStub]] =
     retriever(workIds).flatMap {

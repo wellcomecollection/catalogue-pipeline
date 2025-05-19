@@ -8,7 +8,7 @@ import weco.lambda.{
   SQSLambdaMessageFailedRetryable,
   SQSLambdaMessageResult
 }
-import weco.pipeline.matcher.matcher.StoredWorksMatcher
+import weco.pipeline.matcher.matcher.WorksMatcher
 import weco.pipeline.matcher.models.MatcherResult
 
 import scala.concurrent.Future
@@ -16,7 +16,7 @@ import scala.concurrent.Future
 trait MatcherSQSLambda[Config <: ApplicationConfig]
     extends SQSBatchResponseLambdaApp[String, Config] {
 
-  protected val worksMatcher: StoredWorksMatcher
+  protected val worksMatcher: WorksMatcher
   protected val downstream: Downstream
 
   private implicit class MatcherResultOps(r: MatcherResult) {

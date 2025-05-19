@@ -28,11 +28,16 @@ import weco.storage.locking.{
 import java.time.Instant
 import java.util.UUID
 
+trait WorkStubMatcher {
+  def matchWork(work: WorkStub): Future[MatcherResult]
+}
+
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
   lockingService: LockingService[MatcherResult, Future, LockDao[String, UUID]]
 )(implicit ec: ExecutionContext)
-    extends Logging {
+    extends WorkStubMatcher
+    with Logging {
 
   def matchWork(work: WorkStub): Future[MatcherResult] = {
     // We start by locking over all the IDs we know are affected by this
