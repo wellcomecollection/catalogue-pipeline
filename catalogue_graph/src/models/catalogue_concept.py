@@ -219,7 +219,7 @@ class CatalogueConcept(BaseModel):
             id=concept_data["concept"]["~properties"]["id"],
             type=concept_type,
             label=label,
-            alternativeLabels=sorted(list(alternative_labels)),
+            alternativeLabels=sorted(list(set(alternative_labels))),
             description=description,
             identifiers=identifiers,
             sameAs=concept_data["same_as_concept_ids"],

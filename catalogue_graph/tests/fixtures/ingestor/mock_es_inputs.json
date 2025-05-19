@@ -70,14 +70,7 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [
-            {
-              "label": "Housing",
-              "id": "uk4ekp5c",
-              "relationshipType": "",
-              "conceptType": "Concept"
-            }
-          ],
+          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -159,7 +152,14 @@
           "broaderThan": [],
           "people": [],
           "referencedTogether": [],
-          "frequentCollaborators": [],
+          "frequentCollaborators": [
+            {
+              "conceptType": "Person",
+              "id": "tgk79tta",
+              "label": "Pfeiffer, J. William",
+              "relationshipType": ""
+            }
+          ],
           "relatedTopics": []
         },
         "sameAs": [
@@ -192,14 +192,7 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [
-            {
-              "label": "History, 19th Century",
-              "id": "dtr393ay",
-              "relationshipType": "",
-              "conceptType": "Period"
-            }
-          ],
+          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -323,32 +316,23 @@
         ],
         "label": "Ketamine",
         "alternativeLabels": [
-          "KETAMINE",
-          "DL-ketamine",
-          "Ketaset",
-          "Ketamina",
-          "Ketaminum",
-          "Purple",
-          "Ketanest",
-          "Ketamine Hydrochloride",
-          "2-(2-Chloro-phenyl)-2-methylamino-cyclohexanone",
-          "K",
-          "(\u00b1)-ketamine",
+          "(+-)-ketamine",
+          "(±)-ketamine",
+          "2-(2-Chlorophenyl)-2-(methylamino)cyclohexanone",
+          "2-(2-chloro-phenyl)-2-methylamino-cyclohexanone",
+          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone",
           "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
-          "Calipsol",
-          "Jet",
-          "Super Acid",
-          "Cat Valium",
-          "(+-)-Ketamine",
-          "Super K",
-          "Keta",
-          "Special La Coke",
-          "Vitamin K",
+          "CI 581",
           "CI-581",
-          "Special K",
-          "Kit Kat",
+          "CI581",
+          "Calipsol",
+          "Calypsol",
+          "DL-ketamine",
+          "Kalipsol",
           "Ketalar",
-          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone"
+          "Ketamine Hydrochloride",
+          "Ketanest",
+          "Ketaset"
         ],
         "type": "Concept"
       },
@@ -367,32 +351,23 @@
         ],
         "label": "Ketamine",
         "alternativeLabels": [
-          "KETAMINE",
-          "DL-ketamine",
-          "Ketaset",
-          "Ketamina",
-          "Ketaminum",
-          "Purple",
-          "Ketanest",
-          "Ketamine Hydrochloride",
-          "2-(2-Chloro-phenyl)-2-methylamino-cyclohexanone",
-          "K",
-          "(\u00b1)-ketamine",
+          "(+-)-ketamine",
+          "(±)-ketamine",
+          "2-(2-Chlorophenyl)-2-(methylamino)cyclohexanone",
+          "2-(2-chloro-phenyl)-2-methylamino-cyclohexanone",
+          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone",
           "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
-          "Calipsol",
-          "Jet",
-          "Super Acid",
-          "Cat Valium",
-          "(+-)-Ketamine",
-          "Super K",
-          "Keta",
-          "Special La Coke",
-          "Vitamin K",
+          "CI 581",
           "CI-581",
-          "Special K",
-          "Kit Kat",
+          "CI581",
+          "Calipsol",
+          "Calypsol",
+          "DL-ketamine",
+          "Kalipsol",
           "Ketalar",
-          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone"
+          "Ketamine Hydrochloride",
+          "Ketanest",
+          "Ketaset"
         ],
         "description": "A cyclohexanone derivative used for induction of anesthesia. Its mechanism of action is not well understood, but ketamine can block NMDA receptors (RECEPTORS, N-METHYL-D-ASPARTATE) and may interact with sigma receptors.\n    ",
         "type": "Concept",
@@ -409,9 +384,16 @@
           ],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
+          "relatedTopics": [
+            {
+              "conceptType": "Concept",
+              "id": "nkngjz5k",
+              "label": "Illicit Drugs",
+              "relationshipType": ""
+            }
+          ],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "referencedTogether": []
         },
         "sameAs": [
           "ufz7k5zq",
@@ -437,8 +419,8 @@
         ],
         "label": "South Cambridgeshire (England)",
         "alternativeLabels": [
-          "South Cambridgeshire, Eng.",
-          "South Cambridgeshire (Cambridgeshire)"
+          "South Cambridgeshire (Cambridgeshire)",
+          "South Cambridgeshire, Eng."
         ],
         "type": "Place"
       },
@@ -457,8 +439,8 @@
         ],
         "label": "South Cambridgeshire (England)",
         "alternativeLabels": [
-          "South Cambridgeshire, Eng.",
-          "South Cambridgeshire (Cambridgeshire)"
+          "South Cambridgeshire (Cambridgeshire)",
+          "South Cambridgeshire, Eng."
         ],
         "description": null,
         "type": "Place",
@@ -469,6 +451,20 @@
           "broaderThan": [],
           "people": [],
           "referencedTogether": [
+            {
+              "conceptType": "Organisation",
+              "id": "y6dk9r86",
+              "label": "South Cambridgeshire (England). Rural District Council.",
+              "relationshipType": ""
+            }
+          ],
+          "relatedTopics": [
+            {
+              "label": "Disease Outbreaks",
+              "id": "d6jhgxuc",
+              "relationshipType": "",
+              "conceptType": "Concept"
+            },
             {
               "label": "Public Health",
               "id": "uj4hz4ct",
@@ -486,22 +482,9 @@
               "id": "gtf5s7h7",
               "relationshipType": "",
               "conceptType": "Concept"
-            },
-            {
-              "label": "Disease Outbreaks",
-              "id": "d6jhgxuc",
-              "relationshipType": "",
-              "conceptType": "Concept"
-            },
-            {
-              "label": "Electronic books",
-              "id": "kqkakf66",
-              "relationshipType": "",
-              "conceptType": "Genre"
             }
           ],
-          "frequentCollaborators": [],
-          "relatedTopics": []
+          "frequentCollaborators": []
         },
         "sameAs": [
           "a22auf32"
@@ -548,14 +531,7 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [
-            {
-              "label": "History, 19th Century",
-              "id": "dtr393ay",
-              "relationshipType": "",
-              "conceptType": "Period"
-            }
-          ],
+          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
