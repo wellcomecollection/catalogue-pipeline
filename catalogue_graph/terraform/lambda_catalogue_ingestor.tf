@@ -105,7 +105,7 @@ module "ingestor_loader_lambda" {
 
   handler     = "ingestor_loader.lambda_handler"
   memory_size = 1024
-  timeout     = 300
+  timeout     = 600
 
   vpc_config = {
     subnet_ids = local.private_subnets
