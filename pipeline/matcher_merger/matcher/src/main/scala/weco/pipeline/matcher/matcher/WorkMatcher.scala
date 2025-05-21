@@ -5,6 +5,7 @@ import cats.implicits._
 import grizzled.slf4j.Logging
 import org.scanamo.DynamoFormat
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
@@ -166,7 +167,8 @@ class WorkMatcher(
       .toSet
 }
 
-object WorkMatcher {
+object WorkMatcher extends Logging {
+
   def apply(
     dynamoConfig: DynamoConfig,
     dynamoLockDaoConfig: DynamoLockDaoConfig
@@ -186,7 +188,7 @@ object WorkMatcher {
         .buildDynamoLockingService[MatcherResult, Future](
           dynamoLockDaoConfig
         )
-
+    
     new WorkMatcher(workGraphStore, lockingService)
   }
 
