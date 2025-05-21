@@ -188,7 +188,7 @@ object WorkMatcher extends Logging {
         .buildDynamoLockingService[MatcherResult, Future](
           dynamoLockDaoConfig
         )
-    
+
     new WorkMatcher(workGraphStore, lockingService)
   }
 
