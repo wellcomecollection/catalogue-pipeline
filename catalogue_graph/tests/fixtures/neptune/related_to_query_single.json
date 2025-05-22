@@ -39,7 +39,8 @@
             "source": "lc-names"
           }
         }
-      ]
+      ],
+      "concept_types": ["Person", "Concept"]
     }
   ]
 }

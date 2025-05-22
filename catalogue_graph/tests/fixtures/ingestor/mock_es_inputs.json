@@ -23,7 +23,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": []
       }
@@ -68,13 +70,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [
-            {
-              "label": "Housing",
-              "id": "uk4ekp5c",
-              "relationshipType": ""
-            }
-          ]
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a223f5a6"
@@ -106,7 +104,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": []
       }
@@ -151,7 +151,16 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [
+            {
+              "conceptType": "Person",
+              "id": "tgk79tta",
+              "label": "Pfeiffer, J. William",
+              "relationshipType": ""
+            }
+          ],
+          "relatedTopics": []
         },
         "sameAs": [
           "a224b9mp"
@@ -183,13 +192,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [
-            {
-              "label": "History, 19th Century",
-              "id": "dtr393ay",
-              "relationshipType": ""
-            }
-          ]
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": []
       }
@@ -234,7 +239,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a224tns9"
@@ -285,7 +292,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": []
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a2258t8s"
@@ -307,32 +316,23 @@
         ],
         "label": "Ketamine",
         "alternativeLabels": [
-          "KETAMINE",
-          "DL-ketamine",
-          "Ketaset",
-          "Ketamina",
-          "Ketaminum",
-          "Purple",
-          "Ketanest",
-          "Ketamine Hydrochloride",
-          "2-(2-Chloro-phenyl)-2-methylamino-cyclohexanone",
-          "K",
-          "(\u00b1)-ketamine",
+          "(+-)-ketamine",
+          "(±)-ketamine",
+          "2-(2-Chlorophenyl)-2-(methylamino)cyclohexanone",
+          "2-(2-chloro-phenyl)-2-methylamino-cyclohexanone",
+          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone",
           "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
-          "Calipsol",
-          "Jet",
-          "Super Acid",
-          "Cat Valium",
-          "(+-)-Ketamine",
-          "Super K",
-          "Keta",
-          "Special La Coke",
-          "Vitamin K",
+          "CI 581",
           "CI-581",
-          "Special K",
-          "Kit Kat",
+          "CI581",
+          "Calipsol",
+          "Calypsol",
+          "DL-ketamine",
+          "Kalipsol",
           "Ketalar",
-          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone"
+          "Ketamine Hydrochloride",
+          "Ketanest",
+          "Ketaset"
         ],
         "type": "Concept"
       },
@@ -351,32 +351,23 @@
         ],
         "label": "Ketamine",
         "alternativeLabels": [
-          "KETAMINE",
-          "DL-ketamine",
-          "Ketaset",
-          "Ketamina",
-          "Ketaminum",
-          "Purple",
-          "Ketanest",
-          "Ketamine Hydrochloride",
-          "2-(2-Chloro-phenyl)-2-methylamino-cyclohexanone",
-          "K",
-          "(\u00b1)-ketamine",
+          "(+-)-ketamine",
+          "(±)-ketamine",
+          "2-(2-Chlorophenyl)-2-(methylamino)cyclohexanone",
+          "2-(2-chloro-phenyl)-2-methylamino-cyclohexanone",
+          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone",
           "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
-          "Calipsol",
-          "Jet",
-          "Super Acid",
-          "Cat Valium",
-          "(+-)-Ketamine",
-          "Super K",
-          "Keta",
-          "Special La Coke",
-          "Vitamin K",
+          "CI 581",
           "CI-581",
-          "Special K",
-          "Kit Kat",
+          "CI581",
+          "Calipsol",
+          "Calypsol",
+          "DL-ketamine",
+          "Kalipsol",
           "Ketalar",
-          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone"
+          "Ketamine Hydrochloride",
+          "Ketanest",
+          "Ketaset"
         ],
         "description": "A cyclohexanone derivative used for induction of anesthesia. Its mechanism of action is not well understood, but ketamine can block NMDA receptors (RECEPTORS, N-METHYL-D-ASPARTATE) and may interact with sigma receptors.\n    ",
         "type": "Concept",
@@ -387,11 +378,21 @@
             {
               "label": "Amines",
               "id": "m6ek9fgg",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             }
           ],
           "broaderThan": [],
           "people": [],
+          "relatedTopics": [
+            {
+              "conceptType": "Concept",
+              "id": "nkngjz5k",
+              "label": "Illicit Drugs",
+              "relationshipType": ""
+            }
+          ],
+          "frequentCollaborators": [],
           "referencedTogether": []
         },
         "sameAs": [
@@ -418,8 +419,8 @@
         ],
         "label": "South Cambridgeshire (England)",
         "alternativeLabels": [
-          "South Cambridgeshire, Eng.",
-          "South Cambridgeshire (Cambridgeshire)"
+          "South Cambridgeshire (Cambridgeshire)",
+          "South Cambridgeshire, Eng."
         ],
         "type": "Place"
       },
@@ -438,8 +439,8 @@
         ],
         "label": "South Cambridgeshire (England)",
         "alternativeLabels": [
-          "South Cambridgeshire, Eng.",
-          "South Cambridgeshire (Cambridgeshire)"
+          "South Cambridgeshire (Cambridgeshire)",
+          "South Cambridgeshire, Eng."
         ],
         "description": null,
         "type": "Place",
@@ -451,31 +452,39 @@
           "people": [],
           "referencedTogether": [
             {
+              "conceptType": "Organisation",
+              "id": "y6dk9r86",
+              "label": "South Cambridgeshire (England). Rural District Council.",
+              "relationshipType": ""
+            }
+          ],
+          "relatedTopics": [
+            {
+              "label": "Disease Outbreaks",
+              "id": "d6jhgxuc",
+              "relationshipType": "",
+              "conceptType": "Concept"
+            },
+            {
               "label": "Public Health",
               "id": "uj4hz4ct",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             },
             {
               "label": "Sanitation",
               "id": "eva7r2dw",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             },
             {
               "label": "Water Supply",
               "id": "gtf5s7h7",
-              "relationshipType": ""
-            },
-            {
-              "label": "Disease Outbreaks",
-              "id": "d6jhgxuc",
-              "relationshipType": ""
-            },
-            {
-              "label": "Electronic books",
-              "id": "kqkakf66",
-              "relationshipType": ""
+              "relationshipType": "",
+              "conceptType": "Concept"
             }
-          ]
+          ],
+          "frequentCollaborators": []
         },
         "sameAs": [
           "a22auf32"
@@ -522,13 +531,9 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [
-            {
-              "label": "History, 19th Century",
-              "id": "dtr393ay",
-              "relationshipType": ""
-            }
-          ]
+          "referencedTogether": [],
+          "frequentCollaborators": [],
+          "relatedTopics": []
         },
         "sameAs": [
           "a22d6ehy"

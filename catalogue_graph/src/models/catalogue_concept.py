@@ -14,6 +14,8 @@ class ConceptsQueryResult(BaseModel):
     broader_than: dict[str, list]
     people: dict[str, list]
     referenced_together: dict[str, list]
+    frequent_collaborators: dict[str, list]
+    related_topics: dict[str, list]
 
 
 class ConceptsQuerySingleResult(BaseModel):
@@ -24,6 +26,8 @@ class ConceptsQuerySingleResult(BaseModel):
     broader_than: list[dict]
     people: list[dict]
     referenced_together: list[dict]
+    frequent_collaborators: list[dict]
+    related_topics: list[dict]
 
 
 class CatalogueConceptIdentifier(BaseModel):
@@ -35,6 +39,7 @@ class CatalogueConceptRelatedTo(BaseModel):
     label: str
     id: str
     relationshipType: str | None
+    conceptType: str
 
 
 def standardise_label(label: str | None) -> str | None:
@@ -92,11 +97,19 @@ def transform_related_concepts(
                 "relationship_type", ""
             )
 
+        if not related_item.get("concept_types"):
+            concept_type: ConceptType = "Concept"
+        else:
+            concept_type = get_most_specific_concept_type(related_item["concept_types"])
+
         if label.lower() not in used_labels:
             used_labels.add(label.lower())
             processed_items.append(
                 CatalogueConceptRelatedTo(
-                    id=concept_id, label=label, relationshipType=relationship_type
+                    id=concept_id,
+                    label=label,
+                    relationshipType=relationship_type,
+                    conceptType=concept_type,
                 )
             )
 
@@ -139,6 +152,8 @@ class RelatedConcepts(BaseModel):
     broaderThan: list[CatalogueConceptRelatedTo]
     people: list[CatalogueConceptRelatedTo]
     referencedTogether: list[CatalogueConceptRelatedTo]
+    frequentCollaborators: list[CatalogueConceptRelatedTo]
+    relatedTopics: list[CatalogueConceptRelatedTo]
 
 
 class CatalogueConcept(BaseModel):
@@ -195,7 +210,7 @@ class CatalogueConcept(BaseModel):
 
         # Concepts which are not connected to any Works will not have any types associated with them. We periodically
         # remove such concepts from the graph, but there might be a few of them at any given point.
-        if not concept_data["concept_types"]:
+        if not concept_data.get("concept_types"):
             concept_type: ConceptType = "Concept"
         else:
             concept_type = get_most_specific_concept_type(concept_data["concept_types"])
@@ -204,7 +219,7 @@ class CatalogueConcept(BaseModel):
             id=concept_data["concept"]["~properties"]["id"],
             type=concept_type,
             label=label,
-            alternativeLabels=sorted(list(alternative_labels)),
+            alternativeLabels=sorted(list(set(alternative_labels))),
             description=description,
             identifiers=identifiers,
             sameAs=concept_data["same_as_concept_ids"],
@@ -217,6 +232,12 @@ class CatalogueConcept(BaseModel):
                     data.narrower_than, used_labels
                 ),
                 broaderThan=transform_related_concepts(data.broader_than, used_labels),
+                frequentCollaborators=transform_related_concepts(
+                    data.frequent_collaborators, used_labels
+                ),
+                relatedTopics=transform_related_concepts(
+                    data.related_topics, used_labels
+                ),
                 relatedTo=transform_related_concepts(data.related_to, used_labels),
                 referencedTogether=transform_related_concepts(
                     data.referenced_together, used_labels
