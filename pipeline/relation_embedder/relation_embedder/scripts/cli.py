@@ -22,7 +22,7 @@ def set_environment(pipeline_date):
     os.environ["es_apikey"] = get_secret_string(session, f"{prefix}read_only/api_key")
     os.environ["es_port"] = get_secret_string(session, f"{prefix}port")
     os.environ["es_protocol"] = get_secret_string(session, f"{prefix}protocol")
-    os.environ["es_merged_index"] = f"works-merged-{pipeline_date}"
+    os.environ["es_denormalised_index"] = f"works-denormalised-{pipeline_date}"
 
 
 set_environment(sys.argv[1])
