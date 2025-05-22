@@ -12,7 +12,7 @@ def format_message(path):
                 "Type": "Notification",
                 "MessageId": "g00dcafe-dead-beef-f00d-d00bed0bed00",
                 "TopicArn": "arn:aws:sns:eu-west-1:999999999999:my_upstream_topic",
-                "Subject": "Sent from the router",
+                "Subject": "Sent from upstream",
                 "Message": path,
                 "Timestamp": "2024-11-06T10:50:43.532Z",
                 "SignatureVersion": "1",

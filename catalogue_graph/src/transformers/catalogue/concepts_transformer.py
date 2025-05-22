@@ -33,7 +33,6 @@ class CatalogueConceptsTransformer(BaseTransformer):
             id=raw_concept.wellcome_id,
             label=raw_concept.label,
             source=raw_concept.source,
-            type=raw_concept.type,
         )
 
     def extract_edges(

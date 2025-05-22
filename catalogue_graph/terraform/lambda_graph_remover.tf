@@ -12,7 +12,7 @@ module "graph_remover_lambda" {
 
   handler     = "graph_remover.lambda_handler"
   memory_size = 4096
-  timeout     = 300 // 5 minutes
+  timeout     = 900 // 15 minutes
 
   vpc_config = {
     subnet_ids         = local.private_subnets

@@ -5,13 +5,15 @@ locals {
     "Lambda.SdkClientException",
     "Lambda.TooManyRequestsException"
   ]
-  DefaultRetry = [{
-    ErrorEquals     = local.DefaultErrorEquals
-    IntervalSeconds = 1
-    MaxAttempts     = 3
-    BackoffRate     = 2
-    JitterStrategy  = "FULL"
-  }]
+  DefaultRetry = [
+    {
+      ErrorEquals     = local.DefaultErrorEquals
+      IntervalSeconds = 1
+      MaxAttempts     = 3
+      BackoffRate     = 2
+      JitterStrategy  = "FULL"
+    }
+  ]
 }
 
 resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
@@ -50,7 +52,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
       "Map load to s3" = {
         Type           = "Map",
-        MaxConcurrency = 1
+        MaxConcurrency = 6
         ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
@@ -125,7 +127,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Arguments = {
           FunctionName = module.index_remover_lambda.lambda.arn,
           Payload = {
-            pipeline_date = local.pipeline_date
+            pipeline_date = local.pipeline_date,
+            index_date    = local.concepts_index_date
           }
         },
         Retry = local.DefaultRetry,

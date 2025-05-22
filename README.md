@@ -34,7 +34,9 @@ The structure and logic of the transformation pipeline evolves over time, as we 
 
 Once the transformation pipeline has finished processing the records, it stores them in a search index, which can be read by the [catalogue API][api].
 
-The catalogue pipeline runs entirely in AWS, with no on-premise infrastructure required.
+The catalogue pipeline runs entirely in AWS, with no on-premise infrastructure required.  
+
+See [here](./pipeline/README.md) for more details.
 
 
 

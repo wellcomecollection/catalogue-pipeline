@@ -1,4 +1,6 @@
-# Batcher
+# Relation Embedder
+
+
 
 ## Running Locally
 
@@ -6,7 +8,7 @@
 
 You can run the Lambda version locally from the repository root thus:
 
-`./scripts/run_local.sh <PROJECT_ID> [<PIPELINE_DATE>] [--skip-build]`
+`./scripts/run_local.sh relation_embedder/relation_embedder [<PIPELINE_DATE>] [--skip-build]`
 
 You can now post JSON SQS messages to it. Because SQS-fed-by-SNS is so awkwardly verbose,
 a convenience script will fill out the boilerplate for you. As with CLIMain, you can pipe some

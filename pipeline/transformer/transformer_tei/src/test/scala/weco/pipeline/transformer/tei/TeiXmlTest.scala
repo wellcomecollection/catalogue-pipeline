@@ -8,6 +8,7 @@ import weco.pipeline.transformer.generators.LabelDerivedIdentifiersGenerators
 import weco.pipeline.transformer.tei.generators.TeiGenerators
 import weco.sierra.generators.SierraIdentifierGenerators
 
+import java.time.Instant
 import scala.xml.Elem
 
 class TeiXmlTest
@@ -114,11 +115,14 @@ class TeiXmlTest
 
   describe("summary") {
     it("removes XML tags from the summary") {
-      val description = "a <note>manuscript</note> about stuff"
+      val summary =
+        <summary>
+        a <note>manuscript</note> about stuff
+        </summary>
 
       val xml = TeiXml(
         id,
-        teiXml(id = id, summary = Some(summary(description)))
+        teiXml(id = id, summary = Some(summary))
           .toString()
       ).flatMap(_.parse)
 
@@ -126,27 +130,33 @@ class TeiXmlTest
     }
 
     it("retains paragraph tags in the summary") {
-      val description =
-        """a <pppp/><note>delightful <p>manu<xp></xp>script</p></note> <p /><p/> about <p>stuff</p><pb />"""
-
+      val summary =
+        <summary>
+          a <pppp/><note>delightful <p>manu<xp></xp>script</p></note> <p /><p/> about <p>stuff</p>
+          <pb />
+        </summary>
       val xml = TeiXml(
         id,
-        teiXml(id = id, summary = Some(summary(description)))
+        teiXml(id = id, summary = Some(summary))
           .toString()
       ).flatMap(_.parse)
 
       xml.value.description shouldBe Some(
-        "a delightful <p>manuscript</p> <p /><p/> about <p>stuff</p>"
+        "a delightful <p>manuscript</p> <p/><p/> about <p>stuff</p>"
       )
+      val w: Work[WorkState.Source] = xml.value.toWork(Instant.now, 5)
+      println(w)
     }
 
     it("discards paragraph attributes from the summary") {
-      val description =
-        """a <note>delightful <p hand="reza_abbasi">manu<xp></xp>script</p></note> <p a="b" /> <p a="b" c="d"/> about stuff"""
+      val summary =
+        <summary>
+        a <note>delightful <p hand="reza_abbasi">manu<xp></xp>script</p></note> <p a="b" /> <p a="b" c="d"/> about stuff
+      </summary>
 
       val xml = TeiXml(
         id,
-        teiXml(id = id, summary = Some(summary(description)))
+        teiXml(id = id, summary = Some(summary))
           .toString()
       ).flatMap(_.parse)
 
