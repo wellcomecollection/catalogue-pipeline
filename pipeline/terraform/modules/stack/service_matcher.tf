@@ -36,7 +36,7 @@ resource "aws_iam_role_policy" "matcher_lock_readwrite" {
 module "matcher_output_topic" {
   source = "../topic"
 
-  name = "${local.namespace}_matcher_output"
+  name       = "${local.namespace}_matcher_output"
   role_names = [module.matcher_lambda.lambda_role_name]
 }
 
