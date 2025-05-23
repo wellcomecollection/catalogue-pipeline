@@ -1,12 +1,18 @@
 package weco.pipeline.matcher.fixtures
 
 import org.scanamo.generic.auto._
+import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.fixtures.TestWith
 import weco.messaging.fixtures.SQS
 import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
-import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.models.{MatcherResult, WorkStub}
+import weco.pipeline.matcher.matcher.{WorkMatcher, WorksMatcher}
+import weco.pipeline.matcher.models.{
+  MatchedIdentifiers,
+  MatcherResult,
+  WorkIdentifier,
+  WorkStub
+}
 import weco.pipeline.matcher.services.MatcherWorkerService
 import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline_storage.Retriever
@@ -16,6 +22,7 @@ import weco.storage.fixtures.DynamoFixtures.Table
 import weco.storage.locking.dynamo.DynamoLockDaoFixtures
 import weco.storage.locking.memory.{MemoryLockDao, MemoryLockingService}
 
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -116,5 +123,37 @@ trait MatcherFixtures
   ): Unit = {
     retriever.index ++= Map(work.id.toString -> work)
     sendNotificationToSQS(queue, body = work.id.toString)
+  }
+
+  case class MatcherStub(shorthandResults: Seq[Set[Set[String]]])
+      extends WorksMatcher {
+
+    /** retrieves stubs for a collection of unrelated works that are currently
+      * stored in a database and performs matching for each of them.
+      */
+    override def matchWorks(
+      workIds: Seq[String]
+    ): Future[Iterable[MatcherResult]] =
+      Future.successful(
+        shorthandResults map {
+          result: Set[Set[String]] =>
+            matcherResultFromStrings(result)
+        }
+      )
+
+    private def matcherResultFromStrings(
+      idSets: Set[Set[String]]
+    ): MatcherResult =
+      MatcherResult(
+        works = idSets.map(ids => matchedIdentifiersFromStrings(ids)),
+        createdTime = Instant.now()
+      )
+
+    private def matchedIdentifiersFromStrings(
+      ids: Set[String]
+    ): MatchedIdentifiers =
+      MatchedIdentifiers(
+        identifiers = ids.map(id => WorkIdentifier(CanonicalId(id), 1))
+      )
   }
 }

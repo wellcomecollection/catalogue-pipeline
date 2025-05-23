@@ -3,6 +3,8 @@ package weco.pipeline.matcher.matcher
 import scala.concurrent.{ExecutionContext, Future}
 import cats.implicits._
 import grizzled.slf4j.Logging
+import org.scanamo.DynamoFormat
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,
@@ -10,8 +12,11 @@ import weco.pipeline.matcher.models.{
   WorkNode,
   WorkStub
 }
-import weco.pipeline.matcher.storage.WorkGraphStore
+import weco.pipeline.matcher.services.LockingBuilder
+import weco.pipeline.matcher.storage.{WorkGraphStore, WorkNodeDao}
 import weco.pipeline.matcher.workgraph.WorkGraphUpdater
+import weco.storage.dynamo.DynamoConfig
+import weco.storage.locking.dynamo.DynamoLockDaoConfig
 import weco.storage.locking.{
   FailedLockingServiceOp,
   FailedProcess,
@@ -23,11 +28,16 @@ import weco.storage.locking.{
 import java.time.Instant
 import java.util.UUID
 
+trait WorkStubMatcher {
+  def matchWork(work: WorkStub): Future[MatcherResult]
+}
+
 class WorkMatcher(
   workGraphStore: WorkGraphStore,
   lockingService: LockingService[MatcherResult, Future, LockDao[String, UUID]]
 )(implicit ec: ExecutionContext)
-    extends Logging {
+    extends WorkStubMatcher
+    with Logging {
 
   def matchWork(work: WorkStub): Future[MatcherResult] = {
     // We start by locking over all the IDs we know are affected by this
@@ -154,4 +164,31 @@ class WorkMatcher(
       }
       .filter { _.identifiers.nonEmpty }
       .toSet
+}
+
+object WorkMatcher extends Logging {
+
+  def apply(
+    dynamoConfig: DynamoConfig,
+    dynamoLockDaoConfig: DynamoLockDaoConfig
+  )(
+    implicit ec: ExecutionContext,
+    format: DynamoFormat[WorkNode]
+  ): WorkMatcher = {
+    val workGraphStore = new WorkGraphStore(
+      workNodeDao = new WorkNodeDao(
+        dynamoClient = DynamoDbClient.builder().build(),
+        dynamoConfig = dynamoConfig
+      )
+    )
+
+    val lockingService =
+      LockingBuilder
+        .buildDynamoLockingService[MatcherResult, Future](
+          dynamoLockDaoConfig
+        )
+
+    new WorkMatcher(workGraphStore, lockingService)
+  }
+
 }

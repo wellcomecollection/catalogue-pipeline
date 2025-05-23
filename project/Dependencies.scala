@@ -89,7 +89,8 @@ object ExternalDependencies {
   lazy val versions = new {
     val apacheCommons = "1.12.0"
     val awsLambdaClient = "2.6.0"
-    val awsLambdaEvents = "3.14.0"
+    val awsLambdaEvents = "3.15.0"
+    val awsSSO = "2.31.47"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.3"
@@ -151,7 +152,10 @@ object ExternalDependencies {
   val scalaGraphDependencies = Seq(
     "org.scala-graph" %% "graph-core" % versions.scalaGraph
   )
-
+  val awsSSODependencies = Seq(
+    "software.amazon.awssdk" % "sso" % versions.awsSSO,
+    "software.amazon.awssdk" % "sts" % versions.awsSSO
+  )
   val scalatestDependencies = Seq(
     "org.scalatestplus" %% versions.scalatestPlusMockitoArtifactId % versions.scalatestPlus % Test,
     "org.scalatest" %% "scalatest" % versions.scalatest % "test"
@@ -243,6 +247,10 @@ object CatalogueDependencies {
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.scalaGraphDependencies ++
+      // Matcher requires SSO in order to connect to DynamoDB
+      // when running in a local RIE lambda container.
+      // This is not required for normal running.
+      ExternalDependencies.awsSSODependencies ++
       WellcomeDependencies.storageTypesafeLibrary
 
   val mergerDependencies: Seq[ModuleID] = Nil

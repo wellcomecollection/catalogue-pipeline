@@ -95,7 +95,7 @@ class WorkMatcherTest
                       )
 
                     val savedWorkNodes = scanTable[WorkNode](graphTable)
-                      .map(_.right.value)
+                      .map(_.value)
 
                     savedWorkNodes should contain theSameElementsAs List(
                       WorkNode(
@@ -158,7 +158,7 @@ class WorkMatcherTest
                       )
 
                     val savedNodes = scanTable[WorkNode](graphTable)
-                      .map(_.right.value)
+                      .map(_.value)
                       .toSet
 
                     savedNodes shouldBe Set(
@@ -508,5 +508,5 @@ class WorkMatcherTest
   }
 
   private def getWorkNode(id: CanonicalId, graphTable: Table): WorkNode =
-    getTableItem[WorkNode](id.underlying, graphTable).map(_.right.value).get
+    getTableItem[WorkNode](id.underlying, graphTable).map(_.value).get
 }
