@@ -283,7 +283,7 @@ class MockRequest:
             ):
                 return response["response"]
 
-        raise Exception(f"Unexpected request: {method} {url} {params}")
+        raise Exception(f"Unexpected request: {method} {url} {params} {data}")
 
     @staticmethod
     def get(

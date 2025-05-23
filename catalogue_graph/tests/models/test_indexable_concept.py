@@ -29,13 +29,18 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             relatedTo=[],
             fieldsOfWork=[
                 CatalogueConceptRelatedTo(
-                    label="some label", id="5678", relationshipType="type"
+                    label="some label",
+                    id="5678",
+                    relationshipType="type",
+                    conceptType="Subject",
                 )
             ],
             narrowerThan=[],
             broaderThan=[],
             people=[],
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[],
         ),
     )
 
@@ -70,13 +75,18 @@ def test_indexable_concept_from_catalogue_concept() -> None:
                 relatedTo=[],
                 fieldsOfWork=[
                     CatalogueConceptRelatedTo(
-                        label="some label", id="5678", relationshipType="type"
+                        label="some label",
+                        id="5678",
+                        relationshipType="type",
+                        conceptType="Subject",
                     )
                 ],
                 narrowerThan=[],
                 broaderThan=[],
                 people=[],
                 referencedTogether=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
             ),
         ),
     )
