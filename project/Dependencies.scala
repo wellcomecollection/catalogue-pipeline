@@ -247,6 +247,9 @@ object CatalogueDependencies {
 
   val matcherDependencies: Seq[ModuleID] =
     ExternalDependencies.scalaGraphDependencies ++
+      // Matcher requires SSO in order to connect to DynamoDB
+      // when running in a local RIE lambda container.
+      // This is not required for normal running.
       ExternalDependencies.awsSSODependencies ++
       WellcomeDependencies.storageTypesafeLibrary
 

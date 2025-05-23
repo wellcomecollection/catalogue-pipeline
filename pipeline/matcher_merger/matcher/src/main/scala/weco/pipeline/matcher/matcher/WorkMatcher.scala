@@ -5,7 +5,6 @@ import cats.implicits._
 import grizzled.slf4j.Logging
 import org.scanamo.DynamoFormat
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest
 import weco.pipeline.matcher.models.{
   MatchedIdentifiers,
   MatcherResult,

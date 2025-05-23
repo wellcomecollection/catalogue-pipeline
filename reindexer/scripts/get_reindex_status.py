@@ -111,7 +111,6 @@ def get_works_index_stats(*, reindex_date):
     indexes = [
         "works-source",
         "works-identified",
-        "works-merged",
         "works-denormalised",
         "works-indexed",
     ]

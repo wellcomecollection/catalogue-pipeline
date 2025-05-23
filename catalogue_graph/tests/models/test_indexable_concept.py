@@ -23,19 +23,24 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         label="label",
         alternativeLabels=["alternativeLabels"],
         description="description",
-        type="type",
+        type="Concept",
         sameAs=["1234"],
         relatedConcepts=RelatedConcepts(
             relatedTo=[],
             fieldsOfWork=[
                 CatalogueConceptRelatedTo(
-                    label="some label", id="5678", relationshipType="type"
+                    label="some label",
+                    id="5678",
+                    relationshipType="type",
+                    conceptType="Subject",
                 )
             ],
             narrowerThan=[],
             broaderThan=[],
             people=[],
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[],
         ),
     )
 
@@ -47,7 +52,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             ],
             label="label",
             alternativeLabels=["alternativeLabels"],
-            type="type",
+            type="Concept",
         ),
         display=ConceptDisplay(
             id="id",
@@ -64,19 +69,24 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             label="label",
             alternativeLabels=["alternativeLabels"],
             description="description",
-            type="type",
+            type="Concept",
             sameAs=["1234"],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[
                     CatalogueConceptRelatedTo(
-                        label="some label", id="5678", relationshipType="type"
+                        label="some label",
+                        id="5678",
+                        relationshipType="type",
+                        conceptType="Subject",
                     )
                 ],
                 narrowerThan=[],
                 broaderThan=[],
                 people=[],
                 referencedTogether=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
             ),
         ),
     )
