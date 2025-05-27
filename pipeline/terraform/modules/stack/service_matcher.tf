@@ -1,33 +1,5 @@
 locals {
   lock_timeout = 1 * 60
-}
-
-resource "aws_iam_role_policy" "matcher_graph_readwrite" {
-  role   = module.matcher.task_role_name
-  policy = data.aws_iam_policy_document.graph_table_readwrite.json
-}
-
-resource "aws_iam_role_policy" "matcher_lock_readwrite" {
-  role   = module.matcher.task_role_name
-  policy = data.aws_iam_policy_document.lock_table_readwrite.json
-}
-
-module "matcher_output_topic" {
-  source = "../topic"
-
-  name       = "${local.namespace}_matcher_output"
-  role_names = [module.matcher.task_role_name]
-}
-
-module "matcher" {
-  source = "../fargate_service"
-
-  name            = "matcher"
-  container_image = local.matcher_image
-
-  topic_arns = [
-    module.id_minter_output_topic.arn,
-  ]
 
   # The records in the locktable expire after local.lock_timeout
   # The matcher is able to override locks that have expired
@@ -49,8 +21,33 @@ module "matcher" {
   # and acquires a lock on A.  The eight other works try to get a lock on A,
   # fail, get redriven.
   max_receive_count = 10
+}
 
-  env_vars = {
+resource "aws_iam_role_policy" "matcher_graph_readwrite" {
+  role   = module.matcher_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.graph_table_readwrite.json
+}
+
+resource "aws_iam_role_policy" "matcher_lock_readwrite" {
+  role   = module.matcher_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.lock_table_readwrite.json
+}
+
+module "matcher_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_matcher_output"
+  role_names = [module.matcher_lambda.lambda_role_name]
+}
+
+module "matcher_lambda" {
+  source = "../pipeline_lambda"
+
+  pipeline_date = var.pipeline_date
+
+  service_name = "matcher"
+
+  environment_variables = {
     topic_arn = module.matcher_output_topic.arn
 
     dynamo_table            = aws_dynamodb_table.matcher_graph_table.id
@@ -60,18 +57,19 @@ module "matcher" {
 
     dynamo_lock_timeout = local.lock_timeout
 
-    es_index                    = local.es_works_identified_index
-    read_batch_size             = 100
-    read_flush_interval_seconds = 30
+    es_index = local.es_works_identified_index
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]
 
-  cpu    = 1024
-  memory = 2048
-
-  min_capacity = var.min_capacity
-  max_capacity = local.max_capacity
-
-  fargate_service_boilerplate = local.fargate_service_boilerplate
+  ecr_repository_name = "uk.ac.wellcome/matcher"
+  queue_config = {
+    visibility_timeout_seconds = local.queue_visibility_timeout_seconds
+    max_receive_count          = local.max_receive_count
+    batching_window_seconds    = 30
+    batch_size                 = 100
+    topic_arns = [
+      module.id_minter_output_topic.arn,
+    ]
+  }
 }
