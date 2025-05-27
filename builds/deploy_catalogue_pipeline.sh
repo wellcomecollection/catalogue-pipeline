@@ -73,7 +73,6 @@ then
   echo "Deploying ECS pipeline services to catalogue-$PIPELINE_DATE"
   CLUSTER="catalogue-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
     image_inferrer \
-    matcher \
     merger \
     ingestor_images \
     ingestor_works \
@@ -89,6 +88,7 @@ then
   "$ROOT/builds/deploy_lambda_services.sh" \
     batcher:r_embed_batcher \
     relation_embedder:r_embed_embedder \
-    id_minter:id_minter
+    id_minter:id_minter \
+    matcher:matcher
 fi
 
