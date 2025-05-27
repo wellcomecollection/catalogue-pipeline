@@ -47,6 +47,14 @@ module "matcher_lambda" {
 
   service_name = "matcher"
 
+  vpc_config = {
+    subnet_ids = local.network_config.subnets
+    security_group_ids = [
+      aws_security_group.egress.id,
+      local.network_config.ec_privatelink_security_group_id,
+    ]
+  }
+
   environment_variables = {
     topic_arn = module.matcher_output_topic.arn
 
