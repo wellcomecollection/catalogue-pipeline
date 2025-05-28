@@ -11,14 +11,15 @@ def check_cluster_status() -> str:
     )
 
     cluster_info = response["DBClusters"][0]
-    return cluster_info["Status"]
+    status: str = cluster_info["Status"]
+    return status
 
 
-def handler() -> str:
+def handler() -> dict:
     return {"status": check_cluster_status()}
 
 
-def lambda_handler(event: dict, context: typing.Any) -> str:
+def lambda_handler(event: dict, context: typing.Any) -> dict:
     return handler()
 
 
