@@ -50,10 +50,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Scale up cluster"
       },
       "Scale up cluster" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
-        Output   = "{% $states.input %}",
-        Parameters = {
+        Type       = "Task"
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Output     = "{% $states.input %}",
+        Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
           Input = {
             min_capacity = 24,
@@ -101,10 +101,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Scale down cluster"
       },
       "Scale down cluster" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
-        Output   = "{% $states.input %}",
-        Parameters = {
+        Type       = "Task"
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Output     = "{% $states.input %}",
+        Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
           Input = {
             min_capacity = 1,
