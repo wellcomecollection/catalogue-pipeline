@@ -2,6 +2,7 @@ import argparse
 import typing
 
 import boto3
+
 import config
 
 
