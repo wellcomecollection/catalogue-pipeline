@@ -11,6 +11,7 @@ module "graph_scaler_lambda" {
   filename = data.archive_file.empty_zip.output_path
 
   handler     = "graph_scaler.lambda_handler"
+
   memory_size = 128
   timeout     = 900 // 15 minutes
 
