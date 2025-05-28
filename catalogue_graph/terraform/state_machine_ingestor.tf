@@ -50,7 +50,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Scale up cluster"
       },
       "Scale up cluster" = {
-        Type = "Task",
+        Type     = "Task",
         Resource = "arn:aws:states:::lambda:invoke",
         Output   = "{% $states.input %}",
         Arguments = {
@@ -101,7 +101,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Scale down cluster"
       },
       "Scale down cluster" = {
-        Type = "Task",
+        Type     = "Task",
         Resource = "arn:aws:states:::lambda:invoke",
         Output   = "{% $states.input %}",
         Arguments = {
