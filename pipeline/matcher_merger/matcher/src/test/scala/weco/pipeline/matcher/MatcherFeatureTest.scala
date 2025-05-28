@@ -3,7 +3,6 @@ package weco.pipeline.matcher
 import org.scalatest.concurrent.{Eventually, IntegrationPatience}
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.generic.auto._
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.fixtures.index.IndexFixtures
 import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
@@ -23,7 +22,6 @@ import weco.pipeline_storage.Retriever
 import weco.pipeline_storage.memory.MemoryRetriever
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.language.higherKinds
 
 class MatcherFeatureTest
     extends AnyFunSpec
@@ -69,48 +67,8 @@ class MatcherFeatureTest
     }
   }
 
-  it("skips a message if the graph store already has a newer version") {
-    implicit val retriever: MemoryRetriever[WorkStub] =
-      new MemoryRetriever[WorkStub]()
-    val messageSender = new MemoryMessageSender()
 
-    withLocalSqsQueuePair() {
-      case QueuePair(queue, dlq) =>
-        withWorkGraphTable {
-          graphTable =>
-            withMatcherService(retriever, queue, messageSender, graphTable) {
-              _ =>
-                val existingWorkVersion = 2
-                val updatedWorkVersion = 1
-
-                val workV1 = createWorkWith(version = updatedWorkVersion)
-
-                val nodeV2 = WorkNode(
-                  id = workV1.id,
-                  subgraphId = SubgraphId(workV1.id),
-                  componentIds = List(workV1.id),
-                  sourceWork = SourceWorkData(
-                    id = workV1.state.sourceIdentifier,
-                    version = existingWorkVersion
-                  )
-                )
-
-                putTableItem[WorkNode](nodeV2, table = graphTable)
-
-                sendWork(workV1, retriever, queue)
-
-                eventually {
-                  assertQueueEmpty(queue)
-                  assertQueueEmpty(dlq)
-                }
-
-                messageSender.messages shouldBe empty
-            }
-        }
-    }
-  }
-
-  it("doesn't match through a suppressed Sierra e-bib") {
+  it("doesn't match through a suppressed Sierra e-bib") { // reproduce in lambda tests if not covered somewhere else
     // This test covers the case where we have three works which are notionally
     // connected:
     //

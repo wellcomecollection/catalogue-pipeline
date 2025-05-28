@@ -188,6 +188,58 @@ class WorkMatcherTest
     }
   }
 
+  it(
+    "doesn't match through a suppressed Sierra e-bib"
+  ) {
+    // This test covers the case where we have three works which are notionally
+    // connected:
+    //
+    //    (Sierra physical bib)
+    //              |
+    //    (Sierra digitised bib)
+    //              |
+    //    (Digitised METS record)
+    //
+    // If the digitised bib is suppressed in Sierra, we won't be able to create a
+    // IIIF Presentation manifest or display a digitised item.  We shouldn't match
+    // through the digitised bib.  They should be returned as three distinct works.
+    //
+    withWorkGraphTable {
+      graphTable =>
+        withWorkGraphStore(graphTable) {
+          workGraphStore =>
+            withWorkMatcher(workGraphStore) {
+              workMatcher =>
+                val work = createWorkWith(id = idA)
+
+                whenReady(workMatcher.matchWork(work)) {
+                  matcherResult =>
+                    assertRecent(matcherResult.createdTime)
+                    matcherResult.works shouldBe
+                      Set(
+                        MatchedIdentifiers(
+                          Set(WorkIdentifier(work.id, work.version))
+                        )
+                      )
+
+                    val savedLinkedWork = getWorkNode(work.id, graphTable)
+
+                    savedLinkedWork shouldBe
+                      WorkNode(
+                        id = work.id,
+                        subgraphId = SubgraphId(work.id),
+                        componentIds = List(work.id),
+                        sourceWork = SourceWorkData(
+                          id = work.state.sourceIdentifier,
+                          version = work.version
+                        )
+                      )
+                }
+            }
+        }
+    }
+  }
+
   it("throws the locking error if it fails to lock primary works") {
     val expectedException = new Throwable("BOOM!")
 

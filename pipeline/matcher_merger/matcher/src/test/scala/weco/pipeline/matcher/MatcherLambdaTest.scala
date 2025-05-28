@@ -4,16 +4,12 @@ import org.scalatest.LoneElement
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.lambda.{
-  Downstream,
-  SQSLambdaMessage,
-  SQSLambdaMessageFailedRetryable,
-  SQSLambdaMessageResult
-}
+import weco.lambda.{Downstream, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
 import weco.pipeline.matcher.matcher.WorksMatcher
 import weco.lambda.helpers.DownstreamHelper
 import weco.pipeline.matcher.fixtures.MatcherFixtures
+import weco.pipeline.matcher.models.MatcherResult
 
 class MatcherLambdaTest
     extends AnyFunSpec
@@ -55,12 +51,10 @@ class MatcherLambdaTest
           response shouldBe empty
         }
         it("sends all the identifiers downstream") {
-          downstream.msgSender.messages.map(
-            _.body
-          ) should contain theSameElementsAs Seq(
-            "g00dcafe",
-            "g00dd00d"
-          )
+          downstream.msgSender
+            .getMessages[MatcherResult]
+            .map(matcherResult => matcherResult.works
+              .flatMap(id => id.identifiers.map(_.identifier.toString()))) should contain theSameElementsAs Seq(Set("g00dcafe", "g00dd00d"))
         }
     }
   }
@@ -85,7 +79,8 @@ class MatcherLambdaTest
           all(results) shouldBe a[SQSLambdaMessageFailedRetryable]
         }
         it("does not notify downstream") {
-          downstream.msgSender.messages shouldBe Nil
+          downstream.msgSender
+            .getMessages[MatcherResult].length shouldBe 0
         }
     }
 
@@ -109,14 +104,15 @@ class MatcherLambdaTest
           results.loneElement shouldBe a[SQSLambdaMessageFailedRetryable]
         }
         it("notifies downstream only for successful ids") {
-          downstream.msgSender.messages
-            .map(
-              _.body
-            )
-            .loneElement shouldBe "g00dcafe"
+          downstream.msgSender
+            .getMessages[MatcherResult]
+            .map(matcherResult => matcherResult.works
+              .flatMap(id => id.identifiers
+                .map(_.identifier.toString()))) should contain theSameElementsAs  Seq(Set("g00dcafe"))
         }
     }
   }
+
   describe("when matcher results contain other identifiers") {
     val messages = Seq(
       SQSTestLambdaMessage(message = "baadd00d"), // fails
@@ -158,15 +154,14 @@ class MatcherLambdaTest
         it(
           "notifies downstream of *all* ids found in all matcher results, even if not mentioned in the messages from upstream"
         ) {
-          downstream.msgSender.messages.map(
-            _.body
-          ) should contain theSameElementsAs Seq(
-            "g00dcafe",
-            "beefcafe",
-            "cafef00d", // cafef00d was not one of the input messages, but it was found in the match for one of them
-            "f00df00d",
-            "f00dfeed"
-          )
+          downstream.msgSender
+            .getMessages[MatcherResult]
+            .map(matcherResult => matcherResult.works
+              .flatMap(id => id.identifiers
+                .map(_.identifier.toString()))) should contain theSameElementsAs Seq(
+                  Set("g00dcafe", "beefcafe", "cafef00d"), // cafef00d was not one of the input messages, but it was found in the match for one of them
+                  Set("f00df00d", "f00dfeed")
+                )
         }
     }
   }
