@@ -1,8 +1,8 @@
-module "graph_scaler_lambda" {
+module "graph_status_poller_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-scaler"
-  description = "Sets the minimum and maximum capacity of the serverless Neptune cluster."
+  name        = "catalogue-graph-status-poller"
+  description = "Checks the status of the serverless Neptune cluster."
   runtime     = "python3.13"
   publish     = true
 
@@ -10,7 +10,7 @@ module "graph_scaler_lambda" {
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
   filename = data.archive_file.empty_zip.output_path
 
-  handler = "graph_scaler.lambda_handler"
+  handler = "graph_status_poller.lambda_handler"
 
   memory_size = 128
   timeout     = 30 // 30 seconds
@@ -22,11 +22,10 @@ module "graph_scaler_lambda" {
 }
 
 
-data "aws_iam_policy_document" "neptune_scale" {
+data "aws_iam_policy_document" "neptune_status_poller" {
   statement {
     actions = [
-      "rds:DescribeDBClusters",
-      "rds:ModifyDBCluster"
+      "rds:DescribeDBClusters"
     ]
 
     resources = [
@@ -35,7 +34,7 @@ data "aws_iam_policy_document" "neptune_scale" {
   }
 }
 
-resource "aws_iam_role_policy" "graph_scaler_lambda_neptune_policy" {
-  role   = module.graph_scaler_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.neptune_scale.json
+resource "aws_iam_role_policy" "graph_status_poller_lambda_neptune_policy" {
+  role   = module.graph_status_poller_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.neptune_status_poller.json
 }
