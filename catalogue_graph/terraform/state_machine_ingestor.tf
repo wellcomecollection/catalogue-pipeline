@@ -24,14 +24,14 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
     QueryLanguage = "JSONata"
     Comment       = "Ingest catalogue concept data into the pipeline cluster."
     StartAt       = "Trigger ingest"
-    States        = {
+    States = {
       "Trigger ingest" = {
-        Type      = "Task"
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_trigger_lambda.lambda.arn,
-          Payload      = {
+          Payload = {
             pipeline_date = local.pipeline_date
             index_date    = local.concepts_index_date
           }
@@ -39,9 +39,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next = "Monitor trigger ingest"
       },
       "Monitor trigger ingest" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_trigger_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -50,34 +50,34 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Scale up cluster"
       },
       "Scale up cluster" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
-        Output     = "{% $states.input %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
-          Input           = {
+          Input = {
             min_capacity = 24,
             max_capacity = 32
           }
         },
         Retry = local.DefaultRetry,
-        Next = "Map load to s3"
+        Next  = "Map load to s3"
       }
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
       "Map load to s3" = {
         Type           = "Map",
         MaxConcurrency = 6
-        ItemProcessor  = {
+        ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Load shard to s3",
-          States  = {
+          States = {
             "Load shard to s3" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::lambda:invoke",
-              Output    = "{% $states.result.Payload %}",
+              Type     = "Task",
+              Resource = "arn:aws:states:::lambda:invoke",
+              Output   = "{% $states.result.Payload %}",
               Arguments = {
                 FunctionName = module.ingestor_loader_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
@@ -90,9 +90,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next = "Monitor loader output"
       },
       "Monitor loader output" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_loader_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -101,12 +101,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Scale down cluster"
       },
       "Scale down cluster" = {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
-        Output     = "{% $states.input %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
-          Input           = {
+          Input = {
             min_capacity = 1,
             max_capacity = 32
           }
@@ -117,17 +117,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       "Map index to ES" = {
         Type           = "Map",
         MaxConcurrency = 1
-        ItemProcessor  = {
+        ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Index shard to ES",
-          States  = {
+          States = {
             "Index shard to ES" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::lambda:invoke",
-              Output    = "{% $states.result.Payload %}",
+              Type     = "Task",
+              Resource = "arn:aws:states:::lambda:invoke",
+              Output   = "{% $states.result.Payload %}",
               Arguments = {
                 FunctionName = module.ingestor_indexer_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
@@ -137,9 +137,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
                   ErrorEquals     = local.DefaultErrorEquals,
                   IntervalSeconds = 300,
                   # Don't try again yet!
-                  MaxAttempts     = 1,
-                  BackoffRate     = 2,
-                  JitterStrategy  = "FULL"
+                  MaxAttempts    = 1,
+                  BackoffRate    = 2,
+                  JitterStrategy = "FULL"
                 }
               ],
               End = true
@@ -149,12 +149,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next = "Remove documents"
       },
       "Remove documents" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.index_remover_lambda.lambda.arn,
-          Payload      = {
+          Payload = {
             pipeline_date = local.pipeline_date,
             index_date    = local.concepts_index_date
           }
