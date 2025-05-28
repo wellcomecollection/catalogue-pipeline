@@ -1,6 +1,13 @@
 package weco.pipeline.matcher
 
-import weco.lambda.{ApplicationConfig, Downstream, SQSBatchResponseLambdaApp, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
+import weco.lambda.{
+  ApplicationConfig,
+  Downstream,
+  SQSBatchResponseLambdaApp,
+  SQSLambdaMessage,
+  SQSLambdaMessageFailedRetryable,
+  SQSLambdaMessageResult
+}
 import weco.pipeline.matcher.matcher.WorksMatcher
 import weco.pipeline.matcher.models.MatcherResult
 
@@ -36,18 +43,24 @@ trait MatcherSQSLambda[Config <: ApplicationConfig]
     // Next, we must do two things:
     // 1. notify downstream with all the MatcherResults.
     // 2. filter out any successful ids from the messagesMap and return the bad messageIds.
-    resultsFuture.map { results: Iterable[MatcherResult] =>
-      // flatten sets of ids in MatcherResult into a single set of Strings.
-      val initialIdentifiers = results.flatMap(_.allUnderlyingIdentifiers).toSet
+    resultsFuture.map {
+      results: Iterable[MatcherResult] =>
+        // flatten sets of ids in MatcherResult into a single set of Strings.
+        val initialIdentifiers =
+          results.flatMap(_.allUnderlyingIdentifiers).toSet
 
-      results.foldLeft(initialIdentifiers) { (identifiers, result) =>
-        downstream.notify(result)(MatcherResult.encoder) match {
-          case Success(_) => identifiers
-          // remove from initialIdentifiers list any identifier that was not successfully sent downstream
-          case Failure(_) => identifiers -- result.works.flatMap(id => id.identifiers.map(_.identifier.toString()))
+        results.foldLeft(initialIdentifiers) {
+          (identifiers, result) =>
+            downstream.notify(result)(MatcherResult.encoder) match {
+              case Success(_) => identifiers
+              // remove from initialIdentifiers list any identifier that was not successfully sent downstream
+              case Failure(_) =>
+                identifiers -- result.works.flatMap(
+                  id => id.identifiers.map(_.identifier.toString())
+                )
+            }
         }
-      }
-      findMissingMessages(messagesMap, initialIdentifiers)
+        findMissingMessages(messagesMap, initialIdentifiers)
     }
   }
 
