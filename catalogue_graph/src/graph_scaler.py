@@ -1,10 +1,7 @@
 import argparse
-import math
-import time
 import typing
 
 import boto3
-
 import config
 
 
@@ -20,40 +17,8 @@ def scale_cluster(min_capacity: float, max_capacity: float) -> None:
     )
 
 
-def check_cluster_ncus() -> dict:
-    client = boto3.client("neptune")
-    response = client.describe_db_clusters(
-        DBClusterIdentifier=config.NEPTUNE_CLUSTER_IDENTIFIER,
-    )
-
-    cluster_info = response["DBClusters"][0]
-    scaling_config = cluster_info["ServerlessV2ScalingConfiguration"]
-
-    return {
-        "min_capacity": scaling_config["MinCapacity"],
-        "max_capacity": scaling_config["MaxCapacity"],
-        "status": cluster_info["Status"],
-    }
-
-
 def handler(min_capacity: float, max_capacity: float) -> None:
-    curr_capacity = check_cluster_ncus()
-    print(f"Current minimum capacity: {curr_capacity['min_capacity']}.")
-    print(f"Current maximum capacity: {curr_capacity['max_capacity']}.")
-
     scale_cluster(min_capacity, max_capacity)
-
-    while not (
-        math.isclose(curr_capacity["min_capacity"], min_capacity)
-        and math.isclose(curr_capacity["max_capacity"], max_capacity)
-        and curr_capacity["status"] == "available"
-    ):
-        time.sleep(30)
-        curr_capacity = check_cluster_ncus()
-        print(curr_capacity)
-
-    print(f"Successfully scaled minimum capacity to {min_capacity}.")
-    print(f"Successfully scaled maximum capacity to {max_capacity}.")
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
