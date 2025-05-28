@@ -2,13 +2,12 @@
 
 import argparse
 import pprint
+import time
 import typing
 
 import boto3
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -17,6 +16,7 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from models.graph_node import ConceptType
+from pydantic import BaseModel
 from utils.aws import get_neptune_client
 from utils.types import WorkConceptKey
 
@@ -310,6 +310,13 @@ def related_query_result_to_dict(related_to: list[dict]) -> dict[str, list[dict]
     return {item["id"]: item["related"] for item in related_to}
 
 
+def time_query(client, query, params):
+    t = time.time()
+    result = client.run_open_cypher_query(query, params)
+    print(f"Retrieved {len(result)} records in {round(time.time() - t)} seconds.")
+    return result
+
+
 def extract_data(
     start_offset: int, end_index: int, is_local: bool
 ) -> ConceptsQueryResult:
@@ -357,44 +364,33 @@ def extract_data(
     }
 
     print("Running concept query...")
-    concept_result = client.run_open_cypher_query(CONCEPT_QUERY, params)
-    print(f"Retrieved {len(concept_result)} records")
+    concept_result = time_query(client, CONCEPT_QUERY, params)
 
     print("Running related to query...")
-    related_to_result = client.run_open_cypher_query(related_to_query, params)
-    print(f"Retrieved {len(related_to_result)} records")
+    related_to_result = time_query(client, related_to_query, params)
 
     print("Running field of work query...")
-    field_of_work_result = client.run_open_cypher_query(field_of_work_query, params)
-    print(f"Retrieved {len(field_of_work_result)} records")
+    field_of_work_result = time_query(client, field_of_work_query, params)
 
     print("Running narrower than query...")
-    narrower_than_result = client.run_open_cypher_query(narrower_than_query, params)
-    print(f"Retrieved {len(narrower_than_result)} records")
+    narrower_than_result = time_query(client, narrower_than_query, params)
 
     print("Running broader than query...")
-    broader_than_result = client.run_open_cypher_query(broader_than_query, params)
-    print(f"Retrieved {len(broader_than_result)} records")
+    broader_than_result = time_query(client, broader_than_query, params)
 
     print("Running people query...")
-    people_result = client.run_open_cypher_query(people_query, params)
-    print(f"Retrieved {len(people_result)} records")
+    people_result = time_query(client, people_query, params)
 
     print("Running referenced together query...")
-    referenced_together_result = client.run_open_cypher_query(
-        referenced_together_query, params
-    )
-    print(f"Retrieved {len(referenced_together_result)} records")
+    referenced_together_result = time_query(client, referenced_together_query, params)
 
     print("Running frequent collaborators query...")
-    frequent_collaborators_result = client.run_open_cypher_query(
-        frequent_collaborators_query, params
+    frequent_collaborators_result = time_query(
+        client, frequent_collaborators_query, params
     )
-    print(f"Retrieved {len(frequent_collaborators_result)} records")
 
     print("Running related topics query...")
-    related_topics_result = client.run_open_cypher_query(related_topics_query, params)
-    print(f"Retrieved {len(related_topics_result)} records")
+    related_topics_result = time_query(client, related_topics_query, params)
 
     return ConceptsQueryResult(
         concepts=concept_result,

@@ -66,7 +66,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
       "Map load to s3" = {
         Type           = "Map",
-        MaxConcurrency = 6
+        MaxConcurrency = 3
         ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
