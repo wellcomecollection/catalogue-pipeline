@@ -10,7 +10,7 @@ module "graph_status_poller_lambda" {
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "graph_status_poller.lambda_handler"
+  handler = "graph_status_poller.lambda_handler"
 
   memory_size = 128
   timeout     = 30 // 30 seconds
