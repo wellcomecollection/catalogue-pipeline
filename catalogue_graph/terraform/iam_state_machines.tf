@@ -58,6 +58,7 @@ resource "aws_iam_policy" "state_machine_policy" {
           module.ingestor_trigger_monitor_lambda.lambda.arn,
           module.graph_remover_lambda.lambda.arn,
           module.index_remover_lambda.lambda.arn,
+          module.graph_scaler_lambda.lambda.arn,
         ]
       },
       {
