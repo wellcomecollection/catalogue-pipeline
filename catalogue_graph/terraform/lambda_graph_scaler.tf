@@ -20,3 +20,22 @@ module "graph_scaler_lambda" {
     security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
   }
 }
+
+
+data "aws_iam_policy_document" "neptune_scale" {
+  statement {
+    actions = [
+      "rds:DescribeDBClusters",
+      "rds:ModifyDBCluster"
+    ]
+
+    resources = [
+      aws_neptune_cluster.catalogue_graph_cluster.arn
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "graph_scaler_lambda_neptune_policy" {
+  role   = module.graph_scaler_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.neptune_scale.json
+}
