@@ -310,6 +310,13 @@ def related_query_result_to_dict(related_to: list[dict]) -> dict[str, list[dict]
     return {item["id"]: item["related"] for item in related_to}
 
 
+def time_query(client, query, params):
+    t = time.time()
+    result = client.run_open_cypher_query(query, params)
+    print(f"Retrieved {len(result)} records in {round(time.time() - t)} seconds.")
+    return result
+
+
 def extract_data(
     start_offset: int, end_index: int, is_local: bool
 ) -> ConceptsQueryResult:
