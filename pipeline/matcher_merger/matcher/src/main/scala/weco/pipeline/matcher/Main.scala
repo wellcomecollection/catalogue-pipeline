@@ -1,47 +1,24 @@
 package weco.pipeline.matcher
-
-import org.apache.pekko.actor.ActorSystem
-import com.typesafe.config.Config
-import org.scanamo.generic.auto._
-import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
+import grizzled.slf4j.Logging
+import weco.lambda._
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
-import weco.pipeline.matcher.matcher.WorkMatcher
-import weco.pipeline.matcher.services.MatcherWorkerService
-import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
-import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
-import weco.typesafe.WellcomeTypesafeApp
+import weco.pipeline.matcher.matcher.StoredWorksMatcher
 
-import scala.concurrent.ExecutionContext
+import org.scanamo.generic.auto._
 import scala.language.higherKinds
 
-object Main extends WellcomeTypesafeApp with MatcherConfigurable {
-  runWithConfig {
-    rawConfig: Config =>
-      implicit val actorSystem: ActorSystem =
-        ActorSystem("main-actor-system")
-      implicit val executionContext: ExecutionContext =
-        actorSystem.dispatcher
+object Main
+    extends MatcherSQSLambda[MatcherConfig]
+    with MatcherConfigurable
+    with Logging {
 
-      val config: MatcherConfig = build(rawConfig)
-
-      val workMatcher =
-        WorkMatcher(config.dynamoConfig, config.dynamoLockDAOConfig)
-
-      val retriever =
-        new ElasticWorkStubRetriever(
-          client = ElasticBuilder.buildElasticClient(config.elasticConfig),
-          index = config.index
-        )
-
-      new MatcherWorkerService(
-        PipelineStorageStreamBuilder.buildPipelineStorageConfig(rawConfig),
-        retriever = retriever,
-        msgStream = SQSBuilder.buildSQSStream[NotificationMessage](rawConfig),
-        msgSender = SNSBuilder
-          .buildSNSMessageSender(rawConfig, subject = "Sent from the matcher"),
-        workMatcher = workMatcher
-      )
-  }
+  override protected val worksMatcher: StoredWorksMatcher = StoredWorksMatcher(
+    config.elasticConfig,
+    config.index,
+    config.dynamoConfig,
+    config.dynamoLockDAOConfig
+  )
+  override protected val downstream: Downstream = Downstream(
+    config.downstreamConfig
+  )
 }

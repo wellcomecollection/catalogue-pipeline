@@ -40,13 +40,20 @@ trait MatcherSQSLambda[Config <: ApplicationConfig]
     // each of which contains a set of affected ids
 
     // Next, we must do two things:
-    // 1. notify downstream with all the ids in all the results.
+    // 1. notify downstream with all the MatcherResults.
     // 2. filter out any successful ids from the messagesMap and return the bad messageIds.
     resultsFuture.map {
       results: Iterable[MatcherResult] =>
-        // as a prerequisite for both, flatten sets of ids in MatcherResult into a single set of Strings.
         val identifiers = results.flatMap(_.allUnderlyingIdentifiers).toSet
-        identifiers.foreach(downstream.notify)
+        // If we have failed to notify downstream, we will throw an exception
+        // this could be smarter, but for now we will just fail the whole batch
+        if (
+          results
+            .map(downstream.notify(_)(MatcherResult.encoder))
+            .exists(_.isFailure)
+        ) {
+          throw new RuntimeException("Failed to notify downstream")
+        }
         findMissingMessages(messagesMap, identifiers)
     }
   }
