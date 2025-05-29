@@ -11,7 +11,7 @@ import weco.lambda.helpers.DownstreamHelper
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.MatcherResult
 
-class MatcherLambdaTest
+class MatcherFeatureTest
     extends AnyFunSpec
     with Matchers
     with LoneElement

@@ -7,7 +7,7 @@ import weco.pipeline.matcher.matcher.StoredWorksMatcher
 import org.scanamo.generic.auto._
 import scala.language.higherKinds
 
-object LambdaMain
+object Main
     extends MatcherSQSLambda[MatcherConfig]
     with MatcherConfigurable
     with Logging {

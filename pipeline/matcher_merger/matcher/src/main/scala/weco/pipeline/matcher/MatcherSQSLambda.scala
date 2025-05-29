@@ -12,7 +12,6 @@ import weco.pipeline.matcher.matcher.WorksMatcher
 import weco.pipeline.matcher.models.MatcherResult
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 trait MatcherSQSLambda[Config <: ApplicationConfig]
     extends SQSBatchResponseLambdaApp[String, Config] {
@@ -45,22 +44,13 @@ trait MatcherSQSLambda[Config <: ApplicationConfig]
     // 2. filter out any successful ids from the messagesMap and return the bad messageIds.
     resultsFuture.map {
       results: Iterable[MatcherResult] =>
-        // flatten sets of ids in MatcherResult into a single set of Strings.
-        val initialIdentifiers =
-          results.flatMap(_.allUnderlyingIdentifiers).toSet
-
-        results.foldLeft(initialIdentifiers) {
-          (identifiers, result) =>
-            downstream.notify(result)(MatcherResult.encoder) match {
-              case Success(_) => identifiers
-              // remove from initialIdentifiers list any identifier that was not successfully sent downstream
-              case Failure(_) =>
-                identifiers -- result.works.flatMap(
-                  id => id.identifiers.map(_.identifier.toString())
-                )
-            }
+        val identifiers = results.flatMap(_.allUnderlyingIdentifiers).toSet
+        // If we have failed to notify downstream, we will throw an exception
+        // this could be smarter, but for now we will just fail the whole batch
+        if(results.map(downstream.notify(_)(MatcherResult.encoder)).exists(_.isFailure)){
+            throw new RuntimeException("Failed to notify downstream")
         }
-        findMissingMessages(messagesMap, initialIdentifiers)
+        findMissingMessages(messagesMap, identifiers)
     }
   }
 
