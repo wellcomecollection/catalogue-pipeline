@@ -30,14 +30,14 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
     QueryLanguage = "JSONata"
     Comment       = "Ingest catalogue concept data into the pipeline cluster."
     StartAt       = "Trigger ingest"
-    States        = {
+    States = {
       "Trigger ingest" = {
-        Type      = "Task"
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_trigger_lambda.lambda.arn,
-          Payload      = {
+          Payload = {
             pipeline_date = local.pipeline_date
             index_date    = local.concepts_index_date
           }
@@ -45,9 +45,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next = "Monitor trigger ingest"
       },
       "Monitor trigger ingest" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_trigger_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -58,12 +58,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       # Make sure the cluster is scaled up before we run queries against it. Neptune's automatic scaling system
       # is not responsive enough and often results in queries timing out and returning errors.
       "Scale up cluster" = {
-        Type      = "Task"
-        Resource  = "arn:aws:states:::states:startExecution.sync:2",
-        Output    = "{% $states.input %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
         Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
-          Input           = {
+          Input = {
             min_capacity = local.cluster_min_scaled_up_capacity,
             max_capacity = local.cluster_max_capacity
           }
@@ -75,17 +75,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       "Map load to s3" = {
         Type           = "Map",
         MaxConcurrency = local.s3_loader_concurrency
-        ItemProcessor  = {
+        ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Load shard to s3",
-          States  = {
+          States = {
             "Load shard to s3" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::lambda:invoke",
-              Output    = "{% $states.result.Payload %}",
+              Type     = "Task",
+              Resource = "arn:aws:states:::lambda:invoke",
+              Output   = "{% $states.result.Payload %}",
               Arguments = {
                 FunctionName = module.ingestor_loader_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
@@ -104,9 +104,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next = "Monitor loader output"
       },
       "Monitor loader output" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_loader_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -122,12 +122,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       },
       # Keeping the cluster scaled up is expensive, so we scale it back down after we've extracted all data
       "Scale down cluster" = {
-        Type      = "Task"
-        Resource  = "arn:aws:states:::states:startExecution.sync:2",
-        Output    = "{% $states.input %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
         Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
-          Input           = {
+          Input = {
             min_capacity = local.cluster_min_scaled_down_capacity,
             max_capacity = local.cluster_max_capacity
           }
@@ -138,17 +138,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       "Map index to ES" = {
         Type           = "Map",
         MaxConcurrency = 1
-        ItemProcessor  = {
+        ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Index shard to ES",
-          States  = {
+          States = {
             "Index shard to ES" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::lambda:invoke",
-              Output    = "{% $states.result.Payload %}",
+              Type     = "Task",
+              Resource = "arn:aws:states:::lambda:invoke",
+              Output   = "{% $states.result.Payload %}",
               Arguments = {
                 FunctionName = module.ingestor_indexer_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
@@ -158,9 +158,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
                   ErrorEquals     = local.DefaultErrorEquals,
                   IntervalSeconds = 300,
                   # Don't try again yet!
-                  MaxAttempts     = 1,
-                  BackoffRate     = 2,
-                  JitterStrategy  = "FULL"
+                  MaxAttempts    = 1,
+                  BackoffRate    = 2,
+                  JitterStrategy = "FULL"
                 }
               ],
               End = true
@@ -170,12 +170,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next = "Remove documents"
       },
       "Remove documents" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.index_remover_lambda.lambda.arn,
-          Payload      = {
+          Payload = {
             pipeline_date = local.pipeline_date,
             index_date    = local.concepts_index_date
           }
@@ -189,12 +189,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       # Any steps between 'Scale up cluster' and 'Scale down cluster' can fail. If this happens, we need
       # to make sure the cluster still gets scaled down to prevent extra costs.
       "Clean up" = {
-        Type      = "Task"
-        Resource  = "arn:aws:states:::states:startExecution.sync:2",
-        Output    = "{% $states.input %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
         Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
-          Input           = {
+          Input = {
             min_capacity = local.cluster_min_scaled_down_capacity,
             max_capacity = local.cluster_max_capacity
           }
