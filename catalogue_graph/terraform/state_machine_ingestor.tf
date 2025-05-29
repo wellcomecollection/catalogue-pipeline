@@ -14,6 +14,12 @@ locals {
       JitterStrategy  = "FULL"
     }
   ]
+
+  cluster_min_scaled_down_capacity = 1
+  cluster_min_scaled_up_capacity   = 24
+  cluster_max_capacity             = 32
+
+  s3_loader_concurrency = 3
 }
 
 resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
@@ -47,12 +53,28 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           Payload      = "{% $states.input %}"
         },
         Retry = local.DefaultRetry,
+        Next  = "Scale up cluster"
+      },
+      # Make sure the cluster is scaled up before we run queries against it. Neptune's automatic scaling system
+      # is not responsive enough and often results in queries timing out and returning errors.
+      "Scale up cluster" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
+        Arguments = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
+          Input = {
+            min_capacity = local.cluster_min_scaled_up_capacity,
+            max_capacity = local.cluster_max_capacity
+          }
+        },
+        Retry = local.DefaultRetry,
         Next  = "Map load to s3"
       }
       # the next step is a state map that takes the json list output of the ingestor_trigger_lambda and maps it to a list of ingestor tasks
       "Map load to s3" = {
         Type           = "Map",
-        MaxConcurrency = 6
+        MaxConcurrency = local.s3_loader_concurrency
         ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
@@ -73,6 +95,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
             }
           }
         },
+        Catch = [
+          {
+            ErrorEquals = ["States.ALL"],
+            Next        = "Clean up"
+          }
+        ],
         Next = "Monitor loader output"
       },
       "Monitor loader output" = {
@@ -84,7 +112,28 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           Payload      = "{% $states.input %}"
         },
         Retry = local.DefaultRetry,
-        Next  = "Map index to ES"
+        Catch = [
+          {
+            ErrorEquals = ["States.ALL"],
+            Next        = "Clean up"
+          }
+        ],
+        Next = "Scale down cluster"
+      },
+      # Keeping the cluster scaled up is expensive, so we scale it back down after we've extracted all data
+      "Scale down cluster" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
+        Arguments = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
+          Input = {
+            min_capacity = local.cluster_min_scaled_down_capacity,
+            max_capacity = local.cluster_max_capacity
+          }
+        },
+        Retry = local.DefaultRetry,
+        "Next" : "Map index to ES"
       },
       "Map index to ES" = {
         Type           = "Map",
@@ -136,6 +185,27 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       },
       Success = {
         Type = "Succeed"
+      },
+      # Any steps between 'Scale up cluster' and 'Scale down cluster' can fail. If this happens, we need
+      # to make sure the cluster still gets scaled down to prevent extra costs.
+      "Clean up" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Output   = "{% $states.input %}",
+        Arguments = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_scaler.arn
+          Input = {
+            min_capacity = local.cluster_min_scaled_down_capacity,
+            max_capacity = local.cluster_max_capacity
+          }
+        },
+        Retry = local.DefaultRetry,
+        "Next" : "Fail"
+      },
+      Fail = {
+        Type  = "Fail",
+        Error = "MainTaskError",
+        Cause = "$.errorInfo.Cause"
       }
     }
   })

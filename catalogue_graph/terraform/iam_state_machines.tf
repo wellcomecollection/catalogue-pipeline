@@ -42,7 +42,8 @@ resource "aws_iam_policy" "state_machine_policy" {
           aws_sfn_state_machine.catalogue_graph_bulk_loaders_daily.arn,
           aws_sfn_state_machine.catalogue_graph_ingestor.arn,
           aws_sfn_state_machine.concepts_pipeline_monthly.arn,
-          aws_sfn_state_machine.concepts_pipeline_daily.arn
+          aws_sfn_state_machine.concepts_pipeline_daily.arn,
+          aws_sfn_state_machine.catalogue_graph_scaler.arn
         ]
       },
       {
@@ -58,6 +59,8 @@ resource "aws_iam_policy" "state_machine_policy" {
           module.ingestor_trigger_monitor_lambda.lambda.arn,
           module.graph_remover_lambda.lambda.arn,
           module.index_remover_lambda.lambda.arn,
+          module.graph_scaler_lambda.lambda.arn,
+          module.graph_status_poller_lambda.lambda.arn,
         ]
       },
       {
