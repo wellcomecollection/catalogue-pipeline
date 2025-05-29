@@ -46,7 +46,9 @@ trait MatcherSQSLambda[Config <: ApplicationConfig]
       results: Iterable[MatcherResult] =>
         // as a prerequisite for both, flatten sets of ids in MatcherResult into a single set of Strings.
         val identifiers = results.flatMap(_.allUnderlyingIdentifiers).toSet
-        results.foreach(result => downstream.notify(result)(MatcherResult.encoder)) // catch the try
+        results.foreach(
+          result => downstream.notify(result)(MatcherResult.encoder)
+        ) // catch the try
         findMissingMessages(messagesMap, identifiers)
     }
   }
