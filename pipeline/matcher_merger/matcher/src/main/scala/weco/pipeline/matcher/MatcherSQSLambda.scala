@@ -47,8 +47,12 @@ trait MatcherSQSLambda[Config <: ApplicationConfig]
         val identifiers = results.flatMap(_.allUnderlyingIdentifiers).toSet
         // If we have failed to notify downstream, we will throw an exception
         // this could be smarter, but for now we will just fail the whole batch
-        if(results.map(downstream.notify(_)(MatcherResult.encoder)).exists(_.isFailure)){
-            throw new RuntimeException("Failed to notify downstream")
+        if (
+          results
+            .map(downstream.notify(_)(MatcherResult.encoder))
+            .exists(_.isFailure)
+        ) {
+          throw new RuntimeException("Failed to notify downstream")
         }
         findMissingMessages(messagesMap, identifiers)
     }
