@@ -5,9 +5,7 @@
 #    pip-compile ./requirements.in
 #
 anyio==3.2.1
-    # via
-    #   httpcore
-    #   httpx
+    # via httpx
 boto3==1.17.103
     # via -r ./requirements.in
 botocore==1.20.103
@@ -17,6 +15,7 @@ botocore==1.20.103
 certifi==2024.8.30
     # via
     #   elasticsearch
+    #   httpcore
     #   httpx
     #   requests
 charset-normalizer==3.3.2
@@ -27,11 +26,11 @@ dateparser==1.0.0
     # via maya
 elasticsearch==7.13.1
     # via -r ./requirements.in
-h11==0.12.0
+h11==0.16.0
     # via httpcore
-httpcore==0.13.6
+httpcore==1.0.9
     # via httpx
-httpx==0.25.1
+httpx==0.28.1
     # via -r ./requirements.in
 humanize==3.9.0
     # via maya
@@ -76,10 +75,7 @@ six==1.16.0
 snaptime==0.2.4
     # via maya
 sniffio==1.2.0
-    # via
-    #   anyio
-    #   httpcore
-    #   httpx
+    # via anyio
 termcolor==1.1.0
     # via yaspin
 tqdm==4.61.1
