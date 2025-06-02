@@ -44,7 +44,7 @@ def get_client(
 ) -> elasticsearch.Elasticsearch:
     config = (
         ElasticsearchConfig()
-        if pipeline_date is None
+        if pipeline_date is None or pipeline_date == "dev"
         else get_pipeline_config(pipeline_date, is_local)
     )
     return ElasticsearchClient(config).client

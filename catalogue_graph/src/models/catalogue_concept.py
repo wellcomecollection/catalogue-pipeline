@@ -3,6 +3,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel
 
+from models.graph_node import ConceptType
+
 
 class ConceptsQueryResult(BaseModel):
     concepts: list[dict]
@@ -12,6 +14,8 @@ class ConceptsQueryResult(BaseModel):
     broader_than: dict[str, list]
     people: dict[str, list]
     referenced_together: dict[str, list]
+    frequent_collaborators: dict[str, list]
+    related_topics: dict[str, list]
 
 
 class ConceptsQuerySingleResult(BaseModel):
@@ -22,6 +26,8 @@ class ConceptsQuerySingleResult(BaseModel):
     broader_than: list[dict]
     people: list[dict]
     referenced_together: list[dict]
+    frequent_collaborators: list[dict]
+    related_topics: list[dict]
 
 
 class CatalogueConceptIdentifier(BaseModel):
@@ -33,6 +39,7 @@ class CatalogueConceptRelatedTo(BaseModel):
     label: str
     id: str
     relationshipType: str | None
+    conceptType: str
 
 
 def standardise_label(label: str | None) -> str | None:
@@ -90,15 +97,52 @@ def transform_related_concepts(
                 "relationship_type", ""
             )
 
+        if not related_item.get("concept_types"):
+            concept_type: ConceptType = "Concept"
+        else:
+            concept_type = get_most_specific_concept_type(related_item["concept_types"])
+
         if label.lower() not in used_labels:
             used_labels.add(label.lower())
             processed_items.append(
                 CatalogueConceptRelatedTo(
-                    id=concept_id, label=label, relationshipType=relationship_type
+                    id=concept_id,
+                    label=label,
+                    relationshipType=relationship_type,
+                    conceptType=concept_type,
                 )
             )
 
     return processed_items
+
+
+def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
+    """If a concept is classified under more than one type, pick the most specific one and return it."""
+
+    # Prioritise concepts, with more specific ones (e.g. 'Person') above less specific ones (e.g. 'Agent').
+    # Sometimes a concept is classified under types which are mutually exclusive. For example, there are
+    # several hundred concepts categorised as both a 'Person' and an 'Organisation'. These inconsistencies
+    # arise upstream, and we cannot easily resolve them here. To mitigate this issue, the priority list below
+    # is ordered to maximise the probability of choosing the right type based on an analysis of current inconsistencies.
+    # (For example, when a concept is categorised as both an 'Organisation' and a 'Place', the 'Place' type is almost
+    # always the correct one, which is why 'Place' is higher in the priority list than 'Organisation').
+    concept_types_by_priority: list[ConceptType] = [
+        "Genre",
+        "Place",
+        "Person",
+        "Organisation",
+        "Period",
+        "Meeting",
+        "Agent",
+        "Subject",
+        "Concept",
+    ]
+
+    for concept_type in concept_types_by_priority:
+        if concept_type in concept_types:
+            return concept_type
+
+    raise ValueError(f"Invalid set of concept types: {concept_types}.")
 
 
 class RelatedConcepts(BaseModel):
@@ -108,6 +152,8 @@ class RelatedConcepts(BaseModel):
     broaderThan: list[CatalogueConceptRelatedTo]
     people: list[CatalogueConceptRelatedTo]
     referencedTogether: list[CatalogueConceptRelatedTo]
+    frequentCollaborators: list[CatalogueConceptRelatedTo]
+    relatedTopics: list[CatalogueConceptRelatedTo]
 
 
 class CatalogueConcept(BaseModel):
@@ -116,7 +162,7 @@ class CatalogueConcept(BaseModel):
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[str]
-    type: str
+    type: ConceptType
     sameAs: list[str]
     relatedConcepts: RelatedConcepts
 
@@ -162,11 +208,18 @@ class CatalogueConcept(BaseModel):
         # one of those references to prevent duplication in the frontend.
         used_labels = {label.lower()}
 
+        # Concepts which are not connected to any Works will not have any types associated with them. We periodically
+        # remove such concepts from the graph, but there might be a few of them at any given point.
+        if not concept_data.get("concept_types"):
+            concept_type: ConceptType = "Concept"
+        else:
+            concept_type = get_most_specific_concept_type(concept_data["concept_types"])
+
         return CatalogueConcept(
             id=concept_data["concept"]["~properties"]["id"],
-            type=concept_data["concept"]["~properties"]["type"],
+            type=concept_type,
             label=label,
-            alternativeLabels=sorted(list(alternative_labels)),
+            alternativeLabels=sorted(list(set(alternative_labels))),
             description=description,
             identifiers=identifiers,
             sameAs=concept_data["same_as_concept_ids"],
@@ -179,6 +232,12 @@ class CatalogueConcept(BaseModel):
                     data.narrower_than, used_labels
                 ),
                 broaderThan=transform_related_concepts(data.broader_than, used_labels),
+                frequentCollaborators=transform_related_concepts(
+                    data.frequent_collaborators, used_labels
+                ),
+                relatedTopics=transform_related_concepts(
+                    data.related_topics, used_labels
+                ),
                 relatedTo=transform_related_concepts(data.related_to, used_labels),
                 referencedTogether=transform_related_concepts(
                     data.referenced_together, used_labels

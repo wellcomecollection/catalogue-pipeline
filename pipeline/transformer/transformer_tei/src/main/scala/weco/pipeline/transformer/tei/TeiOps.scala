@@ -20,7 +20,8 @@ object TeiOps {
         // some summary nodes can contain TEI specific xml tags, so we remove them
         Right(
           Some(
-            node.text.trim
+            node
+              .toString()
               // First, strip out any attributes in paragraph tags
               // This allows the next replacement to simply leave in
               // any paragraph tags without worrying about what to do
@@ -33,6 +34,7 @@ object TeiOps {
               // It also matches the poorly-formed </p/>, but we do not
               // expect to find anything like that.
               .replaceAll("""(?!</?p\s*/?>)<.*?>""", "")
+              .trim
           )
         )
       case Nil => Right(None)

@@ -66,19 +66,20 @@ object RelationSet {
     existingRelations: List[Relation],
     newRelations: List[Relation]
   ): List[Relation] = {
-    val newTitles =
-      newRelations.map(relation => removeTerminalPunctuation(relation.title))
-
-    // duplicated if it shares a title, but not if it already has an identifier.
-    def isRelationDuplicated(relation: Relation): Boolean =
-      relation.id.isEmpty && newTitles.contains(
-        removeTerminalPunctuation(relation.title)
-      )
-
-    val relationsToKeep =
-      existingRelations.filter(r => !isRelationDuplicated(r))
-    relationsToKeep ++ newRelations
+    // Retain any unidentified relations that do not have a replacement in the new list.
+    val retainedRelations = existingRelations filter {
+      oldRelation =>
+        oldRelation.id.isEmpty && !newRelations.exists(
+          newRelation => sameTitle(oldRelation, newRelation)
+        )
+    }
+    retainedRelations ++ newRelations
   }
+
+  private def sameTitle(oldRelation: Relation, newRelation: Relation): Boolean =
+    removeTerminalPunctuation(
+      newRelation.title
+    ) == removeTerminalPunctuation(oldRelation.title)
 
   /** The title used in a relation may come from one of two places:
     *   1. The title of the related document 2. The title of the link to the

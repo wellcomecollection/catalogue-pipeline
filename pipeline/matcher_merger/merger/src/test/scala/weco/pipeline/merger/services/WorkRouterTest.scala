@@ -23,7 +23,7 @@ class WorkRouterSpec
       ),
     ).collectionPath(CollectionPath("send/to/pathConcatenator"))
 
-    workRouter(Left(work_sierra))
+    workRouter(work_sierra)
     getIncompletePathSent(workRouter.pathConcatenatorSender) shouldBe Seq("send/to/pathConcatenator")
   }
 
@@ -36,14 +36,14 @@ class WorkRouterSpec
       )
     ).collectionPath(CollectionPath("send/to/pathSender"))
 
-    workRouter(Left(work_calm))
+    workRouter(work_calm)
     getPathsSent(workRouter.pathSender) shouldBe Seq("send/to/pathSender")
   }
 
   it("uses workSender for Denormalised works") {
-    val work_no_collectionPath = denormalisedWork(canonicalId = CanonicalId("sierra_2"))
+    val work_no_collectionPath = mergedWork(canonicalId = CanonicalId("sierra_2"))
 
-    workRouter(Right(work_no_collectionPath))
+    workRouter(work_no_collectionPath)
     getWorksSent(workRouter.workSender) shouldBe Seq("sierra_2")
   }
 }

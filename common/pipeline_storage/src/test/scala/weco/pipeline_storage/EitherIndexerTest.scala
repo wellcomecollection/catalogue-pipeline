@@ -45,7 +45,7 @@ class EitherIndexerTest
   ): Unit = {
     withLocalInitialImagesIndex {
       imageIndex =>
-        withLocalMergedWorksIndex {
+        withLocalDenormalisedWorksIndex {
           workIndex =>
             val indexer = new EitherIndexer(
               leftIndexer = new ElasticIndexer[L](

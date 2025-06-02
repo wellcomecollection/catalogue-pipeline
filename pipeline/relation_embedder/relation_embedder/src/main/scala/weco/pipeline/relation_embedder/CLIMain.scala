@@ -27,7 +27,7 @@ object CLIMain extends App with StdInNDJSON[Batch] {
   private val batchProcessor = new BatchProcessor(
     relationsService = new PathQueryRelationsService(
       elasticClient = esClient,
-      index = Index(config.requireString("es.merged-works.index"))
+      index = Index(config.requireString("es.denormalised-works.index"))
     ),
     bulkWriter = new BulkSTDOutWriter(10),
     downstream = STDIODownstream

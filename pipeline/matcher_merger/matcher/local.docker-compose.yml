@@ -1,0 +1,19 @@
+services:
+  lambda:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: lambda_rie
+    volumes:
+      - ~/.aws:/root/.aws
+    ports:
+      - "9000:8080"
+    environment:
+      - AWS_PROFILE=platform-developer
+      - metrics_namespace=catalogue-dev_matcher
+      - es_protocol=https
+      - es_port=443
+      - dynamo_index=work-sets-index
+      - dynamo_lock_table_index=context-ids-index
+    env_file:
+      - .env

@@ -185,7 +185,7 @@ locals {
       write = []
     }
     concepts_api = {
-      read  = ["${local.es_concepts_index_prefix}-2025-03-06"]
+      read  = ["${local.es_concepts_index_prefix}*"]
       write = []
     }
     concepts_api_new = {

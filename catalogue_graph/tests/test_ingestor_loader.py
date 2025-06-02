@@ -9,10 +9,10 @@ from test_utils import load_json_fixture
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     CONCEPT_QUERY,
-    REFERENCED_TOGETHER_QUERY,
     IngestorIndexerObject,
     IngestorLoaderConfig,
     IngestorLoaderLambdaEvent,
+    get_referenced_together_query,
     get_related_query,
     handler,
 )
@@ -75,6 +75,7 @@ def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> 
         "limit": 1,
         "ignored_wikidata_ids": ["Q5", "Q151885"],
         "related_to_limit": 10,
+        "number_of_shared_works_threshold": 3,
     }
 
     MockRequest.mock_response(
@@ -129,7 +130,32 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=REFERENCED_TOGETHER_QUERY,
+        expected_query=get_referenced_together_query(),
+        mock_results=[],
+    )
+
+    add_neptune_mock_response(
+        expected_query=get_referenced_together_query(
+            source_referenced_types=["Person"],
+            related_referenced_types=["Person", "Organisation"],
+            source_referenced_in=["contributors"],
+            related_referenced_in=["contributors"],
+        ),
+        mock_results=[],
+    )
+
+    add_neptune_mock_response(
+        expected_query=get_referenced_together_query(
+            related_referenced_types=[
+                "Concept",
+                "Subject",
+                "Place",
+                "Meeting",
+                "Period",
+                "Genre",
+            ],
+            related_referenced_in=["subjects"],
+        ),
         mock_results=[],
     )
 
@@ -149,13 +175,22 @@ def get_catalogue_concept_mock(
     if MockNeptuneResponseItem.CONCEPT_BROADER_THAN in include:
         broader_than = [
             CatalogueConceptRelatedTo(
-                label="Electromagnetic Radiation", id="hstuwwsu", relationshipType=""
+                label="Electromagnetic Radiation",
+                id="hstuwwsu",
+                relationshipType="",
+                conceptType="Concept",
             ),
             CatalogueConceptRelatedTo(
-                label="Wave mechanics", id="hv6pemej", relationshipType=""
+                label="Wave mechanics",
+                id="hv6pemej",
+                relationshipType="",
+                conceptType="Concept",
             ),
             CatalogueConceptRelatedTo(
-                label="Electric waves", id="ugcgqepy", relationshipType=""
+                label="Electric waves",
+                id="ugcgqepy",
+                relationshipType="",
+                conceptType="Concept",
             ),
         ]
 
@@ -163,10 +198,16 @@ def get_catalogue_concept_mock(
     if MockNeptuneResponseItem.CONCEPT_PEOPLE in include:
         people = [
             CatalogueConceptRelatedTo(
-                label="Tegart, W. J. McG.", id="vc6xrky5", relationshipType=""
+                label="Tegart, W. J. McG.",
+                id="vc6xrky5",
+                relationshipType="",
+                conceptType="Person",
             ),
             CatalogueConceptRelatedTo(
-                label="Bube, Richard H., 1927-", id="garjbvhe", relationshipType=""
+                label="Bube, Richard H., 1927-",
+                id="garjbvhe",
+                relationshipType="",
+                conceptType="Person",
             ),
         ]
 
@@ -177,13 +218,14 @@ def get_catalogue_concept_mock(
                 label="Hilton, Violet, 1908-1969",
                 id="tzrtx26u",
                 relationshipType="has_sibling",
+                conceptType="Person",
             )
         ]
 
     return CatalogueConcept(
         id="id",
         label="label",
-        type="type",
+        type="Person",
         alternativeLabels=alternative_labels,
         description="Mesh description",
         identifiers=[
@@ -200,6 +242,8 @@ def get_catalogue_concept_mock(
             broaderThan=broader_than,
             people=people,
             referencedTogether=[],
+            frequentCollaborators=[],
+            relatedTopics=[],
         ),
     )
 
@@ -237,7 +281,7 @@ def test_ingestor_loader(
     result = handler(MOCK_INGESTOR_LOADER_EVENT, MOCK_INGESTOR_LOADER_CONFIG)
 
     assert result == MOCK_INGESTOR_INDEXER_EVENT
-    assert len(MockRequest.calls) == 7
+    assert len(MockRequest.calls) == 9
 
     request = MockRequest.calls[0]
     assert request["method"] == "POST"

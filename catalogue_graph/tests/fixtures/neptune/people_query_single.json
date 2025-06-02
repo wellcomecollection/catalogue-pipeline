@@ -37,7 +37,8 @@
             "alternative_labels": "Tegart, Greg"
           }
         }
-      ]
+      ],
+      "concept_types": ["Person"]
     },
     {
       "concept_node": {
@@ -75,7 +76,8 @@
             "alternative_labels": "Bube, Richard, 1927-||Bube, R. H. (Richard H.), 1927-"
           }
         }
-      ]
+      ],
+      "concept_types": ["Person", "Agent"]
     }
   ]
 }

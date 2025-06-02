@@ -1,177 +1,167 @@
 package weco.pipeline.matcher
 
-import org.scalatest.concurrent.{Eventually, IntegrationPatience}
+import org.scalatest.LoneElement
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.generic.auto._
-import weco.catalogue.internal_model.Implicits._
-import weco.catalogue.internal_model.fixtures.index.IndexFixtures
-import weco.catalogue.internal_model.work.DeletedReason.SuppressedFromSource
-import weco.catalogue.internal_model.work.generators.SourceWorkGenerators
-import weco.fixtures.TimeAssertions
-import weco.messaging.fixtures.SQS.QueuePair
-import weco.messaging.memory.MemoryMessageSender
+import weco.lambda.{Downstream, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
+import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
+import weco.pipeline.matcher.matcher.WorksMatcher
+import weco.lambda.helpers.DownstreamHelper
 import weco.pipeline.matcher.fixtures.MatcherFixtures
-import weco.pipeline.matcher.generators.{
-  MergeCandidateGenerators,
-  WorkStubGenerators
-}
-import weco.pipeline.matcher.models.MatcherResult._
-import weco.pipeline.matcher.models._
-import weco.pipeline.matcher.storage.elastic.ElasticWorkStubRetriever
-import weco.pipeline_storage.Retriever
-import weco.pipeline_storage.memory.MemoryRetriever
-
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.language.higherKinds
+import weco.pipeline.matcher.models.MatcherResult
 
 class MatcherFeatureTest
     extends AnyFunSpec
     with Matchers
-    with Eventually
-    with IntegrationPatience
+    with LoneElement
+    with ScalaFutures
     with MatcherFixtures
-    with IndexFixtures
-    with WorkStubGenerators
-    with SourceWorkGenerators
-    with MergeCandidateGenerators
-    with TimeAssertions {
+    with DownstreamHelper {
 
-  it("processes a single Work with nothing linked to it") {
-    implicit val retriever: MemoryRetriever[WorkStub] =
-      new MemoryRetriever[WorkStub]()
-    val messageSender = new MemoryMessageSender()
-
-    withLocalSqsQueue() {
-      queue =>
-        withMatcherService(retriever, queue, messageSender) {
-          _ =>
-            val work = createWorkWith(mergeCandidateIds = Set.empty)
-
-            val expectedWorks =
-              Set(
-                MatchedIdentifiers(
-                  identifiers =
-                    Set(WorkIdentifier(work.id, version = work.version))
-                )
-              )
-
-            sendWork(work, retriever, queue)
-
-            eventually {
-              messageSender.messages should have size 1
-
-              val result = messageSender.getMessages[MatcherResult].head
-              result.works shouldBe expectedWorks
-              assertRecent(result.createdTime)
-            }
-        }
-    }
+  private object SQSTestLambdaMessage {
+    def apply[T](message: T): SQSLambdaMessage[T] =
+      SQSLambdaMessage(messageId = randomUUID.toString, message = message)
   }
 
-  it("skips a message if the graph store already has a newer version") {
-    implicit val retriever: MemoryRetriever[WorkStub] =
-      new MemoryRetriever[WorkStub]()
-    val messageSender = new MemoryMessageSender()
+  /** Stub class representing the Lambda interface, which can be connected to a
+    * dummy matcher to test the behaviour of the lambda when faced with various
+    * responses.
+    */
+  private case class StubLambda(
+    worksMatcher: WorksMatcher,
+    downstream: Downstream
+  ) extends MatcherSQSLambda[MatcherConfig]
+      with MatcherConfigurable
 
-    withLocalSqsQueuePair() {
-      case QueuePair(queue, dlq) =>
-        withWorkGraphTable {
-          graphTable =>
-            withMatcherService(retriever, queue, messageSender, graphTable) {
-              _ =>
-                val existingWorkVersion = 2
-                val updatedWorkVersion = 1
-
-                val workV1 = createWorkWith(version = updatedWorkVersion)
-
-                val nodeV2 = WorkNode(
-                  id = workV1.id,
-                  subgraphId = SubgraphId(workV1.id),
-                  componentIds = List(workV1.id),
-                  sourceWork = SourceWorkData(
-                    id = workV1.state.sourceIdentifier,
-                    version = existingWorkVersion
-                  )
-                )
-
-                putTableItem[WorkNode](nodeV2, table = graphTable)
-
-                sendWork(workV1, retriever, queue)
-
-                eventually {
-                  assertQueueEmpty(queue)
-                  assertQueueEmpty(dlq)
-                }
-
-                messageSender.messages shouldBe empty
-            }
-        }
-    }
-  }
-
-  it("doesn't match through a suppressed Sierra e-bib") {
-    // This test covers the case where we have three works which are notionally
-    // connected:
-    //
-    //    (Sierra physical bib)
-    //              |
-    //    (Sierra digitised bib)
-    //              |
-    //    (Digitised METS record)
-    //
-    // If the digitised bib is suppressed in Sierra, we won't be able to create a
-    // IIIF Presentation manifest or display a digitised item.  We shouldn't match
-    // through the digitised bib.  They should be returned as three distinct works.
-    //
-    val sierraPhysicalBib = sierraPhysicalIdentifiedWork()
-
-    val sierraDigitisedBib = sierraDigitalIdentifiedWork()
-      .mergeCandidates(
-        List(createSierraPairMergeCandidateFor(sierraPhysicalBib))
+  describe("when everything is successful") {
+    val matcher = MatcherStub(Seq(Set(Set("g00dcafe"), Set("g00dd00d"))))
+    val downstream = new MemoryDownstream
+    val sut = StubLambda(matcher, downstream)
+    whenReady(
+      sut.processMessages(messages =
+        Seq(
+          SQSTestLambdaMessage(message = "g00dcafe"),
+          SQSTestLambdaMessage(message = "g00dd00d")
+        )
       )
-      .deleted(SuppressedFromSource("Sierra"))
+    ) {
+      response =>
+        it("returns no results") {
+          response shouldBe empty
+        }
+        it("sends all the identifiers downstream") {
+          downstream.msgSender
+            .getMessages[MatcherResult]
+            .map(matcherResult => matcherResult.works
+              .flatMap(id => id.identifiers.map(_.identifier.toString()))) should contain theSameElementsAs Seq(Set("g00dcafe", "g00dd00d"))
+        }
+    }
+  }
+  
+  describe("when all messages fail to process") {
+    val messages = Seq(
+      SQSTestLambdaMessage(message = "baadcafe"),
+      SQSTestLambdaMessage(message = "baadd00d")
+    )
+    val downstream = new MemoryDownstream
+    val sut = StubLambda(MatcherStub(Nil), downstream)
 
-    val metsRecord = metsIdentifiedWork()
-      .mergeCandidates(List(createMetsMergeCandidateFor(sierraDigitisedBib)))
+    whenReady(
+      sut.processMessages(messages = messages)
+    ) {
+      results: Seq[SQSLambdaMessageResult] =>
+        it("returns a seq of BatchItemFailure responses") {
+          results.map(_.messageId) should contain theSameElementsAs messages
+            .map(
+              _.messageId
+            )
+          all(results) shouldBe a[SQSLambdaMessageFailedRetryable]
+        }
+        it("does not notify downstream") {
+          downstream.msgSender
+            .getMessages[MatcherResult].length shouldBe 0
+        }
+    }
 
-    val works = Seq(sierraPhysicalBib, sierraDigitisedBib, metsRecord)
+  }
 
-    withLocalIdentifiedWorksIndex {
-      index =>
-        insertIntoElasticsearch(index, works: _*)
+  describe("when some messages fail to process") {
+    val messages = Seq(
+      SQSTestLambdaMessage(message = "g00dcafe"),
+      SQSTestLambdaMessage(message = "baadd00d")
+    )
+    val downstream = new MemoryDownstream
+    val sut = StubLambda(MatcherStub(Seq(Set(Set("g00dcafe")))), downstream)
 
-        implicit val retriever: Retriever[WorkStub] =
-          new ElasticWorkStubRetriever(elasticClient, index)
+    whenReady(
+      sut
+        .processMessages(messages = messages)
+    ) {
+      results: Seq[SQSLambdaMessageResult] =>
+        it("returns BatchItemFailure responses only for failing ids") {
+          results.loneElement.messageId shouldBe messages(1).messageId
+          results.loneElement shouldBe a[SQSLambdaMessageFailedRetryable]
+        }
+        it("notifies downstream only for successful ids") {
+          downstream.msgSender
+            .getMessages[MatcherResult]
+            .map(matcherResult => matcherResult.works
+              .flatMap(id => id.identifiers
+                .map(_.identifier.toString()))) should contain theSameElementsAs  Seq(Set("g00dcafe"))
+        }
+    }
+  }
 
-        val messageSender = new MemoryMessageSender()
+  describe("when matcher results contain other identifiers") {
+    val messages = Seq(
+      SQSTestLambdaMessage(message = "baadd00d"), // fails
+      SQSTestLambdaMessage(message = "g00dcafe"),
+      SQSTestLambdaMessage(message = "beefcafe"),
+      SQSTestLambdaMessage(message = "f00df00d"),
+      SQSTestLambdaMessage(message = "f00dfeed")
+    )
+    // Five messages went in, one fails and only two works come out.
+    // (perhaps something went wrong with the handling of those messages)
+    // However, the matches returned by the two works cover
+    // the two remaining works, so they are deemed to have succeeded
+    val matcher =
+      MatcherStub(
+        Seq(
+          Set(
+            Set("g00dcafe", "beefcafe", "cafef00d")
+          ),
+          Set(
+            Set("f00df00d"),
+            Set("f00dfeed")
+          )
+        )
+      )
+    val downstream = new MemoryDownstream
+    val sut = StubLambda(matcher, downstream)
 
-        withLocalSqsQueuePair() {
-          case QueuePair(queue, dlq) =>
-            withMatcherService(retriever, queue, messageSender) {
-              _ =>
-                works.foreach {
-                  w =>
-                    sendNotificationToSQS(queue, body = w.id)
-                }
-
-                eventually {
-                  val results = messageSender.getMessages[MatcherResult]
-                  results should have size 3
-
-                  // Every collection of MatchedIdentifiers only has a single entry.
-                  //
-                  // This is a bit easier than matching directly on the result, which varies
-                  // depending on the exact order the notifications are processed.
-                  results.forall {
-                    matcherResult =>
-                      matcherResult.works.forall(_.identifiers.size == 1)
-                  }
-
-                  assertQueueEmpty(queue)
-                  assertQueueEmpty(dlq)
-                }
-            }
+    whenReady(
+      sut.processMessages(messages = messages)
+    ) {
+      results: Seq[SQSLambdaMessageResult] =>
+        it(
+          "treats a message as a failure if its body cannot be found in any matcher result"
+        ) {
+          // baadd00d is first in the input list, and is absent from any output results
+          results.loneElement.messageId shouldBe messages.head.messageId
+          results.loneElement shouldBe a[SQSLambdaMessageFailedRetryable]
+        }
+        it(
+          "notifies downstream of *all* ids found in all matcher results, even if not mentioned in the messages from upstream"
+        ) {
+          downstream.msgSender
+            .getMessages[MatcherResult]
+            .map(matcherResult => matcherResult.works
+              .flatMap(id => id.identifiers
+                .map(_.identifier.toString()))) should contain theSameElementsAs Seq(
+                  Set("g00dcafe", "beefcafe", "cafef00d"), // cafef00d was not one of the input messages, but it was found in the match for one of them
+                  Set("f00df00d", "f00dfeed")
+                )
         }
     }
   }

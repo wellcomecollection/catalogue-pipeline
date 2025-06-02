@@ -29,25 +29,21 @@ flowchart TB
     end
 
     matchergraph[(matcher graph)]
-    works_merged[(works_merged)]
+
     subgraph MatcherMerger
         direction LR
         matcher <--> matchergraph
         matcher --> merger
-        merger --> works_merged
+        merger --> works_denormalised
     end
 
     works_denormalised[(works_denormalised)]
-    router{router}
     subgraph RelationEmbedder
         direction LR
-        router --> path_concatenator
-        path_concatenator <--> works_merged
+        path_concatenator <--> works_denormalised
         path_concatenator --> batcher
-        router --> batcher
         batcher --> relation_embedder
         relation_embedder --> works_denormalised
-        router --> works_denormalised
     end
 
     works_indexed[(works_indexed)]
@@ -64,9 +60,19 @@ flowchart TB
 
 ```
 
-See individual stages for more detail:
-* [matcher](./matcher/README.md)
-* [merger](./merger/README.md)
+Individual stages:
+* [CALM adapter](../calm_adapter/README.md)
+* [EBSCO adapter](../ebsco_adapter/README.md)
+* [METS adapter](../mets_adapter/README.md)
+* [SIERRA adapter](../sierra_adapter/README.md)
+* [TEI adapter](../tei_adapter/README.md)
+* [transformers](./transformer/)
+* [id_minter](./id_minter/README.md)
+* [matcher](./matcher_merger/matcher/README.md)
+* [merger](./matcher_merger/merger/README.md)
 * [path_concatenator](./relation_embedder/path_concatenator/README.md)
+* [batcher](./relation_embedder/batcher/README.md)
+* [relation_embedder](./relation_embedder/relation_embedder/README.md)
+* [ingestor](./ingestor/)
 
 
