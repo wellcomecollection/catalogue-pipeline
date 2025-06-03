@@ -14,6 +14,12 @@ module "bulk_load_poller_lambda" {
   memory_size = 128
   timeout     = 120 // 120 seconds
 
+  environment = {
+    variables = {
+      SLACK_SECRET_ID = local.slack_webhook
+    }
+  }
+
   vpc_config = {
     subnet_ids         = local.private_subnets
     security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
@@ -30,6 +36,11 @@ resource "aws_iam_role_policy" "bulk_load_poller_lambda_read_secrets_policy" {
 resource "aws_iam_role_policy" "bulk_load_poller_lambda_neptune_policy" {
   role   = module.bulk_load_poller_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.neptune_load_poll.json
+}
+
+resource "aws_iam_role_policy" "bulk_load_poller_lambda_read_slack_secret_policy" {
+  role   = module.bulk_load_poller_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.allow_slack_secret_read.json
 }
 
 resource "aws_iam_role_policy" "bulk_load_poller_s3_write" {

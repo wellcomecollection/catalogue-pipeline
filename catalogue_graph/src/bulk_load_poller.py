@@ -7,6 +7,7 @@ import smart_open
 
 import config
 from utils.aws import get_neptune_client
+from utils.slack_report import publish_report
 
 INSERT_ERROR_THRESHOLD = 1 / 10000
 
@@ -94,6 +95,31 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
         print(
             "Bulk load failed due to a very small number of insert errors. Marking as successful."
         )
+        if insert_error_count > 0:
+            bulk_load_type = payload["overallStatus"]["fullUri"].split("/")[-1].split(".")[0]
+            report = [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "emoji": True,
+                        "text": f":warning: Concepts loader :spider_web:",
+                    },
+                },
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "\n".join(
+                            [
+                              f"Loading *{bulk_load_type}* into the graph resulted in *{insert_error_count} insert errors*.",
+                              f"Total time spent: {formatted_time}.",
+                            ]
+                        ),
+                    },
+                }
+            ]
+            publish_report(report, slack_secret=config.SLACK_SECRET_ID)
 
     if not is_local:
         log_payload(payload)
