@@ -8,6 +8,7 @@ from ingestor_loader import IngestorLoaderLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
+from utils.slack_report import build_final_report, TriggerReport
 
 
 class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -17,18 +18,11 @@ class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
 
 
 class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
-    loader_s3_bucket: str = INGESTOR_S3_BUCKET
-    loader_s3_prefix: str = INGESTOR_S3_PREFIX
+    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
+    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     percentage_threshold: float = 0.1
 
     is_local: bool = False
-
-
-class TriggerReport(BaseModel):
-    record_count: int
-    pipeline_date: str
-    index_date: str
-    job_id: str
 
 
 def run_check(
@@ -60,8 +54,8 @@ def run_check(
     )
 
     s3_report_name = "report.trigger.json"
-    s3_url_current_job = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
-    s3_url_latest = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
+    s3_url_current_job = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
+    s3_url_latest = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
 
     # open with smart_open, check for file existence
     latest_report = pydantic_from_s3_json(
@@ -77,6 +71,8 @@ def run_check(
             fractional_threshold=config.percentage_threshold,
             force_pass=force_pass,
         )
+        # build and write the final pipeline report to s3 
+        build_final_report(current_report, latest_report, config)
 
     # write the current report to s3 as latest
     pydantic_to_s3_json(current_report, s3_url_latest)

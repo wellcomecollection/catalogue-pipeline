@@ -6,67 +6,17 @@ import boto3
 from pydantic import BaseModel
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX, SLACK_SECRET_ID
-from ingestor_loader_monitor import IngestorLoaderMonitorConfig, LoaderReport
-from ingestor_trigger_monitor import IngestorTriggerMonitorConfig, TriggerReport
+
 from models.step_events import ReporterEvent
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
-from utils.slack_report import publish_report
+from utils.slack_report import publish_report, FinalReport
 
 
 class ReporterConfig(BaseModel):
     ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
-    slack_secret: str
+    slack_secret: str = SLACK_SECRET_ID
     is_local: bool = False
-
-
-class FinalReport(BaseModel):
-    pipeline_date: str
-    job_id: str
-    previous_job_id: str
-    neptune_record_count: int
-    previous_neptune_record_count: int
-    es_record_count: int | None
-    previous_es_record_count: int | None
-
-
-def build_final_report(
-    current_report: TriggerReport | LoaderReport,
-    latest_report: TriggerReport | LoaderReport,
-    config: IngestorTriggerMonitorConfig | IngestorLoaderMonitorConfig,
-) -> None:
-    report_name = "report.final.json"
-    s3_url_final_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"
-
-    final_report = pydantic_from_s3_json(
-      FinalReport, s3_url_final_report, ignore_missing=True
-    )
-
-    if final_report is None:
-        final_report = FinalReport(
-            pipeline_date=current_report.pipeline_date,
-            job_id=current_report.job_id,
-            previous_job_id=latest_report.job_id,
-            neptune_record_count=current_report.record_count,
-            previous_neptune_record_count=latest_report.record_count,
-            es_record_count=None,
-            previous_es_record_count=None,
-        )
-        pydantic_to_s3_json(final_report, s3_url_final_report)
-
-    else:
-        updated_final_report = FinalReport(
-            pipeline_date=final_report.pipeline_date,
-            job_id=final_report.job_id,
-            previous_job_id=final_report.previous_job_id,
-            neptune_record_count=final_report.neptune_record_count,
-            previous_neptune_record_count=final_report.previous_neptune_record_count,
-            es_record_count=current_report.record_count,
-            previous_es_record_count=latest_report.record_count,
-        )
-        pydantic_to_s3_json(updated_final_report, s3_url_final_report)
-
-
 
 def date_time_from_job_id(job_id: str) -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
