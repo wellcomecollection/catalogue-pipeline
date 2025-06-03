@@ -6,6 +6,7 @@ from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
+from catalogue_graph.src.ingestor_reporter import build_final_report
 
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -13,8 +14,8 @@ class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
 
 
 class IngestorLoaderMonitorConfig(IngestorMonitorStepEvent):
-    loader_s3_bucket: str = INGESTOR_S3_BUCKET
-    loader_s3_prefix: str = INGESTOR_S3_PREFIX
+    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
+    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     percentage_threshold: float = 0.1
 
     is_local: bool = False
@@ -74,9 +75,8 @@ def run_check(
     )
 
     s3_report_name = "report.loader.json"
-    s3_url_current_job = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
-    s3_url_latest = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
-
+    s3_url_current_job = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{job_id}/{s3_report_name}"
+    s3_url_latest = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{s3_report_name}"
     # Load the latest report
     latest_report = pydantic_from_s3_json(
         LoaderReport, s3_url_latest, ignore_missing=True
@@ -98,6 +98,9 @@ def run_check(
 
     # write the current report to s3 as job_id
     pydantic_to_s3_json(current_report, s3_url_current_job)
+
+    # build and write the final pipeline report to s3 
+    build_final_report(current_report, latest_report, config)
 
     return current_report
 
