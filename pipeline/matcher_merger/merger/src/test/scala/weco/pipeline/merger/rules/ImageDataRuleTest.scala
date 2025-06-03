@@ -67,9 +67,9 @@ class ImageDataRuleTest
         "there are two digcodes that designate a Sierra document as digmiro - digmiro and digaids"
       )
 
-      forAll(Table("digcode", "digmiro", "digaids")) {
-        digcode =>
-          it(s"discards Miro images for Sierra works with digcode: $digcode") {
+      it(s"discards Miro images for Sierra works with digmiro or digaids") {
+        forAll(Table("digcode", "digmiro", "digaids")) {
+          digcode =>
             val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
               List(
                 createDigcodeIdentifier(digcode)
@@ -79,7 +79,7 @@ class ImageDataRuleTest
             ImageDataRule
               .merge(sierraWork, miroWorks)
               .data shouldBe empty
-          }
+        }
       }
 
       it(s"returns Miro images for Sierra works with non-digmiro digcodes") {
