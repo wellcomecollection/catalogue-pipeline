@@ -140,7 +140,8 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any
         "type": "header",
         "text": {
             "type": "plain_text",
-            "text": "Concepts Remover",
+            "emoji": True,
+            "text": ":wastebasket: Concepts Remover :bulb:",
         }
     }
 
