@@ -6,7 +6,7 @@ from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
-from utils.slack_report import build_final_report, LoaderReport
+from utils.slack_report import build_indexer_report, LoaderReport
 
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -87,7 +87,7 @@ def run_check(
             force_pass=force_pass,
         )
         # build and write the final pipeline report to s3 
-        build_final_report(current_report, latest_report, config)
+        build_indexer_report(current_report, latest_report, config)
 
     # write the current report to s3 as latest
     pydantic_to_s3_json(current_report, s3_url_latest)

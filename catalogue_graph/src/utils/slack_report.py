@@ -18,6 +18,7 @@ class TriggerReport(BaseModel):
     pipeline_date: str
     index_date: str
     job_id: str
+
 class LoaderReport(BaseModel):
     pipeline_date: str
     index_date: str
@@ -40,20 +41,20 @@ class IndexerReport(BaseModel):
     es_record_count: int | None
     previous_es_record_count: int | None
 
-def build_final_report(
+def build_indexer_report(
     current_report: TriggerReport | LoaderReport,
     latest_report: TriggerReport | LoaderReport,
     config: Config,
 ) -> None:
-    report_name = "report.final.json"
-    s3_url_final_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"
+    report_name = "report.indexer.json"
+    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"
 
-    final_report = pydantic_from_s3_json(
-      IndexerReport, s3_url_final_report, ignore_missing=True
+    indexer_report = pydantic_from_s3_json(
+      IndexerReport, s3_url_indexer_report, ignore_missing=True
     )
 
-    if final_report is None:
-        final_report = IndexerReport(
+    if indexer_report is None:
+        indexer_report = IndexerReport(
             pipeline_date=current_report.pipeline_date,
             job_id=current_report.job_id,
             previous_job_id=latest_report.job_id,
@@ -62,19 +63,19 @@ def build_final_report(
             es_record_count=None,
             previous_es_record_count=None,
         )
-        pydantic_to_s3_json(final_report, s3_url_final_report)
+        pydantic_to_s3_json(indexer_report, s3_url_indexer_report)
 
     else:
-        updated_final_report = IndexerReport(
-            pipeline_date=final_report.pipeline_date,
-            job_id=final_report.job_id,
-            previous_job_id=final_report.previous_job_id,
-            neptune_record_count=final_report.neptune_record_count,
-            previous_neptune_record_count=final_report.previous_neptune_record_count,
+        updated_indexer_report = IndexerReport(
+            pipeline_date=indexer_report.pipeline_date,
+            job_id=indexer_report.job_id,
+            previous_job_id=indexer_report.previous_job_id,
+            neptune_record_count=indexer_report.neptune_record_count,
+            previous_neptune_record_count=indexer_report.previous_neptune_record_count,
             es_record_count=current_report.record_count,
             previous_es_record_count=latest_report.record_count,
         )
-        pydantic_to_s3_json(updated_final_report, s3_url_final_report)
+        pydantic_to_s3_json(updated_indexer_report, s3_url_indexer_report)
 
 def publish_report(report: list[typing.Any], slack_secret: str) -> None:
     slack_endpoint = get_secret(slack_secret)

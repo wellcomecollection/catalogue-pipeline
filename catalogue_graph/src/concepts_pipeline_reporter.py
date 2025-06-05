@@ -62,7 +62,8 @@ def get_indexer_report(event: ReporterEvent, indexer_success_count: int, config:
     index_date = event.index_date
     job_id = event.job_id
 
-    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/report.indexer.json" 
+    report_name = "report.indexer.json"
+    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}" 
 
     indexer_report = pydantic_from_s3_json(
       IndexerReport, s3_url_indexer_report, ignore_missing=True
