@@ -140,7 +140,6 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any
         "type": "header",
         "text": {
             "type": "plain_text",
-            "emoji": True,
             "text": "Concepts Remover",
         }
     }
@@ -155,14 +154,24 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"- Nodes and edges deleted from the graph:\n```{table}```",
+                "text": "\n".join(
+                    [
+                        f"*Graph Remover*",
+                        f"```\n{table}\n```"
+                    ]
+                ),
             },
         }
     else: graph_remover_slack = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "No nodes or edges were deleted from the graph.", # This potentially hides failure to retrieve the parquet file(s)
+                "text": "\n".join(
+                    [
+                        f"*Graph Remover*",
+                        "No nodes or edges were deleted from the graph." # This potentially hides failure to retrieve the parquet file(s)
+                    ]
+                ),
             },
     }
     
@@ -171,9 +180,10 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any
         "text": {
             "type": "mrkdwn",
             "text": "\n".join(
-                [
+                [   
+                    f"*Index Remover*",
+                    f"Index *concepts-indexed-{index_date}* in pipeline-{pipeline_date}",
                     f"- *{index_remover_report.deleted_count}* documents were deleted",
-                    f"- from the index *concepts-indexed-{index_date}* in pipeline-{pipeline_date}",
                 ]
             ),
         },
