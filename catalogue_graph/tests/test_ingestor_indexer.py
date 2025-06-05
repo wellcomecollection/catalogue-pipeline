@@ -48,6 +48,7 @@ def build_test_matrix() -> list[tuple]:
         (
             "the file at s3_uri doesn't exist",
             IngestorIndexerLambdaEvent(
+                pipeline_date="2021-07-01",
                 index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/ghost-file"

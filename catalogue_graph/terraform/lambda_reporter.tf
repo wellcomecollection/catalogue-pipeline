@@ -1,7 +1,7 @@
-module "reporter_lambda" {
+module "concepts_pipeline_reporter_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-reporter"
+  name        = "catalogue-graph-pipeline_reporter"
   description = "Generates a report on the latest pipeline run and posts it to #wc-search-alerts"
   runtime     = "python3.13"
   publish     = true

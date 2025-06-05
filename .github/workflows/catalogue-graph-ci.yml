@@ -58,7 +58,7 @@ jobs:
           catalogue-graph-ingestor-loader-monitor,
           catalogue-graph-remover,
           catalogue-graph-index-remover,
-          catalogue-graph-ingestor-reporter
+          catalogue-graph-pipeline_reporter
         ]
     steps:
       - uses: actions/checkout@v3

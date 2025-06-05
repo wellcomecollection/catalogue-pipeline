@@ -24,7 +24,14 @@ class LoaderReport(BaseModel):
     job_id: str
     record_count: int
     total_file_size: int
-class FinalReport(BaseModel):
+
+class IndexRemoverReport(BaseModel):
+    pipeline_date: str
+    index_date: str
+    deleted_count: int | None
+    date: str
+    
+class IndexerReport(BaseModel):
     pipeline_date: str
     job_id: str
     previous_job_id: str
@@ -42,12 +49,11 @@ def build_final_report(
     s3_url_final_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"
 
     final_report = pydantic_from_s3_json(
-      FinalReport, s3_url_final_report, ignore_missing=True
+      IndexerReport, s3_url_final_report, ignore_missing=True
     )
 
     if final_report is None:
-        print(f"!!!!!!!!!!!!!!!!!! {latest_report}")
-        final_report = FinalReport(
+        final_report = IndexerReport(
             pipeline_date=current_report.pipeline_date,
             job_id=current_report.job_id,
             previous_job_id=latest_report.job_id,
@@ -59,7 +65,7 @@ def build_final_report(
         pydantic_to_s3_json(final_report, s3_url_final_report)
 
     else:
-        updated_final_report = FinalReport(
+        updated_final_report = IndexerReport(
             pipeline_date=final_report.pipeline_date,
             job_id=final_report.job_id,
             previous_job_id=final_report.previous_job_id,
