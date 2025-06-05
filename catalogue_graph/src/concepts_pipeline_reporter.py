@@ -36,7 +36,7 @@ graph_sources = [
 
 graph_entities = ["nodes", "edges"]
 
-def report_failure_message(report_type: str): 
+def report_failure_message(report_type: str)-> dict[Any, Any]: 
     return {
         "type": "section",
         "text": {
@@ -115,15 +115,11 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any
     for source, entity in product(graph_sources, graph_entities):
         df = df_from_s3_parquet(f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet")
     
-        if df is not None:
-            now = datetime.now()
-            beginning_of_today = datetime(now.year, now.month, now.day) # should this be the last_run_date? 
-            deletions_today = len(df.filter(pl.col("timestamp") > beginning_of_today).select("id").to_series().unique().to_list())
-            if deletions_today > 0:
-              graph_remover_deletions[f"{source}__{entity}"] = deletions_today
-          
-        elif df is None:
-            print(f"No data found for {source}__{entity}.parquet.")
+        now = datetime.now()
+        beginning_of_today = datetime(now.year, now.month, now.day) # should this be the last_run_date? 
+        deletions_today = len(df.filter(pl.col("timestamp") > beginning_of_today).select("id").to_series().unique().to_list())
+        if deletions_today > 0:
+          graph_remover_deletions[f"{source}__{entity}"] = deletions_today
 
     # get deletions from the index
     pipeline_date = event.pipeline_date or "dev"

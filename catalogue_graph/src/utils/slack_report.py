@@ -5,6 +5,8 @@ from pydantic import BaseModel
 
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json, get_secret
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from ingestor_loader_monitor import IngestorLoaderMonitorConfig
+from ingestor_trigger_monitor import IngestorTriggerMonitorConfig
 
 class Config(BaseModel):
     ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
@@ -44,7 +46,7 @@ class IndexerReport(BaseModel):
 def build_indexer_report(
     current_report: TriggerReport | LoaderReport,
     latest_report: TriggerReport | LoaderReport,
-    config: Config,
+    config: IngestorTriggerMonitorConfig | IngestorLoaderMonitorConfig,
 ) -> None:
     report_name = "report.indexer.json"
     s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"

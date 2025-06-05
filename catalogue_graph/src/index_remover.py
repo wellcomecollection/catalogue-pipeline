@@ -49,7 +49,7 @@ def delete_concepts_from_elasticsearch(
         index=index_name, body={"query": {"ids": {"values": list(deleted_ids)}}}
     )
 
-    deleted_count = response["deleted"]
+    deleted_count: int = response["deleted"]
     print(f"Deleted {deleted_count} documents from the {index_name} index.")
     return deleted_count
 

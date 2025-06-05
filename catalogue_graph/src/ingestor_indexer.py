@@ -91,7 +91,7 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
     )
 
 
-def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> int:
+def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> ReporterEvent:
     return handler(
         IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
     )
