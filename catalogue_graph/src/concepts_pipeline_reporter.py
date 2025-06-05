@@ -2,10 +2,11 @@ import argparse
 from typing import Any
 from datetime import datetime, timedelta
 import boto3
-import tabulate
 import polars as pl
 from pydantic import BaseModel
 from itertools import product
+from tabulate import tabulate
+
 from models.step_events import ReporterEvent
 from utils.aws import pydantic_from_s3_json, df_from_s3_parquet
 from utils.slack_report import publish_report, IndexerReport, IndexRemoverReport
@@ -142,7 +143,7 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any
     }
 
     if bool(graph_remover_deletions):
-        table = tabulate.tabulate(
+        table = tabulate(
               graph_remover_deletions.items(),
               headers=["Type", "Deletions"],
               colalign=("right", "left"),
