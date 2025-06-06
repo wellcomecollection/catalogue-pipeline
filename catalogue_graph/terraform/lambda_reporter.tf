@@ -18,7 +18,7 @@ module "concepts_pipeline_reporter_lambda" {
     variables = {
       INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
-      SLACK_SECRET_ID = local.slack_webhook
+      SLACK_SECRET_ID    = local.slack_webhook
     }
   }
 }
