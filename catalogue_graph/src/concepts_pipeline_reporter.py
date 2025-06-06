@@ -109,7 +109,7 @@ def get_indexer_report(event: ReporterEvent, indexer_success_count: int, config:
         ]
     return [report_failure_message("Indexer")]
 
-def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any]:
+def get_remover_report(event: ReporterEvent, config: ReporterConfig, graph_sources, graph_entities) -> list[Any]:
     # get deletions from the graph
     graph_remover_deletions = {}
 
@@ -117,21 +117,22 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig) -> list[Any
         df = df_from_s3_parquet(f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet")
     
         now = datetime.now()
-        beginning_of_today = datetime(now.year, now.month, now.day) # should this be the last_run_date? 
-        deletions_today = len(df.filter(pl.col("timestamp") > beginning_of_today).select("id").to_series().unique().to_list())
+        beginning_of_today = datetime(now.year, now.month, now.day).date() # should this be the last_run_date? 
+        deletions_today = len(df.filter(pl.col("timestamp") >= beginning_of_today).select("id").to_series().unique().to_list())
         if deletions_today > 0:
           graph_remover_deletions[f"{source}__{entity}"] = deletions_today
-
+    
     # get deletions from the index
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date
 
-    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/report.index_remover.json"
+    report_name = "report.index_remover.json"
+    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{report_name}"
 
     index_remover_report = pydantic_from_s3_json(
         IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
     )
-
+    
     # format the report for Slack
     header_slack = {
         "type": "header",
@@ -195,7 +196,7 @@ def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
 
     try:
         indexer_report = get_indexer_report(events[0], total_indexer_success, config)
-        remover_report = get_remover_report(events[0], config)
+        remover_report = get_remover_report(events[0], config, graph_sources, graph_entities)
         publish_report(indexer_report, config.slack_secret)
         publish_report(remover_report, config.slack_secret)
 
