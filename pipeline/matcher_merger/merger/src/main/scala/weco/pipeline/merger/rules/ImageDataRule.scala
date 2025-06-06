@@ -6,15 +6,18 @@ import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.work.Work
 import weco.pipeline.merger.models.{FieldMergeResult, ImageDataOps}
+import weco.pipeline.merger.rules.WorkPredicates.{
+  not,
+  sierraDigitisedMiro,
+  sierraWork,
+  WorkPredicate
+}
 /*
  * Rule for populating the imageData property on the merged target
- * from the itself and its sources.
- *
- * The imageData property is populated from the
- * */
+ * from itself and its sources.
+ */
 
 trait ImageRule extends FieldMergeRule {
-
   import WorkPredicates._
 
   type FieldData = List[ImageData[IdState.Identified]]
@@ -28,11 +31,20 @@ trait ImageRule extends FieldMergeRule {
     sources: Seq[Work[Identified]] = Nil
   ): FieldMergeResult[FieldData] = {
     // We merge images into Sierra targets, regardless of whether this is the principal
-    // target of the graph we're currently merging (ie if there's a Calm target, it's ignored)
-    TargetPrecedence
-      .targetSatisfying(sierraWork)(
-        target +: sources.collect(TargetPrecedence.visibleWork)
-      )
+    // target of the graph we're currently merging.
+    // This is because the Sierra participant is the one that
+    // contains the best information to enable us to choose
+    // which images to put where.
+    // The resulting FieldMergeResult is still expected to be applied to the
+    // actual target.
+    val allParticipants =
+      target +: sources.collect(TargetPrecedence.visibleWork)
+    val maybeSierraTarget: Option[Work.Visible[Identified]] =
+      TargetPrecedence
+        .targetSatisfying(sierraDigitisedMiro)(allParticipants)
+        .orElse(TargetPrecedence.targetSatisfying(sierraWork)(allParticipants))
+
+    maybeSierraTarget
       .map(mergeSierraImages(sources))
       .getOrElse(FieldMergeResult(data = Nil, sources = Nil))
   }
