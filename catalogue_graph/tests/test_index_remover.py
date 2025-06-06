@@ -1,5 +1,6 @@
 import polars as pl
 import pytest
+import json
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 
@@ -68,8 +69,13 @@ def test_index_remover_next_run() -> None:
 
     # Mock a file storing the date of the last index remover run
     MockSmartOpen.mock_s3_file(
-        f"s3://wellcomecollection-catalogue-graph/ingestor/{pipeline_date}/{index_date}/last_index_remover_run_date.txt",
-        "2025-04-07",
+        f"s3://wellcomecollection-catalogue-graph/ingestor/{pipeline_date}/{index_date}/report.index_remover.json",
+        json.dumps({
+            "pipeline_date": pipeline_date,
+            "index_date": index_date,
+            "deleted_count": 2,
+            "date": "2025-04-07"
+        })
     )
 
     index_concepts(

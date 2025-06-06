@@ -5,6 +5,8 @@ backoff
 smart-open
 polars
 elasticsearch
+tabulate
 
+types-tabulate
 boto3-stubs
 types-requests

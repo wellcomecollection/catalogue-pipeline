@@ -7,6 +7,18 @@ data "aws_iam_policy_document" "allow_secret_read" {
   }
 }
 
+data "aws_iam_policy_document" "allow_slack_secret_read" {
+  statement {
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:${local.slack_webhook}*",
+    ]
+  }
+}
+
 data "aws_iam_policy_document" "allow_pipeline_storage_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
