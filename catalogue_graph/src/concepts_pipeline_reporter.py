@@ -111,7 +111,12 @@ def get_indexer_report(event: ReporterEvent, indexer_success_count: int, config:
         ]
     return [report_failure_message("Indexer")]
 
-def get_remover_report(event: ReporterEvent, config: ReporterConfig, graph_sources, graph_entities) -> list[Any]:
+def get_remover_report(
+    event: ReporterEvent, 
+    config: ReporterConfig, 
+    graph_sources: list[str], 
+    graph_entities: list[str]
+) -> list[Any]:
     # get deletions from the graph
     graph_remover_deletions = {}
 

@@ -1,6 +1,7 @@
+from typing import Any
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 import polars as pl
-
 from test_mocks import MockSmartOpen, fixed_datetime
 from test_utils import load_fixture
 from concepts_pipeline_reporter import get_indexer_report, get_remover_report, ReporterConfig
@@ -17,7 +18,7 @@ s3_prefix = "test-prefix"
 s3_url = f"s3://{s3_bucket}/{s3_prefix}/{pipeline_date}/{index_date}"
 
 @pytest.fixture
-def reporter_event():
+def reporter_event() -> ReporterEvent:
   return ReporterEvent(
     pipeline_date=pipeline_date,
     index_date=index_date,
@@ -26,7 +27,7 @@ def reporter_event():
   )
 
 @pytest.fixture
-def reporter_config():
+def reporter_config() -> ReporterConfig:
   return ReporterConfig(
     ingestor_s3_bucket=s3_bucket,
     ingestor_s3_prefix=s3_prefix,
@@ -42,14 +43,18 @@ def mock_deleted_ids_log_file() -> None:
     df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
     MockSmartOpen.mock_s3_parquet_file(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, df)
 
-def test_get_indexer_report_failure(reporter_event, reporter_config):
+def test_get_indexer_report_failure(reporter_event: ReporterEvent, reporter_config: ReporterConfig) -> None:
   report = get_indexer_report(reporter_event, 123, reporter_config)
 
   assert isinstance(report, list)
   assert report[0]["type"] == "section"
   assert "Could not produce Concepts Indexer report" in report[0]["text"]["text"]
 
-def test_get_indexer_report_success(monkeypatch, reporter_event, reporter_config):
+def test_get_indexer_report_success(
+    monkeypatch: MonkeyPatch, 
+    reporter_event: ReporterEvent, 
+    reporter_config: ReporterConfig
+) -> None:
     monkeypatch.setattr("concepts_pipeline_reporter.datetime", fixed_datetime(2024, 1, 4))
     MockSmartOpen.mock_s3_file(
         f"{s3_url}/{job_id}/report.indexer.json",
@@ -74,7 +79,11 @@ def test_get_indexer_report_success(monkeypatch, reporter_event, reporter_config
 
     MockSmartOpen.reset_mocks()
 
-def test_get_remover_report_success(monkeypatch, reporter_event, reporter_config):
+def test_get_remover_report_success(
+    monkeypatch: MonkeyPatch, 
+    reporter_event: ReporterEvent, 
+    reporter_config: ReporterConfig
+) -> None:
     monkeypatch.setattr("concepts_pipeline_reporter.datetime", fixed_datetime(2024, 1, 2))
 
     MockSmartOpen.mock_s3_file(
@@ -96,7 +105,11 @@ def test_get_remover_report_success(monkeypatch, reporter_event, reporter_config
     
     MockSmartOpen.reset_mocks()
 
-def test_get_remover_report_failure(monkeypatch, reporter_event, reporter_config):
+def test_get_remover_report_failure(
+    monkeypatch: MonkeyPatch, 
+    reporter_event: ReporterEvent, 
+    reporter_config: ReporterConfig
+) -> None:
     monkeypatch.setattr("concepts_pipeline_reporter.datetime", fixed_datetime(2025, 1, 2))
 
     mock_deleted_ids_log_file()
