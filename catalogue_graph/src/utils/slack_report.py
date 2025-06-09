@@ -1,16 +1,18 @@
-import boto3
 import typing
+
 import requests
 from pydantic import BaseModel
 
-from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json, get_secret
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from utils.aws import get_secret, pydantic_from_s3_json, pydantic_to_s3_json
+
 
 class TriggerReport(BaseModel):
     record_count: int
     pipeline_date: str
     index_date: str
     job_id: str
+
 
 class LoaderReport(BaseModel):
     pipeline_date: str
@@ -19,12 +21,14 @@ class LoaderReport(BaseModel):
     record_count: int
     total_file_size: int
 
+
 class IndexRemoverReport(BaseModel):
     pipeline_date: str
     index_date: str
     deleted_count: int | None
     date: str
-    
+
+
 class IndexerReport(BaseModel):
     pipeline_date: str
     job_id: str
@@ -34,6 +38,7 @@ class IndexerReport(BaseModel):
     es_record_count: int | None
     previous_es_record_count: int | None
 
+
 def build_indexer_report(
     current_report: TriggerReport | LoaderReport,
     latest_report: TriggerReport | LoaderReport,
@@ -42,7 +47,7 @@ def build_indexer_report(
     s3_url_indexer_report = f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"
 
     indexer_report = pydantic_from_s3_json(
-      IndexerReport, s3_url_indexer_report, ignore_missing=True
+        IndexerReport, s3_url_indexer_report, ignore_missing=True
     )
 
     if indexer_report is None:
@@ -68,6 +73,7 @@ def build_indexer_report(
             previous_es_record_count=latest_report.record_count,
         )
         pydantic_to_s3_json(updated_indexer_report, s3_url_indexer_report)
+
 
 def publish_report(report: list[typing.Any], slack_secret: str) -> None:
     slack_endpoint = get_secret(slack_secret)

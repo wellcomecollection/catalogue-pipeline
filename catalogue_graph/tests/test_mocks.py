@@ -1,3 +1,4 @@
+import datetime
 import gzip
 import io
 import os
@@ -6,7 +7,6 @@ from collections import defaultdict
 from collections.abc import Generator
 from typing import Any, Optional, TypedDict
 
-import datetime
 import polars as pl
 from botocore.credentials import Credentials
 
@@ -342,9 +342,11 @@ class MockElasticsearchClient:
     def count(self, index: str) -> dict:
         return {"count": len(self.indexed_documents.get(index, {}).values())}
 
+
 def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     class FixedDateTime(datetime.datetime):
         @classmethod
         def now(cls, tz: Optional[datetime.tzinfo] = None) -> "FixedDateTime":
             return cls(year, month, day)
+
     return FixedDateTime

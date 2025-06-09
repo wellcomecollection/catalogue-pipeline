@@ -3,7 +3,7 @@ from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSmartOpen, MockSecretsManagerClient
+from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
 
 from ingestor_indexer import (
@@ -25,7 +25,7 @@ def test_ingestor_indexer_success() -> None:
     )
 
     _mock_es_secrets()
-    
+
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
     # INGESTOR_SHARD_SIZE=10 AWS_PROFILE=platform-developer python3.13 ingestor_local.py --limit=1
@@ -100,6 +100,7 @@ def test_ingestor_indexer_failure(
         MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
         handler(event, config)
+
 
 def _mock_es_secrets() -> None:
     # Using a non-null pipeline_date connects to the production ES cluster, so we need to mock some secrets

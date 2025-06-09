@@ -67,7 +67,9 @@ def load_data(
     return success_count
 
 
-def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> ReporterEvent:
+def handler(
+    event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
+) -> ReporterEvent:
     print(f"Received event: {event} with config {config}")
 
     extracted_data = df_from_s3_parquet(event.object_to_index.s3_uri)
@@ -86,12 +88,14 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
     return ReporterEvent(
         pipeline_date=event.pipeline_date,
         index_date=event.index_date,
-        job_id=event.job_id, 
-        success_count=success_count
+        job_id=event.job_id,
+        success_count=success_count,
     )
 
 
-def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> ReporterEvent:
+def lambda_handler(
+    event: IngestorIndexerLambdaEvent, context: typing.Any
+) -> ReporterEvent:
     return handler(
         IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
     )

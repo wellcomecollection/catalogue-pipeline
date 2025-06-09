@@ -1,17 +1,16 @@
 import argparse
-from typing import Any
 from datetime import datetime, timedelta
-import boto3
+from itertools import product
+from typing import Any
+
 import polars as pl
 from pydantic import BaseModel
-from itertools import product
 from tabulate import tabulate
 
-from models.step_events import ReporterEvent
-from utils.aws import pydantic_from_s3_json, df_from_s3_parquet
-from utils.slack_report import publish_report, IndexerReport, IndexRemoverReport
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX, SLACK_SECRET_ID
+from models.step_events import ReporterEvent
+from utils.aws import df_from_s3_parquet, pydantic_from_s3_json
+from utils.slack_report import IndexerReport, IndexRemoverReport, publish_report
 
 
 class ReporterConfig(BaseModel):
@@ -19,6 +18,7 @@ class ReporterConfig(BaseModel):
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     slack_secret: str = SLACK_SECRET_ID
     is_local: bool = False
+
 
 graph_sources = [
     "loc_concepts",
@@ -37,7 +37,8 @@ graph_sources = [
 
 graph_entities = ["nodes", "edges"]
 
-def report_failure_message(report_type: str)-> dict[Any, Any]: 
+
+def report_failure_message(report_type: str) -> dict[Any, Any]:
     return {
         "type": "section",
         "text": {
@@ -47,16 +48,18 @@ def report_failure_message(report_type: str)-> dict[Any, Any]:
         },
     }
 
+
 slack_header = [
-        {
+    {
         "type": "header",
         "text": {
             "type": "plain_text",
             "emoji": True,
-            "text": f":white_check_mark: Concepts :bulb:",
+            "text": ":white_check_mark: Concepts :bulb:",
         },
     }
 ]
+
 
 def date_time_from_job_id(job_id: str) -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
@@ -68,29 +71,32 @@ def date_time_from_job_id(job_id: str) -> str:
         return start_datetime.strftime("on %A, %B %-d at %-I:%M %p %Z")
 
 
-def get_indexer_report(event: ReporterEvent, indexer_success_count: int, config: ReporterConfig) -> list[Any]:
+def get_indexer_report(
+    event: ReporterEvent, indexer_success_count: int, config: ReporterConfig
+) -> list[Any]:
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date
     job_id = event.job_id
 
     report_name = "report.indexer.json"
-    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}" 
+    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}"
 
     indexer_report = pydantic_from_s3_json(
-      IndexerReport, s3_url_indexer_report, ignore_missing=True
+        IndexerReport, s3_url_indexer_report, ignore_missing=True
     )
-      
+
     if job_id is not None and indexer_report is not None:
         start_datetime = date_time_from_job_id(job_id)
         previous_start_datetime = date_time_from_job_id(indexer_report.previous_job_id)
-        current_run_duration = int((datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds() / 60)
+        current_run_duration = int(
+            (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds()
+            / 60
+        )
 
         if indexer_report.neptune_record_count == indexer_success_count:
             graph_index_comparison = "_(the same as the graph)_"
         else:
-            graph_index_comparison = (
-                f":warning: _compared to {indexer_report.neptune_record_count} in the graph_"
-            )
+            graph_index_comparison = f":warning: _compared to {indexer_report.neptune_record_count} in the graph_"
 
         return [
             {
@@ -111,24 +117,35 @@ def get_indexer_report(event: ReporterEvent, indexer_success_count: int, config:
         ]
     return [report_failure_message("Indexer")]
 
+
 def get_remover_report(
-    event: ReporterEvent, 
-    config: ReporterConfig, 
-    graph_sources: list[str], 
-    graph_entities: list[str]
+    event: ReporterEvent,
+    config: ReporterConfig,
+    graph_sources: list[str],
+    graph_entities: list[str],
 ) -> list[Any]:
     # get deletions from the graph
     graph_remover_deletions = {}
 
     for source, entity in product(graph_sources, graph_entities):
-        df = df_from_s3_parquet(f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet")
-    
+        df = df_from_s3_parquet(
+            f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet"
+        )
+
         now = datetime.now()
-        beginning_of_today = datetime(now.year, now.month, now.day).date() # should this be the last_run_date? 
-        deletions_today = len(df.filter(pl.col("timestamp") >= beginning_of_today).select("id").to_series().unique().to_list())
+        beginning_of_today = datetime(
+            now.year, now.month, now.day
+        ).date()  # should this be the last_run_date?
+        deletions_today = len(
+            df.filter(pl.col("timestamp") >= beginning_of_today)
+            .select("id")
+            .to_series()
+            .unique()
+            .to_list()
+        )
         if deletions_today > 0:
-          graph_remover_deletions[f"{source}__{entity}"] = deletions_today
-    
+            graph_remover_deletions[f"{source}__{entity}"] = deletions_today
+
     # get deletions from the index
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date
@@ -139,55 +156,56 @@ def get_remover_report(
     index_remover_report = pydantic_from_s3_json(
         IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
     )
-    
+
     # format the reports for Slack
 
     if bool(graph_remover_deletions):
         table = tabulate(
-              graph_remover_deletions.items(),
-              headers=["Type", "Deletions"],
-              colalign=("right", "left"),
+            graph_remover_deletions.items(),
+            headers=["Type", "Deletions"],
+            colalign=("right", "left"),
         )
+        graph_remover_slack = {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "\n".join(["*Graph Remover*", f"```\n{table}\n```"]),
+            },
+        }
+    else:
         graph_remover_slack = {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
                 "text": "\n".join(
                     [
-                        f"*Graph Remover*",
-                        f"```\n{table}\n```"
+                        "*Graph Remover*",
+                        "No nodes or edges were deleted from the graph.",  # This potentially hides failure to retrieve the parquet file(s)
                     ]
                 ),
             },
         }
-    else: graph_remover_slack = {
+
+    index_remover_slack = (
+        {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
                 "text": "\n".join(
                     [
-                        f"*Graph Remover*",
-                        "No nodes or edges were deleted from the graph." # This potentially hides failure to retrieve the parquet file(s)
+                        "*Index Remover*",
+                        f"Index *concepts-indexed-{index_date}* in pipeline-{pipeline_date}",
+                        f"- *{index_remover_report.deleted_count}* documents were deleted",
                     ]
                 ),
             },
-    }
-    
-    index_remover_slack = {
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": "\n".join(
-                [   
-                    f"*Index Remover*",
-                    f"Index *concepts-indexed-{index_date}* in pipeline-{pipeline_date}",
-                    f"- *{index_remover_report.deleted_count}* documents were deleted",
-                ]
-            ),
-        },
-    } if index_remover_report is not None else report_failure_message("Index Remover")
-        
+        }
+        if index_remover_report is not None
+        else report_failure_message("Index Remover")
+    )
+
     return [graph_remover_slack, index_remover_slack]
+
 
 def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
     print("Preparing concepts pipeline reports ...")
@@ -195,8 +213,12 @@ def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
 
     try:
         indexer_report = get_indexer_report(events[0], total_indexer_success, config)
-        remover_report = get_remover_report(events[0], config, graph_sources, graph_entities)
-        publish_report(slack_header + indexer_report + remover_report, config.slack_secret)
+        remover_report = get_remover_report(
+            events[0], config, graph_sources, graph_entities
+        )
+        publish_report(
+            slack_header + indexer_report + remover_report, config.slack_secret
+        )
 
     except ValueError as e:
         print(f"Report failed: {e}")

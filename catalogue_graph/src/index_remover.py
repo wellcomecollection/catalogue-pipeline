@@ -7,7 +7,7 @@ import polars as pl
 import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
-from utils.aws import df_from_s3_parquet, pydantic_to_s3_json, pydantic_from_s3_json
+from utils.aws import df_from_s3_parquet, pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
 from utils.slack_report import IndexRemoverReport
 
@@ -90,17 +90,15 @@ def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date
     """Return a date corresponding to the last time we ran the index_remover Lambda."""
     s3_uri = _get_last_index_remover_report_file_uri(pipeline_date, index_date)
     index_remover_report = pydantic_from_s3_json(IndexRemoverReport, s3_uri)
-    
+
     if index_remover_report is None:
         raise ValueError(f"No index remover report found at {s3_uri}.")
-    
+
     return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
 
 
 def update_last_run_report(
-      pipeline_date: str | None, 
-      index_date: str | None, 
-      deleted_count: int | None
+    pipeline_date: str | None, index_date: str | None, deleted_count: int | None
 ) -> None:
     """Update the S3 file storing the date and count of the last index_remover run with today's date and count."""
     s3_uri = _get_last_index_remover_report_file_uri(pipeline_date, index_date)
@@ -108,7 +106,7 @@ def update_last_run_report(
         pipeline_date=pipeline_date or "dev",
         index_date=index_date or "dev",
         deleted_count=deleted_count,
-        date=datetime.today().strftime("%Y-%m-%d")
+        date=datetime.today().strftime("%Y-%m-%d"),
     )
     pydantic_to_s3_json(report, s3_uri)
 
