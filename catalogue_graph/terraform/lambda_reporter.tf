@@ -24,11 +24,11 @@ module "concepts_pipeline_reporter_lambda" {
 }
 
 resource "aws_iam_role_policy" "reporter_lambda_read_slack_secret_policy" {
-  role   = module.reporter_lambda.lambda_role.name
+  role = module.concepts_pipeline_reporter_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_slack_secret_read.json
 }
 
 resource "aws_iam_role_policy" "reporter_lambda_s3_read_policy" {
-  role   = module.reporter_lambda.lambda_role.name
+  role   = module.concepts_pipeline_reporter_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.ingestor_s3_read.json
 }
