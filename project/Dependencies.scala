@@ -90,7 +90,7 @@ object ExternalDependencies {
     val apacheCommons = "1.12.0"
     val awsLambdaClient = "2.6.0"
     val awsLambdaEvents = "3.15.0"
-    val awsSSO = "2.31.47"
+    val awsSSO = "2.31.54"
     val circe = "0.14.1"
     val diffJson = "4.1.1"
     val fastparse = "2.3.3"
@@ -137,7 +137,7 @@ object ExternalDependencies {
     // we would also need to update the MySQL tei-adapter-cluster and identifiers-delta-cluster databases in RDS.
     "org.flywaydb" % "flyway-core" % "7.15.0",
     "org.scalikejdbc" %% "scalikejdbc" % "3.4.2",
-    "com.mysql" % "mysql-connector-j" % "8.2.0"
+    "com.mysql" % "mysql-connector-j" % "9.3.0"
   )
 
   val scalacheckDependencies = Seq(

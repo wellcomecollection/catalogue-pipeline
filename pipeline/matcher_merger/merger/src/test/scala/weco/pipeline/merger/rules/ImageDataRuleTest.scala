@@ -4,11 +4,12 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
-import weco.catalogue.internal_model.work.generators.SierraWorkGenerators
 import weco.catalogue.internal_model.work.generators.{
+  CalmWorkGenerators,
   MetsWorkGenerators,
   MiroWorkGenerators,
-  SierraWorkGenerators
+  SierraWorkGenerators,
+  TeiWorkGenerators
 }
 
 class ImageDataRuleTest
@@ -16,7 +17,9 @@ class ImageDataRuleTest
     with Matchers
     with MiroWorkGenerators
     with SierraWorkGenerators
+    with TeiWorkGenerators
     with MetsWorkGenerators
+    with CalmWorkGenerators
     with PrivateMethodTester
     with OptionValues
     with Inspectors
@@ -67,9 +70,9 @@ class ImageDataRuleTest
         "there are two digcodes that designate a Sierra document as digmiro - digmiro and digaids"
       )
 
-      forAll(Table("digcode", "digmiro", "digaids")) {
-        digcode =>
-          it(s"discards Miro images for Sierra works with digcode: $digcode") {
+      it(s"discards Miro images for Sierra works with digmiro or digaids") {
+        forAll(Table("digcode", "digmiro", "digaids")) {
+          digcode =>
             val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
               List(
                 createDigcodeIdentifier(digcode)
@@ -79,7 +82,34 @@ class ImageDataRuleTest
             ImageDataRule
               .merge(sierraWork, miroWorks)
               .data shouldBe empty
-          }
+        }
+      }
+
+      it(s"discards digmiro images when the target is a TEI work") {
+        val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+          List(
+            createDigcodeIdentifier("digaids")
+          )
+        )
+        val teiWork = teiIdentifiedWork()
+        val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+        val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 3)
+        ImageDataRule
+          .merge(teiWork, miroWorks :+ sierraWork :+ metsWork)
+          .data shouldBe empty
+      }
+
+      it(s"discards digmiro images when the target is a CALM work") {
+        val sierraWork = sierraDigitalIdentifiedWork().otherIdentifiers(
+          List(
+            createDigcodeIdentifier("digmiro")
+          )
+        )
+        val calmWork = calmIdentifiedWork()
+        val miroWorks = (1 to 5).map(_ => miroIdentifiedWork())
+        ImageDataRule
+          .merge(calmWork, miroWorks :+ sierraWork)
+          .data shouldBe empty
       }
 
       it(s"returns Miro images for Sierra works with non-digmiro digcodes") {
