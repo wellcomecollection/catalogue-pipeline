@@ -3,7 +3,7 @@ import polars as pl
 
 from test_mocks import MockSmartOpen, fixed_datetime
 from test_utils import load_fixture
-from src.concepts_pipeline_reporter import get_indexer_report, get_remover_report, ReporterConfig
+from concepts_pipeline_reporter import get_indexer_report, get_remover_report, ReporterConfig
 from models.step_events import ReporterEvent
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from graph_remover import IDS_LOG_SCHEMA
@@ -50,7 +50,7 @@ def test_get_indexer_report_failure(reporter_event, reporter_config):
   assert "Could not produce Concepts Indexer report" in report[0]["text"]["text"]
 
 def test_get_indexer_report_success(monkeypatch, reporter_event, reporter_config):
-    monkeypatch.setattr("src.concepts_pipeline_reporter.datetime", fixed_datetime(2024, 1, 4))
+    monkeypatch.setattr("concepts_pipeline_reporter.datetime", fixed_datetime(2024, 1, 4))
     MockSmartOpen.mock_s3_file(
         f"{s3_url}/{job_id}/report.indexer.json",
         load_fixture("reporter/report.indexer.json"),
@@ -60,8 +60,7 @@ def test_get_indexer_report_success(monkeypatch, reporter_event, reporter_config
     report = get_indexer_report(reporter_event, 1000, reporter_config)
 
     assert isinstance(report, list)
-    assert report[0]["type"] == "header"
-    assert report[1]["type"] == "section"
+    assert report[0]["type"] == "section"
     expected_section_lines = [
         "- Index *concepts-indexed-2024-01-02* in pipeline-2024-01-01",
         "- Pipeline started *on Tuesday, January 2 at 12:00 PM *",
@@ -69,14 +68,14 @@ def test_get_indexer_report_success(monkeypatch, reporter_event, reporter_config
         "- Pipeline took *2160 minutes* to complete.",
         "- The last update was on Tuesday, January 2 at 12:00 PM when 930 documents were indexed."
     ]
-    actual_section_text = report[1]["text"]["text"]
+    actual_section_text = report[0]["text"]["text"]
     for line in expected_section_lines:
         assert line in actual_section_text
 
     MockSmartOpen.reset_mocks()
 
 def test_get_remover_report_success(monkeypatch, reporter_event, reporter_config):
-    monkeypatch.setattr("src.concepts_pipeline_reporter.datetime", fixed_datetime(2024, 1, 2))
+    monkeypatch.setattr("concepts_pipeline_reporter.datetime", fixed_datetime(2024, 1, 2))
 
     MockSmartOpen.mock_s3_file(
         f"{s3_url}/report.index_remover.json",
@@ -89,27 +88,25 @@ def test_get_remover_report_success(monkeypatch, reporter_event, reporter_config
     report = get_remover_report(reporter_event, reporter_config, ["catalogue_concepts"], ["nodes"])
 
     assert isinstance(report, list)
-    assert report[0]["type"] == "header"
+    assert report[0]["type"] == "section"
     assert report[1]["type"] == "section"
-    assert report[2]["type"] == "section"
-    assert "catalogue_concepts__nodes" in report[1]["text"]["text"]
+    assert "catalogue_concepts__nodes" in report[0]["text"]["text"]
     assert "2" in report[1]["text"]["text"]  # deleted_count from the graph
-    assert "*2* documents were deleted" in report[2]["text"]["text"]  # deleted_count from the index
+    assert "*2* documents were deleted" in report[1]["text"]["text"]  # deleted_count from the index
     
     MockSmartOpen.reset_mocks()
 
 def test_get_remover_report_failure(monkeypatch, reporter_event, reporter_config):
-    monkeypatch.setattr("src.concepts_pipeline_reporter.datetime", fixed_datetime(2025, 1, 2))
+    monkeypatch.setattr("concepts_pipeline_reporter.datetime", fixed_datetime(2025, 1, 2))
 
     mock_deleted_ids_log_file()
 
     report = get_remover_report(reporter_event, reporter_config, ["catalogue_concepts"], ["nodes"])
 
     assert isinstance(report, list)
-    assert report[0]["type"] == "header"
+    assert report[0]["type"] == "section"
     assert report[1]["type"] == "section"
-    assert report[2]["type"] == "section"
-    assert "No nodes or edges were deleted from the graph" in report[1]["text"]["text"]
-    assert "Could not produce Concepts Index Remover report" in report[2]["text"]["text"]   
+    assert "No nodes or edges were deleted from the graph" in report[0]["text"]["text"]
+    assert "Could not produce Concepts Index Remover report" in report[1]["text"]["text"]   
     
     MockSmartOpen.reset_mocks()

@@ -47,6 +47,16 @@ def report_failure_message(report_type: str)-> dict[Any, Any]:
         },
     }
 
+slack_header = [
+        {
+        "type": "header",
+        "text": {
+            "type": "plain_text",
+            "emoji": True,
+            "text": f":white_check_mark: Concepts :bulb:",
+        },
+    }
+]
 
 def date_time_from_job_id(job_id: str) -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
@@ -83,14 +93,6 @@ def get_indexer_report(event: ReporterEvent, indexer_success_count: int, config:
             )
 
         return [
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "emoji": True,
-                    "text": f":white_check_mark: Concepts :bulb:",
-                },
-            },
             {
                 "type": "section",
                 "text": {
@@ -133,15 +135,7 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig, graph_sourc
         IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
     )
     
-    # format the report for Slack
-    header_slack = {
-        "type": "header",
-        "text": {
-            "type": "plain_text",
-            "emoji": True,
-            "text": ":wastebasket: Concepts Remover :bulb:",
-        }
-    }
+    # format the reports for Slack
 
     if bool(graph_remover_deletions):
         table = tabulate(
@@ -188,7 +182,7 @@ def get_remover_report(event: ReporterEvent, config: ReporterConfig, graph_sourc
         },
     } if index_remover_report is not None else report_failure_message("Index Remover")
         
-    return [header_slack, graph_remover_slack, index_remover_slack]
+    return [graph_remover_slack, index_remover_slack]
 
 def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
     print("Preparing concepts pipeline reports ...")
@@ -197,8 +191,7 @@ def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
     try:
         indexer_report = get_indexer_report(events[0], total_indexer_success, config)
         remover_report = get_remover_report(events[0], config, graph_sources, graph_entities)
-        publish_report(indexer_report, config.slack_secret)
-        publish_report(remover_report, config.slack_secret)
+        publish_report(slack_header + indexer_report + remover_report, config.slack_secret)
 
     except ValueError as e:
         print(f"Report failed: {e}")
