@@ -22,7 +22,7 @@ if __name__ == "__main__":
     client = httpx.Client(base_url="https://api.wellcomecollection.org/catalogue/v2")
 
     works_index = client.get("/_elasticConfig").json()["worksIndex"]
-    print(client.get("/swagger.json").json())
+    
     includes = client.get("/swagger.json").json()["paths"]["/works/{id}"]["get"][
         "parameters"
     ][1]["schema"]["enum"]
