@@ -192,13 +192,6 @@ class RelatedConcepts(BaseModel):
     frequentCollaborators: list[CatalogueConceptRelatedTo]
     relatedTopics: list[CatalogueConceptRelatedTo]
 
-
-class ConceptDescription(BaseModel):
-    text: str
-    sourceLabel: str
-    sourceUrl: str
-
-
 class CatalogueConcept(BaseModel):
     id: str
     identifiers: list[CatalogueConceptIdentifier] = field(default_factory=list)
