@@ -1,7 +1,7 @@
 module "concepts_pipeline_reporter_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-pipeline_reporter"
+  name        = "catalogue-graph-pipeline-reporter"
   description = "Generates a report on the latest pipeline run and posts it to #wc-search-alerts"
   runtime     = "python3.13"
   publish     = true
@@ -18,13 +18,13 @@ module "concepts_pipeline_reporter_lambda" {
     variables = {
       INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
-      SLACK_SECRET_ID = local.slack_webhook
+      SLACK_SECRET_ID    = local.slack_webhook
     }
   }
 }
 
 resource "aws_iam_role_policy" "reporter_lambda_read_slack_secret_policy" {
-  role = module.concepts_pipeline_reporter_lambda.lambda_role.name
+  role   = module.concepts_pipeline_reporter_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_slack_secret_read.json
 }
 
