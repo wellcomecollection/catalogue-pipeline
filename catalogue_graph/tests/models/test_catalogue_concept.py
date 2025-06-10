@@ -1,13 +1,13 @@
-from test_utils import load_json_fixture
-
 from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
     CatalogueConceptRelatedTo,
+    ConceptDescription,
     ConceptsQuerySingleResult,
     RelatedConcepts,
     get_most_specific_concept_type,
 )
+from test_utils import load_json_fixture
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
@@ -38,7 +38,11 @@ def test_catalogue_concept_from_neptune_result() -> None:
             "Another alternative label",
             "MeSH alternative label",
         ],
-        description="Mesh description",
+        description=ConceptDescription(
+            text="Mesh description",
+            sourceLabel="nlm-mesh",
+            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+        ),
         type="Person",
         sameAs=[],
         relatedConcepts=RelatedConcepts(
@@ -76,7 +80,11 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         ],
         label="label",
         alternativeLabels=[],
-        description="Mesh description",
+        description=ConceptDescription(
+            text="Mesh description",
+            sourceLabel="nlm-mesh",
+            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+        ),
         type="Person",
         sameAs=[],
         relatedConcepts=RelatedConcepts(
@@ -117,7 +125,11 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         ],
         label="Waves",
         alternativeLabels=["Mechanical waves", "Waves"],
-        description="Repeated oscillation about a stable equilibrium",
+        description=ConceptDescription(
+            text="Repeated oscillation about a stable equilibrium",
+            sourceLabel="wikidata",
+            sourceUrl="https://www.wikidata.org/wiki/Q37172",
+        ),
         type="Concept",
         sameAs=["gcmn66yk", "a2584ttj"],
         relatedConcepts=RelatedConcepts(

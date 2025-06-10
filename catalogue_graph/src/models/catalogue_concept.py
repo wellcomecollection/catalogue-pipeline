@@ -167,16 +167,23 @@ class ConceptDescription(BaseModel):
 
 
 def get_concept_description(concept_data: dict) -> ConceptDescription | None:
+    source_concept_nodes = concept_data["source_concepts"]
     description_text, description_source = get_priority_source_concept_value(
-        None, concept_data["source_concepts"], "description"
+        None, source_concept_nodes, "description"
     )
 
     if description_text and description_source:
-        concept_id = concept_data["concept"]["~properties"]["id"]
+        source_concept_id: str | None = None
+        for source_concept in source_concept_nodes:
+            if source_concept["~properties"]["source"] == description_source:
+                source_concept_id = source_concept["~properties"]["id"]
+        
+        assert source_concept_id is not None
+        
         return ConceptDescription(
             text=description_text,
             sourceLabel=description_source,
-            sourceUrl=get_source_concept_url(concept_id, description_source),
+            sourceUrl=get_source_concept_url(source_concept_id, description_source),
         )
 
     return None
@@ -191,6 +198,7 @@ class RelatedConcepts(BaseModel):
     referencedTogether: list[CatalogueConceptRelatedTo]
     frequentCollaborators: list[CatalogueConceptRelatedTo]
     relatedTopics: list[CatalogueConceptRelatedTo]
+
 
 class CatalogueConcept(BaseModel):
     id: str
