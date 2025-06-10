@@ -177,9 +177,9 @@ def get_concept_description(concept_data: dict) -> ConceptDescription | None:
         for source_concept in source_concept_nodes:
             if source_concept["~properties"]["source"] == description_source:
                 source_concept_id = source_concept["~properties"]["id"]
-        
+
         assert source_concept_id is not None
-        
+
         return ConceptDescription(
             text=description_text,
             sourceLabel=description_source,
