@@ -18,13 +18,13 @@ module "concepts_pipeline_reporter_lambda" {
     variables = {
       INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
-      SLACK_SECRET_ID = local.slack_webhook
+      SLACK_SECRET_ID    = local.slack_webhook
     }
   }
 }
 
 resource "aws_iam_role_policy" "reporter_lambda_read_slack_secret_policy" {
-  role = module.concepts_pipeline_reporter_lambda.lambda_role.name
+  role   = module.concepts_pipeline_reporter_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_slack_secret_read.json
 }
 

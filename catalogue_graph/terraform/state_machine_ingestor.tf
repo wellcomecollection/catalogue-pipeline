@@ -188,7 +188,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Resource = "arn:aws:states:::lambda:invoke",
         Arguments = {
           FunctionName = module.concepts_pipeline_reporter_lambda.lambda.arn,
-          Payload = "{% $states.input %}"
+          Payload      = "{% $states.input %}"
         },
         Next = "Success"
       },
