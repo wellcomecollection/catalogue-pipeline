@@ -54,7 +54,7 @@ def standardise_label(label: str | None) -> str | None:
 
 def get_priority_source_concept_value(
     concept_node: dict | None, source_concept_nodes: list[dict], key: str
-) -> Any:
+) -> tuple[Any, str | None]:
     """
     Given a concept, its source concepts, and a key (e.g. 'label' or 'description'), extract the corresponding
     values (where available) and return the highest-priority one.
@@ -74,7 +74,9 @@ def get_priority_source_concept_value(
     # Sources sorted by priority
     for source in ["nlm-mesh", "lc-subjects", "lc-names", "wikidata", "label-derived"]:
         if (value := values.get(source)) is not None:
-            return value
+            return value, source
+
+    return None, None
 
 
 def transform_related_concepts(
@@ -87,7 +89,7 @@ def transform_related_concepts(
 
     for related_item in related_items:
         concept_id = related_item["concept_node"]["~properties"]["id"]
-        label = get_priority_source_concept_value(
+        label, _ = get_priority_source_concept_value(
             related_item["concept_node"], related_item["source_concept_nodes"], "label"
         )
 
@@ -145,6 +147,41 @@ def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptT
     raise ValueError(f"Invalid set of concept types: {concept_types}.")
 
 
+def get_source_concept_url(source_concept_id: str, source: str) -> str:
+    if source == "nlm-mesh":
+        return f"https://meshb.nlm.nih.gov/record/ui?ui={source_concept_id}"
+    if source == "lc-subjects":
+        return f"https://id.loc.gov/authorities/subjects/{source_concept_id}.html"
+    if source == "lc-names":
+        return f"https://id.loc.gov/authorities/names/{source_concept_id}.html"
+    if source == "wikidata":
+        return f"https://www.wikidata.org/wiki/{source_concept_id}"
+
+    raise ValueError(f"Unknown source: {source}")
+
+
+class ConceptDescription(BaseModel):
+    text: str
+    sourceLabel: str
+    sourceUrl: str
+
+
+def get_concept_description(concept_data: dict) -> ConceptDescription | None:
+    description_text, description_source = get_priority_source_concept_value(
+        None, concept_data["source_concepts"], "description"
+    )
+
+    if description_text and description_source:
+        concept_id = concept_data["concept"]["~properties"]["id"]
+        return ConceptDescription(
+            text=description_text,
+            sourceLabel=description_source,
+            sourceUrl=get_source_concept_url(concept_id, description_source),
+        )
+
+    return None
+
+
 class RelatedConcepts(BaseModel):
     relatedTo: list[CatalogueConceptRelatedTo]
     fieldsOfWork: list[CatalogueConceptRelatedTo]
@@ -161,7 +198,7 @@ class CatalogueConcept(BaseModel):
     identifiers: list[CatalogueConceptIdentifier] = field(default_factory=list)
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
-    description: Optional[str]
+    description: Optional[ConceptDescription]
     type: ConceptType
     sameAs: list[str]
     relatedConcepts: RelatedConcepts
@@ -175,11 +212,8 @@ class CatalogueConcept(BaseModel):
 
         # For now, only extract labels from source concepts which are explicitly linked
         # to the concept via HAS_SOURCE_CONCEPT edges
-        label = get_priority_source_concept_value(
+        label, _ = get_priority_source_concept_value(
             concept_data["concept"], concept_data["linked_source_concepts"], "label"
-        )
-        description = get_priority_source_concept_value(
-            None, concept_data["source_concepts"], "description"
         )
 
         for source_concept in concept_data["linked_source_concepts"]:
@@ -220,7 +254,7 @@ class CatalogueConcept(BaseModel):
             type=concept_type,
             label=label,
             alternativeLabels=sorted(list(set(alternative_labels))),
-            description=description,
+            description=get_concept_description(concept_data),
             identifiers=identifiers,
             sameAs=concept_data["same_as_concept_ids"],
             relatedConcepts=RelatedConcepts(
