@@ -193,6 +193,12 @@ class RelatedConcepts(BaseModel):
     relatedTopics: list[CatalogueConceptRelatedTo]
 
 
+class ConceptDescription(BaseModel):
+    text: str
+    sourceLabel: str
+    sourceUrl: str
+
+
 class CatalogueConcept(BaseModel):
     id: str
     identifiers: list[CatalogueConceptIdentifier] = field(default_factory=list)
@@ -209,11 +215,17 @@ class CatalogueConcept(BaseModel):
         alternative_labels = set()
 
         concept_data: dict = data.concept
+        
+        concept_id = concept_data["concept"]["~properties"]["id"]
 
         # For now, only extract labels from source concepts which are explicitly linked
         # to the concept via HAS_SOURCE_CONCEPT edges
         label, _ = get_priority_source_concept_value(
             concept_data["concept"], concept_data["linked_source_concepts"], "label"
+        )
+
+        description, description_source = get_priority_source_concept_value(
+            None, concept_data["source_concepts"], "description"
         )
 
         for source_concept in concept_data["linked_source_concepts"]:
@@ -250,7 +262,7 @@ class CatalogueConcept(BaseModel):
             concept_type = get_most_specific_concept_type(concept_data["concept_types"])
 
         return CatalogueConcept(
-            id=concept_data["concept"]["~properties"]["id"],
+            id=concept_id,
             type=concept_type,
             label=label,
             alternativeLabels=sorted(list(set(alternative_labels))),
