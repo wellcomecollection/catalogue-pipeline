@@ -12,6 +12,7 @@ import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
+from models.step_events import ReporterEvent
 from utils.aws import df_from_s3_parquet
 
 
@@ -66,7 +67,9 @@ def load_data(
     return success_count
 
 
-def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) -> int:
+def handler(
+    event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
+) -> ReporterEvent:
     print(f"Received event: {event} with config {config}")
 
     extracted_data = df_from_s3_parquet(event.object_to_index.s3_uri)
@@ -82,10 +85,17 @@ def handler(event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig) ->
 
     print(f"Successfully indexed {success_count} documents.")
 
-    return success_count
+    return ReporterEvent(
+        pipeline_date=event.pipeline_date,
+        index_date=event.index_date,
+        job_id=event.job_id,
+        success_count=success_count,
+    )
 
 
-def lambda_handler(event: IngestorIndexerLambdaEvent, context: typing.Any) -> int:
+def lambda_handler(
+    event: IngestorIndexerLambdaEvent, context: typing.Any
+) -> ReporterEvent:
     return handler(
         IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
     )
