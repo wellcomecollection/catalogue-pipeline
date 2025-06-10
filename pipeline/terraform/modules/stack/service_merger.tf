@@ -2,66 +2,67 @@ module "merger_works_output_topic" {
   source = "../topic"
 
   name       = "${local.namespace}_merger_works_output"
-  role_names = [module.merger.task_role_name]
+  role_names = [module.merger_lambda.lambda_role_name]
 }
 
 module "merger_works_path_output_topic" {
   source = "../topic"
 
   name       = "${local.namespace}_merger_works_with_path_output"
-  role_names = [module.merger.task_role_name]
+  role_names = [module.merger_lambda.lambda_role_name]
 }
 
 module "merger_works_incomplete_path_output_topic" {
   source = "../topic"
 
   name       = "${local.namespace}_merger_works_incomplete_path_output"
-  role_names = [module.merger.task_role_name]
+  role_names = [module.merger_lambda.lambda_role_name]
 }
 
 module "merger_images_output_topic" {
   source = "../topic"
 
   name       = "${local.namespace}_merger_images_output"
-  role_names = [module.merger.task_role_name]
+  role_names = [module.merger_lambda.lambda_role_name]
 }
 
-module "merger" {
-  source = "../fargate_service"
+module "merger_lambda" {
+  source = "../pipeline_lambda"
 
-  name            = "merger"
-  container_image = local.merger_image
+  pipeline_date = var.pipeline_date
 
-  topic_arns = [
-    module.matcher_output_topic.arn,
-  ]
+  service_name = "merger"
 
-  # This has to be longer than the `flush_interval_seconds` in the merger.
-  # It also has to be long enough for the Work to actually get processed,
-  # and some of them are quite big.
-  queue_visibility_timeout_seconds = 20 * 60
+  vpc_config = {
+    subnet_ids = local.network_config.subnets
+    security_group_ids = [
+      aws_security_group.egress.id,
+      local.network_config.ec_privatelink_security_group_id,
+    ]
+  }
 
-  env_vars = {
-    merger_works_topic_arn             = module.merger_works_output_topic.arn
-    merger_paths_topic_arn             = module.merger_works_path_output_topic.arn
+  environment_variables = {
+    merger_works_topic_arn = module.merger_works_output_topic.arn
+    merger_paths_topic_arn = module.merger_works_path_output_topic.arn
     merger_path_concatenator_topic_arn = module.merger_works_incomplete_path_output_topic.arn
-    merger_images_topic_arn            = module.merger_images_output_topic.arn
+    merger_images_topic_arn = module.merger_images_output_topic.arn
 
-    es_identified_works_index   = local.es_works_identified_index
+    es_identified_works_index = local.es_works_identified_index
     es_denormalised_works_index = local.es_works_denormalised_index
-    es_initial_images_index     = local.es_images_initial_index
+    es_initial_images_index = local.es_images_initial_index
 
-    batch_size             = 50
-    flush_interval_seconds = 120
   }
 
   secret_env_vars = local.pipeline_storage_es_service_secrets["merger"]
 
-  cpu    = 2048
-  memory = 4096
-
-  min_capacity = var.min_capacity
-  max_capacity = local.max_capacity
-
-  fargate_service_boilerplate = local.fargate_service_boilerplate
+  ecr_repository_name = "uk.ac.wellcome/merger"
+  queue_config = {
+    visibility_timeout_seconds = local.queue_visibility_timeout_seconds
+    max_receive_count          = local.max_receive_count
+    batching_window_seconds    = 30
+    batch_size                 = 100
+    topic_arns = [
+      module.matcher_output_topic.arn,
+    ]
+  }
 }
