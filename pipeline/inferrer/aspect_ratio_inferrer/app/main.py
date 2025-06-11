@@ -52,13 +52,3 @@ async def main(query_url: str):
 @app.get("/healthcheck")
 def healthcheck():
     return {"status": "healthy"}
-
-
-@app.on_event("startup")
-def on_startup():
-    http.start_persistent_client_session()
-
-
-@app.on_event("shutdown")
-async def on_shutdown():
-    await http.close_persistent_client_session()
