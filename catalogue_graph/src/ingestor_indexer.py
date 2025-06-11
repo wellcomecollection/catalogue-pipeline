@@ -95,7 +95,7 @@ def handler(
 
 def lambda_handler(
     event: IngestorIndexerLambdaEvent, context: typing.Any
-) -> ReporterEvent:
+) -> dict[str, typing.Any]:
     return handler(
         IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
     ).model_dump()
