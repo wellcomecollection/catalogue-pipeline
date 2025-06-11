@@ -29,7 +29,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Palette extractor",
     description="extracts color palette vectors from images",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 logger.info("API started, awaiting requests")
 
