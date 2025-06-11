@@ -1,9 +1,11 @@
+import base64
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from common import http
 from common.batching import BatchExecutionQueue
 from common.image import get_image_from_url
 from common.logging import get_logger
-import base64
 
 from palette_encoder import PaletteEncoder
 
@@ -15,6 +17,15 @@ palette_encoder = PaletteEncoder()
 
 # initialise API
 logger.info("Starting API")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    startup()
+    yield
+    await shutdown()
+
+
 app = FastAPI(
     title="Palette extractor", description="extracts color palette vectors from images"
 )
@@ -46,13 +57,11 @@ def healthcheck():
     return {"status": "healthy"}
 
 
-@app.on_event("startup")
-def on_startup():
+def startup():
     http.start_persistent_client_session()
     batch_inferrer_queue.start_worker()
 
 
-@app.on_event("shutdown")
-async def on_shutdown():
+async def shutdown():
     await http.close_persistent_client_session()
     batch_inferrer_queue.stop_worker()
