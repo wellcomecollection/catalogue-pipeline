@@ -98,7 +98,7 @@ def lambda_handler(
 ) -> ReporterEvent:
     return handler(
         IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
-    )
+    ).model_dump()
 
 
 def local_handler() -> None:
