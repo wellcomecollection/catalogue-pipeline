@@ -23,6 +23,7 @@ CATALOGUE_SNAPSHOT_URL = os.environ.get(
     "https://data.wellcomecollection.org/catalogue/v2/works.json.gz",
 )
 
+SLACK_SECRET_ID = os.environ.get("SLACK_SECRET_ID", "")
 
 # Ingestor configuration
 

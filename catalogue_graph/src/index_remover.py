@@ -3,19 +3,19 @@ import typing
 from datetime import date, datetime
 
 import polars as pl
-import smart_open
 
 import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
-from utils.aws import df_from_s3_parquet
+from utils.aws import df_from_s3_parquet, pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
+from utils.slack_report import IndexRemoverReport
 
 
-def _get_last_index_remover_run_file_uri(
+def _get_last_index_remover_report_file_uri(
     pipeline_date: str | None, index_date: str | None
 ) -> str:
-    return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/{index_date or 'dev'}/last_index_remover_run_date.txt"
+    return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/{index_date or 'dev'}/report.index_remover.json"
 
 
 def _get_concepts_index_name(index_date: str | None) -> str:
@@ -40,7 +40,7 @@ def delete_concepts_from_elasticsearch(
     pipeline_date: str | None,
     index_date: str | None,
     is_local: bool,
-) -> None:
+) -> int:
     """Remove documents matching `deleted_ids` from the concepts ES index."""
     es = utils.elasticsearch.get_client(pipeline_date, is_local)
     index_name = _get_concepts_index_name(index_date)
@@ -49,8 +49,9 @@ def delete_concepts_from_elasticsearch(
         index=index_name, body={"query": {"ids": {"values": list(deleted_ids)}}}
     )
 
-    deleted_count = response["deleted"]
+    deleted_count: int = response["deleted"]
     print(f"Deleted {deleted_count} documents from the {index_name} index.")
+    return deleted_count
 
 
 def _is_valid_date(index_date: str) -> bool:
@@ -87,19 +88,27 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
 
 def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date:
     """Return a date corresponding to the last time we ran the index_remover Lambda."""
-    s3_uri = _get_last_index_remover_run_file_uri(pipeline_date, index_date)
-    with smart_open.open(s3_uri, "r") as f:
-        formatted_date = f.read()
+    s3_uri = _get_last_index_remover_report_file_uri(pipeline_date, index_date)
+    index_remover_report = pydantic_from_s3_json(IndexRemoverReport, s3_uri)
 
-    return datetime.strptime(formatted_date, "%Y-%m-%d").date()
+    if index_remover_report is None:
+        raise ValueError(f"No index remover report found at {s3_uri}.")
+
+    return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
 
 
-def update_last_run_date(pipeline_date: str | None, index_date: str | None) -> None:
-    """Update the S3 file storing the date of the last index_remover run with today's date."""
-    s3_uri = _get_last_index_remover_run_file_uri(pipeline_date, index_date)
-    formatted_today = datetime.today().strftime("%Y-%m-%d")
-    with smart_open.open(s3_uri, "w") as f:
-        f.write(formatted_today)
+def update_last_run_report(
+    pipeline_date: str | None, index_date: str | None, deleted_count: int | None
+) -> None:
+    """Update the S3 file storing the date and count of the last index_remover run with today's date and count."""
+    s3_uri = _get_last_index_remover_report_file_uri(pipeline_date, index_date)
+    report = IndexRemoverReport(
+        pipeline_date=pipeline_date or "dev",
+        index_date=index_date or "dev",
+        deleted_count=deleted_count,
+        date=datetime.today().strftime("%Y-%m-%d"),
+    )
+    pydantic_to_s3_json(report, s3_uri)
 
 
 def handler(
@@ -118,14 +127,14 @@ def handler(
         total_size=current_id_count,
         force_pass=disable_safety_check,
     )
-
+    deleted_count = 0
     if len(ids_to_delete) > 0:
         # Delete the corresponding items from the graph
-        delete_concepts_from_elasticsearch(
+        deleted_count = delete_concepts_from_elasticsearch(
             ids_to_delete, pipeline_date, index_date, is_local
         )
 
-    update_last_run_date(pipeline_date, index_date)
+    update_last_run_report(pipeline_date, index_date, deleted_count)
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:

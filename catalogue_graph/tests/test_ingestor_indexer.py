@@ -3,7 +3,7 @@ from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSmartOpen
+from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
 
 from ingestor_indexer import (
@@ -17,11 +17,14 @@ from ingestor_indexer import (
 def test_ingestor_indexer_success() -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
+        pipeline_date="2025-01-01",
         index_date="2025-01-01",
         object_to_index=IngestorIndexerObject(
             s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
         ),
     )
+
+    _mock_es_secrets()
 
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
@@ -36,7 +39,7 @@ def test_ingestor_indexer_success() -> None:
 
     result = handler(event, config)
     assert len(MockElasticsearchClient.inputs) == 10
-    assert result == 10  # success count
+    assert result.success_count == 10
     assert MockElasticsearchClient.inputs == expected_inputs
 
 
@@ -45,6 +48,7 @@ def build_test_matrix() -> list[tuple]:
         (
             "the file at s3_uri doesn't exist",
             IngestorIndexerLambdaEvent(
+                pipeline_date="2021-07-01",
                 index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/ghost-file"
@@ -96,3 +100,19 @@ def test_ingestor_indexer_failure(
         MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
         handler(event, config)
+
+
+def _mock_es_secrets() -> None:
+    # Using a non-null pipeline_date connects to the production ES cluster, so we need to mock some secrets
+    MockSecretsManagerClient.add_mock_secret(
+        "elasticsearch/pipeline_storage_2025-01-01/private_host", "test"
+    )
+    MockSecretsManagerClient.add_mock_secret(
+        "elasticsearch/pipeline_storage_2025-01-01/port", 80
+    )
+    MockSecretsManagerClient.add_mock_secret(
+        "elasticsearch/pipeline_storage_2025-01-01/protocol", "http"
+    )
+    MockSecretsManagerClient.add_mock_secret(
+        "elasticsearch/pipeline_storage_2025-01-01/concept_ingestor/api_key", ""
+    )

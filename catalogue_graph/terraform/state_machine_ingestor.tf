@@ -172,7 +172,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       "Remove documents" = {
         Type     = "Task",
         Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
+        Output   = "{% $states.input %}",
         Arguments = {
           FunctionName = module.index_remover_lambda.lambda.arn,
           Payload = {
@@ -181,7 +181,16 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           }
         },
         Retry = local.DefaultRetry,
-        Next  = "Success"
+        Next  = "Generate final report"
+      },
+      "Generate final report" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Arguments = {
+          FunctionName = module.concepts_pipeline_reporter_lambda.lambda.arn,
+          Payload      = "{% $states.input %}"
+        },
+        Next = "Success"
       },
       Success = {
         Type = "Succeed"
@@ -200,7 +209,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           }
         },
         Retry = local.DefaultRetry,
-        "Next" : "Fail"
+        Next : "Fail"
       },
       Fail = {
         Type  = "Fail",
