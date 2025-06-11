@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Feature vector encoder",
     description=("Takes an image url and returns the image's feature vector"),
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 logger.info("API started, awaiting requests")
 

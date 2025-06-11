@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Aspect ratio extractor",
     description="extracts aspect ratios",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 logger.info("API started, awaiting requests")
 
