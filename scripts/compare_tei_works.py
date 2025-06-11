@@ -13,7 +13,6 @@ import sys
 
 import httpx
 
-
 if __name__ == "__main__":
     try:
         work_id = sys.argv[1]
