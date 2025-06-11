@@ -10,7 +10,7 @@ module "concepts_pipeline_reporter_lambda" {
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_reporter.lambda_handler"
+  handler     = "concepts_pipeline_reporter.lambda_handler"
   memory_size = 128
   timeout     = 300
 
@@ -31,4 +31,9 @@ resource "aws_iam_role_policy" "reporter_lambda_read_slack_secret_policy" {
 resource "aws_iam_role_policy" "reporter_lambda_s3_read_policy" {
   role   = module.concepts_pipeline_reporter_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.ingestor_s3_read.json
+}
+
+resource "aws_iam_role_policy" "reporter_lambda_graph_remover_s3_read_policy" {
+  role   = module.concepts_pipeline_reporter_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.graph_remover_s3_read.json
 }

@@ -61,6 +61,7 @@ resource "aws_iam_policy" "state_machine_policy" {
           module.index_remover_lambda.lambda.arn,
           module.graph_scaler_lambda.lambda.arn,
           module.graph_status_poller_lambda.lambda.arn,
+          module.concepts_pipeline_reporter_lambda.lambda.arn
         ]
       },
       {
