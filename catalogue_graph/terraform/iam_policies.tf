@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "neptune_delete" {
   }
 }
 
-# read from catalogue_graph_bucket s3 bucket
+# read from catalogue_graph_bucket s3 bucket with prefix /ingestor
 data "aws_iam_policy_document" "ingestor_s3_read" {
   statement {
     actions = [
@@ -76,6 +76,21 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
 
     resources = [
       "${aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor/*"
+    ]
+  }
+}
+
+# read from catalogue_graph_bucket s3 bucket with prefix /graph_remover
+data "aws_iam_policy_document" "graph_remover_s3_read" {
+  statement {
+    actions = [
+      "s3:ListBucket",
+      "s3:GetObject",
+      "s3:HeadObject",
+    ]
+
+    resources = [
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
     ]
   }
 }
