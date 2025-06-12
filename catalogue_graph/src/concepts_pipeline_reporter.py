@@ -137,7 +137,10 @@ def get_remover_report(
 
     # get deletions from the graph
     graph_remover_deletions = {}
-    last_index_remover_run_date = index_remover_report.date if index_remover_report is not None else datetime.now().date()
+    if index_remover_report is not None:
+        last_index_remover_run_date = datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
+    else:
+        last_index_remover_run_date = datetime.now().date()
 
     for source, entity in product(graph_sources, graph_entities):
         try:
