@@ -2,6 +2,7 @@ from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
     CatalogueConceptRelatedTo,
+    ConceptDescription,
 )
 from models.indexable_concept import (
     ConceptDisplay,
@@ -22,7 +23,11 @@ def test_indexable_concept_from_catalogue_concept() -> None:
         ],
         label="label",
         alternativeLabels=["alternativeLabels"],
-        description="description",
+        description=ConceptDescription(
+            text="description",
+            sourceLabel="nlm-mesh",
+            sourceUrl="https://test.com",
+        ),
         type="Concept",
         sameAs=["1234"],
         relatedConcepts=RelatedConcepts(
@@ -68,7 +73,11 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             ],
             label="label",
             alternativeLabels=["alternativeLabels"],
-            description="description",
+            description=ConceptDescription(
+                text="description",
+                sourceLabel="nlm-mesh",
+                sourceUrl="https://test.com",
+            ),
             type="Concept",
             sameAs=["1234"],
             relatedConcepts=RelatedConcepts(
