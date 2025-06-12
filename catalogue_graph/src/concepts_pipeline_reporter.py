@@ -128,7 +128,7 @@ def get_remover_report(
     graph_remover_deletions = {}
 
     for source, entity in product(graph_sources, graph_entities):
-        try: 
+        try:
             df = df_from_s3_parquet(
                 f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet",
             )
@@ -136,7 +136,7 @@ def get_remover_report(
             # if file does not exist, ignore
             print(f"S3 file not found for {source}__{entity}: {e}")
             df = None
-            
+
         now = datetime.now()
         beginning_of_today = datetime(
             now.year, now.month, now.day
