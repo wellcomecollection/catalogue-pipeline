@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, HTTPException
 from common import http
 from common.image import get_image_from_url
@@ -7,7 +9,20 @@ logger = get_logger(__name__)
 
 # initialise API
 logger.info("Starting API")
-app = FastAPI(title="Aspect ratio extractor", description="extracts aspect ratios")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    http.start_persistent_client_session()
+    yield
+    await http.close_persistent_client_session()
+
+
+app = FastAPI(
+    title="Aspect ratio extractor",
+    description="extracts aspect ratios",
+    lifespan=lifespan,
+)
 logger.info("API started, awaiting requests")
 
 
@@ -37,13 +52,3 @@ async def main(query_url: str):
 @app.get("/healthcheck")
 def healthcheck():
     return {"status": "healthy"}
-
-
-@app.on_event("startup")
-def on_startup():
-    http.start_persistent_client_session()
-
-
-@app.on_event("shutdown")
-async def on_shutdown():
-    await http.close_persistent_client_session()
