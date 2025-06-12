@@ -1,5 +1,6 @@
 import numpy as np
 import base64
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from common import http
@@ -13,12 +14,21 @@ logger = get_logger(__name__)
 
 # initialise API
 logger.info("Starting API")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    startup()
+    yield
+    await shutdown()
+
+
 app = FastAPI(
     title="Feature vector encoder",
     description=("Takes an image url and returns the image's feature vector"),
+    lifespan=lifespan,
 )
 logger.info("API started, awaiting requests")
-
 
 batch_inferrer_queue = BatchExecutionQueue(
     extract_features, batch_size=16, timeout=0.250
@@ -47,13 +57,11 @@ def healthcheck():
     return {"status": "healthy"}
 
 
-@app.on_event("startup")
-def on_startup():
+def startup():
     http.start_persistent_client_session()
     batch_inferrer_queue.start_worker()
 
 
-@app.on_event("shutdown")
-async def on_shutdown():
+async def shutdown():
     await http.close_persistent_client_session()
     batch_inferrer_queue.stop_worker()
