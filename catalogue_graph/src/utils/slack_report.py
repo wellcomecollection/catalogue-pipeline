@@ -44,7 +44,7 @@ def build_indexer_report(
     latest_report: TriggerReport | LoaderReport,
 ) -> None:
     report_name = "report.indexer.json"
-    s3_url_indexer_report = f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{current_report.pipeline_date}/{current_report.job_id}/{report_name}"
+    s3_url_indexer_report = f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{current_report.pipeline_date}/{current_report.index_date}/{current_report.job_id}/{report_name}"
 
     indexer_report = pydantic_from_s3_json(
         IndexerReport, s3_url_indexer_report, ignore_missing=True
