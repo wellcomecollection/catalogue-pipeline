@@ -30,10 +30,10 @@ trait MergerConfigurable
       denormalisedWorkIndex =
         rawConfig.requireString("es.denormalised-works.index"),
       initialImageIndex = rawConfig.requireString("es.initial-images.index"),
-      workDownstreamTarget = buildDownstreamTarget(rawConfig),
-      pathDownstreamTarget = buildDownstreamTarget(rawConfig),
-      pathConcatDownstreamTarget = buildDownstreamTarget(rawConfig),
-      imageDownstreamTarget = buildDownstreamTarget(rawConfig)
+      workDownstreamTarget = buildDownstreamTarget(rawConfig, "work-sender"),
+      pathDownstreamTarget = buildDownstreamTarget(rawConfig, "path-sender"),
+      pathConcatDownstreamTarget = buildDownstreamTarget(rawConfig, "path-concatenator-sender"),
+      imageDownstreamTarget = buildDownstreamTarget(rawConfig, "image-sender")
     )
 }
 
