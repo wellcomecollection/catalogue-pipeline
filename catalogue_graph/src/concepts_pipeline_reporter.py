@@ -124,8 +124,26 @@ def get_remover_report(
     graph_sources: list[str],
     graph_entities: list[str],
 ) -> list[Any]:
+    # get deletions from the index
+    pipeline_date = event.pipeline_date or "dev"
+    index_date = event.index_date
+    job_id = event.job_id
+
+    report_name = "report.index_remover.json"
+    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}"
+
+    index_remover_report = pydantic_from_s3_json(
+        IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
+    )
+
     # get deletions from the graph
     graph_remover_deletions = {}
+    if index_remover_report is not None:
+        last_index_remover_run_date = datetime.strptime(
+            index_remover_report.date, "%Y-%m-%d"
+        ).date()
+    else:
+        last_index_remover_run_date = datetime.now().date()
 
     for source, entity in product(graph_sources, graph_entities):
         try:
@@ -137,13 +155,9 @@ def get_remover_report(
             print(f"S3 file not found for {source}__{entity}: {e}")
             df = None
 
-        now = datetime.now()
-        beginning_of_today = datetime(
-            now.year, now.month, now.day
-        ).date()  # should this be the last_run_date?
         if df is not None:
             deletions_today = len(
-                df.filter(pl.col("timestamp") >= beginning_of_today)
+                df.filter(pl.col("timestamp") >= last_index_remover_run_date)
                 .select("id")
                 .to_series()
                 .unique()
@@ -151,17 +165,6 @@ def get_remover_report(
             )
             if deletions_today > 0:
                 graph_remover_deletions[f"{source}__{entity}"] = deletions_today
-
-    # get deletions from the index
-    pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date
-
-    report_name = "report.index_remover.json"
-    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{report_name}"
-
-    index_remover_report = pydantic_from_s3_json(
-        IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
-    )
 
     # format the reports for Slack
 
