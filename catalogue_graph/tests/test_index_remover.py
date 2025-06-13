@@ -2,12 +2,12 @@ import json
 
 import polars as pl
 import pytest
-from models.step_events import ReporterEvent
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 
 from graph_remover import IDS_LOG_SCHEMA
 from index_remover import lambda_handler
+from models.step_events import ReporterEvent
 
 
 def _mock_es_secrets() -> None:
@@ -52,11 +52,11 @@ def test_index_remover_first_run() -> None:
 
     # No index date specified, so the local 'concepts-indexed' index name should be used
     event = ReporterEvent(
-        pipeline_date = None,
-        index_date = None,
-        job_id = None,
-        success_count = 1000,
-        force_pass = True
+        pipeline_date=None,
+        index_date=None,
+        job_id=None,
+        success_count=1000,
+        force_pass=True,
     )
     lambda_handler([event], None)
 
@@ -101,7 +101,7 @@ def test_index_remover_next_run() -> None:
         index_date=index_date,
         job_id=job_id,
         success_count=1000,
-        force_pass=True
+        force_pass=True,
     )
     lambda_handler([event], None)
 
@@ -163,7 +163,7 @@ def test_index_remover_new_index_run() -> None:
         index_date=index_date,
         job_id=job_id,
         success_count=1000,
-        force_pass=True
+        force_pass=True,
     )
 
     lambda_handler([event], None)

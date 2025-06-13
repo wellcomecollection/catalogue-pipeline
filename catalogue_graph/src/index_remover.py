@@ -5,9 +5,9 @@ from datetime import date, datetime
 import polars as pl
 
 import config
-from models.step_events import ReporterEvent
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
+from models.step_events import ReporterEvent
 from utils.aws import df_from_s3_parquet, pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
 from utils.slack_report import IndexRemoverReport
@@ -18,10 +18,12 @@ def _get_last_index_remover_report_file_uri(
 ) -> str:
     return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/{index_date or 'dev'}/report.index_remover.json"
 
+
 def _get_current_index_remover_report_file_uri(
     pipeline_date: str | None, index_date: str | None, job_id: str | None
 ) -> str:
     return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/{index_date or 'dev'}/{job_id or 'dev'}/report.index_remover.json"
+
 
 def _get_concepts_index_name(index_date: str | None) -> str:
     return (
@@ -102,7 +104,7 @@ def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date
     return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
 
 
-def update_index_remover_report(report: IndexRemoverReport, s3_uri:str) -> None:
+def update_index_remover_report(report: IndexRemoverReport, s3_uri: str) -> None:
     """Update the S3 files storing the date and count of the last index_remover run with today's date and count."""
     pydantic_to_s3_json(report, s3_uri)
 
@@ -130,7 +132,7 @@ def handler(
         deleted_count = delete_concepts_from_elasticsearch(
             ids_to_delete, pipeline_date, index_date, is_local
         )
-    
+
     report = IndexRemoverReport(
         pipeline_date=pipeline_date or "dev",
         index_date=index_date or "dev",
@@ -140,20 +142,25 @@ def handler(
     )
 
     # write the current report to s3 as latest
-    update_index_remover_report(report, _get_last_index_remover_report_file_uri(pipeline_date, index_date))
+    update_index_remover_report(
+        report, _get_last_index_remover_report_file_uri(pipeline_date, index_date)
+    )
     # write the current report to s3 as job_id
-    update_index_remover_report(report, _get_current_index_remover_report_file_uri(pipeline_date, index_date, job_id))
+    update_index_remover_report(
+        report,
+        _get_current_index_remover_report_file_uri(pipeline_date, index_date, job_id),
+    )
 
 
 def lambda_handler(events: list[ReporterEvent], context: typing.Any) -> None:
     # we only want properties pertaining to the overall pipeline run, any event will do
     validated_event = [ReporterEvent.model_validate(event) for event in events][0]
-    
+
     handler(
-        validated_event.pipeline_date, 
-        validated_event.index_date, 
+        validated_event.pipeline_date,
+        validated_event.index_date,
         validated_event.job_id,
-        bool(validated_event.force_pass)
+        bool(validated_event.force_pass),
     )
 
 
@@ -182,7 +189,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--job-id",
         type=str,
-        help='The job ID for the current ingestor run.',
+        help="The job ID for the current ingestor run.",
         required=False,
         default="dev",
     )

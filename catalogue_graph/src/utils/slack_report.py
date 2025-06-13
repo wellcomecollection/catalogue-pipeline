@@ -83,6 +83,7 @@ def build_indexer_report(
         # write the final indexer report to s3 as job_id
         pydantic_to_s3_json(updated_indexer_report, s3_url_current_indexer_report)
 
+
 def publish_report(report: list[typing.Any], slack_secret: str) -> None:
     slack_endpoint = get_secret(slack_secret)
 
