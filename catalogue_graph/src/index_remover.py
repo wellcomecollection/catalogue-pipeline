@@ -134,10 +134,11 @@ def handler(
     report = IndexRemoverReport(
         pipeline_date=pipeline_date or "dev",
         index_date=index_date or "dev",
+        job_id=job_id or "dev",
         deleted_count=deleted_count,
         date=datetime.today().strftime("%Y-%m-%d"),
     )
-    
+
     # write the current report to s3 as latest
     update_index_remover_report(report, _get_last_index_remover_report_file_uri(pipeline_date, index_date))
     # write the current report to s3 as job_id
