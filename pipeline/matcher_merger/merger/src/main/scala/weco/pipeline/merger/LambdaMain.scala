@@ -32,13 +32,6 @@ object LambdaMain
   private val workDownstream = Downstream(config.workDownstreamTarget)
   private val pathDownstream = Downstream(config.pathDownstreamTarget)
   private val pathConcatDownstream = Downstream(config.pathConcatDownstreamTarget)
-  private val imageDownstream = Downstream(config.imageDownstreamTarget)
-
-  private val workRouter = new WorkRouter(
-    workSender = workDownstream,
-    pathSender = pathDownstream,
-    pathConcatenatorSender = pathConcatDownstream
-  )
 
   private val workOrImageIndexer = {
     new EitherIndexer[Work[Merged], Image[Initial]](
@@ -52,12 +45,21 @@ object LambdaMain
       )
     )
   }
-  override protected val processor = new MergeProcessor(
+
+  // does this belong here?
+  type WorkOrImage = Either[Work[Merged], Image[Initial]]
+
+  override protected val workRouter: WorkRouter = new WorkRouter(
+    workSender = workDownstream,
+    pathSender = pathDownstream,
+    pathConcatenatorSender = pathConcatDownstream
+  )
+  override protected val imageMsgSender: Downstream = Downstream(config.imageDownstreamTarget)
+
+  override protected val mergeProcessor = new MergeProcessor(
     sourceWorkLookup,
     mergerManager,
-    workOrImageIndexer,
-    workRouter,
-    imageDownstream
+    workOrImageIndexer
   )
 }
 

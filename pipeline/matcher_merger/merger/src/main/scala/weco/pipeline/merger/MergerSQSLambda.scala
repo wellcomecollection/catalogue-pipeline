@@ -1,25 +1,28 @@
 package weco.pipeline.merger
 
-import weco.catalogue.internal_model.image.Image
-import weco.catalogue.internal_model.image.ImageState.Initial
-import weco.catalogue.internal_model.work.Work
-import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.lambda.{ApplicationConfig, Downstream, SQSBatchResponseLambdaApp, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
-import weco.pipeline_storage.Indexable.imageIndexable
-
+import weco.pipeline.merger.services.WorkRouter
+import weco.pipeline.merger.LambdaMain.WorkOrImage
 import scala.concurrent.Future
 import scala.util.Try
+
 
 trait MergerSQSLambda[Config <: ApplicationConfig]
   extends SQSBatchResponseLambdaApp[String, Config] {
 
-  protected val processor: MergeProcessor
+  protected val mergeProcessor: MergeProcessor
+  protected val workRouter: WorkRouter
+  protected val imageMsgSender: Downstream
+
+  private def notifyDownstream(workOrImage: WorkOrImage): Try[Unit] =
+    workOrImage match {
+      case Left(work) => workRouter(work)
+      case Right(image) => imageMsgSender.notify(image.id)
+    }
 
   override def processMessages(
   messages: Seq[SQSLambdaMessage[String]]
 ): Future[Seq[SQSLambdaMessageResult]] = {
-
-    type WorkOrImage = Either[Work[Merged], Image[Initial]]
 
     val messagesMap: Map[String, String] = messages.map {
       message =>
@@ -27,17 +30,14 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
     }.toMap
 
     // keySet is used to remove duplicates
-    processor.process(messagesMap.keySet.toList).map {
-      mergerResponse =>
-        MergerResponse.successes.map(_: WorkOrImage =>
-          sendWorkOrImageSender(_)
-        )
-
-        mintingResponse.failures.map {
+    mergeProcessor.process(messagesMap.keySet.toList).map {
+      mergeProcessorResponse =>
+        mergeProcessorResponse.successes.map(notifyDownstream)
+        mergeProcessorResponse.failures.map {
           sourceIdentifier =>
             SQSLambdaMessageFailedRetryable(
               messageId = messagesMap(sourceIdentifier),
-              error = new Error(s"Failed to mint ID for $sourceIdentifier.")
+              error = new Error(s"Failed to merge $sourceIdentifier.")
             )
         }
     }

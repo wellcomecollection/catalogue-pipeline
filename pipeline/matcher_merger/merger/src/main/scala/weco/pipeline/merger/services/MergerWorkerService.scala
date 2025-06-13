@@ -28,7 +28,7 @@ class MergerWorkerService[WorkDestination, ImageDestination](
   workOrImageIndexer: Indexer[
     Either[Work[Merged], Image[Initial]]
   ],
-  workRouter: WorkRouter[WorkDestination],
+  workRouter: WorkRouter,
   imageMsgSender: MessageSender[ImageDestination],
   config: PipelineStorageConfig
 )(implicit val ec: ExecutionContext)

@@ -49,5 +49,5 @@ object LambdaMain
 
   override protected val processor =
     new MintingRequestProcessor(minter, workIndexer)
-  override protected val downstream = Downstream(config.downstreamConfig)
+  override protected val downstream: Downstream = Downstream(config.downstreamConfig)
 }

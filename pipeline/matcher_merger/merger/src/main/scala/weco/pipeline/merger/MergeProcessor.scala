@@ -1,45 +1,49 @@
 package weco.pipeline.merger
 
 import grizzled.slf4j.Logging
+import org.apache.pekko.stream.Materializer
+import org.apache.pekko.stream.scaladsl.{Flow, Source}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
-import weco.flows.FlowOps
 import weco.json.JsonUtil.fromJson
-import weco.lambda.Downstream
 import weco.pipeline.matcher.models.MatcherResult
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, WorkRouter}
+import weco.pipeline.merger.LambdaMain.WorkOrImage
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager}
 import weco.pipeline_storage.Indexer
 
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
-case class MergerResponse(successes: Seq[String], failures: Seq[String])
-
+case class MergerResponse(successes: Seq[WorkOrImage], failures: Seq[String])
 
 // merge and index workOrImage
 class MergeProcessor(
   sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
   workOrImageIndexer: Indexer[Either[Work[Merged], Image[Initial]]],
-  workRouter: WorkRouter,
-  imageMsgSender: Downstream,
-)(implicit val ec: ExecutionContext)
+)(implicit val ec: ExecutionContext, implicit val materializer: Materializer)
   extends Logging {
-  import weco.pipeline_storage.Indexable._
-
 
   private type WorkSet = Seq[Option[Work[Identified]]]
 
   def process(messages: List[String]): Future[MergerResponse] = {
+    // we want to optimise the index write, the pipeline_storage used to handle that
 
+    // merge and index WorkOrImage
+    Source(messages)
+      .via(merge())
+      .via(workOrImageIndexer)
+
+    // once things have been merged and indexed
+    // collect the successes (as Seq[WorkOrImage]) and failures (as Seq[String]) then return the MergerResponse
+    Future { MergerResponse(successes = ???, failures = ???) }
   }
 
 
 
-  private def processMessage(
+  private def merge(
     message: String
   ): Future[List[WorkOrImage]] =
     for {
@@ -84,10 +88,4 @@ class MergeProcessor(
     mergerManager
       .applyMerge(maybeWorks = workSet)
       .mergedWorksAndImagesWithTime(matcherResultTime)
-
-//  private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
-//    workOrImage match {
-//      case Left(work)   => workRouter(work)
-//      case Right(image) => imageMsgSender.notify(imageIndexable.id(image))
-//    }
 }
