@@ -2,7 +2,6 @@ package weco.pipeline.merger
 
 import grizzled.slf4j.Logging
 import org.apache.pekko.stream.Materializer
-import org.apache.pekko.stream.scaladsl.{Flow, Source}
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
@@ -16,9 +15,8 @@ import weco.pipeline_storage.Indexer
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
-case class MergerResponse(successes: Seq[WorkOrImage], failures: Seq[String])
+case class MergerResponse(successes: Seq[WorkOrImage] = Seq.empty, failures: Seq[WorkOrImage] = Seq.empty)
 
-// merge and index workOrImage
 class MergeProcessor(
   sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
@@ -29,16 +27,14 @@ class MergeProcessor(
   private type WorkSet = Seq[Option[Work[Identified]]]
 
   def process(messages: List[String]): Future[MergerResponse] = {
-    // we want to optimise the index write, the pipeline_storage used to handle that
-
     // merge and index WorkOrImage
-    Source(messages)
-      .via(merge())
-      .via(workOrImageIndexer)
-
-    // once things have been merged and indexed
-    // collect the successes (as Seq[WorkOrImage]) and failures (as Seq[String]) then return the MergerResponse
-    Future { MergerResponse(successes = ???, failures = ???) }
+    Future.sequence(messages.map(merge)) flatMap {
+      merged: Seq[List[WorkOrImage]] =>
+        workOrImageIndexer(merged.flatten)
+    } map {
+      case Right(successfulWorkOrImage) => MergerResponse(successes = successfulWorkOrImage)
+      case Left(failedWorkOrImage) =>  MergerResponse(failures = failedWorkOrImage)
+    }
   }
 
 
