@@ -127,9 +127,10 @@ def get_remover_report(
     # get deletions from the index
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date
+    job_id = event.job_id
 
     report_name = "report.index_remover.json"
-    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{report_name}"
+    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}"
 
     index_remover_report = pydantic_from_s3_json(
         IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
