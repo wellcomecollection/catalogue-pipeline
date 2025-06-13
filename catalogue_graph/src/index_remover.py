@@ -137,8 +137,10 @@ def handler(
         deleted_count=deleted_count,
         date=datetime.today().strftime("%Y-%m-%d"),
     )
-
+    
+    # write the current report to s3 as latest
     update_index_remover_report(report, _get_last_index_remover_report_file_uri(pipeline_date, index_date))
+    # write the current report to s3 as job_id
     update_index_remover_report(report, _get_current_index_remover_report_file_uri(pipeline_date, index_date, job_id))
 
 
