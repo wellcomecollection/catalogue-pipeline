@@ -148,13 +148,12 @@ def handler(
 def lambda_handler(events: list[ReporterEvent], context: typing.Any) -> None:
     # we only want properties pertaining to the overall pipeline run, any event will do
     validated_event = [ReporterEvent.model_validate(event) for event in events][0]
-    override_safety_check = validated_event.force_pass if validated_event.force_pass is not None else False
     
     handler(
         validated_event.pipeline_date, 
         validated_event.index_date, 
         validated_event.job_id,
-        override_safety_check
+        bool(validated_event.force_pass)
     )
 
 
