@@ -1,6 +1,7 @@
 {
   "pipeline_date": "2025-10-01",
   "job_id": "20240103T1200",
+  "index_date": "2025-10-12",
   "previous_job_id": "20240102T1200",
   "neptune_record_count": 1000,
   "previous_neptune_record_count": 950,

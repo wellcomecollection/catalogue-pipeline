@@ -175,7 +175,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Output   = "{% $states.input %}",
         Arguments = {
           FunctionName = module.index_remover_lambda.lambda.arn,
-          Payload = "{% $states.input %}"
+          Payload      = "{% $states.input %}"
         },
         Retry = local.DefaultRetry,
         Next  = "Generate final report"
