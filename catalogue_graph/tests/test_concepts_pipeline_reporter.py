@@ -102,10 +102,10 @@ def test_get_remover_report_success(
     )
 
     MockSmartOpen.mock_s3_file(
-        f"{s3_url}/report.index_remover.json",
+        f"{s3_url}/{job_id}/report.index_remover.json",
         load_fixture("reporter/report.index_remover.json"),
     )
-    MockSmartOpen.open(f"{s3_url}/report.index_remover.json", "r")
+    MockSmartOpen.open(f"{s3_url}/{job_id}/report.index_remover.json", "r")
 
     mock_deleted_ids_log_file()
 
