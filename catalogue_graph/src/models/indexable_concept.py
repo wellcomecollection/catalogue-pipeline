@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from models.catalogue_concept import (
     CatalogueConcept,
+    ConceptDescription,
     RelatedConcepts,
 )
 from models.graph_node import ConceptType
@@ -64,7 +65,7 @@ class ConceptDisplay(BaseModel):
     identifiers: list[ConceptDisplayIdentifier]
     label: str
     alternativeLabels: list[str] = field(default_factory=list)
-    description: Optional[str]
+    description: Optional[ConceptDescription]
     type: ConceptType
     relatedConcepts: RelatedConcepts
     sameAs: list[str]
