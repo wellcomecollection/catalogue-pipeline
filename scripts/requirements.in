@@ -1,6 +1,6 @@
 boto3
 elasticsearch
-httpx>=0.23.0
+httpx>=0.28.1
 maya
 yaspin
 hyperlink

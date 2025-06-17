@@ -6,7 +6,7 @@ class IngestorMonitorStepEvent(BaseModel):
     report_results: bool = True
 
 
-class ReporterEvent(BaseModel):
+class ReporterEvent(IngestorMonitorStepEvent):
     pipeline_date: str | None = None
     index_date: str | None = None
     job_id: str | None = None

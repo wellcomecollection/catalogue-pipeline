@@ -124,38 +124,47 @@ def get_remover_report(
     graph_sources: list[str],
     graph_entities: list[str],
 ) -> list[Any]:
-    # get deletions from the graph
-    graph_remover_deletions = {}
-
-    for source, entity in product(graph_sources, graph_entities):
-        df = df_from_s3_parquet(
-            f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet"
-        )
-
-        now = datetime.now()
-        beginning_of_today = datetime(
-            now.year, now.month, now.day
-        ).date()  # should this be the last_run_date?
-        deletions_today = len(
-            df.filter(pl.col("timestamp") >= beginning_of_today)
-            .select("id")
-            .to_series()
-            .unique()
-            .to_list()
-        )
-        if deletions_today > 0:
-            graph_remover_deletions[f"{source}__{entity}"] = deletions_today
-
     # get deletions from the index
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date
+    job_id = event.job_id
 
     report_name = "report.index_remover.json"
-    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{report_name}"
+    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}"
 
     index_remover_report = pydantic_from_s3_json(
         IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
     )
+
+    # get deletions from the graph
+    graph_remover_deletions = {}
+    if index_remover_report is not None:
+        last_index_remover_run_date = datetime.strptime(
+            index_remover_report.date, "%Y-%m-%d"
+        ).date()
+    else:
+        last_index_remover_run_date = datetime.now().date()
+
+    for source, entity in product(graph_sources, graph_entities):
+        try:
+            df = df_from_s3_parquet(
+                f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet",
+            )
+        except (OSError, KeyError) as e:
+            # if file does not exist, ignore
+            print(f"S3 file not found for {source}__{entity}: {e}")
+            df = None
+
+        if df is not None:
+            deletions_today = len(
+                df.filter(pl.col("timestamp") >= last_index_remover_run_date)
+                .select("id")
+                .to_series()
+                .unique()
+                .to_list()
+            )
+            if deletions_today > 0:
+                graph_remover_deletions[f"{source}__{entity}"] = deletions_today
 
     # format the reports for Slack
 
