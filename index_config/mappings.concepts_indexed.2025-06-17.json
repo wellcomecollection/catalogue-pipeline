@@ -1,0 +1,60 @@
+{
+  "dynamic": "strict",
+  "properties": {
+    "display": {
+      "type": "object",
+      "enabled": false
+    },
+    "query": {
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "identifiers": {
+          "properties": {
+            "value": {
+              "type": "keyword"
+            },
+            "identifierType": {
+              "type": "keyword"
+            }
+          }
+        },
+        "label": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "alternativeLabels": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword"
+            }
+          }
+        },
+        "description": {
+          "properties": {
+            "source": {
+              "type": "keyword"
+            },
+            "text": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
