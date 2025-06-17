@@ -38,7 +38,10 @@
         },
         "description": {
           "properties": {
-            "source": {
+            "sourceLabel": {
+              "type": "keyword"
+            },
+            "sourceUrl": {
               "type": "keyword"
             },
             "text": {
