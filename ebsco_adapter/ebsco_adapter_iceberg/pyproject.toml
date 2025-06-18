@@ -1,0 +1,20 @@
+[project]
+name = "ebsco-adapter-iceberg"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=2.3.0",
+    "polars>=1.30.0",
+    "pyarrow>=20.0.0",
+    "pyiceberg[sql-sqlite]>=0.9.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+]
+
+[tool.pytest.ini_options]
+pythonpath = "app"
