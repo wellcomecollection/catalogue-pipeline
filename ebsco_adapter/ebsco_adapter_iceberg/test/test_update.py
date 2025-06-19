@@ -1,17 +1,37 @@
 """
 Tests covering the update behaviour of the iceberg ebsco adapter
 """
-from pytest import fail
-import main
+from pytest import fail, mark
+from main import data_to_pa_table, update_table, setup_database
+from pyiceberg.expressions import Not, IsNull, EqualTo, In
+
+import pyarrow.compute as pc
+
+from schemata import ARROW_SCHEMA
+from fixtures import temporary_table
 
 
-def test_noop():
+def assert_row_identifiers(rows, ids):
+    assert set(rows.column('id').to_pylist()) == ids
+
+
+def test_noop(temporary_table):
     """
     When there are no updates to perform, nothing happens
     """
-    fail()
+    data = data_to_pa_table([{'id': "eb0001", 'content': 'hello'}])
+    temporary_table.append(data)
+    changeset = update_table(temporary_table, data)
+    # No Changeset identifier is returned
+    assert changeset is None
+    # The data is the same as before the update
+    assert temporary_table.scan(
+        selected_fields=["id", "content"]).to_arrow().cast(ARROW_SCHEMA).equals(data)
+    # No changeset identifiers have been added
+    assert not temporary_table.scan(row_filter=Not(IsNull('changeset'))).to_arrow()
 
 
+@mark.skip
 def test_corrupt_input():
     """
     Given an update file that cannot be understood
@@ -20,7 +40,7 @@ def test_corrupt_input():
     fail()
 
 
-def test_new_table():
+def test_new_table(temporary_table):
     """
     Given an environment with no data
     When an update is applied
@@ -28,8 +48,18 @@ def test_new_table():
     :return:
     """
 
+    new_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hej'},
+        {'id': "eb0002", 'content': 'boo!'},
+        {'id': "eb0003", 'content': 'alle sammen'},
+    ])
+    changeset_id = update_table(temporary_table, new_data)
+    assert temporary_table.scan().to_arrow() == temporary_table.scan(
+        row_filter=EqualTo('changeset', changeset_id)).to_arrow()
+    assert len(temporary_table.scan().to_arrow()) == 3
 
-def test_update_records():
+
+def test_update_records(temporary_table):
     """
     Given an existing iceberg table
     And an update file with the same records
@@ -38,10 +68,29 @@ def test_update_records():
     Then the records will have been changed
     And the changed rows will be identifiably grouped by a changeset property
     """
-    fail()
+    temporary_table.append(data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0002", 'content': 'boo!'},
+        {'id': "eb0003", 'content': 'world'}
+    ]))
+
+    new_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hej'},
+        {'id': "eb0002", 'content': 'boo!'},
+        {'id': "eb0003", 'content': 'alle sammen'},
+    ])
+    changeset_id = update_table(temporary_table, new_data)
+    expected_changes = {"eb0001", "eb0003"}
+    changed_rows = temporary_table.scan(row_filter=In('id', expected_changes),
+                                        selected_fields=["id"]).to_arrow()
+    changeset_rows = temporary_table.scan(row_filter=EqualTo('changeset', changeset_id),
+                                          selected_fields=["id"]).to_arrow()
+
+    assert_row_identifiers(changeset_rows, expected_changes)
+    assert changed_rows == changeset_rows
 
 
-def test_inserst_records():
+def test_insert_records(temporary_table):
     """
     Given an existing iceberg table
     And an update file with the same records
@@ -50,10 +99,30 @@ def test_inserst_records():
     Then the new records will be added
     And the new rows will be identifiably grouped by a changeset property
     """
-    fail()
+
+    temporary_table.append(data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0003", 'content': 'world'},
+    ]))
+
+    new_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0002", 'content': 'bonjour'},
+        {'id': "eb0003", 'content': 'world'},
+        {'id': "eb0099", 'content': 'tout le monde'}
+    ])
+    changeset_id = update_table(temporary_table, new_data)
+    expected_insertions = {"eb0002", "eb0099"}
+    inserted_rows = temporary_table.scan(row_filter=In('id', expected_insertions),
+                                         selected_fields=["id"]).to_arrow()
+    changeset_rows = temporary_table.scan(row_filter=EqualTo('changeset', changeset_id),
+                                          selected_fields=["id"]).to_arrow()
+
+    assert_row_identifiers(changeset_rows, expected_insertions)
+    assert inserted_rows == changeset_rows
 
 
-def test_delete_records():
+def test_delete_records(temporary_table):
     """
     Given an existing iceberg table
     And an update file with some records missing
@@ -70,10 +139,27 @@ def test_delete_records():
     downstream of here.
     If the row is completely deleted, then we have no way of knowing what action to take in the ongoing pipeline.
     """
-    fail()
+    temporary_table.append(data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0002", 'content': 'byebye'},
+        {'id': "eb0003", 'content': 'greetings'},
+        {'id': "eb0099", 'content': 'seeya'}
+    ]))
+    new_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0003", 'content': 'greetings'},
+    ])
+    changeset_id = update_table(temporary_table, new_data)
+    expected_deletions = {"eb0002", "eb0099"}
+    deleted_rows = temporary_table.scan(row_filter=IsNull('content'), selected_fields=["id"]).to_arrow()
+    assert_row_identifiers(deleted_rows, expected_deletions)
+    changeset_rows = temporary_table.scan(row_filter=EqualTo('changeset', changeset_id),
+                                          selected_fields=["id"]).to_arrow()
+
+    assert_row_identifiers(changeset_rows, expected_deletions)
 
 
-def test_all_actions():
+def test_all_actions(temporary_table):
     """
     Given an existing Iceberg table
     And an update file with new, changed, absent and unchanged  records
@@ -81,4 +167,87 @@ def test_all_actions():
     Then all the appropriate actions are taken
     And all the new, changed and deleted rows are identifiably grouped by a changeset property
     """
-    fail()
+
+    temporary_table.append(data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0002", 'content': 'byebye'},
+        {'id': "eb0003", 'content': 'greetings'},
+    ]))
+
+    new_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0003", 'content': 'god aften'},
+        {'id': "eb0004", 'content': 'noswaith dda'},
+    ])
+    expected_deletion = "eb0002"
+    expected_update = "eb0003"
+    expected_insert = "eb0004"
+
+    changeset_id = update_table(temporary_table, new_data)
+    changeset_rows = temporary_table.scan(row_filter=EqualTo('changeset', changeset_id)).to_arrow()
+    assert len(changeset_rows) == 3
+    rows_by_key = {row['id']: row for row in changeset_rows.to_pylist()}
+    assert rows_by_key[expected_deletion]['content'] == None
+    assert rows_by_key[expected_update]['content'] == 'god aften'
+    assert rows_by_key[expected_insert]['content'] == 'noswaith dda'
+    # And the remaining value is unchanged
+    assert temporary_table.scan(
+        row_filter=IsNull('changeset')
+    ).to_arrow().to_pylist() == [{'id': "eb0001", 'content': 'hello', 'changeset': None}]
+
+
+def test_idempotent(temporary_table):
+    """
+    Given an existing Iceberg table
+    And an update with new, changed, absent and unchanged  records
+    When the update is applied twice
+    Then nothing happens the second time
+    """
+
+    temporary_table.append(data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0002", 'content': 'byebye'},
+        {'id': "eb0003", 'content': 'greetings'},
+    ]))
+
+    new_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0003", 'content': 'god aften'},
+        {'id': "eb0004", 'content': 'noswaith dda'},
+    ])
+    changeset_id = update_table(temporary_table, new_data)
+    assert changeset_id
+    second_changeset_id = update_table(temporary_table, new_data)
+    assert second_changeset_id is None
+
+
+def test_most_recent_changeset_preserved(temporary_table):
+    """
+    Given an existing Iceberg table
+    And two subsequent updates that change different records
+    When the updates are applied
+    Then each row's changeset id is the latest one that applied to it
+    """
+    temporary_table.append(data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0003", 'content': 'greetings'},
+    ]))
+
+    new_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0003", 'content': 'god aften'},
+        {'id': "eb0004", 'content': 'noswaith dda'}
+    ])
+    changeset_id = update_table(temporary_table, new_data)
+    assert {'eb0003', 'eb0004'} == set(
+        temporary_table.scan(row_filter=EqualTo('changeset', changeset_id)).to_arrow().column('id').to_pylist())
+    newer_data = data_to_pa_table([
+        {'id': "eb0001", 'content': 'hello'},
+        {'id': "eb0003", 'content': 'guten abend'},
+        {'id': "eb0004", 'content': 'noswaith dda'}
+    ])
+    newer_changeset_id = update_table(temporary_table, newer_data)
+    assert {'eb0003'} == set(
+        temporary_table.scan(row_filter=EqualTo('changeset', newer_changeset_id)).to_arrow().column('id').to_pylist())
+    assert {'eb0004'} == set(
+        temporary_table.scan(row_filter=EqualTo('changeset', changeset_id)).to_arrow().column('id').to_pylist())
