@@ -78,23 +78,35 @@ def get_indexer_report(
     index_date = event.index_date
     job_id = event.job_id
 
-    report_name = "report.indexer.json"
-    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}"
+    indexer_report_name = "report.indexer.json"
+    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{indexer_report_name}"
 
     indexer_report = pydantic_from_s3_json(
         IndexerReport, s3_url_indexer_report, ignore_missing=True
+    )
+    
+    remover_report_name = "report.index_remover.json"
+    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{remover_report_name}"
+
+    index_remover_report = pydantic_from_s3_json(
+        IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
     )
 
     if job_id is not None and indexer_report is not None:
         start_datetime = date_time_from_job_id(job_id)
         
         if indexer_report.previous_job_id is None:
-            last_update_line = "No previous job found to compare."
+            last_update_line = "- No previous job found to compare."
         else:
             last_update_line = (
-                f"The last update was {date_time_from_job_id(indexer_report.previous_job_id)}"
+                f"- The last update was {date_time_from_job_id(indexer_report.previous_job_id)}"
                 f"when {indexer_report.previous_es_record_count} documents were indexed."
             )
+            
+        if index_remover_report is not None:
+            index_remover_line = f"- *{index_remover_report.deleted_count}* documents were deleted from the graph."
+        else:
+            index_remover_line = f"- No index_remover report found."
 
         current_run_duration = int(
             (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds()
@@ -117,7 +129,8 @@ def get_indexer_report(
                             f"- Pipeline started *{start_datetime}*",
                             f"- It contains *{indexer_success_count}* documents {graph_index_comparison}.",
                             f"- Pipeline took *{current_run_duration} minutes* to complete.",
-                            f"- {last_update_line}",
+                            index_remover_line,
+                            last_update_line,
                         ]
                     ),
                 },
@@ -126,115 +139,14 @@ def get_indexer_report(
     return [report_failure_message("Indexer")]
 
 
-def get_remover_report(
-    event: ReporterEvent,
-    config: ReporterConfig,
-    graph_sources: list[str],
-    graph_entities: list[str],
-) -> list[Any]:
-    # get deletions from the index
-    pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date
-    job_id = event.job_id
-
-    report_name = "report.index_remover.json"
-    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{report_name}"
-
-    index_remover_report = pydantic_from_s3_json(
-        IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
-    )
-
-    # get deletions from the graph
-    graph_remover_deletions = {}
-    if index_remover_report is not None:
-        last_index_remover_run_date = datetime.strptime(
-            index_remover_report.date, "%Y-%m-%d"
-        ).date()
-    else:
-        last_index_remover_run_date = datetime.now().date()
-
-    for source, entity in product(graph_sources, graph_entities):
-        try:
-            df = df_from_s3_parquet(
-                f"s3://wellcomecollection-catalogue-graph/graph_remover/deleted_ids/{source}__{entity}.parquet",
-            )
-        except (OSError, KeyError) as e:
-            # if file does not exist, ignore
-            print(f"S3 file not found for {source}__{entity}: {e}")
-            df = None
-
-        if df is not None:
-            deletions_today = len(
-                df.filter(pl.col("timestamp") >= last_index_remover_run_date)
-                .select("id")
-                .to_series()
-                .unique()
-                .to_list()
-            )
-            if deletions_today > 0:
-                graph_remover_deletions[f"{source}__{entity}"] = deletions_today
-
-    # format the reports for Slack
-
-    if bool(graph_remover_deletions):
-        table = tabulate(
-            graph_remover_deletions.items(),
-            headers=["Type", "Deletions"],
-            colalign=("right", "left"),
-        )
-        graph_remover_slack = {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "\n".join(["*Graph Remover*", f"```\n{table}\n```"]),
-            },
-        }
-    else:
-        graph_remover_slack = {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "\n".join(
-                    [
-                        "*Graph Remover*",
-                        "No nodes or edges were deleted from the graph.",  # This potentially hides failure to retrieve the parquet file(s)
-                    ]
-                ),
-            },
-        }
-
-    index_remover_slack = (
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": "\n".join(
-                    [
-                        "*Index Remover*",
-                        f"Index *concepts-indexed-{index_date}* in pipeline-{pipeline_date}",
-                        f"- *{index_remover_report.deleted_count}* documents were deleted",
-                    ]
-                ),
-            },
-        }
-        if index_remover_report is not None
-        else report_failure_message("Index Remover")
-    )
-
-    return [graph_remover_slack, index_remover_slack]
-
-
 def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
     print("Preparing concepts pipeline reports ...")
     total_indexer_success = sum(event.success_count for event in events)
 
     try:
         indexer_report = get_indexer_report(events[0], total_indexer_success, config)
-        remover_report = get_remover_report(
-            events[0], config, graph_sources, graph_entities
-        )
         publish_report(
-            slack_header + indexer_report + remover_report, config.slack_secret
+            slack_header + indexer_report, config.slack_secret
         )
 
     except ValueError as e:
