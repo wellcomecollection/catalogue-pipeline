@@ -23,7 +23,7 @@ def update_table(table: IcebergTable, new_data: pa.Table):
             this allows us to push the identifier of the deleted record downstream
             even if the workflow run that performs the deletion fails.
     - adds an explicit changeset identifier for all records altered in this update.
-        - a normal upsert consists of up to four separate operations, this allows us to easily group
+        - a normal upsert consists of two separate operations, this allows us to easily group
             those changes together at a later stage.
     """
     # Pull out a table view excluding the existing changeset column, and any deleted rows.
@@ -48,7 +48,11 @@ def update_table(table: IcebergTable, new_data: pa.Table):
             pa.field("changeset", type=pa.string(), nullable=True),
             [[changeset_id] * len(changeset)]
         )
-        table.upsert(changeset, ['id'])
+        with table.transaction():
+            # behind the scenes, upsert consists of two separate actions,
+            # the inserts, and the updates.
+            #
+            table.upsert(changeset, ['id'])
         return changeset_id
     else:
         print("nothing to do")
