@@ -23,25 +23,45 @@ def update_table(table: IcebergTable, new_data: pa.Table):
             this allows us to push the identifier of the deleted record downstream
             even if the workflow run that performs the deletion fails.
     - adds an explicit changeset identifier for all records altered in this update.
-        - a normal upsert consists of two separate operations, this allows us to easily group
-            those changes together at a later stage.
+        - a normal upsert consists of separate operations, although they are wrapped in
+          a transaction, and therefore atomic on write, there is no built-in, readable or queryable
+           linking that joins all the operations in one transaction.
+           This label allows us to read the changes as written at a later point
+
+           (
+            TODO: should this function also return the latest snapshot ID to pass on?
+                pro: That would allow us to accurately pass the changeset downstream, even if another change arrives shortly after
+                cont: I don't think that is desirable, as the next change will overwrite it anyway
+           )
     """
+
     # Pull out a table view excluding the existing changeset column, and any deleted rows.
     # the incoming data does not know about changesets, so this allows us to perform a table comparison
     # based on the "real" data.
     # records that have already been "deleted" do not need to be deleted again.
 
-    existing_data = (
-        table.scan(row_filter=Not(IsNull("content")), selected_fields=["id", "content"])
-        .to_arrow()
-        .cast(ARROW_SCHEMA)
-    )
+    existing_data = table.scan(
+        row_filter=Not(IsNull('content')),
+        selected_fields=["id", "content"]
+    ).to_arrow().cast(ARROW_SCHEMA)
     if existing_data:
+        # Although upsert takes care of the what-to-do aspect
+        # of create vs update, we need to produce a changeset
+        # consisting of only those records we wish to modify.
+        # This allows us to tell iceberg that all of the entries
+        # being changed are part of the same changeset.
+
+        # Delete is obvious, as what we have to do here is create
+        # a deletion record with which to overwrite the existing one.
         deletes = get_deletes(existing_data, new_data)
+        # pyiceberg offers a built in feature that returns the update rows
+        # by comparing two tables.  Unfortunately, it does not say anything
+        # about inserts.
         updates = find_updates(existing_data, new_data)
         inserts = find_inserts(existing_data, new_data)
         changeset = pa.concat_tables([deletes, updates, inserts])
     else:
+        # Empty DB short-circuit, just write it all in.
         changeset = new_data
     if changeset:
         changeset_id = str(uuid.uuid1())  # maybe just use a timestamp?
@@ -49,11 +69,7 @@ def update_table(table: IcebergTable, new_data: pa.Table):
             pa.field("changeset", type=pa.string(), nullable=True),
             [[changeset_id] * len(changeset)],
         )
-        with table.transaction():
-            # behind the scenes, upsert consists of two separate actions,
-            # the inserts, and the updates.
-            #
-            table.upsert(changeset, ["id"])
+        table.upsert(changeset, ['id'])
         return changeset_id
     else:
         print("nothing to do")
