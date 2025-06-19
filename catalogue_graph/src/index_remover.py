@@ -10,7 +10,7 @@ from graph_remover import DELETED_IDS_FOLDER
 from models.step_events import ReporterEvent
 from utils.aws import df_from_s3_parquet, pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
-from utils.slack_report import IndexRemoverReport
+from utils.reporting import IndexRemoverReport
 
 
 def _get_last_index_remover_report_file_uri(

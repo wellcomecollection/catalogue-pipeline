@@ -6,7 +6,7 @@ from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 from utils.safety import validate_fractional_change
-from utils.slack_report import LoaderReport, build_indexer_report
+from utils.reporting import LoaderReport, build_indexer_report
 
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):

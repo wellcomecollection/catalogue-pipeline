@@ -1,7 +1,5 @@
-import polars as pl
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockSmartOpen, fixed_datetime
 from test_utils import load_fixture
 

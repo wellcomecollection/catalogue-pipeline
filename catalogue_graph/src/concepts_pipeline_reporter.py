@@ -3,14 +3,13 @@ from datetime import datetime, timedelta
 from itertools import product
 from typing import Any
 
-import polars as pl
 from pydantic import BaseModel
-from tabulate import tabulate
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX, SLACK_SECRET_ID
 from models.step_events import ReporterEvent
-from utils.aws import df_from_s3_parquet, pydantic_from_s3_json
-from utils.slack_report import IndexerReport, IndexRemoverReport, publish_report
+from utils.aws import pydantic_from_s3_json
+from utils.reporting import IndexerReport, IndexRemoverReport
+from utils.slack import publish_report
 
 
 class ReporterConfig(BaseModel):
@@ -18,24 +17,6 @@ class ReporterConfig(BaseModel):
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     slack_secret: str = SLACK_SECRET_ID
     is_local: bool = False
-
-
-graph_sources = [
-    "loc_concepts",
-    "loc_names",
-    "loc_locations",
-    "mesh_concepts",
-    "mesh_locations",
-    "wikidata_linked_loc_concepts",
-    "wikidata_linked_loc_locations",
-    "wikidata_linked_loc_names",
-    "wikidata_linked_mesh_concepts",
-    "wikidata_linked_mesh_locations",
-    "catalogue_concepts",
-    "catalogue_works",
-]
-
-graph_entities = ["nodes", "edges"]
 
 
 def report_failure_message(report_type: str) -> dict[Any, Any]:
