@@ -31,10 +31,11 @@ def update_table(table: IcebergTable, new_data: pa.Table):
     # based on the "real" data.
     # records that have already been "deleted" do not need to be deleted again.
 
-    existing_data = table.scan(
-        row_filter=Not(IsNull('content')),
-        selected_fields=["id", "content"]
-    ).to_arrow().cast(ARROW_SCHEMA)
+    existing_data = (
+        table.scan(row_filter=Not(IsNull("content")), selected_fields=["id", "content"])
+        .to_arrow()
+        .cast(ARROW_SCHEMA)
+    )
     if existing_data:
         deletes = get_deletes(existing_data, new_data)
         updates = find_updates(existing_data, new_data)
@@ -46,13 +47,13 @@ def update_table(table: IcebergTable, new_data: pa.Table):
         changeset_id = str(uuid.uuid1())  # maybe just use a timestamp?
         changeset = changeset.append_column(
             pa.field("changeset", type=pa.string(), nullable=True),
-            [[changeset_id] * len(changeset)]
+            [[changeset_id] * len(changeset)],
         )
         with table.transaction():
             # behind the scenes, upsert consists of two separate actions,
             # the inserts, and the updates.
             #
-            table.upsert(changeset, ['id'])
+            table.upsert(changeset, ["id"])
         return changeset_id
     else:
         print("nothing to do")
@@ -65,7 +66,7 @@ def find_updates(existing_data: pa.Table, new_data: pa.Table):
 
 def find_inserts(existing_data: pa.Table, new_data: pa.Table):
     old_ids = existing_data.column("id")
-    missing_records = new_data.filter(~ pc.field("id").isin(old_ids))
+    missing_records = new_data.filter(~pc.field("id").isin(old_ids))
     return missing_records
 
 
@@ -75,11 +76,10 @@ def get_deletes(existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
     pyarrow Table that can be used to update those records by emptying their content.
     """
     new_ids = new_data.column("id")
-    missing_ids = existing_data.filter(~ pc.field("id").isin(new_ids)).column("id")
-    return pa.Table.from_pylist([
-        {'id': id.as_py()}
-        for id in missing_ids
-    ], schema=ARROW_SCHEMA)
+    missing_ids = existing_data.filter(~pc.field("id").isin(new_ids)).column("id")
+    return pa.Table.from_pylist(
+        [{"id": id.as_py()} for id in missing_ids], schema=ARROW_SCHEMA
+    )
 
 
 def data_to_pa_table(data):
@@ -91,16 +91,19 @@ def main():
 
 
 def setup_database(table_name, initial_data):
-    catalog = load_catalog("local", uri="sqlite:////tmp/warehouse/catalog.db", warehouse="file:///tmp/warehouse/")
-    table_fullname = f'default.{table_name}'
+    catalog = load_catalog(
+        "local",
+        uri="sqlite:////tmp/warehouse/catalog.db",
+        warehouse="file:///tmp/warehouse/",
+    )
+    table_fullname = f"default.{table_name}"
     catalog.create_namespace_if_not_exists("default")
 
-    if (catalog.table_exists(table_fullname)):
+    if catalog.table_exists(table_fullname):
         table = catalog.load_table(table_fullname)
     else:
         table = catalog.create_table_if_not_exists(
-            identifier=table_fullname,
-            schema=SCHEMA
+            identifier=table_fullname, schema=SCHEMA
         )
         table.append(initial_data)
 
