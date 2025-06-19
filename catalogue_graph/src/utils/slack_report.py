@@ -7,36 +7,29 @@ from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from utils.aws import get_secret, pydantic_from_s3_json, pydantic_to_s3_json
 
 
-class TriggerReport(BaseModel):
+class PipelineReport(BaseModel):
+    pipeline_date: str
+    index_date: str
+    job_id: str
+
+class TriggerReport(PipelineReport):
     record_count: int
-    pipeline_date: str
-    index_date: str
-    job_id: str
 
 
-class LoaderReport(BaseModel):
-    pipeline_date: str
-    index_date: str
-    job_id: str
+class LoaderReport(PipelineReport):
     record_count: int
     total_file_size: int
 
 
-class IndexRemoverReport(BaseModel):
-    pipeline_date: str
-    index_date: str
-    job_id: str
+class IndexRemoverReport(PipelineReport):
     deleted_count: int | None
     date: str
 
 
-class IndexerReport(BaseModel):
-    pipeline_date: str
-    index_date: str
-    job_id: str
-    previous_job_id: str
+class IndexerReport(PipelineReport):
+    previous_job_id: str | None
     neptune_record_count: int
-    previous_neptune_record_count: int
+    previous_neptune_record_count: int | None
     es_record_count: int | None
     previous_es_record_count: int | None
 
@@ -58,9 +51,9 @@ def build_indexer_report(
             pipeline_date=current_report.pipeline_date,
             index_date=current_report.index_date,
             job_id=current_report.job_id,
-            previous_job_id=latest_report.job_id,
+            previous_job_id=latest_report.job_id if latest_report else None,
             neptune_record_count=current_report.record_count,
-            previous_neptune_record_count=latest_report.record_count,
+            previous_neptune_record_count=latest_report.record_count if latest_report else None,
             es_record_count=None,
             previous_es_record_count=None,
         )

@@ -69,8 +69,9 @@ def run_check(
             fractional_threshold=config.percentage_threshold,
             force_pass=force_pass,
         )
-        # build and write the final pipeline report to s3
-        build_indexer_report(current_report, latest_report)
+    
+    # build and write the final pipeline report to s3
+    build_indexer_report(current_report, latest_report)
 
     # write the current report to s3 as latest
     pydantic_to_s3_json(current_report, s3_url_latest)

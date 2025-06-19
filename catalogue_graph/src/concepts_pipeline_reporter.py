@@ -87,7 +87,15 @@ def get_indexer_report(
 
     if job_id is not None and indexer_report is not None:
         start_datetime = date_time_from_job_id(job_id)
-        previous_start_datetime = date_time_from_job_id(indexer_report.previous_job_id)
+        
+        if indexer_report.previous_job_id is None:
+            last_update_line = "No previous job found to compare."
+        else:
+            last_update_line = (
+                f"The last update was {date_time_from_job_id(indexer_report.previous_job_id)}"
+                f"when {indexer_report.previous_es_record_count} documents were indexed."
+            )
+
         current_run_duration = int(
             (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds()
             / 60
@@ -109,7 +117,7 @@ def get_indexer_report(
                             f"- Pipeline started *{start_datetime}*",
                             f"- It contains *{indexer_success_count}* documents {graph_index_comparison}.",
                             f"- Pipeline took *{current_run_duration} minutes* to complete.",
-                            f"- The last update was {previous_start_datetime}when {indexer_report.previous_es_record_count} documents were indexed.",
+                            f"- {last_update_line}",
                         ]
                     ),
                 },
