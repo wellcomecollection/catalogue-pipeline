@@ -4,7 +4,7 @@ from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
-from utils.reporting import LoaderReport, build_indexer_report
+from utils.reporting import IndexerReport, LoaderReport
 from utils.safety import validate_fractional_change
 
 
@@ -83,8 +83,28 @@ def run_check(
             force_pass=force_pass,
         )
 
-    # build and write the final pipeline report to s3
-    build_indexer_report(current_report, latest_report)
+    # Update the indexer report in S3 if it exists.
+    # TODO: This should be moved to a lambda function that runs after the indexer
+    indexer_report = IndexerReport.read(
+        current_report.pipeline_date,
+        current_report.index_date,
+        current_report.job_id,
+        ignore_missing=True,
+    )
+
+    if indexer_report is not None:
+        updated_indexer_report = IndexerReport(
+            pipeline_date=indexer_report.pipeline_date,
+            index_date=indexer_report.index_date,
+            job_id=indexer_report.job_id,
+            previous_job_id=indexer_report.previous_job_id,
+            neptune_record_count=indexer_report.neptune_record_count,
+            previous_neptune_record_count=indexer_report.previous_neptune_record_count,
+            es_record_count=current_report.record_count,
+            previous_es_record_count=latest_report.record_count,
+        )
+        updated_indexer_report.write()
+        updated_indexer_report.write(latest=True)
 
     current_report.write()
     current_report.write(latest=True)
