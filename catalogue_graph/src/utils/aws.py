@@ -149,4 +149,4 @@ def pydantic_from_s3_json(
             print(f"S3 file not found: {e}")
             return None
 
-        raise
+        raise FileNotFoundError(f"S3 file not found: {e}")

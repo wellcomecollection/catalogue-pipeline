@@ -8,21 +8,9 @@ import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from models.step_events import ReporterEvent
-from utils.aws import df_from_s3_parquet, pydantic_from_s3_json, pydantic_to_s3_json
+from utils.aws import df_from_s3_parquet
 from utils.safety import validate_fractional_change
 from utils.reporting import IndexRemoverReport
-
-
-def _get_last_index_remover_report_file_uri(
-    pipeline_date: str | None, index_date: str | None
-) -> str:
-    return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/{index_date or 'dev'}/report.index_remover.json"
-
-
-def _get_current_index_remover_report_file_uri(
-    pipeline_date: str | None, index_date: str | None, job_id: str | None
-) -> str:
-    return f"s3://{config.INGESTOR_S3_BUCKET}/ingestor/{pipeline_date or 'dev'}/{index_date or 'dev'}/{job_id or 'dev'}/report.index_remover.json"
 
 
 def _get_concepts_index_name(index_date: str | None) -> str:
@@ -80,7 +68,7 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
         # Filter for IDs which were added to the log file since the last run of the index_remover.
         cutoff_date = get_last_run_date(pipeline_date, index_date)
         df = df.filter(pl.col("timestamp") >= cutoff_date)
-    except (OSError, KeyError):
+    except (FileNotFoundError):
         # The file might not exist on the first run, implying we did not run the index remover on the current index yet.
         # In this case, we can use the index date as a filter (since all IDs which were removed from the graph before
         # the index was created cannot exist in the index).
@@ -94,19 +82,13 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
 
 
 def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date:
-    """Return a date corresponding to the last time we ran the index_remover Lambda."""
-    s3_uri = _get_last_index_remover_report_file_uri(pipeline_date, index_date)
-    index_remover_report = pydantic_from_s3_json(IndexRemoverReport, s3_uri)
-
-    if index_remover_report is None:
-        raise ValueError(f"No index remover report found at {s3_uri}.")
+    """Return a date corresponding to the last time we ran the index_remover Lambda."""        
+    index_remover_report = IndexRemoverReport.read(
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+    )
 
     return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
-
-
-def update_index_remover_report(report: IndexRemoverReport, s3_uri: str) -> None:
-    """Update the S3 files storing the date and count of the last index_remover run with today's date and count."""
-    pydantic_to_s3_json(report, s3_uri)
 
 
 def handler(
@@ -141,15 +123,8 @@ def handler(
         date=datetime.today().strftime("%Y-%m-%d"),
     )
 
-    # write the current report to s3 as latest
-    update_index_remover_report(
-        report, _get_last_index_remover_report_file_uri(pipeline_date, index_date)
-    )
-    # write the current report to s3 as job_id
-    update_index_remover_report(
-        report,
-        _get_current_index_remover_report_file_uri(pipeline_date, index_date, job_id),
-    )
+    report.write()
+    report.write(latest=True)
 
 
 def lambda_handler(events: list[ReporterEvent], context: typing.Any) -> None:

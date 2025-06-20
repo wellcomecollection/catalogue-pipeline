@@ -58,6 +58,7 @@ def test_index_remover_first_run() -> None:
         success_count=1000,
         force_pass=True,
     )
+    
     lambda_handler([event], None)
 
     indexed_concepts = MockElasticsearchClient.indexed_documents["concepts-indexed"]
