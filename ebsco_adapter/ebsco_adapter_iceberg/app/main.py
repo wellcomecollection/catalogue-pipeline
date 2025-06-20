@@ -40,10 +40,11 @@ def update_table(table: IcebergTable, new_data: pa.Table):
     # based on the "real" data.
     # records that have already been "deleted" do not need to be deleted again.
 
-    existing_data = table.scan(
-        row_filter=Not(IsNull('content')),
-        selected_fields=["id", "content"]
-    ).to_arrow().cast(ARROW_SCHEMA)
+    existing_data = (
+        table.scan(row_filter=Not(IsNull("content")), selected_fields=["id", "content"])
+        .to_arrow()
+        .cast(ARROW_SCHEMA)
+    )
     if existing_data:
         # Although upsert takes care of the what-to-do aspect
         # of create vs update, we need to produce a changeset
@@ -69,7 +70,7 @@ def update_table(table: IcebergTable, new_data: pa.Table):
             pa.field("changeset", type=pa.string(), nullable=True),
             [[changeset_id] * len(changeset)],
         )
-        table.upsert(changeset, ['id'])
+        table.upsert(changeset, ["id"])
         return changeset_id
     else:
         print("nothing to do")
