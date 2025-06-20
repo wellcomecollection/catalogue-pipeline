@@ -7,7 +7,7 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.json.JsonUtil.fromJson
 import weco.pipeline.matcher.models.MatcherResult
-import weco.pipeline.merger.LambdaMain.WorkOrImage
+import weco.pipeline.merger.Main.WorkOrImage
 import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager}
 import weco.pipeline_storage.Indexer
 

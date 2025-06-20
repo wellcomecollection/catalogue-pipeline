@@ -2,7 +2,7 @@ package weco.pipeline.merger
 
 import weco.lambda.{ApplicationConfig, Downstream, SQSBatchResponseLambdaApp, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
 import weco.pipeline.merger.services.WorkRouter
-import weco.pipeline.merger.LambdaMain.WorkOrImage
+import weco.pipeline.merger.Main.WorkOrImage
 import scala.concurrent.Future
 import scala.util.Try
 

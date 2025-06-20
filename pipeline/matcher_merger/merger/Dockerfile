@@ -14,11 +14,11 @@ ENTRYPOINT ["/aws-lambda/aws-lambda-rie"]
 
 ENV use_downstream=stdio
 
-CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.merger.LambdaMain::handleRequest"]
+CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.merger.Main::handleRequest"]
 
 FROM base
 
 ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
 
-CMD ["weco.pipeline.merger.LambdaMain::handleRequest"]
+CMD ["weco.pipeline.merger.Main::handleRequest"]
 

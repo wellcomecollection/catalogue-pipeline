@@ -1,107 +1,66 @@
 package weco.pipeline.merger
 
-import org.apache.pekko.actor.ActorSystem
 import com.sksamuel.elastic4s.Index
-import com.typesafe.config.Config
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.typesafe.{SNSBuilder, SQSBuilder}
-import weco.pipeline.merger.services.{
-  IdentifiedWorkLookup,
-  MergerManager,
-  MergerWorkerService,
-  PlatformMerger,
-  WorkRouter
-}
+import weco.lambda._
+import weco.pipeline.merger.config.{MergerConfig, MergerConfigurable}
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger, WorkRouter}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
-import weco.pipeline_storage.typesafe.PipelineStorageStreamBuilder
-import weco.typesafe.WellcomeTypesafeApp
-import weco.typesafe.config.builders.EnrichConfig._
 
-import scala.concurrent.ExecutionContext
+object Main
+  extends MergerSQSLambda[MergerConfig]
+    with MergerConfigurable
+    with Logging {
 
-object Main extends WellcomeTypesafeApp {
-  runWithConfig {
-    config: Config =>
-      implicit val actorSystem: ActorSystem =
-        ActorSystem("main-actor-system")
-      implicit val executionContext: ExecutionContext =
-        actorSystem.dispatcher
+  private val esClient = ElasticBuilder.buildElasticClient(config.elasticConfig)
+  private val retriever =
+    new ElasticSourceRetriever[Work[Identified]](
+      client = esClient,
+      index = Index(config.identifiedWorkIndex)
+    )
+  private val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
 
-      val esClient = ElasticBuilder.buildElasticClient(config)
+  private val mergerManager = new MergerManager(PlatformMerger)
 
-      val retriever =
-        new ElasticSourceRetriever[Work[Identified]](
-          client = esClient,
-          index = Index(config.requireString("es.identified-works.index"))
-        )
+  private val workDownstream = Downstream(config.workDownstreamTarget)
+  private val pathDownstream = Downstream(config.pathDownstreamTarget)
+  private val pathConcatDownstream = Downstream(config.pathConcatDownstreamTarget)
 
-      val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
-
-      val mergerManager = new MergerManager(PlatformMerger)
-
-      val workSender =
-        SNSBuilder.buildSNSMessageSender(
-          config,
-          namespace = "work-sender",
-          subject = "Sent by the merger"
-        )
-
-      val pathSender =
-        SNSBuilder
-          .buildSNSMessageSender(
-            config,
-            namespace = "path-sender",
-            subject = "Sent by the merger"
-          )
-
-      val pathConcatenatorSender =
-        SNSBuilder
-          .buildSNSMessageSender(
-            config,
-            namespace = "path-concatenator-sender",
-            subject = "Sent by the merger"
-          )
-
-      val workRouter = new WorkRouter(
-        workSender = workSender,
-        pathSender = pathSender,
-        pathConcatenatorSender = pathConcatenatorSender
+  private val workOrImageIndexer = {
+    new EitherIndexer[Work[Merged], Image[Initial]](
+      leftIndexer = new ElasticIndexer[Work[Merged]](
+        client = esClient,
+        index = Index(config.denormalisedWorkIndex)
+      ),
+      rightIndexer = new ElasticIndexer[Image[Initial]](
+        client = esClient,
+        index = Index(config.initialImageIndex)
       )
-
-      val imageMsgSender =
-        SNSBuilder.buildSNSMessageSender(
-          config,
-          namespace = "image-sender",
-          subject = "Sent by the merger"
-        )
-
-      val workOrImageIndexer =
-        new EitherIndexer[Work[Merged], Image[Initial]](
-          leftIndexer = new ElasticIndexer[Work[Merged]](
-            client = esClient,
-            index = Index(config.requireString("es.denormalised-works.index"))
-          ),
-          rightIndexer = new ElasticIndexer[Image[Initial]](
-            client = esClient,
-            index = Index(config.requireString("es.initial-images.index"))
-          )
-        )
-
-      new MergerWorkerService(
-        msgStream = SQSBuilder.buildSQSStream[NotificationMessage](config),
-        sourceWorkLookup = sourceWorkLookup,
-        mergerManager = mergerManager,
-        workOrImageIndexer = workOrImageIndexer,
-        workRouter = workRouter,
-        imageMsgSender = imageMsgSender,
-        config = PipelineStorageStreamBuilder.buildPipelineStorageConfig(config)
-      )
+    )
   }
+
+  // does this belong here?
+  type WorkOrImage = Either[Work[Merged], Image[Initial]]
+
+  override protected val workRouter: WorkRouter = new WorkRouter(
+    workSender = workDownstream,
+    pathSender = pathDownstream,
+    pathConcatenatorSender = pathConcatDownstream
+  )
+  override protected val imageMsgSender: Downstream = Downstream(config.imageDownstreamTarget)
+
+  override protected val mergeProcessor = new MergeProcessor(
+    sourceWorkLookup,
+    mergerManager,
+    workOrImageIndexer
+  )
 }
+
+
