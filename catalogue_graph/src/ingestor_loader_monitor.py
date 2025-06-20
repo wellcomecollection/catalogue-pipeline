@@ -57,7 +57,7 @@ def run_check(
     sum_file_size = sum((e.object_to_index.content_length or 0) for e in event.events)
     sum_record_count = sum((e.object_to_index.record_count or 0) for e in event.events)
 
-    current_report = LoaderReport(
+    current_report = LoaderReport(  # type: ignore[call-arg]
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id or "dev",
@@ -65,7 +65,7 @@ def run_check(
         total_file_size=sum_file_size,
     )
 
-    latest_report = LoaderReport.read(
+    latest_report: LoaderReport | None = LoaderReport.read(  # type: ignore[assignment]
         pipeline_date=pipeline_date,
         index_date=index_date,
         # load latest report by not passing job_id
@@ -85,7 +85,7 @@ def run_check(
 
     # Update the indexer report in S3 if it exists.
     # TODO: This should be moved to a lambda function that runs after the indexer
-    indexer_report = IndexerReport.read(
+    indexer_report: IndexerReport | None = IndexerReport.read(  # type: ignore[assignment]
         current_report.pipeline_date,
         current_report.index_date,
         current_report.job_id,
@@ -93,7 +93,7 @@ def run_check(
     )
 
     if indexer_report is not None:
-        updated_indexer_report = IndexerReport(
+        updated_indexer_report = IndexerReport(  # type: ignore[call-arg]
             pipeline_date=indexer_report.pipeline_date,
             index_date=indexer_report.index_date,
             job_id=indexer_report.job_id,
@@ -101,7 +101,9 @@ def run_check(
             neptune_record_count=indexer_report.neptune_record_count,
             previous_neptune_record_count=indexer_report.previous_neptune_record_count,
             es_record_count=current_report.record_count,
-            previous_es_record_count=latest_report.record_count,
+            previous_es_record_count=latest_report.record_count
+            if latest_report
+            else None,
         )
         updated_indexer_report.write()
         updated_indexer_report.write(latest=True)
@@ -120,7 +122,7 @@ def report_results(
         "pipeline_date": report.pipeline_date,
         "index_date": report.index_date,
         "step": "ingestor_loader_monitor",
-        "job_id": report.job_id,
+        "job_id": report.job_id or "unspecified",
     }
 
     print(f"Reporting results {report}, {dimensions} ...")

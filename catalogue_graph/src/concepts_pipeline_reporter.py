@@ -52,17 +52,17 @@ def get_indexer_report(
     event: ReporterEvent, indexer_success_count: int, config: ReporterConfig
 ) -> list[Any]:
     pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date
+    index_date = event.index_date or "dev"
     job_id = event.job_id
 
-    indexer_report: IndexerReport = IndexerReport.read(
+    indexer_report: IndexerReport | None = IndexerReport.read(  # type: ignore[assignment]
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,
         ignore_missing=True,
     )
 
-    index_remover_report: IndexRemoverReport = IndexRemoverReport.read(
+    index_remover_report: IndexRemoverReport | None = IndexRemoverReport.read(  # type: ignore[assignment]
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,

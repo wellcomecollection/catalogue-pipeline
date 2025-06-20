@@ -43,14 +43,14 @@ def run_check(
     # get the highest end_index
     record_count = max([e.end_index for e in loader_events])
 
-    current_report = TriggerReport(
+    current_report = TriggerReport(  # type: ignore[call-arg]
         record_count=record_count,
         job_id=job_id,
         pipeline_date=pipeline_date,
         index_date=index_date,
     )
 
-    latest_report = TriggerReport.read(
+    latest_report: TriggerReport | None = TriggerReport.read(  # type: ignore[assignment]
         pipeline_date=pipeline_date,
         index_date=index_date,
         # load the latest report without job_id
@@ -69,7 +69,7 @@ def run_check(
 
     # Write an indexer report to S3
     # TODO: This should be moved to a lambda function that runs after the indexer
-    IndexerReport(
+    IndexerReport(  # type: ignore[call-arg]
         pipeline_date=current_report.pipeline_date,
         index_date=current_report.index_date,
         job_id=current_report.job_id,
@@ -96,7 +96,7 @@ def report_results(
         "pipeline_date": report.pipeline_date,
         "index_date": report.index_date,
         "step": "ingestor_trigger_monitor",
-        "job_id": report.job_id,
+        "job_id": report.job_id or "unspecified",
     }
 
     print(f"Reporting results {report}, {dimensions} ...")

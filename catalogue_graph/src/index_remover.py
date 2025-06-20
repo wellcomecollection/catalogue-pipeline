@@ -57,7 +57,7 @@ def _is_valid_date(index_date: str) -> bool:
         return False
 
 
-def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[str]:
+def get_ids_to_delete(pipeline_date: str, index_date: str) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
     s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{DELETED_IDS_FOLDER}/catalogue_concepts__nodes.parquet"
 
@@ -81,9 +81,9 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
     return set(ids)
 
 
-def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date:
+def get_last_run_date(pipeline_date: str, index_date: str) -> date:
     """Return a date corresponding to the last time we ran the index_remover Lambda."""
-    index_remover_report = IndexRemoverReport.read(
+    index_remover_report: IndexRemoverReport = IndexRemoverReport.read(  # type: ignore[assignment]
         pipeline_date=pipeline_date,
         index_date=index_date,
     )
@@ -98,6 +98,9 @@ def handler(
     disable_safety_check: bool,
     is_local: bool = False,
 ) -> None:
+    pipeline_date = pipeline_date or "dev"
+    index_date = index_date or "dev"
+
     ids_to_delete = get_ids_to_delete(pipeline_date, index_date)
     current_id_count = get_current_id_count(pipeline_date, index_date, is_local)
 
@@ -115,7 +118,7 @@ def handler(
             ids_to_delete, pipeline_date, index_date, is_local
         )
 
-    report = IndexRemoverReport(
+    report = IndexRemoverReport(  # type: ignore[call-arg]
         pipeline_date=pipeline_date or "dev",
         index_date=index_date or "dev",
         job_id=job_id or "dev",

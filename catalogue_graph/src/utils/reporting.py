@@ -12,7 +12,7 @@ class ReportType(str, Enum):
     indexer = "indexer"
     index_remover = "index_remover"
 
-    def get_class(self):
+    def get_class(self):  # type: ignore[no-untyped-def]
         return {
             ReportType.trigger: TriggerReport,
             ReportType.loader: LoaderReport,
@@ -51,8 +51,8 @@ class PipelineReport(BaseModel):
         index_date: str,
         job_id: str | None = None,
         ignore_missing: bool = False,
-    ) -> "PipelineReport | None":
-        cls_report_type = cls._report_type.get_default()
+    ) -> type["PipelineReport"] | None:
+        cls_report_type = cls._report_type.get_default()  # type: ignore[attr-defined]
 
         s3_url = get_report_s3_url(cls_report_type, pipeline_date, index_date, job_id)
 
@@ -110,7 +110,9 @@ def read_report_from_s3(
     s3_url = get_report_s3_url(report_type, pipeline_date, index_date, job_id)
 
     return pydantic_from_s3_json(
-        report_type.get_class(), s3_url, ignore_missing=ignore_missing
+        report_type.get_class(),  # type: ignore[no-untyped-call]
+        s3_url,
+        ignore_missing=ignore_missing,
     )
 
 
