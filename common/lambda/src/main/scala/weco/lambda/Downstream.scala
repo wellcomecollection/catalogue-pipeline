@@ -21,7 +21,8 @@ class SNSDownstream(snsConfig: SNSConfig) extends Downstream {
     snsClient = SnsClient.builder().build(),
     snsConfig = snsConfig,
     // format the topicArn to keep the service name only
-    subject = s"Sent from ${snsConfig.topicArn.split(":").last.split("_").drop(1).dropRight(1).mkString("-")}"
+    subject =
+      s"Sent from ${snsConfig.topicArn.split(":").last.split("_").drop(1).dropRight(1).mkString("-")}"
   )
 
   override def notify(workId: String): Try[Unit] = Try(msgSender.send(workId))
@@ -54,7 +55,10 @@ object Downstream {
 object DownstreamBuilder extends Logging {
   import weco.typesafe.config.builders.EnrichConfig._
 
-  def buildDownstreamTarget(config: Config, namespace: String = ""): DownstreamTarget = {
+  def buildDownstreamTarget(
+    config: Config,
+    namespace: String = ""
+  ): DownstreamTarget = {
     config.getStringOption("downstream.target") match {
       case Some("sns") =>
         val snsConfig = buildSNSConfig(config, namespace)
