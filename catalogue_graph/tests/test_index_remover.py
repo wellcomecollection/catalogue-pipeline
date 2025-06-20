@@ -83,6 +83,7 @@ def test_index_remover_next_run() -> None:
             {
                 "pipeline_date": pipeline_date,
                 "index_date": index_date,
+                "job_id": "20240103T1200",
                 "deleted_count": 2,
                 "date": "2025-04-07",
             }

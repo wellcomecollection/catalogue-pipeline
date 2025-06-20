@@ -369,7 +369,11 @@
           "Ketanest",
           "Ketaset"
         ],
-        "description": "A cyclohexanone derivative used for induction of anesthesia. Its mechanism of action is not well understood, but ketamine can block NMDA receptors (RECEPTORS, N-METHYL-D-ASPARTATE) and may interact with sigma receptors.\n    ",
+        "description": {
+          "text": "A cyclohexanone derivative used for induction of anesthesia. Its mechanism of action is not well understood, but ketamine can block NMDA receptors (RECEPTORS, N-METHYL-D-ASPARTATE) and may interact with sigma receptors.\n    ",
+          "sourceLabel": "nlm-mesh",
+          "sourceUrl": "https://meshb.nlm.nih.gov/record/ui?ui=D007649"
+        },
         "type": "Concept",
         "relatedConcepts": {
           "relatedTo": [],
@@ -452,6 +456,24 @@
           "people": [],
           "referencedTogether": [
             {
+              "conceptType": "Genre",
+              "id": "ajcm2jdg",
+              "label": "Annual reports",
+              "relationshipType": ""
+            },
+            {
+              "conceptType": "Genre",
+              "id": "rasp7aye",
+              "label": "MOH reports",
+              "relationshipType": ""
+            },
+            {
+              "conceptType": "Genre",
+              "id": "kqkakf66",
+              "label": "Electronic books",
+              "relationshipType": ""
+            },
+            {
               "conceptType": "Organisation",
               "id": "y6dk9r86",
               "label": "South Cambridgeshire (England). Rural District Council.",
@@ -460,14 +482,8 @@
           ],
           "relatedTopics": [
             {
-              "label": "Disease Outbreaks",
-              "id": "d6jhgxuc",
-              "relationshipType": "",
-              "conceptType": "Concept"
-            },
-            {
-              "label": "Public Health",
-              "id": "uj4hz4ct",
+              "label": "Water Supply",
+              "id": "gtf5s7h7",
               "relationshipType": "",
               "conceptType": "Concept"
             },
@@ -478,8 +494,14 @@
               "conceptType": "Concept"
             },
             {
-              "label": "Water Supply",
-              "id": "gtf5s7h7",
+              "label": "Public Health",
+              "id": "uj4hz4ct",
+              "relationshipType": "",
+              "conceptType": "Concept"
+            },
+            {
+              "label": "Disease Outbreaks",
+              "id": "d6jhgxuc",
               "relationshipType": "",
               "conceptType": "Concept"
             }

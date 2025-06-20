@@ -20,6 +20,7 @@ from models.catalogue_concept import (
     CatalogueConcept,
     CatalogueConceptIdentifier,
     CatalogueConceptRelatedTo,
+    ConceptDescription,
     RelatedConcepts,
 )
 
@@ -227,7 +228,11 @@ def get_catalogue_concept_mock(
         label="label",
         type="Person",
         alternativeLabels=alternative_labels,
-        description="Mesh description",
+        description=ConceptDescription(
+            text="Mesh description",
+            sourceLabel="nlm-mesh",
+            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+        ),
         identifiers=[
             CatalogueConceptIdentifier(
                 value="456",
