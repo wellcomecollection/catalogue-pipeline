@@ -75,7 +75,7 @@ def test_get_indexer_report_success(
         "- Pipeline started *on Tuesday, January 2 at 12:00 PM *",
         "- It contains *1000* documents _(the same as the graph)_.",
         "- Pipeline took *2160 minutes* to complete.",
-        "- *2* documents were deleted from the graph.",
+        "- *2* documents were deleted from the index.",
         "- The last update was on Tuesday, January 2 at 12:00 PM when 930 documents were indexed.",
     ]
     actual_section_text = report[0]["text"]["text"]

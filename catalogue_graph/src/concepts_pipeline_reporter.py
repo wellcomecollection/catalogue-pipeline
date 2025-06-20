@@ -81,7 +81,7 @@ def get_indexer_report(
             )
 
         if index_remover_report is not None:
-            index_remover_line = f"- *{index_remover_report.deleted_count}* documents were deleted from the graph."
+            index_remover_line = f"- *{index_remover_report.deleted_count}* documents were deleted from the index."
         else:
             index_remover_line = "- No index_remover report found."
 
