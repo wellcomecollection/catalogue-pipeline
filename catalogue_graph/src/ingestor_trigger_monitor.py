@@ -50,7 +50,7 @@ def run_check(
         index_date=index_date,
     )
 
-    latest_report: TriggerReport | None = TriggerReport.read(  # type: ignore[assignment]
+    latest_report: TriggerReport | None = TriggerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
         # load the latest report without job_id

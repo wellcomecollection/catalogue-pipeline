@@ -65,7 +65,7 @@ def run_check(
         total_file_size=sum_file_size,
     )
 
-    latest_report: LoaderReport | None = LoaderReport.read(  # type: ignore[assignment]
+    latest_report: LoaderReport | None = LoaderReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
         # load latest report by not passing job_id
@@ -85,7 +85,7 @@ def run_check(
 
     # Update the indexer report in S3 if it exists.
     # TODO: This should be moved to a lambda function that runs after the indexer
-    indexer_report: IndexerReport | None = IndexerReport.read(  # type: ignore[assignment]
+    indexer_report: IndexerReport | None = IndexerReport.read(
         current_report.pipeline_date,
         current_report.index_date,
         current_report.job_id,

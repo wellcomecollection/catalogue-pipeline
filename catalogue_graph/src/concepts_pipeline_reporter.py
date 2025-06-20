@@ -55,14 +55,14 @@ def get_indexer_report(
     index_date = event.index_date or "dev"
     job_id = event.job_id
 
-    indexer_report: IndexerReport | None = IndexerReport.read(  # type: ignore[assignment]
+    indexer_report: IndexerReport | None = IndexerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,
         ignore_missing=True,
     )
 
-    index_remover_report: IndexRemoverReport | None = IndexRemoverReport.read(  # type: ignore[assignment]
+    index_remover_report: IndexRemoverReport | None = IndexRemoverReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,

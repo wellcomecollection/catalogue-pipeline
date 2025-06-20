@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import TypeVar
 
 from pydantic import BaseModel
 
@@ -38,6 +39,9 @@ def get_report_s3_url(
     )
 
 
+PipelineReportType = TypeVar("PipelineReportType", bound="PipelineReport")
+
+
 class PipelineReport(BaseModel):
     _report_type: ReportType
     pipeline_date: str
@@ -45,13 +49,13 @@ class PipelineReport(BaseModel):
     job_id: str | None
 
     @classmethod
-    def read(
+    def read[PipelineReportType](
         cls,
         pipeline_date: str,
         index_date: str,
         job_id: str | None = None,
         ignore_missing: bool = False,
-    ) -> type["PipelineReport"] | None:
+    ) -> PipelineReportType | None:
         cls_report_type = cls._report_type.get_default()  # type: ignore[attr-defined]
 
         s3_url = get_report_s3_url(cls_report_type, pipeline_date, index_date, job_id)
