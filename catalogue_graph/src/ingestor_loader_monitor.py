@@ -1,4 +1,4 @@
-from pydantic import typing
+import typing
 
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX

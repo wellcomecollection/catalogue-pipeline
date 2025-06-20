@@ -19,7 +19,7 @@ locals {
 
   # This is a hint that the ingestors might need to be in the pipeline stack!
   pipeline_date       = "2025-05-01"
-  concepts_index_date = "2025-05-15"
+  concepts_index_date = "2025-06-17"
 
   concepts_pipeline_inputs_monthly = [
     {
