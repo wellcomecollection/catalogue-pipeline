@@ -51,13 +51,11 @@ def run_check(
         index_date=index_date,
     )
 
-    s3_report_name = "report.trigger.json"
-    s3_url_current_job = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
-    s3_url_latest = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
-
-    # open with smart_open, check for file existence
-    latest_report = pydantic_from_s3_json(
-        TriggerReport, s3_url_latest, ignore_missing=True
+    latest_report = TriggerReport.read(
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+        # load the latest report without job_id
+        ignore_missing=True
     )
 
     if latest_report is not None:
@@ -73,11 +71,8 @@ def run_check(
     # build and write the final pipeline report to s3
     build_indexer_report(current_report, latest_report)
 
-    # write the current report to s3 as latest
-    pydantic_to_s3_json(current_report, s3_url_latest)
-
-    # write the current report to s3 as job_id
-    pydantic_to_s3_json(current_report, s3_url_current_job)
+    current_report.write()
+    current_report.write(latest=True)
 
     return current_report
 
