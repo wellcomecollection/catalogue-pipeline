@@ -1,6 +1,5 @@
 import argparse
 from datetime import datetime, timedelta
-from itertools import product
 from typing import Any
 
 from pydantic import BaseModel

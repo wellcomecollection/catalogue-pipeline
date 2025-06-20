@@ -69,6 +69,7 @@ def run_check(
     s3_report_name = "report.loader.json"
     s3_url_current_job = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
     s3_url_latest = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
+    
     # Load the latest report
     latest_report = pydantic_from_s3_json(
         LoaderReport, s3_url_latest, ignore_missing=True

@@ -4,46 +4,20 @@ from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 
 
-class PipelineReport(BaseModel):
-    _report_type: str
-    pipeline_date: str
-    index_date: str
-    job_id: str | None
-
-
-class TriggerReport(PipelineReport):
-    _report_type = "trigger"
-    record_count: int
-
-
-class LoaderReport(PipelineReport):
-    _report_type = "loader"
-    record_count: int
-    total_file_size: int
-
-
-class IndexRemoverReport(PipelineReport):
-    _report_type = "index_remover"
-    deleted_count: int | None
-    date: str
-
-
-class IndexerReport(PipelineReport):
-    _report_type = "indexer"
-    previous_job_id: str | None
-    neptune_record_count: int
-    previous_neptune_record_count: int | None
-    es_record_count: int | None
-    previous_es_record_count: int | None
-
-
 from enum import Enum
 class ReportType(str, Enum):
-    trigger = TriggerReport._report_type
-    loader = LoaderReport._report_type
-    indexer = IndexerReport._report_type
-    index_remover = IndexRemoverReport._report_type
+    trigger = "trigger"
+    loader = "loader"
+    indexer = "indexer"
+    index_remover = "index_remover"
 
+    def get_class(self):
+        return {
+            ReportType.trigger: TriggerReport,
+            ReportType.loader: LoaderReport,
+            ReportType.indexer: IndexerReport,
+            ReportType.index_remover: IndexRemoverReport,
+        }[self]
 
 def get_report_s3_url(
     report_type: ReportType, 
@@ -59,6 +33,71 @@ def get_report_s3_url(
         
     return f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{report_prefix}/{report_name}"
 
+class PipelineReport(BaseModel):
+    _report_type: ReportType
+    pipeline_date: str
+    index_date: str
+    job_id: str | None
+
+    @classmethod
+    def read(
+        cls,
+        pipeline_date: str,
+        index_date: str,
+        job_id: str | None = None,
+        ignore_missing: bool = False,
+    ) -> "PipelineReport | None":
+        cls_report_type = cls._report_type.get_default()
+        
+        s3_url = get_report_s3_url(
+            cls_report_type,
+            pipeline_date,
+            index_date,
+            job_id
+        )
+            
+        return pydantic_from_s3_json(
+            cls_report_type.get_class(), s3_url, ignore_missing=ignore_missing
+        )
+
+    def write(
+        self,
+        latest: bool = False,
+    ) -> None:
+        s3_url = get_report_s3_url(
+            ReportType(self._report_type), 
+            self.pipeline_date,
+            self.index_date,
+            job_id=self.job_id if not latest else None
+        )
+        
+        pydantic_to_s3_json(self, s3_url)
+
+class TriggerReport(PipelineReport):
+    _report_type = ReportType.trigger
+    record_count: int
+
+
+class LoaderReport(PipelineReport):
+    _report_type = ReportType.loader
+    record_count: int
+    total_file_size: int
+
+
+class IndexRemoverReport(PipelineReport):
+    _report_type = ReportType.index_remover
+    deleted_count: int | None
+    date: str
+
+
+class IndexerReport(PipelineReport):
+    _report_type = ReportType.indexer
+    previous_job_id: str | None
+    neptune_record_count: int
+    previous_neptune_record_count: int | None
+    es_record_count: int | None
+    previous_es_record_count: int | None
+
 def read_report_from_s3(
     report_type: ReportType,
     pipeline_date: str,
@@ -69,40 +108,32 @@ def read_report_from_s3(
     s3_url = get_report_s3_url(report_type, pipeline_date, index_date, job_id)
     
     return pydantic_from_s3_json(
-        report_type, s3_url, ignore_missing=ignore_missing
+        report_type.get_class(), s3_url, ignore_missing=ignore_missing
+    )
+
+def write_report_to_s3(
+    report: PipelineReport,
+) -> None:
+    s3_url = get_report_s3_url(
+        ReportType(report._report_type), 
+        report.pipeline_date,
+        report.index_date,
+        report.job_id
     )
     
+    pydantic_to_s3_json(report, s3_url)
+
 def build_indexer_report(
     current_report: TriggerReport | LoaderReport,
     latest_report: TriggerReport | LoaderReport,
 ) -> None:
-    s3_url_current_indexer_report = get_report_s3_url(
-        ReportType.indexer, 
-        current_report.pipeline_date, 
-        current_report.index_date, 
-        current_report.job_id
-    )
-    
-    s3_url_latest_indexer_report = get_report_s3_url(
-        ReportType.indexer, 
-        current_report.pipeline_date, 
-        current_report.index_date, 
-    )
-    
-    # new_indexer_report = read_report_from_s3(
-    #     ReportType.indexer,
-    #     current_report.pipeline_date,
-    #     current_report.index_date,
-    #     ignore_missing=True
-    # )
 
-    indexer_report = pydantic_from_s3_json(
-        IndexerReport, s3_url_current_indexer_report, ignore_missing=True
+    indexer_report = IndexerReport.read(
+        current_report.pipeline_date,
+        current_report.index_date,
+        current_report.job_id,
+        ignore_missing=True
     )
-    
-    # assert (new_indexer_report == indexer_report), (
-    #     f"indexer_report mismatch! Expected: {new_indexer_report}, but got: {indexer_report}"
-    # )
     
     if indexer_report is None:
         indexer_report = IndexerReport(
@@ -115,7 +146,7 @@ def build_indexer_report(
             es_record_count=None,
             previous_es_record_count=None,
         )
-        pydantic_to_s3_json(indexer_report, s3_url_current_indexer_report)
+        indexer_report.write()
 
     else:
         updated_indexer_report = IndexerReport(
@@ -130,7 +161,5 @@ def build_indexer_report(
         )
 
         # write the final indexer report to s3 as latest
-        pydantic_to_s3_json(updated_indexer_report, s3_url_latest_indexer_report)
-        
-        # write the final indexer report to s3 as job_id
-        pydantic_to_s3_json(updated_indexer_report, s3_url_current_indexer_report)
+        updated_indexer_report.write()
+        updated_indexer_report.write(latest=True)
