@@ -4,8 +4,8 @@ from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
-from utils.safety import validate_fractional_change
 from utils.reporting import LoaderReport, build_indexer_report
+from utils.safety import validate_fractional_change
 
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -68,7 +68,7 @@ def run_check(
     latest_report = LoaderReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
-        # load latest report by not passing job_id
+        # load latest report by not passing job_id
         ignore_missing=True,
     )
 
@@ -82,7 +82,7 @@ def run_check(
             fractional_threshold=config.percentage_threshold,
             force_pass=force_pass,
         )
-    
+
     # build and write the final pipeline report to s3
     build_indexer_report(current_report, latest_report)
 

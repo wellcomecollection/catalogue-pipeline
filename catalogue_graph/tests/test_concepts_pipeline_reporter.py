@@ -7,14 +7,14 @@ from concepts_pipeline_reporter import (
     ReporterConfig,
     get_indexer_report,
 )
+from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from models.step_events import ReporterEvent
 
 pipeline_date = "2024-01-01"
 index_date = "2024-01-02"
 job_id = "20240102T1200"
-s3_bucket = "test-bucket"
-s3_prefix = "test-prefix"
-s3_url = f"s3://{s3_bucket}/{s3_prefix}/{pipeline_date}/{index_date}"
+
+s3_url = f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{pipeline_date}/{index_date}"
 
 
 @pytest.fixture
@@ -30,8 +30,6 @@ def reporter_event() -> ReporterEvent:
 @pytest.fixture
 def reporter_config() -> ReporterConfig:
     return ReporterConfig(
-        ingestor_s3_bucket=s3_bucket,
-        ingestor_s3_prefix=s3_prefix,
         slack_secret="test-secret",
         is_local=True,
     )
@@ -55,7 +53,7 @@ def test_get_indexer_report_success(
     monkeypatch.setattr(
         "concepts_pipeline_reporter.datetime", fixed_datetime(2024, 1, 4)
     )
-    
+
     MockSmartOpen.mock_s3_file(
         f"{s3_url}/{job_id}/report.indexer.json",
         load_fixture("reporter/report.indexer.json"),
@@ -67,7 +65,7 @@ def test_get_indexer_report_success(
         load_fixture("reporter/report.index_remover.json"),
     )
     MockSmartOpen.open(f"{s3_url}/{job_id}/report.index_remover.json", "r")
-    
+
     report = get_indexer_report(reporter_event, 1000, reporter_config)
 
     assert isinstance(report, list)

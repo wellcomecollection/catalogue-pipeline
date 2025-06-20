@@ -4,16 +4,13 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX, SLACK_SECRET_ID
+from config import SLACK_SECRET_ID
 from models.step_events import ReporterEvent
-from utils.aws import pydantic_from_s3_json
 from utils.reporting import IndexerReport, IndexRemoverReport
 from utils.slack import publish_report
 
 
 class ReporterConfig(BaseModel):
-    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
-    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     slack_secret: str = SLACK_SECRET_ID
     is_local: bool = False
 
@@ -58,23 +55,23 @@ def get_indexer_report(
     index_date = event.index_date
     job_id = event.job_id
 
-    indexer_report_name = "report.indexer.json"
-    s3_url_indexer_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{indexer_report_name}"
-
-    indexer_report = pydantic_from_s3_json(
-        IndexerReport, s3_url_indexer_report, ignore_missing=True
+    indexer_report: IndexerReport = IndexerReport.read(
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+        job_id=job_id,
+        ignore_missing=True,
     )
-    
-    remover_report_name = "report.index_remover.json"
-    s3_url_index_remover_report = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{remover_report_name}"
 
-    index_remover_report = pydantic_from_s3_json(
-        IndexRemoverReport, s3_url_index_remover_report, ignore_missing=True
+    index_remover_report: IndexRemoverReport = IndexRemoverReport.read(
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+        job_id=job_id,
+        ignore_missing=True,
     )
 
     if job_id is not None and indexer_report is not None:
         start_datetime = date_time_from_job_id(job_id)
-        
+
         if indexer_report.previous_job_id is None:
             last_update_line = "- No previous job found to compare."
         else:
@@ -82,11 +79,11 @@ def get_indexer_report(
                 f"- The last update was {date_time_from_job_id(indexer_report.previous_job_id)}"
                 f"when {indexer_report.previous_es_record_count} documents were indexed."
             )
-            
+
         if index_remover_report is not None:
             index_remover_line = f"- *{index_remover_report.deleted_count}* documents were deleted from the graph."
         else:
-            index_remover_line = f"- No index_remover report found."
+            index_remover_line = "- No index_remover report found."
 
         current_run_duration = int(
             (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds()
@@ -125,9 +122,7 @@ def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
 
     try:
         indexer_report = get_indexer_report(events[0], total_indexer_success, config)
-        publish_report(
-            slack_header + indexer_report, config.slack_secret
-        )
+        publish_report(slack_header + indexer_report, config.slack_secret)
 
     except ValueError as e:
         print(f"Report failed: {e}")

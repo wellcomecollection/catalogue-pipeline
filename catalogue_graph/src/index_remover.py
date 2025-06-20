@@ -9,8 +9,8 @@ import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from models.step_events import ReporterEvent
 from utils.aws import df_from_s3_parquet
-from utils.safety import validate_fractional_change
 from utils.reporting import IndexRemoverReport
+from utils.safety import validate_fractional_change
 
 
 def _get_concepts_index_name(index_date: str | None) -> str:
@@ -68,7 +68,7 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
         # Filter for IDs which were added to the log file since the last run of the index_remover.
         cutoff_date = get_last_run_date(pipeline_date, index_date)
         df = df.filter(pl.col("timestamp") >= cutoff_date)
-    except (FileNotFoundError):
+    except FileNotFoundError:
         # The file might not exist on the first run, implying we did not run the index remover on the current index yet.
         # In this case, we can use the index date as a filter (since all IDs which were removed from the graph before
         # the index was created cannot exist in the index).
@@ -82,7 +82,7 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
 
 
 def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date:
-    """Return a date corresponding to the last time we ran the index_remover Lambda."""        
+    """Return a date corresponding to the last time we ran the index_remover Lambda."""
     index_remover_report = IndexRemoverReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
