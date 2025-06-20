@@ -1,7 +1,6 @@
 package weco.pipeline.merger
 
 import grizzled.slf4j.Logging
-import org.apache.pekko.stream.Materializer
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
@@ -21,7 +20,7 @@ class MergeProcessor(
   sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
   workOrImageIndexer: Indexer[Either[Work[Merged], Image[Initial]]],
-)(implicit val ec: ExecutionContext, implicit val materializer: Materializer)
+)(implicit val ec: ExecutionContext)
   extends Logging {
 
   private type WorkSet = Seq[Option[Work[Identified]]]
