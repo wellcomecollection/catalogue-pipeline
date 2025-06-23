@@ -1,11 +1,14 @@
 from collections.abc import Generator
+from queue import Queue
+from threading import Thread
 from typing import Tuple
 
 from elasticsearch import Elasticsearch
 
 from .base_source import BaseSource
 
-ES_BATCH_SIZE = 10000
+ES_BATCH_SIZE = 1000
+SLICE_COUNT = 10
 
 
 class ElasticsearchSource(BaseSource):
@@ -13,12 +16,14 @@ class ElasticsearchSource(BaseSource):
         self.es_client = Elasticsearch(url, basic_auth=basic_auth, timeout=120)
         self.index_name = index_name
 
-    def search_with_pit(self, pit_id: int):
+    def search_with_pit(self, pit_id: int, slice_index: int, queue: Queue):
+        # For now, only extract 'Visible' works.
         body = {
             "query": {"match": {"type": "Visible"}},
             "size": ES_BATCH_SIZE,
             "pit": {"id": pit_id, "keep_alive": "2m"},
             "sort": [{"_shard_doc": "asc"}],
+            "slice": {"id": slice_index, "max": SLICE_COUNT},
         }
 
         while True:
@@ -26,13 +31,29 @@ class ElasticsearchSource(BaseSource):
             if not hits:
                 break
 
-            yield from hits
+            for hit in hits:
+                queue.put(hit["_source"])
 
             body["search_after"] = hits[-1]["sort"]
+
+        queue.put(None)    
 
     def stream_raw(self) -> Generator[dict]:
         pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="2m")
 
-        yield from self.search_with_pit(pit["id"])
+        q = Queue(maxsize=ES_BATCH_SIZE)
+        threads = []
+        for i in range(SLICE_COUNT):
+            t = Thread(target=self.search_with_pit, args=(pit["id"], i, q), daemon=True)
+            t.start()
+            threads.append(t)
+    
+        done_signals = 0
+        while done_signals < SLICE_COUNT:
+            item = q.get()
+            if item is None:
+                done_signals += 1
+            else:
+                yield item        
 
         self.es_client.close_point_in_time(body={"id": pit["id"]})
