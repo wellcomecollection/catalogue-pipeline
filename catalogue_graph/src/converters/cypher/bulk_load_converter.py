@@ -1,9 +1,8 @@
 from typing import Literal, cast
 
-from pydantic import BaseModel
-
 from models.graph_edge import BaseEdge, get_all_edge_attributes
-from models.graph_node import BaseNode, SourceLocation, SourceName
+from models.graph_node import BaseNode, SourceLocation, SourceName, Work
+from pydantic import BaseModel
 
 from .base_converter import CypherBaseConverter
 
@@ -29,6 +28,9 @@ class CypherBulkLoadConverter(CypherBaseConverter):
             "date_of_death",
         }:
             field_type = "DateTime"
+        if isinstance(model, Work) and field_name == "duration":
+            field_type = "Int"
+                
 
         return f"{field_name}:{field_type}"
 
