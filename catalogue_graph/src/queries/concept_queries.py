@@ -1,5 +1,8 @@
+from clients.base_neptune_client import BaseNeptuneClient
 from models.graph_node import ConceptType
 from utils.types import WorkConceptKey
+
+LinkedConcepts = dict[str, list[dict]]
 
 # A query returning all Wellcome concepts and the corresponding `SourceConcepts`.
 CONCEPT_QUERY = """
@@ -18,10 +21,10 @@ CONCEPT_QUERY = """
     """
 
 
-def get_related_query(
-        edge_type: str,
-        direction: str = "from",
-        source_concept_label_types: list[str] | None = None,
+def _get_related_query(
+    edge_type: str,
+    direction: str = "from",
+    source_concept_label_types: list[str] | None = None,
 ) -> str:
     """Return a parameterized Neptune query to fetch related Wellcome concepts."""
     label_filter = ""
@@ -104,7 +107,7 @@ def get_related_query(
 
 
 def _get_referenced_together_filter(
-        property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
+    property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
 ) -> str:
     """Return a Cypher filter in the form `AND property_key IN ['some allowed value', 'another value']`."""
     if allowed_values is not None and len(allowed_values) > 0:
@@ -114,11 +117,11 @@ def _get_referenced_together_filter(
     return ""
 
 
-def get_referenced_together_query(
-        source_referenced_types: list[ConceptType] | None = None,
-        related_referenced_types: list[ConceptType] | None = None,
-        source_referenced_in: list[WorkConceptKey] | None = None,
-        related_referenced_in: list[WorkConceptKey] | None = None,
+def _get_referenced_together_query(
+    source_referenced_types: list[ConceptType] | None = None,
+    related_referenced_types: list[ConceptType] | None = None,
+    source_referenced_in: list[WorkConceptKey] | None = None,
+    related_referenced_in: list[WorkConceptKey] | None = None,
 ) -> str:
     """
     Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works.
@@ -256,3 +259,84 @@ def get_referenced_together_query(
         """
 
 
+def _related_query_result_to_dict(related_to: list[dict]) -> LinkedConcepts:
+    """
+    Transform a list of dictionaries mapping a concept ID to a list of related concepts into a single dictionary
+    (with concept IDs as keys and related concepts as values).
+    """
+    return {item["id"]: item["related"] for item in related_to}
+
+
+def get_concepts(client: BaseNeptuneClient, params: dict) -> list[dict]:
+    return client.time_open_cypher_query(CONCEPT_QUERY, params, "concept")
+
+
+def get_related_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
+    query = _get_related_query("RELATED_TO")
+    result = client.time_open_cypher_query(query, params, "related to")
+    return _related_query_result_to_dict(result)
+
+
+def get_field_of_work_concepts(
+    client: BaseNeptuneClient, params: dict
+) -> LinkedConcepts:
+    query = _get_related_query("HAS_FIELD_OF_WORK")
+    result = client.time_open_cypher_query(query, params, "field of work")
+    return _related_query_result_to_dict(result)
+
+
+def get_narrower_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
+    query = _get_related_query("NARROWER_THAN")
+    result = client.time_open_cypher_query(query, params, "narrower than")
+    return _related_query_result_to_dict(result)
+
+
+def get_broader_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
+    query = _get_related_query("NARROWER_THAN|HAS_PARENT", "to")
+    result = client.time_open_cypher_query(query, params, "broader than")
+    return _related_query_result_to_dict(result)
+
+
+def get_people_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
+    query = _get_related_query("HAS_FIELD_OF_WORK", "to")
+    result = client.time_open_cypher_query(query, params, "people")
+    return _related_query_result_to_dict(result)
+
+
+def get_coreferenced_concepts(
+    client: BaseNeptuneClient, params: dict
+) -> LinkedConcepts:
+    query = _get_referenced_together_query()
+    result = client.time_open_cypher_query(query, params, "referenced together")
+    return _related_query_result_to_dict(result)
+
+
+def get_collaborator_concepts(
+    client: BaseNeptuneClient, params: dict
+) -> LinkedConcepts:
+    # Retrieve people and organisations which are commonly referenced together as collaborators with a given person
+    query = _get_referenced_together_query(
+        source_referenced_types=["Person"],
+        related_referenced_types=["Person", "Organisation"],
+        source_referenced_in=["contributors"],
+        related_referenced_in=["contributors"],
+    )
+    result = client.time_open_cypher_query(query, params, "frequent collaborators")
+    return _related_query_result_to_dict(result)
+
+
+def get_related_topics(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
+    # Do not include agents/people/orgs in the list of related topics.
+    query = _get_referenced_together_query(
+        related_referenced_types=[
+            "Concept",
+            "Subject",
+            "Place",
+            "Meeting",
+            "Period",
+            "Genre",
+        ],
+        related_referenced_in=["subjects"],
+    )
+    result = client.time_open_cypher_query(query, params, "related topics")
+    return _related_query_result_to_dict(result)
