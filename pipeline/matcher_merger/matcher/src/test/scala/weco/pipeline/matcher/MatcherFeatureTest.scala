@@ -9,7 +9,7 @@ import weco.lambda.behaviours.LambdaBehaviours
 import weco.lambda.Downstream
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
 import weco.pipeline.matcher.matcher.WorksMatcher
-import weco.lambda.helpers.{DownstreamHelper, LambdaFixtures}
+import weco.lambda.helpers.{LambdaFixtures, MemoryDownstream}
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.MatcherResult
 
@@ -19,9 +19,9 @@ class MatcherFeatureTest
     with LoneElement
     with ScalaFutures
     with MatcherFixtures
-    with DownstreamHelper
     with LambdaFixtures
-    with LambdaBehaviours[String, MatcherConfig, MatcherResult, Set[String]] {
+    with LambdaBehaviours[String, MatcherConfig, MatcherResult, Set[String]]
+    with MemoryDownstream {
 
   protected implicit val outputDecoder: Decoder[MatcherResult] =
     MatcherResult.decoder
@@ -56,13 +56,9 @@ class MatcherFeatureTest
   describe("When all messages fail") {
     it should behave like aFailingInvocation(
       LambdaBuilder(MatcherStub(Nil)),
-      Seq(
-        baadcafe,
-        baadd00d
-      )
+      Seq(baadcafe, baadd00d)
     )
   }
-
   describe("When some messages fail") {
     it should behave like aPartialSuccess(
       LambdaBuilder(MatcherStub(Seq(Set(Set(g00dcafe.message))))),

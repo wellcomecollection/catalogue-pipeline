@@ -5,8 +5,8 @@ import org.scalatest.LoneElement
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.lambda.helpers.DownstreamHelper
 import weco.lambda._
+import weco.lambda.helpers.MemoryDownstream
 import weco.lambda.matchers.LambdaResultMatchers
 
 trait LambdaBehaviours[
@@ -16,7 +16,7 @@ trait LambdaBehaviours[
   ComparisonType
 ] extends Matchers
     with LambdaResultMatchers[T]
-    with DownstreamHelper
+    with MemoryDownstream
     with ScalaFutures
     with LoneElement {
   this: AnyFunSpec =>
@@ -32,7 +32,7 @@ trait LambdaBehaviours[
     lambdaBuilder: Downstream => LambdaApp,
     messages: Seq[IncomingMessage]
   ): Unit = {
-    val downstream = new MemoryDownstream
+    val downstream = new MemorySNSDownstream
     whenReady(lambdaBuilder(downstream).processMessages(messages = messages)) {
       results: Seq[SQSLambdaMessageResult] =>
         it(
@@ -54,7 +54,7 @@ trait LambdaBehaviours[
     outputs: Seq[ComparisonType]
   ): Unit = {
 
-    val downstream = new MemoryDownstream
+    val downstream = new MemorySNSDownstream
 
     whenReady(
       lambdaBuilder(downstream).processMessages(messages = messages)
@@ -78,7 +78,7 @@ trait LambdaBehaviours[
     messages: Seq[IncomingMessage],
     outputs: Seq[ComparisonType]
   ): Unit = {
-    val downstream = new MemoryDownstream
+    val downstream = new MemorySNSDownstream
     whenReady(
       lambdaBuilder(downstream).processMessages(messages = messages)
     ) {
