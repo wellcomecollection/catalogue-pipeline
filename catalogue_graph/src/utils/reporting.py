@@ -6,24 +6,22 @@ from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 
 
-def _get_report_s3_url(
-    report_type: type["PipelineReport"],
-    pipeline_date: str,
-    index_date: str,
-    job_id: str | None = None,
-) -> str:
-    report_name = f"report.{report_type.label}.json"
-    if job_id is not None:
-        report_prefix = f"{pipeline_date}/{index_date}/{job_id}"
-    else:
-        report_prefix = f"{pipeline_date}/{index_date}"
-
-    return (
-        f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{report_prefix}/{report_name}"
-    )
-
-
 class PipelineReport(BaseModel):
+    @staticmethod
+    def _get_report_s3_url(
+        report_type: type["PipelineReport"],
+        pipeline_date: str,
+        index_date: str,
+        job_id: str | None = None,
+    ) -> str:
+        report_name = f"report.{report_type.label}.json"
+        if job_id is not None:
+            report_prefix = f"{pipeline_date}/{index_date}/{job_id}"
+        else:
+            report_prefix = f"{pipeline_date}/{index_date}"
+
+        return f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{report_prefix}/{report_name}"
+
     label: ClassVar[str]
     pipeline_date: str
     index_date: str
@@ -37,7 +35,9 @@ class PipelineReport(BaseModel):
         job_id: str | None = None,
         ignore_missing: bool = False,
     ) -> Self | None:
-        s3_url = _get_report_s3_url(cls, pipeline_date, index_date, job_id)
+        s3_url = PipelineReport._get_report_s3_url(
+            cls, pipeline_date, index_date, job_id
+        )
 
         return pydantic_from_s3_json(cls, s3_url, ignore_missing=ignore_missing)
 
@@ -45,7 +45,7 @@ class PipelineReport(BaseModel):
         self,
         latest: bool = False,
     ) -> None:
-        s3_url = _get_report_s3_url(
+        s3_url = PipelineReport._get_report_s3_url(
             self.__class__,
             self.pipeline_date,
             self.index_date,
