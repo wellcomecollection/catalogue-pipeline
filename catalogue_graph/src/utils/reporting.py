@@ -102,32 +102,3 @@ class IndexerReport(PipelineReport):
     previous_neptune_record_count: int | None
     es_record_count: int | None
     previous_es_record_count: int | None
-
-
-def read_report_from_s3(
-    report_type: ReportType,
-    pipeline_date: str,
-    index_date: str,
-    job_id: str | None = None,
-    ignore_missing: bool = False,
-) -> PipelineReport | None:
-    s3_url = get_report_s3_url(report_type, pipeline_date, index_date, job_id)
-
-    return pydantic_from_s3_json(
-        report_type.get_class(),  # type: ignore[no-untyped-call]
-        s3_url,
-        ignore_missing=ignore_missing,
-    )
-
-
-def write_report_to_s3(
-    report: PipelineReport,
-) -> None:
-    s3_url = get_report_s3_url(
-        ReportType(report._report_type),
-        report.pipeline_date,
-        report.index_date,
-        report.job_id,
-    )
-
-    pydantic_to_s3_json(report, s3_url)
