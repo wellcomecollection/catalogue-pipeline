@@ -6,10 +6,12 @@ import weco.messaging.memory.MemoryMessageSender
 
 import scala.util.Try
 
-trait DownstreamHelper {
+trait MemorySNSDownstream {
 
-  class MemoryDownstream extends Downstream {
-    val msgSender = new MemoryMessageSender
+  class MemorySNSDownstream(sender: MemoryMessageSender = new MemoryMessageSender)
+    extends Downstream {
+
+    val msgSender: MemoryMessageSender = sender
 
     override def notify(workId: String): Try[Unit] =
       Try(msgSender.send(workId))
