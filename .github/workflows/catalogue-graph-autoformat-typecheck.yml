@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   typecheck:
-    runs-on: ubuntu-latest
+    runs-on: default_x64_latest
 
     steps:
       - uses: actions/checkout@v3
@@ -28,7 +28,7 @@ jobs:
           ./catalogue_graph/scripts/typecheck.sh
 
   autoformat:
-    runs-on: ubuntu-latest
+    runs-on: default_x64_latest
     needs: typecheck
 
     steps:
