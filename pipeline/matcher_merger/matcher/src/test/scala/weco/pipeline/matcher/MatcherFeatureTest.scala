@@ -1,10 +1,17 @@
 package weco.pipeline.matcher
 
+import io.circe.Decoder
 import org.scalatest.LoneElement
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import weco.lambda.{Downstream, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
+import weco.lambda.behaviours.LambdaBehaviours
+import weco.lambda.{
+  Downstream,
+  SQSLambdaMessage,
+  SQSLambdaMessageFailedRetryable,
+  SQSLambdaMessageResult
+}
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
 import weco.pipeline.matcher.matcher.WorksMatcher
 import weco.lambda.helpers.DownstreamHelper
@@ -17,22 +24,35 @@ class MatcherFeatureTest
     with LoneElement
     with ScalaFutures
     with MatcherFixtures
-    with DownstreamHelper {
-
+    with DownstreamHelper
+    with LambdaBehaviours[String, MatcherConfig] {
   private object SQSTestLambdaMessage {
     def apply[T](message: T): SQSLambdaMessage[T] =
       SQSLambdaMessage(messageId = randomUUID.toString, message = message)
   }
+  protected type OutputMessageType = MatcherResult
+  protected implicit val outputDecoder: Decoder[OutputMessageType] =
+    MatcherResult.decoder
 
   /** Stub class representing the Lambda interface, which can be connected to a
     * dummy matcher to test the behaviour of the lambda when faced with various
     * responses.
     */
-  private case class StubLambda(
+  case class StubLambda(
     worksMatcher: WorksMatcher,
     downstream: Downstream
   ) extends MatcherSQSLambda[MatcherConfig]
       with MatcherConfigurable
+
+  val LambdaBuilder = StubLambda.curried
+
+  it should behave like failingLambda(
+    LambdaBuilder(MatcherStub(Nil)),
+    Seq(
+      SQSTestLambdaMessage(message = "baadcafe"),
+      SQSTestLambdaMessage(message = "baadd00d")
+    )
+  )
 
   describe("when everything is successful") {
     val matcher = MatcherStub(Seq(Set(Set("g00dcafe"), Set("g00dd00d"))))
@@ -53,37 +73,13 @@ class MatcherFeatureTest
         it("sends all the identifiers downstream") {
           downstream.msgSender
             .getMessages[MatcherResult]
-            .map(matcherResult => matcherResult.works
-              .flatMap(id => id.identifiers.map(_.identifier.toString()))) should contain theSameElementsAs Seq(Set("g00dcafe", "g00dd00d"))
-        }
-    }
-  }
-  
-  describe("when all messages fail to process") {
-    val messages = Seq(
-      SQSTestLambdaMessage(message = "baadcafe"),
-      SQSTestLambdaMessage(message = "baadd00d")
-    )
-    val downstream = new MemoryDownstream
-    val sut = StubLambda(MatcherStub(Nil), downstream)
-
-    whenReady(
-      sut.processMessages(messages = messages)
-    ) {
-      results: Seq[SQSLambdaMessageResult] =>
-        it("returns a seq of BatchItemFailure responses") {
-          results.map(_.messageId) should contain theSameElementsAs messages
             .map(
-              _.messageId
-            )
-          all(results) shouldBe a[SQSLambdaMessageFailedRetryable]
-        }
-        it("does not notify downstream") {
-          downstream.msgSender
-            .getMessages[MatcherResult].length shouldBe 0
+              matcherResult =>
+                matcherResult.works
+                  .flatMap(id => id.identifiers.map(_.identifier.toString()))
+            ) should contain theSameElementsAs Seq(Set("g00dcafe", "g00dd00d"))
         }
     }
-
   }
 
   describe("when some messages fail to process") {
@@ -106,9 +102,15 @@ class MatcherFeatureTest
         it("notifies downstream only for successful ids") {
           downstream.msgSender
             .getMessages[MatcherResult]
-            .map(matcherResult => matcherResult.works
-              .flatMap(id => id.identifiers
-                .map(_.identifier.toString()))) should contain theSameElementsAs  Seq(Set("g00dcafe"))
+            .map(
+              matcherResult =>
+                matcherResult.works
+                  .flatMap(
+                    id =>
+                      id.identifiers
+                        .map(_.identifier.toString())
+                  )
+            ) should contain theSameElementsAs Seq(Set("g00dcafe"))
         }
     }
   }
@@ -156,12 +158,22 @@ class MatcherFeatureTest
         ) {
           downstream.msgSender
             .getMessages[MatcherResult]
-            .map(matcherResult => matcherResult.works
-              .flatMap(id => id.identifiers
-                .map(_.identifier.toString()))) should contain theSameElementsAs Seq(
-                  Set("g00dcafe", "beefcafe", "cafef00d"), // cafef00d was not one of the input messages, but it was found in the match for one of them
-                  Set("f00df00d", "f00dfeed")
-                )
+            .map(
+              matcherResult =>
+                matcherResult.works
+                  .flatMap(
+                    id =>
+                      id.identifiers
+                        .map(_.identifier.toString())
+                  )
+            ) should contain theSameElementsAs Seq(
+            Set(
+              "g00dcafe",
+              "beefcafe",
+              "cafef00d"
+            ), // cafef00d was not one of the input messages, but it was found in the match for one of them
+            Set("f00df00d", "f00dfeed")
+          )
         }
     }
   }
