@@ -7,7 +7,6 @@ import typing
 import boto3
 import polars as pl
 import smart_open
-from clients.base_neptune_client import BaseNeptuneClient
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.catalogue_concept import (
@@ -16,10 +15,16 @@ from models.catalogue_concept import (
     ConceptsQuerySingleResult,
 )
 from pydantic import BaseModel
-from queries.concept import (
-    CONCEPT_QUERY,
-    get_referenced_together_query,
-    get_related_query,
+from queries.concept_queries import (
+    get_broader_concepts,
+    get_collaborator_concepts,
+    get_concepts,
+    get_coreferenced_concepts,
+    get_field_of_work_concepts,
+    get_narrower_concepts,
+    get_people_concepts,
+    get_related_concepts,
+    get_related_topics,
 )
 from utils.aws import get_neptune_client
 
@@ -49,81 +54,6 @@ NUMBER_OF_SHARED_WORKS_THRESHOLD = 3
 # Q5 -> 'human', Q151885 -> 'concept'
 IGNORED_WIKIDATA_IDS = ["Q5", "Q151885"]
 
-LinkedConcepts = dict[str, list[dict]]
-
-
-def _related_query_result_to_dict(related_to: list[dict]) -> LinkedConcepts:
-    """
-    Transform a list of dictionaries mapping a concept ID to a list of related concepts into a single dictionary
-    (with concept IDs as keys and related concepts as values).
-    """
-    return {item["id"]: item["related"] for item in related_to}
-
-
-def related_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    query = get_related_query("RELATED_TO")
-    result = client.time_open_cypher_query(query, params, "related to")
-    return _related_query_result_to_dict(result)
-
-
-def field_of_work_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    query = get_related_query("HAS_FIELD_OF_WORK")
-    result = client.time_open_cypher_query(query, params, "field of work")
-    return _related_query_result_to_dict(result)
-
-
-def narrower_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    query = get_related_query("NARROWER_THAN")
-    result = client.time_open_cypher_query(query, params, "narrower than")
-    return _related_query_result_to_dict(result)
-
-
-def broader_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    query = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
-    result = client.time_open_cypher_query(query, params, "broader than")
-    return _related_query_result_to_dict(result)
-
-
-def people_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    query = get_related_query("HAS_FIELD_OF_WORK", "to")
-    result = client.time_open_cypher_query(query, params, "people")
-    return _related_query_result_to_dict(result)
-
-
-def coreferenced_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    query = get_referenced_together_query()
-    result = client.time_open_cypher_query(query, params, "referenced together")
-    return _related_query_result_to_dict(result)
-
-
-def collaborator_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    # Retrieve people and organisations which are commonly referenced together as collaborators with a given person
-    query = get_referenced_together_query(
-        source_referenced_types=["Person"],
-        related_referenced_types=["Person", "Organisation"],
-        source_referenced_in=["contributors"],
-        related_referenced_in=["contributors"],
-    )
-    result = client.time_open_cypher_query(query, params, "frequent collaborators")
-    return _related_query_result_to_dict(result)
-
-
-def related_topics(client: BaseNeptuneClient, params: dict) -> LinkedConcepts:
-    # Do not include agents/people/orgs in the list of related topics.
-    query = get_referenced_together_query(
-        related_referenced_types=[
-            "Concept",
-            "Subject",
-            "Place",
-            "Meeting",
-            "Period",
-            "Genre",
-        ],
-        related_referenced_in=["subjects"],
-    )
-    result = client.time_open_cypher_query(query, params, "related topics")
-    return _related_query_result_to_dict(result)
-
 
 def extract_data(
     start_offset: int, end_index: int, is_local: bool
@@ -141,18 +71,16 @@ def extract_data(
         "number_of_shared_works_threshold": NUMBER_OF_SHARED_WORKS_THRESHOLD,
     }
 
-    concept_result = client.time_open_cypher_query(CONCEPT_QUERY, params, "concept")
-
     return ConceptsQueryResult(
-        concepts=concept_result,
-        related_to=related_concepts(client, params),
-        fields_of_work=field_of_work_concepts(client, params),
-        narrower_than=narrower_concepts(client, params),
-        broader_than=broader_concepts(client, params),
-        people=people_concepts(client, params),
-        referenced_together=coreferenced_concepts(client, params),
-        frequent_collaborators=collaborator_concepts(client, params),
-        related_topics=related_topics(client, params),
+        concepts=get_concepts(client, params),
+        related_to=get_related_concepts(client, params),
+        fields_of_work=get_field_of_work_concepts(client, params),
+        narrower_than=get_narrower_concepts(client, params),
+        broader_than=get_broader_concepts(client, params),
+        people=get_people_concepts(client, params),
+        referenced_together=get_coreferenced_concepts(client, params),
+        frequent_collaborators=get_collaborator_concepts(client, params),
+        related_topics=get_related_topics(client, params),
     )
 
 
