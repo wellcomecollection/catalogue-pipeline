@@ -6,7 +6,7 @@ import weco.messaging.memory.MemoryMessageSender
 
 import scala.util.Try
 
-trait MemorySNSDownstream {
+trait MemoryDownstream {
 
   class MemorySNSDownstream(sender: MemoryMessageSender = new MemoryMessageSender)
     extends Downstream {

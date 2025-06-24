@@ -8,7 +8,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{Seconds, Span}
 import weco.fixtures.TestWith
 import weco.json.JsonUtil._
-import weco.lambda.Downstream
+import weco.lambda.helpers.MemoryDownstream
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
 import weco.messaging.memory.MemoryMessageSender
@@ -25,7 +25,8 @@ class BatcherWorkerServiceTest
     with SQS
     with Pekko
     with Eventually
-    with IntegrationPatience {
+    with IntegrationPatience
+    with MemoryDownstream {
 
   import Selector._
 
@@ -156,7 +157,7 @@ class BatcherWorkerServiceTest
             withSQSStream[NotificationMessage, R](queuePair.queue) {
               msgStream =>
                 val msgSender = new MessageSender(brokenPaths)
-                val memoryDownstream = new MemoryDownstream(msgSender)
+                val memoryDownstream = new MemorySNSDownstream(msgSender)
                 val pathsProcessor = new PathsProcessor(
                   downstream = memoryDownstream,
                   maxBatchSize = maxBatchSize
@@ -183,10 +184,5 @@ class BatcherWorkerServiceTest
       else
         super.sendT(t)
     }
-  }
-
-  class MemoryDownstream(messageSender: MessageSender) extends Downstream {
-    override def notify(workId: String): Try[Unit] = ???
-    override def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit] = messageSender.sendT(batch)
   }
 }
