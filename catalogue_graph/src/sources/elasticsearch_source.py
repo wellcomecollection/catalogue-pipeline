@@ -13,7 +13,7 @@ SLICE_COUNT = 10
 
 class ElasticsearchSource(BaseSource):
     def __init__(self, url: str, index_name: str, basic_auth: Tuple[str, str]):
-        self.es_client = Elasticsearch(url, basic_auth=basic_auth, timeout=120)
+        self.es_client = Elasticsearch(url, basic_auth=basic_auth, timeout=600)
         self.index_name = index_name
 
     def search_with_pit(self, pit_id: int, slice_index: int, queue: Queue):
@@ -21,7 +21,7 @@ class ElasticsearchSource(BaseSource):
         body = {
             "query": {"match": {"type": "Visible"}},
             "size": ES_BATCH_SIZE,
-            "pit": {"id": pit_id, "keep_alive": "2m"},
+            "pit": {"id": pit_id, "keep_alive": "5m"},
             "sort": [{"_shard_doc": "asc"}],
             "slice": {"id": slice_index, "max": SLICE_COUNT},
         }
@@ -39,7 +39,7 @@ class ElasticsearchSource(BaseSource):
         queue.put(None)    
 
     def stream_raw(self) -> Generator[dict]:
-        pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="2m")
+        pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="5m")
 
         q = Queue(maxsize=ES_BATCH_SIZE)
         threads = []

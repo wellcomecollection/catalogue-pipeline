@@ -69,3 +69,30 @@ WorkType = Literal["Work", "Series", "Section", "Collection"]
 class Work(BaseNode):
     type: WorkType
     alternative_labels: list[str]
+    lettering: str | None
+    reference_number: str | None
+    description: str | None
+    physical_description: str | None
+    edition: str | None
+    duration: int | None
+    current_frequency: str | None
+    former_frequency: list[str]
+    designation: list[str]
+
+    collection_path_label: str | None
+    other_identifiers: str | None
+    created_date: str | None
+    thumbnail: str | None
+    production: str | None
+    languages: str | None
+    notes: str | None
+    items: str | None
+    holdings: str | None
+    image_data: str | None
+
+    format_id: str | None
+    format_label: str | None
+
+
+class WorkIdentifier(BaseNode):
+    pass

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
+from utils.types import WorkConceptKey, WorkIdentifiersKey
 
 from models.graph_node import ConceptType
-from utils.types import WorkConceptKey
 
 
 class EdgeAttributes(BaseModel):
@@ -26,6 +26,10 @@ class WorkHasConceptAttributes(EdgeAttributes):
     referenced_type: ConceptType
 
 
+class WorkHasIdentifierAttributes(EdgeAttributes):
+    referenced_in: WorkIdentifiersKey
+
+
 def get_all_edge_attributes() -> set[str]:
     """Returns a set of all possible edge attributes from all edge types."""
     attribute_classes: list[type[EdgeAttributes]] = [
@@ -33,6 +37,7 @@ def get_all_edge_attributes() -> set[str]:
         SourceConceptSameAsAttributes,
         ConceptHasSourceConceptAttributes,
         WorkHasConceptAttributes,
+        WorkHasIdentifierAttributes
     ]
 
     attributes = set()
@@ -105,4 +110,18 @@ class WorkHasConcept(BaseEdge):
     from_type: str = "Work"
     to_type: str = "Concept"
     relationship: str = "HAS_CONCEPT"
+    directed: bool = True
+
+
+class WorkHasIdentifier(BaseEdge):
+    from_type: str = "Work"
+    to_type: str = "WorkIdentifier"
+    relationship: str = "HAS_SOURCE_IDENTIFIER"
+    directed: bool = True
+
+
+class WorkIdentifierHasParent(BaseEdge):
+    from_type: str = "WorkIdentifier"
+    to_type: str = "WorkIdentifier"
+    relationship: str = "HAS_PARENT"
     directed: bool = True

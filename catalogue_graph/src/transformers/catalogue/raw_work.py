@@ -1,10 +1,13 @@
+import json
 from typing import TypedDict
 
 from models.graph_node import ConceptType, WorkType
 from sources.catalogue.concepts_source import extract_concepts_from_work
-from utils.types import WorkConceptKey
+from sources.catalogue.work_identifiers_source import extract_identifiers_from_work
+from utils.types import WorkConceptKey, WorkIdentifiersKey
 
 from .raw_concept import RawCatalogueConcept
+from .raw_work_identifier import RawCatalogueWorkIdentifier
 
 
 class WorkConcept(TypedDict):
@@ -13,38 +16,130 @@ class WorkConcept(TypedDict):
     referenced_type: ConceptType
 
 
+class WorkIdentifier(TypedDict):
+    id: str
+    referenced_in: WorkIdentifiersKey
+
+
 class RawCatalogueWork:
     def __init__(self, raw_work: dict):
         self.raw_work = raw_work
+        self.work_data = self.raw_work.get("data", {})
+        self.work_state = self.raw_work["state"]
+
+    def _get_stringified_field(self, field_name: str) -> str | None:
+        if field_name in self.work_data:
+            return json.dumps(self.work_data[field_name])
+
+        return None
 
     @property
     def wellcome_id(self) -> str:
-        wellcome_id = self.raw_work["id"]
-        assert isinstance(wellcome_id, str)
-        return wellcome_id
+        return self.work_state["canonicalId"]
 
     @property
     def label(self) -> str:
-        label = self.raw_work["title"]
-        assert isinstance(label, str)
-        return label
+        return self.work_data.get("title", "")
 
     @property
     def type(self) -> WorkType:
-        concept_type: WorkType = self.raw_work["type"]
-        return concept_type
+        work_type: WorkType = self.work_data.get("type", "Work")
+        return work_type
+
+    @property
+    def lettering(self) -> str | None:
+        return self.work_data.get("lettering")
+
+    @property
+    def reference_number(self) -> str | None:
+        return self.work_data.get("referenceNumber")
+
+    @property
+    def description(self) -> str | None:
+        return self.work_data.get("description")
+
+    @property
+    def physical_description(self) -> str | None:
+        return self.work_data.get("physicalDescription")
+
+    @property
+    def format_id(self) -> str | None:
+        return self.work_data.get("format", {}).get("id")
+
+    @property
+    def format_label(self) -> str | None:
+        return self.work_data.get("format", {}).get("label")
+
+    @property
+    def edition(self) -> str | None:
+        return self.work_data.get("edition")
+
+    @property
+    def duration(self) -> int | None:
+        return self.work_data.get("duration")
+
+    @property
+    def current_frequency(self) -> str | None:
+        return self.work_data.get("currentFrequency")
+
+    @property
+    def former_frequency(self) -> list[str]:
+        return self.work_data.get("formerFrequency", [])
 
     @property
     def alternative_labels(self) -> list[str]:
-        alternative_titles = self.raw_work["alternativeTitles"]
-        assert isinstance(alternative_titles, list)
-        return alternative_titles
+        return self.work_data.get("alternativeTitles", [])
+
+    @property
+    def designation(self) -> list[str]:
+        return self.work_data.get("designation", [])
+
+    @property
+    def collection_path_label(self) -> str | None:
+        return self.work_data.get("collectionPath", {}).get("label")
+
+    @property
+    def other_identifiers(self) -> str | None:
+        return self._get_stringified_field("otherIdentifiers")
+
+    @property
+    def created_date(self) -> str | None:
+        return self._get_stringified_field("createdDate")
+
+    @property
+    def thumbnail(self) -> str | None:
+        return self._get_stringified_field("thumbnail")
+
+    @property
+    def production(self) -> str | None:
+        return self._get_stringified_field("production")
+
+    @property
+    def languages(self) -> str | None:
+        return self._get_stringified_field("languages")
+
+    @property
+    def notes(self) -> str | None:
+        return self._get_stringified_field("notes")
+
+    @property
+    def items(self) -> str | None:
+        return self._get_stringified_field("items")
+
+    @property
+    def holdings(self) -> str | None:
+        return self._get_stringified_field("holdings")
+
+    @property
+    def image_data(self) -> str | None:
+        return self._get_stringified_field("imageData")
 
     @property
     def concepts(self) -> list[WorkConcept]:
+        # TODO: Do not extract concepts from removed works
         processed = set()
         work_concepts: list[WorkConcept] = []
-        for concept, referenced_in in extract_concepts_from_work(self.raw_work):
+        for concept, referenced_in in extract_concepts_from_work(self.work_data):
             raw_concept = RawCatalogueConcept(concept)
 
             if raw_concept.is_concept and raw_concept.wellcome_id not in processed:
@@ -58,3 +153,21 @@ class RawCatalogueWork:
                 )
 
         return work_concepts
+
+    @property
+    def identifiers(self) -> list[WorkIdentifier]:
+        work_identifiers: list[WorkIdentifier] = []
+
+        for identifier, path, referenced_in in extract_identifiers_from_work(
+            self.raw_work
+        ):
+            raw_identifier = RawCatalogueWorkIdentifier(identifier, path)
+
+            work_identifiers.append(
+                {
+                    "id": raw_identifier.unique_id,
+                    "referenced_in": referenced_in
+                }
+            )
+
+        return work_identifiers
