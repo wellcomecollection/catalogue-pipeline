@@ -44,14 +44,14 @@ class BatcherWorkerServiceTest
     */
   it("processes incoming paths into batches") {
     withWorkerService(visibilityTimeout = 2 seconds) {
-      case (QueuePair(queue, dlq), msgSender) =>
+      case (QueuePair(queue, dlq), downstream) =>
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
         }
-        val batches = msgSender.getMessages[Batch]
+        val batches = downstream.msgSender.getMessages[Batch]
         batches.size shouldBe 1
         batchRoots(batches) shouldBe Set("A")
         batches.head.selectors should contain theSameElementsAs List(
@@ -66,14 +66,14 @@ class BatcherWorkerServiceTest
 
   it("processes incoming paths into batches split per tree") {
     withWorkerService(visibilityTimeout = 2 seconds) {
-      case (QueuePair(queue, dlq), msgSender) =>
+      case (QueuePair(queue, dlq), downstream) =>
         sendNotificationToSQS(queue = queue, body = "A")
         sendNotificationToSQS(queue = queue, body = "Other/Tree")
         eventually {
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
         }
-        val batches = msgSender.getMessages[Batch]
+        val batches = downstream.msgSender.getMessages[Batch]
         batches.size shouldBe 2
         batchRoots(batches) shouldBe Set("A", "Other")
         batchWithRoot("A", batches) should contain theSameElementsAs List(
@@ -89,7 +89,7 @@ class BatcherWorkerServiceTest
 
   it("sends the whole tree when batch consists of too many selectors") {
     withWorkerService(maxBatchSize = 3) {
-      case (QueuePair(queue, dlq), msgSender) =>
+      case (QueuePair(queue, dlq), downstream) =>
         // These two notifications yield five selectors,
         // (see "it processes incoming paths into batches", above)
         // which exceeds the maxBatchSize of 3.
@@ -100,7 +100,7 @@ class BatcherWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
         }
-        val batches = msgSender.getMessages[Batch]
+        val batches = downstream.msgSender.getMessages[Batch]
         batches.size shouldBe 1
         batches.head shouldBe Batch(rootPath = "A", selectors = List(Tree("A")))
     }
@@ -112,7 +112,7 @@ class BatcherWorkerServiceTest
       brokenPaths = Set("A/E", "A/B"),
       flushInterval = 750 milliseconds
     ) {
-      case (QueuePair(queue, dlq), msgSender) =>
+      case (QueuePair(queue, dlq), downstream) =>
         sendNotificationToSQS(queue = queue, body = "A/E")
         sendNotificationToSQS(queue = queue, body = "A/B")
         sendNotificationToSQS(queue = queue, body = "A/E/1")
@@ -124,7 +124,7 @@ class BatcherWorkerServiceTest
           .map(msg => fromJson[NotificationMessage](msg.body).get.body)
           .toList
         failedPaths should contain theSameElementsAs List("A/E", "A/B")
-        val sentBatches = msgSender.getMessages[Batch]
+        val sentBatches = downstream.msgSender.getMessages[Batch]
         sentBatches.size shouldBe 1
         batchRoots(sentBatches) shouldBe Set("Other")
         batchWithRoot(
@@ -149,7 +149,7 @@ class BatcherWorkerServiceTest
     maxBatchSize: Int = 10,
     brokenPaths: Set[String] = Set.empty,
     flushInterval: FiniteDuration = 500 milliseconds
-  )(testWith: TestWith[(QueuePair, MemoryMessageSender), R]): R =
+  )(testWith: TestWith[(QueuePair, MemorySNSDownstream), R]): R =
     withLocalSqsQueuePair(visibilityTimeout = visibilityTimeout) {
       queuePair =>
         withActorSystem {
@@ -169,7 +169,7 @@ class BatcherWorkerServiceTest
                   pathsProcessor = pathsProcessor
                 )
                 workerService.run()
-                testWith((queuePair, msgSender))
+                testWith((queuePair, memoryDownstream))
             }
         }
     }
