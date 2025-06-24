@@ -86,10 +86,17 @@ def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date
     pipeline_date = pipeline_date or "dev"
     index_date = index_date or "dev"
 
-    index_remover_report: IndexRemoverReport = IndexRemoverReport.read(  # type: ignore[assignment]
+    index_remover_report: IndexRemoverReport | None = IndexRemoverReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
     )
+
+    # We shouldn't get here as IndexRemoverReport.read should throw its own error,
+    # throw a RuntimeError here, to make it clear that the state of the index remover is unexpected.
+    if index_remover_report is None:
+        raise RuntimeError(
+            f"Unexpected error: IndexRemoverReport for pipeline_date={pipeline_date} and index_date={index_date} not found."
+        )
 
     return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
 
@@ -118,7 +125,7 @@ def handler(
             ids_to_delete, pipeline_date, index_date, is_local
         )
 
-    report = IndexRemoverReport(  # type: ignore[call-arg]
+    report = IndexRemoverReport(
         pipeline_date=pipeline_date or "dev",
         index_date=index_date or "dev",
         job_id=job_id or "dev",

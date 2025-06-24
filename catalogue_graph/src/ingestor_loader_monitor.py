@@ -57,7 +57,7 @@ def run_check(
     sum_file_size = sum((e.object_to_index.content_length or 0) for e in event.events)
     sum_record_count = sum((e.object_to_index.record_count or 0) for e in event.events)
 
-    current_report = LoaderReport(  # type: ignore[call-arg]
+    current_report = LoaderReport(
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id or "dev",
@@ -93,7 +93,7 @@ def run_check(
     )
 
     if indexer_report is not None:
-        updated_indexer_report = IndexerReport(  # type: ignore[call-arg]
+        updated_indexer_report = IndexerReport(
             pipeline_date=indexer_report.pipeline_date,
             index_date=indexer_report.index_date,
             job_id=indexer_report.job_id,
