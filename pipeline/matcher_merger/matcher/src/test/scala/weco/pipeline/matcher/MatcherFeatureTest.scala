@@ -64,7 +64,7 @@ class MatcherFeatureTest
       SQSTestLambdaMessage(message = "baadcafe"),
       SQSTestLambdaMessage(message = "baadd00d")
     )
-    val downstream = new MemorySNSDownstream()
+    val downstream = new MemorySNSDownstream
     val sut = StubLambda(MatcherStub(Nil), downstream)
 
     whenReady(
@@ -91,7 +91,7 @@ class MatcherFeatureTest
       SQSTestLambdaMessage(message = "g00dcafe"),
       SQSTestLambdaMessage(message = "baadd00d")
     )
-    val downstream = new MemorySNSDownstream()
+    val downstream = new MemorySNSDownstream
     val sut = StubLambda(MatcherStub(Seq(Set(Set("g00dcafe")))), downstream)
 
     whenReady(
@@ -137,7 +137,7 @@ class MatcherFeatureTest
           )
         )
       )
-    val downstream = new MemorySNSDownstream()
+    val downstream = new MemorySNSDownstream
     val sut = StubLambda(matcher, downstream)
 
     whenReady(
