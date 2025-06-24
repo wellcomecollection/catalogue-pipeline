@@ -8,6 +8,7 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.lambda._
+import weco.lambda.helpers.LambdaFixtures
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.id_minter.config.models.IdentifiersTableConfig
 import weco.pipeline.id_minter.utils.IdMinterSqsLambdaTestHelpers
@@ -21,7 +22,8 @@ class IdMinterSqsLambdaFeatureTest
     with IdMinterSqsLambdaTestHelpers
     with IntegrationPatience
     with Eventually
-    with WorkGenerators {
+    with WorkGenerators
+    with LambdaFixtures {
 
   it("mints the same IDs where source identifiers match") {
     val work = sourceWork()
@@ -42,11 +44,7 @@ class IdMinterSqsLambdaFeatureTest
 
             val messageCount = 5
             val messages = (1 to messageCount).map {
-              _ =>
-                SQSLambdaMessage(
-                  messageId = randomUUID.toString,
-                  message = work.id
-                )
+              _ => SQSTestLambdaMessage(message = work.id)
             }
 
             whenReady(idMinterSqsLambda.processMessages(messages)) {
@@ -85,10 +83,7 @@ class IdMinterSqsLambdaFeatureTest
             eventuallyTableExists(identifiersTableConfig)
 
             val messages = List(
-              SQSLambdaMessage(
-                messageId = randomUUID.toString,
-                message = work.id
-              )
+              SQSTestLambdaMessage(message = work.id)
             )
 
             whenReady(idMinterSqsLambda.processMessages(messages)) {
@@ -129,10 +124,7 @@ class IdMinterSqsLambdaFeatureTest
             eventuallyTableExists(identifiersTableConfig)
 
             val messages = List(
-              SQSLambdaMessage(
-                messageId = randomUUID.toString,
-                message = work.id
-              )
+              SQSTestLambdaMessage(message = work.id)
             )
 
             whenReady(idMinterSqsLambda.processMessages(messages)) {
@@ -171,15 +163,10 @@ class IdMinterSqsLambdaFeatureTest
 
           idMinterSqsLambda =>
             eventuallyTableExists(identifiersTableConfig)
-            val goodMessage = SQSLambdaMessage(
-              messageId = randomUUID.toString,
-              message = work.id
-            )
+            val goodMessage = SQSTestLambdaMessage(message = work.id)
 
-            val badMessage = SQSLambdaMessage(
-              messageId = randomUUID.toString,
-              message = "this_work_id_does_not_exist"
-            )
+            val badMessage =
+              SQSTestLambdaMessage(message = "this_work_id_does_not_exist")
 
             val messages = List(goodMessage, badMessage)
 

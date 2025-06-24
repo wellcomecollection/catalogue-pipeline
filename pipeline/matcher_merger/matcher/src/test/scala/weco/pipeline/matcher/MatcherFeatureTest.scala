@@ -6,10 +6,10 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.lambda.behaviours.LambdaBehaviours
-import weco.lambda.{Downstream, SQSLambdaMessage}
+import weco.lambda.Downstream
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
 import weco.pipeline.matcher.matcher.WorksMatcher
-import weco.lambda.helpers.DownstreamHelper
+import weco.lambda.helpers.{DownstreamHelper, LambdaFixtures}
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.MatcherResult
 
@@ -20,11 +20,8 @@ class MatcherFeatureTest
     with ScalaFutures
     with MatcherFixtures
     with DownstreamHelper
+    with LambdaFixtures
     with LambdaBehaviours[String, MatcherConfig, MatcherResult, Set[String]] {
-  private object SQSTestLambdaMessage {
-    def apply[T](message: T): SQSLambdaMessage[T] =
-      SQSLambdaMessage(messageId = randomUUID.toString, message = message)
-  }
 
   protected implicit val outputDecoder: Decoder[MatcherResult] =
     MatcherResult.decoder
