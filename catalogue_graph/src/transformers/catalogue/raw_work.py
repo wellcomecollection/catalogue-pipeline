@@ -24,8 +24,8 @@ class WorkIdentifier(TypedDict):
 class RawCatalogueWork:
     def __init__(self, raw_work: dict):
         self.raw_work = raw_work
-        self.work_data = self.raw_work.get("data", {})
-        self.work_state = self.raw_work["state"]
+        self.work_data: dict = self.raw_work.get("data", {})
+        self.work_state: dict = self.raw_work["state"]
 
     def _get_stringified_field(self, field_name: str) -> str | None:
         if field_name in self.work_data:
@@ -164,10 +164,7 @@ class RawCatalogueWork:
             raw_identifier = RawCatalogueWorkIdentifier(identifier, path)
 
             work_identifiers.append(
-                {
-                    "id": raw_identifier.unique_id,
-                    "referenced_in": referenced_in
-                }
+                {"id": raw_identifier.unique_id, "referenced_in": referenced_in}
             )
 
         return work_identifiers

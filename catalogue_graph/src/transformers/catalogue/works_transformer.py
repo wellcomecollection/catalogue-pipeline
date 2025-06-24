@@ -21,7 +21,7 @@ class CatalogueWorksTransformer(BaseTransformer):
 
     def transform_node(self, raw_node: dict) -> Work:
         raw_work = RawCatalogueWork(raw_node)
-        
+
         return Work(
             id=raw_work.wellcome_id,
             label=raw_work.label,
@@ -50,7 +50,9 @@ class CatalogueWorksTransformer(BaseTransformer):
             image_data=raw_work.image_data,
         )
 
-    def extract_edges(self, raw_node: dict) -> Generator[WorkHasConcept]:
+    def extract_edges(
+        self, raw_node: dict
+    ) -> Generator[WorkHasConcept | WorkHasIdentifier]:
         raw_work = RawCatalogueWork(raw_node)
 
         for identifier in raw_work.identifiers:
@@ -73,4 +75,3 @@ class CatalogueWorksTransformer(BaseTransformer):
                 to_id=concept["id"],
                 attributes=attributes,
             )
-

@@ -3,7 +3,7 @@ class RawCatalogueWorkIdentifier:
         self.raw_identifier = raw_identifier
         self.path = collection_path
     
-    def _make_unique_id(self, identifier: str):
+    def _make_unique_id(self, identifier: str) -> str:
         return f"{self.identifier_type}||{identifier}"
     
     @property
@@ -21,7 +21,7 @@ class RawCatalogueWorkIdentifier:
     @property
     def parent(self) -> str | None:
         if self.path is None or "/" not in self.path:
-            return
+            return None
         
         path_fragments = self.path.split("/")
         
@@ -34,3 +34,5 @@ class RawCatalogueWorkIdentifier:
         if self.identifier in path_fragments[1:] and not self.path.startswith("(WCat)"):
             parent_index = path_fragments.index(self.identifier) - 1
             return self._make_unique_id(path_fragments[parent_index])
+    
+        return None

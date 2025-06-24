@@ -20,14 +20,15 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
         return WorkIdentifier(
             id=raw_identifier.unique_id,
             identifier=raw_identifier.identifier,
-            label=raw_identifier.identifier_type
+            label=raw_identifier.identifier_type,
         )
 
-    def extract_edges(self, raw_data: Tuple[dict, str]) -> Generator[WorkIdentifierHasParent]:
+    def extract_edges(
+        self, raw_data: Tuple[dict, str]
+    ) -> Generator[WorkIdentifierHasParent]:
         raw_identifier = RawCatalogueWorkIdentifier(raw_data[0], raw_data[1])
-        
+
         if raw_identifier.parent:
             yield WorkIdentifierHasParent(
-                from_id=raw_identifier.unique_id,
-                to_id=raw_identifier.parent
+                from_id=raw_identifier.unique_id, to_id=raw_identifier.parent
             )

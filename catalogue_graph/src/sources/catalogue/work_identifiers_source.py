@@ -18,7 +18,7 @@ def extract_identifiers_from_work(
 
 
 class CatalogueWorkIdentifiersSource(ElasticsearchSource):
-    def __init__(self, url: str, index_name: str, basic_auth: str):
+    def __init__(self, url: str, index_name: str, basic_auth: tuple[str, str]):
         super().__init__(url, index_name, basic_auth)
 
     def stream_raw(self) -> Generator[tuple[dict, str, WorkIdentifiersKey]]:

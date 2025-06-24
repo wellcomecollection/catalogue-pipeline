@@ -16,7 +16,7 @@ class ElasticsearchSource(BaseSource):
         self.es_client = Elasticsearch(url, basic_auth=basic_auth, timeout=600)
         self.index_name = index_name
 
-    def search_with_pit(self, pit_id: int, slice_index: int, queue: Queue):
+    def search_with_pit(self, pit_id: int, slice_index: int, queue: Queue) -> None:
         # For now, only extract 'Visible' works.
         body = {
             "query": {"match": {"type": "Visible"}},
@@ -41,7 +41,7 @@ class ElasticsearchSource(BaseSource):
     def stream_raw(self) -> Generator[dict]:
         pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="5m")
 
-        q = Queue(maxsize=ES_BATCH_SIZE)
+        q: Queue = Queue(maxsize=ES_BATCH_SIZE)
         threads = []
         for i in range(SLICE_COUNT):
             t = Thread(target=self.search_with_pit, args=(pit["id"], i, q), daemon=True)
