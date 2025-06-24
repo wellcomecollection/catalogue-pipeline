@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import weco.lambda.{Downstream, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
 import weco.pipeline.matcher.config.{MatcherConfig, MatcherConfigurable}
 import weco.pipeline.matcher.matcher.WorksMatcher
-import weco.lambda.helpers.DownstreamHelper
+import weco.lambda.helpers.MemoryDownstream
 import weco.pipeline.matcher.fixtures.MatcherFixtures
 import weco.pipeline.matcher.models.MatcherResult
 
@@ -17,7 +17,7 @@ class MatcherFeatureTest
     with LoneElement
     with ScalaFutures
     with MatcherFixtures
-    with DownstreamHelper {
+    with MemoryDownstream {
 
   private object SQSTestLambdaMessage {
     def apply[T](message: T): SQSLambdaMessage[T] =
@@ -36,7 +36,7 @@ class MatcherFeatureTest
 
   describe("when everything is successful") {
     val matcher = MatcherStub(Seq(Set(Set("g00dcafe"), Set("g00dd00d"))))
-    val downstream = new MemoryDownstream
+    val downstream = new MemorySNSDownstream
     val sut = StubLambda(matcher, downstream)
     whenReady(
       sut.processMessages(messages =
@@ -64,7 +64,7 @@ class MatcherFeatureTest
       SQSTestLambdaMessage(message = "baadcafe"),
       SQSTestLambdaMessage(message = "baadd00d")
     )
-    val downstream = new MemoryDownstream
+    val downstream = new MemorySNSDownstream()
     val sut = StubLambda(MatcherStub(Nil), downstream)
 
     whenReady(
@@ -91,7 +91,7 @@ class MatcherFeatureTest
       SQSTestLambdaMessage(message = "g00dcafe"),
       SQSTestLambdaMessage(message = "baadd00d")
     )
-    val downstream = new MemoryDownstream
+    val downstream = new MemorySNSDownstream()
     val sut = StubLambda(MatcherStub(Seq(Set(Set("g00dcafe")))), downstream)
 
     whenReady(
@@ -137,7 +137,7 @@ class MatcherFeatureTest
           )
         )
       )
-    val downstream = new MemoryDownstream
+    val downstream = new MemorySNSDownstream()
     val sut = StubLambda(matcher, downstream)
 
     whenReady(
