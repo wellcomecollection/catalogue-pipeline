@@ -10,23 +10,28 @@ import weco.lambda.helpers.MemoryDownstream
 import weco.lambda.matchers.LambdaResultMatchers
 
 trait LambdaBehaviours[
-  T,
+  InputMessageType,
   Config <: ApplicationConfig,
   OutputMessageType,
   ComparisonType
 ] extends Matchers
-    with LambdaResultMatchers[T]
+    with LambdaResultMatchers[InputMessageType]
     with MemoryDownstream
     with ScalaFutures
     with LoneElement {
   this: AnyFunSpec =>
-  protected type LambdaApp = SQSBatchResponseLambdaApp[T, Config]
-  protected type IncomingMessage = SQSLambdaMessage[T]
+  protected type LambdaApp = SQSBatchResponseLambdaApp[InputMessageType, Config]
+  protected type IncomingMessage = SQSLambdaMessage[InputMessageType]
   protected implicit val outputDecoder: Decoder[OutputMessageType]
 
   protected def convertForComparison(
     results: Seq[OutputMessageType]
   ): Seq[ComparisonType]
+
+  protected def getMessages(
+    downstream: MemorySNSDownstream
+  ): Seq[OutputMessageType] =
+    downstream.msgSender.getMessages[OutputMessageType]
 
   def aFailingInvocation(
     lambdaBuilder: Downstream => LambdaApp,
@@ -42,7 +47,7 @@ trait LambdaBehaviours[
           all(results) shouldBe a[SQSLambdaMessageFailedRetryable]
         }
         it("does not notify downstream") {
-          downstream.msgSender.getMessages[OutputMessageType] shouldBe empty
+          getMessages(downstream) shouldBe empty
         }
     }
   }
@@ -76,7 +81,8 @@ trait LambdaBehaviours[
   def aTotalSuccess(
     lambdaBuilder: Downstream => LambdaApp,
     messages: Seq[IncomingMessage],
-    outputs: Seq[ComparisonType]
+    outputs: () => Seq[ComparisonType],
+    downstreamDescription: String = "sends all the identifiers downstream"
   ): Unit = {
     val downstream = new MemorySNSDownstream
     whenReady(
@@ -86,12 +92,26 @@ trait LambdaBehaviours[
         it("returns no results") {
           response shouldBe empty
         }
-        it("sends all the identifiers downstream") {
+        it(downstreamDescription) {
           convertForComparison(
-            downstream.msgSender
-              .getMessages[OutputMessageType]
-          ) should contain theSameElementsAs outputs
+            getMessages(downstream)
+          ) should contain theSameElementsAs outputs()
         }
     }
   }
+}
+
+trait LambdaBehavioursStringInStringOut[
+  Config <: ApplicationConfig
+] extends LambdaBehaviours[String, Config, String, String] {
+  this: AnyFunSpec =>
+
+  protected def convertForComparison: Seq[String] => Seq[String] =
+    identity[Seq[String]]
+
+  override protected def getMessages(
+    downstream: MemorySNSDownstream
+  ): Seq[String] =
+    downstream.msgSender.messages.map(_.body)
+
 }

@@ -71,7 +71,7 @@ class MatcherFeatureTest
     it should behave like aTotalSuccess(
       LambdaBuilder(MatcherStub(Seq(Set(Set("g00dcafe"), Set("g00dd00d"))))),
       messages = Seq(g00dcafe, g00dd00d),
-      outputs = Seq(Set("g00dcafe", "g00dd00d"))
+      outputs = () => Seq(Set("g00dcafe", "g00dd00d"))
     )
   }
 
