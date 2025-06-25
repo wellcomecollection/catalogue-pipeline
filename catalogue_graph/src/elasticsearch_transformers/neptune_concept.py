@@ -5,8 +5,9 @@ from models.indexable_concept import (
     CatalogueConceptIdentifier,
     ConceptDescription,
     ConceptDisplayIdentifier,
-    ConceptDisplayIdentifierType,
 )
+
+from elasticsearch_transformers.display_identifier import get_display_identifier
 
 
 def standardise_label(label: str | None) -> str | None:
@@ -33,7 +34,7 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
 
 
 def get_priority_source_concept_value(
-        concept_node: dict | None, source_concept_nodes: list[dict], key: str
+    concept_node: dict | None, source_concept_nodes: list[dict], key: str
 ) -> tuple[Any, str | None]:
     """
     Given a concept, its source concepts, and a key (e.g. 'label' or 'description'), extract the corresponding
@@ -140,25 +141,11 @@ class RawNeptuneConcept:
 
     @property
     def display_identifiers(self) -> list[ConceptDisplayIdentifier]:
-        label_mapping = {
-            "label-derived": "Identifier derived from the label of the referent",
-            "nlm-mesh": "Medical Subject Headings (MeSH) identifier",
-            "lc-names": "Library of Congress Name authority records",
-            "lc-subjects": "Library of Congress Subject Headings (LCSH)",
-            "viaf": "VIAF: The Virtual International Authority File",
-            "fihrist": "Fihrist Authority",
-        }
-
         display_ids = []
         for identifier in self.identifiers:
-            display_id = ConceptDisplayIdentifier(
-                value=identifier.value,
-                identifierType=ConceptDisplayIdentifierType(
-                    id=identifier.identifierType,
-                    label=label_mapping[identifier.identifierType],
-                ),
+            display_ids.append(
+                get_display_identifier(identifier.value, identifier.identifierType)
             )
-            display_ids.append(display_id)
 
         return display_ids
 

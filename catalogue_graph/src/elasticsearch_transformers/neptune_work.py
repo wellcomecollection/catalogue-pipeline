@@ -1,0 +1,245 @@
+import json
+
+from models.indexable_work import (
+    DisplayConcept,
+    DisplayDigitalLocation,
+    DisplayHoldings,
+    DisplayId,
+    DisplayIdLabel,
+    DisplayItem,
+    DisplayNote,
+    DisplayProductionEvent,
+)
+
+from elasticsearch_transformers.display_identifier import get_display_identifier
+from elasticsearch_transformers.display_location import get_display_location
+
+
+class RawNeptuneWork:
+    def __init__(self, neptune_work: dict):
+        self.raw_work = neptune_work["work"]["~properties"]
+
+    def _get_optional_string(self, key: str) -> str | None:
+        value = self.raw_work.get(key)
+        if value is not None:
+            assert isinstance(value, str)
+
+        return value
+
+    def _extract_list(self, key: str) -> list[str]:
+        values: list[str] = self.raw_work.get(key, "").split("||")
+        return [v for v in values if len(v) > 0]
+
+    def _extract_json_list(self, key: str) -> list[dict]:
+        if self.raw_work.get(key) is None:
+            return []
+
+        return json.loads(self.raw_work[key])
+
+    def _extract_dict(self, key: str) -> dict | None:
+        if self.raw_work.get(key) is None:
+            return None
+
+        return json.loads(self.raw_work[key])
+
+    @property
+    def wellcome_id(self) -> str:
+        wellcome_id: str = self.raw_work["id"]
+        return wellcome_id
+
+    @property
+    def title(self) -> str:
+        title: str = self.raw_work["label"]
+        return title
+
+    @property
+    def reference_number(self) -> str | None:
+        return self._get_optional_string("reference_number")
+
+    @property
+    def physical_description(self) -> str | None:
+        return self._get_optional_string("physical_description")
+
+    @property
+    def lettering(self) -> str | None:
+        return self._get_optional_string("lettering")
+
+    @property
+    def edition(self) -> str | None:
+        return self._get_optional_string("edition")
+
+    @property
+    def duration(self) -> int | None:
+        duration: int | None = self.raw_work.get("duration")
+        return duration
+
+    @property
+    def alternative_titles(self) -> list[str]:
+        return self._extract_list("alternative_labels")
+
+    @property
+    def description(self) -> str | None:
+        return self._get_optional_string("description")
+
+    @property
+    def current_frequency(self) -> str | None:
+        return self._get_optional_string("current_frequency")
+
+    @property
+    def former_frequency(self) -> list[str]:
+        return self._extract_list("former_frequency")
+
+    @property
+    def designation(self) -> list[str]:
+        return self._extract_list("designation")
+
+    @property
+    def thumbnail(self) -> DisplayDigitalLocation | None:
+        thumbnail = self._extract_dict("thumbnail")
+        if thumbnail is None:
+            return
+
+        return get_display_location(thumbnail)
+
+    @property
+    def work_type(self) -> DisplayIdLabel | None:
+        if "format_id" not in self.raw_work:
+            return None
+
+        return DisplayIdLabel(
+            id=self.raw_work["format_id"],
+            label=self.raw_work["format_label"],
+            type="Format",
+        )
+
+    @property
+    def languages(self) -> list[DisplayIdLabel]:
+        languages = []
+        for language in self._extract_json_list("languages"):
+            languages.append(DisplayIdLabel(**language, type="Language"))
+
+        return languages
+
+    @property
+    def notes(self) -> list[DisplayNote]:
+        notes = []
+
+        # TODO: Group by note type
+        for note in self._extract_json_list("notes"):
+            notes.append(
+                DisplayNote(
+                    contents=[note["contents"]],
+                    noteType=DisplayIdLabel(**note["noteType"], type="NoteType"),
+                )
+            )
+
+        return notes
+
+    @property
+    def created_date(self) -> DisplayConcept | None:
+        created_date = self._extract_dict("created_date")
+        if created_date is None:
+            return None
+
+        return DisplayConcept(label=created_date["label"], type="Period")
+
+    @property
+    def items(self) -> list[DisplayItem]:
+        items = []
+
+        for item in self._extract_json_list("items"):
+            locations = [get_display_location(loc) for loc in item.get("locations")]
+
+            identifiers = []
+
+            # TODO: Handle otherIdentifiers too!
+            raw_source_id = item["id"].get("sourceIdentifier")
+            if raw_source_id:
+                identifiers.append(
+                    get_display_identifier(
+                        raw_source_id["value"], raw_source_id["identifierType"]["id"]
+                    )
+                )
+
+            items.append(
+                DisplayItem(
+                    id=item["id"].get("canonicalId"),
+                    identifiers=identifiers,
+                    title=item.get("title"),
+                    note=item.get("note"),
+                    locations=locations,
+                )
+            )
+
+        return items
+
+    @property
+    def holdings(self):
+        holdings = []
+
+        for holding in self._extract_json_list("holdings"):
+            location = None
+            if "location" in holding:
+                location = get_display_location(holding["location"])
+
+            holdings.append(
+                DisplayHoldings(
+                    note=holding.get("note"),
+                    enumeration=holding.get("enumeration", []),
+                    location=location,
+                )
+            )
+
+        return holdings
+
+    @property
+    def images(self):
+        images = []
+        for image in self._extract_json_list("image_data"):
+            images.append(DisplayId(id=image["id"]["canonicalId"], type="Image"))
+
+        return images
+
+    @property
+    def production(self):
+        events = []
+        for event in self._extract_json_list("production"):
+            events.append(
+                DisplayProductionEvent(
+                    label=event["label"],
+                    places=[
+                        DisplayConcept(label=p["label"], type="Place")
+                        for p in event["places"]
+                    ],
+                    agents=[
+                        DisplayConcept(label=p["label"], type="Agent")
+                        for p in event["agents"]
+                    ],
+                    dates=[
+                        DisplayConcept(label=p["label"], type="Period")
+                        for p in event["dates"]
+                    ],
+                    function=(
+                        DisplayConcept(label=event["function"]["label"])
+                        if event.get("function")
+                        else None
+                    ),
+                )
+            )
+
+        return events
+
+
+# contributors
+# subjects
+# genres
+
+# identifiers
+
+# parts
+# partOf
+# precededBy
+# succeededB
+
+# TODO: availabilities
+# TODO: collection_path_label

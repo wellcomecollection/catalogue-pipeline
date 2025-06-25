@@ -5,9 +5,10 @@ from pydantic import BaseModel
 from models.graph_node import ConceptType
 
 
-class CatalogueConceptIdentifier(BaseModel):
-    value: str
-    identifierType: str
+class ConceptDescription(BaseModel):
+    text: str
+    sourceLabel: str
+    sourceUrl: str
 
 
 class CatalogueConceptRelatedTo(BaseModel):
@@ -15,12 +16,6 @@ class CatalogueConceptRelatedTo(BaseModel):
     id: str
     relationshipType: str | None
     conceptType: str
-
-
-class ConceptDescription(BaseModel):
-    text: str
-    sourceLabel: str
-    sourceUrl: str
 
 
 class RelatedConcepts(BaseModel):
@@ -34,24 +29,16 @@ class RelatedConcepts(BaseModel):
     relatedTopics: list[CatalogueConceptRelatedTo]
 
 
+class CatalogueConceptIdentifier(BaseModel):
+    value: str
+    identifierType: str
+
 class ConceptQuery(BaseModel):
     id: str
     identifiers: list[CatalogueConceptIdentifier]
     label: str
     alternativeLabels: list[str]
     type: ConceptType
-
-
-class ConceptDisplayIdentifierType(BaseModel):
-    id: str
-    label: str
-    type: str = "IdentifierType"
-
-
-class ConceptDisplayIdentifier(BaseModel):
-    value: str
-    type: str = "Identifier"
-    identifierType: ConceptDisplayIdentifierType
 
 
 class ConceptDisplay(BaseModel):
