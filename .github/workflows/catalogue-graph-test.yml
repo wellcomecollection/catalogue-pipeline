@@ -11,7 +11,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: default_x64_latest
 
     steps:
       - uses: actions/checkout@v3

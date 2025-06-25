@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test: 
-    runs-on: ubuntu-latest
+    runs-on: default_x64_latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v5
@@ -26,7 +26,7 @@ jobs:
           ./catalogue_graph/scripts/test.sh
         
   build:
-    runs-on: ubuntu-latest
+    runs-on: default_x64_latest
     needs: test
     if: ${{ needs.test.result == 'success' }}
     steps:
@@ -42,7 +42,7 @@ jobs:
           ./catalogue_graph/scripts/build.sh --push
   
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: default_x64_latest
     needs: build
     if: ${{ needs.build.result == 'success' }}
     strategy:
