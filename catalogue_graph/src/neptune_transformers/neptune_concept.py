@@ -32,8 +32,23 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
     raise ValueError(f"Unknown source: {source}")
 
 
+def get_priority_source(source_concept_nodes: list[dict]) -> str | None:
+    """Given a list of source concept nodes, return the label of the highest priority one."""
+    all_sources = set()
+    for source_concept in source_concept_nodes:
+        properties = source_concept["~properties"]
+        all_sources.add(properties["source"])
+
+    # Sources sorted by priority
+    for source in ["nlm-mesh", "lc-subjects", "lc-names", "wikidata", "label-derived"]:
+        if source in all_sources:
+            return source
+
+    return None
+
+
 def get_priority_source_concept_value(
-        concept_node: dict | None, source_concept_nodes: list[dict], key: str
+    concept_node: dict | None, source_concept_nodes: list[dict], key: str
 ) -> tuple[Any, str | None]:
     """
     Given a concept, its source concepts, and a key (e.g. 'label' or 'description'), extract the corresponding
@@ -41,20 +56,16 @@ def get_priority_source_concept_value(
 
     (For example, if a `description` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.)
     """
-    values = {}
+    priority_source = get_priority_source(source_concept_nodes)
+    if priority_source is not None:
+        for source_concept in source_concept_nodes:
+            properties = source_concept["~properties"]
+
+            if properties["source"] == priority_source:
+                return standardise_label(properties.get(key)), priority_source
 
     if concept_node is not None:
-        values["label-derived"] = concept_node["~properties"].get(key, "")
-
-    for source_concept in source_concept_nodes:
-        properties = source_concept["~properties"]
-        source = properties["source"]
-        values[source] = standardise_label(properties.get(key))
-
-    # Sources sorted by priority
-    for source in ["nlm-mesh", "lc-subjects", "lc-names", "wikidata", "label-derived"]:
-        if (value := values.get(source)) is not None:
-            return value, source
+        return concept_node["~properties"].get(key, ""), "label-derived"
 
     return None, None
 

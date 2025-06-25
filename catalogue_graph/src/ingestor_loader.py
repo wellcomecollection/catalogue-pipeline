@@ -86,7 +86,7 @@ def extract_data(
         "frequent_collaborators": get_collaborator_concepts(client, params),
         "related_topics": get_related_topics(client, params),
     }
-    
+
     transformer = ElasticsearchConceptsTransformer()
     for concept in concepts:
         yield transformer.transform_document(concept, related_concepts)
