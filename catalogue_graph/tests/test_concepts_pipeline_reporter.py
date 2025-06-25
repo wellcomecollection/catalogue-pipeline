@@ -1,10 +1,6 @@
 import polars as pl
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
-from test_mocks import MockSmartOpen, fixed_datetime
-from test_utils import load_fixture
-
 from concepts_pipeline_reporter import (
     ReporterConfig,
     get_indexer_report,
@@ -12,6 +8,9 @@ from concepts_pipeline_reporter import (
 )
 from graph_remover import IDS_LOG_SCHEMA
 from models.step_events import ReporterEvent
+from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
+from test_mocks import MockSmartOpen, fixed_datetime
+from test_utils import load_fixture
 
 pipeline_date = "2024-01-01"
 index_date = "2024-01-02"

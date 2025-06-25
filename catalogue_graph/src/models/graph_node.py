@@ -96,4 +96,3 @@ class Work(BaseNode):
 
 class WorkIdentifier(BaseNode):
     identifier: str
-    pass

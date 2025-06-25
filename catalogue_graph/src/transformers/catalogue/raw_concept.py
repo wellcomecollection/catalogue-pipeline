@@ -27,12 +27,14 @@ class RawCatalogueConcept:
     @property
     def wellcome_id(self) -> str:
         """Returns the canonical Wellcome identifier."""
-        return self.raw_concept["id"]["canonicalId"]
+        wellcome_id: str = self.raw_concept["id"]["canonicalId"]
+        return wellcome_id
 
     @property
     def label(self) -> str:
         """Returns the concept label."""
-        return self.raw_concept.get("label")
+        label: str = self.raw_concept["label"]
+        return label 
 
     @property
     def type(self) -> ConceptType:

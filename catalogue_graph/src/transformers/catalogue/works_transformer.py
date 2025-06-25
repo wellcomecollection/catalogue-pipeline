@@ -56,22 +56,22 @@ class CatalogueWorksTransformer(BaseTransformer):
         raw_work = RawCatalogueWork(raw_node)
 
         for identifier in raw_work.identifiers:
-            attributes = WorkHasIdentifierAttributes(
+            identifier_attributes = WorkHasIdentifierAttributes(
                 referenced_in=identifier["referenced_in"],
             )
             yield WorkHasIdentifier(
                 from_id=raw_work.wellcome_id,
                 to_id=identifier["id"],
-                attributes=attributes,
+                attributes=identifier_attributes,
             )
 
         for concept in raw_work.concepts:
-            attributes = WorkHasConceptAttributes(
+            concept_attributes = WorkHasConceptAttributes(
                 referenced_in=concept["referenced_in"],
                 referenced_type=concept["referenced_type"],
             )
             yield WorkHasConcept(
                 from_id=raw_work.wellcome_id,
                 to_id=concept["id"],
-                attributes=attributes,
+                attributes=concept_attributes,
             )

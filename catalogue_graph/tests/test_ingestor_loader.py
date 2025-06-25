@@ -3,26 +3,31 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
-from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_json_fixture
-
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
-    CONCEPT_QUERY,
     IngestorIndexerObject,
     IngestorLoaderConfig,
     IngestorLoaderLambdaEvent,
-    get_referenced_together_query,
-    get_related_query,
     handler,
 )
-from models.catalogue_concept import (
-    CatalogueConcept,
+from models.indexable_concept import (
     CatalogueConceptIdentifier,
     CatalogueConceptRelatedTo,
     ConceptDescription,
+    ConceptDisplay,
+    ConceptDisplayIdentifier,
+    ConceptDisplayIdentifierType,
+    ConceptQuery,
+    IndexableConcept,
     RelatedConcepts,
 )
+from queries.concept_queries import (
+    CONCEPT_QUERY,
+    _get_referenced_together_query,
+    _get_related_query,
+)
+from test_mocks import MockRequest, MockSmartOpen
+from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -106,37 +111,37 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("RELATED_TO"),
+        expected_query=_get_related_query("RELATED_TO"),
         mock_results=related_to_results,
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("HAS_FIELD_OF_WORK"),
+        expected_query=_get_related_query("HAS_FIELD_OF_WORK"),
         mock_results=[],
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
+        expected_query=_get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
         mock_results=broader_than_results,
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("HAS_FIELD_OF_WORK", "to"),
+        expected_query=_get_related_query("HAS_FIELD_OF_WORK", "to"),
         mock_results=people_results,
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("NARROWER_THAN"),
+        expected_query=_get_related_query("NARROWER_THAN"),
         mock_results=[],
     )
 
     add_neptune_mock_response(
-        expected_query=get_referenced_together_query(),
+        expected_query=_get_referenced_together_query(),
         mock_results=[],
     )
 
     add_neptune_mock_response(
-        expected_query=get_referenced_together_query(
+        expected_query=_get_referenced_together_query(
             source_referenced_types=["Person"],
             related_referenced_types=["Person", "Organisation"],
             source_referenced_in=["contributors"],
@@ -146,7 +151,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=get_referenced_together_query(
+        expected_query=_get_referenced_together_query(
             related_referenced_types=[
                 "Concept",
                 "Subject",
@@ -163,7 +168,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
 
 def get_catalogue_concept_mock(
     include: list[MockNeptuneResponseItem],
-) -> CatalogueConcept:
+) -> IndexableConcept:
     alternative_labels = []
     if MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include:
         alternative_labels = [
@@ -223,32 +228,50 @@ def get_catalogue_concept_mock(
             )
         ]
 
-    return CatalogueConcept(
-        id="id",
-        label="label",
-        type="Person",
-        alternativeLabels=alternative_labels,
-        description=ConceptDescription(
-            text="Mesh description",
-            sourceLabel="nlm-mesh",
-            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+    return IndexableConcept(
+        query=ConceptQuery(
+            id="id",
+            label="label",
+            type="Person",
+            identifiers=[
+                CatalogueConceptIdentifier(
+                    value="456",
+                    identifierType="lc-names",
+                )
+            ],
+            alternativeLabels=alternative_labels,
         ),
-        identifiers=[
-            CatalogueConceptIdentifier(
-                value="456",
-                identifierType="lc-names",
-            )
-        ],
-        sameAs=[],
-        relatedConcepts=RelatedConcepts(
-            relatedTo=related_to,
-            fieldsOfWork=[],
-            narrowerThan=[],
-            broaderThan=broader_than,
-            people=people,
-            referencedTogether=[],
-            frequentCollaborators=[],
-            relatedTopics=[],
+        display=ConceptDisplay(
+            id="id",
+            label="label",
+            type="Person",
+            identifiers=[
+                ConceptDisplayIdentifier(
+                    value="lc-names",
+                    identifierType=ConceptDisplayIdentifierType(
+                        id="nlm-mesh",
+                        label="Library of Congress Name authority records",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
+            alternativeLabels=alternative_labels,
+            description=ConceptDescription(
+                text="Mesh description",
+                sourceLabel="nlm-mesh",
+                sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+            ),
+            sameAs=[],
+            relatedConcepts=RelatedConcepts(
+                relatedTo=related_to,
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=broader_than,
+                people=people,
+                referencedTogether=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
+            ),
         ),
     )
 
@@ -299,7 +322,7 @@ def test_ingestor_loader(
         assert len(df) == 1
 
         catalogue_concepts = [
-            CatalogueConcept.model_validate(row) for row in df.to_dicts()
+            IndexableConcept.model_validate(row) for row in df.to_dicts()
         ]
 
         assert len(catalogue_concepts) == 1
