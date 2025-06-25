@@ -2,18 +2,21 @@
 
 import argparse
 import pprint
-import typing
+from typing import Any, Generator
 
 import boto3
 import polars as pl
 import smart_open
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
-from models.catalogue_concept import (
-    CatalogueConcept,
-    ConceptsQueryResult,
-    ConceptsQuerySingleResult,
+from models.indexable_concept import (
+    ConceptDisplay,
+    ConceptQuery,
+    IndexableConcept,
+    RelatedConcepts,
 )
+from neptune_transformers.neptune_concept import RawNeptuneConcept
+from neptune_transformers.neptune_related_concepts import RawNeptuneRelatedConcepts
 from pydantic import BaseModel
 from queries.concept_queries import (
     get_broader_concepts,
@@ -55,15 +58,8 @@ NUMBER_OF_SHARED_WORKS_THRESHOLD = 3
 IGNORED_WIKIDATA_IDS = ["Q5", "Q151885"]
 
 
-def extract_data(
-    start_offset: int, end_index: int, is_local: bool
-) -> ConceptsQueryResult:
-    client = get_neptune_client(is_local)
-
-    limit = end_index - start_offset
-    print(f"Processing records from {start_offset} to {end_index} ({limit} records)")
-
-    params = {
+def _get_params(start_offset: int, limit: int) -> dict:
+    return {
         "start_offset": start_offset,
         "limit": limit,
         "ignored_wikidata_ids": IGNORED_WIKIDATA_IDS,
@@ -71,45 +67,65 @@ def extract_data(
         "number_of_shared_works_threshold": NUMBER_OF_SHARED_WORKS_THRESHOLD,
     }
 
-    return ConceptsQueryResult(
-        concepts=get_concepts(client, params),
-        related_to=get_related_concepts(client, params),
-        fields_of_work=get_field_of_work_concepts(client, params),
-        narrower_than=get_narrower_concepts(client, params),
-        broader_than=get_broader_concepts(client, params),
-        people=get_people_concepts(client, params),
-        referenced_together=get_coreferenced_concepts(client, params),
-        frequent_collaborators=get_collaborator_concepts(client, params),
-        related_topics=get_related_topics(client, params),
-    )
 
+def extract_data(
+    start_offset: int, end_index: int, is_local: bool
+) -> Generator[IndexableConcept]:
+    limit = end_index - start_offset
+    print(f"Processing records from {start_offset} to {end_index} ({limit} records)")
 
-def transform_data(neptune_data: ConceptsQueryResult) -> list[CatalogueConcept]:
-    print("Transforming data to CatalogueConcept ...")
+    client = get_neptune_client(is_local)
+    params = _get_params(start_offset, limit)
 
-    transformed = []
-    for concept_data in neptune_data.concepts:
-        concept_id = concept_data["concept"]["~properties"]["id"]
+    concepts = get_concepts(client, params)
+    related_concepts = {
+        "related_to": get_related_concepts(client, params),
+        "fields_of_work": get_field_of_work_concepts(client, params),
+        "narrower_than": get_narrower_concepts(client, params),
+        "broader_than": get_broader_concepts(client, params),
+        "people": get_people_concepts(client, params),
+        "referenced_together": get_coreferenced_concepts(client, params),
+        "frequent_collaborators": get_collaborator_concepts(client, params),
+        "related_topics": get_related_topics(client, params),
+    }
 
-        result = ConceptsQuerySingleResult(
-            concept=concept_data,
-            related_to=neptune_data.related_to.get(concept_id, []),
-            fields_of_work=neptune_data.fields_of_work.get(concept_id, []),
-            narrower_than=neptune_data.narrower_than.get(concept_id, []),
-            broader_than=neptune_data.broader_than.get(concept_id, []),
-            people=neptune_data.people.get(concept_id, []),
-            referenced_together=neptune_data.referenced_together.get(concept_id, []),
-            frequent_collaborators=neptune_data.frequent_collaborators.get(
-                concept_id, []
-            ),
-            related_topics=neptune_data.related_topics.get(concept_id, []),
+    for concept in concepts:
+        neptune_concept = RawNeptuneConcept(concept, related_concepts)
+        neptune_related = RawNeptuneRelatedConcepts(
+            neptune_concept.wellcome_id, related_concepts
         )
-        transformed.append(CatalogueConcept.from_neptune_result(result))
 
-    return transformed
+        query = ConceptQuery(
+            id=neptune_concept.wellcome_id,
+            identifiers=neptune_concept.identifiers,
+            label=neptune_concept.label,
+            alternativeLabels=neptune_concept.alternative_labels,
+            type=neptune_concept.concept_type,
+        )
+        display = ConceptDisplay(
+            id=neptune_concept.wellcome_id,
+            identifiers=neptune_concept.display_identifiers,
+            label=neptune_concept.label,
+            alternativeLabels=neptune_concept.alternative_labels,
+            type=neptune_concept.concept_type,
+            description=neptune_concept.description,
+            sameAs=neptune_concept.same_as,
+            relatedConcepts=RelatedConcepts(
+                relatedTo=neptune_related.related_to,
+                fieldsOfWork=neptune_related.fields_of_work,
+                narrowerThan=neptune_related.narrower_than,
+                broaderThan=neptune_related.broader_than,
+                people=neptune_related.people,
+                referencedTogether=neptune_related.referenced_together,
+                frequentCollaborators=neptune_related.frequent_collaborators,
+                relatedTopics=neptune_related.related_topics,
+            ),
+        )
+
+        yield IndexableConcept(query=query, display=display)
 
 
-def load_data(s3_uri: str, data: list[CatalogueConcept]) -> IngestorIndexerObject:
+def load_data(s3_uri: str, data: list[IndexableConcept]) -> IngestorIndexerObject:
     print(f"Loading data to {s3_uri} ...")
 
     # using polars write to parquet in S3 using smart_open
@@ -153,8 +169,7 @@ def handler(
         end_index=event.end_index,
         is_local=config.is_local,
     )
-    transformed_data = transform_data(extracted_data)
-    result = load_data(s3_uri=s3_uri, data=transformed_data)
+    result = load_data(s3_uri=s3_uri, data=list(extracted_data))
 
     print(f"Data loaded successfully: {result}")
 
@@ -166,7 +181,7 @@ def handler(
     )
 
 
-def lambda_handler(event: IngestorLoaderLambdaEvent, context: typing.Any) -> dict:
+def lambda_handler(event: IngestorLoaderLambdaEvent, context: Any) -> dict:
     return handler(
         IngestorLoaderLambdaEvent.model_validate(event), IngestorLoaderConfig()
     ).model_dump()

@@ -12,11 +12,15 @@ class RawCatalogueWorkIdentifier:
 
     @property
     def identifier(self) -> str:
-        return self.raw_identifier["value"]
+        identifier = self.raw_identifier["value"]
+        assert isinstance(identifier, str)
+        return identifier
 
     @property
     def identifier_type(self) -> str:
-        return self.raw_identifier["identifierType"]["id"]
+        identifier_type = self.raw_identifier["identifierType"]["id"]
+        assert isinstance(identifier_type, str)
+        return identifier_type
 
     @property
     def parent(self) -> str | None:
