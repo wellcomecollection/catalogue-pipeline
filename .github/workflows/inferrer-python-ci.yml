@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   python-inferrers-checks:
-    runs-on: default_x64_latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
@@ -23,7 +23,7 @@ jobs:
     # then we could see a situation where the overall build fails, (e.g. because feature inferrer is broken)
     # but the other inferrers have been deployed.
     needs: python-inferrers-checks
-    runs-on: default_x64_latest
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
