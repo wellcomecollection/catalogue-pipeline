@@ -18,11 +18,11 @@ ENTRYPOINT ["/aws-lambda/aws-lambda-rie"]
 ENV max_batch_size=40
 ENV use_downstream=stdio
 
-CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.batcher.LambdaMain::handleRequest"]
+CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.batcher.Main::handleRequest"]
 
 FROM base
 
 ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
 
-CMD ["weco.pipeline.batcher.LambdaMain::handleRequest"]
+CMD ["weco.pipeline.batcher.Main::handleRequest"]
 

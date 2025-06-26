@@ -1,4 +1,4 @@
-package weco.pipeline.batcher
+package weco.pipeline.batcher.models
 
 /** A `Selector` is used to match nodes within a particular archive. A selector
   * matches one of the following:
