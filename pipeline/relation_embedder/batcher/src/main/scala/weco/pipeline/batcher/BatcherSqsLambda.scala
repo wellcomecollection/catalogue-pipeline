@@ -1,7 +1,7 @@
 package weco.pipeline.batcher
 
 import weco.lambda.{ApplicationConfig, Downstream, SQSBatchResponseLambdaApp, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
-
+import weco.pipeline.batcher.models.Batch
 import scala.concurrent.Future
 
 trait BatcherSqsLambda[Config <: ApplicationConfig]
@@ -22,7 +22,7 @@ trait BatcherSqsLambda[Config <: ApplicationConfig]
     processor.process(messagesMap.keySet.toList).map {
       batcherResponse =>
         batcherResponse.successes.map(
-          downstream.notify
+          downstream.notify(_)(Batch.encoder)
         )
 
         batcherResponse.failures.map {

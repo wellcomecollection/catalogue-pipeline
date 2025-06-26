@@ -1,5 +1,6 @@
 package weco.pipeline.batcher
 import grizzled.slf4j.Logging
+import weco.pipeline.batcher.models.{Batch, Path, PathFromString, Selector}
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -41,7 +42,7 @@ class PathsProcessor(maxBatchSize: Int)(
    * matching works needing to be denormalised, and group these according to
    * tree and within a maximum `batchSize`.
    */
-  private def generateBatches(
+  def generateBatches(
     maxBatchSize: Int,
     paths: Seq[Path]
   ): Try[Seq[Batch]] = {

@@ -1,7 +1,8 @@
-package weco.pipeline.batcher
+package weco.pipeline.batcher.models
 
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.extras.semiauto._
+import io.circe.{Decoder, Encoder}
+import weco.json.JsonUtil._
 
 case class Batch(rootPath: String, selectors: List[Selector])
 
