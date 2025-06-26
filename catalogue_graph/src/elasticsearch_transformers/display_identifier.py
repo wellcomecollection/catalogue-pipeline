@@ -25,6 +25,7 @@ IDENTIFIER_LABEL_MAPPING = {
     "bl-estc-citation-no": "British Library English Short Title Catalogue",
     "label-derived": "Identifier derived from the label of the referent",
     "wellcome-accession-number": "Accession number",
+    "wikidata": "Wikidata",
 }
 
 

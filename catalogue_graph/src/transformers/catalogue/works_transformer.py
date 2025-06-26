@@ -27,6 +27,7 @@ class CatalogueWorksTransformer(BaseTransformer):
             label=raw_work.label,
             alternative_labels=raw_work.alternative_labels,
             type=raw_work.type,
+            availabilities=raw_work.availabilities,
             lettering=raw_work.lettering,
             reference_number=raw_work.reference_number,
             description=raw_work.description,
@@ -48,6 +49,7 @@ class CatalogueWorksTransformer(BaseTransformer):
             items=raw_work.items,
             holdings=raw_work.holdings,
             image_data=raw_work.image_data,
+            status=raw_work.status
         )
 
     def extract_edges(

@@ -64,6 +64,7 @@ class Concept(BaseNode):
 
 
 WorkType = Literal["Work", "Series", "Section", "Collection"]
+WorkStatus = Literal["Visible", "Redirected", "Deleted", "Invisible"]
 
 
 class Work(BaseNode):
@@ -78,7 +79,8 @@ class Work(BaseNode):
     current_frequency: str | None
     former_frequency: list[str]
     designation: list[str]
-
+    availabilities: list[str]
+    status: WorkStatus
     collection_path_label: str | None
     other_identifiers: str | None
     created_date: str | None

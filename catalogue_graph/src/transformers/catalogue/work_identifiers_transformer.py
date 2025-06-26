@@ -13,22 +13,27 @@ from .raw_work_identifier import RawCatalogueWorkIdentifier
 class CatalogueWorkIdentifiersTransformer(BaseTransformer):
     def __init__(self, url: str, index_name: str, basic_auth: Tuple[str, str]):
         self.source = CatalogueWorkIdentifiersSource(url, index_name, basic_auth)
+        self.streamed_ids = set()
 
-    def transform_node(self, raw_data: Tuple[dict, str]) -> WorkIdentifier:
+    def transform_node(self, raw_data: Tuple[dict, str]) -> WorkIdentifier | None:
         raw_identifier = RawCatalogueWorkIdentifier(raw_data[0], raw_data[1])
 
-        return WorkIdentifier(
-            id=raw_identifier.unique_id,
-            identifier=raw_identifier.identifier,
-            label=raw_identifier.identifier_type,
-        )
+        if raw_identifier.unique_id not in self.streamed_ids:
+            self.streamed_ids.add(raw_identifier.unique_id)
+
+            return WorkIdentifier(
+                id=raw_identifier.unique_id,
+                identifier=raw_identifier.identifier,
+                label=raw_identifier.identifier_type,
+            )
 
     def extract_edges(
         self, raw_data: Tuple[dict, str]
     ) -> Generator[WorkIdentifierHasParent]:
         raw_identifier = RawCatalogueWorkIdentifier(raw_data[0], raw_data[1])
 
-        if raw_identifier.parent:
+        if raw_identifier.parent and raw_identifier.unique_id not in self.streamed_ids:
+            self.streamed_ids.add(raw_identifier.unique_id)
             yield WorkIdentifierHasParent(
                 from_id=raw_identifier.unique_id, to_id=raw_identifier.parent
             )

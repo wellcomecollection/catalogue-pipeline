@@ -33,16 +33,17 @@ class ElasticsearchWorksTransformer:
             formerFrequency=neptune_work.former_frequency,
             designation=neptune_work.designation,
             images=neptune_work.images,
-            contributors=[],
+            contributors=neptune_work.contributors,
             identifiers=neptune_work.identifiers,
-            subjects=[],
-            genres=[],
+            subjects=neptune_work.subjects,
+            genres=neptune_work.genres,
             availabilities=[],
-            parts=[],
+            parts=neptune_work.parts,
             partOf=neptune_work.part_of,
-            precededBy=neptune_work.preceded_by,
-            succeededBy=neptune_work.succeeded_by,
+            # precededBy=neptune_work.preceded_by,
+            # succeededBy=neptune_work.succeeded_by,
         )
-        
-        import json
-        print(json.dumps(display.model_dump(exclude_none=True), indent=2))
+
+        # import json
+        # if len(display.parts) > 0:
+        #     print(json.dumps(display.model_dump(exclude_none=True), indent=2))

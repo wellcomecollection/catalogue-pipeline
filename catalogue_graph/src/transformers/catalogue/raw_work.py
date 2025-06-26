@@ -1,7 +1,7 @@
 import json
 from typing import TypedDict
 
-from models.graph_node import ConceptType, WorkType
+from models.graph_node import ConceptType, WorkStatus, WorkType
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.catalogue.work_identifiers_source import extract_identifiers_from_work
 from utils.types import WorkConceptKey, WorkIdentifiersKey
@@ -54,6 +54,16 @@ class RawCatalogueWork:
     def type(self) -> WorkType:
         work_type: WorkType = self.work_data.get("type", "Work")
         return work_type
+
+    @property
+    def status(self) -> WorkStatus:
+        work_status: WorkStatus = self.raw_work["type"]
+        return work_status
+
+    @property
+    def availabilities(self) -> list[str]:
+        availabilities: list[dict] = self.work_state.get("availabilities", [])
+        return [a["id"] for a in availabilities]
 
     @property
     def lettering(self) -> str | None:

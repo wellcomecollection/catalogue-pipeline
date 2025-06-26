@@ -19,7 +19,8 @@ class ElasticsearchSource(BaseSource):
     def search_with_pit(self, pit_id: int, slice_index: int, queue: Queue) -> None:
         # For now, only extract 'Visible' works.
         body = {
-            "query": {"match": {"type": "Visible"}},
+            "query": {"match_all": {}},
+            #"query": {"match": {"type": "Visible"}},
             "size": ES_BATCH_SIZE,
             "pit": {"id": pit_id, "keep_alive": "5m"},
             "sort": [{"_shard_doc": "asc"}],
