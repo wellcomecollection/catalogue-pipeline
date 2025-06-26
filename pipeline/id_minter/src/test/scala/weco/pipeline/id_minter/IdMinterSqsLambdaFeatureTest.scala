@@ -60,7 +60,7 @@ trait IdMinterSqsLambdaBehaviours
 
 class IdMinterSqsLambdaFeatureTest extends IdMinterSqsLambdaBehaviours {
 
-  describe("When input source identifiers match") {
+  describe("When there are multiple identical input source identifiers") {
     info(
       """multiple input messages with the same identifier
     only result in one record written and one message sent"""
