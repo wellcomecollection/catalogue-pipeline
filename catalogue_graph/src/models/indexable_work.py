@@ -142,8 +142,8 @@ class WorkDisplay(BaseModel):
     images: list[DisplayId]
     parts: list[DisplayRelation]
     partOf: list[DisplayRelation]
-    precededBy: list[DisplayRelation]
-    succeededBy: list[DisplayRelation]
+    # precededBy: list[DisplayRelation]
+    # succeededBy: list[DisplayRelation]
     type: str = "Work"
 
 

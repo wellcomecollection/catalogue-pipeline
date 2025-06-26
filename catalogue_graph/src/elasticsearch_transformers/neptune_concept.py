@@ -1,10 +1,10 @@
 from typing import Any
 
 from models.graph_node import ConceptType
+from models.indexable import DisplayIdentifier
 from models.indexable_concept import (
     CatalogueConceptIdentifier,
     ConceptDescription,
-    ConceptDisplayIdentifier,
 )
 
 from elasticsearch_transformers.display_identifier import get_display_identifier
@@ -140,7 +140,7 @@ class RawNeptuneConcept:
         return ids
 
     @property
-    def display_identifiers(self) -> list[ConceptDisplayIdentifier]:
+    def display_identifiers(self) -> list[DisplayIdentifier]:
         display_ids = []
         for identifier in self.identifiers:
             display_ids.append(

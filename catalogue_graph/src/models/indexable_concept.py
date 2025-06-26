@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from models.graph_node import ConceptType
+from models.indexable import DisplayIdentifier
 
 
 class ConceptDescription(BaseModel):
@@ -43,7 +44,7 @@ class ConceptQuery(BaseModel):
 
 class ConceptDisplay(BaseModel):
     id: str
-    identifiers: list[ConceptDisplayIdentifier]
+    identifiers: list[DisplayIdentifier]
     label: str
     alternativeLabels: list[str]
     description: Optional[ConceptDescription]

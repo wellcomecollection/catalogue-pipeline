@@ -2,7 +2,9 @@ import json
 
 from models.indexable_work import (
     DisplayConcept,
+    DisplayContributor,
     DisplayDigitalLocation,
+    DisplayGenre,
     DisplayHoldings,
     DisplayId,
     DisplayIdentifier,
@@ -11,10 +13,13 @@ from models.indexable_work import (
     DisplayNote,
     DisplayProductionEvent,
     DisplayRelation,
+    DisplaySubject,
 )
 
 from elasticsearch_transformers.display_identifier import get_display_identifier
 from elasticsearch_transformers.display_location import get_display_location
+
+from .neptune_concept import get_priority_source_concept_value
 
 
 class RawNeptuneWork:
@@ -22,7 +27,7 @@ class RawNeptuneWork:
         self.raw_work = neptune_work["work"]["~properties"]
         self.raw_identifiers = neptune_work["identifiers"]
         self.work_hierarchy = work_hierarchy or {}
-        self.work_concepts = work_concepts
+        self.raw_work_concepts = work_concepts or []
 
     def _get_optional_string(self, key: str) -> str | None:
         value = self.raw_work.get(key)
@@ -46,6 +51,11 @@ class RawNeptuneWork:
             return None
 
         return json.loads(self.raw_work[key])
+
+    def _extract_raw_concepts(self, referenced_in: str) -> list[dict]:
+        return [
+            c for c in self.raw_work_concepts if c["referenced_in"] == referenced_in
+        ]
 
     @property
     def wellcome_id(self) -> str:
@@ -267,31 +277,105 @@ class RawNeptuneWork:
         # TODO: Handle series
         return [parent]
 
+    # @property
+    # def preceded_by(self) -> list[DisplayRelation]:
+    #     preceded_by = []
+    #     for sibling in self.work_hierarchy.get("siblings", []):
+    #         if (sibling["reference"] or sibling["title"]) < (
+    #             self.reference_number or self.title
+    #         ):
+    #             preceded_by.append(self._get_display_relation(sibling, 0))
+    #
+    #     return sorted(preceded_by, key=lambda item: item.referenceNumber or item.title)
+    #
+    # @property
+    # def succeeded_by(self) -> list[DisplayRelation]:
+    #     succeeded_by = []
+    #     for sibling in self.work_hierarchy.get("siblings", []):
+    #         if (sibling["reference"] or sibling["title"]) > (
+    #             self.reference_number or self.title
+    #         ):
+    #             succeeded_by.append(self._get_display_relation(sibling, 0))
+    #
+    #     return sorted(succeeded_by, key=lambda item: item.referenceNumber or item.title)
+
     @property
-    def preceded_by(self) -> list[DisplayRelation]:
-        preceded_by = []
-        for sibling in self.work_hierarchy.get("siblings", []):
-            if sibling["reference"] < self.reference_number:
-                preceded_by.append(self._get_display_relation(sibling, 0))
+    def parts(self) -> list[DisplayRelation]:
+        parts = []
+        for child in self.work_hierarchy.get("children", []):
+            if child["id"] is not None:
+                parts.append(self._get_display_relation(child, 0))
 
-        return preceded_by
+        return sorted(parts, key=lambda item: item.referenceNumber or item.title)
+
+    def _get_display_concept(self, raw_concept: dict) -> DisplayConcept:
+        source_concepts = raw_concept["other_source_concepts"]
+        if raw_concept["linked_source_concept"] is not None:
+            source_concepts.append(raw_concept["linked_source_concept"])
+
+        identifiers = []
+        for source_concept in source_concepts:
+            identifiers.append(
+                get_display_identifier(
+                    source_concept["~properties"]["id"],
+                    source_concept["~properties"]["source"],
+                )
+            )
+
+        label, _ = get_priority_source_concept_value(
+            raw_concept["concept"], source_concepts, "label"
+        )
+
+        # if raw_concept["referenced_type"] is None:
+        #     print(raw_concept)
+
+        return DisplayConcept(
+            id=raw_concept["concept"]["~properties"]["id"],
+            label=label,
+            identifiers=identifiers,
+            type=raw_concept["referenced_type"] or "Concept",
+        )
 
     @property
-    def succeeded_by(self) -> list[DisplayRelation]:
-        succeeded_by = []
-        for sibling in self.work_hierarchy.get("siblings", []):
-            if sibling["reference"] > self.reference_number:
-                succeeded_by.append(self._get_display_relation(sibling, 0))
+    def contributors(self) -> list[DisplayContributor]:
+        contributors = []
 
-        return succeeded_by
+        for raw_contributor in self._extract_raw_concepts("contributors"):
+            contributors.append(
+                DisplayContributor(
+                    agent=self._get_display_concept(raw_contributor),
+                    roles=[],  # TODO: Is this ever populated?
+                    primary=False,  # TODO: Extract this info
+                )
+            )
 
+        return contributors
 
-# contributors
-# subjects
-# genres
+    @property
+    def genres(self) -> list[DisplayGenre]:
+        genres = []
 
-# parts
+        for raw_genre in self._extract_raw_concepts("genres"):
+            concept = self._get_display_concept(raw_genre)
 
-# TODO: Recursive partOf
-# TODO: availabilities
-# TODO: collection_path_label
+            # TODO: Are there genres with multiple concepts?
+            genres.append(DisplayGenre(concepts=[concept], label=concept.label))
+
+        return genres
+
+    @property
+    def subjects(self) -> list[DisplaySubject]:
+        subjects = []
+
+        for raw_subject in self._extract_raw_concepts("subjects"):
+            concept = self._get_display_concept(raw_subject)
+            # TODO: Handle subjects with multiple concepts
+            subjects.append(
+                DisplaySubject(label=concept.label, id=concept.id, concepts=[concept])
+            )
+
+        return subjects
+
+    # TODO: Recursive partOf
+    # TODO: availabilities
+    # TODO: collection_path_label
