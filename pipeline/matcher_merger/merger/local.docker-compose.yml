@@ -1,0 +1,18 @@
+services:
+  lambda:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: lambda_rie
+    volumes:
+      - ~/.aws:/root/.aws
+    ports:
+      - "9000:8080"
+    environment:
+      - AWS_PROFILE=platform-developer
+      - metrics_namespace=catalogue-dev_merger
+      - es_protocol=https
+      - es_port=443
+      - use_downstream=stdio
+    env_file:
+      - .env

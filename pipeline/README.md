@@ -70,9 +70,10 @@ Individual stages:
 * [id_minter](./id_minter/README.md)
 * [matcher](./matcher_merger/matcher/README.md)
 * [merger](./matcher_merger/merger/README.md)
-* [path_concatenator](./relation_embedder/path_concatenator/README.md)
-* [batcher](./relation_embedder/batcher/README.md)
-* [relation_embedder](./relation_embedder/relation_embedder/README.md)
+* [relation_embedder_subsystem](./relation_embedder/README.md)
+  * [path_concatenator](./relation_embedder/path_concatenator/README.md)
+  * [batcher](./relation_embedder/batcher/README.md)
+  * [relation_embedder](./relation_embedder/relation_embedder/README.md)
 * [ingestor](./ingestor/)
 
 

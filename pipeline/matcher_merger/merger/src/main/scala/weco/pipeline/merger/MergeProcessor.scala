@@ -1,71 +1,52 @@
-package weco.pipeline.merger.services
+package weco.pipeline.merger
 
-import org.apache.pekko.stream.scaladsl.Flow
-import org.apache.pekko.{Done, NotUsed}
-import software.amazon.awssdk.services.sqs.model.Message
+import grizzled.slf4j.Logging
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
-import weco.flows.FlowOps
-import weco.pipeline.matcher.models.MatcherResult._
 import weco.json.JsonUtil.fromJson
-import weco.messaging.MessageSender
-import weco.messaging.sns.NotificationMessage
-import weco.messaging.sqs.SQSStream
 import weco.pipeline.matcher.models.MatcherResult
-import weco.pipeline_storage.{Indexer, PipelineStorageConfig}
-import weco.typesafe.Runnable
+import weco.pipeline.merger.Main.WorkOrImage
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager}
+import weco.pipeline_storage.Indexer
 
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
-class MergerWorkerService[WorkDestination, ImageDestination](
-  msgStream: SQSStream[NotificationMessage],
+case class MergerResponse(
+  successes: Seq[WorkOrImage] = Seq.empty,
+  failures: Seq[WorkOrImage] = Seq.empty
+)
+
+class MergeProcessor(
   sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
-  workOrImageIndexer: Indexer[
-    Either[Work[Merged], Image[Initial]]
-  ],
-  workRouter: WorkRouter[WorkDestination],
-  imageMsgSender: MessageSender[ImageDestination],
-  config: PipelineStorageConfig
+  workOrImageIndexer: Indexer[Either[Work[Merged], Image[Initial]]]
 )(implicit val ec: ExecutionContext)
-    extends Runnable
-    with FlowOps {
+    extends Logging {
 
-  import weco.pipeline_storage.Indexable._
-  import weco.pipeline_storage.PipelineStorageStream._
+  private type WorkSet = Seq[Option[Work[Identified]]]
 
-  type WorkOrImage = Either[Work[Merged], Image[Initial]]
+  def process(messages: List[String]): Future[MergerResponse] = {
+    // merge and index WorkOrImage
+    Future.sequence(messages.map(merge)) flatMap {
+      merged: Seq[List[WorkOrImage]] =>
+        workOrImageIndexer(merged.flatten)
+    } map {
+      case Right(successfulWorkOrImage) =>
+        MergerResponse(successes = successfulWorkOrImage)
+      case Left(failedWorkOrImage) =>
+        MergerResponse(failures = failedWorkOrImage)
+    }
+  }
 
-  type WorkSet = Seq[Option[Work[Identified]]]
-
-  def run(): Future[Done] =
-    for {
-      _ <- workOrImageIndexer.init()
-      _ <- msgStream.runStream(
-        this.getClass.getSimpleName,
-        source =>
-          source
-            .via(processFlow(config, processMessage))
-            .via(
-              broadcastAndMerge(batchIndexAndSendWorksAndImages, noOutputFlow)
-            )
-      )
-    } yield Done
-
-  val batchIndexAndSendWorksAndImages
-    : Flow[(Message, List[WorkOrImage]), Message, NotUsed] =
-    batchIndexAndSendFlow(config, sendWorkOrImage, workOrImageIndexer)
-
-  private def processMessage(
-    message: NotificationMessage
+  private def merge(
+    message: String
   ): Future[List[WorkOrImage]] =
     for {
       matcherResult <- Future.fromTry(
-        fromJson[MatcherResult](message.body)
+        fromJson[MatcherResult](message)
       )
 
       workSets <- getWorkSets(matcherResult)
@@ -105,10 +86,4 @@ class MergerWorkerService[WorkDestination, ImageDestination](
     mergerManager
       .applyMerge(maybeWorks = workSet)
       .mergedWorksAndImagesWithTime(matcherResultTime)
-
-  private def sendWorkOrImage(workOrImage: WorkOrImage): Try[Unit] =
-    workOrImage match {
-      case Left(work)   => workRouter(work)
-      case Right(image) => imageMsgSender.send(imageIndexable.id(image))
-    }
 }
