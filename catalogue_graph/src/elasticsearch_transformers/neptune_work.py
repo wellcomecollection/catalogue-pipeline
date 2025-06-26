@@ -5,10 +5,12 @@ from models.indexable_work import (
     DisplayDigitalLocation,
     DisplayHoldings,
     DisplayId,
+    DisplayIdentifier,
     DisplayIdLabel,
     DisplayItem,
     DisplayNote,
     DisplayProductionEvent,
+    DisplayRelation,
 )
 
 from elasticsearch_transformers.display_identifier import get_display_identifier
@@ -16,8 +18,11 @@ from elasticsearch_transformers.display_location import get_display_location
 
 
 class RawNeptuneWork:
-    def __init__(self, neptune_work: dict):
+    def __init__(self, neptune_work: dict, work_hierarchy: dict, work_concepts: list):
         self.raw_work = neptune_work["work"]["~properties"]
+        self.raw_identifiers = neptune_work["identifiers"]
+        self.work_hierarchy = work_hierarchy or {}
+        self.work_concepts = work_concepts
 
     def _get_optional_string(self, key: str) -> str | None:
         value = self.raw_work.get(key)
@@ -51,6 +56,17 @@ class RawNeptuneWork:
     def title(self) -> str:
         title: str = self.raw_work["label"]
         return title
+
+    @property
+    def identifiers(self) -> list[DisplayIdentifier]:
+        identifiers = []
+        for identifier in self.raw_identifiers:
+            source_id = identifier["~properties"]
+            value = source_id["id"].split("||")[1]
+            display_id = get_display_identifier(value, source_id["label"])
+            identifiers.append(display_id)
+
+        return identifiers
 
     @property
     def reference_number(self) -> str | None:
@@ -148,18 +164,19 @@ class RawNeptuneWork:
         items = []
 
         for item in self._extract_json_list("items"):
-            locations = [get_display_location(loc) for loc in item.get("locations")]
-
             identifiers = []
 
-            # TODO: Handle otherIdentifiers too!
-            raw_source_id = item["id"].get("sourceIdentifier")
-            if raw_source_id:
-                identifiers.append(
-                    get_display_identifier(
-                        raw_source_id["value"], raw_source_id["identifierType"]["id"]
-                    )
+            raw_identifiers = item["id"].get("otherIdentifiers", [])
+            if "sourceIdentifier" in item["id"]:
+                raw_identifiers.append(item["id"]["sourceIdentifier"])
+
+            for raw_id in raw_identifiers:
+                display_id = get_display_identifier(
+                    raw_id["value"], raw_id["identifierType"]["id"]
                 )
+                identifiers.append(display_id)
+
+            locations = [get_display_location(loc) for loc in item.get("locations")]
 
             items.append(
                 DisplayItem(
@@ -229,17 +246,52 @@ class RawNeptuneWork:
 
         return events
 
+    def _get_display_relation(self, raw_related: dict, total_parts: int):
+        return DisplayRelation(
+            id=raw_related["id"],
+            title=raw_related["title"],
+            referenceNumber=raw_related["reference"],
+            totalParts=total_parts,
+        )
+
+    @property
+    def part_of(self) -> list[DisplayRelation]:
+        if "parent" not in self.work_hierarchy:
+            return []
+
+        sibling_count = len(self.work_hierarchy.get("siblings", [])) + 1
+        parent = self._get_display_relation(
+            self.work_hierarchy["parent"], sibling_count
+        )
+
+        # TODO: Handle series
+        return [parent]
+
+    @property
+    def preceded_by(self) -> list[DisplayRelation]:
+        preceded_by = []
+        for sibling in self.work_hierarchy.get("siblings", []):
+            if sibling["reference"] < self.reference_number:
+                preceded_by.append(self._get_display_relation(sibling, 0))
+
+        return preceded_by
+
+    @property
+    def succeeded_by(self) -> list[DisplayRelation]:
+        succeeded_by = []
+        for sibling in self.work_hierarchy.get("siblings", []):
+            if sibling["reference"] > self.reference_number:
+                succeeded_by.append(self._get_display_relation(sibling, 0))
+
+        return succeeded_by
+
 
 # contributors
 # subjects
 # genres
 
-# identifiers
-
 # parts
-# partOf
-# precededBy
-# succeededB
 
+# TODO: Recursive partOf
 # TODO: availabilities
 # TODO: collection_path_label

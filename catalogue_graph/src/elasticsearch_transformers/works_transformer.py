@@ -4,8 +4,8 @@ from .neptune_work import RawNeptuneWork
 
 
 class ElasticsearchWorksTransformer:
-    def transform_document(self, work: dict) -> IndexableWork:
-        neptune_work = RawNeptuneWork(work)
+    def transform_document(self, work: dict, hierarchy: dict, concepts: list) -> IndexableWork:
+        neptune_work = RawNeptuneWork(work, hierarchy, concepts)
         
         # There are some old label-less works in the graph 
         if "label" not in work["work"]["~properties"]:
@@ -34,12 +34,15 @@ class ElasticsearchWorksTransformer:
             designation=neptune_work.designation,
             images=neptune_work.images,
             contributors=[],
-            identifiers=[],
+            identifiers=neptune_work.identifiers,
             subjects=[],
             genres=[],
             availabilities=[],
             parts=[],
-            partOf=[],
-            precededBy=[],
-            succeededBy=[],
+            partOf=neptune_work.part_of,
+            precededBy=neptune_work.preceded_by,
+            succeededBy=neptune_work.succeeded_by,
         )
+        
+        import json
+        print(json.dumps(display.model_dump(exclude_none=True), indent=2))

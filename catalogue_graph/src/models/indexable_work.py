@@ -33,7 +33,7 @@ class DisplayRelation(BaseModel):
     referenceNumber: Optional[str] = None
     partOf: Optional[list[Self]] = None
     totalParts: int
-    totalDescendentParts: int
+    # totalDescendentParts: int # TODO: Is this field needed?
     type: str = "Work"
 
 
