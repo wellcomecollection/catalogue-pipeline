@@ -64,7 +64,7 @@ class MatcherFeatureTest
       LambdaBuilder(MatcherStub(Seq(Set(Set(g00dcafe.message))))),
       messages = Seq(g00dcafe, baadd00d),
       failingMessages = Seq(baadd00d),
-      outputs = Seq(Set(g00dcafe.message))
+      outputs = () => Seq(Set(g00dcafe.message))
     )
   }
   describe("When everything is successful") {
@@ -115,14 +115,15 @@ class MatcherFeatureTest
       matcherLambda,
       messages = messages,
       failingMessages = Seq(baadd00d),
-      outputs = Seq(
-        Set(
-          g00dcafe.message,
-          beefcafe.message,
-          "cafef00d"
-        ), // cafef00d was not one of the input messages, but it was found in the match for one of them
-        Set(f00df00d.message, f00dfeed.message)
-      )
+      outputs = () =>
+        Seq(
+          Set(
+            g00dcafe.message,
+            beefcafe.message,
+            "cafef00d"
+          ), // cafef00d was not one of the input messages, but it was found in the match for one of them
+          Set(f00df00d.message, f00dfeed.message)
+        )
     )
   }
 }

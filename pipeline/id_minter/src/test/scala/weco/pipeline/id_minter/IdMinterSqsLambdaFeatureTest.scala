@@ -1,7 +1,7 @@
 package weco.pipeline.id_minter
 
 import io.circe.Json
-import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.identifiers.{
@@ -15,8 +15,6 @@ import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.lambda._
 import weco.lambda.behaviours.LambdaBehavioursStringInStringOut
 import weco.lambda.helpers.LambdaFixtures
-import weco.lambda.helpers.MemoryDownstream
-import weco.pipeline.id_minter.config.models.IdentifiersTableConfig
 import weco.pipeline.id_minter.utils.{DummyConfig, IdMinterSqsLambdaTestHelpers}
 
 import scala.collection.mutable
@@ -26,12 +24,9 @@ trait IdMinterSqsLambdaBehaviours
     with Matchers
     with ScalaFutures
     with IdMinterSqsLambdaTestHelpers
-    with IntegrationPatience
-    with Eventually
     with WorkGenerators
     with LambdaFixtures
-    with LambdaBehavioursStringInStringOut[DummyConfig]
-    with MemoryDownstream {
+    with LambdaBehavioursStringInStringOut[DummyConfig] {
 
   def anInvocationMintingOneIdentifier(
     upstreamIndex: Map[String, Json],
@@ -107,47 +102,35 @@ class IdMinterSqsLambdaFeatureTest extends IdMinterSqsLambdaBehaviours {
     )
   }
 
-  it("continues if something fails processing a message") {
-    val downstream = new MemorySNSDownstream
+  describe("When not all messages correspond to a Work in the upstream index") {
     val work = sourceWork()
-    val inputIndex = createIndex(List(work))
-    val outputIndex = mutable.Map.empty[String, Work[Identified]]
+    val downstreamIndex = mutable.Map.empty[String, Work[Identified]]
+    val goodMessage = SQSTestLambdaMessage(message = work.id)
 
-    withIdentifiersTable {
-      identifiersTableConfig: IdentifiersTableConfig =>
-        withIdMinterSQSLambda(
-          identifiersTableConfig = identifiersTableConfig,
-          memoryDownstream = downstream,
-          mergedIndex = inputIndex,
-          identifiedIndex = outputIndex
-        ) {
+    val badMessage =
+      SQSTestLambdaMessage(message = "this_work_id_does_not_exist")
 
-          idMinterSqsLambda =>
-            eventuallyTableExists(identifiersTableConfig)
-            val goodMessage = SQSTestLambdaMessage(message = work.id)
-
-            val badMessage =
-              SQSTestLambdaMessage(message = "this_work_id_does_not_exist")
-
-            val messages = List(goodMessage, badMessage)
-
-            whenReady(idMinterSqsLambda.processMessages(messages)) {
-              result =>
-                val sentIds = downstream.msgSender.messages.map(_.body)
-                sentIds.size shouldBe 1
-
-                val identifiedWork = outputIndex(sentIds.head)
-                identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
-                identifiedWork.state.canonicalId shouldBe CanonicalId(
-                  sentIds.head
-                )
-
-                // One failure, so one message should be returned
-                result.size shouldBe 1
-                result.head shouldBe a[SQSLambdaMessageFailedRetryable]
-                result.head.messageId shouldBe badMessage.messageId
-            }
-        }
+    withIdMinterSQSLambdaBuilder(
+      mergedIndex = createIndex(List(work)),
+      identifiedIndex = downstreamIndex
+    ) {
+      idMinterSqsLambdaBuilder =>
+        it should behave like aPartialSuccess(
+          idMinterSqsLambdaBuilder,
+          Seq(goodMessage, badMessage),
+          failingMessages = Seq(badMessage),
+          outputs = () => Seq(downstreamIndex.keys.loneElement)
+        )
+    }
+    it(
+      "sets the canonicalid of the successful document to the newly minted identifier"
+    ) {
+      val mintedId = downstreamIndex.keys.loneElement
+      val identifiedWork = downstreamIndex(mintedId)
+      identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
+      identifiedWork.state.canonicalId shouldBe CanonicalId(
+        mintedId
+      )
     }
   }
 }

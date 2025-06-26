@@ -56,7 +56,7 @@ trait LambdaBehaviours[
     lambdaBuilder: Downstream => LambdaApp,
     messages: Seq[IncomingMessage],
     failingMessages: Seq[IncomingMessage],
-    outputs: Seq[ComparisonType]
+    outputs: () => Seq[ComparisonType]
   ): Unit = {
 
     val downstream = new MemorySNSDownstream
@@ -71,9 +71,8 @@ trait LambdaBehaviours[
         }
         it("notifies downstream only for successful ids") {
           convertForComparison(
-            downstream.msgSender
-              .getMessages[OutputMessageType]
-          ) should contain theSameElementsAs outputs
+            getMessages(downstream)
+          ) should contain theSameElementsAs outputs()
         }
     }
   }
