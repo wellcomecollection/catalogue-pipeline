@@ -5,43 +5,44 @@ import weco.pipeline.batcher.models.{Batch, Path, PathFromString, Selector}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
-case class BatcherResponse(successes: Seq[Batch] = Seq.empty, failures: Seq[String] = Seq.empty)
+case class BatcherResponse(
+  successes: Seq[Batch] = Seq.empty,
+  failures: Seq[String] = Seq.empty
+)
 
 /** Processes a list of paths by bundling them into Batches
- * @param maxBatchSize
- *   The maximum number of selectors to include in a single Batch
- */
+  * @param maxBatchSize
+  *   The maximum number of selectors to include in a single Batch
+  */
 class PathsProcessor(maxBatchSize: Int)(
   implicit ec: ExecutionContext
 ) extends Logging {
 
   /** Takes a list of strings, each representing a path to be processed by
-   * _downstream_
-   *
-   * This processor bundles the input paths together into Batches suitable for
-   * processing together
-   *
-   * @return
-   *   A sequence of BatcherResponse with successes and/or failures
-   *   The caller publishes the successes downstream
-   *   and sends the failures back to be retried or to the DLQ
-   */
+    * _downstream_
+    *
+    * This processor bundles the input paths together into Batches suitable for
+    * processing together
+    *
+    * @return
+    *   A sequence of BatcherResponse with successes and/or failures The caller
+    *   publishes the successes downstream and sends the failures back to be
+    *   retried or to the DLQ
+    */
   def process(paths: Seq[String]): Future[BatcherResponse] = {
     info(s"Processing ${paths.size} paths with max batch size $maxBatchSize")
 
     val result = generateBatches(maxBatchSize, paths.map(PathFromString))
     result match {
       case Success(batches) => Future(BatcherResponse(successes = batches))
-      case Failure(ex) => Future(BatcherResponse(failures = paths))
+      case Failure(ex)      => Future(BatcherResponse(failures = paths))
     }
   }
 
-
-
   /** Given a list of input paths, generate the minimal set of selectors
-   * matching works needing to be denormalised, and group these according to
-   * tree and within a maximum `batchSize`.
-   */
+    * matching works needing to be denormalised, and group these according to
+    * tree and within a maximum `batchSize`.
+    */
   def generateBatches(
     maxBatchSize: Int,
     paths: Seq[Path]
