@@ -120,7 +120,7 @@ class IdMinterSqsLambdaFeatureTest extends IdMinterSqsLambdaBehaviours {
           idMinterSqsLambdaBuilder,
           Seq(goodMessage, badMessage),
           failingMessages = Seq(badMessage),
-          outputs = () => Seq(downstreamIndex.keys.loneElement)
+          outgoingMessageContent = () => Seq(downstreamIndex.keys.loneElement)
         )
     }
     it(

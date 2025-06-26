@@ -63,16 +63,16 @@ class MatcherFeatureTest
   describe("When some messages fail") {
     it should behave like aPartialSuccess(
       LambdaBuilder(MatcherStub(Seq(Set(Set(g00dcafe.message))))),
-      messages = Seq(g00dcafe, baadd00d),
+      incomingMessages = Seq(g00dcafe, baadd00d),
       failingMessages = Seq(baadd00d),
-      outputs = () => Seq(Set(g00dcafe.message))
+      outgoingMessageContent = () => Seq(Set(g00dcafe.message))
     )
   }
   describe("When everything is successful") {
     it should behave like aTotalSuccess(
       LambdaBuilder(MatcherStub(Seq(Set(Set("g00dcafe"), Set("g00dd00d"))))),
-      messages = Seq(g00dcafe, g00dd00d),
-      outputs = () => Seq(Set("g00dcafe", "g00dd00d"))
+      incomingMessages = Seq(g00dcafe, g00dd00d),
+      outgoingMessageContent = () => Seq(Set("g00dcafe", "g00dd00d"))
     )
 
   }
@@ -115,9 +115,9 @@ class MatcherFeatureTest
 
     it should behave like aPartialSuccess(
       matcherLambda,
-      messages = messages,
+      incomingMessages = messages,
       failingMessages = Seq(baadd00d),
-      outputs = () =>
+      outgoingMessageContent = () =>
         Seq(
           Set(
             g00dcafe.message,
