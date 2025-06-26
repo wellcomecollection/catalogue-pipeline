@@ -48,7 +48,7 @@ trait IdMinterSqsLambdaTestHelpers
   ): R = {
     testWith(new MemoryIndexer[Work[Identified]](index = identifiedIndex))
   }
-
+      
   def withIdMinterSQSLambdaBuilder[R](
     mergedIndex: Map[String, Json] = Map.empty,
     identifiedIndex: mutable.Map[String, Work[Identified]]
@@ -107,6 +107,7 @@ trait IdMinterSqsLambdaTestHelpers
       rdsClientConfig,
       identifiersTableConfig
     )
+
 
     withMemoryRetriever(mergedIndex) {
       retriever =>

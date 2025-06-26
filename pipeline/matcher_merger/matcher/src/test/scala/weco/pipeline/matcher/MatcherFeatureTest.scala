@@ -50,6 +50,7 @@ class MatcherFeatureTest
   private val g00dcafe = SQSTestLambdaMessage(message = "g00dcafe")
   private val g00dd00d = SQSTestLambdaMessage(message = "g00dd00d")
 
+
   private val LambdaBuilder: WorksMatcher => Downstream => StubLambda =
     StubLambda.curried
 
@@ -73,6 +74,7 @@ class MatcherFeatureTest
       messages = Seq(g00dcafe, g00dd00d),
       outputs = () => Seq(Set("g00dcafe", "g00dd00d"))
     )
+
   }
 
   describe("When matcher results contain other identifiers") {

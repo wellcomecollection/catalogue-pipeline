@@ -81,6 +81,7 @@ class IdMinterSqsLambdaFeatureTest extends IdMinterSqsLambdaBehaviours {
   describe("When a work to be processed is marked as Invisible") {
     val work = sourceWork().invisible()
 
+
     it should behave like anInvocationMintingOneIdentifier(
       upstreamIndex = createIndex(List(work)),
       inputMessages = Seq(SQSTestLambdaMessage(message = work.id)),
