@@ -106,12 +106,16 @@ trait LambdaBehavioursStringInStringOut[
 ] extends LambdaBehaviours[String, Config, String, String] {
   this: AnyFunSpec =>
 
-  protected def convertForComparison: Seq[String] => Seq[String] =
-    identity[Seq[String]]
+  override protected def convertForComparison(
+    results: Seq[String]
+  ): Seq[String] = results
 
   override protected def getMessages(
     downstream: MemorySNSDownstream
   ): Seq[String] =
     downstream.msgSender.messages.map(_.body)
+
+  override protected implicit val outputDecoder: Decoder[String] =
+    Decoder.decodeString
 
 }
