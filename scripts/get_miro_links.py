@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 base_url = "https://api.wellcomecollection.org/catalogue/v2/works?partOf=qzcbm8q3&pageSize=100&include=notes"
 
+
 def fetch_and_extract_all_pages(start_url, max_workers=4):
     """
     Fetch and extract all pages in parallel as they are discovered, updating tqdm manually.
@@ -36,18 +37,19 @@ def fetch_and_extract_all_pages(start_url, max_workers=4):
         data = r.json()
         total_pages = data.get("totalPages", 1)
         pbar = tqdm(total=total_pages, desc="Processing pages")
+
         def submit_page(url):
             if url and url not in seen_pages:
                 seen_pages.add(url)
                 futures.append(executor.submit(fetch_and_extract_page, url))
-                
+
         # Submit first page
         submit_page(start_url)
-        
+
         # If nextPage exists, submit it
         next_url = data.get("nextPage")
         submit_page(next_url)
-        
+
         # Process results as they complete, submitting new pages as we go
         while futures:
             done, futures = wait_first(futures)
@@ -57,7 +59,7 @@ def fetch_and_extract_all_pages(start_url, max_workers=4):
                 pbar.update(1)
                 submit_page(next_page_url)
         pbar.close()
-        
+
     return all_workdata
 
 
@@ -100,11 +102,14 @@ def fetch_and_extract_page(url):
                         }
                     )
             except Exception as e:
-                print(f"Error fetching B numbers for {work['id']} and {related_work}: {e}")
+                print(
+                    f"Error fetching B numbers for {work['id']} and {related_work}: {e}"
+                )
                 pass
-            
+
     next_page_url = data.get("nextPage")
     return workdata, next_page_url
+
 
 def wait_first(futures):
     """
@@ -112,7 +117,10 @@ def wait_first(futures):
     Used to process page fetches as they finish.
     """
     import concurrent.futures
-    done, not_done = concurrent.futures.wait(futures, return_when=concurrent.futures.FIRST_COMPLETED)
+
+    done, not_done = concurrent.futures.wait(
+        futures, return_when=concurrent.futures.FIRST_COMPLETED
+    )
     return done, list(not_done)
 
 
@@ -157,6 +165,7 @@ def main():
     df = pd.DataFrame(all_workdata)
     print(f"Writing {len(df)} rows to mirolinks.csv...")
     df.to_csv("mirolinks.csv", index=False)
+
 
 if __name__ == "__main__":
     main()
