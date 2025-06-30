@@ -7,7 +7,7 @@ import smart_open
 
 import config
 from utils.aws import get_neptune_client
-from utils.slack_report import publish_report
+from utils.slack import publish_report
 
 INSERT_ERROR_THRESHOLD = 1 / 10000
 

@@ -8,7 +8,7 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.lambda._
-import weco.messaging.memory.MemoryMessageSender
+import weco.lambda.helpers.MemoryDownstream
 import weco.pipeline.id_minter.config.models.IdentifiersTableConfig
 import weco.pipeline.id_minter.utils.IdMinterSqsLambdaTestHelpers
 
@@ -21,19 +21,20 @@ class IdMinterSqsLambdaFeatureTest
     with IdMinterSqsLambdaTestHelpers
     with IntegrationPatience
     with Eventually
-    with WorkGenerators {
+    with WorkGenerators
+    with MemoryDownstream {
 
   it("mints the same IDs where source identifiers match") {
     val work = sourceWork()
     val inputIndex = createIndex(List(work))
     val outputIndex = mutable.Map.empty[String, Work[Identified]]
-    val msgSender = new MemoryMessageSender()
+    val downstream = new MemorySNSDownstream
 
     withIdentifiersTable {
       identifiersTableConfig: IdentifiersTableConfig =>
         withIdMinterSQSLambda(
           identifiersTableConfig = identifiersTableConfig,
-          msgSender = Some(msgSender),
+          memoryDownstream = downstream,
           mergedIndex = inputIndex,
           identifiedIndex = outputIndex
         ) {
@@ -51,7 +52,7 @@ class IdMinterSqsLambdaFeatureTest
 
             whenReady(idMinterSqsLambda.processMessages(messages)) {
               results =>
-                val sentIds = msgSender.messages.map(_.body)
+                val sentIds = downstream.msgSender.messages.map(_.body)
 
                 val identifiedWork = outputIndex(sentIds.head)
                 identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
@@ -67,7 +68,7 @@ class IdMinterSqsLambdaFeatureTest
   }
 
   it("mints an identifier for a invisible work") {
-    val msgSender = new MemoryMessageSender()
+    val downstream = new MemorySNSDownstream
     val work = sourceWork().invisible()
     val inputIndex = createIndex(List(work))
     val outputIndex = mutable.Map.empty[String, Work[Identified]]
@@ -76,7 +77,7 @@ class IdMinterSqsLambdaFeatureTest
       identifiersTableConfig: IdentifiersTableConfig =>
         withIdMinterSQSLambda(
           identifiersTableConfig = identifiersTableConfig,
-          msgSender = Some(msgSender),
+          memoryDownstream = downstream,
           mergedIndex = inputIndex,
           identifiedIndex = outputIndex
         ) {
@@ -93,7 +94,7 @@ class IdMinterSqsLambdaFeatureTest
 
             whenReady(idMinterSqsLambda.processMessages(messages)) {
               results =>
-                val sentId = msgSender.messages.map(_.body).head
+                val sentId = downstream.msgSender.messages.map(_.body).head
 
                 val identifiedWork = outputIndex(sentId)
                 identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
@@ -107,7 +108,7 @@ class IdMinterSqsLambdaFeatureTest
   }
 
   it("mints an identifier for a redirected work") {
-    val msgSender = new MemoryMessageSender()
+    val downstream = new MemorySNSDownstream
     val work = sourceWork()
       .redirected(
         redirectTarget =
@@ -120,7 +121,7 @@ class IdMinterSqsLambdaFeatureTest
       identifiersTableConfig: IdentifiersTableConfig =>
         withIdMinterSQSLambda(
           identifiersTableConfig = identifiersTableConfig,
-          msgSender = Some(msgSender),
+          memoryDownstream = downstream,
           mergedIndex = inputIndex,
           identifiedIndex = outputIndex
         ) {
@@ -137,7 +138,7 @@ class IdMinterSqsLambdaFeatureTest
 
             whenReady(idMinterSqsLambda.processMessages(messages)) {
               result =>
-                val sentId = msgSender.messages.map(_.body).head
+                val sentId = downstream.msgSender.messages.map(_.body).head
                 val identifiedWork = outputIndex(sentId)
                 identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
                 identifiedWork.state.canonicalId shouldBe CanonicalId(sentId)
@@ -155,7 +156,7 @@ class IdMinterSqsLambdaFeatureTest
   }
 
   it("continues if something fails processing a message") {
-    val msgSender = new MemoryMessageSender()
+    val downstream = new MemorySNSDownstream
     val work = sourceWork()
     val inputIndex = createIndex(List(work))
     val outputIndex = mutable.Map.empty[String, Work[Identified]]
@@ -164,7 +165,7 @@ class IdMinterSqsLambdaFeatureTest
       identifiersTableConfig: IdentifiersTableConfig =>
         withIdMinterSQSLambda(
           identifiersTableConfig = identifiersTableConfig,
-          msgSender = Some(msgSender),
+          memoryDownstream = downstream,
           mergedIndex = inputIndex,
           identifiedIndex = outputIndex
         ) {
@@ -185,7 +186,7 @@ class IdMinterSqsLambdaFeatureTest
 
             whenReady(idMinterSqsLambda.processMessages(messages)) {
               result =>
-                val sentIds = msgSender.messages.map(_.body)
+                val sentIds = downstream.msgSender.messages.map(_.body)
                 sentIds.size shouldBe 1
 
                 val identifiedWork = outputIndex(sentIds.head)

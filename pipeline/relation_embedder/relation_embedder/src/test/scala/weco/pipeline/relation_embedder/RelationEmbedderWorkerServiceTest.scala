@@ -1,8 +1,6 @@
 package weco.pipeline.relation_embedder
 
 import com.sksamuel.elastic4s.Index
-import io.circe.Encoder
-
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -18,24 +16,23 @@ import weco.fixtures.TestWith
 import weco.json.JsonUtil._
 import weco.messaging.fixtures.SQS
 import weco.messaging.fixtures.SQS.QueuePair
-import weco.messaging.memory.MemoryMessageSender
 import weco.messaging.sns.NotificationMessage
 import weco.catalogue.internal_model.work.WorkState.{Denormalised, Merged}
 import weco.catalogue.internal_model.work._
-import weco.lambda.Downstream
+import weco.lambda.helpers.MemoryDownstream
 import weco.pipeline.relation_embedder.fixtures.SampleWorkTree
 import weco.pipeline.relation_embedder.models._
 import weco.pipeline_storage.memory.MemoryIndexer
 
 import java.nio.charset.StandardCharsets
-import scala.util.Try
 
 class RelationEmbedderWorkerServiceTest
     extends AnyFunSpec
     with Matchers
     with SQS
     with Pekko
-    with SampleWorkTree {
+    with SampleWorkTree
+    with MemoryDownstream {
 
   // This test is a duplicate of one in BatchProcessorTest,
   // wrapped in the furniture of the Worker Service.
@@ -44,7 +41,7 @@ class RelationEmbedderWorkerServiceTest
   // configured BatchProcessor.
   it("denormalises a batch containing a list of selectors") {
     withWorkerService() {
-      case (QueuePair(queue, dlq), index, msgSender) =>
+      case (QueuePair(queue, dlq), index, downstream) =>
         import Selector._
         val batch = Batch(
           rootPath = "a",
@@ -55,7 +52,7 @@ class RelationEmbedderWorkerServiceTest
           assertQueueEmpty(queue)
           assertQueueEmpty(dlq)
         }
-        msgSender.messages.map(_.body).toSet shouldBe Set(
+        downstream.msgSender.messages.map(_.body).toSet shouldBe Set(
           work2.id,
           workC.id,
           workD.id,
@@ -78,7 +75,7 @@ class RelationEmbedderWorkerServiceTest
 
   it("puts failed messages onto the DLQ") {
     withWorkerService(fails = true, visibilityTimeout = 1 second) {
-      case (QueuePair(queue, dlq), _, msgSender) =>
+      case (QueuePair(queue, dlq), _, downstream) =>
         import Selector._
         val batch = Batch(rootPath = "a", selectors = List(Tree("a")))
         sendNotificationToSQS(queue = queue, message = batch)
@@ -86,7 +83,7 @@ class RelationEmbedderWorkerServiceTest
           assertQueueEmpty(queue)
         }
         assertQueueHasSize(dlq, size = 1)
-        msgSender.messages.map(_.body).toSet shouldBe Set()
+        downstream.msgSender.messages.map(_.body).toSet shouldBe Set()
     }
   }
 
@@ -113,7 +110,7 @@ class RelationEmbedderWorkerServiceTest
     )
 
     withWorkerService(works, visibilityTimeout = 30.seconds) {
-      case (QueuePair(queue, dlq), _, msgSender) =>
+      case (QueuePair(queue, dlq), _, downstream) =>
         sendNotificationToSQS(queue = queue, message = batch)
 
         eventually(Timeout(Span(45, Seconds))) {
@@ -121,7 +118,7 @@ class RelationEmbedderWorkerServiceTest
           assertQueueEmpty(dlq)
         }
 
-        msgSender.messages should have size 5
+        downstream.msgSender.messages should have size 5
     }
   }
 
@@ -131,7 +128,7 @@ class RelationEmbedderWorkerServiceTest
     visibilityTimeout: Duration = 5.seconds
   )(
     testWith: TestWith[
-      (QueuePair, mutable.Map[String, Work[Denormalised]], MemoryMessageSender),
+      (QueuePair, mutable.Map[String, Work[Denormalised]], MemorySNSDownstream),
       R
     ]
   ): R = {
@@ -143,18 +140,7 @@ class RelationEmbedderWorkerServiceTest
               implicit actorSystem =>
                 withSQSStream[NotificationMessage, R](queuePair.queue) {
                   sqsStream =>
-                    val messageSender = new MemoryMessageSender
-                    object MemoryDownstream extends Downstream {
-                      private val msgSender = messageSender
-
-                      override def notify(workId: String): Try[Unit] =
-                        Try(msgSender.send(workId))
-
-                      override def notify[T](batch: T)(
-                        implicit encoder: Encoder[T]
-                      ): Try[Unit] = ???
-                    }
-
+                    val downstream = new MemorySNSDownstream
                     val denormalisedIndex =
                       mutable.Map.empty[String, Work[Denormalised]]
                     val relationsService =
@@ -170,7 +156,7 @@ class RelationEmbedderWorkerServiceTest
                       maxBatchWeight = 100
                     )
                     val processor = new BatchProcessor(
-                      downstream = MemoryDownstream,
+                      downstream = downstream,
                       bulkWriter = bulkWriter,
                       relationsService = relationsService
                     )
@@ -180,7 +166,7 @@ class RelationEmbedderWorkerServiceTest
                         batchProcessor = processor
                       )
                     workerService.run()
-                    testWith((queuePair, denormalisedIndex, messageSender))
+                    testWith((queuePair, denormalisedIndex, downstream))
                 }
             }
         }
