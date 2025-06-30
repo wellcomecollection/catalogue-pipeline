@@ -22,7 +22,9 @@ def update_from_xml_file(table: IcebergTable, xmlfile):
 
 def update_from_xml(table: IcebergTable, collection: ET.ElementTree):
     for record in collection:
-        ebsco_id = record.find("{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']").text
+        ebsco_id = record.find(
+            "{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"
+        ).text
         print(ebsco_id)
 
 
