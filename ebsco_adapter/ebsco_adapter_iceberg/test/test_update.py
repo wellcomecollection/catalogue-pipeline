@@ -5,10 +5,8 @@ from pytest import fail, mark
 from main import data_to_pa_table, update_table, setup_database
 from pyiceberg.expressions import Not, IsNull, EqualTo, In
 
-import pyarrow.compute as pc
-
 from schemata import ARROW_SCHEMA
-from fixtures import temporary_table
+from fixtures import temporary_table  # noqa: F401
 
 
 def assert_row_identifiers(rows, ids):
@@ -61,10 +59,10 @@ def test_new_table(temporary_table):
     )
     changeset_id = update_table(temporary_table, new_data)
     assert (
-        temporary_table.scan().to_arrow()
-        == temporary_table.scan(
-            row_filter=EqualTo("changeset", changeset_id)
-        ).to_arrow()
+            temporary_table.scan().to_arrow()
+            == temporary_table.scan(
+        row_filter=EqualTo("changeset", changeset_id)
+    ).to_arrow()
     )
     assert len(temporary_table.scan().to_arrow()) == 3
 
@@ -230,15 +228,15 @@ def test_all_actions(temporary_table):
     ).to_arrow()
     assert len(changeset_rows) == 3
     rows_by_key = {row["id"]: row for row in changeset_rows.to_pylist()}
-    assert rows_by_key[expected_deletion]["content"] == None
+    assert rows_by_key[expected_deletion]["content"] is None
     assert rows_by_key[expected_update]["content"] == "god aften"
     assert rows_by_key[expected_insert]["content"] == "noswaith dda"
     # And the remaining value is unchanged
     assert temporary_table.scan(
         row_filter=IsNull("changeset")
     ).to_arrow().to_pylist() == [
-        {"id": "eb0001", "content": "hello", "changeset": None}
-    ]
+               {"id": "eb0001", "content": "hello", "changeset": None}
+           ]
 
 
 def test_idempotent(temporary_table):
