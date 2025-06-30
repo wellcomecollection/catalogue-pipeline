@@ -11,6 +11,19 @@ import uuid
 
 from pyiceberg.expressions import Not, IsNull
 from schemata import SCHEMA, ARROW_SCHEMA
+import xml.etree.ElementTree as ET
+
+import sys
+
+
+def update_from_xml_file(table: IcebergTable, xmlfile):
+    return update_from_xml(table, ET.parse(xmlfile).getroot())
+
+
+def update_from_xml(table: IcebergTable, collection: ET.ElementTree):
+    for record in collection:
+        ebsco_id = record.find("{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']").text
+        print(ebsco_id)
 
 
 def update_table(table: IcebergTable, new_data: pa.Table):
@@ -103,8 +116,9 @@ def data_to_pa_table(data):
     return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
 
 
-def main():
+def main(xmlfile):
     """Do Something"""
+    update_from_xml_file(None, xmlfile)
 
 
 def setup_database(table_name, initial_data):
@@ -128,4 +142,4 @@ def setup_database(table_name, initial_data):
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.stdin)
