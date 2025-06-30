@@ -16,12 +16,23 @@ trait Downstream {
   def notify[T](batch: T)(implicit encoder: Encoder[T]): Try[Unit]
 }
 
+object Downstream {
+  def apply(downstreamTarget: DownstreamTarget): Downstream = {
+    downstreamTarget match {
+      case SNS(config) => new SNSDownstream(config)
+      case StdOut      => STDIODownstream
+    }
+  }
+  def apply(): Downstream = STDIODownstream
+}
+
 class SNSDownstream(snsConfig: SNSConfig) extends Downstream {
   protected val msgSender: MessageSender[_] = new SNSMessageSender(
     snsClient = SnsClient.builder().build(),
     snsConfig = snsConfig,
     // format the topicArn to keep the service name only
-    subject = s"Sent from ${snsConfig.topicArn.split(":").last.split("_").drop(1).dropRight(1).mkString("-")}"
+    subject =
+      s"Sent from ${snsConfig.topicArn.split(":").last.split("_").drop(1).dropRight(1).mkString("-")}"
   )
 
   override def notify(workId: String): Try[Unit] = Try(msgSender.send(workId))
@@ -40,21 +51,14 @@ sealed trait DownstreamTarget
 case class SNS(config: SNSConfig) extends DownstreamTarget
 case object StdOut extends DownstreamTarget
 
-object Downstream {
-  def apply(downstreamTarget: DownstreamTarget): Downstream = {
-    downstreamTarget match {
-      case SNS(config) => new SNSDownstream(config)
-      case StdOut      => STDIODownstream
-    }
-  }
-  def apply(): Downstream = STDIODownstream
-}
-
 // Typesafe specific configuration builder
 object DownstreamBuilder extends Logging {
   import weco.typesafe.config.builders.EnrichConfig._
 
-  def buildDownstreamTarget(config: Config, namespace: String = ""): DownstreamTarget = {
+  def buildDownstreamTarget(
+    config: Config,
+    namespace: String = ""
+  ): DownstreamTarget = {
     config.getStringOption("downstream.target") match {
       case Some("sns") =>
         val snsConfig = buildSNSConfig(config, namespace)

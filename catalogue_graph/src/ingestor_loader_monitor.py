@@ -4,9 +4,8 @@ from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
-from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
+from utils.reporting import IndexerReport, LoaderReport
 from utils.safety import validate_fractional_change
-from utils.slack_report import LoaderReport, build_indexer_report
 
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
@@ -66,12 +65,11 @@ def run_check(
         total_file_size=sum_file_size,
     )
 
-    s3_report_name = "report.loader.json"
-    s3_url_current_job = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{job_id}/{s3_report_name}"
-    s3_url_latest = f"s3://{config.ingestor_s3_bucket}/{config.ingestor_s3_prefix}/{pipeline_date}/{index_date}/{s3_report_name}"
-    # Load the latest report
-    latest_report = pydantic_from_s3_json(
-        LoaderReport, s3_url_latest, ignore_missing=True
+    latest_report: LoaderReport | None = LoaderReport.read(
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+        # load latest report by not passing job_id
+        ignore_missing=True,
     )
 
     if latest_report is not None:
@@ -84,14 +82,34 @@ def run_check(
             fractional_threshold=config.percentage_threshold,
             force_pass=force_pass,
         )
-        # build and write the final pipeline report to s3
-        build_indexer_report(current_report, latest_report)
 
-    # write the current report to s3 as latest
-    pydantic_to_s3_json(current_report, s3_url_latest)
+    # Update the indexer report in S3 if it exists.
+    # TODO: This should be moved to a lambda function that runs after the indexer
+    indexer_report: IndexerReport | None = IndexerReport.read(
+        current_report.pipeline_date,
+        current_report.index_date,
+        current_report.job_id,
+        ignore_missing=True,
+    )
 
-    # write the current report to s3 as job_id
-    pydantic_to_s3_json(current_report, s3_url_current_job)
+    if indexer_report is not None:
+        updated_indexer_report = IndexerReport(
+            pipeline_date=indexer_report.pipeline_date,
+            index_date=indexer_report.index_date,
+            job_id=indexer_report.job_id,
+            previous_job_id=indexer_report.previous_job_id,
+            neptune_record_count=indexer_report.neptune_record_count,
+            previous_neptune_record_count=indexer_report.previous_neptune_record_count,
+            es_record_count=current_report.record_count,
+            previous_es_record_count=latest_report.record_count
+            if latest_report
+            else None,
+        )
+        updated_indexer_report.write()
+        updated_indexer_report.write(latest=True)
+
+    current_report.write()
+    current_report.write(latest=True)
 
     return current_report
 
@@ -104,7 +122,7 @@ def report_results(
         "pipeline_date": report.pipeline_date,
         "index_date": report.index_date,
         "step": "ingestor_loader_monitor",
-        "job_id": report.job_id,
+        "job_id": report.job_id or "unspecified",
     }
 
     print(f"Reporting results {report}, {dimensions} ...")
