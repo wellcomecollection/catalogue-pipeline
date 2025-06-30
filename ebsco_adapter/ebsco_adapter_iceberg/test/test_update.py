@@ -59,10 +59,10 @@ def test_new_table(temporary_table):
     )
     changeset_id = update_table(temporary_table, new_data)
     assert (
-            temporary_table.scan().to_arrow()
-            == temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id)
-    ).to_arrow()
+        temporary_table.scan().to_arrow()
+        == temporary_table.scan(
+            row_filter=EqualTo("changeset", changeset_id)
+        ).to_arrow()
     )
     assert len(temporary_table.scan().to_arrow()) == 3
 
@@ -235,8 +235,8 @@ def test_all_actions(temporary_table):
     assert temporary_table.scan(
         row_filter=IsNull("changeset")
     ).to_arrow().to_pylist() == [
-               {"id": "eb0001", "content": "hello", "changeset": None}
-           ]
+        {"id": "eb0001", "content": "hello", "changeset": None}
+    ]
 
 
 def test_idempotent(temporary_table):
