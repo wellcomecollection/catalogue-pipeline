@@ -15,6 +15,7 @@ notes with reciprocal links on the Sierra bibs.
 import csv
 import re
 import requests
+from tqdm import tqdm
 
 works = []
 base_url = "https://api.wellcomecollection.org/catalogue/v2/works?partOf=qzcbm8q3&pageSize=100&include=notes"
@@ -23,7 +24,8 @@ base_url = "https://api.wellcomecollection.org/catalogue/v2/works?partOf=qzcbm8q
 def get_works(url):
     r = requests.get(url)
     data = r.json()
-    for work in data["results"]:
+    results = data["results"]
+    for work in tqdm(results, desc="Processing works"):
         if work["type"] == "Work":
             for note in work["notes"]:
                 if note["noteType"]["id"] == "related-material":
@@ -71,7 +73,9 @@ def get_bnumbers(id):
 
 
 def main():
+    print("Fetching works and generating links...")
     get_works(base_url)
+    print(f"Writing {len(works)} rows to mirolinks.csv...")
     with open("mirolinks.csv", "w") as f:
         writer = csv.writer(f)
         writer.writerow(
