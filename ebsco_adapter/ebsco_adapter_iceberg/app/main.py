@@ -12,8 +12,8 @@ import uuid
 from pyiceberg.expressions import Not, IsNull
 from schemata import SCHEMA, ARROW_SCHEMA
 import xml.etree.ElementTree as ET
-
 import sys
+from common import setup_database
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile):
@@ -21,11 +21,14 @@ def update_from_xml_file(table: IcebergTable, xmlfile):
 
 
 def update_from_xml(table: IcebergTable, collection: ET.ElementTree):
-    for record in collection:
-        ebsco_id = record.find(
-            "{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"
-        ).text
-        print(ebsco_id)
+    return update_table(table, data_to_pa_table([node_to_record(record_node) for record_node in collection]))
+
+
+def node_to_record(node: ET.ElementTree):
+    ebsco_id = node.find(
+        "{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"
+    ).text
+    return {"id": ebsco_id, "content": ET.tostring(node)}
 
 
 def update_table(table: IcebergTable, new_data: pa.Table):
@@ -120,28 +123,9 @@ def data_to_pa_table(data):
 
 def main(xmlfile):
     """Do Something"""
-    update_from_xml_file(None, xmlfile)
-
-
-def setup_database(table_name, initial_data):
-    catalog = load_catalog(
-        "local",
-        uri="sqlite:////tmp/warehouse/catalog.db",
-        warehouse="file:///tmp/warehouse/",
-    )
-    table_fullname = f"default.{table_name}"
-    catalog.create_namespace_if_not_exists("default")
-
-    if catalog.table_exists(table_fullname):
-        table = catalog.load_table(table_fullname)
-    else:
-        table = catalog.create_table_if_not_exists(
-            identifier=table_fullname, schema=SCHEMA
-        )
-        table.append(initial_data)
-
-    return catalog, table
+    catalog, table = setup_database("mydb")
+    return update_from_xml_file(table, xmlfile)
 
 
 if __name__ == "__main__":
-    main(sys.stdin)
+    print(main(sys.stdin))
