@@ -6,25 +6,34 @@ from main import data_to_pa_table, update_table, setup_database
 from pyiceberg.expressions import Not, IsNull, EqualTo, In
 
 from schemata import ARROW_SCHEMA
-from fixtures import temporary_table  # noqa: F401
+from fixtures import temporary_table
 
 
 def assert_row_identifiers(rows, ids):
     assert set(rows.column("id").to_pylist()) == ids
 
 
+def data_to_namespaced_table(unqualified_data):
+    return data_to_pa_table([add_namespace(entry) for entry in unqualified_data])
+
+
+def add_namespace(d):
+    d["namespace"] = "test"
+    return d
+
+
 def test_noop(temporary_table):
     """
     When there are no updates to perform, nothing happens
     """
-    data = data_to_pa_table([{"id": "eb0001", "content": "hello"}])
+    data = data_to_namespaced_table([{"id": "eb0001", "content": "hello"}])
     temporary_table.append(data)
     changeset = update_table(temporary_table, data)
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
     assert (
-        temporary_table.scan(selected_fields=["id", "content"])
+        temporary_table.scan(selected_fields=["namespace", "id", "content"])
         .to_arrow()
         .cast(ARROW_SCHEMA)
         .equals(data)
@@ -50,7 +59,7 @@ def test_new_table(temporary_table):
     :return:
     """
 
-    new_data = data_to_pa_table(
+    new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hej"},
             {"id": "eb0002", "content": "boo!"},
@@ -59,10 +68,10 @@ def test_new_table(temporary_table):
     )
     changeset_id = update_table(temporary_table, new_data)
     assert (
-        temporary_table.scan().to_arrow()
-        == temporary_table.scan(
-            row_filter=EqualTo("changeset", changeset_id)
-        ).to_arrow()
+            temporary_table.scan().to_arrow()
+            == temporary_table.scan(
+        row_filter=EqualTo("changeset", changeset_id)
+    ).to_arrow()
     )
     assert len(temporary_table.scan().to_arrow()) == 3
 
@@ -77,7 +86,7 @@ def test_update_records(temporary_table):
     And the changed rows will be identifiably grouped by a changeset property
     """
     temporary_table.append(
-        data_to_pa_table(
+        data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "boo!"},
@@ -86,7 +95,7 @@ def test_update_records(temporary_table):
         )
     )
 
-    new_data = data_to_pa_table(
+    new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hej"},
             {"id": "eb0002", "content": "boo!"},
@@ -117,7 +126,7 @@ def test_insert_records(temporary_table):
     """
 
     temporary_table.append(
-        data_to_pa_table(
+        data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0003", "content": "world"},
@@ -125,7 +134,7 @@ def test_insert_records(temporary_table):
         )
     )
 
-    new_data = data_to_pa_table(
+    new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hello"},
             {"id": "eb0002", "content": "bonjour"},
@@ -164,7 +173,7 @@ def test_delete_records(temporary_table):
     If the row is completely deleted, then we have no way of knowing what action to take in the ongoing pipeline.
     """
     temporary_table.append(
-        data_to_pa_table(
+        data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "byebye"},
@@ -173,7 +182,7 @@ def test_delete_records(temporary_table):
             ]
         )
     )
-    new_data = data_to_pa_table(
+    new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hello"},
             {"id": "eb0003", "content": "greetings"},
@@ -202,7 +211,7 @@ def test_all_actions(temporary_table):
     """
 
     temporary_table.append(
-        data_to_pa_table(
+        data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "byebye"},
@@ -211,7 +220,7 @@ def test_all_actions(temporary_table):
         )
     )
 
-    new_data = data_to_pa_table(
+    new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hello"},
             {"id": "eb0003", "content": "god aften"},
@@ -231,12 +240,18 @@ def test_all_actions(temporary_table):
     assert rows_by_key[expected_deletion]["content"] is None
     assert rows_by_key[expected_update]["content"] == "god aften"
     assert rows_by_key[expected_insert]["content"] == "noswaith dda"
+    # all rows in the changeset have the same last modified time
+    # which is not None
+    assert (rows_by_key[expected_deletion]["last_modified"] ==
+            rows_by_key[expected_update]["last_modified"] ==
+            rows_by_key[expected_insert]["last_modified"] is not None
+            )
     # And the remaining value is unchanged
     assert temporary_table.scan(
         row_filter=IsNull("changeset")
     ).to_arrow().to_pylist() == [
-        {"id": "eb0001", "content": "hello", "changeset": None}
-    ]
+               {"id": "eb0001", "content": "hello", "changeset": None, 'last_modified': None, 'namespace': 'test'}
+           ]
 
 
 def test_idempotent(temporary_table):
@@ -248,7 +263,7 @@ def test_idempotent(temporary_table):
     """
 
     temporary_table.append(
-        data_to_pa_table(
+        data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0002", "content": "byebye"},
@@ -256,7 +271,7 @@ def test_idempotent(temporary_table):
             ]
         )
     )
-    new_data = data_to_pa_table(
+    new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hello"},
             {"id": "eb0003", "content": "god aften"},
@@ -277,7 +292,7 @@ def test_most_recent_changeset_preserved(temporary_table):
     Then each row's changeset id is the latest one that applied to it
     """
     temporary_table.append(
-        data_to_pa_table(
+        data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello"},
                 {"id": "eb0003", "content": "greetings"},
@@ -285,7 +300,7 @@ def test_most_recent_changeset_preserved(temporary_table):
         )
     )
 
-    new_data = data_to_pa_table(
+    new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hello"},
             {"id": "eb0003", "content": "god aften"},
@@ -299,7 +314,7 @@ def test_most_recent_changeset_preserved(temporary_table):
         .column("id")
         .to_pylist()
     )
-    newer_data = data_to_pa_table(
+    newer_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hello"},
             {"id": "eb0003", "content": "guten abend"},

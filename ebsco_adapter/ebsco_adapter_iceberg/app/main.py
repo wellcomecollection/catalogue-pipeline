@@ -10,10 +10,14 @@ import pyarrow.compute as pc
 import uuid
 
 from pyiceberg.expressions import Not, IsNull
-from schemata import SCHEMA, ARROW_SCHEMA
+from schemata import ARROW_SCHEMA
 import xml.etree.ElementTree as ET
 import sys
+from datetime import datetime, timezone
+
 from common import setup_database
+
+EBSCO_NAMESPACE = "ebsco"
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile):
@@ -31,7 +35,7 @@ def node_to_record(node: ET.ElementTree):
     ebsco_id = node.find(
         "{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"
     ).text
-    return {"id": ebsco_id, "content": ET.tostring(node)}
+    return {"namespace": EBSCO_NAMESPACE, "id": ebsco_id, "content": ET.tostring(node)}
 
 
 def update_table(table: IcebergTable, new_data: pa.Table):
@@ -62,7 +66,7 @@ def update_table(table: IcebergTable, new_data: pa.Table):
     # records that have already been "deleted" do not need to be deleted again.
 
     existing_data = (
-        table.scan(row_filter=Not(IsNull("content")), selected_fields=["id", "content"])
+        table.scan(row_filter=Not(IsNull("content")), selected_fields=["namespace", "id", "content"])
         .to_arrow()
         .cast(ARROW_SCHEMA)
     )
@@ -76,7 +80,7 @@ def update_table(table: IcebergTable, new_data: pa.Table):
         # Delete is obvious, as what we have to do here is create
         # a deletion record with which to overwrite the existing one.
         deletes = get_deletes(existing_data, new_data)
-        # pyiceberg offers a built in feature that returns the update rows
+        # pyiceberg offers a built-in feature that returns the update rows
         # by comparing two tables.  Unfortunately, it does not say anything
         # about inserts.
         updates = find_updates(existing_data, new_data)
@@ -86,10 +90,14 @@ def update_table(table: IcebergTable, new_data: pa.Table):
         # Empty DB short-circuit, just write it all in.
         changeset = new_data
     if changeset:
-        changeset_id = str(uuid.uuid1())  # maybe just use a timestamp?
+        now = pa.scalar(datetime.now(timezone.utc), pa.timestamp('us', 'UTC'))
+        changeset_id = str(uuid.uuid1())
         changeset = changeset.append_column(
             pa.field("changeset", type=pa.string(), nullable=True),
             [[changeset_id] * len(changeset)],
+        ).append_column(
+            pa.field("last_modified", type=pa.timestamp('us', 'UTC'), nullable=True),
+            [[now] * len(changeset)],
         )
         table.upsert(changeset, ["id"])
         return changeset_id
@@ -116,7 +124,7 @@ def get_deletes(existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
     new_ids = new_data.column("id")
     missing_ids = existing_data.filter(~pc.field("id").isin(new_ids)).column("id")
     return pa.Table.from_pylist(
-        [{"id": id.as_py()} for id in missing_ids], schema=ARROW_SCHEMA
+        [{"namespace": EBSCO_NAMESPACE, "id": id.as_py()} for id in missing_ids], schema=ARROW_SCHEMA
     )
 
 
