@@ -21,7 +21,10 @@ def update_from_xml_file(table: IcebergTable, xmlfile):
 
 
 def update_from_xml(table: IcebergTable, collection: ET.ElementTree):
-    return update_table(table, data_to_pa_table([node_to_record(record_node) for record_node in collection]))
+    return update_table(
+        table,
+        data_to_pa_table([node_to_record(record_node) for record_node in collection]),
+    )
 
 
 def node_to_record(node: ET.ElementTree):
