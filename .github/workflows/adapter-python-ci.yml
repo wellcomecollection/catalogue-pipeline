@@ -1,4 +1,4 @@
-name: "Adapters: Run checks and build"
+name: "Adapters: Run checks"
 on: [ push ]
 paths: [ 'ebsco_adapter/ebsco_adapter_iceberg/**' ]
 

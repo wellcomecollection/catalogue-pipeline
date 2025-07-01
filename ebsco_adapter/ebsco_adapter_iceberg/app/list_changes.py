@@ -5,10 +5,8 @@ from pyiceberg.expressions import EqualTo
 
 def main(changeset_id):
     catalogue, table = setup_database("mydb")
-    print(table.scan().count())
-    print(len(table.scan(
-        row_filter=EqualTo("changeset", changeset_id), selected_fields=["id"]
-    ).to_arrow()))
+    print(f"  total records: {table.scan().count()}")
+    print(f"changed records: {table.scan(row_filter=EqualTo('changeset', changeset_id)).count()}")
 
 
 if __name__ == "__main__":
