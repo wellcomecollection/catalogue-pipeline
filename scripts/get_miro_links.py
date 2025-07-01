@@ -132,7 +132,7 @@ def process_note(contents):
     related_works = []
     for entry in contents:
         matches = re.findall(
-            r'https://wellcomecollection.org/works/([^\'"/]+)[\'\"]', entry
+            r'https://wellcomecollection.org/works/([^\'"]+)[\'"]', entry
         )
         for match in matches:
             related_works.append(match)
