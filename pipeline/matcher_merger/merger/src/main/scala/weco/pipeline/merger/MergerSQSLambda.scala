@@ -32,7 +32,7 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
     // keySet is used to remove duplicates
     mergeProcessor.process(messagesMap.keySet.toList).map {
       mergeProcessorResponse =>
-        mergeProcessorResponse.successes.map(notifyDownstream) // what if Nil?
+        mergeProcessorResponse.successes.map(notifyDownstream)
         mergeProcessorResponse.failures.map {
           case Left(work) => SQSLambdaMessageFailedRetryable(
             messageId = messagesMap(work.sourceIdentifier.toString),
