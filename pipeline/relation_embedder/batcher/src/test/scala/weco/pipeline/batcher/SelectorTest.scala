@@ -3,10 +3,11 @@ package weco.pipeline.batcher
 import org.scalatest.Assertion
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
+import weco.pipeline.batcher.models.{PathFromString, Selector}
 
 class SelectorTest extends AnyFunSpec with Matchers {
 
-  import Selector._
+  import weco.pipeline.batcher.models.Selector._
 
   /** The following tests use paths representing this tree:
     * {{{
