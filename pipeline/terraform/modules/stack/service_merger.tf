@@ -42,14 +42,14 @@ module "merger_lambda" {
   }
 
   environment_variables = {
-    merger_works_topic_arn = module.merger_works_output_topic.arn
-    merger_paths_topic_arn = module.merger_works_path_output_topic.arn
+    merger_works_topic_arn             = module.merger_works_output_topic.arn
+    merger_paths_topic_arn             = module.merger_works_path_output_topic.arn
     merger_path_concatenator_topic_arn = module.merger_works_incomplete_path_output_topic.arn
-    merger_images_topic_arn = module.merger_images_output_topic.arn
+    merger_images_topic_arn            = module.merger_images_output_topic.arn
 
-    es_identified_works_index = local.es_works_identified_index
+    es_identified_works_index   = local.es_works_identified_index
     es_denormalised_works_index = local.es_works_denormalised_index
-    es_initial_images_index = local.es_images_initial_index
+    es_initial_images_index     = local.es_images_initial_index
 
   }
 

@@ -1,14 +1,20 @@
 package weco.pipeline.merger
 
-import weco.lambda.{ApplicationConfig, Downstream, SQSBatchResponseLambdaApp, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageResult}
+import weco.lambda.{
+  ApplicationConfig,
+  Downstream,
+  SQSBatchResponseLambdaApp,
+  SQSLambdaMessage,
+  SQSLambdaMessageFailedRetryable,
+  SQSLambdaMessageResult
+}
 import weco.pipeline.merger.services.WorkRouter
 import weco.pipeline.merger.Main.WorkOrImage
 import scala.concurrent.Future
 import scala.util.Try
 
-
 trait MergerSQSLambda[Config <: ApplicationConfig]
-  extends SQSBatchResponseLambdaApp[String, Config] {
+    extends SQSBatchResponseLambdaApp[String, Config] {
 
   protected val mergeProcessor: MergeProcessor
   protected val workRouter: WorkRouter
@@ -16,13 +22,13 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
 
   private def notifyDownstream(workOrImage: WorkOrImage): Try[Unit] =
     workOrImage match {
-      case Left(work) => workRouter(work)
+      case Left(work)   => workRouter(work)
       case Right(image) => imageMsgSender.notify(image.id)
     }
 
   override def processMessages(
-  messages: Seq[SQSLambdaMessage[String]]
-): Future[Seq[SQSLambdaMessageResult]] = {
+    messages: Seq[SQSLambdaMessage[String]]
+  ): Future[Seq[SQSLambdaMessageResult]] = {
 
     val messagesMap: Map[String, String] = messages.map {
       message =>
@@ -34,14 +40,16 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
       mergeProcessorResponse =>
         mergeProcessorResponse.successes.map(notifyDownstream)
         mergeProcessorResponse.failures.map {
-          case Left(work) => SQSLambdaMessageFailedRetryable(
-            messageId = messagesMap(work.sourceIdentifier.toString),
-            error = new Error(s"Failed to merge $work.sourceIdentifier.")
-          )
-          case Right(image) => SQSLambdaMessageFailedRetryable(
-            messageId = messagesMap(image.sourceIdentifier.toString),
-            error = new Error(s"Failed to merge $image.sourceIdentifier.")
-          )
+          case Left(work) =>
+            SQSLambdaMessageFailedRetryable(
+              messageId = messagesMap(work.sourceIdentifier.toString),
+              error = new Error(s"Failed to merge $work.sourceIdentifier.")
+            )
+          case Right(image) =>
+            SQSLambdaMessageFailedRetryable(
+              messageId = messagesMap(image.sourceIdentifier.toString),
+              error = new Error(s"Failed to merge $image.sourceIdentifier.")
+            )
         }
     }
 

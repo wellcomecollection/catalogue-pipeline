@@ -10,12 +10,17 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.lambda._
 import weco.pipeline.merger.config.{MergerConfig, MergerConfigurable}
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger, WorkRouter}
+import weco.pipeline.merger.services.{
+  IdentifiedWorkLookup,
+  MergerManager,
+  PlatformMerger,
+  WorkRouter
+}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
 object Main
-  extends MergerSQSLambda[MergerConfig]
+    extends MergerSQSLambda[MergerConfig]
     with MergerConfigurable
     with Logging {
 
@@ -31,7 +36,9 @@ object Main
 
   private val workDownstream = Downstream(config.workDownstreamTarget)
   private val pathDownstream = Downstream(config.pathDownstreamTarget)
-  private val pathConcatDownstream = Downstream(config.pathConcatDownstreamTarget)
+  private val pathConcatDownstream = Downstream(
+    config.pathConcatDownstreamTarget
+  )
 
   private val workOrImageIndexer = {
     new EitherIndexer[Work[Merged], Image[Initial]](
@@ -54,7 +61,9 @@ object Main
     pathSender = pathDownstream,
     pathConcatenatorSender = pathConcatDownstream
   )
-  override protected val imageMsgSender: Downstream = Downstream(config.imageDownstreamTarget)
+  override protected val imageMsgSender: Downstream = Downstream(
+    config.imageDownstreamTarget
+  )
 
   override protected val mergeProcessor = new MergeProcessor(
     sourceWorkLookup,
@@ -62,5 +71,3 @@ object Main
     workOrImageIndexer
   )
 }
-
-

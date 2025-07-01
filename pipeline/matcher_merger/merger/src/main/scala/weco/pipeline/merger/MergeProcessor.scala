@@ -14,14 +14,17 @@ import weco.pipeline_storage.Indexer
 import java.time.Instant
 import scala.concurrent.{ExecutionContext, Future}
 
-case class MergerResponse(successes: Seq[WorkOrImage] = Seq.empty, failures: Seq[WorkOrImage] = Seq.empty)
+case class MergerResponse(
+  successes: Seq[WorkOrImage] = Seq.empty,
+  failures: Seq[WorkOrImage] = Seq.empty
+)
 
 class MergeProcessor(
   sourceWorkLookup: IdentifiedWorkLookup,
   mergerManager: MergerManager,
-  workOrImageIndexer: Indexer[Either[Work[Merged], Image[Initial]]],
+  workOrImageIndexer: Indexer[Either[Work[Merged], Image[Initial]]]
 )(implicit val ec: ExecutionContext)
-  extends Logging {
+    extends Logging {
 
   private type WorkSet = Seq[Option[Work[Identified]]]
 
@@ -31,12 +34,12 @@ class MergeProcessor(
       merged: Seq[List[WorkOrImage]] =>
         workOrImageIndexer(merged.flatten)
     } map {
-      case Right(successfulWorkOrImage) => MergerResponse(successes = successfulWorkOrImage)
-      case Left(failedWorkOrImage) =>  MergerResponse(failures = failedWorkOrImage)
+      case Right(successfulWorkOrImage) =>
+        MergerResponse(successes = successfulWorkOrImage)
+      case Left(failedWorkOrImage) =>
+        MergerResponse(failures = failedWorkOrImage)
     }
   }
-
-
 
   private def merge(
     message: String
