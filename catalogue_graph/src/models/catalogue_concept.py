@@ -66,7 +66,8 @@ def get_priority_label(
         source = properties["source"]
         labels[source] = standardise_label(properties.get("label"))
 
-    # Sources sorted by priority
+    # Sources sorted by priority. Wikidata is prioritised over Library of Congress Names since Wikidata person names
+    # work better as theme page titles (e.g. 'Florence Nightingale' vs 'Nightingale, Florence, 1820-1910').
     for source in ["nlm-mesh", "lc-subjects", "wikidata", "lc-names", "label-derived"]:
         if (value := labels.get(source)) is not None:
             return value, source
@@ -172,6 +173,7 @@ def get_concept_description(concept_data: dict) -> ConceptDescription | None:
         description_source = properties["source"]
         source_concept_id = properties["id"]
 
+        # Only extract descriptions from Wikidata (MeSH also stores descriptions, but we do not want to surface them).
         if description_text is not None and description_source == "wikidata":
             return ConceptDescription(
                 text=description_text,
