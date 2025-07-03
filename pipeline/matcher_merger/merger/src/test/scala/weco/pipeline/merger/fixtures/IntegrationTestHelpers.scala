@@ -23,6 +23,7 @@ import java.time.Instant
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.mutable
 import scala.concurrent.duration._
+import weco.fixtures.TestWith
 
 // These are in a separate file to avoid cluttering up the integration tests
 // with code that doesn't tell us about the desired matcher/merger behaviour.
@@ -61,29 +62,55 @@ trait IntegrationTestHelpers
     }
   }
 
-  def getMerged(
-    originalWork: Work[WorkState.Identified]
-  ): Work[WorkState.Merged] = {
-    mergedIndex(originalWork.state.canonicalId.underlying).left.value
-  }
+  type Context = (String, MergedIndex)
 
-  def imageData: Seq[ImageData[IdState.Identified]] =
-    mergedIndex.values.collect {
-      case Right(im) =>
-        ImageData(
-          id = IdState.Identified(
-            canonicalId = im.state.canonicalId,
-            sourceIdentifier = im.state.sourceIdentifier
-          ),
-          version = im.version,
-          locations = im.locations
-        )
-    }.toSeq
+  implicit class ContextOps(context: Context) {
+    val (_, mergedIndex) = context
+
+    def getMerged(
+                   originalWork: Work[WorkState.Identified]
+                 ): Work[WorkState.Merged] = {
+
+      mergedIndex(originalWork.state.canonicalId.underlying).left.value
+    }
+
+    def imageData: Seq[ImageData[IdState.Identified]] =
+      mergedIndex.values.collect {
+        case Right(im) =>
+          ImageData(
+            id = IdState.Identified(
+              canonicalId = im.state.canonicalId,
+              sourceIdentifier = im.state.sourceIdentifier
+            ),
+            version = im.version,
+            locations = im.locations
+          )
+      }.toSeq
+  }
 
   implicit class VisibleWorkOps(val work: Work.Visible[Identified]) {
     def singleImage: ImageData[IdState.Identified] =
       work.data.imageData.head
   }
+
+  def withContext[R](testWith: TestWith[Context, R]): R = {
+    val mergerIndex = mutable.Map[String, WorkOrImage]()
+    val context = ("foo", mergerIndex)
+
+    testWith(context)
+  }
+
+  def updateInternalWork(
+                          internalWork: Work.Visible[WorkState.Identified],
+                          teiWork: Work.Visible[WorkState.Identified]
+                        ) =
+    internalWork
+      .copy(version = teiWork.version)
+      .mapState(
+        state =>
+          state.copy(sourceModifiedTime = teiWork.state.sourceModifiedTime)
+      )
+
 
   class StateMatcher(right: WorkState.Identified)
     extends Matcher[WorkState.Merged] {
@@ -112,6 +139,12 @@ trait IntegrationTestHelpers
 
   def beRecent(within: Duration = 3 seconds) =
     new InstantMatcher(within)
+
+  def beVisible: Matcher[Work[Merged]] = (left: Work[Merged]) => MatchResult(
+    left.isInstanceOf[Work.Visible[Merged]],
+    s"${left.id} is not visible",
+    s"${left.id} is visible"
+  )
 
   class RedirectMatcher(expectedRedirectTo: Work.Visible[Identified])
     extends Matcher[Work[Merged]] {
@@ -183,4 +216,6 @@ trait IntegrationTestHelpers
         }
     }
   }
+
+  def processWork(work: Work[WorkState.Identified]): Unit = processWorks(work)
 }
