@@ -35,8 +35,6 @@ trait IntegrationTestHelpers
     with MergerFixtures
     with WorkGenerators {
 
-  type MergedIndex = mutable.Map[String, WorkOrImage]
-
   case class StubMatcherLambda(
     worksMatcher: WorksMatcher,
     downstream: Downstream
@@ -51,21 +49,15 @@ trait IntegrationTestHelpers
     with MergerConfigurable
 
   val matcherDownstream = new MemorySNSDownstream
-
-  val identifiedIndex: MemoryRetriever[Work[WorkState.Identified]] =
-    new MemoryRetriever[Work[WorkState.Identified]]()
   val imageSender: MemorySNSDownstream = new MemorySNSDownstream
-  val mergedIndex: MergedIndex = mutable.Map[String, WorkOrImage]()
-  val mergerSut: StubMergerLambda = withMergerProcessor(identifiedIndex, mergedIndex) {
-    mergeProcessor => {
-      StubMergerLambda(mergeProcessor, workRouter, imageSender)
-    }
-  }
 
-  type Context = (String, MergedIndex)
+  type IdentifiedIndex = MemoryRetriever[Work[WorkState.Identified]]
+  type MergedIndex = mutable.Map[String, WorkOrImage]
+
+  type Context = (StubMergerLambda, IdentifiedIndex, MergedIndex)
 
   implicit class ContextOps(context: Context) {
-    val (_, mergedIndex) = context
+    val (_, _, mergedIndex) = context
 
     def getMerged(
                    originalWork: Work[WorkState.Identified]
@@ -94,8 +86,17 @@ trait IntegrationTestHelpers
   }
 
   def withContext[R](testWith: TestWith[Context, R]): R = {
-    val mergerIndex = mutable.Map[String, WorkOrImage]()
-    val context = ("foo", mergerIndex)
+    val mergedIndex = mutable.Map[String, WorkOrImage]()
+    val identifiedIndex: MemoryRetriever[Work[WorkState.Identified]] =
+      new MemoryRetriever[Work[WorkState.Identified]]()
+
+    val merger: StubMergerLambda = withMergerProcessor(identifiedIndex, mergedIndex) {
+      mergeProcessor => {
+        StubMergerLambda(mergeProcessor, workRouter, imageSender)
+      }
+    }
+
+    val context = (merger, identifiedIndex, mergedIndex)
 
     testWith(context)
   }
@@ -172,7 +173,9 @@ trait IntegrationTestHelpers
 
   def processWorks(
     works: Work[WorkState.Identified]*
-  ): Unit = {
+  )(implicit context: Context): Unit = {
+    val (merger, identifiedIndex, mergedIndex) = context
+
     works.foreach {
       w =>
         println(
@@ -194,12 +197,11 @@ trait IntegrationTestHelpers
       _ => val matcherResults = matcherDownstream.msgSender
         .getMessages[MatcherResult]
         whenReady(
-          mergerSut.processMessages(messages =
+          merger.processMessages(messages =
             matcherResults.map(
               matcherResult => {
                 SQSTestLambdaMessage(message = MatcherResult.encoder(matcherResult).toString)
               }
-
             )
           )
         ) {
@@ -217,5 +219,5 @@ trait IntegrationTestHelpers
     }
   }
 
-  def processWork(work: Work[WorkState.Identified]): Unit = processWorks(work)
+  def processWork(work: Work[WorkState.Identified])(implicit context: Context): Unit = processWorks(work)(context)
 }
