@@ -48,16 +48,16 @@ trait IntegrationTestHelpers
   ) extends MergerSQSLambda[MergerConfig]
     with MergerConfigurable
 
-  val matcherDownstream = new MemorySNSDownstream
-  val imageSender: MemorySNSDownstream = new MemorySNSDownstream
 
+  type MatcherDownstream = MemorySNSDownstream
+  type ImageDownstream = MemorySNSDownstream
   type IdentifiedIndex = MemoryRetriever[Work[WorkState.Identified]]
   type MergedIndex = mutable.Map[String, WorkOrImage]
 
-  type Context = (StubMergerLambda, IdentifiedIndex, MergedIndex)
+  type Context = (StubMergerLambda, ImageDownstream, MatcherDownstream, IdentifiedIndex, MergedIndex)
 
   implicit class ContextOps(context: Context) {
-    val (_, _, mergedIndex) = context
+    val (_, _, _, _, mergedIndex) = context
 
     def getMerged(
                    originalWork: Work[WorkState.Identified]
@@ -90,13 +90,16 @@ trait IntegrationTestHelpers
     val identifiedIndex: MemoryRetriever[Work[WorkState.Identified]] =
       new MemoryRetriever[Work[WorkState.Identified]]()
 
+    val matcherDownstream = new MemorySNSDownstream
+    val imageSender: MemorySNSDownstream = new MemorySNSDownstream
+
     val merger: StubMergerLambda = withMergerProcessor(identifiedIndex, mergedIndex) {
       mergeProcessor => {
         StubMergerLambda(mergeProcessor, workRouter, imageSender)
       }
     }
 
-    val context = (merger, identifiedIndex, mergedIndex)
+    val context = (merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex)
 
     testWith(context)
   }
@@ -174,7 +177,7 @@ trait IntegrationTestHelpers
   def processWorks(
     works: Work[WorkState.Identified]*
   )(implicit context: Context): Unit = {
-    val (merger, identifiedIndex, mergedIndex) = context
+    val (merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex) = context
 
     works.foreach {
       w =>
