@@ -1,5 +1,5 @@
 from dataclasses import field
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel
 
@@ -52,31 +52,28 @@ def standardise_label(label: str | None) -> str | None:
     return capitalised.replace("--", " - ")
 
 
-def get_priority_source_concept_value(
-    concept_node: dict | None, source_concept_nodes: list[dict], key: str
-) -> tuple[Any, str | None]:
+def get_priority_label(
+    concept_node: dict, source_concept_nodes: list[dict]
+) -> tuple[str, str]:
     """
-    Given a concept, its source concepts, and a key (e.g. 'label' or 'description'), extract the corresponding
-    values (where available) and return the highest-priority one.
-
-    (For example, if a `description` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.)
+    Given a concept, its source concepts, extract the corresponding labels and return the highest-priority one.
+    (For example, if a `label` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.)
     """
-    values = {}
-
-    if concept_node is not None:
-        values["label-derived"] = concept_node["~properties"].get(key, "")
+    labels = {"label-derived": concept_node["~properties"].get("label")}
 
     for source_concept in source_concept_nodes:
         properties = source_concept["~properties"]
         source = properties["source"]
-        values[source] = standardise_label(properties.get(key))
+        labels[source] = standardise_label(properties.get("label"))
 
     # Sources sorted by priority
-    for source in ["nlm-mesh", "lc-subjects", "lc-names", "wikidata", "label-derived"]:
-        if (value := values.get(source)) is not None:
+    for source in ["nlm-mesh", "lc-subjects", "wikidata", "lc-names", "label-derived"]:
+        if (value := labels.get(source)) is not None:
             return value, source
 
-    return None, None
+    raise ValueError(
+        f"Concept {concept_node['properties']['id']} does not have a label."
+    )
 
 
 def transform_related_concepts(
@@ -89,8 +86,8 @@ def transform_related_concepts(
 
     for related_item in related_items:
         concept_id = related_item["concept_node"]["~properties"]["id"]
-        label, _ = get_priority_source_concept_value(
-            related_item["concept_node"], related_item["source_concept_nodes"], "label"
+        label, _ = get_priority_label(
+            related_item["concept_node"], related_item["source_concept_nodes"]
         )
 
         relationship_type = ""
@@ -168,23 +165,19 @@ class ConceptDescription(BaseModel):
 
 def get_concept_description(concept_data: dict) -> ConceptDescription | None:
     source_concept_nodes = concept_data["source_concepts"]
-    description_text, description_source = get_priority_source_concept_value(
-        None, source_concept_nodes, "description"
-    )
 
-    if description_text and description_source:
-        source_concept_id: str | None = None
-        for source_concept in source_concept_nodes:
-            if source_concept["~properties"]["source"] == description_source:
-                source_concept_id = source_concept["~properties"]["id"]
+    for source_concept in source_concept_nodes:
+        properties = source_concept["~properties"]
+        description_text = standardise_label(properties.get("description"))
+        description_source = properties["source"]
+        source_concept_id = properties["id"]
 
-        assert source_concept_id is not None
-
-        return ConceptDescription(
-            text=description_text,
-            sourceLabel=description_source,
-            sourceUrl=get_source_concept_url(source_concept_id, description_source),
-        )
+        if description_text is not None and description_source == "wikidata":
+            return ConceptDescription(
+                text=description_text,
+                sourceLabel=description_source,
+                sourceUrl=get_source_concept_url(source_concept_id, description_source),
+            )
 
     return None
 
@@ -217,10 +210,8 @@ class CatalogueConcept(BaseModel):
 
         concept_data: dict = data.concept
 
-        # For now, only extract labels from source concepts which are explicitly linked
-        # to the concept via HAS_SOURCE_CONCEPT edges
-        label, _ = get_priority_source_concept_value(
-            concept_data["concept"], concept_data["linked_source_concepts"], "label"
+        label, _ = get_priority_label(
+            concept_data["concept"], concept_data["source_concepts"]
         )
 
         for source_concept in concept_data["linked_source_concepts"]:
