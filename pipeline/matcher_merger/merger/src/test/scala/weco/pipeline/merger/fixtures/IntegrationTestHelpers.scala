@@ -137,7 +137,6 @@ trait IntegrationTestHelpers
   def beRedirectedTo(expectedRedirectTo: Work.Visible[Identified]) =
     new RedirectMatcher(expectedRedirectTo)
 
-
   def processWorks(
     works: Work[WorkState.Identified]*
   ): Unit = {

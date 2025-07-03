@@ -52,6 +52,5 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
             )
         }
     }
-
   }
 }

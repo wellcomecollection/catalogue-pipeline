@@ -26,6 +26,7 @@ class MergerFeatureTest
     with Eventually
     with EitherValues
     with IntegrationPatience {
+
   it("switches how a pair of works are matched") {
     // This test case is based on a real example of four Works that were
     // being matched correctly.  In particular, we had some Sanskrit manuscripts
@@ -77,8 +78,6 @@ class MergerFeatureTest
         idD.underlying -> workD_t0
       )
     )
-
-
 
     withMergerProcessor(retriever, mergedIndex) {
       mergeProcessor =>
