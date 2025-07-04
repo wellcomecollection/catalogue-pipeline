@@ -125,8 +125,16 @@ trait MatcherFixtures
     sendNotificationToSQS(queue, body = work.id.toString)
   }
 
-  case class MatcherStub(shorthandResults: Seq[Set[Set[String]]])
+  case class MatcherStub(shorthandResults: Seq[Set[Set[String]]] = Seq(Set.empty[Set[String]]))
       extends WorksMatcher {
+
+    var internalShorthandResults: Seq[Set[Set[String]]] = shorthandResults
+
+    def setShorthandResults(
+      results: Seq[Set[Set[String]]]
+    ): Unit = {
+      internalShorthandResults = results
+    }
 
     /** retrieves stubs for a collection of unrelated works that are currently
       * stored in a database and performs matching for each of them.
@@ -135,7 +143,7 @@ trait MatcherFixtures
       workIds: Seq[String]
     ): Future[Iterable[MatcherResult]] =
       Future.successful(
-        shorthandResults map {
+        internalShorthandResults map {
           result: Set[Set[String]] =>
             matcherResultFromStrings(result)
         }
