@@ -54,10 +54,10 @@ trait IntegrationTestHelpers
   type IdentifiedIndex = MemoryRetriever[Work[WorkState.Identified]]
   type MergedIndex = mutable.Map[String, WorkOrImage]
 
-  type Context = (StubMergerLambda, ImageDownstream, MatcherDownstream, IdentifiedIndex, MergedIndex)
+  type Context = (MatcherStub, StubMatcherLambda, StubMergerLambda, ImageDownstream, MatcherDownstream, IdentifiedIndex, MergedIndex)
 
   implicit class ContextOps(context: Context) {
-    val (_, _, _, _, mergedIndex) = context
+    val (_, _, _, _, _, _, mergedIndex) = context
 
     def getMerged(
                    originalWork: Work[WorkState.Identified]
@@ -93,13 +93,16 @@ trait IntegrationTestHelpers
     val matcherDownstream = new MemorySNSDownstream
     val imageSender: MemorySNSDownstream = new MemorySNSDownstream
 
+    val matcherStub = MatcherStub()
+    val matcher = StubMatcherLambda(matcherStub, matcherDownstream)
+
     val merger: StubMergerLambda = withMergerProcessor(identifiedIndex, mergedIndex) {
       mergeProcessor => {
         StubMergerLambda(mergeProcessor, workRouter, imageSender)
       }
     }
 
-    val context = (merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex)
+    val context = (matcherStub, matcher, merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex)
 
     testWith(context)
   }
@@ -177,7 +180,7 @@ trait IntegrationTestHelpers
   def processWorks(
     works: Work[WorkState.Identified]*
   )(implicit context: Context): Unit = {
-    val (merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex) = context
+    val (matcherStub, matcher, merger, imageSender, matcherDownstream, identifiedIndex, mergedIndex) = context
 
     works.foreach {
       w =>
@@ -189,11 +192,12 @@ trait IntegrationTestHelpers
 
     val canonicalIds = works.map(_.state.canonicalId.underlying).toSet
 
-    val matcher = MatcherStub(Seq(Set(canonicalIds)))
-    val matcherSut = StubMatcherLambda(matcher, matcherDownstream)
+    // Append the canonical IDs to the matcher stub so that it can return
+    // the expected results when it processes the messages.
+    matcherStub.setShorthandResults(Seq(Set(canonicalIds)))
 
     whenReady(
-      matcherSut.processMessages(messages =
+      matcher.processMessages(messages =
         works.map {
           work =>  SQSTestLambdaMessage(message = work.state.canonicalId.underlying)
         }
