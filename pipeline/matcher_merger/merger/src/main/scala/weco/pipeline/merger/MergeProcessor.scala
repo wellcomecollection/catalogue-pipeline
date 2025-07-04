@@ -5,7 +5,6 @@ import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
-import weco.json.JsonUtil.fromJson
 import weco.pipeline.matcher.models.MatcherResult
 import weco.pipeline.merger.Main.WorkOrImage
 import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager}
@@ -28,27 +27,20 @@ class MergeProcessor(
 
   private type WorkSet = Seq[Option[Work[Identified]]]
 
-  def process(messages: List[String]): Future[MergerResponse] = {
-    // merge and index WorkOrImage
-    Future.sequence(messages.map(merge)) flatMap {
-      merged: Seq[List[WorkOrImage]] =>
-        workOrImageIndexer(merged.flatten)
-    } map {
-      case Right(successfulWorkOrImage) =>
-        MergerResponse(successes = successfulWorkOrImage)
-      case Left(failedWorkOrImage) =>
-        MergerResponse(failures = failedWorkOrImage)
+  def process(matcherResult: MatcherResult): Future[MergerResponse] =
+    merge(matcherResult) flatMap { merged =>
+      workOrImageIndexer(merged) map {
+        case Right(successfulWorkOrImage) =>
+          MergerResponse(successes = successfulWorkOrImage)
+        case Left(failedWorkOrImage) =>
+          MergerResponse(failures = failedWorkOrImage)
+      }
     }
-  }
 
   private def merge(
-    message: String
+                     matcherResult: MatcherResult
   ): Future[List[WorkOrImage]] =
     for {
-      matcherResult <- Future.fromTry(
-        fromJson[MatcherResult](message)
-      )
-
       workSets <- getWorkSets(matcherResult)
         .map(workSets => workSets.filter(_.flatten.nonEmpty))
 

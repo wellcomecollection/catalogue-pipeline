@@ -8,8 +8,6 @@ import weco.catalogue.internal_model.identifiers.CanonicalId
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.json.JsonUtil.toJson
-import weco.pipeline.matcher.models.MatcherResult._
 import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -128,7 +126,7 @@ class MergerFeatureTest
         )
 
         val existingTimes_t5 = getModifiedTimes(mergedIndex)
-        mergeProcessor.process(List(toJson(matcherResult_t5).get))
+        mergeProcessor.process(matcherResult_t5)
 
         eventually {
           val storedTimes_t5 = getModifiedTimes(mergedIndex)
@@ -164,7 +162,7 @@ class MergerFeatureTest
         )
 
         val existingTimes_t6 = getModifiedTimes(mergedIndex)
-        mergeProcessor.process(List(toJson(matcherResult_t6).get))
+        mergeProcessor.process(matcherResult_t6)
 
         eventually {
           val storedTimes_t6 = getModifiedTimes(mergedIndex)
@@ -190,7 +188,7 @@ class MergerFeatureTest
         )
 
         val existingTimes_t7 = getModifiedTimes(mergedIndex)
-        mergeProcessor.process(List(toJson(matcherResult_t7).get))
+        mergeProcessor.process(matcherResult_t7)
 
         eventually {
           val storedTimes_t7 = getModifiedTimes(mergedIndex)

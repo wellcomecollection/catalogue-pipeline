@@ -9,11 +9,9 @@ import weco.catalogue.internal_model.work.WorkFsm._
 import weco.catalogue.internal_model.work.WorkState.Merged
 import weco.catalogue.internal_model.work.generators.MiroWorkGenerators
 import weco.fixtures.TestWith
-import weco.json.JsonUtil.toJson
 import weco.lambda.SQSLambdaMessage
 import weco.messaging.memory.MemoryMessageSender
 import weco.pipeline.matcher.generators.MergeCandidateGenerators
-import weco.json.exceptions.JsonDecodingError
 import weco.pipeline.merger.fixtures.{MatcherResultFixture, MergerFixtures}
 import weco.pipeline_storage.memory.MemoryRetriever
 
@@ -42,7 +40,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
-            message = toJson(matcherResult).get
+            message = matcherResult
           ))
         identifiedIndex.index ++= Map(
           work1.id -> work1,
@@ -81,7 +79,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
-          message = toJson(matcherResult).get
+          message = matcherResult
         ))
         identifiedIndex.index ++= Map(work.id -> work)
 
@@ -106,7 +104,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
-          message = toJson(matcherResult).get
+          message = matcherResult
         ))
 
         whenReady(mergerSQSLambda.processMessages(messages).failed) {
@@ -130,7 +128,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
-            message = toJson(matcherResult).get
+            message = matcherResult
           ))
 
         identifiedIndex.index ++= Map(workA.id -> workA, workB.id -> newerWorkB)
@@ -160,7 +158,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
-            message = toJson(matcherResult).get
+            message = matcherResult
           ))
 
         identifiedIndex.index ++= Map(
@@ -204,7 +202,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, imageSender) =>
         val messages = List(SQSLambdaMessage(
             messageId = randomUUID.toString,
-            message = toJson(matcherResult).get
+            message = matcherResult
           ))
         identifiedIndex.index ++= Map(
           physicalWork.id -> physicalWork,
@@ -269,7 +267,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
-          message = toJson(matcherResult).get
+          message = matcherResult
         ))
         identifiedIndex.index ++= Map(
           physicalWork1.id -> physicalWork1,
@@ -309,7 +307,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
-          message = toJson(matcherResult).get
+          message = matcherResult
         ))
         identifiedIndex.index ++= Map(
           visibleWork.id -> visibleWork,
@@ -333,21 +331,6 @@ class MergerSQSLambdaTest
     }
   }
 
-  it("fails if the message sent is not a matcher result") {
-    withMergerSQSLambdaFixtures {
-      case(mergerSQSLambda, _, _, _, _, _, _) =>
-
-        val messages = List(SQSLambdaMessage(
-          messageId = randomUUID.toString,
-          message = "Not a match result"
-        ))
-
-        whenReady(mergerSQSLambda.processMessages(messages).failed) {
-          exc => exc shouldBe a[JsonDecodingError]
-      }
-    }
-  }
-
   it("sends messages even if the works are outdated") {
     val work0 = identifiedWork().withVersion(0)
     val work1 = identifiedWork(canonicalId = work0.state.canonicalId)
@@ -358,7 +341,7 @@ class MergerSQSLambdaTest
       case(mergerSQSLambda, identifiedIndex, mergedIndex, workSender, _, _, _) =>
         val messages = List(SQSLambdaMessage(
           messageId = randomUUID.toString,
-          message = toJson(matcherResult).get
+          message = matcherResult
         ))
         identifiedIndex.index ++= Map(work1.id -> work1)
 

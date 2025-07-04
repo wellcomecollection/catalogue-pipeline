@@ -54,7 +54,15 @@ trait IntegrationTestHelpers
   type IdentifiedIndex = MemoryRetriever[Work[WorkState.Identified]]
   type MergedIndex = mutable.Map[String, WorkOrImage]
 
-  type Context = (MatcherStub, StubMatcherLambda, StubMergerLambda, ImageDownstream, MatcherDownstream, IdentifiedIndex, MergedIndex)
+  type Context = (
+    MatcherStub,
+      StubMatcherLambda,
+      StubMergerLambda,
+      ImageDownstream,
+      MatcherDownstream,
+      IdentifiedIndex,
+      MergedIndex
+    )
 
   implicit class ContextOps(context: Context) {
     val (_, _, _, _, _, _, mergedIndex) = context
@@ -209,7 +217,7 @@ trait IntegrationTestHelpers
           merger.processMessages(messages =
             matcherResults.map(
               matcherResult => {
-                SQSTestLambdaMessage(message = MatcherResult.encoder(matcherResult).toString)
+                SQSTestLambdaMessage(message = matcherResult)
               }
             )
           )
