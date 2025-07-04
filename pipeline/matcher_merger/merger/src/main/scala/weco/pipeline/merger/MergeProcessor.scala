@@ -28,17 +28,18 @@ class MergeProcessor(
   private type WorkSet = Seq[Option[Work[Identified]]]
 
   def process(matcherResult: MatcherResult): Future[MergerResponse] =
-    merge(matcherResult) flatMap { merged =>
-      workOrImageIndexer(merged) map {
-        case Right(successfulWorkOrImage) =>
-          MergerResponse(successes = successfulWorkOrImage)
-        case Left(failedWorkOrImage) =>
-          MergerResponse(failures = failedWorkOrImage)
-      }
+    merge(matcherResult) flatMap {
+      merged =>
+        workOrImageIndexer(merged) map {
+          case Right(successfulWorkOrImage) =>
+            MergerResponse(successes = successfulWorkOrImage)
+          case Left(failedWorkOrImage) =>
+            MergerResponse(failures = failedWorkOrImage)
+        }
     }
 
   private def merge(
-                     matcherResult: MatcherResult
+    matcherResult: MatcherResult
   ): Future[List[WorkOrImage]] =
     for {
       workSets <- getWorkSets(matcherResult)

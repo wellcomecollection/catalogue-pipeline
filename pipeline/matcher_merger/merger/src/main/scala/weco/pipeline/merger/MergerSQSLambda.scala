@@ -1,6 +1,14 @@
 package weco.pipeline.merger
 
-import weco.lambda.{ApplicationConfig, Downstream, SQSBatchResponseLambdaApp, SQSLambdaMessage, SQSLambdaMessageFailedRetryable, SQSLambdaMessageProcessed, SQSLambdaMessageResult}
+import weco.lambda.{
+  ApplicationConfig,
+  Downstream,
+  SQSBatchResponseLambdaApp,
+  SQSLambdaMessage,
+  SQSLambdaMessageFailedRetryable,
+  SQSLambdaMessageProcessed,
+  SQSLambdaMessageResult
+}
 import weco.pipeline.matcher.models.MatcherResult
 import weco.pipeline.merger.services.WorkRouter
 import weco.pipeline.merger.Main.WorkOrImage
@@ -27,18 +35,19 @@ trait MergerSQSLambda[Config <: ApplicationConfig]
 
     Future.sequence(messages.map {
       case SQSLambdaMessage(messageId, message) =>
-        mergeProcessor.process(message).map { mergeProcessorResponse =>
-          if(mergeProcessorResponse.failures.isEmpty) {
-            // If there are no failures, we notify the downstream services
-            mergeProcessorResponse.successes.map(notifyDownstream)
-            SQSLambdaMessageProcessed(messageId)
-          } else {
-            // If there are any failures, we retry the message
-            SQSLambdaMessageFailedRetryable(
-              messageId = messageId,
-              error = new Error(s"Failed to merge: $message")
-            )
-          }
+        mergeProcessor.process(message).map {
+          mergeProcessorResponse =>
+            if (mergeProcessorResponse.failures.isEmpty) {
+              // If there are no failures, we notify the downstream services
+              mergeProcessorResponse.successes.map(notifyDownstream)
+              SQSLambdaMessageProcessed(messageId)
+            } else {
+              // If there are any failures, we retry the message
+              SQSLambdaMessageFailedRetryable(
+                messageId = messageId,
+                error = new Error(s"Failed to merge: $message")
+              )
+            }
         }
     })
   }
