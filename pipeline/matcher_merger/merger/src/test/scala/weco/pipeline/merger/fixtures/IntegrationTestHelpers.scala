@@ -187,7 +187,9 @@ trait IntegrationTestHelpers
         identifiedIndex.index ++= Map(w.state.canonicalId.underlying -> w)
     }
 
-    val matcher = MatcherStub(Seq(works.map(w => Set(w.state.canonicalId.underlying)).toSet))
+    val canonicalIds = works.map(_.state.canonicalId.underlying).toSet
+
+    val matcher = MatcherStub(Seq(Set(canonicalIds)))
     val matcherSut = StubMatcherLambda(matcher, matcherDownstream)
 
     whenReady(
