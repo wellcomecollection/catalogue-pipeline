@@ -2,7 +2,7 @@
 Tests covering the update behaviour of the iceberg ebsco adapter
 """
 from pytest import fail, mark
-from main import data_to_pa_table, update_table, setup_database
+from main import data_to_pa_table, update_table, get_table
 from pyiceberg.expressions import Not, IsNull, EqualTo, In
 
 from schemata import ARROW_SCHEMA
@@ -18,7 +18,7 @@ def data_to_namespaced_table(unqualified_data):
 
 
 def add_namespace(d):
-    d["namespace"] = "test"
+    d["namespace"] = "ebsco_test"
     return d
 
 
@@ -28,7 +28,7 @@ def test_noop(temporary_table):
     """
     data = data_to_namespaced_table([{"id": "eb0001", "content": "hello"}])
     temporary_table.append(data)
-    changeset = update_table(temporary_table, data)
+    changeset = update_table(temporary_table, data, "ebsco_test")
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
@@ -66,7 +66,7 @@ def test_new_table(temporary_table):
             {"id": "eb0003", "content": "alle sammen"},
         ]
     )
-    changeset_id = update_table(temporary_table, new_data)
+    changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     assert (
             temporary_table.scan().to_arrow()
             == temporary_table.scan(
@@ -102,7 +102,7 @@ def test_update_records(temporary_table):
             {"id": "eb0003", "content": "alle sammen"},
         ]
     )
-    changeset_id = update_table(temporary_table, new_data)
+    changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     expected_changes = {"eb0001", "eb0003"}
     changed_rows = temporary_table.scan(
         row_filter=In("id", expected_changes), selected_fields=["id"]
@@ -142,7 +142,7 @@ def test_insert_records(temporary_table):
             {"id": "eb0099", "content": "tout le monde"},
         ]
     )
-    changeset_id = update_table(temporary_table, new_data)
+    changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     expected_insertions = {"eb0002", "eb0099"}
     inserted_rows = temporary_table.scan(
         row_filter=In("id", expected_insertions), selected_fields=["id"]
@@ -188,7 +188,7 @@ def test_delete_records(temporary_table):
             {"id": "eb0003", "content": "greetings"},
         ]
     )
-    changeset_id = update_table(temporary_table, new_data)
+    changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     expected_deletions = {"eb0002", "eb0099"}
     deleted_rows = temporary_table.scan(
         row_filter=IsNull("content"), selected_fields=["id"]
@@ -231,7 +231,7 @@ def test_all_actions(temporary_table):
     expected_update = "eb0003"
     expected_insert = "eb0004"
 
-    changeset_id = update_table(temporary_table, new_data)
+    changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     changeset_rows = temporary_table.scan(
         row_filter=EqualTo("changeset", changeset_id)
     ).to_arrow()
@@ -250,7 +250,7 @@ def test_all_actions(temporary_table):
     assert temporary_table.scan(
         row_filter=IsNull("changeset")
     ).to_arrow().to_pylist() == [
-               {"id": "eb0001", "content": "hello", "changeset": None, 'last_modified': None, 'namespace': 'test'}
+               {"id": "eb0001", "content": "hello", "changeset": None, 'last_modified': None, 'namespace': 'ebsco_test'}
            ]
 
 
@@ -278,9 +278,9 @@ def test_idempotent(temporary_table):
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    changeset_id = update_table(temporary_table, new_data)
+    changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     assert changeset_id
-    second_changeset_id = update_table(temporary_table, new_data)
+    second_changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     assert second_changeset_id is None
 
 
@@ -307,7 +307,7 @@ def test_most_recent_changeset_preserved(temporary_table):
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    changeset_id = update_table(temporary_table, new_data)
+    changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     assert {"eb0003", "eb0004"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", changeset_id))
         .to_arrow()
@@ -321,7 +321,7 @@ def test_most_recent_changeset_preserved(temporary_table):
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    newer_changeset_id = update_table(temporary_table, newer_data)
+    newer_changeset_id = update_table(temporary_table, newer_data, "ebsco_test")
     assert {"eb0003"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", newer_changeset_id))
         .to_arrow()
