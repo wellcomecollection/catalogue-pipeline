@@ -31,7 +31,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
         id="id",
         identifiers=[
-            CatalogueConceptIdentifier(value="456", identifierType="lc-names")
+            CatalogueConceptIdentifier(value="123", identifierType="lc-names")
         ],
         label="label",
         alternativeLabels=[
@@ -40,9 +40,9 @@ def test_catalogue_concept_from_neptune_result() -> None:
             "MeSH alternative label",
         ],
         description=ConceptDescription(
-            text="Mesh description",
-            sourceLabel="nlm-mesh",
-            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+            text="Description",
+            sourceLabel="wikidata",
+            sourceUrl="https://www.wikidata.org/wiki/456",
         ),
         type="Person",
         sameAs=[],
@@ -77,14 +77,14 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
     assert CatalogueConcept.from_neptune_result(neptune_result) == CatalogueConcept(
         id="id",
         identifiers=[
-            CatalogueConceptIdentifier(value="456", identifierType="lc-names")
+            CatalogueConceptIdentifier(value="123", identifierType="lc-names")
         ],
         label="label",
         alternativeLabels=[],
         description=ConceptDescription(
-            text="Mesh description",
-            sourceLabel="nlm-mesh",
-            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+            text="Description",
+            sourceLabel="wikidata",
+            sourceUrl="https://www.wikidata.org/wiki/456",
         ),
         type="Person",
         sameAs=[],

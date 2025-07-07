@@ -229,13 +229,13 @@ def get_catalogue_concept_mock(
         type="Person",
         alternativeLabels=alternative_labels,
         description=ConceptDescription(
-            text="Mesh description",
-            sourceLabel="nlm-mesh",
-            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+            text="Description",
+            sourceLabel="wikidata",
+            sourceUrl="https://www.wikidata.org/wiki/456",
         ),
         identifiers=[
             CatalogueConceptIdentifier(
-                value="456",
+                value="123",
                 identifierType="lc-names",
             )
         ],
