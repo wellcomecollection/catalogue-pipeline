@@ -10,8 +10,9 @@ SCHEMA = Schema(
     NestedField(field_id=2, name="id", field_type=StringType(), required=True),
     NestedField(field_id=3, name="content", field_type=StringType(), required=False),
     NestedField(field_id=4, name="changeset", field_type=StringType(), required=False),
-    NestedField(field_id=5, name="last_modified", field_type=TimestamptzType(), required=False),
-
+    NestedField(
+        field_id=5, name="last_modified", field_type=TimestamptzType(), required=False
+    ),
 )
 
 # The Arrow schema corresponds to the "Real Data" as stored in iceberg, i.e. without

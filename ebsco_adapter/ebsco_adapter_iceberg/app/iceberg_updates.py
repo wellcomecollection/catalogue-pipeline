@@ -19,13 +19,23 @@ from datetime import datetime, timezone
 
 
 class Updater:
-
-    def __init__(self, catalogue_name, catalogue_uri, catalogue_warehouse, table_name, catalogue_namespace="default"):
+    def __init__(
+        self,
+        catalogue_name,
+        catalogue_uri,
+        catalogue_warehouse,
+        table_name,
+        catalogue_namespace="default",
+    ):
         self.catalogue_namespace = catalogue_namespace
-        self.catalogue = self.get_catalogue(catalogue_name, catalogue_uri, catalogue_warehouse)
+        self.catalogue = self.get_catalogue(
+            catalogue_name, catalogue_uri, catalogue_warehouse
+        )
 
 
-def get_table(catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name):
+def get_table(
+    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
+):
     catalogue = load_catalog(
         catalogue_name,
         uri=catalogue_uri,
@@ -61,7 +71,10 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
     # records that have already been "deleted" do not need to be deleted again.
 
     existing_data = (
-        table.scan(row_filter=Not(IsNull("content")), selected_fields=["namespace", "id", "content"])
+        table.scan(
+            row_filter=Not(IsNull("content")),
+            selected_fields=["namespace", "id", "content"],
+        )
         .to_arrow()
         .cast(ARROW_SCHEMA)
     )
@@ -85,13 +98,13 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
         # Empty DB short-circuit, just write it all in.
         changeset = new_data
     if changeset:
-        now = pa.scalar(datetime.now(timezone.utc), pa.timestamp('us', 'UTC'))
+        now = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
         changeset_id = str(uuid.uuid1())
         changeset = changeset.append_column(
             pa.field("changeset", type=pa.string(), nullable=True),
             [[changeset_id] * len(changeset)],
         ).append_column(
-            pa.field("last_modified", type=pa.timestamp('us', 'UTC'), nullable=True),
+            pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
             [[now] * len(changeset)],
         )
         table.upsert(changeset, ["id"])
@@ -107,18 +120,24 @@ def _find_updates(existing_data: pa.Table, new_data: pa.Table):
 
 def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace: str):
     old_ids = existing_data.column("id")
-    missing_records = new_data.filter((pc.field("namespace") == record_namespace) & ~pc.field("id").isin(old_ids))
+    missing_records = new_data.filter(
+        (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(old_ids)
+    )
     return missing_records
 
 
-def _get_deletes(existing_data: pa.Table, new_data: pa.Table, record_namespace: str) -> pa.Table:
+def _get_deletes(
+    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+) -> pa.Table:
     """
     Find records in `existing_data` that are not in `new_data`, and produce a
     pyarrow Table that can be used to update those records by emptying their content.
     """
     new_ids = new_data.column("id")
     missing_ids = existing_data.filter(
-        (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(new_ids)).column("id")
+        (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(new_ids)
+    ).column("id")
     return pa.Table.from_pylist(
-        [{"namespace": record_namespace, "id": id.as_py()} for id in missing_ids], schema=ARROW_SCHEMA
+        [{"namespace": record_namespace, "id": id.as_py()} for id in missing_ids],
+        schema=ARROW_SCHEMA,
     )

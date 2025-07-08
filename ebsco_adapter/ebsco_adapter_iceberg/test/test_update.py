@@ -68,10 +68,10 @@ def test_new_table(temporary_table):
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     assert (
-            temporary_table.scan().to_arrow()
-            == temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id)
-    ).to_arrow()
+        temporary_table.scan().to_arrow()
+        == temporary_table.scan(
+            row_filter=EqualTo("changeset", changeset_id)
+        ).to_arrow()
     )
     assert len(temporary_table.scan().to_arrow()) == 3
 
@@ -242,16 +242,24 @@ def test_all_actions(temporary_table):
     assert rows_by_key[expected_insert]["content"] == "noswaith dda"
     # all rows in the changeset have the same last modified time
     # which is not None
-    assert (rows_by_key[expected_deletion]["last_modified"] ==
-            rows_by_key[expected_update]["last_modified"] ==
-            rows_by_key[expected_insert]["last_modified"] is not None
-            )
+    assert (
+        rows_by_key[expected_deletion]["last_modified"]
+        == rows_by_key[expected_update]["last_modified"]
+        == rows_by_key[expected_insert]["last_modified"]
+        is not None
+    )
     # And the remaining value is unchanged
     assert temporary_table.scan(
         row_filter=IsNull("changeset")
     ).to_arrow().to_pylist() == [
-               {"id": "eb0001", "content": "hello", "changeset": None, 'last_modified': None, 'namespace': 'ebsco_test'}
-           ]
+        {
+            "id": "eb0001",
+            "content": "hello",
+            "changeset": None,
+            "last_modified": None,
+            "namespace": "ebsco_test",
+        }
+    ]
 
 
 def test_idempotent(temporary_table):
