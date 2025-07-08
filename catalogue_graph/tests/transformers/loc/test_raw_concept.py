@@ -42,6 +42,10 @@ class TestSourceId:
             node = {"@id": "rwo/agents/sh1234567890"}
             _ = RawLibraryOfCongressConcept(node).source_id
 
+        with pytest.raises(AssertionError):
+            node = {"@id": "http://id.loc.gov/authorities/childrensSubjects/sh12345"}
+            _ = RawLibraryOfCongressConcept(node).source_id
+
 
 class TestSource:
     def test_source_subjects(self) -> None:
