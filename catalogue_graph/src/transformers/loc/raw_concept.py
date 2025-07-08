@@ -7,7 +7,7 @@ def extract_source_id(raw_item: dict) -> str | None:
     Given a raw node, returns its Library of Congress ID. Returns `None` if the raw ID does not
     correspond to a name or a subject heading.
     """
-    
+
     # Subject heading IDs always start with an 'sh', followed by a sequence of digits.
     subjects_match = re.search(r"authorities/subjects/(sh\d+)$", raw_item["@id"])
     if subjects_match:
