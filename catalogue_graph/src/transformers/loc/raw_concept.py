@@ -4,8 +4,8 @@ from typing import Literal
 
 def extract_source_id(raw_item: dict) -> str | None:
     """
-    Returns Library of Congress ID given a raw node.
-    Returns `None` if the raw ID does not correspond to a name or a subject heading.
+    Given a raw node, returns its Library of Congress ID. Returns `None` if the raw ID does not
+    correspond to a name or a subject heading.
     """
     
     # Subject heading IDs always start with an 'sh', followed by a sequence of digits.
