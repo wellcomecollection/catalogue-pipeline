@@ -10,8 +10,14 @@
   "source_concepts": [
     {
       "~properties": {
+        "id": "123",
+        "source": "lc-names"
+      }
+    },
+    {
+      "~properties": {
         "id": "456",
-        "source": "lc-names",
+        "source": "wikidata",
         "description": "description"
       }
     },
@@ -26,9 +32,8 @@
   "linked_source_concepts": [
     {
       "~properties": {
-        "id": "456",
-        "source": "lc-names",
-        "description": "description"
+        "id": "123",
+        "source": "lc-names"
       }
     }
   ],
