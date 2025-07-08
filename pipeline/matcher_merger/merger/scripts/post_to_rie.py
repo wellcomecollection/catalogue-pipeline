@@ -35,7 +35,11 @@ def format_message(payload):
     }
 
 
-payload = {"Records": [format_message(matcher_result) for matcher_result in sys.stdin.readlines()]}
+payload = {
+    "Records": [
+        format_message(matcher_result) for matcher_result in sys.stdin.readlines()
+    ]
+}
 requests.post(
     "http://localhost:9000/2015-03-31/functions/function/invocations",
     data=json.dumps(payload),

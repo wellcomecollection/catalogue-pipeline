@@ -10,7 +10,12 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.lambda._
 import weco.pipeline.merger.config.{MergerConfig, MergerConfigurable}
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger, WorkRouter}
+import weco.pipeline.merger.services.{
+  IdentifiedWorkLookup,
+  MergerManager,
+  PlatformMerger,
+  WorkRouter
+}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
