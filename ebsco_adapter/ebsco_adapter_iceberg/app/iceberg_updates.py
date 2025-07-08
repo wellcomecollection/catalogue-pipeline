@@ -13,7 +13,9 @@ from pyiceberg.expressions import Not, IsNull
 from datetime import datetime, timezone
 
 
-def get_table(catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name):
+def get_table(
+    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
+):
     catalogue = load_catalog(
         catalogue_name,
         uri=catalogue_uri,
@@ -105,7 +107,7 @@ def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace:
 
 
 def _get_deletes(
-        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
 ) -> pa.Table:
     """
     Find records in `existing_data` that are not in `new_data`, and produce a

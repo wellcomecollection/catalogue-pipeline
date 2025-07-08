@@ -55,7 +55,9 @@ def test_change_record(temporary_table, xml_with_one_record, xml_with_three_reco
     Then the ebs00001 row will contain the new data
     """
     update_from_xml_file(temporary_table, xml_with_one_record)
-    pa_table = temporary_table.scan(selected_fields=["content"], row_filter=EqualTo("id", "ebs00001")).to_arrow()
+    pa_table = temporary_table.scan(
+        selected_fields=["content"], row_filter=EqualTo("id", "ebs00001")
+    ).to_arrow()
     assert "John W. Trimmer" not in pa_table.column("content")[0].as_py()
     update_from_xml_file(temporary_table, xml_with_three_records)
     pa_table = temporary_table.scan(
