@@ -33,7 +33,11 @@ def node_to_record(node: ET.ElementTree):
         "marc:controlfield[@tag='001']",
         namespaces={"marc": "http://www.loc.gov/MARC21/slim"},
     ).text
-    return {"namespace": EBSCO_NAMESPACE, "id": ebsco_id, "content": canonicalize(ET.tostring(node))}
+    return {
+        "namespace": EBSCO_NAMESPACE,
+        "id": ebsco_id,
+        "content": canonicalize(ET.tostring(node)),
+    }
 
 
 def data_to_pa_table(data):
