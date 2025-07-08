@@ -2,7 +2,6 @@ import json
 
 import pytest
 from test_utils import load_fixture
-
 from transformers.loc.raw_concept import RawLibraryOfCongressConcept
 
 
@@ -43,7 +42,7 @@ class TestSourceId:
             _ = RawLibraryOfCongressConcept(node).source_id
 
         with pytest.raises(AssertionError):
-            node = {"@id": "http://id.loc.gov/authorities/childrensSubjects/sh12345"}
+            node = {"@id": "http://id.loc.gov/authorities/childrensSubjects/sj12345"}
             _ = RawLibraryOfCongressConcept(node).source_id
 
 
