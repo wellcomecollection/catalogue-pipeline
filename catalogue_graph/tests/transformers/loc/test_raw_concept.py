@@ -2,6 +2,7 @@ import json
 
 import pytest
 from test_utils import load_fixture
+
 from transformers.loc.raw_concept import RawLibraryOfCongressConcept
 
 

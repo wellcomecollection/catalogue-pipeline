@@ -45,9 +45,9 @@ class RawLibraryOfCongressConcept:
             # Ignore DeprecatedAuthority in this context, as they are to be excluded.
             # https://www.loc.gov/standards/mads/rdf/#t21
             if (
-                    self.source_id in node.get("@id", "")
-                    and "madsrdf:Authority" in node["@type"]
-                    and node.get("madsrdf:authoritativeLabel")
+                self.source_id in node.get("@id", "")
+                and "madsrdf:Authority" in node["@type"]
+                and node.get("madsrdf:authoritativeLabel")
             ):
                 return node
 
@@ -155,7 +155,10 @@ class RawLibraryOfCongressConcept:
 
     def exclude(self) -> bool:
         """Returns True if the concept should be excluded from the graph."""
-        return extract_source_id(self.raw_concept) is None or self._raw_concept_node is None
+        return (
+            extract_source_id(self.raw_concept) is None
+            or self._raw_concept_node is None
+        )
 
 
 def _as_list(dict_or_list: dict | list[dict]) -> list[dict]:
