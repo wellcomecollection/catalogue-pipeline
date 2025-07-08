@@ -11,8 +11,27 @@ services:
     environment:
       - AWS_PROFILE=platform-developer
       - metrics_namespace=catalogue-dev_merger
-      - es_protocol=https
-      - es_port=443
+      - es_upstream_protocol=https
+      - es_upstream_port=443
       - use_downstream=stdio
+      - es_downstream_host=elasticsearch-local
+      - es_downstream_port=9200
+      - es_downstream_protocol=http
+      - es_downstream_username=itsme
+      - es_downstream_password=itreallyis
+      - es_denormalised_works_index=local-works-denormalised
+      - es_initial_images_index=local-images-initial
     env_file:
       - .env
+  elasticsearch-local:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:8.8.2"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - "http.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "cluster.name=wellcome"
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+      - "action.auto_create_index=true"

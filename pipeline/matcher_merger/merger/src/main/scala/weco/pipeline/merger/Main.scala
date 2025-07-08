@@ -10,12 +10,7 @@ import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.lambda._
 import weco.pipeline.merger.config.{MergerConfig, MergerConfigurable}
-import weco.pipeline.merger.services.{
-  IdentifiedWorkLookup,
-  MergerManager,
-  PlatformMerger,
-  WorkRouter
-}
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger, WorkRouter}
 import weco.pipeline_storage.EitherIndexer
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
 
@@ -24,10 +19,14 @@ object Main
     with MergerConfigurable
     with Logging {
 
-  private val esClient = ElasticBuilder.buildElasticClient(config.elasticConfig)
+  private val upstreamESClient =
+    ElasticBuilder.buildElasticClient(config.upstreamElasticConfig)
+  private val downstreamESClient =
+    ElasticBuilder.buildElasticClient(config.downstreamElasticConfig)
+
   private val retriever =
     new ElasticSourceRetriever[Work[Identified]](
-      client = esClient,
+      client = upstreamESClient,
       index = Index(config.identifiedWorkIndex)
     )
   private val sourceWorkLookup = new IdentifiedWorkLookup(retriever)
@@ -43,11 +42,11 @@ object Main
   private val workOrImageIndexer = {
     new EitherIndexer[Work[Merged], Image[Initial]](
       leftIndexer = new ElasticIndexer[Work[Merged]](
-        client = esClient,
+        client = downstreamESClient,
         index = Index(config.denormalisedWorkIndex)
       ),
       rightIndexer = new ElasticIndexer[Image[Initial]](
-        client = esClient,
+        client = downstreamESClient,
         index = Index(config.initialImageIndex)
       )
     )

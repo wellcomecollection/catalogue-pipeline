@@ -52,8 +52,17 @@ module "merger_lambda" {
     es_initial_images_index     = local.es_images_initial_index
 
   }
+  secret_env_vars = {
+    es_upstream_host     = local.pipeline_storage_private_host
+    es_upstream_port     = local.pipeline_storage_port
+    es_upstream_protocol = local.pipeline_storage_protocol
+    es_upstream_apikey   = local.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
 
-  secret_env_vars = local.pipeline_storage_es_service_secrets["merger"]
+    es_downstream_host     = local.pipeline_storage_private_host
+    es_downstream_port     = local.pipeline_storage_port
+    es_downstream_protocol = local.pipeline_storage_protocol
+    es_downstream_apikey   = local.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
+  }
 
   ecr_repository_name = "uk.ac.wellcome/merger"
   queue_config = {

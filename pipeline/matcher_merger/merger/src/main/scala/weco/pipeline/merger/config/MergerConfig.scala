@@ -7,7 +7,8 @@ import weco.lambda.DownstreamBuilder.buildDownstreamTarget
 import weco.lambda.{ApplicationConfig, DownstreamTarget, LambdaConfigurable}
 
 case class MergerConfig(
-  elasticConfig: ElasticConfig,
+                         upstreamElasticConfig: ElasticConfig,
+                         downstreamElasticConfig: ElasticConfig,
   identifiedWorkIndex: String,
   denormalisedWorkIndex: String,
   initialImageIndex: String,
@@ -22,7 +23,8 @@ trait MergerConfigurable extends LambdaConfigurable[MergerConfig] {
 
   def build(rawConfig: Config): MergerConfig =
     MergerConfig(
-      elasticConfig = buildElasticClientConfig(rawConfig),
+      upstreamElasticConfig = buildElasticClientConfig(rawConfig, "upstream"),
+      downstreamElasticConfig = buildElasticClientConfig(rawConfig, "downstream"),
       identifiedWorkIndex =
         rawConfig.requireString(("es.identified-works.index")),
       denormalisedWorkIndex =
