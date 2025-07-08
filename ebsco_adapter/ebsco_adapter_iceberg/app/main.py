@@ -20,6 +20,7 @@ EBSCO_NAMESPACE = "ebsco"
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile):
+    ET.register_namespace('', 'http://www.loc.gov/MARC21/slim')
     return update_from_xml(table, ET.parse(xmlfile).getroot())
 
 
@@ -27,14 +28,17 @@ def update_from_xml(table: IcebergTable, collection: ET.ElementTree):
     return update_table(
         table,
         data_to_pa_table([node_to_record(record_node) for record_node in collection]),
+        EBSCO_NAMESPACE
     )
 
 
 def node_to_record(node: ET.ElementTree):
     ebsco_id = node.find(
-        "{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"
+        "marc:controlfield[@tag='001']",
+        namespaces={"marc": "http://www.loc.gov/MARC21/slim"}
     ).text
-    return {"namespace": EBSCO_NAMESPACE, "id": ebsco_id, "content": ET.tostring(node)}
+    return {"namespace": EBSCO_NAMESPACE, "id": ebsco_id,
+            "content": ET.tostring(node)}
 
 
 def data_to_pa_table(data):
