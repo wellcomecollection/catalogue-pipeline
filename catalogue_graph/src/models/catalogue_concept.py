@@ -73,7 +73,7 @@ def get_priority_label(
             return value, source
 
     raise ValueError(
-        f"Concept {concept_node['properties']['id']} does not have a label."
+        f"Concept {concept_node['~properties']['id']} does not have a label."
     )
 
 
