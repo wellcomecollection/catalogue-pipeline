@@ -11,6 +11,10 @@ from schemata import ARROW_SCHEMA
 EBSCO_NAMESPACE = "ebsco"
 
 
+def canonicalize(xml_string):
+    return ET.canonicalize(xml_string, strip_text=True)
+
+
 def update_from_xml_file(table: IcebergTable, xmlfile):
     ET.register_namespace("", "http://www.loc.gov/MARC21/slim")
     return update_from_xml(table, ET.parse(xmlfile).getroot())
@@ -29,7 +33,7 @@ def node_to_record(node: ET.ElementTree):
         "marc:controlfield[@tag='001']",
         namespaces={"marc": "http://www.loc.gov/MARC21/slim"},
     ).text
-    return {"namespace": EBSCO_NAMESPACE, "id": ebsco_id, "content": ET.tostring(node)}
+    return {"namespace": EBSCO_NAMESPACE, "id": ebsco_id, "content": canonicalize(ET.tostring(node))}
 
 
 def data_to_pa_table(data):

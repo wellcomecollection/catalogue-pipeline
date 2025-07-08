@@ -14,10 +14,6 @@ def add_namespace(d):
     return d
 
 
-def canonicalize(xml_string):
-    return ET.canonicalize(xml_string, strip_text=True)
-
-
 def test_store_record(temporary_table, xml_with_one_record):
     """The XML from each record is serialised and stored in the content field."""
     update_from_xml_file(temporary_table, xml_with_one_record)
@@ -27,7 +23,7 @@ def test_store_record(temporary_table, xml_with_one_record):
     pa_table = temporary_table.scan(
         selected_fields=["content"], row_filter=EqualTo("id", "ebs00001")
     ).to_arrow()
-    assert canonicalize(pa_table.column("content")[0].as_py()) == expected_content
+    assert pa_table.column("content")[0].as_py() == expected_content
 
 
 def test_delete_record(temporary_table, xml_with_one_record, xml_with_two_records):
