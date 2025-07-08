@@ -1,5 +1,5 @@
 from pyiceberg.schema import Schema
-from pyiceberg.types import NestedField, IntegerType, StringType, TimestamptzType
+from pyiceberg.types import NestedField, StringType, TimestamptzType
 import pyarrow as pa
 
 # namespace - e.g. ebsco - in case we decide to store everything in one table

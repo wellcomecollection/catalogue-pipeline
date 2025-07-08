@@ -1,17 +1,9 @@
-import os
-from pyiceberg.catalog import load_catalog
-from pyiceberg.schema import Schema
-from pyiceberg.types import NestedField, IntegerType, StringType
 from pyiceberg.table import Table as IcebergTable
-from pyiceberg.table.upsert_util import get_rows_to_update
 
 import pyarrow as pa
-import uuid
 
-from pyiceberg.expressions import Not, IsNull
 import xml.etree.ElementTree as ET
 import sys
-from datetime import datetime, timezone
 
 from iceberg_updates import get_table, update_table
 from schemata import ARROW_SCHEMA
@@ -45,7 +37,6 @@ def data_to_pa_table(data):
 
 
 def main(xmlfile):
-    """Do Something"""
     table = get_table(
         catalogue_name="local",
         catalogue_uri="sqlite:////tmp/warehouse/catalog.db",

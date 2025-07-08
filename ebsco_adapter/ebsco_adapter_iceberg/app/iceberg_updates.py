@@ -2,11 +2,7 @@ from pyiceberg.catalog import load_catalog
 from schemata import SCHEMA, ARROW_SCHEMA
 
 import pyarrow.compute as pc
-from schemata import ARROW_SCHEMA
 
-from pyiceberg.catalog import load_catalog
-from pyiceberg.schema import Schema
-from pyiceberg.types import NestedField, IntegerType, StringType
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
@@ -14,28 +10,10 @@ import pyarrow as pa
 import uuid
 
 from pyiceberg.expressions import Not, IsNull
-import sys
 from datetime import datetime, timezone
 
 
-class Updater:
-    def __init__(
-        self,
-        catalogue_name,
-        catalogue_uri,
-        catalogue_warehouse,
-        table_name,
-        catalogue_namespace="default",
-    ):
-        self.catalogue_namespace = catalogue_namespace
-        self.catalogue = self.get_catalogue(
-            catalogue_name, catalogue_uri, catalogue_warehouse
-        )
-
-
-def get_table(
-    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
-):
+def get_table(catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name):
     catalogue = load_catalog(
         catalogue_name,
         uri=catalogue_uri,
@@ -127,7 +105,7 @@ def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace:
 
 
 def _get_deletes(
-    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
 ) -> pa.Table:
     """
     Find records in `existing_data` that are not in `new_data`, and produce a

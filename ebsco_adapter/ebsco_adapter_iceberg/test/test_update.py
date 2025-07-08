@@ -1,12 +1,10 @@
 """
 Tests covering the update behaviour of the iceberg ebsco adapter
 """
-from pytest import fail, mark
-from main import data_to_pa_table, update_table, get_table
+from main import data_to_pa_table, update_table
 from pyiceberg.expressions import Not, IsNull, EqualTo, In
 
 from schemata import ARROW_SCHEMA
-from fixtures import temporary_table
 
 
 def assert_row_identifiers(rows, ids):
@@ -40,15 +38,6 @@ def test_noop(temporary_table):
     )
     # No changeset identifiers have been added
     assert not temporary_table.scan(row_filter=Not(IsNull("changeset"))).to_arrow()
-
-
-@mark.skip
-def test_corrupt_input():
-    """
-    Given an update file that cannot be understood
-    Then an Exception is raised
-    """
-    fail()
 
 
 def test_new_table(temporary_table):

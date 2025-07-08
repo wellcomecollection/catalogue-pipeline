@@ -44,3 +44,9 @@ def xml_with_two_records():
 def xml_with_three_records():
     with open(os.path.join(HERE, "data", "with_three_records.xml"), "r") as xmlfile:
         yield xmlfile
+
+
+@pytest.fixture
+def not_xml():
+    with open(os.path.join(HERE, "data", "not_xml.xml"), "r") as xmlfile:
+        yield xmlfile
