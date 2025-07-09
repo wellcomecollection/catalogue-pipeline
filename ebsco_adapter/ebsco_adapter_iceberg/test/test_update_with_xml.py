@@ -1,4 +1,3 @@
-import xml.etree.ElementTree as ET
 import pytest
 from pyiceberg.expressions import EqualTo
 
@@ -17,9 +16,9 @@ def add_namespace(d):
 def test_store_record(temporary_table, xml_with_one_record):
     """The XML from each record is serialised and stored in the content field."""
     update_from_xml_file(temporary_table, xml_with_one_record)
-    expected_content = ET.canonicalize(
-        """<record xmlns="http://www.loc.gov/MARC21/slim"><leader>00000cas a22000003 4500</leader><controlfield tag="001">ebs00001</controlfield><datafield tag="210" ind1=" " ind2=" "><subfield code="a">How to Avoid Huge Ships</subfield></datafield></record>"""
-    )
+    expected_content = """
+    <record xmlns="http://www.loc.gov/MARC21/slim"><leader>00000cas a22000003 4500</leader><controlfield tag="001">ebs00001</controlfield><datafield tag="210" ind1=" " ind2=" "><subfield code="a">How to Avoid Huge Ships</subfield></datafield></record>
+    """.strip()
     pa_table = temporary_table.scan(
         selected_fields=["content"], row_filter=EqualTo("id", "ebs00001")
     ).to_arrow()
@@ -67,6 +66,5 @@ def test_corrupt_input(temporary_table, not_xml):
     Given an update file that cannot be understood
     Then an Exception is raised
     """
-
-    with pytest.raises(ET.ParseError):
+    with pytest.raises(Exception):
         update_from_xml_file(temporary_table, not_xml)

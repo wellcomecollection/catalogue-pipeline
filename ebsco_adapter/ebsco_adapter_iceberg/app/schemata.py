@@ -12,13 +12,15 @@ SCHEMA = Schema(
     NestedField(field_id=2, name="id", field_type=StringType(), required=True),
     # This is the body of the record - the thing we have extracted from the source
     # It is left otherwise unaltered by the adapter
-    NestedField(field_id=3, name="content", field_type=StringType(), required=False),
+    # A hash of the content, for accelerated upsert detection
+    NestedField(field_id=3, name="content_hash", field_type=StringType(), required=False),
+    NestedField(field_id=4, name="content", field_type=StringType(), required=False),
     # An identifier for an "atomic" change.  This groups together all the update/insert/delete operations
     # associated with a single run of the adapter.
-    NestedField(field_id=4, name="changeset", field_type=StringType(), required=False),
+    NestedField(field_id=5, name="changeset", field_type=StringType(), required=False),
     # When a record was last modified.
     NestedField(
-        field_id=5, name="last_modified", field_type=TimestamptzType(), required=False
+        field_id=6, name="last_modified", field_type=TimestamptzType(), required=False
     ),
 )
 
@@ -29,6 +31,7 @@ ARROW_SCHEMA = pa.schema(
     [
         pa.field("namespace", type=pa.string(), nullable=False),
         pa.field("id", type=pa.string(), nullable=False),
+        pa.field("content_hash", type=pa.string(), nullable=True),
         pa.field("content", type=pa.string(), nullable=True),
     ]
 )
