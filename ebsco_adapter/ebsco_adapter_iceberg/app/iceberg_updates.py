@@ -12,12 +12,12 @@ import pyarrow.compute as pc
 from hashlib import sha3_256
 from timeit import timeit
 import functools
-
+from pyiceberg.table.upsert_util import get_rows_to_update
 import operator
 
 
 def get_table(
-    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
+        catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
 ) -> IcebergTable:
     catalogue = load_catalog(
         catalogue_name,
@@ -52,11 +52,10 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
     # the incoming data does not know about changesets, so this allows us to perform a table comparison
     # based on the "real" data.
     # records that have already been "deleted" do not need to be deleted again.
-    new_data = update_content_hash(new_data)
     existing_data = (
         table.scan(
             row_filter=Not(IsNull("content")),
-            selected_fields=("namespace", "id", "content", "content_hash"),
+            selected_fields=("namespace", "id", "content"),
         )
         .to_arrow()
         .cast(ARROW_SCHEMA)
@@ -92,7 +91,7 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
 
 @timeit
 def _upsert_with_markers(
-    table: IcebergTable, changes: pa.Table, inserts: pa.Table
+        table: IcebergTable, changes: pa.Table, inserts: pa.Table
 ) -> str:
     changeset_id = str(uuid.uuid1())
     timestamp = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
@@ -116,7 +115,7 @@ def _create_match_filter(changes: pa.Table):
 
 @timeit
 def _append_change_columns(
-    changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
+        changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
 ):
     changeset = changeset.append_column(
         pa.field("changeset", type=pa.string(), nullable=True),
@@ -130,9 +129,7 @@ def _append_change_columns(
 
 @timeit
 def _find_updates(existing_data: pa.Table, new_data: pa.Table):
-    return get_rows_to_update(
-        new_data, existing_data, ["namespace", "id"], ["content_hash"]
-    )
+    return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
 
 
 @timeit
@@ -146,7 +143,7 @@ def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace:
 
 @timeit
 def _get_deletes(
-    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
 ) -> pa.Table:
     """
     Find records in `existing_data` that are not in `new_data`, and produce a
@@ -160,77 +157,3 @@ def _get_deletes(
         [{"namespace": record_namespace, "id": id.as_py()} for id in missing_ids],
         schema=ARROW_SCHEMA,
     )
-
-
-def hash_content(content):
-    return sha3_256(content.encode()).hexdigest()
-
-
-def update_content_hash(table: pa.Table) -> pa.Table:
-    # Initialize a list to store the computed hashes
-    content_hashes = []
-
-    # Get the column arrays
-    content_column = table.column("content")
-
-    # Iterate over the rows in the content column
-    for content in content_column:
-        content_hash = hash_content(content.as_py())
-        content_hashes.append(content_hash)
-
-    # Create a new array for the content_hash column
-    content_hashes_array = pa.array(content_hashes)
-
-    # Add the new column to the table
-    updated_table = table.set_column(2, "content_hash", content_hashes_array)
-
-    return updated_table
-
-
-def get_rows_to_update(
-    source_table: pa.Table,
-    target_table: pa.Table,
-    join_cols: list[str],
-    compare_cols: list[str],
-) -> pa.Table:
-    """
-    Return a table with rows that need to be updated in the target table based on the join columns.
-
-    The table is joined on the identifier columns, and then checked if there are any updated rows.
-    Those are selected and everything is renamed correctly.
-    """
-    all_columns = set(source_table.column_names)
-    join_cols_set = set(join_cols)
-    non_key_cols = all_columns - join_cols_set
-
-    if len(target_table) == 0:
-        # When the target table is empty, there is nothing to update :)
-        return source_table.schema.empty_table()
-
-    diff_expr = functools.reduce(
-        operator.or_,
-        [pc.field(f"{col}-lhs") != pc.field(f"{col}-rhs") for col in compare_cols],
-    )
-
-    return (
-        source_table
-        # We already know that the schema is compatible, this is to fix large_ types
-        .cast(target_table.schema)
-        .join(
-            target_table,
-            keys=list(join_cols_set),
-            join_type="inner",
-            left_suffix="-lhs",
-            right_suffix="-rhs",
-        )
-        .filter(diff_expr)
-        .drop_columns([f"{col}-rhs" for col in non_key_cols])
-        .rename_columns(
-            {
-                f"{col}-lhs" if col not in join_cols else col: col
-                for col in source_table.column_names
-            }
-        )
-        # Finally cast to the original schema since it doesn't carry nullability:
-        # https://github.com/apache/arrow/issues/45557
-    ).cast(target_table.schema)

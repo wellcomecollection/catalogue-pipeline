@@ -22,6 +22,10 @@ def main(changeset_id):
     print(
         f"deleted records: {table.scan(row_filter=EqualTo('changeset', changeset_id) & IsNull('content')).count()}"
     )
+    print(
+        f"sample records: {table.scan(row_filter=EqualTo('changeset', changeset_id), limit=2).to_arrow()}"
+    )
+    #
 
 
 if __name__ == "__main__":
