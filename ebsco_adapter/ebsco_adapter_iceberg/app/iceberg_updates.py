@@ -17,7 +17,7 @@ import operator
 
 
 def get_table(
-        catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
+    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
 ) -> IcebergTable:
     catalogue = load_catalog(
         catalogue_name,
@@ -91,7 +91,7 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
 
 @timeit
 def _upsert_with_markers(
-        table: IcebergTable, changes: pa.Table, inserts: pa.Table
+    table: IcebergTable, changes: pa.Table, inserts: pa.Table
 ) -> str:
     changeset_id = str(uuid.uuid1())
     timestamp = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
@@ -115,7 +115,7 @@ def _create_match_filter(changes: pa.Table):
 
 @timeit
 def _append_change_columns(
-        changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
+    changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
 ):
     changeset = changeset.append_column(
         pa.field("changeset", type=pa.string(), nullable=True),
@@ -143,7 +143,7 @@ def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace:
 
 @timeit
 def _get_deletes(
-        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
 ) -> pa.Table:
     """
     Find records in `existing_data` that are not in `new_data`, and produce a
