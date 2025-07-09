@@ -5,6 +5,25 @@ from pydantic import BaseModel
 
 from models.graph_node import ConceptType
 
+# Sources sorted by priority for querying purposes.
+QUERY_SOURCE_PRIORITY = [
+    "nlm-mesh",
+    "lc-subjects",
+    "lc-names",
+    "wikidata",
+    "label-derived",
+]
+
+# Sources sorted by priority for display purposes. Wikidata is prioritised over Library of Congress Names since Wikidata
+# person names work better as theme page titles (e.g. 'Florence Nightingale' vs 'Nightingale, Florence, 1820-1910').
+DISPLAY_SOURCE_PRIORITY = [
+    "nlm-mesh",
+    "lc-subjects",
+    "wikidata",
+    "lc-names",
+    "label-derived",
+]
+
 
 class MissingLabelError(ValueError):
     pass
@@ -57,7 +76,9 @@ def standardise_label(label: str | None) -> str | None:
 
 
 def get_priority_label(
-    concept_node: dict, source_concept_nodes: list[dict]
+    concept_node: dict,
+    source_concept_nodes: list[dict],
+    source_priority: list[str],
 ) -> tuple[str, str]:
     """
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.
@@ -70,9 +91,7 @@ def get_priority_label(
         source = properties["source"]
         labels[source] = standardise_label(properties.get("label"))
 
-    # Sources sorted by priority. Wikidata is prioritised over Library of Congress Names since Wikidata person names
-    # work better as theme page titles (e.g. 'Florence Nightingale' vs 'Nightingale, Florence, 1820-1910').
-    for source in ["nlm-mesh", "lc-subjects", "wikidata", "lc-names", "label-derived"]:
+    for source in source_priority:
         if (value := labels.get(source)) is not None:
             return value, source
 
@@ -94,7 +113,9 @@ def transform_related_concepts(
 
         try:
             label, _ = get_priority_label(
-                related_item["concept_node"], related_item["source_concept_nodes"]
+                related_item["concept_node"],
+                related_item["source_concept_nodes"],
+                DISPLAY_SOURCE_PRIORITY,
             )
         except MissingLabelError:
             # If a related concept does not have a label, do not include it
@@ -173,10 +194,8 @@ class ConceptDescription(BaseModel):
     sourceUrl: str
 
 
-def get_concept_description(concept_data: dict) -> ConceptDescription | None:
-    source_concept_nodes = concept_data["source_concepts"]
-
-    for source_concept in source_concept_nodes:
+def get_concept_description(source_concepts: list[dict]) -> ConceptDescription | None:
+    for source_concept in source_concepts:
         properties = source_concept["~properties"]
         description_text = standardise_label(properties.get("description"))
         description_source = properties["source"]
@@ -191,6 +210,40 @@ def get_concept_description(concept_data: dict) -> ConceptDescription | None:
             )
 
     return None
+
+
+def get_concept_alternative_labels(source_concepts: list[dict]) -> list[str]:
+    alternative_labels = set()
+
+    for source_concept in source_concepts:
+        for alternative_label in (
+            source_concept["~properties"].get("alternative_labels", "").split("||")
+        ):
+            if len(alternative_label) > 0:
+                standardised_label = standardise_label(alternative_label)
+                if standardised_label is not None:
+                    alternative_labels.add(standardised_label)
+
+    return sorted(list(alternative_labels))
+
+
+def get_source_identifiers(
+    linked_source_concepts: list[dict],
+) -> list[CatalogueConceptIdentifier]:
+    identifiers = []
+
+    for source_concept in linked_source_concepts:
+        properties = source_concept["~properties"]
+        source = properties["source"]
+
+        identifiers.append(
+            CatalogueConceptIdentifier(
+                value=properties["id"],
+                identifierType=source,
+            )
+        )
+
+    return identifiers
 
 
 class RelatedConcepts(BaseModel):
@@ -208,6 +261,7 @@ class CatalogueConcept(BaseModel):
     id: str
     identifiers: list[CatalogueConceptIdentifier] = field(default_factory=list)
     label: str
+    displayLabel: str
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[ConceptDescription]
     type: ConceptType
@@ -216,56 +270,35 @@ class CatalogueConcept(BaseModel):
 
     @classmethod
     def from_neptune_result(cls, data: ConceptsQuerySingleResult) -> "CatalogueConcept":
-        identifiers = []
-        alternative_labels = set()
+        concept = data.concept["concept"]
+        source_concepts = data.concept["source_concepts"]
+        linked_source_concepts = data.concept["linked_source_concepts"]
+        same_as = sorted(data.concept["same_as_concept_ids"])
 
-        concept_data: dict = data.concept
+        # Concepts which are not connected to any Works will not have any types associated with them. We periodically
+        # remove such concepts from the graph, but there might be a few of them at any given point.
+        concept_types = data.concept.get("concept_types", ["Concept"])
 
-        label, _ = get_priority_label(
-            concept_data["concept"], concept_data["source_concepts"]
+        label, _ = get_priority_label(concept, source_concepts, QUERY_SOURCE_PRIORITY)
+
+        display_label, _ = get_priority_label(
+            concept, source_concepts, DISPLAY_SOURCE_PRIORITY
         )
-
-        for source_concept in concept_data["linked_source_concepts"]:
-            properties = source_concept["~properties"]
-            source = properties["source"]
-
-            identifiers.append(
-                CatalogueConceptIdentifier(
-                    value=properties["id"],
-                    identifierType=source,
-                )
-            )
-
-        # Extract alternative labels from _all_ source concepts (utilising both HAS_SOURCE_CONCEPT and SAME_AS edges)
-        for source_concept in concept_data["source_concepts"]:
-            for alternative_label in (
-                source_concept["~properties"].get("alternative_labels", "").split("||")
-            ):
-                if len(alternative_label) > 0:
-                    standardised_label = standardise_label(alternative_label)
-                    if standardised_label is not None:
-                        alternative_labels.add(standardised_label)
 
         # The `used_labels` set is used to ensure that a given related concept is only listed once. For example,
         # if a given concept is listed in both `broader_than` and `referenced_together`, we only want to keep
         # one of those references to prevent duplication in the frontend.
         used_labels = {label.lower()}
 
-        # Concepts which are not connected to any Works will not have any types associated with them. We periodically
-        # remove such concepts from the graph, but there might be a few of them at any given point.
-        if not concept_data.get("concept_types"):
-            concept_type: ConceptType = "Concept"
-        else:
-            concept_type = get_most_specific_concept_type(concept_data["concept_types"])
-
         return CatalogueConcept(
-            id=concept_data["concept"]["~properties"]["id"],
-            type=concept_type,
+            id=concept["~properties"]["id"],
+            type=get_most_specific_concept_type(concept_types),
             label=label,
-            alternativeLabels=sorted(list(set(alternative_labels))),
-            description=get_concept_description(concept_data),
-            identifiers=identifiers,
-            sameAs=concept_data["same_as_concept_ids"],
+            displayLabel=display_label,
+            alternativeLabels=get_concept_alternative_labels(source_concepts),
+            description=get_concept_description(source_concepts),
+            identifiers=get_source_identifiers(linked_source_concepts),
+            sameAs=same_as,
             relatedConcepts=RelatedConcepts(
                 fieldsOfWork=transform_related_concepts(
                     data.fields_of_work, used_labels

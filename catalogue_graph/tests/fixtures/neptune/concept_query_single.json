@@ -11,14 +11,16 @@
     {
       "~properties": {
         "id": "123",
-        "source": "lc-names"
+        "source": "lc-names",
+        "label": "LoC label"
       }
     },
     {
       "~properties": {
         "id": "456",
         "source": "wikidata",
-        "description": "description"
+        "description": "description",
+        "label": "Wikidata label"
       }
     },
     {
@@ -33,7 +35,8 @@
     {
       "~properties": {
         "id": "123",
-        "source": "lc-names"
+        "source": "lc-names",
+        "label": "LoC label"
       }
     }
   ],

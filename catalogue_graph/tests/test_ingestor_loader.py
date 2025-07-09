@@ -3,9 +3,6 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
-from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_json_fixture
-
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     CONCEPT_QUERY,
@@ -23,6 +20,8 @@ from models.catalogue_concept import (
     ConceptDescription,
     RelatedConcepts,
 )
+from test_mocks import MockRequest, MockSmartOpen
+from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -165,6 +164,7 @@ def get_catalogue_concept_mock(
     include: list[MockNeptuneResponseItem],
 ) -> CatalogueConcept:
     alternative_labels = []
+
     if MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include:
         alternative_labels = [
             "Alternative label",
@@ -225,7 +225,8 @@ def get_catalogue_concept_mock(
 
     return CatalogueConcept(
         id="id",
-        label="label",
+        label="LoC label",
+        displayLabel="Wikidata label",
         type="Person",
         alternativeLabels=alternative_labels,
         description=ConceptDescription(
