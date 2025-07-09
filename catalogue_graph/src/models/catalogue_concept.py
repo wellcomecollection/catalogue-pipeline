@@ -149,6 +149,11 @@ def transform_related_concepts(
 def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
     """If a concept is classified under more than one type, pick the most specific one and return it."""
 
+    # Concepts which are not connected to any Works will not have any types associated with them. We periodically
+    # remove such concepts from the graph, but there might be a few of them at any given point.
+    if len(concept_types) == 0:
+        return "Concept"
+
     # Prioritise concepts, with more specific ones (e.g. 'Person') above less specific ones (e.g. 'Agent').
     # Sometimes a concept is classified under types which are mutually exclusive. For example, there are
     # several hundred concepts categorised as both a 'Person' and an 'Organisation'. These inconsistencies
@@ -275,9 +280,7 @@ class CatalogueConcept(BaseModel):
         linked_source_concepts = data.concept["linked_source_concepts"]
         same_as = sorted(data.concept["same_as_concept_ids"])
 
-        # Concepts which are not connected to any Works will not have any types associated with them. We periodically
-        # remove such concepts from the graph, but there might be a few of them at any given point.
-        concept_types = data.concept.get("concept_types", ["Concept"])
+        concept_types = data.concept.get("concept_types", [])
 
         label, _ = get_priority_label(concept, source_concepts, QUERY_SOURCE_PRIORITY)
 
