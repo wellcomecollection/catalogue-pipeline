@@ -75,7 +75,7 @@ def get_priority_label(
     # Normally concepts should not have empty labels, but there is one concept which does (possibly due to a cataloguing
     # error). 
     if concept_node['~properties']['id'] == "k6p2u5fh":
-        return ""
+        return "", "label-derived"
     
     raise ValueError(
         f"Concept {concept_node['~properties']['id']} does not have a label."
