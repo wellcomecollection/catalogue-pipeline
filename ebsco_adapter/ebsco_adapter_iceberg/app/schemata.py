@@ -13,7 +13,9 @@ SCHEMA = Schema(
     # This is the body of the record - the thing we have extracted from the source
     # It is left otherwise unaltered by the adapter
     # A hash of the content, for accelerated upsert detection
-    NestedField(field_id=3, name="content_hash", field_type=StringType(), required=False),
+    NestedField(
+        field_id=3, name="content_hash", field_type=StringType(), required=False
+    ),
     NestedField(field_id=4, name="content", field_type=StringType(), required=False),
     # An identifier for an "atomic" change.  This groups together all the update/insert/delete operations
     # associated with a single run of the adapter.

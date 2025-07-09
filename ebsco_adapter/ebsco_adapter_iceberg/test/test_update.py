@@ -32,7 +32,9 @@ def test_noop(temporary_table):
     assert changeset is None
     # The data is the same as before the update
     assert (
-        temporary_table.scan(selected_fields=["namespace", "id", "content_hash", "content"])
+        temporary_table.scan(
+            selected_fields=["namespace", "id", "content_hash", "content"]
+        )
         .to_arrow()
         .cast(ARROW_SCHEMA)
         .equals(data)
@@ -58,10 +60,10 @@ def test_new_table(temporary_table):
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     assert (
-            temporary_table.scan().to_arrow()
-            == temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id)
-    ).to_arrow()
+        temporary_table.scan().to_arrow()
+        == temporary_table.scan(
+            row_filter=EqualTo("changeset", changeset_id)
+        ).to_arrow()
     )
     assert len(temporary_table.scan().to_arrow()) == 3
 
@@ -78,9 +80,21 @@ def test_update_records(temporary_table):
     temporary_table.append(
         data_to_namespaced_table(
             [
-                {"id": "eb0001", "content": "hello", "content_hash": hash_content("hello")},
-                {"id": "eb0002", "content": "boo!", "content_hash": hash_content("boo!")},
-                {"id": "eb0003", "content": "world", "content_hash": hash_content("world")},
+                {
+                    "id": "eb0001",
+                    "content": "hello",
+                    "content_hash": hash_content("hello"),
+                },
+                {
+                    "id": "eb0002",
+                    "content": "boo!",
+                    "content_hash": hash_content("boo!"),
+                },
+                {
+                    "id": "eb0003",
+                    "content": "world",
+                    "content_hash": hash_content("world"),
+                },
             ]
         )
     )
@@ -204,8 +218,16 @@ def test_all_actions(temporary_table):
         data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello", "content_hash": hash_hello},
-                {"id": "eb0002", "content": "byebye", "content_hash": hash_content("byebye")},
-                {"id": "eb0003", "content": "greetings", "content_hash": hash_content("greetings")},
+                {
+                    "id": "eb0002",
+                    "content": "byebye",
+                    "content_hash": hash_content("byebye"),
+                },
+                {
+                    "id": "eb0003",
+                    "content": "greetings",
+                    "content_hash": hash_content("greetings"),
+                },
             ]
         )
     )
@@ -233,24 +255,24 @@ def test_all_actions(temporary_table):
     # all rows in the changeset have the same last modified time
     # which is not None
     assert (
-            rows_by_key[expected_deletion]["last_modified"]
-            == rows_by_key[expected_update]["last_modified"]
-            == rows_by_key[expected_insert]["last_modified"]
-            is not None
+        rows_by_key[expected_deletion]["last_modified"]
+        == rows_by_key[expected_update]["last_modified"]
+        == rows_by_key[expected_insert]["last_modified"]
+        is not None
     )
     # And the remaining value is unchanged
     assert temporary_table.scan(
         row_filter=IsNull("changeset")
     ).to_arrow().to_pylist() == [
-               {
-                   "id": "eb0001",
-                   "content": "hello",
-                   "content_hash": hash_hello,
-                   "changeset": None,
-                   "last_modified": None,
-                   "namespace": "ebsco_test",
-               }
-           ]
+        {
+            "id": "eb0001",
+            "content": "hello",
+            "content_hash": hash_hello,
+            "changeset": None,
+            "last_modified": None,
+            "namespace": "ebsco_test",
+        }
+    ]
 
 
 def test_idempotent(temporary_table):
@@ -293,8 +315,16 @@ def test_most_recent_changeset_preserved(temporary_table):
     temporary_table.append(
         data_to_namespaced_table(
             [
-                {"id": "eb0001", "content": "hello", "content_hash": hash_content("hello")},
-                {"id": "eb0003", "content": "greetings", "content_hash": hash_content("greetings")},
+                {
+                    "id": "eb0001",
+                    "content": "hello",
+                    "content_hash": hash_content("hello"),
+                },
+                {
+                    "id": "eb0003",
+                    "content": "greetings",
+                    "content_hash": hash_content("greetings"),
+                },
             ]
         )
     )

@@ -29,7 +29,9 @@ def update_from_xml(table: IcebergTable, collection: etree._Element):
     records = nodes_to_records(collection)
     return update_table(
         table,
-        data_to_pa_table(records),  # [node_to_record(record_node) for record_node in collection]),
+        data_to_pa_table(
+            records
+        ),  # [node_to_record(record_node) for record_node in collection]),
         EBSCO_NAMESPACE,
     )
 
@@ -40,13 +42,15 @@ def nodes_to_records(collection: etree._Element):
 
 def node_to_record(node: etree._Element):
     ebsco_id = extract_id(node)
-    return {"namespace": EBSCO_NAMESPACE, "id": ebsco_id, "content": canonicalize(etree.tostring(node))}
+    return {
+        "namespace": EBSCO_NAMESPACE,
+        "id": ebsco_id,
+        "content": canonicalize(etree.tostring(node)),
+    }
 
 
 def extract_id(node: etree._Element) -> str:
-    id_field = node.find(
-        "./{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']"
-    )
+    id_field = node.find("./{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']")
     if id_field is None:
         raise ValueError(f"id controlfield could not be found in {node}")
     return id_field.text or ""

@@ -17,7 +17,7 @@ import operator
 
 
 def get_table(
-        catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
+    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
 ) -> IcebergTable:
     catalogue = load_catalog(
         catalogue_name,
@@ -91,7 +91,9 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
 
 
 @timeit
-def _upsert_with_markers(table: IcebergTable, changes: pa.Table, inserts: pa.Table) -> str:
+def _upsert_with_markers(
+    table: IcebergTable, changes: pa.Table, inserts: pa.Table
+) -> str:
     changeset_id = str(uuid.uuid1())
     timestamp = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
     if changes:
@@ -113,7 +115,9 @@ def _create_match_filter(changes: pa.Table):
 
 
 @timeit
-def _append_change_columns(changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar):
+def _append_change_columns(
+    changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
+):
     changeset = changeset.append_column(
         pa.field("changeset", type=pa.string(), nullable=True),
         [[changeset_id] * len(changeset)],
@@ -126,8 +130,9 @@ def _append_change_columns(changeset: pa.Table, changeset_id: str, timestamp: pa
 
 @timeit
 def _find_updates(existing_data: pa.Table, new_data: pa.Table):
-    return get_rows_to_update(new_data, existing_data,
-                              ["namespace", "id"], ["content_hash"])
+    return get_rows_to_update(
+        new_data, existing_data, ["namespace", "id"], ["content_hash"]
+    )
 
 
 @timeit
@@ -141,7 +146,7 @@ def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace:
 
 @timeit
 def _get_deletes(
-        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
 ) -> pa.Table:
     """
     Find records in `existing_data` that are not in `new_data`, and produce a
@@ -182,8 +187,12 @@ def update_content_hash(table: pa.Table) -> pa.Table:
     return updated_table
 
 
-def get_rows_to_update(source_table: pa.Table, target_table: pa.Table, join_cols: list[str],
-                       compare_cols: list[str]) -> pa.Table:
+def get_rows_to_update(
+    source_table: pa.Table,
+    target_table: pa.Table,
+    join_cols: list[str],
+    compare_cols: list[str],
+) -> pa.Table:
     """
     Return a table with rows that need to be updated in the target table based on the join columns.
 
@@ -198,17 +207,30 @@ def get_rows_to_update(source_table: pa.Table, target_table: pa.Table, join_cols
         # When the target table is empty, there is nothing to update :)
         return source_table.schema.empty_table()
 
-    diff_expr = functools.reduce(operator.or_,
-                                 [pc.field(f"{col}-lhs") != pc.field(f"{col}-rhs") for col in compare_cols])
+    diff_expr = functools.reduce(
+        operator.or_,
+        [pc.field(f"{col}-lhs") != pc.field(f"{col}-rhs") for col in compare_cols],
+    )
 
     return (
         source_table
         # We already know that the schema is compatible, this is to fix large_ types
         .cast(target_table.schema)
-        .join(target_table, keys=list(join_cols_set), join_type="inner", left_suffix="-lhs", right_suffix="-rhs")
+        .join(
+            target_table,
+            keys=list(join_cols_set),
+            join_type="inner",
+            left_suffix="-lhs",
+            right_suffix="-rhs",
+        )
         .filter(diff_expr)
         .drop_columns([f"{col}-rhs" for col in non_key_cols])
-        .rename_columns({f"{col}-lhs" if col not in join_cols else col: col for col in source_table.column_names})
+        .rename_columns(
+            {
+                f"{col}-lhs" if col not in join_cols else col: col
+                for col in source_table.column_names
+            }
+        )
         # Finally cast to the original schema since it doesn't carry nullability:
         # https://github.com/apache/arrow/issues/45557
     ).cast(target_table.schema)
