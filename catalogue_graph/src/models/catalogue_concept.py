@@ -69,7 +69,7 @@ def get_priority_label(
         properties = source_concept["~properties"]
         source = properties["source"]
         labels[source] = standardise_label(properties.get("label"))
-    
+
     # Sources sorted by priority. Wikidata is prioritised over Library of Congress Names since Wikidata person names
     # work better as theme page titles (e.g. 'Florence Nightingale' vs 'Nightingale, Florence, 1820-1910').
     for source in ["nlm-mesh", "lc-subjects", "wikidata", "lc-names", "label-derived"]:
@@ -91,13 +91,13 @@ def transform_related_concepts(
 
     for related_item in related_items:
         concept_id = related_item["concept_node"]["~properties"]["id"]
-        
+
         try:
             label, _ = get_priority_label(
                 related_item["concept_node"], related_item["source_concept_nodes"]
             )
         except MissingLabelError:
-            # If a related concept does not have a label, do not include it 
+            # If a related concept does not have a label, do not include it
             continue
 
         relationship_type = ""
