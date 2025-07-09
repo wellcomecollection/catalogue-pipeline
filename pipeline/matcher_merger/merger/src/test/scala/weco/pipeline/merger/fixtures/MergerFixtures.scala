@@ -1,82 +1,128 @@
 package weco.pipeline.merger.fixtures
 
+import com.typesafe.config.Config
 import weco.catalogue.internal_model.image.Image
 import weco.catalogue.internal_model.image.ImageState.Initial
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Merged}
 import weco.fixtures.TestWith
-import weco.messaging.fixtures.SQS.Queue
+import weco.lambda.{ApplicationConfig, Downstream}
+import weco.lambda.helpers.MemoryDownstream
 import weco.messaging.memory.MemoryMessageSender
-import weco.messaging.sns.NotificationMessage
-import weco.monitoring.Metrics
-import weco.monitoring.memory.MemoryMetrics
-import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, MergerWorkerService, PlatformMerger, WorkRouter}
-import weco.pipeline_storage.fixtures.PipelineStorageStreamFixtures
+import weco.pipeline.merger.{MergeProcessor, MergerSQSLambda}
+import weco.pipeline.merger.services.{IdentifiedWorkLookup, MergerManager, PlatformMerger, WorkRouter}
 import weco.pipeline_storage.memory.{MemoryIndexer, MemoryRetriever}
 
 import scala.collection.mutable
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
-trait MergerFixtures extends PipelineStorageStreamFixtures {
+trait MergerFixtures extends MemoryDownstream {
+    case class DummyConfig() extends ApplicationConfig
 
-  type WorkOrImage = Either[Work[Merged], Image[Initial]]
+    type WorkOrImage = Either[Work[Merged], Image[Initial]]
 
-  val workRouter = new MemoryWorkRouter(
-    new MemoryMessageSender(): MemoryMessageSender,
-    new MemoryMessageSender(): MemoryMessageSender,
-    new MemoryMessageSender(): MemoryMessageSender
-  )
-
-  def withMergerService[R](
-    retriever: MemoryRetriever[Work[Identified]],
-    queue: Queue,
-    workRouter: MemoryWorkRouter,
-    imageSender: MemoryMessageSender = new MemoryMessageSender(),
-    metrics: Metrics[Future] = new MemoryMetrics,
-    index: mutable.Map[String, WorkOrImage] = mutable.Map.empty
-  )(testWith: TestWith[MergerWorkerService[String, String], R]): R =
-    withActorSystem {
-      implicit actorSystem =>
-        withSQSStream[NotificationMessage, R](queue, metrics) {
-          msgStream =>
-            val workerService = new MergerWorkerService(
-              msgStream = msgStream,
-              sourceWorkLookup = new IdentifiedWorkLookup(retriever),
-              mergerManager = new MergerManager(PlatformMerger),
-              workOrImageIndexer = new MemoryIndexer(index),
-              workRouter = workRouter,
-              imageMsgSender = imageSender,
-              config = pipelineStorageConfig
-            )
-
-            workerService.run()
-
-            testWith(workerService)
-        }
-    }
-
-  class MemoryWorkRouter (
-    val workSender: MemoryMessageSender,
-    val pathSender: MemoryMessageSender,
-    val pathConcatenatorSender: MemoryMessageSender
-    ) extends WorkRouter[String](
-      workSender = workSender,
-      pathSender = pathSender,
-      pathConcatenatorSender = pathConcatenatorSender
+    val workRouter = new MemoryWorkRouter(
+      new MemoryMessageSender(): MemoryMessageSender,
+      new MemoryMessageSender(): MemoryMessageSender,
+      new MemoryMessageSender(): MemoryMessageSender
     )
 
-  def getWorksSent(workSender: MemoryMessageSender): Seq[String] = {
-    workSender.messages.map { _.body }
-  }
+    def withMemoryWorkLookup[R](
+      identifiedIndex: MemoryRetriever[Work[Identified]]
+    )(
+      testWith: TestWith[IdentifiedWorkLookup, R]
+    ): R = {
+      testWith(
+        new IdentifiedWorkLookup(identifiedIndex)
+      )
+    }
 
-  def getPathsSent(pathSender: MemoryMessageSender): Seq[String] =
-    pathSender.messages.map { _.body }
+    def withMemoryIndexer[R](
+      index: mutable.Map[String, WorkOrImage] = mutable.Map.empty
+    )(
+      testWith: TestWith[MemoryIndexer[WorkOrImage], R]
+    ): R = {
+      testWith(new MemoryIndexer[WorkOrImage](index = index))
+    }
 
-  def getIncompletePathSent(incompletePathSender: MemoryMessageSender): Seq[String] = {
-    incompletePathSender.messages.map { _.body }
-  }
+    def withImageDownstream[R](sender: MemoryMessageSender)(
+      testWith: TestWith[MemorySNSDownstream, R]
+    ): R = {
+      testWith(new MemorySNSDownstream(sender))
+    }
 
-  def getImagesSent(imageSender: MemoryMessageSender): Seq[String] =
-    imageSender.messages.map { _.body }
+    def withMergerProcessor[R](
+      retriever: MemoryRetriever[Work[Identified]],
+      index: mutable.Map[String, WorkOrImage],
+    )(testWith: TestWith[MergeProcessor, R]): R = {
+      val mergeProcessor = new MergeProcessor(
+        sourceWorkLookup = new IdentifiedWorkLookup(retriever),
+        mergerManager = new MergerManager(PlatformMerger),
+        workOrImageIndexer = new MemoryIndexer(index)
+      )
+      testWith(mergeProcessor)
+    }
+
+    def withMergerSQSLambda[R](
+      identifiedIndex: MemoryRetriever[Work[Identified]],
+      mergedIndex: mutable.Map[String, WorkOrImage] = mutable.Map.empty,
+      workSender: MemoryMessageSender,
+      pathSender: MemoryMessageSender,
+      pathconcatSender: MemoryMessageSender,
+      imageSender: MemoryMessageSender,
+    )(
+      testWith: TestWith[MergerSQSLambda[DummyConfig], R]
+    ): R = {
+      withMemoryWorkLookup(identifiedIndex) {
+        retriever =>
+          withMemoryIndexer(mergedIndex) {
+            indexer =>
+              withImageDownstream(imageSender) {
+                imageDownstream =>
+                  testWith(new MergerSQSLambda[DummyConfig] {
+                    override def build(rawConfig: Config): DummyConfig =
+                      DummyConfig()
+
+                    override protected val mergeProcessor: MergeProcessor = {
+                      new MergeProcessor(
+                        retriever,
+                        new MergerManager(PlatformMerger),
+                        indexer
+                      )(global)
+                    }
+                    override protected val workRouter: WorkRouter = new MemoryWorkRouter(
+                      workSender,
+                      pathSender,
+                      pathconcatSender
+                    )
+                    override protected val imageMsgSender: Downstream = imageDownstream
+                  })
+              }
+          }
+      }
+    }
+
+    class MemoryWorkRouter (
+      val workSender: MemoryMessageSender,
+      val pathSender: MemoryMessageSender,
+      val pathConcatenatorSender: MemoryMessageSender
+      ) extends WorkRouter(
+        workSender = new MemorySNSDownstream(workSender),
+        pathSender = new MemorySNSDownstream(pathSender),
+        pathConcatenatorSender = new MemorySNSDownstream(pathConcatenatorSender),
+      )
+
+    def getWorksSent(workSender: MemoryMessageSender): Seq[String] = {
+      workSender.messages.map { _.body }
+    }
+
+    def getPathsSent(pathSender: MemoryMessageSender): Seq[String] =
+      pathSender.messages.map { _.body }
+
+    def getIncompletePathSent(incompletePathSender: MemoryMessageSender): Seq[String] = {
+      incompletePathSender.messages.map { _.body }
+    }
+
+    def getImagesSent(imageSender: MemoryMessageSender): Seq[String] =
+      imageSender.messages.map { _.body }
 }
