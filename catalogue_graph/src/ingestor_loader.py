@@ -414,14 +414,14 @@ def transform_data(neptune_data: ConceptsQueryResult) -> list[CatalogueConcept]:
             ),
             related_topics=neptune_data.related_topics.get(concept_id, []),
         )
-        
+
         try:
             catalogue_concept = CatalogueConcept.from_neptune_result(result)
             transformed.append(catalogue_concept)
         except MissingLabelError:
             # There is currently one concept which does not have a label ('k6p2u5fh') 
             print(f"Concept {concept_id} does not have a label and will not be indexed.")
-        
+
     return transformed
 
 

@@ -91,7 +91,7 @@ def transform_related_concepts(
 
     for related_item in related_items:
         concept_id = related_item["concept_node"]["~properties"]["id"]
-        
+
         try:
             label, _ = get_priority_label(
                 related_item["concept_node"], related_item["source_concept_nodes"]
