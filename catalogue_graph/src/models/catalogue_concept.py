@@ -71,12 +71,12 @@ def get_priority_label(
     for source in ["nlm-mesh", "lc-subjects", "wikidata", "lc-names", "label-derived"]:
         if (value := labels.get(source)) is not None:
             return value, source
-    
+
     # Normally concepts should not have empty labels, but there is one concept which does (possibly due to a cataloguing
-    # error). 
-    if concept_node['~properties']['id'] == "k6p2u5fh":
+    # error).
+    if concept_node["~properties"]["id"] == "k6p2u5fh":
         return "", "label-derived"
-    
+
     raise ValueError(
         f"Concept {concept_node['~properties']['id']} does not have a label."
     )
