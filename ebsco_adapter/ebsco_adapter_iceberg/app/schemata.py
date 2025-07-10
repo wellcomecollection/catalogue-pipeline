@@ -11,7 +11,8 @@ SCHEMA = Schema(
     # Each record has an identifier which is unique within its namespace
     NestedField(field_id=2, name="id", field_type=StringType(), required=True),
     # This is the body of the record - the thing we have extracted from the source
-    # It is left otherwise unaltered by the adapter
+    # It is left otherwise unaltered by the adapter.
+    # This could be anything, the updater does not care
     NestedField(field_id=3, name="content", field_type=StringType(), required=False),
     # An identifier for an "atomic" change.  This groups together all the update/insert/delete operations
     # associated with a single run of the adapter.

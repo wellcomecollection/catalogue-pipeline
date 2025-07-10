@@ -1,21 +1,24 @@
 from pyiceberg.catalog import load_catalog
 from schemata import SCHEMA, ARROW_SCHEMA
 
-import pyarrow.compute as pc
-
 from pyiceberg.table import Table as IcebergTable
-from pyiceberg.table.upsert_util import get_rows_to_update
 
 import pyarrow as pa
 import uuid
 
-from pyiceberg.expressions import Not, IsNull
+from pyiceberg.expressions import Not, IsNull, In
 from datetime import datetime, timezone
+import pyarrow.compute as pc
+from hashlib import sha3_256
+from timeit import timeit
+import functools
+from pyiceberg.table.upsert_util import get_rows_to_update
+import operator
 
 
 def get_table(
     catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
-):
+) -> IcebergTable:
     catalogue = load_catalog(
         catalogue_name,
         uri=catalogue_uri,
@@ -48,56 +51,96 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
     # Pull out a table view excluding the existing changeset column, and any deleted rows.
     # the incoming data does not know about changesets, so this allows us to perform a table comparison
     # based on the "real" data.
-    # records that have already been "deleted" do not need to be deleted again.
-
     existing_data = (
         table.scan(
-            row_filter=Not(IsNull("content")),
-            selected_fields=["namespace", "id", "content"],
+            selected_fields=("namespace", "id", "content"),
         )
         .to_arrow()
         .cast(ARROW_SCHEMA)
     )
     if existing_data:
-        # Although upsert takes care of the what-to-do aspect
-        # of create vs update, we need to produce a changeset
-        # consisting of only those records we wish to modify.
-        # This allows us to tell iceberg that all of the entries
-        # being changed are part of the same changeset.
+        existing_data = existing_data.sort_by("id")
+        new_data = new_data.sort_by("id")
+        # we need to produce a changeset consisting of only those
+        # records we wish to modify.
+        # This allows us to store a value in iceberg that identifies
+        # all the entries being changed as part of the same changeset.
 
         # Delete is obvious, as what we have to do here is create
         # a deletion record with which to overwrite the existing one.
         deletes = _get_deletes(existing_data, new_data, record_namespace)
+
         # pyiceberg offers a built-in feature that returns the update rows
         # by comparing two tables.  Unfortunately, it does not say anything
         # about inserts.
         updates = _find_updates(existing_data, new_data)
+        # Insert is essentially the opposite of delete. What is in new but not old.
         inserts = _find_inserts(existing_data, new_data, record_namespace)
-        changeset = pa.concat_tables([deletes, updates, inserts])
+        changes = pa.concat_tables([deletes, updates])
     else:
         # Empty DB short-circuit, just write it all in.
-        changeset = new_data
-    if changeset:
-        now = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
-        changeset_id = str(uuid.uuid1())
-        changeset = changeset.append_column(
-            pa.field("changeset", type=pa.string(), nullable=True),
-            [[changeset_id] * len(changeset)],
-        ).append_column(
-            pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
-            [[now] * len(changeset)],
-        )
-        table.upsert(changeset, ["id"])
-        return changeset_id
+        inserts = new_data
+        changes = None
+    if changes or inserts:
+        return _upsert_with_markers(table, changes, inserts)
     else:
         print("nothing to do")
         return None
 
 
+def _upsert_with_markers(
+    table: IcebergTable, changes: pa.Table, inserts: pa.Table
+) -> str:
+    """
+    Insert and update records, adding the timestamp and changeset values to
+    any changed rows.
+    :param table: The table to update
+    :param changes: New versions of existing records to change
+    :param inserts: New records to insert
+    """
+    changeset_id = str(uuid.uuid1())
+    timestamp = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
+    if changes:
+        changes = _append_change_columns(changes, changeset_id, timestamp)
+    if inserts:
+        inserts = _append_change_columns(inserts, changeset_id, timestamp)
+    with table.transaction() as tx:
+        # Because we already know which records to overwrite and which ones to append,
+        # we can avoid all the extra processing that happens inside table.upsert to find
+        # matching records, check them for differences etc.
+        # Just overwrite all the `changes` and append all the `inserts`
+        if changes:
+            overwrite_mask_predicate = _create_match_filter(changes)
+            tx.overwrite(changes, overwrite_filter=overwrite_mask_predicate)
+        if inserts:
+            tx.append(inserts)
+    return changeset_id
+
+
+def _create_match_filter(changes: pa.Table):
+    change_ids = changes.column("id").to_pylist()
+    return In("id", change_ids)
+
+
+def _append_change_columns(
+    changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
+):
+    changeset = changeset.append_column(
+        pa.field("changeset", type=pa.string(), nullable=True),
+        [[changeset_id] * len(changeset)],
+    ).append_column(
+        pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
+        [[timestamp] * len(changeset)],
+    )
+    return changeset
+
+
+@timeit
 def _find_updates(existing_data: pa.Table, new_data: pa.Table):
-    return get_rows_to_update(new_data, existing_data, ["id"])
+    return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
 
 
+@timeit
 def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace: str):
     old_ids = existing_data.column("id")
     missing_records = new_data.filter(
@@ -106,6 +149,7 @@ def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace:
     return missing_records
 
 
+@timeit
 def _get_deletes(
     existing_data: pa.Table, new_data: pa.Table, record_namespace: str
 ) -> pa.Table:
@@ -115,7 +159,10 @@ def _get_deletes(
     """
     new_ids = new_data.column("id")
     missing_ids = existing_data.filter(
-        (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(new_ids)
+        # records that have already been "deleted" do not need to be deleted again.
+        (~pc.field("content").is_null()) &
+        (pc.field("namespace") == record_namespace) &
+        ~pc.field("id").isin(new_ids)
     ).column("id")
     return pa.Table.from_pylist(
         [{"namespace": record_namespace, "id": id.as_py()} for id in missing_ids],

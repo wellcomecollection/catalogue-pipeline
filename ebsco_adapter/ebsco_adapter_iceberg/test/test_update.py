@@ -31,13 +31,47 @@ def test_noop(temporary_table):
     assert changeset is None
     # The data is the same as before the update
     assert (
-        temporary_table.scan(selected_fields=["namespace", "id", "content"])
+        temporary_table.scan(
+            selected_fields=["namespace", "id", "content"]
+        )
         .to_arrow()
         .cast(ARROW_SCHEMA)
         .equals(data)
     )
     # No changeset identifiers have been added
     assert not temporary_table.scan(row_filter=Not(IsNull("changeset"))).to_arrow()
+
+
+def test_undelete(temporary_table):
+    """
+    Given a table with a record that has been deleted
+    When a record with the same identifier is present in new data
+    The record is successfully undeleted.
+
+        This test ensures that we do not run the risk of creating an
+        infinite number of records with the same identifier if the
+        provider deletes and restores access to that resource.
+    """
+    data = data_to_namespaced_table([
+        {"id": "eb0001", "content": "hello"},
+        {"id": "eb0002", "content": None}
+    ])
+    temporary_table.append(data)
+    new_data = data_to_namespaced_table([
+        {"id": "eb0001", "content": "hello"},
+        {"id": "eb0002", "content": "world!"}
+    ])
+
+    changeset = update_table(temporary_table, new_data, "ebsco_test")
+    # No Changeset identifier is returned
+    assert changeset is not None
+    # The data is the same as before the update
+    as_pa = temporary_table.scan(
+        selected_fields=["id", "content", "changeset"]
+    ).to_arrow().sort_by('id').to_pylist()
+    # i.e. the same number of records are present before and after the change
+    assert len(as_pa) == 2
+    assert as_pa[1] == {"id": "eb0002", "content": "world!", "changeset": changeset}
 
 
 def test_new_table(temporary_table):
@@ -57,10 +91,10 @@ def test_new_table(temporary_table):
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     assert (
-        temporary_table.scan().to_arrow()
-        == temporary_table.scan(
-            row_filter=EqualTo("changeset", changeset_id)
-        ).to_arrow()
+            temporary_table.scan().to_arrow()
+            == temporary_table.scan(
+        row_filter=EqualTo("changeset", changeset_id)
+    ).to_arrow()
     )
     assert len(temporary_table.scan().to_arrow()) == 3
 
@@ -77,9 +111,18 @@ def test_update_records(temporary_table):
     temporary_table.append(
         data_to_namespaced_table(
             [
-                {"id": "eb0001", "content": "hello"},
-                {"id": "eb0002", "content": "boo!"},
-                {"id": "eb0003", "content": "world"},
+                {
+                    "id": "eb0001",
+                    "content": "hello",
+                },
+                {
+                    "id": "eb0002",
+                    "content": "boo!",
+                },
+                {
+                    "id": "eb0003",
+                    "content": "world",
+                },
             ]
         )
     )
@@ -198,13 +241,18 @@ def test_all_actions(temporary_table):
     Then all the appropriate actions are taken
     And all the new, changed and deleted rows are identifiably grouped by a changeset property
     """
-
     temporary_table.append(
         data_to_namespaced_table(
             [
                 {"id": "eb0001", "content": "hello"},
-                {"id": "eb0002", "content": "byebye"},
-                {"id": "eb0003", "content": "greetings"},
+                {
+                    "id": "eb0002",
+                    "content": "byebye"
+                },
+                {
+                    "id": "eb0003",
+                    "content": "greetings"
+                },
             ]
         )
     )
@@ -222,7 +270,7 @@ def test_all_actions(temporary_table):
 
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
     changeset_rows = temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id)
+        row_filter=EqualTo("changeset", changeset_id),
     ).to_arrow()
     assert len(changeset_rows) == 3
     rows_by_key = {row["id"]: row for row in changeset_rows.to_pylist()}
@@ -232,23 +280,23 @@ def test_all_actions(temporary_table):
     # all rows in the changeset have the same last modified time
     # which is not None
     assert (
-        rows_by_key[expected_deletion]["last_modified"]
-        == rows_by_key[expected_update]["last_modified"]
-        == rows_by_key[expected_insert]["last_modified"]
-        is not None
+            rows_by_key[expected_deletion]["last_modified"]
+            == rows_by_key[expected_update]["last_modified"]
+            == rows_by_key[expected_insert]["last_modified"]
+            is not None
     )
     # And the remaining value is unchanged
     assert temporary_table.scan(
         row_filter=IsNull("changeset")
     ).to_arrow().to_pylist() == [
-        {
-            "id": "eb0001",
-            "content": "hello",
-            "changeset": None,
-            "last_modified": None,
-            "namespace": "ebsco_test",
-        }
-    ]
+               {
+                   "id": "eb0001",
+                   "content": "hello",
+                   "changeset": None,
+                   "last_modified": None,
+                   "namespace": "ebsco_test",
+               }
+           ]
 
 
 def test_idempotent(temporary_table):
@@ -291,8 +339,14 @@ def test_most_recent_changeset_preserved(temporary_table):
     temporary_table.append(
         data_to_namespaced_table(
             [
-                {"id": "eb0001", "content": "hello"},
-                {"id": "eb0003", "content": "greetings"},
+                {
+                    "id": "eb0001",
+                    "content": "hello"
+                },
+                {
+                    "id": "eb0003",
+                    "content": "greetings"
+                },
             ]
         )
     )
