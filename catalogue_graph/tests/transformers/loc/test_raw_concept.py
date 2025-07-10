@@ -7,66 +7,44 @@ from transformers.loc.raw_concept import RawLibraryOfCongressConcept
 
 
 class TestSourceId:
-    def test_remove_prefix_noop(self) -> None:
+    def test_extract_id_fully_qualified(self) -> None:
         """
-        If there is no prefix to remove, remove_id_prefix will do nothing
+        IDs extracted from fully-qualified URL-style prefixes
         """
-        assert (
-            RawLibraryOfCongressConcept({"@id": "sh1234567890"}).source_id
-            == "sh1234567890"
-        )
+        subject = {"@id": "http://id.loc.gov/authorities/subjects/sh1234567890"}
+        assert RawLibraryOfCongressConcept(subject).source_id == "sh1234567890"
 
-    def test_remove_prefix_fully_qualified(self) -> None:
-        """
-        remove_id_prefix removes fully-qualified URL-style prefixes
-        """
-        assert (
-            RawLibraryOfCongressConcept(
-                {"@id": "http://id.loc.gov/authorities/subjects/sh1234567890"}
-            ).source_id
-            == "sh1234567890"
-        )
-        assert (
-            RawLibraryOfCongressConcept(
-                {"@id": "http://id.loc.gov/authorities/names/sh0987654321"}
-            ).source_id
-            == "sh0987654321"
-        )
+        name = {"@id": "http://id.loc.gov/authorities/names/no0987654321"}
+        assert RawLibraryOfCongressConcept(name).source_id == "no0987654321"
 
-    def test_remove_prefix_relative(self) -> None:
+    def test_extract_id_relative(self) -> None:
         """
-        remove_id_prefix removes relative/local prefixes
+        IDs extracted from relative/local prefixes
         """
-        assert (
-            RawLibraryOfCongressConcept(
-                {"@id": "/authorities/subjects/sh1234567890"}
-            ).source_id
-            == "sh1234567890"
-        )
-        assert (
-            RawLibraryOfCongressConcept(
-                {"@id": "/authorities/names/sh0987654321"}
-            ).source_id
-            == "sh0987654321"
-        )
+        node = {"@id": "/authorities/subjects/sh1234567890"}
+        assert RawLibraryOfCongressConcept(node).source_id == "sh1234567890"
 
-    def test_remove_prefix_lookalikes(self) -> None:
+        node = {"@id": "/authorities/names/n0987654321"}
+        assert RawLibraryOfCongressConcept(node).source_id == "n0987654321"
+
+        node = {"@id": "/authorities/names/nr0987654321"}
+        assert RawLibraryOfCongressConcept(node).source_id == "nr0987654321"
+
+    def test_extract_id_lookalikes(self) -> None:
         """
-        remove_id_prefix only removes specific known prefixes,
-        not just things that look a bit like them
+        IDs with unknown prefixes not extracted
         """
-        assert (
-            RawLibraryOfCongressConcept(
-                {"@id": "/authorities/banana/sh1234567890"}
-            ).source_id
-            == "/authorities/banana/sh1234567890"
-        )
-        assert (
-            RawLibraryOfCongressConcept(
-                {"@id": "https://id.loc.gov.uk/authorities/subjects/sh1234567890"}
-            ).source_id
-            == "https://id.loc.gov.uk/authorities/subjects/sh1234567890"
-        )
+        with pytest.raises(AssertionError):
+            node = {"@id": "/authorities/banana/sh1234567890"}
+            _ = RawLibraryOfCongressConcept(node).source_id
+
+        with pytest.raises(AssertionError):
+            node = {"@id": "rwo/agents/sh1234567890"}
+            _ = RawLibraryOfCongressConcept(node).source_id
+
+        with pytest.raises(AssertionError):
+            node = {"@id": "http://id.loc.gov/authorities/childrensSubjects/sj12345"}
+            _ = RawLibraryOfCongressConcept(node).source_id
 
 
 class TestSource:
@@ -90,10 +68,9 @@ class TestSource:
 
     def test_source_invalid(self) -> None:
         with pytest.raises(ValueError):
-            concept = RawLibraryOfCongressConcept(
+            _ = RawLibraryOfCongressConcept(
                 {"@id": "authorities/childrensSubjects/sj2021051581"}
-            )
-            _ = concept.source
+            ).source
 
 
 class TestExclusion:
@@ -103,7 +80,7 @@ class TestExclusion:
         should be included in the output
         """
         concept = RawLibraryOfCongressConcept(
-            {"@id": "authorities/names/sh2010105253", "@graph": []}
+            {"@id": "authorities/subjects/sh2010105253", "@graph": []}
         )
         # The SUT at this point doesn't actually care what the node is, just that it exists
         concept._raw_concept_node = {}
