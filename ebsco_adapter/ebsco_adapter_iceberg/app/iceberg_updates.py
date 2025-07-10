@@ -51,10 +51,8 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
     # Pull out a table view excluding the existing changeset column, and any deleted rows.
     # the incoming data does not know about changesets, so this allows us to perform a table comparison
     # based on the "real" data.
-    # records that have already been "deleted" do not need to be deleted again.
     existing_data = (
         table.scan(
-            row_filter=Not(IsNull("content")),
             selected_fields=("namespace", "id", "content"),
         )
         .to_arrow()
@@ -63,19 +61,20 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
     if existing_data:
         existing_data = existing_data.sort_by("id")
         new_data = new_data.sort_by("id")
-        # Although upsert takes care of the what-to-do aspect
-        # of create vs update, we need to produce a changeset
-        # consisting of only those records we wish to modify.
-        # This allows us to tell iceberg that all of the entries
-        # being changed are part of the same changeset.
+        # we need to produce a changeset consisting of only those
+        # records we wish to modify.
+        # This allows us to store a value in iceberg that identifies
+        # all the entries being changed as part of the same changeset.
 
         # Delete is obvious, as what we have to do here is create
         # a deletion record with which to overwrite the existing one.
         deletes = _get_deletes(existing_data, new_data, record_namespace)
+
         # pyiceberg offers a built-in feature that returns the update rows
         # by comparing two tables.  Unfortunately, it does not say anything
         # about inserts.
         updates = _find_updates(existing_data, new_data)
+        # Insert is essentially the opposite of delete. What is in new but not old.
         inserts = _find_inserts(existing_data, new_data, record_namespace)
         changes = pa.concat_tables([deletes, updates])
     else:
@@ -89,10 +88,16 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
         return None
 
 
-@timeit
 def _upsert_with_markers(
     table: IcebergTable, changes: pa.Table, inserts: pa.Table
 ) -> str:
+    """
+    Insert and update records, adding the timestamp and changeset values to
+    any changed rows.
+    :param table: The table to update
+    :param changes: New versions of existing records to change
+    :param inserts: New records to insert
+    """
     changeset_id = str(uuid.uuid1())
     timestamp = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
     if changes:
@@ -100,6 +105,10 @@ def _upsert_with_markers(
     if inserts:
         inserts = _append_change_columns(inserts, changeset_id, timestamp)
     with table.transaction() as tx:
+        # Because we already know which records to overwrite and which ones to append,
+        # we can avoid all the extra processing that happens inside table.upsert to find
+        # matching records, check them for differences etc.
+        # Just overwrite all the `changes` and append all the `inserts`
         if changes:
             overwrite_mask_predicate = _create_match_filter(changes)
             tx.overwrite(changes, overwrite_filter=overwrite_mask_predicate)
@@ -113,7 +122,6 @@ def _create_match_filter(changes: pa.Table):
     return In("id", change_ids)
 
 
-@timeit
 def _append_change_columns(
     changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
 ):
@@ -151,7 +159,10 @@ def _get_deletes(
     """
     new_ids = new_data.column("id")
     missing_ids = existing_data.filter(
-        (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(new_ids)
+        # records that have already been "deleted" do not need to be deleted again.
+        (~pc.field("content").is_null()) &
+        (pc.field("namespace") == record_namespace) &
+        ~pc.field("id").isin(new_ids)
     ).column("id")
     return pa.Table.from_pylist(
         [{"namespace": record_namespace, "id": id.as_py()} for id in missing_ids],
