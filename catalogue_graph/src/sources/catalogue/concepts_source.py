@@ -1,19 +1,20 @@
 from collections.abc import Generator
 
+from utils.types import WorkConceptKey
+
 from sources.base_source import BaseSource
 from sources.gzip_source import GZipSource
-from utils.types import WorkConceptKey
 
 
 def extract_concepts_from_work(
     raw_work: dict,
 ) -> Generator[tuple[dict, WorkConceptKey]]:
     """Returns all concepts associated with the given work. Does not deduplicate."""
-    # We need to return all concepts stored in each subject, and also the subject itself.
-    # This will sometimes result in duplicates being returned.
+    # Some subjects contain nested component concepts. For example, the subject 'Milk - Quality' consists
+    # of concepts 'Milk' and 'Quality' (each with its own Wellcome ID). For now, we are not interested in 
+    # extracting these component concepts, since the frontend does not make use of them and the resulting 
+    # theme pages would be empty. 
     for subject in raw_work.get("subjects", []):
-        for concept in subject.get("concepts", []):
-            yield concept, "subjects"
         yield subject, "subjects"
 
     # Return all contributors
