@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from models.graph_node import ConceptType
 
 
+class MissingLabelError(ValueError):
+    pass
+
+
 class ConceptsQueryResult(BaseModel):
     concepts: list[dict]
     related_to: dict[str, list]
@@ -72,8 +76,8 @@ def get_priority_label(
         if (value := labels.get(source)) is not None:
             return value, source
 
-    raise ValueError(
-        f"Concept {concept_node['properties']['id']} does not have a label."
+    raise MissingLabelError(
+        f"Concept {concept_node['~properties']['id']} does not have a label."
     )
 
 
@@ -87,9 +91,14 @@ def transform_related_concepts(
 
     for related_item in related_items:
         concept_id = related_item["concept_node"]["~properties"]["id"]
-        label, _ = get_priority_label(
-            related_item["concept_node"], related_item["source_concept_nodes"]
-        )
+
+        try:
+            label, _ = get_priority_label(
+                related_item["concept_node"], related_item["source_concept_nodes"]
+            )
+        except MissingLabelError:
+            # If a related concept does not have a label, do not include it
+            continue
 
         relationship_type = ""
         if "edge" in related_item:
