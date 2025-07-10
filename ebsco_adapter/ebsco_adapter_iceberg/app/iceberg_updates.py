@@ -160,9 +160,9 @@ def _get_deletes(
     new_ids = new_data.column("id")
     missing_ids = existing_data.filter(
         # records that have already been "deleted" do not need to be deleted again.
-        (~pc.field("content").is_null()) &
-        (pc.field("namespace") == record_namespace) &
-        ~pc.field("id").isin(new_ids)
+        (~pc.field("content").is_null())
+        & (pc.field("namespace") == record_namespace)
+        & ~pc.field("id").isin(new_ids)
     ).column("id")
     return pa.Table.from_pylist(
         [{"namespace": record_namespace, "id": id.as_py()} for id in missing_ids],
