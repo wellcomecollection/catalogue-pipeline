@@ -1,4 +1,5 @@
-package weco.pipeline.batcher
+package weco.pipeline.batcher.models
+
 import software.amazon.awssdk.services.sqs.model.{Message => SQSMessage}
 
 sealed trait Path extends Ordered[Path] {
