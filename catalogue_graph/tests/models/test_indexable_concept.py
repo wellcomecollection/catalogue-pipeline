@@ -22,6 +22,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
             CatalogueConceptIdentifier(value="value", identifierType="nlm-mesh")
         ],
         label="label",
+        displayLabel="label",
         alternativeLabels=["alternativeLabels"],
         description=ConceptDescription(
             text="description",
@@ -72,6 +73,7 @@ def test_indexable_concept_from_catalogue_concept() -> None:
                 )
             ],
             label="label",
+            displayLabel="label",
             alternativeLabels=["alternativeLabels"],
             description=ConceptDescription(
                 text="description",
