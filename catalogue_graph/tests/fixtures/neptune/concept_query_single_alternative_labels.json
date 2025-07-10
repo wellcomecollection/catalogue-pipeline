@@ -10,10 +10,19 @@
   "source_concepts": [
     {
       "~properties": {
-        "id": "456",
+        "id": "123",
         "source": "lc-names",
         "description": "description",
-        "alternative_labels": "alternative label||another alternative label"
+        "alternative_labels": "alternative label||another alternative label",
+        "label": "LoC label"
+      }
+    },
+    {
+      "~properties": {
+        "id": "456",
+        "source": "wikidata",
+        "description": "description",
+        "label": "Wikidata label"
       }
     },
     {
@@ -28,9 +37,10 @@
   "linked_source_concepts": [
     {
       "~properties": {
-        "id": "456",
+        "id": "123",
         "source": "lc-names",
-        "description": "description"
+        "description": "description",
+        "label": "LoC label"
       }
     }
   ],

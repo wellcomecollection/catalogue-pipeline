@@ -16,6 +16,7 @@ from models.catalogue_concept import (
     CatalogueConcept,
     ConceptsQueryResult,
     ConceptsQuerySingleResult,
+    MissingLabelError,
 )
 from models.graph_node import ConceptType
 from utils.aws import get_neptune_client
@@ -414,7 +415,15 @@ def transform_data(neptune_data: ConceptsQueryResult) -> list[CatalogueConcept]:
             ),
             related_topics=neptune_data.related_topics.get(concept_id, []),
         )
-        transformed.append(CatalogueConcept.from_neptune_result(result))
+
+        try:
+            catalogue_concept = CatalogueConcept.from_neptune_result(result)
+            transformed.append(catalogue_concept)
+        except MissingLabelError:
+            # There is currently one concept which does not have a label ('k6p2u5fh')
+            print(
+                f"Concept {concept_id} does not have a label and will not be indexed."
+            )
 
     return transformed
 

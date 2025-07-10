@@ -14,6 +14,7 @@
         "id": "a2233f9d",
         "identifiers": [],
         "label": "Circle of State Librarians Conference 1979 : Kew, England)",
+        "displayLabel": "Circle of State Librarians Conference 1979 : Kew, England)",
         "alternativeLabels": [],
         "description": null,
         "type": "Meeting",
@@ -61,6 +62,7 @@
           }
         ],
         "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
+        "displayLabel": "Nelson, Geoffrey B. (Geoffrey Brian)",
         "alternativeLabels": [],
         "description": null,
         "type": "Person",
@@ -95,6 +97,7 @@
         "id": "a2249bxm",
         "identifiers": [],
         "label": "Wolff, G.",
+        "displayLabel": "Wolff, G.",
         "alternativeLabels": [],
         "description": null,
         "type": "Person",
@@ -142,6 +145,7 @@
           }
         ],
         "label": "Jones, John E.",
+        "displayLabel": "Jones, John E.",
         "alternativeLabels": [],
         "description": null,
         "type": "Person",
@@ -183,6 +187,7 @@
         "id": "a224rx5x",
         "identifiers": [],
         "label": "Hulverscheidt, Marion, 1970-",
+        "displayLabel": "Hulverscheidt, Marion, 1970-",
         "alternativeLabels": [],
         "description": null,
         "type": "Person",
@@ -230,6 +235,7 @@
           }
         ],
         "label": "Zimmermann, Wilhelm",
+        "displayLabel": "Zimmermann, Wilhelm",
         "alternativeLabels": [],
         "description": null,
         "type": "Person",
@@ -281,6 +287,7 @@
           }
         ],
         "label": "Gaur, June",
+        "displayLabel": "Gaur, June",
         "alternativeLabels": [
           "June Gaur"
         ],
@@ -350,6 +357,7 @@
           }
         ],
         "label": "Ketamine",
+        "displayLabel": "Ketamine",
         "alternativeLabels": [
           "(+-)-ketamine",
           "(±)-ketamine",
@@ -370,9 +378,9 @@
           "Ketaset"
         ],
         "description": {
-          "text": "A cyclohexanone derivative used for induction of anesthesia. Its mechanism of action is not well understood, but ketamine can block NMDA receptors (RECEPTORS, N-METHYL-D-ASPARTATE) and may interact with sigma receptors.\n    ",
-          "sourceLabel": "nlm-mesh",
-          "sourceUrl": "https://meshb.nlm.nih.gov/record/ui?ui=D007649"
+          "text": "Group of stereoisomers",
+          "sourceLabel": "wikidata",
+          "sourceUrl": "https://www.wikidata.org/wiki/Q243547"
         },
         "type": "Concept",
         "relatedConcepts": {
@@ -400,11 +408,11 @@
           "referencedTogether": []
         },
         "sameAs": [
-          "ufz7k5zq",
-          "t77hfer4",
           "a229u886",
           "fgvb8zzh",
-          "mtsv24xk"
+          "mtsv24xk",
+          "t77hfer4",
+          "ufz7k5zq"
         ]
       }
     }
@@ -442,6 +450,7 @@
           }
         ],
         "label": "South Cambridgeshire (England)",
+        "displayLabel": "South Cambridgeshire (England)",
         "alternativeLabels": [
           "South Cambridgeshire (Cambridgeshire)",
           "South Cambridgeshire, Eng."
@@ -544,6 +553,7 @@
           }
         ],
         "label": "Orel, Harold, 1926-2017",
+        "displayLabel": "Harold Orel",
         "alternativeLabels": [],
         "description": null,
         "type": "Person",

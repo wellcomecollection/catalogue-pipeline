@@ -127,7 +127,7 @@ lazy val matcher = setupProject(
 lazy val merger = setupProject(
   project,
   "pipeline/matcher_merger/merger",
-  localDependencies = Seq(internal_model, matcher, pipeline_storage_typesafe),
+  localDependencies = Seq(internal_model, matcher, pipeline_storage_typesafe, lambda),
   externalDependencies = CatalogueDependencies.mergerDependencies
 )
 

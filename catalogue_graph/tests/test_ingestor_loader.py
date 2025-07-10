@@ -165,6 +165,7 @@ def get_catalogue_concept_mock(
     include: list[MockNeptuneResponseItem],
 ) -> CatalogueConcept:
     alternative_labels = []
+
     if MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include:
         alternative_labels = [
             "Alternative label",
@@ -225,17 +226,18 @@ def get_catalogue_concept_mock(
 
     return CatalogueConcept(
         id="id",
-        label="label",
+        label="LoC label",
+        displayLabel="Wikidata label",
         type="Person",
         alternativeLabels=alternative_labels,
         description=ConceptDescription(
-            text="Mesh description",
-            sourceLabel="nlm-mesh",
-            sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+            text="Description",
+            sourceLabel="wikidata",
+            sourceUrl="https://www.wikidata.org/wiki/456",
         ),
         identifiers=[
             CatalogueConceptIdentifier(
-                value="456",
+                value="123",
                 identifierType="lc-names",
             )
         ],
