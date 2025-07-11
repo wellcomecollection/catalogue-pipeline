@@ -9,15 +9,13 @@ import uuid
 from pyiceberg.expressions import Not, IsNull, In
 from datetime import datetime, timezone
 import pyarrow.compute as pc
-from hashlib import sha3_256
-from timeit import timeit
 import functools
 from pyiceberg.table.upsert_util import get_rows_to_update
 import operator
 
 
 def get_table(
-    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
+        catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
 ) -> IcebergTable:
     catalogue = load_catalog(
         catalogue_name,
@@ -89,7 +87,7 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
 
 
 def _upsert_with_markers(
-    table: IcebergTable, changes: pa.Table, inserts: pa.Table
+        table: IcebergTable, changes: pa.Table, inserts: pa.Table
 ) -> str:
     """
     Insert and update records, adding the timestamp and changeset values to
@@ -123,7 +121,7 @@ def _create_match_filter(changes: pa.Table):
 
 
 def _append_change_columns(
-    changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
+        changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
 ):
     changeset = changeset.append_column(
         pa.field("changeset", type=pa.string(), nullable=True),
@@ -135,12 +133,10 @@ def _append_change_columns(
     return changeset
 
 
-@timeit
 def _find_updates(existing_data: pa.Table, new_data: pa.Table):
     return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
 
 
-@timeit
 def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace: str):
     old_ids = existing_data.column("id")
     missing_records = new_data.filter(
@@ -149,9 +145,8 @@ def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace:
     return missing_records
 
 
-@timeit
 def _get_deletes(
-    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+        existing_data: pa.Table, new_data: pa.Table, record_namespace: str
 ) -> pa.Table:
     """
     Find records in `existing_data` that are not in `new_data`, and produce a
