@@ -6,13 +6,20 @@ from uuid import uuid1
 import os
 
 HERE = os.path.dirname(os.path.realpath(__file__))
+PROJECT_ROOT = os.path.dirname(HERE)
+LOCAL_DIR = os.path.join(PROJECT_ROOT, ".local")
+TEST_WAREHOUSE_DIR = os.path.join(LOCAL_DIR, "test_warehouse")
 
 
 def setup_test_db(table_name):
+    # Ensure directories exist
+    os.makedirs(LOCAL_DIR, exist_ok=True)
+    os.makedirs(TEST_WAREHOUSE_DIR, exist_ok=True)
+    
     catalog = load_catalog(
         "local",
-        uri="sqlite:////tmp/warehouse/test_catalog.db",
-        warehouse="file:///tmp/warehouse/",
+        uri=f"sqlite:///{os.path.join(LOCAL_DIR, 'test_catalog.db')}",
+        warehouse=f"file://{TEST_WAREHOUSE_DIR}/",
     )
     table_fullname = f"test.{table_name}"
     catalog.create_namespace_if_not_exists("test")
