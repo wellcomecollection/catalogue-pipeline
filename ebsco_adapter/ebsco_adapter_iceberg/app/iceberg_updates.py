@@ -56,7 +56,7 @@ def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str)
         .to_arrow()
         .cast(ARROW_SCHEMA)
     )
-    if existing_data:
+    if existing_data.num_rows > 0:
         existing_data = existing_data.sort_by("id")
         new_data = new_data.sort_by("id")
         # we need to produce a changeset consisting of only those
@@ -130,6 +130,7 @@ def _append_change_columns(
         pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
         [[timestamp] * len(changeset)],
     )
+    
     return changeset
 
 

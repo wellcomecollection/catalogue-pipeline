@@ -45,7 +45,7 @@ def node_to_record(node: etree._Element):
     return {
         "namespace": EBSCO_NAMESPACE,
         "id": ebsco_id,
-        "content": canonicalize(etree.tostring(node)),
+        "content": canonicalize(etree.tostring(node, encoding='unicode')),
     }
 
 
@@ -63,8 +63,8 @@ def data_to_pa_table(data):
 def main(xmlfile):
     table = get_table(
         catalogue_name="local",
-        catalogue_uri="sqlite:////tmp/warehouse/catalog.db",
-        catalogue_warehouse="file:///tmp/warehouse/",
+        catalogue_uri="sqlite:///.local/catalog.db",
+        catalogue_warehouse="file://.local/",
         catalogue_namespace="default",
         table_name="mytable",
     )

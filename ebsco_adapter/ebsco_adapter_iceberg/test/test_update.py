@@ -5,19 +5,13 @@ from main import data_to_pa_table, update_table
 from pyiceberg.expressions import Not, IsNull, EqualTo, In
 
 from schemata import ARROW_SCHEMA
+from helpers import assert_row_identifiers, add_namespace
+from helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
 
 
-def assert_row_identifiers(rows, ids):
-    assert set(rows.column("id").to_pylist()) == ids
-
-
+# Override the default namespace for these tests  
 def data_to_namespaced_table(unqualified_data):
-    return data_to_pa_table([add_namespace(entry) for entry in unqualified_data])
-
-
-def add_namespace(d):
-    d["namespace"] = "ebsco_test"
-    return d
+    return _data_to_namespaced_table_helper(unqualified_data, "ebsco_test")
 
 
 def test_noop(temporary_table):

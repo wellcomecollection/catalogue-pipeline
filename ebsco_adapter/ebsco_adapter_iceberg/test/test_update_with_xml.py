@@ -4,15 +4,6 @@ from pyiceberg.expressions import EqualTo
 from main import update_from_xml_file, data_to_pa_table, EBSCO_NAMESPACE
 
 
-def data_to_namespaced_table(unqualified_data):
-    return data_to_pa_table([add_namespace(entry) for entry in unqualified_data])
-
-
-def add_namespace(d):
-    d["namespace"] = EBSCO_NAMESPACE
-    return d
-
-
 def test_store_record(temporary_table, xml_with_one_record):
     """The XML from each record is serialised and stored in the content field."""
     update_from_xml_file(temporary_table, xml_with_one_record)
