@@ -7,11 +7,11 @@ from main import data_to_pa_table, EBSCO_NAMESPACE
 def add_namespace(data_dict, namespace=None):
     """
     Add a namespace field to a data dictionary.
-    
+
     Args:
         data_dict: Dictionary containing record data
         namespace: Namespace to add (defaults to EBSCO_NAMESPACE from main)
-    
+
     Returns:
         Dictionary with namespace field added
     """
@@ -24,23 +24,25 @@ def add_namespace(data_dict, namespace=None):
 def data_to_namespaced_table(unqualified_data, namespace=None):
     """
     Convert a list of data dictionaries to a PyArrow table with namespace added.
-    
+
     Args:
         unqualified_data: List of dictionaries containing record data
         namespace: Namespace to add to all records (defaults to EBSCO_NAMESPACE from main)
-    
+
     Returns:
         PyArrow table with namespace field added to all records
     """
     if namespace is None:
         namespace = EBSCO_NAMESPACE
-    return data_to_pa_table([add_namespace(entry.copy(), namespace) for entry in unqualified_data])
+    return data_to_pa_table(
+        [add_namespace(entry.copy(), namespace) for entry in unqualified_data]
+    )
 
 
 def assert_row_identifiers(rows, expected_ids):
     """
     Assert that the given rows contain exactly the expected IDs.
-    
+
     Args:
         rows: PyArrow table containing rows with an 'id' column
         expected_ids: Set or collection of expected ID values

@@ -9,7 +9,7 @@ from helpers import assert_row_identifiers, add_namespace
 from helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
 
 
-# Override the default namespace for these tests  
+# Override the default namespace for these tests
 def data_to_namespaced_table(unqualified_data):
     return _data_to_namespaced_table_helper(unqualified_data, "ebsco_test")
 

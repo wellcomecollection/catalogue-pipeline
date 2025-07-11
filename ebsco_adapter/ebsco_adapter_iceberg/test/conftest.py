@@ -14,7 +14,9 @@ from uuid import uuid1
 @pytest.fixture
 def temporary_table():
     table_name = str(uuid1())
-    table = get_local_table(table_name=table_name, namespace="test", db_name="test_catalog")
+    table = get_local_table(
+        table_name=table_name, namespace="test", db_name="test_catalog"
+    )
     yield table
     # For cleanup, we need to get the catalog again
     # Since the table object contains the catalog reference, we can use it
