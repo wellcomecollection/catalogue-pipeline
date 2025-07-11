@@ -1,38 +1,24 @@
 import pytest
-from pyiceberg.catalog import load_catalog
-
-from schemata import SCHEMA
-from uuid import uuid1
+import sys
 import os
 
+# Add the app directory to the path so we can import from it
 HERE = os.path.dirname(os.path.realpath(__file__))
-PROJECT_ROOT = os.path.dirname(HERE)
-LOCAL_DIR = os.path.join(PROJECT_ROOT, ".local")
-TEST_WAREHOUSE_DIR = os.path.join(LOCAL_DIR, "test_warehouse")
+APP_DIR = os.path.join(os.path.dirname(HERE), "app")
+sys.path.insert(0, APP_DIR)
 
-
-def setup_test_db(table_name):
-    # Ensure directories exist
-    os.makedirs(LOCAL_DIR, exist_ok=True)
-    os.makedirs(TEST_WAREHOUSE_DIR, exist_ok=True)
-    
-    catalog = load_catalog(
-        "local",
-        uri=f"sqlite:///{os.path.join(LOCAL_DIR, 'test_catalog.db')}",
-        warehouse=f"file://{TEST_WAREHOUSE_DIR}/",
-    )
-    table_fullname = f"test.{table_name}"
-    catalog.create_namespace_if_not_exists("test")
-    table = catalog.create_table_if_not_exists(identifier=table_fullname, schema=SCHEMA)
-    return catalog, table
+from table_config import get_test_table
+from uuid import uuid1
 
 
 @pytest.fixture
 def temporary_table():
     table_name = str(uuid1())
-    catalogue, table = setup_test_db(table_name)
+    table = get_test_table(table_name)
     yield table
-    catalogue.drop_table(f"test.{table_name}")
+    # For cleanup, we need to get the catalog again
+    # Since the table object contains the catalog reference, we can use it
+    table.catalog.drop_table(f"test.{table_name}")
 
 
 @pytest.fixture

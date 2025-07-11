@@ -1,5 +1,5 @@
 import sys
-from iceberg_updates import get_table
+from table_config import get_local_table
 from pyiceberg.expressions import EqualTo, IsNull
 
 
@@ -8,13 +8,7 @@ from pyiceberg.expressions import EqualTo, IsNull
 
 
 def main(changeset_id):
-    table = get_table(
-        catalogue_name="local",
-        catalogue_uri="sqlite:////tmp/warehouse/catalog.db",
-        catalogue_warehouse="file:///tmp/warehouse/",
-        catalogue_namespace="default",
-        table_name="mytable",
-    )
+    table = get_local_table()
     print(f"  total records: {table.scan().count()}")
     print(
         f"changed records: {table.scan(row_filter=EqualTo('changeset', changeset_id)).count()}"
