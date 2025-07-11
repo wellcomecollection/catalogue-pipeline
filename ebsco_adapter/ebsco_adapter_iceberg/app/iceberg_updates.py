@@ -130,7 +130,7 @@ def _append_change_columns(
         pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
         [[timestamp] * len(changeset)],
     )
-    
+
     return changeset
 
 

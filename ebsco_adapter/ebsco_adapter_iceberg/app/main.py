@@ -45,7 +45,7 @@ def node_to_record(node: etree._Element):
     return {
         "namespace": EBSCO_NAMESPACE,
         "id": ebsco_id,
-        "content": canonicalize(etree.tostring(node, encoding='unicode')),
+        "content": canonicalize(etree.tostring(node, encoding="unicode")),
     }
 
 

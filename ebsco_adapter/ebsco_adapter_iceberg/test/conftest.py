@@ -15,7 +15,7 @@ def setup_test_db(table_name):
     # Ensure directories exist
     os.makedirs(LOCAL_DIR, exist_ok=True)
     os.makedirs(TEST_WAREHOUSE_DIR, exist_ok=True)
-    
+
     catalog = load_catalog(
         "local",
         uri=f"sqlite:///{os.path.join(LOCAL_DIR, 'test_catalog.db')}",
