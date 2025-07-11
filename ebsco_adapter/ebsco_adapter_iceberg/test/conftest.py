@@ -7,14 +7,14 @@ HERE = os.path.dirname(os.path.realpath(__file__))
 APP_DIR = os.path.join(os.path.dirname(HERE), "app")
 sys.path.insert(0, APP_DIR)
 
-from table_config import get_test_table
+from table_config import get_local_table
 from uuid import uuid1
 
 
 @pytest.fixture
 def temporary_table():
     table_name = str(uuid1())
-    table = get_test_table(table_name)
+    table = get_local_table(table_name=table_name, namespace="test", db_name="test_catalog")
     yield table
     # For cleanup, we need to get the catalog again
     # Since the table object contains the catalog reference, we can use it

@@ -36,13 +36,14 @@ def get_table(
     return table
 
 
-def get_local_table(table_name="mytable", namespace="default"):
+def get_local_table(table_name="mytable", namespace="default", db_name="catalog"):
     """
     Get a table from the local catalog using the .local directory.
     
     Args:
         table_name: Name of the table (defaults to "mytable")
         namespace: Namespace for the table (defaults to "default")
+        db_name: Database name (defaults to "catalog", use "test_catalog" for tests)
     
     Returns:
         IcebergTable: The configured table
@@ -52,43 +53,20 @@ def get_local_table(table_name="mytable", namespace="default"):
     project_root = os.path.dirname(app_dir)
     local_dir = os.path.join(project_root, ".local")
     
-    # Ensure the .local directory exists
-    os.makedirs(local_dir, exist_ok=True)
-    
-    return get_table(
-        catalogue_name="local",
-        catalogue_uri=f"sqlite:///{os.path.join(local_dir, 'catalog.db')}",
-        catalogue_warehouse=f"file://{local_dir}/",
-        catalogue_namespace=namespace,
-        table_name=table_name,
-    )
-
-
-def get_test_table(table_name, namespace="test"):
-    """
-    Get a test table using the .local directory but with separate test database.
-    
-    Args:
-        table_name: Name of the table
-        namespace: Namespace for the table (defaults to "test")
-    
-    Returns:
-        IcebergTable: The configured test table
-    """
-    # Get the project root directory (parent of app directory)
-    app_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(app_dir)
-    local_dir = os.path.join(project_root, ".local")
-    test_warehouse_dir = os.path.join(local_dir, "test_warehouse")
+    # For test databases, use a separate warehouse directory
+    if db_name.startswith("test"):
+        warehouse_dir = os.path.join(local_dir, "test_warehouse")
+    else:
+        warehouse_dir = local_dir
     
     # Ensure directories exist
     os.makedirs(local_dir, exist_ok=True)
-    os.makedirs(test_warehouse_dir, exist_ok=True)
+    os.makedirs(warehouse_dir, exist_ok=True)
     
     return get_table(
         catalogue_name="local",
-        catalogue_uri=f"sqlite:///{os.path.join(local_dir, 'test_catalog.db')}",
-        catalogue_warehouse=f"file://{test_warehouse_dir}/",
+        catalogue_uri=f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
+        catalogue_warehouse=f"file://{warehouse_dir}/",
         catalogue_namespace=namespace,
         table_name=table_name,
     )
