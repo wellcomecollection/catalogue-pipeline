@@ -1,0 +1,59 @@
+import pytest
+from pyiceberg.catalog import load_catalog
+
+from schemata import SCHEMA
+from uuid import uuid1
+import os
+
+HERE = os.path.dirname(os.path.realpath(__file__))
+PROJECT_ROOT = os.path.dirname(HERE)
+LOCAL_DIR = os.path.join(PROJECT_ROOT, ".local")
+TEST_WAREHOUSE_DIR = os.path.join(LOCAL_DIR, "test_warehouse")
+
+
+def setup_test_db(table_name):
+    # Ensure directories exist
+    os.makedirs(LOCAL_DIR, exist_ok=True)
+    os.makedirs(TEST_WAREHOUSE_DIR, exist_ok=True)
+
+    catalog = load_catalog(
+        "local",
+        uri=f"sqlite:///{os.path.join(LOCAL_DIR, 'test_catalog.db')}",
+        warehouse=f"file://{TEST_WAREHOUSE_DIR}/",
+    )
+    table_fullname = f"test.{table_name}"
+    catalog.create_namespace_if_not_exists("test")
+    table = catalog.create_table_if_not_exists(identifier=table_fullname, schema=SCHEMA)
+    return catalog, table
+
+
+@pytest.fixture
+def temporary_table():
+    table_name = str(uuid1())
+    catalogue, table = setup_test_db(table_name)
+    yield table
+    catalogue.drop_table(f"test.{table_name}")
+
+
+@pytest.fixture
+def xml_with_one_record():
+    with open(os.path.join(HERE, "data", "with_one_record.xml"), "r") as xmlfile:
+        yield xmlfile
+
+
+@pytest.fixture
+def xml_with_two_records():
+    with open(os.path.join(HERE, "data", "with_two_records.xml"), "r") as xmlfile:
+        yield xmlfile
+
+
+@pytest.fixture
+def xml_with_three_records():
+    with open(os.path.join(HERE, "data", "with_three_records.xml"), "r") as xmlfile:
+        yield xmlfile
+
+
+@pytest.fixture
+def not_xml():
+    with open(os.path.join(HERE, "data", "not_xml.xml"), "r") as xmlfile:
+        yield xmlfile
