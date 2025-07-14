@@ -95,10 +95,8 @@ def handler(
         print(
             "Bulk load failed due to a very small number of insert errors. Marking as successful."
         )
-        if insert_error_count > 0:
-            bulk_load_type = (
-                payload["overallStatus"]["fullUri"].split("/")[-1].split(".")[0]
-            )
+        if not is_local:
+            bulk_load_type = overall_status["fullUri"].split("/")[-1].split(".")[0]
             report = [
                 {
                     "type": "header",
@@ -153,7 +151,7 @@ def local_handler() -> None:
     )
     parser.add_argument(
         "--insert-error-threshold",
-        type=int,
+        type=float,
         help="Maximum insert errors as a fraction of total records to still consider the bulk load successful.",
         default=DEFAULT_INSERT_ERROR_THRESHOLD,
         required=False,
