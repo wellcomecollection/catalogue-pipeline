@@ -12,7 +12,7 @@ DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 def handler(
     transformer_type: TransformerType,
     entity_type: EntityType,
-    insert_error_threshold: int,
+    insert_error_threshold: float,
     is_local: bool = False,
 ) -> dict[str, str]:
     file_name = f"{transformer_type}__{entity_type}.csv"

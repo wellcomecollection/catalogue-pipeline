@@ -55,7 +55,7 @@ def print_detailed_bulk_load_errors(payload: dict) -> None:
 
 def handler(
     load_id: str, insert_error_threshold: float, is_local: bool = False
-) -> dict[str, str]:
+) -> dict[str, typing.Any]:
     # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
     payload = get_neptune_client(is_local).get_bulk_load_status(load_id)
     overall_status = payload["overallStatus"]
@@ -135,7 +135,7 @@ def handler(
     raise Exception("Load failed. See error log above.")
 
 
-def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
+def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     load_id = event["load_id"]
     insert_error_threshold = event.get(
         "insert_error_threshold", DEFAULT_INSERT_ERROR_THRESHOLD
