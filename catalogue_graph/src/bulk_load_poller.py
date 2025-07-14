@@ -154,7 +154,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--insert-error-threshold",
         type=int,
-        help="Maximum fraction of insert errors to still consider the bulk load successful.",
+        help="Maximum insert errors as a fraction of total records to still consider the bulk load successful.",
         default=DEFAULT_INSERT_ERROR_THRESHOLD,
         required=False,
     )
