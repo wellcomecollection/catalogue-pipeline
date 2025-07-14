@@ -1,7 +1,7 @@
 resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   cluster_identifier                   = "catalogue-graph"
   engine                               = "neptune"
-  engine_version                       = "1.4.5.0"
+  engine_version                       = "1.4.5.1"
   neptune_cluster_parameter_group_name = "default.neptune1.4"
   iam_database_authentication_enabled  = true
   apply_immediately                    = true
