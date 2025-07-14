@@ -68,7 +68,8 @@ def handler(
 
     if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
         return {
-            "loadId": load_id,
+            "load_id": load_id,
+            "insert_error_threshold": insert_error_threshold,
             "status": "IN_PROGRESS",
         }
 
@@ -126,7 +127,8 @@ def handler(
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
         return {
-            "loadId": load_id,
+            "load_id": load_id,
+            "insert_error_threshold": insert_error_threshold,
             "status": "SUCCEEDED",
         }
 
