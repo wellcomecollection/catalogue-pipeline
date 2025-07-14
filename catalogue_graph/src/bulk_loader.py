@@ -12,9 +12,9 @@ DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 def handler(
     transformer_type: TransformerType,
     entity_type: EntityType,
-    insert_error_threshold: int,
+    insert_error_threshold: float,
     is_local: bool = False,
-) -> dict[str, str]:
+) -> dict[str, typing.Any]:
     file_name = f"{transformer_type}__{entity_type}.csv"
     s3_file_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
 
