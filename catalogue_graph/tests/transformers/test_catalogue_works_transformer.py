@@ -1,9 +1,8 @@
-from test_mocks import MockRequest
-from test_utils import load_fixture
-
 from config import CATALOGUE_SNAPSHOT_URL
 from models.graph_edge import BaseEdge, WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
+from test_mocks import MockRequest
+from test_utils import load_fixture
 from transformers.catalogue.works_transformer import CatalogueWorksTransformer
 
 
@@ -69,7 +68,7 @@ def test_catalogue_works_transformer_edges() -> None:
             relationship="HAS_CONCEPT",
             directed=True,
             attributes=WorkHasConceptAttributes(
-                referenced_in="subjects", referenced_type="Concept"
+                referenced_in="subjects", referenced_type="Subject"
             ),
         ),
     )
@@ -86,7 +85,7 @@ def test_catalogue_works_transformer_edges() -> None:
             relationship="HAS_CONCEPT",
             directed=True,
             attributes=WorkHasConceptAttributes(
-                referenced_in="subjects", referenced_type="Concept"
+                referenced_in="subjects", referenced_type="Subject"
             ),
         ),
     )
