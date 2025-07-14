@@ -3,13 +3,11 @@ import datetime
 import json
 import typing
 
-import smart_open
-
 import config
+import smart_open
+from bulk_loader import DEFAULT_INSERT_ERROR_THRESHOLD
 from utils.aws import get_neptune_client
 from utils.slack import publish_report
-
-INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
 def log_payload(payload: dict) -> None:
@@ -55,7 +53,9 @@ def print_detailed_bulk_load_errors(payload: dict) -> None:
             print(f"         {failed_feed['status']}")
 
 
-def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
+def handler(
+    load_id: str, insert_error_threshold: float, is_local: bool = False
+) -> dict[str, str]:
     # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
     payload = get_neptune_client(is_local).get_bulk_load_status(load_id)
     overall_status = payload["overallStatus"]
@@ -88,7 +88,7 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
         status == "LOAD_FAILED"
         and parsing_error_count == 0
         and data_type_error_count == 0
-        and (insert_error_count / processed_count < INSERT_ERROR_THRESHOLD)
+        and (insert_error_count / processed_count < insert_error_threshold)
     )
 
     if failed_below_insert_error_threshold:
@@ -136,8 +136,11 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
-    load_id = event["loadId"]
-    return handler(load_id)
+    load_id = event["load_id"]
+    insert_error_threshold = event.get(
+        "insert_error_threshold", DEFAULT_INSERT_ERROR_THRESHOLD
+    )
+    return handler(load_id, insert_error_threshold)
 
 
 def local_handler() -> None:
@@ -147,6 +150,13 @@ def local_handler() -> None:
         type=str,
         help="The ID of the bulk load job whose status to check.",
         required=True,
+    )
+    parser.add_argument(
+        "--insert-error-threshold",
+        type=int,
+        help="Maximum fraction of insert errors to still consider the bulk load successful.",
+        default=DEFAULT_INSERT_ERROR_THRESHOLD,
+        required=False,
     )
     args = parser.parse_args()
 
