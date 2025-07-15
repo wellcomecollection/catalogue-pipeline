@@ -20,7 +20,6 @@ sys.path.append(
 from build_windows import generate_windows  # noqa
 from sierra_progress_reporter import build_report  # noqa
 
-
 BUCKET = "wellcomecollection-platform-sierra-adapter-20200604"
 
 
@@ -73,5 +72,5 @@ if __name__ == "__main__":
             client.publish(
                 TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource_type}_windows",
                 Message=json.dumps(missing_window),
-                Subject=f"Window sender {__file__}",
+                Subject=f"Window sender {__file__[100 - 15:]}",
             )
