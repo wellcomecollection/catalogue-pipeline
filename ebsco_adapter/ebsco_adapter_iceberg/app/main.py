@@ -4,8 +4,9 @@ import pyarrow as pa
 
 import sys
 
-from iceberg_updates import get_table, update_table
+from iceberg_updates import update_table
 from schemata import ARROW_SCHEMA
+from table_config import get_local_table
 
 from lxml import etree
 
@@ -61,13 +62,7 @@ def data_to_pa_table(data):
 
 
 def main(xmlfile):
-    table = get_table(
-        catalogue_name="local",
-        catalogue_uri="sqlite:///.local/catalog.db",
-        catalogue_warehouse="file://.local/",
-        catalogue_namespace="default",
-        table_name="mytable",
-    )
+    table = get_local_table()
     return update_from_xml_file(table, xmlfile)
 
 

@@ -1,5 +1,6 @@
 from pyiceberg.catalog import load_catalog
 from schemata import SCHEMA, ARROW_SCHEMA
+from table_config import get_table
 
 from pyiceberg.table import Table as IcebergTable
 
@@ -12,22 +13,6 @@ import pyarrow.compute as pc
 import functools
 from pyiceberg.table.upsert_util import get_rows_to_update
 import operator
-
-
-def get_table(
-    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
-) -> IcebergTable:
-    catalogue = load_catalog(
-        catalogue_name,
-        uri=catalogue_uri,
-        warehouse=catalogue_warehouse,
-    )
-    catalogue.create_namespace_if_not_exists(catalogue_namespace)
-    table_fullname = f"{catalogue_namespace}.{table_name}"
-    table = catalogue.create_table_if_not_exists(
-        identifier=table_fullname, schema=SCHEMA
-    )
-    return table
 
 
 def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str):
