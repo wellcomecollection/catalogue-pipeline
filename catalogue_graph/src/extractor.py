@@ -21,6 +21,7 @@ def handler(
     transformer_type: TransformerType,
     entity_type: EntityType,
     sample_size: int | None = None,
+    pipeline_date: str | None = None,
     is_local: bool = False,
 ) -> None:
     print(
@@ -28,7 +29,9 @@ def handler(
         f"transformer and streaming them into {stream_destination}."
     )
 
-    transformer: BaseTransformer = create_transformer(transformer_type, entity_type)
+    transformer: BaseTransformer = create_transformer(
+        transformer_type, entity_type, pipeline_date, is_local
+    )
 
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)
@@ -39,9 +42,9 @@ def handler(
         transformer.stream_to_s3(s3_uri, entity_type, sample_size)
     elif stream_destination == "sns":
         topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
-        assert topic_arn is not None, (
-            "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
-        )
+        assert (
+            topic_arn is not None
+        ), "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
 
         transformer.stream_to_sns(topic_arn, entity_type, sample_size)
     elif stream_destination == "local":
@@ -58,9 +61,10 @@ def lambda_handler(event: LambdaEvent, context: typing.Any) -> None:
     stream_destination = event["stream_destination"]
     transformer_type = event["transformer_type"]
     entity_type = event["entity_type"]
+    pipeline_date = event["pipeline_date"]
     sample_size = event.get("sample_size")
 
-    handler(stream_destination, transformer_type, entity_type, sample_size)
+    handler(stream_destination, transformer_type, entity_type, pipeline_date, sample_size)
 
 
 def local_handler() -> None:
@@ -85,6 +89,12 @@ def local_handler() -> None:
         choices=typing.get_args(StreamDestination),
         help="Where to stream the transformed entities.",
         required=True,
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help="The pipeline to extract data from. Will default to `None`.",
+        required=False,
     )
     parser.add_argument(
         "--sample-size",

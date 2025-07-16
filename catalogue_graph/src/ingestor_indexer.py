@@ -5,14 +5,13 @@ import typing
 from collections.abc import Generator
 
 import elasticsearch.helpers
-from polars import DataFrame
-from pydantic import BaseModel
-
 import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
 from models.step_events import ReporterEvent
+from polars import DataFrame
+from pydantic import BaseModel
 from utils.aws import df_from_s3_parquet
 
 
@@ -52,7 +51,7 @@ def load_data(
     )
 
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
-    es = utils.elasticsearch.get_client(pipeline_date, is_local)
+    es = utils.elasticsearch.get_client("concepts_ingestor", pipeline_date, is_local)
 
     def generate_data() -> Generator[dict]:
         for concept in concepts:
