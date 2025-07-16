@@ -99,12 +99,8 @@ def handler(
     print("Checking output of ingestor_trigger ...")
     send_report = event.report_results or config.report_results
 
-    try:
-        report = run_check(event, config)
-        report_results(report, send_report)
-    except ValueError as e:
-        print(f"Check failed: {e}")
-        raise e
+    report = run_check(event, config)
+    report_results(report, send_report)
 
     print("Check complete.")
     return

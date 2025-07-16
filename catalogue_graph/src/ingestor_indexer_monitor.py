@@ -41,11 +41,7 @@ def build_indexer_report(
 def handler(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
     print("Preparing concepts pipeline reports ...")
 
-    try:
-        build_indexer_report(events)
-    except ValueError as e:
-        print(f"Report failed: {e}")
-        raise e
+    build_indexer_report(events)
 
     print("Report complete.")
     return 

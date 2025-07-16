@@ -136,13 +136,8 @@ def get_ingestor_report(
 def handler(event: IngestorStepEvent, config: ReporterConfig) -> None:
     print("Preparing concepts pipeline reports ...")
 
-    try:
-        ingestor_report = get_ingestor_report(event, config)
-        publish_report(slack_header + ingestor_report, config.slack_secret)
-
-    except ValueError as e:
-        print(f"Report failed: {e}")
-        raise e
+    ingestor_report = get_ingestor_report(event, config)
+    publish_report(slack_header + ingestor_report, config.slack_secret)
 
     print("Report complete.")
     return
