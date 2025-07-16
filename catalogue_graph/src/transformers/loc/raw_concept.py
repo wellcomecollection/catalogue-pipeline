@@ -1,19 +1,34 @@
+import re
 from typing import Literal
 
-ID_PREFIXES_TO_REMOVE = (
-    "/authorities/subjects/",
-    "http://id.loc.gov/authorities/subjects/",
-    "/authorities/names/",
-    "http://id.loc.gov/authorities/names/",
-    "https://id.loc.gov/authorities/names/",
-    "http://id.loc.gov/authorities/childrensSubjects/",
-)
+
+def extract_source_id(raw_item: dict) -> str | None:
+    """
+    Given a raw node, returns its Library of Congress ID. Returns `None` if the raw ID does not
+    correspond to a name or a subject heading.
+    """
+
+    # Subject heading IDs always start with an 'sh', followed by a sequence of digits.
+    subjects_match = re.search(r"authorities/subjects/(sh\d+)$", raw_item["@id"])
+    if subjects_match:
+        return subjects_match.group(1)
+
+    # Name IDs always start with an 'n', followed by an optional letter, followed by a sequence of digits.
+    names_match = re.search(r"authorities/names/(n[a-z]?\d+)$", raw_item["@id"])
+    if names_match:
+        return names_match.group(1)
+
+    return None
 
 
-def remove_id_prefix(raw_id: str) -> str:
-    for prefix in ID_PREFIXES_TO_REMOVE:
-        raw_id = raw_id.removeprefix(prefix)
-    return raw_id
+def extract_source_ids(raw_items: list[dict]) -> list[str]:
+    """Extracts Library of Congress IDs from raw nodes."""
+    source_ids = []
+    for raw_item in raw_items:
+        if (source_id := extract_source_id(raw_item)) is not None:
+            source_ids.append(source_id)
+
+    return source_ids
 
 
 class RawLibraryOfCongressConcept:
@@ -23,9 +38,13 @@ class RawLibraryOfCongressConcept:
 
     def _extract_concept_node(self) -> dict | None:
         graph: list[dict] = self.raw_concept.get("@graph", [])
+
+        if extract_source_id(self.raw_concept) is None:
+            return None
+
         for node in graph:
             # madsrdf:Authority corresponds to the "idea or notion"
-            # So the node we are after is the one whose id matches, and is an Authority
+            # So the node we are after is the one whose id matches, and is an Authority.
             # Ignore DeprecatedAuthority in this context, as they are to be excluded.
             # https://www.loc.gov/standards/mads/rdf/#t21
             if (
@@ -34,11 +53,14 @@ class RawLibraryOfCongressConcept:
                 and node.get("madsrdf:authoritativeLabel")
             ):
                 return node
+
         return None
 
     @property
     def source_id(self) -> str:
-        return remove_id_prefix(self.raw_concept["@id"])
+        source_id = extract_source_id(self.raw_concept)
+        assert isinstance(source_id, str)
+        return source_id
 
     @property
     def source(self) -> Literal["lc-subjects", "lc-names"]:
@@ -55,21 +77,20 @@ class RawLibraryOfCongressConcept:
         """Returns a list of alternative labels for the concept."""
         assert self._raw_concept_node is not None
 
-        raw_alternative_identifiers = [
-            entry["@id"]
-            for entry in _as_list(self._raw_concept_node.get("madsrdf:hasVariant", []))
-        ]
-        if raw_alternative_identifiers:
-            identifier_lookup = {
-                n["@id"]: self._extract_value(n["madsrdf:variantLabel"])
-                for n in self.raw_concept.get("@graph", [])
-                if "madsrdf:Variant" in n["@type"]
-            }
-            return [
-                identifier_lookup[identifier]
-                for identifier in raw_alternative_identifiers
-            ]
-        return []
+        identifier_lookup = {
+            n["@id"]: self._extract_value(n["madsrdf:variantLabel"])
+            for n in self.raw_concept.get("@graph", [])
+            if "madsrdf:Variant" in n["@type"]
+        }
+
+        has_variant = _as_list(self._raw_concept_node.get("madsrdf:hasVariant", []))
+        raw_alternative_identifiers = [entry["@id"] for entry in has_variant]
+
+        alternative_labels = []
+        for identifier in raw_alternative_identifiers:
+            alternative_labels.append(identifier_lookup[identifier])
+
+        return alternative_labels
 
     @property
     def label(self) -> str:
@@ -94,13 +115,7 @@ class RawLibraryOfCongressConcept:
         component_items = _as_list(
             self._raw_concept_node.get("madsrdf:componentList", {}).get("@list", [])
         )
-
-        return _filter_irrelevant_ids(
-            [
-                remove_id_prefix(broader["@id"])
-                for broader in (broader_items + component_items)
-            ]
-        )
+        return extract_source_ids(broader_items + component_items)
 
     @property
     def narrower_concept_ids(self) -> list[str]:
@@ -110,23 +125,17 @@ class RawLibraryOfCongressConcept:
         narrower_terms = _as_list(
             self._raw_concept_node.get("madsrdf:hasNarrowerAuthority", [])
         )
-
-        return _filter_irrelevant_ids(
-            [remove_id_prefix(narrower["@id"]) for narrower in narrower_terms]
-        )
+        return extract_source_ids(narrower_terms)
 
     @property
     def related_concept_ids(self) -> list[str]:
         """Returns a list of IDs representing concepts which are related to the current concept."""
         assert self._raw_concept_node is not None
-        return _filter_irrelevant_ids(
-            [
-                remove_id_prefix(broader["@id"])
-                for broader in _as_list(
-                    self._raw_concept_node.get("madsrdf:hasReciprocalAuthority", [])
-                )
-            ]
+
+        raw_related_ids = _as_list(
+            self._raw_concept_node.get("madsrdf:hasReciprocalAuthority", [])
         )
+        return extract_source_ids(raw_related_ids)
 
     @staticmethod
     def _extract_value(dict_or_str: str | dict[str, str]) -> str:
@@ -149,18 +158,10 @@ class RawLibraryOfCongressConcept:
 
     def exclude(self) -> bool:
         """Returns True if the concept should be excluded from the graph."""
-        # Remove concepts whose IDs have the "-781" suffix. They are duplicates of concepts with non-suffixed IDs.
-        # The suffix represents the fact that the concept in question is part of the LCSH - Geographic collection.
-        return self._raw_concept_node is None or self.source_id.endswith("-781")
-
-
-def _filter_irrelevant_ids(ids: list[str]) -> list[str]:
-    # IDs starting with 'sj' are for Children's Subject Headings. We don't want to include those.
-    return [
-        concept_id
-        for concept_id in ids
-        if not concept_id.startswith("_:n") and not concept_id.startswith("sj")
-    ]
+        return (
+            extract_source_id(self.raw_concept) is None
+            or self._raw_concept_node is None
+        )
 
 
 def _as_list(dict_or_list: dict | list[dict]) -> list[dict]:

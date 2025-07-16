@@ -33,7 +33,8 @@ def test_catalogue_concept_from_neptune_result() -> None:
         identifiers=[
             CatalogueConceptIdentifier(value="123", identifierType="lc-names")
         ],
-        label="label",
+        label="LoC label",
+        displayLabel="Wikidata label",
         alternativeLabels=[
             "Alternative label",
             "Another alternative label",
@@ -79,7 +80,8 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         identifiers=[
             CatalogueConceptIdentifier(value="123", identifierType="lc-names")
         ],
-        label="label",
+        label="LoC label",
+        displayLabel="Wikidata label",
         alternativeLabels=[],
         description=ConceptDescription(
             text="Description",
@@ -125,6 +127,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             CatalogueConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
         ],
         label="Waves",
+        displayLabel="Waves",
         alternativeLabels=["Mechanical waves", "Waves"],
         description=ConceptDescription(
             text="Repeated oscillation about a stable equilibrium",
@@ -132,7 +135,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             sourceUrl="https://www.wikidata.org/wiki/Q37172",
         ),
         type="Concept",
-        sameAs=["gcmn66yk", "a2584ttj"],
+        sameAs=["a2584ttj", "gcmn66yk"],
         relatedConcepts=RelatedConcepts(
             relatedTo=[
                 CatalogueConceptRelatedTo(

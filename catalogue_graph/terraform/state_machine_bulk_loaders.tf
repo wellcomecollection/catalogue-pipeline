@@ -41,10 +41,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_monthly" {
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
-          Input = {
-            "transformer_type" = task_input.transformer_type,
-            "entity_type"      = task_input.entity_type
-          }
+          Input           = jsonencode(task_input)
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
@@ -70,10 +67,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_daily" {
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
-          Input = {
-            "transformer_type" = task_input.transformer_type,
-            "entity_type"      = task_input.entity_type
-          }
+          Input           = jsonencode(task_input)
         }
         Next = index == length(local.concepts_pipeline_inputs_daily) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_daily[index + 1].label}"
       }
@@ -84,6 +78,3 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_daily" {
     })
   })
 }
-
-
-
