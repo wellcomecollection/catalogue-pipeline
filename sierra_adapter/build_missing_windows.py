@@ -72,5 +72,5 @@ if __name__ == "__main__":
             client.publish(
                 TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource_type}_windows",
                 Message=json.dumps(missing_window),
-                Subject="Window sender: missing windows script"
+                Subject="Window sender: missing windows script",
             )
