@@ -170,12 +170,7 @@ def local_handler() -> None:
         help="The job to report on",
         required=False,
     )
-    parser.add_argument(
-        "--success-count",
-        type=str,
-        help="How many documents were successfully indexed at the previous pipeline step",
-        required=False,
-    )
+    
     args = parser.parse_args()
 
     event = IngestorStepEvent(
