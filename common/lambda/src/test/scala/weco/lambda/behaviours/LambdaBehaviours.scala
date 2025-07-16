@@ -9,6 +9,11 @@ import weco.lambda._
 import weco.lambda.helpers.MemoryDownstream
 import weco.lambda.matchers.LambdaResultMatchers
 
+/** Implements tests for the three common scenarios in a Lambda invocation
+  *   1. Everything works 2. Nothing works 3. Some of it works, some of it
+  *      doesn't.
+  */
+
 trait LambdaBehaviours[
   InputMessageType,
   Config <: ApplicationConfig,
@@ -35,15 +40,17 @@ trait LambdaBehaviours[
 
   def aFailingInvocation(
     lambdaBuilder: Downstream => LambdaApp,
-    messages: Seq[IncomingMessage]
+    incomingMessages: Seq[IncomingMessage]
   ): Unit = {
     val downstream = new MemorySNSDownstream
-    whenReady(lambdaBuilder(downstream).processMessages(messages = messages)) {
+    whenReady(
+      lambdaBuilder(downstream).processMessages(messages = incomingMessages)
+    ) {
       results: Seq[SQSLambdaMessageResult] =>
         it(
           "returns BatchItemFailure responses for each input message"
         ) {
-          results should haveTheSameIdsAs(messages)
+          results should haveTheSameIdsAs(incomingMessages)
           all(results) shouldBe a[SQSLambdaMessageFailedRetryable]
         }
         it("does not notify downstream") {
@@ -54,15 +61,15 @@ trait LambdaBehaviours[
 
   def aPartialSuccess(
     lambdaBuilder: Downstream => LambdaApp,
-    messages: Seq[IncomingMessage],
+    incomingMessages: Seq[IncomingMessage],
     failingMessages: Seq[IncomingMessage],
-    outputs: Seq[ComparisonType]
+    outgoingMessageContent: () => Seq[ComparisonType]
   ): Unit = {
 
     val downstream = new MemorySNSDownstream
 
     whenReady(
-      lambdaBuilder(downstream).processMessages(messages = messages)
+      lambdaBuilder(downstream).processMessages(messages = incomingMessages)
     ) {
       results: Seq[SQSLambdaMessageResult] =>
         it("returns BatchItemFailure responses only for failing ids") {
@@ -71,22 +78,21 @@ trait LambdaBehaviours[
         }
         it("notifies downstream only for successful ids") {
           convertForComparison(
-            downstream.msgSender
-              .getMessages[OutputMessageType]
-          ) should contain theSameElementsAs outputs
+            getMessages(downstream)
+          ) should contain theSameElementsAs outgoingMessageContent()
         }
     }
   }
 
   def aTotalSuccess(
     lambdaBuilder: Downstream => LambdaApp,
-    messages: Seq[IncomingMessage],
-    outputs: () => Seq[ComparisonType],
+    incomingMessages: Seq[IncomingMessage],
+    outgoingMessageContent: () => Seq[ComparisonType],
     downstreamDescription: String = "sends all the identifiers downstream"
   ): Unit = {
     val downstream = new MemorySNSDownstream
     whenReady(
-      lambdaBuilder(downstream).processMessages(messages = messages)
+      lambdaBuilder(downstream).processMessages(messages = incomingMessages)
     ) {
       response =>
         it("returns no results") {
@@ -95,7 +101,7 @@ trait LambdaBehaviours[
         it(downstreamDescription) {
           convertForComparison(
             getMessages(downstream)
-          ) should contain theSameElementsAs outputs()
+          ) should contain theSameElementsAs outgoingMessageContent()
         }
     }
   }

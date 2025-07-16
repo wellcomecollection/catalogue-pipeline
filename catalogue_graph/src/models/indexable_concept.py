@@ -64,6 +64,7 @@ class ConceptDisplay(BaseModel):
     id: str
     identifiers: list[ConceptDisplayIdentifier]
     label: str
+    displayLabel: str
     alternativeLabels: list[str] = field(default_factory=list)
     description: Optional[ConceptDescription]
     type: ConceptType
@@ -104,6 +105,7 @@ class IndexableConcept(BaseModel):
                     for identifier in concept.identifiers
                 ],
                 label=concept.label,
+                displayLabel=concept.displayLabel,
                 alternativeLabels=concept.alternativeLabels,
                 type=concept.type,
                 description=concept.description,

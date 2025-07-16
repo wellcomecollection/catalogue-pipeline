@@ -6,10 +6,9 @@ import typing
 import smart_open
 
 import config
+from bulk_loader import DEFAULT_INSERT_ERROR_THRESHOLD
 from utils.aws import get_neptune_client
-from utils.slack_report import publish_report
-
-INSERT_ERROR_THRESHOLD = 1 / 10000
+from utils.slack import publish_report
 
 
 def log_payload(payload: dict) -> None:
@@ -55,7 +54,9 @@ def print_detailed_bulk_load_errors(payload: dict) -> None:
             print(f"         {failed_feed['status']}")
 
 
-def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
+def handler(
+    load_id: str, insert_error_threshold: float, is_local: bool = False
+) -> dict[str, typing.Any]:
     # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
     payload = get_neptune_client(is_local).get_bulk_load_status(load_id)
     overall_status = payload["overallStatus"]
@@ -68,7 +69,8 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
 
     if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
         return {
-            "loadId": load_id,
+            "load_id": load_id,
+            "insert_error_threshold": insert_error_threshold,
             "status": "IN_PROGRESS",
         }
 
@@ -88,17 +90,15 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
         status == "LOAD_FAILED"
         and parsing_error_count == 0
         and data_type_error_count == 0
-        and (insert_error_count / processed_count < INSERT_ERROR_THRESHOLD)
+        and (insert_error_count / processed_count < insert_error_threshold)
     )
 
     if failed_below_insert_error_threshold:
         print(
             "Bulk load failed due to a very small number of insert errors. Marking as successful."
         )
-        if insert_error_count > 0:
-            bulk_load_type = (
-                payload["overallStatus"]["fullUri"].split("/")[-1].split(".")[0]
-            )
+        if not is_local:
+            bulk_load_type = overall_status["fullUri"].split("/")[-1].split(".")[0]
             report = [
                 {
                     "type": "header",
@@ -128,16 +128,20 @@ def handler(load_id: str, is_local: bool = False) -> dict[str, str]:
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
         return {
-            "loadId": load_id,
+            "load_id": load_id,
+            "insert_error_threshold": insert_error_threshold,
             "status": "SUCCEEDED",
         }
 
     raise Exception("Load failed. See error log above.")
 
 
-def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
-    load_id = event["loadId"]
-    return handler(load_id)
+def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
+    load_id = event["load_id"]
+    insert_error_threshold = event.get(
+        "insert_error_threshold", DEFAULT_INSERT_ERROR_THRESHOLD
+    )
+    return handler(load_id, insert_error_threshold)
 
 
 def local_handler() -> None:
@@ -147,6 +151,13 @@ def local_handler() -> None:
         type=str,
         help="The ID of the bulk load job whose status to check.",
         required=True,
+    )
+    parser.add_argument(
+        "--insert-error-threshold",
+        type=float,
+        help="Maximum insert errors as a fraction of total records to still consider the bulk load successful.",
+        default=DEFAULT_INSERT_ERROR_THRESHOLD,
+        required=False,
     )
     args = parser.parse_args()
 

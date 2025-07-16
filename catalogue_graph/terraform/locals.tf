@@ -19,7 +19,7 @@ locals {
 
   # This is a hint that the ingestors might need to be in the pipeline stack!
   pipeline_date       = "2025-05-01"
-  concepts_index_date = "2025-06-17"
+  concepts_index_date = "2025-07-09"
 
   concepts_pipeline_inputs_monthly = [
     {
@@ -80,17 +80,20 @@ locals {
     {
       "label" : "Wikidata Linked LoC Concept Edges",
       "transformer_type" : "wikidata_linked_loc_concepts",
-      "entity_type" : "edges"
+      "entity_type" : "edges",
+      "insert_error_threshold" : 1 / 2000
     },
     {
       "label" : "Wikidata Linked LoC Location Edges",
       "transformer_type" : "wikidata_linked_loc_locations",
-      "entity_type" : "edges"
+      "entity_type" : "edges",
+      "insert_error_threshold" : 1 / 2000
     },
     {
       "label" : "Wikidata Linked LoC Name Edges",
       "transformer_type" : "wikidata_linked_loc_names",
-      "entity_type" : "edges"
+      "entity_type" : "edges",
+      "insert_error_threshold" : 1 / 2000
     },
     {
       "label" : "Wikidata Linked MeSH Concept Nodes",
@@ -105,12 +108,14 @@ locals {
     {
       "label" : "Wikidata Linked MeSH Concept Edges",
       "transformer_type" : "wikidata_linked_mesh_concepts",
-      "entity_type" : "edges"
+      "entity_type" : "edges",
+      "insert_error_threshold" : 1 / 2000
     },
     {
       "label" : "Wikidata Linked MeSH Location Edges",
       "transformer_type" : "wikidata_linked_mesh_locations",
-      "entity_type" : "edges"
+      "entity_type" : "edges",
+      "insert_error_threshold" : 1 / 2000
     }
   ]
 

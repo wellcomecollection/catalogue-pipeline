@@ -50,6 +50,7 @@ class MatcherFeatureTest
   private val g00dcafe = SQSTestLambdaMessage(message = "g00dcafe")
   private val g00dd00d = SQSTestLambdaMessage(message = "g00dd00d")
 
+
   private val LambdaBuilder: WorksMatcher => Downstream => StubLambda =
     StubLambda.curried
 
@@ -62,17 +63,18 @@ class MatcherFeatureTest
   describe("When some messages fail") {
     it should behave like aPartialSuccess(
       LambdaBuilder(MatcherStub(Seq(Set(Set(g00dcafe.message))))),
-      messages = Seq(g00dcafe, baadd00d),
+      incomingMessages = Seq(g00dcafe, baadd00d),
       failingMessages = Seq(baadd00d),
-      outputs = Seq(Set(g00dcafe.message))
+      outgoingMessageContent = () => Seq(Set(g00dcafe.message))
     )
   }
   describe("When everything is successful") {
     it should behave like aTotalSuccess(
       LambdaBuilder(MatcherStub(Seq(Set(Set("g00dcafe"), Set("g00dd00d"))))),
-      messages = Seq(g00dcafe, g00dd00d),
-      outputs = () => Seq(Set("g00dcafe", "g00dd00d"))
+      incomingMessages = Seq(g00dcafe, g00dd00d),
+      outgoingMessageContent = () => Seq(Set("g00dcafe", "g00dd00d"))
     )
+
   }
 
   describe("When matcher results contain other identifiers") {
@@ -113,16 +115,17 @@ class MatcherFeatureTest
 
     it should behave like aPartialSuccess(
       matcherLambda,
-      messages = messages,
+      incomingMessages = messages,
       failingMessages = Seq(baadd00d),
-      outputs = Seq(
-        Set(
-          g00dcafe.message,
-          beefcafe.message,
-          "cafef00d"
-        ), // cafef00d was not one of the input messages, but it was found in the match for one of them
-        Set(f00df00d.message, f00dfeed.message)
-      )
+      outgoingMessageContent = () =>
+        Seq(
+          Set(
+            g00dcafe.message,
+            beefcafe.message,
+            "cafef00d"
+          ), // cafef00d was not one of the input messages, but it was found in the match for one of them
+          Set(f00df00d.message, f00dfeed.message)
+        )
     )
   }
 }
