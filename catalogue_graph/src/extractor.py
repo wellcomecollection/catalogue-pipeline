@@ -21,8 +21,8 @@ def handler(
     stream_destination: StreamDestination,
     transformer_type: TransformerType,
     entity_type: EntityType,
-    pipeline_date: str | None = None,
     sample_size: int | None = None,
+    pipeline_date: str | None = None,
     is_local: bool = False,
 ) -> None:
     print(
