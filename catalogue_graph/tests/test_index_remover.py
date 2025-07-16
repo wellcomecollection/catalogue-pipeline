@@ -7,7 +7,7 @@ from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSm
 
 from graph_remover import IDS_LOG_SCHEMA
 from index_remover import lambda_handler
-from models.step_events import ReporterEvent
+from models.step_events import IngestorMonitorStepEvent
 
 
 def _mock_es_secrets() -> None:
@@ -51,15 +51,14 @@ def test_index_remover_first_run() -> None:
     assert len(indexed_concepts) == 5
 
     # No index date specified, so the local 'concepts-indexed' index name should be used
-    event = ReporterEvent(
+    event = IngestorMonitorStepEvent(
         pipeline_date=None,
         index_date=None,
         job_id=None,
-        success_count=1000,
         force_pass=True,
     )
 
-    lambda_handler([event], None)
+    lambda_handler(event, None)
 
     indexed_concepts = MockElasticsearchClient.indexed_documents["concepts-indexed"]
 
@@ -79,7 +78,7 @@ def test_index_remover_next_run() -> None:
 
     # Mock a file storing the date of the last index remover run
     MockSmartOpen.mock_s3_file(
-        f"s3://wellcomecollection-catalogue-graph/ingestor/{pipeline_date}/{index_date}/report.index_remover.json",
+        f"s3://wellcomecollection-catalogue-graph/ingestor/{pipeline_date}/{index_date}/report.deletions.json",
         json.dumps(
             {
                 "pipeline_date": pipeline_date,
@@ -98,14 +97,13 @@ def test_index_remover_next_run() -> None:
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]
     assert len(indexed_concepts) == 5
 
-    event = ReporterEvent(
+    event = IngestorMonitorStepEvent(
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,
-        success_count=1000,
         force_pass=True,
     )
-    lambda_handler([event], None)
+    lambda_handler(event, None)
 
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]
 
@@ -120,28 +118,26 @@ def test_index_remover_safety_check() -> None:
     mock_deleted_ids_log_file()
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
 
-    event = ReporterEvent(
+    event = IngestorMonitorStepEvent(
         pipeline_date=None,
         index_date=None,
         job_id=None,
-        success_count=1000,
     )
     with pytest.raises(ValueError):
-        lambda_handler([event], None)
+        lambda_handler(event, None)
 
 
 def test_index_remover_no_deleted_ids_file() -> None:
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
 
     # If the file storing deleted IDs does not exist, something went wrong and an exception should be thrown.
-    event = ReporterEvent(
+    event = IngestorMonitorStepEvent(
         pipeline_date=None,
         index_date=None,
         job_id=None,
-        success_count=1000,
     )
     with pytest.raises(KeyError):
-        lambda_handler([event], None)
+        lambda_handler(event, None)
 
 
 def test_index_remover_new_index_run() -> None:
@@ -160,15 +156,14 @@ def test_index_remover_new_index_run() -> None:
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]
     assert len(indexed_concepts) == 4
 
-    event = ReporterEvent(
+    event = IngestorMonitorStepEvent(
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,
-        success_count=1000,
         force_pass=True,
     )
 
-    lambda_handler([event], None)
+    lambda_handler(event, None)
 
     indexed_concepts = MockElasticsearchClient.indexed_documents[index_name]
 
