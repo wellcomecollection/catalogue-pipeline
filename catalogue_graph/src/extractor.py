@@ -23,6 +23,7 @@ def handler(
     entity_type: EntityType,
     pipeline_date: str | None = None,
     sample_size: int | None = None,
+    pipeline_date: str | None = None,
     is_local: bool = False,
 ) -> None:
     print(
