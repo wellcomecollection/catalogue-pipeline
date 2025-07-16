@@ -7,7 +7,7 @@ permissions:
   id-token: write
 
 jobs:
-  python-inferrers-checks:
+  python-adapter-checks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
