@@ -2,9 +2,8 @@ import argparse
 import typing
 from datetime import date, datetime
 
-import polars as pl
-
 import config
+import polars as pl
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from models.step_events import ReporterEvent
@@ -23,7 +22,7 @@ def get_current_id_count(
     pipeline_date: str | None, index_date: str | None, is_local: bool
 ) -> int:
     """Return the number of documents currently stored in ES in the concepts index."""
-    es = utils.elasticsearch.get_client(pipeline_date, is_local)
+    es = utils.elasticsearch.get_client("concepts_ingestor", pipeline_date, is_local)
 
     response = es.count(index=_get_concepts_index_name(index_date))
     count: int = response.get("count", 0)
@@ -37,7 +36,7 @@ def delete_concepts_from_elasticsearch(
     is_local: bool,
 ) -> int:
     """Remove documents matching `deleted_ids` from the concepts ES index."""
-    es = utils.elasticsearch.get_client(pipeline_date, is_local)
+    es = utils.elasticsearch.get_client("concepts-ingestor", pipeline_date, is_local)
     index_name = _get_concepts_index_name(index_date)
 
     response = es.delete_by_query(
@@ -167,8 +166,7 @@ def local_handler() -> None:
         "--index-date",
         type=str,
         help='The concepts index date that is being ingested to, will default to "dev".',
-        required=False,
-        default="dev",
+        required=False
     )
 
     parser.add_argument(
