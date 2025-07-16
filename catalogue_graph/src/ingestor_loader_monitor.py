@@ -4,7 +4,7 @@ from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
-from utils.reporting import IndexerReport, LoaderReport
+from utils.reporting import LoaderReport
 from utils.safety import validate_fractional_change
 
 
@@ -82,31 +82,6 @@ def run_check(
             fractional_threshold=config.percentage_threshold,
             force_pass=force_pass,
         )
-
-    # Update the indexer report in S3 if it exists.
-    # TODO: This should be moved to a lambda function that runs after the indexer
-    indexer_report: IndexerReport | None = IndexerReport.read(
-        current_report.pipeline_date,
-        current_report.index_date,
-        current_report.job_id,
-        ignore_missing=True,
-    )
-
-    if indexer_report is not None:
-        updated_indexer_report = IndexerReport(
-            pipeline_date=indexer_report.pipeline_date,
-            index_date=indexer_report.index_date,
-            job_id=indexer_report.job_id,
-            previous_job_id=indexer_report.previous_job_id,
-            neptune_record_count=indexer_report.neptune_record_count,
-            previous_neptune_record_count=indexer_report.previous_neptune_record_count,
-            es_record_count=current_report.record_count,
-            previous_es_record_count=latest_report.record_count
-            if latest_report
-            else None,
-        )
-        updated_indexer_report.write()
-        updated_indexer_report.write(latest=True)
 
     current_report.write()
     current_report.write(latest=True)
