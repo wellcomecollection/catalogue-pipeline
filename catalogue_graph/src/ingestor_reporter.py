@@ -5,8 +5,8 @@ from typing import Any
 from pydantic import BaseModel
 
 from config import SLACK_SECRET_ID
-from models.step_events import ReporterEvent
-from utils.reporting import IndexerReport, IndexRemoverReport
+from models.step_events import IngestorStepEvent
+from utils.reporting import DeletionReport, IndexerReport, TriggerReport
 from utils.slack import publish_report
 
 
@@ -38,7 +38,7 @@ slack_header = [
 ]
 
 
-def date_time_from_job_id(job_id: str) -> str:
+def date_time_from_job_id(job_id: str = "") -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
     if start_datetime.date() == datetime.now().date():
         return start_datetime.strftime("today at %-I:%M %p %Z")
@@ -48,12 +48,17 @@ def date_time_from_job_id(job_id: str) -> str:
         return start_datetime.strftime("on %A, %B %-d at %-I:%M %p %Z")
 
 
-def get_indexer_report(
-    event: ReporterEvent, indexer_success_count: int, config: ReporterConfig
-) -> list[Any]:
+def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> list[Any]:
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date or "dev"
     job_id = event.job_id
+
+    trigger_report: TriggerReport | None = TriggerReport.read(
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+        job_id=job_id,
+        ignore_missing=True,
+    )
 
     indexer_report: IndexerReport | None = IndexerReport.read(
         pipeline_date=pipeline_date,
@@ -62,38 +67,51 @@ def get_indexer_report(
         ignore_missing=True,
     )
 
-    index_remover_report: IndexRemoverReport | None = IndexRemoverReport.read(
+    previous_indexer_report: IndexerReport | None = (
+        IndexerReport.read(
+            pipeline_date=pipeline_date,
+            index_date=index_date,
+            job_id=indexer_report.previous_job_id,
+            ignore_missing=True,
+        )
+        if indexer_report and indexer_report.previous_job_id
+        else None
+    )
+
+    deletions_report: DeletionReport | None = DeletionReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,
         ignore_missing=True,
     )
 
-    if job_id is not None and indexer_report is not None:
+    if job_id is not None and trigger_report is not None and indexer_report is not None:
         start_datetime = date_time_from_job_id(job_id)
 
-        if indexer_report.previous_job_id is None:
-            last_update_line = "- No previous job found to compare."
+        if trigger_report.record_count == indexer_report.success_count:
+            graph_index_comparison = "_(the same as the graph)_"
         else:
-            last_update_line = (
-                f"- The last update was {date_time_from_job_id(indexer_report.previous_job_id)}"
-                f"when {indexer_report.previous_es_record_count} documents were indexed."
+            graph_index_comparison = (
+                f":warning: _compared to {trigger_report.record_count} in the graph_"
             )
-
-        if index_remover_report is not None:
-            index_remover_line = f"- *{index_remover_report.deleted_count}* documents were deleted from the index."
-        else:
-            index_remover_line = "- No index_remover report found."
 
         current_run_duration = int(
             (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds()
             / 60
         )
 
-        if indexer_report.neptune_record_count == indexer_success_count:
-            graph_index_comparison = "_(the same as the graph)_"
+        if deletions_report:
+            ingestor_deletions_line = f"- *{deletions_report.deleted_count}* documents were deleted from the index."
         else:
-            graph_index_comparison = f":warning: _compared to {indexer_report.neptune_record_count} in the graph_"
+            ingestor_deletions_line = "- No deletions report found."
+
+        if previous_indexer_report and previous_indexer_report.job_id:
+            last_update_line = (
+                f"- The last update was {date_time_from_job_id(previous_indexer_report.job_id)}"
+                f"when {previous_indexer_report.success_count} documents were indexed."
+            )
+        else:
+            last_update_line = "- No previous indexer report found."
 
         return [
             {
@@ -104,9 +122,9 @@ def get_indexer_report(
                         [
                             f"- Index *concepts-indexed-{index_date}* in pipeline-{pipeline_date}",
                             f"- Pipeline started *{start_datetime}*",
-                            f"- It contains *{indexer_success_count}* documents {graph_index_comparison}.",
+                            f"- It contains *{indexer_report.success_count}* documents {graph_index_comparison}.",
                             f"- Pipeline took *{current_run_duration} minutes* to complete.",
-                            index_remover_line,
+                            ingestor_deletions_line,
                             last_update_line,
                         ]
                     ),
@@ -116,27 +134,21 @@ def get_indexer_report(
     return [report_failure_message("Indexer")]
 
 
-def handler(events: list[ReporterEvent], config: ReporterConfig) -> None:
+def handler(event: IngestorStepEvent, config: ReporterConfig) -> None:
     print("Preparing concepts pipeline reports ...")
-    total_indexer_success = sum(event.success_count for event in events)
 
-    try:
-        indexer_report = get_indexer_report(events[0], total_indexer_success, config)
-        publish_report(slack_header + indexer_report, config.slack_secret)
-
-    except ValueError as e:
-        print(f"Report failed: {e}")
-        raise e
+    ingestor_report = get_ingestor_report(event, config)
+    publish_report(slack_header + ingestor_report, config.slack_secret)
 
     print("Report complete.")
     return
 
 
-def lambda_handler(events: list[ReporterEvent], context: Any) -> None:
-    validated_events = [ReporterEvent.model_validate(event) for event in events]
+def lambda_handler(event: IngestorStepEvent, context: Any) -> None:
+    validated_event = IngestorStepEvent.model_validate(event)
     config = ReporterConfig()
 
-    handler(validated_events, config)
+    handler(validated_event, config)
 
 
 def local_handler() -> None:
@@ -159,23 +171,17 @@ def local_handler() -> None:
         help="The job to report on",
         required=False,
     )
-    parser.add_argument(
-        "--success-count",
-        type=str,
-        help="How many documents were successfully indexed at the previous pipeline step",
-        required=False,
-    )
+
     args = parser.parse_args()
 
-    event = ReporterEvent(
+    event = IngestorStepEvent(
         pipeline_date=args.pipeline_date,
         index_date=args.index_date,
         job_id=args.job_id,
-        success_count=args.success_count,
     )
     config = ReporterConfig(is_local=True)
 
-    handler([event], config)
+    handler(event, config)
 
 
 if __name__ == "__main__":
