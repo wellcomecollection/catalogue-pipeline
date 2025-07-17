@@ -9,6 +9,7 @@ from typing import Any, Optional, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
+
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -54,9 +55,7 @@ class MockSmartOpen:
             # Create a temporary file, return a handle and save the location in the file lookup
             # We're ignoring "SIM115 Use a context manager for opening files" as we need to keep
             # the file around for the duration of the test, cleaning it up in reset_mocks.
-            temp_file = tempfile.NamedTemporaryFile(
-                delete=False, mode=mode
-            )  # noqa: SIM115
+            temp_file = tempfile.NamedTemporaryFile(delete=False, mode=mode)  # noqa: SIM115
             # Insert the to_boto3 method to simulate the method provided by smart_open
             # https://github.com/piskvorky/smart_open/blob/develop/howto.md#how-to-access-s3-object-properties
             temp_file.to_boto3 = lambda _: MockBotoS3Object()  # type: ignore[attr-defined]
@@ -356,7 +355,7 @@ class MockElasticsearchClient:
 
         all_documents = self.indexed_documents[self.pit_index].values()
         sorted_documents = sorted(all_documents, key=lambda d: d["_id"])
-        
+
         items = []
         for document in sorted_documents:
             item = dict(document)

@@ -1,7 +1,7 @@
+from test_utils import add_mock_denormalised_documents
 
 from models.graph_edge import BaseEdge, WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
-from test_utils import add_mock_denormalised_documents
 from transformers.catalogue.works_transformer import CatalogueWorksTransformer
 
 
@@ -28,7 +28,7 @@ def test_catalogue_works_transformer_nodes() -> None:
         type="Work",
         alternative_labels=[],
     )
-    assert any(node == expected_work for node in nodes) 
+    assert any(node == expected_work for node in nodes)
 
 
 def test_catalogue_works_transformer_edges() -> None:
@@ -36,7 +36,7 @@ def test_catalogue_works_transformer_edges() -> None:
 
     transformer = CatalogueWorksTransformer(None, True)
     edges = list(transformer._stream_edges())
-        
+
     assert len(edges) == 15
 
     _check_edge(

@@ -2,8 +2,9 @@ import argparse
 import typing
 from datetime import date, datetime
 
-import config
 import polars as pl
+
+import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
@@ -177,7 +178,7 @@ def local_handler() -> None:
         "--index-date",
         type=str,
         help='The concepts index date that is being ingested to, will default to "dev".',
-        required=False
+        required=False,
     )
 
     parser.add_argument(

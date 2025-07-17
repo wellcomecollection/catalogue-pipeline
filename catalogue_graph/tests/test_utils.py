@@ -4,6 +4,7 @@ from itertools import product
 from typing import Any, Literal
 
 from test_mocks import MockElasticsearchClient, MockSmartOpen
+
 from utils.aws import VALID_SOURCE_FILES
 
 
@@ -49,5 +50,6 @@ def add_mock_denormalised_documents() -> None:
     index_name = "works-denormalised"
     fixture = load_jsonl_fixture("catalogue/denormalised_works_example.jsonl")
     for json_item in fixture:
-        MockElasticsearchClient.index(index_name, json_item["state"]["canonicalId"], json_item)
-    
+        MockElasticsearchClient.index(
+            index_name, json_item["state"]["canonicalId"], json_item
+        )

@@ -35,7 +35,10 @@ TransformerType = Literal[
 
 
 def create_transformer(
-    transformer_type: TransformerType, entity_type: EntityType, pipeline_date: str | None, is_local: bool
+    transformer_type: TransformerType,
+    entity_type: EntityType,
+    pipeline_date: str | None,
+    is_local: bool,
 ) -> BaseTransformer:
     if transformer_type == "loc_concepts":
         return LibraryOfCongressConceptsTransformer(LOC_SUBJECT_HEADINGS_URL)

@@ -3,14 +3,15 @@ from typing import Any
 
 import polars
 import pytest
+from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
+from test_utils import load_fixture
+
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
-from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
-from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:

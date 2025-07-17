@@ -1,10 +1,11 @@
+from test_utils import add_mock_denormalised_documents, add_mock_transformer_outputs
+
 from models.graph_edge import (
     BaseEdge,
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
-from test_utils import add_mock_denormalised_documents, add_mock_transformer_outputs
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
@@ -28,7 +29,10 @@ def test_catalogue_concepts_transformer_nodes() -> None:
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 12
-    assert any(item == Concept(id="s6s24vd7", label="Human anatomy", source="lc-subjects") for item in nodes)
+    assert any(
+        item == Concept(id="s6s24vd7", label="Human anatomy", source="lc-subjects")
+        for item in nodes
+    )
 
 
 def test_catalogue_concepts_transformer_edges() -> None:

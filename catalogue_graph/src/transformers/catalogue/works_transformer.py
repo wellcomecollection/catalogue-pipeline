@@ -4,9 +4,8 @@ import config
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from sources.elasticsearch_source import ElasticsearchSource
-from utils.elasticsearch import get_standard_index_name
-
 from transformers.base_transformer import BaseTransformer
+from utils.elasticsearch import get_standard_index_name
 
 from .raw_work import RawCatalogueWork
 
@@ -19,14 +18,18 @@ ES_FIELDS = [
     "state.canonicalId",
     "data.subjects",
     "data.contributors",
-    "data.genres"
+    "data.genres",
 ]
 
 
 class CatalogueWorksTransformer(BaseTransformer):
     def __init__(self, pipeline_date: str | None, is_local: bool):
-        index_name = get_standard_index_name(config.ES_DENORMALISED_INDEX_NAME, pipeline_date)
-        self.source = ElasticsearchSource(pipeline_date, is_local, index_name, ES_QUERY, ES_FIELDS)
+        index_name = get_standard_index_name(
+            config.ES_DENORMALISED_INDEX_NAME, pipeline_date
+        )
+        self.source = ElasticsearchSource(
+            pipeline_date, is_local, index_name, ES_QUERY, ES_FIELDS
+        )
 
     def transform_node(self, raw_node: dict) -> Work:
         raw_work = RawCatalogueWork(raw_node)

@@ -24,7 +24,6 @@ class ElasticsearchSource(BaseSource):
         self.query = {"match_all": {}} if query is None else query
         self.fields = fields
 
-
     def search_with_pit(self, pit_id: int, slice_index: int, queue: Queue) -> None:
         body = {
             "query": {"match": {"_id": "f33w7jru"}},
