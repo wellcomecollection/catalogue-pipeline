@@ -10,9 +10,9 @@ from pydantic import BaseModel
 
 import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
+from ingestor_indexer_monitor import IngestorIndexerMonitorLambdaEvent
 from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
-from models.step_events import ReporterEvent
 from utils.aws import df_from_s3_parquet
 
 
@@ -69,7 +69,7 @@ def load_data(
 
 def handler(
     event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
-) -> ReporterEvent:
+) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
     extracted_data = df_from_s3_parquet(event.object_to_index.s3_uri)
@@ -85,7 +85,7 @@ def handler(
 
     print(f"Successfully indexed {success_count} documents.")
 
-    return ReporterEvent(
+    return IngestorIndexerMonitorLambdaEvent(
         pipeline_date=event.pipeline_date,
         index_date=event.index_date,
         job_id=event.job_id,

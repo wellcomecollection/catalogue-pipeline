@@ -66,16 +66,13 @@ class LoaderReport(PipelineReport):
     total_file_size: int
 
 
-class IndexRemoverReport(PipelineReport):
-    label: ClassVar[str] = "index_remover"
+class DeletionReport(PipelineReport):
+    label: ClassVar[str] = "deletions"
     deleted_count: int | None
     date: str
 
 
 class IndexerReport(PipelineReport):
     label: ClassVar[str] = "indexer"
-    previous_job_id: str | None
-    neptune_record_count: int
-    previous_neptune_record_count: int | None
-    es_record_count: int | None
-    previous_es_record_count: int | None
+    success_count: int | None = None
+    previous_job_id: str | None = None
