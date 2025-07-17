@@ -51,7 +51,7 @@ def load_data(
     )
 
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
-    es = utils.elasticsearch.get_client("concepts_ingestor", pipeline_date, is_local)
+    es = utils.elasticsearch.get_client("concept_ingestor", pipeline_date, is_local)
 
     def generate_data() -> Generator[dict]:
         for concept in concepts:

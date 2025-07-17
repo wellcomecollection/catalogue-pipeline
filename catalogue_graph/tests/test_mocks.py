@@ -9,7 +9,6 @@ from typing import Any, Optional, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
-
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -55,7 +54,9 @@ class MockSmartOpen:
             # Create a temporary file, return a handle and save the location in the file lookup
             # We're ignoring "SIM115 Use a context manager for opening files" as we need to keep
             # the file around for the duration of the test, cleaning it up in reset_mocks.
-            temp_file = tempfile.NamedTemporaryFile(delete=False, mode=mode)  # noqa: SIM115
+            temp_file = tempfile.NamedTemporaryFile(
+                delete=False, mode=mode
+            )  # noqa: SIM115
             # Insert the to_boto3 method to simulate the method provided by smart_open
             # https://github.com/piskvorky/smart_open/blob/develop/howto.md#how-to-access-s3-object-properties
             temp_file.to_boto3 = lambda _: MockBotoS3Object()  # type: ignore[attr-defined]
@@ -305,6 +306,7 @@ class MockBulkResponse:
 class MockElasticsearchClient:
     indexed_documents: dict = defaultdict(dict[str, dict])
     inputs: list[dict] = []
+    pit_index: str
 
     def __init__(self, config: dict, api_key: str) -> None:
         pass
@@ -321,7 +323,7 @@ class MockElasticsearchClient:
 
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:
-        cls.indexed_documents[index][id] = document
+        cls.indexed_documents[index][id] = {"_source": document, "_id": id}
 
     def delete_by_query(self, index: str, body: dict) -> dict:
         deleted_ids = body["query"]["ids"]["values"]
@@ -341,6 +343,28 @@ class MockElasticsearchClient:
 
     def count(self, index: str) -> dict:
         return {"count": len(self.indexed_documents.get(index, {}).values())}
+
+    def open_point_in_time(self, index: str, keep_alive: str) -> dict:
+        self.pit_index = index
+        return {"id": "some_pit_id"}
+
+    def close_point_in_time(self, body: dict) -> None:
+        pass
+
+    def search(self, body: dict) -> dict:
+        search_after = body.get("search_after")
+
+        all_documents = self.indexed_documents[self.pit_index].values()
+        sorted_documents = sorted(all_documents, key=lambda d: d["_id"])
+        
+        items = []
+        for document in sorted_documents:
+            item = dict(document)
+            item["sort"] = item["_id"]
+            if search_after is None or item["sort"] > search_after:
+                items.append(item)
+
+        return {"hits": {"hits": items}}
 
 
 def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:

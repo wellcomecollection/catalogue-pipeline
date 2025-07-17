@@ -44,3 +44,5 @@ ES_LOCAL_SCHEME = os.environ.get("ES_LOCAL_SCHEME")
 ES_LOCAL_API_KEY = os.environ.get("ES_LOCAL_API_KEY")
 
 ES_DENORMALISED_INDEX_NAME = "works-denormalised"
+
+ES_SOURCE_PARALLELISM = 10

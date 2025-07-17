@@ -3,15 +3,14 @@ from typing import Any
 
 import polars
 import pytest
-from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
-from test_utils import load_fixture
-
 from ingestor_indexer import (
     IngestorIndexerConfig,
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
     handler,
 )
+from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
+from test_utils import load_fixture
 
 
 def test_ingestor_indexer_success() -> None:
@@ -64,10 +63,10 @@ def build_test_matrix() -> list[tuple]:
                 pipeline_date="2021-07-01",
                 index_date="2025-01-01",
                 object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://test-catalogue-graph/catalogue/works_snapshot_example.json"
+                    s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
                 ),
             ),
-            "catalogue/works_snapshot_example.json",
+            "catalogue/denormalised_works_example.jsonl",
             polars.exceptions.ComputeError,
             "parquet: File out of specification: The file must end with PAR1",
         ),

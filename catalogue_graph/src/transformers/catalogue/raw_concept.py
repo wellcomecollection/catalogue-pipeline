@@ -1,5 +1,4 @@
 import re
-from typing import get_args
 
 from models.graph_node import ConceptSource, ConceptType
 
@@ -19,10 +18,7 @@ class RawCatalogueConcept:
         Determines whether a given block of JSON represents a Concept as returned from the Catalogue API.
         A Concept is a block of JSON with a type property and a list of identifiers.
         """
-        return (
-            self.raw_concept.get("type") in get_args(ConceptType)
-            and self.raw_concept.get("id", {}).get("canonicalId") is not None
-        )
+        return self.raw_concept.get("id", {}).get("canonicalId") is not None
 
     @property
     def wellcome_id(self) -> str:

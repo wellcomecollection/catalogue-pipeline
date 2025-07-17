@@ -1,22 +1,11 @@
-from test_mocks import MockRequest
-from test_utils import add_mock_transformer_outputs, load_fixture
-
-from config import CATALOGUE_SNAPSHOT_URL
 from models.graph_edge import (
     BaseEdge,
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
+from test_utils import add_mock_denormalised_documents, add_mock_transformer_outputs
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
-
-
-def _add_catalogue_request() -> None:
-    MockRequest.mock_response(
-        method="GET",
-        url=CATALOGUE_SNAPSHOT_URL,
-        content_bytes=load_fixture("catalogue/works_snapshot_example.json"),
-    )
 
 
 def _check_edge(
@@ -33,32 +22,25 @@ def test_catalogue_concepts_transformer_nodes() -> None:
     add_mock_transformer_outputs(
         sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
     )
-    _add_catalogue_request()
+    add_mock_denormalised_documents()
 
-    catalogue_concepts_transformer = CatalogueConceptsTransformer(
-        CATALOGUE_SNAPSHOT_URL
-    )
+    transformer = CatalogueConceptsTransformer(None, True)
+    nodes = list(transformer._stream_nodes())
 
-    nodes = list(catalogue_concepts_transformer._stream_nodes())
-
-    assert len(nodes) == 11
-    assert nodes[0] == Concept(
-        id="s6s24vd7", label="Human anatomy", source="lc-subjects"
-    )
+    assert len(nodes) == 12
+    assert any(item == Concept(id="s6s24vd7", label="Human anatomy", source="lc-subjects") for item in nodes)
 
 
 def test_catalogue_concepts_transformer_edges() -> None:
     add_mock_transformer_outputs(
         sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
     )
-    _add_catalogue_request()
+    add_mock_denormalised_documents()
 
-    catalogue_concepts_transformer = CatalogueConceptsTransformer(
-        CATALOGUE_SNAPSHOT_URL
-    )
+    transformer = CatalogueConceptsTransformer(None, True)
 
-    edges = list(catalogue_concepts_transformer._stream_edges())
-    assert len(edges) == 6
+    edges = list(transformer._stream_edges())
+    assert len(edges) == 7
 
     _check_edge(
         edges,
@@ -80,12 +62,12 @@ def test_catalogue_concepts_transformer_edges() -> None:
     _check_edge(
         edges,
         "yfqryj26",
-        "sh00005643",
+        "sh85045046",
         ConceptHasSourceConcept(
             from_type="Concept",
             to_type="SourceConcept",
             from_id="yfqryj26",
-            to_id="sh00005643",
+            to_id="sh85045046",
             relationship="HAS_SOURCE_CONCEPT",
             directed=True,
             attributes=ConceptHasSourceConceptAttributes(
