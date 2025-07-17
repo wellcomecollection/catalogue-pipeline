@@ -133,7 +133,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           }
         },
         Retry = local.DefaultRetry,
-        "Next" : "Map index to ES"
+        Next : "Map index to ES"
       },
       "Map index to ES" = {
         Type           = "Map",
@@ -169,7 +169,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         },
         Next = "Monitor indexer"
       },
-      "Monitor indexer output" = {
+      "Monitor indexer" = {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke",
         Arguments = {
