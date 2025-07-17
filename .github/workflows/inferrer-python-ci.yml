@@ -14,7 +14,7 @@ jobs:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
     steps:
       - uses: actions/checkout@v3
-      - uses: wellcomecollection/.github/actions/python-check@main
+      - uses: wellcomecollection/.github/.github/actions/python-check@main
         with:
           folder: pipeline/inferrer/${{matrix.project}}
   python-inferrers-builds:
