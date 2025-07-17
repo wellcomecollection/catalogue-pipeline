@@ -1,24 +1,20 @@
 import typing
-from pydantic import BaseModel
 
-from utils.reporting import IndexerReport
 from models.step_events import IngestorMonitorStepEvent
+from utils.reporting import IndexerReport
 
 
 class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):
     success_count: int
 
 
-def build_indexer_report(
-    events: list[IngestorIndexerMonitorLambdaEvent]
-) -> None:
+def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
     pipeline_date = events[0].pipeline_date or "dev"
     index_date = events[0].index_date or "dev"
     job_id = events[0].job_id
 
     sum_success_count = sum((e.success_count or 0) for e in events)
 
-  
     latest_report: IndexerReport | None = IndexerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
@@ -44,11 +40,15 @@ def handler(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
     build_indexer_report(events)
 
     print("Report complete.")
-    return 
+    return
 
 
-def lambda_handler(events: list[IngestorIndexerMonitorLambdaEvent], context: typing.Any) -> dict:
-    validated_events = [IngestorIndexerMonitorLambdaEvent.model_validate(event) for event in events]
+def lambda_handler(
+    events: list[IngestorIndexerMonitorLambdaEvent], context: typing.Any
+) -> dict:
+    validated_events = [
+        IngestorIndexerMonitorLambdaEvent.model_validate(event) for event in events
+    ]
 
     handler(validated_events)
 

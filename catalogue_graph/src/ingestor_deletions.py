@@ -92,7 +92,7 @@ def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date
         ignore_missing=True,
     )
 
-    # We shouldn't get here as DeletionReport.read should throw its own error, 
+    # We shouldn't get here as DeletionReport.read should throw its own error,
     # throw a RuntimeError here, to make it clear that the state of the ingestor deletions is unexpected.
     if ingestor_deletion_report is None:
         # TO DO: remove this when we have a report.deletions.json report
@@ -158,7 +158,6 @@ def lambda_handler(event: IngestorMonitorStepEvent, context: typing.Any) -> dict
         index_date=validated_event.index_date,
         job_id=validated_event.job_id,
     ).model_dump()
-
 
 
 def local_handler() -> None:

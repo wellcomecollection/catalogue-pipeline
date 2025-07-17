@@ -11,6 +11,7 @@ from utils.safety import validate_fractional_change
 class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
     events: list[IngestorLoaderLambdaEvent]
 
+
 class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
     ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX

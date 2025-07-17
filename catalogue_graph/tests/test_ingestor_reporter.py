@@ -3,12 +3,12 @@ from _pytest.monkeypatch import MonkeyPatch
 from test_mocks import MockSmartOpen, fixed_datetime
 from test_utils import load_fixture
 
+from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_reporter import (
     ReporterConfig,
     get_ingestor_report,
 )
 from models.step_events import IngestorStepEvent
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 
 pipeline_date = "2024-01-01"
 index_date = "2024-01-02"
@@ -25,6 +25,7 @@ def reporter_event() -> IngestorStepEvent:
         index_date=index_date,
         job_id=job_id,
     )
+
 
 @pytest.fixture
 def reporter_config() -> ReporterConfig:
@@ -49,9 +50,7 @@ def test_get_ingestor_report_success(
     reporter_event: IngestorStepEvent,
     reporter_config: ReporterConfig,
 ) -> None:
-    monkeypatch.setattr(
-        "ingestor_reporter.datetime", fixed_datetime(2024, 1, 6)
-    )
+    monkeypatch.setattr("ingestor_reporter.datetime", fixed_datetime(2024, 1, 6))
 
     MockSmartOpen.mock_s3_file(
         f"{s3_url}/{job_id}/report.trigger.json",
@@ -89,7 +88,7 @@ def test_get_ingestor_report_success(
         "- *2* documents were deleted from the index.",
         "- The last update was on Monday, January 1 at 12:00 PM when 980 documents were indexed.",
     ]
-    
+
     actual_section_text = report[0]["text"]["text"]
     print("Actual section text:", actual_section_text)
     for line in expected_section_lines:

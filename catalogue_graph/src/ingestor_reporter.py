@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from config import SLACK_SECRET_ID
 from models.step_events import IngestorStepEvent
-from utils.reporting import TriggerReport, LoaderReport, IndexerReport, DeletionReport
+from utils.reporting import DeletionReport, IndexerReport, TriggerReport
 from utils.slack import publish_report
 
 
@@ -38,7 +38,7 @@ slack_header = [
 ]
 
 
-def date_time_from_job_id(job_id: str="") -> str:
+def date_time_from_job_id(job_id: str = "") -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
     if start_datetime.date() == datetime.now().date():
         return start_datetime.strftime("today at %-I:%M %p %Z")
@@ -48,9 +48,7 @@ def date_time_from_job_id(job_id: str="") -> str:
         return start_datetime.strftime("on %A, %B %-d at %-I:%M %p %Z")
 
 
-def get_ingestor_report(
-    event: IngestorStepEvent, config: ReporterConfig
-) -> list[Any]:
+def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> list[Any]:
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date or "dev"
     job_id = event.job_id
@@ -69,13 +67,16 @@ def get_ingestor_report(
         ignore_missing=True,
     )
 
-    previous_indexer_report: IndexerReport | None = IndexerReport.read(
-      pipeline_date=pipeline_date,
-      index_date=index_date,
-      job_id=indexer_report.previous_job_id,
-      ignore_missing=True,
-
-    ) if indexer_report and indexer_report.previous_job_id else None
+    previous_indexer_report: IndexerReport | None = (
+        IndexerReport.read(
+            pipeline_date=pipeline_date,
+            index_date=index_date,
+            job_id=indexer_report.previous_job_id,
+            ignore_missing=True,
+        )
+        if indexer_report and indexer_report.previous_job_id
+        else None
+    )
 
     deletions_report: DeletionReport | None = DeletionReport.read(
         pipeline_date=pipeline_date,
@@ -84,14 +85,15 @@ def get_ingestor_report(
         ignore_missing=True,
     )
 
-
     if job_id is not None and trigger_report is not None and indexer_report is not None:
         start_datetime = date_time_from_job_id(job_id)
-    
+
         if trigger_report.record_count == indexer_report.success_count:
             graph_index_comparison = "_(the same as the graph)_"
         else:
-            graph_index_comparison = f":warning: _compared to {trigger_report.record_count} in the graph_"
+            graph_index_comparison = (
+                f":warning: _compared to {trigger_report.record_count} in the graph_"
+            )
 
         current_run_duration = int(
             (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds()
@@ -102,7 +104,7 @@ def get_ingestor_report(
             ingestor_deletions_line = f"- *{deletions_report.deleted_count}* documents were deleted from the index."
         else:
             ingestor_deletions_line = "- No deletions report found."
-        
+
         if previous_indexer_report and previous_indexer_report.job_id:
             last_update_line = (
                 f"- The last update was {date_time_from_job_id(previous_indexer_report.job_id)}"
@@ -110,7 +112,6 @@ def get_ingestor_report(
             )
         else:
             last_update_line = "- No previous indexer report found."
-        
 
         return [
             {
@@ -170,7 +171,7 @@ def local_handler() -> None:
         help="The job to report on",
         required=False,
     )
-    
+
     args = parser.parse_args()
 
     event = IngestorStepEvent(
