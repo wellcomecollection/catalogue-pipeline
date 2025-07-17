@@ -19,7 +19,7 @@ jobs:
           repository: wellcomecollection/.github
           ref: common-python-ci
           path: dotgithub
-      - uses: ./dotgithub/./.github/actions/python_check
+      - uses: ./dotgithub/.github/actions/python_check
         with:
           folder: pipeline/inferrer/${{matrix.project}}
   python-inferrers-builds:
@@ -34,7 +34,12 @@ jobs:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
     steps:
       - uses: actions/checkout@v3
-      - uses: ./.github/actions/docker-build-and-push
+      - uses: actions/checkout@v3
+        with:
+          repository: wellcomecollection/.github
+          ref: common-python-ci
+          path: dotgithub
+      - uses: ./dotgithub/.github/actions/docker-build-and-push
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           folder: pipeline/inferrer
