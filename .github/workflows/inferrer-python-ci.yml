@@ -14,6 +14,7 @@ jobs:
         project: [ aspect_ratio_inferrer, feature_inferrer, palette_inferrer ]
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           repository: wellcomecollection/.github
           ref: common-python-ci
