@@ -4,9 +4,10 @@ import config
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
-from transformers.base_transformer import BaseTransformer
 from utils.elasticsearch import get_standard_index_name
 from utils.types import WorkConceptKey
+
+from transformers.base_transformer import BaseTransformer
 
 from .id_label_checker import IdLabelChecker
 from .raw_concept import RawCatalogueConcept
@@ -22,9 +23,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
             pipeline_date, is_local, index_name, ES_QUERY, ES_FIELDS
         )
 
-        self.id_label_checker = IdLabelChecker(
-            node_types=["concepts", "locations", "names"], sources=["loc", "mesh"]
-        )
+        self.id_label_checker: IdLabelChecker | None = None
         self.id_lookup: set = set()
 
     def transform_node(self, raw_data: tuple[dict, WorkConceptKey]) -> Concept | None:
@@ -47,6 +46,11 @@ class CatalogueConceptsTransformer(BaseTransformer):
     def extract_edges(
         self, raw_data: tuple[dict, WorkConceptKey]
     ) -> Generator[ConceptHasSourceConcept]:
+        if self.id_label_checker is None:
+            self.id_label_checker = IdLabelChecker(
+                node_types=["concepts", "locations", "names"], sources=["loc", "mesh"]
+            )
+
         raw_concept = RawCatalogueConcept(raw_data[0], self.id_label_checker)
 
         if not raw_concept.is_concept:
