@@ -99,9 +99,9 @@ def get_ingestor_report(
         )
 
         if deletions_report:
-            index_remover_line = f"- *{deletions_report.deleted_count}* documents were deleted from the index."
+            ingestor_deletions_line = f"- *{deletions_report.deleted_count}* documents were deleted from the index."
         else:
-            index_remover_line = "- No deletions report found."
+            ingestor_deletions_line = "- No deletions report found."
         
         if previous_indexer_report and previous_indexer_report.job_id:
             last_update_line = (
@@ -123,7 +123,7 @@ def get_ingestor_report(
                             f"- Pipeline started *{start_datetime}*",
                             f"- It contains *{indexer_report.success_count}* documents {graph_index_comparison}.",
                             f"- Pipeline took *{current_run_duration} minutes* to complete.",
-                            index_remover_line,
+                            ingestor_deletions_line,
                             last_update_line,
                         ]
                     ),
