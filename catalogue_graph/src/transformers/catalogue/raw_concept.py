@@ -1,5 +1,4 @@
 import re
-from typing import get_args
 
 from models.graph_node import ConceptSource, ConceptType
 
@@ -19,25 +18,18 @@ class RawCatalogueConcept:
         Determines whether a given block of JSON represents a Concept as returned from the Catalogue API.
         A Concept is a block of JSON with a type property and a list of identifiers.
         """
-        return (
-            self.raw_concept.get("type") in get_args(ConceptType)
-            and self.raw_concept.get("identifiers") is not None
-        )
+        return self.raw_concept.get("id", {}).get("canonicalId") is not None
 
     @property
     def wellcome_id(self) -> str:
         """Returns the canonical Wellcome identifier."""
-        wellcome_id = self.raw_concept.get("id")
-
-        assert isinstance(wellcome_id, str)
+        wellcome_id: str = self.raw_concept["id"]["canonicalId"]
         return wellcome_id
 
     @property
     def label(self) -> str:
         """Returns the concept label."""
-        label = self.raw_concept.get("label")
-
-        assert isinstance(label, str)
+        label: str = self.raw_concept["label"]
         return label
 
     @property
@@ -49,11 +41,7 @@ class RawCatalogueConcept:
     @property
     def raw_identifier(self) -> dict:
         """Returns metadata about the source identifier."""
-        identifier_metadata = self.raw_concept.get("identifiers", [])
-        # There should be exactly one source identifier for each concept
-        assert len(identifier_metadata) == 1
-        raw_identifier = identifier_metadata[0]
-
+        raw_identifier = self.raw_concept["id"]["sourceIdentifier"]
         assert isinstance(raw_identifier, dict)
         return raw_identifier
 

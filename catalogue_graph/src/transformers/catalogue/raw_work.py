@@ -16,35 +16,34 @@ class WorkConcept(TypedDict):
 class RawCatalogueWork:
     def __init__(self, raw_work: dict):
         self.raw_work = raw_work
+        self.work_data: dict = self.raw_work.get("data", {})
+        self.work_state: dict = self.raw_work["state"]
 
     @property
     def wellcome_id(self) -> str:
-        wellcome_id = self.raw_work["id"]
-        assert isinstance(wellcome_id, str)
+        wellcome_id: str = self.work_state["canonicalId"]
         return wellcome_id
 
     @property
     def label(self) -> str:
-        label = self.raw_work["title"]
-        assert isinstance(label, str)
+        label: str = self.work_data.get("title", "")
         return label
 
     @property
     def type(self) -> WorkType:
-        concept_type: WorkType = self.raw_work["type"]
-        return concept_type
+        work_type: WorkType = self.work_data.get("type", "Work")
+        return work_type
 
     @property
     def alternative_labels(self) -> list[str]:
-        alternative_titles = self.raw_work["alternativeTitles"]
-        assert isinstance(alternative_titles, list)
+        alternative_titles: list[str] = self.work_data.get("alternativeTitles", [])
         return alternative_titles
 
     @property
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []
-        for concept, referenced_in in extract_concepts_from_work(self.raw_work):
+        for concept, referenced_in in extract_concepts_from_work(self.work_data):
             raw_concept = RawCatalogueConcept(concept)
 
             if raw_concept.is_concept and raw_concept.wellcome_id not in processed:

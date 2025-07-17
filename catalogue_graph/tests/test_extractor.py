@@ -7,7 +7,6 @@ from test_utils import add_mock_transformer_outputs, load_fixture
 from typing_extensions import get_args
 
 from config import (
-    CATALOGUE_SNAPSHOT_URL,
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
     MESH_URL,
@@ -38,12 +37,6 @@ LOC_NAMES_SOURCE_MOCK_RESPONSE = {
     "method": "GET",
     "url": LOC_NAMES_URL,
     "content_bytes": load_fixture("loc/raw_names.jsonld"),
-}
-
-CATALOGUE_SOURCE_MOCK_RESPONSE = {
-    "method": "GET",
-    "url": CATALOGUE_SNAPSHOT_URL,
-    "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
 }
 
 WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE = {
@@ -79,8 +72,8 @@ SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[dict]] = {
     "wikidata_linked_loc_locations": [WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE],
     "wikidata_linked_mesh_concepts": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
     "wikidata_linked_mesh_locations": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
-    "catalogue_concepts": [CATALOGUE_SOURCE_MOCK_RESPONSE],
-    "catalogue_works": [CATALOGUE_SOURCE_MOCK_RESPONSE],
+    "catalogue_concepts": [],
+    "catalogue_works": [],
 }
 
 
@@ -88,10 +81,8 @@ def mock_requests_lookup_table(
     destination: StreamDestination,
     transformer_type: TransformerType,
 ) -> Any:
-    mocked_responses: list[dict] = []
-
     # Add all relevant source mock responses
-    mocked_responses.extend(SOURCE_MOCK_RESPONSE_MAPPING[transformer_type])
+    mocked_responses: list[dict] = SOURCE_MOCK_RESPONSE_MAPPING[transformer_type]
 
     if destination == "graph":
         mocked_responses.append(
@@ -115,6 +106,7 @@ def build_test_matrix() -> Generator[tuple[LambdaEvent, list[MockResponseInput]]
                         "transformer_type": transformer_type,
                         "entity_type": entity_type,
                         "stream_destination": stream_destination,
+                        "pipeline_date": None,
                         "sample_size": 1,
                     },
                     mock_requests_lookup_table(stream_destination, transformer_type),
@@ -157,8 +149,8 @@ def test_lambda_handler(
         "wikidata_linked_loc_locations": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_mesh_concepts": [WIKIDATA_SPARQL_URL],
         "wikidata_linked_mesh_locations": [WIKIDATA_SPARQL_URL],
-        "catalogue_concepts": [CATALOGUE_SNAPSHOT_URL],
-        "catalogue_works": [CATALOGUE_SNAPSHOT_URL],
+        "catalogue_concepts": [],
+        "catalogue_works": [],
     }
 
     assert transformer_type in transformer_types

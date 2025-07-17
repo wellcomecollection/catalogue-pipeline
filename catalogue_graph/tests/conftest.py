@@ -30,6 +30,8 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
         "arn:aws:sns:us-east-1:123456789012:graph_queries_test_topic",
     )
 
+    monkeypatch.setattr("config.ES_SOURCE_PARALLELISM", 1)
+
     MockRequest.reset_mocks()
     MockSmartOpen.reset_mocks()
     MockSNSClient.reset_mocks()

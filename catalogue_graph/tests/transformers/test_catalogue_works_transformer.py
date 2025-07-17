@@ -1,7 +1,5 @@
-from test_mocks import MockRequest
-from test_utils import load_fixture
+from test_utils import add_mock_denormalised_documents
 
-from config import CATALOGUE_SNAPSHOT_URL
 from models.graph_edge import BaseEdge, WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from transformers.catalogue.works_transformer import CatalogueWorksTransformer
@@ -17,45 +15,29 @@ def _check_edge(
     assert filtered_edges[0] == expected_edge
 
 
-def _add_catalogue_request() -> None:
-    MockRequest.mock_responses(
-        [
-            {
-                "method": "GET",
-                "url": CATALOGUE_SNAPSHOT_URL,
-                "status_code": 200,
-                "json_data": None,
-                "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
-                "params": None,
-            }
-        ]
-    )
-
-
 def test_catalogue_works_transformer_nodes() -> None:
-    _add_catalogue_request()
+    add_mock_denormalised_documents()
 
-    catalogue_works_transformer = CatalogueWorksTransformer(CATALOGUE_SNAPSHOT_URL)
+    transformer = CatalogueWorksTransformer(None, True)
+    nodes = list(transformer._stream_nodes())
 
-    nodes = list(catalogue_works_transformer._stream_nodes())
-
-    assert len(nodes) == 4
-    assert nodes[0] == Work(
+    assert len(nodes) == 3
+    expected_work = Work(
         id="m4u8drnu",
         label="Human skull, seen from below, with details of the lower jaw bone. Etching by Martin after J. Gamelin, 1778/1779.",
         type="Work",
         alternative_labels=[],
     )
+    assert any(node == expected_work for node in nodes)
 
 
 def test_catalogue_works_transformer_edges() -> None:
-    _add_catalogue_request()
+    add_mock_denormalised_documents()
 
-    catalogue_works_transformer = CatalogueWorksTransformer(CATALOGUE_SNAPSHOT_URL)
+    transformer = CatalogueWorksTransformer(None, True)
+    edges = list(transformer._stream_edges())
 
-    edges = list(catalogue_works_transformer._stream_edges())
-
-    assert len(edges) == 16
+    assert len(edges) == 15
 
     _check_edge(
         edges,
