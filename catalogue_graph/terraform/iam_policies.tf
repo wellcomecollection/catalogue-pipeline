@@ -133,6 +133,19 @@ data "aws_iam_policy_document" "s3_bulk_load_write" {
   }
 }
 
+data "aws_iam_policy_document" "ingestor_deletions_s3_policy" {
+  statement {
+    actions = [
+      "s3:HeadObject",
+      "s3:GetObject"
+    ]
+
+    resources = [
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
+    ]
+  }
+}
+
 # write cloudwatch metrics to the "catalogue_graph_ingestor" namespace
 data "aws_iam_policy_document" "cloudwatch_write" {
   statement {

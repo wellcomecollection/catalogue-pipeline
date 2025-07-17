@@ -6,9 +6,9 @@ import config
 import polars as pl
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
-from models.step_events import ReporterEvent
-from utils.aws import df_from_s3_parquet
-from utils.reporting import IndexRemoverReport
+from models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
+from utils.aws import df_from_s3_parquet, pydantic_from_s3_json
+from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
 
 
@@ -64,11 +64,11 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
     df = df_from_s3_parquet(s3_file_uri)
 
     try:
-        # Filter for IDs which were added to the log file since the last run of the index_remover.
+        # Filter for IDs which were added to the log file since the last run of the ingestor_deletion.
         cutoff_date = get_last_run_date(pipeline_date, index_date)
         df = df.filter(pl.col("timestamp") >= cutoff_date)
     except FileNotFoundError:
-        # The file might not exist on the first run, implying we did not run the index remover on the current index yet.
+        # The file might not exist on the first run, implying we did not run the ingestor deletions on the current index yet.
         # In this case, we can use the index date as a filter (since all IDs which were removed from the graph before
         # the index was created cannot exist in the index).
         if index_date and _is_valid_date(index_date):
@@ -81,23 +81,29 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
 
 
 def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date:
-    """Return a date corresponding to the last time we ran the index_remover Lambda."""
+    """Return a date corresponding to the last time we ran the ingestor_deletion Lambda."""
     pipeline_date = pipeline_date or "dev"
     index_date = index_date or "dev"
 
-    index_remover_report: IndexRemoverReport | None = IndexRemoverReport.read(
+    ingestor_deletion_report: DeletionReport | None = DeletionReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ignore_missing=True,
     )
 
-    # We shouldn't get here as IndexRemoverReport.read should throw its own error,
-    # throw a RuntimeError here, to make it clear that the state of the index remover is unexpected.
-    if index_remover_report is None:
-        raise RuntimeError(
-            f"Unexpected error: IndexRemoverReport for pipeline_date={pipeline_date} and index_date={index_date} not found."
-        )
+    # We shouldn't get here as DeletionReport.read should throw its own error,
+    # throw a RuntimeError here, to make it clear that the state of the ingestor deletions is unexpected.
+    if ingestor_deletion_report is None:
+        # TO DO: remove this when we have a report.deletions.json report
+        s3_url = f"s3://{config.INGESTOR_S3_BUCKET}/{config.INGESTOR_S3_PREFIX}/{pipeline_date}/{index_date}/report.index_remover.json"
+        index_remover_report = pydantic_from_s3_json(DeletionReport, s3_url)
+        if index_remover_report is None:
+            raise RuntimeError(
+                f"Unexpected error: DeletionReport for pipeline_date={pipeline_date} and index_date={index_date} not found."
+            )
+        return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
 
-    return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
+    return datetime.strptime(ingestor_deletion_report.date, "%Y-%m-%d").date()
 
 
 def handler(
@@ -124,7 +130,7 @@ def handler(
             ids_to_delete, pipeline_date, index_date, is_local
         )
 
-    report = IndexRemoverReport(
+    report = DeletionReport(
         pipeline_date=pipeline_date or "dev",
         index_date=index_date or "dev",
         job_id=job_id or "dev",
@@ -136,9 +142,8 @@ def handler(
     report.write(latest=True)
 
 
-def lambda_handler(events: list[ReporterEvent], context: typing.Any) -> None:
-    # we only want properties pertaining to the overall pipeline run, any event will do
-    validated_event = [ReporterEvent.model_validate(event) for event in events][0]
+def lambda_handler(event: IngestorMonitorStepEvent, context: typing.Any) -> dict:
+    validated_event = IngestorMonitorStepEvent.model_validate(event)
 
     handler(
         validated_event.pipeline_date,
@@ -146,6 +151,12 @@ def lambda_handler(events: list[ReporterEvent], context: typing.Any) -> None:
         validated_event.job_id,
         bool(validated_event.force_pass),
     )
+
+    return IngestorStepEvent(
+        pipeline_date=validated_event.pipeline_date,
+        index_date=validated_event.index_date,
+        job_id=validated_event.job_id,
+    ).model_dump()
 
 
 def local_handler() -> None:

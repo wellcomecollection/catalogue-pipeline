@@ -4,13 +4,11 @@ from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor_loader import IngestorLoaderLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
-from utils.reporting import IndexerReport, TriggerReport
+from utils.reporting import TriggerReport
 from utils.safety import validate_fractional_change
 
 
 class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
-    pipeline_date: str | None = None
-    index_date: str | None = None
     events: list[IngestorLoaderLambdaEvent]
 
 
@@ -67,21 +65,6 @@ def run_check(
             force_pass=force_pass,
         )
 
-    # Write an indexer report to S3
-    # TODO: This should be moved to a lambda function that runs after the indexer
-    IndexerReport(
-        pipeline_date=current_report.pipeline_date,
-        index_date=current_report.index_date,
-        job_id=current_report.job_id,
-        previous_job_id=latest_report.job_id if latest_report else None,
-        neptune_record_count=current_report.record_count,
-        previous_neptune_record_count=latest_report.record_count
-        if latest_report
-        else None,
-        es_record_count=None,
-        previous_es_record_count=None,
-    ).write()
-
     current_report.write()
     current_report.write(latest=True)
 
@@ -114,15 +97,11 @@ def report_results(
 def handler(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> None:
-    print("Checking output of ingestor_loader ...")
+    print("Checking output of ingestor_trigger ...")
     send_report = event.report_results or config.report_results
 
-    try:
-        report = run_check(event, config)
-        report_results(report, send_report)
-    except ValueError as e:
-        print(f"Check failed: {e}")
-        raise e
+    report = run_check(event, config)
+    report_results(report, send_report)
 
     print("Check complete.")
     return
