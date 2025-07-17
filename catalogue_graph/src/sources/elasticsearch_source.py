@@ -26,7 +26,7 @@ class ElasticsearchSource(BaseSource):
 
     def search_with_pit(self, pit_id: int, slice_index: int, queue: Queue) -> None:
         body = {
-            "query": {"match": {"_id": "f33w7jru"}},
+            "query": self.query,
             "size": ES_BATCH_SIZE,
             "pit": {"id": pit_id, "keep_alive": "5m"},
             "sort": [{"_shard_doc": "asc"}],
