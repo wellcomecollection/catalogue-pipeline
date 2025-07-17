@@ -17,8 +17,8 @@ jobs:
         with:
           repository: wellcomecollection/.github
           ref: common-python-ci
-          path: .github/actions
-      - uses: ./.github/actions/python_check
+          path: dotgithub
+      - uses: ./dotgithub/./.github/actions/python_check
         with:
           folder: pipeline/inferrer/${{matrix.project}}
   python-inferrers-builds:
