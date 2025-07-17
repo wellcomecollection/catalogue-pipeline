@@ -172,6 +172,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
       "Monitor indexer" = {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_indexer_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
