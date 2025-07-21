@@ -53,7 +53,7 @@ def lambda_handler(
     handler(validated_events)
 
     return IngestorMonitorStepEvent(
-        pipeline_date=events[0].pipeline_date,
-        index_date=events[0].index_date,
-        job_id=events[0].job_id,
+        pipeline_date=validated_events[0].pipeline_date,
+        index_date=validated_events[0].index_date,
+        job_id=validated_events[0].job_id,
     ).model_dump()

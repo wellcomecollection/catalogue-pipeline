@@ -1,0 +1,28 @@
+[project]
+name = "ebsco-adapter-iceberg"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lxml>=6.0.0",
+    "lxml-stubs>=0.5.1",
+    "pyarrow>=20.0.0",
+    "pyiceberg[sql-sqlite]>=0.9.1",
+    "tqdm>=4.67.1",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.0",
+]
+test = [
+    "mypy>=1.16.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = "app"
+
+[[tool.mypy.overrides]]
+module = ["pyarrow.*"]
+ignore_missing_imports = true
