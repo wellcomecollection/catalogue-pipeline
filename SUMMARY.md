@@ -1,25 +1,35 @@
 # Table of contents
 
-* [catalogue](README.md)
-* [catalogue\_api](api/README.md)
-  * [Stress testing script](api/stress_testing.md)
-  * [API diff tool](api/diff_tool.md)
-  * [update\_api\_docs](api/update_api_docs.md)
-* [Catalogue API & Pipeline](docs/README.md)
-  * [Sierra IDs](docs/sierra_ids.md)
-  * [README](docs/search_relevance/README.md)
-    * [Test 2](docs/search_relevance/002_implicit_feedback.md)
-    * [Test 4: AND or OR](docs/search_relevance/004_and_or_or.md)
-    * [Intentions & Expectations](docs/search_relevance/query_design.md)
-    * [Test 5: Stacked queries](docs/search_relevance/005_stacked_queries.md)
-    * [Test 1](docs/search_relevance/001_explicit_feedback.md)
-    * [Test 3: Adding notes](docs/search_relevance/003_adding_notes.md)
-  * [Fetching records from Sierra](docs/fetching_records_from_sierra.md)
-  * [Ingest pipeline](docs/pipeline/README.md)
-  * [Adapter lifecycle](docs/adapter_lifecycle.md)
-* [sierra\_adapter](sierra_adapter.md)
-* [mets\_adapter](mets_adapter/README.md)
-  * [METS adapter population tool](mets_adapter/populate_mets.md)
-* [Catalogue scripts](scripts.md)
-* [data\_api](snapshots.md)
+This documentation provides an overview of the Wellcome Collection catalogue pipeline, which creates and maintains the search index for our unified collections search. The pipeline fetches records from multiple source systems, transforms them into a common model, and populates an Elasticsearch index accessible via the catalogue API.
+
+## Core Documentation
+
+* [Catalogue Pipeline](README.md) - Main project overview and high-level design
+* [Documentation](docs/README.md) - Introduction to the pipeline and its purpose
+  * [Sierra IDs](docs/sierra/sierra_ids.md) - Understanding Sierra library system identifiers
+  * [Fetching records from Sierra](docs/adapters/fetching_records_from_sierra.md) - How we retrieve library records
+  * [Pipeline](docs/pipeline/README.md) - The works transformation pipeline overview
+  * [Developers Guide](docs/developers.md) - Information for developers working on the pipeline
+  * [APM](docs/apm.md) - Application Performance Monitoring guidance
+
+## Source Adapters
+
+* [Adapters](docs/README.md) - Overview of how adapters fetch and sync data from source systems
+  * [Sierra Adapter](sierra_adapter/README.md) - Library management system records adapter
+  * [METS Adapter](mets_adapter/README.md) - Digitised materials metadata adapter
+    * [METS adapter population tool](mets_adapter/populate_mets.md) - Tool for populating METS records
+  * [CALM Adapter](calm_adapter/README.md) - Archive catalogue records adapter
+  * [EBSCO Adapter](ebsco_adapter/README.md) - E-journals MARCXML data adapter
+  * [TEI Adapter](tei_adapter/README.md) - TEI XML files adapter for encoded texts
+
+## Pipeline Components
+
+* [Pipeline](pipeline/README.md) - The works pipeline and transformation logic
+* [Catalogue Graph](catalogue_graph/README.md) - Graph pipeline for building knowledge connections
+* [Scripts](scripts/README.md) - Utility scripts for pipeline operations and maintenance
+
+## Infrastructure
+
+* [Infrastructure](infrastructure/critical/README.md) - Critical infrastructure configuration and setup
+* [Index Configuration](index_config/README.md) - Elasticsearch index mappings and settings
 
