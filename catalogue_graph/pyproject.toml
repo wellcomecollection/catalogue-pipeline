@@ -35,6 +35,7 @@ dev = [
 pythonpath = "src"
 testpaths = "tests"
 addopts = "--cov src --cov-report term --cov-report xml:coverage.xml"
+filterwarnings = "ignore::DeprecationWarning"
 
 [tool.ruff]
 line-length = 88
