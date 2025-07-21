@@ -44,4 +44,5 @@ class RawCatalogueWorkIdentifier:
         if self.identifier in (last_fragment, last_partial_fragment):
             return self._make_unique_id(path_fragments[-2])
 
+
         return None
