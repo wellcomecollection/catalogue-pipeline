@@ -20,10 +20,10 @@ def get_secret(secret_name, region_name="eu-west-1", profile_name="platform-deve
     """Retrieve a secret from AWS Secrets Manager."""
     try:
         session = boto3.session.Session(profile_name=profile_name)
-        client = session.client(service_name='secretsmanager', region_name=region_name)
-        
+        client = session.client(service_name="secretsmanager", region_name=region_name)
+
         get_secret_value_response = client.get_secret_value(SecretId=secret_name)
-        return get_secret_value_response['SecretString']
+        return get_secret_value_response["SecretString"]
     except Exception as e:
         print(f"Error retrieving secret {secret_name}: {e}")
         return None
@@ -40,10 +40,10 @@ def dump_query(connection, query, file_name, output_dir="."):
         result = connection.execute(text(query))
         result_df = result.mappings().all()
         df = pd.DataFrame(result_df)
-        
+
         full_filename = os.path.join(output_dir, f"mimsy_{file_name.lower()}.csv")
         df.to_csv(full_filename, index=False)
-        
+
         print(f"Dumped {len(df)} rows to {full_filename}")
         return full_filename
     except Exception as e:
@@ -90,15 +90,17 @@ ON
 
 def create_zip_file(files, output_dir="."):
     """Create a ZIP file containing all dumped files."""
-    zip_filename = os.path.join(output_dir, f"mimsy_dump_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip")
-    
+    zip_filename = os.path.join(
+        output_dir, f"mimsy_dump_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+    )
+
     try:
-        with zipfile.ZipFile(zip_filename, 'w') as zipf:
+        with zipfile.ZipFile(zip_filename, "w") as zipf:
             for file in files:
                 if file and os.path.exists(file):
                     zipf.write(file, arcname=os.path.basename(file))
                     print(f"Added {file} to {zip_filename}")
-        
+
         print(f"ZIP file created: {zip_filename}")
         return zip_filename
     except Exception as e:
@@ -107,66 +109,60 @@ def create_zip_file(files, output_dir="."):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Dump MIMSY Oracle database views to CSV files")
+    parser = argparse.ArgumentParser(
+        description="Dump MIMSY Oracle database views to CSV files"
+    )
     parser.add_argument(
-        "--secret-name", 
+        "--secret-name",
         default="mimsy_dump/connection_string",
-        help="AWS Secrets Manager secret name for database connection string"
+        help="AWS Secrets Manager secret name for database connection string",
     )
     parser.add_argument(
-        "--profile", 
-        default="platform-developer",
-        help="AWS profile name to use"
+        "--profile", default="platform-developer", help="AWS profile name to use"
     )
     parser.add_argument(
-        "--region", 
-        default="eu-west-1",
-        help="AWS region for Secrets Manager"
+        "--region", default="eu-west-1", help="AWS region for Secrets Manager"
     )
     parser.add_argument(
-        "--output-dir", 
-        default=".",
-        help="Output directory for CSV files and ZIP file"
+        "--output-dir", default=".", help="Output directory for CSV files and ZIP file"
     )
     parser.add_argument(
-        "--no-zip", 
-        action="store_true",
-        help="Skip creating a ZIP file"
+        "--no-zip", action="store_true", help="Skip creating a ZIP file"
     )
     parser.add_argument(
-        "--views", 
+        "--views",
         nargs="*",
         default=[
             "VW_OTHER_NUMBERS",
-            "VW_EXHIBITION_ITEMS", 
+            "VW_EXHIBITION_ITEMS",
             "VW_EXHIBITIONS",
             "VW_CATALOGUE",
             "VW_CONSERVATION_STATUS",
             "VW_CONDITION",
-            "VW_LOAN_ITEMS"
+            "VW_LOAN_ITEMS",
         ],
-        help="List of views to dump (default: all interesting views)"
+        help="List of views to dump (default: all interesting views)",
     )
     parser.add_argument(
-        "--include-join", 
+        "--include-join",
         action="store_true",
         default=True,
-        help="Include the exhibition items join query"
+        help="Include the exhibition items join query",
     )
-    
+
     args = parser.parse_args()
-    
+
     # Create output directory if it doesn't exist
     os.makedirs(args.output_dir, exist_ok=True)
-    
+
     # Get database connection string from AWS Secrets Manager
     print(f"Retrieving connection string from secret: {args.secret_name}")
     connection_string = get_secret(args.secret_name, args.region, args.profile)
-    
+
     if not connection_string:
         print("Failed to retrieve database connection string")
         sys.exit(1)
-    
+
     # Connect to database
     try:
         print("Connecting to Oracle database...")
@@ -176,9 +172,9 @@ def main():
     except Exception as e:
         print(f"Error connecting to database: {e}")
         sys.exit(1)
-    
+
     dumped_files = []
-    
+
     # Dump specified views
     for view in args.views:
         print(f"Dumping view: {view}")
@@ -186,18 +182,20 @@ def main():
         filename = dump_query(connection, query, view, args.output_dir)
         if filename:
             dumped_files.append(filename)
-    
+
     # Dump exhibition items join if requested
     if args.include_join:
         print("Dumping exhibition items join query...")
         join_query = get_exhibition_items_join_query()
-        filename = dump_query(connection, join_query, "exhibition_items_join", args.output_dir)
+        filename = dump_query(
+            connection, join_query, "exhibition_items_join", args.output_dir
+        )
         if filename:
             dumped_files.append(filename)
-    
+
     # Close database connection
     connection.close()
-    
+
     # Create ZIP file unless --no-zip is specified
     if not args.no_zip:
         if dumped_files:
