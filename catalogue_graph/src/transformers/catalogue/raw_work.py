@@ -31,7 +31,8 @@ class RawCatalogueWork:
 
     @property
     def type(self) -> WorkType:
-        work_type: WorkType = self.work_data.get("type", "Work")
+        raw_work_type = self.work_data["workType"]
+        work_type: WorkType = "Work" if raw_work_type == "Standard" else raw_work_type
         return work_type
 
     @property
