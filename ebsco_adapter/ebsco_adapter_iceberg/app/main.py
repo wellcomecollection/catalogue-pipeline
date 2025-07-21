@@ -14,10 +14,6 @@ XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
 
 
-def canonicalize(xml_string):
-    return xml_string
-
-
 def update_from_xml_file(table: IcebergTable, xmlfile):
     return update_from_xml(table, load_xml(xmlfile))
 
@@ -46,7 +42,7 @@ def node_to_record(node: etree._Element):
     return {
         "namespace": EBSCO_NAMESPACE,
         "id": ebsco_id,
-        "content": canonicalize(etree.tostring(node, encoding="unicode")),
+        "content": etree.tostring(node, encoding="unicode"),
     }
 
 
