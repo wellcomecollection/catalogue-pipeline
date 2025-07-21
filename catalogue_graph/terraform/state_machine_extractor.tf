@@ -36,7 +36,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
                   "--entity-type",
                   "{% $states.input.entity_type %}",
                   "--stream-destination",
-                  "{% $states.input.stream_destination %}"
+                  "{% $states.input.stream_destination %}",
+                  "--pipeline-date",
+                  local.pipeline_date,
                 ]
               }
             ]
