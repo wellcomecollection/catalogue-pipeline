@@ -19,7 +19,7 @@ class ElasticsearchSource(BaseSource):
         query: dict | None = None,
         fields: list | None = None,
     ):
-        self.es_client = get_client("work_ingestor", pipeline_date, is_local)
+        self.es_client = get_client("graph_extractor", pipeline_date, is_local)
         self.index_name = index_name
         self.query = {"match_all": {}} if query is None else query
         self.fields = fields
