@@ -50,7 +50,7 @@ class ElasticsearchSource(BaseSource):
 
     def stream_raw(self) -> Generator[dict]:
         pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="5m")
-        
+
         # Extract documents in parallel, with all threads adding resulting documents to the same queue
         q: Queue = Queue(maxsize=ES_BATCH_SIZE)
         threads = []
