@@ -9,5 +9,5 @@ ROOT+="$(dirname "$DIR")"
 # change working directory to the root of the project
 cd "$ROOT"
 
-mypy --config-file ./mypy.ini src/
-mypy --config-file ./mypy.ini tests/
+uv run mypy --config-file ./mypy.ini src/
+uv run mypy --config-file ./mypy.ini tests/

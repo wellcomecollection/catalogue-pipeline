@@ -10,6 +10,12 @@ ROOT+="$(dirname "$DIR")"
 # get python version from .python-version
 PY_VERSION=$(cat catalogue_graph/.python-version)
 
+# Install UV if not available
+if ! command -v uv &> /dev/null; then
+    echo "Installing UV..."
+    pip install uv
+fi
+
 # set default values
 ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome"
 S3_BUCKET="wellcomecollection-platform-infra"
@@ -57,12 +63,18 @@ function build_zip() {( set -e
     mkdir -p target/tmp
 
     cp -r src/* target/tmp
+    
+    # Use UV to install dependencies
+    uv export --no-dev --format requirements-txt > target/tmp/requirements.txt
     pip install \
-        -r src/requirements.txt \
+        -r target/tmp/requirements.txt \
         --platform manylinux2014_x86_64 \
         --target target/tmp \
         --only-binary=:all: \
         --python-version $PY_VERSION
+    
+    # Clean up the requirements.txt file we generated
+    rm target/tmp/requirements.txt
 
     pushd target/tmp
     zip -r $ZIP_TARGET .
