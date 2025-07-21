@@ -8,6 +8,7 @@ from config import (
 
 from .base_transformer import BaseTransformer, EntityType
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
+from .catalogue.work_identifiers_transformer import CatalogueWorkIdentifiersTransformer
 from .catalogue.works_transformer import CatalogueWorksTransformer
 from .loc.concepts_transformer import LibraryOfCongressConceptsTransformer
 from .loc.locations_transformer import LibraryOfCongressLocationsTransformer
@@ -31,6 +32,7 @@ TransformerType = Literal[
     "wikidata_linked_mesh_locations",
     "catalogue_concepts",
     "catalogue_works",
+    "catalogue_work_identifiers",
 ]
 
 
@@ -66,5 +68,7 @@ def create_transformer(
         return CatalogueConceptsTransformer(pipeline_date, is_local)
     if transformer_type == "catalogue_works":
         return CatalogueWorksTransformer(pipeline_date, is_local)
+    if transformer_type == "catalogue_work_identifiers":
+        return CatalogueWorkIdentifiersTransformer(pipeline_date, is_local)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")
