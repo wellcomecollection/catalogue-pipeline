@@ -4,9 +4,8 @@ import config
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from sources.elasticsearch_source import ElasticsearchSource
-from utils.elasticsearch import get_standard_index_name
-
 from transformers.base_transformer import BaseTransformer
+from utils.elasticsearch import get_standard_index_name
 
 from .raw_work import RawCatalogueWork
 
