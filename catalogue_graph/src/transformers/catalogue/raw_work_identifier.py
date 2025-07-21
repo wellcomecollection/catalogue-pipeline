@@ -30,19 +30,25 @@ class RawCatalogueWorkIdentifier:
         if self.path is None or "/" not in self.path:
             return None
 
+        # We don't need to capture parent/child relationships between Calm altref identifiers since Calm ref
+        # identifiers capture the same hierarchy.
+        if self.identifier_type == "calm-altref-no":
+            return None
+
         path_fragments = self.path.split("/")
+
+        # In most cases, the identifier value represents the full hierarchy of ancestors, matching the collection path.
+        # To get the parent identifier, take everything before the last slash (e.g. PPMIA/A/6/2/21/5 => PPMIA/A/6/2/21).
+        if self.identifier == self.path:
+            return self._make_unique_id("/".join(path_fragments[:-1]))
 
         last_fragment = path_fragments[-1]
         last_partial_fragment = None
         if "_" in last_fragment:
             last_partial_fragment = last_fragment.split("_")[-1]
-        
-        if self.identifier == self.path:
-            return self._make_unique_id("/".join(path_fragments[:-1]))
 
-        # and not self.path.startswith("(WCat)")
+        # In some cases, the identifier is only one component of the collection path.
         if self.identifier in (last_fragment, last_partial_fragment):
             return self._make_unique_id(path_fragments[-2])
-
 
         return None
