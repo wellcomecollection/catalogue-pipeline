@@ -1,3 +1,41 @@
+[project]
+name = "catalogue-graph"
+version = "0.1.0"
+description = "Catalogue graph processing and indexing"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3",
+    "requests",
+    "pydantic",
+    "backoff",
+    "smart-open",
+    "polars",
+    "elasticsearch",
+    "tabulate",
+    "types-tabulate",
+    "boto3-stubs",
+    "types-requests",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "coverage[toml]",
+    "mypy",
+    "pytest",
+    "pytest-cov",
+    "freezegun",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+pythonpath = "src"
+testpaths = "tests"
+addopts = "--cov src --cov-report term --cov-report xml:coverage.xml"
+
 [tool.ruff]
 line-length = 88
 
