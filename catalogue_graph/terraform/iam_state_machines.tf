@@ -52,16 +52,17 @@ resource "aws_iam_policy" "state_machine_policy" {
         Resource = [
           module.bulk_loader_lambda.lambda.arn,
           module.bulk_load_poller_lambda.lambda.arn,
-          module.ingestor_trigger_lambda.lambda.arn,
-          module.ingestor_loader_lambda.lambda.arn,
-          module.ingestor_indexer_lambda.lambda.arn,
-          module.ingestor_loader_monitor_lambda.lambda.arn,
-          module.ingestor_trigger_monitor_lambda.lambda.arn,
           module.graph_remover_lambda.lambda.arn,
-          module.index_remover_lambda.lambda.arn,
           module.graph_scaler_lambda.lambda.arn,
           module.graph_status_poller_lambda.lambda.arn,
-          module.concepts_pipeline_reporter_lambda.lambda.arn
+          module.ingestor_trigger_lambda.lambda.arn,
+          module.ingestor_trigger_monitor_lambda.lambda.arn,
+          module.ingestor_loader_lambda.lambda.arn,
+          module.ingestor_loader_monitor_lambda.lambda.arn,
+          module.ingestor_indexer_lambda.lambda.arn,
+          module.ingestor_indexer_monitor_lambda.lambda.arn,
+          module.ingestor_deletions_lambda.lambda.arn,
+          module.ingestor_reporter_lambda.lambda.arn
         ]
       },
       {

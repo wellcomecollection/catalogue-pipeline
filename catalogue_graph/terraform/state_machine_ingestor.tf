@@ -133,7 +133,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           }
         },
         Retry = local.DefaultRetry,
-        "Next" : "Map index to ES"
+        Next : "Map index to ES"
       },
       "Map index to ES" = {
         Type           = "Map",
@@ -167,6 +167,16 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
             }
           }
         },
+        Next = "Monitor indexer"
+      },
+      "Monitor indexer" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
+        Arguments = {
+          FunctionName = module.ingestor_indexer_monitor_lambda.lambda.arn,
+          Payload      = "{% $states.input %}"
+        },
         Next = "Remove documents"
       },
       "Remove documents" = {
@@ -174,7 +184,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Resource = "arn:aws:states:::lambda:invoke",
         Output   = "{% $states.input %}",
         Arguments = {
-          FunctionName = module.index_remover_lambda.lambda.arn,
+          FunctionName = module.ingestor_deletions_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
         },
         Retry = local.DefaultRetry,
@@ -184,7 +194,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Type     = "Task"
         Resource = "arn:aws:states:::lambda:invoke",
         Arguments = {
-          FunctionName = module.concepts_pipeline_reporter_lambda.lambda.arn,
+          FunctionName = module.ingestor_reporter_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
         },
         Next = "Success"

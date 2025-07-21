@@ -1,0 +1,5 @@
+# Ignore everything in .local directory
+.local/*
+
+# But keep .gitkeep files
+!.local/.gitkeep

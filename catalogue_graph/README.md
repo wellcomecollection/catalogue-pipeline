@@ -38,7 +38,7 @@ graph database (running in Amazon Neptune). It consists of several Lambda functi
 * `graph_remover`: Removes nodes and edges from the Neptune cluster. Nodes/edges are removed if they existed in a
   previous bulk load file but no longer exist in the latest one. Keeps an append-only log of deleted
   and added nodes/edges (with a retention period of one year) for debugging purposes.
-* `index_remover`: Removes indexed concepts from Elasticsearch if corresponding 'Concept' nodes were removed from the
+* `ingestor_deletions`: Removes indexed concepts from Elasticsearch if corresponding 'Concept' nodes were removed from the
   catalogue graph. Uses the append-only log of deleted IDs created by the `graph_remover` to decide which
   documents to remove.
 
