@@ -60,12 +60,12 @@ def get_exhibition_items_join_query():
     """Get the complex exhibition items join query."""
     return """
 WITH AggregatedNumbers AS (
-    SELECT 
+    SELECT
         mkey,
         LISTAGG(other_number, ', ') WITHIN GROUP (ORDER BY other_number) AS other_numbers_list
-    FROM 
+    FROM
         XGVIEWS.VW_OTHER_NUMBERS
-    GROUP BY 
+    GROUP BY
         mkey
 )
 SELECT DISTINCT
@@ -73,7 +73,7 @@ SELECT DISTINCT
     VW_CATALOGUE.TITLE,
     VW_CATALOGUE.LEGAL_STATUS,
     VW_CATALOGUE.category1,
-    VW_EXHIBITION_ITEMS.*, 
+    VW_EXHIBITION_ITEMS.*,
     AggregatedNumbers.other_numbers_list
 FROM
     XGVIEWS.VW_CATALOGUE
