@@ -71,7 +71,7 @@ uv run mimsy-dump --no-zip
 
 #### Skip the exhibition items join query:
 ```bash
-uv run mimsy-dump --no-include-join
+uv run mimsy-dump --include-join=False
 ```
 
 ### Command Line Options
