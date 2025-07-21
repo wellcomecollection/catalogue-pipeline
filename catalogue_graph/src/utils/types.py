@@ -6,3 +6,5 @@ OntologyType = Literal[
 ]
 
 WorkConceptKey = Literal["subjects", "genres", "contributors"]
+
+WorkIdentifiersKey = Literal["sourceIdentifier", "otherIdentifiers"]
