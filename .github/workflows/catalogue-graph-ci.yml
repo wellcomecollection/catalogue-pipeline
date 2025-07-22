@@ -5,6 +5,8 @@ on:
     branches:
       - main
     paths: 'catalogue_graph/**'
+  pull_request:
+    paths: 'catalogue_graph/**'
 
 permissions:
   contents: read
@@ -33,12 +35,16 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
       - name: Build and push artefacts
         run: |
-          ./catalogue_graph/scripts/build.sh --push
+          if [ "${{ github.event_name }}" == "push" ] && [ "${{ github.ref }}" == "refs/heads/main" ]; then
+            ./catalogue_graph/scripts/build.sh --push
+          else
+            ./catalogue_graph/scripts/build.sh
+          fi
   
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ needs.build.result == 'success' }}
+    if: ${{ needs.build.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     strategy:
       matrix:
         lambda_name: [
