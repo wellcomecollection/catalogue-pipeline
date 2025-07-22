@@ -8,7 +8,9 @@ from .id_label_checker import IdLabelChecker
 
 class RawCatalogueConcept:
     def __init__(
-        self, raw_data: tuple[dict, WorkConceptKey], id_label_checker: IdLabelChecker | None = None
+        self,
+        raw_data: tuple[dict, WorkConceptKey],
+        id_label_checker: IdLabelChecker | None = None,
     ):
         self.raw_concept = raw_data[0]
         self.referenced_in = raw_data[1]
@@ -37,16 +39,16 @@ class RawCatalogueConcept:
     @property
     def type(self) -> ConceptType:
         """Returns the concept type (one of "Person", "Concept", "Genre", etc.)."""
-        
+
         # All root concepts extracted from the 'subjects' section are of type 'Subject'. However, these concepts do
         # not have a 'type' field in the denormalised index, so we need to add it here.
         if self.referenced_in == "subjects":
             return "Subject"
         # All concepts extracted from the 'genres' section are always of type 'Genre' (but the denormalised index uses
-        # the term 'GenreConcept'). 
+        # the term 'GenreConcept').
         if self.referenced_in == "genres":
             return "Genre"
-        
+
         concept_type: ConceptType = self.raw_concept["type"]
         return concept_type
 
