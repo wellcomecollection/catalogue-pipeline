@@ -32,6 +32,8 @@ class RawCatalogueWork:
     @property
     def type(self) -> WorkType:
         raw_work_type = self.work_data["workType"]
+
+        # Replace the type 'Standard' (used in the denormalised index) with type 'Work' (used in the final index).
         work_type: WorkType = "Work" if raw_work_type == "Standard" else raw_work_type
         return work_type
 
@@ -44,15 +46,15 @@ class RawCatalogueWork:
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []
-        for concept, referenced_in in extract_concepts_from_work(self.work_data):
-            raw_concept = RawCatalogueConcept(concept)
+        for raw_data in extract_concepts_from_work(self.work_data):
+            raw_concept = RawCatalogueConcept(raw_data)
 
             if raw_concept.is_concept and raw_concept.wellcome_id not in processed:
                 processed.add(raw_concept.wellcome_id)
                 work_concepts.append(
                     {
                         "id": raw_concept.wellcome_id,
-                        "referenced_in": referenced_in,
+                        "referenced_in": raw_concept.referenced_in,
                         "referenced_type": raw_concept.type,
                     }
                 )

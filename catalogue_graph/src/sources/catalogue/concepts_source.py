@@ -14,7 +14,6 @@ def extract_concepts_from_work(
     # extracting these component concepts, since the frontend does not make use of them and the resulting
     # theme pages would be empty.
     for subject in raw_work.get("subjects", []):
-        subject["type"] = "Subject"
         yield subject, "subjects"
 
     # Return all contributors
@@ -23,7 +22,6 @@ def extract_concepts_from_work(
 
     for genre in raw_work.get("genres", []):
         for concept in genre.get("concepts", []):
-            concept["type"] = "Genre"
             yield concept, "genres"
             # Only extract the first item from each genre. Subsequent items are not associated with the work in
             # catalogue API filters and the resulting theme pages would be empty.
@@ -35,13 +33,10 @@ class CatalogueConceptsSource(BaseSource):
         self,
         pipeline_date: str | None,
         is_local: bool,
-        index_name: str,
         query: dict | None = None,
         fields: list | None = None,
     ):
-        self.es_source = ElasticsearchSource(
-            pipeline_date, is_local, index_name, query, fields
-        )
+        self.es_source = ElasticsearchSource(pipeline_date, is_local, query, fields)
 
     def stream_raw(self) -> Generator[tuple[dict, WorkConceptKey]]:
         """Streams raw concept nodes from a work's subjects, genres, and contributors."""
