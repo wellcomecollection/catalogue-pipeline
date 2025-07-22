@@ -1,14 +1,19 @@
-
 from sources.catalogue.work_identifiers_source import RawDenormalisedWorkIdentifier
 from transformers.catalogue.raw_work_identifier import RawCatalogueWorkIdentifier
 
 
-def _get_test_identifier(identifier: str, collection_path: str | None) -> RawDenormalisedWorkIdentifier:
+def _get_test_identifier(
+    identifier: str, collection_path: str | None
+) -> RawDenormalisedWorkIdentifier:
     return RawDenormalisedWorkIdentifier(
-        identifier={'identifierType': {'id': 'some-type'}, 'ontologyType': 'Work', 'value': identifier},
+        identifier={
+            "identifierType": {"id": "some-type"},
+            "ontologyType": "Work",
+            "value": identifier,
+        },
         referenced_in="otherIdentifiers",
         work_id="123",
-        work_collection_path=collection_path
+        work_collection_path=collection_path,
     )
 
 
@@ -36,7 +41,9 @@ def test_extracts_parent_when_identifier_equal_to_collection_path_fragment() -> 
     assert raw_identifier.parent == "some-type||3288731i"
 
 
-def test_extracts_parent_when_identifier_equal_to_collection_path_sub_fragment() -> None:
+def test_extracts_parent_when_identifier_equal_to_collection_path_sub_fragment() -> (
+    None
+):
     test_data = _get_test_identifier("653162i", "148769i/fol_1_pl_2_653162i")
     raw_identifier = RawCatalogueWorkIdentifier(test_data)
     assert raw_identifier.parent == "some-type||148769i"
