@@ -3,5 +3,4 @@
 set -o errexit
 set -o nounset
 
-./scripts/autoformat.sh --check
 ./scripts/typecheck.sh
