@@ -1,10 +1,11 @@
+from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
+
 from models.graph_edge import (
     WorkHasIdentifier,
     WorkHasIdentifierAttributes,
     WorkIdentifierHasParent,
 )
 from models.graph_node import WorkIdentifier
-from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
 from transformers.catalogue.work_identifiers_transformer import (
     CatalogueWorkIdentifiersTransformer,
 )
@@ -61,13 +62,13 @@ def test_catalogue_work_identifiers_transformer_edges() -> None:
     for start, end in expected_has_source_identifier_edges:
         check_bulk_load_edge(
             edges,
-             WorkHasIdentifier(
+            WorkHasIdentifier(
                 from_id=start,
                 to_id=end,
                 attributes=WorkHasIdentifierAttributes(
                     referenced_in="sourceIdentifier",
                 ),
-            )
+            ),
         )
 
     expected_has_other_identifiers_edges = [
@@ -84,8 +85,8 @@ def test_catalogue_work_identifiers_transformer_edges() -> None:
                 attributes=WorkHasIdentifierAttributes(
                     referenced_in="otherIdentifiers",
                 ),
-            )
-        )        
+            ),
+        )
 
     expected_identifier_parent_edges = [
         ("iconographic-number||569742i", "iconographic-number||147150i"),
