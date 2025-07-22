@@ -7,6 +7,7 @@ from pyiceberg.table import Table as IcebergTable
 from schemata import SCHEMA
 import boto3
 
+
 def get_table(
     catalogue_namespace, table_name, catalogue_name, **params
 ) -> IcebergTable:
@@ -36,7 +37,10 @@ def get_table(
     )
     return table
 
-def get_glue_table(s3_tables_bucket, table_name, namespace, region=None, account_id=None):
+
+def get_glue_table(
+    s3_tables_bucket, table_name, namespace, region=None, account_id=None
+):
     """
     Get a table from the Glue catalog.
 
@@ -55,6 +59,7 @@ def get_glue_table(s3_tables_bucket, table_name, namespace, region=None, account
     account_id = account_id or session.client("sts").get_caller_identity()["Account"]
 
     import os
+
     os.environ["AWS_PROFILE"] = "platform-developer"
 
     return get_table(
@@ -62,13 +67,13 @@ def get_glue_table(s3_tables_bucket, table_name, namespace, region=None, account
         table_name=table_name,
         catalogue_name="s3tablescatalog",
         **{
-            "type": "rest",    
+            "type": "rest",
             "warehouse": f"{account_id}:s3tablescatalog/{s3_tables_bucket}",
             "uri": f"https://glue.{region}.amazonaws.com/iceberg",
             "rest.sigv4-enabled": "true",
             "rest.signing-name": "glue",
             "rest.signing-region": region,
-        }
+        },
     )
 
 
@@ -104,9 +109,7 @@ def get_local_table(table_name="mytable", namespace="default", db_name="catalog"
         table_name=table_name,
         catalogue_name="local",
         **{
-            
             "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
             "warehouse": f"file://{warehouse_dir}/",
-        }
+        },
     )
-
