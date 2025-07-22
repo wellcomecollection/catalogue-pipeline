@@ -6,12 +6,6 @@ set -o nounset
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT+="$(dirname "$DIR")"
 
-setup_git_hook() {
-  echo "Setting up pre-push hook ..."
-  cp "${ROOT}/scripts/pre-push" "${ROOT}/.git/hooks/pre-push"
-  chmod +x "${ROOT}/.git/hooks/pre-push"
-}
-
 check_install_uv() {
     echo "Checking if UV is installed ..."
     if ! command -v uv &> /dev/null; then
@@ -27,7 +21,6 @@ install_dependencies() {
     uv sync --all-groups
 }
 
-setup_git_hook
 check_install_uv
 install_dependencies
 
