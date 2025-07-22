@@ -7,8 +7,14 @@ set -o nounset
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT+="$(dirname "$DIR")"
 
-# get python version from .python-version
-PY_VERSION=$(cat .python-version)
+# get python version from pyproject.toml
+PY_VERSION=$(python3 -c "
+import tomllib
+with open('pyproject.toml', 'rb') as f:
+    data = tomllib.load(f)
+    requires_python = data['project']['requires-python']
+    print(requires_python.lstrip('>='))
+")
 
 # Install UV if not available
 if ! command -v uv &> /dev/null; then
