@@ -1,10 +1,9 @@
 from collections.abc import Generator
-from typing import Any
+from typing import Any, get_args
 
 import pytest
 from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
 from test_utils import add_mock_transformer_outputs, load_fixture
-from typing_extensions import get_args
 
 from config import (
     CATALOGUE_SNAPSHOT_URL,
@@ -22,33 +21,46 @@ entity_types = get_args(EntityType)
 stream_destinations = get_args(StreamDestination)
 
 
-MESH_SOURCE_MOCK_RESPONSE = {
+MESH_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": MESH_URL,
+    "status_code": 200,
+    "params": None,
     "content_bytes": load_fixture("mesh/raw_descriptors.xml"),
+    "json_data": None,
 }
 
-LOC_SH_SOURCE_MOCK_RESPONSE = {
+LOC_SH_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": LOC_SUBJECT_HEADINGS_URL,
+    "status_code": 200,
+    "params": None,
     "content_bytes": load_fixture("loc/raw_subject_headings.jsonld"),
+    "json_data": None,
 }
 
-LOC_NAMES_SOURCE_MOCK_RESPONSE = {
+LOC_NAMES_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": LOC_NAMES_URL,
+    "status_code": 200,
+    "params": None,
     "content_bytes": load_fixture("loc/raw_names.jsonld"),
+    "json_data": None,
 }
 
-CATALOGUE_SOURCE_MOCK_RESPONSE = {
+CATALOGUE_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": CATALOGUE_SNAPSHOT_URL,
+    "status_code": 200,
+    "params": None,
     "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
+    "json_data": None,
 }
 
-WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE = {
+WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": WIKIDATA_SPARQL_URL,
+    "status_code": 200,
     "params": {
         "format": "json",
         "query": "SELECT ?item WHERE { ?item wdt:P244 _:anyValueP244. }",
@@ -57,9 +69,10 @@ WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE = {
     "json_data": {"results": {"bindings": []}},
 }
 
-WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE = {
+WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": WIKIDATA_SPARQL_URL,
+    "status_code": 200,
     "params": {
         "format": "json",
         "query": "SELECT ?item WHERE { ?item wdt:P486 _:anyValueP486. }",
@@ -68,7 +81,7 @@ WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE = {
     "json_data": {"results": {"bindings": []}},
 }
 
-SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[dict]] = {
+SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[MockResponseInput]] = {
     "mesh_concepts": [MESH_SOURCE_MOCK_RESPONSE],
     "mesh_locations": [MESH_SOURCE_MOCK_RESPONSE],
     "loc_concepts": [LOC_SH_SOURCE_MOCK_RESPONSE],
@@ -88,7 +101,7 @@ def mock_requests_lookup_table(
     destination: StreamDestination,
     transformer_type: TransformerType,
 ) -> Any:
-    mocked_responses: list[dict] = []
+    mocked_responses: list[MockResponseInput] = []
 
     # Add all relevant source mock responses
     mocked_responses.extend(SOURCE_MOCK_RESPONSE_MAPPING[transformer_type])
@@ -98,6 +111,8 @@ def mock_requests_lookup_table(
             {
                 "method": "POST",
                 "url": f"https://{MOCK_INSTANCE_ENDPOINT}:8182/openCypher",
+                "status_code": 200,
+                "params": None,
                 "content_bytes": None,
                 "json_data": {"results": {}},
             }

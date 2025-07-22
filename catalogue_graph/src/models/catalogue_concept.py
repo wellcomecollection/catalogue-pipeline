@@ -1,5 +1,4 @@
 from dataclasses import field
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -268,7 +267,7 @@ class CatalogueConcept(BaseModel):
     label: str
     displayLabel: str
     alternativeLabels: list[str] = field(default_factory=list)
-    description: Optional[ConceptDescription]
+    description: ConceptDescription | None
     type: ConceptType
     sameAs: list[str]
     relatedConcepts: RelatedConcepts
