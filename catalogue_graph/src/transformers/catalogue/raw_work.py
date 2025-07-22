@@ -32,6 +32,8 @@ class RawCatalogueWork:
     @property
     def type(self) -> WorkType:
         raw_work_type = self.work_data["workType"]
+
+        # Replace the type 'Standard' (used in the denormalised index) with type 'Work' (used in the final index).
         work_type: WorkType = "Work" if raw_work_type == "Standard" else raw_work_type
         return work_type
 
