@@ -131,6 +131,16 @@ locals {
       "entity_type" : "edges"
     },
     {
+      "label" : "Catalogue Work Identifier Nodes",
+      "transformer_type" : "catalogue_work_identifiers",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Catalogue Work Identifier Edges",
+      "transformer_type" : "catalogue_work_identifiers",
+      "entity_type" : "edges"
+    },
+    {
       "label" : "Catalogue Work Nodes",
       "transformer_type" : "catalogue_works",
       "entity_type" : "nodes"
