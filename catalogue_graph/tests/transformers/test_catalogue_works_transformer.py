@@ -1,18 +1,7 @@
-from test_utils import add_mock_denormalised_documents
-
-from models.graph_edge import BaseEdge, WorkHasConcept, WorkHasConceptAttributes
+from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
+from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
 from transformers.catalogue.works_transformer import CatalogueWorksTransformer
-
-
-def _check_edge(
-    all_edges: list[BaseEdge], from_id: str, to_id: str, expected_edge: BaseEdge
-) -> None:
-    filtered_edges = [
-        edge for edge in all_edges if edge.from_id == from_id and edge.to_id == to_id
-    ]
-    assert len(filtered_edges) == 1
-    assert filtered_edges[0] == expected_edge
 
 
 def test_catalogue_works_transformer_nodes() -> None:
@@ -39,10 +28,8 @@ def test_catalogue_works_transformer_edges() -> None:
 
     assert len(edges) == 15
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "m4u8drnu",
-        "s6s24vd7",
         WorkHasConcept(
             from_type="Work",
             to_type="Concept",
@@ -56,10 +43,8 @@ def test_catalogue_works_transformer_edges() -> None:
         ),
     )
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "ydz8wd5r",
-        "s6s24vd8",
         WorkHasConcept(
             from_type="Work",
             to_type="Concept",
@@ -73,10 +58,8 @@ def test_catalogue_works_transformer_edges() -> None:
         ),
     )
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "ydz8wd5r",
-        "yfqryj26",
         WorkHasConcept(
             from_type="Work",
             to_type="Concept",
@@ -90,10 +73,8 @@ def test_catalogue_works_transformer_edges() -> None:
         ),
     )
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "ydz8wd5r",
-        "uykuavkt",
         WorkHasConcept(
             from_type="Work",
             to_type="Concept",

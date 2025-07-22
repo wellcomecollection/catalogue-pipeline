@@ -3,8 +3,8 @@ import os
 from itertools import product
 from typing import Any, Literal
 
+from models.graph_edge import BaseEdge
 from test_mocks import MockElasticsearchClient, MockSmartOpen
-
 from utils.aws import VALID_SOURCE_FILES
 
 
@@ -53,3 +53,17 @@ def add_mock_denormalised_documents() -> None:
         MockElasticsearchClient.index(
             index_name, json_item["state"]["canonicalId"], json_item
         )
+
+
+def check_bulk_load_edge(all_edges: list[BaseEdge], expected_edge: BaseEdge) -> None:
+    filtered_edges = [
+        edge
+        for edge in all_edges
+        if edge.from_id == expected_edge.from_id and edge.to_id == expected_edge.to_id
+    ]
+
+    error_message = (
+        f"Check for edge {expected_edge.from_id}-->{expected_edge.to_id} failed."
+    )
+    assert len(filtered_edges) == 1, error_message
+    assert filtered_edges[0] == expected_edge, error_message
