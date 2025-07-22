@@ -1,8 +1,9 @@
 from collections.abc import Generator
 
+from utils.types import WorkConceptKey
+
 from sources.base_source import BaseSource
 from sources.elasticsearch_source import ElasticsearchSource
-from utils.types import WorkConceptKey
 
 
 def extract_concepts_from_work(
@@ -14,7 +15,6 @@ def extract_concepts_from_work(
     # extracting these component concepts, since the frontend does not make use of them and the resulting
     # theme pages would be empty.
     for subject in raw_work.get("subjects", []):
-        subject["type"] = "Subject"
         yield subject, "subjects"
 
     # Return all contributors
@@ -23,7 +23,6 @@ def extract_concepts_from_work(
 
     for genre in raw_work.get("genres", []):
         for concept in genre.get("concepts", []):
-            concept["type"] = "Genre"
             yield concept, "genres"
             # Only extract the first item from each genre. Subsequent items are not associated with the work in
             # catalogue API filters and the resulting theme pages would be empty.

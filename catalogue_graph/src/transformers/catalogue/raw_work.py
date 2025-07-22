@@ -44,15 +44,15 @@ class RawCatalogueWork:
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []
-        for concept, referenced_in in extract_concepts_from_work(self.work_data):
-            raw_concept = RawCatalogueConcept(concept)
+        for raw_data in extract_concepts_from_work(self.work_data):
+            raw_concept = RawCatalogueConcept(raw_data)
 
             if raw_concept.is_concept and raw_concept.wellcome_id not in processed:
                 processed.add(raw_concept.wellcome_id)
                 work_concepts.append(
                     {
                         "id": raw_concept.wellcome_id,
-                        "referenced_in": referenced_in,
+                        "referenced_in": raw_concept.referenced_in,
                         "referenced_type": raw_concept.type,
                     }
                 )
