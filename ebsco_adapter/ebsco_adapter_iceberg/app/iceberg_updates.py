@@ -1,18 +1,14 @@
-from pyiceberg.catalog import load_catalog
 from schemata import SCHEMA, ARROW_SCHEMA
-from table_config import get_table
 
 from pyiceberg.table import Table as IcebergTable
 
 import pyarrow as pa
 import uuid
 
-from pyiceberg.expressions import Not, IsNull, In
+from pyiceberg.expressions import In
 from datetime import datetime, timezone
 import pyarrow.compute as pc
-import functools
 from pyiceberg.table.upsert_util import get_rows_to_update
-import operator
 
 
 def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str):

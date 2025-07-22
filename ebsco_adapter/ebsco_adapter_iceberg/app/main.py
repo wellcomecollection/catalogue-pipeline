@@ -1,12 +1,16 @@
+import os
 from pyiceberg.table import Table as IcebergTable
 
 import pyarrow as pa
-
+import os
 import sys
+import argparse
 
 from iceberg_updates import update_table
 from schemata import ARROW_SCHEMA
-from table_config import get_local_table
+from table_config import get_local_table, get_glue_table
+import smart_open
+import config
 
 from lxml import etree
 
@@ -56,11 +60,40 @@ def extract_id(node: etree._Element) -> str:
 def data_to_pa_table(data):
     return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
 
+def handler(table, xml_file_location):
+    with smart_open.open(xml_file_location, "rb") as f:
+        return update_from_xml_file(table, f)
 
-def main(xmlfile):
-    table = get_local_table()
-    return update_from_xml_file(table, xmlfile)
-
-
+def local_handler():
+    parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
+    parser.add_argument("xmlfile", help="Path to the XML file to process")
+    parser.add_argument("--use-glue-table", action="store_true", 
+                       help="Use AWS Glue table instead of local table")
+    
+    args = parser.parse_args()
+    
+    if not os.path.isfile(args.xmlfile):
+        print(f"Error: {args.xmlfile} does not exist or is not a file.")
+        sys.exit(1)
+    
+    if args.use_glue_table:
+        print("Using AWS Glue table...")
+        table = get_glue_table(
+            s3_tables_bucket=config.S3_TABLES_BUCKET,
+            table_name=config.GLUE_TABLE_NAME,
+            namespace=config.GLUE_NAMESPACE,
+            region=config.AWS_REGION,
+            account_id=config.AWS_ACCOUNT_ID
+        )
+    else:
+        print("Using local table...")
+        table = get_local_table(
+            table_name=config.LOCAL_TABLE_NAME,
+            namespace=config.LOCAL_NAMESPACE,            db_name=config.LOCAL_DB_NAME
+        )
+    
+    return handler(table, args.xmlfile)
+    
 if __name__ == "__main__":
-    print(main(sys.stdin))
+    print("Running local handler...")
+    local_handler()
