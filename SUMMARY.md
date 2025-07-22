@@ -14,13 +14,12 @@ This documentation provides an overview of the Wellcome Collection catalogue pip
 
 ## Source Adapters
 
-* [Adapters](docs/README.md) - Overview of how adapters fetch and sync data from source systems
-  * [Sierra Adapter](sierra_adapter/README.md) - Library management system records adapter
-  * [METS Adapter](mets_adapter/README.md) - Digitised materials metadata adapter
-    * [METS adapter population tool](mets_adapter/populate_mets.md) - Tool for populating METS records
-  * [CALM Adapter](calm_adapter/README.md) - Archive catalogue records adapter
-  * [EBSCO Adapter](ebsco_adapter/README.md) - E-journals MARCXML data adapter
-  * [TEI Adapter](tei_adapter/README.md) - TEI XML files adapter for encoded texts
+* [Sierra Adapter](sierra_adapter/README.md) - Library management system records adapter*
+*  [METS Adapter](mets_adapter/README.md) - Digitised materials metadata adapter
+  * [METS adapter population tool](mets_adapter/populate_mets.md) - Tool for populating METS records
+* [CALM Adapter](calm_adapter/README.md) - Archive catalogue records adapter
+* [EBSCO Adapter](ebsco_adapter/README.md) - E-journals MARCXML data adapter
+* [TEI Adapter](tei_adapter/README.md) - TEI XML files adapter for encoded texts
 
 ## Pipeline Components
 
