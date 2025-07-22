@@ -1,5 +1,5 @@
 resource "aws_s3tables_table_bucket" "table_bucket" {
-  name =  "wellcomecollection-platform-ebsco-adapter"
+  name = "wellcomecollection-platform-ebsco-adapter"
 }
 
 resource "aws_s3tables_namespace" "example" {
