@@ -137,6 +137,7 @@ def main():
             "VW_EXHIBITION_ITEMS",
             "VW_EXHIBITIONS",
             "VW_CATALOGUE",
+            "VW_CONSERVATION",
             "VW_CONSERVATION_STATUS",
             "VW_CONDITION",
             "VW_LOAN_ITEMS",

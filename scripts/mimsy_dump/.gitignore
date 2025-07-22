@@ -21,6 +21,8 @@ wheels/
 *.egg
 MANIFEST
 
+!mimsy_dump.py
+
 # Virtual environments
 .env
 .venv
