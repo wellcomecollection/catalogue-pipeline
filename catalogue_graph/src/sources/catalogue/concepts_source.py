@@ -1,8 +1,9 @@
 from collections.abc import Generator
 
+from utils.types import WorkConceptKey
+
 from sources.base_source import BaseSource
 from sources.elasticsearch_source import ElasticsearchSource
-from utils.types import WorkConceptKey
 
 
 def extract_concepts_from_work(
@@ -33,13 +34,10 @@ class CatalogueConceptsSource(BaseSource):
         self,
         pipeline_date: str | None,
         is_local: bool,
-        index_name: str,
         query: dict | None = None,
         fields: list | None = None,
     ):
-        self.es_source = ElasticsearchSource(
-            pipeline_date, is_local, index_name, query, fields
-        )
+        self.es_source = ElasticsearchSource(pipeline_date, is_local, query, fields)
 
     def stream_raw(self) -> Generator[tuple[dict, WorkConceptKey]]:
         """Streams raw concept nodes from a work's subjects, genres, and contributors."""

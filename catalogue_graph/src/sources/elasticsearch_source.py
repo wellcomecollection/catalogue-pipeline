@@ -3,7 +3,7 @@ from queue import Queue
 from threading import Thread
 
 import config
-from utils.elasticsearch import get_client
+from utils.elasticsearch import get_client, get_standard_index_name
 
 from .base_source import BaseSource
 
@@ -15,12 +15,13 @@ class ElasticsearchSource(BaseSource):
         self,
         pipeline_date: str | None,
         is_local: bool,
-        index_name: str,
         query: dict | None = None,
         fields: list | None = None,
     ):
         self.es_client = get_client("graph_extractor", pipeline_date, is_local)
-        self.index_name = index_name
+        self.index_name = get_standard_index_name(
+            config.ES_DENORMALISED_INDEX_NAME, pipeline_date
+        )
         self.query = {"match_all": {}} if query is None else query
         self.fields = fields
 
