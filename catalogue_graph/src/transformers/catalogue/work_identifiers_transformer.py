@@ -1,11 +1,16 @@
 from collections.abc import Generator
 
-from models.graph_edge import WorkIdentifierHasParent
+from models.graph_edge import (
+    WorkHasIdentifier,
+    WorkHasIdentifierAttributes,
+    WorkIdentifierHasParent,
+)
 from models.graph_node import WorkIdentifier
 from sources.catalogue.work_identifiers_source import (
     CatalogueWorkIdentifiersSource,
     RawDenormalisedWorkIdentifier,
 )
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work_identifier import RawCatalogueWorkIdentifier
@@ -47,8 +52,17 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
 
     def extract_edges(
         self, raw_data: RawDenormalisedWorkIdentifier
-    ) -> Generator[WorkIdentifierHasParent]:
+    ) -> Generator[WorkHasIdentifier | WorkIdentifierHasParent]:
         raw_identifier = RawCatalogueWorkIdentifier(raw_data)
+
+        identifier_attributes = WorkHasIdentifierAttributes(
+            referenced_in=raw_data.referenced_in,
+        )
+        yield WorkHasIdentifier(
+            from_id=raw_data.work_id,
+            to_id=raw_identifier.unique_id,
+            attributes=identifier_attributes,
+        )        
 
         if raw_identifier.parent and raw_identifier.unique_id not in self.streamed_ids:
             self.streamed_ids.add(raw_identifier.unique_id)
