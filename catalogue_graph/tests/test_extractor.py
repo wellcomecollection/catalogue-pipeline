@@ -2,10 +2,6 @@ from collections.abc import Generator
 from typing import Any
 
 import pytest
-from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
-from test_utils import add_mock_transformer_outputs, load_fixture
-from typing_extensions import get_args
-
 from config import (
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
@@ -13,8 +9,11 @@ from config import (
     WIKIDATA_SPARQL_URL,
 )
 from extractor import LambdaEvent, lambda_handler
+from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
+from test_utils import add_mock_transformer_outputs, load_fixture
 from transformers.base_transformer import EntityType, StreamDestination
 from transformers.create_transformer import TransformerType
+from typing_extensions import get_args
 
 transformer_types = get_args(TransformerType)
 entity_types = get_args(EntityType)
@@ -74,6 +73,7 @@ SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[dict]] = {
     "wikidata_linked_mesh_locations": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
     "catalogue_concepts": [],
     "catalogue_works": [],
+    "catalogue_work_identifiers": [],
 }
 
 
@@ -151,6 +151,7 @@ def test_lambda_handler(
         "wikidata_linked_mesh_locations": [WIKIDATA_SPARQL_URL],
         "catalogue_concepts": [],
         "catalogue_works": [],
+        "catalogue_work_identifiers": []
     }
 
     assert transformer_type in transformer_types
