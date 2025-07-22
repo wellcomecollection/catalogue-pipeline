@@ -1,5 +1,6 @@
-from sources.catalogue.concepts_source import CatalogueConceptsSource
 from test_utils import add_mock_denormalised_documents
+
+from sources.catalogue.concepts_source import CatalogueConceptsSource
 
 
 def test_catalogue_concepts_source() -> None:
