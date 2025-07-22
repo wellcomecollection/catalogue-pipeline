@@ -1,6 +1,7 @@
+from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
+
 from models.graph_edge import WorkIdentifierHasParent
 from models.graph_node import WorkIdentifier
-from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
 from transformers.catalogue.work_identifiers_transformer import (
     CatalogueWorkIdentifiersTransformer,
 )

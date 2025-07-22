@@ -3,8 +3,9 @@ import os
 from itertools import product
 from typing import Any, Literal
 
-from models.graph_edge import BaseEdge
 from test_mocks import MockElasticsearchClient, MockSmartOpen
+
+from models.graph_edge import BaseEdge
 from utils.aws import VALID_SOURCE_FILES
 
 

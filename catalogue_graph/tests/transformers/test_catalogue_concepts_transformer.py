@@ -1,13 +1,14 @@
-from models.graph_edge import (
-    ConceptHasSourceConcept,
-    ConceptHasSourceConceptAttributes,
-)
-from models.graph_node import Concept
 from test_utils import (
     add_mock_denormalised_documents,
     add_mock_transformer_outputs,
     check_bulk_load_edge,
 )
+
+from models.graph_edge import (
+    ConceptHasSourceConcept,
+    ConceptHasSourceConceptAttributes,
+)
+from models.graph_node import Concept
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
