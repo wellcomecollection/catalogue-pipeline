@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from utils.types import WorkConceptKey, WorkIdentifiersKey
 
 from models.graph_node import ConceptType
+from utils.types import WorkConceptKey, WorkIdentifiersKey
 
 
 class EdgeAttributes(BaseModel):
@@ -23,6 +23,7 @@ class ConceptHasSourceConceptAttributes(EdgeAttributes):
 
 class WorkHasIdentifierAttributes(EdgeAttributes):
     referenced_in: WorkIdentifiersKey
+
 
 class WorkHasConceptAttributes(EdgeAttributes):
     referenced_in: WorkConceptKey
