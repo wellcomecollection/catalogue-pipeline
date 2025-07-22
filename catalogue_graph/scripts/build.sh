@@ -70,7 +70,6 @@ function build_zip() {( set -e
         --python-platform x86_64-manylinux2014 \
         --target target/tmp \
         --only-binary=:all: \
-        --python-version $PY_VERSION \
         --no-deps
 
     pushd target/tmp
