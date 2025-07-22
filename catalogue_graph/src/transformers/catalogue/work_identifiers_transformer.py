@@ -6,7 +6,6 @@ from sources.catalogue.work_identifiers_source import (
     CatalogueWorkIdentifiersSource,
     RawDenormalisedWorkIdentifier,
 )
-
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work_identifier import RawCatalogueWorkIdentifier
@@ -31,7 +30,7 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
         self, raw_data: RawDenormalisedWorkIdentifier
     ) -> WorkIdentifier | None:
         raw_identifier = RawCatalogueWorkIdentifier(raw_data)
-        
+
         # Some works use the same identifier (e.g. 'uyrth3u2' shares its Sierra system number with 'bqu3aedn',
         # and 'zq3hbs3f' has the same Wellcome digcode as 'pbtcyfpr'). Therefore, we need to deduplicate to
         # ensure each identifier only has one entry in the bulk load file.
@@ -45,7 +44,6 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
             )
 
         return None
-            
 
     def extract_edges(
         self, raw_data: RawDenormalisedWorkIdentifier

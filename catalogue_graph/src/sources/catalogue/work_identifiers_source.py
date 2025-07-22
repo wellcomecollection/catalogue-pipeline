@@ -1,10 +1,10 @@
 from collections.abc import Generator
 
 from pydantic import BaseModel
-from utils.types import WorkIdentifiersKey
 
 from sources.base_source import BaseSource
 from sources.elasticsearch_source import ElasticsearchSource
+from utils.types import WorkIdentifiersKey
 
 
 class RawDenormalisedWorkIdentifier(BaseModel):
