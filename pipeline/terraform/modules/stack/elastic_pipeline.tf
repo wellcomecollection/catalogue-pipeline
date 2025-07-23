@@ -168,6 +168,10 @@ locals {
       read  = [local.es_images_initial_index]
       write = [local.es_images_augmented_index]
     }
+    graph_extractor = {
+      read  = [local.es_works_denormalised_index]
+      write = []
+    }
     image_ingestor = {
       read  = [local.es_images_augmented_index]
       write = [local.es_images_index]

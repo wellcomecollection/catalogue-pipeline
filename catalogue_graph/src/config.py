@@ -18,10 +18,6 @@ LOC_SUBJECT_HEADINGS_URL = (
 LOC_NAMES_URL = "https://id.loc.gov/download/authorities/names.madsrdf.jsonld.gz"
 MESH_URL = "https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/desc2025.gz"
 WIKIDATA_SPARQL_URL = "https://query.wikidata.org/sparql"
-CATALOGUE_SNAPSHOT_URL = os.environ.get(
-    "CATALOGUE_SNAPSHOT_URL",
-    "https://data.wellcomecollection.org/catalogue/v2/works.json.gz",
-)
 
 SLACK_SECRET_ID = os.environ.get("SLACK_SECRET_ID", "")
 
@@ -36,9 +32,13 @@ INGESTOR_S3_PREFIX = os.environ.get("INGESTOR_S3_PREFIX", INGESTOR_S3_PREFIX_DEF
 INGESTOR_SHARD_SIZE = int(
     os.environ.get("INGESTOR_SHARD_SIZE", INGESTOR_SHARD_SIZE_DEFAULT)
 )
-INGESTOR_ES_INDEX = os.environ.get("INGESTOR_ES_INDEX")
-INGESTOR_ES_HOST = os.environ.get("INGESTOR_ES_HOST")
-INGESTOR_ES_PORT = os.environ.get("INGESTOR_ES_PORT")
-INGESTOR_ES_SCHEME = os.environ.get("INGESTOR_ES_SCHEME")
-INGESTOR_ES_API_KEY = os.environ.get("INGESTOR_ES_API_KEY")
 INGESTOR_PIPELINE_DATE = os.environ.get("INGESTOR_PIPELINE_DATE")
+
+ES_LOCAL_HOST = os.environ.get("ES_LOCAL_HOST")
+ES_LOCAL_PORT = os.environ.get("ES_LOCAL_PORT")
+ES_LOCAL_SCHEME = os.environ.get("ES_LOCAL_SCHEME")
+ES_LOCAL_API_KEY = os.environ.get("ES_LOCAL_API_KEY")
+
+ES_DENORMALISED_INDEX_NAME = "works-denormalised"
+
+ES_SOURCE_PARALLELISM = 5
