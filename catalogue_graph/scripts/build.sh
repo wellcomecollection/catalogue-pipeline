@@ -5,10 +5,10 @@ set -o nounset
 
 # set ROOT to the root of the project
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT+="$(dirname "$DIR")"
+ROOT="$(dirname "$DIR")"
 
 # get python version from .python-version
-PY_VERSION=$(cat ${ROOT}/.python-version)
+PY_VERSION=$(cat "$ROOT"/.python-version)
 
 # Install UV if not available
 if ! command -v uv &> /dev/null; then
