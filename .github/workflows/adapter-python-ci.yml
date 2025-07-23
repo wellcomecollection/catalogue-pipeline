@@ -1,6 +1,8 @@
 name: "Adapters: Run checks"
-on: [ push ]
-paths: [ 'ebsco_adapter/ebsco_adapter_iceberg/**' ]
+on:
+  push:
+    paths:
+      - 'ebsco_adapter/ebsco_adapter_iceberg/**'
 
 permissions:
   contents: read

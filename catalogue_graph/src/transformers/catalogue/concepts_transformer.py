@@ -8,18 +8,20 @@ from utils.types import WorkConceptKey
 
 from .id_label_checker import IdLabelChecker
 from .raw_concept import RawCatalogueConcept
+from .works_transformer import ES_FIELDS, ES_QUERY
 
 
 class CatalogueConceptsTransformer(BaseTransformer):
-    def __init__(self, url: str):
-        self.source = CatalogueConceptsSource(url)
-        self.id_label_checker = IdLabelChecker(
-            node_types=["concepts", "locations", "names"], sources=["loc", "mesh"]
+    def __init__(self, pipeline_date: str | None, is_local: bool):
+        self.source = CatalogueConceptsSource(
+            pipeline_date, is_local, ES_QUERY, ES_FIELDS
         )
+
+        self.id_label_checker: IdLabelChecker | None = None
         self.id_lookup: set = set()
 
     def transform_node(self, raw_data: tuple[dict, WorkConceptKey]) -> Concept | None:
-        raw_concept = RawCatalogueConcept(raw_data[0], self.id_label_checker)
+        raw_concept = RawCatalogueConcept(raw_data, self.id_label_checker)
 
         if not raw_concept.is_concept:
             return None
@@ -38,7 +40,12 @@ class CatalogueConceptsTransformer(BaseTransformer):
     def extract_edges(
         self, raw_data: tuple[dict, WorkConceptKey]
     ) -> Generator[ConceptHasSourceConcept]:
-        raw_concept = RawCatalogueConcept(raw_data[0], self.id_label_checker)
+        if self.id_label_checker is None:
+            self.id_label_checker = IdLabelChecker(
+                node_types=["concepts", "locations", "names"], sources=["loc", "mesh"]
+            )
+
+        raw_concept = RawCatalogueConcept(raw_data, self.id_label_checker)
 
         if not raw_concept.is_concept:
             return

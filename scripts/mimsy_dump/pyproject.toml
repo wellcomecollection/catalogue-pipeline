@@ -1,0 +1,45 @@
+[project]
+name = "mimsy-dump"
+version = "0.1.0"
+description = "Temporary CLI tool for dumping MIMSY Oracle database views to CSV files for collection metadata analysts during MIMSY migration"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "boto3>=1.26.0",
+    "sqlalchemy>=2.0.0",
+    "pandas>=1.5.0",
+    "oracledb>=1.4.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[project.scripts]
+mimsy-dump = "mimsy_dump:main"
+
+[tool.uv]
+package = true
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I"
+]
+ignore = ["E501", "B019"]

@@ -2,15 +2,28 @@ from collections.abc import Generator
 
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
-from sources.gzip_source import GZipSource
+from sources.elasticsearch_source import ElasticsearchSource
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
 
+# Only store visible works in the graph
+ES_QUERY = {"match": {"type": "Visible"}}
+ES_FIELDS = [
+    "type",
+    "data.title",
+    "data.alternativeTitles",
+    "data.workType",
+    "state.canonicalId",
+    "data.subjects",
+    "data.contributors",
+    "data.genres",
+]
+
 
 class CatalogueWorksTransformer(BaseTransformer):
-    def __init__(self, url: str):
-        self.source = GZipSource(url)
+    def __init__(self, pipeline_date: str | None, is_local: bool):
+        self.source = ElasticsearchSource(pipeline_date, is_local, ES_QUERY, ES_FIELDS)
 
     def transform_node(self, raw_node: dict) -> Work:
         raw_work = RawCatalogueWork(raw_node)

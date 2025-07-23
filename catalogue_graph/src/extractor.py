@@ -13,6 +13,7 @@ class LambdaEvent(typing.TypedDict):
     transformer_type: TransformerType
     entity_type: EntityType
     stream_destination: StreamDestination
+    pipeline_date: str | None
     sample_size: int | None
 
 
@@ -20,6 +21,7 @@ def handler(
     stream_destination: StreamDestination,
     transformer_type: TransformerType,
     entity_type: EntityType,
+    pipeline_date: str | None = None,
     sample_size: int | None = None,
     is_local: bool = False,
 ) -> None:
@@ -28,7 +30,9 @@ def handler(
         f"transformer and streaming them into {stream_destination}."
     )
 
-    transformer: BaseTransformer = create_transformer(transformer_type, entity_type)
+    transformer: BaseTransformer = create_transformer(
+        transformer_type, entity_type, pipeline_date, is_local
+    )
 
     if stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)
@@ -58,9 +62,12 @@ def lambda_handler(event: LambdaEvent, context: typing.Any) -> None:
     stream_destination = event["stream_destination"]
     transformer_type = event["transformer_type"]
     entity_type = event["entity_type"]
+    pipeline_date = event["pipeline_date"]
     sample_size = event.get("sample_size")
 
-    handler(stream_destination, transformer_type, entity_type, sample_size)
+    handler(
+        stream_destination, transformer_type, entity_type, pipeline_date, sample_size
+    )
 
 
 def local_handler() -> None:
@@ -85,6 +92,12 @@ def local_handler() -> None:
         choices=typing.get_args(StreamDestination),
         help="Where to stream the transformed entities.",
         required=True,
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help="The pipeline to extract data from. Will default to `None`.",
+        required=False,
     )
     parser.add_argument(
         "--sample-size",

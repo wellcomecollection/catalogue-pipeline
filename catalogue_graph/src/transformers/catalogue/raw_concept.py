@@ -1,16 +1,19 @@
 import re
-from typing import get_args
 
 from models.graph_node import ConceptSource, ConceptType
+from utils.types import WorkConceptKey
 
 from .id_label_checker import IdLabelChecker
 
 
 class RawCatalogueConcept:
     def __init__(
-        self, raw_concept: dict, id_label_checker: IdLabelChecker | None = None
+        self,
+        raw_data: tuple[dict, WorkConceptKey],
+        id_label_checker: IdLabelChecker | None = None,
     ):
-        self.raw_concept = raw_concept
+        self.raw_concept = raw_data[0]
+        self.referenced_in = raw_data[1]
         self.id_label_checker = id_label_checker
 
     @property
@@ -19,41 +22,40 @@ class RawCatalogueConcept:
         Determines whether a given block of JSON represents a Concept as returned from the Catalogue API.
         A Concept is a block of JSON with a type property and a list of identifiers.
         """
-        return (
-            self.raw_concept.get("type") in get_args(ConceptType)
-            and self.raw_concept.get("identifiers") is not None
-        )
+        return self.raw_concept.get("id", {}).get("canonicalId") is not None
 
     @property
     def wellcome_id(self) -> str:
         """Returns the canonical Wellcome identifier."""
-        wellcome_id = self.raw_concept.get("id")
-
-        assert isinstance(wellcome_id, str)
+        wellcome_id: str = self.raw_concept["id"]["canonicalId"]
         return wellcome_id
 
     @property
     def label(self) -> str:
         """Returns the concept label."""
-        label = self.raw_concept.get("label")
-
-        assert isinstance(label, str)
+        label: str = self.raw_concept["label"]
         return label
 
     @property
     def type(self) -> ConceptType:
         """Returns the concept type (one of "Person", "Concept", "Genre", etc.)."""
+
+        # All root concepts extracted from the 'subjects' section are of type 'Subject'. However, these concepts do
+        # not have a 'type' field in the denormalised index, so we need to add it here.
+        if self.referenced_in == "subjects":
+            return "Subject"
+        # All concepts extracted from the 'genres' section are always of type 'Genre' (but the denormalised index uses
+        # the term 'GenreConcept').
+        if self.referenced_in == "genres":
+            return "Genre"
+
         concept_type: ConceptType = self.raw_concept["type"]
         return concept_type
 
     @property
     def raw_identifier(self) -> dict:
         """Returns metadata about the source identifier."""
-        identifier_metadata = self.raw_concept.get("identifiers", [])
-        # There should be exactly one source identifier for each concept
-        assert len(identifier_metadata) == 1
-        raw_identifier = identifier_metadata[0]
-
+        raw_identifier = self.raw_concept["id"]["sourceIdentifier"]
         assert isinstance(raw_identifier, dict)
         return raw_identifier
 
