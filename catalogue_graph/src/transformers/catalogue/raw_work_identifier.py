@@ -44,10 +44,10 @@ class RawCatalogueWorkIdentifier:
         # Calm ref identifiers match this pattern.
         if self.identifier == self.path:
             return self._make_unique_id("/".join(path_fragments[:-1]))
-        
+
         # In some cases, each 'fragment' of the collection path represents an identifier. The current (child) identifier
         # either equals the full last fragment (e.g. grandparent/parent/child), or the last part of the last fragment,
-        # where individual parts ('subfragments') are separated by underscores (e.g. parent/something_child). 
+        # where individual parts ('subfragments') are separated by underscores (e.g. parent/something_child).
         last_fragment = path_fragments[-1]
         last_partial_fragment = None
         if "_" in last_fragment:
