@@ -108,6 +108,7 @@ dependencies = [
     { name = "boto3" },
     { name = "lxml" },
     { name = "lxml-stubs" },
+    { name = "mypy" },
     { name = "pyarrow" },
     { name = "pyiceberg", extra = ["sql-sqlite"] },
     { name = "smart-open" },
@@ -116,6 +117,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "lxml-stubs" },
     { name = "pytest" },
 ]
 test = [
@@ -127,6 +129,7 @@ requires-dist = [
     { name = "boto3", specifier = ">=1.39.10" },
     { name = "lxml", specifier = ">=6.0.0" },
     { name = "lxml-stubs", specifier = ">=0.5.1" },
+    { name = "mypy", specifier = ">=1.16.1" },
     { name = "pyarrow", specifier = ">=20.0.0" },
     { name = "pyiceberg", extras = ["sql-sqlite"], specifier = ">=0.9.1" },
     { name = "smart-open", specifier = ">=7.3.0.post1" },
@@ -134,7 +137,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.4.0" }]
+dev = [
+    { name = "lxml-stubs", specifier = ">=0.5.1" },
+    { name = "pytest", specifier = ">=8.4.0" },
+]
 test = [{ name = "mypy", specifier = ">=1.16.1" }]
 
 [[package]]

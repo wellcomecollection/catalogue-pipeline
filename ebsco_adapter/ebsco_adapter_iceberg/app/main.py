@@ -1,8 +1,8 @@
 import os
 from pyiceberg.table import Table as IcebergTable
+from typing import Any, Dict, List, IO, Optional
 
 import pyarrow as pa
-import os
 import sys
 import argparse
 
@@ -18,15 +18,15 @@ XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
 
 
-def update_from_xml_file(table: IcebergTable, xmlfile):
+def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> Optional[str]:
     return update_from_xml(table, load_xml(xmlfile))
 
 
-def load_xml(xmlfile) -> etree._Element:
+def load_xml(xmlfile: IO[bytes]) -> etree._Element:
     return etree.parse(xmlfile, parser=XMLPARSER).getroot()
 
 
-def update_from_xml(table: IcebergTable, collection: etree._Element):
+def update_from_xml(table: IcebergTable, collection: etree._Element) -> Optional[str]:
     records = nodes_to_records(collection)
     return update_table(
         table,
@@ -37,11 +37,11 @@ def update_from_xml(table: IcebergTable, collection: etree._Element):
     )
 
 
-def nodes_to_records(collection: etree._Element):
+def nodes_to_records(collection: etree._Element) -> List[Dict[str, str]]:
     return [node_to_record(record_node) for record_node in collection]
 
 
-def node_to_record(node: etree._Element):
+def node_to_record(node: etree._Element) -> Dict[str, str]:
     ebsco_id = extract_id(node)
     return {
         "namespace": EBSCO_NAMESPACE,
@@ -57,16 +57,16 @@ def extract_id(node: etree._Element) -> str:
     return id_field.text or ""
 
 
-def data_to_pa_table(data):
+def data_to_pa_table(data: List[Dict[str, str]]) -> pa.Table:
     return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
 
 
-def handler(table, xml_file_location):
+def handler(table: IcebergTable, xml_file_location: str) -> Optional[str]:
     with smart_open.open(xml_file_location, "rb") as f:
         return update_from_xml_file(table, f)
 
 
-def local_handler():
+def local_handler() -> Optional[str]:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
     parser.add_argument("xmlfile", help="Path to the XML file to process")
     parser.add_argument(

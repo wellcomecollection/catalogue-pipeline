@@ -1,10 +1,12 @@
 import pytest
 from pyiceberg.expressions import EqualTo
+from pyiceberg.table import Table as IcebergTable
+from typing import Any
 
-from main import update_from_xml_file, data_to_pa_table, EBSCO_NAMESPACE
+from main import update_from_xml_file
 
 
-def test_store_record(temporary_table, xml_with_one_record):
+def test_store_record(temporary_table: IcebergTable, xml_with_one_record: Any) -> None:
     """The XML from each record is serialised and stored in the content field."""
     update_from_xml_file(temporary_table, xml_with_one_record)
     expected_content = """
@@ -16,7 +18,7 @@ def test_store_record(temporary_table, xml_with_one_record):
     assert pa_table.column("content")[0].as_py() == expected_content
 
 
-def test_delete_record(temporary_table, xml_with_one_record, xml_with_two_records):
+def test_delete_record(temporary_table: IcebergTable, xml_with_one_record: Any, xml_with_two_records: Any) -> None:
     """
     Given a table containing a record ebs00002,
     When a new XML file with no record ebs00002 is imported
@@ -34,7 +36,7 @@ def test_delete_record(temporary_table, xml_with_one_record, xml_with_two_record
     assert pa_table.column("content")[0].as_py() is None
 
 
-def test_change_record(temporary_table, xml_with_one_record, xml_with_three_records):
+def test_change_record(temporary_table: IcebergTable, xml_with_one_record: Any, xml_with_three_records: Any) -> None:
     """
     Given a table containing a record ebs00001,
     When a new XML file with a different ebs00001 record is imported
@@ -52,7 +54,7 @@ def test_change_record(temporary_table, xml_with_one_record, xml_with_three_reco
     assert "John W. Trimmer" in pa_table.column("content")[0].as_py()
 
 
-def test_corrupt_input(temporary_table, not_xml):
+def test_corrupt_input(temporary_table: IcebergTable, not_xml: Any) -> None:
     """
     Given an update file that cannot be understood
     Then an Exception is raised
