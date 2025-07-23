@@ -5,14 +5,11 @@ import typing
 from collections.abc import Generator
 
 import elasticsearch.helpers
-from polars import DataFrame
-from pydantic import BaseModel
-
 import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from ingestor_indexer_monitor import IngestorIndexerMonitorLambdaEvent
-from models.catalogue_concept import CatalogueConcept
 from models.indexable_concept import IndexableConcept
+from pydantic import BaseModel
 from utils.aws import df_from_s3_parquet
 
 
@@ -31,13 +28,6 @@ class IngestorIndexerLambdaEvent(BaseModel):
 
 class IngestorIndexerConfig(BaseModel):
     is_local: bool = False
-
-
-def transform_data(df: DataFrame) -> list[IndexableConcept]:
-    print("Transforming data: CatalogueConcept -> IndexableConcept -> JSON -> str ...")
-    catalogue_concepts = [CatalogueConcept.model_validate(row) for row in df.to_dicts()]
-    return [IndexableConcept.from_concept(concept) for concept in catalogue_concepts]
-
 
 def load_data(
     concepts: list[IndexableConcept],
@@ -72,12 +62,12 @@ def handler(
 ) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
-    extracted_data = df_from_s3_parquet(event.object_to_index.s3_uri)
-    print(f"Extracted {len(extracted_data)} records.")
+    df = df_from_s3_parquet(event.object_to_index.s3_uri)
+    print(f"Extracted {len(df)} records.")
 
-    transformed_data = transform_data(extracted_data)
+    indexable_concepts = [IndexableConcept.model_validate(row) for row in df.to_dicts()]
     success_count = load_data(
-        concepts=transformed_data,
+        concepts=indexable_concepts,
         pipeline_date=event.pipeline_date,
         index_date=event.index_date,
         is_local=config.is_local,

@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import typing
 from itertools import batched
 
@@ -85,6 +86,17 @@ class BaseNeptuneClient:
 
         response = self._make_request("POST", "/openCypher", payload)
         results: list[dict] = response["results"]
+        return results
+
+    def time_open_cypher_query(
+            self, query: str, parameters: dict[str, typing.Any], query_label: str
+    ) -> list[dict]:
+        """Runs an openCypher query, measures its execution time, and prints a summary."""
+        t = time.time()
+        results = self.run_open_cypher_query(query, parameters)
+        print(
+            f"Ran '{query_label}' query in {round(time.time() - t)} seconds, retrieving {len(results)} records."
+        )
         return results
 
     def get_graph_summary(self) -> dict:
