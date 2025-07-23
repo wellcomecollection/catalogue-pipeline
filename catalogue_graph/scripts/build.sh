@@ -8,7 +8,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT+="$(dirname "$DIR")"
 
 # get python version from .python-version
-PY_VERSION=$(cat catalogue_graph/.python-version)
+PY_VERSION=$(cat ${ROOT}/.python-version)
 
 # Install UV if not available
 if ! command -v uv &> /dev/null; then
@@ -64,13 +64,14 @@ function build_zip() {( set -e
 
     cp -r src/* target/tmp
     
-    # Use UV to install dependencies directly from pyproject.toml
+    # Export requirements to a file, then install from it
+    uv export --no-dev --format=requirements-txt > target/requirements.txt
     uv pip install \
-        -r <(uv export --no-dev --format requirements-txt) \
+        -r target/requirements.txt \
         --python-platform x86_64-manylinux2014 \
         --target target/tmp \
         --only-binary=:all: \
-        --no-deps
+        --python-version $PY_VERSION
 
     pushd target/tmp
     zip -r $ZIP_TARGET .
