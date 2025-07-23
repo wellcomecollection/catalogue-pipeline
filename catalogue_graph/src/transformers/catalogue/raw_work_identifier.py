@@ -39,15 +39,20 @@ class RawCatalogueWorkIdentifier:
 
         # In most cases, the identifier value represents the full hierarchy of ancestors, matching the collection path.
         # To get the parent identifier, take everything before the last slash (e.g. PPMIA/A/6/2/21/5 => PPMIA/A/6/2/21).
+        # Calm ref identifiers match this pattern.
         if self.identifier == self.path:
             return self._make_unique_id("/".join(path_fragments[:-1]))
-
+        
+        # In some cases, each 'fragment' of the collection path represents an identifier. The current (child) identifier
+        # either equals the full last fragment (e.g. grandparent/parent/child), or the last part of the last fragment,
+        # where individual parts ('subfragments') are separated by underscores (e.g. parent/something_child). 
         last_fragment = path_fragments[-1]
         last_partial_fragment = None
         if "_" in last_fragment:
             last_partial_fragment = last_fragment.split("_")[-1]
 
-        # In some cases, the identifier is only one component of the collection path.
+        # The parent identifier is stored in the second to last fragment (e.g. grandparent/parent/child => parent).
+        # Sierra iconographic numbers and Tei manuscript identifiers match this pattern.
         if self.identifier in (last_fragment, last_partial_fragment):
             return self._make_unique_id(path_fragments[-2])
 
