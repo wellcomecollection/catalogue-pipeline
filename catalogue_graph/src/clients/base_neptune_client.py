@@ -2,7 +2,9 @@ import json
 import os
 import sys
 import typing
+from collections.abc import Iterator
 from itertools import batched
+from typing import Any
 
 import backoff
 import boto3
@@ -21,7 +23,7 @@ ID_DELETE_BATCH_SIZE = 1000
 ALLOW_DATABASE_RESET = False
 
 
-def _batched_with_strict_support(iterable, n):
+def _batched_with_strict_support(iterable: Any, n: int) -> Iterator[Any]:
     """Wrapper for itertools.batched that handles strict parameter compatibility."""
     if sys.version_info >= (3, 13):
         return batched(iterable, n, strict=False)

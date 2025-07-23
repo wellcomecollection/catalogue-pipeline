@@ -48,7 +48,6 @@ LOC_NAMES_SOURCE_MOCK_RESPONSE: MockResponseInput = {
 }
 
 
-
 WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
     "url": WIKIDATA_SPARQL_URL,
@@ -96,7 +95,10 @@ def mock_requests_lookup_table(
     mocked_responses: list[MockResponseInput] = []
 
     # Add all relevant source mock responses
-    mocked_responses: list[dict] = SOURCE_MOCK_RESPONSE_MAPPING[transformer_type]
+    source_mock_responses: list[MockResponseInput] = SOURCE_MOCK_RESPONSE_MAPPING[
+        transformer_type
+    ]
+    mocked_responses.extend(source_mock_responses)
 
     if destination == "graph":
         mocked_responses.append(
