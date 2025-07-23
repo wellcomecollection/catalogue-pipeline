@@ -20,7 +20,6 @@ from queries.concept_queries import (
     get_broader_concepts,
     get_collaborator_concepts,
     get_concepts,
-    get_coreferenced_concepts,
     get_field_of_work_concepts,
     get_narrower_concepts,
     get_people_concepts,
@@ -82,7 +81,6 @@ def extract_data(
         "narrower_than": get_narrower_concepts(client, params),
         "broader_than": get_broader_concepts(client, params),
         "people": get_people_concepts(client, params),
-        "referenced_together": get_coreferenced_concepts(client, params),
         "frequent_collaborators": get_collaborator_concepts(client, params),
         "related_topics": get_related_topics(client, params),
     }

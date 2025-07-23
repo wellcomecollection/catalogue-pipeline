@@ -82,8 +82,3 @@ class RawNeptuneRelatedConcepts:
     def related_to(self) -> list[ConceptRelatedTo]:
         raw_related = self._get_related_concepts("related_to")
         return transform_related_concepts(raw_related)
-
-    @property
-    def referenced_together(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("referenced_together")
-        return transform_related_concepts(raw_related)

@@ -135,11 +135,6 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=_get_referenced_together_query(),
-        mock_results=[],
-    )
-
-    add_neptune_mock_response(
         expected_query=_get_referenced_together_query(
             source_referenced_types=["Person"],
             related_referenced_types=["Person", "Organisation"],
@@ -268,7 +263,6 @@ def get_catalogue_concept_mock(
                 narrowerThan=[],
                 broaderThan=broader_than,
                 people=people,
-                referencedTogether=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
             ),

@@ -25,7 +25,6 @@ class RelatedConcepts(BaseModel):
     narrowerThan: list[ConceptRelatedTo]
     broaderThan: list[ConceptRelatedTo]
     people: list[ConceptRelatedTo]
-    referencedTogether: list[ConceptRelatedTo]
     frequentCollaborators: list[ConceptRelatedTo]
     relatedTopics: list[ConceptRelatedTo]
 

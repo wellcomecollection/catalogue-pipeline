@@ -300,20 +300,12 @@ def get_people_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcep
     return _related_query_result_to_dict(result)
 
 
-def get_coreferenced_concepts(
-        client: BaseNeptuneClient, params: dict
-) -> LinkedConcepts:
-    query = _get_referenced_together_query()
-    result = client.time_open_cypher_query(query, params, "referenced together")
-    return _related_query_result_to_dict(result)
-
-
 def get_collaborator_concepts(
         client: BaseNeptuneClient, params: dict
 ) -> LinkedConcepts:
-    # Retrieve people and organisations which are commonly referenced together as collaborators with a given person
+    # Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
     query = _get_referenced_together_query(
-        source_referenced_types=["Person"],
+        source_referenced_types=["Person", "Organisation"],
         related_referenced_types=["Person", "Organisation"],
         source_referenced_in=["contributors"],
         related_referenced_in=["contributors"],

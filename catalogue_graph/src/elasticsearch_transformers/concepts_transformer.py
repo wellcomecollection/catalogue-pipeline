@@ -39,7 +39,6 @@ class ElasticsearchConceptsTransformer:
                 narrowerThan=neptune_related.narrower_than,
                 broaderThan=neptune_related.broader_than,
                 people=neptune_related.people,
-                referencedTogether=neptune_related.referenced_together,
                 frequentCollaborators=neptune_related.frequent_collaborators,
                 relatedTopics=neptune_related.related_topics,
             ),

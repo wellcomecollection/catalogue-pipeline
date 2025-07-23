@@ -24,7 +24,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -72,7 +71,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -107,7 +105,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -155,7 +152,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [
             {
               "conceptType": "Person",
@@ -197,7 +193,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -245,7 +240,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -299,7 +293,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
@@ -404,8 +397,7 @@
               "relationshipType": ""
             }
           ],
-          "frequentCollaborators": [],
-          "referencedTogether": []
+          "frequentCollaborators": []
         },
         "sameAs": [
           "a229u886",
@@ -463,32 +455,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [
-            {
-              "conceptType": "Genre",
-              "id": "ajcm2jdg",
-              "label": "Annual reports",
-              "relationshipType": ""
-            },
-            {
-              "conceptType": "Genre",
-              "id": "rasp7aye",
-              "label": "MOH reports",
-              "relationshipType": ""
-            },
-            {
-              "conceptType": "Genre",
-              "id": "kqkakf66",
-              "label": "Electronic books",
-              "relationshipType": ""
-            },
-            {
-              "conceptType": "Organisation",
-              "id": "y6dk9r86",
-              "label": "South Cambridgeshire (England). Rural District Council.",
-              "relationshipType": ""
-            }
-          ],
           "relatedTopics": [
             {
               "label": "Water Supply",
@@ -563,7 +529,6 @@
           "narrowerThan": [],
           "broaderThan": [],
           "people": [],
-          "referencedTogether": [],
           "frequentCollaborators": [],
           "relatedTopics": []
         },
