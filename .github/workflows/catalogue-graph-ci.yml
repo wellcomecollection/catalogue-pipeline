@@ -21,10 +21,44 @@ jobs:
         with:
           folder: catalogue_graph
 
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install UV
+        run: pip install uv
+      - name: Install dependencies
+        run: |
+          cd catalogue_graph
+          uv sync
+      - name: Run typecheck
+        run: |
+          ./catalogue_graph/scripts/typecheck.sh
+
+  autoformat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install UV
+        run: pip install uv
+      - name: Install dependencies
+        run: |
+          cd catalogue_graph
+          uv sync
+      - name: Run autoformat check
+        run: |
+          ./catalogue_graph/scripts/autoformat.sh --check
+
   build:
     runs-on: ubuntu-latest
-    needs: python-checks
-    if: ${{ needs.python-checks.result == 'success' }}
+    needs: [python-checks, typecheck, autoformat]
+    if: ${{ needs.python-checks.result == 'success' && needs.typecheck.result == 'success' && needs.autoformat.result == 'success' }}
     steps:
       - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
