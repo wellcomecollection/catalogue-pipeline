@@ -1,10 +1,7 @@
 import json
 import os
-import sys
 import typing
-from collections.abc import Iterator
 from itertools import batched
-from typing import Any
 
 import backoff
 import boto3
@@ -21,14 +18,6 @@ DELETE_BATCH_SIZE = 10000
 ID_DELETE_BATCH_SIZE = 1000
 
 ALLOW_DATABASE_RESET = False
-
-
-def _batched_with_strict_support(iterable: Any, n: int) -> Iterator[Any]:
-    """Wrapper for itertools.batched that handles strict parameter compatibility."""
-    if sys.version_info >= (3, 13):
-        return batched(iterable, n, strict=False)
-    else:
-        return batched(iterable, n)
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -190,7 +179,7 @@ class BaseNeptuneClient:
 
         previous_node_count = self.get_total_node_count()
 
-        for batch in _batched_with_strict_support(ids, ID_DELETE_BATCH_SIZE):
+        for batch in batched(ids, ID_DELETE_BATCH_SIZE, strict=False):
             self.run_open_cypher_query(delete_query, {"nodeIds": list(batch)})
             print(f"Deleted a batch of nodes. (Batch size: {ID_DELETE_BATCH_SIZE})")
 
@@ -205,7 +194,7 @@ class BaseNeptuneClient:
 
         previous_edge_count = self.get_total_edge_count()
 
-        for batch in _batched_with_strict_support(ids, ID_DELETE_BATCH_SIZE):
+        for batch in batched(ids, ID_DELETE_BATCH_SIZE, strict=False):
             self.run_open_cypher_query(delete_query, {"edgeIds": list(batch)})
             print(f"Deleted a batch of edges. (Batch size: {ID_DELETE_BATCH_SIZE})")
 
