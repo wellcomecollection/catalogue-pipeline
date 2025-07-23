@@ -47,14 +47,7 @@ LOC_NAMES_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "json_data": None,
 }
 
-CATALOGUE_SOURCE_MOCK_RESPONSE: MockResponseInput = {
-    "method": "GET",
-    "url": CATALOGUE_SNAPSHOT_URL,
-    "status_code": 200,
-    "params": None,
-    "content_bytes": load_fixture("catalogue/works_snapshot_example.json"),
-    "json_data": None,
-}
+
 
 WIKIDATA_LINKED_LOC_SOURCE_MOCK_RESPONSE: MockResponseInput = {
     "method": "GET",
