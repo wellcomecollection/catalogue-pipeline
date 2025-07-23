@@ -8,6 +8,7 @@ dependencies = [
     "boto3>=1.39.10",
     "lxml>=6.0.0",
     "lxml-stubs>=0.5.1",
+    "mypy>=1.16.1",
     "pyarrow>=20.0.0",
     "pyiceberg[sql-sqlite]>=0.9.1",
     "smart-open>=7.3.0.post1",
@@ -16,6 +17,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "lxml-stubs>=0.5.1",
     "pytest>=8.4.0",
 ]
 test = [
@@ -25,6 +27,17 @@ test = [
 [tool.pytest.ini_options]
 pythonpath = "app"
 
-[[tool.mypy.overrides]]
-module = ["pyarrow.*"]
+[tool.mypy]
+strict_optional = true
+strict_equality = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+
 ignore_missing_imports = true
