@@ -12,4 +12,6 @@ WORKDIR /app
 
 RUN pip install uv && uv sync --no-dev
 
+FROM base AS extractor
+
 ENTRYPOINT [ "/app/src/extractor.py" ]
