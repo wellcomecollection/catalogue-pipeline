@@ -29,6 +29,7 @@ class ElasticsearchConceptsTransformer:
             id=neptune_concept.wellcome_id,
             identifiers=neptune_concept.display_identifiers,
             label=neptune_concept.label,
+            displayLabel=neptune_concept.display_label,
             alternativeLabels=neptune_concept.alternative_labels,
             type=neptune_concept.concept_type,
             description=neptune_concept.description,

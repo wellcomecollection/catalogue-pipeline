@@ -42,9 +42,9 @@ def test_catalogue_concept_from_neptune_result() -> None:
         query=ConceptQuery(
             id="id",
             identifiers=[
-                ConceptIdentifier(value="456", identifierType="lc-names")
+                ConceptIdentifier(value="123", identifierType="lc-names")
             ],
-            label="label",
+            label="LoC label",
             alternativeLabels=alternative_labels,
             type="Person",
         ),
@@ -52,7 +52,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
             id="id",
             identifiers=[
                 DisplayIdentifier(
-                    value="456",
+                    value="123",
                     identifierType=DisplayIdentifierType(
                         id="lc-names",
                         label="Library of Congress Name authority records",
@@ -60,12 +60,13 @@ def test_catalogue_concept_from_neptune_result() -> None:
                     ),
                 )
             ],
-            label="label",
+            label="LoC label",
+            displayLabel="Wikidata label",
             alternativeLabels=alternative_labels,
             description=ConceptDescription(
-                text="Mesh description",
-                sourceLabel="nlm-mesh",
-                sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+                text="Description",
+                sourceLabel="wikidata",
+                sourceUrl="https://www.wikidata.org/wiki/456",
             ),
             type="Person",
             sameAs=[],
@@ -93,9 +94,9 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         query=ConceptQuery(
             id="id",
             identifiers=[
-                ConceptIdentifier(value="456", identifierType="lc-names")
+                ConceptIdentifier(value="123", identifierType="lc-names")
             ],
-            label="label",
+            label="LoC label",
             alternativeLabels=[],
             type="Person",
         ),
@@ -103,7 +104,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             id="id",
             identifiers=[
                 DisplayIdentifier(
-                    value="456",
+                    value="123",
                     identifierType=DisplayIdentifierType(
                         id="lc-names",
                         label="Library of Congress Name authority records",
@@ -111,12 +112,13 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
                     ),
                 )
             ],
-            label="label",
+            label="LoC label",
+            displayLabel="Wikidata label",
             alternativeLabels=[],
             description=ConceptDescription(
-                text="Mesh description",
-                sourceLabel="nlm-mesh",
-                sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+                text="Description",
+                sourceLabel="wikidata",
+                sourceUrl="https://www.wikidata.org/wiki/456",
             ),
             type="Person",
             sameAs=[],
@@ -172,6 +174,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
                 )
             ],
             label="Waves",
+            displayLabel="Waves",
             alternativeLabels=["Mechanical waves", "Waves"],
             description=ConceptDescription(
                 text="Repeated oscillation about a stable equilibrium",
@@ -179,7 +182,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
                 sourceUrl="https://www.wikidata.org/wiki/Q37172",
             ),
             type="Concept",
-            sameAs=["gcmn66yk", "a2584ttj"],
+            sameAs=["a2584ttj", "gcmn66yk"],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(

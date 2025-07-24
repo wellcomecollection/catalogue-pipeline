@@ -1,8 +1,10 @@
 from models.indexable_concept import ConceptRelatedTo
 
 from .raw_neptune_concept import (
+    DISPLAY_SOURCE_PRIORITY,
+    MissingLabelError,
     get_most_specific_concept_type,
-    get_priority_source_concept_value,
+    get_priority_label,
 )
 
 
@@ -18,7 +20,11 @@ def transform_related_concepts(
         node, edge = related_item["concept_node"], related_item.get("edge")
         source_nodes = related_item["source_concept_nodes"]
 
-        label, _ = get_priority_source_concept_value(node, source_nodes, "label")
+        try:
+            label, _ = get_priority_label(node, source_nodes, DISPLAY_SOURCE_PRIORITY)
+        except MissingLabelError:
+            # If a related concept does not have a label, do not include it
+            continue
 
         relationship_type = ""
         if edge is not None:

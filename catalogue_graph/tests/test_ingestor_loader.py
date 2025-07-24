@@ -136,7 +136,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
 
     add_neptune_mock_response(
         expected_query=_get_referenced_together_query(
-            source_referenced_types=["Person"],
+            source_referenced_types=["Person", "Organisation"],
             related_referenced_types=["Person", "Organisation"],
             source_referenced_in=["contributors"],
             related_referenced_in=["contributors"],
@@ -226,11 +226,11 @@ def get_catalogue_concept_mock(
     return IndexableConcept(
         query=ConceptQuery(
             id="id",
-            label="label",
+            label="LoC label",
             type="Person",
             identifiers=[
                 ConceptIdentifier(
-                    value="456",
+                    value="123",
                     identifierType="lc-names",
                 )
             ],
@@ -238,13 +238,14 @@ def get_catalogue_concept_mock(
         ),
         display=ConceptDisplay(
             id="id",
-            label="label",
+            label="LoC label",
+            displayLabel="Wikidata label",
             type="Person",
             identifiers=[
                 DisplayIdentifier(
-                    value="lc-names",
+                    value="123",
                     identifierType=DisplayIdentifierType(
-                        id="nlm-mesh",
+                        id="lc-names",
                         label="Library of Congress Name authority records",
                         type="IdentifierType",
                     ),
@@ -252,9 +253,9 @@ def get_catalogue_concept_mock(
             ],
             alternativeLabels=alternative_labels,
             description=ConceptDescription(
-                text="Mesh description",
-                sourceLabel="nlm-mesh",
-                sourceUrl="https://meshb.nlm.nih.gov/record/ui?ui=789",
+                text="Description",
+                sourceLabel="wikidata",
+                sourceUrl="https://www.wikidata.org/wiki/456",
             ),
             sameAs=[],
             relatedConcepts=RelatedConcepts(
@@ -303,7 +304,7 @@ def test_ingestor_loader(
     result = handler(MOCK_INGESTOR_LOADER_EVENT, MOCK_INGESTOR_LOADER_CONFIG)
 
     assert result == MOCK_INGESTOR_INDEXER_EVENT
-    assert len(MockRequest.calls) == 9
+    assert len(MockRequest.calls) == 8
 
     request = MockRequest.calls[0]
     assert request["method"] == "POST"
