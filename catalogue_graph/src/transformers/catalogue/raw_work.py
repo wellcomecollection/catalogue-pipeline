@@ -70,14 +70,22 @@ class RawCatalogueWork:
         return [i["value"] for i in all_identifiers]
 
     @property
-    def path(self) -> str | None:
+    def raw_path(self) -> str | None:
         path: str | None = self.work_data.get("collectionPath", {}).get("path")
 
         if path is None or len(path) == 0:
             return None
 
-        # A small number of works have a trailing slash in their collection path
-        return path.rstrip("/")
+        return path
+
+    @property
+    def path(self) -> str | None:
+        if self.raw_path is None:
+            return None
+
+        # A small number of works have a trailing slash in their collection path which must be removed 
+        # to correctly extract parent identifiers
+        return self.raw_path.rstrip("/")
 
     @property
     def path_identifier(self) -> str | None:
@@ -85,7 +93,7 @@ class RawCatalogueWork:
             return None
 
         for identifier in self.identifiers:
-            if identifier == self.path:
+            if identifier == self.raw_path:
                 return self.path
 
         path_fragments = self.path.split("/")
@@ -98,7 +106,7 @@ class RawCatalogueWork:
 
         path_fragments = self.path.split("/")
         for identifier in self.identifiers:
-            if identifier == self.path:
+            if identifier == self.raw_path:
                 return "/".join(path_fragments[:-1])
 
         return path_fragments[-2]
