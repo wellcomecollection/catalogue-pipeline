@@ -26,7 +26,7 @@ jobs:
         with:
           folder: catalogue_graph
 
-  build:
+  build-lambda-zip:
     runs-on: ubuntu-latest
     needs: [python-checks]
     if: ${{ needs.python-checks.result == 'success' }}
@@ -36,32 +36,43 @@ jobs:
         with:
           aws-region: eu-west-1
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-      - name: Log in to private ECR
-        uses: aws-actions/amazon-ecr-login@v2
-      - name: Build artefacts
+      - name: Build lambda ZIP artefact
         run: |
-          ./catalogue_graph/scripts/build.sh
+          ./catalogue_graph/scripts/build.sh --skip-container-build
 
-  push:
+  build-extractor-image:
     runs-on: ubuntu-latest
-    needs: build
-    if: ${{ needs.build.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    needs: [python-checks]
+    if: ${{ needs.python-checks.result == 'success' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
+        with:
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          folder: catalogue_graph
+          target: extractor
+          tag: ${{ github.sha }}
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          publish_latest: ${{ github.ref == 'refs/heads/main' }}
+
+  push-lambda-zip:
+    runs-on: ubuntu-latest
+    needs: build-lambda-zip
+    if: ${{ needs.build-lambda-zip.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-west-1
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-      - name: Log in to private ECR
-        uses: aws-actions/amazon-ecr-login@v2
-      - name: Push artefacts
+      - name: Push lambda ZIP artefact
         run: |
-          ./catalogue_graph/scripts/build.sh --push
+          ./catalogue_graph/scripts/build.sh --skip-container-build --push
 
   deploy:
     runs-on: ubuntu-latest
-    needs: push
-    if: ${{ needs.push.result == 'success' }}
+    needs: push-lambda-zip
+    if: ${{ needs.push-lambda-zip.result == 'success' }}
     strategy:
       matrix:
         lambda_name:
