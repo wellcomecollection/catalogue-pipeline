@@ -18,9 +18,7 @@ class RawCatalogueWork:
         self.raw_work = raw_work
         self.work_data: dict = self.raw_work.get("data", {})
         self.work_state: dict = self.raw_work["state"]
-        self.collection_path: str | None = self.work_data.get("collectionPath", {}).get(
-            "path"
-        )
+        self.path: str | None = self.work_data.get("collectionPath", {}).get("path")
 
     @property
     def wellcome_id(self) -> str:
@@ -74,24 +72,24 @@ class RawCatalogueWork:
 
     @property
     def path_identifier(self) -> str | None:
-        if self.collection_path is None or len(self.collection_path) == 0:
+        if self.path is None or len(self.path) == 0:
             return None
 
         for identifier in self.identifiers:
-            if identifier == self.collection_path:
-                return self.collection_path
+            if identifier == self.path:
+                return self.path
 
-        path_fragments = self.collection_path.split("/")
+        path_fragments = self.path.split("/")
         return path_fragments[-1]
 
     @property
     def parent_path_identifier(self) -> str | None:
-        if self.collection_path is None or "/" not in self.collection_path:
+        if self.path is None or "/" not in self.path:
             return None
 
-        path_fragments = self.collection_path.split("/")
+        path_fragments = self.path.split("/")
         for identifier in self.identifiers:
-            if identifier == self.collection_path:
+            if identifier == self.path:
                 return "/".join(path_fragments[:-1])
 
         return path_fragments[-2]

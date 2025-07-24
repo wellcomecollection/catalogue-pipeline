@@ -6,6 +6,7 @@ from models.graph_edge import (
 )
 from models.graph_node import PathIdentifier
 from sources.elasticsearch_source import ElasticsearchSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -36,7 +37,7 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
         if raw_identifier.path_identifier is not None:
             return PathIdentifier(
                 id=raw_identifier.path_identifier,
-                label="",
+                label=None,
             )
 
         return None

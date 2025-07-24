@@ -1,10 +1,9 @@
-from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
-
 from models.graph_edge import (
     PathIdentifierHasParent,
     WorkHasPathIdentifier,
 )
 from models.graph_node import PathIdentifier
+from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
 from transformers.catalogue.work_identifiers_transformer import (
     CatalogueWorkIdentifiersTransformer,
 )
@@ -18,13 +17,13 @@ def test_catalogue_work_identifiers_transformer_nodes() -> None:
 
     assert len(nodes) == 3
 
-    expected_sierra_identifier = PathIdentifier(id="569742i", label="")
+    expected_sierra_identifier = PathIdentifier(id="569742i", label=None)
     assert any(node == expected_sierra_identifier for node in nodes)
 
-    expected_miro_image_number = PathIdentifier(id="569755i", label="")
+    expected_miro_image_number = PathIdentifier(id="569755i", label=None)
     assert any(node == expected_miro_image_number for node in nodes)
 
-    expected_sierra_system_number = PathIdentifier(id="569729i", label="")
+    expected_sierra_system_number = PathIdentifier(id="569729i", label=None)
     assert any(node == expected_sierra_system_number for node in nodes)
 
 
