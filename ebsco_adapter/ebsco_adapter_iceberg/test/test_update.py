@@ -30,7 +30,7 @@ def test_noop(temporary_table: IcebergTable) -> None:
     assert changeset is None
     # The data is the same as before the update
     assert (
-        temporary_table.scan(selected_fields=["namespace", "id", "content"])
+        temporary_table.scan(selected_fields=("namespace", "id", "content"))
         .to_arrow()
         .cast(ARROW_SCHEMA)
         .equals(data)
@@ -62,7 +62,7 @@ def test_undelete(temporary_table: IcebergTable) -> None:
     assert changeset is not None
     # The data is the same as before the update
     as_pa = (
-        temporary_table.scan(selected_fields=["id", "content", "changeset"])
+        temporary_table.scan(selected_fields=("id", "content", "changeset"))
         .to_arrow()
         .sort_by("id")
         .to_pylist()
@@ -88,6 +88,7 @@ def test_new_table(temporary_table: IcebergTable) -> None:
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     assert (
         temporary_table.scan().to_arrow()
         == temporary_table.scan(
@@ -133,12 +134,13 @@ def test_update_records(temporary_table: IcebergTable) -> None:
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     expected_changes = {"eb0001", "eb0003"}
     changed_rows = temporary_table.scan(
-        row_filter=In("id", expected_changes), selected_fields=["id"]
+        row_filter=In("id", expected_changes), selected_fields=("id",)
     ).to_arrow()
     changeset_rows = temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id), selected_fields=["id"]
+        row_filter=EqualTo("changeset", changeset_id), selected_fields=("id",)
     ).to_arrow()
 
     assert_row_identifiers(changeset_rows, expected_changes)
@@ -173,12 +175,13 @@ def test_insert_records(temporary_table: IcebergTable) -> None:
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     expected_insertions = {"eb0002", "eb0099"}
     inserted_rows = temporary_table.scan(
-        row_filter=In("id", expected_insertions), selected_fields=["id"]
+        row_filter=In("id", expected_insertions), selected_fields=("id",)
     ).to_arrow()
     changeset_rows = temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id), selected_fields=["id"]
+        row_filter=EqualTo("changeset", changeset_id), selected_fields=("id",)
     ).to_arrow()
 
     assert_row_identifiers(changeset_rows, expected_insertions)
@@ -219,13 +222,14 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     expected_deletions = {"eb0002", "eb0099"}
     deleted_rows = temporary_table.scan(
-        row_filter=IsNull("content"), selected_fields=["id"]
+        row_filter=IsNull("content"), selected_fields=("id",)
     ).to_arrow()
     assert_row_identifiers(deleted_rows, expected_deletions)
     changeset_rows = temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id), selected_fields=["id"]
+        row_filter=EqualTo("changeset", changeset_id), selected_fields=("id",)
     ).to_arrow()
 
     assert_row_identifiers(changeset_rows, expected_deletions)
@@ -261,6 +265,7 @@ def test_all_actions(temporary_table: IcebergTable) -> None:
     expected_insert = "eb0004"
 
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     changeset_rows = temporary_table.scan(
         row_filter=EqualTo("changeset", changeset_id),
     ).to_arrow()
@@ -345,6 +350,7 @@ def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     assert {"eb0003", "eb0004"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", changeset_id))
         .to_arrow()
@@ -359,6 +365,7 @@ def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
         ]
     )
     newer_changeset_id = update_table(temporary_table, newer_data, "ebsco_test")
+    assert newer_changeset_id is not None  # Type assertion for mypy
     assert {"eb0003"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", newer_changeset_id))
         .to_arrow()
