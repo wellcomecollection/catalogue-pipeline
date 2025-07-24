@@ -1,8 +1,9 @@
 from collections.abc import Generator
 
+from utils.types import WorkConceptKey
+
 from sources.base_source import BaseSource
 from sources.elasticsearch_source import ElasticsearchSource
-from utils.types import WorkConceptKey
 
 
 def extract_concepts_from_work(
@@ -14,6 +15,10 @@ def extract_concepts_from_work(
     # extracting these component concepts, since the frontend does not make use of them and the resulting
     # theme pages would be empty.
     for subject in raw_work.get("subjects", []):
+        nested_concepts = subject.get("concepts", [])
+        if len(nested_concepts) > 0 and nested_concepts[0]["id"] == subject["id"]:
+            yield nested_concepts[0], "subjects"
+
         yield subject, "subjects"
 
     # Return all contributors
