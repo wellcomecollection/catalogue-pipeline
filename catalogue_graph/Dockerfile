@@ -12,6 +12,6 @@ WORKDIR /app
 
 RUN pip install uv && uv sync --no-dev
 
-FROM base AS extractor
+FROM base AS catalogue_graph_extractor
 
 ENTRYPOINT [ "/app/src/extractor.py" ]
