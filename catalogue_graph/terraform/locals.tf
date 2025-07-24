@@ -138,7 +138,8 @@ locals {
     {
       "label" : "Catalogue Work Identifier Edges",
       "transformer_type" : "catalogue_work_identifiers",
-      "entity_type" : "edges"
+      "entity_type" : "edges",
+      "insert_error_threshold" : 1.5 / 100
     },
     {
       "label" : "Catalogue Work Nodes",
