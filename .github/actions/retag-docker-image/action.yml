@@ -1,4 +1,6 @@
 name: "Retag Docker Image"
+permissions:
+  id-token: write
 description: "Retags an existing Docker image in ECR with a new tag"
 inputs:
   registry:
