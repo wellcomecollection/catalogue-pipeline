@@ -1,4 +1,4 @@
-from typing import Annotated, Literal, Optional
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, StringConstraints
 
@@ -22,20 +22,20 @@ class SourceConcept(BaseNode):
     # LoC variants, MeSH concepts other than preferred term
     alternative_labels: list[str] = []
     # Concept description, such as MeSH scope note or Wikidata description
-    description: Optional[str] = None
+    description: str | None = None
 
 
 # Represents a LoC or Wikidata location. Inherits all fields from SourceConcept, plus optional coordinates.
 class SourceLocation(SourceConcept):
-    latitude: Optional[float] = None  # Coordinates from Wikidata
-    longitude: Optional[float] = None  # Coordinates from Wikidata
+    latitude: float | None = None  # Coordinates from Wikidata
+    longitude: float | None = None  # Coordinates from Wikidata
 
 
 # Represents a LoC or Wikidata name. Inherits all fields from SourceConcept, plus other optional fields.
 class SourceName(SourceConcept):
-    date_of_birth: Optional[FormattedDateString] = None
-    date_of_death: Optional[FormattedDateString] = None
-    place_of_birth: Optional[str] = None
+    date_of_birth: FormattedDateString | None = None
+    date_of_death: FormattedDateString | None = None
+    place_of_birth: str | None = None
 
 
 # Catalogue concepts have a specific type and source

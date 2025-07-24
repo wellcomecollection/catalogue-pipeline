@@ -1,34 +1,34 @@
 name: "Catalogue graph: Run CI pipeline"
 
-on: 
+on:
   push:
     branches:
       - main
-    paths: 'catalogue_graph/**'
+    paths:
+      - "catalogue_graph/**"
+      - ".github/workflows/catalogue-graph-ci.yml"
+  pull_request:
+    paths:
+      - "catalogue_graph/**"
+      - ".github/workflows/catalogue-graph-ci.yml"
 
 permissions:
   contents: read
   id-token: write
 
 jobs:
-  test: 
+  python-checks:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v5
+      - uses: wellcomecollection/.github/.github/actions/python_check@main
         with:
-          python-version: '3.13'
-      - name: CI setup
-        run: |
-          ./catalogue_graph/scripts/ci-setup.sh
-      - name: Test
-        run: |
-          ./catalogue_graph/scripts/test.sh
-        
+          folder: catalogue_graph
+
   build:
     runs-on: ubuntu-latest
-    needs: test
-    if: ${{ needs.test.result == 'success' }}
+    needs: [python-checks]
+    if: ${{ needs.python-checks.result == 'success' }}
     steps:
       - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
@@ -37,30 +37,47 @@ jobs:
           role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - name: Log in to private ECR
         uses: aws-actions/amazon-ecr-login@v2
-      - name: Build and push artefacts
+      - name: Build artefacts
         run: |
-          ./catalogue_graph/scripts/build.sh --push
-  
-  deploy:
+          ./catalogue_graph/scripts/build.sh
+
+  push:
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ needs.build.result == 'success' }}
+    if: ${{ needs.build.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - name: Log in to private ECR
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Push artefacts
+        run: |
+          ./catalogue_graph/scripts/build.sh --push
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: push
+    if: ${{ needs.push.result == 'success' }}
     strategy:
       matrix:
-        lambda_name: [
-          catalogue-graph-bulk-loader,
-          catalogue-graph-bulk-load-poller,
-          catalogue-graph-indexer,
-          catalogue-graph-remover,
-          catalogue-graph-ingestor-trigger,
-          catalogue-graph-ingestor-trigger-monitor,
-          catalogue-graph-ingestor-loader,
-          catalogue-graph-ingestor-loader-monitor,
-          catalogue-graph-ingestor-indexer,
-          catalogue-graph-ingestor-indexer-monitor,
-          catalogue-graph-ingestor-deletions,
-          catalogue-graph-ingestor-reporter
-        ]
+        lambda_name:
+          [
+            catalogue-graph-bulk-loader,
+            catalogue-graph-bulk-load-poller,
+            catalogue-graph-indexer,
+            catalogue-graph-remover,
+            catalogue-graph-ingestor-trigger,
+            catalogue-graph-ingestor-trigger-monitor,
+            catalogue-graph-ingestor-loader,
+            catalogue-graph-ingestor-loader-monitor,
+            catalogue-graph-ingestor-indexer,
+            catalogue-graph-ingestor-indexer-monitor,
+            catalogue-graph-ingestor-deletions,
+            catalogue-graph-ingestor-reporter,
+          ]
     steps:
       - uses: actions/checkout@v3
       - uses: aws-actions/configure-aws-credentials@v4
@@ -70,4 +87,3 @@ jobs:
       - name: Deploy ${{ matrix.lambda_name }} lambda
         run: |
           ./catalogue_graph/scripts/deploy_lambda_zip.sh ${{ matrix.lambda_name }}
-
