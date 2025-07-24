@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       deploy_tag:
-        description: "Docker image tag to deploy (e.g., commit SHA)"
+        description: "Tag to deploy (e.g., commit SHA)"
         required: true
         type: string
 
@@ -61,10 +61,8 @@ jobs:
           ]
     steps:
       - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: ./.github/actions/deploy-lambda-zip
         with:
-          aws-region: eu-west-1
-          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-      - name: Deploy ${{ matrix.lambda_name }} lambda
-        run: |
-          ./catalogue_graph/scripts/deploy_lambda_zip.sh ${{ matrix.lambda_name }}
+          lambda_name: ${{ matrix.lambda_name }}
+          deploy_tag: ${{ inputs.deploy_tag }}
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
