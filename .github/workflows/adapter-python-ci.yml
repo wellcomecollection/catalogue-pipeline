@@ -2,7 +2,7 @@ name: "Adapters: Run checks"
 on:
   push:
     paths:
-      - 'ebsco_adapter/ebsco_adapter_iceberg/**'
+      - "ebsco_adapter/ebsco_adapter_iceberg/**"
 
 permissions:
   contents: read
@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [ ebsco_adapter_iceberg ]
+        project: [ebsco_adapter_iceberg]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/python_check
