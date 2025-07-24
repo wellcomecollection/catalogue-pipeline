@@ -210,3 +210,5 @@ class RawNeptuneConcept:
                         source_concept_id, description_source
                     ),
                 )
+
+        return None
