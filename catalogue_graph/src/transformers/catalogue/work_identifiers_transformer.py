@@ -1,19 +1,15 @@
 from collections.abc import Generator
 
 from models.graph_edge import (
-    WorkHasIdentifier,
-    WorkHasIdentifierAttributes,
-    WorkIdentifierHasParent,
+    PathIdentifierHasParent,
+    WorkHasPathIdentifier,
 )
-from models.graph_node import WorkIdentifier
-from sources.catalogue.work_identifiers_source import (
-    CatalogueWorkIdentifiersSource,
-    RawDenormalisedWorkIdentifier,
-)
+from models.graph_node import PathIdentifier
+from sources.elasticsearch_source import ElasticsearchSource
+
 from transformers.base_transformer import BaseTransformer
 
-from .raw_work_identifier import RawCatalogueWorkIdentifier
-from .works_transformer import ES_QUERY
+from .raw_work import RawCatalogueWork
 
 ES_FIELDS = [
     "state.canonicalId",
@@ -21,50 +17,43 @@ ES_FIELDS = [
     "data.collectionPath",
     "data.otherIdentifiers",
 ]
+ES_QUERY = {
+    "bool": {
+        "must": [
+            {"match": {"type": "Visible"}},
+            {"exists": { "field": "data.collectionPath.path"}}
+        ]
+    }
+}
 
 
 class CatalogueWorkIdentifiersTransformer(BaseTransformer):
     def __init__(self, pipeline_date: str | None, is_local: bool) -> None:
-        self.source = CatalogueWorkIdentifiersSource(
-            pipeline_date, is_local, ES_QUERY, ES_FIELDS
-        )
-        self.streamed_ids: set[str] = set()
+        self.source = ElasticsearchSource(pipeline_date, is_local, ES_QUERY, ES_FIELDS)
 
-    def transform_node(
-        self, raw_data: RawDenormalisedWorkIdentifier
-    ) -> WorkIdentifier | None:
-        raw_identifier = RawCatalogueWorkIdentifier(raw_data)
+    def transform_node(self, raw_data: dict) -> PathIdentifier | None:
+        raw_identifier = RawCatalogueWork(raw_data)
 
-        # Some works use the same identifier (e.g. 'uyrth3u2' shares its Sierra system number with 'bqu3aedn',
-        # and 'zq3hbs3f' has the same Wellcome digcode as 'pbtcyfpr'). Therefore, we need to deduplicate to
-        # ensure each identifier only has one entry in the bulk load file.
-        if raw_identifier.unique_id not in self.streamed_ids:
-            self.streamed_ids.add(raw_identifier.unique_id)
-
-            return WorkIdentifier(
-                id=raw_identifier.unique_id,
-                identifier=raw_identifier.identifier,
-                label=raw_identifier.identifier_type,
+        if raw_identifier.path_identifier is not None:
+            return PathIdentifier(
+                id=raw_identifier.path_identifier,
+                label="",
             )
-
+        
         return None
 
-    def extract_edges(
-        self, raw_data: RawDenormalisedWorkIdentifier
-    ) -> Generator[WorkHasIdentifier | WorkIdentifierHasParent]:
-        raw_identifier = RawCatalogueWorkIdentifier(raw_data)
+    def extract_edges(self, raw_data: dict) -> Generator[WorkHasPathIdentifier | PathIdentifierHasParent]:
+        raw_identifier = RawCatalogueWork(raw_data)
 
-        identifier_attributes = WorkHasIdentifierAttributes(
-            referenced_in=raw_data.referenced_in,
-        )
-        yield WorkHasIdentifier(
-            from_id=raw_data.work_id,
-            to_id=raw_identifier.unique_id,
-            attributes=identifier_attributes,
+        if raw_identifier.path_identifier is None:
+            return
+        
+        yield WorkHasPathIdentifier(
+            from_id=raw_identifier.wellcome_id,
+            to_id=raw_identifier.path_identifier,
         )
 
-        if raw_identifier.parent and raw_identifier.unique_id not in self.streamed_ids:
-            self.streamed_ids.add(raw_identifier.unique_id)
-            yield WorkIdentifierHasParent(
-                from_id=raw_identifier.unique_id, to_id=raw_identifier.parent
+        if raw_identifier.parent_path_identifier is not None:
+            yield PathIdentifierHasParent(
+                from_id=raw_identifier.path_identifier, to_id=raw_identifier.parent_path_identifier
             )

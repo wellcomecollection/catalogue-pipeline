@@ -18,6 +18,7 @@ class RawCatalogueWork:
         self.raw_work = raw_work
         self.work_data: dict = self.raw_work.get("data", {})
         self.work_state: dict = self.raw_work["state"]
+        self.collection_path: str | None = self.work_data.get("collectionPath", {}).get("path")
 
     @property
     def wellcome_id(self) -> str:
@@ -60,3 +61,35 @@ class RawCatalogueWork:
                 )
 
         return work_concepts
+    
+    @property
+    def identifiers(self) -> list[str]:
+        source_identifier = self.work_state["sourceIdentifier"]
+        other_identifiers = self.work_data.get("otherIdentifiers", [])
+        
+        all_identifiers = [source_identifier] + other_identifiers
+        return [i["value"] for i in all_identifiers]
+        
+    @property
+    def path_identifier(self) -> str | None:
+        if self.collection_path is None or len(self.collection_path) == 0:
+            return None
+
+        for identifier in self.identifiers:
+            if identifier == self.collection_path:
+                return self.collection_path
+
+        path_fragments = self.collection_path.split("/")
+        return path_fragments[-1]
+
+    @property
+    def parent_path_identifier(self) -> str | None:
+        if self.collection_path is None or "/" not in self.collection_path:
+            return None
+
+        path_fragments = self.collection_path.split("/")
+        for identifier in self.identifiers:
+            if identifier == self.collection_path:
+                return "/".join(path_fragments[:-1])
+
+        return path_fragments[-2]        

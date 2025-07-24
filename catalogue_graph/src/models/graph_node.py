@@ -71,5 +71,5 @@ class Work(BaseNode):
     alternative_labels: list[str]
 
 
-class WorkIdentifier(BaseNode):
-    identifier: str
+class PathIdentifier(BaseNode):
+    pass
