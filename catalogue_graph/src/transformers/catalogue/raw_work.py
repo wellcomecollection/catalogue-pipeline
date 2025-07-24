@@ -68,14 +68,14 @@ class RawCatalogueWork:
 
         all_identifiers = [source_identifier] + other_identifiers
         return [i["value"] for i in all_identifiers]
-    
+
     @property
     def path(self) -> str | None:
         path: str | None = self.work_data.get("collectionPath", {}).get("path")
-        
+
         if path is None or len(path) == 0:
             return None
-        
+
         # A small number of works have a trailing slash in their collection path
         return path.rstrip("/")
 
