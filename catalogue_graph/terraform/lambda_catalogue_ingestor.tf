@@ -224,7 +224,7 @@ resource "aws_iam_role_policy" "ingestor_indexer_lambda_read_secrets_policy" {
 
 resource "aws_iam_role_policy" "ingestor_indexer_lambda_read_pipeline_secrets_policy" {
   role   = module.ingestor_indexer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read.json
+  policy = data.aws_iam_policy_document.ingestor_allow_pipeline_storage_secret_read.json
 }
 
 resource "aws_iam_role_policy" "ingestor_indexer_lambda_s3_read_policy" {
@@ -311,7 +311,7 @@ resource "aws_iam_role_policy" "ingestor_deletions_lambda_read_secrets_policy" {
 
 resource "aws_iam_role_policy" "ingestor_deletions_lambda_read_pipeline_secrets_policy" {
   role   = module.ingestor_deletions_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read.json
+  policy = data.aws_iam_policy_document.ingestor_allow_pipeline_storage_secret_read.json
 }
 
 # Allow the Lambda to write the 'report.ingestor_deletions.json' file

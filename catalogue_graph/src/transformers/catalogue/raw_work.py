@@ -83,7 +83,7 @@ class RawCatalogueWork:
         if self.raw_path is None:
             return None
 
-        # A small number of works have a trailing slash in their collection path which must be removed 
+        # A small number of works have a trailing slash in their collection path which must be removed
         # to correctly extract parent identifiers
         return self.raw_path.rstrip("/")
 
