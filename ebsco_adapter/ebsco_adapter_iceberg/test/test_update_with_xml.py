@@ -13,7 +13,7 @@ def test_store_record(temporary_table: IcebergTable, xml_with_one_record: Any) -
     <record xmlns="http://www.loc.gov/MARC21/slim"><leader>00000cas a22000003 4500</leader><controlfield tag="001">ebs00001</controlfield><datafield tag="210" ind1=" " ind2=" "><subfield code="a">How to Avoid Huge Ships</subfield></datafield></record>
     """.strip()
     pa_table = temporary_table.scan(
-        selected_fields=["content"], row_filter=EqualTo("id", "ebs00001")
+        selected_fields=("content",), row_filter=EqualTo("id", "ebs00001")
     ).to_arrow()
     assert pa_table.column("content")[0].as_py() == expected_content
 
@@ -28,12 +28,12 @@ def test_delete_record(
     """
     update_from_xml_file(temporary_table, xml_with_two_records)
     pa_table = temporary_table.scan(
-        selected_fields=["content"], row_filter=EqualTo("id", "ebs00002")
+        selected_fields=("content",), row_filter=EqualTo("id", "ebs00002")
     ).to_arrow()
     assert pa_table.column("content")[0].as_py() is not None
     update_from_xml_file(temporary_table, xml_with_one_record)
     pa_table = temporary_table.scan(
-        selected_fields=["content"], row_filter=EqualTo("id", "ebs00002")
+        selected_fields=("content",), row_filter=EqualTo("id", "ebs00002")
     ).to_arrow()
     assert pa_table.column("content")[0].as_py() is None
 
@@ -48,12 +48,12 @@ def test_change_record(
     """
     update_from_xml_file(temporary_table, xml_with_one_record)
     pa_table = temporary_table.scan(
-        selected_fields=["content"], row_filter=EqualTo("id", "ebs00001")
+        selected_fields=("content",), row_filter=EqualTo("id", "ebs00001")
     ).to_arrow()
     assert "John W. Trimmer" not in pa_table.column("content")[0].as_py()
     update_from_xml_file(temporary_table, xml_with_three_records)
     pa_table = temporary_table.scan(
-        selected_fields=["content"], row_filter=EqualTo("id", "ebs00001")
+        selected_fields=("content",), row_filter=EqualTo("id", "ebs00001")
     ).to_arrow()
     assert "John W. Trimmer" in pa_table.column("content")[0].as_py()
 
