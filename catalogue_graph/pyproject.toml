@@ -71,5 +71,6 @@ warn_unreachable = true
 warn_unused_configs = true
 mypy_path = "src"
 
-["tool.mypy-smart_open.*"]
+[[tool.mypy.overrides]]
+module = ["smart_open.*"]
 ignore_missing_imports = true
