@@ -50,3 +50,8 @@ data "aws_iam_policy_document" "stream_to_sns" {
     ]
   }
 }
+
+resource "aws_iam_role_policy" "graph_extractor_ecs_read_pipeline_secrets_policy" {
+  role   = module.extractor_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.extractor_allow_pipeline_storage_secret_read.json
+}
