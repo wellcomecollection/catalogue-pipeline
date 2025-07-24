@@ -304,113 +304,6 @@
   },
   {
     "_index": "concepts-indexed-2025-01-01",
-    "_id": "a229u886",
-    "_source": {
-      "query": {
-        "id": "a229u886",
-        "identifiers": [
-          {
-            "value": "D007649",
-            "identifierType": "nlm-mesh"
-          }
-        ],
-        "label": "Ketamine",
-        "alternativeLabels": [
-          "(+-)-ketamine",
-          "(±)-ketamine",
-          "2-(2-Chlorophenyl)-2-(methylamino)cyclohexanone",
-          "2-(2-chloro-phenyl)-2-methylamino-cyclohexanone",
-          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone",
-          "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
-          "CI 581",
-          "CI-581",
-          "CI581",
-          "Calipsol",
-          "Calypsol",
-          "DL-ketamine",
-          "Kalipsol",
-          "Ketalar",
-          "Ketamine Hydrochloride",
-          "Ketanest",
-          "Ketaset"
-        ],
-        "type": "Concept"
-      },
-      "display": {
-        "id": "a229u886",
-        "identifiers": [
-          {
-            "value": "D007649",
-            "type": "Identifier",
-            "identifierType": {
-              "id": "nlm-mesh",
-              "label": "Medical Subject Headings (MeSH) identifier",
-              "type": "IdentifierType"
-            }
-          }
-        ],
-        "label": "Ketamine",
-        "displayLabel": "Ketamine",
-        "alternativeLabels": [
-          "(+-)-ketamine",
-          "(±)-ketamine",
-          "2-(2-Chlorophenyl)-2-(methylamino)cyclohexanone",
-          "2-(2-chloro-phenyl)-2-methylamino-cyclohexanone",
-          "2-(methylamino)-2-(2-chlorophenyl)cyclohexanone",
-          "2-(o-chlorophenyl)-2-(methylamino)-cyclohexanone",
-          "CI 581",
-          "CI-581",
-          "CI581",
-          "Calipsol",
-          "Calypsol",
-          "DL-ketamine",
-          "Kalipsol",
-          "Ketalar",
-          "Ketamine Hydrochloride",
-          "Ketanest",
-          "Ketaset"
-        ],
-        "description": {
-          "text": "Group of stereoisomers",
-          "sourceLabel": "wikidata",
-          "sourceUrl": "https://www.wikidata.org/wiki/Q243547"
-        },
-        "type": "Concept",
-        "relatedConcepts": {
-          "relatedTo": [],
-          "fieldsOfWork": [],
-          "narrowerThan": [
-            {
-              "label": "Amines",
-              "id": "m6ek9fgg",
-              "relationshipType": "",
-              "conceptType": "Concept"
-            }
-          ],
-          "broaderThan": [],
-          "people": [],
-          "relatedTopics": [
-            {
-              "conceptType": "Concept",
-              "id": "nkngjz5k",
-              "label": "Illicit Drugs",
-              "relationshipType": ""
-            }
-          ],
-          "frequentCollaborators": []
-        },
-        "sameAs": [
-          "a229u886",
-          "fgvb8zzh",
-          "mtsv24xk",
-          "t77hfer4",
-          "ufz7k5zq"
-        ]
-      }
-    }
-  },
-  {
-    "_index": "concepts-indexed-2025-01-01",
     "_id": "a22auf32",
     "_source": {
       "query": {
@@ -426,7 +319,7 @@
           "South Cambridgeshire (Cambridgeshire)",
           "South Cambridgeshire, Eng."
         ],
-        "type": "Place"
+        "type": "Subject"
       },
       "display": {
         "id": "a22auf32",
@@ -448,7 +341,7 @@
           "South Cambridgeshire, Eng."
         ],
         "description": null,
-        "type": "Place",
+        "type": "Subject",
         "relatedConcepts": {
           "relatedTo": [],
           "fieldsOfWork": [],
@@ -457,28 +350,28 @@
           "people": [],
           "relatedTopics": [
             {
-              "label": "Water Supply",
-              "id": "gtf5s7h7",
+              "label": "Disease Outbreaks",
+              "id": "d6jhgxuc",
               "relationshipType": "",
-              "conceptType": "Concept"
-            },
-            {
-              "label": "Sanitation",
-              "id": "eva7r2dw",
-              "relationshipType": "",
-              "conceptType": "Concept"
+              "conceptType": "Subject"
             },
             {
               "label": "Public Health",
               "id": "uj4hz4ct",
               "relationshipType": "",
-              "conceptType": "Concept"
+              "conceptType": "Subject"
             },
             {
-              "label": "Disease Outbreaks",
-              "id": "d6jhgxuc",
+              "label": "Sanitation",
+              "id": "eva7r2dw",
               "relationshipType": "",
-              "conceptType": "Concept"
+              "conceptType": "Subject"
+            },
+            {
+              "label": "Water Supply",
+              "id": "gtf5s7h7",
+              "relationshipType": "",
+              "conceptType": "Subject"
             }
           ],
           "frequentCollaborators": []
@@ -537,5 +430,38 @@
         ]
       }
     }
+  },
+  {
+    "_id": "a22d7muq",
+    "_index": "concepts-indexed-2025-01-01",
+    "_source": {
+      "display": {
+        "alternativeLabels": [],
+        "description": null,
+        "displayLabel": "Brown, Bruce, 1942-",
+        "id": "a22d7muq",
+        "identifiers": [],
+        "label": "Brown, Bruce, 1942-",
+        "relatedConcepts": {
+          "broaderThan": [],
+          "fieldsOfWork": [],
+          "frequentCollaborators": [],
+          "narrowerThan": [],
+          "people": [],
+          "relatedTo": [],
+          "relatedTopics": []
+        },
+        "sameAs": [],
+        "type": "Person"
+      },
+      "query": {
+        "alternativeLabels": [],
+        "id": "a22d7muq",
+        "identifiers": [],
+        "label": "Brown, Bruce, 1942-",
+        "type": "Person"
+      }
+    }
   }
+
 ]
