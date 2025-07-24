@@ -55,10 +55,10 @@ jobs:
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [build-extractor-image, build-lambda-zip]
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
       deploy_tag: ${{ github.sha }}
     secrets:
       CATALOGUE_GRAPH_CI_ROLE_ARN: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-    
