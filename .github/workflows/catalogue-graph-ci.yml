@@ -12,7 +12,7 @@ on:
       - "catalogue_graph/**"
       - ".github/workflows/catalogue-graph-ci.yml"
   workflow_dispatch:
-    
+
 permissions:
   contents: read
   id-token: write
@@ -68,34 +68,3 @@ jobs:
       - name: Push lambda ZIP artefact
         run: |
           ./catalogue_graph/scripts/build.sh --skip-container-build --push
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: push-lambda-zip
-    if: ${{ needs.push-lambda-zip.result == 'success' }}
-    strategy:
-      matrix:
-        lambda_name:
-          [
-            catalogue-graph-bulk-loader,
-            catalogue-graph-bulk-load-poller,
-            catalogue-graph-indexer,
-            catalogue-graph-remover,
-            catalogue-graph-ingestor-trigger,
-            catalogue-graph-ingestor-trigger-monitor,
-            catalogue-graph-ingestor-loader,
-            catalogue-graph-ingestor-loader-monitor,
-            catalogue-graph-ingestor-indexer,
-            catalogue-graph-ingestor-indexer-monitor,
-            catalogue-graph-ingestor-deletions,
-            catalogue-graph-ingestor-reporter,
-          ]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-region: eu-west-1
-          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-      - name: Deploy ${{ matrix.lambda_name }} lambda
-        run: |
-          ./catalogue_graph/scripts/deploy_lambda_zip.sh ${{ matrix.lambda_name }}
