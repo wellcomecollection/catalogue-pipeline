@@ -6,7 +6,6 @@ from models.graph_edge import (
 )
 from models.graph_node import PathIdentifier
 from sources.elasticsearch_source import ElasticsearchSource
-
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -21,7 +20,7 @@ ES_QUERY = {
     "bool": {
         "must": [
             {"match": {"type": "Visible"}},
-            {"exists": { "field": "data.collectionPath.path"}}
+            {"exists": {"field": "data.collectionPath.path"}},
         ]
     }
 }
@@ -39,15 +38,17 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
                 id=raw_identifier.path_identifier,
                 label="",
             )
-        
+
         return None
 
-    def extract_edges(self, raw_data: dict) -> Generator[WorkHasPathIdentifier | PathIdentifierHasParent]:
+    def extract_edges(
+        self, raw_data: dict
+    ) -> Generator[WorkHasPathIdentifier | PathIdentifierHasParent]:
         raw_identifier = RawCatalogueWork(raw_data)
 
         if raw_identifier.path_identifier is None:
             return
-        
+
         yield WorkHasPathIdentifier(
             from_id=raw_identifier.wellcome_id,
             to_id=raw_identifier.path_identifier,
@@ -55,5 +56,6 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
 
         if raw_identifier.parent_path_identifier is not None:
             yield PathIdentifierHasParent(
-                from_id=raw_identifier.path_identifier, to_id=raw_identifier.parent_path_identifier
+                from_id=raw_identifier.path_identifier,
+                to_id=raw_identifier.parent_path_identifier,
             )

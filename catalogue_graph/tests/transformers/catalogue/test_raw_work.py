@@ -1,13 +1,11 @@
 from transformers.catalogue.raw_work import RawCatalogueWork
 
 
-def _get_test_work(
-    identifier: str, collection_path: str | None
-) -> dict:
+def _get_test_work(identifier: str, collection_path: str | None) -> dict:
     return {
         "data": {"collectionPath": {"path": collection_path}},
-        "state": {"sourceIdentifier": {"value": identifier}}
-    } 
+        "state": {"sourceIdentifier": {"value": identifier}},
+    }
 
 
 def test_extracts_parent_when_identifier_equal_to_full_collection_path() -> None:
