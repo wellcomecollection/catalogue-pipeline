@@ -3,10 +3,10 @@ name: "Catalogue graph: Deploy"
 on:
   workflow_run:
     workflows: ["Catalogue graph: Run CI pipeline"]
-    types:
-      - completed
-    branches:
-      - main
+    # types:
+    #   - completed
+    # branches:
+    #   - main
   workflow_dispatch:
     inputs:
       image_tag:
