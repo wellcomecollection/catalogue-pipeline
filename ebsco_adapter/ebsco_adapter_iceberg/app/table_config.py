@@ -41,7 +41,11 @@ def get_table(
 
 
 def get_glue_table(
-    s3_tables_bucket: str, table_name: str, namespace: str, region: Optional[str] = None, account_id: Optional[str] = None
+    s3_tables_bucket: str,
+    table_name: str,
+    namespace: str,
+    region: Optional[str] = None,
+    account_id: Optional[str] = None,
 ) -> IcebergTable:
     """
     Get a table from the Glue catalog.
@@ -79,7 +83,9 @@ def get_glue_table(
     )
 
 
-def get_local_table(table_name: str = "mytable", namespace: str = "default", db_name: str = "catalog") -> IcebergTable:
+def get_local_table(
+    table_name: str = "mytable", namespace: str = "default", db_name: str = "catalog"
+) -> IcebergTable:
     """
     Get a table from the local catalog using the .local directory.
 

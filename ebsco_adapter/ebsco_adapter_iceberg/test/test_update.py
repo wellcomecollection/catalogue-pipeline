@@ -1,6 +1,7 @@
 """
 Tests covering the update behaviour of the iceberg ebsco adapter
 """
+
 from typing import List, Dict, Any
 import pyarrow as pa
 from pyiceberg.table import Table as IcebergTable
