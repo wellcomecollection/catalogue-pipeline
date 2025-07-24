@@ -6,6 +6,7 @@ from models.graph_edge import (
 )
 from models.graph_node import PathIdentifier
 from sources.elasticsearch_source import ElasticsearchSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -16,6 +17,8 @@ ES_FIELDS = [
     "data.collectionPath",
     "data.otherIdentifiers",
 ]
+
+# We are only interested in visible works with a non-null collection path
 ES_QUERY = {
     "bool": {
         "must": [
