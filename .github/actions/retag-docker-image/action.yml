@@ -1,7 +1,4 @@
 name: "Retag Docker Image"
-
-permissions:
-  id-token: write
 description: "Retags an existing Docker image in ECR with a new tag"
 inputs:
   registry:
@@ -23,19 +20,22 @@ runs:
   using: "composite"
   steps:
     - name: Configure AWS credentials
-      id: aws_credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-region: eu-west-1
         role-to-assume: ${{ inputs.role_to_assume }}
+    
     - name: Login to Amazon ECR
-      id: login-ecr
       uses: aws-actions/amazon-ecr-login@v2
+    
     - name: Retag image
       shell: bash
       run: |
+        echo "Pulling: $SOURCE_FULLNAME"
         docker pull "$SOURCE_FULLNAME"
+        echo "Tagging: $SOURCE_FULLNAME -> $TARGET_FULLNAME"
         docker tag "$SOURCE_FULLNAME" "$TARGET_FULLNAME"
+        echo "Pushing: $TARGET_FULLNAME"
         docker push "$TARGET_FULLNAME"
       env:
         SOURCE_FULLNAME: "${{ inputs.registry }}/${{ inputs.image_name }}:${{ inputs.source_tag }}"

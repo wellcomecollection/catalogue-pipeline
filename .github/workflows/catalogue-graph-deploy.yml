@@ -23,6 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
       - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
@@ -30,7 +34,7 @@ jobs:
           source_tag: ${{ inputs.deploy_tag }}
           target_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-          
+
   deploy:
     runs-on: ubuntu-latest
     needs: [retag-extractor-image]
