@@ -1,15 +1,15 @@
 name: "Catalogue graph: Deploy"
 
 on:
-  workflow_run:
-    workflows: ["Catalogue graph: Run CI pipeline"]
-    # types:
-    #   - completed
-    # branches:
-    #   - main
+  workflow_call:
+    inputs:
+      deploy_tag:
+        description: "Docker image tag to deploy (e.g., commit SHA)"
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
-      image_tag:
+      deploy_tag:
         description: "Docker image tag to deploy (e.g., commit SHA)"
         required: true
         type: string
@@ -19,45 +19,21 @@ permissions:
   id-token: write
 
 jobs:
-  check-ci-success:
-    runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_run' }}
-    outputs:
-      should_deploy: ${{ steps.check.outputs.should_deploy }}
-      image_tag: ${{ steps.check.outputs.image_tag }}
-    steps:
-      - name: Check CI workflow success
-        id: check
-        run: |
-          if [ "${{ github.event.workflow_run.conclusion }}" == "success" ]; then
-            echo "should_deploy=true" >> $GITHUB_OUTPUT
-            echo "image_tag=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
-          else
-            echo "should_deploy=false" >> $GITHUB_OUTPUT
-          fi
-
   retag-extractor-image:
     runs-on: ubuntu-latest
-    needs: check-ci-success
-    if: |
-      always() && (
-        (github.event_name == 'workflow_run' && needs.check-ci-success.outputs.should_deploy == 'true') ||
-        github.event_name == 'workflow_dispatch'
-      )
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/retag-docker-image
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           image_name: catalogue_graph_extractor
-          source_tag: ${{ github.event_name == 'workflow_dispatch' && inputs.image_tag || needs.check-ci-success.outputs.image_tag }}
+          source_tag: ${{ inputs.deploy_tag }}
           target_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: [retag-extractor-image]
-    if: ${{ needs.retag-extractor-image.result == 'success' }}
     strategy:
       matrix:
         lambda_name:
