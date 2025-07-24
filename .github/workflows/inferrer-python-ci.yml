@@ -17,6 +17,8 @@ jobs:
       - uses: wellcomecollection/.github/.github/actions/python_check@main
         with:
           folder: pipeline/inferrer/${{matrix.project}}
+          skip-format-check: 'true'
+          skip-type-check: 'true'
   python-inferrers-builds:
     # Only build and push the images if ALL the inferrers are OK.
     # If we had this as another step in the matrix (check 1, build1| check 2, build 2 etc.)

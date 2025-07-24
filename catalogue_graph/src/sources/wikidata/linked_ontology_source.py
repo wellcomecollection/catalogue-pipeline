@@ -1,6 +1,5 @@
-from collections.abc import Generator, Iterator
+from collections.abc import Callable, Generator, Iterator
 from functools import lru_cache
-from typing import Callable
 
 from sources.base_source import BaseSource
 from transformers.base_transformer import EntityType

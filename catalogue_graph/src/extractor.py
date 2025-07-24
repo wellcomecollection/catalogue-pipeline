@@ -104,9 +104,10 @@ def local_handler() -> None:
         type=int,
         help="How many entities to stream. If not specified, streaming will continue until the source is exhausted.",
     )
+    parser.add_argument("--is-local", type=bool, required=False, default=False)
     args = parser.parse_args()
 
-    handler(**args.__dict__, is_local=True)
+    handler(**args.__dict__)
 
 
 if __name__ == "__main__":

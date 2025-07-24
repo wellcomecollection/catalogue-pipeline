@@ -116,7 +116,7 @@ Subdirectories contain various modules and are shared by all Lambda functions.
 
 ## Setting up the project
 
-Run `./scripts/setup.sh` to install the project dependencies.
+Run `uv sync` to install the project dependencies.
 
 ## Deployment
 

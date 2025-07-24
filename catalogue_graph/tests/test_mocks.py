@@ -5,7 +5,7 @@ import os
 import tempfile
 from collections import defaultdict
 from collections.abc import Generator
-from typing import Any, Optional, TypedDict
+from typing import Any, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
@@ -206,7 +206,7 @@ class MockRequestExpectation(TypedDict):
     url: str
     params: dict | None
     response: MockResponse
-    data: Optional[dict | str]
+    data: dict | str | None
 
 
 class MockResponseInput(TypedDict):
@@ -369,7 +369,7 @@ class MockElasticsearchClient:
 def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     class FixedDateTime(datetime.datetime):
         @classmethod
-        def now(cls, tz: Optional[datetime.tzinfo] = None) -> "FixedDateTime":
+        def now(cls, tz: datetime.tzinfo | None = None) -> "FixedDateTime":
             return cls(year, month, day)
 
     return FixedDateTime
