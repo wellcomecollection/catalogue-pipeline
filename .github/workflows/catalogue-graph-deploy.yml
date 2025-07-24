@@ -7,6 +7,10 @@ on:
         description: "Docker image tag to deploy (e.g., commit SHA)"
         required: true
         type: string
+    secrets:
+      CATALOGUE_GRAPH_CI_ROLE_ARN:
+        description: "Role ARN to assume for deploying catalogue graph resources"
+        required: true
   workflow_dispatch:
     inputs:
       deploy_tag:
