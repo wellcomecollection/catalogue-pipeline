@@ -1,13 +1,16 @@
 """
 Common helper functions for tests.
 """
+
 from typing import Dict, Any, List, Optional, Collection
 import pyarrow as pa
 
 from main import data_to_pa_table, EBSCO_NAMESPACE
 
 
-def add_namespace(data_dict: Dict[str, Any], namespace: Optional[str] = None) -> Dict[str, Any]:
+def add_namespace(
+    data_dict: Dict[str, Any], namespace: Optional[str] = None
+) -> Dict[str, Any]:
     """
     Add a namespace field to a data dictionary.
 
@@ -24,7 +27,9 @@ def add_namespace(data_dict: Dict[str, Any], namespace: Optional[str] = None) ->
     return data_dict
 
 
-def data_to_namespaced_table(unqualified_data: List[Dict[str, Any]], namespace: Optional[str] = None) -> pa.Table:
+def data_to_namespaced_table(
+    unqualified_data: List[Dict[str, Any]], namespace: Optional[str] = None
+) -> pa.Table:
     """
     Convert a list of data dictionaries to a PyArrow table with namespace added.
 

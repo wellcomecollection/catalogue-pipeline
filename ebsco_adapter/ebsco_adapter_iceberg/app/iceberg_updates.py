@@ -1,5 +1,5 @@
 from schemata import ARROW_SCHEMA
-from typing import List, Optional
+from typing import Optional
 
 from pyiceberg.table import Table as IcebergTable
 
@@ -12,7 +12,9 @@ import pyarrow.compute as pc
 from pyiceberg.table.upsert_util import get_rows_to_update
 
 
-def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str) -> Optional[str]:
+def update_table(
+    table: IcebergTable, new_data: pa.Table, record_namespace: str
+) -> Optional[str]:
     """
     Perform an update on `table`, using the data provided in new_data.
 
@@ -120,7 +122,9 @@ def _find_updates(existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
     return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
 
 
-def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace: str) -> pa.Table:
+def _find_inserts(
+    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+) -> pa.Table:
     old_ids = existing_data.column("id")
     missing_records = new_data.filter(
         (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(old_ids)

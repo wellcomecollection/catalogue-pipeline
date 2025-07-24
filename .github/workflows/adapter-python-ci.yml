@@ -20,6 +20,3 @@ jobs:
       - uses: wellcomecollection/.github/.github/actions/python_check@main
         with:
           folder: ebsco_adapter/${{matrix.project}}
-          skip-lint: "true"
-          skip-format-check: "true"
-          skip-type-check: "true"

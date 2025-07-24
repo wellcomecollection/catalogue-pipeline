@@ -1,6 +1,6 @@
 import os
 from pyiceberg.table import Table as IcebergTable
-from typing import Any, Dict, List, IO, Optional
+from typing import Dict, List, IO, Optional
 
 import pyarrow as pa
 import sys

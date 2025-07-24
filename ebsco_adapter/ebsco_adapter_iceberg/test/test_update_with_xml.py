@@ -18,7 +18,9 @@ def test_store_record(temporary_table: IcebergTable, xml_with_one_record: Any) -
     assert pa_table.column("content")[0].as_py() == expected_content
 
 
-def test_delete_record(temporary_table: IcebergTable, xml_with_one_record: Any, xml_with_two_records: Any) -> None:
+def test_delete_record(
+    temporary_table: IcebergTable, xml_with_one_record: Any, xml_with_two_records: Any
+) -> None:
     """
     Given a table containing a record ebs00002,
     When a new XML file with no record ebs00002 is imported
@@ -36,7 +38,9 @@ def test_delete_record(temporary_table: IcebergTable, xml_with_one_record: Any, 
     assert pa_table.column("content")[0].as_py() is None
 
 
-def test_change_record(temporary_table: IcebergTable, xml_with_one_record: Any, xml_with_three_records: Any) -> None:
+def test_change_record(
+    temporary_table: IcebergTable, xml_with_one_record: Any, xml_with_three_records: Any
+) -> None:
     """
     Given a table containing a record ebs00001,
     When a new XML file with a different ebs00001 record is imported
