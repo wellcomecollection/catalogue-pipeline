@@ -18,7 +18,6 @@ class RawCatalogueWork:
         self.raw_work = raw_work
         self.work_data: dict = self.raw_work.get("data", {})
         self.work_state: dict = self.raw_work["state"]
-        self.path: str | None = self.work_data.get("collectionPath", {}).get("path")
 
     @property
     def wellcome_id(self) -> str:
@@ -69,10 +68,20 @@ class RawCatalogueWork:
 
         all_identifiers = [source_identifier] + other_identifiers
         return [i["value"] for i in all_identifiers]
+    
+    @property
+    def path(self) -> str | None:
+        path: str | None = self.work_data.get("collectionPath", {}).get("path")
+        
+        if path is None or len(path) == 0:
+            return None
+        
+        # A small number of works have a trailing slash in their collection path
+        return path.rstrip("/")
 
     @property
     def path_identifier(self) -> str | None:
-        if self.path is None or len(self.path) == 0:
+        if self.path is None:
             return None
 
         for identifier in self.identifiers:
