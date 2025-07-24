@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: wellcomecollection/.github/.github/actions/python_check@rk/updated-python-checks
+      - uses: wellcomecollection/.github/.github/actions/python_check@main
         with:
           folder: catalogue_graph
 
