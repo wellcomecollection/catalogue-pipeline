@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
-    paths: "catalogue_graph/**"
+    paths:
+      - "catalogue_graph/**"
+      - ".github/workflows/catalogue-graph-ci.yml"
   pull_request:
-    paths: "catalogue_graph/**"
+    paths:
+      - "catalogue_graph/**"
+      - ".github/workflows/catalogue-graph-ci.yml"
 
 permissions:
   contents: read
