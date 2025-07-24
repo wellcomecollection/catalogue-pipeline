@@ -84,7 +84,7 @@ class RawCatalogueWork:
             return None
 
         # A small number of works have a trailing slash in their collection path which must be removed
-        # to correctly extract parent identifiers
+        # to correctly extract parent path identifiers
         return self.raw_path.rstrip("/")
 
     @property
@@ -92,10 +92,20 @@ class RawCatalogueWork:
         if self.path is None:
             return None
 
+        # All works which are part of a hierarchy have a corresponding 'path identifier' node representing
+        # its position in the hierarchy. In most (but not all) cases, the path identifier equals the work's
+        # source identifier or one of its other identifiers.
+
+        # Path identifiers are extracted from the work's collection path. In most cases, the collection path exactly
+        # matches the work's Calm ref identifier. In such cases, the path identifier should also match the collection
+        # path.
         for identifier in self.identifiers:
             if identifier == self.raw_path:
                 return self.path
 
+        # In all other cases, the collection path consists of slash-separated 'fragments', each of which represents
+        # a path identifier. The last fragment represents the path identifier of the current work, with other
+        # fragments representing its ancestors (e.g. grandparentId/parentId/childId).
         path_fragments = self.path.split("/")
         return path_fragments[-1]
 

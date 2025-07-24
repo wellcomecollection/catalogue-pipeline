@@ -16,6 +16,8 @@ ES_FIELDS = [
     "data.collectionPath",
     "data.otherIdentifiers",
 ]
+
+# We are only interested in visible works with a non-null collection path
 ES_QUERY = {
     "bool": {
         "must": [
