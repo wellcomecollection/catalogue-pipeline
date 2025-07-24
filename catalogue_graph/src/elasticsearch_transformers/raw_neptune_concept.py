@@ -27,8 +27,10 @@ DISPLAY_SOURCE_PRIORITY = [
     "label-derived",
 ]
 
+
 class MissingLabelError(ValueError):
     pass
+
 
 def standardise_label(label: str | None) -> str | None:
     if label is None or len(label) < 1:

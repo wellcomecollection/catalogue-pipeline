@@ -1,5 +1,3 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 from models.graph_node import ConceptType
@@ -48,7 +46,7 @@ class ConceptDisplay(BaseModel):
     label: str
     displayLabel: str
     alternativeLabels: list[str]
-    description: Optional[ConceptDescription]
+    description: ConceptDescription | None
     type: ConceptType
     relatedConcepts: RelatedConcepts
     sameAs: list[str]

@@ -11,6 +11,7 @@ from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from elasticsearch_transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
+from elasticsearch_transformers.raw_neptune_concept import MissingLabelError
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.indexable_concept import (
     IndexableConcept,
@@ -87,7 +88,14 @@ def extract_data(
 
     transformer = ElasticsearchConceptsTransformer()
     for concept in concepts:
-        yield transformer.transform_document(concept, related_concepts)    
+        try:
+            yield transformer.transform_document(concept, related_concepts)
+        except MissingLabelError:
+            # There is currently one concept which does not have a label ('k6p2u5fh')
+            concept_id = concept["concept"]["~properties"]["id"]
+            print(
+                f"Concept {concept_id} does not have a label and will not be indexed."
+            )     
 
 
 def load_data(s3_uri: str, data: list[IndexableConcept]) -> IngestorIndexerObject:

@@ -3,12 +3,13 @@ FROM python:${PYTHON_IMAGE_VERSION} AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
-ADD .python-version /app/.python_version
+ADD .python-version /app/.python-version
+ADD pyproject.toml /app/pyproject.toml
+ADD uv.lock /app/uv.lock
 ADD src /app/src
-ADD scripts /app/scripts
 
 WORKDIR /app
 
-RUN scripts/ci-setup.sh
+RUN pip install uv && uv sync --no-dev
 
 ENTRYPOINT [ "/app/src/extractor.py" ]

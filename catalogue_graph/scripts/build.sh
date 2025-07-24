@@ -5,10 +5,16 @@ set -o nounset
 
 # set ROOT to the root of the project
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-ROOT+="$(dirname "$DIR")"
+ROOT="$(dirname "$DIR")"
 
 # get python version from .python-version
-PY_VERSION=$(cat catalogue_graph/.python-version)
+PY_VERSION=$(cat "$ROOT"/.python-version)
+
+# Install UV if not available
+if ! command -v uv &> /dev/null; then
+    echo "Installing UV..."
+    pip install uv
+fi
 
 # set default values
 ECR_REGISTRY="760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome"
@@ -57,9 +63,12 @@ function build_zip() {( set -e
     mkdir -p target/tmp
 
     cp -r src/* target/tmp
-    pip install \
-        -r src/requirements.txt \
-        --platform manylinux2014_x86_64 \
+    
+    # Export requirements to a file, then install from it
+    uv export --no-dev --format=requirements-txt > target/requirements.txt
+    uv pip install \
+        -r target/requirements.txt \
+        --python-platform x86_64-manylinux2014 \
         --target target/tmp \
         --only-binary=:all: \
         --python-version $PY_VERSION
