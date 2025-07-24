@@ -31,13 +31,14 @@ jobs:
     needs: [python-checks]
     steps:
       - uses: actions/checkout@v3
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: ./.github/actions/build-lambda-zip
         with:
-          aws-region: eu-west-1
-          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-      - name: Build lambda ZIP artefact
-        run: |
-          ./catalogue_graph/scripts/build.sh --skip-container-build --push
+          folder: catalogue_graph
+          upload_to_s3: true
+          s3_bucket: wellcomecollection-platform-infra
+          s3_prefix: lambdas/catalogue_graph
+          s3_tag: ${{ github.sha }}
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
 
   build-extractor-image:
     runs-on: ubuntu-latest

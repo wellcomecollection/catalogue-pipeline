@@ -1,0 +1,54 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+# Parse command line arguments
+FOLDER="$1"
+PYTHON_VERSION_FILE="$2"
+TARGET_DIR="$3"
+ZIP_NAME="$4"
+
+# Change to the project folder
+cd "$FOLDER"
+
+# Get Python version from .python-version file
+PY_VERSION=$(cat "$PYTHON_VERSION_FILE")
+echo "Using Python version: $PY_VERSION"
+
+# Set up paths
+ZIP_TARGET="$TARGET_DIR/$ZIP_NAME"
+TMP_DIR="$TARGET_DIR/tmp"
+
+# Ensure the target directory is clean
+rm -rf "$TMP_DIR"
+rm -f "$ZIP_TARGET"
+mkdir -p "$TMP_DIR"
+
+# Copy source files
+cp -r src/* "$TMP_DIR"
+
+# Export requirements and install dependencies
+uv export --no-dev --format=requirements-txt > "$TARGET_DIR/requirements.txt"
+uv pip install \
+    -r "$TARGET_DIR/requirements.txt" \
+    --python-platform x86_64-manylinux2014 \
+    --target "$TMP_DIR" \
+    --only-binary=:all: \
+    --python-version "$PY_VERSION"
+
+# Create ZIP file
+pushd "$TMP_DIR"
+zip -r "../$ZIP_NAME" .
+popd
+
+# Clean up temporary directory
+rm -rf "$TMP_DIR"
+
+# Output the ZIP path for GitHub Actions
+echo "zip_path=$ZIP_TARGET" >> "$GITHUB_OUTPUT"
+echo "Created ZIP: $ZIP_TARGET"
+
+# Show ZIP contents for verification
+echo "ZIP contents:"
+unzip -l "$ZIP_TARGET" | head -20
