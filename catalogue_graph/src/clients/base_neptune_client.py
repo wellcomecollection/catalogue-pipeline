@@ -89,7 +89,7 @@ class BaseNeptuneClient:
         return results
 
     def time_open_cypher_query(
-            self, query: str, parameters: dict[str, typing.Any], query_label: str
+        self, query: str, parameters: dict[str, typing.Any], query_label: str
     ) -> list[dict]:
         """Runs an openCypher query, measures its execution time, and prints a summary."""
         t = time.time()

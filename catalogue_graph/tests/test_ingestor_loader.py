@@ -3,6 +3,9 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
+from test_mocks import MockRequest, MockSmartOpen
+from test_utils import load_json_fixture
+
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
     IngestorIndexerObject,
@@ -25,8 +28,6 @@ from queries.concept_queries import (
     _get_referenced_together_query,
     _get_related_query,
 )
-from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -267,7 +268,7 @@ def get_catalogue_concept_mock(
                 frequentCollaborators=[],
                 relatedTopics=[],
             ),
-        )
+        ),
     )
 
 

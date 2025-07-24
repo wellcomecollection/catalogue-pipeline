@@ -5,11 +5,12 @@ import typing
 from collections.abc import Generator
 
 import elasticsearch.helpers
+from pydantic import BaseModel
+
 import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
 from ingestor_indexer_monitor import IngestorIndexerMonitorLambdaEvent
 from models.indexable_concept import IndexableConcept
-from pydantic import BaseModel
 from utils.aws import df_from_s3_parquet
 
 
@@ -28,6 +29,7 @@ class IngestorIndexerLambdaEvent(BaseModel):
 
 class IngestorIndexerConfig(BaseModel):
     is_local: bool = False
+
 
 def load_data(
     concepts: list[IndexableConcept],

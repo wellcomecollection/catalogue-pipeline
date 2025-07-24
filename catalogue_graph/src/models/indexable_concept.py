@@ -38,7 +38,7 @@ class ConceptQuery(BaseModel):
     label: str
     alternativeLabels: list[str]
     type: ConceptType
-    
+
 
 class ConceptDisplay(BaseModel):
     id: str

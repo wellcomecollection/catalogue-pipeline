@@ -1,12 +1,10 @@
-
+from elasticsearch_transformers.display_identifier import get_display_identifier
 from models.graph_node import ConceptType
 from models.indexable import DisplayIdentifier
 from models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
-
-from elasticsearch_transformers.display_identifier import get_display_identifier
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY = [
@@ -56,9 +54,9 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
 
 
 def get_priority_label(
-        concept_node: dict,
-        source_concept_nodes: list[dict],
-        source_priority: list[str],
+    concept_node: dict,
+    source_concept_nodes: list[dict],
+    source_priority: list[str],
 ) -> tuple[str, str]:
     """
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.
@@ -85,7 +83,7 @@ def get_most_specific_concept_type(concept_types: list[str]) -> ConceptType:
     # remove such concepts from the graph, but there might be a few of them at any given point.
     if len(concept_types) == 0:
         return "Concept"
-    
+
     # Prioritise concepts, with more specific ones (e.g. 'Person') above less specific ones (e.g. 'Agent').
     # Sometimes a concept is classified under types which are mutually exclusive. For example, there are
     # several hundred concepts categorised as both a 'Person' and an 'Organisation'. These inconsistencies arise
@@ -128,22 +126,24 @@ class RawNeptuneConcept:
         concept_node = self.raw_concept["concept"]
         source_concept_nodes = self.raw_concept["source_concepts"]
 
-        label, _ = get_priority_label(concept_node, source_concept_nodes, QUERY_SOURCE_PRIORITY)
+        label, _ = get_priority_label(
+            concept_node, source_concept_nodes, QUERY_SOURCE_PRIORITY
+        )
 
         assert isinstance(label, str)
         return label
-    
+
     @property
     def display_label(self) -> str:
         concept = self.raw_concept["concept"]
         source_concepts = self.raw_concept["source_concepts"]
-        
+
         display_label, _ = get_priority_label(
             concept, source_concepts, DISPLAY_SOURCE_PRIORITY
         )
-        
+
         return display_label
-    
+
     @property
     def same_as(self) -> list[str]:
         same_as = self.raw_concept["same_as_concept_ids"]
@@ -197,14 +197,16 @@ class RawNeptuneConcept:
         for source_concept in self.raw_concept["source_concepts"]:
             properties = source_concept["~properties"]
             description_text = standardise_label(properties.get("description"))
-    
+
             description_source = properties["source"]
             source_concept_id = properties["id"]
-    
+
             # Only extract descriptions from Wikidata (MeSH also stores descriptions, but we should not surface them).
             if description_text is not None and description_source == "wikidata":
                 return ConceptDescription(
                     text=description_text,
                     sourceLabel=description_source,
-                    sourceUrl=get_source_concept_url(source_concept_id, description_source),
+                    sourceUrl=get_source_concept_url(
+                        source_concept_id, description_source
+                    ),
                 )

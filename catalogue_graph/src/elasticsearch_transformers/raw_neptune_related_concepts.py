@@ -9,7 +9,7 @@ from .raw_neptune_concept import (
 
 
 def transform_related_concepts(
-        related_items: list[dict],
+    related_items: list[dict],
 ) -> list[ConceptRelatedTo]:
     """
     Process each related concept, extracting its highest-priority label and the relationship type.

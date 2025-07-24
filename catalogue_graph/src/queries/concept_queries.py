@@ -22,9 +22,9 @@ CONCEPT_QUERY = """
 
 
 def _get_related_query(
-        edge_type: str,
-        direction: str = "from",
-        source_concept_label_types: list[str] | None = None,
+    edge_type: str,
+    direction: str = "from",
+    source_concept_label_types: list[str] | None = None,
 ) -> str:
     """Return a parameterized Neptune query to fetch related Wellcome concepts."""
     label_filter = ""
@@ -105,7 +105,7 @@ def _get_related_query(
 
 
 def _get_referenced_together_filter(
-        property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
+    property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
 ) -> str:
     """Return a Cypher filter in the form `AND property_key IN ['some allowed value', 'another value']`."""
     if allowed_values is not None and len(allowed_values) > 0:
@@ -116,10 +116,10 @@ def _get_referenced_together_filter(
 
 
 def _get_referenced_together_query(
-        source_referenced_types: list[ConceptType] | None = None,
-        related_referenced_types: list[ConceptType] | None = None,
-        source_referenced_in: list[WorkConceptKey] | None = None,
-        related_referenced_in: list[WorkConceptKey] | None = None,
+    source_referenced_types: list[ConceptType] | None = None,
+    related_referenced_types: list[ConceptType] | None = None,
+    source_referenced_in: list[WorkConceptKey] | None = None,
+    related_referenced_in: list[WorkConceptKey] | None = None,
 ) -> str:
     """
     Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works.
@@ -275,7 +275,7 @@ def get_related_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConce
 
 
 def get_field_of_work_concepts(
-        client: BaseNeptuneClient, params: dict
+    client: BaseNeptuneClient, params: dict
 ) -> LinkedConcepts:
     query = _get_related_query("HAS_FIELD_OF_WORK")
     result = client.time_open_cypher_query(query, params, "field of work")
@@ -301,7 +301,7 @@ def get_people_concepts(client: BaseNeptuneClient, params: dict) -> LinkedConcep
 
 
 def get_collaborator_concepts(
-        client: BaseNeptuneClient, params: dict
+    client: BaseNeptuneClient, params: dict
 ) -> LinkedConcepts:
     # Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
     query = _get_referenced_together_query(

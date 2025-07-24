@@ -1,3 +1,5 @@
+from test_utils import load_json_fixture
+
 from elasticsearch_transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
@@ -14,7 +16,6 @@ from models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from test_utils import load_json_fixture
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": {},
@@ -41,9 +42,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
     expected_result = IndexableConcept(
         query=ConceptQuery(
             id="id",
-            identifiers=[
-                ConceptIdentifier(value="123", identifierType="lc-names")
-            ],
+            identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
             label="LoC label",
             alternativeLabels=alternative_labels,
             type="Person",
@@ -93,9 +92,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
     expected_result = IndexableConcept(
         query=ConceptQuery(
             id="id",
-            identifiers=[
-                ConceptIdentifier(value="123", identifierType="lc-names")
-            ],
+            identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
             label="LoC label",
             alternativeLabels=[],
             type="Person",
@@ -153,9 +150,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         query=ConceptQuery(
             id="a2584ttj",
             identifiers=[
-                ConceptIdentifier(
-                    value="sh85145789", identifierType="lc-subjects"
-                )
+                ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
             ],
             label="Waves",
             alternativeLabels=["Mechanical waves", "Waves"],
@@ -221,8 +216,8 @@ def test_concept_type_agent_precedence() -> None:
     # Person/Agent/Organisation take precedence over general Concept/Subject types
     assert get_most_specific_concept_type(["Person", "Concept", "Subject"]) == "Person"
     assert (
-            get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
-            == "Organisation"
+        get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
+        == "Organisation"
     )
     assert get_most_specific_concept_type(["Concept", "Subject", "Agent"]) == "Agent"
 
@@ -235,39 +230,39 @@ def test_concept_type_genre_precedence() -> None:
     assert get_most_specific_concept_type(["Agent", "Genre", "Person"]) == "Genre"
     assert get_most_specific_concept_type(["Genre", "Place"]) == "Genre"
     assert (
-            get_most_specific_concept_type(
-                [
-                    "Genre",
-                    "Place",
-                    "Person",
-                    "Organisation",
-                    "Period",
-                    "Meeting",
-                    "Agent",
-                    "Subject",
-                    "Concept",
-                ]
-            )
-            == "Genre"
+        get_most_specific_concept_type(
+            [
+                "Genre",
+                "Place",
+                "Person",
+                "Organisation",
+                "Period",
+                "Meeting",
+                "Agent",
+                "Subject",
+                "Concept",
+            ]
+        )
+        == "Genre"
     )
 
 
 def test_concept_type_place_precedence() -> None:
     # Place has precedence over everything (except for Genre).
     assert (
-            get_most_specific_concept_type(
-                [
-                    "Place",
-                    "Person",
-                    "Organisation",
-                    "Period",
-                    "Meeting",
-                    "Agent",
-                    "Subject",
-                    "Concept",
-                ]
-            )
-            == "Place"
+        get_most_specific_concept_type(
+            [
+                "Place",
+                "Person",
+                "Organisation",
+                "Period",
+                "Meeting",
+                "Agent",
+                "Subject",
+                "Concept",
+            ]
+        )
+        == "Place"
     )
 
     assert get_most_specific_concept_type(["Concept", "Subject", "Place"]) == "Place"
@@ -277,6 +272,6 @@ def test_concept_type_place_precedence() -> None:
     assert get_most_specific_concept_type(["Place", "Person"]) == "Place"
     assert get_most_specific_concept_type(["Place", "Organisation"]) == "Place"
     assert (
-            get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
-            == "Place"
+        get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
+        == "Place"
     )

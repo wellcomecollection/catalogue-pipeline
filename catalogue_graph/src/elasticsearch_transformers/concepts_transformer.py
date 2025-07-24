@@ -11,7 +11,7 @@ from .raw_neptune_related_concepts import RawNeptuneRelatedConcepts
 
 class ElasticsearchConceptsTransformer:
     def transform_document(
-            self, concept: dict, related_concepts: dict
+        self, concept: dict, related_concepts: dict
     ) -> IndexableConcept:
         neptune_concept = RawNeptuneConcept(concept, related_concepts)
         neptune_related = RawNeptuneRelatedConcepts(

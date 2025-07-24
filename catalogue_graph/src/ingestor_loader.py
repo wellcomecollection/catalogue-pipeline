@@ -2,11 +2,14 @@
 
 import argparse
 import pprint
-from typing import Any, Generator
+from collections.abc import Generator
+from typing import Any
 
 import boto3
 import polars as pl
 import smart_open
+from pydantic import BaseModel
+
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from elasticsearch_transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
@@ -16,7 +19,6 @@ from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
 from models.indexable_concept import (
     IndexableConcept,
 )
-from pydantic import BaseModel
 from queries.concept_queries import (
     get_broader_concepts,
     get_collaborator_concepts,
@@ -67,7 +69,7 @@ def _get_params(start_offset: int, limit: int) -> dict:
 
 
 def extract_data(
-        start_offset: int, end_index: int, is_local: bool
+    start_offset: int, end_index: int, is_local: bool
 ) -> Generator[IndexableConcept]:
     limit = end_index - start_offset
     print(f"Processing records from {start_offset} to {end_index} ({limit} records)")
@@ -95,7 +97,7 @@ def extract_data(
             concept_id = concept["concept"]["~properties"]["id"]
             print(
                 f"Concept {concept_id} does not have a label and will not be indexed."
-            )     
+            )
 
 
 def load_data(s3_uri: str, data: list[IndexableConcept]) -> IngestorIndexerObject:
