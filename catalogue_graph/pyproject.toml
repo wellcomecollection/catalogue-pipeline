@@ -56,3 +56,20 @@ select = [
     "I"
 ]
 ignore = ["E501", "B019"]
+
+[tool.mypy]
+strict_optional = true
+strict_equality = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+mypy_path = "src"
+
+["tool.mypy-smart_open.*"]
+ignore_missing_imports = true

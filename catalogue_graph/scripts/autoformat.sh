@@ -13,10 +13,10 @@ CHECK=${1:-}
 
 if [ "$CHECK" == "--check" ]; then
     echo "Checking code formatting and linting (run ./scripts/autoformat.sh to fix any issues!)..."
-    uv run ruff format src/ tests/ --check
-    uv run ruff check src/ tests/
+    uv run ruff format . --check
+    uv run ruff check .
 else
     echo "Formatting and linting code ..."
-    uv run ruff format src/ tests/
-    uv run ruff check src/ tests/ --fix
+    uv run ruff format .
+    uv run ruff check . --fix
 fi
