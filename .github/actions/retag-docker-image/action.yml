@@ -1,6 +1,14 @@
 name: "Retag Docker Image"
 permissions:
   id-token: write
+  
+  on: 
+    workflow_call:
+      secrets:
+        CATALOGUE_GRAPH_CI_ROLE_ARN:
+          description: "Role ARN to assume for accessing ECR"
+          required: true
+          
 description: "Retags an existing Docker image in ECR with a new tag"
 inputs:
   registry:
