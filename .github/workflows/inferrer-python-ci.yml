@@ -10,6 +10,8 @@ on:
     paths:
       - "pipeline/inferrer/**"
       - ".github/workflows/inferrer-python-ci.yml"
+  workflow_dispatch:
+    
 permissions:
   contents: read
   id-token: write

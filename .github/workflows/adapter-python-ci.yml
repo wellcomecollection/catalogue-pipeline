@@ -1,9 +1,16 @@
 name: "Adapters: Run checks"
 on:
   push:
+    branches:
+      - main
     paths:
       - "ebsco_adapter/ebsco_adapter_iceberg/**"
       - ".github/workflows/adapter-python-ci.yml"
+  pull_request:
+    paths:
+      - "ebsco_adapter/ebsco_adapter_iceberg/**"
+      - ".github/workflows/adapter-python-ci.yml"
+  workflow_dispatch:
 
 permissions:
   contents: read
