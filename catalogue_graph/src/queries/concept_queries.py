@@ -1,5 +1,5 @@
 from clients.base_neptune_client import BaseNeptuneClient
-from models.graph_node import ConceptType
+from shared.types import ConceptType
 from utils.types import WorkConceptKey
 
 LinkedConcepts = dict[str, list[dict]]

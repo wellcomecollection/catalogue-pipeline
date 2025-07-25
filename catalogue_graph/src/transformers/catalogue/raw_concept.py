@@ -1,6 +1,6 @@
 import re
 
-from models.graph_node import ConceptSource, ConceptType
+from shared.types import ConceptSource, ConceptType
 from utils.types import WorkConceptKey
 
 from .id_label_checker import IdLabelChecker

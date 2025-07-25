@@ -11,18 +11,18 @@ import smart_open
 from pydantic import BaseModel
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from elasticsearch_transformers.concepts_transformer import (
-    ElasticsearchConceptsTransformer,
+from ingestor.models.concept import MissingLabelError, RawNeptuneConcept
+from ingestor.models.indexable_concept import (
+    IndexableConcept,
 )
+from ingestor.models.related_concepts import RawNeptuneRelatedConcepts
 from ingestor.steps.ingestor_indexer import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
 )
-from models.ingestor.concept import MissingLabelError, RawNeptuneConcept
-from models.ingestor.indexable_concept import (
-    IndexableConcept,
+from ingestor.transformers.concepts_transformer import (
+    ElasticsearchConceptsTransformer,
 )
-from models.ingestor.related_concepts import RawNeptuneRelatedConcepts
 from queries.concept_queries import (
     get_broader_concepts,
     get_collaborator_concepts,

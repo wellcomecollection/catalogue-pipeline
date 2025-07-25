@@ -10,6 +10,17 @@ The ingestor subsystem processes catalogue concepts from Neptune graph database 
 src/ingestor/
 ├── __init__.py                    # Main module documentation
 ├── run_local.py                   # Local testing and development script
+├── models/                        # Ingestor-specific data models
+│   ├── __init__.py
+│   ├── concept.py                 # Core concept models
+│   ├── indexable.py               # Base indexable interfaces
+│   ├── indexable_concept.py       # Elasticsearch-ready concept models
+│   ├── related_concepts.py        # Related concept relationship models
+│   └── display/                   # Display-specific models
+│       └── identifier.py
+├── transformers/                  # Elasticsearch transformation logic
+│   ├── __init__.py
+│   └── concepts_transformer.py    # Transforms Neptune concepts to ES format
 └── steps/                         # All pipeline processing and monitoring steps
     ├── __init__.py
     ├── ingestor_trigger.py        # Queries Neptune, generates shard ranges
@@ -26,16 +37,25 @@ src/ingestor/
 
 The ingestor is designed as a serverless pipeline with each step implemented as an AWS Lambda function. All steps are packaged together in a single deployment unit while maintaining clear separation of responsibilities.
 
+The ingestor module is self-contained with its own models and transformers:
+- **Models** (`models/`) - Pydantic data models specific to the ingestor pipeline
+- **Transformers** (`transformers/`) - Logic for transforming Neptune concepts to Elasticsearch format
+- **Steps** (`steps/`) - Individual pipeline stages implemented as Lambda functions
+
+Shared types (ConceptType, ConceptSource, WorkType) are imported from `shared.types` to maintain consistency across the codebase.
+
 ## Pipeline Flow
 
 1. **Trigger** (`steps/ingestor_trigger.py`) - Queries Neptune for concept counts and creates shard ranges
 2. **Trigger Monitor** (`steps/ingestor_trigger_monitor.py`) - Validates trigger output and safety checks
 3. **Loader** (`steps/ingestor_loader.py`) - Loads concept data from Neptune to S3 in parallel shards
 4. **Loader Monitor** (`steps/ingestor_loader_monitor.py`) - Validates loader output and tracks file sizes
-5. **Indexer** (`steps/ingestor_indexer.py`) - Indexes concept data from S3 to Elasticsearch
+5. **Indexer** (`steps/ingestor_indexer.py`) - Indexes concept data from S3 to Elasticsearch using models and transformers
 6. **Indexer Monitor** (`steps/ingestor_indexer_monitor.py`) - Tracks indexing success and builds reports
 7. **Deletions** (`steps/ingestor_deletions.py`) - Removes deleted concepts from Elasticsearch
 8. **Reporter** (`steps/ingestor_reporter.py`) - Generates final pipeline reports and sends to Slack
+
+The pipeline uses ingestor-specific models (`models/indexable_concept.py`) and transformers (`transformers/concepts_transformer.py`) to convert Neptune graph data into Elasticsearch-ready documents.
 
 ## Development
 
