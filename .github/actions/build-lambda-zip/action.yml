@@ -20,7 +20,6 @@ inputs:
     description: "Whether to upload the ZIP to S3"
     required: false
     default: "false"
-    type: boolean
   s3_bucket:
     description: "S3 bucket to upload to (required if upload_to_s3 is true)"
     required: false
