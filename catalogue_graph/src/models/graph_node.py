@@ -40,8 +40,6 @@ class SourceName(SourceConcept):
     place_of_birth: str | None = None
 
 
-
-
 # The `id` field stores a canonical Wellcome identifier
 class Concept(BaseNode):
     source: ConceptSource
