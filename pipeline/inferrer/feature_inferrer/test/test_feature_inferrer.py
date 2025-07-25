@@ -28,40 +28,48 @@ def test_feature_vector_endpoint():
     try:
         import main
         from fastapi.testclient import TestClient
-        
+
         # Create a mock image object
         class MockImage:
             def __init__(self):
                 self.width = 224
                 self.height = 224
-        
+
         mock_image = MockImage()
-        
+
         # Mock feature vector from extract_features
         mock_features = np.array([0.1, 0.2, 0.3, 0.4], dtype=np.float32)
-        
-        with patch('main.get_image_from_url', new_callable=AsyncMock) as mock_get_image, \
-             patch('main.batch_inferrer_queue.execute', new_callable=AsyncMock) as mock_execute:
-            
+
+        with patch(
+            "main.get_image_from_url", new_callable=AsyncMock
+        ) as mock_get_image, patch(
+            "main.batch_inferrer_queue.execute", new_callable=AsyncMock
+        ) as mock_execute:
             mock_get_image.return_value = mock_image
             mock_execute.return_value = mock_features
-            
+
             client = TestClient(main.app)
-            response = client.get("/feature-vector/?query_url=http://example.com/image.jpg")
-            
+            response = client.get(
+                "/feature-vector/?query_url=http://example.com/image.jpg"
+            )
+
             assert response.status_code == 200
             data = response.json()
             assert "features_b64" in data
-            
+
             # Decode the base64 features and verify normalization
-            decoded_features = np.frombuffer(base64.b64decode(data["features_b64"]), dtype=np.float32)
-            assert np.isclose(np.linalg.norm(decoded_features), 1.0)  # Should be normalized
-            
+            decoded_features = np.frombuffer(
+                base64.b64decode(data["features_b64"]), dtype=np.float32
+            )
+            assert np.isclose(
+                np.linalg.norm(decoded_features), 1.0
+            )  # Should be normalized
+
     except ImportError:
         # If dependencies are missing, verify the endpoint exists in main.py
         main_path = os.path.join(os.path.dirname(__file__), "..", "app", "main.py")
         assert os.path.exists(main_path)
-        
+
         with open(main_path, "r") as f:
             content = f.read()
             assert '@app.get("/feature-vector/")' in content
@@ -73,18 +81,20 @@ def test_feature_vector_endpoint_error_handling():
     try:
         import main
         from fastapi.testclient import TestClient
-        
-        with patch('main.get_image_from_url', new_callable=AsyncMock) as mock_get_image:
+
+        with patch("main.get_image_from_url", new_callable=AsyncMock) as mock_get_image:
             # Simulate ValueError from get_image_from_url
             mock_get_image.side_effect = ValueError("Invalid image URL")
-            
+
             client = TestClient(main.app)
-            response = client.get("/feature-vector/?query_url=http://invalid-url.com/bad.jpg")
-            
+            response = client.get(
+                "/feature-vector/?query_url=http://invalid-url.com/bad.jpg"
+            )
+
             assert response.status_code == 404
             data = response.json()
             assert "detail" in data
-            
+
     except ImportError:
         # If dependencies are missing, verify error handling logic exists
         main_path = os.path.join(os.path.dirname(__file__), "..", "app", "main.py")
@@ -121,20 +131,20 @@ def test_feature_vector_normalization_logic():
     """Test the normalization logic used in the API endpoint."""
     # Test the exact normalization logic from main.py
     features = np.array([3.0, 4.0, 0.0], dtype=np.float32)
-    
+
     # This matches the normalization in main.py: features / np.linalg.norm(features, axis=0, keepdims=True)
     normalized_features = features / np.linalg.norm(features, axis=0, keepdims=True)
-    
+
     # Verify normalization
     assert isinstance(normalized_features, np.ndarray)
     # The norm of the normalized vector should be 1
     norm = np.linalg.norm(normalized_features)
     assert np.isclose(norm, 1.0)
-    
+
     # Verify base64 encoding works
     encoded = base64.b64encode(normalized_features)
     assert isinstance(encoded, bytes)
-    
+
     # Verify it can be decoded back
     decoded = np.frombuffer(base64.b64decode(encoded), dtype=np.float32)
     assert np.allclose(normalized_features, decoded)
@@ -144,11 +154,11 @@ def test_batch_queue_integration():
     """Test that the batch queue is properly configured in main.py."""
     try:
         import main
-        
+
         # Verify batch queue exists and is configured
         assert hasattr(main, "batch_inferrer_queue")
         assert main.batch_inferrer_queue is not None
-        
+
     except ImportError:
         # If dependencies are missing, verify batch queue setup exists in code
         main_path = os.path.join(os.path.dirname(__file__), "..", "app", "main.py")
