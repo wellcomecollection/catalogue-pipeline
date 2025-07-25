@@ -1,4 +1,3 @@
-
 from models.graph_node import ConceptType
 from models.ingestor.display.identifier import get_display_identifier
 from models.ingestor.indexable import DisplayIdentifier
