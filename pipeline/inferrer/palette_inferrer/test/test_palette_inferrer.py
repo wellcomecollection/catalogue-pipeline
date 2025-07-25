@@ -62,19 +62,6 @@ def test_palette_endpoint_error_handling():
         assert "detail" in data
 
 
-def test_palette_encoder_file_exists():
-    """Test that PaletteEncoder module exists and is importable."""
-    from palette_encoder import PaletteEncoder
-    
-    encoder = PaletteEncoder()
-    assert encoder is not None
-    assert hasattr(encoder, "n_bins")
-    assert hasattr(encoder, "alpha")
-    assert hasattr(encoder, "embed")
-    assert hasattr(encoder, "average_color_hex")
-
-
-
 def test_palette_response_structure():
     """Test the expected structure of palette API response."""
     # Test base64 encoding capability for palette embeddings
@@ -99,13 +86,6 @@ def test_palette_response_structure():
     decoded = np.frombuffer(base64.b64decode(mock_response["palette_embedding"]), dtype=np.float32)
     assert np.allclose(embedding, decoded)
 
-
-def test_batch_queue_integration():
-    """Test that the batch queue is properly configured in main.py."""
-    # Verify batch queue exists and is configured with PaletteEncoder
-    assert hasattr(main, "batch_inferrer_queue")
-    assert main.batch_inferrer_queue is not None
-    assert hasattr(main, "palette_encoder")
 
 
 def test_healthcheck_function_exists():

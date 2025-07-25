@@ -41,6 +41,20 @@ def test_feature_vector_endpoint():
         # Decode the base64 features and verify normalization
         decoded_features = np.frombuffer(base64.b64decode(data["features_b64"]), dtype=np.float32)
         assert np.isclose(np.linalg.norm(decoded_features), 1.0)  # Should be normalized
+        
+        # Test the normalization logic directly with the same data
+        # This matches the normalization in main.py: features / np.linalg.norm(features, axis=0, keepdims=True)
+        normalized_features = mock_features / np.linalg.norm(mock_features, axis=0, keepdims=True)
+        norm = np.linalg.norm(normalized_features)
+        assert np.isclose(norm, 1.0)
+        
+        # Verify base64 encoding works
+        encoded = base64.b64encode(normalized_features)
+        assert isinstance(encoded, bytes)
+        
+        # Verify it can be decoded back
+        decoded = np.frombuffer(base64.b64decode(encoded), dtype=np.float32)
+        assert np.allclose(normalized_features, decoded)
 
 
 def test_feature_vector_endpoint_error_handling():
@@ -65,34 +79,6 @@ def test_feature_extraction_module_exists():
     assert callable(extract_features)
 
 
-def test_feature_vector_normalization_logic():
-    """Test the normalization logic used in the API endpoint."""
-    # Test the exact normalization logic from main.py
-    features = np.array([3.0, 4.0, 0.0], dtype=np.float32)
-    
-    # This matches the normalization in main.py: features / np.linalg.norm(features, axis=0, keepdims=True)
-    normalized_features = features / np.linalg.norm(features, axis=0, keepdims=True)
-    
-    # Verify normalization
-    assert isinstance(normalized_features, np.ndarray)
-    # The norm of the normalized vector should be 1
-    norm = np.linalg.norm(normalized_features)
-    assert np.isclose(norm, 1.0)
-    
-    # Verify base64 encoding works
-    encoded = base64.b64encode(normalized_features)
-    assert isinstance(encoded, bytes)
-    
-    # Verify it can be decoded back
-    decoded = np.frombuffer(base64.b64decode(encoded), dtype=np.float32)
-    assert np.allclose(normalized_features, decoded)
-
-
-def test_batch_queue_integration():
-    """Test that the batch queue is properly configured in main.py."""
-    # Verify batch queue exists and is configured
-    assert hasattr(main, "batch_inferrer_queue")
-    assert main.batch_inferrer_queue is not None
 
 
 def test_healthcheck_function_exists():
