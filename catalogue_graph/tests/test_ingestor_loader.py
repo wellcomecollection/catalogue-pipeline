@@ -8,20 +8,25 @@ from test_utils import load_json_fixture
 
 from ingestor_indexer import IngestorIndexerLambdaEvent
 from ingestor_loader import (
-    CONCEPT_QUERY,
     IngestorIndexerObject,
     IngestorLoaderConfig,
     IngestorLoaderLambdaEvent,
-    get_referenced_together_query,
-    get_related_query,
     handler,
 )
-from models.catalogue_concept import (
-    CatalogueConcept,
-    CatalogueConceptIdentifier,
-    CatalogueConceptRelatedTo,
+from models.ingestor.indexable import DisplayIdentifier, DisplayIdentifierType
+from models.ingestor.indexable_concept import (
     ConceptDescription,
+    ConceptDisplay,
+    ConceptIdentifier,
+    ConceptQuery,
+    ConceptRelatedTo,
+    IndexableConcept,
     RelatedConcepts,
+)
+from queries.concept_queries import (
+    CONCEPT_QUERY,
+    _get_referenced_together_query,
+    _get_related_query,
 )
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
@@ -106,38 +111,33 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("RELATED_TO"),
+        expected_query=_get_related_query("RELATED_TO"),
         mock_results=related_to_results,
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("HAS_FIELD_OF_WORK"),
+        expected_query=_get_related_query("HAS_FIELD_OF_WORK"),
         mock_results=[],
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
+        expected_query=_get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
         mock_results=broader_than_results,
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("HAS_FIELD_OF_WORK", "to"),
+        expected_query=_get_related_query("HAS_FIELD_OF_WORK", "to"),
         mock_results=people_results,
     )
 
     add_neptune_mock_response(
-        expected_query=get_related_query("NARROWER_THAN"),
+        expected_query=_get_related_query("NARROWER_THAN"),
         mock_results=[],
     )
 
     add_neptune_mock_response(
-        expected_query=get_referenced_together_query(),
-        mock_results=[],
-    )
-
-    add_neptune_mock_response(
-        expected_query=get_referenced_together_query(
-            source_referenced_types=["Person"],
+        expected_query=_get_referenced_together_query(
+            source_referenced_types=["Person", "Organisation"],
             related_referenced_types=["Person", "Organisation"],
             source_referenced_in=["contributors"],
             related_referenced_in=["contributors"],
@@ -146,7 +146,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=get_referenced_together_query(
+        expected_query=_get_referenced_together_query(
             related_referenced_types=[
                 "Concept",
                 "Subject",
@@ -163,7 +163,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
 
 def get_catalogue_concept_mock(
     include: list[MockNeptuneResponseItem],
-) -> CatalogueConcept:
+) -> IndexableConcept:
     alternative_labels = []
 
     if MockNeptuneResponseItem.SOURCE_ALTERNATIVE_LABELS in include:
@@ -176,19 +176,19 @@ def get_catalogue_concept_mock(
     broader_than = []
     if MockNeptuneResponseItem.CONCEPT_BROADER_THAN in include:
         broader_than = [
-            CatalogueConceptRelatedTo(
+            ConceptRelatedTo(
                 label="Electromagnetic Radiation",
                 id="hstuwwsu",
                 relationshipType="",
                 conceptType="Concept",
             ),
-            CatalogueConceptRelatedTo(
+            ConceptRelatedTo(
                 label="Wave mechanics",
                 id="hv6pemej",
                 relationshipType="",
                 conceptType="Concept",
             ),
-            CatalogueConceptRelatedTo(
+            ConceptRelatedTo(
                 label="Electric waves",
                 id="ugcgqepy",
                 relationshipType="",
@@ -199,13 +199,13 @@ def get_catalogue_concept_mock(
     people = []
     if MockNeptuneResponseItem.CONCEPT_PEOPLE in include:
         people = [
-            CatalogueConceptRelatedTo(
+            ConceptRelatedTo(
                 label="Tegart, W. J. McG.",
                 id="vc6xrky5",
                 relationshipType="",
                 conceptType="Person",
             ),
-            CatalogueConceptRelatedTo(
+            ConceptRelatedTo(
                 label="Bube, Richard H., 1927-",
                 id="garjbvhe",
                 relationshipType="",
@@ -216,7 +216,7 @@ def get_catalogue_concept_mock(
     related_to = []
     if MockNeptuneResponseItem.CONCEPT_RELATED_TO in include:
         related_to = [
-            CatalogueConceptRelatedTo(
+            ConceptRelatedTo(
                 label="Hilton, Violet, 1908-1969",
                 id="tzrtx26u",
                 relationshipType="has_sibling",
@@ -224,33 +224,50 @@ def get_catalogue_concept_mock(
             )
         ]
 
-    return CatalogueConcept(
-        id="id",
-        label="LoC label",
-        displayLabel="Wikidata label",
-        type="Person",
-        alternativeLabels=alternative_labels,
-        description=ConceptDescription(
-            text="Description",
-            sourceLabel="wikidata",
-            sourceUrl="https://www.wikidata.org/wiki/456",
+    return IndexableConcept(
+        query=ConceptQuery(
+            id="id",
+            label="LoC label",
+            type="Person",
+            identifiers=[
+                ConceptIdentifier(
+                    value="123",
+                    identifierType="lc-names",
+                )
+            ],
+            alternativeLabels=alternative_labels,
         ),
-        identifiers=[
-            CatalogueConceptIdentifier(
-                value="123",
-                identifierType="lc-names",
-            )
-        ],
-        sameAs=[],
-        relatedConcepts=RelatedConcepts(
-            relatedTo=related_to,
-            fieldsOfWork=[],
-            narrowerThan=[],
-            broaderThan=broader_than,
-            people=people,
-            referencedTogether=[],
-            frequentCollaborators=[],
-            relatedTopics=[],
+        display=ConceptDisplay(
+            id="id",
+            label="LoC label",
+            displayLabel="Wikidata label",
+            type="Person",
+            identifiers=[
+                DisplayIdentifier(
+                    value="123",
+                    identifierType=DisplayIdentifierType(
+                        id="lc-names",
+                        label="Library of Congress Name authority records",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
+            alternativeLabels=alternative_labels,
+            description=ConceptDescription(
+                text="Description",
+                sourceLabel="wikidata",
+                sourceUrl="https://www.wikidata.org/wiki/456",
+            ),
+            sameAs=[],
+            relatedConcepts=RelatedConcepts(
+                relatedTo=related_to,
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=broader_than,
+                people=people,
+                frequentCollaborators=[],
+                relatedTopics=[],
+            ),
         ),
     )
 
@@ -288,7 +305,7 @@ def test_ingestor_loader(
     result = handler(MOCK_INGESTOR_LOADER_EVENT, MOCK_INGESTOR_LOADER_CONFIG)
 
     assert result == MOCK_INGESTOR_INDEXER_EVENT
-    assert len(MockRequest.calls) == 9
+    assert len(MockRequest.calls) == 8
 
     request = MockRequest.calls[0]
     assert request["method"] == "POST"
@@ -301,7 +318,7 @@ def test_ingestor_loader(
         assert len(df) == 1
 
         catalogue_concepts = [
-            CatalogueConcept.model_validate(row) for row in df.to_dicts()
+            IndexableConcept.model_validate(row) for row in df.to_dicts()
         ]
 
         assert len(catalogue_concepts) == 1
