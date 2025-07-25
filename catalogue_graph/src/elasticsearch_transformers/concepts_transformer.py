@@ -1,23 +1,19 @@
-from models.indexable_concept import (
+from models.ingestor.concept import RawNeptuneConcept
+from models.ingestor.indexable_concept import (
     ConceptDisplay,
     ConceptQuery,
     IndexableConcept,
     RelatedConcepts,
 )
-
-from .raw_neptune_concept import RawNeptuneConcept
-from .raw_neptune_related_concepts import RawNeptuneRelatedConcepts
+from models.ingestor.related_concepts import RawNeptuneRelatedConcepts
 
 
 class ElasticsearchConceptsTransformer:
     def transform_document(
-        self, concept: dict, related_concepts: dict
+        self,
+        neptune_concept: RawNeptuneConcept,
+        neptune_related: RawNeptuneRelatedConcepts,
     ) -> IndexableConcept:
-        neptune_concept = RawNeptuneConcept(concept, related_concepts)
-        neptune_related = RawNeptuneRelatedConcepts(
-            neptune_concept.wellcome_id, related_concepts
-        )
-
         query = ConceptQuery(
             id=neptune_concept.wellcome_id,
             identifiers=neptune_concept.identifiers,

@@ -14,11 +14,12 @@ from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from elasticsearch_transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
-from elasticsearch_transformers.raw_neptune_concept import MissingLabelError
 from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
-from models.indexable_concept import (
+from models.ingestor.concept import MissingLabelError, RawNeptuneConcept
+from models.ingestor.indexable_concept import (
     IndexableConcept,
 )
+from models.ingestor.related_concepts import RawNeptuneRelatedConcepts
 from queries.concept_queries import (
     get_broader_concepts,
     get_collaborator_concepts,
@@ -91,7 +92,11 @@ def extract_data(
     transformer = ElasticsearchConceptsTransformer()
     for concept in concepts:
         try:
-            yield transformer.transform_document(concept, related_concepts)
+            neptune_concept = RawNeptuneConcept(concept, related_concepts)
+            neptune_related = RawNeptuneRelatedConcepts(
+                neptune_concept.wellcome_id, related_concepts
+            )
+            yield transformer.transform_document(neptune_concept, neptune_related)
         except MissingLabelError:
             # There is currently one concept which does not have a label ('k6p2u5fh')
             concept_id = concept["concept"]["~properties"]["id"]

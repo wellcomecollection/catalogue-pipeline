@@ -1,7 +1,8 @@
-from elasticsearch_transformers.display_identifier import get_display_identifier
+
 from models.graph_node import ConceptType
-from models.indexable import DisplayIdentifier
-from models.indexable_concept import (
+from models.ingestor.display.identifier import get_display_identifier
+from models.ingestor.indexable import DisplayIdentifier
+from models.ingestor.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )

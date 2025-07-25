@@ -13,8 +13,8 @@ from ingestor_loader import (
     IngestorLoaderLambdaEvent,
     handler,
 )
-from models.indexable import DisplayIdentifier, DisplayIdentifierType
-from models.indexable_concept import (
+from models.ingestor.indexable import DisplayIdentifier, DisplayIdentifierType
+from models.ingestor.indexable_concept import (
     ConceptDescription,
     ConceptDisplay,
     ConceptIdentifier,

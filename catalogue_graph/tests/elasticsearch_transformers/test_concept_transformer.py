@@ -3,11 +3,12 @@ from test_utils import load_json_fixture
 from elasticsearch_transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
-from elasticsearch_transformers.raw_neptune_concept import (
+from models.ingestor.concept import (
+    RawNeptuneConcept,
     get_most_specific_concept_type,
 )
-from models.indexable import DisplayIdentifier, DisplayIdentifierType
-from models.indexable_concept import (
+from models.ingestor.indexable import DisplayIdentifier, DisplayIdentifierType
+from models.ingestor.indexable_concept import (
     ConceptDescription,
     ConceptDisplay,
     ConceptIdentifier,
@@ -16,6 +17,7 @@ from models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
+from models.ingestor.related_concepts import RawNeptuneRelatedConcepts
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": {},
@@ -82,7 +84,11 @@ def test_catalogue_concept_from_neptune_result() -> None:
     )
 
     transformer = ElasticsearchConceptsTransformer()
-    result = transformer.transform_document(mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    neptune_concept = RawNeptuneConcept(mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, MOCK_EMPTY_RELATED_CONCEPTS
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
     assert result == expected_result
 
 
@@ -132,7 +138,11 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
     )
 
     transformer = ElasticsearchConceptsTransformer()
-    result = transformer.transform_document(mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    neptune_concept = RawNeptuneConcept(mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, MOCK_EMPTY_RELATED_CONCEPTS
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
     assert result == expected_result
 
 
@@ -198,7 +208,11 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
     )
 
     transformer = ElasticsearchConceptsTransformer()
-    result = transformer.transform_document(mock_concept, related_concepts)
+    neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, related_concepts
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
     assert result == expected_result
 
 

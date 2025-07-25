@@ -1,4 +1,4 @@
-from models.indexable import DisplayIdentifier, DisplayIdentifierType
+from models.ingestor.indexable import DisplayIdentifier, DisplayIdentifierType
 
 IDENTIFIER_LABEL_MAPPING = {
     "lc-subjects": "Library of Congress Subject Headings (LCSH)",
