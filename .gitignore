@@ -177,6 +177,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+build/
 dist/
 .eggs/
 sdist/
