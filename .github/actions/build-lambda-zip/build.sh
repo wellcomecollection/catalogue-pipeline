@@ -13,6 +13,10 @@ ZIP_NAME="$4"
 cd "$FOLDER"
 
 # Get Python version from .python-version file
+if [[ ! -r "$PYTHON_VERSION_FILE" ]]; then
+    echo "Error: The file '$PYTHON_VERSION_FILE' does not exist or is not readable." >&2
+    exit 1
+fi
 PY_VERSION=$(cat "$PYTHON_VERSION_FILE")
 echo "Using Python version: $PY_VERSION"
 
