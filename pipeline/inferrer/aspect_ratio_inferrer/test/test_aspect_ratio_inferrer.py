@@ -26,33 +26,35 @@ def test_landscape_aspect_ratio_endpoint():
     try:
         import main
         from fastapi.testclient import TestClient
-        
+
         # Create a mock image object with landscape dimensions
         class MockImage:
             def __init__(self, width, height):
                 self.width = width
                 self.height = height
-        
+
         mock_image = MockImage(200, 100)  # 2:1 landscape
-        
-        with patch('main.get_image_from_url', new_callable=AsyncMock) as mock_get_image:
+
+        with patch("main.get_image_from_url", new_callable=AsyncMock) as mock_get_image:
             mock_get_image.return_value = mock_image
-            
+
             client = TestClient(main.app)
-            response = client.get("/aspect-ratio/?query_url=http://example.com/image.jpg")
-            
+            response = client.get(
+                "/aspect-ratio/?query_url=http://example.com/image.jpg"
+            )
+
             assert response.status_code == 200
             data = response.json()
             assert "aspect_ratio" in data
             assert data["aspect_ratio"] == 2.0
             assert data["aspect_ratio"] > 1  # landscape
-            
+
     except ImportError:
         # If dependencies are missing, skip the integration test
         # but verify the main file exists and contains the endpoint
         main_path = os.path.join(os.path.dirname(__file__), "..", "app", "main.py")
         assert os.path.exists(main_path)
-        
+
         with open(main_path, "r") as f:
             content = f.read()
             assert '@app.get("/aspect-ratio/")' in content
@@ -64,26 +66,28 @@ def test_square_aspect_ratio_endpoint():
     try:
         import main
         from fastapi.testclient import TestClient
-        
+
         # Create a mock image object with square dimensions
         class MockImage:
             def __init__(self, width, height):
                 self.width = width
                 self.height = height
-        
+
         mock_image = MockImage(100, 100)  # 1:1 square
-        
-        with patch('main.get_image_from_url', new_callable=AsyncMock) as mock_get_image:
+
+        with patch("main.get_image_from_url", new_callable=AsyncMock) as mock_get_image:
             mock_get_image.return_value = mock_image
-            
+
             client = TestClient(main.app)
-            response = client.get("/aspect-ratio/?query_url=http://example.com/square.jpg")
-            
+            response = client.get(
+                "/aspect-ratio/?query_url=http://example.com/square.jpg"
+            )
+
             assert response.status_code == 200
             data = response.json()
             assert "aspect_ratio" in data
             assert data["aspect_ratio"] == 1.0  # square
-            
+
     except ImportError:
         # If dependencies are missing, verify the endpoint logic exists
         main_path = os.path.join(os.path.dirname(__file__), "..", "app", "main.py")
@@ -97,27 +101,29 @@ def test_portrait_aspect_ratio_endpoint():
     try:
         import main
         from fastapi.testclient import TestClient
-        
+
         # Create a mock image object with portrait dimensions
         class MockImage:
             def __init__(self, width, height):
                 self.width = width
                 self.height = height
-        
+
         mock_image = MockImage(100, 200)  # 1:2 portrait
-        
-        with patch('main.get_image_from_url', new_callable=AsyncMock) as mock_get_image:
+
+        with patch("main.get_image_from_url", new_callable=AsyncMock) as mock_get_image:
             mock_get_image.return_value = mock_image
-            
+
             client = TestClient(main.app)
-            response = client.get("/aspect-ratio/?query_url=http://example.com/portrait.jpg")
-            
+            response = client.get(
+                "/aspect-ratio/?query_url=http://example.com/portrait.jpg"
+            )
+
             assert response.status_code == 200
             data = response.json()
             assert "aspect_ratio" in data
             assert data["aspect_ratio"] == 0.5
             assert data["aspect_ratio"] < 1  # portrait
-            
+
     except ImportError:
         # If dependencies are missing, verify the response structure is defined
         main_path = os.path.join(os.path.dirname(__file__), "..", "app", "main.py")
@@ -132,18 +138,20 @@ def test_aspect_ratio_endpoint_error_handling():
         import main
         from fastapi.testclient import TestClient
         from fastapi import HTTPException
-        
-        with patch('main.get_image_from_url', new_callable=AsyncMock) as mock_get_image:
+
+        with patch("main.get_image_from_url", new_callable=AsyncMock) as mock_get_image:
             # Simulate ValueError from get_image_from_url
             mock_get_image.side_effect = ValueError("Invalid image URL")
-            
+
             client = TestClient(main.app)
-            response = client.get("/aspect-ratio/?query_url=http://invalid-url.com/bad.jpg")
-            
+            response = client.get(
+                "/aspect-ratio/?query_url=http://invalid-url.com/bad.jpg"
+            )
+
             assert response.status_code == 404
             data = response.json()
             assert "detail" in data
-            
+
     except ImportError:
         # If dependencies are missing, verify error handling logic exists
         main_path = os.path.join(os.path.dirname(__file__), "..", "app", "main.py")
