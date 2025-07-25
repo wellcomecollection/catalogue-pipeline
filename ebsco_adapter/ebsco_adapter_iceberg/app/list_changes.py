@@ -7,7 +7,7 @@ from pyiceberg.expressions import EqualTo, IsNull
 # changes have been made, and that pre-existing data is left alone
 
 
-def main(changeset_id):
+def main(changeset_id: str) -> None:
     table = get_local_table()
     print(f"  total records: {table.scan().count()}")
     print(

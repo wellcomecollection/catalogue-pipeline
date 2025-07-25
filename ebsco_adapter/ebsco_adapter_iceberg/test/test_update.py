@@ -1,20 +1,25 @@
 """
 Tests covering the update behaviour of the iceberg ebsco adapter
 """
-from main import data_to_pa_table, update_table
+
+from typing import List, Dict, Any
+import pyarrow as pa
+from pyiceberg.table import Table as IcebergTable
+
+from iceberg_updates import update_table
 from pyiceberg.expressions import Not, IsNull, EqualTo, In
 
 from schemata import ARROW_SCHEMA
-from helpers import assert_row_identifiers, add_namespace
+from helpers import assert_row_identifiers
 from helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
 
 
 # Override the default namespace for these tests
-def data_to_namespaced_table(unqualified_data):
+def data_to_namespaced_table(unqualified_data: List[Dict[str, Any]]) -> pa.Table:
     return _data_to_namespaced_table_helper(unqualified_data, "ebsco_test")
 
 
-def test_noop(temporary_table):
+def test_noop(temporary_table: IcebergTable) -> None:
     """
     When there are no updates to perform, nothing happens
     """
@@ -25,7 +30,7 @@ def test_noop(temporary_table):
     assert changeset is None
     # The data is the same as before the update
     assert (
-        temporary_table.scan(selected_fields=["namespace", "id", "content"])
+        temporary_table.scan(selected_fields=("namespace", "id", "content"))
         .to_arrow()
         .cast(ARROW_SCHEMA)
         .equals(data)
@@ -34,7 +39,7 @@ def test_noop(temporary_table):
     assert not temporary_table.scan(row_filter=Not(IsNull("changeset"))).to_arrow()
 
 
-def test_undelete(temporary_table):
+def test_undelete(temporary_table: IcebergTable) -> None:
     """
     Given a table with a record that has been deleted
     When a record with the same identifier is present in new data
@@ -57,7 +62,7 @@ def test_undelete(temporary_table):
     assert changeset is not None
     # The data is the same as before the update
     as_pa = (
-        temporary_table.scan(selected_fields=["id", "content", "changeset"])
+        temporary_table.scan(selected_fields=("id", "content", "changeset"))
         .to_arrow()
         .sort_by("id")
         .to_pylist()
@@ -67,7 +72,7 @@ def test_undelete(temporary_table):
     assert as_pa[1] == {"id": "eb0002", "content": "world!", "changeset": changeset}
 
 
-def test_new_table(temporary_table):
+def test_new_table(temporary_table: IcebergTable) -> None:
     """
     Given an environment with no data
     When an update is applied
@@ -83,6 +88,7 @@ def test_new_table(temporary_table):
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     assert (
         temporary_table.scan().to_arrow()
         == temporary_table.scan(
@@ -92,7 +98,7 @@ def test_new_table(temporary_table):
     assert len(temporary_table.scan().to_arrow()) == 3
 
 
-def test_update_records(temporary_table):
+def test_update_records(temporary_table: IcebergTable) -> None:
     """
     Given an existing iceberg table
     And an update file with the same records
@@ -128,19 +134,20 @@ def test_update_records(temporary_table):
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     expected_changes = {"eb0001", "eb0003"}
     changed_rows = temporary_table.scan(
-        row_filter=In("id", expected_changes), selected_fields=["id"]
+        row_filter=In("id", expected_changes), selected_fields=("id",)
     ).to_arrow()
     changeset_rows = temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id), selected_fields=["id"]
+        row_filter=EqualTo("changeset", changeset_id), selected_fields=("id",)
     ).to_arrow()
 
     assert_row_identifiers(changeset_rows, expected_changes)
     assert changed_rows == changeset_rows
 
 
-def test_insert_records(temporary_table):
+def test_insert_records(temporary_table: IcebergTable) -> None:
     """
     Given an existing iceberg table
     And an update file with the same records
@@ -168,19 +175,20 @@ def test_insert_records(temporary_table):
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     expected_insertions = {"eb0002", "eb0099"}
     inserted_rows = temporary_table.scan(
-        row_filter=In("id", expected_insertions), selected_fields=["id"]
+        row_filter=In("id", expected_insertions), selected_fields=("id",)
     ).to_arrow()
     changeset_rows = temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id), selected_fields=["id"]
+        row_filter=EqualTo("changeset", changeset_id), selected_fields=("id",)
     ).to_arrow()
 
     assert_row_identifiers(changeset_rows, expected_insertions)
     assert inserted_rows == changeset_rows
 
 
-def test_delete_records(temporary_table):
+def test_delete_records(temporary_table: IcebergTable) -> None:
     """
     Given an existing iceberg table
     And an update file with some records missing
@@ -214,19 +222,20 @@ def test_delete_records(temporary_table):
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     expected_deletions = {"eb0002", "eb0099"}
     deleted_rows = temporary_table.scan(
-        row_filter=IsNull("content"), selected_fields=["id"]
+        row_filter=IsNull("content"), selected_fields=("id",)
     ).to_arrow()
     assert_row_identifiers(deleted_rows, expected_deletions)
     changeset_rows = temporary_table.scan(
-        row_filter=EqualTo("changeset", changeset_id), selected_fields=["id"]
+        row_filter=EqualTo("changeset", changeset_id), selected_fields=("id",)
     ).to_arrow()
 
     assert_row_identifiers(changeset_rows, expected_deletions)
 
 
-def test_all_actions(temporary_table):
+def test_all_actions(temporary_table: IcebergTable) -> None:
     """
     Given an existing Iceberg table
     And an update file with new, changed, absent and unchanged  records
@@ -256,6 +265,7 @@ def test_all_actions(temporary_table):
     expected_insert = "eb0004"
 
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     changeset_rows = temporary_table.scan(
         row_filter=EqualTo("changeset", changeset_id),
     ).to_arrow()
@@ -286,7 +296,7 @@ def test_all_actions(temporary_table):
     ]
 
 
-def test_idempotent(temporary_table):
+def test_idempotent(temporary_table: IcebergTable) -> None:
     """
     Given an existing Iceberg table
     And an update with new, changed, absent and unchanged  records
@@ -316,7 +326,7 @@ def test_idempotent(temporary_table):
     assert second_changeset_id is None
 
 
-def test_most_recent_changeset_preserved(temporary_table):
+def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
     """
     Given an existing Iceberg table
     And two subsequent updates that change different records
@@ -340,6 +350,7 @@ def test_most_recent_changeset_preserved(temporary_table):
         ]
     )
     changeset_id = update_table(temporary_table, new_data, "ebsco_test")
+    assert changeset_id is not None  # Type assertion for mypy
     assert {"eb0003", "eb0004"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", changeset_id))
         .to_arrow()
@@ -354,6 +365,7 @@ def test_most_recent_changeset_preserved(temporary_table):
         ]
     )
     newer_changeset_id = update_table(temporary_table, newer_data, "ebsco_test")
+    assert newer_changeset_id is not None  # Type assertion for mypy
     assert {"eb0003"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", newer_changeset_id))
         .to_arrow()

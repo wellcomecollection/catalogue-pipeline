@@ -11,7 +11,8 @@ on:
     paths:
       - "catalogue_graph/**"
       - ".github/workflows/catalogue-graph-ci.yml"
-
+  workflow_dispatch:
+    
 permissions:
   contents: read
   id-token: write

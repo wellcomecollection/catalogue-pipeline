@@ -1,14 +1,17 @@
 """
 Shared table configuration for the EBSCO adapter.
 """
+
 import os
+from typing import Any, Optional
 from pyiceberg.catalog import load_catalog
 from pyiceberg.table import Table as IcebergTable
 from schemata import SCHEMA
+import boto3
 
 
 def get_table(
-    catalogue_name, catalogue_uri, catalogue_warehouse, catalogue_namespace, table_name
+    catalogue_namespace: str, table_name: str, catalogue_name: str, **params: Any
 ) -> IcebergTable:
     """
     Generic table getter that can be used by any module.
@@ -23,11 +26,12 @@ def get_table(
     Returns:
         IcebergTable: The configured table
     """
+
     catalogue = load_catalog(
         catalogue_name,
-        uri=catalogue_uri,
-        warehouse=catalogue_warehouse,
+        **params,
     )
+
     catalogue.create_namespace_if_not_exists(catalogue_namespace)
     table_fullname = f"{catalogue_namespace}.{table_name}"
     table = catalogue.create_table_if_not_exists(
@@ -36,7 +40,52 @@ def get_table(
     return table
 
 
-def get_local_table(table_name="mytable", namespace="default", db_name="catalog"):
+def get_glue_table(
+    s3_tables_bucket: str,
+    table_name: str,
+    namespace: str,
+    region: Optional[str] = None,
+    account_id: Optional[str] = None,
+) -> IcebergTable:
+    """
+    Get a table from the Glue catalog.
+
+    Args:
+        region: AWS region where the Glue catalog is located
+        account_id: AWS account ID
+        s3_tables_bucket: S3 bucket for the Glue catalog
+        table_name: Name of the table
+        namespace: Namespace for the table
+    Returns:
+        IcebergTable: The configured table
+    """
+
+    session = boto3.Session()
+    region = region or session.region_name
+    account_id = account_id or session.client("sts").get_caller_identity()["Account"]
+
+    import os
+
+    os.environ["AWS_PROFILE"] = "platform-developer"
+
+    return get_table(
+        catalogue_namespace=namespace,
+        table_name=table_name,
+        catalogue_name="s3tablescatalog",
+        **{
+            "type": "rest",
+            "warehouse": f"{account_id}:s3tablescatalog/{s3_tables_bucket}",
+            "uri": f"https://glue.{region}.amazonaws.com/iceberg",
+            "rest.sigv4-enabled": "true",
+            "rest.signing-name": "glue",
+            "rest.signing-region": region,
+        },
+    )
+
+
+def get_local_table(
+    table_name: str = "mytable", namespace: str = "default", db_name: str = "catalog"
+) -> IcebergTable:
     """
     Get a table from the local catalog using the .local directory.
 
@@ -64,9 +113,11 @@ def get_local_table(table_name="mytable", namespace="default", db_name="catalog"
     os.makedirs(warehouse_dir, exist_ok=True)
 
     return get_table(
-        catalogue_name="local",
-        catalogue_uri=f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
-        catalogue_warehouse=f"file://{warehouse_dir}/",
         catalogue_namespace=namespace,
         table_name=table_name,
+        catalogue_name="local",
+        **{
+            "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
+            "warehouse": f"file://{warehouse_dir}/",
+        },
     )

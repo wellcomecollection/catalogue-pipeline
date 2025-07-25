@@ -1,21 +1,20 @@
-from pyiceberg.catalog import load_catalog
-from schemata import SCHEMA, ARROW_SCHEMA
-from table_config import get_table
+from schemata import ARROW_SCHEMA
+from typing import Optional
 
 from pyiceberg.table import Table as IcebergTable
 
 import pyarrow as pa
 import uuid
 
-from pyiceberg.expressions import Not, IsNull, In
+from pyiceberg.expressions import In
 from datetime import datetime, timezone
 import pyarrow.compute as pc
-import functools
 from pyiceberg.table.upsert_util import get_rows_to_update
-import operator
 
 
-def update_table(table: IcebergTable, new_data: pa.Table, record_namespace: str):
+def update_table(
+    table: IcebergTable, new_data: pa.Table, record_namespace: str
+) -> Optional[str]:
     """
     Perform an update on `table`, using the data provided in new_data.
 
@@ -100,14 +99,14 @@ def _upsert_with_markers(
     return changeset_id
 
 
-def _create_match_filter(changes: pa.Table):
+def _create_match_filter(changes: pa.Table) -> In:
     change_ids = changes.column("id").to_pylist()
     return In("id", change_ids)
 
 
 def _append_change_columns(
     changeset: pa.Table, changeset_id: str, timestamp: pa.lib.TimestampScalar
-):
+) -> pa.Table:
     changeset = changeset.append_column(
         pa.field("changeset", type=pa.string(), nullable=True),
         [[changeset_id] * len(changeset)],
@@ -119,11 +118,13 @@ def _append_change_columns(
     return changeset
 
 
-def _find_updates(existing_data: pa.Table, new_data: pa.Table):
+def _find_updates(existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
     return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
 
 
-def _find_inserts(existing_data: pa.Table, new_data: pa.Table, record_namespace: str):
+def _find_inserts(
+    existing_data: pa.Table, new_data: pa.Table, record_namespace: str
+) -> pa.Table:
     old_ids = existing_data.column("id")
     missing_records = new_data.filter(
         (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(old_ids)
