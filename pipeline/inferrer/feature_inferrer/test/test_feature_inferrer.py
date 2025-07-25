@@ -93,8 +93,6 @@ def test_batch_queue_integration():
     # Verify batch queue exists and is configured
     assert hasattr(main, "batch_inferrer_queue")
     assert main.batch_inferrer_queue is not None
-            assert "extract_features" in content
-            assert "batch_size=" in content
 
 
 def test_healthcheck_function_exists():

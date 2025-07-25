@@ -74,23 +74,6 @@ def test_palette_encoder_file_exists():
     assert hasattr(encoder, "average_color_hex")
 
 
-def test_average_color_hex_validation():
-    """Test that average color hex format is correct."""
-    # Test that a valid hex color format is returned
-    test_hex = "#FF0080"
-    
-    # Verify hex color format
-    assert test_hex.startswith("#")
-    assert len(test_hex) == 7  # #rrggbb format
-    
-    # Verify hex characters are valid
-    hex_chars = test_hex[1:]  # Remove the #
-    try:
-        int(hex_chars, 16)  # Should not raise ValueError
-        assert True
-    except ValueError:
-        assert False, "Invalid hex color format"
-
 
 def test_palette_response_structure():
     """Test the expected structure of palette API response."""
