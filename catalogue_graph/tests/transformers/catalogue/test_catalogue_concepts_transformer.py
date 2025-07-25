@@ -1,22 +1,15 @@
-from test_utils import add_mock_denormalised_documents, add_mock_transformer_outputs
+from test_utils import (
+    add_mock_denormalised_documents,
+    add_mock_transformer_outputs,
+    check_bulk_load_edge,
+)
 
 from models.graph_edge import (
-    BaseEdge,
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
-
-
-def _check_edge(
-    all_edges: list[BaseEdge], from_id: str, to_id: str, expected_edge: BaseEdge
-) -> None:
-    filtered_edges = [
-        edge for edge in all_edges if edge.from_id == from_id and edge.to_id == to_id
-    ]
-    assert len(filtered_edges) == 1
-    assert filtered_edges[0] == expected_edge
 
 
 def test_catalogue_concepts_transformer_nodes() -> None:
@@ -46,10 +39,8 @@ def test_catalogue_concepts_transformer_edges() -> None:
     edges = list(transformer._stream_edges())
     assert len(edges) == 7
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "s6s24vd7",
-        "sh85004839",
         ConceptHasSourceConcept(
             from_type="Concept",
             to_type="SourceConcept",
@@ -63,10 +54,8 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "yfqryj26",
-        "sh85045046",
         ConceptHasSourceConcept(
             from_type="Concept",
             to_type="SourceConcept",
@@ -80,10 +69,8 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "s6s24vd8",
-        "D000715",
         ConceptHasSourceConcept(
             from_type="Concept",
             to_type="SourceConcept",
@@ -97,10 +84,8 @@ def test_catalogue_concepts_transformer_edges() -> None:
         ),
     )
 
-    _check_edge(
+    check_bulk_load_edge(
         edges,
-        "s6s24vd9",
-        "D000715",
         ConceptHasSourceConcept(
             from_type="Concept",
             to_type="SourceConcept",

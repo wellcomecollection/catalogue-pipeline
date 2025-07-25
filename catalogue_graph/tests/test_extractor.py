@@ -85,6 +85,7 @@ SOURCE_MOCK_RESPONSE_MAPPING: dict[TransformerType, list[MockResponseInput]] = {
     "wikidata_linked_mesh_locations": [WIKIDATA_LINKED_MESH_SOURCE_MOCK_RESPONSE],
     "catalogue_concepts": [],
     "catalogue_works": [],
+    "catalogue_work_identifiers": [],
 }
 
 
@@ -169,6 +170,7 @@ def test_lambda_handler(
         "wikidata_linked_mesh_locations": [WIKIDATA_SPARQL_URL],
         "catalogue_concepts": [],
         "catalogue_works": [],
+        "catalogue_work_identifiers": [],
     }
 
     assert transformer_type in transformer_types
