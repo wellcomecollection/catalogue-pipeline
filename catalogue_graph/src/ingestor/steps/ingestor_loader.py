@@ -14,7 +14,10 @@ from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from elasticsearch_transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
-from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
+from ingestor.steps.ingestor_indexer import (
+    IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
+)
 from models.ingestor.concept import MissingLabelError, RawNeptuneConcept
 from models.ingestor.indexable_concept import (
     IndexableConcept,

@@ -3,8 +3,11 @@ import json
 import pytest
 from test_mocks import MockCloudwatchClient, MockSmartOpen
 
-from ingestor_indexer import IngestorIndexerLambdaEvent, IngestorIndexerObject
-from ingestor_loader_monitor import (
+from ingestor.steps.ingestor_indexer import (
+    IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
+)
+from ingestor.steps.ingestor_loader_monitor import (
     IngestorLoaderMonitorConfig,
     IngestorLoaderMonitorLambdaEvent,
     handler,

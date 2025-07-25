@@ -9,7 +9,9 @@ from pydantic import BaseModel
 
 import utils.elasticsearch
 from config import INGESTOR_PIPELINE_DATE
-from ingestor_indexer_monitor import IngestorIndexerMonitorLambdaEvent
+from ingestor.steps.ingestor_indexer_monitor import (
+    IngestorIndexerMonitorLambdaEvent,
+)
 from models.ingestor.indexable_concept import IndexableConcept
 from utils.aws import df_from_s3_parquet
 

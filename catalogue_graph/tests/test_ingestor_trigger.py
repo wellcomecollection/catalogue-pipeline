@@ -2,9 +2,15 @@ import pytest
 from freezegun import freeze_time
 from test_mocks import MockRequest
 
-from ingestor_loader import IngestorLoaderLambdaEvent
-from ingestor_trigger import IngestorTriggerConfig, IngestorTriggerLambdaEvent, handler
-from ingestor_trigger_monitor import IngestorTriggerMonitorLambdaEvent
+from ingestor.steps.ingestor_loader import IngestorLoaderLambdaEvent
+from ingestor.steps.ingestor_trigger import (
+    IngestorTriggerConfig,
+    IngestorTriggerLambdaEvent,
+    handler,
+)
+from ingestor.steps.ingestor_trigger_monitor import (
+    IngestorTriggerMonitorLambdaEvent,
+)
 
 
 def get_mock_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:

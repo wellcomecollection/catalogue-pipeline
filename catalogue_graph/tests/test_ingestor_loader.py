@@ -6,8 +6,8 @@ import pytest
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_json_fixture
 
-from ingestor_indexer import IngestorIndexerLambdaEvent
-from ingestor_loader import (
+from ingestor.steps.ingestor_indexer import IngestorIndexerLambdaEvent
+from ingestor.steps.ingestor_loader import (
     IngestorIndexerObject,
     IngestorLoaderConfig,
     IngestorLoaderLambdaEvent,
