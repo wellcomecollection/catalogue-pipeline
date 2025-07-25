@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from models.graph_node import ConceptType
-from models.ingestor.indexable import DisplayIdentifier
+from ingestor.models.indexable import DisplayIdentifier
+from shared.types import ConceptType
 
 
 class ConceptDescription(BaseModel):

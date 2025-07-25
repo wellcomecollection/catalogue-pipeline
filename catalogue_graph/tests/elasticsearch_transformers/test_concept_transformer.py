@@ -1,14 +1,11 @@
 from test_utils import load_json_fixture
 
-from elasticsearch_transformers.concepts_transformer import (
-    ElasticsearchConceptsTransformer,
-)
-from models.ingestor.concept import (
+from ingestor.models.concept import (
     RawNeptuneConcept,
     get_most_specific_concept_type,
 )
-from models.ingestor.indexable import DisplayIdentifier, DisplayIdentifierType
-from models.ingestor.indexable_concept import (
+from ingestor.models.indexable import DisplayIdentifier, DisplayIdentifierType
+from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptDisplay,
     ConceptIdentifier,
@@ -17,7 +14,10 @@ from models.ingestor.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from models.ingestor.related_concepts import RawNeptuneRelatedConcepts
+from ingestor.models.related_concepts import RawNeptuneRelatedConcepts
+from ingestor.transformers.concepts_transformer import (
+    ElasticsearchConceptsTransformer,
+)
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": {},

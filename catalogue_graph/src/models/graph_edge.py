@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from models.graph_node import ConceptType
+from shared.types import ConceptType
 from utils.types import WorkConceptKey
 
 

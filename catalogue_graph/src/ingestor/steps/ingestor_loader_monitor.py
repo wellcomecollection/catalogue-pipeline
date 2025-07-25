@@ -2,7 +2,7 @@ import typing
 
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor_indexer import IngestorIndexerLambdaEvent
+from ingestor.steps.ingestor_indexer import IngestorIndexerLambdaEvent
 from models.step_events import IngestorMonitorStepEvent
 from utils.reporting import LoaderReport
 from utils.safety import validate_fractional_change

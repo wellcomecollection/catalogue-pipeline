@@ -1,10 +1,10 @@
-from models.graph_node import ConceptType
-from models.ingestor.display.identifier import get_display_identifier
-from models.ingestor.indexable import DisplayIdentifier
-from models.ingestor.indexable_concept import (
+from ingestor.models.display.identifier import get_display_identifier
+from ingestor.models.indexable import DisplayIdentifier
+from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
+from shared.types import ConceptType
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY = [

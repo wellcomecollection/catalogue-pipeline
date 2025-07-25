@@ -4,7 +4,7 @@ from test_mocks import MockSmartOpen, fixed_datetime
 from test_utils import load_fixture
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor_reporter import (
+from ingestor.steps.ingestor_reporter import (
     ReporterConfig,
     get_ingestor_report,
 )
@@ -50,7 +50,9 @@ def test_get_ingestor_report_success(
     reporter_event: IngestorStepEvent,
     reporter_config: ReporterConfig,
 ) -> None:
-    monkeypatch.setattr("ingestor_reporter.datetime", fixed_datetime(2024, 1, 6))
+    monkeypatch.setattr(
+        "ingestor.steps.ingestor_reporter.datetime", fixed_datetime(2024, 1, 6)
+    )
 
     MockSmartOpen.mock_s3_file(
         f"{s3_url}/{job_id}/report.trigger.json",

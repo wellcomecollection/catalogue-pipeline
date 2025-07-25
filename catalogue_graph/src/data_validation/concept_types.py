@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.graph_node import ConceptType
+from shared.types import ConceptType
 from utils.aws import get_neptune_client
 
 CONCEPT_TYPES_QUERY_LIMIT = 20000

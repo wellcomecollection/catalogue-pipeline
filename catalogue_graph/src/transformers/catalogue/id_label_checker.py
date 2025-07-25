@@ -2,7 +2,7 @@ import os
 from collections import defaultdict
 from itertools import product
 
-from models.graph_node import ConceptSource, ConceptType
+from shared.types import ConceptSource, ConceptType
 from utils.aws import NodeType, OntologyType, fetch_transformer_output_from_s3
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")

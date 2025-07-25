@@ -2,6 +2,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, StringConstraints
 
+from shared.types import ConceptSource, WorkType
+
 # Matches a Wikidata date, such as 1976-01-01T00:00:00Z or -0005-12-12T00:00:00Z
 WIKIDATA_DATE_PATTERN = r"-?\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ"
 FormattedDateString = Annotated[str, StringConstraints(pattern=WIKIDATA_DATE_PATTERN)]
@@ -38,32 +40,9 @@ class SourceName(SourceConcept):
     place_of_birth: str | None = None
 
 
-# Catalogue concepts have a specific type and source
-# This list should be kept in sync with the one defined in
-# `pipeline/id_minter/src/main/scala/weco/pipeline/id_minter/steps/IdentifierGenerator.scala`
-ConceptType = Literal[
-    "Person",
-    "Concept",
-    "Organisation",
-    "Place",
-    "Agent",
-    "Meeting",
-    "Genre",
-    "Period",
-    "Subject",
-]
-
-ConceptSource = Literal[
-    "label-derived", "nlm-mesh", "lc-subjects", "lc-names", "viaf", "fihrist"
-]
-
-
 # The `id` field stores a canonical Wellcome identifier
 class Concept(BaseNode):
     source: ConceptSource
-
-
-WorkType = Literal["Work", "Series", "Section", "Collection"]
 
 
 class Work(BaseNode):
