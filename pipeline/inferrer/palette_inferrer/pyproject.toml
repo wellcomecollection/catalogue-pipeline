@@ -17,9 +17,11 @@ inferrer-common = { path = "../common" }
 
 [tool.pytest.ini_options]
 pythonpath = "app"
+testpaths = "test"
 
 
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
+    "httpx",
 ]
