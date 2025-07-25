@@ -25,4 +25,5 @@ testpaths = "test"
 [dependency-groups]
 dev = [
     "pytest>=8.3.5",
+    "httpx",
 ]
