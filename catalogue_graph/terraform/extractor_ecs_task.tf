@@ -7,7 +7,7 @@ module "extractor_ecs_task" {
 
   task_name = "${local.namespace}_extractor"
 
-  image = "${aws_ecr_repository.catalogue_graph_extractor.repository_url}:dev"
+  image = "${aws_ecr_repository.catalogue_graph_extractor.repository_url}:prod"
 
   environment = {
     S3_BULK_LOAD_BUCKET_NAME    = aws_s3_bucket.neptune_bulk_upload_bucket.bucket
