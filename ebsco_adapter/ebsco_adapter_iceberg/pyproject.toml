@@ -7,7 +7,6 @@ requires-python = ">=3.13"
 dependencies = [
     "boto3>=1.39.10",
     "lxml>=6.0.0",
-    "lxml-stubs>=0.5.1",
     "mypy>=1.16.1",
     "pyarrow>=20.0.0",
     "pyiceberg[sql-sqlite]>=0.9.1",
