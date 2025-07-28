@@ -107,7 +107,6 @@ source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
     { name = "lxml" },
-    { name = "lxml-stubs" },
     { name = "mypy" },
     { name = "pyarrow" },
     { name = "pyiceberg", extra = ["sql-sqlite"] },
@@ -128,7 +127,6 @@ test = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.39.10" },
     { name = "lxml", specifier = ">=6.0.0" },
-    { name = "lxml-stubs", specifier = ">=0.5.1" },
     { name = "mypy", specifier = ">=1.16.1" },
     { name = "pyarrow", specifier = ">=20.0.0" },
     { name = "pyiceberg", extras = ["sql-sqlite"], specifier = ">=0.9.1" },
