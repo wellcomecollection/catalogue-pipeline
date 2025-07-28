@@ -50,10 +50,16 @@ def handler(
         transformer.stream_to_sns(topic_arn, entity_type, sample_size)
     elif stream_destination == "local":
         file_name = f"{transformer_type}__{entity_type}.csv"
-        transformer.stream_to_local_file(file_name, entity_type, sample_size)
+        file_path = transformer.stream_to_local_file(
+            file_name, entity_type, sample_size
+        )
+        print(f"Data streamed to local file: {file_path}")
     elif stream_destination == "void":
         for _ in transformer.stream(entity_type, sample_size):
             pass
+        # Stop processing to ensure threads are terminated when sample_size is reached
+        if sample_size is not None:
+            transformer.source.stop_processing()
     else:
         raise ValueError("Unsupported stream destination.")
 
@@ -104,7 +110,11 @@ def local_handler() -> None:
         type=int,
         help="How many entities to stream. If not specified, streaming will continue until the source is exhausted.",
     )
-    parser.add_argument("--is-local", type=bool, required=False, default=False)
+    parser.add_argument(
+        "--is-local",
+        action="store_true",
+        help="Whether to run the handler in local mode",
+    )
     args = parser.parse_args()
 
     handler(**args.__dict__)
