@@ -3,13 +3,25 @@ FROM python:${PYTHON_IMAGE_VERSION} AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"
 
-ADD .python-version /app/.python-version
-ADD pyproject.toml /app/pyproject.toml
-ADD uv.lock /app/uv.lock
-ADD src /app/src
-
+# Set working directory
 WORKDIR /app
 
-RUN pip install uv && uv sync --no-dev
+# Copy dependency files
+COPY pyproject.toml uv.lock ./
 
-ENTRYPOINT [ "/app/src/extractor.py" ]
+# Install uv and dependencies
+RUN pip install uv && \
+    uv sync --no-dev && \
+    uv export --no-dev --format requirements-txt > requirements.txt && \
+    pip install --no-deps -r requirements.txt
+
+# Copy application source code
+COPY src/ ./src/
+
+# Make the extractor script executable
+RUN chmod +x src/extractor.py
+
+# Set Python path to include src directory
+ENV PYTHONPATH="/app/src"
+
+ENTRYPOINT [ "python", "/app/src/extractor.py" ]

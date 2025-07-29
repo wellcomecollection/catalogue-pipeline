@@ -11,7 +11,7 @@ dependencies = [
     "backoff",
     "smart-open",
     "polars",
-    "elasticsearch",
+    "elasticsearch>=8.11,<8.13",
     "tabulate",
     "types-tabulate",
     "boto3-stubs",
