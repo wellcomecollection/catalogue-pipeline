@@ -12,7 +12,7 @@ FormattedDateString = Annotated[str, StringConstraints(pattern=WIKIDATA_DATE_PAT
 # Each node must have a label and an id
 class BaseNode(BaseModel):
     id: str
-    label: str
+    label: str | None
 
 
 # Represents a LoC, MeSH, or Wikidata concept.
@@ -48,3 +48,7 @@ class Concept(BaseNode):
 class Work(BaseNode):
     type: WorkType
     alternative_labels: list[str]
+
+
+class PathIdentifier(BaseNode):
+    pass

@@ -106,3 +106,17 @@ class WorkHasConcept(BaseEdge):
     to_type: str = "Concept"
     relationship: str = "HAS_CONCEPT"
     directed: bool = True
+
+
+class PathIdentifierHasParent(BaseEdge):
+    from_type: str = "PathIdentifier"
+    to_type: str = "PathIdentifier"
+    relationship: str = "HAS_PARENT"
+    directed: bool = True
+
+
+class WorkHasPathIdentifier(BaseEdge):
+    from_type: str = "Work"
+    to_type: str = "PathIdentifier"
+    relationship: str = "HAS_PATH_IDENTIFIER"
+    directed: bool = True

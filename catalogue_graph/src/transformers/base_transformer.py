@@ -135,6 +135,10 @@ class BaseTransformer:
         with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
             self._stream_to_bulk_load_file(f, entity_type, sample_size)
 
+        # Stop processing to ensure threads are terminated when sample_size is reached
+        if sample_size is not None:
+            self.source.stop_processing()
+
     def stream_to_graph(
         self,
         neptune_client: BaseNeptuneClient,
@@ -171,6 +175,10 @@ class BaseTransformer:
                 for chunk in islice(chunks, len(done)):
                     futures.add(executor.submit(run_query, chunk))
 
+        # Stop processing to ensure threads are terminated when sample_size is reached
+        if sample_size is not None:
+            self.source.stop_processing()
+
     def stream_to_sns(
         self, topic_arn: str, entity_type: EntityType, sample_size: int | None = None
     ) -> None:
@@ -195,6 +203,10 @@ class BaseTransformer:
         if len(queries) > 0:
             publish_batch_to_sns(topic_arn, queries)
 
+        # Stop processing to ensure threads are terminated when sample_size is reached
+        if sample_size is not None:
+            self.source.stop_processing()
+
     def stream(
         self, entity_type: EntityType, sample_size: int | None = None
     ) -> Generator:
@@ -205,7 +217,7 @@ class BaseTransformer:
 
     def stream_to_local_file(
         self, file_name: str, entity_type: EntityType, sample_size: int | None = None
-    ) -> None:
+    ) -> str:
         """
         Streams transformed entities (nodes or edges) into the local `transformer_outputs` folder.
         Useful for development and testing purposes.
@@ -214,3 +226,9 @@ class BaseTransformer:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             self._stream_to_bulk_load_file(f, entity_type, sample_size)
+
+        # Stop processing to ensure threads are terminated when sample_size is reached
+        if sample_size is not None:
+            self.source.stop_processing()
+
+        return file_path

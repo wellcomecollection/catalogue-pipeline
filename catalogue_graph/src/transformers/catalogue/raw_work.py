@@ -60,3 +60,63 @@ class RawCatalogueWork:
                 )
 
         return work_concepts
+
+    @property
+    def identifiers(self) -> list[str]:
+        source_identifier = self.work_state["sourceIdentifier"]
+        other_identifiers = self.work_data.get("otherIdentifiers", [])
+
+        all_identifiers = [source_identifier] + other_identifiers
+        return [i["value"] for i in all_identifiers]
+
+    @property
+    def raw_path(self) -> str | None:
+        path: str | None = self.work_data.get("collectionPath", {}).get("path")
+
+        if path is None or len(path) == 0:
+            return None
+
+        return path
+
+    @property
+    def path(self) -> str | None:
+        if self.raw_path is None:
+            return None
+
+        # A small number of works have a trailing slash in their collection path which must be removed
+        # to correctly extract parent path identifiers
+        return self.raw_path.rstrip("/")
+
+    @property
+    def path_identifier(self) -> str | None:
+        if self.path is None:
+            return None
+
+        # All works which are part of a hierarchy have a corresponding 'path identifier' node representing
+        # its position in the hierarchy. In most (but not all) cases, the path identifier equals the work's
+        # source identifier or one of its other identifiers.
+
+        # Path identifiers are extracted from the work's collection path. In most cases, the collection path exactly
+        # matches the work's Calm ref identifier. In such cases, the path identifier should also match the collection
+        # path.
+        for identifier in self.identifiers:
+            if identifier == self.raw_path:
+                return self.path
+
+        # In all other cases, the collection path consists of slash-separated 'fragments', each of which represents
+        # a path identifier. The last fragment represents the path identifier of the current work, with other
+        # fragments representing its ancestors (e.g. grandparentId/parentId/childId).
+        path_fragments = self.path.split("/")
+        return path_fragments[-1]
+
+    @property
+    def parent_path_identifier(self) -> str | None:
+        if self.path is None or "/" not in self.path:
+            return None
+
+        path_fragments = self.path.split("/")
+        for identifier in self.identifiers:
+            if identifier == self.raw_path:
+                return "/".join(path_fragments[:-1])
+
+        return path_fragments[-2]
