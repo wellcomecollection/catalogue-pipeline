@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [tool.uv]
-package = false
+package = true
 
 [dependency-groups]
 dev = [
@@ -29,6 +29,8 @@ dev = [
     "pytest-cov",
     "freezegun",
     "ruff",
+    "ipykernel>=6.30.0",
+    "pandas>=2.3.1",
 ]
 
 [tool.pytest.ini_options]
