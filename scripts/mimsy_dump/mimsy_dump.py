@@ -129,6 +129,7 @@ def main():
     parser.add_argument(
         "--no-zip", action="store_true", help="Skip creating a ZIP file"
     )
+
     parser.add_argument(
         "--views",
         nargs="*",
@@ -141,6 +142,12 @@ def main():
             "VW_CONSERVATION_STATUS",
             "VW_CONDITION",
             "VW_LOAN_ITEMS",
+            "VW_VALUATION",
+            "VW_TIMELINE",
+            "VW_LOCATION",
+            "VW_OTHER_MEASUREMENTS",
+            "VW_MEDIA_DESCRIPTORS",
+            "VW_MEASURED_ONLY",
         ],
         help="List of views to dump (default: all interesting views)",
     )
