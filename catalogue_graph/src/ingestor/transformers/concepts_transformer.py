@@ -1,11 +1,11 @@
-from models.ingestor.concept import RawNeptuneConcept
-from models.ingestor.indexable_concept import (
+from ingestor.models.concept import RawNeptuneConcept
+from ingestor.models.indexable_concept import (
     ConceptDisplay,
     ConceptQuery,
     IndexableConcept,
     RelatedConcepts,
 )
-from models.ingestor.related_concepts import RawNeptuneRelatedConcepts
+from ingestor.models.related_concepts import RawNeptuneRelatedConcepts
 
 
 class ElasticsearchConceptsTransformer:

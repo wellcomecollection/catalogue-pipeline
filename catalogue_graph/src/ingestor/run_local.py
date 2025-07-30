@@ -2,37 +2,37 @@
 
 import argparse
 
-from ingestor_indexer import (
+from ingestor.steps.ingestor_indexer import (
     IngestorIndexerConfig,
 )
-from ingestor_indexer import (
+from ingestor.steps.ingestor_indexer import (
     handler as indexer_handler,
 )
-from ingestor_loader import IngestorLoaderConfig
-from ingestor_loader import handler as loader_handler
-from ingestor_loader_monitor import (
+from ingestor.steps.ingestor_loader import IngestorLoaderConfig
+from ingestor.steps.ingestor_loader import handler as loader_handler
+from ingestor.steps.ingestor_loader_monitor import (
     IngestorLoaderMonitorConfig,
     IngestorLoaderMonitorLambdaEvent,
 )
-from ingestor_loader_monitor import (
+from ingestor.steps.ingestor_loader_monitor import (
     handler as loader_monitor_handler,
 )
-from ingestor_trigger import (
+from ingestor.steps.ingestor_trigger import (
     IngestorTriggerConfig,
     IngestorTriggerLambdaEvent,
 )
-from ingestor_trigger import (
+from ingestor.steps.ingestor_trigger import (
     handler as trigger_handler,
 )
-from ingestor_trigger_monitor import (
+from ingestor.steps.ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
 )
-from ingestor_trigger_monitor import (
+from ingestor.steps.ingestor_trigger_monitor import (
     handler as trigger_monitor_handler,
 )
 
 
-# Run the whole pipeline locally, Usage: python src/ingestor_local.py --pipeline-date 2021-07-01 --index-date 2021-07-01 --job-id 123
+# Run the whole pipeline locally, Usage: python src/ingestor/run_local.py --pipeline-date 2021-07-01 --index-date 2021-07-01 --job-id 123
 def main() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(

@@ -1,10 +1,11 @@
 from functools import wraps
 import time
+from typing import Any, Callable
 
 
-def timeit(func):
+def timeit(func: Callable[..., Any]) -> Callable[..., Any]:
     @wraps(func)
-    def timeit_wrapper(*args, **kwargs):
+    def timeit_wrapper(*args: Any, **kwargs: Any) -> Any:
         start_time = time.perf_counter()
         result = func(*args, **kwargs)
         end_time = time.perf_counter()

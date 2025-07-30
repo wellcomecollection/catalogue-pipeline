@@ -6,15 +6,8 @@ import pytest
 from test_mocks import MockRequest, MockSmartOpen
 from test_utils import load_json_fixture
 
-from ingestor_indexer import IngestorIndexerLambdaEvent
-from ingestor_loader import (
-    IngestorIndexerObject,
-    IngestorLoaderConfig,
-    IngestorLoaderLambdaEvent,
-    handler,
-)
-from models.ingestor.indexable import DisplayIdentifier, DisplayIdentifierType
-from models.ingestor.indexable_concept import (
+from ingestor.models.indexable import DisplayIdentifier, DisplayIdentifierType
+from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptDisplay,
     ConceptIdentifier,
@@ -22,6 +15,13 @@ from models.ingestor.indexable_concept import (
     ConceptRelatedTo,
     IndexableConcept,
     RelatedConcepts,
+)
+from ingestor.steps.ingestor_indexer import IngestorIndexerLambdaEvent
+from ingestor.steps.ingestor_loader import (
+    IngestorIndexerObject,
+    IngestorLoaderConfig,
+    IngestorLoaderLambdaEvent,
+    handler,
 )
 from queries.concept_queries import (
     CONCEPT_QUERY,

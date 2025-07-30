@@ -1,5 +1,5 @@
 services:
-  extractor:
+  catalogue_graph_extractor:
     image: ${REPOSITORY_PREFIX:-}catalogue_graph_extractor:${TAG:-dev}
     platform: linux/amd64
     build:
