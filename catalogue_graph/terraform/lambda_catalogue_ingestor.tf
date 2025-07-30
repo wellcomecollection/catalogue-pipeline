@@ -14,7 +14,7 @@ module "ingestor_trigger_lambda" {
 
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_trigger.lambda_handler"
+  handler     = "ingestor.steps.ingestor_trigger.lambda_handler"
   memory_size = 1024
   timeout     = 300
   vpc_config = {
@@ -53,7 +53,7 @@ module "ingestor_trigger_monitor_lambda" {
 
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_trigger_monitor.lambda_handler"
+  handler     = "ingestor.steps.ingestor_trigger_monitor.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -99,7 +99,7 @@ module "ingestor_loader_lambda" {
 
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_loader.lambda_handler"
+  handler     = "ingestor.steps.ingestor_loader.lambda_handler"
   memory_size = 1024
   timeout     = 900
 
@@ -151,7 +151,7 @@ module "ingestor_loader_monitor_lambda" {
 
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_loader_monitor.lambda_handler"
+  handler     = "ingestor.steps.ingestor_loader_monitor.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -197,7 +197,7 @@ module "ingestor_indexer_lambda" {
 
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_indexer.lambda_handler"
+  handler     = "ingestor.steps.ingestor_indexer.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -243,7 +243,7 @@ module "ingestor_indexer_monitor_lambda" {
 
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_indexer_monitor.lambda_handler"
+  handler     = "ingestor.steps.ingestor_indexer_monitor.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -289,7 +289,7 @@ module "ingestor_deletions_lambda" {
 
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_deletions.lambda_handler"
+  handler     = "ingestor.steps.ingestor_deletions.lambda_handler"
   memory_size = 1024
   timeout     = 60 // 1 minute
 
@@ -346,7 +346,7 @@ module "ingestor_reporter_lambda" {
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
   filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor_reporter.lambda_handler"
+  handler     = "ingestor.steps.ingestor_reporter.lambda_handler"
   memory_size = 128
   timeout     = 300
 

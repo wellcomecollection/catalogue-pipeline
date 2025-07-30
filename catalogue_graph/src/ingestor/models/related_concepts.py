@@ -1,4 +1,4 @@
-from models.ingestor.indexable_concept import ConceptRelatedTo
+from ingestor.models.indexable_concept import ConceptRelatedTo
 
 from .concept import (
     DISPLAY_SOURCE_PRIORITY,
