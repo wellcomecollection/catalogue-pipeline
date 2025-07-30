@@ -1,5 +1,5 @@
 # notebooks
 notebooks/*
-!notebooks/graph_exploration.ipynb
+!notebooks/query.ipynb
 
 transformer_outputs/*
