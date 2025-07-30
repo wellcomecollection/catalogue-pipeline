@@ -24,4 +24,6 @@ RUN chmod +x src/extractor.py
 # Set Python path to include src directory
 ENV PYTHONPATH="/app/src"
 
+FROM base AS catalogue_graph_extractor
+
 ENTRYPOINT [ "python", "/app/src/extractor.py" ]
