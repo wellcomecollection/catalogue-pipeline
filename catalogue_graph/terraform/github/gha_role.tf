@@ -21,6 +21,7 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
   statement {
     actions = [
       "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
       "ecr:Describe*",
       "ecr:Get*",
       "ecr:List*",
