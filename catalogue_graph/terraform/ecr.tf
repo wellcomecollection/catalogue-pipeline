@@ -52,9 +52,10 @@ resource "aws_ecr_lifecycle_policy" "expire_old_images" {
         rulePriority = 4
         description  = "Expire other tagged images, keep only the last 50"
         selection = {
-          tagStatus   = "tagged"
-          countType   = "imageCountMoreThan"
-          countNumber = 50
+          tagStatus      = "tagged"
+          tagPatternList = ["*"]
+          countType      = "imageCountMoreThan"
+          countNumber    = 50
         }
         action = {
           type = "expire"
