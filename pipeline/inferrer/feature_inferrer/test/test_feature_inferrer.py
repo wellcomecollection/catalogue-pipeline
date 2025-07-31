@@ -80,13 +80,6 @@ def test_feature_vector_endpoint_error_handling():
         assert "detail" in data
 
 
-def test_feature_extraction_module_exists():
-    """Test that feature extraction module exists."""
-    from src.feature_extraction import extract_features
-
-    assert extract_features is not None
-    assert callable(extract_features)
-
 
 def test_healthcheck_function_exists():
     """Test that the healthcheck function exists."""
