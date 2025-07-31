@@ -79,6 +79,7 @@ def test_feature_vector_endpoint_error_handling():
         data = response.json()
         assert "detail" in data
 
+
 def test_feature_extraction_module_exists():
     """Test that feature extraction module exists."""
     from src.feature_extraction import extract_features
