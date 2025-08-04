@@ -34,7 +34,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--job-id",
         type=str,
-        help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
+        help="The ID of the job to process.",
         required=False,
     )
     parser.add_argument(
