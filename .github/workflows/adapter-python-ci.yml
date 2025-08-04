@@ -46,6 +46,7 @@ jobs:
           role_to_assume: ${{ secrets.EBSCO_ADAPTER_CI_ROLE_ARN }}
 
   deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [build-lambda-zip]
     uses: ./.github/workflows/adapter-python-deploy.yml
     with:
