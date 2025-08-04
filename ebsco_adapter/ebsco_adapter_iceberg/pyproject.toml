@@ -25,7 +25,7 @@ test = [
 ]
 
 [tool.pytest.ini_options]
-pythonpath = "app"
+pythonpath = "src"
 
 [tool.mypy]
 strict_optional = true
