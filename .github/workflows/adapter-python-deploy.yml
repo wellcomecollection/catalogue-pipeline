@@ -31,7 +31,7 @@ jobs:
           [
             {
               3_prefix: lambdas/ebsco_adapter/ebsco_adapter_iceberg,
-              lambda_name: ebsco-adapter-iceberg,
+              lambda_name: ebsco-adapter-trigger,
             }
           ]
     steps:
