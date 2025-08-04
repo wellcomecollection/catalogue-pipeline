@@ -38,6 +38,7 @@ uv pip install \
     -r "$TARGET_DIR/requirements.txt" \
     --python-platform x86_64-manylinux2014 \
     --target "$TMP_DIR" \
+    --only-binary=:all: \
     --python-version "$PY_VERSION"
 
 # Create ZIP file
