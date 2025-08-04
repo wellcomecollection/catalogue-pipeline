@@ -5,8 +5,8 @@ Tests covering the update behaviour of the iceberg ebsco adapter
 from typing import Any
 
 import pyarrow as pa
-from helpers import assert_row_identifiers
-from helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
+from .helpers import assert_row_identifiers
+from .helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
 from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 

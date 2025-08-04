@@ -68,12 +68,10 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 mypy_path = "src"
+explicit_package_bases = true
+namespace_packages = true
 
 # Ignore untyped imports for external libraries without stubs
 [[tool.mypy.overrides]]
 module = ["pyarrow.*", "boto3.*", "smart_open.*"]
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = ["smart_open.*"]
 ignore_missing_imports = true

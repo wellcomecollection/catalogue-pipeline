@@ -1,8 +1,9 @@
 import argparse
 from typing import Any
 
-from steps.loader import EbscoAdapterLoaderEvent
 from pydantic import BaseModel
+
+from steps.loader import EbscoAdapterLoaderEvent
 
 
 class EbscoAdapterTriggerConfig(BaseModel):

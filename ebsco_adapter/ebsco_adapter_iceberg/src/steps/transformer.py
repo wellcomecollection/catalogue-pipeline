@@ -71,11 +71,11 @@ def handler(
 def lambda_handler(event: EbscoAdapterTransformerEvent, context: Any) -> dict[str, Any]:
     """
     Lambda handler for the transformer step.
-    
+
     Args:
         event: Lambda event containing loader output
         context: Lambda context object
-        
+
     Returns:
         Dictionary containing transformation results
     """
