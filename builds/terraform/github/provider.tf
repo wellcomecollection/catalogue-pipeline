@@ -1,3 +1,11 @@
+provider "aws" {
+  region = "eu-west-1"
+
+  assume_role {
+    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+  }
+}
+
 # Configure the GitHub Provider
 # Create a fine-grained personal access token in Github:
 # Go to your Github account > Settings > Developer settings > PAT > Fine-grained tokens

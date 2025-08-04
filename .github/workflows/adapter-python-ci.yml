@@ -43,4 +43,4 @@ jobs:
           s3_bucket: wellcomecollection-platform-infra
           s3_prefix: lambdas/${{matrix.project}}
           s3_tag: ${{ github.sha }}
-          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          role_to_assume: ${{ secrets.EBSCO_ADAPTER_CI_ROLE_ARN }}

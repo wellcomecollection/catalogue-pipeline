@@ -13,3 +13,4 @@ resource "aws_s3tables_table" "iceberg_table" {
   table_bucket_arn = aws_s3tables_table_bucket.table_bucket.arn
   format           = "ICEBERG"
 }
+
