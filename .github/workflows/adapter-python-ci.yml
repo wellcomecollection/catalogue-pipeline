@@ -17,13 +17,30 @@ permissions:
   id-token: write
 
 jobs:
-  python-adapter-checks:
+  python-checks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        project: [ebsco_adapter_iceberg]
+        project: [ebsco_adapter/ebsco_adapter_iceberg]
     steps:
       - uses: actions/checkout@v3
       - uses: wellcomecollection/.github/.github/actions/python_check@main
         with:
-          folder: ebsco_adapter/${{matrix.project}}
+          folder: ${{matrix.project}}
+
+  build-lambda-zip:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        project: [ebsco_adapter/ebsco_adapter_iceberg]
+    needs: [python-checks]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/build-lambda-zip
+        with:
+          folder: ${{matrix.project}}
+          upload_to_s3: true
+          s3_bucket: wellcomecollection-platform-infra
+          s3_prefix: lambdas/${{matrix.project}}
+          s3_tag: ${{ github.sha }}
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
