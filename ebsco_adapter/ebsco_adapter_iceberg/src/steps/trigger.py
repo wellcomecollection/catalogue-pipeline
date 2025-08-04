@@ -1,5 +1,7 @@
 import argparse
 from typing import Any
+
+from steps.loader import EbscoAdapterLoaderEvent
 from pydantic import BaseModel
 
 
@@ -11,10 +13,6 @@ class EbscoAdapterTriggerEvent(BaseModel):
     job_id: str | None = None
 
 
-class EbscoAdapterLoaderEvent(BaseModel):
-    s3_location: str
-
-
 def handler(
     event: EbscoAdapterTriggerEvent, config: EbscoAdapterTriggerConfig
 ) -> EbscoAdapterLoaderEvent:
@@ -23,7 +21,7 @@ def handler(
     return EbscoAdapterLoaderEvent(s3_location="s3://bucket/path/to/file")
 
 
-def lambda_handler(event: EbscoAdapterTriggerEvent, context: Any) -> dict:
+def lambda_handler(event: EbscoAdapterTriggerEvent, context: Any) -> dict[str, Any]:
     return handler(
         EbscoAdapterTriggerEvent.model_validate(event), EbscoAdapterTriggerConfig()
     ).model_dump()
@@ -51,6 +49,11 @@ def local_handler() -> None:
     handler(event=event, config=config)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Entry point for the trigger script"""
     print("Running local handler...")
     local_handler()
+
+
+if __name__ == "__main__":
+    main()

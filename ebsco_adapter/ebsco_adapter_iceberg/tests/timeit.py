@@ -1,6 +1,7 @@
-from functools import wraps
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from functools import wraps
+from typing import Any
 
 
 def timeit(func: Callable[..., Any]) -> Callable[..., Any]:

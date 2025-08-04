@@ -3,6 +3,8 @@ name = "ebsco-adapter-iceberg"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
+# This project requires Python 3.12 instead of 3.13
+# Wheels for pyarrow and pyiceberg are not available for 3.13 yet (as of August 2025)
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "boto3>=1.39.10",
@@ -15,6 +17,9 @@ dependencies = [
     "tqdm>=4.67.1",
 ]
 
+[tool.uv]
+package = true
+
 [dependency-groups]
 dev = [
     "lxml-stubs>=0.5.1",
@@ -24,8 +29,31 @@ test = [
     "mypy>=1.16.1",
 ]
 
+
 [tool.pytest.ini_options]
 pythonpath = "src"
+testpaths = "tests"
+filterwarnings = "ignore::DeprecationWarning"
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = [
+    # pycodestyle
+    "E",
+    # Pyflakes
+    "F",
+    # pyupgrade
+    "UP",
+    # flake8-bugbear
+    "B",
+    # flake8-simplify
+    "SIM",
+    # isort
+    "I"
+]
+ignore = ["E501", "B019"]
 
 [tool.mypy]
 strict_optional = true
@@ -39,5 +67,13 @@ warn_no_return = true
 warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
+mypy_path = "src"
 
+# Ignore untyped imports for external libraries without stubs
+[[tool.mypy.overrides]]
+module = ["pyarrow.*", "boto3.*", "smart_open.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["smart_open.*"]
 ignore_missing_imports = true

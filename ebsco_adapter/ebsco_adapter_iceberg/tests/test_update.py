@@ -2,20 +2,20 @@
 Tests covering the update behaviour of the iceberg ebsco adapter
 """
 
-from typing import List, Dict, Any
+from typing import Any
+
 import pyarrow as pa
+from helpers import assert_row_identifiers
+from helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
+from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 
 from iceberg_updates import update_table
-from pyiceberg.expressions import Not, IsNull, EqualTo, In
-
 from schemata import ARROW_SCHEMA
-from helpers import assert_row_identifiers
-from helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
 
 
 # Override the default namespace for these tests
-def data_to_namespaced_table(unqualified_data: List[Dict[str, Any]]) -> pa.Table:
+def data_to_namespaced_table(unqualified_data: list[dict[str, Any]]) -> pa.Table:
     return _data_to_namespaced_table_helper(unqualified_data, "ebsco_test")
 
 
