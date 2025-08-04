@@ -43,4 +43,3 @@ module "trigger_lambda" {
     }
   }
 }
-
