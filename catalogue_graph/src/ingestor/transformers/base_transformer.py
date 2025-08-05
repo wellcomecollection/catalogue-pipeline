@@ -22,25 +22,25 @@ class ElasticsearchBaseTransformer:
             "Each Elasticsearch transformer must implement a `transform_document` method."
         )
 
-    def stream_es_documents(self) -> Generator[dict]:
+    def stream_es_documents(self) -> Generator[BaseModel]:
         for raw_item in self.source.extract_raw():
             pydantic_document = self.transform_document(raw_item)
             if pydantic_document:
-                yield pydantic_document.model_dump()
+                yield pydantic_document
 
     def load_documents_to_s3(self, s3_uri: str) -> IngestorIndexerObject:
         print(f"Loading data to '{s3_uri}'...")
 
         es_documents = list(self.stream_es_documents())
+        assert len(es_documents) > 0
 
         transport_params = {"client": boto3.client("s3")}
         with smart_open.open(s3_uri, "wb", transport_params=transport_params) as f:
-            df = pl.DataFrame(es_documents)
+            df = pl.DataFrame(es_documents, infer_schema_length=None)
             df.write_parquet(f)
 
         boto_s3_object = f.to_boto3(boto3.resource("s3"))
         content_length = boto_s3_object.content_length
-        print(f"Data loaded to '{s3_uri}' with content length {content_length}")
 
         assert content_length is not None, "Content length should not be None"
         assert len(df) == len(es_documents), "DataFrame length should match data length"

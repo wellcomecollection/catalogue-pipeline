@@ -1,20 +1,20 @@
 #!/usr/bin/env python
-
 import argparse
 import pprint
 import typing
 from typing import Any
 
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from pydantic import BaseModel
+from utils.types import ElasticsearchTransformerType
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
 )
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
-from utils.types import ElasticsearchTransformerType
+from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 
 
 class IngestorLoaderConfig(BaseModel):
@@ -30,8 +30,8 @@ def create_transformer(
         return ElasticsearchConceptsTransformer(
             event.start_offset, event.end_index, config.is_local
         )
-    # if transformer_type == "works":
-    #     return ElasticsearchWorksTransformer()
+    if event.transformer_type == "works":
+        return ElasticsearchWorksTransformer(event.start_offset, event.end_index, config.is_local)
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
 
@@ -45,7 +45,7 @@ def handler(
 
     filename = f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}"
     s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{filename}.parquet"
-    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}/{s3_object_key}"
+    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.transformer_type}/{s3_object_key}"
 
     transformer = create_transformer(event, config)
     result = transformer.load_documents_to_s3(s3_uri=s3_uri)
@@ -123,3 +123,4 @@ def local_handler() -> None:
 
 if __name__ == "__main__":
     local_handler()
+
