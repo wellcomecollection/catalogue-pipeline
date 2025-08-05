@@ -4,10 +4,9 @@ import pprint
 import typing
 from typing import Any
 
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from pydantic import BaseModel
-from utils.types import ElasticsearchTransformerType
 
+from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -15,6 +14,7 @@ from ingestor.models.step_events import (
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
+from utils.types import ElasticsearchTransformerType
 
 
 class IngestorLoaderConfig(BaseModel):
@@ -31,7 +31,9 @@ def create_transformer(
             event.start_offset, event.end_index, config.is_local
         )
     if event.transformer_type == "works":
-        return ElasticsearchWorksTransformer(event.start_offset, event.end_index, config.is_local)
+        return ElasticsearchWorksTransformer(
+            event.start_offset, event.end_index, config.is_local
+        )
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
 
@@ -123,4 +125,3 @@ def local_handler() -> None:
 
 if __name__ == "__main__":
     local_handler()
-

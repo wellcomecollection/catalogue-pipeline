@@ -13,20 +13,24 @@ from .license import get_display_license
 
 
 def get_display_location(
-        raw_location,
+    raw_location: dict,
 ) -> DisplayDigitalLocation | DisplayPhysicalLocation:
     location_type = raw_location["locationType"]["id"]
     license_id = raw_location.get("license", {}).get("id")
-    is_digital = location_type in DIGITAL_LOCATIONS
+    display_license = get_display_license(license_id) if license_id else None
+
+    access_conditions = [
+        get_display_access_condition(c)
+        for c in raw_location.get("accessConditions", [])
+    ]
 
     location = DisplayLocation(
         locationType=get_display_location_type(location_type),
-        license=get_display_license(license_id) if license_id else None,
-        accessConditions=[
-            get_display_access_condition(c) for c in raw_location["accessConditions"]
-        ],
+        license=display_license,
+        accessConditions=access_conditions,
     )
 
+    is_digital = location_type in DIGITAL_LOCATIONS
     if is_digital:
         return DisplayDigitalLocation(
             **location.dict(),
