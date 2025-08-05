@@ -1,3 +1,4 @@
+from typing import TextIO
 from ingestor.models.concept import RawNeptuneConcept
 from ingestor.models.indexable_concept import (
     ConceptDisplay,
@@ -7,12 +8,19 @@ from ingestor.models.indexable_concept import (
 )
 from ingestor.models.related_concepts import RawNeptuneRelatedConcepts
 
+from ingestor.transformers.concept_override import (
+    ConceptTextOverrider
+)
+
 
 class ElasticsearchConceptsTransformer:
+    def __init__(self, overrides: TextIO | None = None):
+        self.override_provider = ConceptTextOverrider(overrides)
+
     def transform_document(
-        self,
-        neptune_concept: RawNeptuneConcept,
-        neptune_related: RawNeptuneRelatedConcepts,
+            self,
+            neptune_concept: RawNeptuneConcept,
+            neptune_related: RawNeptuneRelatedConcepts,
     ) -> IndexableConcept:
         query = ConceptQuery(
             id=neptune_concept.wellcome_id,
@@ -25,10 +33,10 @@ class ElasticsearchConceptsTransformer:
             id=neptune_concept.wellcome_id,
             identifiers=neptune_concept.display_identifiers,
             label=neptune_concept.label,
-            displayLabel=neptune_concept.display_label,
+            displayLabel=self.override_provider.display_label_of(neptune_concept),
             alternativeLabels=neptune_concept.alternative_labels,
             type=neptune_concept.concept_type,
-            description=neptune_concept.description,
+            description=self.override_provider.description_of(neptune_concept),
             sameAs=neptune_concept.same_as,
             relatedConcepts=RelatedConcepts(
                 relatedTo=neptune_related.related_to,

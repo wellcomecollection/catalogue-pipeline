@@ -1,3 +1,5 @@
+import io
+
 from test_utils import load_json_fixture
 
 from ingestor.models.concept import (
@@ -230,8 +232,8 @@ def test_concept_type_agent_precedence() -> None:
     # Person/Agent/Organisation take precedence over general Concept/Subject types
     assert get_most_specific_concept_type(["Person", "Concept", "Subject"]) == "Person"
     assert (
-        get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
-        == "Organisation"
+            get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
+            == "Organisation"
     )
     assert get_most_specific_concept_type(["Concept", "Subject", "Agent"]) == "Agent"
 
@@ -244,39 +246,39 @@ def test_concept_type_genre_precedence() -> None:
     assert get_most_specific_concept_type(["Agent", "Genre", "Person"]) == "Genre"
     assert get_most_specific_concept_type(["Genre", "Place"]) == "Genre"
     assert (
-        get_most_specific_concept_type(
-            [
-                "Genre",
-                "Place",
-                "Person",
-                "Organisation",
-                "Period",
-                "Meeting",
-                "Agent",
-                "Subject",
-                "Concept",
-            ]
-        )
-        == "Genre"
+            get_most_specific_concept_type(
+                [
+                    "Genre",
+                    "Place",
+                    "Person",
+                    "Organisation",
+                    "Period",
+                    "Meeting",
+                    "Agent",
+                    "Subject",
+                    "Concept",
+                ]
+            )
+            == "Genre"
     )
 
 
 def test_concept_type_place_precedence() -> None:
     # Place has precedence over everything (except for Genre).
     assert (
-        get_most_specific_concept_type(
-            [
-                "Place",
-                "Person",
-                "Organisation",
-                "Period",
-                "Meeting",
-                "Agent",
-                "Subject",
-                "Concept",
-            ]
-        )
-        == "Place"
+            get_most_specific_concept_type(
+                [
+                    "Place",
+                    "Person",
+                    "Organisation",
+                    "Period",
+                    "Meeting",
+                    "Agent",
+                    "Subject",
+                    "Concept",
+                ]
+            )
+            == "Place"
     )
 
     assert get_most_specific_concept_type(["Concept", "Subject", "Place"]) == "Place"
@@ -286,6 +288,63 @@ def test_concept_type_place_precedence() -> None:
     assert get_most_specific_concept_type(["Place", "Person"]) == "Place"
     assert get_most_specific_concept_type(["Place", "Organisation"]) == "Place"
     assert (
-        get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
-        == "Place"
+            get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
+            == "Place"
     )
+
+
+def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> None:
+    mock_concept = load_json_fixture("neptune/concept_query_single.json")
+
+    expected_result = IndexableConcept(
+        query=ConceptQuery(
+            id="id",
+            identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
+            label="LoC label",
+            alternativeLabels=[],
+            type="Person",
+        ),
+        display=ConceptDisplay(
+            id="id",
+            identifiers=[
+                DisplayIdentifier(
+                    value="123",
+                    identifierType=DisplayIdentifierType(
+                        id="lc-names",
+                        label="Library of Congress Name authority records",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
+            label="LoC label",
+            displayLabel="Wellcome Label",
+            alternativeLabels=[],
+            description=ConceptDescription(
+                text="Wellcome Description",
+                sourceLabel="wellcome",
+                sourceUrl="",
+            ),
+            type="Person",
+            sameAs=[],
+            relatedConcepts=RelatedConcepts(
+                relatedTo=[],
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=[],
+                people=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
+            ),
+        ),
+    )
+    transformer = ElasticsearchConceptsTransformer(
+        io.StringIO("""id,label,description
+        id, Wellcome Label, Wellcome Description
+        """)
+    )
+    neptune_concept = RawNeptuneConcept(mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, MOCK_EMPTY_RELATED_CONCEPTS
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
+    assert result == expected_result
