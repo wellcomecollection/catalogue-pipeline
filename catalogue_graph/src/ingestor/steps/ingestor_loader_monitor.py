@@ -2,14 +2,13 @@ import typing
 
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor.steps.ingestor_indexer import IngestorIndexerLambdaEvent
-from models.step_events import IngestorMonitorStepEvent
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorLoaderMonitorLambdaEvent,
+    IngestorMonitorStepEvent,
+)
 from utils.reporting import LoaderReport
 from utils.safety import validate_fractional_change
-
-
-class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
-    events: list[IngestorIndexerLambdaEvent]
 
 
 class IngestorLoaderMonitorConfig(IngestorMonitorStepEvent):

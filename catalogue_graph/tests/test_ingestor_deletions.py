@@ -6,8 +6,8 @@ from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 
 from graph_remover import IDS_LOG_SCHEMA
+from ingestor.models.step_events import IngestorMonitorStepEvent
 from ingestor.steps.ingestor_deletions import lambda_handler
-from models.step_events import IngestorMonitorStepEvent
 
 
 def _mock_es_secrets() -> None:

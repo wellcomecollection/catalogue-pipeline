@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, StringConstraints
 
-from shared.types import ConceptSource, WorkType
+from utils.types import ConceptSource, WorkType
 
 # Matches a Wikidata date, such as 1976-01-01T00:00:00Z or -0005-12-12T00:00:00Z
 WIKIDATA_DATE_PATTERN = r"-?\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ"

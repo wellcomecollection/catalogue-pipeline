@@ -4,7 +4,7 @@ from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
-from shared.types import ConceptType
+from utils.types import ConceptType
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY = [
@@ -111,9 +111,8 @@ def get_most_specific_concept_type(concept_types: list[str]) -> ConceptType:
 
 
 class RawNeptuneConcept:
-    def __init__(self, neptune_concept: dict, all_related_concepts: dict):
+    def __init__(self, neptune_concept: dict):
         self.raw_concept = neptune_concept
-        self.raw_related_concepts = all_related_concepts
 
     @property
     def wellcome_id(self) -> str:

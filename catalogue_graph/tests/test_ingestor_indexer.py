@@ -6,12 +6,11 @@ import pytest
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
 
-from ingestor.steps.ingestor_indexer import (
-    IngestorIndexerConfig,
+from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
-    handler,
 )
+from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
 
 
 def test_ingestor_indexer_success() -> None:

@@ -10,6 +10,10 @@ from typing import Any, TypedDict
 import polars as pl
 from botocore.credentials import Credentials
 
+from ingestor.models.step_events import (
+    IngestorLoaderLambdaEvent,
+    IngestorTriggerLambdaEvent,
+)
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
@@ -373,3 +377,22 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
             return cls(year, month, day)
 
     return FixedDateTime
+
+
+def get_mock_ingestor_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
+    return IngestorTriggerLambdaEvent(
+        pipeline_date="2025-01-01",
+        index_date="2025-03-01",
+        job_id=job_id,
+        transformer_type="concepts",
+    )
+
+
+def get_mock_ingestor_loader_event(
+    job_id: str | None, start_offset: int, end_index: int
+) -> IngestorLoaderLambdaEvent:
+    return IngestorLoaderLambdaEvent(
+        **dict(get_mock_ingestor_trigger_event(job_id)),
+        start_offset=start_offset,
+        end_index=end_index,
+    )

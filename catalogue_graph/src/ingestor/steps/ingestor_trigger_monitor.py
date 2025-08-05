@@ -2,21 +2,18 @@ import typing
 
 from clients.metric_reporter import MetricReporter
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor.steps.ingestor_loader import IngestorLoaderLambdaEvent
-from models.step_events import IngestorMonitorStepEvent
+from ingestor.models.step_events import (
+    IngestorMonitorStepEvent,
+    IngestorTriggerMonitorLambdaEvent,
+)
 from utils.reporting import TriggerReport
 from utils.safety import validate_fractional_change
-
-
-class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
-    events: list[IngestorLoaderLambdaEvent]
 
 
 class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
     ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
     ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
     percentage_threshold: float = 0.1
-
     is_local: bool = False
 
 

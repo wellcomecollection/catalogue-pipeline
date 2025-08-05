@@ -1,9 +1,12 @@
 import json
 
 import pytest
-from test_mocks import MockCloudwatchClient, MockSmartOpen
+from test_mocks import (
+    MockCloudwatchClient,
+    MockSmartOpen,
+    get_mock_ingestor_loader_event,
+)
 
-from ingestor.steps.ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor.steps.ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
     IngestorTriggerMonitorLambdaEvent,
@@ -37,18 +40,6 @@ def get_mock_expected_metric(record_count: int) -> dict:
     }
 
 
-def get_mock_ingestor_loader_event(
-    start_offset: int, end_index: int
-) -> IngestorLoaderLambdaEvent:
-    return IngestorLoaderLambdaEvent(
-        pipeline_date="2025-01-01",
-        index_date="2025-03-01",
-        job_id="123",
-        start_offset=start_offset,
-        end_index=end_index,
-    )
-
-
 def verify_s3_reports(record_count: int) -> None:
     expected_report = get_mock_expected_report(record_count)
 
@@ -65,7 +56,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         index_date="2025-03-01",
         force_pass=False,
         report_results=True,
-        events=[get_mock_ingestor_loader_event(0, 1)],
+        events=[get_mock_ingestor_loader_event("123", 0, 1)],
     )
 
     config = IngestorTriggerMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -98,7 +89,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         index_date="2025-03-01",
         force_pass=False,
         report_results=True,
-        events=[get_mock_ingestor_loader_event(0, 110)],
+        events=[get_mock_ingestor_loader_event("123", 0, 110)],
     )
     config = IngestorTriggerMonitorConfig(percentage_threshold=0.1, is_local=True)
 
@@ -121,7 +112,7 @@ def test_ingestor_trigger_monitor_failure_with_previous() -> None:
         index_date="2025-03-01",
         force_pass=False,
         report_results=True,
-        events=[get_mock_ingestor_loader_event(0, 111)],
+        events=[get_mock_ingestor_loader_event("123", 0, 111)],
     )
 
     config = IngestorTriggerMonitorConfig(percentage_threshold=0.1, is_local=True)

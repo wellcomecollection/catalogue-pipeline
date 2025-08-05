@@ -16,18 +16,17 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from ingestor.steps.ingestor_indexer import IngestorIndexerLambdaEvent
-from ingestor.steps.ingestor_loader import (
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
-    IngestorLoaderConfig,
     IngestorLoaderLambdaEvent,
-    handler,
 )
-from queries.concept_queries import (
+from ingestor.queries.concept_queries import (
     CONCEPT_QUERY,
     _get_referenced_together_query,
     _get_related_query,
 )
+from ingestor.steps.ingestor_loader import IngestorLoaderConfig, handler
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     pipeline_date="2021-07-01",
@@ -35,6 +34,7 @@ MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
     job_id="123",
     start_offset=0,
     end_index=1,
+    transformer_type="concepts",
 )
 
 MOCK_INGESTOR_LOADER_CONFIG = IngestorLoaderConfig(
