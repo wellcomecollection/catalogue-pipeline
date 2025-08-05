@@ -64,7 +64,7 @@ def test_corrupt_input(temporary_table: IcebergTable, not_xml: Any) -> None:
     Given an update file that cannot be understood
     Then an Exception is raised
     """
-    with pytest.raises(
+    with pytest.raises(  # noqa: B017 # Asserting blind exception is fine for now
         Exception
-    ):  # noqa: B017 # Asserting blind exception is fine for now
+    ):
         update_from_xml_file(temporary_table, not_xml)
