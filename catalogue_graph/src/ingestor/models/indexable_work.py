@@ -1,13 +1,9 @@
-from typing import Optional, Self
+from typing import Self
 
 from pydantic import BaseModel, Field
 from utils.types import ConceptType
 
 from .indexable import DisplayId, DisplayIdentifier, DisplayIdLabel
-
-
-class DisplayAvailability(DisplayIdLabel):
-    type: str = "Availability"
 
 
 class DisplayLicense(DisplayIdLabel):
@@ -16,9 +12,9 @@ class DisplayLicense(DisplayIdLabel):
 
 
 class DisplayConcept(BaseModel):
-    id: Optional[str] = None
+    id: str | None = None
     label: str
-    identifiers: Optional[list[DisplayIdentifier]] = None
+    identifiers: list[DisplayIdentifier] | None = None
     type: ConceptType = "Concept"
 
 
@@ -28,10 +24,10 @@ class DisplayContributionRole(BaseModel):
 
 
 class DisplayRelation(BaseModel):
-    id: Optional[str]
-    title: Optional[str]
-    referenceNumber: Optional[str] = None
-    partOf: Optional[list[Self]] = None
+    id: str | None
+    title: str | None
+    referenceNumber: str | None = None
+    partOf: list[Self] | None = None
     totalParts: int
     # totalDescendentParts: int # TODO: Is this field needed?
     type: str = "Work"
@@ -48,7 +44,7 @@ class DisplayProductionEvent(BaseModel):
     places: list[DisplayConcept]
     agents: list[DisplayConcept]
     dates: list[DisplayConcept]
-    function: Optional[DisplayConcept]
+    function: DisplayConcept | None
     type: str = "ProductionEvent"
 
 
@@ -61,82 +57,82 @@ class DisplayContributor(BaseModel):
 
 class DisplaySubject(DisplayConcept):
     concepts: list[DisplayConcept]
-    type: str = "Subject"
+    type: ConceptType = "Subject"
 
 
 class DisplayGenre(BaseModel):
     label: str
     concepts: list[DisplayConcept]
-    type: str = "Genre"
+    type: ConceptType = "Genre"
 
 
 class DisplayAccessCondition(BaseModel):
     method: DisplayIdLabel
-    status: Optional[DisplayIdLabel]
-    terms: Optional[str]
-    note: Optional[str]
+    status: DisplayIdLabel | None
+    terms: str | None
+    note: str | None
     type: str = "AccessCondition"
 
 
 class DisplayLocation(BaseModel):
     locationType: DisplayIdLabel
-    license: Optional[DisplayLicense] = None
-    accessConditions: list[DisplayAccessCondition] = None
+    license: DisplayLicense | None = None
+    accessConditions: list[DisplayAccessCondition]
 
 
 class DisplayDigitalLocation(DisplayLocation):
     url: str
-    credit: Optional[str] = None
-    linkText: Optional[str] = None
+    credit: str | None = None
+    linkText: str | None = None
     type: str = "DigitalLocation"
 
 
 class DisplayPhysicalLocation(DisplayLocation):
     label: str
-    shelfmark: Optional[str] = None
+    shelfmark: str | None = None
     type: str = "PhysicalLocation"
 
 
 class DisplayHoldings(BaseModel):
-    note: Optional[str]
+    note: str | None
     enumeration: list[str]
-    location: Optional[DisplayPhysicalLocation | DisplayDigitalLocation]
+    location: DisplayPhysicalLocation | DisplayDigitalLocation | None
     type: str = "Holdings"
 
 
 class DisplayItem(BaseModel):
-    id: Optional[str]
+    id: str | None
     identifiers: list[DisplayIdentifier]
-    title: Optional[str] = None
-    note: Optional[str] = None
+    title: str | None = None
+    note: str | None = None
     locations: list[DisplayPhysicalLocation | DisplayDigitalLocation] = []
     type: str = "Item"
 
 
 class WorkDisplay(BaseModel):
     id: str
-    title: Optional[str]
+    title: str | None
     alternativeTitles: list[str]
-    referenceNumber: Optional[str]
-    description: Optional[str]
-    physicalDescription: Optional[str]
-    workType: Optional[DisplayIdLabel]
-    lettering: Optional[str]
-    createdDate: Optional[DisplayConcept]
+    referenceNumber: str | None
+    description: str | None
+    physicalDescription: str | None
+    workType: DisplayIdLabel | None
+    lettering: str | None
+    createdDate: DisplayConcept | None
     contributors: list[DisplayContributor]
     identifiers: list[DisplayIdentifier]
     subjects: list[DisplaySubject]
     genres: list[DisplayGenre]
-    thumbnail: Optional[DisplayDigitalLocation]
+    thumbnail: DisplayDigitalLocation | None
     items: list[DisplayItem]
     holdings: list[DisplayHoldings]
-    availabilities: list[DisplayAvailability]
+    availabilities: list[DisplayIdLabel]
     production: list[DisplayProductionEvent]
     languages: list[DisplayIdLabel]
-    edition: Optional[str]
+    edition: str | None
     notes: list[DisplayNote]
-    duration: Optional[int]
-    currentFrequency: Optional[str]
+    duration: int | None
+    currentFrequency: str | None
     formerFrequency: list[str]
     designation: list[str]
     images: list[DisplayId]
@@ -146,33 +142,43 @@ class WorkDisplay(BaseModel):
 
 
 class CollectionPath(BaseModel):
-    label: Optional[str]
-    path: Optional[str]
+    label: str | None
+    path: str | None
 
 
 class WorkQuery(BaseModel):
     id: str
-    title: Optional[str]
-    referenceNumber: Optional[str]
-    physicalDescription: Optional[str]
-    lettering: Optional[str]
-    edition: Optional[str]
-    description: Optional[str]
+    title: str | None
+    referenceNumber: str | None
+    physicalDescription: str | None
+    lettering: str | None
+    edition: str | None
+    description: str | None
     alternativeTitles: list[str]
-    languageLabels: list[str] = Field(alias="languages.label")
-    itemIds: list[str] = Field(alias="items.id")
-    contributorsAgentLabel: list[str] = Field(alias="contributors.agent.label")
-    genresConceptsLabel: list[str] = Field(alias="genres.concepts.label")
-    sourceIdentifierValue: str = Field(alias="sourceIdentifier.value")
-    identifiersValue: list[str] = Field(alias="identifiers.value")
-    imagesId: list[str] = Field(alias="images.id")
-    imagesIdentifiersValue: list[str] = Field(alias="images.identifiers.value")
-    itemsIdentifiersValue: list[str] = Field(alias="items.identifiers.value")
-    itemsShelfmarksValue: list[str] = Field(alias="items.shelfmark.value")
-    notesContents: list[str] = Field(alias="notes.contents")
-    partOfTitle: list[str] = Field(alias="partOf.title")
-    productionLabel: list[str] = Field(alias="production.label")
-    subjectsConceptsLabel: list[str] = Field(alias="subjects.concepts.label")
+    languagesLabel: list[str] = Field(serialization_alias="languages.label")
+    sourceIdentifierValue: str = Field(serialization_alias="sourceIdentifier.value")
+    identifiersValue: list[str] = Field(serialization_alias="identifiers.value")
+    imagesId: list[str] = Field(serialization_alias="images.id")
+    imagesIdentifiersValue: list[str] = Field(
+        serialization_alias="images.identifiers.value"
+    )
+    itemsIdentifiersValue: list[str] = Field(
+        serialization_alias="items.identifiers.value"
+    )
+    itemsId: list[str] = Field(serialization_alias="items.id")
+    itemsShelfmarksValue: list[str] = Field(serialization_alias="items.shelfmark.value")
+    notesContents: list[str] = Field(serialization_alias="notes.contents")
+    partOfTitle: list[str] = Field(serialization_alias="partOf.title")
+    productionLabel: list[str] = Field(serialization_alias="production.label")
+    subjectsConceptsLabel: list[str] = Field(
+        serialization_alias="subjects.concepts.label"
+    )
+    contributorsAgentLabel: list[str] = Field(
+        serialization_alias="contributors.agent.label"
+    )
+    genresConceptsLabel: list[str] = Field(serialization_alias="genres.concepts.label")
+    collectionPathLabel: str | None = Field(serialization_alias="collectionPath.label")
+    collectionPathPath: str | None = Field(serialization_alias="collectionPath.path")
 
 
 class IndexableWork(BaseModel):
