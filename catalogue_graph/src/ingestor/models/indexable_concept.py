@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.indexable import DisplayIdentifier
+from ingestor.models.display.identifier import DisplayIdentifier
 from utils.types import ConceptType
 
 

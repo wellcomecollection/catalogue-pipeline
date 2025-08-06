@@ -1,6 +1,6 @@
-from ingestor.models.indexable_work import (
-    DisplayIdLabel,
-)
+from ingestor.models.denormalised.work import Location
+
+from .id_label import DisplayIdLabel
 
 LOCATION_LABEL_MAPPING = {
     "closed-stores": "Closed stores",
@@ -21,9 +21,12 @@ DIGITAL_LOCATIONS = {
 }
 
 
-def get_display_location_type(location_type_id: str) -> DisplayIdLabel:
-    return DisplayIdLabel(
-        id=location_type_id,
-        label=LOCATION_LABEL_MAPPING[location_type_id],
-        type="LocationType",
-    )
+class DisplayLocationType(DisplayIdLabel):
+    type: str = "LocationType"
+
+    @staticmethod
+    def from_location(location: Location) -> "DisplayLocationType":
+        return DisplayLocationType(
+            id=location.locationType.id,
+            label=LOCATION_LABEL_MAPPING[location.locationType.id],
+        )

@@ -1,4 +1,8 @@
-from ingestor.models.indexable_work import DisplayIdLabel
+from typing import Optional
+
+from ingestor.models.denormalised.work import AccessCondition
+
+from .id_label import DisplayIdLabel
 
 ACCESS_STATUS_ID_MAPPING = {
     "Open": "open",
@@ -28,9 +32,17 @@ ACCESS_STATUS_LABEL_MAPPING = {
 }
 
 
-def get_display_access_status(raw_id: str) -> DisplayIdLabel:
-    return DisplayIdLabel(
-        id=ACCESS_STATUS_ID_MAPPING[raw_id],
-        label=ACCESS_STATUS_LABEL_MAPPING[raw_id],
-        type="AccessStatus",
-    )
+class DisplayAccessStatus(DisplayIdLabel):
+    type: str = "AccessStatus"
+
+    @staticmethod
+    def from_access_condition(
+        condition: AccessCondition,
+    ) -> Optional["DisplayAccessStatus"]:
+        if condition.status is None:
+            return None
+
+        return DisplayAccessStatus(
+            id=ACCESS_STATUS_ID_MAPPING[condition.status.type],
+            label=ACCESS_STATUS_LABEL_MAPPING[condition.status.type],
+        )

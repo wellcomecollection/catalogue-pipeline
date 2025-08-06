@@ -1,4 +1,6 @@
-from ingestor.models.indexable_work import DisplayIdLabel
+from ingestor.models.denormalised.work import AccessCondition
+
+from .id_label import DisplayIdLabel
 
 ACCESS_METHOD_LABEL_MAPPING = {
     "OnlineRequest": "Online request",
@@ -17,9 +19,12 @@ ACCESS_METHOD_ID_MAPPING = {
 }
 
 
-def get_display_access_method(raw_id: str) -> DisplayIdLabel:
-    return DisplayIdLabel(
-        id=ACCESS_METHOD_ID_MAPPING[raw_id],
-        label=ACCESS_METHOD_LABEL_MAPPING[raw_id],
-        type="AccessMethod",
-    )
+class DisplayAccessMethod(DisplayIdLabel):
+    type: str = "AccessMethod"
+
+    @staticmethod
+    def from_access_condition(condition: AccessCondition) -> "DisplayAccessMethod":
+        return DisplayAccessMethod(
+            id=ACCESS_METHOD_ID_MAPPING[condition.method.type],
+            label=ACCESS_METHOD_LABEL_MAPPING[condition.method.type],
+        )

@@ -1,4 +1,14 @@
-from ingestor.models.indexable import DisplayIdentifier, DisplayIdentifierType
+from collections.abc import Generator
+
+from pydantic import BaseModel
+
+from ingestor.models.denormalised.work import (
+    AllIdentifiers,
+    SourceIdentifier,
+    Unidentifiable,
+)
+
+from .id_label import DisplayIdLabel
 
 IDENTIFIER_LABEL_MAPPING = {
     "tei-manuscript-id": "Tei manuscript id",
@@ -29,9 +39,34 @@ IDENTIFIER_LABEL_MAPPING = {
 }
 
 
-def get_display_identifier(value: str, identifier_type: str) -> DisplayIdentifier:
-    type_label = IDENTIFIER_LABEL_MAPPING[identifier_type]
-    return DisplayIdentifier(
-        value=value,
-        identifierType=DisplayIdentifierType(id=identifier_type, label=type_label),
-    )
+class DisplayIdentifierType(DisplayIdLabel):
+    type: str = "IdentifierType"
+
+
+class DisplayIdentifier(BaseModel):
+    value: str
+    type: str = "Identifier"
+    identifierType: DisplayIdentifierType
+
+    @staticmethod
+    def from_source_identifier(identifier: SourceIdentifier) -> "DisplayIdentifier":
+        type_label = IDENTIFIER_LABEL_MAPPING[identifier.identifierType.id]
+        return DisplayIdentifier(
+            value=identifier.value,
+            identifierType=DisplayIdentifierType(
+                id=identifier.identifierType.id, label=type_label
+            ),
+        )
+
+    @staticmethod
+    def from_all_identifiers(
+        identifier: AllIdentifiers | Unidentifiable,
+    ) -> Generator["DisplayIdentifier"]:
+        if isinstance(identifier, Unidentifiable):
+            return None
+
+        if identifier.sourceIdentifier is not None:
+            yield DisplayIdentifier.from_source_identifier(identifier.sourceIdentifier)
+
+        for other_identifier in identifier.otherIdentifiers:
+            yield DisplayIdentifier.from_source_identifier(other_identifier)

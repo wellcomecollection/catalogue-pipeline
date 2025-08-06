@@ -1,5 +1,4 @@
-from ingestor.models.display.identifier import get_display_identifier
-from ingestor.models.indexable import DisplayIdentifier
+from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
@@ -170,11 +169,9 @@ class RawNeptuneConcept:
 
     @property
     def display_identifiers(self) -> list[DisplayIdentifier]:
-        display_ids = []
-        for identifier in self.identifiers:
-            display_ids.append(
-                get_display_identifier(identifier.value, identifier.identifierType)
-            )
+        display_ids = [
+            DisplayIdentifier.from_source_identifier(i) for i in self.identifiers
+        ]
 
         return display_ids
 

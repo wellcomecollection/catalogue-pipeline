@@ -1,46 +1,51 @@
-from ingestor.models.display.location_type import (
-    DIGITAL_LOCATIONS,
-    get_display_location_type,
-)
-from ingestor.models.indexable_work import (
-    DisplayDigitalLocation,
-    DisplayLocation,
-    DisplayPhysicalLocation,
-)
+from pydantic import BaseModel
 
-from .access_condition import get_display_access_condition
-from .license import get_display_license
+from ingestor.models.denormalised.work import DigitalLocation, PhysicalLocation
+
+from .access_condition import DisplayAccessCondition
+from .id_label import DisplayIdLabel
+from .license import DisplayLicense
+from .location_type import DisplayLocationType
 
 
-def get_display_location(
-    raw_location: dict,
-) -> DisplayDigitalLocation | DisplayPhysicalLocation:
-    location_type = raw_location["locationType"]["id"]
-    license_id = raw_location.get("license", {}).get("id")
-    display_license = get_display_license(license_id) if license_id else None
+class DisplayLocation(BaseModel):
+    locationType: DisplayIdLabel
+    license: DisplayLicense | None = None
+    accessConditions: list[DisplayAccessCondition]
 
-    access_conditions = [
-        get_display_access_condition(c)
-        for c in raw_location.get("accessConditions", [])
-    ]
-
-    location = DisplayLocation(
-        locationType=get_display_location_type(location_type),
-        license=display_license,
-        accessConditions=access_conditions,
-    )
-
-    is_digital = location_type in DIGITAL_LOCATIONS
-    if is_digital:
-        return DisplayDigitalLocation(
-            **location.dict(),
-            url=raw_location["url"],
-            credit=raw_location.get("credit"),
-            linkText=raw_location.get("linkText"),
+    @staticmethod
+    def from_location(
+        location: PhysicalLocation | DigitalLocation,
+    ) -> "DisplayLocation":
+        display_location = DisplayLocation(
+            locationType=DisplayLocationType.from_location(location),
+            license=DisplayLicense.from_location(location),
+            accessConditions=DisplayAccessCondition.from_location(location),
         )
 
-    return DisplayPhysicalLocation(
-        **location.dict(),
-        label=raw_location["label"],
-        shelfmark=raw_location.get("shelfmark"),
-    )
+        if isinstance(location, DigitalLocation):
+            return DisplayDigitalLocation(
+                **display_location.dict(),
+                url=location.url,
+                credit=location.credit,
+                linkText=location.linkText,
+            )
+
+        return DisplayPhysicalLocation(
+            **display_location.dict(),
+            label=location.label,
+            shelfmark=location.shelfmark,
+        )
+
+
+class DisplayDigitalLocation(DisplayLocation):
+    url: str
+    credit: str | None = None
+    linkText: str | None = None
+    type: str = "DigitalLocation"
+
+
+class DisplayPhysicalLocation(DisplayLocation):
+    label: str
+    shelfmark: str | None = None
+    type: str = "PhysicalLocation"

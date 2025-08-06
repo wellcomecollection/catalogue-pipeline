@@ -1,4 +1,8 @@
-from ingestor.models.indexable_work import DisplayLicense
+from typing import Optional
+
+from ingestor.models.denormalised.work import Location
+
+from .id_label import DisplayIdLabel
 
 LICENSE_LABEL_MAPPING = {
     "cc-by": "Attribution 4.0 International (CC BY 4.0)",
@@ -30,9 +34,17 @@ LICENSE_URL_MAPPING = {
 }
 
 
-def get_display_license(license_id: str) -> DisplayLicense:
-    return DisplayLicense(
-        id=license_id,
-        label=LICENSE_LABEL_MAPPING[license_id],
-        url=LICENSE_URL_MAPPING[license_id],
-    )
+class DisplayLicense(DisplayIdLabel):
+    url: str
+    type: str = "License"
+
+    @staticmethod
+    def from_location(location: Location) -> Optional["DisplayLicense"]:
+        if location.license is None:
+            return None
+
+        return DisplayLicense(
+            id=location.license.id,
+            label=LICENSE_LABEL_MAPPING[location.license.id],
+            url=LICENSE_URL_MAPPING[location.license.id],
+        )

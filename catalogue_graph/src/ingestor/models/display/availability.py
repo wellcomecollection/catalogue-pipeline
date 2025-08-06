@@ -1,4 +1,6 @@
-from ingestor.models.indexable_work import DisplayIdLabel
+from ingestor.models.denormalised.work import Id
+
+from .id_label import DisplayIdLabel
 
 AVAILABILITY_LABEL_MAPPING = {
     "online": "Online",
@@ -7,7 +9,13 @@ AVAILABILITY_LABEL_MAPPING = {
 }
 
 
-def get_display_availability(raw_id: str) -> DisplayIdLabel:
-    return DisplayIdLabel(
-        id=raw_id, label=AVAILABILITY_LABEL_MAPPING[raw_id], type="Availability"
-    )
+class DisplayAvailability(DisplayIdLabel):
+    type: str = "Availability"
+
+    @staticmethod
+    def from_availability(availability: Id) -> "DisplayAvailability":
+        return DisplayAvailability(
+            id=availability.id,
+            label=AVAILABILITY_LABEL_MAPPING[availability.id],
+            type="Availability",
+        )

@@ -1,51 +1,31 @@
 import re
 from collections import defaultdict
+from collections.abc import Generator
 
-from ingestor.models.display.availability import get_display_availability
-from ingestor.models.display.identifier import get_display_identifier
-from ingestor.models.display.location import get_display_location
-from ingestor.models.indexable_work import (
+from ingestor.models.denormalised.work import (
+    AllIdentifiers,
+    DenormalisedWork,
+)
+from ingestor.models.display.availability import DisplayAvailability
+from ingestor.models.display.concept import (
     DisplayConcept,
     DisplayContributionRole,
     DisplayContributor,
-    DisplayDigitalLocation,
     DisplayGenre,
-    DisplayHoldings,
-    DisplayId,
-    DisplayIdentifier,
-    DisplayIdLabel,
-    DisplayItem,
-    DisplayNote,
-    DisplayPhysicalLocation,
-    DisplayProductionEvent,
-    DisplayRelation,
     DisplaySubject,
 )
-from utils.types import ConceptType
-
-
-def get_display_identifiers(
-    source_identifier: dict | None, other_identifiers: list[dict]
-):
-    identifiers = []
-
-    raw_identifiers = []
-    if source_identifier is not None:
-        raw_identifiers.append(source_identifier)
-
-    raw_identifiers += other_identifiers
-
-    for raw in raw_identifiers:
-        display_id = get_display_identifier(raw["value"], raw["identifierType"]["id"])
-        identifiers.append(display_id)
-
-    return identifiers
-
-
-def display_identifiers(raw_item_id: dict):
-    source_identifier = raw_item_id.get("sourceIdentifier")
-    other_identifiers = raw_item_id.get("otherIdentifiers", [])
-    return get_display_identifiers(source_identifier, other_identifiers)
+from ingestor.models.display.holdings import DisplayHoldings
+from ingestor.models.display.id_label import DisplayId, DisplayIdLabel
+from ingestor.models.display.identifier import DisplayIdentifier
+from ingestor.models.display.item import DisplayItem
+from ingestor.models.display.location import (
+    DisplayDigitalLocation,
+    DisplayLocation,
+    DisplayPhysicalLocation,
+)
+from ingestor.models.display.note import DisplayNote
+from ingestor.models.display.production_event import DisplayProductionEvent
+from ingestor.models.display.relation import DisplayRelation
 
 
 def natural_sort_key(key: str | None) -> list[int | str]:
@@ -58,224 +38,153 @@ def natural_sort_key(key: str | None) -> list[int | str]:
 
 class RawNeptuneWork:
     def __init__(
-        self, es_work: dict, work_hierarchy: dict | None, work_concepts: list | None
+        self,
+        denormalised_work: DenormalisedWork,
+        work_hierarchy: dict | None,
+        work_concepts: list | None,
     ):
-        self.work_data = es_work.get("data", {})
-        self.work_state = es_work["state"]
+        self.data = denormalised_work.data
+        self.state = denormalised_work.state
         self.work_hierarchy = work_hierarchy or {}
         self.work_concepts = work_concepts or []
 
-        self.title: str | None = self.work_data.get("title")
-        self.lettering: str | None = self.work_data.get("lettering")
-        self.edition: str | None = self.work_data.get("edition")
-        self.duration: int | None = self.work_data.get("duration")
-        self.reference_number: str | None = self.work_data.get("referenceNumber")
-        self.physical_description: str | None = self.work_data.get(
-            "physicalDescription"
-        )
-        self.alternative_titles: list[str] = self.work_data.get("alternativeTitles", [])
-        self.description: str | None = self.work_data.get("description")
-        self.current_frequency: str | None = self.work_data.get("currentFrequency")
-        self.former_frequency: list[str] = self.work_data.get("formerFrequency", [])
-        self.designation: list[str] = self.work_data.get("designation", [])
-
-    @property
-    def wellcome_id(self) -> str:
-        wellcome_id: str = self.work_state["canonicalId"]
-        assert len(wellcome_id) == 8
-        return wellcome_id
-
     @property
     def display_identifiers(self) -> list[DisplayIdentifier]:
-        source_identifier = self.work_state["sourceIdentifier"]
-        other_identifiers = self.work_data.get("otherIdentifiers", [])
-        return get_display_identifiers(source_identifier, other_identifiers)
-
-    @property
-    def source_identifier(self) -> str:
-        return self.display_identifiers[0].value
+        all_ids = AllIdentifiers(
+            canonicalId=self.state.canonicalId,
+            sourceIdentifier=self.state.sourceIdentifier,
+            otherIdentifiers=self.data.otherIdentifiers,
+        )
+        return DisplayIdentifier.from_all_identifiers(all_ids)
 
     @property
     def other_identifiers(self) -> list[str]:
-        return [i.value for i in self.display_identifiers]
+        return [i.value for i in self.data.otherIdentifiers]
 
     @property
     def thumbnail(self) -> DisplayDigitalLocation | None:
-        thumbnail = self.work_data.get("thumbnail")
-        if thumbnail is None:
+        if self.data.thumbnail is None:
             return None
 
-        location = get_display_location(thumbnail)
-        assert isinstance(location, DisplayDigitalLocation)
+        location: DisplayDigitalLocation = DisplayLocation.from_location(
+            self.data.thumbnail
+        )
         return location
 
     @property
     def work_type(self) -> DisplayIdLabel | None:
-        format: dict | None = self.work_data.get("format")
-        if format is None:
+        if self.data.format is None:
             return None
 
-        return DisplayIdLabel(
-            id=format["id"],
-            label=format["label"],
-            type="Format",
-        )
+        return DisplayIdLabel.from_id_label(self.data.format, "Format")
 
     @property
     def display_languages(self) -> list[DisplayIdLabel]:
-        languages = []
-        for language in self.work_data.get("languages", []):
-            languages.append(DisplayIdLabel(**language, type="Language"))
-
-        return languages
-
-    @property
-    def languages(self) -> list[str]:
-        return [lang.label for lang in self.display_languages]
-
-    @property
-    def display_notes(self) -> list[DisplayNote]:
-        grouped_notes = defaultdict(list)
-        for note in self.work_data.get("notes", []):
-            grouped_notes[note["noteType"]["id"]].append(note)
-
-        notes = []
-        for group in grouped_notes.values():
-            notes.append(
-                DisplayNote(
-                    contents=[note["contents"] for note in group],
-                    noteType=DisplayIdLabel(**group[0]["noteType"], type="NoteType"),
-                )
-            )
-
-        return notes
-
-    @property
-    def notes(self) -> list[str]:
-        contents = []
-        for note in self.work_data.get("notes", []):
-            contents.append(note["contents"])
-
-        return contents
-
-    @property
-    def created_date(self) -> DisplayConcept | None:
-        created_date = self.work_data.get("createdDate")
-        if created_date is None:
-            return None
-
-        return DisplayConcept(label=created_date["label"], type="Period")
-
-    @property
-    def display_items(self) -> list[DisplayItem]:
-        items = []
-
-        for item in self.work_data.get("items", []):
-            locations = [get_display_location(loc) for loc in item.get("locations")]
-            items.append(
-                DisplayItem(
-                    id=item["id"].get("canonicalId"),
-                    identifiers=display_identifiers(item["id"]),
-                    title=item.get("title"),
-                    note=item.get("note"),
-                    locations=locations,
-                )
-            )
-
-        return items
-
-    @property
-    def item_ids(self) -> list[str]:
-        return [item.id for item in self.display_items if item.id is not None]
-
-    @property
-    def item_identifiers(self) -> list[str]:
-        identifiers = []
-        for item in self.display_items:
-            identifiers.extend([identifier.value for identifier in item.identifiers])
-
-        return identifiers
-
-    @property
-    def item_shelfmarks(self) -> list[str]:
-        # Shelfmarks are only available on physical locations
-        physical_locations = []
-        for item in self.display_items:
-            physical_locations.extend(
-                [
-                    loc
-                    for loc in item.locations
-                    if isinstance(loc, DisplayPhysicalLocation)
-                ]
-            )
-
         return [
-            loc.shelfmark for loc in physical_locations if loc.shelfmark is not None
+            DisplayIdLabel.from_id_label(i, "Language") for i in self.data.languages
         ]
 
     @property
-    def holdings(self) -> list[DisplayHoldings]:
-        holdings = []
+    def display_notes(self) -> Generator[DisplayNote]:
+        grouped_notes = defaultdict(list)
+        for note in self.data.notes:
+            grouped_notes[note.noteType.id].append(note)
 
-        for holding in self.work_data.get("holdings", []):
+        for group in grouped_notes.values():
+            yield DisplayNote(
+                contents=[note.contents for note in group],
+                noteType=DisplayIdLabel.from_id_label(group[0].noteType, "NoteType"),
+            )
+
+    @property
+    def created_date(self) -> DisplayConcept | None:
+        if self.data.createdDate is None:
+            return None
+
+        return DisplayConcept(label=self.data.createdDate.label, type="Period")
+
+    @property
+    def display_items(self) -> list[DisplayItem]:
+        for item in self.data.items:
+            yield DisplayItem(
+                id=item.id.canonicalId,
+                identifiers=DisplayIdentifier.from_all_identifiers(item.id),
+                title=item.title,
+                note=item.note,
+                locations=[
+                    DisplayLocation.from_location(loc) for loc in item.locations
+                ],
+            )
+
+    @property
+    def item_ids(self) -> list[str]:
+        return [
+            item.id.canonicalId
+            for item in self.data.items
+            if item.id.canonicalId is not None
+        ]
+
+    @property
+    def item_identifiers(self) -> Generator[str]:
+        for item in self.display_items:
+            for identifier in item.identifiers:
+                yield identifier.value
+
+    @property
+    def item_shelfmarks(self) -> Generator[str]:
+        for item in self.display_items:
+            for loc in item.locations:
+                # Shelfmarks are only available on physical locations
+                if (
+                    isinstance(loc, DisplayPhysicalLocation)
+                    and loc.shelfmark is not None
+                ):
+                    yield loc.shelfmark
+
+    @property
+    def holdings(self) -> Generator[DisplayHoldings]:
+        for holding in self.data.holdings:
             location = None
-            if "location" in holding:
-                location = get_display_location(holding["location"])
+            if holding.location is not None:
+                location = DisplayLocation.from_location(holding.location)
 
-            holdings.append(
-                DisplayHoldings(
-                    note=holding.get("note"),
-                    enumeration=holding.get("enumeration", []),
-                    location=location,
-                )
+            yield DisplayHoldings(
+                note=holding.note,
+                enumeration=holding.enumeration,
+                location=location,
             )
 
-        return holdings
+    @property
+    def images(self) -> Generator[DisplayId]:
+        for image in self.data.imageData:
+            yield DisplayId(id=image.id.canonicalId, type="Image")
 
     @property
-    def images(self) -> list[DisplayId]:
-        images = []
-        for image in self.work_data.get("image_data", []):
-            images.append(DisplayId(id=image["id"]["canonicalId"], type="Image"))
-
-        return images
-
-    @property
-    def display_production(self) -> list[DisplayProductionEvent]:
-        events = []
-        for event in self.work_data.get("production"):
-            events.append(
-                DisplayProductionEvent(
-                    label=event["label"],
-                    places=[
-                        DisplayConcept(label=p["label"], type="Place")
-                        for p in event["places"]
-                    ],
-                    agents=[
-                        DisplayConcept(label=p["label"], type="Agent")
-                        for p in event["agents"]
-                    ],
-                    dates=[
-                        DisplayConcept(label=p["label"], type="Period")
-                        for p in event["dates"]
-                    ],
-                    function=(
-                        DisplayConcept(label=event["function"]["label"])
-                        if event.get("function")
-                        else None
-                    ),
-                )
+    def display_production(self) -> Generator[DisplayProductionEvent]:
+        for event in self.data.production:
+            yield DisplayProductionEvent(
+                label=event.label,
+                places=[
+                    DisplayConcept(label=p.label, type="Place") for p in event.places
+                ],
+                agents=[
+                    DisplayConcept(label=a.label, type="Agent") for a in event.agents
+                ],
+                dates=[
+                    DisplayConcept(label=p.label, type="Period") for p in event.dates
+                ],
+                function=(
+                    DisplayConcept(label=event.function.label)
+                    if event.function
+                    else None
+                ),
             )
-
-        return events
 
     @property
     def production_labels(self) -> list[str]:
-        concepts = []
         for event in self.display_production:
-            concepts.extend(event.places + event.agents + event.dates)
-
-        return [c.label for c in concepts]
+            for concept in event.places + event.agents + event.dates:
+                yield concept.label
 
     def _get_display_relation(self, raw_related: dict, total_parts: int):
         return DisplayRelation(
@@ -313,123 +222,58 @@ class RawNeptuneWork:
             parts, key=lambda item: natural_sort_key(item.referenceNumber or item.title)
         )
 
-    def _get_display_concept(
-        self, raw_concept: dict, concept_type: ConceptType | None = None
-    ) -> DisplayConcept:
-        return DisplayConcept(
-            id=raw_concept["id"].get("canonicalId"),
-            label=raw_concept["label"].removesuffix(
-                "."
-            ),  # TODO: Should we remove the suffix here?
-            identifiers=display_identifiers(raw_concept["id"]),
-            type=concept_type or raw_concept["type"],
-        )
-
     @property
-    def display_contributors(self) -> list[DisplayContributor]:
-        contributors = []
-
-        for raw_contributor in self.work_data["contributors"]:
-            roles = []
-            for raw_role in raw_contributor["roles"]:
-                roles.append(DisplayContributionRole(label=raw_role["label"]))
-
-            contributors.append(
-                DisplayContributor(
-                    agent=self._get_display_concept(raw_contributor["agent"]),
-                    roles=roles,
-                    primary=raw_contributor["primary"],
-                )
+    def display_contributors(self) -> Generator[DisplayContributor]:
+        for contributor in self.data.contributors:
+            yield DisplayContributor(
+                agent=DisplayConcept.from_concept(contributor.agent),
+                roles=[
+                    DisplayContributionRole(label=r.label) for r in contributor.roles
+                ],
+                primary=contributor.primary,
             )
 
-        return contributors
-
     @property
-    def contributor_labels(self) -> list[str]:
-        return [c.agent.label for c in self.display_contributors]
-
-    @property
-    def display_genres(self) -> list[DisplayGenre]:
-        genres = []
-
-        for raw_genre in self.work_data["genres"]:
-            concepts = []
-            for raw_concept in raw_genre["concepts"]:
-                concepts.append(self._get_display_concept(raw_concept, "Genre"))
-
-            genres.append(DisplayGenre(concepts=concepts, label=raw_genre["label"]))
-
-        return genres
+    def display_genres(self) -> Generator[DisplayGenre]:
+        for raw_genre in self.data.genres:
+            concepts = [DisplayConcept.from_concept(c) for c in raw_genre.concepts]
+            yield DisplayGenre(concepts=concepts, label=raw_genre.label)
 
     @property
     def genre_labels(self) -> list[str]:
-        labels = []
         for genre in self.display_genres:
-            labels += [c.label for c in genre.concepts]
-
-        return labels
+            for concept in genre.concepts:
+                yield concept.label
 
     @property
     def display_subjects(self) -> list[DisplaySubject]:
-        subjects = []
-
-        for raw_subject in self.work_data["subjects"]:
-            concepts = []
-            for raw_concept in raw_subject["concepts"]:
-                concepts.append(self._get_display_concept(raw_concept))
-
-            subjects.append(
-                DisplaySubject(
-                    label=raw_subject["label"],
-                    id=raw_subject["id"]["canonicalId"],
-                    concepts=concepts,
-                )
+        for subject in self.data.subjects:
+            yield DisplaySubject(
+                label=subject.label,
+                id=subject.id.canonicalId,
+                concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
             )
-
-        return subjects
 
     @property
     def subject_labels(self) -> list[str]:
-        labels = []
         for subject in self.display_subjects:
-            labels += [c.label for c in subject.concepts]
-
-        return labels
-
-    @property
-    def collection_path(self) -> str | None:
-        collection_path: str | None = self.work_data.get("collectionPath", {}).get(
-            "path"
-        )
-        return collection_path
-
-    @property
-    def collection_path_label(self) -> str | None:
-        collection_path_label: str | None = self.work_data.get(
-            "collectionPath", {}
-        ).get("label")
-        return collection_path_label
+            for concept in subject.concepts:
+                yield concept.label
 
     @property
     def image_ids(self) -> list[str]:
-        images = self.work_data.get("imageData", [])
-        return [image["id"]["canonicalId"] for image in images]
+        return [image.id.canonicalId for image in self.data.imageData]
 
     @property
-    def image_source_identifiers(self) -> list[str]:
-        images = self.work_data.get("imageData", [])
-        image_identifiers = []
-        for image in images:
-            image_identifiers += display_identifiers(image["id"])
-
-        return [i.value for i in image_identifiers]
+    def image_source_identifiers(self) -> Generator[str]:
+        for image in self.data.imageData:
+            for display_identifier in DisplayIdentifier.from_all_identifiers(image.id):
+                yield display_identifier.value
 
     @property
     def availabilities(self) -> list[DisplayIdLabel]:
-        availabilities = []
-        for raw_availability in self.work_state.get("availabilities", []):
-            availabilities.append(get_display_availability(raw_availability["id"]))
-
-        return availabilities
+        return [
+            DisplayAvailability.from_availability(a) for a in self.state.availabilities
+        ]
 
     # TODO: Recursive partOf

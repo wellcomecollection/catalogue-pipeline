@@ -1,16 +1,25 @@
-from ingestor.models.display.access_method import get_display_access_method
-from ingestor.models.display.access_status import get_display_access_status
-from ingestor.models.indexable_work import DisplayAccessCondition
+from pydantic import BaseModel
+
+from ingestor.models.denormalised.work import Location
+
+from .access_method import DisplayAccessMethod
+from .access_status import DisplayAccessStatus
+from .id_label import DisplayIdLabel
 
 
-def get_display_access_condition(raw_condition: dict) -> DisplayAccessCondition:
-    status = None
-    if "status" in raw_condition:
-        status = get_display_access_status(raw_condition["status"]["type"])
+class DisplayAccessCondition(BaseModel):
+    method: DisplayIdLabel
+    status: DisplayIdLabel | None
+    terms: str | None
+    note: str | None
+    type: str = "AccessCondition"
 
-    return DisplayAccessCondition(
-        method=get_display_access_method(raw_condition["method"]["type"]),
-        status=status,
-        terms=raw_condition.get("terms"),
-        note=raw_condition.get("note"),
-    )
+    @staticmethod
+    def from_location(location: Location) -> "DisplayAccessCondition":
+        for condition in location.accessConditions:
+            yield DisplayAccessCondition(
+                method=DisplayAccessMethod.from_access_condition(condition),
+                status=DisplayAccessStatus.from_access_condition(condition),
+                terms=condition.terms,
+                note=condition.note,
+            )

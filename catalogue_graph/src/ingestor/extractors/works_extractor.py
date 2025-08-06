@@ -2,6 +2,7 @@ import time
 from collections.abc import Generator
 
 import config
+from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.queries.work_queries import (
     WORK_CONCEPTS_QUERY,
     WORK_HIERARCHY_QUERY,
@@ -51,7 +52,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         results = self.make_neptune_query(WORK_CONCEPTS_QUERY, "work concepts")
         return {item["id"]: item["concepts"] for item in results}
 
-    def extract_raw(self) -> Generator[tuple[dict, dict | None, dict | None]]:
+    def extract_raw(
+        self,
+    ) -> Generator[tuple[DenormalisedWork, dict | None, dict | None]]:
         all_works = self._get_works()
         all_hierarchy = self._get_work_hierarchy()
         all_concepts = self._get_work_concepts()
@@ -61,7 +64,8 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
         for work in all_works:
             work_id = work["work"]["~properties"]["id"]
-            es_work = all_es_works.get(work_id)
+            es_work = DenormalisedWork(**all_es_works.get(work_id))
+
             work_hierarchy = all_hierarchy.get(work_id)
             work_concepts = all_concepts.get(work_id)
             yield es_work, work_hierarchy, work_concepts

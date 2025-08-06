@@ -1,6 +1,6 @@
 from test_utils import load_json_fixture
 
-from ingestor.models.indexable import DisplayIdentifier, DisplayIdentifierType
+from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptDisplay,
