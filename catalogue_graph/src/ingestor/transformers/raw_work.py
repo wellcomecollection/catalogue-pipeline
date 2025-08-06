@@ -21,6 +21,7 @@ from ingestor.models.indexable_work import (
     DisplayRelation,
     DisplaySubject,
 )
+from utils.types import ConceptType
 
 
 def get_display_identifiers(
@@ -137,21 +138,13 @@ class RawNeptuneWork:
         grouped_notes = defaultdict(list)
         for note in self.work_data.get("notes", []):
             grouped_notes[note["noteType"]["id"]].append(note)
-        
+
         notes = []
-        for note_type, group in grouped_notes.items():
+        for group in grouped_notes.values():
             notes.append(
                 DisplayNote(
                     contents=[note["contents"] for note in group],
                     noteType=DisplayIdLabel(**group[0]["noteType"], type="NoteType"),
-                )
-            )            
-
-        for note in self.work_data.get("notes", []):
-            notes.append(
-                DisplayNote(
-                    contents=[note["contents"]],
-                    noteType=DisplayIdLabel(**note["noteType"], type="NoteType"),
                 )
             )
 
@@ -162,7 +155,7 @@ class RawNeptuneWork:
         contents = []
         for note in self.work_data.get("notes", []):
             contents.append(note["contents"])
-        
+
         return contents
 
     @property
@@ -216,7 +209,9 @@ class RawNeptuneWork:
                 ]
             )
 
-        return [loc.shelfmark for loc in physical_locations if loc.shelfmark is not None]
+        return [
+            loc.shelfmark for loc in physical_locations if loc.shelfmark is not None
+        ]
 
     @property
     def holdings(self) -> list[DisplayHoldings]:
@@ -318,12 +313,16 @@ class RawNeptuneWork:
             parts, key=lambda item: natural_sort_key(item.referenceNumber or item.title)
         )
 
-    def _get_display_concept(self, raw_concept: dict) -> DisplayConcept:
+    def _get_display_concept(
+        self, raw_concept: dict, concept_type: ConceptType | None = None
+    ) -> DisplayConcept:
         return DisplayConcept(
-            id=raw_concept["id"]["canonicalId"],
-            label=raw_concept["label"].removesuffix("."), # TODO: Should we remove the suffix here?
+            id=raw_concept["id"].get("canonicalId"),
+            label=raw_concept["label"].removesuffix(
+                "."
+            ),  # TODO: Should we remove the suffix here?
             identifiers=display_identifiers(raw_concept["id"]),
-            type=raw_concept["type"],
+            type=concept_type or raw_concept["type"],
         )
 
     @property
@@ -344,7 +343,7 @@ class RawNeptuneWork:
             )
 
         return contributors
-    
+
     @property
     def contributor_labels(self) -> list[str]:
         return [c.agent.label for c in self.display_contributors]
@@ -356,12 +355,7 @@ class RawNeptuneWork:
         for raw_genre in self.work_data["genres"]:
             concepts = []
             for raw_concept in raw_genre["concepts"]:
-                concepts.append(DisplayConcept(
-                    id=raw_concept["id"]["canonicalId"],
-                    label=raw_concept["label"].removesuffix("."), # TODO: Should we remove the suffix here?
-                    identifiers=display_identifiers(raw_concept["id"]),
-                    type="Genre",
-                ))
+                concepts.append(self._get_display_concept(raw_concept, "Genre"))
 
             genres.append(DisplayGenre(concepts=concepts, label=raw_genre["label"]))
 
@@ -383,9 +377,12 @@ class RawNeptuneWork:
             concepts = []
             for raw_concept in raw_subject["concepts"]:
                 concepts.append(self._get_display_concept(raw_concept))
+
             subjects.append(
                 DisplaySubject(
-                    label=raw_subject["label"], id=raw_subject["id"]["canonicalId"], concepts=concepts
+                    label=raw_subject["label"],
+                    id=raw_subject["id"]["canonicalId"],
+                    concepts=concepts,
                 )
             )
 
@@ -431,10 +428,8 @@ class RawNeptuneWork:
     def availabilities(self) -> list[DisplayIdLabel]:
         availabilities = []
         for raw_availability in self.work_state.get("availabilities", []):
-            availabilities.append(
-                get_display_availability(raw_availability["id"])
-            )
-        
+            availabilities.append(get_display_availability(raw_availability["id"]))
+
         return availabilities
 
     # TODO: Recursive partOf

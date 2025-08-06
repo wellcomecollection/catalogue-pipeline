@@ -1,6 +1,7 @@
 from typing import Self
 
 from pydantic import BaseModel, Field
+
 from utils.types import ConceptType
 
 from .indexable import DisplayId, DisplayIdentifier, DisplayIdLabel
