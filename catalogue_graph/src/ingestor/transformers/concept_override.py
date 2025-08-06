@@ -9,16 +9,16 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 class ConceptTextOverrider:
-    overrides = None
+    overrides = {}
 
     def __init__(self, overrides_csv: TextIO | None):
         if overrides_csv:
-            self.load_overrides(overrides_csv)
+            self._load_overrides(overrides_csv)
         else:
             with open(os.path.join(HERE, "label_description_overrides.csv")) as csv_file:
-                self.load_overrides(csv_file)
+                self._load_overrides(csv_file)
 
-    def load_overrides(self, overrides: TextIO):
+    def _load_overrides(self, overrides: TextIO):
         csv_reader = csv.DictReader(overrides)
         self.overrides = {row['id'].strip(): row for row in csv_reader}
 
