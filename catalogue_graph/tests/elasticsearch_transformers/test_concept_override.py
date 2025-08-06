@@ -1,6 +1,6 @@
 from test_utils import load_json_fixture
 from ingestor.models.concept import RawNeptuneConcept
-from ingestor.transformers.concept_override import ConceptTextOverrider
+from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 import io
 from ingestor.models.indexable_concept import ConceptDescription
 import pytest
@@ -17,7 +17,7 @@ def test_unchanged_if_not_mentioned(concept) -> None:
     """
     Overrides are only applied to concepts that are present in the override CSV
     """
-    overrider = ConceptTextOverrider(io.StringIO("""id,label,description
+    overrider = ConceptTextOverrideProvider(io.StringIO("""id,label,description
         xx, yy, zz
         """))
     assert overrider.display_label_of(concept) == concept.display_label
@@ -29,7 +29,7 @@ def test_label_unchanged_if_unset(concept) -> None:
     Leaving the label blank signals that the label from the
     source concept should be used as-is
     """
-    overrider = ConceptTextOverrider(
+    overrider = ConceptTextOverrideProvider(
         io.StringIO("""id,label,description
         id, , Pottery with a transparent jade green glaze
         """)
@@ -48,7 +48,7 @@ def test_description_unchanged_if_unset(concept) -> None:
     Leaving the description blank signals that the description from the
     source concept should be used as-is
     """
-    overrider = ConceptTextOverrider(
+    overrider = ConceptTextOverrideProvider(
         io.StringIO("""id,label,description
         id, Celadon Ware,
         """)
@@ -64,7 +64,7 @@ def test_description_removed_if_explicit_empty(concept) -> None:
     signals that the concept should have no description, regardless of
     whether one is found in the source concepts
     """
-    overrider = ConceptTextOverrider(
+    overrider = ConceptTextOverrideProvider(
         io.StringIO("""id,label,description
         id, , empty
         """)
@@ -80,7 +80,7 @@ def test_change_label_and_description(concept) -> None:
     signals that the concept should have no description, regardless of
     whether one is found in the source concepts
     """
-    overrider = ConceptTextOverrider(
+    overrider = ConceptTextOverrideProvider(
         io.StringIO("""id,label,description
         id, New Label, New Description
         """)

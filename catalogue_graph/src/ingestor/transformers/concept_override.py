@@ -8,7 +8,7 @@ from ingestor.models.indexable_concept import ConceptDescription
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-class ConceptTextOverrider:
+class ConceptTextOverrideProvider:
     overrides = {}
 
     def __init__(self, overrides_csv: TextIO | None):

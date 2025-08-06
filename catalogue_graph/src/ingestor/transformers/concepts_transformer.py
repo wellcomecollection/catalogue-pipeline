@@ -9,13 +9,13 @@ from ingestor.models.indexable_concept import (
 from ingestor.models.related_concepts import RawNeptuneRelatedConcepts
 
 from ingestor.transformers.concept_override import (
-    ConceptTextOverrider
+    ConceptTextOverrideProvider
 )
 
 
 class ElasticsearchConceptsTransformer:
     def __init__(self, overrides: TextIO | None = None):
-        self.override_provider = ConceptTextOverrider(overrides)
+        self.override_provider = ConceptTextOverrideProvider(overrides)
 
     def transform_document(
             self,

@@ -23,7 +23,6 @@ from ingestor.steps.ingestor_indexer import (
 from ingestor.transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
-
 from queries.concept_queries import (
     get_broader_concepts,
     get_collaborator_concepts,
@@ -74,7 +73,7 @@ def _get_params(start_offset: int, limit: int) -> dict:
 
 
 def extract_data(
-        start_offset: int, end_index: int, is_local: bool
+    start_offset: int, end_index: int, is_local: bool
 ) -> Generator[IndexableConcept]:
     limit = end_index - start_offset
     print(f"Processing records from {start_offset} to {end_index} ({limit} records)")
@@ -96,8 +95,7 @@ def extract_data(
     transformer = ElasticsearchConceptsTransformer()
     for concept in concepts:
         try:
-            # TODO: Create the overrider and pass it in
-            neptune_concept = RawNeptuneConcept(concept, related_concepts, override_provider)
+            neptune_concept = RawNeptuneConcept(concept, related_concepts)
             neptune_related = RawNeptuneRelatedConcepts(
                 neptune_concept.wellcome_id, related_concepts
             )
@@ -136,7 +134,7 @@ def load_data(s3_uri: str, data: list[IndexableConcept]) -> IngestorIndexerObjec
 
 
 def handler(
-        event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
+    event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
 ) -> IngestorIndexerLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
