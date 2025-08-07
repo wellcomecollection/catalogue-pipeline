@@ -33,9 +33,11 @@ def get_table(
         catalogue_name,
         **params,
     )
+    table_fullname = f"{catalogue_namespace}.{table_name}"
+    
+    print(f"Using {table_fullname} in {catalogue_namespace} catalog")
 
     catalogue.create_namespace_if_not_exists(catalogue_namespace)
-    table_fullname = f"{catalogue_namespace}.{table_name}"
     table = catalogue.create_table_if_not_exists(
         identifier=table_fullname, schema=SCHEMA
     )
