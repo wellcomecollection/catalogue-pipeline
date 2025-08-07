@@ -84,6 +84,10 @@ class AllIdentifiers(FromCamelCaseModel):
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield self.source_identifier
         yield from self.other_identifiers
+    
+    def get_identifier_values(self) -> Generator[str]:
+        for identifier in self.get_identifiers():
+            yield identifier.value
 
 
 class Unidentifiable(FromCamelCaseModel):
@@ -91,6 +95,9 @@ class Unidentifiable(FromCamelCaseModel):
     type: Literal["Unidentifiable"]
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
+        yield from []
+
+    def get_identifier_values(self) -> Generator[str]:
         yield from []
 
 
