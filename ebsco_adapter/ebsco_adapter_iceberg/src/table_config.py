@@ -66,10 +66,6 @@ def get_glue_table(
     region = region or session.region_name
     account_id = account_id or session.client("sts").get_caller_identity()["Account"]
 
-    import os
-
-    os.environ["AWS_PROFILE"] = "platform-developer"
-
     return get_table(
         catalogue_namespace=namespace,
         table_name=table_name,
