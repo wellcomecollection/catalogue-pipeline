@@ -1,5 +1,6 @@
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
 from ingestor.models.aggregate.work import WorkAggregatableValues
+from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
 
 from .base_transformer import ElasticsearchBaseTransformer
@@ -56,9 +57,9 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             collectionPathLabel=transformer.collection_path_label,
             collectionPathPath=transformer.collection_path,
             alternativeTitles=work.data.alternative_titles,
-            contributorsAgentLabel=transformer.contributor_labels,
-            genresConceptsLabel=list(transformer.genre_labels),
-            subjectsConceptsLabel=list(transformer.subject_labels),
+            contributorsAgentLabel=transformer.contributor_agent_labels,
+            genresConceptsLabel=list(transformer.genre_concept_labels),
+            subjectsConceptsLabel=list(transformer.subject_concept_labels),
             description=work.data.description,
             edition=work.data.edition,
             sourceIdentifierValue=work.state.source_identifier.value,
@@ -91,9 +92,42 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             availabilities=list(transformer.availabilities),
         )
 
+    def _transform_filter(self, extracted: ExtractedWork) -> WorkFilterableValues:
+        transformer = QueryWorkTransformer(extracted)
+        work = extracted.work
+        return WorkFilterableValues(
+            format_id=transformer.format_id,
+            work_type=work.data.work_type,
+            production_dates_range_from=list(transformer.production_dates_from),
+            languages_id=[i.id for i in work.data.languages],
+            genres_label=[g.label for g in work.data.genres],
+            genres_concepts_id=list(transformer.genre_ids),
+            genres_concepts_source_identifier=list(transformer.genre_identifiers),
+            subjects_label=[s.label for s in work.data.subjects],
+            subjects_concepts_id=list(transformer.subject_ids),
+            subjects_concepts_source_identifier=list(transformer.subject_identifiers),
+            contributors_agent_label=list(transformer.contributor_agent_labels),
+            contributors_agent_id=list(transformer.contributor_ids),
+            contributors_agent_source_identifier=list(
+                transformer.contributor_identifiers
+            ),
+            identifiers_value=list(transformer.identifiers),
+            items_locations_license_id=list(transformer.license_ids),
+            items_locations_access_conditions_status_id=list(
+                transformer.access_condition_status_ids
+            ),
+            items_id=list(transformer.item_ids),
+            items_identifiers_value=list(transformer.item_identifiers),
+            items_locations_location_type_id=list(transformer.location_type_ids),
+            part_of_id=list(transformer.part_of_ids),
+            part_of_title=list(transformer.part_of_titles),
+            availabilities_id=[a.id for a in work.state.availabilities],
+        )
+
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
         return IndexableWork(
             query=self._transform_query(extracted),
             display=self._transform_display(extracted),
             aggregatableValues=self._transform_aggregate(extracted),
+            filterableValues=self._transform_filter(extracted),
         )

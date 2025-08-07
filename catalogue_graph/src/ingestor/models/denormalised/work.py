@@ -4,6 +4,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
+
 from utils.types import ConceptType
 
 type WorkType = Literal["Standard", "Collection", "Series", "Section"]
@@ -85,12 +86,19 @@ class AllIdentifiers(FromCamelCaseModel):
         yield self.source_identifier
         yield from self.other_identifiers
 
+    def get_identifier_values(self) -> Generator[str]:
+        for identifier in self.get_identifiers():
+            yield identifier.value
+
 
 class Unidentifiable(FromCamelCaseModel):
     canonical_id: None = None
-    type: Literal["Unidentifiable"]
+    type: Literal["Unidentifiable"] = "Unidentifiable"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
+        yield from []
+
+    def get_identifier_values(self) -> Generator[str]:
         yield from []
 
 
@@ -108,7 +116,7 @@ class Item(BaseModel):
 
 
 class Concept(BaseModel):
-    id: AllIdentifiers | Unidentifiable | None
+    id: AllIdentifiers | Unidentifiable = Unidentifiable()
     label: str
     type: ConceptType = "Concept"
 
@@ -117,6 +125,12 @@ class Concept(BaseModel):
     def convert_type(cls, value: ConceptType | Literal["GenreConcept"]) -> ConceptType:
         converted_value = "Genre" if value == "GenreConcept" else value
         return converted_value
+
+    def get_canonical_id(self) -> str | None:
+        if isinstance(self.id, AllIdentifiers):
+            return self.id.canonical_id
+
+        return None
 
 
 class Contributor(BaseModel):

@@ -2,6 +2,7 @@ from collections.abc import Generator
 
 from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.denormalised.work import PhysicalLocation
+from ingestor.models.display.access_status import DisplayAccessStatus
 
 
 class QueryWorkTransformer:
@@ -26,8 +27,7 @@ class QueryWorkTransformer:
     @property
     def item_identifiers(self) -> Generator[str]:
         for item in self.data.items:
-            for identifier in item.id.get_identifiers():
-                yield identifier.value
+            yield from item.id.get_identifier_values()
 
     @property
     def item_shelfmarks(self) -> Generator[str]:
@@ -50,13 +50,18 @@ class QueryWorkTransformer:
                 yield work.properties.label
 
     @property
-    def genre_labels(self) -> Generator[str]:
+    def part_of_ids(self) -> Generator[str]:
+        for work in self.hierarchy.ancestor_works:
+            yield work.properties.id
+
+    @property
+    def genre_concept_labels(self) -> Generator[str]:
         for genre in self.data.genres:
             for concept in genre.concepts:
                 yield concept.label
 
     @property
-    def subject_labels(self) -> Generator[str]:
+    def subject_concept_labels(self) -> Generator[str]:
         for subject in self.data.subjects:
             for concept in subject.concepts:
                 yield concept.label
@@ -68,8 +73,7 @@ class QueryWorkTransformer:
     @property
     def image_source_identifiers(self) -> Generator[str]:
         for image in self.data.image_data:
-            for identifier in image.id.get_identifiers():
-                yield identifier.value
+            yield from image.id.get_identifier_values()
 
     @property
     def collection_path(self) -> str | None:
@@ -86,5 +90,84 @@ class QueryWorkTransformer:
         return self.data.collection_path.label
 
     @property
-    def contributor_labels(self) -> list[str]:
+    def contributor_agent_labels(self) -> list[str]:
         return [c.agent.label for c in self.data.contributors]
+
+    @property
+    def format_id(self) -> str | None:
+        if self.data.format is not None:
+            return self.data.format.id
+
+        return None
+
+    @property
+    def contributor_ids(self) -> Generator[str]:
+        for contributor in self.data.contributors:
+            canonical_id = contributor.agent.get_canonical_id()
+            if canonical_id is not None:
+                yield canonical_id
+
+    # Filter
+    @property
+    def production_dates_from(self) -> Generator[int]:
+        for event in self.data.production:
+            for date in event.dates:
+                if date.range is not None:
+                    # Number of milliseconds since the Unix epoch
+                    yield int(date.range.from_time.timestamp() * 1000)
+
+    @property
+    def genre_ids(self) -> Generator[str]:
+        for genre in self.data.genres:
+            first_concept = genre.concepts[0]
+            canonical_id = first_concept.get_canonical_id()
+            if canonical_id is not None:
+                yield canonical_id
+
+    @property
+    def genre_identifiers(self) -> Generator[str]:
+        for genre in self.data.genres:
+            # TODO: Add comment
+            first_concept = genre.concepts[0]
+            yield from first_concept.id.get_identifier_values()
+
+    @property
+    def subject_identifiers(self) -> Generator[str]:
+        for subject in self.data.subjects:
+            yield from subject.id.get_identifier_values()
+
+    @property
+    def contributor_identifiers(self) -> Generator[str]:
+        for contributor in self.data.contributors:
+            yield from contributor.agent.id.get_identifier_values()
+
+    @property
+    def subject_ids(self) -> Generator[str]:
+        for subject in self.data.subjects:
+            canonical_id = subject.get_canonical_id()
+            if canonical_id is not None:
+                yield canonical_id
+
+    @property
+    def access_condition_status_ids(self) -> Generator[str]:
+        for item in self.data.items:
+            for location in item.locations:
+                for condition in location.access_conditions:
+                    display_status = DisplayAccessStatus.from_access_condition(
+                        condition
+                    )
+                    if display_status is not None:
+                        yield display_status.id
+
+    @property
+    def license_ids(self) -> Generator[str]:
+        for item in self.data.items:
+            for loc in item.locations:
+                if loc.license is not None:
+                    yield loc.license.id
+
+    @property
+    def location_type_ids(self) -> Generator[str]:
+        for item in self.data.items:
+            for loc in item.locations:
+                yield loc.location_type.id
