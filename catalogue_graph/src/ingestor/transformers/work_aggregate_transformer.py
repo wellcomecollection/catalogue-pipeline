@@ -2,9 +2,18 @@ from collections.abc import Generator
 
 from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.aggregate.work import AggregatableField
-from ingestor.models.denormalised.work import AllIdentifiers
+from ingestor.models.denormalised.work import AllIdentifiers, Unidentifiable
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
+
+
+def get_aggregatable(
+    ids: AllIdentifiers | Unidentifiable | None, label: str
+) -> AggregatableField:
+    if ids is None or isinstance(ids, Unidentifiable):
+        return AggregatableField(id=label, label=label)
+
+    return AggregatableField(id=ids.canonical_id, label=label)
 
 
 class AggregateWorkTransformer:
@@ -23,15 +32,12 @@ class AggregateWorkTransformer:
     @property
     def subjects(self) -> Generator[AggregatableField]:
         for subject in self.data.subjects:
-            if subject.id is None:
-                yield AggregatableField(id=subject.label, label=subject.label)
-            else:
-                yield AggregatableField(id=subject.id.canonical_id, label=subject.label)
+            yield get_aggregatable(subject.id, subject.label)
 
     @property
     def contributors(self) -> Generator[AggregatableField]:
         for c in self.data.contributors:
-            yield AggregatableField(id=c.agent.id.canonical_id, label=c.agent.label)
+            yield get_aggregatable(c.agent.id, c.agent.label)
 
     @property
     def work_type(self) -> Generator[AggregatableField]:
