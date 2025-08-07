@@ -2,8 +2,6 @@ import time
 from collections.abc import Generator
 
 import config
-from utils.elasticsearch import get_client, get_standard_index_name
-
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from ingestor.queries.work_queries import (
@@ -11,6 +9,7 @@ from ingestor.queries.work_queries import (
     WORK_HIERARCHY_QUERY,
     WORK_QUERY,
 )
+from utils.elasticsearch import get_client, get_standard_index_name
 
 from .base_extractor import GraphBaseExtractor
 
@@ -60,9 +59,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         all_concepts = self._get_work_concepts()
         all_es_works = self.get_es_works(work_ids)
 
-        for work_id in work_ids:            
+        for work_id in work_ids:
             es_work = all_es_works[work_id]
-            
+
             work_hierarchy = WorkHierarchy(id=work_id)
             if all_hierarchy.get(work_id) is not None:
                 work_hierarchy = WorkHierarchy(**all_hierarchy[work_id])

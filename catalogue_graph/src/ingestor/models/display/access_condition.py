@@ -16,7 +16,7 @@ class DisplayAccessCondition(BaseModel):
 
     @staticmethod
     def from_location(location: Location) -> "DisplayAccessCondition":
-        for condition in location.accessConditions:
+        for condition in location.access_conditions:
             yield DisplayAccessCondition(
                 method=DisplayAccessMethod.from_access_condition(condition),
                 status=DisplayAccessStatus.from_access_condition(condition),

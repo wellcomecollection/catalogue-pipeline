@@ -27,6 +27,6 @@ class DisplayLocationType(DisplayIdLabel):
     @staticmethod
     def from_location(location: Location) -> "DisplayLocationType":
         return DisplayLocationType(
-            id=location.locationType.id,
-            label=LOCATION_LABEL_MAPPING[location.locationType.id],
+            id=location.location_type.id,
+            label=LOCATION_LABEL_MAPPING[location.location_type.id],
         )

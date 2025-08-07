@@ -2,33 +2,31 @@ from ingestor.extractors.works_extractor import GraphWorksExtractor
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
-from ingestor.transformers.raw_work import RawNeptuneWork
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .work_display_transformer import DisplayWorkTransformer
+from .work_query_transformer import QueryWorkTransformer
 
 
 class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
     def __init__(self, start_offset: int, end_index: int, is_local: bool) -> None:
-        self.source = GraphWorksExtractor(start_offset, end_index, is_local)        
-    
+        self.source = GraphWorksExtractor(start_offset, end_index, is_local)
+
     def transform_document(
         self, raw_data: tuple[DenormalisedWork, WorkHierarchy, list[WorkConcept]]
     ) -> IndexableWork:
-        denormalised_work, hierarchy_data, concepts_data = raw_data
-        raw_work = RawNeptuneWork(denormalised_work, hierarchy_data, concepts_data)
+        data = raw_data[0].data
+        state = raw_data[0].state
 
-        data = denormalised_work.data
-        state = denormalised_work.state
-        
         transformer = DisplayWorkTransformer(raw_data[0], raw_data[1], raw_data[2])
+
         display = DisplayWork(
-            id=state.canonicalId,
+            id=state.canonical_id,
             title=data.title,
-            alternativeTitles=data.alternativeTitles,
-            referenceNumber=data.referenceNumber,
+            alternativeTitles=data.alternative_titles,
+            referenceNumber=data.reference_number,
             description=data.description,
-            physicalDescription=data.physicalDescription,
+            physicalDescription=data.physical_description,
             workType=transformer.work_type,
             lettering=data.lettering,
             createdDate=transformer.created_date,
@@ -40,8 +38,8 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             edition=data.edition,
             notes=transformer.notes,
             duration=data.duration,
-            currentFrequency=data.currentFrequency,
-            formerFrequency=data.formerFrequency,
+            currentFrequency=data.current_frequency,
+            formerFrequency=data.former_frequency,
             designation=data.designation,
             images=transformer.images,
             identifiers=transformer.identifiers,
@@ -53,34 +51,31 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             partOf=transformer.part_of,
         )
 
+        transformer = QueryWorkTransformer(raw_data[0], raw_data[1], raw_data[2])
         query = QueryWork(
-            id=state.canonicalId,
-            collectionPathLabel=data.collectionPath.label
-            if data.collectionPath
-            else None,
-            collectionPathPath=data.collectionPath.path
-            if data.collectionPath
-            else None,
-            alternativeTitles=data.alternativeTitles,
-            contributorsAgentLabel=[c.agent.label for c in data.contributors],
-            genresConceptsLabel=raw_work.genre_labels,
-            subjectsConceptsLabel=raw_work.subject_labels,
+            id=state.canonical_id,
+            collectionPathLabel=transformer.collection_path_label,
+            collectionPathPath=transformer.collection_path,
+            alternativeTitles=data.alternative_titles,
+            contributorsAgentLabel=transformer.contributor_labels,
+            genresConceptsLabel=transformer.genre_labels,
+            subjectsConceptsLabel=transformer.subject_labels,
             description=data.description,
             edition=data.edition,
-            sourceIdentifierValue=state.sourceIdentifier.value,
-            identifiersValue=raw_work.other_identifiers,
-            imagesId=raw_work.image_ids,
-            imagesIdentifiersValue=raw_work.image_source_identifiers,
-            itemsId=raw_work.item_ids,
-            itemsIdentifiersValue=raw_work.item_identifiers,
-            itemsShelfmarksValue=raw_work.item_shelfmarks,
+            sourceIdentifierValue=state.source_identifier.value,
+            identifiersValue=transformer.identifiers,
+            imagesId=transformer.image_ids,
+            imagesIdentifiersValue=transformer.image_source_identifiers,
+            itemsId=transformer.item_ids,
+            itemsIdentifiersValue=transformer.item_identifiers,
+            itemsShelfmarksValue=transformer.item_shelfmarks,
             languagesLabel=[i.label for i in data.languages],
             lettering=data.lettering,
             notesContents=[n.contents for n in data.notes],
-            productionLabel=raw_work.production_labels,
-            partOfTitle=raw_work.part_of_titles,
-            physicalDescription=data.physicalDescription,
-            referenceNumber=data.referenceNumber,
+            productionLabel=transformer.production_labels,
+            partOfTitle=transformer.part_of_titles,
+            physicalDescription=data.physical_description,
+            referenceNumber=data.reference_number,
             title=data.title,
         )
 

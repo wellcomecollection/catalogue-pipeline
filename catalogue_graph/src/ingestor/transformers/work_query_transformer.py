@@ -1,11 +1,10 @@
 from collections.abc import Generator
 
 from ingestor.models.denormalised.work import DenormalisedWork, PhysicalLocation
-from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 
 
-class RawNeptuneWork:
+class QueryWorkTransformer:
     def __init__(
         self,
         work: DenormalisedWork,
@@ -18,16 +17,16 @@ class RawNeptuneWork:
         self.concepts = work_concepts
 
     @property
-    def other_identifiers(self) -> list[str]:
-        return [i.value for i in self.data.otherIdentifiers]
+    def identifiers(self) -> list[str]:
+        yield self.state.source_identifier.value
+        for identifier in self.data.other_identifiers:
+            return identifier.value
 
     @property
-    def item_ids(self) -> list[str]:
-        return [
-            item.id.canonicalId
-            for item in self.data.items
-            if item.id.canonicalId is not None
-        ]
+    def item_ids(self) -> Generator[str]:
+        for item in self.data.items:
+            if item.id.canonical_id is not None:
+                yield item.id.canonical_id
 
     @property
     def item_identifiers(self) -> Generator[str]:
@@ -67,10 +66,28 @@ class RawNeptuneWork:
 
     @property
     def image_ids(self) -> list[str]:
-        return [image.id.canonicalId for image in self.data.imageData]
+        return [image.id.canonical_id for image in self.data.image_data]
 
     @property
     def image_source_identifiers(self) -> Generator[str]:
-        for image in self.data.imageData:
-            for display_identifier in DisplayIdentifier.from_all_identifiers(image.id):
-                yield display_identifier.value
+        for image in self.data.image_data:
+            for identifier in image.id.get_identifiers():
+                yield identifier.value
+
+    @property
+    def collection_path(self) -> str | None:
+        if self.data.collection_path is None:
+            return None
+
+        return self.data.collection_path.path
+
+    @property
+    def collection_path_label(self) -> str | None:
+        if self.data.collection_path is None:
+            return None
+
+        return self.data.collection_path.label
+
+    @property
+    def contributor_labels(self) -> list[str]:
+        return [c.agent.label for c in self.data.contributors]

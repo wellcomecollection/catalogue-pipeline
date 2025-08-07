@@ -50,11 +50,11 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_source_identifier(identifier: SourceIdentifier) -> "DisplayIdentifier":
-        type_label = IDENTIFIER_LABEL_MAPPING[identifier.identifierType.id]
+        type_label = IDENTIFIER_LABEL_MAPPING[identifier.identifier_type.id]
         return DisplayIdentifier(
             value=identifier.value,
             identifierType=DisplayIdentifierType(
-                id=identifier.identifierType.id, label=type_label
+                id=identifier.identifier_type.id, label=type_label
             ),
         )
 
@@ -65,8 +65,8 @@ class DisplayIdentifier(BaseModel):
         if isinstance(identifier, Unidentifiable):
             return None
 
-        if identifier.sourceIdentifier is not None:
-            yield DisplayIdentifier.from_source_identifier(identifier.sourceIdentifier)
+        if identifier.source_identifier is not None:
+            yield DisplayIdentifier.from_source_identifier(identifier.source_identifier)
 
-        for other_identifier in identifier.otherIdentifiers:
+        for other_identifier in identifier.other_identifiers:
             yield DisplayIdentifier.from_source_identifier(other_identifier)

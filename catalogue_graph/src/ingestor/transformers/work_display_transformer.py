@@ -1,8 +1,6 @@
 from collections import defaultdict
 from collections.abc import Generator
 
-from utils.sort import natural_sort_key
-
 from ingestor.models.denormalised.work import (
     AllIdentifiers,
     DenormalisedWork,
@@ -27,13 +25,16 @@ from ingestor.models.display.note import DisplayNote
 from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import DisplayRelation
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
+from utils.sort import natural_sort_key
 
 
 class DisplayWorkTransformer:
-    def __init__(self, work: DenormalisedWork,
-                 work_hierarchy: WorkHierarchy,
-                 work_concepts: list[WorkConcept],
-                 ):
+    def __init__(
+        self,
+        work: DenormalisedWork,
+        work_hierarchy: WorkHierarchy,
+        work_concepts: list[WorkConcept],
+    ):
         self.data = work.data
         self.state = work.state
         self.hierarchy = work_hierarchy
@@ -42,9 +43,9 @@ class DisplayWorkTransformer:
     @property
     def identifiers(self) -> list[DisplayIdentifier]:
         all_ids = AllIdentifiers(
-            canonicalId=self.state.canonicalId,
-            sourceIdentifier=self.state.sourceIdentifier,
-            otherIdentifiers=self.data.otherIdentifiers,
+            canonical_id=self.state.canonical_id,
+            source_identifier=self.state.source_identifier,
+            other_identifiers=self.data.other_identifiers,
         )
         return DisplayIdentifier.from_all_identifiers(all_ids)
 
@@ -68,12 +69,12 @@ class DisplayWorkTransformer:
     def notes(self) -> Generator[DisplayNote]:
         grouped_notes = defaultdict(list)
         for note in self.data.notes:
-            grouped_notes[note.noteType.id].append(note)
+            grouped_notes[note.note_type.id].append(note)
 
         for group in grouped_notes.values():
             yield DisplayNote(
                 contents=[note.contents for note in group],
-                noteType=DisplayIdLabel.from_id_label(group[0].noteType, "NoteType"),
+                noteType=DisplayIdLabel.from_id_label(group[0].note_type, "NoteType"),
             )
 
     @property
@@ -83,16 +84,16 @@ class DisplayWorkTransformer:
 
     @property
     def created_date(self) -> DisplayConcept | None:
-        if self.data.createdDate is None:
+        if self.data.created_date is None:
             return None
 
-        return DisplayConcept(label=self.data.createdDate.label, type="Period")
+        return DisplayConcept(label=self.data.created_date.label, type="Period")
 
     @property
     def items(self) -> list[DisplayItem]:
         for item in self.data.items:
             yield DisplayItem(
-                id=item.id.canonicalId,
+                id=item.id.canonical_id,
                 identifiers=DisplayIdentifier.from_all_identifiers(item.id),
                 title=item.title,
                 note=item.note,
@@ -116,15 +117,15 @@ class DisplayWorkTransformer:
 
     @property
     def images(self) -> Generator[DisplayId]:
-        for image in self.data.imageData:
-            yield DisplayId(id=image.id.canonicalId, type="Image")
+        for image in self.data.image_data:
+            yield DisplayId(id=image.id.canonical_id, type="Image")
 
     @property
     def subjects(self) -> list[DisplaySubject]:
         for subject in self.data.subjects:
             yield DisplaySubject(
                 label=subject.label,
-                id=subject.id.canonicalId,
+                id=subject.id.canonical_id,
                 concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
             )
 
@@ -140,14 +141,19 @@ class DisplayWorkTransformer:
         if len(self.hierarchy.ancestor_works) == 0:
             return []
 
-        # Neptune returns ancestors sorted from most distant to least distant (the root ancestor comes first 
+        # Neptune returns ancestors sorted from most distant to least distant (the root ancestor comes first
         # and the parent comes last). We need to reverse this order when constructing the DisplayRelation object.
-        ancestors = DisplayRelation.from_flat_hierarchy(self.hierarchy.ancestor_works[::-1])
+        ancestors = DisplayRelation.from_flat_hierarchy(
+            self.hierarchy.ancestor_works[::-1]
+        )
         return [ancestors]
 
     @property
     def parts(self) -> list[DisplayRelation]:
-        parts = [DisplayRelation.from_neptune_node(c.work, c.parts) for c in self.hierarchy.children]
+        parts = [
+            DisplayRelation.from_neptune_node(c.work, c.parts)
+            for c in self.hierarchy.children
+        ]
 
         return sorted(
             parts, key=lambda item: natural_sort_key(item.referenceNumber or item.title)
@@ -189,5 +195,3 @@ class DisplayWorkTransformer:
                     else None
                 ),
             )
-
-

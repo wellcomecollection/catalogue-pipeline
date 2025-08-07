@@ -28,7 +28,7 @@ class DisplayLocation(BaseModel):
                 **display_location.dict(),
                 url=location.url,
                 credit=location.credit,
-                linkText=location.linkText,
+                linkText=location.link_text,
             )
 
         return DisplayPhysicalLocation(

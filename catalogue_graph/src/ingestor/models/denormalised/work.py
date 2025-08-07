@@ -1,9 +1,15 @@
+from collections.abc import Generator
 from datetime import datetime
-from typing import Generator, Literal
+from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 type WorkType = Literal["Standard", "Collection", "Series", "Section"]
+
+
+class FromCamelCaseModel(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
 
 
 class Id(BaseModel):
@@ -35,16 +41,16 @@ class AccessCondition(BaseModel):
     note: str | None = None
 
 
-class Location(BaseModel):
-    locationType: Id
+class Location(FromCamelCaseModel):
+    location_type: Id
     license: Id | None = None
-    accessConditions: list[AccessCondition]
+    access_conditions: list[AccessCondition]
 
 
 class DigitalLocation(Location):
     url: str
     credit: str | None = None
-    linkText: str | None = None
+    link_text: str | None = None
 
 
 class PhysicalLocation(Location):
@@ -52,14 +58,14 @@ class PhysicalLocation(Location):
     shelfmark: str | None = None
 
 
-class SourceIdentifier(BaseModel):
-    identifierType: Id
-    ontologyType: str
+class SourceIdentifier(FromCamelCaseModel):
+    identifier_type: Id
+    ontology_type: str
     value: str
 
 
-class Note(BaseModel):
-    noteType: IdLabel
+class Note(FromCamelCaseModel):
+    note_type: IdLabel
     contents: str
 
 
@@ -69,20 +75,20 @@ class Holdings(BaseModel):
     location: PhysicalLocation | DigitalLocation | None = None
 
 
-class AllIdentifiers(BaseModel):
-    canonicalId: str
-    sourceIdentifier: SourceIdentifier
-    otherIdentifiers: list[SourceIdentifier] = []
-    
-    def get_identifiers(self) -> Generator[SourceIdentifier]:
-        yield self.sourceIdentifier
-        yield from self.otherIdentifiers
-        
+class AllIdentifiers(FromCamelCaseModel):
+    canonical_id: str
+    source_identifier: SourceIdentifier
+    other_identifiers: list[SourceIdentifier] = []
 
-class Unidentifiable(BaseModel):
-    canonicalId: None = None
+    def get_identifiers(self) -> Generator[SourceIdentifier]:
+        yield self.source_identifier
+        yield from self.other_identifiers
+
+
+class Unidentifiable(FromCamelCaseModel):
+    canonical_id: None = None
     type: Literal["Unidentifiable"]
- 
+
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield from []
 
@@ -129,15 +135,15 @@ class ProductionEvent(BaseModel):
     function: Concept | None = None
 
 
-class DenormalisedWorkData(BaseModel):
+class DenormalisedWorkData(FromCamelCaseModel):
     title: str | None = None
-    otherIdentifiers: list[SourceIdentifier]
-    alternativeTitles: list[str] = []
+    other_identifiers: list[SourceIdentifier]
+    alternative_titles: list[str]
     format: IdLabel | None = None
     description: str | None = None
-    physicalDescription: str | None = None
+    physical_description: str | None = None
     lettering: str | None = None
-    createdDate: Concept | None = None
+    created_date: Concept | None = None
     subjects: list[Subject] = []
     genres: list[Genre] = []
     contributors: list[Contributor] = []
@@ -149,20 +155,20 @@ class DenormalisedWorkData(BaseModel):
     duration: int | None = None
     items: list[Item] = []
     holdings: list[Holdings] = []
-    collectionPath: CollectionPath | None = None
-    referenceNumber: str | None = None
-    imageData: list[ImageData] = []
-    workType: WorkType = "Standard"
-    currentFrequency: str | None = None
-    formerFrequency: list[str] = []
+    collection_path: CollectionPath | None = None
+    reference_number: str | None = None
+    image_data: list[ImageData] = []
+    work_type: WorkType = "Standard"
+    current_frequency: str | None = None
+    former_frequency: list[str] = []
     designation: list[str] = []
 
 
-class DenormalisedWorkState(BaseModel):
-    sourceIdentifier: SourceIdentifier
-    canonicalId: str
-    mergedTime: datetime
-    sourceModifiedTime: datetime
+class DenormalisedWorkState(FromCamelCaseModel):
+    source_identifier: SourceIdentifier
+    canonical_id: str
+    merged_time: datetime
+    source_modified_time: datetime
     availabilities: list[Id]
 
 

@@ -20,7 +20,7 @@ class DisplayConcept(BaseModel):
 
         # TODO: Should we remove the suffix here?
         return DisplayConcept(
-            id=concept.id.canonicalId,
+            id=concept.id.canonical_id,
             label=concept.label.removesuffix("."),
             identifiers=DisplayIdentifier.from_all_identifiers(concept.id),
             type=concept_type,

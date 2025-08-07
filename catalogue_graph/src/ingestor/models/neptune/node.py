@@ -1,6 +1,6 @@
+from pydantic import BaseModel, Field, model_validator
 
 from models.graph_node import BaseNode, Concept, SourceConcept, Work
-from pydantic import BaseModel, Field, model_validator
 
 
 class NeptuneBaseNode(BaseModel):
