@@ -19,7 +19,7 @@ def handler(
 ) -> EbscoAdapterLoaderEvent:
     print(f"Running handler with config: {config}")
     print(f"Processing event: {event}")
-    return EbscoAdapterLoaderEvent(s3_location="s3://bucket/path/to/file")
+    return EbscoAdapterLoaderEvent(file_location="s3://bucket/path/to/file")
 
 
 def lambda_handler(event: EbscoAdapterTriggerEvent, context: Any) -> dict[str, Any]:

@@ -16,7 +16,7 @@ class EbscoAdapterTransformerConfig(BaseModel):
 
 
 class EbscoAdapterTransformerEvent(BaseModel):
-    snapshot_id: str | None = None
+    changeset_id: str | None = None
 
 
 class EbscoAdapterTransformerResult(BaseModel):
@@ -43,7 +43,7 @@ def handler(
     print(f"Processing event: {event}")
 
     try:
-        snapshot_id = event.snapshot_id
+        snapshot_id = event.changeset_id
         print(f"Processing loader output with snapshot_id: {snapshot_id}")
 
         # TODO: Implement actual transformation logic here
@@ -103,7 +103,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
 
     args = parser.parse_args()
 
-    event = EbscoAdapterTransformerEvent(snapshot_id=args.snapshot_id)
+    event = EbscoAdapterTransformerEvent(changeset_id=args.snapshot_id)
     config_obj = EbscoAdapterTransformerConfig(is_local=args.local)
 
     return handler(event=event, config_obj=config_obj)
