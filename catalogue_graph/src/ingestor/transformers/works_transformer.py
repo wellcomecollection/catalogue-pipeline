@@ -1,7 +1,9 @@
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
+from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
 
 from .base_transformer import ElasticsearchBaseTransformer
+from .work_aggregate_transformer import AggregateWorkTransformer
 from .work_display_transformer import DisplayWorkTransformer
 from .work_query_transformer import QueryWorkTransformer
 
@@ -76,8 +78,22 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             title=work.data.title,
         )
 
+    def _transform_aggregate(self, extracted: ExtractedWork) -> WorkAggregatableValues:
+        transformer = AggregateWorkTransformer(extracted)
+        return WorkAggregatableValues(
+            workType=list(transformer.work_type),
+            genres=list(transformer.genres),
+            productionDates=list(transformer.production_dates),
+            subjects=list(transformer.subjects),
+            languages=list(transformer.languages),
+            contributors=list(transformer.contributors),
+            itemLicenses=list(transformer.licenses),
+            availabilities=list(transformer.availabilities),
+        )
+
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
         return IndexableWork(
             query=self._transform_query(extracted),
             display=self._transform_display(extracted),
+            aggregatableValues=self._transform_aggregate(extracted),
         )

@@ -7,13 +7,13 @@ class AggregatableField(BaseModel):
 
 
 class WorkAggregatableValues(BaseModel):
-    workTypes: list[AggregatableField] = Field(serialization_alias="workType")
-    genres: list[AggregatableField] = Field(serialization_alias="genres")
+    workType: list[AggregatableField]
+    genres: list[AggregatableField]
+    subjects: list[AggregatableField]
+    languages: list[AggregatableField]
     productionDates: list[AggregatableField] = Field(
         serialization_alias="production.dates"
     )
-    subjects: list[AggregatableField] = Field(serialization_alias="subjects")
-    languages: list[AggregatableField] = Field(serialization_alias="languages")
     contributors: list[AggregatableField] = Field(
         serialization_alias="contributors.agent"
     )

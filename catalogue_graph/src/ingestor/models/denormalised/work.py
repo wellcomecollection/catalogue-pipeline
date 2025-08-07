@@ -2,9 +2,8 @@ from collections.abc import Generator
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
-
 from utils.types import ConceptType
 
 type WorkType = Literal["Standard", "Collection", "Series", "Section"]
@@ -130,6 +129,16 @@ class Subject(Concept):
     concepts: list[Concept]
 
 
+class DateTimeRange(BaseModel):
+    from_time: datetime = Field(alias="from")
+    to_time: datetime = Field(alias="to")
+    label: str | None = None
+
+
+class Period(Concept):
+    range: DateTimeRange | None = None
+
+
 class Genre(BaseModel):
     label: str
     concepts: list[Concept]
@@ -139,7 +148,7 @@ class ProductionEvent(BaseModel):
     label: str
     places: list[Concept]
     agents: list[Concept]
-    dates: list[Concept]
+    dates: list[Period]
     function: Concept | None = None
 
 
