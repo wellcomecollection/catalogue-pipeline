@@ -7,7 +7,7 @@ import polars as pl
 import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
-from models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
+from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
 from utils.aws import df_from_s3_parquet, pydantic_from_s3_json
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change

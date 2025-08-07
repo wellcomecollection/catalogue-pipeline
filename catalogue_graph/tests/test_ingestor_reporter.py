@@ -4,11 +4,11 @@ from test_mocks import MockSmartOpen, fixed_datetime
 from test_utils import load_fixture
 
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from ingestor.models.step_events import IngestorStepEvent
 from ingestor.steps.ingestor_reporter import (
     ReporterConfig,
     get_ingestor_report,
 )
-from models.step_events import IngestorStepEvent
 
 pipeline_date = "2024-01-01"
 index_date = "2024-01-02"

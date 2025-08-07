@@ -1,8 +1,7 @@
 from typing import TypedDict
 
-from shared.types import ConceptType, WorkType
 from sources.catalogue.concepts_source import extract_concepts_from_work
-from utils.types import WorkConceptKey
+from utils.types import ConceptType, WorkConceptKey, WorkType
 
 from .raw_concept import RawCatalogueConcept
 

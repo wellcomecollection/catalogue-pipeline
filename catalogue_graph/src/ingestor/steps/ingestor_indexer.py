@@ -8,25 +8,13 @@ import elasticsearch.helpers
 from pydantic import BaseModel
 
 import utils.elasticsearch
-from config import INGESTOR_PIPELINE_DATE
 from ingestor.models.indexable_concept import IndexableConcept
-from ingestor.steps.ingestor_indexer_monitor import (
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
     IngestorIndexerMonitorLambdaEvent,
+    IngestorIndexerObject,
 )
 from utils.aws import df_from_s3_parquet
-
-
-class IngestorIndexerObject(BaseModel):
-    s3_uri: str
-    content_length: int | None = None
-    record_count: int | None = None
-
-
-class IngestorIndexerLambdaEvent(BaseModel):
-    pipeline_date: str | None = INGESTOR_PIPELINE_DATE
-    index_date: str | None
-    job_id: str | None = None
-    object_to_index: IngestorIndexerObject
 
 
 class IngestorIndexerConfig(BaseModel):

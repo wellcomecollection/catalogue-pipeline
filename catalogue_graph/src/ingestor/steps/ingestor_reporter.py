@@ -5,7 +5,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from config import SLACK_SECRET_ID
-from models.step_events import IngestorStepEvent
+from ingestor.models.step_events import IngestorStepEvent
 from utils.reporting import DeletionReport, IndexerReport, TriggerReport
 from utils.slack import publish_report
 

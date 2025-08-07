@@ -1,7 +1,7 @@
 from collections.abc import Generator
 
-from shared.types import ConceptType
 from utils.aws import get_neptune_client
+from utils.types import ConceptType
 
 CONCEPT_TYPES_QUERY_LIMIT = 20000
 CONCEPT_TYPES_QUERY = """

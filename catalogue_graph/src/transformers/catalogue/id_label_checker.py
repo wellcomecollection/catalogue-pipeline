@@ -2,8 +2,8 @@ import os
 from collections import defaultdict
 from itertools import product
 
-from shared.types import ConceptSource, ConceptType
 from utils.aws import NodeType, OntologyType, fetch_transformer_output_from_s3
+from utils.types import ConceptSource, ConceptType
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
 SOURCES_BY_PRIORITY: list[ConceptSource] = ["nlm-mesh", "lc-subjects", "lc-names"]

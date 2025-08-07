@@ -1,11 +1,10 @@
 import typing
 
-from models.step_events import IngestorMonitorStepEvent
+from ingestor.models.step_events import (
+    IngestorIndexerMonitorLambdaEvent,
+    IngestorMonitorStepEvent,
+)
 from utils.reporting import IndexerReport
-
-
-class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):
-    success_count: int
 
 
 def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
