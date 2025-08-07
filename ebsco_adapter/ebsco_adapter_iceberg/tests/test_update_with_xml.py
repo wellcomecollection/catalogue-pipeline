@@ -1,9 +1,10 @@
+from typing import Any
+
 import pytest
 from pyiceberg.expressions import EqualTo
 from pyiceberg.table import Table as IcebergTable
-from typing import Any
 
-from main import update_from_xml_file
+from steps.loader import update_from_xml_file
 
 
 def test_store_record(temporary_table: IcebergTable, xml_with_one_record: Any) -> None:
@@ -63,5 +64,7 @@ def test_corrupt_input(temporary_table: IcebergTable, not_xml: Any) -> None:
     Given an update file that cannot be understood
     Then an Exception is raised
     """
-    with pytest.raises(Exception):
+    with pytest.raises(  # noqa: B017 # Asserting blind exception is fine for now
+        Exception
+    ):
         update_from_xml_file(temporary_table, not_xml)

@@ -27,18 +27,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        adapters:
+        lambda_name:
           [
-            {
-              s3_prefix: lambdas/ebsco_adapter/ebsco_adapter_iceberg,
-              lambda_name: ebsco-adapter-trigger,
-            }
+            ebsco-adapter-trigger,
+            ebsco-adapter-loader,
+            ebsco-adapter-transformer,
           ]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/deploy-lambda-zip
         with:
-          s3_prefix: ${{ matrix.adapters.s3_prefix }}
-          lambda_name: ${{ matrix.adapters.lambda_name }}
+          s3_prefix: lambdas/ebsco_adapter/ebsco_adapter_iceberg
+          lambda_name: ${{ matrix.lambda_name }}
           deploy_tag: ${{ inputs.deploy_tag }}
           role_to_assume: ${{ secrets.EBSCO_ADAPTER_CI_ROLE_ARN }}

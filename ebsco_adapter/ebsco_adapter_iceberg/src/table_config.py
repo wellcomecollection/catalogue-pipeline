@@ -3,11 +3,13 @@ Shared table configuration for the EBSCO adapter.
 """
 
 import os
-from typing import Any, Optional
+from typing import Any
+
+import boto3
 from pyiceberg.catalog import load_catalog
 from pyiceberg.table import Table as IcebergTable
+
 from schemata import SCHEMA
-import boto3
 
 
 def get_table(
@@ -44,8 +46,8 @@ def get_glue_table(
     s3_tables_bucket: str,
     table_name: str,
     namespace: str,
-    region: Optional[str] = None,
-    account_id: Optional[str] = None,
+    region: str | None = None,
+    account_id: str | None = None,
 ) -> IcebergTable:
     """
     Get a table from the Glue catalog.

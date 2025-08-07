@@ -1,20 +1,18 @@
-from schemata import ARROW_SCHEMA
-from typing import Optional
-
-from pyiceberg.table import Table as IcebergTable
+import uuid
+from datetime import UTC, datetime
 
 import pyarrow as pa
-import uuid
-
-from pyiceberg.expressions import In
-from datetime import datetime, timezone
 import pyarrow.compute as pc
+from pyiceberg.expressions import In
+from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
+
+from schemata import ARROW_SCHEMA
 
 
 def update_table(
     table: IcebergTable, new_data: pa.Table, record_namespace: str
-) -> Optional[str]:
+) -> str | None:
     """
     Perform an update on `table`, using the data provided in new_data.
 
@@ -81,7 +79,7 @@ def _upsert_with_markers(
     :param inserts: New records to insert
     """
     changeset_id = str(uuid.uuid1())
-    timestamp = pa.scalar(datetime.now(timezone.utc), pa.timestamp("us", "UTC"))
+    timestamp = pa.scalar(datetime.now(UTC), pa.timestamp("us", "UTC"))
     if changes:
         changes = _append_change_columns(changes, changeset_id, timestamp)
     if inserts:
