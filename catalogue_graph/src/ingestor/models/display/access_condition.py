@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 from pydantic import BaseModel
 
 from ingestor.models.denormalised.work import Location
@@ -15,7 +17,7 @@ class DisplayAccessCondition(BaseModel):
     type: str = "AccessCondition"
 
     @staticmethod
-    def from_location(location: Location) -> "DisplayAccessCondition":
+    def from_location(location: Location) -> Generator["DisplayAccessCondition"]:
         for condition in location.access_conditions:
             yield DisplayAccessCondition(
                 method=DisplayAccessMethod.from_access_condition(condition),

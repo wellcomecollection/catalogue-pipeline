@@ -1,26 +1,21 @@
 from collections.abc import Generator
 
-from ingestor.models.denormalised.work import DenormalisedWork, PhysicalLocation
-from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
+from ingestor.extractors.works_extractor import ExtractedWork
+from ingestor.models.denormalised.work import PhysicalLocation
 
 
 class QueryWorkTransformer:
-    def __init__(
-        self,
-        work: DenormalisedWork,
-        work_hierarchy: WorkHierarchy,
-        work_concepts: list[WorkConcept],
-    ):
-        self.data = work.data
-        self.state = work.state
-        self.hierarchy = work_hierarchy
-        self.concepts = work_concepts
+    def __init__(self, extracted: ExtractedWork):
+        self.data = extracted.work.data
+        self.state = extracted.work.state
+        self.hierarchy = extracted.hierarchy
+        self.concepts = extracted.concepts
 
     @property
-    def identifiers(self) -> list[str]:
+    def identifiers(self) -> Generator[str]:
         yield self.state.source_identifier.value
         for identifier in self.data.other_identifiers:
-            return identifier.value
+            yield identifier.value
 
     @property
     def item_ids(self) -> Generator[str]:
@@ -43,23 +38,25 @@ class QueryWorkTransformer:
                     yield loc.shelfmark
 
     @property
-    def production_labels(self) -> list[str]:
+    def production_labels(self) -> Generator[str]:
         for event in self.data.production:
             for concept in event.places + event.agents + event.dates:
                 yield concept.label
 
     @property
-    def part_of_titles(self) -> list[str]:
-        return [p.properties.label for p in self.hierarchy.ancestor_works]
+    def part_of_titles(self) -> Generator[str]:
+        for work in self.hierarchy.ancestor_works:
+            if work.properties.label is not None:
+                yield work.properties.label
 
     @property
-    def genre_labels(self) -> list[str]:
+    def genre_labels(self) -> Generator[str]:
         for genre in self.data.genres:
             for concept in genre.concepts:
                 yield concept.label
 
     @property
-    def subject_labels(self) -> list[str]:
+    def subject_labels(self) -> Generator[str]:
         for subject in self.data.subjects:
             for concept in subject.concepts:
                 yield concept.label

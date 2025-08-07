@@ -16,11 +16,11 @@ class DisplayLocation(BaseModel):
     @staticmethod
     def from_location(
         location: PhysicalLocation | DigitalLocation,
-    ) -> "DisplayLocation":
+    ) -> "DisplayDigitalLocation | DisplayPhysicalLocation":
         display_location = DisplayLocation(
             locationType=DisplayLocationType.from_location(location),
             license=DisplayLicense.from_location(location),
-            accessConditions=DisplayAccessCondition.from_location(location),
+            accessConditions=list(DisplayAccessCondition.from_location(location)),
         )
 
         if isinstance(location, DigitalLocation):

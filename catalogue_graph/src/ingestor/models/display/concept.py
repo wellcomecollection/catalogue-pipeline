@@ -14,16 +14,12 @@ class DisplayConcept(BaseModel):
 
     @staticmethod
     def from_concept(concept: Concept) -> "DisplayConcept":
-        concept_type = concept.type
-        if concept.type == "GenreConcept":
-            concept_type = "Genre"
-
         # TODO: Should we remove the suffix here?
         return DisplayConcept(
             id=concept.id.canonical_id,
             label=concept.label.removesuffix("."),
             identifiers=DisplayIdentifier.from_all_identifiers(concept.id),
-            type=concept_type,
+            type=concept.type,
         )
 
 

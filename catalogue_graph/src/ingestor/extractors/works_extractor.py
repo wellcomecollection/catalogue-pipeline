@@ -1,6 +1,8 @@
 import time
 from collections.abc import Generator
 
+from pydantic import BaseModel
+
 import config
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
@@ -12,6 +14,12 @@ from ingestor.queries.work_queries import (
 from utils.elasticsearch import get_client, get_standard_index_name
 
 from .base_extractor import GraphBaseExtractor
+
+
+class ExtractedWork(BaseModel):
+    work: DenormalisedWork
+    hierarchy: WorkHierarchy
+    concepts: list[WorkConcept]
 
 
 class GraphWorksExtractor(GraphBaseExtractor):
@@ -53,7 +61,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
     def extract_raw(
         self,
-    ) -> Generator[tuple[DenormalisedWork, WorkHierarchy, list[WorkConcept]]]:
+    ) -> Generator[ExtractedWork]:
         work_ids = list(self._get_work_ids())
         all_hierarchy = self._get_work_hierarchy()
         all_concepts = self._get_work_concepts()
@@ -70,4 +78,8 @@ class GraphWorksExtractor(GraphBaseExtractor):
             for raw_concept in all_concepts.get(work_id, []):
                 work_concepts.append(WorkConcept(**raw_concept))
 
-            yield DenormalisedWork(**es_work), work_hierarchy, work_concepts
+            yield ExtractedWork(
+                work=DenormalisedWork(**es_work),
+                hierarchy=work_hierarchy,
+                concepts=work_concepts,
+            )

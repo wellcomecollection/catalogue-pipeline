@@ -26,7 +26,7 @@ class ElasticsearchBaseTransformer:
         for raw_item in self.source.extract_raw():
             pydantic_document = self.transform_document(raw_item)
             if pydantic_document:
-                yield pydantic_document.model_dump()
+                yield pydantic_document
 
     def load_documents_to_s3(self, s3_uri: str) -> IngestorIndexerObject:
         print(f"Loading data to '{s3_uri}'...")

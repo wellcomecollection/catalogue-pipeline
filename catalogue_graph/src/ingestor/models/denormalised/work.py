@@ -2,8 +2,10 @@ from collections.abc import Generator
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
 from pydantic.alias_generators import to_camel
+
+from utils.types import ConceptType
 
 type WorkType = Literal["Standard", "Collection", "Series", "Section"]
 
@@ -109,7 +111,13 @@ class Item(BaseModel):
 class Concept(BaseModel):
     id: AllIdentifiers | Unidentifiable | None
     label: str
-    type: str = "Concept"
+    type: ConceptType = "Concept"
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def convert_type(cls, value: ConceptType | Literal["GenreConcept"]) -> ConceptType:
+        converted_value = "Genre" if value == "GenreConcept" else value
+        return converted_value
 
 
 class Contributor(BaseModel):

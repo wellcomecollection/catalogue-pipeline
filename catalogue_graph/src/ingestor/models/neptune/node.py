@@ -10,7 +10,7 @@ class NeptuneBaseNode(BaseModel):
 
     @model_validator(mode="before")
     @classmethod
-    def process_lists(cls, data):
+    def process_lists(cls, data: dict) -> dict:
         list_fields = ["alternative_labels", "alternative_ids"]
         for field in list_fields:
             if field in data["~properties"]:

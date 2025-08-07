@@ -1,9 +1,9 @@
 from collections import defaultdict
 from collections.abc import Generator
 
+from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.denormalised.work import (
     AllIdentifiers,
-    DenormalisedWork,
 )
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.concept import (
@@ -24,30 +24,24 @@ from ingestor.models.display.location import (
 from ingestor.models.display.note import DisplayNote
 from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import DisplayRelation
-from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from utils.sort import natural_sort_key
 
 
 class DisplayWorkTransformer:
-    def __init__(
-        self,
-        work: DenormalisedWork,
-        work_hierarchy: WorkHierarchy,
-        work_concepts: list[WorkConcept],
-    ):
-        self.data = work.data
-        self.state = work.state
-        self.hierarchy = work_hierarchy
-        self.concepts = work_concepts
+    def __init__(self, extracted: ExtractedWork):
+        self.data = extracted.work.data
+        self.state = extracted.work.state
+        self.hierarchy = extracted.hierarchy
+        self.concepts = extracted.concepts
 
     @property
-    def identifiers(self) -> list[DisplayIdentifier]:
+    def identifiers(self) -> Generator[DisplayIdentifier]:
         all_ids = AllIdentifiers(
             canonical_id=self.state.canonical_id,
             source_identifier=self.state.source_identifier,
             other_identifiers=self.data.other_identifiers,
         )
-        return DisplayIdentifier.from_all_identifiers(all_ids)
+        yield from DisplayIdentifier.from_all_identifiers(all_ids)
 
     @property
     def thumbnail(self) -> DisplayDigitalLocation | None:
@@ -90,11 +84,11 @@ class DisplayWorkTransformer:
         return DisplayConcept(label=self.data.created_date.label, type="Period")
 
     @property
-    def items(self) -> list[DisplayItem]:
+    def items(self) -> Generator[DisplayItem]:
         for item in self.data.items:
             yield DisplayItem(
                 id=item.id.canonical_id,
-                identifiers=DisplayIdentifier.from_all_identifiers(item.id),
+                identifiers=list(DisplayIdentifier.from_all_identifiers(item.id)),
                 title=item.title,
                 note=item.note,
                 locations=[
@@ -121,11 +115,15 @@ class DisplayWorkTransformer:
             yield DisplayId(id=image.id.canonical_id, type="Image")
 
     @property
-    def subjects(self) -> list[DisplaySubject]:
+    def subjects(self) -> Generator[DisplaySubject]:
         for subject in self.data.subjects:
+            subject_id = None
+            if subject.id is not None:
+                subject_id = subject.id.canonical_id
+
             yield DisplaySubject(
                 label=subject.label,
-                id=subject.id.canonical_id,
+                id=subject_id,
                 concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
             )
 
@@ -178,6 +176,10 @@ class DisplayWorkTransformer:
     @property
     def production(self) -> Generator[DisplayProductionEvent]:
         for event in self.data.production:
+            function = None
+            if event.function is not None:
+                function = DisplayConcept(label=event.function.label)
+
             yield DisplayProductionEvent(
                 label=event.label,
                 places=[
@@ -189,9 +191,5 @@ class DisplayWorkTransformer:
                 dates=[
                     DisplayConcept(label=p.label, type="Period") for p in event.dates
                 ],
-                function=(
-                    DisplayConcept(label=event.function.label)
-                    if event.function
-                    else None
-                ),
+                function=function,
             )
