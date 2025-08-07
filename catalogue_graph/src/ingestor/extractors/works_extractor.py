@@ -2,13 +2,15 @@ import time
 from collections.abc import Generator
 
 import config
+from utils.elasticsearch import get_client, get_standard_index_name
+
 from ingestor.models.denormalised.work import DenormalisedWork
+from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from ingestor.queries.work_queries import (
     WORK_CONCEPTS_QUERY,
     WORK_HIERARCHY_QUERY,
     WORK_QUERY,
 )
-from utils.elasticsearch import get_client, get_standard_index_name
 
 from .base_extractor import GraphBaseExtractor
 
@@ -38,15 +40,13 @@ class GraphWorksExtractor(GraphBaseExtractor):
         )
         return work_mapping
 
-    def _get_works(self) -> list[dict]:
-        return self.make_neptune_query(WORK_QUERY, "works")
+    def _get_work_ids(self) -> Generator[str]:
+        for item in self.make_neptune_query(WORK_QUERY, "works"):
+            yield item["id"]
 
     def _get_work_hierarchy(self) -> dict:
         results = self.make_neptune_query(WORK_HIERARCHY_QUERY, "work hierarchy")
-        return {
-            item["id"]: {"parent": item["parent"], "children": item["children"]}
-            for item in results
-        }
+        return {item["id"]: item for item in results}
 
     def _get_work_concepts(self) -> dict:
         results = self.make_neptune_query(WORK_CONCEPTS_QUERY, "work concepts")
@@ -54,18 +54,21 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
     def extract_raw(
         self,
-    ) -> Generator[tuple[DenormalisedWork, dict | None, dict | None]]:
-        all_works = self._get_works()
+    ) -> Generator[tuple[DenormalisedWork, WorkHierarchy, list[WorkConcept]]]:
+        work_ids = list(self._get_work_ids())
         all_hierarchy = self._get_work_hierarchy()
         all_concepts = self._get_work_concepts()
-
-        work_ids = [w["work"]["~properties"]["id"] for w in all_works]
         all_es_works = self.get_es_works(work_ids)
 
-        for work in all_works:
-            work_id = work["work"]["~properties"]["id"]
-            es_work = DenormalisedWork(**all_es_works.get(work_id))
+        for work_id in work_ids:            
+            es_work = all_es_works[work_id]
+            
+            work_hierarchy = WorkHierarchy(id=work_id)
+            if all_hierarchy.get(work_id) is not None:
+                work_hierarchy = WorkHierarchy(**all_hierarchy[work_id])
 
-            work_hierarchy = all_hierarchy.get(work_id)
-            work_concepts = all_concepts.get(work_id)
-            yield es_work, work_hierarchy, work_concepts
+            work_concepts = []
+            for raw_concept in all_concepts.get(work_id, []):
+                work_concepts.append(WorkConcept(**raw_concept))
+
+            yield DenormalisedWork(**es_work), work_hierarchy, work_concepts

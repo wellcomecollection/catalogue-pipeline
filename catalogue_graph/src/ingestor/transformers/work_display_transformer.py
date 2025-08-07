@@ -1,0 +1,193 @@
+from collections import defaultdict
+from collections.abc import Generator
+
+from utils.sort import natural_sort_key
+
+from ingestor.models.denormalised.work import (
+    AllIdentifiers,
+    DenormalisedWork,
+)
+from ingestor.models.display.availability import DisplayAvailability
+from ingestor.models.display.concept import (
+    DisplayConcept,
+    DisplayContributionRole,
+    DisplayContributor,
+    DisplayGenre,
+    DisplaySubject,
+)
+from ingestor.models.display.holdings import DisplayHoldings
+from ingestor.models.display.id_label import DisplayId, DisplayIdLabel
+from ingestor.models.display.identifier import DisplayIdentifier
+from ingestor.models.display.item import DisplayItem
+from ingestor.models.display.location import (
+    DisplayDigitalLocation,
+    DisplayLocation,
+)
+from ingestor.models.display.note import DisplayNote
+from ingestor.models.display.production_event import DisplayProductionEvent
+from ingestor.models.display.relation import DisplayRelation
+from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
+
+
+class DisplayWorkTransformer:
+    def __init__(self, work: DenormalisedWork,
+                 work_hierarchy: WorkHierarchy,
+                 work_concepts: list[WorkConcept],
+                 ):
+        self.data = work.data
+        self.state = work.state
+        self.hierarchy = work_hierarchy
+        self.concepts = work_concepts
+
+    @property
+    def identifiers(self) -> list[DisplayIdentifier]:
+        all_ids = AllIdentifiers(
+            canonicalId=self.state.canonicalId,
+            sourceIdentifier=self.state.sourceIdentifier,
+            otherIdentifiers=self.data.otherIdentifiers,
+        )
+        return DisplayIdentifier.from_all_identifiers(all_ids)
+
+    @property
+    def thumbnail(self) -> DisplayDigitalLocation | None:
+        if self.data.thumbnail is None:
+            return None
+
+        location = DisplayLocation.from_location(self.data.thumbnail)
+        assert isinstance(location, DisplayDigitalLocation)
+        return location
+
+    @property
+    def work_type(self) -> DisplayIdLabel | None:
+        if self.data.format is None:
+            return None
+
+        return DisplayIdLabel.from_id_label(self.data.format, "Format")
+
+    @property
+    def notes(self) -> Generator[DisplayNote]:
+        grouped_notes = defaultdict(list)
+        for note in self.data.notes:
+            grouped_notes[note.noteType.id].append(note)
+
+        for group in grouped_notes.values():
+            yield DisplayNote(
+                contents=[note.contents for note in group],
+                noteType=DisplayIdLabel.from_id_label(group[0].noteType, "NoteType"),
+            )
+
+    @property
+    def languages(self) -> Generator[DisplayIdLabel]:
+        for language in self.data.languages:
+            yield DisplayIdLabel.from_id_label(language, "Language")
+
+    @property
+    def created_date(self) -> DisplayConcept | None:
+        if self.data.createdDate is None:
+            return None
+
+        return DisplayConcept(label=self.data.createdDate.label, type="Period")
+
+    @property
+    def items(self) -> list[DisplayItem]:
+        for item in self.data.items:
+            yield DisplayItem(
+                id=item.id.canonicalId,
+                identifiers=DisplayIdentifier.from_all_identifiers(item.id),
+                title=item.title,
+                note=item.note,
+                locations=[
+                    DisplayLocation.from_location(loc) for loc in item.locations
+                ],
+            )
+
+    @property
+    def holdings(self) -> Generator[DisplayHoldings]:
+        for holding in self.data.holdings:
+            location = None
+            if holding.location is not None:
+                location = DisplayLocation.from_location(holding.location)
+
+            yield DisplayHoldings(
+                note=holding.note,
+                enumeration=holding.enumeration,
+                location=location,
+            )
+
+    @property
+    def images(self) -> Generator[DisplayId]:
+        for image in self.data.imageData:
+            yield DisplayId(id=image.id.canonicalId, type="Image")
+
+    @property
+    def subjects(self) -> list[DisplaySubject]:
+        for subject in self.data.subjects:
+            yield DisplaySubject(
+                label=subject.label,
+                id=subject.id.canonicalId,
+                concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
+            )
+
+    @property
+    def availabilities(self) -> list[DisplayIdLabel]:
+        return [
+            DisplayAvailability.from_availability(a) for a in self.state.availabilities
+        ]
+
+    @property
+    def part_of(self) -> list[DisplayRelation]:
+        # TODO: Handle series
+        if len(self.hierarchy.ancestor_works) == 0:
+            return []
+
+        # Neptune returns ancestors sorted from most distant to least distant (the root ancestor comes first 
+        # and the parent comes last). We need to reverse this order when constructing the DisplayRelation object.
+        ancestors = DisplayRelation.from_flat_hierarchy(self.hierarchy.ancestor_works[::-1])
+        return [ancestors]
+
+    @property
+    def parts(self) -> list[DisplayRelation]:
+        parts = [DisplayRelation.from_neptune_node(c.work, c.parts) for c in self.hierarchy.children]
+
+        return sorted(
+            parts, key=lambda item: natural_sort_key(item.referenceNumber or item.title)
+        )
+
+    @property
+    def contributors(self) -> Generator[DisplayContributor]:
+        for contributor in self.data.contributors:
+            roles = [DisplayContributionRole(label=r.label) for r in contributor.roles]
+            yield DisplayContributor(
+                agent=DisplayConcept.from_concept(contributor.agent),
+                roles=roles,
+                primary=contributor.primary,
+            )
+
+    @property
+    def genres(self) -> Generator[DisplayGenre]:
+        for genre in self.data.genres:
+            concepts = [DisplayConcept.from_concept(c) for c in genre.concepts]
+            yield DisplayGenre(concepts=concepts, label=genre.label)
+
+    @property
+    def production(self) -> Generator[DisplayProductionEvent]:
+        for event in self.data.production:
+            yield DisplayProductionEvent(
+                label=event.label,
+                places=[
+                    DisplayConcept(label=p.label, type="Place") for p in event.places
+                ],
+                agents=[
+                    DisplayConcept(label=a.label, type="Agent") for a in event.agents
+                ],
+                dates=[
+                    DisplayConcept(label=p.label, type="Period") for p in event.dates
+                ],
+                function=(
+                    DisplayConcept(label=event.function.label)
+                    if event.function
+                    else None
+                ),
+            )
+
+

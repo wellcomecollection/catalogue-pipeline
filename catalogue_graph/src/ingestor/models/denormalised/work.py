@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Generator, Literal
 
 from pydantic import BaseModel
 
@@ -73,11 +73,18 @@ class AllIdentifiers(BaseModel):
     canonicalId: str
     sourceIdentifier: SourceIdentifier
     otherIdentifiers: list[SourceIdentifier] = []
-
+    
+    def get_identifiers(self) -> Generator[SourceIdentifier]:
+        yield self.sourceIdentifier
+        yield from self.otherIdentifiers
+        
 
 class Unidentifiable(BaseModel):
     canonicalId: None = None
     type: Literal["Unidentifiable"]
+ 
+    def get_identifiers(self) -> Generator[SourceIdentifier]:
+        yield from []
 
 
 class ImageData(BaseModel):
