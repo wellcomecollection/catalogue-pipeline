@@ -1,6 +1,6 @@
 import os
 from ftplib import FTP
-
+from typing import Callable
 
 class EbscoFtp:
     def __init__(
@@ -19,7 +19,7 @@ class EbscoFtp:
         self.ftp_connection_open = True
         return self
 
-    def list_files(self, validation) -> list[str]:
+    def list_files(self, validation: Callable[[str], bool]) -> list[str]:
         ftp_files: list[str] = []
         self.ftp.retrlines("LIST", ftp_files.append)
         ftp_files = [file.split()[-1] for file in ftp_files if validation(file)]
@@ -36,6 +36,6 @@ class EbscoFtp:
         self.ftp.quit()
         self.ftp_connection_open = False
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         if self.ftp_connection_open:
             self.ftp.quit()

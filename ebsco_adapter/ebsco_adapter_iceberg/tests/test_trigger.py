@@ -7,7 +7,7 @@ from steps.trigger import get_most_recent_S3_object, sync_files, validate_ftp_fi
 
 
 class TestValidateFtpFilename:
-    def test_valid_filename(self):
+    def test_valid_filename(self) -> None:
         """Test that valid filenames pass validation"""
         valid_filenames = [
             "ebz-s7451719-20240322-1.xml",
@@ -18,7 +18,7 @@ class TestValidateFtpFilename:
         for filename in valid_filenames:
             assert validate_ftp_filename(filename) is True
 
-    def test_invalid_prefix(self):
+    def test_invalid_prefix(self) -> None:
         """Test that files with wrong prefix fail validation"""
         invalid_filenames = [
             "abc-s7451719-20240322-1.xml",
@@ -29,7 +29,7 @@ class TestValidateFtpFilename:
         for filename in invalid_filenames:
             assert validate_ftp_filename(filename) is False
 
-    def test_invalid_extension(self):
+    def test_invalid_extension(self) -> None:
         """Test that files with wrong extension fail validation"""
         invalid_filenames = [
             "ebz-s7451719-20240322-1.txt",
@@ -40,7 +40,7 @@ class TestValidateFtpFilename:
         for filename in invalid_filenames:
             assert validate_ftp_filename(filename) is False
 
-    def test_invalid_date_format(self):
+    def test_invalid_date_format(self) -> None:
         """Test that files with invalid date format fail validation"""
         invalid_filenames = [
             "ebz-s7451719-2024032-1.xml",  # Missing digit
@@ -54,13 +54,13 @@ class TestValidateFtpFilename:
 
 
 class TestGetMostRecentS3Object:
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures"""
         self.mock_s3_client = Mock()
         self.bucket = "test-bucket"
         self.prefix = "test-prefix"
 
-    def test_get_most_recent_object(self):
+    def test_get_most_recent_object(self) -> None:
         """Test getting the most recent S3 object by date"""
         self.mock_s3_client.list_objects_v2.return_value = {
             "Contents": [
@@ -81,14 +81,14 @@ class TestGetMostRecentS3Object:
             Bucket=self.bucket, Prefix=self.prefix
         )
 
-    def test_no_objects_found(self):
+    def test_no_objects_found(self) -> None:
         """Test error when no objects are found in S3"""
         self.mock_s3_client.list_objects_v2.return_value = {}
 
         with pytest.raises(ValueError, match="No objects found in S3"):
             get_most_recent_S3_object(self.mock_s3_client, self.bucket, self.prefix)
 
-    def test_empty_contents(self):
+    def test_empty_contents(self) -> None:
         """Test error when Contents is empty"""
         self.mock_s3_client.list_objects_v2.return_value = {"Contents": []}
 
@@ -97,16 +97,23 @@ class TestGetMostRecentS3Object:
 
 
 class TestSyncFiles:
-    def setup_method(self):
+    def setup_method(self) -> None:
         """Set up test fixtures"""
         self.mock_ebsco_ftp = Mock(spec=EbscoFtp)
         self.target_directory = "/tmp/test"
         self.s3_bucket = "test-bucket"
         self.s3_prefix = "test-prefix"
+        self.get_most_recent_s3_object = patch("steps.trigger.get_most_recent_S3_object").start()
+        self.mock_boto3 = patch("steps.trigger.boto3").start()
+        self.mock_s3_client = Mock()
+        self.mock_boto3.client.return_value = self.mock_s3_client
+        
+    def teardown_method(self) -> None:
+        """Clean up patches"""
+        self.get_most_recent_s3_object.stop()
+        self.mock_boto3.stop()
 
-    @patch("steps.trigger.get_most_recent_S3_object")
-    @patch("steps.trigger.boto3")
-    def test_successful_download_and_upload(self, mock_boto3, mock_get_recent_s3):
+    def test_successful_download_and_upload(self) -> None:
         """Test successful download of *most recent* file from FTP and upload to S3"""
         # Setup FTP mock
         ftp_files = [
@@ -120,12 +127,10 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.download_file.return_value = download_path
 
         # Setup S3 mock - file doesn't exist, then successful upload
-        mock_s3_client = Mock()
-        mock_boto3.client.return_value = mock_s3_client
-        mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
+        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
 
         # Mock the get_most_recent_S3_object function
-        mock_get_recent_s3.return_value = "test-prefix/ebz-s7451719-20240325-1.xml"
+        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240325-1.xml"
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -139,11 +144,11 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.download_file.assert_called_once_with(
             "ebz-s7451719-20240325-1.xml", self.target_directory
         )
-        mock_s3_client.upload_file.assert_called_once_with(
+        self.mock_s3_client.upload_file.assert_called_once_with(
             download_path, self.s3_bucket, "test-prefix/ebz-s7451719-20240325-1.xml"
         )
-        mock_get_recent_s3.assert_called_once_with(
-            mock_s3_client, self.s3_bucket, self.s3_prefix
+        self.get_most_recent_s3_object.assert_called_once_with(
+            self.mock_s3_client, self.s3_bucket, self.s3_prefix
         )
 
         # Verify result
@@ -152,7 +157,7 @@ class TestSyncFiles:
         )
         assert result == expected_result
 
-    def test_no_xml_files_found(self):
+    def test_no_xml_files_found(self) -> None:
         """Test ValueError when no valid XML files are found on FTP"""
         self.mock_ebsco_ftp.list_files.return_value = []
 
@@ -164,9 +169,7 @@ class TestSyncFiles:
                 s3_prefix=self.s3_prefix,
             )
 
-    @patch("steps.trigger.get_most_recent_S3_object")
-    @patch("steps.trigger.boto3")
-    def test_file_already_exists_in_s3(self, mock_boto3, mock_get_recent_s3):
+    def test_file_already_exists_in_s3(self) -> None:
         """Test early return when file already exists in S3"""
         # Setup FTP mock
         ftp_files = [
@@ -177,11 +180,9 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.list_files.return_value = ftp_files
 
         # Setup S3 mock - file exists
-        mock_s3_client = Mock()
-        mock_boto3.client.return_value = mock_s3_client
-        mock_s3_client.head_object.return_value = {}  # File exists
+        self.mock_s3_client.head_object.return_value = {}  # File exists
 
-        mock_get_recent_s3.return_value = "test-prefix/ebz-s7451719-20240322-1.xml"
+        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240322-1.xml"
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -196,10 +197,9 @@ class TestSyncFiles:
         )
         assert result == expected_result
         self.mock_ebsco_ftp.download_file.assert_not_called()
-        mock_s3_client.upload_file.assert_not_called()
+        self.mock_s3_client.upload_file.assert_not_called()
 
-    @patch("steps.trigger.boto3")
-    def test_ftp_download_failure(self, mock_boto3):
+    def test_ftp_download_failure(self) -> None:
         """Test RuntimeError when FTP download fails"""
         # Setup FTP mock with download failure
         ftp_files = ["ebz-s7451719-20240322-1.xml"]
@@ -209,9 +209,7 @@ class TestSyncFiles:
         )
 
         # Setup S3 mock - file doesn't exist (so we proceed to download)
-        mock_s3_client = Mock()
-        mock_boto3.client.return_value = mock_s3_client
-        mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
+        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
 
         with pytest.raises(
             RuntimeError,
@@ -224,8 +222,7 @@ class TestSyncFiles:
                 s3_prefix=self.s3_prefix,
             )
 
-    @patch("steps.trigger.boto3")
-    def test_s3_upload_failure(self, mock_boto3):
+    def test_s3_upload_failure(self) -> None:
         """Test RuntimeError when S3 upload fails"""
         # Setup FTP mock
         ftp_files = ["ebz-s7451719-20240322-1.xml"]
@@ -234,10 +231,8 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.download_file.return_value = download_path
 
         # Setup S3 mock - file doesn't exist, upload fails
-        mock_s3_client = Mock()
-        mock_boto3.client.return_value = mock_s3_client
-        mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
-        mock_s3_client.upload_file.side_effect = Exception("S3 permission denied")
+        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
+        self.mock_s3_client.upload_file.side_effect = Exception("S3 permission denied")
 
         with pytest.raises(
             RuntimeError, match="Failed to upload ebz-s7451719-20240322-1.xml to S3"
@@ -249,9 +244,7 @@ class TestSyncFiles:
                 s3_prefix=self.s3_prefix,
             )
 
-    @patch("steps.trigger.get_most_recent_S3_object")
-    @patch("steps.trigger.boto3")
-    def test_forward_most_recent_s3_file(self, mock_boto3, mock_get_recent_s3):
+    def test_forward_most_recent_s3_file(self) -> None:
         """Test that we notify downstream of the most recent S3 file, even if it's not the one we just uploaded"""
         ftp_files = [
             "ebz-s7451719-20240415-1.xml",
@@ -264,12 +257,10 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.download_file.return_value = download_path
 
         # Setup S3 mock - file doesn't exist, then successful upload
-        mock_s3_client = Mock()
-        mock_boto3.client.return_value = mock_s3_client
-        mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
+        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
 
         # There's actually a more recent file in S3
-        mock_get_recent_s3.return_value = "test-prefix/ebz-s7451719-20240428-1.xml"
+        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240428-1.xml"
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -284,9 +275,7 @@ class TestSyncFiles:
         )
         assert result == expected_result
 
-    @patch("steps.trigger.get_most_recent_S3_object")
-    @patch("steps.trigger.boto3")
-    def test_s3_head_object_general_exception(self, mock_boto3, mock_get_recent_s3):
+    def test_s3_head_object_general_exception(self) -> None:
         """Test that general S3 exceptions are handled and processing continues"""
         # Setup FTP mock
         ftp_files = ["ebz-s7451719-20240322-1.xml"]
@@ -295,12 +284,10 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.download_file.return_value = download_path
 
         # Setup S3 mock - head_object fails with general exception, upload succeeds
-        mock_s3_client = Mock()
-        mock_boto3.client.return_value = mock_s3_client
-        mock_s3_client.head_object.side_effect = Exception("Network timeout")
+        self.mock_s3_client.head_object.side_effect = Exception("Network timeout")
 
         # Mock the get_most_recent_S3_object function
-        mock_get_recent_s3.return_value = "test-prefix/ebz-s7451719-20240322-1.xml"
+        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240322-1.xml"
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -311,8 +298,8 @@ class TestSyncFiles:
 
         # Should proceed with download and upload despite S3 check failure
         self.mock_ebsco_ftp.download_file.assert_called_once()
-        mock_s3_client.upload_file.assert_called_once()
-        mock_get_recent_s3.assert_called_once()
+        self.mock_s3_client.upload_file.assert_called_once()
+        self.get_most_recent_s3_object.assert_called_once()
 
         expected_result = (
             f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml"
