@@ -134,14 +134,14 @@ def handler(
             ebsco_ftp=ebsco_ftp,
             target_directory=temp_dir,
             s3_bucket=s3_bucket,
-            s3_prefix=ftp_s3_prefix if not config.is_local else "dev",
+            s3_prefix=ftp_s3_prefix
         )
 
     # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300
     # job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
     #     "%Y%m%dT%H%M"
     # )
-
+    print(f"Sending S3 location downstream: {s3_location}")
     return EbscoAdapterLoaderEvent(s3_location=s3_location)  # add job_id back later
 
 
