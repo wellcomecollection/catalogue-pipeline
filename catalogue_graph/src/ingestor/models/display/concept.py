@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import Concept
+from ingestor.models.shared.concept import Concept
 from utils.types import ConceptType
 
 from .identifier import DisplayIdentifier
@@ -18,7 +18,7 @@ class DisplayConcept(BaseModel):
         return DisplayConcept(
             id=concept.id.canonical_id,
             label=concept.label.removesuffix("."),
-            identifiers=DisplayIdentifier.from_all_identifiers(concept.id),
+            identifiers=list(DisplayIdentifier.from_all_identifiers(concept.id)),
             type=concept.type,
         )
 

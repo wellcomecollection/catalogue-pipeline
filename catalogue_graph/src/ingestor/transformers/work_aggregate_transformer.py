@@ -2,13 +2,13 @@ from collections.abc import Generator
 
 from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.aggregate.work import AggregatableField
-from ingestor.models.denormalised.work import AllIdentifiers, Unidentifiable
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
+from ingestor.models.shared.identifier import Identifiers, Unidentifiable
 
 
 def get_aggregatable(
-    ids: AllIdentifiers | Unidentifiable | None, label: str
+    ids: Identifiers | Unidentifiable | None, label: str
 ) -> AggregatableField:
     if ids is None or isinstance(ids, Unidentifiable):
         return AggregatableField(id=label, label=label)
@@ -24,7 +24,7 @@ class AggregateWorkTransformer:
     @property
     def genres(self) -> Generator[AggregatableField]:
         for genre in self.data.genres:
-            assert isinstance(genre.concepts[0].id, AllIdentifiers)
+            assert isinstance(genre.concepts[0].id, Identifiers)
             concept_id = genre.concepts[0].id.canonical_id
 
             yield AggregatableField(id=concept_id, label=genre.label)

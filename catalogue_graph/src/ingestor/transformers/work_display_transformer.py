@@ -2,9 +2,6 @@ from collections import defaultdict
 from collections.abc import Generator
 
 from ingestor.extractors.works_extractor import ExtractedWork
-from ingestor.models.denormalised.work import (
-    AllIdentifiers,
-)
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.concept import (
     DisplayConcept,
@@ -24,6 +21,7 @@ from ingestor.models.display.location import (
 from ingestor.models.display.note import DisplayNote
 from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import DisplayRelation
+from ingestor.models.shared.identifier import Identifiers
 from utils.sort import natural_sort_key
 
 
@@ -36,7 +34,7 @@ class DisplayWorkTransformer:
 
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
-        all_ids = AllIdentifiers(
+        all_ids = Identifiers(
             canonical_id=self.state.canonical_id,
             source_identifier=self.state.source_identifier,
             other_identifiers=self.data.other_identifiers,

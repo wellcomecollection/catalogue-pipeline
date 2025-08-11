@@ -2,8 +2,8 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import (
-    AllIdentifiers,
+from ingestor.models.shared.identifier import (
+    Identifiers,
     SourceIdentifier,
     Unidentifiable,
 )
@@ -60,7 +60,7 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_all_identifiers(
-        identifier: AllIdentifiers | Unidentifiable,
+        identifier: Identifiers | Unidentifiable,
     ) -> Generator["DisplayIdentifier"]:
         if isinstance(identifier, Unidentifiable):
             return None

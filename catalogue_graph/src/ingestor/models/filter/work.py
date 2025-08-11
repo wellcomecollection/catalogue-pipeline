@@ -1,8 +1,4 @@
-from typing import Literal
-
 from pydantic import BaseModel, Field
-
-type WorkType = Literal["Standard", "Collection", "Series", "Section"]
 
 
 class WorkFilterableValues(BaseModel):

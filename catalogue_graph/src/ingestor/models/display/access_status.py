@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ingestor.models.denormalised.work import AccessCondition
+from ingestor.models.shared.access_condition import AccessCondition
 
 from .id_label import DisplayIdLabel
 

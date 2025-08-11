@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import Location
+from ingestor.models.shared.location import Location
 
 from .access_method import DisplayAccessMethod
 from .access_status import DisplayAccessStatus

@@ -1,4 +1,4 @@
-from ingestor.models.denormalised.work import Id
+from ingestor.models.shared.id_label import Id
 
 from .id_label import DisplayIdLabel
 

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import DigitalLocation, PhysicalLocation
+from ingestor.models.shared.location import DigitalLocation, PhysicalLocation
 
 from .access_condition import DisplayAccessCondition
 from .id_label import DisplayIdLabel

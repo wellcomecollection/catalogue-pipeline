@@ -47,7 +47,7 @@ MOCK_INGESTOR_INDEXER_EVENT = IngestorIndexerLambdaEvent(
     index_date="2025-01-01",
     job_id="123",
     object_to_index=IngestorIndexerObject(
-        s3_uri="s3://test-bucket/test-prefix/2021-07-01/2025-01-01/123/00000000-00000001.parquet",
+        s3_uri="s3://test-bucket/test-prefix_concepts/2021-07-01/2025-01-01/123/00000000-00000001.parquet",
         content_length=1,
         record_count=1,
     ),

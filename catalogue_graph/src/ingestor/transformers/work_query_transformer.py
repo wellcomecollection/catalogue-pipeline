@@ -1,8 +1,8 @@
 from collections.abc import Generator
 
 from ingestor.extractors.works_extractor import ExtractedWork
-from ingestor.models.denormalised.work import PhysicalLocation
 from ingestor.models.display.access_status import DisplayAccessStatus
+from ingestor.models.shared.location import PhysicalLocation
 
 
 class QueryWorkTransformer:

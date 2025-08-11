@@ -3,6 +3,8 @@ from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
+from ingestor.models.shared.id_label import Id
+from ingestor.models.shared.identifier import SourceIdentifier
 from utils.types import ConceptType
 
 # Sources sorted by priority for querying purposes.
@@ -169,9 +171,17 @@ class RawNeptuneConcept:
 
     @property
     def display_identifiers(self) -> list[DisplayIdentifier]:
-        display_ids = [
-            DisplayIdentifier.from_source_identifier(i) for i in self.identifiers
-        ]
+        display_ids = []
+
+        for identifier in self.identifiers:
+            source_identifier = SourceIdentifier(
+                value=identifier.value,
+                identifier_type=Id(id=identifier.identifierType),
+                ontology_type="Concept",
+            )
+            display_ids.append(
+                DisplayIdentifier.from_source_identifier(source_identifier)
+            )
 
         return display_ids
 

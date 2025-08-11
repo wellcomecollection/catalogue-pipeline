@@ -1,4 +1,4 @@
-from ingestor.models.denormalised.work import Location
+from ingestor.models.shared.location import Location
 
 from .id_label import DisplayIdLabel
 

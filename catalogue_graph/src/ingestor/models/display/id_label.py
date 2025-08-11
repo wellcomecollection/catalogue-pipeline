@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import IdLabel
+from ingestor.models.shared.id_label import IdLabel
 
 
 class DisplayId(BaseModel):
