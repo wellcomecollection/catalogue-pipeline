@@ -1,8 +1,9 @@
-import pytest
 from unittest.mock import Mock, patch
-from datetime import datetime
+
+import pytest
+
 from ebsco_ftp import EbscoFtp
-from steps.trigger import sync_files, validate_ftp_filename, get_most_recent_S3_object
+from steps.trigger import get_most_recent_S3_object, sync_files, validate_ftp_filename
 
 
 class TestValidateFtpFilename:

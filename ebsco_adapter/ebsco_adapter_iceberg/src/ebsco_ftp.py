@@ -1,5 +1,5 @@
-from ftplib import FTP
 import os
+from ftplib import FTP
 
 
 class EbscoFtp:

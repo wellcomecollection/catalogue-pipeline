@@ -1,11 +1,13 @@
 import argparse
+import os
+import tempfile
 from datetime import datetime
 from typing import Any
-import tempfile
-import os
-from ebsco_ftp import EbscoFtp
-from pydantic import BaseModel
+
 import boto3
+from pydantic import BaseModel
+
+from ebsco_ftp import EbscoFtp
 from steps.loader import EbscoAdapterLoaderEvent
 from utils.aws import get_ssm_parameter
 
@@ -84,14 +86,14 @@ def sync_files(ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_pr
     try:
         download_location = ebsco_ftp.download_file(most_recent_ftp_file, target_directory)
     except Exception as e:
-        raise RuntimeError(f"Failed to download {most_recent_ftp_file} from FTP: {e}")
+        raise RuntimeError(f"Failed to download {most_recent_ftp_file} from FTP: {e}") from e
 
     # Upload the downloaded file to S3
     try:
         s3_store.upload_file(download_location, s3_bucket, s3_key)
         print(f"Successfully uploaded {most_recent_ftp_file} to {s3_bucket}/{s3_key}")
     except Exception as e:
-        raise RuntimeError(f"Failed to upload {most_recent_ftp_file} to S3: {e}")
+        raise RuntimeError(f"Failed to upload {most_recent_ftp_file} to S3: {e}") from e
 
     # list what's in s3 and get the file with the highest date to send downstream
     obj_key = get_most_recent_S3_object(s3_store, s3_bucket, s3_prefix)
