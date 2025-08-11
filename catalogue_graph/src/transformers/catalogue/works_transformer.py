@@ -3,6 +3,7 @@ from collections.abc import Generator
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from sources.elasticsearch_source import ElasticsearchSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -18,6 +19,7 @@ ES_FIELDS = [
     "data.subjects",
     "data.contributors",
     "data.genres",
+    "data.referenceNumber",
 ]
 
 
@@ -32,6 +34,7 @@ class CatalogueWorksTransformer(BaseTransformer):
             label=raw_work.label,
             alternative_labels=raw_work.alternative_labels,
             type=raw_work.type,
+            reference_number=raw_work.reference_number,
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[WorkHasConcept]:
