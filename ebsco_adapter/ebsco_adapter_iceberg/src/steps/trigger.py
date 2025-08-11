@@ -16,8 +16,10 @@ s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapt
 s3_prefix = os.environ.get("S3_PREFIX", "dev")
 ftp_s3_prefix = os.path.join(s3_prefix, "ftp_v2")
 
+
 class EbscoAdapterTriggerConfig(BaseModel):
     is_local: bool = False
+
 
 class EventBridgeTriggerEvent(BaseModel):
     time: str
@@ -27,7 +29,7 @@ def validate_ftp_filename(filename: str) -> bool:
     """Validate that the filename matches the expected pattern"""
     if not filename.startswith("ebz-s7451719-") or not filename.endswith(".xml"):
         return False
-    
+
     try:
         # Extract the date part (third component when split by '-')
         date_part = filename.split("-")[2]
@@ -40,23 +42,27 @@ def validate_ftp_filename(filename: str) -> bool:
     except (ValueError, IndexError):
         return False
 
+
 def get_most_recent_S3_object(s3_client, bucket: str, prefix: str) -> str:
     response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
-    
+
     s3_objects = []
-    for obj in response.get('Contents', []):
-        key = obj['Key']
+    for obj in response.get("Contents", []):
+        key = obj["Key"]
         # get the part of the S3 prefix after the last slash and split by '-'
-        date_part = key[key.rfind('/') + 1:].split('-')[2] 
+        date_part = key[key.rfind("/") + 1 :].split("-")[2]
         s3_objects.append((int(date_part), key))
-    
+
     if not s3_objects:
         raise ValueError("No objects found in S3")
-    
+
     most_recent = max(s3_objects, key=lambda x: x[0])
     return most_recent[1]  # Return the key
 
-def sync_files(ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str) -> str:
+
+def sync_files(
+    ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
+) -> str:
     valid_ftp_files = ebsco_ftp.list_files(validate_ftp_filename)
 
     if not valid_ftp_files:
@@ -64,9 +70,11 @@ def sync_files(ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_pr
 
     # valid files are in the format ebz-s7451719-20240322-1.xml
     # the third part is the date
-    most_recent_ftp_file = sorted(valid_ftp_files, key=lambda x: x.split("-")[2], reverse=True)[0]
+    most_recent_ftp_file = sorted(
+        valid_ftp_files, key=lambda x: x.split("-")[2], reverse=True
+    )[0]
     print(f"Most recent ftp file: {most_recent_ftp_file}")
-    
+
     s3_store = boto3.client("s3")
     s3_key = f"{s3_prefix}/{most_recent_ftp_file}"
 
@@ -77,16 +85,22 @@ def sync_files(ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_pr
         # we return the S3 location of the most recent file
         return f"s3://{s3_bucket}/{get_most_recent_S3_object(s3_store, s3_bucket, s3_prefix)}"
     except Exception as e:
-        if 'NoSuchKey' in str(e):
-            print(f"File {most_recent_ftp_file} not found in S3. Will download and upload.")
+        if "NoSuchKey" in str(e):
+            print(
+                f"File {most_recent_ftp_file} not found in S3. Will download and upload."
+            )
         else:
             print(f"Error checking S3: {e}. Will proceed with download and upload.")
 
     # Download the most recent file from FTP
     try:
-        download_location = ebsco_ftp.download_file(most_recent_ftp_file, target_directory)
+        download_location = ebsco_ftp.download_file(
+            most_recent_ftp_file, target_directory
+        )
     except Exception as e:
-        raise RuntimeError(f"Failed to download {most_recent_ftp_file} from FTP: {e}") from e
+        raise RuntimeError(
+            f"Failed to download {most_recent_ftp_file} from FTP: {e}"
+        ) from e
 
     # Upload the downloaded file to S3
     try:
@@ -112,18 +126,21 @@ def handler(
     ftp_password = get_ssm_parameter(f"{ssm_param_prefix}/ftp_password")
     ftp_remote_dir = get_ssm_parameter(f"{ssm_param_prefix}/ftp_remote_dir")
 
-    with EbscoFtp(
-        ftp_server, ftp_username, ftp_password, ftp_remote_dir
-    ) as ebsco_ftp, tempfile.TemporaryDirectory() as temp_dir:
-          s3_location = sync_files(
-              ebsco_ftp=ebsco_ftp,
-              target_directory=temp_dir,
-              s3_bucket=s3_bucket,
-              s3_prefix=ftp_s3_prefix if not config.is_local else "dev"  
-          )
+    with (
+        EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp,
+        tempfile.TemporaryDirectory() as temp_dir,
+    ):
+        s3_location = sync_files(
+            ebsco_ftp=ebsco_ftp,
+            target_directory=temp_dir,
+            s3_bucket=s3_bucket,
+            s3_prefix=ftp_s3_prefix if not config.is_local else "dev",
+        )
 
     # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300
-    job_id = datetime.fromisoformat(event.time.replace('Z', '+00:00')).strftime("%Y%m%dT%H%M")
+    job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
+        "%Y%m%dT%H%M"
+    )
 
     return EbscoAdapterLoaderEvent(s3_location=s3_location, job_id=job_id)
 

@@ -3,7 +3,9 @@ from ftplib import FTP
 
 
 class EbscoFtp:
-    def __init__(self, ftp_server: str, ftp_username: str, ftp_password: str, ftp_remote_dir: str) -> None:
+    def __init__(
+        self, ftp_server: str, ftp_username: str, ftp_password: str, ftp_remote_dir: str
+    ) -> None:
         self.ftp_server = ftp_server
         self.ftp_username = ftp_username
         self.ftp_password = ftp_password
@@ -20,11 +22,7 @@ class EbscoFtp:
     def list_files(self, validation) -> list[str]:
         ftp_files: list[str] = []
         self.ftp.retrlines("LIST", ftp_files.append)
-        ftp_files = [
-            file.split()[-1]
-            for file in ftp_files
-            if validation(file)
-        ]
+        ftp_files = [file.split()[-1] for file in ftp_files if validation(file)]
         return ftp_files
 
     def download_file(self, file: str, temp_dir: str) -> str:
