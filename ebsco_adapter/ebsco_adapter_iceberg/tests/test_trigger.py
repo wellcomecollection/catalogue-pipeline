@@ -103,11 +103,13 @@ class TestSyncFiles:
         self.target_directory = "/tmp/test"
         self.s3_bucket = "test-bucket"
         self.s3_prefix = "test-prefix"
-        self.get_most_recent_s3_object = patch("steps.trigger.get_most_recent_S3_object").start()
+        self.get_most_recent_s3_object = patch(
+            "steps.trigger.get_most_recent_S3_object"
+        ).start()
         self.mock_boto3 = patch("steps.trigger.boto3").start()
         self.mock_s3_client = Mock()
         self.mock_boto3.client.return_value = self.mock_s3_client
-        
+
     def teardown_method(self) -> None:
         """Clean up patches"""
         self.get_most_recent_s3_object.stop()
@@ -130,7 +132,9 @@ class TestSyncFiles:
         self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
 
         # Mock the get_most_recent_S3_object function
-        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240325-1.xml"
+        self.get_most_recent_s3_object.return_value = (
+            "test-prefix/ebz-s7451719-20240325-1.xml"
+        )
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -182,7 +186,9 @@ class TestSyncFiles:
         # Setup S3 mock - file exists
         self.mock_s3_client.head_object.return_value = {}  # File exists
 
-        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240322-1.xml"
+        self.get_most_recent_s3_object.return_value = (
+            "test-prefix/ebz-s7451719-20240322-1.xml"
+        )
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -260,7 +266,9 @@ class TestSyncFiles:
         self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
 
         # There's actually a more recent file in S3
-        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240428-1.xml"
+        self.get_most_recent_s3_object.return_value = (
+            "test-prefix/ebz-s7451719-20240428-1.xml"
+        )
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -287,7 +295,9 @@ class TestSyncFiles:
         self.mock_s3_client.head_object.side_effect = Exception("Network timeout")
 
         # Mock the get_most_recent_S3_object function
-        self.get_most_recent_s3_object.return_value = "test-prefix/ebz-s7451719-20240322-1.xml"
+        self.get_most_recent_s3_object.return_value = (
+            "test-prefix/ebz-s7451719-20240322-1.xml"
+        )
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,

@@ -43,7 +43,7 @@ def validate_ftp_filename(filename: str) -> bool:
         return False
 
 
-def get_most_recent_S3_object(s3_client, bucket: str, prefix: str) -> str: # type: ignore
+def get_most_recent_S3_object(s3_client, bucket: str, prefix: str) -> str:  # type: ignore
     response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
 
     s3_objects = []
@@ -142,7 +142,7 @@ def handler(
     #     "%Y%m%dT%H%M"
     # )
 
-    return EbscoAdapterLoaderEvent(s3_location=s3_location) # add job_id back later
+    return EbscoAdapterLoaderEvent(s3_location=s3_location)  # add job_id back later
 
 
 def lambda_handler(event: EventBridgeTriggerEvent, context: Any) -> dict[str, Any]:

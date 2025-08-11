@@ -24,7 +24,7 @@ class EbscoAdapterLoaderConfig(BaseModel):
 
 class EbscoAdapterLoaderEvent(BaseModel):
     s3_location: str
-    # job_id: str # add that back later 
+    # job_id: str # add that back later
 
 
 class EbscoAdapterLoaderResult(BaseModel):
