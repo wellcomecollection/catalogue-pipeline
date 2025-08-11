@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import argparse
-import pprint
 import typing
 from typing import Any
 
@@ -37,6 +36,10 @@ def create_transformer(
     raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
 
+def get_filename(event: IngestorLoaderLambdaEvent) -> str:
+    return f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}"
+
+
 def handler(
     event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
 ) -> IngestorIndexerLambdaEvent:
@@ -45,14 +48,13 @@ def handler(
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date or "dev"
 
-    filename = f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}"
-    s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{filename}.parquet"
-    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.transformer_type}/{s3_object_key}"
-
     transformer = create_transformer(event, config)
-    result = transformer.load_documents_to_s3(s3_uri=s3_uri)
 
-    print(f"Data loaded successfully: {result}")
+    s3_object_key = (
+        f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.parquet"
+    )
+    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.transformer_type}/{s3_object_key}"
+    result = transformer.load_documents_to_s3(s3_uri=s3_uri)
 
     return IngestorIndexerLambdaEvent(
         pipeline_date=pipeline_date,
@@ -112,15 +114,24 @@ def local_handler() -> None:
         required=False,
         default="dev",
     )
+    parser.add_argument(
+        "--load-destination",
+        type=str,
+        help='The destination to load the data to, will default to "s3".',
+        required=False,
+        choices=["s3", "local", "local_json"],
+        default="s3",
+    )
 
     args = parser.parse_args()
-
     event = IngestorLoaderLambdaEvent(**args.__dict__)
     config = IngestorLoaderConfig(is_local=True)
 
-    result = handler(event, config)
-
-    pprint.pprint(result.model_dump())
+    if args.load_destination == "local":
+        transformer = create_transformer(event, config)
+        transformer.load_documents_to_local_file(get_filename(event))
+    else:
+        handler(event, config)
 
 
 if __name__ == "__main__":

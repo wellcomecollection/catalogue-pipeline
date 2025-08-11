@@ -137,11 +137,10 @@ class DisplayWorkTransformer:
         if len(self.hierarchy.ancestor_works) == 0:
             return []
 
-        # Neptune returns ancestors sorted from most distant to least distant (the root ancestor comes first
-        # and the parent comes last). We need to reverse this order when constructing the DisplayRelation object.
         ancestors = DisplayRelation.from_flat_hierarchy(
-            self.hierarchy.ancestor_works[::-1]
+            self.hierarchy.ancestor_works, 1
         )
+
         return [ancestors]
 
     @property

@@ -7,8 +7,9 @@ import config
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from ingestor.queries.work_queries import (
+    WORK_ANCESTORS_QUERY,
+    WORK_CHILDREN_QUERY,
     WORK_CONCEPTS_QUERY,
-    WORK_HIERARCHY_QUERY,
     WORK_QUERY,
 )
 from utils.elasticsearch import get_client, get_standard_index_name
@@ -51,8 +52,12 @@ class GraphWorksExtractor(GraphBaseExtractor):
         for item in self.make_neptune_query(WORK_QUERY, "works"):
             yield item["id"]
 
-    def _get_work_hierarchy(self) -> dict:
-        results = self.make_neptune_query(WORK_HIERARCHY_QUERY, "work hierarchy")
+    def _get_work_ancestors(self) -> dict:
+        results = self.make_neptune_query(WORK_ANCESTORS_QUERY, "work ancestors")
+        return {item["id"]: item for item in results}
+
+    def _get_work_children(self) -> dict:
+        results = self.make_neptune_query(WORK_CHILDREN_QUERY, "work children")
         return {item["id"]: item for item in results}
 
     def _get_work_concepts(self) -> dict:
@@ -63,16 +68,22 @@ class GraphWorksExtractor(GraphBaseExtractor):
         self,
     ) -> Generator[ExtractedWork]:
         work_ids = list(self._get_work_ids())
-        all_hierarchy = self._get_work_hierarchy()
+        all_ancestors = self._get_work_ancestors()
+        all_children = self._get_work_children()
         all_concepts = self._get_work_concepts()
         all_es_works = self.get_es_works(work_ids)
 
         for work_id in work_ids:
             es_work = all_es_works[work_id]
 
-            work_hierarchy = WorkHierarchy(id=work_id)
-            if all_hierarchy.get(work_id) is not None:
-                work_hierarchy = WorkHierarchy(**all_hierarchy[work_id])
+            children, ancestor_works = [], []
+            if all_ancestors.get(work_id) is not None:
+                ancestor_works = all_ancestors[work_id]["ancestor_works"]
+            if all_children.get(work_id) is not None:
+                children = all_children[work_id]["children"]
+            work_hierarchy = WorkHierarchy(
+                id=work_id, ancestor_works=ancestor_works, children=children
+            )
 
             work_concepts = []
             for raw_concept in all_concepts.get(work_id, []):

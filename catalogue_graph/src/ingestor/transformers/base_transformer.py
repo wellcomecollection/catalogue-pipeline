@@ -1,3 +1,5 @@
+import json
+import os
 from collections.abc import Generator
 from typing import Any
 
@@ -32,7 +34,6 @@ class ElasticsearchBaseTransformer:
         print(f"Loading data to '{s3_uri}'...")
 
         es_documents = list(self.stream_es_documents())
-        assert len(es_documents) > 0
 
         transport_params = {"client": boto3.client("s3")}
         with smart_open.open(s3_uri, "wb", transport_params=transport_params) as f:
@@ -44,9 +45,18 @@ class ElasticsearchBaseTransformer:
 
         assert content_length is not None, "Content length should not be None"
         assert len(df) == len(es_documents), "DataFrame length should match data length"
+        assert len(df) > 0
 
         return IngestorIndexerObject(
             s3_uri=s3_uri,
             content_length=content_length,
             record_count=len(df),
         )
+
+    def load_documents_to_local_file(self, file_name: str) -> None:
+        file_path = f"ingestor_outputs/{file_name}.jsonl"
+
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        with open(file_path, "w") as f:
+            for document in self.stream_es_documents():
+                f.write(json.dumps(document.model_dump()) + "\n")

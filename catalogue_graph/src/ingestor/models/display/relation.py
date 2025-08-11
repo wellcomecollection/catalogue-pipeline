@@ -19,20 +19,17 @@ class DisplayRelation(BaseModel):
         return DisplayRelation(
             id=node.properties.id,
             title=node.properties.label,
+            type=node.properties.type,
             referenceNumber="",  # TODO: Add reference number
             totalParts=total_parts,
         )
 
     @staticmethod
-    def from_flat_hierarchy(hierarchy: list[WorkNode]) -> "DisplayRelation":
-        current_work = hierarchy[0]
-        if len(hierarchy) == 1:
-            return DisplayRelation.from_neptune_node(current_work, 1)
+    def from_flat_hierarchy(
+        hierarchy: list[WorkNode], total_parts: int
+    ) -> "DisplayRelation":
+        relation = DisplayRelation.from_neptune_node(hierarchy[0], total_parts)
+        if len(hierarchy) > 1:
+            relation.partOf = [DisplayRelation.from_flat_hierarchy(hierarchy[1:], 1)]
 
-        return DisplayRelation(
-            id=current_work.properties.id,
-            title=current_work.properties.label,
-            referenceNumber="",  # TODO: Add reference number
-            totalParts=0,
-            partOf=[DisplayRelation.from_flat_hierarchy(hierarchy[1:])],
-        )
+        return relation

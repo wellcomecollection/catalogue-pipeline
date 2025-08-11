@@ -6,29 +6,32 @@ WORK_QUERY = """
         RETURN work.id AS id
 """
 
-WORK_HIERARCHY_QUERY = """
+WORK_ANCESTORS_QUERY = """
         MATCH (work:Work)
         WITH work ORDER BY id(work)
         SKIP $start_offset LIMIT $limit
 
         MATCH (work)-[:HAS_PATH_IDENTIFIER]->(identifier)
-        OPTIONAL MATCH (identifier)-[:HAS_PARENT*]->(ancestor_identifier)<-[:HAS_PATH_IDENTIFIER]-(ancestor_work)
-        OPTIONAL MATCH (identifier)<-[:HAS_PARENT]-(child_identifier)<-[:HAS_PATH_IDENTIFIER]-(child_work)
+        MATCH path = (identifier)-[:HAS_PARENT*]->(ancestor_identifier)
+        MATCH (ancestor_identifier)<-[:HAS_PATH_IDENTIFIER]-(ancestor_work)
+
+        WITH work.id AS id, ancestor_work, length(path) AS hops
+        ORDER BY hops DESC
+        
+        RETURN id, COLLECT(ancestor_work) AS ancestor_works;
+"""
+
+WORK_CHILDREN_QUERY = """
+        MATCH (work:Work)
+        WITH work ORDER BY id(work)
+        SKIP $start_offset LIMIT $limit
+
+        MATCH (work)-[:HAS_PATH_IDENTIFIER]->(identifier)
+        MATCH (identifier)<-[:HAS_PARENT]-(child_identifier)<-[:HAS_PATH_IDENTIFIER]-(child_work)
         OPTIONAL MATCH (child_identifier)<-[:HAS_PARENT]-(grandchild_identifier)
         
-        WITH work, ancestor_work, child_work, COUNT(grandchild_identifier) AS child_work_parts
-        WITH work,
-             COLLECT(ancestor_work) AS ancestor_works,        
-             COLLECT(
-                 CASE 
-                     WHEN child_work IS NOT NULL THEN { work: child_work, parts: child_work_parts }
-                 END
-             ) AS child_works
-        
-        RETURN 
-            work.id AS id,
-            [work IN ancestor_works WHERE work IS NOT NULL] AS ancestor_works,
-            [work IN child_works WHERE work IS NOT NULL] AS children
+        WITH work, child_work, COUNT(grandchild_identifier) AS child_work_parts
+        RETURN work.id AS id, COLLECT({ work: child_work, parts: child_work_parts }) AS children
 """
 
 WORK_CONCEPTS_QUERY = """
