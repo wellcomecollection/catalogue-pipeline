@@ -4,7 +4,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from pydantic.alias_generators import to_camel
-
 from utils.types import ConceptType
 
 type WorkType = Literal["Standard", "Collection", "Series", "Section"]
