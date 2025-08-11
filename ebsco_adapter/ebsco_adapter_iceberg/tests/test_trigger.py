@@ -159,7 +159,9 @@ class TestSyncFiles:
                 s3_prefix=self.s3_prefix
             )
 
-    def test_file_already_exists_in_s3(self):
+    @patch('steps.trigger.get_most_recent_S3_object')
+    @patch('steps.trigger.boto3')
+    def test_file_already_exists_in_s3(self, mock_boto3, mock_get_recent_s3):
         """Test early return when file already exists in S3"""
         # Setup FTP mock
         ftp_files = [
@@ -169,24 +171,25 @@ class TestSyncFiles:
         ]
         self.mock_ebsco_ftp.list_files.return_value = ftp_files
         
-        with patch('steps.trigger.boto3') as mock_boto3:
-            # Setup S3 mock - file exists
-            mock_s3_client = Mock()
-            mock_boto3.client.return_value = mock_s3_client
-            mock_s3_client.head_object.return_value = {}  # File exists
-            
-            result = sync_files(
-                ebsco_ftp=self.mock_ebsco_ftp,
-                target_directory=self.target_directory,
-                s3_bucket=self.s3_bucket,
-                s3_prefix=self.s3_prefix
-            )
-            
-            # Should return S3 URL without downloading or uploading
-            expected_result = f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml"
-            assert result == expected_result
-            self.mock_ebsco_ftp.download_file.assert_not_called()
-            mock_s3_client.upload_file.assert_not_called()
+        # Setup S3 mock - file exists
+        mock_s3_client = Mock()
+        mock_boto3.client.return_value = mock_s3_client
+        mock_s3_client.head_object.return_value = {}  # File exists
+        
+        mock_get_recent_s3.return_value = "test-prefix/ebz-s7451719-20240322-1.xml"
+        
+        result = sync_files(
+            ebsco_ftp=self.mock_ebsco_ftp,
+            target_directory=self.target_directory,
+            s3_bucket=self.s3_bucket,
+            s3_prefix=self.s3_prefix
+        )
+        
+        # Should return S3 URL without downloading or uploading
+        expected_result = f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml"
+        assert result == expected_result
+        self.mock_ebsco_ftp.download_file.assert_not_called()
+        mock_s3_client.upload_file.assert_not_called()
 
     @patch('steps.trigger.boto3')
     def test_ftp_download_failure(self, mock_boto3):

@@ -72,7 +72,8 @@ def sync_files(ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_pr
     try:
         s3_store.head_object(Bucket=s3_bucket, Key=s3_key)
         print(f"File {most_recent_ftp_file} already exists in S3. No need to download.")
-        return f"s3://{s3_bucket}/{s3_key}"
+        # we return the S3 location of the most recent file
+        return f"s3://{s3_bucket}/{get_most_recent_S3_object(s3_store, s3_bucket, s3_prefix)}"
     except Exception as e:
         if 'NoSuchKey' in str(e):
             print(f"File {most_recent_ftp_file} not found in S3. Will download and upload.")
