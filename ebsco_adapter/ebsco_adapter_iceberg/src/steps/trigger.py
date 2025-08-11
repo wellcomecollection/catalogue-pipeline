@@ -138,9 +138,9 @@ def handler(
         )
 
     # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300
-    job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
-        "%Y%m%dT%H%M"
-    )
+    # job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
+    #     "%Y%m%dT%H%M"
+    # )
 
     return EbscoAdapterLoaderEvent(s3_location=s3_location) # add job_id back later
 

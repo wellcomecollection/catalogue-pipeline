@@ -1,6 +1,7 @@
 import os
+from collections.abc import Callable
 from ftplib import FTP
-from typing import Callable
+
 
 class EbscoFtp:
     def __init__(

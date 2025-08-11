@@ -1,5 +1,7 @@
-import boto3
 from typing import cast
+
+import boto3
+
 
 def get_ssm_parameter(parameter_name: str) -> str:
     """Returns an AWS SSM parameter string associated with a given name."""
