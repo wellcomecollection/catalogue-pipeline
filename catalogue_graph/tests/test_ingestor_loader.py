@@ -29,12 +29,12 @@ from ingestor.queries.concept_queries import (
 from ingestor.steps.ingestor_loader import IngestorLoaderConfig, handler
 
 MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
+    ingestor_type="concepts",
     pipeline_date="2021-07-01",
     index_date="2025-01-01",
     job_id="123",
     start_offset=0,
     end_index=1,
-    transformer_type="concepts",
 )
 
 MOCK_INGESTOR_LOADER_CONFIG = IngestorLoaderConfig(

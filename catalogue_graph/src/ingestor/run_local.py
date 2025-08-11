@@ -31,17 +31,17 @@ from ingestor.steps.ingestor_trigger_monitor import (
 from ingestor.steps.ingestor_trigger_monitor import (
     handler as trigger_monitor_handler,
 )
-from utils.types import ElasticsearchTransformerType
+from utils.types import IngestorType
 
 
-# Run the whole pipeline locally, Usage: python src/ingestor/run_local.py --pipeline-date 2021-07-01 --index-date 2021-07-01 --job-id 123
+# Run the whole pipeline locally, Usage: uv run src/ingestor/run_local.py --pipeline-date 2021-07-01 --index-date 2021-07-01 --job-id 123
 def main() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
-        "--transformer-type",
+        "--ingestor-type",
         type=str,
-        choices=typing.get_args(ElasticsearchTransformerType),
-        help="Which transformer to load data from.",
+        choices=typing.get_args(IngestorType),
+        help="Which ingestor to run (works or concepts).",
         required=True,
     )
     parser.add_argument(
@@ -82,10 +82,10 @@ def main() -> None:
     args = parser.parse_args()
 
     trigger_event = IngestorTriggerLambdaEvent(
+        ingestor_type=args.ingestor_type,
         job_id=args.job_id,
         pipeline_date=args.pipeline_date,
         index_date=args.index_date,
-        transformer_type=args.transformer_type,
     )
     print(f"Processing pipeline for {trigger_event.pipeline_date}.")
 

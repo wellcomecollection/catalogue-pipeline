@@ -30,4 +30,4 @@ ConceptSource = Literal[
 
 WorkType = Literal["Work", "Series", "Section", "Collection"]
 
-ElasticsearchTransformerType = Literal["works", "concepts"]
+IngestorType = Literal["works", "concepts"]

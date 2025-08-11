@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from utils.types import ElasticsearchTransformerType
+from utils.types import IngestorType
 
 
 class IngestorStepEvent(BaseModel):
@@ -10,7 +10,7 @@ class IngestorStepEvent(BaseModel):
 
 
 class IngestorTriggerLambdaEvent(IngestorStepEvent):
-    transformer_type: ElasticsearchTransformerType
+    ingestor_type: IngestorType
 
 
 class IngestorLoaderLambdaEvent(IngestorTriggerLambdaEvent):

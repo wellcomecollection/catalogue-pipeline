@@ -16,7 +16,7 @@ from ingestor.models.step_events import (
 from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
 from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
 from utils.aws import get_neptune_client
-from utils.types import ElasticsearchTransformerType
+from utils.types import IngestorType
 
 
 class IngestorTriggerConfig(BaseModel):
@@ -54,12 +54,12 @@ def transform_data(
         end_index = min(start_offset + config.shard_size, record_count)
         shard_ranges.append(
             IngestorLoaderLambdaEvent(
+                ingestor_type=event.ingestor_type,
                 job_id=event.job_id,
                 start_offset=start_offset,
                 end_index=end_index,
                 pipeline_date=event.pipeline_date,
                 index_date=event.index_date,
-                transformer_type=event.transformer_type,
             )
         )
 
@@ -96,10 +96,10 @@ def lambda_handler(event: IngestorTriggerLambdaEvent, context: typing.Any) -> di
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
-        "--transformer-type",
+        "--ingestor-type",
         type=str,
-        choices=typing.get_args(ElasticsearchTransformerType),
-        help="Which transformer to load data from.",
+        choices=typing.get_args(IngestorType),
+        help="Which ingestor to run (works or concepts).",
         required=True,
     )
     parser.add_argument(
@@ -135,10 +135,10 @@ def local_handler() -> None:
     args = parser.parse_args()
 
     event = IngestorTriggerLambdaEvent(
+        ingestor_type=args.ingestor_type,
         job_id=args.job_id,
         pipeline_date=args.pipeline,
         index_date=args.index_date,
-        transformer_type=args.transformer_type,
     )
     config = IngestorTriggerConfig(is_local=True)
 

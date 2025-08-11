@@ -381,10 +381,10 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
 
 def get_mock_ingestor_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
     return IngestorTriggerLambdaEvent(
+        ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
         job_id=job_id,
-        transformer_type="concepts",
     )
 
 

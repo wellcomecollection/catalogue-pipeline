@@ -1,5 +1,7 @@
 from collections.abc import Generator
 
+from dateutil import parser
+
 from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
 from ingestor.models.shared.location import PhysicalLocation
@@ -114,7 +116,7 @@ class QueryWorkTransformer:
             for date in event.dates:
                 if date.range is not None:
                     # Number of milliseconds since the Unix epoch
-                    yield int(date.range.from_time.timestamp() * 1000)
+                    yield int(parser.parse(date.range.from_time).timestamp() * 1000)
 
     @property
     def genre_ids(self) -> Generator[str]:

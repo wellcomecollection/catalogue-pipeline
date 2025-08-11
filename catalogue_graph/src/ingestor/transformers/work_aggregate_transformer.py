@@ -65,7 +65,7 @@ class AggregateWorkTransformer:
         for event in self.data.production:
             for date in event.dates:
                 if date.range is not None:
-                    from_year = str(date.range.from_time.year)
+                    from_year = date.range.from_time.split("-")[0]
                     yield AggregatableField(id=from_year, label=from_year)
 
     @property

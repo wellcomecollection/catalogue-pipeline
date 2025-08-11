@@ -66,14 +66,14 @@ def build_test_matrix() -> list[tuple]:
             get_mock_trigger_monitor_event([]),
         ),
         (
-            "job_id set, shard_size unset (default 1k) > results count",
+            "job_id set, shard_size unset (default 10k) > results count",
             get_mock_ingestor_trigger_event("123"),
             IngestorTriggerConfig(),
-            {"results": [{"count": 1001}]},
+            {"results": [{"count": 10001}]},
             get_mock_trigger_monitor_event(
                 [
-                    get_mock_ingestor_loader_event("123", 0, 1000),
-                    get_mock_ingestor_loader_event("123", 1000, 1001),
+                    get_mock_ingestor_loader_event("123", 0, 10000),
+                    get_mock_ingestor_loader_event("123", 10000, 10001),
                 ]
             ),
         ),

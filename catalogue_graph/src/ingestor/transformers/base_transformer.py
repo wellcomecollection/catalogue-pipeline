@@ -31,6 +31,7 @@ class ElasticsearchBaseTransformer:
                 yield pydantic_document
 
     def load_documents_to_s3(self, s3_uri: str) -> IngestorIndexerObject:
+        """Load transformed documents into a parquet file in S3."""
         print(f"Loading data to '{s3_uri}'...")
 
         es_documents = list(self.stream_es_documents())
@@ -54,6 +55,7 @@ class ElasticsearchBaseTransformer:
         )
 
     def load_documents_to_local_file(self, file_name: str) -> None:
+        """Load transformed documents into a local JSONL file for testing purposes."""
         file_path = f"ingestor_outputs/{file_name}.jsonl"
 
         os.makedirs(os.path.dirname(file_path), exist_ok=True)

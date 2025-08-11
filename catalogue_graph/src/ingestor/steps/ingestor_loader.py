@@ -3,9 +3,10 @@ import argparse
 import typing
 from typing import Any
 
-from pydantic import BaseModel
-
 from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from pydantic import BaseModel
+from utils.types import IngestorType
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -13,7 +14,6 @@ from ingestor.models.step_events import (
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.types import ElasticsearchTransformerType
 
 
 class IngestorLoaderConfig(BaseModel):
@@ -25,15 +25,15 @@ class IngestorLoaderConfig(BaseModel):
 def create_transformer(
     event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
 ) -> ElasticsearchBaseTransformer:
-    if event.transformer_type == "concepts":
+    if event.ingestor_type == "concepts":
         return ElasticsearchConceptsTransformer(
             event.start_offset, event.end_index, config.is_local
         )
-    if event.transformer_type == "works":
+    if event.ingestor_type == "works":
         return ElasticsearchWorksTransformer(
             event.start_offset, event.end_index, config.is_local
         )
-    raise ValueError(f"Unknown transformer type: {event.transformer_type}")
+    raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
 
 def get_filename(event: IngestorLoaderLambdaEvent) -> str:
@@ -53,7 +53,7 @@ def handler(
     s3_object_key = (
         f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.parquet"
     )
-    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.transformer_type}/{s3_object_key}"
+    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.ingestor_type}/{s3_object_key}"
     result = transformer.load_documents_to_s3(s3_uri=s3_uri)
 
     return IngestorIndexerLambdaEvent(
@@ -73,10 +73,10 @@ def lambda_handler(event: IngestorLoaderLambdaEvent, context: Any) -> dict:
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
-        "--transformer-type",
+        "--ingestor-type",
         type=str,
-        choices=typing.get_args(ElasticsearchTransformerType),
-        help="Which transformer to load data from.",
+        choices=typing.get_args(IngestorType),
+        help="Which ingestor to run (works or concepts).",
         required=True,
     )
     parser.add_argument(
@@ -119,7 +119,7 @@ def local_handler() -> None:
         type=str,
         help='The destination to load the data to, will default to "s3".',
         required=False,
-        choices=["s3", "local", "local_json"],
+        choices=["s3", "local"],
         default="s3",
     )
 

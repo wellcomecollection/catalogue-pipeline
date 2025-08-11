@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
@@ -42,8 +41,8 @@ class Genre(BaseModel):
 
 
 class DateTimeRange(BaseModel):
-    from_time: datetime = Field(alias="from")
-    to_time: datetime = Field(alias="to")
+    from_time: str = Field(alias="from")
+    to_time: str = Field(alias="to")
     label: str | None = None
 
 
