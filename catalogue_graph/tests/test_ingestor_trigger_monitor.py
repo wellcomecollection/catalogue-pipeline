@@ -7,9 +7,9 @@ from test_mocks import (
     get_mock_ingestor_loader_event,
 )
 
+from ingestor.models.step_events import IngestorTriggerMonitorLambdaEvent
 from ingestor.steps.ingestor_trigger_monitor import (
     IngestorTriggerMonitorConfig,
-    IngestorTriggerMonitorLambdaEvent,
     handler,
 )
 

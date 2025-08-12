@@ -6,14 +6,11 @@ from test_mocks import (
     get_mock_ingestor_trigger_event,
 )
 
-from ingestor.steps.ingestor_trigger import (
-    IngestorTriggerConfig,
+from ingestor.models.step_events import (
     IngestorTriggerLambdaEvent,
-    handler,
-)
-from ingestor.steps.ingestor_trigger_monitor import (
     IngestorTriggerMonitorLambdaEvent,
 )
+from ingestor.steps.ingestor_trigger import IngestorTriggerConfig, handler
 
 
 def get_mock_trigger_monitor_event(events: list) -> IngestorTriggerMonitorLambdaEvent:

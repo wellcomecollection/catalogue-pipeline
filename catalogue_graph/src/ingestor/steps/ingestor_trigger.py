@@ -13,12 +13,8 @@ from ingestor.models.step_events import (
     IngestorTriggerLambdaEvent,
     IngestorTriggerMonitorLambdaEvent,
 )
-from ingestor.steps.ingestor_trigger_monitor import (
-    IngestorTriggerMonitorConfig,
-)
-from ingestor.steps.ingestor_trigger_monitor import (
-    handler as trigger_monitor_handler,
-)
+from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
+from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
 from utils.aws import get_neptune_client
 from utils.types import IngestorType
 

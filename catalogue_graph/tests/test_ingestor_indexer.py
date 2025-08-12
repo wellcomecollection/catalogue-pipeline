@@ -10,10 +10,7 @@ from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
 )
-from ingestor.steps.ingestor_indexer import (
-    IngestorIndexerConfig,
-    handler,
-)
+from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
 
 
 def test_ingestor_indexer_success() -> None:

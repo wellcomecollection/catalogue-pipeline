@@ -19,11 +19,6 @@ class IngestorLoaderLambdaEvent(IngestorStepEvent):
     end_index: int
 
 
-class IngestorMonitorStepEvent(IngestorStepEvent):
-    force_pass: bool = False
-    report_results: bool = True
-
-
 class IngestorIndexerObject(BaseModel):
     s3_uri: str
     content_length: int | None = None
@@ -32,6 +27,11 @@ class IngestorIndexerObject(BaseModel):
 
 class IngestorIndexerLambdaEvent(IngestorStepEvent):
     object_to_index: IngestorIndexerObject
+
+
+class IngestorMonitorStepEvent(IngestorStepEvent):
+    force_pass: bool = False
+    report_results: bool = True
 
 
 class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):

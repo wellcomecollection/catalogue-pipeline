@@ -26,10 +26,7 @@ from ingestor.queries.concept_queries import (
     get_referenced_together_query,
     get_related_query,
 )
-from ingestor.steps.ingestor_loader import (
-    IngestorLoaderConfig,
-    handler,
-)
+from ingestor.steps.ingestor_loader import IngestorLoaderConfig, handler
 
 MOCK_INGESTOR_LOADER_CONFIG = IngestorLoaderConfig(
     loader_s3_bucket="test-bucket",

@@ -2,34 +2,20 @@
 
 import argparse
 
-from ingestor.steps.ingestor_indexer import (
-    IngestorIndexerConfig,
-)
-from ingestor.steps.ingestor_indexer import (
-    handler as indexer_handler,
-)
-from ingestor.steps.ingestor_loader import IngestorLoaderConfig
-from ingestor.steps.ingestor_loader import handler as loader_handler
-from ingestor.steps.ingestor_loader_monitor import (
-    IngestorLoaderMonitorConfig,
+from ingestor.models.step_events import (
     IngestorLoaderMonitorLambdaEvent,
-)
-from ingestor.steps.ingestor_loader_monitor import (
-    handler as loader_monitor_handler,
-)
-from ingestor.steps.ingestor_trigger import (
-    IngestorTriggerConfig,
     IngestorTriggerLambdaEvent,
 )
-from ingestor.steps.ingestor_trigger import (
-    handler as trigger_handler,
-)
-from ingestor.steps.ingestor_trigger_monitor import (
-    IngestorTriggerMonitorConfig,
-)
-from ingestor.steps.ingestor_trigger_monitor import (
-    handler as trigger_monitor_handler,
-)
+from ingestor.steps.ingestor_indexer import IngestorIndexerConfig
+from ingestor.steps.ingestor_indexer import handler as indexer_handler
+from ingestor.steps.ingestor_loader import IngestorLoaderConfig
+from ingestor.steps.ingestor_loader import handler as loader_handler
+from ingestor.steps.ingestor_loader_monitor import IngestorLoaderMonitorConfig
+from ingestor.steps.ingestor_loader_monitor import handler as loader_monitor_handler
+from ingestor.steps.ingestor_trigger import IngestorTriggerConfig
+from ingestor.steps.ingestor_trigger import handler as trigger_handler
+from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
+from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
 
 
 # Run the whole pipeline locally, Usage: python src/ingestor/run_local.py --pipeline-date 2021-07-01 --index-date 2021-07-01 --job-id 123
