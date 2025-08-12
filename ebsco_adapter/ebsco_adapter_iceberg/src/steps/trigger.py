@@ -134,7 +134,7 @@ def handler(
             ebsco_ftp=ebsco_ftp,
             target_directory=temp_dir,
             s3_bucket=s3_bucket,
-            s3_prefix=ftp_s3_prefix
+            s3_prefix=ftp_s3_prefix,
         )
 
     # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300
