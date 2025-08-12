@@ -7,7 +7,6 @@ from typing import Any, Literal, TextIO
 
 import boto3
 import smart_open
-
 from clients.base_neptune_client import BaseNeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.graph_edge import BaseEdge
@@ -231,4 +230,4 @@ class BaseTransformer:
         if sample_size is not None:
             self.source.stop_processing()
 
-        return file_path
+        return os.path.abspath(file_path)

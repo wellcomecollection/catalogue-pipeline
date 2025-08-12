@@ -7,10 +7,10 @@ import boto3
 import polars as pl
 import smart_open
 from pydantic import BaseModel
+from utils.types import IngestorLoadFormat
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
 from ingestor.steps.ingestor_indexer import IngestorIndexerObject
-from utils.types import IngestorLoadFormat
 
 
 class ElasticsearchBaseTransformer:
@@ -73,10 +73,10 @@ class ElasticsearchBaseTransformer:
         self, file_name: str, load_format: IngestorLoadFormat
     ) -> str:
         """Load transformed documents into a local JSONL file for testing purposes."""
-        file_path = f"ingestor_outputs/{file_name}.{load_format}"
+        file_path = f"../ingestor_outputs/{file_name}.{load_format}"
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
         with open(file_path, "wb") as f:
             self._load_to_file(f, load_format)
 
-        return file_path
+        return os.path.abspath(file_path)
