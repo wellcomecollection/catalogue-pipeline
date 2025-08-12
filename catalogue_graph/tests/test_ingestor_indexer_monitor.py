@@ -37,12 +37,14 @@ def verify_s3_reports(success_count: int, previous_job_id: str | None) -> None:
 def test_ingestor_loader_monitor_success_no_previous() -> None:
     events = [
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",
             success_count=23,
         ),
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",
@@ -72,12 +74,14 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
 
     events = [
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",
             success_count=250,
         ),
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",

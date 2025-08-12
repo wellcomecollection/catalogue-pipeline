@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 
-from shared.types import ConceptType
-from utils.types import WorkConceptKey
+from utils.types import ConceptType, WorkConceptKey
 
 
 class EdgeAttributes(BaseModel):

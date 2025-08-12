@@ -63,45 +63,38 @@ def main() -> None:
         "--monitoring",
         action=argparse.BooleanOptionalAction,
         help="Whether to enable monitoring, will default to False.",
+        default=False,
     )
     parser.add_argument(
         "--force-pass",
         action=argparse.BooleanOptionalAction,
         help="Whether to force pass monitoring checks, will default to False.",
+        default=False,
     )
 
     args = parser.parse_args()
-
-    trigger_event = IngestorTriggerLambdaEvent(
-        job_id=args.job_id,
-        pipeline_date=args.pipeline_date,
-        index_date=args.index_date,
-    )
-    print(f"Processing pipeline for {trigger_event.pipeline_date}.")
+    trigger_event = IngestorTriggerLambdaEvent(**args.__dict__)
 
     config = IngestorTriggerConfig(is_local=True)
     trigger_result = trigger_handler(trigger_event, config)
-
-    trigger_result_events = (
-        trigger_result.events[: args.limit] if args.limit else trigger_result.events
-    )
+    trigger_result.force_pass = args.force_pass
 
     if args.monitoring:
-        trigger_monitor_config = IngestorTriggerMonitorConfig(
-            is_local=True, force_pass=bool(args.force_pass)
-        )
-        trigger_monitor_handler(trigger_result, trigger_monitor_config)
+        trigger_monitor_handler(trigger_result, IngestorTriggerMonitorConfig())
 
     loader_config = IngestorLoaderConfig(is_local=True)
-    loader_results = [loader_handler(e, loader_config) for e in trigger_result_events]
+    limit = args.limit or len(trigger_result.events)
+    loader_results = [
+        loader_handler(e, loader_config) for e in trigger_result.events[:limit]
+    ]
 
     if args.monitoring:
-        loader_monitor_config = IngestorLoaderMonitorConfig(is_local=True)
         loader_monitor_event = IngestorLoaderMonitorLambdaEvent(
+            **loader_results[0].model_dump(),
             events=loader_results,
-            force_pass=bool(args.force_pass),
+            force_pass=args.force_pass,
         )
-        loader_monitor_handler(loader_monitor_event, loader_monitor_config)
+        loader_monitor_handler(loader_monitor_event, IngestorLoaderMonitorConfig())
 
     indexer_config = IngestorIndexerConfig(is_local=True)
     indexer_handler_responses = [

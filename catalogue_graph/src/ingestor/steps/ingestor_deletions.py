@@ -7,7 +7,7 @@ import polars as pl
 import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
-from models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
+from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
 from utils.aws import df_from_s3_parquet, pydantic_from_s3_json
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
@@ -150,14 +150,10 @@ def lambda_handler(event: IngestorMonitorStepEvent, context: typing.Any) -> dict
         validated_event.pipeline_date,
         validated_event.index_date,
         validated_event.job_id,
-        bool(validated_event.force_pass),
+        validated_event.force_pass,
     )
 
-    return IngestorStepEvent(
-        pipeline_date=validated_event.pipeline_date,
-        index_date=validated_event.index_date,
-        job_id=validated_event.job_id,
-    ).model_dump()
+    return IngestorStepEvent(**event.model_dump()).model_dump()
 
 
 def local_handler() -> None:

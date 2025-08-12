@@ -1,11 +1,10 @@
 import typing
 
-from models.step_events import IngestorMonitorStepEvent
+from ingestor.models.step_events import (
+    IngestorIndexerMonitorLambdaEvent,
+    IngestorMonitorStepEvent,
+)
 from utils.reporting import IndexerReport
-
-
-class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):
-    success_count: int
 
 
 def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
@@ -36,11 +35,8 @@ def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> Non
 
 def handler(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
     print("Preparing concepts pipeline reports ...")
-
     build_indexer_report(events)
-
     print("Report complete.")
-    return
 
 
 def lambda_handler(
@@ -53,7 +49,5 @@ def lambda_handler(
     handler(validated_events)
 
     return IngestorMonitorStepEvent(
-        pipeline_date=validated_events[0].pipeline_date,
-        index_date=validated_events[0].index_date,
-        job_id=validated_events[0].job_id,
+        **validated_events[0].model_dump(),
     ).model_dump()

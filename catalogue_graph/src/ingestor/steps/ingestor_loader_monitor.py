@@ -1,22 +1,18 @@
 import typing
 
+from pydantic import BaseModel
+
 from clients.metric_reporter import MetricReporter
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor.steps.ingestor_indexer import IngestorIndexerLambdaEvent
-from models.step_events import IngestorMonitorStepEvent
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorLoaderMonitorLambdaEvent,
+)
 from utils.reporting import LoaderReport
 from utils.safety import validate_fractional_change
 
 
-class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
-    events: list[IngestorIndexerLambdaEvent]
-
-
-class IngestorLoaderMonitorConfig(IngestorMonitorStepEvent):
-    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
-    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
+class IngestorLoaderMonitorConfig(BaseModel):
     percentage_threshold: float = 0.1
-
     is_local: bool = False
 
 
@@ -42,14 +38,12 @@ def validate_events(events: list[IngestorIndexerLambdaEvent]) -> None:
 def run_check(
     event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
 ) -> LoaderReport:
-    pipeline_date = event.events[0].pipeline_date or "dev"
-    index_date = event.events[0].index_date or "dev"
-    job_id = event.events[0].job_id
-
-    force_pass = config.force_pass or event.force_pass
+    pipeline_date = event.pipeline_date or "dev"
+    index_date = event.index_date or "dev"
+    job_id = event.job_id
 
     print(
-        f"Checking loader events for pipeline_date: {pipeline_date}:{job_id}, force_pass: {force_pass} ..."
+        f"Checking loader events for pipeline_date: {pipeline_date}:{job_id}, force_pass: {event.force_pass} ..."
     )
 
     validate_events(event.events)
@@ -80,7 +74,7 @@ def run_check(
             modified_size=delta,
             total_size=latest_report.total_file_size,
             fractional_threshold=config.percentage_threshold,
-            force_pass=force_pass,
+            force_pass=event.force_pass,
         )
 
     current_report.write()
@@ -116,10 +110,9 @@ def handler(
     event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
 ) -> None:
     print("Checking output of ingestor_loader ...")
-    send_report = event.report_results or config.report_results
 
     report = run_check(event, config)
-    report_results(report, send_report)
+    report_results(report, event.report_results)
 
     print("Check complete.")
 
@@ -128,15 +121,13 @@ def lambda_handler(
     event: list[IngestorIndexerLambdaEvent] | IngestorLoaderMonitorLambdaEvent,
     context: typing.Any,
 ) -> list[dict]:
-    handler_event = None
     if isinstance(event, list):
-        handler_event = IngestorLoaderMonitorLambdaEvent(events=event)
+        handler_event = IngestorLoaderMonitorLambdaEvent(
+            **event[0].model_dump(), events=event
+        )
     else:
         handler_event = event
 
-    handler(
-        event=handler_event,
-        config=IngestorLoaderMonitorConfig(),
-    )
+    handler(handler_event, IngestorLoaderMonitorConfig())
 
     return [e.model_dump() for e in handler_event.events]

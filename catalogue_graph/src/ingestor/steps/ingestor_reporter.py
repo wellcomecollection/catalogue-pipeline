@@ -5,7 +5,7 @@ from typing import Any
 from pydantic import BaseModel
 
 from config import SLACK_SECRET_ID
-from models.step_events import IngestorStepEvent
+from ingestor.models.step_events import IngestorStepEvent
 from utils.reporting import DeletionReport, IndexerReport, TriggerReport
 from utils.slack import publish_report
 
@@ -141,7 +141,6 @@ def handler(event: IngestorStepEvent, config: ReporterConfig) -> None:
     publish_report(slack_header + ingestor_report, config.slack_secret)
 
     print("Report complete.")
-    return
 
 
 def lambda_handler(event: IngestorStepEvent, context: Any) -> None:
@@ -174,11 +173,7 @@ def local_handler() -> None:
 
     args = parser.parse_args()
 
-    event = IngestorStepEvent(
-        pipeline_date=args.pipeline_date,
-        index_date=args.index_date,
-        job_id=args.job_id,
-    )
+    event = IngestorStepEvent(**args.__dict__)
     config = ReporterConfig(is_local=True)
 
     handler(event, config)

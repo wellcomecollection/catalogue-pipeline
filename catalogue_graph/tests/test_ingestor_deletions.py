@@ -6,8 +6,8 @@ from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 
 from graph_remover import IDS_LOG_SCHEMA
+from ingestor.models.step_events import IngestorMonitorStepEvent
 from ingestor.steps.ingestor_deletions import lambda_handler
-from models.step_events import IngestorMonitorStepEvent
 
 
 def _mock_es_secrets() -> None:
@@ -51,12 +51,7 @@ def test_ingestor_deletions_line_first_run() -> None:
     assert len(indexed_concepts) == 5
 
     # No index date specified, so the local 'concepts-indexed' index name should be used
-    event = IngestorMonitorStepEvent(
-        pipeline_date=None,
-        index_date=None,
-        job_id=None,
-        force_pass=True,
-    )
+    event = IngestorMonitorStepEvent(ingestor_type="concepts", force_pass=True)
 
     lambda_handler(event, None)
 
@@ -98,6 +93,7 @@ def test_ingestor_deletions_line_next_run() -> None:
     assert len(indexed_concepts) == 5
 
     event = IngestorMonitorStepEvent(
+        ingestor_type="concepts",
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,
@@ -119,6 +115,7 @@ def test_ingestor_deletions_line_safety_check() -> None:
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
 
     event = IngestorMonitorStepEvent(
+        ingestor_type="concepts",
         pipeline_date=None,
         index_date=None,
         job_id=None,
@@ -132,6 +129,7 @@ def test_ingestor_deletions_line_no_deleted_ids_file() -> None:
 
     # If the file storing deleted IDs does not exist, something went wrong and an exception should be thrown.
     event = IngestorMonitorStepEvent(
+        ingestor_type="concepts",
         pipeline_date=None,
         index_date=None,
         job_id=None,
@@ -157,6 +155,7 @@ def test_ingestor_deletions_line_new_index_run() -> None:
     assert len(indexed_concepts) == 4
 
     event = IngestorMonitorStepEvent(
+        ingestor_type="concepts",
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,

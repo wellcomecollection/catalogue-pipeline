@@ -1,23 +1,17 @@
 import typing
 
+from pydantic import BaseModel
+
 from clients.metric_reporter import MetricReporter
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor.steps.ingestor_loader import IngestorLoaderLambdaEvent
-from models.step_events import IngestorMonitorStepEvent
+from ingestor.models.step_events import (
+    IngestorTriggerMonitorLambdaEvent,
+)
 from utils.reporting import TriggerReport
 from utils.safety import validate_fractional_change
 
 
-class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
-    events: list[IngestorLoaderLambdaEvent]
-
-
-class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
-    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
-    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
+class IngestorTriggerMonitorConfig(BaseModel):
     percentage_threshold: float = 0.1
-
-    is_local: bool = False
 
 
 def run_check(
@@ -25,7 +19,7 @@ def run_check(
 ) -> TriggerReport:
     pipeline_date = event.pipeline_date or "dev"
     index_date = event.index_date or "dev"
-    force_pass = config.force_pass or event.force_pass
+    force_pass = event.force_pass
 
     loader_events = event.events
     # assert all job_ids are the same
@@ -91,29 +85,23 @@ def report_results(
     else:
         print("Skipping sending report metrics.")
 
-    return
-
 
 def handler(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> None:
     print("Checking output of ingestor_trigger ...")
-    send_report = event.report_results or config.report_results
+    send_report = event.report_results
 
     report = run_check(event, config)
     report_results(report, send_report)
 
     print("Check complete.")
-    return
 
 
 def lambda_handler(
     event: IngestorTriggerMonitorLambdaEvent, context: typing.Any
 ) -> list[dict]:
     validated_event = IngestorTriggerMonitorLambdaEvent.model_validate(event)
-    handler(
-        validated_event,
-        IngestorTriggerMonitorConfig(),
-    )
+    handler(validated_event, IngestorTriggerMonitorConfig())
 
     return [e.model_dump() for e in validated_event.events]

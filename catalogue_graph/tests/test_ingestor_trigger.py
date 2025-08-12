@@ -1,8 +1,11 @@
 import pytest
 from freezegun import freeze_time
-from test_mocks import MockRequest
+from test_mocks import (
+    MockRequest,
+    get_mock_ingestor_loader_event,
+    get_mock_ingestor_trigger_event,
+)
 
-from ingestor.steps.ingestor_loader import IngestorLoaderLambdaEvent
 from ingestor.steps.ingestor_trigger import (
     IngestorTriggerConfig,
     IngestorTriggerLambdaEvent,
@@ -13,26 +16,13 @@ from ingestor.steps.ingestor_trigger_monitor import (
 )
 
 
-def get_mock_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
-    return IngestorTriggerLambdaEvent(
-        pipeline_date="2025-01-01", index_date="2025-03-01", job_id=job_id
-    )
-
-
-def get_mock_loader_event(
-    job_id: str | None, start_offset: int, end_index: int
-) -> IngestorLoaderLambdaEvent:
-    return IngestorLoaderLambdaEvent(
-        **dict(get_mock_trigger_event(job_id)),
-        start_offset=start_offset,
-        end_index=end_index,
-    )
-
-
 def get_mock_trigger_monitor_event(events: list) -> IngestorTriggerMonitorLambdaEvent:
+    job_id = events[0].job_id if len(events) > 0 else "123"
     return IngestorTriggerMonitorLambdaEvent(
+        ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id=job_id,
         force_pass=False,
         report_results=True,
         events=events,
@@ -43,53 +33,60 @@ def build_test_matrix() -> list[tuple]:
     return [
         (
             "job_id set, shard_size > results count",
-            get_mock_trigger_event("123"),
+            get_mock_ingestor_trigger_event("123"),
             IngestorTriggerConfig(shard_size=100, is_local=False),
             {"results": [{"count": 1}]},
-            get_mock_trigger_monitor_event([get_mock_loader_event("123", 0, 1)]),
+            get_mock_trigger_monitor_event(
+                [get_mock_ingestor_loader_event("123", 0, 1)]
+            ),
         ),
         (
             "job_id set, shard_size < results count",
-            get_mock_trigger_event("123"),
+            get_mock_ingestor_trigger_event("123"),
             IngestorTriggerConfig(shard_size=1, is_local=False),
             {"results": [{"count": 2}]},
             get_mock_trigger_monitor_event(
-                [get_mock_loader_event("123", 0, 1), get_mock_loader_event("123", 1, 2)]
+                [
+                    get_mock_ingestor_loader_event("123", 0, 1),
+                    get_mock_ingestor_loader_event("123", 1, 2),
+                ]
             ),
         ),
         (
             "job_id set, shard_size == results count",
-            get_mock_trigger_event("123"),
+            get_mock_ingestor_trigger_event("123"),
             IngestorTriggerConfig(shard_size=1),
             {"results": [{"count": 1}]},
-            get_mock_trigger_monitor_event([get_mock_loader_event("123", 0, 1)]),
+            get_mock_trigger_monitor_event(
+                [get_mock_ingestor_loader_event("123", 0, 1)]
+            ),
         ),
         (
             "job_id set, results count == 0",
-            get_mock_trigger_event("123"),
+            get_mock_ingestor_trigger_event("123"),
             IngestorTriggerConfig(shard_size=100),
             {"results": [{"count": 0}]},
             get_mock_trigger_monitor_event([]),
         ),
         (
             "job_id set, shard_size unset (default 1k) > results count",
-            get_mock_trigger_event("123"),
+            get_mock_ingestor_trigger_event("123"),
             IngestorTriggerConfig(),
-            {"results": [{"count": 1001}]},
+            {"results": [{"count": 10001}]},
             get_mock_trigger_monitor_event(
                 [
-                    get_mock_loader_event("123", 0, 1000),
-                    get_mock_loader_event("123", 1000, 1001),
+                    get_mock_ingestor_loader_event("123", 0, 10000),
+                    get_mock_ingestor_loader_event("123", 10000, 10001),
                 ]
             ),
         ),
         (
             "job_id not set, shard_size > results count",
-            get_mock_trigger_event(None),
+            get_mock_ingestor_trigger_event(None),
             IngestorTriggerConfig(shard_size=100),
             {"results": [{"count": 1}]},
             get_mock_trigger_monitor_event(
-                [get_mock_loader_event("20120101T0000", 0, 1)]
+                [get_mock_ingestor_loader_event("20120101T0000", 0, 1)]
             ),
         ),
     ]
