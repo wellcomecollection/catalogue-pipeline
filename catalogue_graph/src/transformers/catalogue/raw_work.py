@@ -45,7 +45,7 @@ class RawCatalogueWork:
     @property
     def reference_number(self) -> str | None:
         reference_number: str | None = self.work_data.get("referenceNumber")
-        return reference_number 
+        return reference_number
 
     @property
     def concepts(self) -> list[WorkConcept]:
