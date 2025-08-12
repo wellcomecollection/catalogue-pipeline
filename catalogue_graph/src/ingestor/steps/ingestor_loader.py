@@ -12,13 +12,14 @@ from ingestor.models.step_events import (
 )
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
-from utils.types import IngestorType
+from utils.types import IngestorLoadFormat, IngestorType
 
 
 class IngestorLoaderConfig(BaseModel):
     loader_s3_bucket: str = INGESTOR_S3_BUCKET
     loader_s3_prefix: str = INGESTOR_S3_PREFIX
     is_local: bool = False
+    load_format: IngestorLoadFormat = "parquet"
 
 
 def create_transformer(
@@ -45,11 +46,11 @@ def handler(
     index_date = event.index_date or "dev"
 
     transformer = create_transformer(event, config)
-    s3_object_key = (
-        f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.parquet"
-    )
+    s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"
     s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.ingestor_type}/{s3_object_key}"
-    result = transformer.load_documents_to_s3(s3_uri=s3_uri)
+    result = transformer.load_documents_to_s3(
+        s3_uri=s3_uri, load_format=config.load_format
+    )
 
     return IngestorIndexerLambdaEvent(
         ingestor_type=event.ingestor_type,
@@ -118,15 +119,26 @@ def local_handler() -> None:
         choices=["s3", "local"],
         default="s3",
     )
+    parser.add_argument(
+        "--load-format",
+        type=str,
+        help='The format of loaded documents, will default to "parquet".',
+        required=False,
+        choices=["parquet", "jsonl"],
+        default="parquet",
+    )
 
     args = parser.parse_args()
 
     event = IngestorLoaderLambdaEvent(**args.__dict__)
-    config = IngestorLoaderConfig(is_local=True)
+    config = IngestorLoaderConfig(is_local=True, load_format=args.load_format)
 
     if args.load_destination == "local":
         transformer = create_transformer(event, config)
-        transformer.load_documents_to_local_file(get_filename(event))
+        file_path = transformer.load_documents_to_local_file(
+            get_filename(event), config.load_format
+        )
+        print(f"Documents loaded to local file: {file_path}")
     else:
         handler(event, config)
 

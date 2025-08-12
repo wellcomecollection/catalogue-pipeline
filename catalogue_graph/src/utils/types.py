@@ -31,3 +31,4 @@ ConceptSource = Literal[
 WorkType = Literal["Work", "Series", "Section", "Collection"]
 
 IngestorType = Literal["concepts"]
+IngestorLoadFormat = Literal["parquet", "jsonl"]
