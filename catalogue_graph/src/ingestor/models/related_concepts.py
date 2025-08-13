@@ -1,6 +1,5 @@
 from .concept import (
     DISPLAY_SOURCE_PRIORITY,
-    MissingLabelError,
     get_most_specific_concept_type,
     get_priority_label,
 )

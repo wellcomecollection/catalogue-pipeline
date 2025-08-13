@@ -1,17 +1,18 @@
 from typing import TextIO
-from ingestor.models.concept import RawNeptuneConcept, MissingLabelError
+
+from ingestor.models.concept import MissingLabelError, RawNeptuneConcept
 from ingestor.models.indexable_concept import (
     ConceptDisplay,
     ConceptQuery,
+    ConceptRelatedTo,
     IndexableConcept,
     RelatedConcepts,
-    ConceptRelatedTo
 )
-from ingestor.models.related_concepts import RawNeptuneRelatedConcepts, RawNeptuneRelatedConcept
-
-from ingestor.transformers.concept_override import (
-    ConceptTextOverrideProvider
+from ingestor.models.related_concepts import (
+    RawNeptuneRelatedConcept,
+    RawNeptuneRelatedConcepts,
 )
+from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 
 
 class ElasticsearchConceptsTransformer:

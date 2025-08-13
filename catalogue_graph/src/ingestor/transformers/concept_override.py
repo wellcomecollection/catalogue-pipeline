@@ -1,11 +1,12 @@
-import os
 import csv
-from ingestor.models.concept import RawNeptuneConcept
-from ingestor.models.related_concepts import RawNeptuneRelatedConcepts, RawNeptuneRelatedConcept
-
+import os
 from typing import TextIO
 
+from ingestor.models.concept import RawNeptuneConcept
 from ingestor.models.indexable_concept import ConceptDescription
+from ingestor.models.related_concepts import (
+    RawNeptuneRelatedConcept,
+)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -33,9 +34,10 @@ class ConceptTextOverrideProvider:
     def description_of(self, raw_concept: RawNeptuneConcept) -> ConceptDescription | None:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override:
-            if override_description := override['description'].strip():
-                if override_description.lower() == 'empty':
-                    return None
+            override_description = override['description'].strip()
+            if override_description.lower() == 'empty':
+                return None
+            if override_description:
                 return ConceptDescription(
                     text=override_description,
                     sourceLabel="wellcome",

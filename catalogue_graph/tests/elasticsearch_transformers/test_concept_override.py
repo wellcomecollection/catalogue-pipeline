@@ -1,9 +1,11 @@
-from test_utils import load_json_fixture
-from ingestor.models.concept import RawNeptuneConcept
-from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 import io
-from ingestor.models.indexable_concept import ConceptDescription
+
 import pytest
+from test_utils import load_json_fixture
+
+from ingestor.models.concept import RawNeptuneConcept
+from ingestor.models.indexable_concept import ConceptDescription
+from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 
 
 @pytest.fixture

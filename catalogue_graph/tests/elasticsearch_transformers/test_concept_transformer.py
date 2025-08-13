@@ -1,5 +1,6 @@
 import io
 
+import fixtures.neptune.neptune_generators as ng
 from test_utils import load_json_fixture
 
 from ingestor.models.concept import (
@@ -20,7 +21,6 @@ from ingestor.models.related_concepts import RawNeptuneRelatedConcepts
 from ingestor.transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
-import fixtures.neptune.neptune_generators as ng
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": {},
