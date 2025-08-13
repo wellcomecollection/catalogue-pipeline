@@ -43,6 +43,7 @@ filterwarnings = "ignore::DeprecationWarning"
 
 [tool.ruff]
 line-length = 88
+extend-exclude = ["*.ipynb"]
 
 [tool.ruff.lint]
 select = [

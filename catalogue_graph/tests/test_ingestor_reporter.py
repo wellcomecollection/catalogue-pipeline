@@ -10,6 +10,7 @@ from ingestor.steps.ingestor_reporter import (
     get_ingestor_report,
 )
 
+ingestor_type = "concepts"
 pipeline_date = "2024-01-01"
 index_date = "2024-01-02"
 job_id = "20240102T1200"
@@ -21,6 +22,7 @@ s3_url = f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{pipeline_date}/{index
 @pytest.fixture
 def reporter_event() -> IngestorStepEvent:
     return IngestorStepEvent(
+        ingestor_type="concepts",
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=job_id,

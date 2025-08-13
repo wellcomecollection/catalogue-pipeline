@@ -3,9 +3,6 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
-from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_json_fixture
-
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
     ConceptDescription,
@@ -16,43 +13,24 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from ingestor.models.step_events import (
-    IngestorIndexerLambdaEvent,
-    IngestorIndexerObject,
-    IngestorLoaderLambdaEvent,
-)
 from ingestor.queries.concept_queries import (
     CONCEPT_QUERY,
-    _get_referenced_together_query,
-    _get_related_query,
+    get_referenced_together_query,
+    get_related_query,
 )
 from ingestor.steps.ingestor_loader import IngestorLoaderConfig, handler
-
-MOCK_INGESTOR_LOADER_EVENT = IngestorLoaderLambdaEvent(
-    ingestor_type="concepts",
-    pipeline_date="2021-07-01",
-    index_date="2025-01-01",
-    job_id="123",
-    start_offset=0,
-    end_index=1,
+from test_mocks import (
+    MockRequest,
+    MockSmartOpen,
+    get_mock_ingestor_indexer_event,
+    get_mock_ingestor_loader_event,
 )
+from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_CONFIG = IngestorLoaderConfig(
     loader_s3_bucket="test-bucket",
     loader_s3_prefix="test-prefix",
 )
-
-MOCK_INGESTOR_INDEXER_EVENT = IngestorIndexerLambdaEvent(
-    pipeline_date="2021-07-01",
-    index_date="2025-01-01",
-    job_id="123",
-    object_to_index=IngestorIndexerObject(
-        s3_uri="s3://test-bucket/test-prefix_concepts/2021-07-01/2025-01-01/123/00000000-00000001.parquet",
-        content_length=1,
-        record_count=1,
-    ),
-)
-
 
 class MockNeptuneResponseItem(Enum):
     SOURCE_ALTERNATIVE_LABELS = auto()
@@ -111,32 +89,32 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=_get_related_query("RELATED_TO"),
+        expected_query=get_related_query("RELATED_TO"),
         mock_results=related_to_results,
     )
 
     add_neptune_mock_response(
-        expected_query=_get_related_query("HAS_FIELD_OF_WORK"),
+        expected_query=get_related_query("HAS_FIELD_OF_WORK"),
         mock_results=[],
     )
 
     add_neptune_mock_response(
-        expected_query=_get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
+        expected_query=get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
         mock_results=broader_than_results,
     )
 
     add_neptune_mock_response(
-        expected_query=_get_related_query("HAS_FIELD_OF_WORK", "to"),
+        expected_query=get_related_query("HAS_FIELD_OF_WORK", "to"),
         mock_results=people_results,
     )
 
     add_neptune_mock_response(
-        expected_query=_get_related_query("NARROWER_THAN"),
+        expected_query=get_related_query("NARROWER_THAN"),
         mock_results=[],
     )
 
     add_neptune_mock_response(
-        expected_query=_get_referenced_together_query(
+        expected_query=get_referenced_together_query(
             source_referenced_types=["Person", "Organisation"],
             related_referenced_types=["Person", "Organisation"],
             source_referenced_in=["contributors"],
@@ -146,7 +124,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     add_neptune_mock_response(
-        expected_query=_get_referenced_together_query(
+        expected_query=get_referenced_together_query(
             related_referenced_types=[
                 "Concept",
                 "Subject",
@@ -302,18 +280,18 @@ def test_ingestor_loader(
     expected_concept = get_catalogue_concept_mock(included_response_items)
     mock_neptune_responses(included_response_items)
 
-    result = handler(MOCK_INGESTOR_LOADER_EVENT, MOCK_INGESTOR_LOADER_CONFIG)
+    loader_event = get_mock_ingestor_loader_event("123", 0, 1)
+    indexer_event = get_mock_ingestor_indexer_event("123")
+    result = handler(loader_event, MOCK_INGESTOR_LOADER_CONFIG)
 
-    assert result == MOCK_INGESTOR_INDEXER_EVENT
+    assert result == indexer_event
     assert len(MockRequest.calls) == 8
 
     request = MockRequest.calls[0]
     assert request["method"] == "POST"
     assert request["url"] == "https://test-host.com:8182/openCypher"
 
-    with MockSmartOpen.open(
-        MOCK_INGESTOR_INDEXER_EVENT.object_to_index.s3_uri, "rb"
-    ) as f:
+    with MockSmartOpen.open(indexer_event.object_to_index.s3_uri, "rb") as f:
         df = pl.read_parquet(f)
         assert len(df) == 1
 
@@ -333,4 +311,5 @@ def test_ingestor_loader_bad_neptune_response() -> None:
     )
 
     with pytest.raises(LookupError):
-        handler(MOCK_INGESTOR_LOADER_EVENT, MOCK_INGESTOR_LOADER_CONFIG)
+        event = get_mock_ingestor_loader_event("123", 0, 1)
+        handler(event, MOCK_INGESTOR_LOADER_CONFIG)

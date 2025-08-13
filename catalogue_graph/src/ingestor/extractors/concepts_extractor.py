@@ -2,8 +2,8 @@ from collections.abc import Generator
 
 from ingestor.queries.concept_queries import (
     CONCEPT_QUERY,
-    _get_referenced_together_query,
-    _get_related_query,
+    get_referenced_together_query,
+    get_related_query,
 )
 
 from .base_extractor import GraphBaseExtractor
@@ -36,33 +36,33 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         return self.make_neptune_query(CONCEPT_QUERY, "concept")
 
     def get_related_concepts(self) -> LinkedConcepts:
-        query = _get_related_query("RELATED_TO")
+        query = get_related_query("RELATED_TO")
         result = self.make_neptune_query(query, "related to")
         return _related_query_result_to_dict(result)
 
     def get_field_of_work_concepts(self) -> LinkedConcepts:
-        query = _get_related_query("HAS_FIELD_OF_WORK")
+        query = get_related_query("HAS_FIELD_OF_WORK")
         result = self.make_neptune_query(query, "field of work")
         return _related_query_result_to_dict(result)
 
     def get_narrower_concepts(self) -> LinkedConcepts:
-        query = _get_related_query("NARROWER_THAN")
+        query = get_related_query("NARROWER_THAN")
         result = self.make_neptune_query(query, "narrower than")
         return _related_query_result_to_dict(result)
 
     def get_broader_concepts(self) -> LinkedConcepts:
-        query = _get_related_query("NARROWER_THAN|HAS_PARENT", "to")
+        query = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
         result = self.make_neptune_query(query, "broader than")
         return _related_query_result_to_dict(result)
 
     def get_people_concepts(self) -> LinkedConcepts:
-        query = _get_related_query("HAS_FIELD_OF_WORK", "to")
+        query = get_related_query("HAS_FIELD_OF_WORK", "to")
         result = self.make_neptune_query(query, "people")
         return _related_query_result_to_dict(result)
 
     def get_collaborator_concepts(self) -> LinkedConcepts:
         # Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
-        query = _get_referenced_together_query(
+        query = get_referenced_together_query(
             source_referenced_types=["Person", "Organisation"],
             related_referenced_types=["Person", "Organisation"],
             source_referenced_in=["contributors"],
@@ -73,7 +73,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
     def get_related_topics(self) -> LinkedConcepts:
         # Do not include agents/people/orgs in the list of related topics.
-        query = _get_referenced_together_query(
+        query = get_referenced_together_query(
             related_referenced_types=[
                 "Concept",
                 "Subject",

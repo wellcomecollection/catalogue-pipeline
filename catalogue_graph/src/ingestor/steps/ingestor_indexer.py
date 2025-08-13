@@ -5,16 +5,17 @@ import typing
 from collections.abc import Generator
 
 import elasticsearch.helpers
-from pydantic import BaseModel
-
 import utils.elasticsearch
+from pydantic import BaseModel
+from utils.aws import df_from_s3_parquet
+from utils.elasticsearch import get_standard_index_name
+
 from ingestor.models.indexable_concept import IndexableConcept
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerMonitorLambdaEvent,
     IngestorIndexerObject,
 )
-from utils.aws import df_from_s3_parquet
 
 
 class IngestorIndexerConfig(BaseModel):
@@ -27,11 +28,7 @@ def load_data(
     index_date: str | None,
     is_local: bool,
 ) -> int:
-    index_name = (
-        "concepts-indexed"
-        if pipeline_date is None
-        else f"concepts-indexed-{index_date}"
-    )
+    index_name = get_standard_index_name("concepts-indexed", index_date)
 
     print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
     es = utils.elasticsearch.get_client("concept_ingestor", pipeline_date, is_local)
@@ -68,18 +65,14 @@ def handler(
     print(f"Successfully indexed {success_count} documents.")
 
     return IngestorIndexerMonitorLambdaEvent(
-        pipeline_date=event.pipeline_date,
-        index_date=event.index_date,
-        job_id=event.job_id,
+        **event.model_dump(),
         success_count=success_count,
     )
 
 
-def lambda_handler(
-    event: IngestorIndexerLambdaEvent, context: typing.Any
-) -> dict[str, typing.Any]:
+def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     return handler(
-        IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
+        IngestorIndexerLambdaEvent(**event), IngestorIndexerConfig()
     ).model_dump()
 
 
@@ -100,14 +93,21 @@ def local_handler() -> None:
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The concepts index date that is being ingested to, will default to None.",
+        help="The concepts index date that is being ingested to, will default to 'dev'.",
         required=False,
+        default="dev",
+    )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        help="The ID of the job to process, will default to 'dev'.",
+        required=False,
+        default="dev",
     )
     args = parser.parse_args()
 
     event = IngestorIndexerLambdaEvent(
-        pipeline_date=args.pipeline_date,
-        index_date=args.index_date,
+        **args.__dict__,
         object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri),
     )
     config = IngestorIndexerConfig(is_local=True)

@@ -1,26 +1,22 @@
 from pydantic import BaseModel
-
 from utils.types import IngestorType
 
 
 class IngestorStepEvent(BaseModel):
-    pipeline_date: str | None = None
-    index_date: str | None = None
-    job_id: str | None = None
+    ingestor_type: IngestorType
+    pipeline_date: str
+    index_date: str
+    job_id: str
 
 
 class IngestorTriggerLambdaEvent(IngestorStepEvent):
-    ingestor_type: IngestorType
+    pass
 
 
-class IngestorLoaderLambdaEvent(IngestorTriggerLambdaEvent):
+class IngestorLoaderLambdaEvent(IngestorStepEvent):
     start_offset: int
     end_index: int
 
-
-class IngestorMonitorStepEvent(IngestorStepEvent):
-    force_pass: bool = False
-    report_results: bool = True
 
 
 class IngestorIndexerObject(BaseModel):
@@ -31,6 +27,11 @@ class IngestorIndexerObject(BaseModel):
 
 class IngestorIndexerLambdaEvent(IngestorStepEvent):
     object_to_index: IngestorIndexerObject
+
+
+class IngestorMonitorStepEvent(IngestorStepEvent):
+    force_pass: bool = False
+    report_results: bool = True
 
 
 class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):

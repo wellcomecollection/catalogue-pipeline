@@ -38,7 +38,7 @@ slack_header = [
 ]
 
 
-def date_time_from_job_id(job_id: str = "") -> str:
+def date_time_from_job_id(job_id: str) -> str:
     start_datetime = datetime.strptime(job_id, "%Y%m%dT%H%M")
     if start_datetime.date() == datetime.now().date():
         return start_datetime.strftime("today at %-I:%M %p %Z")
@@ -49,8 +49,8 @@ def date_time_from_job_id(job_id: str = "") -> str:
 
 
 def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> list[Any]:
-    pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date or "dev"
+    pipeline_date = event.pipeline_date
+    index_date = event.index_date
     job_id = event.job_id
 
     trigger_report: TriggerReport | None = TriggerReport.read(
@@ -85,7 +85,7 @@ def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> lis
         ignore_missing=True,
     )
 
-    if job_id is not None and trigger_report is not None and indexer_report is not None:
+    if trigger_report is not None and indexer_report is not None:
         start_datetime = date_time_from_job_id(job_id)
 
         if trigger_report.record_count == indexer_report.success_count:
@@ -95,10 +95,8 @@ def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> lis
                 f":warning: _compared to {trigger_report.record_count} in the graph_"
             )
 
-        current_run_duration = int(
-            (datetime.now() - datetime.strptime(job_id, "%Y%m%dT%H%M")).total_seconds()
-            / 60
-        )
+        start_time = datetime.strptime(job_id, "%Y%m%dT%H%M")
+        current_run_duration = int((datetime.now() - start_time).total_seconds() / 60)
 
         if deletions_report:
             ingestor_deletions_line = f"- *{deletions_report.deleted_count}* documents were deleted from the index."
@@ -141,14 +139,10 @@ def handler(event: IngestorStepEvent, config: ReporterConfig) -> None:
     publish_report(slack_header + ingestor_report, config.slack_secret)
 
     print("Report complete.")
-    return
 
 
-def lambda_handler(event: IngestorStepEvent, context: Any) -> None:
-    validated_event = IngestorStepEvent.model_validate(event)
-    config = ReporterConfig()
-
-    handler(validated_event, config)
+def lambda_handler(event: dict, context: Any) -> None:
+    handler(IngestorStepEvent(**event), ReporterConfig())
 
 
 def local_handler() -> None:
@@ -169,16 +163,12 @@ def local_handler() -> None:
         "--job-id",
         type=str,
         help="The job to report on",
-        required=False,
+        required=True,
     )
 
     args = parser.parse_args()
 
-    event = IngestorStepEvent(
-        pipeline_date=args.pipeline_date,
-        index_date=args.index_date,
-        job_id=args.job_id,
-    )
+    event = IngestorStepEvent(**args.__dict__)
     config = ReporterConfig(is_local=True)
 
     handler(event, config)

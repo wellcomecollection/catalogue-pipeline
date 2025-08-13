@@ -1,16 +1,15 @@
 import json
 
 import pytest
+from ingestor.models.step_events import IngestorTriggerMonitorLambdaEvent
+from ingestor.steps.ingestor_trigger_monitor import (
+    IngestorTriggerMonitorConfig,
+    handler,
+)
 from test_mocks import (
     MockCloudwatchClient,
     MockSmartOpen,
     get_mock_ingestor_loader_event,
-)
-
-from ingestor.steps.ingestor_trigger_monitor import (
-    IngestorTriggerMonitorConfig,
-    IngestorTriggerMonitorLambdaEvent,
-    handler,
 )
 
 MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.trigger.json"
@@ -52,14 +51,22 @@ def verify_s3_reports(record_count: int) -> None:
 
 def test_ingestor_trigger_monitor_success_no_previous() -> None:
     event = IngestorTriggerMonitorLambdaEvent(
+        ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id="123",
         force_pass=False,
         report_results=True,
-        events=[get_mock_ingestor_loader_event("123", 0, 1)],
+        events=[
+            get_mock_ingestor_loader_event(
+                "123",
+                0,
+                1,
+            )
+        ],
     )
 
-    config = IngestorTriggerMonitorConfig(percentage_threshold=0.1, is_local=True)
+    config = IngestorTriggerMonitorConfig(percentage_threshold=0.1)
 
     handler(event, config)
 
@@ -85,13 +92,15 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
     )
 
     event = IngestorTriggerMonitorLambdaEvent(
+        ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id="123",
         force_pass=False,
         report_results=True,
         events=[get_mock_ingestor_loader_event("123", 0, 110)],
     )
-    config = IngestorTriggerMonitorConfig(percentage_threshold=0.1, is_local=True)
+    config = IngestorTriggerMonitorConfig(percentage_threshold=0.1)
 
     handler(event, config)
 
@@ -108,14 +117,16 @@ def test_ingestor_trigger_monitor_failure_with_previous() -> None:
     MockSmartOpen.mock_s3_file(MOCK_LATEST_S3_URI, json.dumps(latest_content))
 
     event = IngestorTriggerMonitorLambdaEvent(
+        ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id="123",
         force_pass=False,
         report_results=True,
         events=[get_mock_ingestor_loader_event("123", 0, 111)],
     )
 
-    config = IngestorTriggerMonitorConfig(percentage_threshold=0.1, is_local=True)
+    config = IngestorTriggerMonitorConfig(percentage_threshold=0.1)
 
     # assert this raises a ValueError
     with pytest.raises(ValueError):

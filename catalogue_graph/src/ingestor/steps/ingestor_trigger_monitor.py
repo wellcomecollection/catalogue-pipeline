@@ -1,28 +1,25 @@
 import typing
 
 from clients.metric_reporter import MetricReporter
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor.models.step_events import (
-    IngestorMonitorStepEvent,
-    IngestorTriggerMonitorLambdaEvent,
-)
+from pydantic import BaseModel
 from utils.reporting import TriggerReport
 from utils.safety import validate_fractional_change
 
+from ingestor.models.step_events import (
+    IngestorTriggerMonitorLambdaEvent,
+)
 
-class IngestorTriggerMonitorConfig(IngestorMonitorStepEvent):
-    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
-    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
+
+class IngestorTriggerMonitorConfig(BaseModel):
     percentage_threshold: float = 0.1
-    is_local: bool = False
 
 
 def run_check(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> TriggerReport:
-    pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date or "dev"
-    force_pass = config.force_pass or event.force_pass
+    pipeline_date = event.pipeline_date
+    index_date = event.index_date
+    force_pass = event.force_pass
 
     loader_events = event.events
     # assert all job_ids are the same
@@ -88,29 +85,21 @@ def report_results(
     else:
         print("Skipping sending report metrics.")
 
-    return
-
 
 def handler(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> None:
     print("Checking output of ingestor_trigger ...")
-    send_report = event.report_results or config.report_results
+    send_report = event.report_results
 
     report = run_check(event, config)
     report_results(report, send_report)
 
     print("Check complete.")
-    return
 
 
-def lambda_handler(
-    event: IngestorTriggerMonitorLambdaEvent, context: typing.Any
-) -> list[dict]:
-    validated_event = IngestorTriggerMonitorLambdaEvent.model_validate(event)
-    handler(
-        validated_event,
-        IngestorTriggerMonitorConfig(),
-    )
+def lambda_handler(event: dict, context: typing.Any) -> list[dict]:
+    validated_event = IngestorTriggerMonitorLambdaEvent(**event)
+    handler(validated_event, IngestorTriggerMonitorConfig())
 
     return [e.model_dump() for e in validated_event.events]

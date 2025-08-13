@@ -3,18 +3,27 @@ import json
 import pytest
 from test_mocks import MockCloudwatchClient, MockSmartOpen
 
-from ingestor.steps.ingestor_indexer import (
+from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
+    IngestorLoaderMonitorLambdaEvent,
+    IngestorStepEvent,
 )
 from ingestor.steps.ingestor_loader_monitor import (
     IngestorLoaderMonitorConfig,
-    IngestorLoaderMonitorLambdaEvent,
     handler,
 )
 
 MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.loader.json"
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.loader.json"
+
+
+MOCK_STEP_EVENT = IngestorStepEvent(
+    ingestor_type="concepts",
+    pipeline_date="2025-01-01",
+    index_date="2025-03-01",
+    job_id="123",
+)
 
 
 def get_mock_expected_report(record_count: int, file_size: int) -> dict:
@@ -63,20 +72,17 @@ def verify_s3_reports(record_count: int, file_size: int) -> None:
 
 def test_ingestor_loader_monitor_success_no_previous() -> None:
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file", 1000, 100),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file", 2000, 200),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -105,20 +111,17 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
     )
 
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file", 1100, 110),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file", 2100, 210),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -149,20 +152,17 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
     # This event has a much different total file size (2000 vs previous 3000)
     # which exceeds the 10% threshold
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file1", 800, 800),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file2", 1200, 120),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -195,18 +195,15 @@ def test_ingestor_loader_monitor_force_pass() -> None:
     # This event has a much different total file size (2000 vs previous 3000)
     # but will pass because force_pass is True
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         force_pass=True,  # Force pass is enabled
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file1", 800, 80),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file2", 1200, 120),
             ),
         ],
@@ -226,20 +223,20 @@ def test_ingestor_loader_monitor_force_pass() -> None:
 
 def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-02",  # Different pipeline date
-                index_date="2025-03-01",
-                job_id="123",
+                # Different pipeline date
+                **MOCK_STEP_EVENT.model_copy(
+                    update={"pipeline_date": "2025-01-02"}
+                ).model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -251,20 +248,18 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
 
 def test_ingestor_loader_monitor_job_id_mismatch() -> None:
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="456",  # Different job ID
+                # Different job ID
+                **MOCK_STEP_EVENT.model_copy(update={"job_id": "456"}).model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -276,21 +271,18 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
 
 def test_ingestor_loader_monitor_empty_content_length() -> None:
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 # Empty content length
                 object_to_index=get_mock_ingestor_indexer_object("file1", None, 100),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
@@ -302,21 +294,18 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
 
 def test_ingestor_loader_monitor_empty_record_count() -> None:
     event = IngestorLoaderMonitorLambdaEvent(
+        **MOCK_STEP_EVENT.model_dump(),
         events=[
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 # Empty record count
                 object_to_index=get_mock_ingestor_indexer_object("file1", 1000, None),
             ),
             IngestorIndexerLambdaEvent(
-                pipeline_date="2025-01-01",
-                index_date="2025-03-01",
-                job_id="123",
+                **MOCK_STEP_EVENT.model_dump(),
                 object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
             ),
-        ]
+        ],
     )
 
     config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)

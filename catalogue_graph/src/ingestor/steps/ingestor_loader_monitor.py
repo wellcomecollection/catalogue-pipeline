@@ -1,29 +1,26 @@
 import typing
 
 from clients.metric_reporter import MetricReporter
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
-from ingestor.models.step_events import (
-    IngestorIndexerLambdaEvent,
-    IngestorLoaderMonitorLambdaEvent,
-    IngestorMonitorStepEvent,
-)
+from pydantic import BaseModel
 from utils.reporting import LoaderReport
 from utils.safety import validate_fractional_change
 
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorLoaderMonitorLambdaEvent,
+)
 
-class IngestorLoaderMonitorConfig(IngestorMonitorStepEvent):
-    ingestor_s3_bucket: str = INGESTOR_S3_BUCKET
-    ingestor_s3_prefix: str = INGESTOR_S3_PREFIX
+
+class IngestorLoaderMonitorConfig(BaseModel):
     percentage_threshold: float = 0.1
-
     is_local: bool = False
 
 
 def validate_events(events: list[IngestorIndexerLambdaEvent]) -> None:
-    distinct_pipeline_dates = {e.pipeline_date or "dev" for e in events}
+    distinct_pipeline_dates = {e.pipeline_date for e in events}
     assert len(distinct_pipeline_dates) == 1, "pipeline_date mismatch! Stopping."
 
-    distinct_index_dates = {e.index_date or "dev" for e in events}
+    distinct_index_dates = {e.index_date for e in events}
     assert len(distinct_index_dates) == 1, "index_date mismatch! Stopping."
 
     distinct_job_ids = {e.job_id for e in events}
@@ -41,14 +38,12 @@ def validate_events(events: list[IngestorIndexerLambdaEvent]) -> None:
 def run_check(
     event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
 ) -> LoaderReport:
-    pipeline_date = event.events[0].pipeline_date or "dev"
-    index_date = event.events[0].index_date or "dev"
-    job_id = event.events[0].job_id
-
-    force_pass = config.force_pass or event.force_pass
+    pipeline_date = event.pipeline_date
+    index_date = event.index_date
+    job_id = event.job_id
 
     print(
-        f"Checking loader events for pipeline_date: {pipeline_date}:{job_id}, force_pass: {force_pass} ..."
+        f"Checking loader events for pipeline_date: {pipeline_date}:{job_id}, force_pass: {event.force_pass} ..."
     )
 
     validate_events(event.events)
@@ -59,7 +54,7 @@ def run_check(
     current_report = LoaderReport(
         pipeline_date=pipeline_date,
         index_date=index_date,
-        job_id=job_id or "dev",
+        job_id=job_id,
         record_count=sum_record_count,
         total_file_size=sum_file_size,
     )
@@ -79,7 +74,7 @@ def run_check(
             modified_size=delta,
             total_size=latest_report.total_file_size,
             fractional_threshold=config.percentage_threshold,
-            force_pass=force_pass,
+            force_pass=event.force_pass,
         )
 
     current_report.write()
@@ -115,27 +110,23 @@ def handler(
     event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
 ) -> None:
     print("Checking output of ingestor_loader ...")
-    send_report = event.report_results or config.report_results
 
     report = run_check(event, config)
-    report_results(report, send_report)
+    report_results(report, event.report_results)
 
     print("Check complete.")
 
 
-def lambda_handler(
-    event: list[IngestorIndexerLambdaEvent] | IngestorLoaderMonitorLambdaEvent,
-    context: typing.Any,
-) -> list[dict]:
-    handler_event = None
+def lambda_handler(event: list[dict] | dict, context: typing.Any) -> list[dict]:
+    # When running in production, 'event' stores a list of IngestorIndexerLambdaEvent items.
+    # When running locally, it stores an IngestorLoaderMonitorLambdaEvent object.
     if isinstance(event, list):
-        handler_event = IngestorLoaderMonitorLambdaEvent(events=event)
+        validated_events = [IngestorIndexerLambdaEvent(**e) for e in event]
+        handler_event = IngestorLoaderMonitorLambdaEvent(
+            **event[0], events=validated_events
+        )
     else:
-        handler_event = event
+        handler_event = IngestorLoaderMonitorLambdaEvent(**event)
 
-    handler(
-        event=handler_event,
-        config=IngestorLoaderMonitorConfig(),
-    )
-
+    handler(handler_event, IngestorLoaderMonitorConfig())
     return [e.model_dump() for e in handler_event.events]

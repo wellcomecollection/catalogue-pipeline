@@ -3,38 +3,72 @@
 import argparse
 import typing
 
-from ingestor.steps.ingestor_indexer import (
-    IngestorIndexerConfig,
-)
-from ingestor.steps.ingestor_indexer import (
-    handler as indexer_handler,
-)
-from ingestor.steps.ingestor_loader import IngestorLoaderConfig
-from ingestor.steps.ingestor_loader import handler as loader_handler
-from ingestor.steps.ingestor_loader_monitor import (
-    IngestorLoaderMonitorConfig,
-    IngestorLoaderMonitorLambdaEvent,
-)
-from ingestor.steps.ingestor_loader_monitor import (
-    handler as loader_monitor_handler,
-)
-from ingestor.steps.ingestor_trigger import (
-    IngestorTriggerConfig,
-    IngestorTriggerLambdaEvent,
-)
-from ingestor.steps.ingestor_trigger import (
-    handler as trigger_handler,
-)
-from ingestor.steps.ingestor_trigger_monitor import (
-    IngestorTriggerMonitorConfig,
-)
-from ingestor.steps.ingestor_trigger_monitor import (
-    handler as trigger_monitor_handler,
-)
 from utils.types import IngestorType
 
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorLoaderMonitorLambdaEvent,
+    IngestorTriggerLambdaEvent,
+    IngestorTriggerMonitorLambdaEvent,
+)
+from ingestor.steps.ingestor_indexer import IngestorIndexerConfig
+from ingestor.steps.ingestor_indexer import handler as indexer_handler
+from ingestor.steps.ingestor_loader import IngestorLoaderConfig
+from ingestor.steps.ingestor_loader import handler as loader_handler
+from ingestor.steps.ingestor_loader_monitor import IngestorLoaderMonitorConfig
+from ingestor.steps.ingestor_loader_monitor import handler as loader_monitor_handler
+from ingestor.steps.ingestor_trigger import IngestorTriggerConfig
+from ingestor.steps.ingestor_trigger import handler as trigger_handler
+from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
+from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
 
-# Run the whole pipeline locally, Usage: uv run src/ingestor/run_local.py --pipeline-date 2021-07-01 --index-date 2021-07-01 --job-id 123
+
+def run_trigger(
+    event: IngestorTriggerLambdaEvent, args: argparse.Namespace
+) -> IngestorTriggerMonitorLambdaEvent:
+    config = IngestorTriggerConfig(is_local=True)
+    trigger_result = trigger_handler(event, config)
+    trigger_result.force_pass = args.force_pass
+
+    if args.monitoring:
+        trigger_monitor_handler(trigger_result, IngestorTriggerMonitorConfig())
+
+    return trigger_result
+
+
+def run_load(
+    trigger_result: IngestorTriggerMonitorLambdaEvent, args: argparse.Namespace
+) -> list[IngestorIndexerLambdaEvent]:
+    loader_config = IngestorLoaderConfig(is_local=True)
+    limit = args.limit or len(trigger_result.events)
+    loader_results = [
+        loader_handler(e, loader_config) for e in trigger_result.events[:limit]
+    ]
+
+    if args.monitoring:
+        loader_monitor_event = IngestorLoaderMonitorLambdaEvent(
+            **loader_results[0].model_dump(),
+            events=loader_results,
+            force_pass=args.force_pass,
+        )
+        loader_monitor_handler(loader_monitor_event, IngestorLoaderMonitorConfig())
+
+    return loader_results
+
+
+def run_index(loader_results: list[IngestorIndexerLambdaEvent]) -> None:
+    indexer_config = IngestorIndexerConfig(is_local=True)
+    indexer_handler_responses = [
+        indexer_handler(e, indexer_config) for e in loader_results
+    ]
+
+    total_success_count = sum(res.success_count for res in indexer_handler_responses)
+    print(f"Indexed {total_success_count} documents.")
+
+
+# Run the whole pipeline locally.
+# Usage: AWS_PROFILE=platform-developer uv run src/ingestor/run_local.py --ingestor-type=concepts
+# Alternative usage: AWS_PROFILE=platform-developer python -m ingestor.run_local --ingestor-type=concepts --pipeline-date=2025-05-01
 def main() -> None:
     parser = argparse.ArgumentParser(description="")
     parser.add_argument(
@@ -72,54 +106,22 @@ def main() -> None:
         "--monitoring",
         action=argparse.BooleanOptionalAction,
         help="Whether to enable monitoring, will default to False.",
+        default=False,
     )
     parser.add_argument(
         "--force-pass",
         action=argparse.BooleanOptionalAction,
         help="Whether to force pass monitoring checks, will default to False.",
+        default=False,
     )
 
     args = parser.parse_args()
 
-    trigger_event = IngestorTriggerLambdaEvent(
-        ingestor_type=args.ingestor_type,
-        job_id=args.job_id,
-        pipeline_date=args.pipeline_date,
-        index_date=args.index_date,
-    )
-    print(f"Processing pipeline for {trigger_event.pipeline_date}.")
+    trigger_event = IngestorTriggerLambdaEvent(**args.__dict__)
 
-    config = IngestorTriggerConfig(is_local=True)
-    trigger_result = trigger_handler(trigger_event, config)
-
-    trigger_result_events = (
-        trigger_result.events[: args.limit] if args.limit else trigger_result.events
-    )
-
-    if args.monitoring:
-        trigger_monitor_config = IngestorTriggerMonitorConfig(
-            is_local=True, force_pass=bool(args.force_pass)
-        )
-        trigger_monitor_handler(trigger_result, trigger_monitor_config)
-
-    loader_config = IngestorLoaderConfig(is_local=True)
-    loader_results = [loader_handler(e, loader_config) for e in trigger_result_events]
-
-    if args.monitoring:
-        loader_monitor_config = IngestorLoaderMonitorConfig(is_local=True)
-        loader_monitor_event = IngestorLoaderMonitorLambdaEvent(
-            events=loader_results,
-            force_pass=bool(args.force_pass),
-        )
-        loader_monitor_handler(loader_monitor_event, loader_monitor_config)
-
-    indexer_config = IngestorIndexerConfig(is_local=True)
-    indexer_handler_responses = [
-        indexer_handler(e, indexer_config) for e in loader_results
-    ]
-
-    total_success_count = sum(res.success_count for res in indexer_handler_responses)
-    print(f"Indexed {total_success_count} documents.")
+    trigger_result = run_trigger(trigger_event, args)
+    loader_results = run_load(trigger_result, args)
+    run_index(loader_results)
 
 
 if __name__ == "__main__":

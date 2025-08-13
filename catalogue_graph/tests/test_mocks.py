@@ -9,8 +9,9 @@ from typing import Any, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
-
 from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
     IngestorLoaderLambdaEvent,
     IngestorTriggerLambdaEvent,
 )
@@ -379,7 +380,7 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     return FixedDateTime
 
 
-def get_mock_ingestor_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
+def get_mock_ingestor_trigger_event(job_id: str) -> IngestorTriggerLambdaEvent:
     return IngestorTriggerLambdaEvent(
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
@@ -389,10 +390,20 @@ def get_mock_ingestor_trigger_event(job_id: str | None) -> IngestorTriggerLambda
 
 
 def get_mock_ingestor_loader_event(
-    job_id: str | None, start_offset: int, end_index: int
+    job_id: str, start_offset: int, end_index: int
 ) -> IngestorLoaderLambdaEvent:
     return IngestorLoaderLambdaEvent(
         **dict(get_mock_ingestor_trigger_event(job_id)),
         start_offset=start_offset,
         end_index=end_index,
+    )
+
+def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
+    return IngestorIndexerLambdaEvent(
+        **dict(get_mock_ingestor_trigger_event(job_id)),
+        object_to_index=IngestorIndexerObject(
+            s3_uri=f"s3://test-bucket/test-prefix_concepts/2025-01-01/2025-03-01/{job_id}/00000000-00000001.parquet",
+            content_length=1,
+            record_count=1,
+        ),
     )

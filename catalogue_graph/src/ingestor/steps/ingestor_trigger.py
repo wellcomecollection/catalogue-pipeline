@@ -5,9 +5,11 @@ import datetime
 import pprint
 import typing
 
-from pydantic import BaseModel
-
 from config import INGESTOR_SHARD_SIZE
+from pydantic import BaseModel
+from utils.aws import get_neptune_client
+from utils.types import IngestorType
+
 from ingestor.models.step_events import (
     IngestorLoaderLambdaEvent,
     IngestorTriggerLambdaEvent,
@@ -15,13 +17,16 @@ from ingestor.models.step_events import (
 )
 from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
 from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
-from utils.aws import get_neptune_client
-from utils.types import IngestorType
 
 
 class IngestorTriggerConfig(BaseModel):
-    shard_size: int = INGESTOR_SHARD_SIZE
     is_local: bool = False
+    shard_size: int = INGESTOR_SHARD_SIZE
+
+
+def create_job_id() -> str:
+    """Generate a job_id based on the current time using an iso8601 format like 20210701T1300"""
+    return datetime.datetime.now().strftime("%Y%m%dT%H%M")
 
 
 def extract_data(is_local: bool) -> int:
@@ -43,10 +48,6 @@ def transform_data(
 ) -> list[IngestorLoaderLambdaEvent]:
     print("Transforming record count to shard ranges ...")
 
-    if event.job_id is None:
-        # generate a job_id based on the current time using an iso8601 format like 20210701T1300
-        event.job_id = datetime.datetime.now().strftime("%Y%m%dT%H%M")
-
     # generate shard ranges based on the record count and shard size
     shard_ranges = []
 
@@ -54,16 +55,11 @@ def transform_data(
         end_index = min(start_offset + config.shard_size, record_count)
         shard_ranges.append(
             IngestorLoaderLambdaEvent(
-                ingestor_type=event.ingestor_type,
-                job_id=event.job_id,
+                **event.model_dump(),
                 start_offset=start_offset,
                 end_index=end_index,
-                pipeline_date=event.pipeline_date,
-                index_date=event.index_date,
             )
         )
-
-    print(f"Generated {len(shard_ranges)} shard ranges.")
 
     return shard_ranges
 
@@ -81,15 +77,17 @@ def handler(
     print(f"Shard ranges ({len(transformed_data)}) generated successfully.")
 
     return IngestorTriggerMonitorLambdaEvent(
-        pipeline_date=event.pipeline_date,
-        index_date=event.index_date,
+        **event.model_dump(),
         events=transformed_data,
     )
 
 
-def lambda_handler(event: IngestorTriggerLambdaEvent, context: typing.Any) -> dict:
+def lambda_handler(event: dict, context: typing.Any) -> dict:
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
+
     return handler(
-        IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
+        IngestorTriggerLambdaEvent(**event), IngestorTriggerConfig()
     ).model_dump()
 
 
@@ -107,6 +105,7 @@ def local_handler() -> None:
         type=str,
         help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
         required=False,
+        default=create_job_id(),
     )
     parser.add_argument(
         "--pipeline-date",
@@ -125,32 +124,23 @@ def local_handler() -> None:
         "--monitoring",
         action=argparse.BooleanOptionalAction,
         help="Whether to enable monitoring, will default to False.",
+        default=False,
     )
     parser.add_argument(
         "--force-pass",
         action=argparse.BooleanOptionalAction,
         help="Whether to force pass monitoring checks, will default to False.",
+        default=False,
     )
 
     args = parser.parse_args()
-
-    event = IngestorTriggerLambdaEvent(
-        ingestor_type=args.ingestor_type,
-        job_id=args.job_id,
-        pipeline_date=args.pipeline,
-        index_date=args.index_date,
-    )
+    event = IngestorTriggerLambdaEvent(**args.__dict__)
     config = IngestorTriggerConfig(is_local=True)
 
     result = handler(event, config)
 
     if args.monitoring:
-        trigger_monitor_handler(
-            result,
-            IngestorTriggerMonitorConfig(
-                is_local=True, force_pass=bool(args.force_pass)
-            ),
-        )
+        trigger_monitor_handler(result, IngestorTriggerMonitorConfig())
 
     pprint.pprint(result.model_dump())
 
