@@ -17,10 +17,10 @@ class IngestorLoaderMonitorConfig(BaseModel):
 
 
 def validate_events(events: list[IngestorIndexerLambdaEvent]) -> None:
-    distinct_pipeline_dates = {e.pipeline_date or "dev" for e in events}
+    distinct_pipeline_dates = {e.pipeline_date for e in events}
     assert len(distinct_pipeline_dates) == 1, "pipeline_date mismatch! Stopping."
 
-    distinct_index_dates = {e.index_date or "dev" for e in events}
+    distinct_index_dates = {e.index_date for e in events}
     assert len(distinct_index_dates) == 1, "index_date mismatch! Stopping."
 
     distinct_job_ids = {e.job_id for e in events}
@@ -38,8 +38,8 @@ def validate_events(events: list[IngestorIndexerLambdaEvent]) -> None:
 def run_check(
     event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
 ) -> LoaderReport:
-    pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date or "dev"
+    pipeline_date = event.pipeline_date
+    index_date = event.index_date
     job_id = event.job_id
 
     print(
@@ -54,7 +54,7 @@ def run_check(
     current_report = LoaderReport(
         pipeline_date=pipeline_date,
         index_date=index_date,
-        job_id=job_id or "dev",
+        job_id=job_id,
         record_count=sum_record_count,
         total_file_size=sum_file_size,
     )
@@ -117,17 +117,16 @@ def handler(
     print("Check complete.")
 
 
-def lambda_handler(
-    event: list[IngestorIndexerLambdaEvent] | IngestorLoaderMonitorLambdaEvent,
-    context: typing.Any,
-) -> list[dict]:
+def lambda_handler(event: list[dict] | dict, context: typing.Any) -> list[dict]:
+    # When running in production, 'event' stores a list of IngestorIndexerLambdaEvent items.
+    # When running locally, it stores an IngestorLoaderMonitorLambdaEvent object.
     if isinstance(event, list):
+        validated_events = [IngestorIndexerLambdaEvent(**e) for e in event]
         handler_event = IngestorLoaderMonitorLambdaEvent(
-            **event[0].model_dump(), events=event
+            **event[0], events=validated_events
         )
     else:
-        handler_event = event
+        handler_event = IngestorLoaderMonitorLambdaEvent(**event)
 
     handler(handler_event, IngestorLoaderMonitorConfig())
-
     return [e.model_dump() for e in handler_event.events]

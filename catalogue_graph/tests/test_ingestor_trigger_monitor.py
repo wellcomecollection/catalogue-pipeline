@@ -55,6 +55,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id="123",
         force_pass=False,
         report_results=True,
         events=[
@@ -95,6 +96,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id="123",
         force_pass=False,
         report_results=True,
         events=[get_mock_ingestor_loader_event("123", 0, 110)],
@@ -119,6 +121,7 @@ def test_ingestor_trigger_monitor_failure_with_previous() -> None:
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id="123",
         force_pass=False,
         report_results=True,
         events=[get_mock_ingestor_loader_event("123", 0, 111)],

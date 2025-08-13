@@ -19,6 +19,7 @@ def test_ingestor_indexer_success() -> None:
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-01-01",
+        job_id="123",
         object_to_index=IngestorIndexerObject(
             s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
         ),
@@ -51,6 +52,7 @@ def build_test_matrix() -> list[tuple]:
                 ingestor_type="concepts",
                 pipeline_date="2021-07-01",
                 index_date="2025-01-01",
+                job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/ghost-file"
                 ),
@@ -65,6 +67,7 @@ def build_test_matrix() -> list[tuple]:
                 ingestor_type="concepts",
                 pipeline_date="2021-07-01",
                 index_date="2025-01-01",
+                job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
                 ),

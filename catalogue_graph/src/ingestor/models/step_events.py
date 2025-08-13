@@ -5,9 +5,9 @@ from utils.types import IngestorType
 
 class IngestorStepEvent(BaseModel):
     ingestor_type: IngestorType
-    pipeline_date: str | None = None
-    index_date: str | None = None
-    job_id: str | None = None
+    pipeline_date: str
+    index_date: str
+    job_id: str
 
 
 class IngestorTriggerLambdaEvent(IngestorStepEvent):

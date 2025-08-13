@@ -70,11 +70,9 @@ def handler(
     )
 
 
-def lambda_handler(
-    event: IngestorIndexerLambdaEvent, context: typing.Any
-) -> dict[str, typing.Any]:
+def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     return handler(
-        IngestorIndexerLambdaEvent.model_validate(event), IngestorIndexerConfig()
+        IngestorIndexerLambdaEvent(**event), IngestorIndexerConfig()
     ).model_dump()
 
 
@@ -95,15 +93,21 @@ def local_handler() -> None:
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The concepts index date that is being ingested to, will default to None.",
+        help="The concepts index date that is being ingested to, will default to 'dev'.",
         required=False,
+        default="dev",
+    )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        help="The ID of the job to process, will default to 'dev'.",
+        required=False,
+        default="dev",
     )
     args = parser.parse_args()
 
     event = IngestorIndexerLambdaEvent(
-        ingestor_type=args.ingestor_type,
-        pipeline_date=args.pipeline_date,
-        index_date=args.index_date,
+        **args.__dict__,
         object_to_index=IngestorIndexerObject(s3_uri=args.s3_uri),
     )
     config = IngestorIndexerConfig(is_local=True)

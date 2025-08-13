@@ -42,8 +42,8 @@ def handler(
 ) -> IngestorIndexerLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
-    pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date or "dev"
+    pipeline_date = event.pipeline_date
+    index_date = event.index_date
 
     transformer = create_transformer(event, config)
     s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"
@@ -61,9 +61,9 @@ def handler(
     )
 
 
-def lambda_handler(event: IngestorLoaderLambdaEvent, context: typing.Any) -> dict:
+def lambda_handler(event: dict, context: typing.Any) -> dict:
     return handler(
-        IngestorLoaderLambdaEvent.model_validate(event), IngestorLoaderConfig()
+        IngestorLoaderLambdaEvent(**event), IngestorLoaderConfig()
     ).model_dump()
 
 

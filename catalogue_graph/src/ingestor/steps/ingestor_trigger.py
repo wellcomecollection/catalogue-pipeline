@@ -24,6 +24,11 @@ class IngestorTriggerConfig(BaseModel):
     shard_size: int = INGESTOR_SHARD_SIZE
 
 
+def create_job_id() -> str:
+    """Generate a job_id based on the current time using an iso8601 format like 20210701T1300"""
+    return datetime.datetime.now().strftime("%Y%m%dT%H%M")
+
+
 def extract_data(is_local: bool) -> int:
     print("Extracting record count from Neptune ...")
     client = get_neptune_client(is_local)
@@ -42,10 +47,6 @@ def transform_data(
     record_count: int, event: IngestorTriggerLambdaEvent, config: IngestorTriggerConfig
 ) -> list[IngestorLoaderLambdaEvent]:
     print("Transforming record count to shard ranges ...")
-
-    if event.job_id is None:
-        # generate a job_id based on the current time using an iso8601 format like 20210701T1300
-        event.job_id = datetime.datetime.now().strftime("%Y%m%dT%H%M")
 
     # generate shard ranges based on the record count and shard size
     shard_ranges = []
@@ -81,9 +82,12 @@ def handler(
     )
 
 
-def lambda_handler(event: IngestorTriggerLambdaEvent, context: typing.Any) -> dict:
+def lambda_handler(event: dict, context: typing.Any) -> dict:
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
+
     return handler(
-        IngestorTriggerLambdaEvent.model_validate(event), IngestorTriggerConfig()
+        IngestorTriggerLambdaEvent(**event), IngestorTriggerConfig()
     ).model_dump()
 
 
@@ -101,6 +105,7 @@ def local_handler() -> None:
         type=str,
         help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
         required=False,
+        default=create_job_id(),
     )
     parser.add_argument(
         "--pipeline-date",

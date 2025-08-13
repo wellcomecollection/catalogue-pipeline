@@ -381,7 +381,7 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     return FixedDateTime
 
 
-def get_mock_ingestor_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
+def get_mock_ingestor_trigger_event(job_id: str) -> IngestorTriggerLambdaEvent:
     return IngestorTriggerLambdaEvent(
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
@@ -391,7 +391,7 @@ def get_mock_ingestor_trigger_event(job_id: str | None) -> IngestorTriggerLambda
 
 
 def get_mock_ingestor_loader_event(
-    job_id: str | None, start_offset: int, end_index: int
+    job_id: str, start_offset: int, end_index: int
 ) -> IngestorLoaderLambdaEvent:
     return IngestorLoaderLambdaEvent(
         **dict(get_mock_ingestor_trigger_event(job_id)),
@@ -400,7 +400,7 @@ def get_mock_ingestor_loader_event(
     )
 
 
-def get_mock_ingestor_indexer_event(job_id: str | None) -> IngestorIndexerLambdaEvent:
+def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
     return IngestorIndexerLambdaEvent(
         **dict(get_mock_ingestor_trigger_event(job_id)),
         object_to_index=IngestorIndexerObject(

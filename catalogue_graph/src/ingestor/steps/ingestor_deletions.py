@@ -8,37 +8,30 @@ import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
 from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
-from utils.aws import df_from_s3_parquet, pydantic_from_s3_json
+from utils.aws import df_from_s3_parquet
+from utils.elasticsearch import get_standard_index_name
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
 
 
-def _get_concepts_index_name(index_date: str | None) -> str:
-    return (
-        "concepts-indexed" if index_date is None else f"concepts-indexed-{index_date}"
-    )
-
-
-def get_current_id_count(
-    pipeline_date: str | None, index_date: str | None, is_local: bool
-) -> int:
+def get_current_id_count(pipeline_date: str, index_date: str, is_local: bool) -> int:
     """Return the number of documents currently stored in ES in the concepts index."""
     es = utils.elasticsearch.get_client("concept_ingestor", pipeline_date, is_local)
 
-    response = es.count(index=_get_concepts_index_name(index_date))
+    response = es.count(index=get_standard_index_name("concepts-indexed", index_date))
     count: int = response.get("count", 0)
     return count
 
 
 def delete_concepts_from_elasticsearch(
     deleted_ids: set[str],
-    pipeline_date: str | None,
-    index_date: str | None,
+    pipeline_date: str,
+    index_date: str,
     is_local: bool,
 ) -> int:
     """Remove documents matching `deleted_ids` from the concepts ES index."""
     es = utils.elasticsearch.get_client("concept_ingestor", pipeline_date, is_local)
-    index_name = _get_concepts_index_name(index_date)
+    index_name = get_standard_index_name("concepts-indexed", index_date)
 
     response = es.delete_by_query(
         index=index_name, body={"query": {"ids": {"values": list(deleted_ids)}}}
@@ -57,7 +50,7 @@ def _is_valid_date(index_date: str) -> bool:
         return False
 
 
-def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[str]:
+def get_ids_to_delete(pipeline_date: str, index_date: str) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
     s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{DELETED_IDS_FOLDER}/catalogue_concepts__nodes.parquet"
 
@@ -81,36 +74,20 @@ def get_ids_to_delete(pipeline_date: str | None, index_date: str | None) -> set[
     return set(ids)
 
 
-def get_last_run_date(pipeline_date: str | None, index_date: str | None) -> date:
+def get_last_run_date(pipeline_date: str, index_date: str) -> date:
     """Return a date corresponding to the last time we ran the ingestor_deletion Lambda."""
-    pipeline_date = pipeline_date or "dev"
-    index_date = index_date or "dev"
-
     ingestor_deletion_report: DeletionReport | None = DeletionReport.read(
-        pipeline_date=pipeline_date,
-        index_date=index_date,
-        ignore_missing=True,
+        pipeline_date=pipeline_date, index_date=index_date
     )
-
-    # We shouldn't get here as DeletionReport.read should throw its own error,
-    # throw a RuntimeError here, to make it clear that the state of the ingestor deletions is unexpected.
-    if ingestor_deletion_report is None:
-        # TO DO: remove this when we have a report.deletions.json report
-        s3_url = f"s3://{config.INGESTOR_S3_BUCKET}/{config.INGESTOR_S3_PREFIX}/{pipeline_date}/{index_date}/report.index_remover.json"
-        index_remover_report = pydantic_from_s3_json(DeletionReport, s3_url)
-        if index_remover_report is None:
-            raise RuntimeError(
-                f"Unexpected error: DeletionReport for pipeline_date={pipeline_date} and index_date={index_date} not found."
-            )
-        return datetime.strptime(index_remover_report.date, "%Y-%m-%d").date()
+    assert isinstance(ingestor_deletion_report, DeletionReport)
 
     return datetime.strptime(ingestor_deletion_report.date, "%Y-%m-%d").date()
 
 
 def handler(
-    pipeline_date: str | None,
-    index_date: str | None,
-    job_id: str | None,
+    pipeline_date: str,
+    index_date: str,
+    job_id: str,
     disable_safety_check: bool,
     is_local: bool = False,
 ) -> None:
@@ -132,9 +109,9 @@ def handler(
         )
 
     report = DeletionReport(
-        pipeline_date=pipeline_date or "dev",
-        index_date=index_date or "dev",
-        job_id=job_id or "dev",
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+        job_id=job_id,
         deleted_count=deleted_count,
         date=datetime.today().strftime("%Y-%m-%d"),
     )
@@ -143,8 +120,8 @@ def handler(
     report.write(latest=True)
 
 
-def lambda_handler(event: IngestorMonitorStepEvent, context: typing.Any) -> dict:
-    validated_event = IngestorMonitorStepEvent.model_validate(event)
+def lambda_handler(event: dict, context: typing.Any) -> dict:
+    validated_event = IngestorMonitorStepEvent(**event)
 
     handler(
         validated_event.pipeline_date,
@@ -153,7 +130,7 @@ def lambda_handler(event: IngestorMonitorStepEvent, context: typing.Any) -> dict
         validated_event.force_pass,
     )
 
-    return IngestorStepEvent(**event.model_dump()).model_dump()
+    return IngestorStepEvent(**event).model_dump()
 
 
 def local_handler() -> None:
@@ -169,14 +146,15 @@ def local_handler() -> None:
         type=str,
         help="The pipeline date corresponding to the concepts index to remove from.",
         required=False,
+        default="dev",
     )
     parser.add_argument(
         "--index-date",
         type=str,
         help='The concepts index date that is being ingested to, will default to "dev".',
         required=False,
+        default="dev",
     )
-
     parser.add_argument(
         "--job-id",
         type=str,

@@ -8,18 +8,18 @@ from utils.reporting import IndexerReport
 
 
 def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
-    pipeline_date = events[0].pipeline_date or "dev"
-    index_date = events[0].index_date or "dev"
+    pipeline_date = events[0].pipeline_date
+    index_date = events[0].index_date
     job_id = events[0].job_id
 
-    sum_success_count = sum((e.success_count or 0) for e in events)
-
+    # load the latest report without job_id
     latest_report: IndexerReport | None = IndexerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
-        # load the latest report without job_id
         ignore_missing=True,
     )
+
+    sum_success_count = sum((e.success_count or 0) for e in events)
 
     current_report = IndexerReport(
         pipeline_date=pipeline_date,
@@ -39,15 +39,8 @@ def handler(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
     print("Report complete.")
 
 
-def lambda_handler(
-    events: list[IngestorIndexerMonitorLambdaEvent], context: typing.Any
-) -> dict:
-    validated_events = [
-        IngestorIndexerMonitorLambdaEvent.model_validate(event) for event in events
-    ]
-
+def lambda_handler(events: list[dict], context: typing.Any) -> dict:
+    validated_events = [IngestorIndexerMonitorLambdaEvent(**e) for e in events]
     handler(validated_events)
 
-    return IngestorMonitorStepEvent(
-        **validated_events[0].model_dump(),
-    ).model_dump()
+    return IngestorMonitorStepEvent(**events[0]).model_dump()

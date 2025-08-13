@@ -17,8 +17,8 @@ class IngestorTriggerMonitorConfig(BaseModel):
 def run_check(
     event: IngestorTriggerMonitorLambdaEvent, config: IngestorTriggerMonitorConfig
 ) -> TriggerReport:
-    pipeline_date = event.pipeline_date or "dev"
-    index_date = event.index_date or "dev"
+    pipeline_date = event.pipeline_date
+    index_date = event.index_date
     force_pass = event.force_pass
 
     loader_events = event.events
@@ -98,10 +98,8 @@ def handler(
     print("Check complete.")
 
 
-def lambda_handler(
-    event: IngestorTriggerMonitorLambdaEvent, context: typing.Any
-) -> list[dict]:
-    validated_event = IngestorTriggerMonitorLambdaEvent.model_validate(event)
+def lambda_handler(event: dict, context: typing.Any) -> list[dict]:
+    validated_event = IngestorTriggerMonitorLambdaEvent(**event)
     handler(validated_event, IngestorTriggerMonitorConfig())
 
     return [e.model_dump() for e in validated_event.events]
