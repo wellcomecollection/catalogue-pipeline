@@ -49,18 +49,22 @@ class GraphWorksExtractor(GraphBaseExtractor):
         return work_mapping
 
     def _get_work_ids(self) -> Generator[str]:
+        """Return a list of all work IDs belonging to the current batch."""
         for item in self.make_neptune_query(WORK_QUERY, "works"):
             yield item["id"]
 
     def _get_work_ancestors(self) -> dict:
+        """Return all ancestors of each work in the current batch."""
         results = self.make_neptune_query(WORK_ANCESTORS_QUERY, "work ancestors")
         return {item["id"]: item for item in results}
 
     def _get_work_children(self) -> dict:
+        """Return all children of each work in the current batch."""
         results = self.make_neptune_query(WORK_CHILDREN_QUERY, "work children")
         return {item["id"]: item for item in results}
 
     def _get_work_concepts(self) -> dict:
+        """Return all concepts of each work in the current batch."""
         results = self.make_neptune_query(WORK_CONCEPTS_QUERY, "work concepts")
         return {item["id"]: item["concepts"] for item in results}
 
@@ -76,13 +80,10 @@ class GraphWorksExtractor(GraphBaseExtractor):
         for work_id in work_ids:
             es_work = all_es_works[work_id]
 
-            children, ancestor_works = [], []
-            if all_ancestors.get(work_id) is not None:
-                ancestor_works = all_ancestors[work_id]["ancestor_works"]
-            if all_children.get(work_id) is not None:
-                children = all_children[work_id]["children"]
             work_hierarchy = WorkHierarchy(
-                id=work_id, ancestor_works=ancestor_works, children=children
+                id=work_id,
+                ancestor_works=all_ancestors.get(work_id, {}).get("ancestor_works", []),
+                children=all_children.get(work_id, {}).get("children", []),
             )
 
             work_concepts = []
