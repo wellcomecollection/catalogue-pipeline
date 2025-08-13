@@ -1,6 +1,6 @@
 import io
 
-import fixtures.neptune.neptune_generators as ng
+import neptune_generators as ng
 from test_utils import load_json_fixture
 
 from ingestor.models.concept import (
@@ -221,7 +221,6 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
 
 def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() -> None:
     mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
-    import fixtures.neptune.neptune_generators as ng
 
     mock_related_to = [
         ng.a_related_concept(),
@@ -483,8 +482,8 @@ def test_concept_type_agent_precedence() -> None:
     # Person/Agent/Organisation take precedence over general Concept/Subject types
     assert get_most_specific_concept_type(["Person", "Concept", "Subject"]) == "Person"
     assert (
-        get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
-        == "Organisation"
+            get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
+            == "Organisation"
     )
     assert get_most_specific_concept_type(["Concept", "Subject", "Agent"]) == "Agent"
 
@@ -497,39 +496,39 @@ def test_concept_type_genre_precedence() -> None:
     assert get_most_specific_concept_type(["Agent", "Genre", "Person"]) == "Genre"
     assert get_most_specific_concept_type(["Genre", "Place"]) == "Genre"
     assert (
-        get_most_specific_concept_type(
-            [
-                "Genre",
-                "Place",
-                "Person",
-                "Organisation",
-                "Period",
-                "Meeting",
-                "Agent",
-                "Subject",
-                "Concept",
-            ]
-        )
-        == "Genre"
+            get_most_specific_concept_type(
+                [
+                    "Genre",
+                    "Place",
+                    "Person",
+                    "Organisation",
+                    "Period",
+                    "Meeting",
+                    "Agent",
+                    "Subject",
+                    "Concept",
+                ]
+            )
+            == "Genre"
     )
 
 
 def test_concept_type_place_precedence() -> None:
     # Place has precedence over everything (except for Genre).
     assert (
-        get_most_specific_concept_type(
-            [
-                "Place",
-                "Person",
-                "Organisation",
-                "Period",
-                "Meeting",
-                "Agent",
-                "Subject",
-                "Concept",
-            ]
-        )
-        == "Place"
+            get_most_specific_concept_type(
+                [
+                    "Place",
+                    "Person",
+                    "Organisation",
+                    "Period",
+                    "Meeting",
+                    "Agent",
+                    "Subject",
+                    "Concept",
+                ]
+            )
+            == "Place"
     )
 
     assert get_most_specific_concept_type(["Concept", "Subject", "Place"]) == "Place"
@@ -539,13 +538,13 @@ def test_concept_type_place_precedence() -> None:
     assert get_most_specific_concept_type(["Place", "Person"]) == "Place"
     assert get_most_specific_concept_type(["Place", "Organisation"]) == "Place"
     assert (
-        get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
-        == "Place"
+            get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
+            == "Place"
     )
 
 
 def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> (
-    None
+        None
 ):
     mock_concept = load_json_fixture("neptune/concept_query_single.json")
 

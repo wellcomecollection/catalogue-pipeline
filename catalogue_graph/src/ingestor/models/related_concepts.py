@@ -21,7 +21,9 @@ class RawNeptuneRelatedConcept:
 
     @property
     def wellcome_id(self) -> str:
-        return self.node["~properties"]["id"]
+        wellcome_id = self.node["~properties"]["id"]
+        assert isinstance(wellcome_id, str)
+        return wellcome_id
 
     @property
     def relationship_type(self) -> str | None:
@@ -42,7 +44,7 @@ class RawNeptuneRelatedConcepts:
         self.concept_id = concept_id
         self.raw_related_concepts = all_related_concepts
 
-    def _get_related_concepts(self, key: str) -> list[RawNeptuneRelatedConcept]:
+    def _get_related_concepts(self, key: str) -> list[dict]:
         related_concepts: list = self.raw_related_concepts[key].get(self.concept_id, [])
         return related_concepts
 

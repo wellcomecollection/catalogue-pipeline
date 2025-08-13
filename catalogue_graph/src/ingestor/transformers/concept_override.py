@@ -12,23 +12,23 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 class ConceptTextOverrideProvider:
-    overrides = {}
+    overrides: dict[str, dict[str, str]] = {}
 
     def __init__(self, overrides_csv: TextIO | None):
         if overrides_csv:
             self._load_overrides(overrides_csv)
         else:
             with open(
-                os.path.join(HERE, "label_description_overrides.csv")
+                    os.path.join(HERE, "label_description_overrides.csv")
             ) as csv_file:
                 self._load_overrides(csv_file)
 
-    def _load_overrides(self, overrides: TextIO):
+    def _load_overrides(self, overrides: TextIO) -> None:
         csv_reader = csv.DictReader(overrides)
         self.overrides = {row["id"].strip(): row for row in csv_reader}
 
     def display_label_of(
-        self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
+            self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
     ) -> str:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override and (override_label := override["label"].strip()):
@@ -36,7 +36,7 @@ class ConceptTextOverrideProvider:
         return raw_concept.display_label
 
     def description_of(
-        self, raw_concept: RawNeptuneConcept
+            self, raw_concept: RawNeptuneConcept
     ) -> ConceptDescription | None:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override:
