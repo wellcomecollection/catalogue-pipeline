@@ -1,7 +1,8 @@
 import sys
-from table_config import get_local_table
+
 from pyiceberg.expressions import EqualTo, IsNull
 
+from table_config import get_local_table
 
 # This is just a quick starting point for the next work, allowing us to quickly examine that
 # changes have been made, and that pre-existing data is left alone
