@@ -1,5 +1,3 @@
-from ingestor.models.indexable_concept import ConceptRelatedTo
-
 from .concept import (
     DISPLAY_SOURCE_PRIORITY,
     MissingLabelError,
@@ -8,41 +6,30 @@ from .concept import (
 )
 
 
-def transform_related_concepts(
-    related_items: list[dict],
-) -> list[ConceptRelatedTo]:
-    """
-    Process each related concept, extracting its highest-priority label and the relationship type.
-    """
-    processed_items = []
+class RawNeptuneRelatedConcept:
+    def __init__(self, neptune_related_concept: dict):
+        self.raw_related_concept = neptune_related_concept
+        self.node = self.raw_related_concept["concept_node"]
+        self.edge = self.raw_related_concept.get("edge")
+        self.source_nodes = self.raw_related_concept["source_concept_nodes"]
 
-    for related_item in related_items:
-        node, edge = related_item["concept_node"], related_item.get("edge")
-        source_nodes = related_item["source_concept_nodes"]
+    @property
+    def display_label(self) -> str:
+        label, _ = get_priority_label(self.node, self.source_nodes, DISPLAY_SOURCE_PRIORITY)
+        return label
 
-        try:
-            label, _ = get_priority_label(node, source_nodes, DISPLAY_SOURCE_PRIORITY)
-        except MissingLabelError:
-            # If a related concept does not have a label, do not include it
-            continue
+    @property
+    def wellcome_id(self) -> str:
+        return self.node["~properties"]["id"]
 
-        relationship_type = ""
-        if edge is not None:
-            relationship_type = edge["~properties"].get("relationship_type", "")
+    @property
+    def relationship_type(self) -> str | None:
+        return "" if self.edge is None else self.edge["~properties"].get("relationship_type", "")
 
-        concept_types = related_item.get("concept_types", ["Concept"])
-        concept_type = get_most_specific_concept_type(concept_types)
-
-        processed_items.append(
-            ConceptRelatedTo(
-                id=node["~properties"]["id"],
-                label=label,
-                relationshipType=relationship_type,
-                conceptType=concept_type,
-            )
-        )
-
-    return processed_items
+    @property
+    def concept_type(self) -> str:
+        concept_types = self.raw_related_concept.get("concept_types", ["Concept"])
+        return get_most_specific_concept_type(concept_types)
 
 
 class RawNeptuneRelatedConcepts:
@@ -50,41 +37,34 @@ class RawNeptuneRelatedConcepts:
         self.concept_id = concept_id
         self.raw_related_concepts = all_related_concepts
 
-    def _get_related_concepts(self, key: str) -> list[dict]:
+    def _get_related_concepts(self, key: str) -> list[RawNeptuneRelatedConcept]:
         related_concepts: list = self.raw_related_concepts[key].get(self.concept_id, [])
         return related_concepts
 
     @property
-    def fields_of_work(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("fields_of_work")
-        return transform_related_concepts(raw_related)
+    def fields_of_work(self) -> list[RawNeptuneRelatedConcept]:
+        return [RawNeptuneRelatedConcept(concept) for concept in self._get_related_concepts("fields_of_work")]
 
     @property
-    def people(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("people")
-        return transform_related_concepts(raw_related)
+    def people(self) -> list[RawNeptuneRelatedConcept]:
+        return [RawNeptuneRelatedConcept(concept) for concept in (self._get_related_concepts("people"))]
 
     @property
-    def narrower_than(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("narrower_than")
-        return transform_related_concepts(raw_related)
+    def narrower_than(self) -> list[RawNeptuneRelatedConcept]:
+        return [RawNeptuneRelatedConcept(concept) for concept in (self._get_related_concepts("narrower_than"))]
 
     @property
-    def broader_than(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("broader_than")
-        return transform_related_concepts(raw_related)
+    def broader_than(self) -> list[RawNeptuneRelatedConcept]:
+        return [RawNeptuneRelatedConcept(concept) for concept in (self._get_related_concepts("broader_than"))]
 
     @property
-    def frequent_collaborators(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("frequent_collaborators")
-        return transform_related_concepts(raw_related)
+    def frequent_collaborators(self) -> list[RawNeptuneRelatedConcept]:
+        return [RawNeptuneRelatedConcept(concept) for concept in (self._get_related_concepts("frequent_collaborators"))]
 
     @property
-    def related_topics(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("related_topics")
-        return transform_related_concepts(raw_related)
+    def related_topics(self) -> list[RawNeptuneRelatedConcept]:
+        return [RawNeptuneRelatedConcept(concept) for concept in (self._get_related_concepts("related_topics"))]
 
     @property
-    def related_to(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("related_to")
-        return transform_related_concepts(raw_related)
+    def related_to(self) -> list[RawNeptuneRelatedConcept]:
+        return [RawNeptuneRelatedConcept(concept) for concept in (self._get_related_concepts("related_to"))]

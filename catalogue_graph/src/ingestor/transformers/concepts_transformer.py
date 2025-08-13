@@ -1,12 +1,13 @@
 from typing import TextIO
-from ingestor.models.concept import RawNeptuneConcept
+from ingestor.models.concept import RawNeptuneConcept, MissingLabelError
 from ingestor.models.indexable_concept import (
     ConceptDisplay,
     ConceptQuery,
     IndexableConcept,
     RelatedConcepts,
+    ConceptRelatedTo
 )
-from ingestor.models.related_concepts import RawNeptuneRelatedConcepts
+from ingestor.models.related_concepts import RawNeptuneRelatedConcepts, RawNeptuneRelatedConcept
 
 from ingestor.transformers.concept_override import (
     ConceptTextOverrideProvider
@@ -16,6 +17,25 @@ from ingestor.transformers.concept_override import (
 class ElasticsearchConceptsTransformer:
     def __init__(self, overrides: TextIO | None = None):
         self.override_provider = ConceptTextOverrideProvider(overrides)
+
+    def _transform_related_concept(self, related_concept: RawNeptuneRelatedConcept):
+        try:
+            return ConceptRelatedTo(
+                id=related_concept.wellcome_id,
+                relationshipType=related_concept.relationship_type,
+                conceptType=related_concept.concept_type,
+                label=self.override_provider.display_label_of(related_concept)
+            )
+        except MissingLabelError:
+            # If a related concept does not have a label, do not include it
+            return None
+
+    def _transform_related_concepts(self, raw_related_concepts: list[RawNeptuneRelatedConcept]) -> list[
+        ConceptRelatedTo]:
+        return [concept for concept in (
+            self._transform_related_concept(related_concept)
+            for related_concept in raw_related_concepts
+        ) if concept is not None]
 
     def transform_document(
             self,
@@ -39,13 +59,13 @@ class ElasticsearchConceptsTransformer:
             description=self.override_provider.description_of(neptune_concept),
             sameAs=neptune_concept.same_as,
             relatedConcepts=RelatedConcepts(
-                relatedTo=neptune_related.related_to,
-                fieldsOfWork=neptune_related.fields_of_work,
-                narrowerThan=neptune_related.narrower_than,
-                broaderThan=neptune_related.broader_than,
-                people=neptune_related.people,
-                frequentCollaborators=neptune_related.frequent_collaborators,
-                relatedTopics=neptune_related.related_topics,
+                relatedTo=self._transform_related_concepts(neptune_related.related_to),
+                fieldsOfWork=self._transform_related_concepts(neptune_related.fields_of_work),
+                narrowerThan=self._transform_related_concepts(neptune_related.narrower_than),
+                broaderThan=self._transform_related_concepts(neptune_related.broader_than),
+                people=self._transform_related_concepts(neptune_related.people),
+                frequentCollaborators=self._transform_related_concepts(neptune_related.frequent_collaborators),
+                relatedTopics=self._transform_related_concepts(neptune_related.related_topics),
             ),
         )
 

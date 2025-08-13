@@ -1,5 +1,7 @@
 import os
 import csv
+from ingestor.models.concept import RawNeptuneConcept
+from ingestor.models.related_concepts import RawNeptuneRelatedConcepts, RawNeptuneRelatedConcept
 
 from typing import TextIO
 
@@ -22,13 +24,13 @@ class ConceptTextOverrideProvider:
         csv_reader = csv.DictReader(overrides)
         self.overrides = {row['id'].strip(): row for row in csv_reader}
 
-    def display_label_of(self, raw_concept) -> str:
+    def display_label_of(self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept) -> str:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override and (override_label := override['label'].strip()):
             return override_label
         return raw_concept.display_label
 
-    def description_of(self, raw_concept) -> ConceptDescription | None:
+    def description_of(self, raw_concept: RawNeptuneConcept) -> ConceptDescription | None:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override:
             if override_description := override['description'].strip():
