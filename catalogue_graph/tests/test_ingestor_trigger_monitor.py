@@ -1,15 +1,16 @@
 import json
 
 import pytest
-from ingestor.models.step_events import IngestorTriggerMonitorLambdaEvent
-from ingestor.steps.ingestor_trigger_monitor import (
-    IngestorTriggerMonitorConfig,
-    handler,
-)
 from test_mocks import (
     MockCloudwatchClient,
     MockSmartOpen,
     get_mock_ingestor_loader_event,
+)
+
+from ingestor.models.step_events import IngestorTriggerMonitorLambdaEvent
+from ingestor.steps.ingestor_trigger_monitor import (
+    IngestorTriggerMonitorConfig,
+    handler,
 )
 
 MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.trigger.json"

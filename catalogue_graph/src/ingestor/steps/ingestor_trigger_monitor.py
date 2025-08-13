@@ -1,13 +1,13 @@
 import typing
 
-from clients.metric_reporter import MetricReporter
 from pydantic import BaseModel
-from utils.reporting import TriggerReport
-from utils.safety import validate_fractional_change
 
+from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
     IngestorTriggerMonitorLambdaEvent,
 )
+from utils.reporting import TriggerReport
+from utils.safety import validate_fractional_change
 
 
 class IngestorTriggerMonitorConfig(BaseModel):

@@ -2,16 +2,16 @@ import argparse
 import typing
 from datetime import date, datetime
 
-import config
 import polars as pl
+
+import config
 import utils.elasticsearch
 from graph_remover import DELETED_IDS_FOLDER
+from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import get_standard_index_name
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
-
-from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
 
 
 def get_current_id_count(pipeline_date: str, index_date: str, is_local: bool) -> int:

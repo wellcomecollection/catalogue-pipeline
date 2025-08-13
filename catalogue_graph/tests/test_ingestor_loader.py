@@ -3,6 +3,14 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
+from test_mocks import (
+    MockRequest,
+    MockSmartOpen,
+    get_mock_ingestor_indexer_event,
+    get_mock_ingestor_loader_event,
+)
+from test_utils import load_json_fixture
+
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
     ConceptDescription,
@@ -19,18 +27,12 @@ from ingestor.queries.concept_queries import (
     get_related_query,
 )
 from ingestor.steps.ingestor_loader import IngestorLoaderConfig, handler
-from test_mocks import (
-    MockRequest,
-    MockSmartOpen,
-    get_mock_ingestor_indexer_event,
-    get_mock_ingestor_loader_event,
-)
-from test_utils import load_json_fixture
 
 MOCK_INGESTOR_LOADER_CONFIG = IngestorLoaderConfig(
     loader_s3_bucket="test-bucket",
     loader_s3_prefix="test-prefix",
 )
+
 
 class MockNeptuneResponseItem(Enum):
     SOURCE_ALTERNATIVE_LABELS = auto()

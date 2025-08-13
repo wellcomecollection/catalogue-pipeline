@@ -9,6 +9,7 @@ from typing import Any, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
@@ -397,6 +398,7 @@ def get_mock_ingestor_loader_event(
         start_offset=start_offset,
         end_index=end_index,
     )
+
 
 def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
     return IngestorIndexerLambdaEvent(

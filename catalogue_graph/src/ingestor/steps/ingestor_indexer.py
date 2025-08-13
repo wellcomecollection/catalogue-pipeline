@@ -5,17 +5,17 @@ import typing
 from collections.abc import Generator
 
 import elasticsearch.helpers
-import utils.elasticsearch
 from pydantic import BaseModel
-from utils.aws import df_from_s3_parquet
-from utils.elasticsearch import get_standard_index_name
 
+import utils.elasticsearch
 from ingestor.models.indexable_concept import IndexableConcept
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerMonitorLambdaEvent,
     IngestorIndexerObject,
 )
+from utils.aws import df_from_s3_parquet
+from utils.elasticsearch import get_standard_index_name
 
 
 class IngestorIndexerConfig(BaseModel):

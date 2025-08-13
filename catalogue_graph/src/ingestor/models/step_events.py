@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+
 from utils.types import IngestorType
 
 
@@ -16,7 +17,6 @@ class IngestorTriggerLambdaEvent(IngestorStepEvent):
 class IngestorLoaderLambdaEvent(IngestorStepEvent):
     start_offset: int
     end_index: int
-
 
 
 class IngestorIndexerObject(BaseModel):

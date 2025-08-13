@@ -7,10 +7,10 @@ import boto3
 import polars as pl
 import smart_open
 from pydantic import BaseModel
-from utils.types import IngestorLoadFormat
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
 from ingestor.steps.ingestor_indexer import IngestorIndexerObject
+from utils.types import IngestorLoadFormat
 
 
 class ElasticsearchBaseTransformer:
@@ -49,7 +49,6 @@ class ElasticsearchBaseTransformer:
             pydantic_document = self.transform_document(raw_item)
             if pydantic_document:
                 yield pydantic_document
-
 
     def load_documents_to_s3(
         self, s3_uri: str, load_format: IngestorLoadFormat

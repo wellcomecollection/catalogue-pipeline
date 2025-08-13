@@ -1,14 +1,14 @@
 import typing
 
-from clients.metric_reporter import MetricReporter
 from pydantic import BaseModel
-from utils.reporting import LoaderReport
-from utils.safety import validate_fractional_change
 
+from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderMonitorLambdaEvent,
 )
+from utils.reporting import LoaderReport
+from utils.safety import validate_fractional_change
 
 
 class IngestorLoaderMonitorConfig(BaseModel):

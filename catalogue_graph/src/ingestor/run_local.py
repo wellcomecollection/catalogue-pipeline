@@ -3,8 +3,6 @@
 import argparse
 import typing
 
-from utils.types import IngestorType
-
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderMonitorLambdaEvent,
@@ -21,6 +19,7 @@ from ingestor.steps.ingestor_trigger import IngestorTriggerConfig
 from ingestor.steps.ingestor_trigger import handler as trigger_handler
 from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
 from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
+from utils.types import IngestorType
 
 
 def run_trigger(

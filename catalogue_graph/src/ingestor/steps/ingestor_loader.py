@@ -2,10 +2,9 @@
 import argparse
 import typing
 
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from pydantic import BaseModel
-from utils.types import IngestorLoadFormat, IngestorType
 
+from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -13,6 +12,7 @@ from ingestor.models.step_events import (
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
+from utils.types import IngestorLoadFormat, IngestorType
 
 
 class IngestorLoaderConfig(BaseModel):
