@@ -1,10 +1,12 @@
-import pytest
-import sys
 import os
+import sys
+from collections.abc import Generator
 from uuid import uuid1
-from typing import Generator
-from table_config import get_local_table
+
+import pytest
 from pyiceberg.table import Table as IcebergTable
+
+from table_config import get_local_table
 
 # Add the app directory to the path so we can import from it
 HERE = os.path.dirname(os.path.realpath(__file__))
@@ -26,23 +28,23 @@ def temporary_table() -> Generator[IcebergTable, None, None]:
 
 @pytest.fixture
 def xml_with_one_record() -> Generator[object, None, None]:
-    with open(os.path.join(HERE, "data", "with_one_record.xml"), "r") as xmlfile:
+    with open(os.path.join(HERE, "data", "with_one_record.xml")) as xmlfile:
         yield xmlfile
 
 
 @pytest.fixture
 def xml_with_two_records() -> Generator[object, None, None]:
-    with open(os.path.join(HERE, "data", "with_two_records.xml"), "r") as xmlfile:
+    with open(os.path.join(HERE, "data", "with_two_records.xml")) as xmlfile:
         yield xmlfile
 
 
 @pytest.fixture
 def xml_with_three_records() -> Generator[object, None, None]:
-    with open(os.path.join(HERE, "data", "with_three_records.xml"), "r") as xmlfile:
+    with open(os.path.join(HERE, "data", "with_three_records.xml")) as xmlfile:
         yield xmlfile
 
 
 @pytest.fixture
 def not_xml() -> Generator[object, None, None]:
-    with open(os.path.join(HERE, "data", "not_xml.xml"), "r") as xmlfile:
+    with open(os.path.join(HERE, "data", "not_xml.xml")) as xmlfile:
         yield xmlfile

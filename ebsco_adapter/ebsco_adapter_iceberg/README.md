@@ -1,3 +1,5 @@
+# EBSCO Adapter for Iceberg
+
 Download and extract EBSCO data, populating an Iceberg table with it.
 
 EBSCO data is in MARC XML format, provided as a set of `<record>` elements inside a `<collection>` documentElement.
@@ -13,3 +15,31 @@ Subsequent updates will look for matching records using that same id and:
 * Change any records that are different between the two.
 
 Each update can be identified by its changeset identifier, which is returned from this process.
+
+## Running Locally
+
+The EBSCO adapter consists of a series of steps that can be run locally or in a pipeline. 
+
+### Prerequisites
+
+Ensure you have [uv](https://docs.astral.sh/uv/) installed and are in the project root directory.
+
+### Running the Steps
+
+The steps can be run using the `uv` command, which allows you to run Python modules with dependencies managed by `uv`.
+
+Example usage:
+```bash
+cd src
+uv run src/steps/trigger.py --job-id my-job-123 --local
+```
+
+### Development
+
+The project uses a `src/` layout with proper Python packaging. 
+
+To run the tests, you can use `uv` as well:
+
+```bash
+uv run pytest
+```
