@@ -42,6 +42,11 @@ class RawCatalogueWork:
         return alternative_titles
 
     @property
+    def reference_number(self) -> str | None:
+        reference_number: str | None = self.work_data.get("referenceNumber")
+        return reference_number
+
+    @property
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []

@@ -63,6 +63,8 @@ class ElasticsearchBaseTransformer:
         boto_s3_object = f.to_boto3(boto3.resource("s3"))
         content_length = boto_s3_object.content_length
 
+        print(f"Data loaded to '{s3_uri}' with content length {content_length}")
+
         return IngestorIndexerObject(
             s3_uri=s3_uri,
             content_length=content_length,
