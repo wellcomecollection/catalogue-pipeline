@@ -10,18 +10,18 @@ from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 
 @pytest.fixture
 def concept() -> RawNeptuneConcept:
-    return RawNeptuneConcept(load_json_fixture(
-        "neptune/concept_query_single.json"
-    ), {})
+    return RawNeptuneConcept(load_json_fixture("neptune/concept_query_single.json"), {})
 
 
 def test_unchanged_if_not_mentioned(concept) -> None:
     """
     Overrides are only applied to concepts that are present in the override CSV
     """
-    overrider = ConceptTextOverrideProvider(io.StringIO("""id,label,description
+    overrider = ConceptTextOverrideProvider(
+        io.StringIO("""id,label,description
         xx, yy, zz
-        """))
+        """)
+    )
     assert overrider.display_label_of(concept) == concept.display_label
     assert overrider.description_of(concept) == concept.description
 
@@ -39,9 +39,9 @@ def test_label_unchanged_if_unset(concept) -> None:
 
     assert overrider.display_label_of(concept) == concept.display_label
     assert overrider.description_of(concept) == ConceptDescription(
-        text='Pottery with a transparent jade green glaze',
-        sourceLabel='wellcome',
-        sourceUrl=''
+        text="Pottery with a transparent jade green glaze",
+        sourceLabel="wellcome",
+        sourceUrl="",
     )
 
 

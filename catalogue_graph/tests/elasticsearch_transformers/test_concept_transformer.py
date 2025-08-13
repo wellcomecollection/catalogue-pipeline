@@ -225,7 +225,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
 
     mock_related_to = [
         ng.a_related_concept(),
-        ng.a_related_concept_with_two_source_nodes()
+        ng.a_related_concept_with_two_source_nodes(),
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
@@ -277,7 +277,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
                         id="abcd2345",
                         relationshipType="has_sibling",
                         conceptType="Person",
-                    )
+                    ),
                 ],
                 fieldsOfWork=[],
                 narrowerThan=[],
@@ -305,7 +305,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ng.a_related_concept_with_no_label(),
         ng.a_related_concept(),
         ng.a_related_concept_with_no_label(),
-        ng.a_related_concept_with_two_source_nodes()
+        ng.a_related_concept_with_two_source_nodes(),
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
@@ -357,7 +357,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
                         id="abcd2345",
                         relationshipType="has_sibling",
                         conceptType="Person",
-                    )
+                    ),
                 ],
                 fieldsOfWork=[],
                 narrowerThan=[],
@@ -384,7 +384,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
     mock_related_to = [
         ng.a_related_concept_with_no_label(),
         ng.a_related_concept(),
-        ng.a_related_concept_with_two_source_nodes()
+        ng.a_related_concept_with_two_source_nodes(),
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
@@ -442,7 +442,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
                         id="abcd2345",
                         relationshipType="has_sibling",
                         conceptType="Person",
-                    )
+                    ),
                 ],
                 fieldsOfWork=[],
                 narrowerThan=[],
@@ -460,7 +460,6 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         aaaaaaaa,Roland le Petour,
         abcd2345,Le Pétomane,
         """)
-
     )
     neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
     neptune_related = RawNeptuneRelatedConcepts(
@@ -484,8 +483,8 @@ def test_concept_type_agent_precedence() -> None:
     # Person/Agent/Organisation take precedence over general Concept/Subject types
     assert get_most_specific_concept_type(["Person", "Concept", "Subject"]) == "Person"
     assert (
-            get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
-            == "Organisation"
+        get_most_specific_concept_type(["Concept", "Organisation", "Subject"])
+        == "Organisation"
     )
     assert get_most_specific_concept_type(["Concept", "Subject", "Agent"]) == "Agent"
 
@@ -498,39 +497,39 @@ def test_concept_type_genre_precedence() -> None:
     assert get_most_specific_concept_type(["Agent", "Genre", "Person"]) == "Genre"
     assert get_most_specific_concept_type(["Genre", "Place"]) == "Genre"
     assert (
-            get_most_specific_concept_type(
-                [
-                    "Genre",
-                    "Place",
-                    "Person",
-                    "Organisation",
-                    "Period",
-                    "Meeting",
-                    "Agent",
-                    "Subject",
-                    "Concept",
-                ]
-            )
-            == "Genre"
+        get_most_specific_concept_type(
+            [
+                "Genre",
+                "Place",
+                "Person",
+                "Organisation",
+                "Period",
+                "Meeting",
+                "Agent",
+                "Subject",
+                "Concept",
+            ]
+        )
+        == "Genre"
     )
 
 
 def test_concept_type_place_precedence() -> None:
     # Place has precedence over everything (except for Genre).
     assert (
-            get_most_specific_concept_type(
-                [
-                    "Place",
-                    "Person",
-                    "Organisation",
-                    "Period",
-                    "Meeting",
-                    "Agent",
-                    "Subject",
-                    "Concept",
-                ]
-            )
-            == "Place"
+        get_most_specific_concept_type(
+            [
+                "Place",
+                "Person",
+                "Organisation",
+                "Period",
+                "Meeting",
+                "Agent",
+                "Subject",
+                "Concept",
+            ]
+        )
+        == "Place"
     )
 
     assert get_most_specific_concept_type(["Concept", "Subject", "Place"]) == "Place"
@@ -540,12 +539,14 @@ def test_concept_type_place_precedence() -> None:
     assert get_most_specific_concept_type(["Place", "Person"]) == "Place"
     assert get_most_specific_concept_type(["Place", "Organisation"]) == "Place"
     assert (
-            get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
-            == "Place"
+        get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
+        == "Place"
     )
 
 
-def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> None:
+def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> (
+    None
+):
     mock_concept = load_json_fixture("neptune/concept_query_single.json")
 
     expected_result = IndexableConcept(

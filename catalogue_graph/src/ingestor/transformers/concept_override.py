@@ -18,29 +18,33 @@ class ConceptTextOverrideProvider:
         if overrides_csv:
             self._load_overrides(overrides_csv)
         else:
-            with open(os.path.join(HERE, "label_description_overrides.csv")) as csv_file:
+            with open(
+                os.path.join(HERE, "label_description_overrides.csv")
+            ) as csv_file:
                 self._load_overrides(csv_file)
 
     def _load_overrides(self, overrides: TextIO):
         csv_reader = csv.DictReader(overrides)
-        self.overrides = {row['id'].strip(): row for row in csv_reader}
+        self.overrides = {row["id"].strip(): row for row in csv_reader}
 
-    def display_label_of(self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept) -> str:
+    def display_label_of(
+        self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
+    ) -> str:
         override = self.overrides.get(raw_concept.wellcome_id)
-        if override and (override_label := override['label'].strip()):
+        if override and (override_label := override["label"].strip()):
             return override_label
         return raw_concept.display_label
 
-    def description_of(self, raw_concept: RawNeptuneConcept) -> ConceptDescription | None:
+    def description_of(
+        self, raw_concept: RawNeptuneConcept
+    ) -> ConceptDescription | None:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override:
-            override_description = override['description'].strip()
-            if override_description.lower() == 'empty':
+            override_description = override["description"].strip()
+            if override_description.lower() == "empty":
                 return None
             if override_description:
                 return ConceptDescription(
-                    text=override_description,
-                    sourceLabel="wellcome",
-                    sourceUrl=""
+                    text=override_description, sourceLabel="wellcome", sourceUrl=""
                 )
         return raw_concept.description
