@@ -3,6 +3,8 @@ from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
+from ingestor.models.shared.id_label import Id
+from ingestor.models.shared.identifier import SourceIdentifier
 from utils.types import ConceptType
 
 # Sources sorted by priority for querying purposes.
