@@ -19,7 +19,9 @@ class ElasticsearchConceptsTransformer:
     def __init__(self, overrides: TextIO | None = None):
         self.override_provider = ConceptTextOverrideProvider(overrides)
 
-    def _transform_related_concept(self, related_concept: RawNeptuneRelatedConcept) -> ConceptRelatedTo | None:
+    def _transform_related_concept(
+        self, related_concept: RawNeptuneRelatedConcept
+    ) -> ConceptRelatedTo | None:
         try:
             return ConceptRelatedTo(
                 id=related_concept.wellcome_id,
@@ -32,7 +34,7 @@ class ElasticsearchConceptsTransformer:
             return None
 
     def _transform_related_concepts(
-            self, raw_related_concepts: list[RawNeptuneRelatedConcept]
+        self, raw_related_concepts: list[RawNeptuneRelatedConcept]
     ) -> list[ConceptRelatedTo]:
         return [
             concept
@@ -44,9 +46,9 @@ class ElasticsearchConceptsTransformer:
         ]
 
     def transform_document(
-            self,
-            neptune_concept: RawNeptuneConcept,
-            neptune_related: RawNeptuneRelatedConcepts,
+        self,
+        neptune_concept: RawNeptuneConcept,
+        neptune_related: RawNeptuneRelatedConcepts,
     ) -> IndexableConcept:
         query = ConceptQuery(
             id=neptune_concept.wellcome_id,
