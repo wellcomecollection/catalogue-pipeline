@@ -17,6 +17,7 @@ def test_catalogue_works_transformer_nodes() -> None:
         label="Human skull, seen from below, with details of the lower jaw bone. Etching by Martin after J. Gamelin, 1778/1779.",
         type="Work",
         alternative_labels=[],
+        reference_number=None,
     )
     assert any(node == expected_work for node in nodes)
 
