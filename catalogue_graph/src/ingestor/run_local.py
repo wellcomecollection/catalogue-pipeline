@@ -15,7 +15,7 @@ from ingestor.steps.ingestor_loader import IngestorLoaderConfig
 from ingestor.steps.ingestor_loader import handler as loader_handler
 from ingestor.steps.ingestor_loader_monitor import IngestorLoaderMonitorConfig
 from ingestor.steps.ingestor_loader_monitor import handler as loader_monitor_handler
-from ingestor.steps.ingestor_trigger import IngestorTriggerConfig
+from ingestor.steps.ingestor_trigger import IngestorTriggerConfig, create_job_id
 from ingestor.steps.ingestor_trigger import handler as trigger_handler
 from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
 from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
@@ -82,18 +82,21 @@ def main() -> None:
         type=str,
         help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
         required=False,
+        default=create_job_id(),
     )
     parser.add_argument(
         "--pipeline-date",
         type=str,
-        help='The pipeline that is being ingested to, will default to "None".',
+        help="The pipeline that is being ingested to, will default to 'dev'.",
         required=False,
+        default="dev",
     )
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The concepts index date that is being ingested to, will default to None.",
+        help="The concepts index date that is being ingested to, will default to 'dev'.",
         required=False,
+        default="dev",
     )
     parser.add_argument(
         "--limit",
@@ -117,7 +120,6 @@ def main() -> None:
     args = parser.parse_args()
 
     trigger_event = IngestorTriggerLambdaEvent(**args.__dict__)
-
     trigger_result = run_trigger(trigger_event, args)
     loader_results = run_load(trigger_result, args)
     run_index(loader_results)
