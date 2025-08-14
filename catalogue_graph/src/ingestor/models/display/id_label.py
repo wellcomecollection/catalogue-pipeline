@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from ingestor.models.shared.id_label import IdLabel
+
 
 class DisplayId(BaseModel):
     id: str
@@ -8,3 +10,7 @@ class DisplayId(BaseModel):
 
 class DisplayIdLabel(DisplayId):
     label: str
+
+    @staticmethod
+    def from_id_label(data: IdLabel, entity_type: str) -> "DisplayIdLabel":
+        return DisplayIdLabel(id=data.id, label=data.label, type=entity_type)

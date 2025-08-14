@@ -16,6 +16,8 @@ dependencies = [
     "types-tabulate",
     "boto3-stubs",
     "types-requests",
+    "python-dateutil",
+    "types-python-dateutil"
 ]
 
 [tool.uv]

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import argparse
 import typing
 
@@ -12,6 +11,7 @@ from ingestor.models.step_events import (
 )
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
+from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.types import IngestorLoadFormat, IngestorType
 
 
@@ -27,6 +27,10 @@ def create_transformer(
 ) -> ElasticsearchBaseTransformer:
     if event.ingestor_type == "concepts":
         return ElasticsearchConceptsTransformer(
+            event.start_offset, event.end_index, config.is_local
+        )
+    if event.ingestor_type == "works":
+        return ElasticsearchWorksTransformer(
             event.start_offset, event.end_index, config.is_local
         )
 
@@ -73,7 +77,7 @@ def local_handler() -> None:
         "--ingestor-type",
         type=str,
         choices=typing.get_args(IngestorType),
-        help="Which ingestor to run.",
+        help="Which ingestor to run (works or concepts).",
         required=True,
     )
     parser.add_argument(
@@ -129,7 +133,6 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
-
     event = IngestorLoaderLambdaEvent(**args.__dict__)
     config = IngestorLoaderConfig(is_local=True, load_format=args.load_format)
 

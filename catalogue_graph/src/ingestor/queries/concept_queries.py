@@ -1,5 +1,7 @@
 from utils.types import ConceptType, WorkConceptKey
 
+LinkedConcepts = dict[str, list[dict]]
+
 # A query returning all Wellcome concepts and the corresponding `SourceConcepts`.
 CONCEPT_QUERY = """
     MATCH (concept:Concept)

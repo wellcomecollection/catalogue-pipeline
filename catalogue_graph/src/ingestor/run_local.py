@@ -74,7 +74,7 @@ def main() -> None:
         "--ingestor-type",
         type=str,
         choices=typing.get_args(IngestorType),
-        help="Which ingestor to run.",
+        help="Which ingestor to run (works or concepts).",
         required=True,
     )
     parser.add_argument(

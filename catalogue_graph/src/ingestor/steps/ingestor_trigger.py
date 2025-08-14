@@ -29,13 +29,18 @@ def create_job_id() -> str:
     return datetime.datetime.now().strftime("%Y%m%dT%H%M")
 
 
-def extract_data(is_local: bool) -> int:
+def extract_data(ingestor_type: IngestorType, is_local: bool) -> int:
     print("Extracting record count from Neptune ...")
     client = get_neptune_client(is_local)
 
-    open_cypher_count_query = "MATCH (c:Concept) RETURN count(*) as count"
+    if ingestor_type == "concepts":
+        count_query = "MATCH (c:Concept) RETURN count(*) as count"
+    elif ingestor_type == "works":
+        count_query = "MATCH (w:Work) RETURN count(*) as count"
+    else:
+        raise ValueError(f"Unknown ingestor type: {ingestor_type}.")
 
-    count_result = client.run_open_cypher_query(open_cypher_count_query)
+    count_result = client.run_open_cypher_query(count_query)
     number_records = int(count_result[0]["count"])
 
     print(f"Retrieved record count: {number_records}")
@@ -69,7 +74,7 @@ def handler(
 ) -> IngestorTriggerMonitorLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
-    extracted_data = extract_data(config.is_local)
+    extracted_data = extract_data(event.ingestor_type, config.is_local)
     transformed_data = transform_data(
         record_count=extracted_data, event=event, config=config
     )
@@ -97,7 +102,7 @@ def local_handler() -> None:
         "--ingestor-type",
         type=str,
         choices=typing.get_args(IngestorType),
-        help="Which ingestor to run.",
+        help="Which ingestor to run (works or concepts).",
         required=True,
     )
     parser.add_argument(
@@ -112,6 +117,7 @@ def local_handler() -> None:
         type=str,
         help='The pipeline that is being ingested to, will default to "dev".',
         required=False,
+        default="dev",
     )
     parser.add_argument(
         "--index-date",
