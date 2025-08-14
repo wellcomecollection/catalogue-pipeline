@@ -43,3 +43,14 @@ To run the tests, you can use `uv` as well:
 ```bash
 uv run pytest
 ```
+
+## Deployment
+
+### Manual deployment
+
+For manual deployment:
+
+* **Lambda functions**: Use the local deployment script from the repository root:
+  ```shell
+  ./scripts/local/deploy_python_lambda.sh ebsco_adapter/ebsco_adapter_iceberg <function-name>
+  ```

@@ -180,6 +180,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "httpx" },
     { name = "pytest" },
 ]
 
@@ -190,7 +191,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
-dev = [{ name = "pytest", specifier = ">=8.3.5" }]
+dev = [
+    { name = "httpx" },
+    { name = "pytest", specifier = ">=8.3.5" },
+]
 
 [[package]]
 name = "async-timeout"
@@ -590,10 +594,39 @@ wheels = [
 ]
 
 [[package]]
+name = "httpcore"
+version = "0.13.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h11" },
+    { name = "sniffio" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/84/692d3c32c67b6dc94361f74e3320e01fc288eec131e92b527d06e4ed2603/httpcore-0.13.2.tar.gz", hash = "sha256:c16efbdf643e1b57bde0adc12c53b08645d7d92d6d345a3f71adfc2a083e7fd2", size = 44667, upload-time = "2021-04-29T12:38:40.085Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/21/d9/e9bd4ce296a965113070b7eee3919844058573ab361588c1d211f6ad2d35/httpcore-0.13.2-py3-none-any.whl", hash = "sha256:52b7d9413f6f5592a667de9209d70d4d41aba3fb0540dd7c93475c78b85941e9", size = 56667, upload-time = "2021-04-29T12:38:38.816Z" },
+]
+
+[[package]]
 name = "httptools"
 version = "0.1.2"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/8b/35/4fd5fa3d0c670dbccc38b7b8b98354155c47e1871309147ff654ae071a1f/httptools-0.1.2.tar.gz", hash = "sha256:07659649fe6b3948b6490825f89abe5eb1cec79ebfaaa0b4bf30f3f33f3c2ba8", size = 106716, upload-time = "2021-04-26T15:54:30.775Z" }
+
+[[package]]
+name = "httpx"
+version = "0.25.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "certifi" },
+    { name = "httpcore" },
+    { name = "idna" },
+    { name = "sniffio" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1c/fe/c0523094193929a68b288e0ae3eb865725f1ee9faca0f21693a86e96c943/httpx-0.25.1.tar.gz", hash = "sha256:ffd96d5cf901e63863d9f1b4b6807861dbea4d301613415d9e6e57ead15fc5d0", size = 81938, upload-time = "2023-11-03T13:28:58.795Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/82/61/a5fca4a1e88e40969bbd0cf0d981f3aa76d5057db160b94f49603fc18740/httpx-0.25.1-py3-none-any.whl", hash = "sha256:fec7d6cc5c27c578a391f7e87b9aa7d3d8fbcd034f6399f9f79b45bcc12a866a", size = 75044, upload-time = "2023-11-03T13:28:55.775Z" },
+]
 
 [[package]]
 name = "idna"
