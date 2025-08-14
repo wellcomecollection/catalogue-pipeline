@@ -1,6 +1,6 @@
 from ingestor.models.indexable_concept import ConceptRelatedTo
 
-from .concept import (
+from .raw_concept import (
     DISPLAY_SOURCE_PRIORITY,
     MissingLabelError,
     get_most_specific_concept_type,
@@ -46,45 +46,40 @@ def transform_related_concepts(
 
 
 class RawNeptuneRelatedConcepts:
-    def __init__(self, concept_id: str, all_related_concepts: dict):
-        self.concept_id = concept_id
-        self.raw_related_concepts = all_related_concepts
-
-    def _get_related_concepts(self, key: str) -> list[dict]:
-        related_concepts: list = self.raw_related_concepts[key].get(self.concept_id, [])
-        return related_concepts
+    def __init__(self, related_concepts: dict):
+        self.raw_related_concepts = related_concepts
 
     @property
     def fields_of_work(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("fields_of_work")
+        raw_related = self.raw_related_concepts.get("fields_of_work", [])
         return transform_related_concepts(raw_related)
 
     @property
     def people(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("people")
+        raw_related = self.raw_related_concepts.get("people", [])
         return transform_related_concepts(raw_related)
 
     @property
     def narrower_than(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("narrower_than")
+        raw_related = self.raw_related_concepts.get("narrower_than", [])
         return transform_related_concepts(raw_related)
 
     @property
     def broader_than(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("broader_than")
+        raw_related = self.raw_related_concepts.get("broader_than", [])
         return transform_related_concepts(raw_related)
 
     @property
     def frequent_collaborators(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("frequent_collaborators")
+        raw_related = self.raw_related_concepts.get("frequent_collaborators", [])
         return transform_related_concepts(raw_related)
 
     @property
     def related_topics(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("related_topics")
+        raw_related = self.raw_related_concepts.get("related_topics", [])
         return transform_related_concepts(raw_related)
 
     @property
     def related_to(self) -> list[ConceptRelatedTo]:
-        raw_related = self._get_related_concepts("related_to")
+        raw_related = self.raw_related_concepts.get("related_to", [])
         return transform_related_concepts(raw_related)

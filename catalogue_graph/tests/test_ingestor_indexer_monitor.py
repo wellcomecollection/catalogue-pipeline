@@ -2,10 +2,8 @@ import json
 
 from test_mocks import MockSmartOpen
 
-from ingestor.steps.ingestor_indexer_monitor import (
-    IngestorIndexerMonitorLambdaEvent,
-    handler,
-)
+from ingestor.models.step_events import IngestorIndexerMonitorLambdaEvent
+from ingestor.steps.ingestor_indexer_monitor import handler
 
 MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.indexer.json"
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.indexer.json"
@@ -37,12 +35,14 @@ def verify_s3_reports(success_count: int, previous_job_id: str | None) -> None:
 def test_ingestor_loader_monitor_success_no_previous() -> None:
     events = [
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",
             success_count=23,
         ),
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",
@@ -72,12 +72,14 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
 
     events = [
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",
             success_count=250,
         ),
         IngestorIndexerMonitorLambdaEvent(
+            ingestor_type="concepts",
             pipeline_date=pipeline_date,
             index_date=index_date,
             job_id="123",

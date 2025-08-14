@@ -7,6 +7,11 @@ from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 
 
 class PipelineReport(BaseModel):
+    label: ClassVar[str]
+    pipeline_date: str
+    index_date: str
+    job_id: str | None
+
     @staticmethod
     def _get_report_s3_url(
         report_type: type["PipelineReport"],
@@ -21,11 +26,6 @@ class PipelineReport(BaseModel):
             report_prefix = f"{pipeline_date}/{index_date}"
 
         return f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{report_prefix}/{report_name}"
-
-    label: ClassVar[str]
-    pipeline_date: str
-    index_date: str
-    job_id: str | None
 
     @classmethod
     def read(

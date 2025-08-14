@@ -1,7 +1,6 @@
 import re
 
-from shared.types import ConceptSource, ConceptType
-from utils.types import WorkConceptKey
+from utils.types import ConceptSource, ConceptType, WorkConceptKey
 
 from .id_label_checker import IdLabelChecker
 
