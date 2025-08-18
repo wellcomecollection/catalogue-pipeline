@@ -13,7 +13,7 @@ from iceberg_updates import update_table
 from schemata import ARROW_SCHEMA
 from steps.transformer import EbscoAdapterTransformerEvent
 from table_config import get_glue_table, get_local_table
-from utils.tracking import record_processed_file, is_file_already_processed
+from utils.tracking import is_file_already_processed, record_processed_file
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
