@@ -5,9 +5,9 @@ import typing
 
 import config
 from models.events import (
+    BulkLoaderEvent,
     EntityType,
     ExtractorEvent,
-    IncrementalWindow,
     StreamDestination,
     TransformerType,
 )
@@ -16,7 +16,7 @@ from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
 
 
-def get_bulk_load_file_path(event: ExtractorEvent) -> str:
+def get_bulk_load_file_path(event: BulkLoaderEvent | ExtractorEvent) -> str:
     file_name = f"{event.transformer_type}__{event.entity_type}.csv"
 
     window_prefix = ""
@@ -28,15 +28,12 @@ def get_bulk_load_file_path(event: ExtractorEvent) -> str:
     return f"{window_prefix}{file_name}"
 
 
-def get_bulk_load_s3_path(event: ExtractorEvent) -> str:
+def get_bulk_load_s3_path(event: BulkLoaderEvent | ExtractorEvent) -> str:
     file_path = get_bulk_load_file_path(event)
     return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{config.BULK_LOADER_S3_PREFIX}/{file_path}"
 
 
-def handler(
-    event: ExtractorEvent,
-    is_local: bool = False,
-) -> None:
+def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     print(
         f"Transforming {event.sample_size or 'all'} {event.entity_type} using the {event.transformer_type} "
         f"transformer and streaming them into {event.stream_destination}."
@@ -122,13 +119,13 @@ def local_handler() -> None:
     parser.add_argument(
         "--window-start",
         type=str,
-        help="A timestamp in YYYY-MM-DDTHH:MM format (e.g. 2025-01-01T00:00). Only required when running in incremental mode.",
+        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
         required=False,
     )
     parser.add_argument(
         "--window-end",
         type=str,
-        help="A timestamp in YYYY-MM-DDTHH:MM format (e.g. 2025-01-01T00:00). Only required when running in incremental mode.",
+        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
         required=False,
     )
     parser.add_argument(
@@ -137,10 +134,8 @@ def local_handler() -> None:
         help="Whether to run the handler in local mode",
     )
     args = parser.parse_args()
+    event = ExtractorEvent.from_argparser(args)
 
-    window = IncrementalWindow(start_time=args.window_start, end_time=args.window_end)
-
-    event = ExtractorEvent(**args.__dict__, window=window)
     handler(event, is_local=args.is_local)
 
 

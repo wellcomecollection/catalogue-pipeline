@@ -1,5 +1,6 @@
 from collections.abc import Generator
 
+from models.events import EntityType
 from models.graph_edge import (
     BaseEdge,
     SourceConceptHasFieldOfWork,
@@ -8,7 +9,6 @@ from models.graph_edge import (
 )
 from models.graph_node import SourceName
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from transformers.base_transformer import EntityType
 from utils.types import OntologyType
 
 from .concepts_transformer import WikidataConceptsTransformer

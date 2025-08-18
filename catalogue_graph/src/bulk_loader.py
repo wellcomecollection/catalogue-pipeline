@@ -1,38 +1,28 @@
 import argparse
 import typing
 
-import config
-from transformers.base_transformer import EntityType
-from transformers.create_transformer import TransformerType
+from extractor import get_bulk_load_s3_path
+from models.events import (
+    DEFAULT_INSERT_ERROR_THRESHOLD,
+    BulkLoaderEvent,
+    EntityType,
+    TransformerType,
+)
 from utils.aws import get_neptune_client
 
-DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
-
-def handler(
-    transformer_type: TransformerType,
-    entity_type: EntityType,
-    insert_error_threshold: float,
-    is_local: bool = False,
-) -> dict[str, typing.Any]:
-    file_name = f"{transformer_type}__{entity_type}.csv"
-    s3_file_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
-
+def handler(event: BulkLoaderEvent, is_local: bool = False) -> dict[str, typing.Any]:
+    s3_file_uri = get_bulk_load_s3_path(event)
     print(f"Initiating bulk load from {s3_file_uri}.")
 
     neptune_client = get_neptune_client(is_local)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 
-    return {"load_id": load_id, "insert_error_threshold": insert_error_threshold}
+    return {"load_id": load_id, "insert_error_threshold": event.insert_error_threshold}
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
-    transformer_type = event["transformer_type"]
-    entity_type = event["entity_type"]
-    insert_error_threshold = event.get(
-        "insert_error_threshold", DEFAULT_INSERT_ERROR_THRESHOLD
-    )
-    return handler(transformer_type, entity_type, insert_error_threshold)
+    return handler(BulkLoaderEvent(**event))
 
 
 def local_handler() -> None:
@@ -52,15 +42,29 @@ def local_handler() -> None:
         required=True,
     )
     parser.add_argument(
+        "--window-start",
+        type=str,
+        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
+        "--window-end",
+        type=str,
+        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
         "--insert-error-threshold",
         type=float,
         help="Maximum insert errors as a fraction of total records to still consider the bulk load successful.",
         default=DEFAULT_INSERT_ERROR_THRESHOLD,
         required=False,
     )
-    args = parser.parse_args()
 
-    print(handler(**args.__dict__, is_local=True))
+    args = parser.parse_args()
+    event = BulkLoaderEvent.from_argparser(args)
+
+    print(handler(event, is_local=True))
 
 
 if __name__ == "__main__":

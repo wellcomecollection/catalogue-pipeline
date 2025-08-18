@@ -1,8 +1,8 @@
 from collections.abc import Callable, Generator, Iterator
 from functools import lru_cache
 
+from models.events import EntityType
 from sources.base_source import BaseSource
-from transformers.base_transformer import EntityType
 from utils.ontology_id_checker import is_id_classified_as_node_type, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
 from utils.types import NodeType, OntologyType

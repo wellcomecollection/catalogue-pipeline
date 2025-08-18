@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 import polars as pl
 
 import config
-from transformers.create_transformer import EntityType, TransformerType
+from models.events import EntityType, TransformerType
 from utils.aws import (
     df_from_s3_parquet,
     df_to_s3_parquet,

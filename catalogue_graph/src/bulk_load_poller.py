@@ -6,7 +6,7 @@ import typing
 import smart_open
 
 import config
-from bulk_loader import DEFAULT_INSERT_ERROR_THRESHOLD
+from models.events import DEFAULT_INSERT_ERROR_THRESHOLD, BulkLoadPollerEvent
 from utils.aws import get_neptune_client
 from utils.slack import publish_report
 
@@ -55,10 +55,10 @@ def print_detailed_bulk_load_errors(payload: dict) -> None:
 
 
 def handler(
-    load_id: str, insert_error_threshold: float, is_local: bool = False
+    event: BulkLoadPollerEvent, is_local: bool = False
 ) -> dict[str, typing.Any]:
     # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
-    payload = get_neptune_client(is_local).get_bulk_load_status(load_id)
+    payload = get_neptune_client(is_local).get_bulk_load_status(event.load_id)
     overall_status = payload["overallStatus"]
 
     # Statuses: https://docs.aws.amazon.com/neptune/latest/userguide/loader-message.html
@@ -69,8 +69,8 @@ def handler(
 
     if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
         return {
-            "load_id": load_id,
-            "insert_error_threshold": insert_error_threshold,
+            "load_id": event.load_id,
+            "insert_error_threshold": event.insert_error_threshold,
             "status": "IN_PROGRESS",
         }
 
@@ -90,7 +90,7 @@ def handler(
         status == "LOAD_FAILED"
         and parsing_error_count == 0
         and data_type_error_count == 0
-        and (insert_error_count / processed_count < insert_error_threshold)
+        and (insert_error_count / processed_count < event.insert_error_threshold)
     )
 
     if failed_below_insert_error_threshold:
@@ -128,8 +128,8 @@ def handler(
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
         return {
-            "load_id": load_id,
-            "insert_error_threshold": insert_error_threshold,
+            "load_id": event.load_id,
+            "insert_error_threshold": event.insert_error_threshold,
             "status": "SUCCEEDED",
         }
 
@@ -137,11 +137,7 @@ def handler(
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
-    load_id = event["load_id"]
-    insert_error_threshold = event.get(
-        "insert_error_threshold", DEFAULT_INSERT_ERROR_THRESHOLD
-    )
-    return handler(load_id, insert_error_threshold)
+    return handler(BulkLoadPollerEvent(**event))
 
 
 def local_handler() -> None:
@@ -160,8 +156,9 @@ def local_handler() -> None:
         required=False,
     )
     args = parser.parse_args()
+    event = BulkLoadPollerEvent(**args.__dict__)
 
-    handler(**args.__dict__, is_local=True)
+    handler(event, is_local=True)
 
 
 if __name__ == "__main__":
