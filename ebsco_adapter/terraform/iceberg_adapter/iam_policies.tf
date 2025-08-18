@@ -1,31 +1,38 @@
 # IAM Policy Documents for S3 Tables Iceberg access
 
-# Policy for writing to S3 Tables Iceberg table
 data "aws_iam_policy_document" "iceberg_write" {
-  # Glue Data Catalog permissions for S3 Tables catalog access
+  statement {
+    actions = [
+      "lakeformation:GetDataAccess"
+    ]
+
+    resources = ["*"]
+  }
+
   statement {
     actions = [
       "glue:GetCatalog",
-      "glue:GetDatabase",
-      "glue:GetTable",
-      "glue:CreateDatabase"
+      "glue:CreateDatabase",
+      "glue:CreateTable",
+      "glue:GetTable"
     ]
 
     resources = [
       "arn:aws:glue:eu-west-1:760097843905:catalog",
       "arn:aws:glue:eu-west-1:760097843905:catalog/*",
-      "arn:aws:glue:eu-west-1:760097843905:database/s3tablescatalog/${aws_s3tables_table_bucket.table_bucket.name}/*"
+      "arn:aws:glue:eu-west-1:760097843905:database/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue"
     ]
   }
 
-  # Lake Formation permissions for credential federation
-  statement {
+    statement {
     actions = [
-      "lakeformation:GetDataAccess",
-      "lakeformation:CreateDatabase"
+      "glue:CreateTable",
+      "glue:GetTable",
     ]
 
-    resources = ["*"]
+    resources = [
+      "arn:aws:glue:eu-west-1:760097843905:table/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue/ebsco_adapter_table"
+    ]
   }
 }
 
@@ -43,4 +50,10 @@ data "aws_iam_policy_document" "s3_read" {
       "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/*"
     ]
   }
+}
+
+# Create the Glue database that the Lambda will use
+resource "aws_glue_catalog_database" "wellcomecollection_catalogue" {
+  name        = "wellcomecollection_catalogue"
+  description = "Database for Wellcome Collection catalogue data from EBSCO adapter"
 }
