@@ -221,7 +221,7 @@ class TestSyncFiles:
         # There's actually a more recent file in S3
         self.mock_list_s3_keys.return_value = (
             "test-prefix/ebz-s7451719-20240428-1.xml",
-            "test-prefix/ebz-s7451719-20240420-1.xml",
+            "test-prefix/ebz-s7451719-20240425-1.xml",
         )
 
         result = sync_files(
