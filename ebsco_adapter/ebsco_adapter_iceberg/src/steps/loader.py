@@ -13,6 +13,7 @@ from iceberg_updates import update_table
 from schemata import ARROW_SCHEMA
 from steps.transformer import EbscoAdapterTransformerEvent
 from table_config import get_glue_table, get_local_table
+from utils.tracking import record_processed_file, is_file_already_processed
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
@@ -73,6 +74,11 @@ def handler(
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
+    # Check if this file has already been processed
+    if is_file_already_processed(event.file_location):
+        print(f"File {event.file_location} has already been processed, skipping...")
+        return EbscoAdapterTransformerEvent(changeset_id=None)
+
     if config_obj.use_glue_table:
         print("Using AWS Glue table...")
         table = get_glue_table(
@@ -92,6 +98,10 @@ def handler(
 
     with smart_open.open(event.file_location, "rb") as f:
         changeset_id = update_from_xml_file(table, f)
+
+    # Record the processed file to S3 if processing was successful
+    if changeset_id:
+        record_processed_file(event.file_location)
 
     return EbscoAdapterTransformerEvent(changeset_id=changeset_id)
 
