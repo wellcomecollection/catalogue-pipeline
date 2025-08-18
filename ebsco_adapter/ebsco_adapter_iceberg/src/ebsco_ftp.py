@@ -20,10 +20,10 @@ class EbscoFtp:
         self.ftp_connection_open = True
         return self
 
-    def list_files(self, validation: Callable[[str], bool]) -> list[str]:
+    def list_files(self) -> list[str]:
         ftp_files: list[str] = []
         self.ftp.retrlines("LIST", ftp_files.append)
-        ftp_files = [file.split()[-1] for file in ftp_files if validation(file.split()[-1])]
+        ftp_files = [file.split()[-1] for file in ftp_files]
         return ftp_files
 
     def download_file(self, file: str, temp_dir: str) -> str:

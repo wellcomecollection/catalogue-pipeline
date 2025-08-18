@@ -4,12 +4,13 @@ import tempfile
 from datetime import datetime
 from typing import Any
 
+import re
 import boto3
 from pydantic import BaseModel
 
 from ebsco_ftp import EbscoFtp
 from steps.loader import EbscoAdapterLoaderEvent
-from utils.aws import get_ssm_parameter
+from utils.aws import get_ssm_parameter, list_s3_keys
 
 ssm_param_prefix = "/catalogue_pipeline/ebsco_adapter"
 s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
@@ -24,55 +25,42 @@ class EbscoAdapterTriggerConfig(BaseModel):
 class EventBridgeTriggerEvent(BaseModel):
     time: str
 
+def get_most_recent_valid_file(filenames: list[str]) -> str | None:
+    """Filter valid files, sort by date (newest first), and return the most recent one."""
+    """Valid files are in the format ebz-s7451719-20240322-1.xml"""
 
-def validate_ftp_filename(filename: str) -> bool:
-    """Validate that the filename matches the expected pattern"""
-    if not filename.startswith("ebz-s7451719-") or not filename.endswith(".xml"):
-        return False
-
-    try:
-        # Extract the date part (third component when split by '-')
-        date_part = filename.split("-")[2]
-        # Date part must be exactly 8 digits (YYYYMMDD)
-        if len(date_part) != 8 or not date_part.isdigit():
-            return False
-        # Try to parse the date to validate it's a valid date
-        datetime.strptime(date_part, "%Y%m%d")
-        return True
-    except (ValueError, IndexError):
-        return False
-
-
-def get_most_recent_S3_object(s3_client, bucket: str, prefix: str) -> str:  # type: ignore
-    response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
-
-    s3_objects = []
-    for obj in response.get("Contents", []):
-        key: str = obj["Key"]
-        # get the part of the S3 prefix after the last slash and split by '-'
-        date_part = key[key.rfind("/") + 1 :].split("-")[2]
-        s3_objects.append((int(date_part), key))
-
-    if not s3_objects:
-        raise ValueError("No objects found in S3")
-
-    most_recent = max(s3_objects, key=lambda x: x[0])
-    return most_recent[1]  # Return the key
+    valid_files = []
+    for filename in filenames:
+        try:
+            # Extract the date part (third component when split by '-')
+            date_part = filename.split("-")[2]
+            # Try to parse the date to validate it's a valid date
+            parsed_date = datetime.strptime(date_part, "%Y%m%d")
+            # Filename must match the expected pattern
+            if bool(re.match(r"^ebz-s7451719-\d{8}-.*\.xml$", filename)):
+                valid_files.append((filename, parsed_date))
+        except (ValueError, IndexError):
+            # Skip invalid files
+            continue
+    
+    if not valid_files:
+        return None
+    
+    # Sort by date (newest first) and return the filename with highest date
+    valid_files.sort(key=lambda x: x[1], reverse=True)
+    return valid_files[0][0]
 
 
 def sync_files(
     ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
 ) -> str:
-    valid_ftp_files = ebsco_ftp.list_files(validate_ftp_filename)
+    ftp_files = ebsco_ftp.list_files()
 
-    if not valid_ftp_files:
-        raise ValueError("No XML files found on FTP server")
-
-    # valid files are in the format ebz-s7451719-20240322-1.xml
-    # the third part is the date
-    most_recent_ftp_file = sorted(
-        valid_ftp_files, key=lambda x: x.split("-")[2], reverse=True
-    )[0]
+    most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
+    
+    if most_recent_ftp_file is None:
+        raise ValueError("No valid files found on FTP server")
+        
     print(f"Most recent ftp file: {most_recent_ftp_file}")
 
     s3_store = boto3.client("s3")
@@ -83,7 +71,8 @@ def sync_files(
         s3_store.head_object(Bucket=s3_bucket, Key=s3_key)
         print(f"File {most_recent_ftp_file} already exists in S3. No need to download.")
         # we return the S3 location of the most recent file
-        return f"s3://{s3_bucket}/{get_most_recent_S3_object(s3_store, s3_bucket, s3_prefix)}"
+        most_recent_s3_object = get_most_recent_valid_file([key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)])
+        return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
     except Exception as e:
         if "NoSuchKey" in str(e):
             print(
@@ -110,9 +99,9 @@ def sync_files(
         raise RuntimeError(f"Failed to upload {most_recent_ftp_file} to S3: {e}") from e
 
     # list what's in s3 and get the file with the highest date to send downstream
-    obj_key = get_most_recent_S3_object(s3_store, s3_bucket, s3_prefix)
+    s3_object = get_most_recent_valid_file([key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)])
 
-    return f"s3://{s3_bucket}/{obj_key}"
+    return f"s3://{s3_bucket}/{s3_prefix}/{s3_object}"
 
 
 def handler(
