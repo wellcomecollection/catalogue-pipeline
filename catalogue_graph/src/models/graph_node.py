@@ -48,6 +48,7 @@ class Concept(BaseNode):
 class Work(BaseNode):
     type: WorkType
     alternative_labels: list[str]
+    reference_number: str | None
 
 
 class PathIdentifier(BaseNode):

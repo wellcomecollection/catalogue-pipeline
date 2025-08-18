@@ -18,6 +18,7 @@ ES_FIELDS = [
     "data.subjects",
     "data.contributors",
     "data.genres",
+    "data.referenceNumber",
 ]
 
 
@@ -32,6 +33,7 @@ class CatalogueWorksTransformer(BaseTransformer):
             label=raw_work.label,
             alternative_labels=raw_work.alternative_labels,
             type=raw_work.type,
+            reference_number=raw_work.reference_number,
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[WorkHasConcept]:
