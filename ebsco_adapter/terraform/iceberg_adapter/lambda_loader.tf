@@ -9,7 +9,7 @@ module "loader_lambda" {
   filename = data.archive_file.empty_zip.output_path
 
   handler     = "steps.loader.lambda_handler"
-  memory_size = 2048
+  memory_size = 8192
   timeout     = 900
 }
 
