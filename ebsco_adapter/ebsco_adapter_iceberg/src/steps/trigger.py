@@ -1,10 +1,10 @@
 import argparse
 import os
+import re
 import tempfile
 from datetime import datetime
 from typing import Any
 
-import re
 import boto3
 from pydantic import BaseModel
 
@@ -25,6 +25,7 @@ class EbscoAdapterTriggerConfig(BaseModel):
 class EventBridgeTriggerEvent(BaseModel):
     time: str
 
+
 def get_most_recent_valid_file(filenames: list[str]) -> str | None:
     """Filter valid files, sort by date (newest first), and return the most recent one."""
     """Valid files are in the format ebz-s7451719-20240322-1.xml"""
@@ -42,10 +43,10 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
         except (ValueError, IndexError):
             # Skip invalid files
             continue
-    
+
     if not valid_files:
         return None
-    
+
     # Sort by date (newest first) and return the filename with highest date
     valid_files.sort(key=lambda x: x[1], reverse=True)
     return valid_files[0][0]
@@ -57,10 +58,10 @@ def sync_files(
     ftp_files = ebsco_ftp.list_files()
 
     most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
-    
+
     if most_recent_ftp_file is None:
         raise ValueError("No valid files found on FTP server")
-        
+
     print(f"Most recent ftp file: {most_recent_ftp_file}")
 
     s3_store = boto3.client("s3")
@@ -71,7 +72,9 @@ def sync_files(
         s3_store.head_object(Bucket=s3_bucket, Key=s3_key)
         print(f"File {most_recent_ftp_file} already exists in S3. No need to download.")
         # we return the S3 location of the most recent file
-        most_recent_s3_object = get_most_recent_valid_file([key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)])
+        most_recent_s3_object = get_most_recent_valid_file(
+            [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
+        )
         return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
     except Exception as e:
         if "NoSuchKey" in str(e):
@@ -99,7 +102,9 @@ def sync_files(
         raise RuntimeError(f"Failed to upload {most_recent_ftp_file} to S3: {e}") from e
 
     # list what's in s3 and get the file with the highest date to send downstream
-    s3_object = get_most_recent_valid_file([key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)])
+    s3_object = get_most_recent_valid_file(
+        [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
+    )
 
     return f"s3://{s3_bucket}/{s3_prefix}/{s3_object}"
 
@@ -123,7 +128,7 @@ def handler(
             ebsco_ftp=ebsco_ftp,
             target_directory=temp_dir,
             s3_bucket=s3_bucket,
-            s3_prefix=ftp_s3_prefix
+            s3_prefix=ftp_s3_prefix,
         )
 
     # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300

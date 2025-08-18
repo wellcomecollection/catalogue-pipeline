@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from ebsco_ftp import EbscoFtp
-from steps.trigger import sync_files, get_most_recent_valid_file
+from steps.trigger import get_most_recent_valid_file, sync_files
 
 
 class TestMostRecentValidFile:
@@ -15,7 +15,9 @@ class TestMostRecentValidFile:
             "ebz-s7451719-20200101-10.xml",
         ]
 
-        assert get_most_recent_valid_file(valid_filenames) == "ebz-s7451719-20240322-1.xml"
+        assert (
+            get_most_recent_valid_file(valid_filenames) == "ebz-s7451719-20240322-1.xml"
+        )
 
     def test_invalid_prefix(self) -> None:
         """Test that files with wrong prefix fail validation"""
@@ -57,7 +59,7 @@ class TestSyncFiles:
         self.s3_bucket = "test-bucket"
         self.s3_prefix = "test-prefix"
         self.mock_list_s3_keys = patch("steps.trigger.list_s3_keys").start()
-        
+
         # Mock boto3 for the S3 client used in sync_files
         self.mock_boto3 = patch("steps.trigger.boto3").start()
         self.mock_s3_client = Mock()
@@ -87,9 +89,9 @@ class TestSyncFiles:
         # Mock the list_s3_keys function
         self.mock_list_s3_keys.return_value = [
             "test-prefix/ebz-s7451719-20240325-1.xml",
-            "test-prefix/ebz-s7451719-20220325-1.xml"
+            "test-prefix/ebz-s7451719-20220325-1.xml",
         ]
-            
+
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
             target_directory=self.target_directory,
@@ -219,7 +221,7 @@ class TestSyncFiles:
         # There's actually a more recent file in S3
         self.mock_list_s3_keys.return_value = (
             "test-prefix/ebz-s7451719-20240428-1.xml",
-            "test-prefix/ebz-s7451719-20240420-1.xml"
+            "test-prefix/ebz-s7451719-20240420-1.xml",
         )
 
         result = sync_files(
@@ -250,7 +252,7 @@ class TestSyncFiles:
         self.mock_list_s3_keys.return_value = [
             "test-prefix/ebz-s7451719-20240322-1.xml"
         ]
-            
+
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
             target_directory=self.target_directory,
