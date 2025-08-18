@@ -1,38 +1,29 @@
 import pytest
 from freezegun import freeze_time
-from test_mocks import MockRequest
-
-from ingestor.steps.ingestor_loader import IngestorLoaderLambdaEvent
-from ingestor.steps.ingestor_trigger import (
-    IngestorTriggerConfig,
-    IngestorTriggerLambdaEvent,
-    handler,
+from test_mocks import (
+    MockRequest,
+    get_mock_ingestor_loader_event,
+    get_mock_ingestor_trigger_event,
 )
-from ingestor.steps.ingestor_trigger_monitor import (
+
+from ingestor.models.step_events import (
+    IngestorTriggerLambdaEvent,
     IngestorTriggerMonitorLambdaEvent,
 )
-
-
-def get_mock_trigger_event(job_id: str | None) -> IngestorTriggerLambdaEvent:
-    return IngestorTriggerLambdaEvent(
-        pipeline_date="2025-01-01", index_date="2025-03-01", job_id=job_id
-    )
-
-
-def get_mock_loader_event(
-    job_id: str | None, start_offset: int, end_index: int
-) -> IngestorLoaderLambdaEvent:
-    return IngestorLoaderLambdaEvent(
-        **dict(get_mock_trigger_event(job_id)),
-        start_offset=start_offset,
-        end_index=end_index,
-    )
+from ingestor.steps.ingestor_trigger import (
+    IngestorTriggerConfig,
+    handler,
+    lambda_handler,
+)
 
 
 def get_mock_trigger_monitor_event(events: list) -> IngestorTriggerMonitorLambdaEvent:
+    job_id = events[0].job_id if len(events) > 0 else "123"
     return IngestorTriggerMonitorLambdaEvent(
+        ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
+        job_id=job_id,
         force_pass=False,
         report_results=True,
         events=events,
@@ -43,65 +34,70 @@ def build_test_matrix() -> list[tuple]:
     return [
         (
             "job_id set, shard_size > results count",
-            get_mock_trigger_event("123"),
+            get_mock_ingestor_trigger_event("123"),
             IngestorTriggerConfig(shard_size=100, is_local=False),
-            {"results": [{"count": 1}]},
-            get_mock_trigger_monitor_event([get_mock_loader_event("123", 0, 1)]),
-        ),
-        (
-            "job_id set, shard_size < results count",
-            get_mock_trigger_event("123"),
-            IngestorTriggerConfig(shard_size=1, is_local=False),
-            {"results": [{"count": 2}]},
+            1,
             get_mock_trigger_monitor_event(
-                [get_mock_loader_event("123", 0, 1), get_mock_loader_event("123", 1, 2)]
+                [get_mock_ingestor_loader_event("123", 0, 1)]
             ),
         ),
         (
-            "job_id set, shard_size == results count",
-            get_mock_trigger_event("123"),
-            IngestorTriggerConfig(shard_size=1),
-            {"results": [{"count": 1}]},
-            get_mock_trigger_monitor_event([get_mock_loader_event("123", 0, 1)]),
-        ),
-        (
-            "job_id set, results count == 0",
-            get_mock_trigger_event("123"),
-            IngestorTriggerConfig(shard_size=100),
-            {"results": [{"count": 0}]},
-            get_mock_trigger_monitor_event([]),
-        ),
-        (
-            "job_id set, shard_size unset (default 1k) > results count",
-            get_mock_trigger_event("123"),
-            IngestorTriggerConfig(),
-            {"results": [{"count": 1001}]},
+            "job_id set, shard_size < results count",
+            get_mock_ingestor_trigger_event("123"),
+            IngestorTriggerConfig(shard_size=1, is_local=False),
+            2,
             get_mock_trigger_monitor_event(
                 [
-                    get_mock_loader_event("123", 0, 1000),
-                    get_mock_loader_event("123", 1000, 1001),
+                    get_mock_ingestor_loader_event("123", 0, 1),
+                    get_mock_ingestor_loader_event("123", 1, 2),
                 ]
             ),
         ),
         (
-            "job_id not set, shard_size > results count",
-            get_mock_trigger_event(None),
-            IngestorTriggerConfig(shard_size=100),
-            {"results": [{"count": 1}]},
+            "job_id set, shard_size == results count",
+            get_mock_ingestor_trigger_event("123"),
+            IngestorTriggerConfig(shard_size=1),
+            1,
             get_mock_trigger_monitor_event(
-                [get_mock_loader_event("20120101T0000", 0, 1)]
+                [get_mock_ingestor_loader_event("123", 0, 1)]
+            ),
+        ),
+        (
+            "job_id set, results count == 0",
+            get_mock_ingestor_trigger_event("123"),
+            IngestorTriggerConfig(shard_size=100),
+            0,
+            get_mock_trigger_monitor_event([]),
+        ),
+        (
+            "job_id set, shard_size unset (default 1k) > results count",
+            get_mock_ingestor_trigger_event("123"),
+            IngestorTriggerConfig(),
+            10001,
+            get_mock_trigger_monitor_event(
+                [
+                    get_mock_ingestor_loader_event("123", 0, 10000),
+                    get_mock_ingestor_loader_event("123", 10000, 10001),
+                ]
             ),
         ),
     ]
+
+
+def mock_neptune_response(count: int) -> None:
+    MockRequest.mock_response(
+        method="POST",
+        url="https://test-host.com:8182/openCypher",
+        json_data={"results": [{"count": count}]},
+    )
 
 
 def get_test_id(argvalue: str) -> str:
     return argvalue
 
 
-@freeze_time("2012-01-01")
 @pytest.mark.parametrize(
-    "description,event,config,neptune_response,expected_output",
+    "description,event,config,neptune_result_count,expected_output",
     build_test_matrix(),
     ids=get_test_id,
 )
@@ -109,21 +105,10 @@ def test_ingestor_trigger(
     description: str,
     event: IngestorTriggerLambdaEvent,
     config: IngestorTriggerConfig,
-    neptune_response: dict,
+    neptune_result_count: int,
     expected_output: IngestorTriggerMonitorLambdaEvent,
 ) -> None:
-    MockRequest.mock_responses(
-        [
-            {
-                "method": "POST",
-                "url": "https://test-host.com:8182/openCypher",
-                "status_code": 200,
-                "json_data": neptune_response,
-                "content_bytes": None,
-                "params": None,
-            }
-        ]
-    )
+    mock_neptune_response(neptune_result_count)
 
     result = handler(event, config)
 
@@ -134,3 +119,16 @@ def test_ingestor_trigger(
 
     assert request["method"] == "POST"
     assert request["url"] == "https://test-host.com:8182/openCypher"
+
+
+@freeze_time("2012-01-01")
+def test_job_id_generation() -> None:
+    event = {
+        "ingestor_type": "concepts",
+        "pipeline_date": "2025-01-01",
+        "index_date": "2025-03-01",
+    }
+
+    mock_neptune_response(1)
+    result = lambda_handler(event, None)
+    assert result["job_id"] == "20120101T0000"
