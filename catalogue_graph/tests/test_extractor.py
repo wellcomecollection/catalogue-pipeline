@@ -11,8 +11,8 @@ from config import (
     MESH_URL,
     WIKIDATA_SPARQL_URL,
 )
-from extractor import LambdaEvent, lambda_handler
-from transformers.base_transformer import EntityType, StreamDestination
+from extractor import lambda_handler
+from models.events import EntityType, StreamDestination
 from transformers.create_transformer import TransformerType
 
 transformer_types = get_args(TransformerType)
@@ -116,7 +116,7 @@ def mock_requests_lookup_table(
     return mocked_responses
 
 
-def build_test_matrix() -> Generator[tuple[LambdaEvent, list[MockResponseInput]], Any]:
+def build_test_matrix() -> Generator[tuple[dict, list[MockResponseInput]], Any]:
     for transformer_type in transformer_types:
         for entity_type in entity_types:
             for stream_destination in stream_destinations:
@@ -144,7 +144,7 @@ def get_test_id(argvalue: Any) -> str:
     ids=get_test_id,
 )
 def test_lambda_handler(
-    lambda_event: LambdaEvent,
+    lambda_event: dict,
     mock_responses: list[MockResponseInput],
 ) -> None:
     MockRequest.mock_responses(mock_responses)

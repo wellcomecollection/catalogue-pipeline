@@ -1,5 +1,6 @@
 from collections.abc import Generator
 
+from models.events import IncrementalWindow
 from sources.base_source import BaseSource
 from sources.elasticsearch_source import ElasticsearchSource
 from utils.types import WorkConceptKey
@@ -32,11 +33,14 @@ class CatalogueConceptsSource(BaseSource):
     def __init__(
         self,
         pipeline_date: str | None,
-        is_local: bool,
         query: dict | None = None,
         fields: list | None = None,
+        window: IncrementalWindow | None = None,
+        is_local: bool = False,
     ):
-        self.es_source = ElasticsearchSource(pipeline_date, is_local, query, fields)
+        self.es_source = ElasticsearchSource(
+            pipeline_date, query, fields, window, is_local
+        )
 
     def stream_raw(self) -> Generator[tuple[dict, WorkConceptKey]]:
         """Streams raw concept nodes from a work's subjects, genres, and contributors."""

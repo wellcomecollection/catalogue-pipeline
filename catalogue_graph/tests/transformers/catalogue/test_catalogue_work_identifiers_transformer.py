@@ -13,7 +13,7 @@ from transformers.catalogue.work_identifiers_transformer import (
 def test_catalogue_work_identifiers_transformer_nodes() -> None:
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorkIdentifiersTransformer(None, True)
+    transformer = CatalogueWorkIdentifiersTransformer(None, None, True)
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 3
@@ -31,7 +31,7 @@ def test_catalogue_work_identifiers_transformer_nodes() -> None:
 def test_catalogue_work_identifiers_transformer_edges() -> None:
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorkIdentifiersTransformer(None, True)
+    transformer = CatalogueWorkIdentifiersTransformer(None, None, True)
     edges = list(transformer._stream_edges())
 
     assert len(edges) == 6

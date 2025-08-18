@@ -25,7 +25,7 @@ def get_previous_ids(
     transformer_type: TransformerType, entity_type: EntityType
 ) -> set[str]:
     """Return all IDs from the latest snapshot for the specified transformer and entity type."""
-    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
@@ -52,7 +52,7 @@ def update_node_ids_snapshot(
     transformer_type: TransformerType, entity_type: EntityType, ids: set[str]
 ) -> None:
     """Update the IDs snapshot with the latest IDs."""
-    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
 
@@ -64,7 +64,7 @@ def log_ids(
     folder: str,
 ) -> None:
     """Append IDs which were added/removed as part of this run to the corresponding log file."""
-    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{folder}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{folder}/{transformer_type}__{entity_type}.parquet"
 
     try:
         df = df_from_s3_parquet(s3_file_uri)

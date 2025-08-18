@@ -66,7 +66,7 @@ module "ingestor_trigger_monitor_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
     }
   }
@@ -113,7 +113,7 @@ module "ingestor_loader_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
     }
   }
@@ -164,7 +164,7 @@ module "ingestor_loader_monitor_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
     }
   }
@@ -211,7 +211,7 @@ module "ingestor_indexer_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
     }
   }
@@ -256,7 +256,7 @@ module "ingestor_indexer_monitor_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
     }
   }
@@ -352,7 +352,7 @@ module "ingestor_reporter_lambda" {
 
   environment = {
     variables = {
-      INGESTOR_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX = "ingestor"
       SLACK_SECRET_ID    = local.slack_webhook
     }

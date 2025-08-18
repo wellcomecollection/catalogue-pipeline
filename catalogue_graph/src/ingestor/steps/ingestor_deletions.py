@@ -52,7 +52,7 @@ def _is_valid_date(index_date: str) -> bool:
 
 def get_ids_to_delete(pipeline_date: str, index_date: str) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
-    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{DELETED_IDS_FOLDER}/catalogue_concepts__nodes.parquet"
+    s3_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{DELETED_IDS_FOLDER}/catalogue_concepts__nodes.parquet"
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
     df = df_from_s3_parquet(s3_file_uri)

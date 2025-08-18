@@ -4,76 +4,85 @@ import argparse
 import typing
 
 import config
-from transformers.base_transformer import BaseTransformer, EntityType, StreamDestination
-from transformers.create_transformer import TransformerType, create_transformer
+from models.events import (
+    EntityType,
+    ExtractorEvent,
+    IncrementalWindow,
+    StreamDestination,
+    TransformerType,
+)
+from transformers.base_transformer import BaseTransformer
+from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
 
 
-class LambdaEvent(typing.TypedDict):
-    transformer_type: TransformerType
-    entity_type: EntityType
-    stream_destination: StreamDestination
-    pipeline_date: str | None
-    sample_size: int | None
+def get_bulk_load_file_path(event: ExtractorEvent) -> str:
+    file_name = f"{event.transformer_type}__{event.entity_type}.csv"
+
+    window_prefix = ""
+    if event.window is not None:
+        start = event.window.start_time.strftime("%Y%m%dT%H%M")
+        end = event.window.end_time.strftime("%Y%m%dT%H%M")
+        window_prefix = f"windows/{start}-{end}/"
+
+    return f"{window_prefix}{file_name}"
+
+
+def get_bulk_load_s3_path(event: ExtractorEvent) -> str:
+    file_path = get_bulk_load_file_path(event)
+    return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{config.BULK_LOADER_S3_PREFIX}/{file_path}"
 
 
 def handler(
-    stream_destination: StreamDestination,
-    transformer_type: TransformerType,
-    entity_type: EntityType,
-    pipeline_date: str | None = None,
-    sample_size: int | None = None,
+    event: ExtractorEvent,
     is_local: bool = False,
 ) -> None:
     print(
-        f"Transforming {sample_size or 'all'} {entity_type} using the {transformer_type} "
-        f"transformer and streaming them into {stream_destination}."
+        f"Transforming {event.sample_size or 'all'} {event.entity_type} using the {event.transformer_type} "
+        f"transformer and streaming them into {event.stream_destination}."
     )
+    if event.pipeline_date is None:
+        print("No pipeline date specified. Will use a local Elasticsearch instance.")
 
     transformer: BaseTransformer = create_transformer(
-        transformer_type, entity_type, pipeline_date, is_local
+        event.transformer_type,
+        event.entity_type,
+        event.pipeline_date,
+        event.window,
+        is_local=is_local,
     )
 
-    if stream_destination == "graph":
+    if event.stream_destination == "graph":
         neptune_client = get_neptune_client(is_local)
-        transformer.stream_to_graph(neptune_client, entity_type, sample_size)
-    elif stream_destination == "s3":
-        file_name = f"{transformer_type}__{entity_type}.csv"
-        s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{file_name}"
-        transformer.stream_to_s3(s3_uri, entity_type, sample_size)
-    elif stream_destination == "sns":
+        transformer.stream_to_graph(
+            neptune_client, event.entity_type, event.sample_size
+        )
+    elif event.stream_destination == "s3":
+        s3_uri = get_bulk_load_s3_path(event)
+        transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
+    elif event.stream_destination == "sns":
         topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
-        assert topic_arn is not None, (
-            "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
-        )
+        if topic_arn is None:
+            raise ValueError(
+                "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
+            )
 
-        transformer.stream_to_sns(topic_arn, entity_type, sample_size)
-    elif stream_destination == "local":
-        file_name = f"{transformer_type}__{entity_type}.csv"
-        file_path = transformer.stream_to_local_file(
-            file_name, entity_type, sample_size
+        transformer.stream_to_sns(topic_arn, event.entity_type, event.sample_size)
+    elif event.stream_destination == "local":
+        file_path = get_bulk_load_file_path(event)
+        full_file_path = transformer.stream_to_local_file(
+            file_path, event.entity_type, event.sample_size
         )
-        print(f"Data streamed to local file: {file_path}")
-    elif stream_destination == "void":
-        for _ in transformer.stream(entity_type, sample_size):
+        print(f"Data streamed to local file: {full_file_path}")
+    elif event.stream_destination == "void":
+        for _ in transformer.stream(event.entity_type, event.sample_size):
             pass
-        # Stop processing to ensure threads are terminated when sample_size is reached
-        if sample_size is not None:
-            transformer.source.stop_processing()
     else:
         raise ValueError("Unsupported stream destination.")
 
 
-def lambda_handler(event: LambdaEvent, context: typing.Any) -> None:
-    stream_destination = event["stream_destination"]
-    transformer_type = event["transformer_type"]
-    entity_type = event["entity_type"]
-    pipeline_date = event["pipeline_date"]
-    sample_size = event.get("sample_size")
-
-    handler(
-        stream_destination, transformer_type, entity_type, pipeline_date, sample_size
-    )
+def lambda_handler(event: dict, context: typing.Any) -> None:
+    handler(ExtractorEvent(**event))
 
 
 def local_handler() -> None:
@@ -111,13 +120,28 @@ def local_handler() -> None:
         help="How many entities to stream. If not specified, streaming will continue until the source is exhausted.",
     )
     parser.add_argument(
+        "--window-start",
+        type=str,
+        help="A timestamp in YYYY-MM-DDTHH:MM format (e.g. 2025-01-01T00:00). Only required when running in incremental mode.",
+        required=False,
+    )
+    parser.add_argument(
+        "--window-end",
+        type=str,
+        help="A timestamp in YYYY-MM-DDTHH:MM format (e.g. 2025-01-01T00:00). Only required when running in incremental mode.",
+        required=False,
+    )
+    parser.add_argument(
         "--is-local",
         action="store_true",
         help="Whether to run the handler in local mode",
     )
     args = parser.parse_args()
 
-    handler(**args.__dict__)
+    window = IncrementalWindow(start_time=args.window_start, end_time=args.window_end)
+
+    event = ExtractorEvent(**args.__dict__, window=window)
+    handler(event, is_local=args.is_local)
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ from queue import Queue
 from threading import Event, Thread
 
 import config
+from models.events import IncrementalWindow
 from utils.elasticsearch import get_client, get_standard_index_name
 
 from .base_source import BaseSource
@@ -14,18 +15,30 @@ class ElasticsearchSource(BaseSource):
     def __init__(
         self,
         pipeline_date: str | None,
-        is_local: bool,
         query: dict | None = None,
         fields: list | None = None,
-        early_termination_event: Event | None = None,
+        window: IncrementalWindow | None = None,
+        is_local: bool = False,
     ):
         self.es_client = get_client("graph_extractor", pipeline_date, is_local)
         self.index_name = get_standard_index_name(
             config.ES_DENORMALISED_INDEX_NAME, pipeline_date
         )
         self.query = {"match_all": {}} if query is None else query
+
+        if window is not None:
+            range_filter = {
+                "range": {
+                    "state.mergedTime": {
+                        "gte": window.start_time.isoformat(),
+                        "lte": window.end_time.isoformat(),
+                    }
+                }
+            }
+            self.query = {"bool": {"must": [self.query, range_filter]}}
+
         self.fields = fields
-        self.early_termination_event = early_termination_event or Event()
+        self.early_termination_event = Event()
 
     def search_with_pit(self, pit_id: str, slice_index: int, queue: Queue) -> None:
         body = {

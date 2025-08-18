@@ -18,7 +18,7 @@ def test_catalogue_concepts_transformer_nodes() -> None:
     )
     add_mock_denormalised_documents()
 
-    transformer = CatalogueConceptsTransformer(None, True)
+    transformer = CatalogueConceptsTransformer(None, None, True)
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 12
@@ -34,7 +34,7 @@ def test_catalogue_concepts_transformer_edges() -> None:
     )
     add_mock_denormalised_documents()
 
-    transformer = CatalogueConceptsTransformer(None, True)
+    transformer = CatalogueConceptsTransformer(None, None, True)
 
     edges = list(transformer._stream_edges())
     assert len(edges) == 7

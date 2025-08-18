@@ -6,7 +6,7 @@ from sources.catalogue.concepts_source import CatalogueConceptsSource
 def test_catalogue_concepts_source() -> None:
     add_mock_denormalised_documents()
 
-    catalogue_concepts_source = CatalogueConceptsSource(None, True)
+    catalogue_concepts_source = CatalogueConceptsSource(None)
     stream_result = list(catalogue_concepts_source.stream_raw())
 
     # Do some simple checks on mesh source decoding based on known data
