@@ -21,6 +21,13 @@ module "trigger_lambda" {
   handler     = "steps.trigger.lambda_handler"
   memory_size = 1024
   timeout     = 300
+
+  environment = {
+    variables = {
+      S3_BUCKET = resource.aws_s3_bucket.ebsco_adapter.bucket
+      S3_PREFIX = "prod"
+    }
+  }
 }
 
 module "loader_lambda" {
