@@ -10,7 +10,7 @@ module "extractor_ecs_task" {
   image = "${aws_ecr_repository.catalogue_graph_extractor.repository_url}:prod"
 
   environment = {
-    CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+    CATALOGUE_GRAPH_S3_BUCKET   = aws_s3_bucket.catalogue_graph_bucket.bucket
     GRAPH_QUERIES_SNS_TOPIC_ARN = module.catalogue_graph_queries_topic.arn
   }
 
