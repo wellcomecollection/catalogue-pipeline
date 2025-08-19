@@ -9,7 +9,7 @@ module "loader_lambda" {
   filename = data.archive_file.empty_zip.output_path
 
   handler     = "steps.loader.lambda_handler"
-  memory_size = 8192
+  memory_size = 10240
   timeout     = 900
 }
 
@@ -23,4 +23,15 @@ resource "aws_iam_role_policy" "loader_lambda_iceberg_write" {
 resource "aws_iam_role_policy" "loader_lambda_s3_read" {
   role   = module.loader_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.s3_read.json
+}
+
+resource "aws_iam_role_policy" "loader_lambda_s3_write" {
+  role   = module.loader_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.s3_write.json
+}
+
+# Create the Glue database that the Lambda will use
+resource "aws_glue_catalog_database" "wellcomecollection_catalogue" {
+  name        = "wellcomecollection_catalogue"
+  description = "Database for Wellcome Collection catalogue data from EBSCO adapter"
 }

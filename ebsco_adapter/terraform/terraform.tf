@@ -2,7 +2,9 @@ terraform {
   required_version = ">= 0.9"
 
   backend "s3" {
-    role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+    assume_role = {
+      role_arn = "arn:aws:iam::760097843905:role/platform-developer"
+    }
 
     bucket         = "wellcomecollection-platform-infra"
     key            = "terraform/ebsco_adapter.tfstate"
@@ -15,7 +17,9 @@ data "terraform_remote_state" "monitoring" {
   backend = "s3"
 
   config = {
-    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+    assume_role = {
+      role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+    }
 
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/monitoring.tfstate"
@@ -27,7 +31,10 @@ data "terraform_remote_state" "reindexer" {
   backend = "s3"
 
   config = {
-    role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+    assume_role = {
+      role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+    }
+
     bucket   = "wellcomecollection-platform-infra"
     key      = "terraform/catalogue/reindexer.tfstate"
     region   = "eu-west-1"
