@@ -56,6 +56,7 @@ class DenormalisedWorkData(ElasticsearchModel):
     def convert_denormalised_type(
         cls, value: WorkType | Literal["Standard"]
     ) -> WorkType:
+        # In the denormalised index, the 'Work' type is called 'Standard'
         if value == "Standard":
             return "Work"
 
