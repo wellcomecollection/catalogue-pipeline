@@ -6,16 +6,16 @@ resource "aws_s3_bucket" "ebsco_adapter" {
   }
 }
 
-# resource "aws_s3_bucket_lifecycle_configuration" "ebsco_adapter" {
-#   bucket = aws_s3_bucket.ebsco_adapter.id
+resource "aws_s3_bucket_lifecycle_configuration" "ebsco_adapter" {
+  bucket = aws_s3_bucket.ebsco_adapter.id
 
-#   rule {
-#     id     = "delete_objects_after_6_months"
-#     status = "Enabled"
+  rule {
+    id     = "delete_objects_after_6_months"
+    status = "Enabled"
 
-#     expiration {
-#       days = 180
-#     }
-#   }
-# }
+    expiration {
+      days = 180
+    }
+  }
+}
 

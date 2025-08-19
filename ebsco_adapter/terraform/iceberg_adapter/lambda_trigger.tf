@@ -1,3 +1,6 @@
+data "aws_s3_bucket" "ebsco_adapter" {
+  bucket = "wellcomecollection-platform-ebsco-adapter"
+}
 module "trigger_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
@@ -14,7 +17,7 @@ module "trigger_lambda" {
 
   environment = {
     variables = {
-      S3_BUCKET = data.terraform_remote_state.ebsco_adapter.outputs.ebsco_adapter_bucket_name
+      S3_BUCKET = data.aws_s3_bucket.ebsco_adapter.id
       S3_PREFIX = "prod"
     }
   }
