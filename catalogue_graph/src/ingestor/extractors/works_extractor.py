@@ -84,7 +84,14 @@ class GraphWorksExtractor(GraphBaseExtractor):
         all_es_works = self.get_es_works(work_ids)
 
         for work_id in work_ids:
-            es_work = all_es_works[work_id]
+            es_work = all_es_works.get(work_id)
+
+            # Normally, the catalogue graph only stores `Visible` works extracted from the denormalised index. However,
+            # in cases where the status of a work changes from `Visible` to some other status (e.g. `Deleted`), it might
+            # take a while for this change to propagate to the graph. Therefore, it is possible for a work which exists
+            # in the graph to not exist as a `Visible` work in the denormalised index. When this happens, skip the work.
+            if es_work is None:
+                continue
 
             work_hierarchy = WorkHierarchy(
                 id=work_id,
