@@ -27,6 +27,8 @@ class DisplayRelation(BaseModel):
     def from_flat_hierarchy(
         hierarchy: list[WorkNode], total_parts: int
     ) -> "DisplayRelation":
+        """Recursively build a hierarchy of ancestors from a flat list, starting from the parent (the first item
+        in the list) to the root ancestor work (the last item in the list)."""
         relation = DisplayRelation.from_neptune_node(hierarchy[0], total_parts)
         if len(hierarchy) > 1:
             relation.partOf = [DisplayRelation.from_flat_hierarchy(hierarchy[1:], 1)]

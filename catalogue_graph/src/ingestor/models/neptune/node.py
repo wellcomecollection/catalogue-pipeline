@@ -14,6 +14,7 @@ class NeptuneBaseNode(BaseModel):
         list_fields = ["alternative_labels", "alternative_ids"]
         for field in list_fields:
             if field in data["~properties"]:
+                # The catalogue graph stores lists as strings, with individual items separated by `||`.
                 data["~properties"][field] = data["~properties"][field].split("||")
 
         return data
