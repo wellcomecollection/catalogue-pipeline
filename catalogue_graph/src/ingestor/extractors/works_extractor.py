@@ -24,10 +24,16 @@ class ExtractedWork(BaseModel):
 
 
 class GraphWorksExtractor(GraphBaseExtractor):
+    def __init__(
+        self, pipeline_date: str, start_offset: int, end_index: int, is_local: bool
+    ):
+        super().__init__(start_offset, end_index, is_local)
+        self.pipeline_date = pipeline_date
+
     def get_es_works(self, work_ids: list[str]) -> dict:
-        es_client = get_client("graph_extractor", "2025-05-01", True)
+        es_client = get_client("graph_extractor", self.pipeline_date, True)
         index_name = get_standard_index_name(
-            config.ES_DENORMALISED_INDEX_NAME, "2025-05-01"
+            config.ES_DENORMALISED_INDEX_NAME, self.pipeline_date
         )
 
         start_time = time.time()

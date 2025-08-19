@@ -31,7 +31,7 @@ def create_transformer(
         )
     if event.ingestor_type == "works":
         return ElasticsearchWorksTransformer(
-            event.start_offset, event.end_index, config.is_local
+            event.pipeline_date, event.start_offset, event.end_index, config.is_local
         )
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
