@@ -9,6 +9,7 @@ from pydantic import BaseModel
 
 import utils.elasticsearch
 from ingestor.models.indexable_concept import IndexableConcept
+from ingestor.models.indexable_work import IndexableWork
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerMonitorLambdaEvent,
@@ -16,47 +17,57 @@ from ingestor.models.step_events import (
 )
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import get_standard_index_name
+from utils.types import IngestorType
+
+RECORD_CLASSES: dict[IngestorType, typing.Type[BaseModel]] = {
+    "concepts": IndexableConcept,
+    "works": IndexableWork
+}
 
 
 class IngestorIndexerConfig(BaseModel):
     is_local: bool = False
 
 
+def generate_operations(
+        index_name: str,
+        indexable_data: list[IndexableConcept] | list[IndexableWork]) -> Generator[dict]:
+    for datum in indexable_data:
+        yield {
+            "_index": index_name,
+            "_id": datum.query.id,
+            "_source": datum.model_dump(),
+        }
+
+
 def load_data(
-    concepts: list[IndexableConcept],
-    pipeline_date: str | None,
-    index_date: str | None,
-    is_local: bool,
+        ingestor_type: IngestorType,
+        indexable_data: list[IndexableConcept] | list[IndexableWork],
+        pipeline_date: str | None,
+        index_date: str | None,
+        is_local: bool,
 ) -> int:
-    index_name = get_standard_index_name("concepts-indexed", index_date)
+    index_name = get_standard_index_name(f"{ingestor_type}-indexed", index_date)
 
-    print(f"Loading {len(concepts)} IndexableConcept to ES index: {index_name} ...")
+    print(f"Loading {len(indexable_data)} Indexable {ingestor_type} to ES index: {index_name} ...")
     es = utils.elasticsearch.get_client("concept_ingestor", pipeline_date, is_local)
-
-    def generate_data() -> Generator[dict]:
-        for concept in concepts:
-            yield {
-                "_index": index_name,
-                "_id": concept.query.id,
-                "_source": concept.model_dump(),
-            }
-
-    success_count, _ = elasticsearch.helpers.bulk(es, generate_data())
+    success_count, _ = elasticsearch.helpers.bulk(es, generate_operations(index_name, indexable_data))
 
     return success_count
 
 
 def handler(
-    event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
+        event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
 ) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
     df = df_from_s3_parquet(event.object_to_index.s3_uri)
     print(f"Extracted {len(df)} records.")
+    record_class = RECORD_CLASSES[event.ingestor_type]
 
-    indexable_concepts = [IndexableConcept.model_validate(row) for row in df.to_dicts()]
     success_count = load_data(
-        concepts=indexable_concepts,
+        ingestor_type=event.ingestor_type,
+        indexable_data=[record_class.model_validate(row) for row in df.to_dicts()],
         pipeline_date=event.pipeline_date,
         index_date=event.index_date,
         is_local=config.is_local,

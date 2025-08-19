@@ -11,6 +11,9 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
 )
 from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
+from ingestor.models.indexable_concept import IndexableConcept
+import pydantic_core
+from itertools import chain
 
 
 def test_ingestor_indexer_success() -> None:
@@ -29,10 +32,10 @@ def test_ingestor_indexer_success() -> None:
 
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
-    # INGESTOR_SHARD_SIZE=10 AWS_PROFILE=platform-developer python3.13 ingestor_local.py --limit=1
+    # INGESTOR_SHARD_SIZE=10 AWS_PROFILE=platform-developer uv run src/ingestor/run_local.py --ingestor-type=concepts --limit=1
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000010.parquet",
-        load_fixture("ingestor/00000000-00000010.parquet"),
+        load_fixture("ingestor/concepts/00000000-00000010.parquet"),
     )
     MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
@@ -45,11 +48,11 @@ def test_ingestor_indexer_success() -> None:
 
 
 def build_test_matrix() -> list[tuple]:
-    return [
+    return chain.from_iterable([[
         (
             "the file at s3_uri doesn't exist",
             IngestorIndexerLambdaEvent(
-                ingestor_type="concepts",
+                ingestor_type=correct_type,
                 pipeline_date="2021-07-01",
                 index_date="2025-01-01",
                 job_id="123",
@@ -62,9 +65,9 @@ def build_test_matrix() -> list[tuple]:
             "Mock S3 file s3://test-catalogue-graph/ghost-file does not exist.",
         ),
         (
-            "the S3 file doesn't contain valid data",
+            "the S3 file is malformed",
             IngestorIndexerLambdaEvent(
-                ingestor_type="concepts",
+                ingestor_type=correct_type,
                 pipeline_date="2021-07-01",
                 index_date="2025-01-01",
                 job_id="123",
@@ -76,7 +79,22 @@ def build_test_matrix() -> list[tuple]:
             polars.exceptions.ComputeError,
             "parquet: File out of specification: The file must end with PAR1",
         ),
-    ]
+        (
+            "the S3 file contains invalid data",
+            IngestorIndexerLambdaEvent(
+                ingestor_type=correct_type,
+                pipeline_date="2021-07-01",
+                index_date="2025-01-01",
+                job_id="123",
+                object_to_index=IngestorIndexerObject(
+                    s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet"
+                ),
+            ),
+            f"ingestor/{wrong_type}/00000000-00000010.parquet",
+            pydantic_core.ValidationError,
+            "\\d+ validation errors for Indexable.*",
+        )
+    ] for correct_type, wrong_type in [("concepts", "works"), ("works", "concepts")]])
 
 
 def get_test_id(argvalue: str) -> str:
@@ -89,11 +107,11 @@ def get_test_id(argvalue: str) -> str:
     ids=get_test_id,
 )
 def test_ingestor_indexer_failure(
-    description: str,
-    event: IngestorIndexerLambdaEvent,
-    fixture: str,
-    expected_error: Any | tuple,
-    error_message: str,
+        description: str,
+        event: IngestorIndexerLambdaEvent,
+        fixture: str,
+        expected_error: Any | tuple,
+        error_message: str,
 ) -> None:
     config = IngestorIndexerConfig()
 
