@@ -7,6 +7,7 @@ from models.graph_edge import (
 )
 from models.graph_node import PathIdentifier
 from sources.elasticsearch_source import ElasticsearchSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -32,7 +33,7 @@ ES_QUERY = {
 class CatalogueWorkIdentifiersTransformer(BaseTransformer):
     def __init__(
         self,
-        pipeline_date: str | None,
+        pipeline_date: str,
         window: IncrementalWindow | None,
         is_local: bool,
     ) -> None:

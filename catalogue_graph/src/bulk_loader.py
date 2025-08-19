@@ -42,6 +42,13 @@ def local_handler() -> None:
         required=True,
     )
     parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help="The pipeline date associated with the loaded items.",
+        default="dev",
+        required=False,
+    )
+    parser.add_argument(
         "--window-start",
         type=str,
         help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",

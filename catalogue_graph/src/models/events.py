@@ -1,27 +1,9 @@
 import argparse
 from datetime import datetime
-from typing import Literal, Self
+from typing import Self
 
 from pydantic import BaseModel
-
-TransformerType = Literal[
-    "loc_concepts",
-    "loc_names",
-    "loc_locations",
-    "mesh_concepts",
-    "mesh_locations",
-    "wikidata_linked_loc_concepts",
-    "wikidata_linked_loc_locations",
-    "wikidata_linked_loc_names",
-    "wikidata_linked_mesh_concepts",
-    "wikidata_linked_mesh_locations",
-    "catalogue_concepts",
-    "catalogue_works",
-    "catalogue_work_identifiers",
-]
-EntityType = Literal["nodes", "edges"]
-StreamDestination = Literal["graph", "s3", "sns", "local", "void"]
-
+from utils.types import EntityType, StreamDestination, TransformerType
 
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
@@ -35,6 +17,7 @@ class GraphPipelineEvent(BaseModel):
     transformer_type: TransformerType
     entity_type: EntityType
     window: IncrementalWindow | None = None
+    pipeline_date: str
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
@@ -49,7 +32,6 @@ class GraphPipelineEvent(BaseModel):
 
 class ExtractorEvent(GraphPipelineEvent):
     stream_destination: StreamDestination
-    pipeline_date: str | None = None
     sample_size: int | None = None
 
 
@@ -59,4 +41,9 @@ class BulkLoaderEvent(GraphPipelineEvent):
 
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
+    pipeline_date: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
+
+
+class GraphRemoverEvent(GraphPipelineEvent):
+    override_safety_check: bool = False

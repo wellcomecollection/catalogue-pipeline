@@ -4,15 +4,21 @@ from collections.abc import Generator
 from typing import Any, TypeVar
 
 import boto3
+import config
 import polars as pl
 import smart_open
-from pydantic import BaseModel
-
-import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-from utils.types import NodeType, OntologyType
+from models.steps import IncrementalWindow
+from pydantic import BaseModel
+
+from utils.types import (
+    EntityType,
+    NodeType,
+    OntologyType,
+    TransformerType,
+)
 
 PydanticModelType = TypeVar("PydanticModelType", bound=BaseModel)
 
@@ -98,8 +104,25 @@ def write_csv_to_s3(s3_uri: str, items: list[dict]) -> None:
             csv_writer.writerow(item)
 
 
+def get_bulk_load_file_path(transformer_type: TransformerType, entity_type: EntityType, pipeline_date: str, window: IncrementalWindow | None = None) -> str:
+    file_name = f"{transformer_type}__{entity_type}.csv"
+
+    window_prefix = ""
+    if window is not None:
+        start = window.start_time.strftime("%Y%m%dT%H%M")
+        end = window.end_time.strftime("%Y%m%dT%H%M")
+        window_prefix = f"windows/{start}-{end}/"
+
+    return f"{pipeline_date}/{window_prefix}{file_name}"
+
+
+def get_bulk_load_s3_path(transformer_type: TransformerType, entity_type: EntityType, pipeline_date: str, window: IncrementalWindow | None = None) -> str:
+    file_path = get_bulk_load_file_path(transformer_type, entity_type, pipeline_date, window)
+    return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{config.BULK_LOADER_S3_PREFIX}/{file_path}"
+
+
 def fetch_transformer_output_from_s3(
-    node_type: NodeType, source: OntologyType
+    node_type: NodeType, source: OntologyType, pipeline_date: str
 ) -> Generator[Any]:
     """Retrieves the bulk load file outputted by the relevant transformer so that we can extract data from it."""
     if (node_type, source) not in VALID_SOURCE_FILES:
@@ -108,8 +131,8 @@ def fetch_transformer_output_from_s3(
         )
         return
 
-    linked_nodes_file_name = f"{source}_{node_type}__nodes.csv"
-    s3_uri = f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{linked_nodes_file_name}"
+    transformer_type = f"{source}_{node_type}"
+    s3_uri = get_bulk_load_s3_path(transformer_type, "nodes", pipeline_date)
 
     print(f"Retrieving ids of type '{node_type}' from ontology '{source}' from S3.")
     yield from get_csv_from_s3(s3_uri)

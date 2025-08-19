@@ -28,7 +28,7 @@ CATALOGUE_TRANSFORMERS = {
 def create_transformer(
     transformer_type: TransformerType,
     entity_type: EntityType,
-    pipeline_date: str | None,
+    pipeline_date: str,
     window: IncrementalWindow | None,
     is_local: bool,
 ) -> BaseTransformer:

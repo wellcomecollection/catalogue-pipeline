@@ -32,3 +32,22 @@ WorkType = Literal["Work", "Series", "Section", "Collection"]
 
 IngestorType = Literal["concepts"]
 IngestorLoadFormat = Literal["parquet", "jsonl"]
+
+TransformerType = Literal[
+    "loc_concepts",
+    "loc_names",
+    "loc_locations",
+    "mesh_concepts",
+    "mesh_locations",
+    "wikidata_linked_loc_concepts",
+    "wikidata_linked_loc_locations",
+    "wikidata_linked_loc_names",
+    "wikidata_linked_mesh_concepts",
+    "wikidata_linked_mesh_locations",
+    "catalogue_concepts",
+    "catalogue_works",
+    "catalogue_work_identifiers",
+]
+EntityType = Literal["nodes", "edges"]
+StreamDestination = Literal["graph", "s3", "sns", "local", "void"]
+

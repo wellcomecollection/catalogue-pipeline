@@ -5,7 +5,6 @@ import typing
 
 import config
 from models.events import (
-    BulkLoaderEvent,
     EntityType,
     ExtractorEvent,
     StreamDestination,
@@ -16,29 +15,12 @@ from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
 
 
-def get_bulk_load_file_path(event: BulkLoaderEvent | ExtractorEvent) -> str:
-    file_name = f"{event.transformer_type}__{event.entity_type}.csv"
-
-    window_prefix = ""
-    if event.window is not None:
-        start = event.window.start_time.strftime("%Y%m%dT%H%M")
-        end = event.window.end_time.strftime("%Y%m%dT%H%M")
-        window_prefix = f"windows/{start}-{end}/"
-
-    return f"{window_prefix}{file_name}"
-
-
-def get_bulk_load_s3_path(event: BulkLoaderEvent | ExtractorEvent) -> str:
-    file_path = get_bulk_load_file_path(event)
-    return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{config.BULK_LOADER_S3_PREFIX}/{file_path}"
-
-
 def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     print(
         f"Transforming {event.sample_size or 'all'} {event.entity_type} using the {event.transformer_type} "
         f"transformer and streaming them into {event.stream_destination}."
     )
-    if event.pipeline_date is None:
+    if event.pipeline_date == "dev":
         print("No pipeline date specified. Will use a local Elasticsearch instance.")
 
     transformer: BaseTransformer = create_transformer(
@@ -108,7 +90,8 @@ def local_handler() -> None:
     parser.add_argument(
         "--pipeline-date",
         type=str,
-        help="The pipeline to extract data from. Will default to `None`.",
+        help="The pipeline to extract data from. Will default to 'dev'.",
+        default="dev",
         required=False,
     )
     parser.add_argument(

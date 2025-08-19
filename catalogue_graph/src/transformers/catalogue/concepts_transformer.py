@@ -4,8 +4,9 @@ from models.events import IncrementalWindow
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
-from transformers.base_transformer import BaseTransformer
 from utils.types import WorkConceptKey
+
+from transformers.base_transformer import BaseTransformer
 
 from .id_label_checker import IdLabelChecker
 from .raw_concept import RawCatalogueConcept
@@ -15,7 +16,7 @@ from .works_transformer import ES_FIELDS, ES_QUERY
 class CatalogueConceptsTransformer(BaseTransformer):
     def __init__(
         self,
-        pipeline_date: str | None,
+        pipeline_date: str,
         window: IncrementalWindow | None,
         is_local: bool,
     ):

@@ -4,6 +4,7 @@ from models.events import IncrementalWindow
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from sources.elasticsearch_source import ElasticsearchSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -26,7 +27,7 @@ ES_FIELDS = [
 class CatalogueWorksTransformer(BaseTransformer):
     def __init__(
         self,
-        pipeline_date: str | None,
+        pipeline_date: str,
         window: IncrementalWindow | None,
         is_local: bool,
     ):

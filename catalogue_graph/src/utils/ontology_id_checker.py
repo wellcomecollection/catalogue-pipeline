@@ -43,7 +43,7 @@ def is_id_in_ontology(item_id: str, item_ontology: OntologyType) -> bool:
         return is_id_in_ontology(item_id, "wikidata_linked_loc") or is_id_in_ontology(
             item_id, "wikidata_linked_mesh"
         )
-
+    
     return (
         is_id_classified_as_node_type(item_id, item_ontology, "concepts")
         or is_id_classified_as_node_type(item_id, item_ontology, "locations")

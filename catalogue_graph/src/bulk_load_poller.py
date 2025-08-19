@@ -3,22 +3,22 @@ import datetime
 import json
 import typing
 
-import smart_open
-
 import config
+import smart_open
 from models.events import DEFAULT_INSERT_ERROR_THRESHOLD, BulkLoadPollerEvent
 from utils.aws import get_neptune_client
 from utils.slack import publish_report
 
 
-def log_payload(payload: dict) -> None:
+def log_payload(payload: dict, pipeline_date: str) -> None:
     """Log the bulk load result into a JSON file which stores all results from the latest pipeline run"""
     # Extract the name of the bulk load file to use as a key in the JSON log.
     bulk_load_file_uri = payload["overallStatus"]["fullUri"]
     bulk_load_file_name = bulk_load_file_uri.split("/")[-1].split(".")[0]
-    log_file_uri = (
-        f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/report.neptune_bulk_loader.json"
-    )
+    
+    file_name = "report.neptune_bulk_loader.json"
+    prefix = f"{config.BULK_LOADER_S3_PREFIX}/{pipeline_date}"
+    log_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
 
     try:
         with smart_open.open(log_file_uri, "r") as f:
@@ -54,6 +54,15 @@ def print_detailed_bulk_load_errors(payload: dict) -> None:
             print(f"         {failed_feed['status']}")
 
 
+def response_from_event(event: BulkLoadPollerEvent, status: str):
+    return {
+        "load_id": event.load_id,
+        "pipeline_date": event.pipeline_date,
+        "insert_error_threshold": event.insert_error_threshold,
+        "status": status,
+    }
+    
+    
 def handler(
     event: BulkLoadPollerEvent, is_local: bool = False
 ) -> dict[str, typing.Any]:
@@ -68,11 +77,7 @@ def handler(
     print(f"Bulk load status: {status}. (Processed {processed_count:,} records.)")
 
     if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
-        return {
-            "load_id": event.load_id,
-            "insert_error_threshold": event.insert_error_threshold,
-            "status": "IN_PROGRESS",
-        }
+        return response_from_event(event, "IN_PROGRESS")
 
     insert_error_count = overall_status["insertErrors"]
     parsing_error_count = overall_status["parsingErrors"]
@@ -124,14 +129,10 @@ def handler(
             publish_report(report, slack_secret=config.SLACK_SECRET_ID)
 
     if not is_local:
-        log_payload(payload)
+        log_payload(payload, event.pipeline_date)
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
-        return {
-            "load_id": event.load_id,
-            "insert_error_threshold": event.insert_error_threshold,
-            "status": "SUCCEEDED",
-        }
+        return response_from_event(event, "SUCCEEDED")
 
     raise Exception("Load failed. See error log above.")
 
@@ -147,6 +148,13 @@ def local_handler() -> None:
         type=str,
         help="The ID of the bulk load job whose status to check.",
         required=True,
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help="The pipeline date associated with the loaded items.",
+        default="dev",
+        required=False,
     )
     parser.add_argument(
         "--insert-error-threshold",
