@@ -53,7 +53,7 @@ class TestMostRecentValidFile:
             "ebz-s7451719-20240332-1.xml",  # Invalid day
             "ebz-s7451719-20241301-1.xml",  # Invalid month
         ]
-        
+
         for filename in date_invalid_filenames:
             with pytest.raises(ValueError):
                 get_most_recent_valid_file([filename])
