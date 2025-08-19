@@ -22,7 +22,7 @@ class EbscoAdapterTriggerConfig(BaseModel):
     is_local: bool = False
 
 
-class EventBridgeTriggerEvent(BaseModel):
+class EbscoAdapterTriggerEvent(BaseModel):
     time: str
 
 
@@ -99,7 +99,7 @@ def sync_files(
 
 
 def handler(
-    event: EventBridgeTriggerEvent, config: EbscoAdapterTriggerConfig
+    event: EbscoAdapterTriggerEvent, config: EbscoAdapterTriggerConfig
 ) -> EbscoAdapterLoaderEvent:
     print(f"Running handler with config: {config}")
     print(f"Processing event: {event}")
@@ -128,9 +128,9 @@ def handler(
     return EbscoAdapterLoaderEvent(s3_location=s3_location)  # add job_id back later
 
 
-def lambda_handler(event: EventBridgeTriggerEvent, context: Any) -> dict[str, Any]:
+def lambda_handler(event: EbscoAdapterTriggerEvent, context: Any) -> dict[str, Any]:
     return handler(
-        EventBridgeTriggerEvent.model_validate(event), EbscoAdapterTriggerConfig()
+        EbscoAdapterTriggerEvent.model_validate(event), EbscoAdapterTriggerConfig()
     ).model_dump()
 
 
@@ -144,7 +144,7 @@ def local_handler() -> None:
 
     args = parser.parse_args()
 
-    event = EventBridgeTriggerEvent(time=datetime.now().strftime("%Y%m%dT%H%M"))
+    event = EbscoAdapterTriggerEvent(time=datetime.now().strftime("%Y%m%dT%H%M"))
     config = EbscoAdapterTriggerConfig(is_local=args.local)
 
     handler(event=event, config=config)
