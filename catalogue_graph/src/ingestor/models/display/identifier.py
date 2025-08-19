@@ -63,7 +63,7 @@ class DisplayIdentifier(BaseModel):
         identifier: Identifiers | Unidentifiable,
     ) -> Generator["DisplayIdentifier"]:
         if isinstance(identifier, Unidentifiable):
-            return None
+            return
 
         if identifier.source_identifier is not None:
             yield DisplayIdentifier.from_source_identifier(identifier.source_identifier)
