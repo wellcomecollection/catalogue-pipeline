@@ -14,7 +14,8 @@ data "aws_iam_policy_document" "iceberg_write" {
       "glue:GetCatalog",
       "glue:CreateDatabase",
       "glue:CreateTable",
-      "glue:GetTable"
+      "glue:GetTable",
+      "glue:UpdateTable"
     ]
 
     resources = [
@@ -28,6 +29,7 @@ data "aws_iam_policy_document" "iceberg_write" {
     actions = [
       "glue:CreateTable",
       "glue:GetTable",
+      "glue:UpdateTable"
     ]
 
     resources = [
@@ -52,8 +54,48 @@ data "aws_iam_policy_document" "s3_read" {
   }
 }
 
-# Create the Glue database that the Lambda will use
-resource "aws_glue_catalog_database" "wellcomecollection_catalogue" {
-  name        = "wellcomecollection_catalogue"
-  description = "Database for Wellcome Collection catalogue data from EBSCO adapter"
+# Policy for writing to the EBSCO adapter S3 bucket
+data "aws_iam_policy_document" "s3_write" {
+  statement {
+    actions = [
+      "s3:PutObject",
+    ]
+
+    resources = [
+      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter",
+      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*"
+    ]
+  }
+}
+
+# Allow read ssm parameters
+data "aws_iam_policy_document" "ssm_read" {
+  statement {
+    actions = [
+      "ssm:GetParameter",
+      "ssm:GetParameters",
+      "ssm:GetParametersByPath"
+    ]
+
+    resources = [
+      "arn:aws:ssm:eu-west-1:760097843905:parameter/catalogue_pipeline/ebsco_adapter/*"
+    ]
+  }
+
+  # KMS permissions needed for WithDecryption=True on SecureString parameters
+  statement {
+    actions = [
+      "kms:Decrypt"
+    ]
+
+    resources = [
+      "arn:aws:kms:eu-west-1:760097843905:key/*"
+    ]
+
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["ssm.eu-west-1.amazonaws.com"]
+    }
+  }
 }
