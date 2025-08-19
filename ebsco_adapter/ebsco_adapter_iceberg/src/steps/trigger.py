@@ -125,7 +125,7 @@ def handler(
     #     "%Y%m%dT%H%M"
     # )
     print(f"Sending S3 location downstream: {s3_location}")
-    return EbscoAdapterLoaderEvent(s3_location=s3_location)  # add job_id back later
+    return EbscoAdapterLoaderEvent(file_location=s3_location)  # add job_id back later
 
 
 def lambda_handler(event: EbscoAdapterTriggerEvent, context: Any) -> dict[str, Any]:
