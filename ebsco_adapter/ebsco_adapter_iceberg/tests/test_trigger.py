@@ -41,14 +41,22 @@ class TestMostRecentValidFile:
 
     def test_invalid_date_format(self) -> None:
         """Test that files with invalid date format fail validation"""
-        invalid_filenames = [
-            "ebz-s7451719-2024032-1.xml",  # Missing digit
+        # Files that don't match the regex pattern should return None
+        pattern_invalid_filenames = [
+            "ebz-s7451719-2024032-1.xml",  # Missing digit (doesn't match \d{8})
+            "ebz-s7451719-abc-1.xml",  # Non-numeric date (doesn't match \d{8})
+        ]
+        assert get_most_recent_valid_file(pattern_invalid_filenames) is None
+
+        # Files that match the pattern but have invalid dates should raise ValueError
+        date_invalid_filenames = [
             "ebz-s7451719-20240332-1.xml",  # Invalid day
             "ebz-s7451719-20241301-1.xml",  # Invalid month
-            "ebz-s7451719-abc-1.xml",  # Non-numeric date
         ]
-
-        assert get_most_recent_valid_file(invalid_filenames) is None
+        
+        for filename in date_invalid_filenames:
+            with pytest.raises(ValueError):
+                get_most_recent_valid_file([filename])
 
 
 class TestSyncFiles:

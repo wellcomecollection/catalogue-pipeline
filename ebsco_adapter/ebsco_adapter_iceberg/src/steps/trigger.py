@@ -30,26 +30,15 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
     """Filter valid files, sort by date (newest first), and return the most recent one."""
     """Valid files are in the format ebz-s7451719-20240322-1.xml"""
 
-    valid_files = []
-    for filename in filenames:
-        try:
-            # Extract the date part (third component when split by '-')
-            date_part = filename.split("-")[2]
-            # Try to parse the date to validate it's a valid date
-            parsed_date = datetime.strptime(date_part, "%Y%m%d")
-            # Filename must match the expected pattern
-            if bool(re.match(r"^ebz-s7451719-\d{8}-.*\.xml$", filename)):
-                valid_files.append((filename, parsed_date))
-        except (ValueError, IndexError):
-            # Skip invalid files
-            continue
+    # Extract valid files with their parsed dates
+    valid_files = [
+        (filename, datetime.strptime(match.group(1), "%Y%m%d"))
+        for filename in filenames
+        if (match := re.match(r"^ebz-s7451719-(\d{8})-.*\.xml$", filename))
+    ]
 
-    if not valid_files:
-        return None
-
-    # Sort by date (newest first) and return the filename with highest date
-    valid_files.sort(key=lambda x: x[1], reverse=True)
-    return valid_files[0][0]
+    # Return the filename with the most recent date, or None if no valid files
+    return max(valid_files, key=lambda x: x[1])[0] if valid_files else None
 
 
 def sync_files(
