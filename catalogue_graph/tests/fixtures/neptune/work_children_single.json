@@ -1,0 +1,83 @@
+[
+  {
+    "work": {
+      "~id": "xfpdsw92",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "xfpdsw92",
+        "label": "Large photograph of Pontecorvo at his microscope",
+        "reference_number": "UGC 198/10/3/5/3",
+        "type": "Work"
+      }
+    },
+    "parts": 0
+  },
+  {
+    "work": {
+      "~id": "ntjmm35c",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "ntjmm35c",
+        "label": "Mounted Royal Society photograph of Pontecorvo looking at the camera",
+        "reference_number": "UGC 198/10/3/5/2",
+        "type": "Work"
+      }
+    },
+    "parts": 0
+  },
+  {
+    "work": {
+      "~id": "zd4dq3wu",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "zd4dq3wu",
+        "label": "Pontecorvo's Imperial Cancer Research Fund staff photograph",
+        "reference_number": "UGC 198/10/3/5/5",
+        "type": "Work"
+      }
+    },
+    "parts": 0
+  },
+  {
+    "work": {
+      "~id": "mc5wd5zz",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "mc5wd5zz",
+        "label": "Pontecorvo's Imperial Cancer Research Fund staff photograph",
+        "reference_number": "UGC 198/10/3/5/4",
+        "type": "Work"
+      }
+    },
+    "parts": 0
+  },
+  {
+    "work": {
+      "~id": "kwhgj69c",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "kwhgj69c",
+        "label": "Mounted Royal Society photograph of Pontecorvo looking away from the camera",
+        "reference_number": "UGC 198/10/3/5/1",
+        "type": "Work"
+      }
+    },
+    "parts": 0
+  }
+]
+

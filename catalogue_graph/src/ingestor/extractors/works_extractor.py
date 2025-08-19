@@ -43,6 +43,12 @@ class GraphWorksExtractor(GraphBaseExtractor):
         work_mapping = {}
         for work in result["docs"]:
             work_id = work["_id"]
+
+            if "error" in work:
+                raise ValueError(
+                    f"Failed to retrieve work from Elasticsearch: {work['error']}"
+                )
+
             if not work["found"]:
                 print(f"Work {work_id} does not exist in the denormalised index.")
                 continue

@@ -1,4 +1,3 @@
-import json
 from enum import Enum, auto
 
 import polars as pl
@@ -6,6 +5,7 @@ import pytest
 from test_mocks import (
     MockRequest,
     MockSmartOpen,
+    add_neptune_mock_response,
     get_mock_ingestor_indexer_event,
     get_mock_ingestor_loader_event,
 )
@@ -53,9 +53,7 @@ def get_mock_neptune_concept(include: list[MockNeptuneResponseItem]) -> dict:
     return fixture
 
 
-def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> None:
-    query = " ".join(expected_query.split())  # normalise query
-
+def _add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> None:
     expected_params = {
         "start_offset": 0,
         "limit": 1,
@@ -63,13 +61,7 @@ def add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> 
         "related_to_limit": 10,
         "number_of_shared_works_threshold": 3,
     }
-
-    MockRequest.mock_response(
-        method="POST",
-        url="https://test-host.com:8182/openCypher",
-        json_data={"results": mock_results},
-        body=json.dumps({"query": query, "parameters": expected_params}),
-    )
+    add_neptune_mock_response(expected_query, expected_params, mock_results)
 
 
 def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
@@ -86,36 +78,36 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     if MockNeptuneResponseItem.CONCEPT_RELATED_TO in include:
         related_to_results = [load_json_fixture("neptune/related_to_query_single.json")]
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=CONCEPT_QUERY, mock_results=[get_mock_neptune_concept(include)]
     )
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=get_related_query("RELATED_TO"),
         mock_results=related_to_results,
     )
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=get_related_query("HAS_FIELD_OF_WORK"),
         mock_results=[],
     )
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
         mock_results=broader_than_results,
     )
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=get_related_query("HAS_FIELD_OF_WORK", "to"),
         mock_results=people_results,
     )
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=get_related_query("NARROWER_THAN"),
         mock_results=[],
     )
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=get_referenced_together_query(
             source_referenced_types=["Person", "Organisation"],
             related_referenced_types=["Person", "Organisation"],
@@ -125,7 +117,7 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
         mock_results=[],
     )
 
-    add_neptune_mock_response(
+    _add_neptune_mock_response(
         expected_query=get_referenced_together_query(
             related_referenced_types=[
                 "Concept",
