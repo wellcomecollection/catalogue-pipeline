@@ -11,7 +11,6 @@ class DisplayRelation(BaseModel):
     referenceNumber: str | None = None
     partOf: list[Self] | None = None
     totalParts: int
-    # totalDescendentParts: int # TODO: Is this field needed?
     type: str = "Work"
 
     @staticmethod
