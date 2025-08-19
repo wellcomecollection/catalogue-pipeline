@@ -49,6 +49,11 @@ def handler(
     pipeline_date = event.pipeline_date
     index_date = event.index_date
 
+    if pipeline_date == "dev":
+        print(
+            "No pipeline date specified. Will connect to a local Elasticsearch instance."
+        )
+
     transformer = create_transformer(event, config)
     s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"
     s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.ingestor_type}/{s3_object_key}"

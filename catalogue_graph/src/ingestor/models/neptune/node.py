@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator
 
 from models.graph_node import BaseNode, Concept, SourceConcept, Work
 
@@ -8,14 +8,15 @@ class NeptuneBaseNode(BaseModel):
     labels: list[str] = Field(alias="~labels")
     properties: BaseNode = Field(alias="~properties")
 
-    @model_validator(mode="before")
+    @field_validator("properties", mode="before")
     @classmethod
     def process_lists(cls, data: dict) -> dict:
+        data = data.copy()
         list_fields = ["alternative_labels", "alternative_ids"]
         for field in list_fields:
-            if field in data["~properties"]:
+            if field in data:
                 # The catalogue graph stores lists as strings, with individual items separated by `||`.
-                data["~properties"][field] = data["~properties"][field].split("||")
+                data[field] = data[field].split("||")
 
         return data
 
