@@ -19,7 +19,7 @@ class DisplayRelation(BaseModel):
             id=node.properties.id,
             title=node.properties.label,
             type=node.properties.type,
-            referenceNumber="",  # TODO: Add reference number
+            referenceNumber=node.properties.reference_number,
             totalParts=total_parts,
         )
 
