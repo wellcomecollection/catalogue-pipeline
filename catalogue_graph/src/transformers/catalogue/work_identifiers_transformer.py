@@ -7,7 +7,6 @@ from models.graph_edge import (
 )
 from models.graph_node import PathIdentifier
 from sources.elasticsearch_source import ElasticsearchSource
-
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork

@@ -12,7 +12,9 @@ from utils.aws import get_neptune_client
 
 
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> dict[str, typing.Any]:
-    s3_file_uri = get_bulk_load_s3_path(event)
+    s3_file_uri = get_bulk_load_s3_path(
+        event.transformer_type, event.entity_type, event.pipeline_date
+    )
     print(f"Initiating bulk load from {s3_file_uri}.")
 
     neptune_client = get_neptune_client(is_local)

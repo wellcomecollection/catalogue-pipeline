@@ -12,7 +12,7 @@ from models.events import (
 )
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
-from utils.aws import get_neptune_client
+from utils.aws import get_bulk_load_s3_path, get_neptune_client
 
 
 def handler(event: ExtractorEvent, is_local: bool = False) -> None:
@@ -37,7 +37,9 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
             neptune_client, event.entity_type, event.sample_size
         )
     elif event.stream_destination == "s3":
-        s3_uri = get_bulk_load_s3_path(event)
+        s3_uri = get_bulk_load_s3_path(
+            event.transformer_type, event.entity_type, event.pipeline_date
+        )
         transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
     elif event.stream_destination == "sns":
         topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN

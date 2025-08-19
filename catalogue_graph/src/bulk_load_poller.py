@@ -3,8 +3,9 @@ import datetime
 import json
 import typing
 
-import config
 import smart_open
+
+import config
 from models.events import DEFAULT_INSERT_ERROR_THRESHOLD, BulkLoadPollerEvent
 from utils.aws import get_neptune_client
 from utils.slack import publish_report
@@ -15,7 +16,7 @@ def log_payload(payload: dict, pipeline_date: str) -> None:
     # Extract the name of the bulk load file to use as a key in the JSON log.
     bulk_load_file_uri = payload["overallStatus"]["fullUri"]
     bulk_load_file_name = bulk_load_file_uri.split("/")[-1].split(".")[0]
-    
+
     file_name = "report.neptune_bulk_loader.json"
     prefix = f"{config.BULK_LOADER_S3_PREFIX}/{pipeline_date}"
     log_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
@@ -61,8 +62,8 @@ def response_from_event(event: BulkLoadPollerEvent, status: str):
         "insert_error_threshold": event.insert_error_threshold,
         "status": status,
     }
-    
-    
+
+
 def handler(
     event: BulkLoadPollerEvent, is_local: bool = False
 ) -> dict[str, typing.Any]:

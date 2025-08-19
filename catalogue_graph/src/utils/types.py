@@ -50,4 +50,3 @@ TransformerType = Literal[
 ]
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["graph", "s3", "sns", "local", "void"]
-

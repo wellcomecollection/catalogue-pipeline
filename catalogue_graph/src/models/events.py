@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Self
 
 from pydantic import BaseModel
+
 from utils.types import EntityType, StreamDestination, TransformerType
 
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000

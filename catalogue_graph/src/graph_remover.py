@@ -3,8 +3,9 @@ import typing
 from datetime import datetime, timedelta
 from typing import Literal
 
-import config
 import polars as pl
+
+import config
 from models.events import (
     GraphPipelineEvent,
     GraphRemoverEvent,
@@ -41,7 +42,9 @@ def get_previous_ids(event: GraphRemoverEvent) -> set[str]:
 
 def get_current_ids(event: GraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest bulk load file for the specified transformer and entity type."""
-    s3_file_uri = get_bulk_load_s3_path(event.transformer_type, event.entity_type, event.pipeline_date)
+    s3_file_uri = get_bulk_load_s3_path(
+        event.transformer_type, event.entity_type, event.pipeline_date
+    )
 
     ids = set(row[":ID"] for row in get_csv_from_s3(s3_file_uri))
     print(f"Retrieved {len(ids)} ids from the current bulk loader file.")
@@ -55,10 +58,12 @@ def update_node_ids_snapshot(event: GraphRemoverEvent, ids: set[str]) -> None:
     df_to_s3_parquet(df, s3_file_uri)
 
 
-def log_ids(event: GraphRemoverEvent, ids: set[str], folder: GraphRemoverFolder) -> None:
+def log_ids(
+    event: GraphRemoverEvent, ids: set[str], folder: GraphRemoverFolder
+) -> None:
     """Append IDs which were added/removed as part of this run to the corresponding log file."""
     s3_file_uri = get_s3_uri(event, folder)
-    
+
     try:
         df = df_from_s3_parquet(s3_file_uri)
     except (OSError, KeyError):
