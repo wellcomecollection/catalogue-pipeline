@@ -25,6 +25,11 @@ class EbscoAdapterLoaderConfig(BaseModel):
 
 class EbscoAdapterLoaderEvent(BaseModel):
     file_location: str
+    # job_id: str # add that back later
+
+
+class EbscoAdapterLoaderResult(BaseModel):
+    snapshot_id: str | None = None
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> str | None:
