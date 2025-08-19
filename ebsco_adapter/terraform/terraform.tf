@@ -35,8 +35,8 @@ data "terraform_remote_state" "reindexer" {
       role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
     }
 
-    bucket   = "wellcomecollection-platform-infra"
-    key      = "terraform/catalogue/reindexer.tfstate"
-    region   = "eu-west-1"
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/catalogue/reindexer.tfstate"
+    region = "eu-west-1"
   }
 }
