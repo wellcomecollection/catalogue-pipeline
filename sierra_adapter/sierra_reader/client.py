@@ -4,7 +4,7 @@ import os
 
 import boto3
 import httpx
-from tenacity import retry, stop_after_attempt
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 from aws import get_secret_string
 
@@ -18,7 +18,8 @@ class SierraClient:
         self.oauth_key = oauth_key
         self.oauth_secret = oauth_secret
 
-        self.client = httpx.Client(base_url=api_url)
+        # Set timeout to 10 seconds (instead of the default 5 seconds)
+        self.client = httpx.Client(base_url=api_url, timeout=10)
 
         self.responses = []
         self._refresh_auth_token()
@@ -88,7 +89,10 @@ class SierraClient:
             "Connection": "close",
         }
 
-    @retry(stop=stop_after_attempt(3))
+    # Try up to five times with an exponential backoff strategy (retries after 2s, 4s, 8s, and 16s)
+    @retry(
+        wait=wait_exponential(multiplier=2, min=2, max=60), stop=stop_after_attempt(5)
+    )
     def _get_objects_from_id(self, path, id, params):
         id_param = {"id": f"[{id},]"}
         merged_params = {**id_param, **params}

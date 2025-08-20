@@ -42,7 +42,7 @@ class AggregateWorkTransformer:
     @property
     def work_type(self) -> Generator[AggregatableField]:
         if self.data.format is None:
-            return None
+            return
 
         yield AggregatableField(**self.data.format.model_dump())
 

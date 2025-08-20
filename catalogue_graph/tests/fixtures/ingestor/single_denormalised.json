@@ -1,0 +1,150 @@
+{
+  "version": 7,
+  "data": {
+    "title": "Pontecorvo's official/staff photographs",
+    "otherIdentifiers": [
+      {
+        "identifierType": {
+          "id": "calm-ref-no"
+        },
+        "ontologyType": "Work",
+        "value": "UGC198/10/3/5"
+      },
+      {
+        "identifierType": {
+          "id": "calm-altref-no"
+        },
+        "ontologyType": "Work",
+        "value": "UGC 198/10/3/5"
+      },
+      {
+        "identifierType": {
+          "id": "sierra-system-number"
+        },
+        "ontologyType": "Work",
+        "value": "b19874121"
+      },
+      {
+        "identifierType": {
+          "id": "sierra-identifier"
+        },
+        "ontologyType": "Work",
+        "value": "1987412"
+      },
+      {
+        "identifierType": {
+          "id": "wellcome-digcode"
+        },
+        "ontologyType": "Work",
+        "value": "diggenetics"
+      }
+    ],
+    "alternativeTitles": [],
+    "format": {
+      "id": "h",
+      "label": "Archives and manuscripts"
+    },
+    "physicalDescription": "5 large photographs",
+    "subjects": [],
+    "genres": [],
+    "contributors": [],
+    "production": [
+      {
+        "label": "1955-1978",
+        "places": [],
+        "agents": [],
+        "dates": [
+          {
+            "id": {
+              "type": "Unidentifiable"
+            },
+            "label": "1955-1978",
+            "range": {
+              "from": "1955-01-01T00:00:00Z",
+              "to": "1978-12-31T23:59:59.999999999Z",
+              "label": "1955-1978"
+            }
+          }
+        ]
+      }
+    ],
+    "languages": [],
+    "notes": [
+      {
+        "noteType": {
+          "id": "location-of-duplicates",
+          "label": "Location of duplicates"
+        },
+        "contents": "A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."
+      },
+      {
+        "noteType": {
+          "id": "location-of-original",
+          "label": "Location of original"
+        },
+        "contents": "The original material is held at <a href='http://www.gla.ac.uk/services/archives/' rel='nofollow'>Glasgow University Archive Services.</a> This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics."
+      },
+      {
+        "noteType": {
+          "id": "terms-of-use",
+          "label": "Terms of use"
+        },
+        "contents": "Open and available at Glasgow University Archives Service."
+      }
+    ],
+    "items": [],
+    "holdings": [],
+    "collectionPath": {
+      "path": "UGC198/10/3/5",
+      "label": "UGC 198/10/3/5"
+    },
+    "referenceNumber": "UGC 198/10/3/5",
+    "imageData": [],
+    "workType": "Series",
+    "formerFrequency": [],
+    "designation": []
+  },
+  "state": {
+    "sourceIdentifier": {
+      "identifierType": {
+        "id": "calm-record-id"
+      },
+      "ontologyType": "Work",
+      "value": "20cd370b-76ef-4d92-96b5-2f0cc27292f7"
+    },
+    "canonicalId": "a24esypq",
+    "mergedTime": "2025-05-14T16:03:39.155351Z",
+    "sourceModifiedTime": "2023-12-04T12:35:18Z",
+    "availabilities": [],
+    "mergeCandidates": [
+      {
+        "id": {
+          "canonicalId": "pawwq3yp",
+          "sourceIdentifier": {
+            "identifierType": {
+              "id": "calm-ref-no"
+            },
+            "ontologyType": "Work",
+            "value": "UGC198/10/3/5"
+          },
+          "otherIdentifiers": []
+        },
+        "reason": "Archivematica work"
+      }
+    ]
+  },
+  "redirectSources": [
+    {
+      "canonicalId": "ygwq7j69",
+      "sourceIdentifier": {
+        "identifierType": {
+          "id": "sierra-system-number"
+        },
+        "ontologyType": "Work",
+        "value": "b19874121"
+      },
+      "otherIdentifiers": []
+    }
+  ],
+  "type": "Visible"
+}

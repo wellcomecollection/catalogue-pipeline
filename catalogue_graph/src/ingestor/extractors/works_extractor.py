@@ -24,10 +24,16 @@ class ExtractedWork(BaseModel):
 
 
 class GraphWorksExtractor(GraphBaseExtractor):
+    def __init__(
+        self, pipeline_date: str, start_offset: int, end_index: int, is_local: bool
+    ):
+        super().__init__(start_offset, end_index, is_local)
+        self.pipeline_date = pipeline_date
+
     def get_es_works(self, work_ids: list[str]) -> dict:
-        es_client = get_client("graph_extractor", "2025-05-01", True)
+        es_client = get_client("graph_extractor", self.pipeline_date, True)
         index_name = get_standard_index_name(
-            config.ES_DENORMALISED_INDEX_NAME, "2025-05-01"
+            config.ES_DENORMALISED_INDEX_NAME, self.pipeline_date
         )
 
         start_time = time.time()
@@ -37,6 +43,12 @@ class GraphWorksExtractor(GraphBaseExtractor):
         work_mapping = {}
         for work in result["docs"]:
             work_id = work["_id"]
+
+            if "error" in work:
+                raise ValueError(
+                    f"Failed to retrieve work from Elasticsearch: {work['error']}"
+                )
+
             if not work["found"]:
                 print(f"Work {work_id} does not exist in the denormalised index.")
                 continue
@@ -78,7 +90,14 @@ class GraphWorksExtractor(GraphBaseExtractor):
         all_es_works = self.get_es_works(work_ids)
 
         for work_id in work_ids:
-            es_work = all_es_works[work_id]
+            es_work = all_es_works.get(work_id)
+
+            # Normally, the catalogue graph only stores `Visible` works extracted from the denormalised index. However,
+            # in cases where the status of a work changes from `Visible` to some other status (e.g. `Deleted`), it might
+            # take a while for this change to propagate to the graph. Therefore, it is possible for a work which exists
+            # in the graph to not exist as a `Visible` work in the denormalised index. When this happens, skip the work.
+            if es_work is None:
+                continue
 
             work_hierarchy = WorkHierarchy(
                 id=work_id,

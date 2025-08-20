@@ -31,7 +31,7 @@ def create_transformer(
         )
     if event.ingestor_type == "works":
         return ElasticsearchWorksTransformer(
-            event.start_offset, event.end_index, config.is_local
+            event.pipeline_date, event.start_offset, event.end_index, config.is_local
         )
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
@@ -48,6 +48,11 @@ def handler(
 
     pipeline_date = event.pipeline_date
     index_date = event.index_date
+
+    if pipeline_date == "dev":
+        print(
+            "No pipeline date specified. Will connect to a local Elasticsearch instance."
+        )
 
     transformer = create_transformer(event, config)
     s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"

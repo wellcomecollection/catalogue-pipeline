@@ -10,8 +10,12 @@ from .work_query_transformer import QueryWorkTransformer
 
 
 class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
-    def __init__(self, start_offset: int, end_index: int, is_local: bool) -> None:
-        self.source = GraphWorksExtractor(start_offset, end_index, is_local)
+    def __init__(
+        self, pipeline_date: str, start_offset: int, end_index: int, is_local: bool
+    ) -> None:
+        self.source = GraphWorksExtractor(
+            pipeline_date, start_offset, end_index, is_local
+        )
 
     def _transform_display(self, extracted: ExtractedWork) -> DisplayWork:
         work = extracted.work

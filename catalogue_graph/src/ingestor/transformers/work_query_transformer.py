@@ -129,7 +129,9 @@ class QueryWorkTransformer:
     @property
     def genre_identifiers(self) -> Generator[str]:
         for genre in self.data.genres:
-            # TODO: Add comment
+            # Only the first concept counts, the others include things like places and periods that help
+            # a reader understand more about the genre of a given item, but do not contribute meaningfully
+            # to a filter, so are excluded from the query section.
             first_concept = genre.concepts[0]
             yield from first_concept.id.get_identifier_values()
 
