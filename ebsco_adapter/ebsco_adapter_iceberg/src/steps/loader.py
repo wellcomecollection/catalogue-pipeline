@@ -1,5 +1,6 @@
 import argparse
 import sys
+from datetime import datetime
 from typing import IO, Any
 
 import pyarrow as pa
@@ -13,7 +14,7 @@ from iceberg_updates import update_table
 from schemata import ARROW_SCHEMA
 from steps.transformer import EbscoAdapterTransformerEvent
 from table_config import get_glue_table, get_local_table
-from utils.tracking import is_file_already_processed, record_processed_file
+from utils.tracking import record_processed_file
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
@@ -24,12 +25,9 @@ class EbscoAdapterLoaderConfig(BaseModel):
 
 
 class EbscoAdapterLoaderEvent(BaseModel):
+    job_id: str
     file_location: str
-    # job_id: str # add that back later
-
-
-class EbscoAdapterLoaderResult(BaseModel):
-    snapshot_id: str | None = None
+    is_processed: bool
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> str | None:
@@ -79,11 +77,6 @@ def handler(
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
-    # Check if this file has already been processed
-    if is_file_already_processed(event.file_location):
-        print(f"File {event.file_location} has already been processed, skipping...")
-        return EbscoAdapterTransformerEvent(changeset_id=None)
-
     if config_obj.use_glue_table:
         print("Using AWS Glue table...")
         table = get_glue_table(
@@ -104,9 +97,8 @@ def handler(
     with smart_open.open(event.file_location, "rb") as f:
         changeset_id = update_from_xml_file(table, f)
 
-    # Record the processed file to S3 if processing was successful
-    if changeset_id:
-        record_processed_file(event.file_location)
+    # Record the processed file to S3
+    record_processed_file(event.job_id, event.file_location, changeset_id)
 
     return EbscoAdapterTransformerEvent(changeset_id=changeset_id)
 
@@ -132,7 +124,11 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 
     args = parser.parse_args()
 
-    event = EbscoAdapterLoaderEvent(file_location=args.xmlfile)
+    event = EbscoAdapterLoaderEvent(
+        file_location=args.xmlfile,
+        is_processed=False,
+        job_id=datetime.now().strftime("%Y%m%dT%H%M"),
+    )
     config_obj = EbscoAdapterLoaderConfig(use_glue_table=args.use_glue_table)
 
     return handler(event=event, config_obj=config_obj)
