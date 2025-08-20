@@ -104,7 +104,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The concepts index date that is being ingested to, will default to 'dev'.",
+        help="The index date that is being ingested to, will default to 'dev'.",
         required=False,
         default="dev",
     )
@@ -114,6 +114,13 @@ def local_handler() -> None:
         help="The ID of the job to process, will default to 'dev'.",
         required=False,
         default="dev",
+    )
+    parser.add_argument(
+        "--ingestor-type",
+        type=str,
+        choices=["concepts", "works"],
+        help="The type of the records being ingested",
+        required=True
     )
     args = parser.parse_args()
 
