@@ -9,6 +9,7 @@ from typing import Any, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
@@ -324,6 +325,7 @@ class MockElasticsearchClient:
     @classmethod
     def reset_mocks(cls) -> None:
         cls.inputs = []
+        cls.indexed_documents = defaultdict(dict[str, dict])
 
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:
@@ -357,6 +359,8 @@ class MockElasticsearchClient:
 
     def search(self, body: dict) -> dict:
         search_after = body.get("search_after")
+
+        print(self.indexed_documents)
 
         all_documents = self.indexed_documents[self.pit_index].values()
         sorted_documents = sorted(all_documents, key=lambda d: d["_id"])

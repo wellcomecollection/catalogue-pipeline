@@ -1,8 +1,9 @@
 import argparse
 from typing import Self
 
-import utils.bulk_load as bulk_load
 from pydantic import BaseModel
+
+import utils.bulk_load as bulk_load
 from utils.bulk_load import IncrementalWindow
 from utils.types import EntityType, StreamDestination, TransformerType
 

@@ -1,19 +1,20 @@
+from test_mocks import mock_es_secrets
+from test_utils import (
+    add_mock_denormalised_documents,
+    add_mock_transformer_outputs_for_ontologies,
+    check_bulk_load_edge,
+)
+
 from models.graph_edge import (
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
-from test_mocks import mock_es_secrets
-from test_utils import (
-    add_mock_denormalised_documents,
-    add_mock_transformer_outputs,
-    check_bulk_load_edge,
-)
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
 def test_catalogue_concepts_transformer_nodes() -> None:
-    add_mock_transformer_outputs(["loc", "mesh"])
+    add_mock_transformer_outputs_for_ontologies(["loc", "mesh"])
     add_mock_denormalised_documents()
 
     transformer = CatalogueConceptsTransformer("dev", None, True)
@@ -27,10 +28,11 @@ def test_catalogue_concepts_transformer_nodes() -> None:
 
 
 def test_catalogue_concepts_transformer_edges() -> None:
-    add_mock_transformer_outputs(["loc", "mesh"], "2027-12-24")
-    add_mock_denormalised_documents()
-    mock_es_secrets("graph_extractor", "2027-12-24", True)
-    transformer = CatalogueConceptsTransformer("2027-12-24", None, True)
+    pipeline_date = "2027-12-24"
+    add_mock_transformer_outputs_for_ontologies(["loc", "mesh"], pipeline_date)
+    add_mock_denormalised_documents(pipeline_date)
+    mock_es_secrets("graph_extractor", pipeline_date, True)
+    transformer = CatalogueConceptsTransformer(pipeline_date, None, True)
 
     edges = list(transformer._stream_edges())
     assert len(edges) == 7
@@ -94,3 +96,17 @@ def test_catalogue_concepts_transformer_edges() -> None:
             ),
         ),
     )
+
+
+def test_mismatched_pipeline_date() -> None:
+    pipeline_date = "2027-12-24"
+    add_mock_transformer_outputs_for_ontologies(["loc", "mesh"], pipeline_date)
+    mock_es_secrets("graph_extractor", pipeline_date, True)
+    transformer = CatalogueConceptsTransformer(pipeline_date, None, True)
+
+    # Works exist in an index with a different pipeline date
+    add_mock_denormalised_documents("2025-01-01")
+
+    edges = list(transformer._stream_edges())
+    print(edges)
+    assert len(edges) == 0

@@ -32,7 +32,7 @@ def extract_concepts_from_work(
 class CatalogueConceptsSource(BaseSource):
     def __init__(
         self,
-        pipeline_date: str | None,
+        pipeline_date: str,
         query: dict | None = None,
         fields: list | None = None,
         window: IncrementalWindow | None = None,

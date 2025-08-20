@@ -23,6 +23,12 @@ def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerTy
         transformers = get_args(MeshTransformerType)
     elif ontology == "catalogue":
         transformers = get_args(CatalogueTransformerType)
+    elif ontology == "wikidata_linked_loc":
+        transformers = tuple(t for t in get_args(WikidataTransformerType) if "loc" in t)
+    elif ontology == "wikidata_linked_mesh":
+        transformers = tuple(
+            t for t in get_args(WikidataTransformerType) if "mesh" in t
+        )
     else:
         raise ValueError(f"Unknown ontology {ontology}.")
 

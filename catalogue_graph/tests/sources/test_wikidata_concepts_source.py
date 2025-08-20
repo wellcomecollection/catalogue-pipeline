@@ -2,7 +2,7 @@ import json
 from typing import Literal
 
 from test_mocks import MockRequest
-from test_utils import add_mock_transformer_outputs, load_fixture
+from test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 
 from config import WIKIDATA_SPARQL_URL
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
@@ -42,7 +42,7 @@ def _add_mock_wikidata_requests(
 
 
 def test_wikidata_concepts_source_edges() -> None:
-    add_mock_transformer_outputs(["loc"], "2020-05-05")
+    add_mock_transformer_outputs_for_ontologies(["loc"], "2020-05-05")
     _add_mock_wikidata_requests("edges", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
@@ -75,7 +75,7 @@ def test_wikidata_concepts_source_edges() -> None:
 
 
 def test_wikidata_concepts_source_nodes() -> None:
-    add_mock_transformer_outputs(["loc"])
+    add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("nodes", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
@@ -93,11 +93,11 @@ def test_wikidata_concepts_source_nodes() -> None:
 
 
 def test_wikidata_linked_ontology_id_checker() -> None:
-    add_mock_transformer_outputs(["loc"], "1900-01-01")
+    add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01")
 
     assert is_id_in_ontology("sh00000001", "loc", "1900-01-01")
     assert not is_id_in_ontology("sh00000001000", "loc", "1900-01-01")
 
-    assert "sh00000001" not in get_extracted_ids("loc", "locations", "1900-01-01")
-    assert "tgrefwdw" not in get_extracted_ids("loc", "locations", "1900-01-01")
-    assert "sh00000015" not in get_extracted_ids("loc", "locations", "1900-01-01")
+    assert "sh00000001" not in get_extracted_ids("loc_locations", "1900-01-01")
+    assert "tgrefwdw" not in get_extracted_ids("loc_locations", "1900-01-01")
+    assert "sh00000015" in get_extracted_ids("loc_locations", "1900-01-01")
