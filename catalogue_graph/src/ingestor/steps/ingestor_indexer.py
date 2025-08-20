@@ -8,6 +8,7 @@ import elasticsearch.helpers
 from pydantic import BaseModel
 
 import utils.elasticsearch
+from ingestor.models.indexable import IndexableRecord
 from ingestor.models.indexable_concept import IndexableConcept
 from ingestor.models.indexable_work import IndexableWork
 from ingestor.models.step_events import (
@@ -19,7 +20,7 @@ from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import get_standard_index_name
 from utils.types import IngestorType
 
-RECORD_CLASSES: dict[IngestorType, type[BaseModel]] = {
+RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
     "concepts": IndexableConcept,
     "works": IndexableWork
 }
@@ -31,18 +32,18 @@ class IngestorIndexerConfig(BaseModel):
 
 def generate_operations(
         index_name: str,
-        indexable_data: list[IndexableConcept] | list[IndexableWork]) -> Generator[dict]:
+        indexable_data: list[IndexableRecord]) -> Generator[dict]:
     for datum in indexable_data:
         yield {
             "_index": index_name,
-            "_id": datum.query.id,
+            "_id": datum.get_id(),
             "_source": datum.model_dump(),
         }
 
 
 def load_data(
         ingestor_type: IngestorType,
-        indexable_data: list[IndexableConcept] | list[IndexableWork],
+        indexable_data: list[IndexableRecord],
         pipeline_date: str | None,
         index_date: str | None,
         is_local: bool,
