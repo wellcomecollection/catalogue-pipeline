@@ -1,7 +1,6 @@
 import argparse
-import sys
 from datetime import datetime
-from typing import IO, Any
+from typing import IO, Any, cast
 
 import pyarrow as pa
 import smart_open
@@ -10,10 +9,10 @@ from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
 import config
-from iceberg_updates import update_table
 from schemata import ARROW_SCHEMA
 from steps.transformer import EbscoAdapterTransformerEvent
 from table_config import get_glue_table, get_local_table
+from utils.iceberg import IcebergTableClient
 from utils.tracking import record_processed_file
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
@@ -40,11 +39,8 @@ def load_xml(xmlfile: IO[bytes]) -> etree._Element:
 
 def update_from_xml(table: IcebergTable, collection: etree._Element) -> str | None:
     records = nodes_to_records(collection)
-    return update_table(
-        table,
-        data_to_pa_table(records),
-        EBSCO_NAMESPACE,
-    )
+    updater = IcebergTableClient(table, default_namespace=EBSCO_NAMESPACE)
+    return updater.update(data_to_pa_table(records))
 
 
 def nodes_to_records(collection: etree._Element) -> list[dict[str, str]]:
@@ -52,23 +48,20 @@ def nodes_to_records(collection: etree._Element) -> list[dict[str, str]]:
 
 
 def node_to_record(node: etree._Element) -> dict[str, str]:
-    ebsco_id = extract_id(node)
-    return {
-        "namespace": EBSCO_NAMESPACE,
-        "id": ebsco_id,
-        "content": etree.tostring(node, encoding="unicode"),
-    }
-
-
-def extract_id(node: etree._Element) -> str:
-    id_field = node.find("./{http://www.loc.gov/MARC21/slim}controlfield[@tag='001']")
-    if id_field is None:
-        raise ValueError(f"id controlfield could not be found in {node}")
-    return id_field.text or ""
+    controlfield = cast(
+        list[str], node.xpath("./*[local-name()='controlfield' and @tag='001']/text()")
+    )
+    if not controlfield:
+        raise Exception("Could not find controlfield with tag 001")
+    record_id: str = controlfield[0]
+    # serialize XML
+    content = etree.tostring(node, encoding="unicode", pretty_print=False)
+    return {"id": record_id, "content": content}
 
 
 def data_to_pa_table(data: list[dict[str, str]]) -> pa.Table:
-    return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
+    namespaced = [{"namespace": EBSCO_NAMESPACE, **row} for row in data]
+    return pa.Table.from_pylist(namespaced, schema=ARROW_SCHEMA)
 
 
 def handler(
@@ -104,9 +97,13 @@ def handler(
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
-    return handler(
-        EbscoAdapterLoaderEvent.model_validate(event), EbscoAdapterLoaderConfig()
-    ).model_dump()
+    try:
+        config_obj = EbscoAdapterLoaderConfig()
+        transformer_event = handler(event, config_obj)
+        return {"changeset_id": transformer_event.changeset_id}
+    except Exception as e:
+        print(f"Error: {e}")
+        return {"error": str(e)}
 
 
 def local_handler() -> EbscoAdapterTransformerEvent:
@@ -136,11 +133,23 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 
 def main() -> None:
     """Entry point for the loader script"""
-    print("Running local handler...")
-    result = local_handler()
-    print(f"Result: {result}")
-    if not result.changeset_id:
-        sys.exit(1)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file_location")
+    args = parser.parse_args()
+
+    result = (
+        local_handler()
+        if not args.file_location
+        else handler(
+            EbscoAdapterLoaderEvent(
+                file_location=args.xmlfile,
+                is_processed=False,
+                job_id=datetime.now().strftime("%Y%m%dT%H%M"),
+            ),
+            EbscoAdapterLoaderConfig(use_glue_table=False),
+        )
+    )
+    print(result)
 
 
 if __name__ == "__main__":

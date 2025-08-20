@@ -10,9 +10,13 @@ from typing import Any
 
 from pydantic import BaseModel
 
+import config
+from table_config import get_glue_table, get_local_table
+from utils.iceberg import IcebergTableClient
+
 
 class EbscoAdapterTransformerConfig(BaseModel):
-    is_local: bool = False
+    use_glue_table: bool = True
 
 
 class EbscoAdapterTransformerEvent(BaseModel):
@@ -43,20 +47,44 @@ def handler(
     print(f"Processing event: {event}")
 
     try:
-        snapshot_id = event.changeset_id
-        print(f"Processing loader output with snapshot_id: {snapshot_id}")
+        changeset_id = event.changeset_id
+        print(f"Processing loader output with changeset_id: {changeset_id}")
+
+        # Initialize to default value in case changeset_id is None or no records are found
+        records_transformed: int = 0
 
         # TODO: Implement actual transformation logic here
-        # For now, this is a no-op that processes the snapshot
+        # For now, this is a no-op that processes the changeset
 
-        records_transformed = 0  # Placeholder value
-        if snapshot_id:
-            print(f"Would transform data from snapshot: {snapshot_id}")
+        if changeset_id:
+            print(f"Transform data from changeset: {changeset_id}")
+
+            if config_obj.use_glue_table:
+                print("Using AWS Glue table...")
+                table = get_glue_table(
+                    s3_tables_bucket=config.S3_TABLES_BUCKET,
+                    table_name=config.GLUE_TABLE_NAME,
+                    namespace=config.GLUE_NAMESPACE,
+                    region=config.AWS_REGION,
+                    account_id=config.AWS_ACCOUNT_ID,
+                )
+            else:
+                print("Using local table...")
+                table = get_local_table(
+                    table_name=config.LOCAL_TABLE_NAME,
+                    namespace=config.LOCAL_NAMESPACE,
+                    db_name=config.LOCAL_DB_NAME,
+                )
+
+            table_client = IcebergTableClient(table)
+
+            df = table_client.get_records_by_changeset(changeset_id)
+
             # In a real implementation, we would:
             # 1. Read data from the Iceberg table using the snapshot_id
             # 2. Apply transformations to the records
             # 3. Write transformed data to output location
-            records_transformed = 1  # Placeholder
+            records_transformed = len(df)
 
         result = EbscoAdapterTransformerResult(records_transformed=records_transformed)
 
@@ -93,18 +121,18 @@ def local_handler() -> EbscoAdapterTransformerResult:
     """Handle local execution with command line arguments."""
     parser = argparse.ArgumentParser(description="Transform EBSCO adapter data")
     parser.add_argument(
-        "--snapshot-id", type=str, help="Snapshot ID from loader output to transform"
+        "--changeset-id", type=str, help="Changeset ID from loader output to transform"
     )
     parser.add_argument(
-        "--local",
+        "--use-glue-table",
         action="store_true",
-        help="Run locally without AWS dependencies",
+        help="Use AWS Glue table instead of local table",
     )
 
     args = parser.parse_args()
 
-    event = EbscoAdapterTransformerEvent(changeset_id=args.snapshot_id)
-    config_obj = EbscoAdapterTransformerConfig(is_local=args.local)
+    event = EbscoAdapterTransformerEvent(changeset_id=args.changeset_id)
+    config_obj = EbscoAdapterTransformerConfig(use_glue_table=args.use_glue_table)
 
     return handler(event=event, config_obj=config_obj)
 
