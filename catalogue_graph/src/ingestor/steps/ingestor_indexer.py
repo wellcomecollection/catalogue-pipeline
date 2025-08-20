@@ -19,7 +19,7 @@ from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import get_standard_index_name
 from utils.types import IngestorType
 
-RECORD_CLASSES: dict[IngestorType, typing.Type[BaseModel]] = {
+RECORD_CLASSES: dict[IngestorType, type[BaseModel]] = {
     "concepts": IndexableConcept,
     "works": IndexableWork
 }

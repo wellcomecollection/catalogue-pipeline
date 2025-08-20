@@ -1,7 +1,9 @@
 import json
+from itertools import chain
 from typing import Any
 
 import polars
+import pydantic_core
 import pytest
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
@@ -11,9 +13,6 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
 )
 from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
-from ingestor.models.indexable_concept import IndexableConcept
-import pydantic_core
-from itertools import chain
 
 
 @pytest.mark.parametrize(
