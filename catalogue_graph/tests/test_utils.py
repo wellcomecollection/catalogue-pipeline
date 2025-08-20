@@ -2,10 +2,9 @@ import json
 import os
 from typing import Any
 
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-
 from models.graph_edge import BaseEdge
-from utils.aws import get_transformers_from_ontology
+from test_mocks import MockElasticsearchClient, MockSmartOpen
+from utils.ontology import get_transformers_from_ontology
 from utils.types import OntologyType
 
 
@@ -40,7 +39,7 @@ def add_mock_transformer_outputs(
 
     for transformer in transformers:
         bucket_name = "wellcomecollection-catalogue-graph"
-        s3_uri = f"s3://{bucket_name}/graph_bulk_loader/{pipeline_date}{transformer}__nodes.csv"
+        s3_uri = f"s3://{bucket_name}/graph_bulk_loader/{pipeline_date}/{transformer}__nodes.csv"
         fixture = load_fixture(f"bulk_load/{transformer}__nodes.csv").decode()
         MockSmartOpen.mock_s3_file(s3_uri, fixture)
 

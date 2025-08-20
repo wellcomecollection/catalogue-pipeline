@@ -2,9 +2,6 @@ from collections.abc import Generator
 from typing import Any, get_args
 
 import pytest
-from test_mocks import MOCK_INSTANCE_ENDPOINT, MockRequest, MockResponseInput
-from test_utils import add_mock_transformer_outputs, load_fixture
-
 from config import (
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
@@ -13,6 +10,13 @@ from config import (
 )
 from extractor import lambda_handler
 from models.events import EntityType, StreamDestination
+from test_mocks import (
+    MOCK_INSTANCE_ENDPOINT,
+    MockRequest,
+    MockResponseInput,
+    mock_es_secrets,
+)
+from test_utils import add_mock_transformer_outputs, load_fixture
 from transformers.create_transformer import TransformerType
 
 transformer_types = get_args(TransformerType)
@@ -125,7 +129,7 @@ def build_test_matrix() -> Generator[tuple[dict, list[MockResponseInput]], Any]:
                         "transformer_type": transformer_type,
                         "entity_type": entity_type,
                         "stream_destination": stream_destination,
-                        "pipeline_date": None,
+                        "pipeline_date": "2024-06-06",
                         "sample_size": 1,
                     },
                     mock_requests_lookup_table(stream_destination, transformer_type),
@@ -149,6 +153,7 @@ def test_lambda_handler(
 ) -> None:
     MockRequest.mock_responses(mock_responses)
     add_mock_transformer_outputs(["loc", "mesh"])
+    mock_es_secrets("graph_extractor", "2024-06-06")
     lambda_handler(lambda_event, None)
 
     transformer_type = lambda_event["transformer_type"]

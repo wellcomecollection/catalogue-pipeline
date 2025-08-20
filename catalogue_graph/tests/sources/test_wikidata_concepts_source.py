@@ -6,7 +6,7 @@ from test_utils import add_mock_transformer_outputs, load_fixture
 
 from config import WIKIDATA_SPARQL_URL
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from utils.ontology_id_checker import get_extracted_ids, is_id_in_ontology
+from utils.ontology import get_extracted_ids, is_id_in_ontology
 
 
 def _add_mock_wikidata_requests(
@@ -42,11 +42,13 @@ def _add_mock_wikidata_requests(
 
 
 def test_wikidata_concepts_source_edges() -> None:
-    add_mock_transformer_outputs(["loc"])
+    add_mock_transformer_outputs(["loc"], "2020-05-05")
     _add_mock_wikidata_requests("edges", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_concepts", entity_type="edges"
+        linked_transformer="loc_concepts",
+        entity_type="edges",
+        pipeline_date="2020-05-05",
     )
     stream_result = list(mesh_concepts_source.stream_raw())
 
@@ -77,7 +79,7 @@ def test_wikidata_concepts_source_nodes() -> None:
     _add_mock_wikidata_requests("nodes", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_concepts", entity_type="nodes"
+        linked_transformer="loc_concepts", entity_type="nodes", pipeline_date="dev"
     )
 
     stream_result = list(mesh_concepts_source.stream_raw())

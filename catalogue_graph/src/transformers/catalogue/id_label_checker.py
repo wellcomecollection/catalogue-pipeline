@@ -1,7 +1,8 @@
 import os
 from collections import defaultdict
 
-from utils.aws import get_bulk_load_s3_uri, get_csv_from_s3
+import utils.bulk_load as bulk_load
+from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
@@ -45,7 +46,7 @@ class IdLabelChecker:
         )
 
         for transformer in transformers:
-            s3_uri = get_bulk_load_s3_uri(transformer, "nodes", pipeline_date)
+            s3_uri = bulk_load.get_s3_uri(transformer, "nodes", pipeline_date)
             for row in get_csv_from_s3(s3_uri):
                 source_id = row[":ID"]
                 label = row["label:String"].lower()

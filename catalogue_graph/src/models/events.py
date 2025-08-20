@@ -1,18 +1,12 @@
 import argparse
-from datetime import datetime
 from typing import Self
 
+import utils.bulk_load as bulk_load
 from pydantic import BaseModel
-
-from utils.aws import get_bulk_load_file_path, get_bulk_load_s3_uri
+from utils.bulk_load import IncrementalWindow
 from utils.types import EntityType, StreamDestination, TransformerType
 
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
-
-
-class IncrementalWindow(BaseModel):
-    start_time: datetime
-    end_time: datetime
 
 
 class GraphPipelineEvent(BaseModel):
@@ -32,10 +26,14 @@ class GraphPipelineEvent(BaseModel):
         return cls(**args.__dict__, window=window)
 
     def get_bulk_load_s3_uri(self) -> str:
-        return get_bulk_load_s3_uri(**dict(self))
+        return bulk_load.get_s3_uri(
+            self.transformer_type, self.entity_type, self.pipeline_date, self.window
+        )
 
     def get_bulk_load_file_path(self) -> str:
-        return get_bulk_load_file_path(**dict(self))
+        return bulk_load.get_file_path(
+            self.transformer_type, self.entity_type, self.pipeline_date, self.window
+        )
 
 
 class ExtractorEvent(GraphPipelineEvent):

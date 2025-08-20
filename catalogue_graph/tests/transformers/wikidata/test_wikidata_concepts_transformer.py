@@ -15,9 +15,7 @@ def test_wikidata_concepts_nodes_transformer() -> None:
     add_mock_transformer_outputs(["loc"])
     _add_mock_wikidata_requests("nodes", "concepts")
 
-    transformer = WikidataConceptsTransformer(
-        entity_type="nodes", linked_ontology="loc"
-    )
+    transformer = WikidataConceptsTransformer("loc_concepts", "nodes", "dev")
 
     nodes = list(transformer._stream_entities(entity_type="nodes"))
 
@@ -37,9 +35,7 @@ def test_wikidata_concepts_edges_transformer() -> None:
     add_mock_transformer_outputs(["loc"])
     _add_mock_wikidata_requests("edges", "concepts")
 
-    transformer = WikidataConceptsTransformer(
-        entity_type="edges", linked_ontology="loc"
-    )
+    transformer = WikidataConceptsTransformer("loc_concepts", "edges", "dev")
 
     edges = list(transformer._stream_entities(entity_type="edges"))
     assert len(list(edges)) == 7

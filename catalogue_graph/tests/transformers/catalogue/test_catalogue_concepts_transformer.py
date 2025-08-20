@@ -1,14 +1,14 @@
-from test_utils import (
-    add_mock_denormalised_documents,
-    add_mock_transformer_outputs,
-    check_bulk_load_edge,
-)
-
 from models.graph_edge import (
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
+from test_mocks import mock_es_secrets
+from test_utils import (
+    add_mock_denormalised_documents,
+    add_mock_transformer_outputs,
+    check_bulk_load_edge,
+)
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
@@ -29,7 +29,7 @@ def test_catalogue_concepts_transformer_nodes() -> None:
 def test_catalogue_concepts_transformer_edges() -> None:
     add_mock_transformer_outputs(["loc", "mesh"], "2027-12-24")
     add_mock_denormalised_documents()
-
+    mock_es_secrets("graph_extractor", "2027-12-24", True)
     transformer = CatalogueConceptsTransformer("2027-12-24", None, True)
 
     edges = list(transformer._stream_edges())

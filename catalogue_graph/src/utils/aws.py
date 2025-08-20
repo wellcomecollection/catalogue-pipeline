@@ -1,27 +1,16 @@
 import csv
 import json
 from collections.abc import Generator
-from typing import Any, get_args
+from typing import Any
 
 import boto3
 import polars as pl
 import smart_open
 from pydantic import BaseModel
 
-import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-from models.events import IncrementalWindow
-from utils.types import (
-    CatalogueTransformerType,
-    EntityType,
-    LocTransformerType,
-    MeshTransformerType,
-    OntologyType,
-    TransformerType,
-    WikidataTransformerType,
-)
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
 INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph/neptune-cluster-endpoint"
@@ -92,35 +81,6 @@ def write_csv_to_s3(s3_uri: str, items: list[dict]) -> None:
             csv_writer.writerow(item)
 
 
-def get_bulk_load_file_path(
-    transformer_type: TransformerType,
-    entity_type: EntityType,
-    pipeline_date: str,
-    window: IncrementalWindow | None = None,
-) -> str:
-    file_name = f"{transformer_type}__{entity_type}.csv"
-
-    window_prefix = ""
-    if window is not None:
-        start = window.start_time.strftime("%Y%m%dT%H%M")
-        end = window.end_time.strftime("%Y%m%dT%H%M")
-        window_prefix = f"windows/{start}-{end}/"
-
-    return f"{pipeline_date}/{window_prefix}{file_name}"
-
-
-def get_bulk_load_s3_uri(
-    transformer_type: TransformerType,
-    entity_type: EntityType,
-    pipeline_date: str,
-    window: IncrementalWindow | None = None,
-) -> str:
-    file_path = get_bulk_load_file_path(
-        transformer_type, entity_type, pipeline_date, window
-    )
-    return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{config.BULK_LOADER_S3_PREFIX}/{file_path}"
-
-
 def df_from_s3_parquet(s3_file_uri: str) -> pl.DataFrame:
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_file_uri, "rb", transport_params=transport_params) as f:
@@ -156,18 +116,3 @@ def pydantic_from_s3_json[T: BaseModel](
             return None
 
         raise FileNotFoundError(f"S3 file not found: {e}") from e
-
-
-def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerType]:
-    if ontology == "wikidata":
-        transformers = get_args(WikidataTransformerType)
-    elif ontology == "loc":
-        transformers = get_args(LocTransformerType)
-    elif ontology == "mesh":
-        transformers = get_args(MeshTransformerType)
-    elif ontology == "catalogue":
-        transformers = get_args(CatalogueTransformerType)
-    else:
-        raise ValueError(f"Unknown ontology {ontology}.")
-
-    return list(transformers)

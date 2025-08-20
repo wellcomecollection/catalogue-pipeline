@@ -2,11 +2,10 @@ import json
 
 import polars as pl
 import pytest
-from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
-from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
-
 from graph_remover import IDS_LOG_SCHEMA
 from ingestor.steps.ingestor_deletions import lambda_handler
+from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
+from test_mocks import MockElasticsearchClient, MockSmartOpen, mock_es_secrets
 
 MOCK_EVENT = {
     "ingestor_type": "concepts",
@@ -14,22 +13,6 @@ MOCK_EVENT = {
     "index_date": "dev",
     "job_id": "dev",
 }
-
-
-def _mock_es_secrets() -> None:
-    # Using a non-null pipeline_date connects to the production ES cluster, so we need to mock some secrets
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/private_host", "test"
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/port", 80
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/protocol", "http"
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/concept_ingestor/api_key", ""
-    )
 
 
 def index_concepts(ids: list[str], index_name: str = "concepts-indexed-dev") -> None:
@@ -75,7 +58,7 @@ def test_ingestor_deletions_line_next_run() -> None:
     job_id = "test-job-id"
     index_name = f"concepts-indexed-{index_date}"
 
-    _mock_es_secrets()
+    mock_es_secrets("concept_ingestor", pipeline_date)
 
     # Mock a file storing the date of the last index remover run
     MockSmartOpen.mock_s3_file(
@@ -140,7 +123,7 @@ def test_ingestor_deletions_line_new_index_run() -> None:
     job_id = "test-job-id"
     index_name = f"concepts-indexed-{index_date}"
 
-    _mock_es_secrets()
+    mock_es_secrets("concept_ingestor", pipeline_date)
 
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], index_name)
 

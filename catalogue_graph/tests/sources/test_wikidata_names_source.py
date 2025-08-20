@@ -9,7 +9,7 @@ def test_wikidata_names_source_edges() -> None:
     _add_mock_wikidata_requests("edges", "names")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_names", entity_type="edges"
+        linked_transformer="loc_names", entity_type="edges", pipeline_date="dev"
     )
     stream_result = list(mesh_concepts_source.stream_raw())
 
@@ -45,7 +45,7 @@ def test_wikidata_names_source_nodes() -> None:
     _add_mock_wikidata_requests("nodes", "names")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        linked_transformer="loc_names", entity_type="nodes"
+        linked_transformer="loc_names", entity_type="nodes", pipeline_date="dev"
     )
     stream_result = list(mesh_concepts_source.stream_raw())
 

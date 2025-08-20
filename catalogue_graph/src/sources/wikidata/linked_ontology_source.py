@@ -1,9 +1,10 @@
 from collections.abc import Callable, Generator, Iterator
 from functools import lru_cache
+from typing import cast
 
 from models.events import EntityType
 from sources.base_source import BaseSource
-from utils.ontology_id_checker import get_extracted_ids, is_id_in_ontology
+from utils.ontology import get_extracted_ids, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
 from utils.types import NodeType, OntologyType, TransformerType
 
@@ -70,8 +71,8 @@ class WikidataLinkedOntologySource(BaseSource):
 
     def __init__(
         self,
-        entity_type: EntityType,
         linked_transformer: TransformerType,
+        entity_type: EntityType,
         pipeline_date: str,
     ):
         self.client = WikidataSparqlClient()
@@ -79,15 +80,9 @@ class WikidataLinkedOntologySource(BaseSource):
         self.entity_type = entity_type
         self.pipeline_date = pipeline_date
 
-    @property
-    def node_type(self) -> NodeType:
-        node_type: NodeType = self.linked_transformer.split("_")[1]
-        return node_type
-
-    @property
-    def linked_ontology(self) -> OntologyType:
-        linked_ontology: OntologyType = self.linked_transformer.split("_")[0]
-        return linked_ontology
+        # Transformer type strings are always in the format `<ontology_type>_<node_type>`
+        self.linked_ontology = cast(OntologyType, self.linked_transformer.split("_")[0])
+        self.node_type = cast(NodeType, self.linked_transformer.split("_")[-1])
 
     @lru_cache
     def _get_all_ids(self) -> list[str]:

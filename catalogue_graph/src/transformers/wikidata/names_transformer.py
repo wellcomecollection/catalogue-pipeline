@@ -16,8 +16,15 @@ from .raw_concept import RawWikidataName
 
 
 class WikidataNamesTransformer(WikidataConceptsTransformer):
-    def __init__(self, entity_type: EntityType, linked_transformer: TransformerType):
-        self.source = WikidataLinkedOntologySource(entity_type, linked_transformer)
+    def __init__(
+        self,
+        linked_transformer: TransformerType,
+        entity_type: EntityType,
+        pipeline_date: str,
+    ):
+        self.source = WikidataLinkedOntologySource(
+            linked_transformer, entity_type, pipeline_date
+        )
 
     def transform_node(self, raw_node: dict) -> SourceName | None:
         raw_concept = RawWikidataName(raw_node)
