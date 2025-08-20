@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 
 from ingestor.models.display.identifier import DisplayIdentifier
-from utils.types import ConceptType
 from ingestor.models.indexable import IndexableRecord
+from utils.types import ConceptType
 
 
 class ConceptDescription(BaseModel):

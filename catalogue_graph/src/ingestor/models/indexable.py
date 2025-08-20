@@ -1,5 +1,6 @@
-from pydantic import BaseModel
 from abc import ABC, abstractmethod
+
+from pydantic import BaseModel
 
 
 class IndexableRecord(BaseModel, ABC):
