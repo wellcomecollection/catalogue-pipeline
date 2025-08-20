@@ -1,0 +1,16 @@
+[project]
+name = "scripts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10,<3.11"
+# Dependencies migrated from requirements.in
+dependencies = [
+  "boto3",
+  "click",
+  "elasticsearch",
+  "humanize",
+  "tabulate",
+  "tenacity",
+  "tqdm",
+]
