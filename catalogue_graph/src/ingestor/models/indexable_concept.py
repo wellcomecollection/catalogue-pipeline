@@ -57,4 +57,5 @@ class IndexableConcept(IndexableRecord):
     query: ConceptQuery
     display: ConceptDisplay
 
-    def get_id(self): return self.query.id
+    def get_id(self):
+        return self.query.id

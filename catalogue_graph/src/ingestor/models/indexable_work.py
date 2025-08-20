@@ -1,4 +1,3 @@
-
 from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.display.work import DisplayWork
 from ingestor.models.filter.work import WorkFilterableValues
@@ -12,4 +11,5 @@ class IndexableWork(IndexableRecord):
     aggregatableValues: WorkAggregatableValues
     filterableValues: WorkFilterableValues
 
-    def get_id(self): return self.query.id
+    def get_id(self):
+        return self.query.id

@@ -22,7 +22,7 @@ from utils.types import IngestorType
 
 RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
     "concepts": IndexableConcept,
-    "works": IndexableWork
+    "works": IndexableWork,
 }
 
 
@@ -31,8 +31,8 @@ class IngestorIndexerConfig(BaseModel):
 
 
 def generate_operations(
-        index_name: str,
-        indexable_data: list[IndexableRecord]) -> Generator[dict]:
+    index_name: str, indexable_data: list[IndexableRecord]
+) -> Generator[dict]:
     for datum in indexable_data:
         yield {
             "_index": index_name,
@@ -42,22 +42,26 @@ def generate_operations(
 
 
 def load_data(
-        ingestor_type: IngestorType,
-        indexable_data: list[IndexableRecord],
-        pipeline_date: str | None,
-        index_date: str | None,
-        is_local: bool,
+    ingestor_type: IngestorType,
+    indexable_data: list[IndexableRecord],
+    pipeline_date: str | None,
+    index_date: str | None,
+    is_local: bool,
 ) -> int:
     index_name = get_standard_index_name(f"{ingestor_type}-indexed", index_date)
-    print(f"Loading {len(indexable_data)} Indexable {ingestor_type} to ES index: {index_name} ...")
+    print(
+        f"Loading {len(indexable_data)} Indexable {ingestor_type} to ES index: {index_name} ..."
+    )
     es = utils.elasticsearch.get_client("concept_ingestor", pipeline_date, is_local)
-    success_count, _ = elasticsearch.helpers.bulk(es, generate_operations(index_name, indexable_data))
+    success_count, _ = elasticsearch.helpers.bulk(
+        es, generate_operations(index_name, indexable_data)
+    )
 
     return success_count
 
 
 def handler(
-        event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
+    event: IngestorIndexerLambdaEvent, config: IngestorIndexerConfig
 ) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event} with config {config}")
 
@@ -120,7 +124,7 @@ def local_handler() -> None:
         type=str,
         choices=["concepts", "works"],
         help="The type of the records being ingested",
-        required=True
+        required=True,
     )
     args = parser.parse_args()
 
