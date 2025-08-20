@@ -16,10 +16,14 @@ import pydantic_core
 from itertools import chain
 
 
-def test_ingestor_indexer_success() -> None:
+@pytest.mark.parametrize(
+    "record_type",
+    ["concepts", "works"]
+)
+def test_ingestor_indexer_success(record_type: str) -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
-        ingestor_type="concepts",
+        ingestor_type=record_type,
         pipeline_date="2025-01-01",
         index_date="2025-01-01",
         job_id="123",
@@ -35,11 +39,11 @@ def test_ingestor_indexer_success() -> None:
     # INGESTOR_SHARD_SIZE=10 AWS_PROFILE=platform-developer uv run src/ingestor/run_local.py --ingestor-type=concepts --limit=1
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000010.parquet",
-        load_fixture("ingestor/concepts/00000000-00000010.parquet"),
+        load_fixture(f"ingestor/{record_type}/00000000-00000010.parquet"),
     )
     MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
-    expected_inputs = json.loads(load_fixture("ingestor/mock_es_inputs.json"))
+    expected_inputs = json.loads(load_fixture(f"ingestor/{record_type}/mock_es_inputs.json"))
 
     result = handler(event, config)
     assert len(MockElasticsearchClient.inputs) == 10
@@ -47,7 +51,7 @@ def test_ingestor_indexer_success() -> None:
     assert MockElasticsearchClient.inputs == expected_inputs
 
 
-def build_test_matrix() -> list[tuple]:
+def build_failure_test_matrix() -> list[tuple]:
     return chain.from_iterable([[
         (
             "the file at s3_uri doesn't exist",
@@ -103,7 +107,7 @@ def get_test_id(argvalue: str) -> str:
 
 @pytest.mark.parametrize(
     "description,event,fixture,expected_error,error_message",
-    build_test_matrix(),
+    build_failure_test_matrix(),
     ids=get_test_id,
 )
 def test_ingestor_indexer_failure(
