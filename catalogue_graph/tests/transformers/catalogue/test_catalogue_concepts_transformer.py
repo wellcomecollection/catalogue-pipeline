@@ -1,15 +1,14 @@
+from models.graph_edge import (
+    ConceptHasSourceConcept,
+    ConceptHasSourceConceptAttributes,
+)
+from models.graph_node import Concept
 from test_mocks import mock_es_secrets
 from test_utils import (
     add_mock_denormalised_documents,
     add_mock_transformer_outputs_for_ontologies,
     check_bulk_load_edge,
 )
-
-from models.graph_edge import (
-    ConceptHasSourceConcept,
-    ConceptHasSourceConceptAttributes,
-)
-from models.graph_node import Concept
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 
@@ -108,5 +107,4 @@ def test_mismatched_pipeline_date() -> None:
     add_mock_denormalised_documents("2025-01-01")
 
     edges = list(transformer._stream_edges())
-    print(edges)
     assert len(edges) == 0
