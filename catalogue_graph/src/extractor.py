@@ -12,7 +12,7 @@ from models.events import (
 )
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
-from utils.aws import get_bulk_load_s3_path, get_neptune_client
+from utils.aws import get_neptune_client
 
 
 def handler(event: ExtractorEvent, is_local: bool = False) -> None:
@@ -32,14 +32,10 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     )
 
     if event.stream_destination == "graph":
-        neptune_client = get_neptune_client(is_local)
-        transformer.stream_to_graph(
-            neptune_client, event.entity_type, event.sample_size
-        )
+        client = get_neptune_client(is_local)
+        transformer.stream_to_graph(client, event.entity_type, event.sample_size)
     elif event.stream_destination == "s3":
-        s3_uri = get_bulk_load_s3_path(
-            event.transformer_type, event.entity_type, event.pipeline_date
-        )
+        s3_uri = event.get_bulk_load_s3_uri()
         transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
     elif event.stream_destination == "sns":
         topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
@@ -50,7 +46,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
 
         transformer.stream_to_sns(topic_arn, event.entity_type, event.sample_size)
     elif event.stream_destination == "local":
-        file_path = get_bulk_load_file_path(event)
+        file_path = event.get_bulk_load_file_path()
         full_file_path = transformer.stream_to_local_file(
             file_path, event.entity_type, event.sample_size
         )

@@ -1,7 +1,6 @@
 import argparse
 import typing
 
-from extractor import get_bulk_load_s3_path
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
@@ -12,9 +11,7 @@ from utils.aws import get_neptune_client
 
 
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> dict[str, typing.Any]:
-    s3_file_uri = get_bulk_load_s3_path(
-        event.transformer_type, event.entity_type, event.pipeline_date
-    )
+    s3_file_uri = event.get_bulk_load_s3_uri()
     print(f"Initiating bulk load from {s3_file_uri}.")
 
     neptune_client = get_neptune_client(is_local)

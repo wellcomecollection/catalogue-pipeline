@@ -12,9 +12,7 @@ from transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataNa
 
 
 def test_wikidata_concepts_nodes_transformer() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs(["loc"])
     _add_mock_wikidata_requests("nodes", "concepts")
 
     transformer = WikidataConceptsTransformer(
@@ -36,9 +34,7 @@ def test_wikidata_concepts_nodes_transformer() -> None:
 
 
 def test_wikidata_concepts_edges_transformer() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs(["loc"])
     _add_mock_wikidata_requests("edges", "concepts")
 
     transformer = WikidataConceptsTransformer(

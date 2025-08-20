@@ -1,17 +1,15 @@
 from models.events import EntityType
 from models.graph_node import SourceLocation
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from utils.types import OntologyType
+from utils.types import TransformerType
 
 from .concepts_transformer import WikidataConceptsTransformer
 from .raw_concept import RawWikidataLocation
 
 
 class WikidataLocationsTransformer(WikidataConceptsTransformer):
-    def __init__(self, entity_type: EntityType, linked_ontology: OntologyType):
-        self.source = WikidataLinkedOntologySource(
-            "locations", linked_ontology, entity_type
-        )
+    def __init__(self, entity_type: EntityType, linked_transformer: TransformerType):
+        self.source = WikidataLinkedOntologySource(entity_type, linked_transformer)
 
     def transform_node(self, raw_node: dict) -> SourceLocation | None:
         raw_concept = RawWikidataLocation(raw_node)

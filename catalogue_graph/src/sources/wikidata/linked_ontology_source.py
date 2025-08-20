@@ -3,9 +3,9 @@ from functools import lru_cache
 
 from models.events import EntityType
 from sources.base_source import BaseSource
-from utils.ontology_id_checker import is_id_classified_as_node_type, is_id_in_ontology
+from utils.ontology_id_checker import get_extracted_ids, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
-from utils.types import NodeType, OntologyType
+from utils.types import NodeType, OntologyType, TransformerType
 
 from .sparql_client import SPARQL_MAX_PARALLEL_QUERIES, WikidataSparqlClient
 from .sparql_query_builder import SparqlQueryBuilder, WikidataEdgeQueryType
@@ -70,14 +70,24 @@ class WikidataLinkedOntologySource(BaseSource):
 
     def __init__(
         self,
-        node_type: NodeType,
-        linked_ontology: OntologyType,
         entity_type: EntityType,
+        linked_transformer: TransformerType,
+        pipeline_date: str,
     ):
         self.client = WikidataSparqlClient()
-        self.node_type = node_type
-        self.linked_ontology = linked_ontology
+        self.linked_transformer = linked_transformer
         self.entity_type = entity_type
+        self.pipeline_date = pipeline_date
+
+    @property
+    def node_type(self) -> NodeType:
+        node_type: NodeType = self.linked_transformer.split("_")[1]
+        return node_type
+
+    @property
+    def linked_ontology(self) -> OntologyType:
+        linked_ontology: OntologyType = self.linked_transformer.split("_")[0]
+        return linked_ontology
 
     @lru_cache
     def _get_all_ids(self) -> list[str]:
@@ -156,14 +166,16 @@ class WikidataLinkedOntologySource(BaseSource):
         # (a given Wikidata id can appear in more than one edge).
         for edge in self._stream_all_same_as_edges():
             wikidata_id, linked_id = edge["from_id"], edge["to_id"]
-            linked_id_is_valid = is_id_in_ontology(linked_id, self.linked_ontology)
+            linked_id_is_valid = is_id_in_ontology(
+                linked_id, self.linked_ontology, self.pipeline_date
+            )
             if linked_id_is_valid and wikidata_id not in seen:
                 # Add Wikidata id to `seen` no matter if it's part of the selected node type
                 # to make sure it is not processed again as a parent below.
                 seen.add(wikidata_id)
 
-                if is_id_classified_as_node_type(
-                    linked_id, self.linked_ontology, self.node_type
+                if linked_id in get_extracted_ids(
+                    self.linked_transformer, self.pipeline_date
                 ):
                     yield wikidata_id
 
@@ -189,8 +201,9 @@ class WikidataLinkedOntologySource(BaseSource):
             # For example, if we are streaming Wikidata 'names' edges linked to LoC ids but the LoC id linked to some
             # Wikidata id is classified as a 'location', we skip it. This filtering process also removes mappings which
             # include invalid LoC ids (of which there are several thousand).
-            if is_id_classified_as_node_type(
-                edge["to_id"], self.linked_ontology, self.node_type
+
+            if edge["to_id"] in get_extracted_ids(
+                self.linked_transformer, self.pipeline_date
             ):
                 streamed_wikidata_ids.add(edge["from_id"])
                 yield {**edge, "type": "SAME_AS"}
@@ -209,7 +222,7 @@ class WikidataLinkedOntologySource(BaseSource):
             for edge in self._stream_all_edges_by_type("has_field_of_work"):
                 # Only include an edge if its `to_id` has a corresponding concept node in the graph
                 if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
-                    edge["to_id"], "wikidata"
+                    edge["to_id"], "wikidata", self.pipeline_date
                 ):
                     yield {**edge, "type": "HAS_FIELD_OF_WORK"}
 

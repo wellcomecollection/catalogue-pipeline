@@ -55,7 +55,9 @@ def print_detailed_bulk_load_errors(payload: dict) -> None:
             print(f"         {failed_feed['status']}")
 
 
-def response_from_event(event: BulkLoadPollerEvent, status: str):
+def response_from_event(
+    event: BulkLoadPollerEvent, status: str
+) -> dict[str, typing.Any]:
     return {
         "load_id": event.load_id,
         "pipeline_date": event.pipeline_date,

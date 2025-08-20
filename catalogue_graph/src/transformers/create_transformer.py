@@ -50,15 +50,15 @@ def create_transformer(
     if transformer_type == "mesh_locations":
         return MeSHLocationsTransformer(MESH_URL)
     if transformer_type == "wikidata_linked_loc_concepts":
-        return WikidataConceptsTransformer(entity_type, "loc")
+        return WikidataConceptsTransformer(entity_type, "loc_concepts")
     if transformer_type == "wikidata_linked_loc_locations":
-        return WikidataLocationsTransformer(entity_type, "loc")
+        return WikidataLocationsTransformer(entity_type, "loc_locations")
     if transformer_type == "wikidata_linked_loc_names":
-        return WikidataNamesTransformer(entity_type, "loc")
+        return WikidataNamesTransformer(entity_type, "loc_names")
     if transformer_type == "wikidata_linked_mesh_concepts":
-        return WikidataConceptsTransformer(entity_type, "mesh")
+        return WikidataConceptsTransformer(entity_type, "mesh_concepts")
     if transformer_type == "wikidata_linked_mesh_locations":
-        return WikidataLocationsTransformer(entity_type, "mesh")
+        return WikidataLocationsTransformer(entity_type, "mesh_locations")
     if transformer_type == "catalogue_concepts":
         return CatalogueConceptsTransformer(pipeline_date, window, is_local)
     if transformer_type == "catalogue_works":

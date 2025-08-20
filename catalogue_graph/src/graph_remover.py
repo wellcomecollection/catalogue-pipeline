@@ -7,13 +7,11 @@ import polars as pl
 
 import config
 from models.events import (
-    GraphPipelineEvent,
     GraphRemoverEvent,
 )
 from utils.aws import (
     df_from_s3_parquet,
     df_to_s3_parquet,
-    get_bulk_load_s3_path,
     get_csv_from_s3,
     get_neptune_client,
 )
@@ -24,15 +22,19 @@ IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
 GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
 
 
-def get_s3_uri(event: GraphRemoverEvent, folder: GraphRemoverFolder):
-    file_name = f"{event.transformer_type}__{event.entity_type}.parquet"
+def get_s3_uri(
+    transformer: TransformerType, entity: EntityType, folder: GraphRemoverFolder
+) -> str:
+    file_name = f"{transformer}__{entity}.parquet"
     prefix = f"{config.GRAPH_REMOVER_S3_PREFIX}/{folder}"
     return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
 
 
 def get_previous_ids(event: GraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest snapshot for the specified transformer and entity type."""
-    s3_file_uri = get_s3_uri(event, "previous_ids_snapshot")
+    s3_file_uri = get_s3_uri(
+        event.transformer_type, event.entity_type, "previous_ids_snapshot"
+    )
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
@@ -42,9 +44,7 @@ def get_previous_ids(event: GraphRemoverEvent) -> set[str]:
 
 def get_current_ids(event: GraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest bulk load file for the specified transformer and entity type."""
-    s3_file_uri = get_bulk_load_s3_path(
-        event.transformer_type, event.entity_type, event.pipeline_date
-    )
+    s3_file_uri = event.get_bulk_load_s3_uri()
 
     ids = set(row[":ID"] for row in get_csv_from_s3(s3_file_uri))
     print(f"Retrieved {len(ids)} ids from the current bulk loader file.")
@@ -53,7 +53,9 @@ def get_current_ids(event: GraphRemoverEvent) -> set[str]:
 
 def update_node_ids_snapshot(event: GraphRemoverEvent, ids: set[str]) -> None:
     """Update the IDs snapshot with the latest IDs."""
-    s3_file_uri = get_s3_uri(event, "previous_ids_snapshot")
+    s3_file_uri = get_s3_uri(
+        event.transformer_type, event.entity_type, "previous_ids_snapshot"
+    )
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
 
@@ -62,7 +64,7 @@ def log_ids(
     event: GraphRemoverEvent, ids: set[str], folder: GraphRemoverFolder
 ) -> None:
     """Append IDs which were added/removed as part of this run to the corresponding log file."""
-    s3_file_uri = get_s3_uri(event, folder)
+    s3_file_uri = get_s3_uri(event.transformer_type, event.entity_type, folder)
 
     try:
         df = df_from_s3_parquet(s3_file_uri)
@@ -146,7 +148,7 @@ def handler(event: GraphRemoverEvent, is_local: bool = False) -> None:
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    handler(GraphPipelineEvent(**event))
+    handler(GraphRemoverEvent(**event))
 
 
 def local_handler() -> None:

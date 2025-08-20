@@ -1,15 +1,19 @@
 from test_utils import add_mock_transformer_outputs
 
 from transformers.catalogue.id_label_checker import IdLabelChecker
+from utils.aws import get_transformers_from_ontology
+from utils.types import OntologyType
 
 
 def _setup_id_label_checker() -> IdLabelChecker:
-    add_mock_transformer_outputs(
-        sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
-    )
-    return IdLabelChecker(
-        node_types=["concepts", "locations", "names"], sources=["loc", "mesh"]
-    )
+    ontologies: list[OntologyType] = ["loc", "mesh"]
+    pipeline_date = "2025-01-01"
+
+    add_mock_transformer_outputs(ontologies, pipeline_date)
+    transformers = []
+    for ontology in ontologies:
+        transformers += get_transformers_from_ontology(ontology)
+    return IdLabelChecker(transformers, pipeline_date)
 
 
 def test_id_label_checker_label_matching() -> None:

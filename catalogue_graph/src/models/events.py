@@ -4,6 +4,7 @@ from typing import Self
 
 from pydantic import BaseModel
 
+from utils.aws import get_bulk_load_file_path, get_bulk_load_s3_uri
 from utils.types import EntityType, StreamDestination, TransformerType
 
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
@@ -29,6 +30,12 @@ class GraphPipelineEvent(BaseModel):
             )
 
         return cls(**args.__dict__, window=window)
+
+    def get_bulk_load_s3_uri(self) -> str:
+        return get_bulk_load_s3_uri(**dict(self))
+
+    def get_bulk_load_file_path(self) -> str:
+        return get_bulk_load_file_path(**dict(self))
 
 
 class ExtractorEvent(GraphPipelineEvent):

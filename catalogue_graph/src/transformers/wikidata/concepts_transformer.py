@@ -9,16 +9,14 @@ from models.graph_edge import (
 from models.graph_node import SourceConcept
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from transformers.base_transformer import BaseTransformer, EntityType
-from utils.types import OntologyType
+from utils.types import TransformerType
 
 from .raw_concept import RawWikidataConcept
 
 
 class WikidataConceptsTransformer(BaseTransformer):
-    def __init__(self, entity_type: EntityType, linked_ontology: OntologyType):
-        self.source = WikidataLinkedOntologySource(
-            "concepts", linked_ontology, entity_type
-        )
+    def __init__(self, entity_type: EntityType, linked_transformer: TransformerType):
+        self.source = WikidataLinkedOntologySource(entity_type, linked_transformer)
 
     def transform_node(self, raw_node: dict) -> SourceConcept | None:
         raw_concept = RawWikidataConcept(raw_node)

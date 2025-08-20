@@ -13,12 +13,10 @@ from transformers.catalogue.concepts_transformer import CatalogueConceptsTransfo
 
 
 def test_catalogue_concepts_transformer_nodes() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs(["loc", "mesh"])
     add_mock_denormalised_documents()
 
-    transformer = CatalogueConceptsTransformer(None, None, True)
+    transformer = CatalogueConceptsTransformer("dev", None, True)
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 12
@@ -29,12 +27,10 @@ def test_catalogue_concepts_transformer_nodes() -> None:
 
 
 def test_catalogue_concepts_transformer_edges() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc", "mesh"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs(["loc", "mesh"], "2027-12-24")
     add_mock_denormalised_documents()
 
-    transformer = CatalogueConceptsTransformer(None, None, True)
+    transformer = CatalogueConceptsTransformer("2027-12-24", None, True)
 
     edges = list(transformer._stream_edges())
     assert len(edges) == 7

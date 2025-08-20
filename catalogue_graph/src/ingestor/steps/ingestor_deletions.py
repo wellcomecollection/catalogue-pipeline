@@ -4,9 +4,8 @@ from datetime import date, datetime
 
 import polars as pl
 
-import config
+import graph_remover
 import utils.elasticsearch
-from graph_remover import DELETED_IDS_FOLDER
 from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import get_standard_index_name
@@ -52,7 +51,7 @@ def _is_valid_date(index_date: str) -> bool:
 
 def get_ids_to_delete(pipeline_date: str, index_date: str) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
-    s3_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{DELETED_IDS_FOLDER}/catalogue_concepts__nodes.parquet"
+    s3_file_uri = graph_remover.get_s3_uri("catalogue_concepts", "nodes", "deleted_ids")
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
     df = df_from_s3_parquet(s3_file_uri)

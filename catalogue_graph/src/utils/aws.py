@@ -1,7 +1,7 @@
 import csv
 import json
 from collections.abc import Generator
-from typing import Any, TypeVar
+from typing import Any, get_args
 
 import boto3
 import polars as pl
@@ -12,31 +12,19 @@ import config
 from clients.base_neptune_client import BaseNeptuneClient
 from clients.lambda_neptune_client import LambdaNeptuneClient
 from clients.local_neptune_client import LocalNeptuneClient
-from models.steps import IncrementalWindow
+from models.events import IncrementalWindow
 from utils.types import (
+    CatalogueTransformerType,
     EntityType,
-    NodeType,
+    LocTransformerType,
+    MeshTransformerType,
     OntologyType,
     TransformerType,
+    WikidataTransformerType,
 )
-
-PydanticModelType = TypeVar("PydanticModelType", bound=BaseModel)
-
 
 LOAD_BALANCER_SECRET_NAME = "catalogue-graph/neptune-nlb-url"
 INSTANCE_ENDPOINT_SECRET_NAME = "catalogue-graph/neptune-cluster-endpoint"
-VALID_SOURCE_FILES = [
-    ("concepts", "mesh"),
-    ("concepts", "loc"),
-    ("locations", "mesh"),
-    ("locations", "loc"),
-    ("names", "loc"),
-    ("concepts", "wikidata_linked_mesh"),
-    ("concepts", "wikidata_linked_loc"),
-    ("locations", "wikidata_linked_mesh"),
-    ("locations", "wikidata_linked_loc"),
-    ("names", "wikidata_linked_loc"),
-]
 
 
 def get_secret(secret_name: str) -> str:
@@ -121,7 +109,7 @@ def get_bulk_load_file_path(
     return f"{pipeline_date}/{window_prefix}{file_name}"
 
 
-def get_bulk_load_s3_path(
+def get_bulk_load_s3_uri(
     transformer_type: TransformerType,
     entity_type: EntityType,
     pipeline_date: str,
@@ -131,23 +119,6 @@ def get_bulk_load_s3_path(
         transformer_type, entity_type, pipeline_date, window
     )
     return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{config.BULK_LOADER_S3_PREFIX}/{file_path}"
-
-
-def fetch_transformer_output_from_s3(
-    node_type: NodeType, source: OntologyType, pipeline_date: str
-) -> Generator[Any]:
-    """Retrieves the bulk load file outputted by the relevant transformer so that we can extract data from it."""
-    if (node_type, source) not in VALID_SOURCE_FILES:
-        print(
-            f"Invalid source and node_type combination: ({source}, {node_type}). Returning an empty generator."
-        )
-        return
-
-    transformer_type = f"{source}_{node_type}"
-    s3_uri = get_bulk_load_s3_path(transformer_type, "nodes", pipeline_date)
-
-    print(f"Retrieving ids of type '{node_type}' from ontology '{source}' from S3.")
-    yield from get_csv_from_s3(s3_uri)
 
 
 def df_from_s3_parquet(s3_file_uri: str) -> pl.DataFrame:
@@ -185,3 +156,18 @@ def pydantic_from_s3_json[T: BaseModel](
             return None
 
         raise FileNotFoundError(f"S3 file not found: {e}") from e
+
+
+def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerType]:
+    if ontology == "wikidata":
+        transformers = get_args(WikidataTransformerType)
+    elif ontology == "loc":
+        transformers = get_args(LocTransformerType)
+    elif ontology == "mesh":
+        transformers = get_args(MeshTransformerType)
+    elif ontology == "catalogue":
+        transformers = get_args(CatalogueTransformerType)
+    else:
+        raise ValueError(f"Unknown ontology {ontology}.")
+
+    return list(transformers)
