@@ -2,6 +2,9 @@ from typing import Any, Literal
 from unittest.mock import patch
 
 import pytest
+from test_mocks import MockElasticsearchClient, add_neptune_mock_response
+from test_utils import load_json_fixture
+
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
 from ingestor.models.neptune.query_result import WorkHierarchy
 from ingestor.queries.work_queries import (
@@ -10,8 +13,6 @@ from ingestor.queries.work_queries import (
     WORK_CONCEPTS_QUERY,
     WORK_QUERY,
 )
-from test_mocks import MockElasticsearchClient, add_neptune_mock_response
-from test_utils import load_json_fixture
 
 DENORMALISED_FIXTURE = load_json_fixture("ingestor/single_denormalised.json")
 ANCESTORS_FIXTURE = load_json_fixture("neptune/work_ancestors_single.json")
