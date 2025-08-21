@@ -87,7 +87,7 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
     ]
 
     resources = [
-      "${aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor/*"
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
     ]
   }
 }
@@ -115,7 +115,7 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
     ]
 
     resources = [
-      "${aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor/*"
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
     ]
   }
 }

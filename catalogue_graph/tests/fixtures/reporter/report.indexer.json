@@ -2,6 +2,7 @@
   "pipeline_date": "2025-10-01",
   "job_id": "20240102T1200",
   "index_date": "2025-10-12",
+  "ingestor_type": "concepts",
   "previous_job_id": "20240101T1200",
   "success_count": 980
 }

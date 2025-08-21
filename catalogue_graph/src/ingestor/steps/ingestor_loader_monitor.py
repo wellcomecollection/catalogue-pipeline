@@ -40,6 +40,7 @@ def run_check(
 ) -> LoaderReport:
     pipeline_date = event.pipeline_date
     index_date = event.index_date
+    ingestor_type = event.ingestor_type
     job_id = event.job_id
 
     print(
@@ -54,6 +55,7 @@ def run_check(
     current_report = LoaderReport(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=ingestor_type,
         job_id=job_id,
         record_count=sum_record_count,
         total_file_size=sum_file_size,
@@ -62,6 +64,7 @@ def run_check(
     latest_report: LoaderReport | None = LoaderReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=ingestor_type,
         # load latest report by not passing job_id
         ignore_missing=True,
     )
