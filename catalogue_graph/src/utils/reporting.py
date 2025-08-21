@@ -2,7 +2,7 @@ from typing import ClassVar, Self
 
 from pydantic import BaseModel
 
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from config import CATALOGUE_GRAPH_S3_BUCKET, INGESTOR_S3_PREFIX
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 
 
@@ -25,7 +25,7 @@ class PipelineReport(BaseModel):
         else:
             report_prefix = f"{pipeline_date}/{index_date}"
 
-        return f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{report_prefix}/{report_name}"
+        return f"s3://{CATALOGUE_GRAPH_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{report_prefix}/{report_name}"
 
     @classmethod
     def read(

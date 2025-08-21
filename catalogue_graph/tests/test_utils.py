@@ -1,12 +1,12 @@
 import json
 import os
-from itertools import product
-from typing import Any, Literal
+from typing import Any
 
 from test_mocks import MockElasticsearchClient, MockSmartOpen
 
 from models.graph_edge import BaseEdge
-from utils.aws import VALID_SOURCE_FILES
+from utils.ontology import get_transformers_from_ontology
+from utils.types import OntologyType, TransformerType
 
 
 def _get_fixture_path(file_name: str) -> str:
@@ -29,26 +29,38 @@ def load_jsonl_fixture(file_name: str) -> list[Any]:
 
 
 def add_mock_transformer_outputs(
-    sources: list[
-        Literal["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"]
-    ],
-    node_types: list[Literal["concepts", "locations", "names"]],
+    transformers: list[TransformerType], pipeline_date: str = "dev"
 ) -> None:
     """
     Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
     """
-    for source, node_type in product(sources, node_types):
-        if (node_type, source) in VALID_SOURCE_FILES:
-            MockSmartOpen.mock_s3_file(
-                f"s3://wellcomecollection-neptune-graph-loader/{source}_{node_type}__nodes.csv",
-                load_fixture(
-                    f"{source}/transformer_output_{node_type}_nodes.csv"
-                ).decode(),
-            )
+    for transformer in transformers:
+        bucket_name = "wellcomecollection-catalogue-graph"
+        s3_uri = f"s3://{bucket_name}/graph_bulk_loader/{pipeline_date}/{transformer}__nodes.csv"
+
+        try:
+            fixture = load_fixture(f"bulk_load/{transformer}__nodes.csv").decode()
+            MockSmartOpen.mock_s3_file(s3_uri, fixture)
+        except FileNotFoundError:
+            # We do not have mocks for all possible files
+            pass
 
 
-def add_mock_denormalised_documents() -> None:
-    index_name = "works-denormalised"
+def add_mock_transformer_outputs_for_ontologies(
+    ontologies: list[OntologyType], pipeline_date: str = "dev"
+) -> None:
+    """
+    Add mock transformer output files to S3 so that the IdLabelChecker class can extract ids and labels from them.
+    """
+    transformers = []
+    for ontology in ontologies:
+        transformers += get_transformers_from_ontology(ontology)
+
+    return add_mock_transformer_outputs(transformers, pipeline_date)
+
+
+def add_mock_denormalised_documents(pipeline_date: str = "dev") -> None:
+    index_name = f"works-denormalised-{pipeline_date}"
     fixture = load_jsonl_fixture("catalogue/denormalised_works_example.jsonl")
     for json_item in fixture:
         MockElasticsearchClient.index(

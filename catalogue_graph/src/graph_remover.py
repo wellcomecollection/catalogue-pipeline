@@ -1,11 +1,14 @@
 import argparse
 import typing
 from datetime import datetime, timedelta
+from typing import Literal
 
 import polars as pl
 
 import config
-from transformers.create_transformer import EntityType, TransformerType
+from models.events import (
+    GraphRemoverEvent,
+)
 from utils.aws import (
     df_from_s3_parquet,
     df_to_s3_parquet,
@@ -13,19 +16,25 @@ from utils.aws import (
     get_neptune_client,
 )
 from utils.safety import validate_fractional_change
+from utils.types import EntityType, TransformerType
 
 IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
-
-IDS_SNAPSHOT_FOLDER = "graph_remover/previous_ids_snapshot"
-DELETED_IDS_FOLDER = "graph_remover/deleted_ids"
-ADDED_IDS_FOLDER = "graph_remover/added_ids"
+GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
 
 
-def get_previous_ids(
-    transformer_type: TransformerType, entity_type: EntityType
-) -> set[str]:
+def get_s3_uri(
+    transformer: TransformerType, entity: EntityType, folder: GraphRemoverFolder
+) -> str:
+    file_name = f"{transformer}__{entity}.parquet"
+    prefix = f"{config.GRAPH_REMOVER_S3_PREFIX}/{folder}"
+    return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
+
+
+def get_previous_ids(event: GraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest snapshot for the specified transformer and entity type."""
-    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = get_s3_uri(
+        event.transformer_type, event.entity_type, "previous_ids_snapshot"
+    )
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
@@ -33,38 +42,29 @@ def get_previous_ids(
     return set(ids)
 
 
-def get_current_ids(
-    transformer_type: TransformerType, entity_type: EntityType
-) -> set[str]:
+def get_current_ids(event: GraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest bulk load file for the specified transformer and entity type."""
-    s3_file_uri = (
-        f"s3://{config.S3_BULK_LOAD_BUCKET_NAME}/{transformer_type}__{entity_type}.csv"
-    )
-
-    print("OPENING URI", s3_file_uri)
+    s3_file_uri = event.get_bulk_load_s3_uri()
 
     ids = set(row[":ID"] for row in get_csv_from_s3(s3_file_uri))
     print(f"Retrieved {len(ids)} ids from the current bulk loader file.")
     return ids
 
 
-def update_node_ids_snapshot(
-    transformer_type: TransformerType, entity_type: EntityType, ids: set[str]
-) -> None:
+def update_node_ids_snapshot(event: GraphRemoverEvent, ids: set[str]) -> None:
     """Update the IDs snapshot with the latest IDs."""
-    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{IDS_SNAPSHOT_FOLDER}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = get_s3_uri(
+        event.transformer_type, event.entity_type, "previous_ids_snapshot"
+    )
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
 
 
 def log_ids(
-    ids: set[str],
-    transformer_type: TransformerType,
-    entity_type: EntityType,
-    folder: str,
+    event: GraphRemoverEvent, ids: set[str], folder: GraphRemoverFolder
 ) -> None:
     """Append IDs which were added/removed as part of this run to the corresponding log file."""
-    s3_file_uri = f"s3://{config.INGESTOR_S3_BUCKET}/{folder}/{transformer_type}__{entity_type}.parquet"
+    s3_file_uri = get_s3_uri(event.transformer_type, event.entity_type, folder)
 
     try:
         df = df_from_s3_parquet(s3_file_uri)
@@ -97,15 +97,10 @@ def delete_ids_from_neptune(
         client.delete_edges_by_id(list(deleted_ids))
 
 
-def handler(
-    transformer_type: TransformerType,
-    entity_type: EntityType,
-    disable_safety_check: bool,
-    is_local: bool = False,
-) -> None:
+def handler(event: GraphRemoverEvent, is_local: bool = False) -> None:
     try:
         # Retrieve a list of all ids which were loaded into the graph as part of the previous run
-        previous_ids = get_previous_ids(transformer_type, entity_type)
+        previous_ids = get_previous_ids(event)
         is_first_run = False
     except (OSError, KeyError):
         print(
@@ -115,7 +110,7 @@ def handler(
         is_first_run = True
 
     # Retrieve a list of ids which were loaded into the graph as part of the current run
-    current_ids = get_current_ids(transformer_type, entity_type)
+    current_ids = get_current_ids(event)
     deleted_ids = set()
     added_ids = set()
 
@@ -135,29 +130,25 @@ def handler(
     validate_fractional_change(
         modified_size=len(deleted_ids),
         total_size=len(previous_ids),
-        force_pass=disable_safety_check,
+        force_pass=event.override_safety_check,
     )
 
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
-        delete_ids_from_neptune(deleted_ids, entity_type, is_local)
+        delete_ids_from_neptune(deleted_ids, event.entity_type, is_local)
 
     # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
-    log_ids(deleted_ids, transformer_type, entity_type, DELETED_IDS_FOLDER)
-    log_ids(added_ids, transformer_type, entity_type, ADDED_IDS_FOLDER)
+    log_ids(event, deleted_ids, "deleted_ids")
+    log_ids(event, added_ids, "added_ids")
     print("Successfully logged added and deleted ids.")
 
     # Update the list of all ids which have been loaded into the graph
-    update_node_ids_snapshot(transformer_type, entity_type, current_ids)
+    update_node_ids_snapshot(event, current_ids)
     print("Successfully updated bulk loaded ids snapshot.")
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    transformer_type = event["transformer_type"]
-    entity_type = event["entity_type"]
-    override_safety_check = event.get("override_safety_check", False)
-
-    handler(transformer_type, entity_type, override_safety_check)
+    handler(GraphRemoverEvent(**event))
 
 
 def local_handler() -> None:
@@ -177,15 +168,23 @@ def local_handler() -> None:
         required=True,
     )
     parser.add_argument(
-        "--disable-safety-check",
+        "--pipeline-date",
+        type=str,
+        help="The pipeline date associated with the removed items.",
+        default="dev",
+        required=False,
+    )
+    parser.add_argument(
+        "--override-safety-check",
         type=bool,
         help="Whether to override a safety check which prevents node/edge removal if the percentage of removed entities is above a certain threshold.",
         default=False,
     )
 
     args = parser.parse_args()
+    event = GraphRemoverEvent(**args.__dict__)
 
-    handler(**args.__dict__, is_local=True)
+    handler(event, is_local=True)
 
 
 if __name__ == "__main__":

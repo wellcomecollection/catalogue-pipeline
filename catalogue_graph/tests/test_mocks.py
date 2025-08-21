@@ -313,6 +313,7 @@ class MockElasticsearchClient:
     indexed_documents: dict = defaultdict(dict[str, dict])
     inputs: list[dict] = []
     pit_index: str
+    queries: list[dict] = []
 
     def __init__(self, config: dict, api_key: str) -> None:
         pass
@@ -327,6 +328,7 @@ class MockElasticsearchClient:
     def reset_mocks(cls) -> None:
         cls.inputs = []
         cls.indexed_documents = defaultdict(dict[str, dict])
+        cls.queries = []
 
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:
@@ -359,6 +361,7 @@ class MockElasticsearchClient:
         pass
 
     def search(self, body: dict) -> dict:
+        self.queries.append(body["query"])
         search_after = body.get("search_after")
 
         all_documents = self.indexed_documents[self.pit_index].values()
@@ -427,6 +430,18 @@ def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
             record_count=1,
         ),
     )
+
+
+def mock_es_secrets(
+    service_name: str, pipeline_date: str, is_local: bool = False
+) -> None:
+    """Mock AWS Secrets Manager secrets to simulate connecting to the production cluster."""
+    host = "public" if is_local else "private"
+    prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/{host}_host", "test")
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/port", 80)
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/protocol", "http")
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/{service_name}/api_key", "")
 
 
 def add_neptune_mock_response(

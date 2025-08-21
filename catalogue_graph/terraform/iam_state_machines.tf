@@ -33,11 +33,9 @@ resource "aws_iam_policy" "state_machine_policy" {
         Action = ["states:StartExecution", "states:RedriveExecution"],
         Resource = [
           aws_sfn_state_machine.catalogue_graph_extractor.arn,
-          aws_sfn_state_machine.catalogue_graph_extractors.arn,
           aws_sfn_state_machine.catalogue_graph_extractors_monthly.arn,
           aws_sfn_state_machine.catalogue_graph_extractors_daily.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loader.arn,
-          aws_sfn_state_machine.catalogue_graph_bulk_loaders.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loaders_monthly.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loaders_daily.arn,
           aws_sfn_state_machine.catalogue_graph_ingestor.arn,

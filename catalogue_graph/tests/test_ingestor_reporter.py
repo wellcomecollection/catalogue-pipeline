@@ -3,7 +3,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from test_mocks import MockSmartOpen, fixed_datetime
 from test_utils import load_fixture
 
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from config import CATALOGUE_GRAPH_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor.models.step_events import IngestorStepEvent
 from ingestor.steps.ingestor_reporter import (
     ReporterConfig,
@@ -16,7 +16,7 @@ index_date = "2024-01-02"
 job_id = "20240102T1200"
 previous_job_id = "20240101T1200"
 
-s3_url = f"s3://{INGESTOR_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{pipeline_date}/{index_date}"
+s3_url = f"s3://{CATALOGUE_GRAPH_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{pipeline_date}/{index_date}"
 
 
 @pytest.fixture
