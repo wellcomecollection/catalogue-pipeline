@@ -18,12 +18,12 @@ locals {
         ]
       }
       TransitionStep = {
-        Type     = "Choice"
-        Choices  = [
+        Type = "Choice"
+        Choices = [
           {
-            Variable = "$.is_processed"
+            Variable      = "$.is_processed"
             BooleanEquals = true
-            Next         = "Success"
+            Next          = "Success"
           }
         ]
         Default = "LoaderStep"
