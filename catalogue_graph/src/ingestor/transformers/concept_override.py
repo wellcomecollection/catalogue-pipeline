@@ -2,9 +2,10 @@ import csv
 import os
 from typing import TextIO
 
-from ingestor.models.concept import RawNeptuneConcept
 from ingestor.models.indexable_concept import ConceptDescription
-from ingestor.models.related_concepts import (
+
+from .raw_concept import RawNeptuneConcept
+from .raw_related_concepts import (
     RawNeptuneRelatedConcept,
 )
 

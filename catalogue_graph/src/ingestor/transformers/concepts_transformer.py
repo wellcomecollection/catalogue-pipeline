@@ -1,6 +1,6 @@
 from typing import TextIO
 
-from ingestor.models.concept import MissingLabelError, RawNeptuneConcept
+from ingestor.extractors.concepts_extractor import GraphConceptsExtractor
 from ingestor.models.indexable_concept import (
     ConceptDisplay,
     ConceptQuery,
@@ -8,15 +8,24 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from ingestor.models.related_concepts import (
-    RawNeptuneRelatedConcept,
-    RawNeptuneRelatedConcepts,
-)
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
+from ingestor.transformers.raw_concept import RawNeptuneConcept
+from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
+
+from .base_transformer import ElasticsearchBaseTransformer
+from .raw_concept import MissingLabelError
+from .raw_related_concepts import RawNeptuneRelatedConcept
 
 
-class ElasticsearchConceptsTransformer:
-    def __init__(self, overrides: TextIO | None = None):
+class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
+    def __init__(
+        self,
+        start_offset: int,
+        end_index: int,
+        is_local: bool,
+        overrides: TextIO | None = None,
+    ) -> None:
+        self.source = GraphConceptsExtractor(start_offset, end_index, is_local)
         self.override_provider = ConceptTextOverrideProvider(overrides)
 
     def _transform_related_concept(
@@ -45,19 +54,21 @@ class ElasticsearchConceptsTransformer:
             if concept is not None
         ]
 
-    def transform_document(
-        self,
-        neptune_concept: RawNeptuneConcept,
-        neptune_related: RawNeptuneRelatedConcepts,
-    ) -> IndexableConcept:
-        query = ConceptQuery(
+    def _get_query(self, neptune_concept: RawNeptuneConcept) -> ConceptQuery:
+        return ConceptQuery(
             id=neptune_concept.wellcome_id,
             identifiers=neptune_concept.identifiers,
             label=neptune_concept.label,
             alternativeLabels=neptune_concept.alternative_labels,
             type=neptune_concept.concept_type,
         )
-        display = ConceptDisplay(
+
+    def _get_display(
+        self,
+        neptune_concept: RawNeptuneConcept,
+        neptune_related: RawNeptuneRelatedConcepts,
+    ) -> ConceptDisplay:
+        return ConceptDisplay(
             id=neptune_concept.wellcome_id,
             identifiers=neptune_concept.display_identifiers,
             label=neptune_concept.label,
@@ -87,4 +98,20 @@ class ElasticsearchConceptsTransformer:
             ),
         )
 
-        return IndexableConcept(query=query, display=display)
+    def transform_document(
+        self, raw_item: tuple[dict, dict]
+    ) -> IndexableConcept | None:
+        neptune_concept = RawNeptuneConcept(raw_item[0])
+        neptune_related = RawNeptuneRelatedConcepts(raw_item[1])
+
+        try:
+            query = self._get_query(neptune_concept)
+            display = self._get_display(neptune_concept, neptune_related)
+            return IndexableConcept(query=query, display=display)
+        except MissingLabelError:
+            # There is currently one concept which does not have a label ('k6p2u5fh')
+            print(
+                f"Concept {neptune_concept.wellcome_id} does not have a label and will not be indexed."
+            )
+
+        return None

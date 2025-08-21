@@ -231,4 +231,4 @@ class BaseTransformer:
         if sample_size is not None:
             self.source.stop_processing()
 
-        return file_path
+        return os.path.abspath(file_path)

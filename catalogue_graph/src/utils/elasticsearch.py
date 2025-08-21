@@ -10,9 +10,9 @@ from config import (
 from utils.aws import get_secret
 
 
-def get_standard_index_name(prefix: str, pipeline_date: str | None) -> str:
-    if pipeline_date is not None:
-        return f"{prefix}-{pipeline_date}"
+def get_standard_index_name(prefix: str, date: str | None) -> str:
+    if date is not None:
+        return f"{prefix}-{date}"
 
     return prefix
 

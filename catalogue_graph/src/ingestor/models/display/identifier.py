@@ -1,4 +1,6 @@
-from ingestor.models.indexable import DisplayIdentifier, DisplayIdentifierType
+from pydantic import BaseModel
+
+from .id_label import DisplayIdLabel
 
 IDENTIFIER_LABEL_MAPPING = {
     "lc-subjects": "Library of Congress Subject Headings (LCSH)",
@@ -9,6 +11,16 @@ IDENTIFIER_LABEL_MAPPING = {
     "label-derived": "Identifier derived from the label of the referent",
     "wikidata": "Wikidata",
 }
+
+
+class DisplayIdentifierType(DisplayIdLabel):
+    type: str = "IdentifierType"
+
+
+class DisplayIdentifier(BaseModel):
+    value: str
+    type: str = "Identifier"
+    identifierType: DisplayIdentifierType
 
 
 def get_display_identifier(value: str, identifier_type: str) -> DisplayIdentifier:
