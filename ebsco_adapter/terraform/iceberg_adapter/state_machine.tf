@@ -21,14 +21,12 @@ locals {
         Type     = "Choice"
         Choices  = [
           {
-            Condition =  "{% $states.input.is_processed = true %}"
+            Variable = "$.is_processed"
+            BooleanEquals = true
             Next         = "Success"
-          },
-          {
-            Condition =  "{% $states.input.is_processed = false %}"
-            Next         = "LoaderStep"
           }
-        ],
+        ]
+        Default = "LoaderStep"
       }
       LoaderStep = {
         Type     = "Task"
