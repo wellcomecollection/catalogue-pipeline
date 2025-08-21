@@ -1,6 +1,7 @@
 import json
 
 import boto3
+import smart_open
 
 
 def record_processed_file(
@@ -10,23 +11,16 @@ def record_processed_file(
     Record the file as processed
     Args:
         job_id: state machine execution id
-        file_location: S3 path of the processed file
+        file_location: S3 URI of the processed file
         changeset_id: identifies items added or updated in the current execution
     """
-    s3_client = boto3.client("s3")
-
-    path_parts = file_location.split("/")
-    bucket_name = path_parts[2]
-    key = f"{'/'.join(path_parts[3:])}.loaded.json"
+    # Construct the S3 URI for the tracking file by appending .loaded.json
+    tracking_file_uri = f"{file_location}.loaded.json"
 
     record = {"job_id": job_id, "changeset_id": changeset_id}
 
-    s3_client.put_object(
-        Bucket=bucket_name,
-        Key=key,
-        Body=json.dumps(record),
-        ContentType="application/json",
-    )
+    with smart_open.open(tracking_file_uri, "w", encoding="utf-8") as f:
+        f.write(json.dumps(record))
 
     return record
 

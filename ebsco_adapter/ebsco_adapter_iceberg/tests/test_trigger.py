@@ -107,7 +107,6 @@ class TestSyncFiles:
             s3_bucket=self.s3_bucket,
             s3_prefix=self.s3_prefix,
         )
-        print(f"RESULT!!!!!!!!!!!!!! {result}")
 
         self.mock_ebsco_ftp.list_files.assert_called_once()
         self.mock_ebsco_ftp.download_file.assert_called_once_with(
