@@ -111,6 +111,7 @@ dependencies = [
     { name = "pyarrow" },
     { name = "pydantic" },
     { name = "pyiceberg", extra = ["sql-sqlite"] },
+    { name = "pymarc" },
     { name = "smart-open" },
     { name = "tqdm" },
 ]
@@ -133,6 +134,7 @@ requires-dist = [
     { name = "pyarrow", specifier = ">=20.0.0,<21.0.0" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "pyiceberg", extras = ["sql-sqlite"], specifier = ">=0.9.1" },
+    { name = "pymarc", specifier = ">=5.3.1" },
     { name = "smart-open", specifier = ">=7.3.0.post1" },
     { name = "tqdm", specifier = ">=4.67.1" },
 ]
@@ -427,6 +429,15 @@ wheels = [
 [package.optional-dependencies]
 sql-sqlite = [
     { name = "sqlalchemy" },
+]
+
+[[package]]
+name = "pymarc"
+version = "5.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e2/28/8cd999db1c4c6d7e855e7596bc17294829e95e818473afbb655cfa167dd0/pymarc-5.3.1.tar.gz", hash = "sha256:d289233d7298aeae45d976081710391cf21e754f73928132508b8adfe8ea0b49", size = 235395, upload-time = "2025-06-18T13:57:51.3Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/ba/058498db9945b4f0b1bbf9d2e3095d3c4c21934946953056b1a0751cc5a1/pymarc-5.3.1-py3-none-any.whl", hash = "sha256:3fcc09f9d51ef27c40f8d215e3219d0f3eb29716a0767e689c4923e38182ad73", size = 160259, upload-time = "2025-06-18T13:57:46.869Z" },
 ]
 
 [[package]]

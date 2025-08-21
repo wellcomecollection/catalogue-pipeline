@@ -9,11 +9,13 @@ import argparse
 from typing import Any
 
 from pydantic import BaseModel
-
+from pymarc import parse_xml_to_array
+import pyarrow as pa
+import io
 import config
 from table_config import get_glue_table, get_local_table
 from utils.iceberg import IcebergTableClient
-
+from models.work import TransformedWork
 
 class EbscoAdapterTransformerConfig(BaseModel):
     use_glue_table: bool = True
@@ -25,6 +27,18 @@ class EbscoAdapterTransformerEvent(BaseModel):
 
 class EbscoAdapterTransformerResult(BaseModel):
     records_transformed: int = 0
+
+def transform(id: str, content: str):
+    records = parse_xml_to_array(io.StringIO(content))
+
+    for record in records:
+        transformed_work = TransformedWork(
+            id=id,
+            title=record.title,
+            description=record.description
+        )
+
+    raise Exception("nope")
 
 
 def handler(
@@ -78,13 +92,21 @@ def handler(
 
             table_client = IcebergTableClient(table)
 
-            df = table_client.get_records_by_changeset(changeset_id)
+            pa_table: pa.Table = table_client.get_records_by_changeset(changeset_id)
+
+            # iterate over the rows in pa_table, pass content to transform function
+
+            for batch in pa_table.to_batches():
+                for row in batch.to_pylist():
+                    content = row.get("content")
+                    if content:
+                        transform(content)
+                        records_transformed += 1
 
             # In a real implementation, we would:
             # 1. Read data from the Iceberg table using the snapshot_id
             # 2. Apply transformations to the records
             # 3. Write transformed data to output location
-            records_transformed = len(df)
 
         result = EbscoAdapterTransformerResult(records_transformed=records_transformed)
 
