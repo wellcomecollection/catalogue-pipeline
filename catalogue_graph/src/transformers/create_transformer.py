@@ -33,7 +33,8 @@ def create_transformer(
         CatalogueTransformerType
     ):
         raise ValueError(
-            f"The {transformer_type} transformer does not support incremental mode."
+            f"The {transformer_type} transformer does not support incremental mode. "
+            "Only catalogue transformers support incremental (window-based) processing."
         )
 
     if transformer_type == "loc_concepts":
