@@ -6,8 +6,8 @@ from utils.types import ConceptType
 
 class ConceptDescription(BaseModel):
     text: str
-    sourceLabel: str
-    sourceUrl: str
+    sourceLabel: str | None
+    sourceUrl: str | None
 
 
 class ConceptRelatedTo(BaseModel):
