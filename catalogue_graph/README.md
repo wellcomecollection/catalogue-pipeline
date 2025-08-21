@@ -124,7 +124,31 @@ The pipeline deploys automatically on push to main via
 the [catalogue-graph-ci](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/.github/workflows/catalogue-graph-ci.yml)
 GitHub action. This action deploys the latest code to all Lambda functions and publishes a new image to ECR.
 
-To deploy manually, see `scripts/deploy_lambda_zip.sh` and `scripts/build.sh`.
+### Manual deployment
+
+For manual deployment:
+
+* **Lambda functions**: Use the local deployment script from the repository root:
+  ```shell
+  ./scripts/local/deplot_python_lambda.sh catalogue_graph <function-name>
+  ```
+
+* **Extractor container**: Use docker compose commands from the catalogue_graph directory:
+  ```shell
+  # Build the container
+  TAG=dev \
+  REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
+  PYTHON_IMAGE_VERSION=3.13-slim \
+  docker compose build extractor
+  
+  # Push to ECR (requires appropriate AWS credentials)
+  TAG=dev \
+  REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
+  PYTHON_IMAGE_VERSION=3.13-slim \
+  docker compose push extractor
+  ```
+
+
 
 ## Local execution
 
@@ -132,7 +156,7 @@ To run one of the Lambda functions locally, navigate to the `src` directory and 
 command line. For example, to check the status of a bulk load job, run the following:
 
 ```shell
-AWS_PROFILE=platform-developer python3.13 bulk_load_poller.py --load-id=<some_id>
+AWS_PROFILE=platform-developer uv run bulk_load_poller.py --load-id=<some_id>
 ```
 
 To run an extractor, use the following:
@@ -149,20 +173,8 @@ python3.13 extractor.py \
 
 ## Local Neptune experimentation
 
-To run experimental Neptune queries locally, create a new Python file in the `src` directory, create a local Neptune
-client, and then run your queries. For example:
-
-```python3
-from utils.aws import get_neptune_client
-
-neptune_client = get_neptune_client(True)
-
-query = """
-MATCH (n) RETURN count(*)
-"""
-result = neptune_client.run_open_cypher_query(query)
-print(result)
-```
+To run experimental Neptune queries locally, you can use the notebook in the `notebooks` directory. This notebook
+connects to a Neptune instance running in the cloud and allows you to run openCypher queries against it. 
 
 ## Running with local Elasticsearch
 
@@ -172,53 +184,3 @@ To run Elasticsearch locally, you can use `elasticsearch.docker-compose.yml` to 
 
 This will start Elasticsearch on `localhost:9200`, and Kibana on `localhost:5601`. Lambda functions can be configured to
 use this Elasticsearch instance by setting the relevant environment variables when starting the Lambda function locally.
-
-### AWS Graph Notebook
-
-Additionally, it is possible to connect to the cluster
-using [AWS graph notebook](https://github.com/aws/graph-notebook). The most straightforward option to do this locally is
-using [JupyterLab](https://jupyter.org/). To make this work, you need to set this up in a different virtual environment
-from the one in this project (this is because `graph-notebook` currently requires Python 3.9.x-3.10.14). Once you have
-created a new environment with the correct Python version, install the following:
-
-```
-# install graph-notebook
-pip install graph-notebook
-
-# install jupyterlab
-pip install "jupyterlab>=3,<4"
-
-# aws graph-notebook comes with some example notebooks, this creates copies in the notebooks directory
-python -m graph_notebook.notebooks.install --destination notebooks
-```
-
-Run the following command to open JupyterLab in your browser:
-
-`python -m graph_notebook.start_jupyterlab --jupyter-dir notebooks`
-
-To connect to the catalogue graph, add the following configuration into your Jupyter notebook:
-
-```
-%%graph_notebook_config
-{
-    "host": <value stored in AWS Secrets Manager under 'catalogue-graph/neptune-cluster-endpoint' in the platform account>,
-    "neptune_service": "neptune-db",
-    "port": 8182,
-    "ssl": true,
-    "proxy_port": 443,
-    "proxy_host": "catalogue-graph.wellcomecollection.org",
-    "auth_mode": "IAM",
-    "aws_region": "eu-west-1",
-    "load_from_s3_arn": ""
-}  
-```
-
-To communicate with the cluster, the AWS_PROFILE environment variable first needs to be set like this in the same
-Jupyter notebook:
-
-```
-%env AWS_PROFILE=platform-developer
-```
-
-You can find an [example notebook](notebooks/graph_exploration.ipynb) in the notebooks folder with openCypher queries to
-explore the catalogue graph.
