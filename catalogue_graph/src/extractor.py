@@ -22,6 +22,10 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     )
     if event.pipeline_date == "dev":
         print("No pipeline date specified. Will use a local Elasticsearch instance.")
+    elif is_local:
+        print("Will connect to the public Elasticsearch host.")
+    else:
+        print("Will connect to the private Elasticsearch host.")
 
     transformer: BaseTransformer = create_transformer(
         event.transformer_type,
