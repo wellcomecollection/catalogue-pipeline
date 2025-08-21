@@ -1,7 +1,7 @@
 [project]
 name = "scripts"
 version = "0.1.0"
-description = "Add your description here"
+description = "Scripts for managing and reindexing Elasticsearch data"
 readme = "README.md"
 requires-python = ">=3.10,<3.11"
 # Dependencies migrated from requirements.in
