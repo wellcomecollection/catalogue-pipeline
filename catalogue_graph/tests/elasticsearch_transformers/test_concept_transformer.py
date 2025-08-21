@@ -1,3 +1,6 @@
+import io
+
+import neptune_generators as ng
 from test_utils import load_json_fixture
 
 from ingestor.models.concept import (
@@ -216,6 +219,255 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
     assert result == expected_result
 
 
+def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() -> None:
+    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+
+    mock_related_to = [
+        ng.a_related_concept(),
+        ng.a_related_concept_with_two_source_nodes(),
+    ]
+
+    related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
+        "related_to": {"a2584ttj": mock_related_to},
+    }
+
+    expected_result = IndexableConcept(
+        query=ConceptQuery(
+            id="a2584ttj",
+            identifiers=[
+                ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
+            ],
+            label="Waves",
+            alternativeLabels=["Mechanical waves", "Waves"],
+            type="Concept",
+        ),
+        display=ConceptDisplay(
+            id="a2584ttj",
+            identifiers=[
+                DisplayIdentifier(
+                    value="sh85145789",
+                    identifierType=DisplayIdentifierType(
+                        id="lc-subjects",
+                        label="Library of Congress Subject Headings (LCSH)",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
+            label="Waves",
+            displayLabel="Waves",
+            alternativeLabels=["Mechanical waves", "Waves"],
+            description=ConceptDescription(
+                text="Repeated oscillation about a stable equilibrium",
+                sourceLabel="wikidata",
+                sourceUrl="https://www.wikidata.org/wiki/Q37172",
+            ),
+            type="Concept",
+            sameAs=["a2584ttj", "gcmn66yk"],
+            relatedConcepts=RelatedConcepts(
+                relatedTo=[
+                    ConceptRelatedTo(
+                        label="Hilton, Violet, 1908-1969",
+                        id="tzrtx26u",
+                        relationshipType="has_sibling",
+                        conceptType="Person",
+                    ),
+                    ConceptRelatedTo(
+                        label="Joseph Pujol",
+                        id="abcd2345",
+                        relationshipType="has_sibling",
+                        conceptType="Person",
+                    ),
+                ],
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=[],
+                people=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
+            ),
+        ),
+    )
+
+    transformer = ElasticsearchConceptsTransformer()
+    neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, related_concepts
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
+    assert result == expected_result
+
+
+def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
+    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+
+    mock_related_to = [
+        ng.a_related_concept_with_no_label(),
+        ng.a_related_concept(),
+        ng.a_related_concept_with_no_label(),
+        ng.a_related_concept_with_two_source_nodes(),
+    ]
+
+    related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
+        "related_to": {"a2584ttj": mock_related_to},
+    }
+
+    expected_result = IndexableConcept(
+        query=ConceptQuery(
+            id="a2584ttj",
+            identifiers=[
+                ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
+            ],
+            label="Waves",
+            alternativeLabels=["Mechanical waves", "Waves"],
+            type="Concept",
+        ),
+        display=ConceptDisplay(
+            id="a2584ttj",
+            identifiers=[
+                DisplayIdentifier(
+                    value="sh85145789",
+                    identifierType=DisplayIdentifierType(
+                        id="lc-subjects",
+                        label="Library of Congress Subject Headings (LCSH)",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
+            label="Waves",
+            displayLabel="Waves",
+            alternativeLabels=["Mechanical waves", "Waves"],
+            description=ConceptDescription(
+                text="Repeated oscillation about a stable equilibrium",
+                sourceLabel="wikidata",
+                sourceUrl="https://www.wikidata.org/wiki/Q37172",
+            ),
+            type="Concept",
+            sameAs=["a2584ttj", "gcmn66yk"],
+            relatedConcepts=RelatedConcepts(
+                relatedTo=[
+                    ConceptRelatedTo(
+                        label="Hilton, Violet, 1908-1969",
+                        id="tzrtx26u",
+                        relationshipType="has_sibling",
+                        conceptType="Person",
+                    ),
+                    ConceptRelatedTo(
+                        label="Joseph Pujol",
+                        id="abcd2345",
+                        relationshipType="has_sibling",
+                        conceptType="Person",
+                    ),
+                ],
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=[],
+                people=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
+            ),
+        ),
+    )
+
+    transformer = ElasticsearchConceptsTransformer()
+    neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, related_concepts
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
+    assert result == expected_result
+
+
+def test_catalogue_concept_overridden_related_concepts() -> None:
+    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+
+    mock_related_to = [
+        ng.a_related_concept_with_no_label(),
+        ng.a_related_concept(),
+        ng.a_related_concept_with_two_source_nodes(),
+    ]
+
+    related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
+        "related_to": {"a2584ttj": mock_related_to},
+    }
+
+    expected_result = IndexableConcept(
+        query=ConceptQuery(
+            id="a2584ttj",
+            identifiers=[
+                ConceptIdentifier(value="sh85145789", identifierType="lc-subjects")
+            ],
+            label="Waves",
+            alternativeLabels=["Mechanical waves", "Waves"],
+            type="Concept",
+        ),
+        display=ConceptDisplay(
+            id="a2584ttj",
+            identifiers=[
+                DisplayIdentifier(
+                    value="sh85145789",
+                    identifierType=DisplayIdentifierType(
+                        id="lc-subjects",
+                        label="Library of Congress Subject Headings (LCSH)",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
+            label="Waves",
+            displayLabel="Waves",
+            alternativeLabels=["Mechanical waves", "Waves"],
+            description=ConceptDescription(
+                text="Repeated oscillation about a stable equilibrium",
+                sourceLabel="wikidata",
+                sourceUrl="https://www.wikidata.org/wiki/Q37172",
+            ),
+            type="Concept",
+            sameAs=["a2584ttj", "gcmn66yk"],
+            relatedConcepts=RelatedConcepts(
+                relatedTo=[
+                    ConceptRelatedTo(
+                        label="Roland le Petour",
+                        id="aaaaaaaa",
+                        relationshipType="has_sibling",
+                        conceptType="Person",
+                    ),
+                    ConceptRelatedTo(
+                        label="Hilton, Violet, 1908-1969",
+                        id="tzrtx26u",
+                        relationshipType="has_sibling",
+                        conceptType="Person",
+                    ),
+                    ConceptRelatedTo(
+                        label="Le Pétomane",
+                        id="abcd2345",
+                        relationshipType="has_sibling",
+                        conceptType="Person",
+                    ),
+                ],
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=[],
+                people=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
+            ),
+        ),
+    )
+
+    transformer = ElasticsearchConceptsTransformer(
+        io.StringIO("""id,label,description
+        id, Wellcome Label, Wellcome Description
+        aaaaaaaa,Roland le Petour,
+        abcd2345,Le Pétomane,
+        """)
+    )
+    neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, related_concepts
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
+    assert result == expected_result
+
+
 def test_concept_type_agent_precedence() -> None:
     # Person is more specific than Agent
     assert get_most_specific_concept_type(["Agent", "Person"]) == "Person"
@@ -289,3 +541,62 @@ def test_concept_type_place_precedence() -> None:
         get_most_specific_concept_type(["Agent", "Place", "Person", "Organisation"])
         == "Place"
     )
+
+
+def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> (
+    None
+):
+    mock_concept = load_json_fixture("neptune/concept_query_single.json")
+
+    expected_result = IndexableConcept(
+        query=ConceptQuery(
+            id="id",
+            identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
+            label="LoC label",
+            alternativeLabels=[],
+            type="Person",
+        ),
+        display=ConceptDisplay(
+            id="id",
+            identifiers=[
+                DisplayIdentifier(
+                    value="123",
+                    identifierType=DisplayIdentifierType(
+                        id="lc-names",
+                        label="Library of Congress Name authority records",
+                        type="IdentifierType",
+                    ),
+                )
+            ],
+            label="LoC label",
+            displayLabel="Wellcome Label",
+            alternativeLabels=[],
+            description=ConceptDescription(
+                text="Wellcome Description",
+                sourceLabel=None,
+                sourceUrl=None,
+            ),
+            type="Person",
+            sameAs=[],
+            relatedConcepts=RelatedConcepts(
+                relatedTo=[],
+                fieldsOfWork=[],
+                narrowerThan=[],
+                broaderThan=[],
+                people=[],
+                frequentCollaborators=[],
+                relatedTopics=[],
+            ),
+        ),
+    )
+    transformer = ElasticsearchConceptsTransformer(
+        io.StringIO("""id,label,description
+        id, Wellcome Label, Wellcome Description
+        """)
+    )
+    neptune_concept = RawNeptuneConcept(mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    neptune_related = RawNeptuneRelatedConcepts(
+        neptune_concept.wellcome_id, MOCK_EMPTY_RELATED_CONCEPTS
+    )
+    result = transformer.transform_document(neptune_concept, neptune_related)
+    assert result == expected_result
