@@ -102,9 +102,11 @@ dependencies = [
     { name = "elasticsearch" },
     { name = "polars" },
     { name = "pydantic" },
+    { name = "python-dateutil" },
     { name = "requests" },
     { name = "smart-open" },
     { name = "tabulate" },
+    { name = "types-python-dateutil" },
     { name = "types-requests" },
     { name = "types-tabulate" },
 ]
@@ -129,9 +131,11 @@ requires-dist = [
     { name = "elasticsearch", specifier = ">=8.11,<8.13" },
     { name = "polars" },
     { name = "pydantic" },
+    { name = "python-dateutil" },
     { name = "requests" },
     { name = "smart-open" },
     { name = "tabulate" },
+    { name = "types-python-dateutil" },
     { name = "types-requests" },
     { name = "types-tabulate" },
 ]
@@ -1010,6 +1014,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/95/02564024f8668feab6733a2c491005b5281b048b3d0573510622cbcd9fd4/types_awscrt-0.27.4.tar.gz", hash = "sha256:c019ba91a097e8a31d6948f6176ede1312963f41cdcacf82482ac877cbbcf390", size = 16941 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/d4/40/cb4d04df4ac3520858f5b397a4ab89f34be2601000002a26edd8ddc0cac5/types_awscrt-0.27.4-py3-none-any.whl", hash = "sha256:a8c4b9d9ae66d616755c322aba75ab9bd793c6fef448917e6de2e8b8cdf66fb4", size = 39626 },
+]
+
+[[package]]
+name = "types-python-dateutil"
+version = "2.9.0.20250809"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/a3/53/07dac71db45fb6b3c71c2fd29a87cada2239eac7ecfb318e6ebc7da00a3b/types_python_dateutil-2.9.0.20250809.tar.gz", hash = "sha256:69cbf8d15ef7a75c3801d65d63466e46ac25a0baa678d89d0a137fc31a608cc1", size = 15820, upload-time = "2025-08-09T03:14:14.109Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/43/5e/67312e679f612218d07fcdbd14017e6d571ce240a5ba1ad734f15a8523cc/types_python_dateutil-2.9.0.20250809-py3-none-any.whl", hash = "sha256:768890cac4f2d7fd9e0feb6f3217fce2abbfdfc0cadd38d11fba325a815e4b9f", size = 17707, upload-time = "2025-08-09T03:14:13.314Z" },
 ]
 
 [[package]]

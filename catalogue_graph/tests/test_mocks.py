@@ -1,6 +1,7 @@
 import datetime
 import gzip
 import io
+import json
 import os
 import tempfile
 from collections import defaultdict
@@ -9,7 +10,6 @@ from typing import Any, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
-
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
@@ -375,6 +375,22 @@ class MockElasticsearchClient:
 
         return {"hits": {"hits": items}}
 
+    def mget(self, index: str, body: dict) -> dict:
+        indexed_documents = self.indexed_documents[index]
+
+        items = []
+        for requested_id in body["ids"]:
+            item = {"_id": requested_id}
+            if requested_id in indexed_documents:
+                item["found"] = True
+                item["_source"] = indexed_documents[requested_id]["_source"]
+            else:
+                item["found"] = False
+
+            items.append(item)
+
+        return {"docs": items}
+
 
 def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     class FixedDateTime(datetime.datetime):
@@ -425,3 +441,16 @@ def mock_es_secrets(
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/port", 80)
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/protocol", "http")
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/{service_name}/api_key", "")
+
+
+def add_neptune_mock_response(
+    mock_query: str, expected_params: dict, mock_results: list[dict]
+) -> None:
+    query = " ".join(mock_query.split())
+
+    MockRequest.mock_response(
+        method="POST",
+        url="https://test-host.com:8182/openCypher",
+        json_data={"results": mock_results},
+        body=json.dumps({"query": query, "parameters": expected_params}),
+    )

@@ -1,0 +1,298 @@
+[
+  {
+    "concept": {
+      "~id": "nkngjz5k",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "nkngjz5k",
+        "label": "Illicit Drugs",
+        "source": "nlm-mesh",
+        "type": "Concept"
+      }
+    },
+    "linked_source_concept": {
+      "~id": "D013287",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "D013287",
+        "label": "Illicit Drugs",
+        "source": "nlm-mesh",
+        "alternative_ids": "D26.878",
+        "alternative_labels": "Drugs, Illicit||Illicit Drug||Drug, Illicit||Illegal Drug||Drug, Illegal||Illegal Drugs||Drugs, Illegal||Street Drugs||Drugs, Street||Street Drug||Drug, Street||Recreational Drugs||Drugs, Recreational||Recreational Drug||Drug, Recreational||Club Drugs||Drugs, Club||Club Drug||Drug, Club",
+        "description": "Drugs that are manufactured, obtained, or sold illegally. They include prescription drugs obtained or sold without prescription and non-prescription drugs. Illicit drugs are widely distributed, tend to be grossly impure and may cause unexpected toxicity.\n    "
+      }
+    },
+    "other_source_concepts": [
+      {
+        "~id": "Q10268802",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "Q10268802",
+          "label": "illegal drug",
+          "source": "wikidata",
+          "alternative_labels": "illegal drugs||dope||drugs||narcotic||narcotics||illegal substance||illicit drug||illicit drugs||illicit substance||prohibited drug||street drug||street drugs",
+          "description": "psychoactive drug whose possession, use or trade is outlawed"
+        }
+      }
+    ]
+  },
+  {
+    "concept": {
+      "~id": "nc4qjd2x",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "nc4qjd2x",
+        "label": "Methamphetamine",
+        "source": "nlm-mesh",
+        "type": "Concept"
+      }
+    },
+    "linked_source_concept": {
+      "~id": "D008694",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "D008694",
+        "label": "Methamphetamine",
+        "source": "nlm-mesh",
+        "alternative_ids": "D02.092.471.683.152.619",
+        "alternative_labels": "Deoxyephedrine||Desoxyephedrine||Methylamphetamine||N-Methylamphetamine||N Methylamphetamine||Metamfetamine||Methamphetamine Hydrochloride||Hydrochloride, Methamphetamine||Desoxyn||Madrine",
+        "description": "A central nervous system stimulant and sympathomimetic with actions and uses similar to DEXTROAMPHETAMINE. The smokable form is a drug of abuse and is referred to as crank, crystal, crystal meth, ice, and speed.\n    "
+      }
+    },
+    "other_source_concepts": [
+      {
+        "~id": "sh85084377",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "sh85084377",
+          "label": "Methamphetamine",
+          "source": "lc-subjects",
+          "alternative_labels": "Methylamphetamine||Deoxyephedrine||Speed (Drug)||Phenylmethylaminopropane||Dimethylphenethylamine||Meth (Drug)"
+        }
+      },
+      {
+        "~id": "Q191924",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "Q191924",
+          "label": "D-methamphetamine",
+          "source": "wikidata",
+          "alternative_labels": "methamphetamine||chalk||crank||ice||base||crystal||fast||pure||glass||wax||whiz||speed||tweak||crypto||(+)-(S)-N-alpha-dimethylphenethylamine||(+)-(S)-P-α-dimethylphenethylamine||(alphaS)-N,alpha-dimethylbenzeneethanamine||(S)-N,alpha-dimethylbenzeneethanamine||(S)-N,α-dimethylbenzeneethanamine||(αS)-N,α-dimethylbenzeneethanamine||crystal meth||d-1-phenyl-2-methylaminopropane||d-deoxyephedrine||d-desoxyephedrine||d-meth||d-N-methylamphetamine||d-phenylisopropylmethylamine||desoxyephedrine||dextromethamphetamine||metamfetamine||meth||methyl-beta-phenylisopropylamine||methyl-β-phenylisopropylamine||methylamphetamine||S-methamphetamine||N-methylamphetamine pito-1342",
+          "description": "central nervous system stimulant"
+        }
+      }
+    ]
+  },
+  {
+    "concept": {
+      "~id": "xggmrgjw",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "xggmrgjw",
+        "label": "Drug traffic",
+        "source": "lc-subjects",
+        "type": "Concept"
+      }
+    },
+    "linked_source_concept": {
+      "~id": "sh88000332",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "sh88000332",
+        "label": "Drug traffic",
+        "source": "lc-subjects",
+        "alternative_labels": "Drugs--Prices and sale||Trafficking in narcotics||Trafficking in drugs||Traffic, Drug||Drug smuggling||Drug production, Illicit||Drug trafficking||Illicit drug production||Narcotic trafficking||Drug trade, Illicit||Smuggling of drugs||Narcotic traffic||Smuggling of narcotics||Illicit drug trade||Drug dealing||Narcotic trade"
+      }
+    },
+    "other_source_concepts": [
+      {
+        "~id": "D064423",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "D064423",
+          "label": "Drug Trafficking",
+          "source": "nlm-mesh",
+          "alternative_ids": "I01.198.240.247||I01.880.735.191.101",
+          "alternative_labels": "Drug Traffickings||Trafficking, Drug||Traffickings, Drug||Drug Smuggling||Drug Smugglings||Smuggling, Drug||Smugglings, Drug||Drug Dealing||Dealing, Drug||Dealings, Drug||Drug Dealings||Illicit Drug Trade||Drug Trade, Illicit||Drug Trades, Illicit||Illicit Drug Trades||Trade, Illicit Drug||Trades, Illicit Drug",
+          "description": "The illegal acquisition, sale, production, transport, movement, and distribution of controlled substances such as narcotics.\n    "
+        }
+      },
+      {
+        "~id": "Q844924",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "Q844924",
+          "label": "drug trafficking",
+          "source": "wikidata",
+          "alternative_labels": "illegal drug trade||drug traffic||illegal drug industry||narcotics trafficking||narcotrafficking",
+          "description": "global black market in illegal drugs"
+        }
+      }
+    ]
+  },
+  {
+    "concept": {
+      "~id": "s589e8zp",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "s589e8zp",
+        "label": "DrugScope (Organization)",
+        "source": "lc-names",
+        "type": "Organisation"
+      }
+    },
+    "linked_source_concept": {
+      "~id": "nb2005005340",
+      "~entityType": "node",
+      "~labels": [
+        "SourceName"
+      ],
+      "~properties": {
+        "id": "nb2005005340",
+        "label": "DrugScope (Organization)",
+        "source": "lc-names"
+      }
+    },
+    "other_source_concepts": []
+  },
+  {
+    "concept": {
+      "~id": "gtk2w877",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "gtk2w877",
+        "label": "Methamphetamine",
+        "source": "lc-subjects",
+        "type": "Subject"
+      }
+    },
+    "linked_source_concept": {
+      "~id": "sh85084377",
+      "~entityType": "node",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "sh85084377",
+        "label": "Methamphetamine",
+        "source": "lc-subjects",
+        "alternative_labels": "Methylamphetamine||Deoxyephedrine||Speed (Drug)||Phenylmethylaminopropane||Dimethylphenethylamine||Meth (Drug)"
+      }
+    },
+    "other_source_concepts": [
+      {
+        "~id": "D008694",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "D008694",
+          "label": "Methamphetamine",
+          "source": "nlm-mesh",
+          "alternative_ids": "D02.092.471.683.152.619",
+          "alternative_labels": "Deoxyephedrine||Desoxyephedrine||Methylamphetamine||N-Methylamphetamine||N Methylamphetamine||Metamfetamine||Methamphetamine Hydrochloride||Hydrochloride, Methamphetamine||Desoxyn||Madrine",
+          "description": "A central nervous system stimulant and sympathomimetic with actions and uses similar to DEXTROAMPHETAMINE. The smokable form is a drug of abuse and is referred to as crank, crystal, crystal meth, ice, and speed.\n    "
+        }
+      },
+      {
+        "~id": "Q191924",
+        "~entityType": "node",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "Q191924",
+          "label": "D-methamphetamine",
+          "source": "wikidata",
+          "alternative_labels": "methamphetamine||chalk||crank||ice||base||crystal||fast||pure||glass||wax||whiz||speed||tweak||crypto||(+)-(S)-N-alpha-dimethylphenethylamine||(+)-(S)-P-α-dimethylphenethylamine||(alphaS)-N,alpha-dimethylbenzeneethanamine||(S)-N,alpha-dimethylbenzeneethanamine||(S)-N,α-dimethylbenzeneethanamine||(αS)-N,α-dimethylbenzeneethanamine||crystal meth||d-1-phenyl-2-methylaminopropane||d-deoxyephedrine||d-desoxyephedrine||d-meth||d-N-methylamphetamine||d-phenylisopropylmethylamine||desoxyephedrine||dextromethamphetamine||metamfetamine||meth||methyl-beta-phenylisopropylamine||methyl-β-phenylisopropylamine||methylamphetamine||S-methamphetamine||N-methylamphetamine pito-1342",
+          "description": "central nervous system stimulant"
+        }
+      }
+    ]
+  },
+  {
+    "concept": {
+      "~id": "vcnymmn7",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "vcnymmn7",
+        "label": "Fester, Uncle",
+        "source": "lc-names",
+        "type": "Person"
+      }
+    },
+    "linked_source_concept": {
+      "~id": "n88157141",
+      "~entityType": "node",
+      "~labels": [
+        "SourceName"
+      ],
+      "~properties": {
+        "id": "n88157141",
+        "label": "Fester, Uncle",
+        "source": "lc-names",
+        "alternative_labels": "Uncle Fester"
+      }
+    },
+    "other_source_concepts": [
+      {
+        "~id": "Q664975",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "Q664975",
+          "date_of_birth": "2000-01-01T00:00:00.000Z",
+          "label": "Uncle Fester",
+          "source": "wikidata",
+          "place_of_birth": "Wisconsin",
+          "description": "American chemist"
+        }
+      }
+    ]
+  }
+]

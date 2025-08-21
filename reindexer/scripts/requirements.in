@@ -1,7 +1,0 @@
-boto3
-click
-elasticsearch
-humanize
-tabulate
-tenacity
-tqdm
