@@ -51,6 +51,7 @@ def verify_s3_reports(record_count: int) -> None:
 
 
 def test_ingestor_trigger_monitor_success_no_previous() -> None:
+    loader_event = get_mock_ingestor_loader_event("123", 0, 1)
     event = IngestorTriggerMonitorLambdaEvent(
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
@@ -58,13 +59,7 @@ def test_ingestor_trigger_monitor_success_no_previous() -> None:
         job_id="123",
         force_pass=False,
         report_results=True,
-        events=[
-            get_mock_ingestor_loader_event(
-                "123",
-                0,
-                1,
-            )
-        ],
+        events=[loader_event],
     )
 
     config = IngestorTriggerMonitorConfig(percentage_threshold=0.1)
