@@ -8,23 +8,25 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from ingestor.models.related_concepts import (
-    RawNeptuneRelatedConcept,
-    RawNeptuneRelatedConcepts,
-)
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .raw_concept import MissingLabelError
+from .raw_related_concepts import RawNeptuneRelatedConcept
 
 
 class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
-    def __init__(self, start_offset: int, end_index: int, is_local: bool, overrides: TextIO | None = None) -> None:
+    def __init__(
+        self,
+        start_offset: int,
+        end_index: int,
+        is_local: bool,
+        overrides: TextIO | None = None,
+    ) -> None:
         self.source = GraphConceptsExtractor(start_offset, end_index, is_local)
         self.override_provider = ConceptTextOverrideProvider(overrides)
-
 
     def _transform_related_concept(
         self, related_concept: RawNeptuneRelatedConcept
@@ -60,7 +62,6 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             alternativeLabels=neptune_concept.alternative_labels,
             type=neptune_concept.concept_type,
         )
-
 
     def _get_display(
         self,

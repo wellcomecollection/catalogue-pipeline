@@ -1,4 +1,4 @@
-from .concept import (
+from .raw_concept import (
     DISPLAY_SOURCE_PRIORITY,
     get_most_specific_concept_type,
     get_priority_label,

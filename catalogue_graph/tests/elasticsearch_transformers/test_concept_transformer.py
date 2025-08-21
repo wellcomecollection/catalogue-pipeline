@@ -217,7 +217,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
-        "related_to": {"a2584ttj": mock_related_to},
+        "related_to": mock_related_to,
     }
 
     expected_result = IndexableConcept(
@@ -277,12 +277,9 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer()
-    neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
-    neptune_related = RawNeptuneRelatedConcepts(
-        neptune_concept.wellcome_id, related_concepts
-    )
-    result = transformer.transform_document(neptune_concept, neptune_related)
+    transformer = ElasticsearchConceptsTransformer(0, 1, True)
+    raw_data = (mock_concept, related_concepts)
+    result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
@@ -297,7 +294,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
-        "related_to": {"a2584ttj": mock_related_to},
+        "related_to": mock_related_to,
     }
 
     expected_result = IndexableConcept(
@@ -357,12 +354,9 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer()
-    neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
-    neptune_related = RawNeptuneRelatedConcepts(
-        neptune_concept.wellcome_id, related_concepts
-    )
-    result = transformer.transform_document(neptune_concept, neptune_related)
+    transformer = ElasticsearchConceptsTransformer(0, 1, True)
+    raw_data = (mock_concept, related_concepts)
+    result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
@@ -376,7 +370,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
-        "related_to": {"a2584ttj": mock_related_to},
+        "related_to": mock_related_to,
     }
 
     expected_result = IndexableConcept(
@@ -442,18 +436,14 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(
-        io.StringIO("""id,label,description
+    overrides = io.StringIO("""id,label,description
         id, Wellcome Label, Wellcome Description
         aaaaaaaa,Roland le Petour,
         abcd2345,Le Pétomane,
         """)
-    )
-    neptune_concept = RawNeptuneConcept(mock_concept, related_concepts)
-    neptune_related = RawNeptuneRelatedConcepts(
-        neptune_concept.wellcome_id, related_concepts
-    )
-    result = transformer.transform_document(neptune_concept, neptune_related)
+    transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)
+    raw_data = (mock_concept, related_concepts)
+    result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
@@ -578,14 +568,11 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
             ),
         ),
     )
-    transformer = ElasticsearchConceptsTransformer(
-        io.StringIO("""id,label,description
+    overrides = io.StringIO("""id,label,description
         id, Wellcome Label, Wellcome Description
         """)
-    )
-    neptune_concept = RawNeptuneConcept(mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
-    neptune_related = RawNeptuneRelatedConcepts(
-        neptune_concept.wellcome_id, MOCK_EMPTY_RELATED_CONCEPTS
-    )
-    result = transformer.transform_document(neptune_concept, neptune_related)
+
+    transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)
+    raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    result = transformer.transform_document(raw_data)
     assert result == expected_result
