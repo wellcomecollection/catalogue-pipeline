@@ -67,6 +67,7 @@ class TestSyncFiles:
         self.s3_bucket = "test-bucket"
         self.s3_prefix = "test-prefix"
         self.mock_list_s3_keys = patch("steps.trigger.list_s3_keys").start()
+        # self.mock_is_file_processed = patch("steps.trigger.is_file_already_processed").start()
 
         # Mock boto3 for the S3 client used in sync_files
         self.mock_boto3 = patch("steps.trigger.boto3").start()
@@ -76,11 +77,11 @@ class TestSyncFiles:
     def teardown_method(self) -> None:
         """Clean up patches"""
         self.mock_list_s3_keys.stop()
+        # self.mock_is_file_processed.stop()
         self.mock_boto3.stop()
 
     def test_successful_download_and_upload(self) -> None:
         """Test successful download of *most recent* file from FTP and upload to S3"""
-        # Setup FTP mock
         ftp_files = [
             "ebz-s7451719-20240315-1.xml",
             "ebz-s7451719-20240320-1.xml",
@@ -107,7 +108,6 @@ class TestSyncFiles:
             s3_prefix=self.s3_prefix,
         )
 
-        # Verify calls
         self.mock_ebsco_ftp.list_files.assert_called_once()
         self.mock_ebsco_ftp.download_file.assert_called_once_with(
             "ebz-s7451719-20240325-1.xml", self.target_directory
@@ -116,9 +116,9 @@ class TestSyncFiles:
             download_path, self.s3_bucket, "test-prefix/ebz-s7451719-20240325-1.xml"
         )
 
-        # Verify result
         expected_result = (
-            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240325-1.xml"
+            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240325-1.xml",
+            False,
         )
         assert result == expected_result
 
@@ -136,7 +136,6 @@ class TestSyncFiles:
 
     def test_file_already_exists_in_s3(self) -> None:
         """Test early return when file already exists in S3"""
-        # Setup FTP mock
         ftp_files = [
             "ebz-s7451719-20240320-1.xml",
             "ebz-s7451719-20240322-1.xml",
@@ -145,7 +144,7 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.list_files.return_value = ftp_files
 
         # Setup S3 mock - file exists
-        self.mock_s3_client.head_object.return_value = {}  # File exists
+        self.mock_s3_client.head_object.return_value = {}
 
         self.mock_list_s3_keys.return_value = [
             "test-prefix/ebz-s7451719-20240322-1.xml"
@@ -160,7 +159,45 @@ class TestSyncFiles:
 
         # Should return S3 URL without downloading or uploading
         expected_result = (
-            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml"
+            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml",
+            False,
+        )
+        assert result == expected_result
+        self.mock_ebsco_ftp.download_file.assert_not_called()
+        self.mock_s3_client.upload_file.assert_not_called()
+
+    @patch("steps.trigger.is_file_already_processed")
+    def test_file_already_exists_in_s3_and_processed(  # type: ignore
+        self, mock_is_file_processed
+    ) -> None:
+        """Test early return with is_processed: True when files exist in S3"""
+        ftp_files = [
+            "ebz-s7451719-20240320-1.xml",
+            "ebz-s7451719-20240322-1.xml",
+            "ebz-s7451719-20240321-1.xml",
+        ]
+        self.mock_ebsco_ftp.list_files.return_value = ftp_files
+
+        # Setup S3 mock - file exists
+        self.mock_s3_client.head_object.return_value = {}
+
+        self.mock_list_s3_keys.return_value = [
+            "test-prefix/ebz-s7451719-20240322-1.xml"
+        ]
+
+        mock_is_file_processed.return_value = True
+
+        result = sync_files(
+            ebsco_ftp=self.mock_ebsco_ftp,
+            target_directory=self.target_directory,
+            s3_bucket=self.s3_bucket,
+            s3_prefix=self.s3_prefix,
+        )
+
+        # Should return S3 URL without downloading or uploading
+        expected_result = (
+            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml",
+            True,
         )
         assert result == expected_result
         self.mock_ebsco_ftp.download_file.assert_not_called()
@@ -241,7 +278,8 @@ class TestSyncFiles:
 
         # Should select the newest file in s3 (20240428)
         expected_result = (
-            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240428-1.xml"
+            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240428-1.xml",
+            False,
         )
         assert result == expected_result
 
@@ -274,6 +312,7 @@ class TestSyncFiles:
         self.mock_list_s3_keys.assert_called_once()
 
         expected_result = (
-            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml"
+            f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml",
+            False,
         )
         assert result == expected_result

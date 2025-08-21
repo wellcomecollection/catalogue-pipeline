@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from ebsco_ftp import EbscoFtp
 from steps.loader import EbscoAdapterLoaderEvent
 from utils.aws import get_ssm_parameter, list_s3_keys
+from utils.tracking import is_file_already_processed
 
 ssm_param_prefix = "/catalogue_pipeline/ebsco_adapter"
 s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
@@ -43,7 +44,7 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
 
 def sync_files(
     ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
-) -> str:
+) -> tuple[str, bool]:
     ftp_files = ebsco_ftp.list_files()
 
     most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
@@ -64,12 +65,15 @@ def sync_files(
         most_recent_s3_object = get_most_recent_valid_file(
             [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
         )
-        return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
+        return (
+            f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
+            is_file_already_processed(
+                s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
+            ),
+        )
     except Exception as e:
         if "NoSuchKey" in str(e):
-            print(
-                f"File {most_recent_ftp_file} not found in S3. Will download and upload."
-            )
+            print(f"{most_recent_ftp_file} not found in S3. Will download and upload.")
         else:
             print(f"Error checking S3: {e}. Will proceed with download and upload.")
 
@@ -91,11 +95,14 @@ def sync_files(
         raise RuntimeError(f"Failed to upload {most_recent_ftp_file} to S3: {e}") from e
 
     # list what's in s3 and get the file with the highest date to send downstream
-    s3_object = get_most_recent_valid_file(
+    most_recent_s3_object = get_most_recent_valid_file(
         [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
     )
 
-    return f"s3://{s3_bucket}/{s3_prefix}/{s3_object}"
+    return (
+        f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
+        is_file_already_processed(s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"),
+    )
 
 
 def handler(
@@ -103,6 +110,11 @@ def handler(
 ) -> EbscoAdapterLoaderEvent:
     print(f"Running handler with config: {config}")
     print(f"Processing event: {event}")
+
+    # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300
+    job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
+        "%Y%m%dT%H%M"
+    )
 
     ftp_server = get_ssm_parameter(f"{ssm_param_prefix}/ftp_server")
     ftp_username = get_ssm_parameter(f"{ssm_param_prefix}/ftp_username")
@@ -113,19 +125,17 @@ def handler(
         EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp,
         tempfile.TemporaryDirectory() as temp_dir,
     ):
-        s3_location = sync_files(
+        s3_location, is_processed = sync_files(
             ebsco_ftp=ebsco_ftp,
             target_directory=temp_dir,
             s3_bucket=s3_bucket,
             s3_prefix=ftp_s3_prefix,
         )
 
-    # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300
-    # job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
-    #     "%Y%m%dT%H%M"
-    # )
     print(f"Sending S3 location downstream: {s3_location}")
-    return EbscoAdapterLoaderEvent(file_location=s3_location)  # add job_id back later
+    return EbscoAdapterLoaderEvent(
+        job_id=job_id, file_location=s3_location, is_processed=is_processed
+    )
 
 
 def lambda_handler(event: EbscoAdapterTriggerEvent, context: Any) -> dict[str, Any]:
