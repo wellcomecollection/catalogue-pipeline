@@ -21,7 +21,9 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
         f"transformer and streaming them into {event.stream_destination}."
     )
     if event.pipeline_date == "dev":
-        print("No pipeline date specified. Will connect to a local Elasticsearch instance.")
+        print(
+            "No pipeline date specified. Will connect to a local Elasticsearch instance."
+        )
     elif is_local:
         print("Will connect to the public Elasticsearch host (is_local=True).")
     else:
