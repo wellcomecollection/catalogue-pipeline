@@ -41,7 +41,7 @@ def test_label_unchanged_if_unset(concept: RawNeptuneConcept) -> None:
     assert overrider.description_of(concept) == ConceptDescription(
         text="Pottery with a transparent jade green glaze",
         sourceLabel=None,
-        sourceUrl=None
+        sourceUrl=None,
     )
 
 

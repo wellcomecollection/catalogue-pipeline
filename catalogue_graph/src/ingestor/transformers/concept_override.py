@@ -19,7 +19,7 @@ class ConceptTextOverrideProvider:
             self._load_overrides(overrides_csv)
         else:
             with open(
-                    os.path.join(HERE, "label_description_overrides.csv")
+                os.path.join(HERE, "label_description_overrides.csv")
             ) as csv_file:
                 self._load_overrides(csv_file)
 
@@ -28,7 +28,7 @@ class ConceptTextOverrideProvider:
         self.overrides = {row["id"].strip(): row for row in csv_reader}
 
     def display_label_of(
-            self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
+        self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
     ) -> str:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override and (override_label := override["label"].strip()):
@@ -36,7 +36,7 @@ class ConceptTextOverrideProvider:
         return raw_concept.display_label
 
     def description_of(
-            self, raw_concept: RawNeptuneConcept
+        self, raw_concept: RawNeptuneConcept
     ) -> ConceptDescription | None:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override:
@@ -45,8 +45,6 @@ class ConceptTextOverrideProvider:
                 return None
             if override_description:
                 return ConceptDescription(
-                    text=override_description,
-                    sourceUrl=None,
-                    sourceLabel=None
+                    text=override_description, sourceUrl=None, sourceLabel=None
                 )
         return raw_concept.description
