@@ -7,7 +7,7 @@ locals {
       TriggerStep = {
         Type     = "Task"
         Resource = module.trigger_lambda.lambda.arn
-        Next     = "LoaderStep"
+        Next     = "TransitionStep"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
