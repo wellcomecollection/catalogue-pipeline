@@ -41,6 +41,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     elif event.stream_destination == "s3":
         s3_uri = event.get_bulk_load_s3_uri()
         transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
+        print(f"Data streamed to S3 file: '{s3_uri}'.")
     elif event.stream_destination == "sns":
         topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
         if topic_arn is None:
@@ -54,7 +55,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
         full_file_path = transformer.stream_to_local_file(
             file_path, event.entity_type, event.sample_size
         )
-        print(f"Data streamed to local file: {full_file_path}")
+        print(f"Data streamed to local file: '{full_file_path}'.")
     elif event.stream_destination == "void":
         for _ in transformer.stream(event.entity_type, event.sample_size):
             pass
