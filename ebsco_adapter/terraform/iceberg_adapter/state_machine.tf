@@ -7,7 +7,7 @@ locals {
       TriggerStep = {
         Type     = "Task"
         Resource = module.trigger_lambda.lambda.arn
-        Next     = "LoaderStep"
+        Next     = "TransitionStep"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -44,7 +44,6 @@ locals {
       TransformerStep = {
         Type     = "Task"
         Resource = module.transformer_lambda.lambda.arn
-        End      = true
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -53,6 +52,7 @@ locals {
             BackoffRate     = 2.0
           }
         ]
+        Next = "Success"
       }
       Success = {
         Type = "Succeed"
