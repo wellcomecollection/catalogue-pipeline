@@ -48,7 +48,6 @@ class BulkLoaderEvent(GraphPipelineEvent):
 
 class BulkLoadPollerEvent(BaseModel):
     load_id: str
-    pipeline_date: str
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
 
 

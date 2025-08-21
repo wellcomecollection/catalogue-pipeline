@@ -3,37 +3,25 @@ import datetime
 import json
 import typing
 
-import smart_open
-
 import config
+import smart_open
 from models.events import DEFAULT_INSERT_ERROR_THRESHOLD, BulkLoadPollerEvent
 from utils.aws import get_neptune_client
 from utils.slack import publish_report
 
 
-def log_payload(payload: dict, pipeline_date: str) -> None:
-    """Log the bulk load result into a JSON file which stores all results from the latest pipeline run"""
+def log_payload(payload: dict) -> None:
+    """Log the bulk load result into a JSON file stored in the same location as the corresponding bulk load file."""
     # Extract the name of the bulk load file to use as a key in the JSON log.
     bulk_load_file_uri = payload["overallStatus"]["fullUri"]
-    bulk_load_file_name = bulk_load_file_uri.split("/")[-1].split(".")[0]
 
-    file_name = "report.neptune_bulk_loader.json"
-    prefix = f"{config.BULK_LOADER_S3_PREFIX}/{pipeline_date}"
-    log_file_uri = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
-
-    try:
-        with smart_open.open(log_file_uri, "r") as f:
-            bulk_load_log = json.loads(f.read())
-    except (OSError, KeyError):
-        # On the first run, the log file might not exist
-        bulk_load_log = {}
-
-    # Overwrite the existing result (from the last bulk load) with the current one
-    bulk_load_log[bulk_load_file_name] = payload
+    transformer_type = bulk_load_file_uri.split("/")[-1].split(".")[0]
+    bulk_load_s3_path = "/".join(bulk_load_file_uri.split("/")[:-1])
+    log_file_uri = f"{bulk_load_s3_path}/report.{transformer_type}.json"
 
     # Save the log file back to S3
     with smart_open.open(log_file_uri, "w") as f:
-        f.write(json.dumps(bulk_load_log, indent=2))
+        f.write(json.dumps(payload, indent=2))
 
 
 def print_detailed_bulk_load_errors(payload: dict) -> None:
@@ -60,7 +48,6 @@ def response_from_event(
 ) -> dict[str, typing.Any]:
     return {
         "load_id": event.load_id,
-        "pipeline_date": event.pipeline_date,
         "insert_error_threshold": event.insert_error_threshold,
         "status": status,
     }
@@ -132,7 +119,7 @@ def handler(
             publish_report(report, slack_secret=config.SLACK_SECRET_ID)
 
     if not is_local:
-        log_payload(payload, event.pipeline_date)
+        log_payload(payload)
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
         return response_from_event(event, "SUCCEEDED")
@@ -151,13 +138,6 @@ def local_handler() -> None:
         type=str,
         help="The ID of the bulk load job whose status to check.",
         required=True,
-    )
-    parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help="The pipeline date associated with the loaded items.",
-        default="dev",
-        required=False,
     )
     parser.add_argument(
         "--insert-error-threshold",
