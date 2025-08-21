@@ -1,19 +1,19 @@
 import json
 from itertools import chain
-from typing import Any
+from typing import Any, Literal
 
 import polars
 import pydantic_core
 import pytest
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
-from utils.types import IngestorType
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
 )
 from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
+from utils.types import IngestorType
 
 
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
@@ -48,9 +48,6 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
     assert len(MockElasticsearchClient.inputs) == 10
     assert result.success_count == 10
     assert MockElasticsearchClient.inputs == expected_inputs
-
-
-from typing import Literal
 
 
 def build_failure_test_matrix() -> list[tuple]:
