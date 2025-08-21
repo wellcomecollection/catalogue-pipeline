@@ -1,4 +1,4 @@
-from .concept import (
+from .raw_concept import (
     DISPLAY_SOURCE_PRIORITY,
     get_most_specific_concept_type,
     get_priority_label,
@@ -40,59 +40,54 @@ class RawNeptuneRelatedConcept:
 
 
 class RawNeptuneRelatedConcepts:
-    def __init__(self, concept_id: str, all_related_concepts: dict):
-        self.concept_id = concept_id
-        self.raw_related_concepts = all_related_concepts
-
-    def _get_related_concepts(self, key: str) -> list[dict]:
-        related_concepts: list = self.raw_related_concepts[key].get(self.concept_id, [])
-        return related_concepts
+    def __init__(self, related_concepts: dict):
+        self.raw_related_concepts = related_concepts
 
     @property
     def fields_of_work(self) -> list[RawNeptuneRelatedConcept]:
         return [
             RawNeptuneRelatedConcept(concept)
-            for concept in self._get_related_concepts("fields_of_work")
+            for concept in self.raw_related_concepts.get("fields_of_work", [])
         ]
 
     @property
     def people(self) -> list[RawNeptuneRelatedConcept]:
         return [
             RawNeptuneRelatedConcept(concept)
-            for concept in (self._get_related_concepts("people"))
+            for concept in self.raw_related_concepts.get("people", [])
         ]
 
     @property
     def narrower_than(self) -> list[RawNeptuneRelatedConcept]:
         return [
             RawNeptuneRelatedConcept(concept)
-            for concept in (self._get_related_concepts("narrower_than"))
+            for concept in self.raw_related_concepts.get("narrower_than", [])
         ]
 
     @property
     def broader_than(self) -> list[RawNeptuneRelatedConcept]:
         return [
             RawNeptuneRelatedConcept(concept)
-            for concept in (self._get_related_concepts("broader_than"))
+            for concept in self.raw_related_concepts.get("broader_than", [])
         ]
 
     @property
     def frequent_collaborators(self) -> list[RawNeptuneRelatedConcept]:
         return [
             RawNeptuneRelatedConcept(concept)
-            for concept in (self._get_related_concepts("frequent_collaborators"))
+            for concept in self.raw_related_concepts.get("frequent_collaborators", [])
         ]
 
     @property
     def related_topics(self) -> list[RawNeptuneRelatedConcept]:
         return [
             RawNeptuneRelatedConcept(concept)
-            for concept in (self._get_related_concepts("related_topics"))
+            for concept in self.raw_related_concepts.get("related_topics", [])
         ]
 
     @property
     def related_to(self) -> list[RawNeptuneRelatedConcept]:
         return [
             RawNeptuneRelatedConcept(concept)
-            for concept in (self._get_related_concepts("related_to"))
+            for concept in self.raw_related_concepts.get("related_to", [])
         ]

@@ -3,14 +3,14 @@ import io
 import pytest
 from test_utils import load_json_fixture
 
-from ingestor.models.concept import RawNeptuneConcept
 from ingestor.models.indexable_concept import ConceptDescription
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
+from ingestor.transformers.raw_concept import RawNeptuneConcept
 
 
 @pytest.fixture
 def concept() -> RawNeptuneConcept:
-    return RawNeptuneConcept(load_json_fixture("neptune/concept_query_single.json"), {})
+    return RawNeptuneConcept(load_json_fixture("neptune/concept_query_single.json"))
 
 
 def test_unchanged_if_not_mentioned(concept: RawNeptuneConcept) -> None:

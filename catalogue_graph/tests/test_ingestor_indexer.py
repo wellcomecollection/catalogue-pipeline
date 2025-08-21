@@ -6,19 +6,20 @@ import pytest
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
 
-from ingestor.steps.ingestor_indexer import (
-    IngestorIndexerConfig,
+from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
-    handler,
 )
+from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
 
 
 def test_ingestor_indexer_success() -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
+        ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-01-01",
+        job_id="123",
         object_to_index=IngestorIndexerObject(
             s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
         ),
@@ -48,8 +49,10 @@ def build_test_matrix() -> list[tuple]:
         (
             "the file at s3_uri doesn't exist",
             IngestorIndexerLambdaEvent(
+                ingestor_type="concepts",
                 pipeline_date="2021-07-01",
                 index_date="2025-01-01",
+                job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/ghost-file"
                 ),
@@ -61,8 +64,10 @@ def build_test_matrix() -> list[tuple]:
         (
             "the S3 file doesn't contain valid data",
             IngestorIndexerLambdaEvent(
+                ingestor_type="concepts",
                 pipeline_date="2021-07-01",
                 index_date="2025-01-01",
+                job_id="123",
                 object_to_index=IngestorIndexerObject(
                     s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
                 ),
