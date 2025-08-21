@@ -2,6 +2,8 @@ import argparse
 import datetime
 import json
 import typing
+from pathlib import Path
+from urllib.parse import urlparse
 
 import smart_open
 
@@ -13,14 +15,11 @@ from utils.slack import publish_report
 
 def log_payload(payload: dict) -> None:
     """Log the bulk load result into a JSON file stored in the same location as the corresponding bulk load file."""
-    # Extract the name of the bulk load file to use as a key in the JSON log.
     bulk_load_file_uri = payload["overallStatus"]["fullUri"]
 
-    transformer_type = bulk_load_file_uri.split("/")[-1].split(".")[0]
-    bulk_load_s3_path = "/".join(bulk_load_file_uri.split("/")[:-1])
-    log_file_uri = f"{bulk_load_s3_path}/report.{transformer_type}.json"
-
-    # Save the log file back to S3
+    parsed_uri = urlparse(bulk_load_file_uri)
+    path = Path(parsed_uri.path)
+    log_file_uri = f"s3://{parsed_uri.netloc}{path.parent}/report.{path.stem}.json"
     with smart_open.open(log_file_uri, "w") as f:
         f.write(json.dumps(payload, indent=2))
 
