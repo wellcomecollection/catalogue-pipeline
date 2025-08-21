@@ -12,7 +12,7 @@ module "pipeline" {
   index_config = {
     works = {
       identified   = "works_identified.2023-05-26"
-      denormalised = "works_denormalised.2023-05-26"
+      denormalised = "works_denormalised.2025-08-14"
       indexed      = "works_indexed.2024-11-14"
     }
     images = {
@@ -22,9 +22,8 @@ module "pipeline" {
     concepts = {
       # Define a set of concept indexes, each with its own config definition
       indexed = {
-        "2025-06-17" = "concepts_indexed.2025-06-17"
-        "2025-07-09" = "concepts_indexed.2025-06-17"
         "2025-07-21" = "concepts_indexed.2025-06-17"
+        "2025-08-21" = "concepts_indexed.2025-06-17"
       }
     }
   }

@@ -17,14 +17,19 @@ trait InstantGenerators extends RandomGenerators {
   // https://github.com/rallyhealth/scalacheck-ops/blob/master/core/src/main/scala/org/scalacheck/ops/time/ImplicitJavaTimeGenerators.scala
   implicit val arbitraryInstant: Arbitrary[Instant] =
     Arbitrary {
+      // Clamp generated dates between year 1 and year 9,999. This is sufficient (we do not expect to see values
+      // outside of this range in production data) and avoids errors when indexing test data into Elasticsearch.
+      val minEpochSecond = Instant.parse("0001-01-01T00:00:00Z").getEpochSecond
+      val maxEpochSecond = Instant.parse("9999-01-01T00:00:00Z").getEpochSecond
+
       for {
-        millis <- chooseNum(
-          Instant.MIN.getEpochSecond,
-          Instant.MAX.getEpochSecond
+        seconds <- chooseNum(
+          minEpochSecond,
+          maxEpochSecond
         )
-        nanos <- chooseNum(Instant.MIN.getNano, Instant.MAX.getNano)
+        nanos <- chooseNum(0, 999999999)
       } yield {
-        Instant.ofEpochMilli(millis).plusNanos(nanos)
+        Instant.ofEpochSecond(seconds).plusNanos(nanos)
       }
     }
 

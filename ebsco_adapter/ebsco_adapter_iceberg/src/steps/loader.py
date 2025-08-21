@@ -1,5 +1,6 @@
 import argparse
 import sys
+from datetime import datetime
 from typing import IO, Any
 
 import pyarrow as pa
@@ -11,23 +12,22 @@ from pyiceberg.table import Table as IcebergTable
 import config
 from iceberg_updates import update_table
 from schemata import ARROW_SCHEMA
+from steps.transformer import EbscoAdapterTransformerEvent
 from table_config import get_glue_table, get_local_table
+from utils.tracking import record_processed_file
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
 
 
 class EbscoAdapterLoaderConfig(BaseModel):
-    is_local: bool = False
     use_glue_table: bool = True
 
 
 class EbscoAdapterLoaderEvent(BaseModel):
-    s3_location: str
-
-
-class EbscoAdapterLoaderResult(BaseModel):
-    snapshot_id: str | None = None
+    job_id: str
+    file_location: str
+    is_processed: bool
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> str | None:
@@ -42,9 +42,7 @@ def update_from_xml(table: IcebergTable, collection: etree._Element) -> str | No
     records = nodes_to_records(collection)
     return update_table(
         table,
-        data_to_pa_table(
-            records
-        ),  # [node_to_record(record_node) for record_node in collection]),
+        data_to_pa_table(records),
         EBSCO_NAMESPACE,
     )
 
@@ -75,47 +73,43 @@ def data_to_pa_table(data: list[dict[str, str]]) -> pa.Table:
 
 def handler(
     event: EbscoAdapterLoaderEvent, config_obj: EbscoAdapterLoaderConfig
-) -> EbscoAdapterLoaderResult:
+) -> EbscoAdapterTransformerEvent:
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
-    try:
-        if config_obj.use_glue_table and not config_obj.is_local:
-            print("Using AWS Glue table...")
-            table = get_glue_table(
-                s3_tables_bucket=config.S3_TABLES_BUCKET,
-                table_name=config.GLUE_TABLE_NAME,
-                namespace=config.GLUE_NAMESPACE,
-                region=config.AWS_REGION,
-                account_id=config.AWS_ACCOUNT_ID,
-            )
-        else:
-            print("Using local table...")
-            table = get_local_table(
-                table_name=config.LOCAL_TABLE_NAME,
-                namespace=config.LOCAL_NAMESPACE,
-                db_name=config.LOCAL_DB_NAME,
-            )
+    if config_obj.use_glue_table:
+        print("Using AWS Glue table...")
+        table = get_glue_table(
+            s3_tables_bucket=config.S3_TABLES_BUCKET,
+            table_name=config.GLUE_TABLE_NAME,
+            namespace=config.GLUE_NAMESPACE,
+            region=config.AWS_REGION,
+            account_id=config.AWS_ACCOUNT_ID,
+        )
+    else:
+        print("Using local table...")
+        table = get_local_table(
+            table_name=config.LOCAL_TABLE_NAME,
+            namespace=config.LOCAL_NAMESPACE,
+            db_name=config.LOCAL_DB_NAME,
+        )
 
-        with smart_open.open(event.s3_location, "rb") as f:
-            snapshot_id = update_from_xml_file(table, f)
+    with smart_open.open(event.file_location, "rb") as f:
+        changeset_id = update_from_xml_file(table, f)
 
-        return EbscoAdapterLoaderResult(snapshot_id=snapshot_id)
-    except Exception as e:
-        print(f"Error processing event: {e}")
-        return EbscoAdapterLoaderResult()
+    # Record the processed file to S3
+    record_processed_file(event.job_id, event.file_location, changeset_id)
+
+    return EbscoAdapterTransformerEvent(changeset_id=changeset_id)
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
-    try:
-        return handler(
-            EbscoAdapterLoaderEvent.model_validate(event), EbscoAdapterLoaderConfig()
-        ).model_dump()
-    except Exception:
-        return EbscoAdapterLoaderResult().model_dump()
+    return handler(
+        EbscoAdapterLoaderEvent.model_validate(event), EbscoAdapterLoaderConfig()
+    ).model_dump()
 
 
-def local_handler() -> EbscoAdapterLoaderResult:
+def local_handler() -> EbscoAdapterTransformerEvent:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
     parser.add_argument(
         "xmlfile",
@@ -127,18 +121,15 @@ def local_handler() -> EbscoAdapterLoaderResult:
         action="store_true",
         help="Use AWS Glue table instead of local table",
     )
-    parser.add_argument(
-        "--local",
-        action="store_true",
-        help="Run locally without AWS dependencies",
-    )
 
     args = parser.parse_args()
 
-    event = EbscoAdapterLoaderEvent(s3_location=args.xmlfile)
-    config_obj = EbscoAdapterLoaderConfig(
-        is_local=args.local, use_glue_table=args.use_glue_table
+    event = EbscoAdapterLoaderEvent(
+        file_location=args.xmlfile,
+        is_processed=False,
+        job_id=datetime.now().strftime("%Y%m%dT%H%M"),
     )
+    config_obj = EbscoAdapterLoaderConfig(use_glue_table=args.use_glue_table)
 
     return handler(event=event, config_obj=config_obj)
 
@@ -148,7 +139,7 @@ def main() -> None:
     print("Running local handler...")
     result = local_handler()
     print(f"Result: {result}")
-    if not result.snapshot_id:
+    if not result.changeset_id:
         sys.exit(1)
 
 
