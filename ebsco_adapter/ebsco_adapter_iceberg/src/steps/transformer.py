@@ -8,38 +8,50 @@ for downstream processing.
 import argparse
 from typing import Any
 
+from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 import pyarrow as pa
 import io
 import config
 from table_config import get_glue_table, get_local_table
+import elasticsearch.helpers
+from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient
 from models.work import TransformedWork
+from collections.abc import Generator
 
 class EbscoAdapterTransformerConfig(BaseModel):
+    is_local: bool = False
     use_glue_table: bool = True
 
 
 class EbscoAdapterTransformerEvent(BaseModel):
     changeset_id: str | None = None
+    pipeline_date: str 
 
 
 class EbscoAdapterTransformerResult(BaseModel):
     records_transformed: int = 0
 
-def transform(id: str, content: str):
-    records = parse_xml_to_array(io.StringIO(content))
+def load_data(elastic_client: Elasticsearch, records: list[TransformedWork], index_name):
+    def generate_data() -> Generator[dict]:
+        for record in records:
+            yield {
+                "_index": index_name,
+                "_id": record.id,
+                "_source": record.model_dump(),
+            }
 
-    for record in records:
-        transformed_work = TransformedWork(
+    success_count, _ = elasticsearch.helpers.bulk(elastic_client, generate_data())
+    print(f"Successfully stored {success_count} transformed records in Elasticsearch index: {index_name}")
+
+
+def transform(id: str, content: str):
+    return [TransformedWork(
             id=id,
             title=record.title,
-            description=record.description
-        )
-
-    raise Exception("nope")
-
+        ) for record in parse_xml_to_array(io.StringIO(content)) ]
 
 def handler(
     event: EbscoAdapterTransformerEvent, config_obj: EbscoAdapterTransformerConfig
@@ -67,9 +79,6 @@ def handler(
         # Initialize to default value in case changeset_id is None or no records are found
         records_transformed: int = 0
 
-        # TODO: Implement actual transformation logic here
-        # For now, this is a no-op that processes the changeset
-
         if changeset_id:
             print(f"Transform data from changeset: {changeset_id}")
 
@@ -93,15 +102,27 @@ def handler(
             table_client = IcebergTableClient(table)
 
             pa_table: pa.Table = table_client.get_records_by_changeset(changeset_id)
+            print(f"Retrieved {len(pa_table)} records from table")
 
-            # iterate over the rows in pa_table, pass content to transform function
+            es_client = get_client(
+                pipeline_date=event.pipeline_date,
+                is_local=config_obj.is_local,
+                api_key_name='ebsco_adapter_ideberg'
+            )
+            index_name = get_standard_index_name("concepts-indexed", event.pipeline_date)
 
-            for batch in pa_table.to_batches():
+            for batch in pa_table.to_batches(max_chunksize=10000):
+                print(f"Processing batch with {len(batch)} records")
+
+                transformed_batch = []
                 for row in batch.to_pylist():
-                    content = row.get("content")
+                    (_, id, content, _, _) = row.values()
                     if content:
-                        transform(content)
-                        records_transformed += 1
+                        transformed_batch.extend(transform(id, content))
+
+                load_data(es_client, transformed_batch, index_name)
+
+                records_transformed += len(transformed_batch)
 
             # In a real implementation, we would:
             # 1. Read data from the Iceberg table using the snapshot_id
@@ -150,11 +171,24 @@ def local_handler() -> EbscoAdapterTransformerResult:
         action="store_true",
         help="Use AWS Glue table instead of local table",
     )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help="The pipeline that is being ingested to, will default to None.",
+        default="dev",
+        required=False,
+    )
 
     args = parser.parse_args()
 
-    event = EbscoAdapterTransformerEvent(changeset_id=args.changeset_id)
-    config_obj = EbscoAdapterTransformerConfig(use_glue_table=args.use_glue_table)
+    event = EbscoAdapterTransformerEvent(
+        pipeline_date=args.pipeline_date,
+        changeset_id=args.changeset_id
+    )
+    config_obj = EbscoAdapterTransformerConfig(
+        is_local=True,
+        use_glue_table=args.use_glue_table
+    )
 
     return handler(event=event, config_obj=config_obj)
 

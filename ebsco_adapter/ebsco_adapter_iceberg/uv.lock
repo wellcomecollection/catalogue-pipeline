@@ -106,6 +106,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "boto3" },
+    { name = "elasticsearch" },
     { name = "lxml" },
     { name = "mypy" },
     { name = "pyarrow" },
@@ -129,6 +130,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "boto3", specifier = ">=1.39.10" },
+    { name = "elasticsearch", specifier = ">=8,<9" },
     { name = "lxml", specifier = ">=6.0.0" },
     { name = "mypy", specifier = ">=1.16.1" },
     { name = "pyarrow", specifier = ">=20.0.0,<21.0.0" },
@@ -146,6 +148,31 @@ dev = [
     { name = "ruff", specifier = ">=0.12.9" },
 ]
 test = [{ name = "mypy", specifier = ">=1.16.1" }]
+
+[[package]]
+name = "elastic-transport"
+version = "8.17.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "certifi" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6a/54/d498a766ac8fa475f931da85a154666cc81a70f8eb4a780bc8e4e934e9ac/elastic_transport-8.17.1.tar.gz", hash = "sha256:5edef32ac864dca8e2f0a613ef63491ee8d6b8cfb52881fa7313ba9290cac6d2", size = 73425, upload-time = "2025-03-13T07:28:30.776Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/cf/cd/b71d5bc74cde7fc6fd9b2ff9389890f45d9762cbbbf81dc5e51fd7588c4a/elastic_transport-8.17.1-py3-none-any.whl", hash = "sha256:192718f498f1d10c5e9aa8b9cf32aed405e469a7f0e9d6a8923431dbb2c59fb8", size = 64969, upload-time = "2025-03-13T07:28:29.031Z" },
+]
+
+[[package]]
+name = "elasticsearch"
+version = "8.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "elastic-transport" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8b/5d/7b82bb35888a328bb0c843090786bae8a7a37428324e7118cc0b44a29203/elasticsearch-8.0.0.tar.gz", hash = "sha256:29d80795daf9244bf3b9e3691720cb9d96cc8de42fab82c7d26973323526f785", size = 291101, upload-time = "2022-02-10T16:35:33.66Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/52/7d/5eabffaeb72e7c6d564402f2888b33acc20c3c74d2d1f5319eb6abb397e1/elasticsearch-8.0.0-py3-none-any.whl", hash = "sha256:ba5d9336b99e43cc4e031df4ed02e1f487ab70130fe9357ec459c8862d0a02a6", size = 369717, upload-time = "2022-02-10T16:35:30.249Z" },
+]
 
 [[package]]
 name = "fsspec"
