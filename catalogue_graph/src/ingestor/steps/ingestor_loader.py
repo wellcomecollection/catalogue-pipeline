@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import argparse
 import typing
 
@@ -12,6 +11,7 @@ from ingestor.models.step_events import (
 )
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
+from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.types import IngestorLoadFormat, IngestorType
 
 
@@ -29,6 +29,10 @@ def create_transformer(
         return ElasticsearchConceptsTransformer(
             event.start_offset, event.end_index, config.is_local
         )
+    if event.ingestor_type == "works":
+        return ElasticsearchWorksTransformer(
+            event.pipeline_date, event.start_offset, event.end_index, config.is_local
+        )
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
@@ -44,6 +48,11 @@ def handler(
 
     pipeline_date = event.pipeline_date
     index_date = event.index_date
+
+    if pipeline_date == "dev":
+        print(
+            "No pipeline date specified. Will connect to a local Elasticsearch instance."
+        )
 
     transformer = create_transformer(event, config)
     s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"
@@ -73,7 +82,7 @@ def local_handler() -> None:
         "--ingestor-type",
         type=str,
         choices=typing.get_args(IngestorType),
-        help="Which ingestor to run.",
+        help="Which ingestor to run (works or concepts).",
         required=True,
     )
     parser.add_argument(
@@ -129,7 +138,6 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
-
     event = IngestorLoaderLambdaEvent(**args.__dict__)
     config = IngestorLoaderConfig(is_local=True, load_format=args.load_format)
 

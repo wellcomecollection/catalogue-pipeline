@@ -1,6 +1,7 @@
 import datetime
 import gzip
 import io
+import json
 import os
 import tempfile
 from collections import defaultdict
@@ -325,6 +326,7 @@ class MockElasticsearchClient:
     @classmethod
     def reset_mocks(cls) -> None:
         cls.inputs = []
+        cls.indexed_documents = defaultdict(dict[str, dict])
 
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:
@@ -371,6 +373,22 @@ class MockElasticsearchClient:
 
         return {"hits": {"hits": items}}
 
+    def mget(self, index: str, body: dict) -> dict:
+        indexed_documents = self.indexed_documents[index]
+
+        items = []
+        for requested_id in body["ids"]:
+            item = {"_id": requested_id}
+            if requested_id in indexed_documents:
+                item["found"] = True
+                item["_source"] = indexed_documents[requested_id]["_source"]
+            else:
+                item["found"] = False
+
+            items.append(item)
+
+        return {"docs": items}
+
 
 def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     class FixedDateTime(datetime.datetime):
@@ -408,4 +426,17 @@ def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
             content_length=1,
             record_count=1,
         ),
+    )
+
+
+def add_neptune_mock_response(
+    mock_query: str, expected_params: dict, mock_results: list[dict]
+) -> None:
+    query = " ".join(mock_query.split())
+
+    MockRequest.mock_response(
+        method="POST",
+        url="https://test-host.com:8182/openCypher",
+        json_data={"results": mock_results},
+        body=json.dumps({"query": query, "parameters": expected_params}),
     )
