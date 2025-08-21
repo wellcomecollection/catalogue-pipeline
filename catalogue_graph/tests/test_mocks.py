@@ -10,6 +10,7 @@ from typing import Any, TypedDict
 
 import polars as pl
 from botocore.credentials import Credentials
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
