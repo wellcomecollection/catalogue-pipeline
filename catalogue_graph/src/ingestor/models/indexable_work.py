@@ -11,5 +11,5 @@ class IndexableWork(IndexableRecord):
     aggregatableValues: WorkAggregatableValues
     filterableValues: WorkFilterableValues
 
-    def get_id(self):
+    def get_id(self) -> str:
         return self.query.id

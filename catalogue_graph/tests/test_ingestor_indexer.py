@@ -7,6 +7,7 @@ import pydantic_core
 import pytest
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
+from utils.types import IngestorType
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
@@ -16,7 +17,7 @@ from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
 
 
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
-def test_ingestor_indexer_success(record_type: str) -> None:
+def test_ingestor_indexer_success(record_type: IngestorType) -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
@@ -49,8 +50,13 @@ def test_ingestor_indexer_success(record_type: str) -> None:
     assert MockElasticsearchClient.inputs == expected_inputs
 
 
+from typing import Literal
+
+
 def build_failure_test_matrix() -> list[tuple]:
-    return chain.from_iterable(
+    concepts: Literal["works", "concepts"] = "concepts"
+    works: Literal["works", "concepts"] = "works"
+    return list(chain.from_iterable(
         [
             [
                 (
@@ -100,11 +106,11 @@ def build_failure_test_matrix() -> list[tuple]:
                 ),
             ]
             for correct_type, wrong_type in [
-                ("concepts", "works"),
-                ("works", "concepts"),
-            ]
+            (concepts, works),
+            (works, concepts),
         ]
-    )
+        ]
+    ))
 
 
 def get_test_id(argvalue: str) -> str:
@@ -117,11 +123,11 @@ def get_test_id(argvalue: str) -> str:
     ids=get_test_id,
 )
 def test_ingestor_indexer_failure(
-    description: str,
-    event: IngestorIndexerLambdaEvent,
-    fixture: str,
-    expected_error: Any | tuple,
-    error_message: str,
+        description: str,
+        event: IngestorIndexerLambdaEvent,
+        fixture: str,
+        expected_error: Any | tuple,
+        error_message: str,
 ) -> None:
     config = IngestorIndexerConfig()
 
