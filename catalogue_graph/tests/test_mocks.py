@@ -312,6 +312,7 @@ class MockElasticsearchClient:
     indexed_documents: dict = defaultdict(dict[str, dict])
     inputs: list[dict] = []
     pit_index: str
+    queries: list[dict] = []
 
     def __init__(self, config: dict, api_key: str) -> None:
         pass
@@ -326,6 +327,7 @@ class MockElasticsearchClient:
     def reset_mocks(cls) -> None:
         cls.inputs = []
         cls.indexed_documents = defaultdict(dict[str, dict])
+        cls.queries = []
 
     @classmethod
     def index(cls, index: str, id: str, document: dict) -> None:
@@ -358,6 +360,7 @@ class MockElasticsearchClient:
         pass
 
     def search(self, body: dict) -> dict:
+        self.queries.append(body["query"])
         search_after = body.get("search_after")
 
         all_documents = self.indexed_documents[self.pit_index].values()

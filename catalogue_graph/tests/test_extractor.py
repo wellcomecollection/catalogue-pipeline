@@ -4,11 +4,17 @@ from typing import Any, get_args
 import pytest
 from test_mocks import (
     MOCK_INSTANCE_ENDPOINT,
+    MockElasticsearchClient,
     MockRequest,
     MockResponseInput,
+    MockSmartOpen,
     mock_es_secrets,
 )
-from test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
+from test_utils import (
+    add_mock_denormalised_documents,
+    add_mock_transformer_outputs_for_ontologies,
+    load_fixture,
+)
 
 from config import (
     LOC_NAMES_URL,
@@ -191,3 +197,55 @@ def test_lambda_handler(
         f"Unexpected requests found for ({transformer_type}, {entity_type}, {destination}): "
         + f"Expected concept retrieval URLs: {concept_retrieval_urls}, got: {called_urls}"
     )
+
+
+def test_incremental_mode() -> None:
+    event = {
+        "transformer_type": "catalogue_works",
+        "entity_type": "nodes",
+        "stream_destination": "s3",
+        "pipeline_date": "2024-06-06",
+        "window": {"start_time": "2025-05-05T15:15", "end_time": "2025-05-05T15:30"},
+        "sample_size": 100,
+    }
+    add_mock_denormalised_documents("2024-06-06")
+    lambda_handler(event, None)
+
+    expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/windows/20250505T1515-20250505T1530/catalogue_works__nodes.csv"
+    assert len(MockSmartOpen.file_lookup) == 1
+    assert expected_s3_uri in MockSmartOpen.file_lookup
+
+    print(MockElasticsearchClient.queries)
+
+    # We expect two ES queries. The second returns no results, after which the loop inside `search_with_pit` stops.
+    assert len(MockElasticsearchClient.queries) == 2
+    assert MockElasticsearchClient.queries[0] == {
+        "bool": {
+            "must": [
+                {"match": {"type": "Visible"}},
+                {
+                    "range": {
+                        "state.mergedTime": {
+                            "gte": "2025-05-05T15:15:00",
+                            "lte": "2025-05-05T15:30:00",
+                        }
+                    }
+                },
+            ]
+        }
+    }
+
+
+def test_unsupported_incremental_mode() -> None:
+    event = {
+        "transformer_type": "loc_concepts",
+        "entity_type": "nodes",
+        "stream_destination": "local",
+        "pipeline_date": "2024-06-06",
+        "window": {"start_time": "2025-05-05T15:15", "end_time": "2025-05-05T15:30"},
+        "sample_size": 1,
+    }
+
+    # The loc_concepts transformer does not support incremental mode
+    with pytest.raises(ValueError):
+        lambda_handler(event, None)
