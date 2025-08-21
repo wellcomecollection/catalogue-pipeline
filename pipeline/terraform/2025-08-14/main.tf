@@ -23,6 +23,7 @@ module "pipeline" {
       # Define a set of concept indexes, each with its own config definition
       indexed = {
         "2025-07-21" = "concepts_indexed.2025-06-17"
+        "2025-08-21" = "concepts_indexed.2025-06-17"
       }
     }
   }

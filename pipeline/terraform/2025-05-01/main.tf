@@ -24,7 +24,7 @@ module "pipeline" {
       indexed = {
         "2025-06-17" = "concepts_indexed.2025-06-17"
         "2025-07-09" = "concepts_indexed.2025-06-17"
-        "2025-08-13" = "concepts_indexed.2025-06-17"
+        "2025-07-21" = "concepts_indexed.2025-06-17"
       }
     }
   }

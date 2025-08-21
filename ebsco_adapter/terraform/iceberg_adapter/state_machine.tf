@@ -17,6 +17,17 @@ locals {
           }
         ]
       }
+      TransitionStep = {
+        Type = "Choice"
+        Choices = [
+          {
+            Variable      = "$.is_processed"
+            BooleanEquals = true
+            Next          = "Success"
+          }
+        ]
+        Default = "LoaderStep"
+      }
       LoaderStep = {
         Type     = "Task"
         Resource = module.loader_lambda.lambda.arn
@@ -42,6 +53,9 @@ locals {
             BackoffRate     = 2.0
           }
         ]
+      }
+      Success = {
+        Type = "Succeed"
       }
     }
   })
