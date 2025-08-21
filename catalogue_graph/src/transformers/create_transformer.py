@@ -1,9 +1,12 @@
+from typing import get_args
+
 from config import (
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
     MESH_URL,
 )
-from models.events import EntityType, IncrementalWindow, TransformerType
+from models.events import IncrementalWindow
+from utils.types import CatalogueTransformerType, EntityType, TransformerType
 
 from .base_transformer import BaseTransformer
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
@@ -18,12 +21,6 @@ from .wikidata.concepts_transformer import WikidataConceptsTransformer
 from .wikidata.locations_transformer import WikidataLocationsTransformer
 from .wikidata.names_transformer import WikidataNamesTransformer
 
-CATALOGUE_TRANSFORMERS = {
-    "catalogue_concepts",
-    "catalogue_works",
-    "catalogue_work_identifiers",
-}
-
 
 def create_transformer(
     transformer_type: TransformerType,
@@ -32,7 +29,9 @@ def create_transformer(
     window: IncrementalWindow | None,
     is_local: bool,
 ) -> BaseTransformer:
-    if window is not None and transformer_type not in CATALOGUE_TRANSFORMERS:
+    if window is not None and transformer_type not in get_args(
+        CatalogueTransformerType
+    ):
         raise ValueError(
             f"The {transformer_type} transformer does not support incremental mode."
         )
