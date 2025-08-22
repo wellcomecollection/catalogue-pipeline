@@ -24,6 +24,7 @@ package = true
 dev = [
     "lxml-stubs>=0.5.1",
     "pytest>=8.4.0",
+    "ruff>=0.12.9",
 ]
 test = [
     "mypy>=1.16.1",
