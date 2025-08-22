@@ -110,7 +110,7 @@ def handler(
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
         is_local=config_obj.is_local,
-        api_key_name="ebsco_adapter_ideberg",
+        api_key_name="ebsco_adapter_iceberg",
     )
     index_name = get_standard_index_name(
         "concepts-indexed", event.index_date or config_obj.pipeline_date

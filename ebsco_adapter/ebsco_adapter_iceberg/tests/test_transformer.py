@@ -4,41 +4,80 @@ import pytest
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
     EbscoAdapterTransformerEvent,
+    EbscoAdapterTransformerResult,
     handler,
 )
 from utils.iceberg import IcebergTableClient
 
 from .helpers import data_to_namespaced_table
-from .test_mocks import MockElasticsearchClient
+from .test_mocks import MockElasticsearchClient, MockSecretsManagerClient
+
+# --------------------------------------------------------------------------------------
+# Helpers
+# --------------------------------------------------------------------------------------
+
+
+def _prepare_changeset(
+    temporary_table: pa.Table,
+    monkeypatch: pytest.MonkeyPatch,
+    xml_records: list[str],
+) -> str:  # added return type
+    """Insert XML records into the temporary Iceberg table and return the new changeset_id."""
+    pa_table_initial = data_to_namespaced_table(
+        [{"id": "batch", "content": record} for record in xml_records]
+    )
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.update(pa_table_initial, "ebsco")
+    assert changeset_id, "Expected a changeset_id to be returned"
+
+    # Ensure transformer uses our temporary table
+    monkeypatch.setattr(
+        "steps.transformer.get_local_table", lambda **kwargs: temporary_table
+    )
+    return changeset_id
+
+
+def _run_transform(
+    changeset_id: str, index_date: str | None, pipeline_date: str = "dev"
+) -> EbscoAdapterTransformerResult:
+    event = EbscoAdapterTransformerEvent(
+        changeset_id=changeset_id, index_date=index_date
+    )
+    config = EbscoAdapterTransformerConfig(
+        is_local=True, use_glue_table=False, pipeline_date=pipeline_date
+    )
+    return handler(event=event, config_obj=config)
+
+
+def _add_pipeline_secrets(pipeline_date: str) -> None:
+    """Provide the minimal set of ES secrets required for get_client for a pipeline_date."""
+    secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
+    for name, value in [
+        ("public_host", "test"),
+        ("private_host", "test"),
+        ("port", 80),
+        ("protocol", "http"),
+        ("ebsco_adapter_ideberg/api_key", ""),
+        ("ebsco_adapter_iceberg/api_key", ""),  # variant used in some code paths
+    ]:
+        MockSecretsManagerClient.add_mock_secret(f"{secret_prefix}/{name}", value)
+
+
+# --------------------------------------------------------------------------------------
+# Tests
+# --------------------------------------------------------------------------------------
 
 
 def test_transformer_end_to_end_with_local_table(
     temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
-) -> None: 
+) -> None:
     xml_records = [
         "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
         "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Parasites, hosts and diseases</subfield></datafield></record>",
     ]
-    pa_table_initial = data_to_namespaced_table(
-        [{"id": "batch1", "content": record} for record in xml_records]
-    )
-    client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(pa_table_initial, "ebsco")
-    assert changeset_id is not None
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, xml_records)
 
-    # After creating client and changeset_id, ensure handler uses same table
-    monkeypatch.setattr(
-        "steps.transformer.get_local_table", lambda **kwargs: temporary_table
-    )
-
-    event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id, index_date="2025-01-01"
-    )
-    config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
-    )
-
-    result = handler(event=event, config_obj=config)
+    result = _run_transform(changeset_id, index_date="2025-01-01")
 
     assert result.records_transformed == 2
     titles = {op["_source"]["title"] for op in MockElasticsearchClient.inputs}
@@ -54,3 +93,37 @@ def test_transformer_no_changeset_returns_zero(monkeypatch: pytest.MonkeyPatch) 
     result = handler(event=event, config_obj=config)
     assert result.records_transformed == 0
     assert MockElasticsearchClient.inputs == []
+
+
+@pytest.mark.parametrize(
+    "index_date, pipeline_date, expected_index",
+    [
+        ("2025-02-02", "dev", "concepts-indexed-2025-02-02"),  # explicit index_date
+        (None, "dev", "concepts-indexed-dev"),  # falls back to pipeline_date default
+        (
+            None,
+            "2025-05-05",
+            "concepts-indexed-2025-05-05",
+        ),  # custom pipeline_date when no index_date
+    ],
+)
+def test_transformer_index_name_selection(
+    temporary_table: pa.Table,
+    monkeypatch: pytest.MonkeyPatch,
+    index_date: str | None,
+    pipeline_date: str,
+    expected_index: str,
+) -> None:
+    """The ES index name should use index_date if provided; otherwise pipeline_date (custom or default)."""
+    # Provide required secrets for any pipeline_date used in this parameterised test
+    _add_pipeline_secrets(pipeline_date)
+
+    xml_records = [
+        "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdx001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Some Title</subfield></datafield></record>",
+    ]
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, xml_records)
+
+    _run_transform(changeset_id, index_date=index_date, pipeline_date=pipeline_date)
+
+    indices = {op["_index"] for op in MockElasticsearchClient.inputs}
+    assert indices == {expected_index}
