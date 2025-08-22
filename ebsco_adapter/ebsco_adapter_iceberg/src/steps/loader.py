@@ -97,13 +97,12 @@ def handler(
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
-    try:
-        config_obj = EbscoAdapterLoaderConfig()
-        transformer_event = handler(event, config_obj)
-        return {"changeset_id": transformer_event.changeset_id}
-    except Exception as e:
-        print(f"Error: {e}")
-        return {"error": str(e)}
+    config_obj = EbscoAdapterLoaderConfig()
+    transformer_event = handler(event, config_obj)
+
+    return EbscoAdapterTransformerEvent(
+        changeset_id=transformer_event.changeset_id
+    ).model_dump()
 
 
 def local_handler() -> EbscoAdapterTransformerEvent:

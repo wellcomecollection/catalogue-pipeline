@@ -21,3 +21,5 @@ ES_LOCAL_HOST = os.environ.get("ES_LOCAL_HOST")
 ES_LOCAL_PORT = os.environ.get("ES_LOCAL_PORT")
 ES_LOCAL_SCHEME = os.environ.get("ES_LOCAL_SCHEME")
 ES_LOCAL_API_KEY = os.environ.get("ES_LOCAL_API_KEY")
+
+PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")

@@ -21,6 +21,7 @@ class BaseWork(BaseModel):
 
     id: str
 
+
 class TransformedWork(ElasticsearchModel, BaseWork):
     """
     Model representing a transformed work with additional attributes.

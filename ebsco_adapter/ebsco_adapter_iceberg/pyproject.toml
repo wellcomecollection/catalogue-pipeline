@@ -8,6 +8,7 @@ readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
     "boto3>=1.39.10",
+    "boto3-stubs>=1.40.15",
     "elasticsearch>=8,<9",
     "lxml>=6.0.0",
     "mypy>=1.16.1",
@@ -25,6 +26,7 @@ package = true
 [dependency-groups]
 dev = [
     "lxml-stubs>=0.5.1",
+    "polars>=1.32.3",
     "pytest>=8.4.0",
     "ruff>=0.12.9",
 ]

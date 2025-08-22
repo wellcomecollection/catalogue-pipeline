@@ -27,4 +27,3 @@ def list_s3_keys(bucket: str, prefix: str) -> list[str]:
     for s3_obj in response.get("Contents", []):
         keys.append(s3_obj["Key"])
     return keys
-
