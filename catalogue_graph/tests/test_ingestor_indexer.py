@@ -1,6 +1,7 @@
 import json
+from collections.abc import Iterable
 from itertools import chain
-from typing import Any, Literal
+from typing import Any
 
 import polars
 import pydantic_core
@@ -50,65 +51,74 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
     assert MockElasticsearchClient.inputs == expected_inputs
 
 
-def build_failure_test_matrix() -> list[tuple]:
-    concepts: Literal["works", "concepts"] = "concepts"
-    works: Literal["works", "concepts"] = "works"
-    return list(
-        chain.from_iterable(
-            [
-                [
-                    (
-                        "the file at s3_uri doesn't exist",
-                        IngestorIndexerLambdaEvent(
-                            ingestor_type=correct_type,
-                            pipeline_date="2021-07-01",
-                            index_date="2025-01-01",
-                            job_id="123",
-                            object_to_index=IngestorIndexerObject(
-                                s3_uri="s3://test-catalogue-graph/ghost-file"
-                            ),
-                        ),
-                        None,
-                        KeyError,
-                        "Mock S3 file s3://test-catalogue-graph/ghost-file does not exist.",
-                    ),
-                    (
-                        "the S3 file is malformed",
-                        IngestorIndexerLambdaEvent(
-                            ingestor_type=correct_type,
-                            pipeline_date="2021-07-01",
-                            index_date="2025-01-01",
-                            job_id="123",
-                            object_to_index=IngestorIndexerObject(
-                                s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
-                            ),
-                        ),
-                        "catalogue/denormalised_works_example.jsonl",
-                        polars.exceptions.ComputeError,
-                        "parquet: File out of specification: The file must end with PAR1",
-                    ),
-                    (
-                        "the S3 file contains invalid data",
-                        IngestorIndexerLambdaEvent(
-                            ingestor_type=correct_type,
-                            pipeline_date="2021-07-01",
-                            index_date="2025-01-01",
-                            job_id="123",
-                            object_to_index=IngestorIndexerObject(
-                                s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet"
-                            ),
-                        ),
-                        f"ingestor/{wrong_type}/00000000-00000010.parquet",
-                        pydantic_core.ValidationError,
-                        "\\d+ validation errors for Indexable.*",
-                    ),
-                ]
-                for correct_type, wrong_type in [
-                    (concepts, works),
-                    (works, concepts),
-                ]
-            ]
-        )
+def build_failure_test_matrix() -> Iterable[tuple]:
+    concepts: IngestorType = "concepts"
+    works: IngestorType = "works"
+    return chain.from_iterable(
+        [
+            (
+                failure_params_missing_file(correct_type),
+                failure_params_malformed_parquet(correct_type),
+                failure_params_wrong_content(correct_type, wrong_type),
+            )
+            for correct_type, wrong_type in [(concepts, works), (works, concepts)]
+        ]
+    )
+
+
+def failure_params_missing_file(record_type: IngestorType) -> tuple:
+    return (
+        "the file at s3_uri doesn't exist",
+        IngestorIndexerLambdaEvent(
+            ingestor_type=record_type,
+            pipeline_date="2021-07-01",
+            index_date="2025-01-01",
+            job_id="123",
+            object_to_index=IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/ghost-file"
+            ),
+        ),
+        None,
+        KeyError,
+        "Mock S3 file s3://test-catalogue-graph/ghost-file does not exist.",
+    )
+
+
+def failure_params_malformed_parquet(record_type: IngestorType) -> tuple:
+    return (
+        "the S3 file is malformed",
+        IngestorIndexerLambdaEvent(
+            ingestor_type=record_type,
+            pipeline_date="2021-07-01",
+            index_date="2025-01-01",
+            job_id="123",
+            object_to_index=IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
+            ),
+        ),
+        "catalogue/denormalised_works_example.jsonl",
+        polars.exceptions.ComputeError,
+        "parquet: File out of specification: The file must end with PAR1",
+    )
+
+
+def failure_params_wrong_content(
+    expected_type: IngestorType, actual_type: IngestorType
+) -> tuple:
+    return (
+        "the S3 file contains invalid data",
+        IngestorIndexerLambdaEvent(
+            ingestor_type=expected_type,
+            pipeline_date="2021-07-01",
+            index_date="2025-01-01",
+            job_id="123",
+            object_to_index=IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet"
+            ),
+        ),
+        f"ingestor/{actual_type}/00000000-00000010.parquet",
+        pydantic_core.ValidationError,
+        "\\d+ validation errors for Indexable.*",
     )
 
 
