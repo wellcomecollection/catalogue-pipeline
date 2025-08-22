@@ -1,13 +1,13 @@
 """
 Transformer step for EBSCO adapter pipeline.
 
-This module transforms data from the loader output into the final format
-for downstream processing.
+Transforms data from the loader output into the final format for downstream
+processing (currently indexing into Elasticsearch).
 """
 
 import argparse
 import io
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from typing import Any
 
 import elasticsearch.helpers
@@ -21,6 +21,9 @@ from models.work import TransformedWork
 from table_config import get_glue_table, get_local_table
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient
+
+# Batch size for converting Arrow tables to Python objects before indexing
+BATCH_SIZE = 10_000
 
 
 class EbscoAdapterTransformerConfig(BaseModel):
@@ -36,37 +39,101 @@ class EbscoAdapterTransformerEvent(BaseModel):
 
 class EbscoAdapterTransformerResult(BaseModel):
     records_transformed: int = 0
+    records_failed: int = 0
+
+
+def transform(work_id: str, content: str) -> list[TransformedWork]:
+    """Parse a MARC XML string into TransformedWork records."""
+    if not content:
+        return []
+
+    def valid_record(record: Any) -> bool:  # local for clarity
+        return bool(record and getattr(record, "title", None))
+
+    try:
+        marc_records = parse_xml_to_array(io.StringIO(content))
+    except Exception as exc:  # broad, but we want to skip bad MARC payloads only
+        print(f"Failed to parse MARC content for id={work_id}: {exc}")
+        return []
+
+    return [
+        TransformedWork(id=work_id, title=str(record.title))
+        for record in marc_records
+        if valid_record(record)
+    ]
+
+
+def _generate_actions(
+    records: Iterable[TransformedWork], index_name: str
+) -> Generator[dict[str, Any], None, None]:
+    for record in records:
+        yield {
+            "_index": index_name,
+            "_id": record.id,
+            "_source": record.model_dump(),
+        }
 
 
 def load_data(
-    elastic_client: Elasticsearch, records: list[TransformedWork], index_name: str
-) -> None:
-    def generate_data() -> Generator[dict]:
-        for record in records:
-            yield {
-                "_index": index_name,
-                "_id": record.id,
-                "_source": record.model_dump(),
-            }
-
-    success_count, _ = elasticsearch.helpers.bulk(elastic_client, generate_data())
-    print(
-        f"Successfully stored {success_count} transformed records in Elasticsearch index: {index_name}"
+    elastic_client: Elasticsearch, records: Iterable[TransformedWork], index_name: str
+) -> tuple[int, int]:
+    """Index records; return (success_count, error_count)."""
+    success_count, errors = elasticsearch.helpers.bulk(
+        elastic_client,
+        _generate_actions(records, index_name),
+        raise_on_error=False,
+        stats_only=False,
     )
 
+    # ES8 helper returns a list of error items when raise_on_error=False; may be empty
+    error_items: list[Any]
+    error_items = [] if not errors or isinstance(errors, int) else list(errors)
+    error_count = len(error_items)
 
-def transform(id: str, content: str) -> list[TransformedWork]:
-    def valid_record(record: Any) -> bool:
-        return record and hasattr(record, "title") and record.title
-
-    return [
-        TransformedWork(
-            id=id,
-            title=str(record.title),
+    if error_items:
+        printed: list[str] = []
+        for e in error_items[:5]:
+            try:
+                idx_error = e.get("index", {})
+                printed.append(
+                    f"id={idx_error.get('_id')} status={idx_error.get('status')} error={idx_error.get('error', {}).get('type')}"
+                )
+            except Exception:  # pragma: no cover - defensive
+                printed.append(str(e)[:200])
+        print(
+            f"Encountered {error_count} indexing errors (showing up to 5):\n"
+            + "\n".join(printed)
         )
-        for record in parse_xml_to_array(io.StringIO(content))
-        if valid_record(record)
-    ]
+    else:
+        print(
+            f"Successfully stored {success_count} transformed records in index: {index_name}"
+        )
+
+    return success_count, error_count
+
+
+def _process_batch(
+    batch: pa.RecordBatch,
+    index_name: str,
+    es_client: Elasticsearch,
+) -> tuple[int, int]:
+    """Process a single Arrow RecordBatch; return counts and error samples."""
+    print(f"Processing batch with {len(batch)} rows")
+
+    transformed: list[TransformedWork] = []
+
+    # Schema (see schemata.py): namespace, id, content, changeset, last_modified
+    for row in batch.to_pylist():
+        work_id = row["id"]  # guaranteed by schema
+        content = row.get("content")  # optional per schema
+        if content:
+            transformed.extend(transform(str(work_id), content))
+
+    if not transformed:
+        print("No valid records produced from batch")
+        return 0, 0
+
+    return load_data(es_client, transformed, index_name)
 
 
 def handler(
@@ -75,15 +142,12 @@ def handler(
     print(f"Running transformer handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
-    changeset_id = event.changeset_id
-    if changeset_id is None:
+    if event.changeset_id is None:
         print("No changeset_id provided, skipping transformation.")
         return EbscoAdapterTransformerResult()
 
+    changeset_id = event.changeset_id
     print(f"Processing loader output with changeset_id: {changeset_id}")
-
-    # Initialize to default value in case changeset_id is None or no records are found
-    records_transformed: int = 0
 
     if config_obj.use_glue_table:
         print("Using AWS Glue table...")
@@ -116,22 +180,26 @@ def handler(
         "concepts-indexed", event.index_date or config_obj.pipeline_date
     )
 
-    for batch in pa_table.to_batches(max_chunksize=10000):
-        print(f"Processing batch with {len(batch)} records")
+    total_success = 0
+    total_failed = 0
 
-        transformed_batch = []
-        for row in batch.to_pylist():
-            (_, id, content, _, _) = row.values()
-            if content:
-                transformed_batch.extend(transform(id, content))
+    for batch in pa_table.to_batches(max_chunksize=BATCH_SIZE):
+        success, failed = _process_batch(batch, index_name, es_client)
+        total_success += success
+        total_failed += failed
 
-        load_data(es_client, transformed_batch, index_name)
+    result = EbscoAdapterTransformerResult(
+        records_transformed=total_success, records_failed=total_failed
+    )
 
-        records_transformed += len(transformed_batch)
+    print(f"Transformer completed: {result}")
 
-    result = EbscoAdapterTransformerResult(records_transformed=records_transformed)
+    if total_failed > 0:
+        # Raising so that upstream (e.g. Lambda / Step Function) treats this as a failure.
+        raise RuntimeError(
+            f"Indexing completed with {total_failed} failures out of {total_success + total_failed} attempts"
+        )
 
-    print(f"Transformer completed successfully: {result}")
     return result
 
 
@@ -143,7 +211,6 @@ def lambda_handler(event: EbscoAdapterTransformerEvent, context: Any) -> dict[st
 
 
 def local_handler() -> EbscoAdapterTransformerResult:
-    """Handle local execution with command line arguments."""
     parser = argparse.ArgumentParser(description="Transform EBSCO adapter data")
     parser.add_argument(
         "--changeset-id", type=str, help="Changeset ID from loader output to transform"
@@ -156,14 +223,14 @@ def local_handler() -> EbscoAdapterTransformerResult:
     parser.add_argument(
         "--pipeline-date",
         type=str,
-        help="The pipeline that is being ingested to, will default to dev.",
+        help="The pipeline date being ingested to (defaults to dev).",
         default="dev",
         required=False,
     )
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The index date to use for the transformation, will default to None.",
+        help="The index date to use (defaults to pipeline date).",
         required=False,
     )
 
@@ -181,11 +248,14 @@ def local_handler() -> EbscoAdapterTransformerResult:
     return handler(event=event, config_obj=config_obj)
 
 
-def main() -> None:
-    """Entry point for the transformer script"""
+def main() -> None:  # pragma: no cover - CLI entry point
     print("Running local transformer handler...")
-    print(local_handler())
+    try:
+        print(local_handler())
+    except Exception as exc:  # surface failures clearly in local runs
+        print(f"Transformer failed: {exc}")
+        raise
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     main()

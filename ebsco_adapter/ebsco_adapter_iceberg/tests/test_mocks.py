@@ -298,10 +298,11 @@ class MockElasticsearchClient:
         pass
 
     @classmethod
-    def bulk(cls, _: Any, operations: Generator[dict]) -> tuple[int, None]:
+    def bulk(cls, _: Any, operations: Generator[dict], *args: Any, **kwargs: Any) -> tuple[int, list]:
         for op in operations:
             cls.inputs.append(op)
-        return (len(cls.inputs), None)
+        # Emulate ES8 helpers.bulk returning (success_count, errors_list)
+        return (len(cls.inputs), [])
 
     @classmethod
     def reset_mocks(cls) -> None:
