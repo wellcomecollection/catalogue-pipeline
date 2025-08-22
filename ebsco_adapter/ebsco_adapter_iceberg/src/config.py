@@ -23,3 +23,9 @@ ES_LOCAL_SCHEME = os.environ.get("ES_LOCAL_SCHEME")
 ES_LOCAL_API_KEY = os.environ.get("ES_LOCAL_API_KEY")
 
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
+
+# EBSCO Adapter Trigger Configuration (moved from steps/trigger.py)
+SSM_PARAM_PREFIX = "/catalogue_pipeline/ebsco_adapter"
+S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
+S3_PREFIX = os.getenv("S3_PREFIX", "dev")  # corresponds to previous s3_prefix
+FTP_S3_PREFIX = os.path.join(S3_PREFIX, "ftp_v2")

@@ -12,11 +12,12 @@ from ebsco_ftp import EbscoFtp
 from steps.loader import EbscoAdapterLoaderEvent
 from utils.aws import get_ssm_parameter, list_s3_keys
 from utils.tracking import is_file_already_processed
-
-ssm_param_prefix = "/catalogue_pipeline/ebsco_adapter"
-s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
-s3_prefix = os.environ.get("S3_PREFIX", "dev")
-ftp_s3_prefix = os.path.join(s3_prefix, "ftp_v2")
+from config import (
+    SSM_PARAM_PREFIX,
+    S3_BUCKET,
+    S3_PREFIX,
+    FTP_S3_PREFIX,
+)
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
@@ -117,10 +118,10 @@ def handler(
 
     job_id = event.job_id
 
-    ftp_server = get_ssm_parameter(f"{ssm_param_prefix}/ftp_server")
-    ftp_username = get_ssm_parameter(f"{ssm_param_prefix}/ftp_username")
-    ftp_password = get_ssm_parameter(f"{ssm_param_prefix}/ftp_password")
-    ftp_remote_dir = get_ssm_parameter(f"{ssm_param_prefix}/ftp_remote_dir")
+    ftp_server = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_server")
+    ftp_username = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_username")
+    ftp_password = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_password")
+    ftp_remote_dir = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_remote_dir")
 
     with (
         EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp,
@@ -129,8 +130,8 @@ def handler(
         s3_location, is_processed = sync_files(
             ebsco_ftp=ebsco_ftp,
             target_directory=temp_dir,
-            s3_bucket=s3_bucket,
-            s3_prefix=ftp_s3_prefix,
+            s3_bucket=S3_BUCKET,
+            s3_prefix=FTP_S3_PREFIX,
         )
 
     print(f"Sending S3 location downstream: {s3_location}")
