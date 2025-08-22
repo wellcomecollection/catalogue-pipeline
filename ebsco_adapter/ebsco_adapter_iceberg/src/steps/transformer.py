@@ -39,8 +39,14 @@ class EbscoAdapterTransformerEvent(BaseModel):
 
 
 class EbscoAdapterTransformerResult(BaseModel):
-    records_transformed: int = 0
-    records_failed: int = 0
+    """Result of transformer execution.
+
+    batches contains one entry per processed RecordBatch; each inner list is the
+    ordered list of IDs successfully transformed & sent for indexing for that batch.
+    An empty result (no changeset or no valid records) yields batches=[].
+    """
+
+    batches: list[list[str]] = []
 
 
 def transform(work_id: str, content: str) -> list[TransformedWork]:
@@ -117,8 +123,8 @@ def _process_batch(
     batch: pa.RecordBatch,
     index_name: str,
     es_client: Elasticsearch,
-) -> tuple[int, int]:
-    """Process a single Arrow RecordBatch; return counts and error samples."""
+) -> tuple[int, int, list[str]]:
+    """Process a single Arrow RecordBatch; return (success_count, failure_count, ids)."""
     print(f"Processing batch with {len(batch)} rows")
 
     transformed: list[TransformedWork] = []
@@ -132,9 +138,11 @@ def _process_batch(
 
     if not transformed:
         print("No valid records produced from batch")
-        return 0, 0
+        return 0, 0, []
 
-    return load_data(es_client, transformed, index_name)
+    success, failed = load_data(es_client, transformed, index_name)
+    ids = [t.id for t in transformed]
+    return success, failed, ids
 
 
 def handler(
@@ -184,20 +192,20 @@ def handler(
 
     total_success = 0
     total_failed = 0
+    batches_ids: list[list[str]] = []
 
     for batch in pa_table.to_batches(max_chunksize=BATCH_SIZE):
-        success, failed = _process_batch(batch, index_name, es_client)
+        success, failed, ids = _process_batch(batch, index_name, es_client)
         total_success += success
         total_failed += failed
+        if ids:  # only record non-empty batches
+            batches_ids.append(ids)
 
-    result = EbscoAdapterTransformerResult(
-        records_transformed=total_success, records_failed=total_failed
-    )
+    result = EbscoAdapterTransformerResult(batches=batches_ids)
 
     print(f"Transformer completed: {result}")
 
     if total_failed > 0:
-        # Raising so that upstream (e.g. Lambda / Step Function) treats this as a failure.
         raise RuntimeError(
             f"Indexing completed with {total_failed} failures out of {total_success + total_failed} attempts"
         )

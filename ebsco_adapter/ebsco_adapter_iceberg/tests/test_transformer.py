@@ -26,12 +26,16 @@ from .test_mocks import MockElasticsearchClient, MockSecretsManagerClient
 def _prepare_changeset(
     temporary_table: pa.Table,
     monkeypatch: pytest.MonkeyPatch,
-    xml_records: list[str],
-) -> str:  # added return type
-    """Insert XML records into the temporary Iceberg table and return the new changeset_id."""
-    pa_table_initial = data_to_namespaced_table(
-        [{"id": "batch", "content": record} for record in xml_records]
-    )
+    records_by_id: dict[str, str],
+) -> str:
+    """Insert XML records (mapping of id -> MARC XML) into the temporary Iceberg table.
+
+    Returns the new changeset_id.
+    """
+    rows = [
+        {"id": rid, "content": record_xml} for rid, record_xml in records_by_id.items()
+    ]
+    pa_table_initial = data_to_namespaced_table(rows)
     client = IcebergTableClient(temporary_table)
     changeset_id = client.update(pa_table_initial, "ebsco")
     assert changeset_id, "Expected a changeset_id to be returned"
@@ -79,15 +83,16 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
 def test_transformer_end_to_end_with_local_table(
     temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    xml_records = [
-        "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
-        "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Parasites, hosts and diseases</subfield></datafield></record>",
-    ]
-    changeset_id = _prepare_changeset(temporary_table, monkeypatch, xml_records)
+    records_by_id = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
+        "ebs00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Parasites, hosts and diseases</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
     result = _run_transform(changeset_id, index_date="2025-01-01")
 
-    assert result.records_transformed == 2
+    # Expect one batch with two specific IDs in order (dict preserves insertion order in Python 3.7+)
+    assert result.batches == [list(records_by_id.keys())]
     titles = {op["_source"]["title"] for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
@@ -99,7 +104,7 @@ def test_transformer_no_changeset_returns_zero(monkeypatch: pytest.MonkeyPatch) 
     )
 
     result = handler(event=event, config_obj=config)
-    assert result.records_transformed == 0
+    assert result.batches == []
     assert MockElasticsearchClient.inputs == []
 
 
@@ -126,10 +131,11 @@ def test_transformer_index_name_selection(
     # Provide required secrets for any pipeline_date used in this parameterised test
     _add_pipeline_secrets(pipeline_date)
 
-    xml_records = [
-        "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdx001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Some Title</subfield></datafield></record>",
-    ]
-    changeset_id = _prepare_changeset(temporary_table, monkeypatch, xml_records)
+    # single record mapping
+    records_by_id = {
+        "ebsIdx001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdx001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Some Title</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
     _run_transform(changeset_id, index_date=index_date, pipeline_date=pipeline_date)
 
