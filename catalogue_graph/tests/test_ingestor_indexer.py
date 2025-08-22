@@ -1,7 +1,10 @@
 import json
+from collections.abc import Iterable
+from itertools import chain
 from typing import Any
 
 import polars
+import pydantic_core
 import pytest
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
 from test_utils import load_fixture
@@ -11,12 +14,14 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
 )
 from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
+from utils.types import IngestorType
 
 
-def test_ingestor_indexer_success() -> None:
+@pytest.mark.parametrize("record_type", ["concepts", "works"])
+def test_ingestor_indexer_success(record_type: IngestorType) -> None:
     config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
-        ingestor_type="concepts",
+        ingestor_type=record_type,
         pipeline_date="2025-01-01",
         index_date="2025-01-01",
         job_id="123",
@@ -29,14 +34,16 @@ def test_ingestor_indexer_success() -> None:
 
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
-    # INGESTOR_SHARD_SIZE=10 AWS_PROFILE=platform-developer python3.13 ingestor_local.py --limit=1
+    # INGESTOR_SHARD_SIZE=10 AWS_PROFILE=platform-developer uv run src/ingestor/run_local.py --ingestor-type=concepts --limit=1
     MockSmartOpen.mock_s3_file(
         "s3://test-catalogue-graph/00000000-00000010.parquet",
-        load_fixture("ingestor/00000000-00000010.parquet"),
+        load_fixture(f"ingestor/{record_type}/00000000-00000010.parquet"),
     )
     MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
-    expected_inputs = json.loads(load_fixture("ingestor/mock_es_inputs.json"))
+    expected_inputs = json.loads(
+        load_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
+    )
 
     result = handler(event, config)
     assert len(MockElasticsearchClient.inputs) == 10
@@ -44,39 +51,75 @@ def test_ingestor_indexer_success() -> None:
     assert MockElasticsearchClient.inputs == expected_inputs
 
 
-def build_test_matrix() -> list[tuple]:
-    return [
-        (
-            "the file at s3_uri doesn't exist",
-            IngestorIndexerLambdaEvent(
-                ingestor_type="concepts",
-                pipeline_date="2021-07-01",
-                index_date="2025-01-01",
-                job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://test-catalogue-graph/ghost-file"
-                ),
+def build_failure_test_matrix() -> Iterable[tuple]:
+    concepts: IngestorType = "concepts"
+    works: IngestorType = "works"
+    return chain.from_iterable(
+        [
+            (
+                failure_params_missing_file(correct_type),
+                failure_params_malformed_parquet(correct_type),
+                failure_params_wrong_content(correct_type, wrong_type),
+            )
+            for correct_type, wrong_type in [(concepts, works), (works, concepts)]
+        ]
+    )
+
+
+def failure_params_missing_file(record_type: IngestorType) -> tuple:
+    return (
+        "the file at s3_uri doesn't exist",
+        IngestorIndexerLambdaEvent(
+            ingestor_type=record_type,
+            pipeline_date="2021-07-01",
+            index_date="2025-01-01",
+            job_id="123",
+            object_to_index=IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/ghost-file"
             ),
-            None,
-            KeyError,
-            "Mock S3 file s3://test-catalogue-graph/ghost-file does not exist.",
         ),
-        (
-            "the S3 file doesn't contain valid data",
-            IngestorIndexerLambdaEvent(
-                ingestor_type="concepts",
-                pipeline_date="2021-07-01",
-                index_date="2025-01-01",
-                job_id="123",
-                object_to_index=IngestorIndexerObject(
-                    s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
-                ),
+        None,
+        KeyError,
+        "Mock S3 file s3://test-catalogue-graph/ghost-file does not exist.",
+    )
+
+
+def failure_params_malformed_parquet(record_type: IngestorType) -> tuple:
+    return (
+        "the S3 file is malformed",
+        IngestorIndexerLambdaEvent(
+            ingestor_type=record_type,
+            pipeline_date="2021-07-01",
+            index_date="2025-01-01",
+            job_id="123",
+            object_to_index=IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
             ),
-            "catalogue/denormalised_works_example.jsonl",
-            polars.exceptions.ComputeError,
-            "parquet: File out of specification: The file must end with PAR1",
         ),
-    ]
+        "catalogue/denormalised_works_example.jsonl",
+        polars.exceptions.ComputeError,
+        "parquet: File out of specification: The file must end with PAR1",
+    )
+
+
+def failure_params_wrong_content(
+    expected_type: IngestorType, actual_type: IngestorType
+) -> tuple:
+    return (
+        "the S3 file contains invalid data",
+        IngestorIndexerLambdaEvent(
+            ingestor_type=expected_type,
+            pipeline_date="2021-07-01",
+            index_date="2025-01-01",
+            job_id="123",
+            object_to_index=IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet"
+            ),
+        ),
+        f"ingestor/{actual_type}/00000000-00000010.parquet",
+        pydantic_core.ValidationError,
+        "\\d+ validation errors for Indexable.*",
+    )
 
 
 def get_test_id(argvalue: str) -> str:
@@ -85,7 +128,7 @@ def get_test_id(argvalue: str) -> str:
 
 @pytest.mark.parametrize(
     "description,event,fixture,expected_error,error_message",
-    build_test_matrix(),
+    build_failure_test_matrix(),
     ids=get_test_id,
 )
 def test_ingestor_indexer_failure(
