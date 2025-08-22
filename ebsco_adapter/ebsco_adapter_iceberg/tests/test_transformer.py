@@ -1,11 +1,17 @@
+from typing import cast  # added for dummy ES client
+
 import pyarrow as pa
 import pytest
+from elasticsearch import Elasticsearch  # added
 
+from models.work import TransformedWork  # type: ignore[import-not-found]
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
     EbscoAdapterTransformerEvent,
     EbscoAdapterTransformerResult,
     handler,
+    load_data,
+    transform,
 )
 from utils.iceberg import IcebergTableClient
 
@@ -64,7 +70,7 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
 
 
 # --------------------------------------------------------------------------------------
-# Tests
+# Tests (existing end-to-end & integration)
 # --------------------------------------------------------------------------------------
 
 
@@ -127,3 +133,88 @@ def test_transformer_index_name_selection(
 
     indices = {op["_index"] for op in MockElasticsearchClient.inputs}
     assert indices == {expected_index}
+
+
+# --------------------------------------------------------------------------------------
+# Tests for transform()
+# --------------------------------------------------------------------------------------
+
+
+def test_transform_empty_content_returns_empty_list() -> None:
+    assert transform("work1", "") == []
+
+
+def test_transform_invalid_xml_returns_empty_list() -> None:
+    # malformed XML so pymarc should throw and transform should swallow
+    assert transform("work2", "<record><leader>bad") == []
+
+
+def test_transform_valid_marcxml_returns_work() -> None:
+    xml = (
+        "<record>"
+        "<leader>00000nam a2200000   4500</leader>"
+        "<controlfield tag='001'>ebs12345</controlfield>"
+        "<datafield tag='245' ind1='0' ind2='0'>"
+        "<subfield code='a'>A Useful Title</subfield>"
+        "</datafield>"
+        "</record>"
+    )
+    result = transform("ebs12345", xml)
+    assert len(result) == 1
+    assert result[0].id == "ebs12345"
+    assert result[0].title == "A Useful Title"
+
+
+# --------------------------------------------------------------------------------------
+# Tests for load_data()
+# --------------------------------------------------------------------------------------
+
+
+def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    collected: list[dict] = []
+
+    def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
+        for a in actions:
+            collected.append(a)
+        return len(collected), []  # success count, no errors
+
+    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+    records = [
+        TransformedWork(id="id1", title="Title 1"),
+        TransformedWork(id="id2", title="Title 2"),
+    ]
+    dummy_client = cast(Elasticsearch, object())
+    success, errors = load_data(
+        elastic_client=dummy_client, records=records, index_name="concepts-indexed-dev"
+    )
+
+    assert success == 2
+    assert errors == 0
+    assert {a["_id"] for a in collected} == {"id1", "id2"}
+    assert {a["_source"]["title"] for a in collected} == {"Title 1", "Title 2"}
+
+
+def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
+        actions_list = list(actions)
+        return 1, [
+            {
+                "index": {
+                    "_id": actions_list[0]["_id"],
+                    "status": 400,
+                    "error": {"type": "mapper_parsing_exception"},
+                }
+            }
+        ]
+
+    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+    records = [TransformedWork(id="id1", title="Bad Title")]
+    dummy_client = cast(Elasticsearch, object())
+    success, errors = load_data(
+        elastic_client=dummy_client, records=records, index_name="concepts-indexed-dev"
+    )
+
+    assert success == 1
+    assert errors == 1

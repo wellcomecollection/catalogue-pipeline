@@ -298,7 +298,9 @@ class MockElasticsearchClient:
         pass
 
     @classmethod
-    def bulk(cls, _: Any, operations: Generator[dict], *args: Any, **kwargs: Any) -> tuple[int, list]:
+    def bulk(
+        cls, _: Any, operations: Generator[dict], *args: Any, **kwargs: Any
+    ) -> tuple[int, list]:
         for op in operations:
             cls.inputs.append(op)
         # Emulate ES8 helpers.bulk returning (success_count, errors_list)
