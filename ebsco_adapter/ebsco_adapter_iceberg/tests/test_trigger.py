@@ -316,3 +316,30 @@ class TestSyncFiles:
             False,
         )
         assert result == expected_result
+
+
+@patch("steps.trigger.handler")
+def test_lambda_handler_eventbridge_conversion(mock_handler) -> None:  # type: ignore
+    from typing import cast
+    from unittest.mock import Mock as _Mock
+
+    from steps.loader import EbscoAdapterLoaderEvent
+    from steps.trigger import EventBridgeScheduledEvent
+
+    scheduled_time = "2025-08-22T12:34:00Z"
+    expected_job_id = "20250822T1234"
+
+    mock_handler.return_value = EbscoAdapterLoaderEvent(
+        job_id=expected_job_id, file_location="s3://test/file.xml", is_processed=False
+    )
+
+    from steps.trigger import lambda_handler
+
+    result = lambda_handler(EventBridgeScheduledEvent(time=scheduled_time), None)
+
+    handler_mock = cast(_Mock, mock_handler)
+    args_tuple = handler_mock.call_args[0]
+    internal_event = args_tuple[0]
+    assert internal_event.job_id == expected_job_id
+
+    assert result["job_id"] == expected_job_id

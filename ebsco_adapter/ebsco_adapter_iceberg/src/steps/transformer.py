@@ -35,6 +35,7 @@ class EbscoAdapterTransformerConfig(BaseModel):
 class EbscoAdapterTransformerEvent(BaseModel):
     changeset_id: str | None = None
     index_date: str | None = None
+    job_id: str  # required
 
 
 class EbscoAdapterTransformerResult(BaseModel):
@@ -141,6 +142,7 @@ def handler(
 ) -> EbscoAdapterTransformerResult:
     print(f"Running transformer handler with config: {config_obj}")
     print(f"Processing event: {event}")
+    print(f"Received job_id: {event.job_id}")
 
     if event.changeset_id is None:
         print("No changeset_id provided, skipping transformation.")
@@ -233,11 +235,18 @@ def local_handler() -> EbscoAdapterTransformerResult:
         help="The index date to use (defaults to pipeline date).",
         required=False,
     )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        help="Job identifier (defaults to 'dev' when not supplied).",
+        default="dev",
+        required=False,
+    )
 
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, index_date=args.index_date
+        changeset_id=args.changeset_id, index_date=args.index_date, job_id=args.job_id
     )
     config_obj = EbscoAdapterTransformerConfig(
         is_local=True,

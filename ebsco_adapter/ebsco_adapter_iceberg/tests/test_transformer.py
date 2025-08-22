@@ -4,7 +4,7 @@ import pyarrow as pa
 import pytest
 from elasticsearch import Elasticsearch  # added
 
-from models.work import TransformedWork  # type: ignore[import-not-found]
+from models.work import TransformedWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
     EbscoAdapterTransformerEvent,
@@ -47,7 +47,9 @@ def _run_transform(
     changeset_id: str, index_date: str | None, pipeline_date: str = "dev"
 ) -> EbscoAdapterTransformerResult:
     event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id, index_date=index_date
+        changeset_id=changeset_id,
+        index_date=index_date,
+        job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
         is_local=True, use_glue_table=False, pipeline_date=pipeline_date
@@ -91,7 +93,7 @@ def test_transformer_end_to_end_with_local_table(
 
 
 def test_transformer_no_changeset_returns_zero(monkeypatch: pytest.MonkeyPatch) -> None:
-    event = EbscoAdapterTransformerEvent(changeset_id=None)
+    event = EbscoAdapterTransformerEvent(changeset_id=None, job_id="20250101T1200")
     config = EbscoAdapterTransformerConfig(
         is_local=True, use_glue_table=False, pipeline_date="dev"
     )

@@ -24,7 +24,11 @@ class EbscoAdapterTriggerConfig(BaseModel):
 
 
 class EbscoAdapterTriggerEvent(BaseModel):
-    time: str
+    job_id: str
+
+
+class EventBridgeScheduledEvent(BaseModel):
+    time: str  # original EventBridge schedule event time
 
 
 def get_most_recent_valid_file(filenames: list[str]) -> str | None:
@@ -111,10 +115,7 @@ def handler(
     print(f"Running handler with config: {config}")
     print(f"Processing event: {event}")
 
-    # generate a job_id based on the schedule time, using an iso8601 format like 20210701T1300
-    job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
-        "%Y%m%dT%H%M"
-    )
+    job_id = event.job_id
 
     ftp_server = get_ssm_parameter(f"{ssm_param_prefix}/ftp_server")
     ftp_username = get_ssm_parameter(f"{ssm_param_prefix}/ftp_username")
@@ -138,10 +139,13 @@ def handler(
     )
 
 
-def lambda_handler(event: EbscoAdapterTriggerEvent, context: Any) -> dict[str, Any]:
-    return handler(
-        EbscoAdapterTriggerEvent.model_validate(event), EbscoAdapterTriggerConfig()
-    ).model_dump()
+def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, Any]:
+    # Convert external scheduled event into internal trigger event with job_id
+    job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
+        "%Y%m%dT%H%M"
+    )
+    internal_event = EbscoAdapterTriggerEvent(job_id=job_id)
+    return handler(internal_event, EbscoAdapterTriggerConfig()).model_dump()
 
 
 def local_handler() -> None:
@@ -151,10 +155,18 @@ def local_handler() -> None:
         action="store_true",
         help="Run locally -writes to /dev S3 prefix",
     )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        required=False,
+        help="Optional job id (defaults to current time if omitted)",
+    )
 
     args = parser.parse_args()
 
-    event = EbscoAdapterTriggerEvent(time=datetime.now().strftime("%Y%m%dT%H%M"))
+    job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
+
+    event = EbscoAdapterTriggerEvent(job_id=job_id)
     config = EbscoAdapterTriggerConfig(is_local=args.local)
 
     handler(event=event, config=config)
