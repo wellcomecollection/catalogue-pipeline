@@ -22,9 +22,9 @@ class BaseWork(BaseModel):
     id: str
 
 
-class TransformedWork(ElasticsearchModel, BaseWork):
-    """
-    Model representing a transformed work with additional attributes.
-    """
+class DeletedWork(ElasticsearchModel, BaseWork):
+    deleted_reason: str
 
+
+class SourceWork(ElasticsearchModel, BaseWork):
     title: str

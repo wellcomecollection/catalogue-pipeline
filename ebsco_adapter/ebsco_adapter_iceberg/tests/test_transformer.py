@@ -4,7 +4,7 @@ import pyarrow as pa
 import pytest
 from elasticsearch import Elasticsearch  # added
 
-from models.work import TransformedWork
+from models.work import SourceWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
     EbscoAdapterTransformerEvent,
@@ -91,10 +91,40 @@ def test_transformer_end_to_end_with_local_table(
 
     result = _run_transform(changeset_id, index_date="2025-01-01")
 
-    # Expect one batch with two specific IDs in order (dict preserves insertion order in Python 3.7+)
     assert result.batches == [list(records_by_id.keys())]
-    titles = {op["_source"]["title"] for op in MockElasticsearchClient.inputs}
+    assert result.success_count == 2
+    assert result.failure_count == 0
+    titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
+
+
+def test_transformer_creates_deletedwork_for_empty_content(
+    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Note: empty string content indicates deletion
+    records_by_id = {
+        "ebsDel001": "",  # deletion marker
+        "ebsDel002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsDel002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Alive Title</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+
+    result = _run_transform(changeset_id, index_date="2025-03-01")
+
+    # Both IDs should appear (one DeletedWork, one SourceWork)
+    assert result.batches == [["ebsDel001", "ebsDel002"]]
+    assert result.success_count == 2
+    deleted_docs = [
+        op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel001"
+    ]
+    assert len(deleted_docs) == 1
+    deleted_source = deleted_docs[0]["_source"]
+    assert deleted_source["deletedReason"] == "not found in EBSCO source"
+    # Ensure normal record still indexed
+    alive_docs = [
+        op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel002"
+    ]
+    assert len(alive_docs) == 1
+    assert alive_docs[0]["_source"]["title"] == "Alive Title"
 
 
 def test_transformer_no_changeset_returns_zero(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -105,18 +135,20 @@ def test_transformer_no_changeset_returns_zero(monkeypatch: pytest.MonkeyPatch) 
 
     result = handler(event=event, config_obj=config)
     assert result.batches == []
+    assert result.success_count == 0
+    assert result.failure_count == 0
     assert MockElasticsearchClient.inputs == []
 
 
 @pytest.mark.parametrize(
     "index_date, pipeline_date, expected_index",
     [
-        ("2025-02-02", "dev", "concepts-indexed-2025-02-02"),  # explicit index_date
-        (None, "dev", "concepts-indexed-dev"),  # falls back to pipeline_date default
+        ("2025-02-02", "dev", "works-source-2025-02-02"),  # explicit index_date
+        (None, "dev", "works-source-dev"),  # falls back to pipeline_date default
         (
             None,
             "2025-05-05",
-            "concepts-indexed-2025-05-05",
+            "works-source-2025-05-05",
         ),  # custom pipeline_date when no index_date
     ],
 )
@@ -189,12 +221,12 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
     records = [
-        TransformedWork(id="id1", title="Title 1"),
-        TransformedWork(id="id2", title="Title 2"),
+        SourceWork(id="id1", title="Title 1"),
+        SourceWork(id="id2", title="Title 2"),
     ]
     dummy_client = cast(Elasticsearch, object())
     success, errors = load_data(
-        elastic_client=dummy_client, records=records, index_name="concepts-indexed-dev"
+        elastic_client=dummy_client, records=records, index_name="works-source-dev"
     )
 
     assert success == 2
@@ -218,10 +250,10 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    records = [TransformedWork(id="id1", title="Bad Title")]
+    records = [SourceWork(id="id1", title="Bad Title")]
     dummy_client = cast(Elasticsearch, object())
     success, errors = load_data(
-        elastic_client=dummy_client, records=records, index_name="concepts-indexed-dev"
+        elastic_client=dummy_client, records=records, index_name="works-source-dev"
     )
 
     assert success == 1
