@@ -1,5 +1,6 @@
-import pytest
 import pyarrow as pa
+import pytest
+
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
     EbscoAdapterTransformerEvent,
