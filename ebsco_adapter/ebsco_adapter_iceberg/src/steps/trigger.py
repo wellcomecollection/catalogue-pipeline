@@ -1,5 +1,4 @@
 import argparse
-import os
 import re
 import tempfile
 from datetime import datetime
@@ -8,16 +7,15 @@ from typing import Any
 import boto3
 from pydantic import BaseModel
 
+from config import (
+    FTP_S3_PREFIX,
+    S3_BUCKET,
+    SSM_PARAM_PREFIX,
+)
 from ebsco_ftp import EbscoFtp
 from steps.loader import EbscoAdapterLoaderEvent
 from utils.aws import get_ssm_parameter, list_s3_keys
 from utils.tracking import is_file_already_processed
-from config import (
-    SSM_PARAM_PREFIX,
-    S3_BUCKET,
-    S3_PREFIX,
-    FTP_S3_PREFIX,
-)
 
 
 class EbscoAdapterTriggerConfig(BaseModel):

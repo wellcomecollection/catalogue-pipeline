@@ -203,7 +203,9 @@ def handler(
 
     result = EbscoAdapterTransformerResult(batches=batches_ids)
 
-    print(f"Transformer completed: {result}")
+    total_batches = len(result.batches)
+    total_ids = sum(len(b) for b in result.batches)
+    print(f"Transformer summary: batches={total_batches} total_ids={total_ids}")
 
     if total_failed > 0:
         raise RuntimeError(
@@ -268,7 +270,8 @@ def local_handler() -> EbscoAdapterTransformerResult:
 def main() -> None:  # pragma: no cover - CLI entry point
     print("Running local transformer handler...")
     try:
-        print(local_handler())
+        local_handler()
+
     except Exception as exc:  # surface failures clearly in local runs
         print(f"Transformer failed: {exc}")
         raise
