@@ -56,6 +56,7 @@ def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> lis
     trigger_report: TriggerReport | None = TriggerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=event.ingestor_type,
         job_id=job_id,
         ignore_missing=True,
     )
@@ -63,6 +64,7 @@ def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> lis
     indexer_report: IndexerReport | None = IndexerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=event.ingestor_type,
         job_id=job_id,
         ignore_missing=True,
     )
@@ -71,6 +73,7 @@ def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> lis
         IndexerReport.read(
             pipeline_date=pipeline_date,
             index_date=index_date,
+            ingestor_type=event.ingestor_type,
             job_id=indexer_report.previous_job_id,
             ignore_missing=True,
         )
@@ -81,6 +84,7 @@ def get_ingestor_report(event: IngestorStepEvent, config: ReporterConfig) -> lis
     deletions_report: DeletionReport | None = DeletionReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=event.ingestor_type,
         job_id=job_id,
         ignore_missing=True,
     )

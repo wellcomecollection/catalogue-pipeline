@@ -19,6 +19,7 @@ def run_check(
 ) -> TriggerReport:
     pipeline_date = event.pipeline_date
     index_date = event.index_date
+    ingestor_type = event.ingestor_type
     force_pass = event.force_pass
 
     loader_events = event.events
@@ -39,12 +40,14 @@ def run_check(
         record_count=record_count,
         job_id=job_id,
         pipeline_date=pipeline_date,
+        ingestor_type=ingestor_type,
         index_date=index_date,
     )
 
     latest_report: TriggerReport | None = TriggerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=ingestor_type,
         # load the latest report without job_id
         ignore_missing=True,
     )

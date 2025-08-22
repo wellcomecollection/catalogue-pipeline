@@ -40,6 +40,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           Payload = {
             pipeline_date = local.pipeline_date
             index_date    = local.concepts_index_date
+            ingestor_type = "concepts"
           }
         },
         Next = "Monitor trigger ingest"

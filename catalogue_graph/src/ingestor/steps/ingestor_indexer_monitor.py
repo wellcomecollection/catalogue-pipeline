@@ -10,12 +10,14 @@ from utils.reporting import IndexerReport
 def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
     pipeline_date = events[0].pipeline_date
     index_date = events[0].index_date
+    ingestor_type = events[0].ingestor_type
     job_id = events[0].job_id
 
     # load the latest report without job_id
     latest_report: IndexerReport | None = IndexerReport.read(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=ingestor_type,
         ignore_missing=True,
     )
 
@@ -24,6 +26,7 @@ def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> Non
     current_report = IndexerReport(
         pipeline_date=pipeline_date,
         index_date=index_date,
+        ingestor_type=ingestor_type,
         job_id=job_id,
         success_count=sum_success_count,
         previous_job_id=latest_report.job_id if latest_report else None,
