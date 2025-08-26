@@ -14,7 +14,19 @@ def extract_concepts_from_work(
     # extracting these component concepts, since the frontend does not make use of them and the resulting
     # theme pages would be empty.
     for subject in raw_work.get("subjects", []):
-        yield subject, "subjects"
+        # caveat concerning the above comment:
+        # for non-composite concepts, identified as having the same id as the top-level subject,
+        # the nested "Type" is more specific than the top-level "Type"
+        # in that case, we copy the nested concept's "Type" onto the subject
+        # Check if the first concept in the concepts list has the same id as the subject
+        concepts = subject.get("concepts", [])
+        if concepts and concepts[0].get("id") == subject.get("id"):
+            # Replace the subject's type with the concept's type
+            subject_copy = subject.copy()
+            subject_copy["type"] = concepts[0].get("type", subject.get("type"))
+            yield subject_copy, "subjects"
+        else:
+            yield subject, "subjects"
 
     # Return all contributors
     for contributor in raw_work.get("contributors", []):
