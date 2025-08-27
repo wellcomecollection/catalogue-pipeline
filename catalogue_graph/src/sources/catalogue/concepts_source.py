@@ -20,7 +20,11 @@ def extract_concepts_from_work(
         # in that case, we copy the nested concept's "Type" onto the subject
         # Check if the first concept in the concepts list has the same id as the subject
         concepts = subject.get("concepts", [])
-        if concepts and len(concepts) == 1 and concepts[0].get("id") == subject.get("id"):
+        if (
+            concepts
+            and len(concepts) == 1
+            and concepts[0].get("id") == subject.get("id")
+        ):
             # Replace the subject's type with the concept's type
             subject_copy = subject.copy()
             subject_copy["type"] = concepts[0].get("type", subject.get("type"))
