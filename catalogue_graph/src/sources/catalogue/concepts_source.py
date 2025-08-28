@@ -26,9 +26,9 @@ def extract_concepts_from_work(
             and concepts[0].get("id") == subject.get("id")
         ):
             # Replace the subject's type with the concept's type
-            subject_copy = subject.copy()
-            subject_copy["type"] = concepts[0].get("type", subject.get("type"))
-            yield subject_copy, "subjects"
+            subject_with_concept_type = subject.copy()
+            subject_with_concept_type["type"] = concepts[0].get("type", subject.get("type"))
+            yield subject_with_concept_type, "subjects"
         else:
             # All root concepts extracted from the 'subjects' section are of type 'Subject'. However, these concepts do
             # not have a 'type' field in the denormalised index, so we need to add it here.
