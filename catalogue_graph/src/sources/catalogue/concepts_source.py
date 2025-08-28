@@ -13,11 +13,9 @@ def extract_concepts_from_work(
     # of concepts 'Milk' and 'Quality' (each with its own Wellcome ID). For now, we are not interested in
     # extracting these component concepts, since the frontend does not make use of them and the resulting
     # theme pages would be empty.
-    # CAVEAT concerning the above:
-    # for non-composite concepts, identified as having the same id as the top-level subject,
-    # the nested "Type" is more specific than the top-level "Type"
-    # in that case, we copy the nested concept's "Type" onto the subject
-    # Check if the first concept in the concepts list has the same id as the subject
+    # However, an exception exists for simple, non-composite subjects where the nested concept 
+    # is the subject itself (identified by matching IDs). In this specific case, the nested 
+    # concept's "Type" is more specific, so we promote it to the top-level subject.
     for subject in raw_work.get("subjects", []):
         new_type = "Subject"
 
