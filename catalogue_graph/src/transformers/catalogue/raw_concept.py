@@ -44,7 +44,7 @@ class RawCatalogueConcept:
         if self.referenced_in == "genres":
             return "Genre"
 
-        concept_type: ConceptType = self.raw_concept["type"] if "type" in self.raw_concept else "Subject"
+        concept_type: ConceptType = self.raw_concept.get("type", "Subject")
         return concept_type
 
     @property
