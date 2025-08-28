@@ -38,8 +38,6 @@ class RawCatalogueConcept:
     @property
     def type(self) -> ConceptType:
         """Returns the concept type (one of "Person", "Concept", "Genre", etc.)."""
-
-
         concept_type: ConceptType = self.raw_concept.get("type", "Concept")
         return concept_type
 

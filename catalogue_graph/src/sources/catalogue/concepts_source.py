@@ -20,13 +20,13 @@ def extract_concepts_from_work(
     # Check if the first concept in the concepts list has the same id as the subject
     for subject in raw_work.get("subjects", []):
         new_type = "Subject"
-        
+
         concepts = subject.get("concepts", [])
         if len(concepts) == 1 and concepts[0].get("id") == subject.get("id"):
             # If the case matches, use the concept's type, falling back to the subject's original type
             concept = concepts[0]
             new_type = concept.get("type", subject.get("type"))
-        
+
         new_subject = subject.copy()
         new_subject["type"] = new_type
         yield new_subject, "subjects"
