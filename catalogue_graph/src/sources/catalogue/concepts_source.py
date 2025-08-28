@@ -30,7 +30,11 @@ def extract_concepts_from_work(
             subject_copy["type"] = concepts[0].get("type", subject.get("type"))
             yield subject_copy, "subjects"
         else:
-            yield subject, "subjects"
+            # All root concepts extracted from the 'subjects' section are of type 'Subject'. However, these concepts do
+            # not have a 'type' field in the denormalised index, so we need to add it here.
+            subject_with_default_type = subject.copy()
+            subject_with_default_type["type"] = "Subject"
+            yield subject_with_default_type, "subjects"
 
     # Return all contributors
     for contributor in raw_work.get("contributors", []):
