@@ -13,30 +13,23 @@ def extract_concepts_from_work(
     # of concepts 'Milk' and 'Quality' (each with its own Wellcome ID). For now, we are not interested in
     # extracting these component concepts, since the frontend does not make use of them and the resulting
     # theme pages would be empty.
+    # CAVEAT concerning the above:
+    # for non-composite concepts, identified as having the same id as the top-level subject,
+    # the nested "Type" is more specific than the top-level "Type"
+    # in that case, we copy the nested concept's "Type" onto the subject
+    # Check if the first concept in the concepts list has the same id as the subject
     for subject in raw_work.get("subjects", []):
-        # caveat concerning the above comment:
-        # for non-composite concepts, identified as having the same id as the top-level subject,
-        # the nested "Type" is more specific than the top-level "Type"
-        # in that case, we copy the nested concept's "Type" onto the subject
-        # Check if the first concept in the concepts list has the same id as the subject
+        new_type = "Subject"
+        
         concepts = subject.get("concepts", [])
-        if (
-            concepts
-            and len(concepts) == 1
-            and concepts[0].get("id") == subject.get("id")
-        ):
-            # Replace the subject's type with the concept's type
-            subject_with_concept_type = subject.copy()
-            subject_with_concept_type["type"] = concepts[0].get(
-                "type", subject.get("type")
-            )
-            yield subject_with_concept_type, "subjects"
-        else:
-            # All root concepts extracted from the 'subjects' section are of type 'Subject'. However, these concepts do
-            # not have a 'type' field in the denormalised index, so we need to add it here.
-            subject_with_default_type = subject.copy()
-            subject_with_default_type["type"] = "Subject"
-            yield subject_with_default_type, "subjects"
+        if len(concepts) == 1 and concepts[0].get("id") == subject.get("id"):
+            # If the case matches, use the concept's type, falling back to the subject's original type
+            concept = concepts[0]
+            new_type = concept.get("type", subject.get("type"))
+        
+        new_subject = subject.copy()
+        new_subject["type"] = new_type
+        yield new_subject, "subjects"
 
     # Return all contributors
     for contributor in raw_work.get("contributors", []):
@@ -44,7 +37,11 @@ def extract_concepts_from_work(
 
     for genre in raw_work.get("genres", []):
         for concept in genre.get("concepts", []):
-            yield concept, "genres"
+            # All concepts extracted from the 'genres' section are always of type 'Genre' (but the denormalised index uses
+            # the term 'GenreConcept').
+            new_concept = concept.copy()
+            new_concept["type"] = "Genre"
+            yield new_concept, "genres"
             # Only extract the first item from each genre. Subsequent items are not associated with the work in
             # catalogue API filters and the resulting theme pages would be empty.
             break
