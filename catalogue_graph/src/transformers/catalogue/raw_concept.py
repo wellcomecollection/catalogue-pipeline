@@ -41,7 +41,7 @@ class RawCatalogueConcept:
 
         # All root concepts extracted from the 'subjects' section are of type 'Subject'. However, these concepts do
         # not have a 'type' field in the denormalised index, so we need to add it here.
-        if self.referenced_in == "subjects": # it's here! 
+        if self.referenced_in == "subjects":
             return self.raw_concept["type"] if "type" in self.raw_concept else "Subject"
         # All concepts extracted from the 'genres' section are always of type 'Genre' (but the denormalised index uses
         # the term 'GenreConcept').
