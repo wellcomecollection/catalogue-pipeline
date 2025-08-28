@@ -40,7 +40,7 @@ class RawCatalogueConcept:
         """Returns the concept type (one of "Person", "Concept", "Genre", etc.)."""
 
 
-        concept_type: ConceptType = self.raw_concept.get("type", "Subject")
+        concept_type: ConceptType = self.raw_concept.get("type", "Concept")
         return concept_type
 
     @property
