@@ -53,6 +53,7 @@ class EbscoAdapterTransformerResult(BaseModel):
 
 def transform(work_id: str, content: str) -> list[SourceWork]:
     """Parse a MARC XML string into TransformedWork records."""
+
     def valid_record(record: Any) -> bool:  # local for clarity
         return bool(record and getattr(record, "title", None))
 
@@ -70,8 +71,8 @@ def transform(work_id: str, content: str) -> list[SourceWork]:
 
 
 def _generate_actions(
-    records: Iterable[BaseWork],
-    index_name: str,  # accept any pydantic model with model_dump
+    records: Iterable[BaseWork],  # accept any pydantic model with model_dump
+    index_name: str,
 ) -> Generator[dict[str, Any], None, None]:
     for record in records:
         yield {

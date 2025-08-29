@@ -1,5 +1,4 @@
 import os
-import sys
 from collections.abc import Generator
 from uuid import uuid1
 
