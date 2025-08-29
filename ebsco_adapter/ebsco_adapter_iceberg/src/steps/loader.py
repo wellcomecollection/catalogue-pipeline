@@ -93,17 +93,12 @@ def handler(
     # Record the processed file to S3
     record_processed_file(event.job_id, event.file_location, changeset_id)
 
-    return EbscoAdapterTransformerEvent(changeset_id=changeset_id)
+    return EbscoAdapterTransformerEvent(changeset_id=changeset_id, job_id=event.job_id)
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
-    try:
-        config_obj = EbscoAdapterLoaderConfig()
-        transformer_event = handler(event, config_obj)
-        return {"changeset_id": transformer_event.changeset_id}
-    except Exception as e:
-        print(f"Error: {e}")
-        return {"error": str(e)}
+    config_obj = EbscoAdapterLoaderConfig()
+    return handler(event, config_obj).model_dump()
 
 
 def local_handler() -> EbscoAdapterTransformerEvent:
@@ -118,13 +113,21 @@ def local_handler() -> EbscoAdapterTransformerEvent:
         action="store_true",
         help="Use AWS Glue table instead of local table",
     )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        required=False,
+        help="Optional job id (defaults to current time if omitted)",
+    )
 
     args = parser.parse_args()
+
+    job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
     event = EbscoAdapterLoaderEvent(
         file_location=args.xmlfile,
         is_processed=False,
-        job_id=datetime.now().strftime("%Y%m%dT%H%M"),
+        job_id=job_id,
     )
     config_obj = EbscoAdapterLoaderConfig(use_glue_table=args.use_glue_table)
 
