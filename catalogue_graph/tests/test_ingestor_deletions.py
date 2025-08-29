@@ -63,7 +63,7 @@ def test_ingestor_deletions_line_next_run() -> None:
 
     # Mock a file storing the date of the last index remover run
     MockSmartOpen.mock_s3_file(
-        f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/{pipeline_date}/{index_date}/report.deletions.json",
+        f"s3://wellcomecollection-catalogue-graph/ingestor/{pipeline_date}/{index_date}/report.deletions.json",
         json.dumps(
             {
                 "pipeline_date": pipeline_date,
