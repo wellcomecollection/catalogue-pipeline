@@ -17,11 +17,8 @@ from .test_mocks import (
     MockSmartOpen,
 )
 
-# Add the app directory to the path so we can import from it
+# Add the test directory to the path so we can import from it
 HERE = os.path.dirname(os.path.realpath(__file__))
-APP_DIR = os.path.join(os.path.dirname(HERE), "app")
-sys.path.insert(0, APP_DIR)
-
 
 @pytest.fixture(autouse=True)
 def common_mocks(monkeypatch: MonkeyPatch) -> Generator[None, None, None]:
