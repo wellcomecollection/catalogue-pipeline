@@ -53,9 +53,6 @@ class EbscoAdapterTransformerResult(BaseModel):
 
 def transform(work_id: str, content: str) -> list[SourceWork]:
     """Parse a MARC XML string into TransformedWork records."""
-    if not content:
-        return []
-
     def valid_record(record: Any) -> bool:  # local for clarity
         return bool(record and getattr(record, "title", None))
 
