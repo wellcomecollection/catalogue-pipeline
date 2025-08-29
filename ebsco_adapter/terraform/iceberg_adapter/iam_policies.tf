@@ -102,7 +102,7 @@ data "aws_iam_policy_document" "s3_write" {
 
 locals {
   // TODO: Understand how to deal with this changing!
-  pipeline_date = "2025-08-14"
+  pipeline_date = "2025-05-01"
 }
 
 # Allow read ssm parameters
