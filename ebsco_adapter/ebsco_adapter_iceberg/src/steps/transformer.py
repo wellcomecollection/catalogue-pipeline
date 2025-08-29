@@ -17,6 +17,7 @@ from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 
 import config
+from models.marc import MarcRecord
 from models.work import BaseWork, DeletedWork, SourceWork
 from table_config import get_glue_table, get_local_table
 from utils.elasticsearch import get_client, get_standard_index_name
@@ -58,7 +59,7 @@ def transform(work_id: str, content: str) -> list[SourceWork]:
         return bool(record and getattr(record, "title", None))
 
     try:
-        marc_records = parse_xml_to_array(io.StringIO(content))
+        marc_records: list[MarcRecord] = parse_xml_to_array(io.StringIO(content))
     except Exception as exc:  # broad, but we want to skip bad MARC payloads only
         print(f"Failed to parse MARC content for id={work_id}: {exc}")
         return []
