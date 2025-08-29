@@ -14,8 +14,8 @@ from ingestor.steps.ingestor_loader_monitor import (
     handler,
 )
 
-MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.loader.json"
-MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.loader.json"
+MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/report.loader.json"
+MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.loader.json"
 
 
 MOCK_STEP_EVENT = IngestorStepEvent(
@@ -31,6 +31,7 @@ def get_mock_expected_report(record_count: int, file_size: int) -> dict:
         "pipeline_date": "2025-01-01",
         "index_date": "2025-03-01",
         "job_id": "123",
+        "ingestor_type": "concepts",
         "record_count": record_count,
         "total_file_size": file_size,
     }
@@ -54,7 +55,7 @@ def get_mock_ingestor_indexer_object(
     file_name: str, content_length: int | None, record_count: int | None
 ) -> IngestorIndexerObject:
     return IngestorIndexerObject(
-        s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/{file_name}.parquet",
+        s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/{file_name}.parquet",
         content_length=content_length,
         record_count=record_count,
     )
@@ -104,6 +105,7 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
                 "pipeline_date": "XXX",
                 "index_date": "XXX",
                 "job_id": "XXX",
+                "ingestor_type": "concepts",
                 "record_count": 300,
                 "total_file_size": 3000,
             }
@@ -143,6 +145,7 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
                 "pipeline_date": "XXX",
                 "index_date": "XXX",
                 "job_id": "XXX",
+                "ingestor_type": "concepts",
                 "record_count": 300,
                 "total_file_size": 3000,
             }
@@ -186,6 +189,7 @@ def test_ingestor_loader_monitor_force_pass() -> None:
                 "pipeline_date": "XXX",
                 "index_date": "XXX",
                 "job_id": "XXX",
+                "ingestor_type": "concepts",
                 "record_count": 300,
                 "total_file_size": 3000,
             }

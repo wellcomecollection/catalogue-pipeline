@@ -3,5 +3,6 @@
   "job_id": "20240101T1200",
   "index_date": "2025-10-12",
   "previous_job_id": "whatever",
+  "ingestor_type": "concepts",
   "success_count": 980
 }

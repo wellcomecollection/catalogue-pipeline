@@ -10,6 +10,7 @@ class PipelineReport(BaseModel):
     label: ClassVar[str]
     pipeline_date: str
     index_date: str
+    ingestor_type: str
     job_id: str | None
 
     @staticmethod
@@ -17,6 +18,7 @@ class PipelineReport(BaseModel):
         report_type: type["PipelineReport"],
         pipeline_date: str,
         index_date: str,
+        ingestor_type: str,
         job_id: str | None = None,
     ) -> str:
         report_name = f"report.{report_type.label}.json"
@@ -32,23 +34,22 @@ class PipelineReport(BaseModel):
         cls,
         pipeline_date: str,
         index_date: str,
+        ingestor_type: str,
         job_id: str | None = None,
         ignore_missing: bool = False,
     ) -> Self | None:
         s3_url = PipelineReport._get_report_s3_url(
-            cls, pipeline_date, index_date, job_id
+            cls, pipeline_date, index_date, ingestor_type, job_id
         )
 
         return pydantic_from_s3_json(cls, s3_url, ignore_missing=ignore_missing)
 
-    def write(
-        self,
-        latest: bool = False,
-    ) -> None:
+    def write(self, latest: bool = False) -> None:
         s3_url = PipelineReport._get_report_s3_url(
             self.__class__,
             self.pipeline_date,
             self.index_date,
+            self.ingestor_type,
             job_id=self.job_id if not latest else None,
         )
 

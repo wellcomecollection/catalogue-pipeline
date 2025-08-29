@@ -40,7 +40,7 @@ def test_catalogue_works_transformer_edges() -> None:
             relationship="HAS_CONCEPT",
             directed=True,
             attributes=WorkHasConceptAttributes(
-                referenced_in="subjects", referenced_type="Subject"
+                referenced_in="subjects", referenced_type="Concept"
             ),
         ),
     )
@@ -55,7 +55,7 @@ def test_catalogue_works_transformer_edges() -> None:
             relationship="HAS_CONCEPT",
             directed=True,
             attributes=WorkHasConceptAttributes(
-                referenced_in="subjects", referenced_type="Subject"
+                referenced_in="subjects", referenced_type="Concept"
             ),
         ),
     )

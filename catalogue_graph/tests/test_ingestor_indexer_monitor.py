@@ -5,8 +5,8 @@ from test_mocks import MockSmartOpen
 from ingestor.models.step_events import IngestorIndexerMonitorLambdaEvent
 from ingestor.steps.ingestor_indexer_monitor import handler
 
-MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.indexer.json"
-MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.indexer.json"
+MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/report.indexer.json"
+MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.indexer.json"
 
 pipeline_date = "2025-01-01"
 index_date = "2025-03-01"
@@ -16,6 +16,7 @@ def get_mock_expected_report(success_count: int, previous_job_id: str | None) ->
     return {
         "pipeline_date": pipeline_date,
         "index_date": index_date,
+        "ingestor_type": "concepts",
         "job_id": "123",
         "previous_job_id": previous_job_id,
         "success_count": success_count,
@@ -64,6 +65,7 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
                 "pipeline_date": pipeline_date,
                 "job_id": "122",
                 "index_date": index_date,
+                "ingestor_type": "concepts",
                 "previous_job_id": "121",
                 "success_count": 62,
             }

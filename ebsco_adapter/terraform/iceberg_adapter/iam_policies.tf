@@ -38,6 +38,38 @@ data "aws_iam_policy_document" "iceberg_write" {
   }
 }
 
+data "aws_iam_policy_document" "iceberg_read" {
+  statement {
+    actions = [
+      "lakeformation:GetDataAccess"
+    ]
+
+    resources = ["*"]
+  }
+
+  statement {
+    actions = [
+      "glue:GetCatalog",
+      "glue:GetTable"
+    ]
+
+    resources = [
+      "arn:aws:glue:eu-west-1:760097843905:catalog",
+      "arn:aws:glue:eu-west-1:760097843905:catalog/*",
+      "arn:aws:glue:eu-west-1:760097843905:database/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue"
+    ]
+  }
+
+  statement {
+    actions = [
+      "glue:GetTable"
+    ]
+
+    resources = [
+      "arn:aws:glue:eu-west-1:760097843905:table/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue/ebsco_adapter_table"
+    ]
+  }
+}
 
 # Policy for reading from the EBSCO adapter S3 bucket
 data "aws_iam_policy_document" "s3_read" {
@@ -66,6 +98,11 @@ data "aws_iam_policy_document" "s3_write" {
       "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*"
     ]
   }
+}
+
+locals {
+  // TODO: Understand how to deal with this changing!
+  pipeline_date = "2025-05-01"
 }
 
 # Allow read ssm parameters
@@ -97,5 +134,17 @@ data "aws_iam_policy_document" "ssm_read" {
       variable = "kms:ViaService"
       values   = ["ssm.eu-west-1.amazonaws.com"]
     }
+  }
+}
+
+data "aws_iam_policy_document" "transformer_allow_pipeline_storage_secret_read" {
+  statement {
+    actions = ["secretsmanager:GetSecretValue"]
+    resources = [
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/graph_extractor/api_key*"
+    ]
   }
 }

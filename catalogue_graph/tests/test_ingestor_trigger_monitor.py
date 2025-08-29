@@ -13,8 +13,8 @@ from ingestor.steps.ingestor_trigger_monitor import (
     handler,
 )
 
-MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.trigger.json"
-MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.trigger.json"
+MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/report.trigger.json"
+MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.trigger.json"
 
 
 def get_mock_expected_report(record_count: int) -> dict:
@@ -22,6 +22,7 @@ def get_mock_expected_report(record_count: int) -> dict:
         "record_count": record_count,
         "job_id": "123",
         "pipeline_date": "2025-01-01",
+        "ingestor_type": "concepts",
         "index_date": "2025-03-01",
     }
 
@@ -81,6 +82,7 @@ def test_ingestor_trigger_monitor_success_with_previous() -> None:
                 "record_count": 100,
                 # Test this gets overwritten
                 "job_id": "XXX",
+                "ingestor_type": "concepts",
                 "pipeline_date": "XXX",
                 "index_date": "XXX",
             }
