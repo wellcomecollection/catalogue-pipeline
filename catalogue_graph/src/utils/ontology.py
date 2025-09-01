@@ -9,28 +9,27 @@ from utils.types import (
     MeshTransformerType,
     OntologyType,
     TransformerType,
+    WikidataLinkedLocTransformerType,
+    WikidataLinkedMeshTransformerType,
     WikidataTransformerType,
 )
+
+TRANSFORMERS_BY_ONTOLOGY: dict[OntologyType, tuple[TransformerType, ...]] = {
+    "wikidata": get_args(WikidataTransformerType),
+    "loc": get_args(LocTransformerType),
+    "mesh": get_args(MeshTransformerType),
+    "catalogue": get_args(CatalogueTransformerType),
+    "wikidata_linked_loc": get_args(WikidataLinkedLocTransformerType),
+    "wikidata_linked_mesh": get_args(WikidataLinkedMeshTransformerType),
+}
 
 
 def get_transformers_from_ontology(ontology: OntologyType) -> list[TransformerType]:
     """Return a list of all transformer types associated with the given ontology."""
-    if ontology == "wikidata":
-        transformers = get_args(WikidataTransformerType)
-    elif ontology == "loc":
-        transformers = get_args(LocTransformerType)
-    elif ontology == "mesh":
-        transformers = get_args(MeshTransformerType)
-    elif ontology == "catalogue":
-        transformers = get_args(CatalogueTransformerType)
-    elif ontology == "wikidata_linked_loc":
-        transformers = tuple(t for t in get_args(WikidataTransformerType) if "loc" in t)
-    elif ontology == "wikidata_linked_mesh":
-        transformers = tuple(
-            t for t in get_args(WikidataTransformerType) if "mesh" in t
-        )
-    else:
-        raise ValueError(f"Unknown ontology {ontology}.")
+
+    transformers = TRANSFORMERS_BY_ONTOLOGY.get(ontology)
+    if transformers is None:
+        raise ValueError(f"Unknown ontology {ontology}")
 
     return list(transformers)
 
