@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import PurePosixPath
 
 from pydantic import BaseModel
 
@@ -13,8 +14,6 @@ class IncrementalWindow(BaseModel):
     start_time: datetime
     end_time: datetime
 
-
-from pathlib import PurePosixPath
 
 def get_file_path(
     transformer_type: TransformerType,
