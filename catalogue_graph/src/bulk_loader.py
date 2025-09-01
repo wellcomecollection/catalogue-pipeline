@@ -4,24 +4,27 @@ import typing
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
+    BulkLoadPollerEvent,
     EntityType,
     TransformerType,
 )
 from utils.aws import get_neptune_client
 
 
-def handler(event: BulkLoaderEvent, is_local: bool = False) -> dict[str, typing.Any]:
+def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
     s3_file_uri = event.get_bulk_load_s3_uri()
     print(f"Initiating bulk load from {s3_file_uri}.")
 
     neptune_client = get_neptune_client(is_local)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
 
-    return {"load_id": load_id, "insert_error_threshold": event.insert_error_threshold}
+    return BulkLoadPollerEvent(
+        load_id=load_id, insert_error_threshold=event.insert_error_threshold
+    )
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
-    return handler(BulkLoaderEvent(**event))
+    return handler(BulkLoaderEvent(**event)).model_dump()
 
 
 def local_handler() -> None:

@@ -3,14 +3,26 @@ import datetime
 import json
 import typing
 from pathlib import Path
+from typing import Literal
 from urllib.parse import urlparse
 
-import smart_open
-
 import config
+import smart_open
 from models.events import DEFAULT_INSERT_ERROR_THRESHOLD, BulkLoadPollerEvent
 from utils.aws import get_neptune_client
 from utils.slack import publish_report
+
+BulkLoadStatus = Literal["IN_PROGRESS", "SUCCEEDED"]
+
+
+class BulkLoadPollerResponse(BulkLoadPollerEvent):
+    status: BulkLoadStatus
+
+    @classmethod
+    def from_event(
+        cls, event: BulkLoadPollerEvent, status: BulkLoadStatus
+    ) -> "BulkLoadPollerResponse":
+        return BulkLoadPollerResponse(**event.model_dump(), status=status)
 
 
 def log_payload(payload: dict) -> None:
@@ -43,19 +55,9 @@ def print_detailed_bulk_load_errors(payload: dict) -> None:
             print(f"         {failed_feed['status']}")
 
 
-def response_from_event(
-    event: BulkLoadPollerEvent, status: str
-) -> dict[str, typing.Any]:
-    return {
-        "load_id": event.load_id,
-        "insert_error_threshold": event.insert_error_threshold,
-        "status": status,
-    }
-
-
 def handler(
     event: BulkLoadPollerEvent, is_local: bool = False
-) -> dict[str, typing.Any]:
+) -> BulkLoadPollerResponse:
     # Response format: https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-response.html
     payload = get_neptune_client(is_local).get_bulk_load_status(event.load_id)
     overall_status = payload["overallStatus"]
@@ -67,7 +69,7 @@ def handler(
     print(f"Bulk load status: {status}. (Processed {processed_count:,} records.)")
 
     if status in ("LOAD_NOT_STARTED", "LOAD_IN_QUEUE", "LOAD_IN_PROGRESS"):
-        return response_from_event(event, "IN_PROGRESS")
+        return BulkLoadPollerResponse.from_event(event, "IN_PROGRESS")
 
     insert_error_count = overall_status["insertErrors"]
     parsing_error_count = overall_status["parsingErrors"]
@@ -122,13 +124,13 @@ def handler(
         log_payload(payload)
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
-        return response_from_event(event, "SUCCEEDED")
+        return BulkLoadPollerResponse.from_event(event, "SUCCEEDED")
 
     raise Exception("Load failed. See error log above.")
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
-    return handler(BulkLoadPollerEvent(**event))
+    return handler(BulkLoadPollerEvent(**event)).model_dump()
 
 
 def local_handler() -> None:
