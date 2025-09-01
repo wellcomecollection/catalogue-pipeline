@@ -156,8 +156,8 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
-
-    handler(**args.__dict__, is_local=True)
+    event = IngestorMonitorStepEvent(**args.__dict__, ingestor_type="concepts")
+    handler(event, is_local=True)
 
 
 if __name__ == "__main__":
