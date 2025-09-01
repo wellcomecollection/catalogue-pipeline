@@ -14,22 +14,25 @@ class IncrementalWindow(BaseModel):
     end_time: datetime
 
 
+from pathlib import PurePosixPath
+
 def get_file_path(
     transformer_type: TransformerType,
     entity_type: EntityType,
     pipeline_date: str,
     window: IncrementalWindow | None = None,
 ) -> str:
-    """Return the file path of a bulk load file."""
+    """Return the file path (object key) of a bulk load file."""
     file_name = f"{transformer_type}__{entity_type}.csv"
 
-    window_prefix = ""
+    parts: list[str] = [pipeline_date]
     if window is not None:
         start = window.start_time.strftime("%Y%m%dT%H%M")
         end = window.end_time.strftime("%Y%m%dT%H%M")
-        window_prefix = f"windows/{start}-{end}/"
+        parts += ["windows", f"{start}-{end}"]
 
-    return f"{pipeline_date}/{window_prefix}{file_name}"
+    file_path = PurePosixPath(*parts) / file_name
+    return str(file_path)
 
 
 def get_s3_uri(
