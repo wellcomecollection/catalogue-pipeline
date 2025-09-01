@@ -6,7 +6,7 @@ from models.graph_edge import (
     WorkHasPathIdentifier,
 )
 from models.graph_node import PathIdentifier
-from sources.elasticsearch_source import ElasticsearchSource
+from sources.elasticsearch_source import MergedWorksSource
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -36,7 +36,7 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
         window: IncrementalWindow | None,
         is_local: bool,
     ) -> None:
-        self.source = ElasticsearchSource(
+        self.source = MergedWorksSource(
             pipeline_date, ES_QUERY, ES_FIELDS, window, is_local
         )
 

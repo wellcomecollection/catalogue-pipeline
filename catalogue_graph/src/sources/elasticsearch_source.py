@@ -11,10 +11,10 @@ from .base_source import BaseSource
 ES_BATCH_SIZE = 1000
 
 
-class ElasticsearchSource(BaseSource):
+class MergedWorksSource(BaseSource):
     def __init__(
         self,
-        pipeline_date: str | None,
+        pipeline_date: str,
         query: dict | None = None,
         fields: list | None = None,
         window: IncrementalWindow | None = None,
@@ -27,6 +27,7 @@ class ElasticsearchSource(BaseSource):
         self.query = {"match_all": {}} if query is None else query
 
         if window is not None:
+            # Windows are based on the 'mergedTime' field, which indicates when the document was last updated
             range_filter = {
                 "range": {
                     "state.mergedTime": {
