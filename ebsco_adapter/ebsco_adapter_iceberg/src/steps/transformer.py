@@ -17,7 +17,8 @@ from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 
 import config
-from models.work import TransformedWork
+from models.marc import MarcRecord
+from models.work import BaseWork, DeletedWork, SourceWork
 from table_config import get_glue_table, get_local_table
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient
@@ -47,31 +48,32 @@ class EbscoAdapterTransformerResult(BaseModel):
     """
 
     batches: list[list[str]] = []
+    success_count: int = 0
+    failure_count: int = 0
 
 
-def transform(work_id: str, content: str) -> list[TransformedWork]:
+def transform(work_id: str, content: str) -> list[SourceWork]:
     """Parse a MARC XML string into TransformedWork records."""
-    if not content:
-        return []
 
     def valid_record(record: Any) -> bool:  # local for clarity
         return bool(record and getattr(record, "title", None))
 
     try:
-        marc_records = parse_xml_to_array(io.StringIO(content))
+        marc_records: list[MarcRecord] = parse_xml_to_array(io.StringIO(content))
     except Exception as exc:  # broad, but we want to skip bad MARC payloads only
         print(f"Failed to parse MARC content for id={work_id}: {exc}")
         return []
 
     return [
-        TransformedWork(id=work_id, title=str(record.title))
+        SourceWork(id=work_id, title=str(record.title))
         for record in marc_records
         if valid_record(record)
     ]
 
 
 def _generate_actions(
-    records: Iterable[TransformedWork], index_name: str
+    records: Iterable[BaseWork],  # accept any pydantic model with model_dump
+    index_name: str,
 ) -> Generator[dict[str, Any], None, None]:
     for record in records:
         yield {
@@ -82,7 +84,7 @@ def _generate_actions(
 
 
 def load_data(
-    elastic_client: Elasticsearch, records: Iterable[TransformedWork], index_name: str
+    elastic_client: Elasticsearch, records: Iterable[BaseWork], index_name: str
 ) -> tuple[int, int]:
     """Index records; return (success_count, error_count)."""
     success_count, errors = elasticsearch.helpers.bulk(
@@ -124,10 +126,14 @@ def _process_batch(
     index_name: str,
     es_client: Elasticsearch,
 ) -> tuple[int, int, list[str]]:
-    """Process a single Arrow RecordBatch; return (success_count, failure_count, ids)."""
+    """Process a single Arrow RecordBatch; return (success_count, failure_count, ids).
+
+    Empty content denotes a deletion; in that case we index a DeletedWork with a
+    standard reason so downstream consumers know the record was removed at source.
+    """
     print(f"Processing batch with {len(batch)} rows")
 
-    transformed: list[TransformedWork] = []
+    transformed: list[BaseWork] = []
 
     # Schema (see schemata.py): namespace, id, content, changeset, last_modified
     for row in batch.to_pylist():
@@ -135,6 +141,14 @@ def _process_batch(
         content = row.get("content")  # optional per schema
         if content:
             transformed.extend(transform(str(work_id), content))
+        else:
+            # Create a DeletedWork marker document
+            transformed.append(
+                DeletedWork(
+                    id=str(work_id),
+                    deleted_reason="not found in EBSCO source",
+                )
+            )
 
     if not transformed:
         print("No valid records produced from batch")
@@ -187,7 +201,7 @@ def handler(
         api_key_name="ebsco_adapter_iceberg",
     )
     index_name = get_standard_index_name(
-        "concepts-indexed", event.index_date or config_obj.pipeline_date
+        "works-source", event.index_date or config_obj.pipeline_date
     )
 
     total_success = 0
@@ -201,17 +215,17 @@ def handler(
         if ids:  # only record non-empty batches
             batches_ids.append(ids)
 
-    result = EbscoAdapterTransformerResult(batches=batches_ids)
+    result = EbscoAdapterTransformerResult(
+        batches=batches_ids, success_count=total_success, failure_count=total_failed
+    )
 
     total_batches = len(result.batches)
     total_ids = sum(len(b) for b in result.batches)
-    print(f"Transformer summary: batches={total_batches} total_ids={total_ids}")
+    print(
+        f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={total_failed}"
+    )
 
-    if total_failed > 0:
-        raise RuntimeError(
-            f"Indexing completed with {total_failed} failures out of {total_success + total_failed} attempts"
-        )
-
+    # No longer raise on failures; caller can inspect failure_count
     return result
 
 

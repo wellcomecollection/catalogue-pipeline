@@ -98,11 +98,7 @@ def handler(
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
     config_obj = EbscoAdapterLoaderConfig()
-    transformer_event = handler(event, config_obj)
-
-    return EbscoAdapterTransformerEvent(
-        changeset_id=transformer_event.changeset_id, job_id=event.job_id
-    ).model_dump()
+    return handler(event, config_obj).model_dump()
 
 
 def local_handler() -> EbscoAdapterTransformerEvent:

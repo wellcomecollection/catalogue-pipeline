@@ -1,9 +1,16 @@
+from typing import cast
 from unittest.mock import Mock, patch
+from unittest.mock import Mock as _Mock
 
 import pytest
 
 from ebsco_ftp import EbscoFtp
-from steps.trigger import get_most_recent_valid_file, sync_files
+from steps.loader import EbscoAdapterLoaderEvent
+from steps.trigger import (
+    EventBridgeScheduledEvent,
+    get_most_recent_valid_file,
+    sync_files,
+)
 
 
 class TestMostRecentValidFile:
@@ -320,12 +327,6 @@ class TestSyncFiles:
 
 @patch("steps.trigger.handler")
 def test_lambda_handler_eventbridge_conversion(mock_handler) -> None:  # type: ignore
-    from typing import cast
-    from unittest.mock import Mock as _Mock
-
-    from steps.loader import EbscoAdapterLoaderEvent
-    from steps.trigger import EventBridgeScheduledEvent
-
     scheduled_time = "2025-08-22T12:34:00Z"
     expected_job_id = "20250822T1234"
 

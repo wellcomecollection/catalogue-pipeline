@@ -38,17 +38,7 @@ class RawCatalogueConcept:
     @property
     def type(self) -> ConceptType:
         """Returns the concept type (one of "Person", "Concept", "Genre", etc.)."""
-
-        # All root concepts extracted from the 'subjects' section are of type 'Subject'. However, these concepts do
-        # not have a 'type' field in the denormalised index, so we need to add it here.
-        if self.referenced_in == "subjects":
-            return "Subject"
-        # All concepts extracted from the 'genres' section are always of type 'Genre' (but the denormalised index uses
-        # the term 'GenreConcept').
-        if self.referenced_in == "genres":
-            return "Genre"
-
-        concept_type: ConceptType = self.raw_concept["type"]
+        concept_type: ConceptType = self.raw_concept.get("type", "Concept")
         return concept_type
 
     @property

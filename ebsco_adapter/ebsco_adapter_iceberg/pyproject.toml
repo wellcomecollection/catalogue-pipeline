@@ -72,7 +72,7 @@ warn_no_return = true
 warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
-mypy_path = "src"
+mypy_path = "src:type_stubs"
 explicit_package_bases = true
 namespace_packages = true
 

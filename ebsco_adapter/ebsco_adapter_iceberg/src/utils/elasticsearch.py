@@ -18,9 +18,9 @@ def get_standard_index_name(prefix: str, date: str | None) -> str:
 
 
 class ElasticsearchConfig(BaseModel):
-    host: str = "localhost" if ES_LOCAL_HOST is None else ES_LOCAL_HOST
-    port: int = 9200 if ES_LOCAL_PORT is None else int(ES_LOCAL_PORT)
-    scheme: str = "http" if ES_LOCAL_SCHEME is None else ES_LOCAL_SCHEME
+    host: str = ES_LOCAL_HOST
+    port: int = ES_LOCAL_PORT
+    scheme: str = ES_LOCAL_SCHEME
     apikey: str | None = ES_LOCAL_API_KEY
 
 
