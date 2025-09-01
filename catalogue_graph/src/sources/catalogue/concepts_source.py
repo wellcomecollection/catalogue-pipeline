@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 from models.events import IncrementalWindow
 from sources.base_source import BaseSource
-from sources.elasticsearch_source import ElasticsearchSource
+from sources.elasticsearch_source import MergedWorksSource
 from utils.types import WorkConceptKey
 
 
@@ -55,7 +55,7 @@ class CatalogueConceptsSource(BaseSource):
         window: IncrementalWindow | None = None,
         is_local: bool = False,
     ):
-        self.es_source = ElasticsearchSource(
+        self.es_source = MergedWorksSource(
             pipeline_date, query, fields, window, is_local
         )
 
