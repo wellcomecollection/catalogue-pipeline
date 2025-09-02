@@ -1,6 +1,7 @@
 from pymarc.record import Record
 
 from models.work import SourceIdentifier, SourceWork
+from transformers.alternative_titles import extract_alternative_titles
 from transformers.common import mandatory_field
 from transformers.title import extract_title
 
@@ -17,6 +18,7 @@ def transform(marc_record: Record) -> SourceWork:
             marc_record
         ),  # TODO: where should this become a SourceIdentifier?
         title=extract_title(marc_record),
+        alternative_titles=extract_alternative_titles(marc_record),
     )
 
 

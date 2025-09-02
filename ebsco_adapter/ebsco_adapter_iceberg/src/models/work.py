@@ -28,6 +28,7 @@ class DeletedWork(ElasticsearchModel, BaseWork):
 
 class SourceWork(ElasticsearchModel, BaseWork):
     title: str
+    alternative_titles: list[str] = []
 
 
 # TODO: This is from catalogue_graph.ingestor.models.

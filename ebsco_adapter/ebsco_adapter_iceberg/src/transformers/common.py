@@ -5,10 +5,15 @@ from pymarc.record import Record
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
     """
-    Decorator for a field that must be present and non-empty in the input record
-    :param marc_code:
-    :param field_name:
-    :return:
+    Decorator for functions that extract from a field that must be
+    present and non-empty in the input record.
+
+    This decorator performs both the entry (is the field there)
+    and exit (does it contain anything) checks for an extractor function
+    so that you can keep the extractors themselves clean and readable, without
+    having to cover them in error-checking boilerplate.
+    :param marc_code: The MARC code for the field that must be present
+    :param field_name: A human-readable name for this field
     """
 
     def decorate(extractor: Callable[[Record], str]) -> Callable[[Record], str]:

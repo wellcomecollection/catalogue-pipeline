@@ -105,7 +105,7 @@ def test_title_a_b_c(marc_record: Record) -> None:
     Subfield c is also included in the title
 
     $c - Statement of responsibility, etc. (NR)
-    e.g. from y5cb65n3
+    e.g. from y5cb65n3 (ebs100966e)
 
     """
     work = transform(marc_record)
@@ -132,10 +132,10 @@ def test_title_a_b_c(marc_record: Record) -> None:
 )
 def test_exclude_electronic_resource(marc_record: Record) -> None:
     """
-    subfield h sometimes provide punctuation to be retained between two fields,
+    subfield h sometimes provides punctuation to be retained between two fields,
     but also contains the unwanted term [electronic resource]
 
-    As seen in this example: j6e4cuhm
+    As seen in this example: j6e4cuhm (ebs375816e)
     [electronic resource] is to be removed,
     but the h subfield contains punctuation which is to be retained
     """
@@ -146,5 +146,35 @@ def test_exclude_electronic_resource(marc_record: Record) -> None:
     )
 
 
-# qs9k7q54
-# <datafield tag="245" ind1="0" ind2="0"><subfield code="a">Philosophical transactions of the Royal Society of London.</subfield><subfield code="n">Series B,</subfield><subfield code="p">Biological sciences</subfield><subfield code="h">[electronic resource].</subfield></datafield>
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        (
+            Field(
+                tag="245",
+                subfields=[
+                    Subfield(
+                        code="a",
+                        value="Philosophical transactions of the Royal Society of London.",
+                    ),
+                    Subfield(code="n", value="Series B,"),
+                    Subfield(code="p", value="Biological sciences"),
+                ],
+            ),
+        )
+    ],
+    indirect=True,
+)
+def test_title_a_n_p(marc_record: Record) -> None:
+    """
+    Subfields n and p are also included in the title
+
+    $c - Statement of responsibility, etc. (NR)
+    e.g. from qs9k7q54 (ebs83382e)
+
+    """
+    work = transform(marc_record)
+    assert (
+        work.title
+        == "Philosophical transactions of the Royal Society of London. Series B, Biological sciences"
+    )

@@ -12,10 +12,9 @@ from transformers.common import mandatory_field
 
 @mandatory_field("245", "title")
 def extract_title(marc_record: Record) -> str:
-    title_field = marc_record["245"]
     return normalise_whitespace(
         remove_unwanted_text(
-            " ".join(title_field.get_subfields("a", "b", "c", "h", "n", "p"))
+            " ".join(marc_record["245"].get_subfields("a", "b", "c", "h", "n", "p"))
         )
     )
 
