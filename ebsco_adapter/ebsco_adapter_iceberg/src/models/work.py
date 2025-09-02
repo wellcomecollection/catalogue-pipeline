@@ -26,14 +26,14 @@ class DeletedWork(ElasticsearchModel, BaseWork):
     deleted_reason: str
 
 
-class SourceWork(ElasticsearchModel, BaseWork):
-    title: str
-    alternative_titles: list[str] = []
-
-
 # TODO: This is from catalogue_graph.ingestor.models.
 # import it rather than copy
 class SourceIdentifier(ElasticsearchModel):
     identifier_type: str
     ontology_type: str
     value: str
+
+
+class SourceWork(ElasticsearchModel, BaseWork):
+    title: str
+    alternative_titles: list[str] = []

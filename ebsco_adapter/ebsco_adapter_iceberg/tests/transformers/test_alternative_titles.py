@@ -1,7 +1,7 @@
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
-from transformers.ebsco_to_weco import transform
+from transformers.ebsco_to_weco import transform_record
 
 
 @pytest.mark.parametrize(
@@ -30,7 +30,7 @@ def test_single_alternative_title(marc_record: Record) -> None:
     240 (Uniform Title),
     and 246 (Varying Form of Title)
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert work.alternative_titles == [
         "Memoirs of Sundry Transactions from the World in the Moon"
     ]
@@ -70,7 +70,7 @@ def test_excludes_caption_titles(marc_record: Record) -> None:
 
     Example from s9pmua5p (ebs465184e)
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert work.alternative_titles == ["Westminster review (London, England : 1852)"]
 
 
@@ -145,7 +145,7 @@ def test_multiple_alternative_titles(marc_record: Record) -> None:
     Alternative titles can be found in fields 130, 240, and 246
     130 and 240 are non-repeating, but 246 can repeat.
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert work.alternative_titles == [
         "What You Will",  # 130
         "Your Own Thing",  # 240
@@ -216,7 +216,7 @@ def test_distinct_alternative_titles(marc_record: Record) -> None:
     fields (with subtly different meaning).
     As we condense them down to one field, we discard any duplicates
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert work.alternative_titles == [
         "What You Will",
         "Motocrossed",  # 246
@@ -252,7 +252,7 @@ def test_construct_alternative_title_from_subfields(marc_record: Record) -> None
     """
     The title string is constructed from all the subfields
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert work.alternative_titles == [
         "What You Will in G flat Major with Ayapeneco subtitles"
     ]

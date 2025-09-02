@@ -6,13 +6,13 @@ https://www.loc.gov/marc/bibliographic/bd245.html
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from transformers.ebsco_to_weco import transform
+from transformers.ebsco_to_weco import transform_record
 
 
 def test_title_is_mandatory(marc_record: Record) -> None:
     marc_record.remove_fields("245")
     with pytest.raises(ValueError, match="Missing title field.*"):
-        transform(marc_record)
+        transform_record(marc_record)
 
 
 @pytest.mark.parametrize(
@@ -29,7 +29,7 @@ def test_title_is_mandatory(marc_record: Record) -> None:
 )
 def test_title_must_not_be_empty(marc_record: Record) -> None:
     with pytest.raises(ValueError, match="Empty title field.*"):
-        transform(marc_record)
+        transform_record(marc_record)
 
 
 @pytest.mark.parametrize(
@@ -49,7 +49,7 @@ def test_title_a(marc_record: Record) -> None:
     A minimal title uses only the $a subfield
     $a - Title
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert work.title == "How to Avoid Huge Ships"
 
 
@@ -77,7 +77,7 @@ def test_title_a_b(marc_record: Record) -> None:
 
     $b - Remainder of title (NR)
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert (
         work.title
         == "101 Ways to Know If Your Cat Is French: How To Talk to Your Cat About Their Secret Life"
@@ -108,7 +108,7 @@ def test_title_a_b_c(marc_record: Record) -> None:
     e.g. from y5cb65n3 (ebs100966e)
 
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert work.title == "BMJ : British medical journal / British Medical Association."
 
 
@@ -139,7 +139,7 @@ def test_exclude_electronic_resource(marc_record: Record) -> None:
     [electronic resource] is to be removed,
     but the h subfield contains punctuation which is to be retained
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert (
         work.title
         == "The Oxford and Cambridge magazine / conducted by members of the two universities."
@@ -174,7 +174,7 @@ def test_title_a_n_p(marc_record: Record) -> None:
 
     e.g. from qs9k7q54 (ebs83382e)
     """
-    work = transform(marc_record)
+    work = transform_record(marc_record)
     assert (
         work.title
         == "Philosophical transactions of the Royal Society of London. Series B, Biological sciences"

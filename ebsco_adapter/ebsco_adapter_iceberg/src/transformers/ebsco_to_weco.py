@@ -12,11 +12,10 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
     )
 
 
-def transform(marc_record: Record) -> SourceWork:
+def transform_record(marc_record: Record) -> SourceWork:
+    work_id = extract_id(marc_record)
     return SourceWork(
-        id=extract_id(
-            marc_record
-        ),  # TODO: where should this become a SourceIdentifier?
+        id=work_id,
         title=extract_title(marc_record),
         alternative_titles=extract_alternative_titles(marc_record),
     )
