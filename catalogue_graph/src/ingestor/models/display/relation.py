@@ -1,4 +1,3 @@
-from typing import Self
 
 from pydantic import BaseModel
 
@@ -9,13 +8,12 @@ class DisplayRelation(BaseModel):
     id: str | None
     title: str | None
     referenceNumber: str | None = None
-    partOf: list[Self] | None = None
     totalParts: int
     type: str = "Work"
 
-    @staticmethod
-    def from_neptune_node(node: WorkNode, total_parts: int) -> "DisplayRelation":
-        return DisplayRelation(
+    @classmethod
+    def from_neptune_node(cls, node: WorkNode, total_parts: int) -> "DisplayRelation":
+        return cls(
             id=node.properties.id,
             title=node.properties.label,
             type=node.properties.type,
@@ -23,14 +21,17 @@ class DisplayRelation(BaseModel):
             totalParts=total_parts,
         )
 
+
+class DisplayRelationWithAncestors(DisplayRelation):
+    partOf: list["DisplayRelation"] = []
+    
     @staticmethod
     def from_flat_hierarchy(
-        hierarchy: list[WorkNode], total_parts: int
+            hierarchy: list[WorkNode], total_parts: int
     ) -> "DisplayRelation":
         """Recursively build a hierarchy of ancestors from a flat list, starting from the parent (the first item
         in the list) to the root ancestor work (the last item in the list)."""
-        relation = DisplayRelation.from_neptune_node(hierarchy[0], total_parts)
-        if len(hierarchy) > 1:
-            relation.partOf = [DisplayRelation.from_flat_hierarchy(hierarchy[1:], 1)]
+        relation = DisplayRelationWithAncestors.from_neptune_node(hierarchy[0], total_parts)
+        relation.partOf = [DisplayRelation.from_neptune_node(a, 1) for a in hierarchy] 
 
         return relation

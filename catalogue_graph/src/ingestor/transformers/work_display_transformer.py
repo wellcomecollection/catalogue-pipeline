@@ -1,6 +1,8 @@
 from collections import defaultdict
 from collections.abc import Generator
 
+from utils.sort import natural_sort_key
+
 from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.concept import (
@@ -20,9 +22,11 @@ from ingestor.models.display.location import (
 )
 from ingestor.models.display.note import DisplayNote
 from ingestor.models.display.production_event import DisplayProductionEvent
-from ingestor.models.display.relation import DisplayRelation
+from ingestor.models.display.relation import (
+    DisplayRelation,
+    DisplayRelationWithAncestors,
+)
 from ingestor.models.shared.identifier import Identifiers
-from utils.sort import natural_sort_key
 
 
 class DisplayWorkTransformer:
@@ -137,7 +141,7 @@ class DisplayWorkTransformer:
         if len(self.hierarchy.ancestor_works) == 0:
             return []
 
-        ancestors = DisplayRelation.from_flat_hierarchy(
+        ancestors = DisplayRelationWithAncestors.from_flat_hierarchy(
             self.hierarchy.ancestor_works, 1
         )
 
