@@ -176,6 +176,13 @@ python3.13 extractor.py \
 To run experimental Neptune queries locally, you can use the notebook in the `notebooks` directory. This notebook
 connects to a Neptune instance running in the cloud and allows you to run openCypher queries against it. 
 
+The notebook uses utility functions from the graph pipeline project. To ensure these functions are accessible,
+add the project to your PYTHONPATH or run Jupyter with uv:
+
+```sh
+uv run --with jupyter jupyter lab
+```
+
 ## Running with local Elasticsearch
 
 To run Elasticsearch locally, you can use `elasticsearch.docker-compose.yml` to start a local Elasticsearch instance.
