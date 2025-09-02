@@ -37,3 +37,4 @@ class SourceIdentifier(ElasticsearchModel):
 class SourceWork(ElasticsearchModel, BaseWork):
     title: str
     alternative_titles: list[str] = []
+    other_identifiers: list[SourceIdentifier] = []

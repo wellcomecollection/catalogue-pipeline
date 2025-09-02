@@ -1,3 +1,10 @@
+"""
+The following fields are used as possible alternative titles:
+* 130 $a http://www.loc.gov/marc/bibliographic/bd130.html
+* 240 $a https://www.loc.gov/marc/bibliographic/bd240.html
+* 246 $a https://www.loc.gov/marc/bibliographic/bd246.html
+"""
+
 from collections import OrderedDict
 
 from pymarc.field import Field
