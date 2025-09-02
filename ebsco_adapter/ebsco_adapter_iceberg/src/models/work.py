@@ -28,3 +28,11 @@ class DeletedWork(ElasticsearchModel, BaseWork):
 
 class SourceWork(ElasticsearchModel, BaseWork):
     title: str
+
+
+# TODO: This is from catalogue_graph.ingestor.models.
+# import it rather than copy
+class SourceIdentifier(ElasticsearchModel):
+    identifier_type: str
+    ontology_type: str
+    value: str

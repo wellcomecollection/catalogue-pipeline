@@ -36,22 +36,6 @@ def common_mocks(monkeypatch: MonkeyPatch) -> Generator[None, None, None]:
     yield
 
 
-@pytest.fixture(autouse=True)
-def common_mocks(monkeypatch: MonkeyPatch) -> Generator[None, None, None]:
-    monkeypatch.setattr("boto3.Session", MockBoto3Session)
-    monkeypatch.setattr("boto3.resource", MockBoto3Resource)
-    monkeypatch.setattr("requests.request", MockRequest.request)
-    monkeypatch.setattr("requests.get", MockRequest.get)
-    monkeypatch.setattr("smart_open.open", MockSmartOpen.open)
-    monkeypatch.setattr("elasticsearch.Elasticsearch", MockElasticsearchClient)
-    monkeypatch.setattr("elasticsearch.helpers.bulk", MockElasticsearchClient.bulk)
-
-    MockRequest.reset_mocks()
-    MockSmartOpen.reset_mocks()
-    MockElasticsearchClient.reset_mocks()
-    yield
-
-
 @pytest.fixture
 def temporary_table() -> Generator[IcebergTable, None, None]:
     table_name = str(uuid1())
