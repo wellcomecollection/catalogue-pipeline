@@ -1,9 +1,10 @@
 import time
 from collections.abc import Generator
 
-from pydantic import BaseModel
-
 import config
+from pydantic import BaseModel
+from utils.elasticsearch import get_client, get_standard_index_name
+
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from ingestor.queries.work_queries import (
@@ -12,7 +13,6 @@ from ingestor.queries.work_queries import (
     WORK_CONCEPTS_QUERY,
     WORK_QUERY,
 )
-from utils.elasticsearch import get_client, get_standard_index_name
 
 from .base_extractor import GraphBaseExtractor
 
@@ -91,12 +91,12 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
         for work_id in work_ids:
             es_work = all_es_works.get(work_id)
-
+            
             # Normally, the catalogue graph only stores `Visible` works extracted from the denormalised index. However,
             # in cases where the status of a work changes from `Visible` to some other status (e.g. `Deleted`), it might
             # take a while for this change to propagate to the graph. Therefore, it is possible for a work which exists
             # in the graph to not exist as a `Visible` work in the denormalised index. When this happens, skip the work.
-            if es_work is None:
+            if es_work is None or es_work["type"] != "Visible":
                 continue
 
             work_hierarchy = WorkHierarchy(
