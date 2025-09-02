@@ -19,10 +19,10 @@ def test_title_is_mandatory(marc_record: Record) -> None:
     "marc_record",
     [
         (
-            Field(
-                tag="245",
-                subfields=[Subfield(code="a", value=""), Subfield(code="b", value="")],
-            ),
+                Field(
+                    tag="245",
+                    subfields=[Subfield(code="a", value=""), Subfield(code="b", value="")],
+                ),
         )
     ],
     indirect=True,
@@ -36,10 +36,10 @@ def test_title_must_not_be_empty(marc_record: Record) -> None:
     "marc_record",
     [
         (
-            Field(
-                tag="245",
-                subfields=[Subfield(code="a", value="How to Avoid Huge Ships")],
-            ),
+                Field(
+                    tag="245",
+                    subfields=[Subfield(code="a", value="How to Avoid Huge Ships")],
+                ),
         )
     ],
     indirect=True,
@@ -57,16 +57,16 @@ def test_title_a(marc_record: Record) -> None:
     "marc_record",
     [
         (
-            Field(
-                tag="245",
-                subfields=[
-                    Subfield(code="a", value="101 Ways to Know If Your Cat Is French:"),
-                    Subfield(
-                        code="b",
-                        value="How To Talk to Your Cat About Their Secret Life",
-                    ),
-                ],
-            ),
+                Field(
+                    tag="245",
+                    subfields=[
+                        Subfield(code="a", value="101 Ways to Know If Your Cat Is French:"),
+                        Subfield(
+                            code="b",
+                            value="How To Talk to Your Cat About Their Secret Life",
+                        ),
+                    ],
+                ),
         )
     ],
     indirect=True,
@@ -79,8 +79,8 @@ def test_title_a_b(marc_record: Record) -> None:
     """
     work = transform(marc_record)
     assert (
-        work.title
-        == "101 Ways to Know If Your Cat Is French: How To Talk to Your Cat About Their Secret Life"
+            work.title
+            == "101 Ways to Know If Your Cat Is French: How To Talk to Your Cat About Their Secret Life"
     )
 
 
@@ -88,14 +88,14 @@ def test_title_a_b(marc_record: Record) -> None:
     "marc_record",
     [
         (
-            Field(
-                tag="245",
-                subfields=[
-                    Subfield(code="a", value="BMJ :"),
-                    Subfield(code="b", value="British medical journal /"),
-                    Subfield(code="c", value="British Medical Association."),
-                ],
-            ),
+                Field(
+                    tag="245",
+                    subfields=[
+                        Subfield(code="a", value="BMJ :"),
+                        Subfield(code="b", value="British medical journal /"),
+                        Subfield(code="c", value="British Medical Association."),
+                    ],
+                ),
         )
     ],
     indirect=True,
@@ -116,16 +116,16 @@ def test_title_a_b_c(marc_record: Record) -> None:
     "marc_record",
     [
         (
-            Field(
-                tag="245",
-                subfields=[
-                    Subfield(code="a", value="The Oxford and Cambridge magazine"),
-                    Subfield(code="h", value="[electronic resource] /"),
-                    Subfield(
-                        code="c", value="conducted by members of the two universities."
-                    ),
-                ],
-            ),
+                Field(
+                    tag="245",
+                    subfields=[
+                        Subfield(code="a", value="The Oxford and Cambridge magazine"),
+                        Subfield(code="h", value="[electronic resource] /"),
+                        Subfield(
+                            code="c", value="conducted by members of the two universities."
+                        ),
+                    ],
+                ),
         )
     ],
     indirect=True,
@@ -141,8 +141,8 @@ def test_exclude_electronic_resource(marc_record: Record) -> None:
     """
     work = transform(marc_record)
     assert (
-        work.title
-        == "The Oxford and Cambridge magazine / conducted by members of the two universities."
+            work.title
+            == "The Oxford and Cambridge magazine / conducted by members of the two universities."
     )
 
 
@@ -150,17 +150,17 @@ def test_exclude_electronic_resource(marc_record: Record) -> None:
     "marc_record",
     [
         (
-            Field(
-                tag="245",
-                subfields=[
-                    Subfield(
-                        code="a",
-                        value="Philosophical transactions of the Royal Society of London.",
-                    ),
-                    Subfield(code="n", value="Series B,"),
-                    Subfield(code="p", value="Biological sciences"),
-                ],
-            ),
+                Field(
+                    tag="245",
+                    subfields=[
+                        Subfield(
+                            code="a",
+                            value="Philosophical transactions of the Royal Society of London.",
+                        ),
+                        Subfield(code="n", value="Series B,"),
+                        Subfield(code="p", value="Biological sciences"),
+                    ],
+                ),
         )
     ],
     indirect=True,
@@ -169,12 +169,13 @@ def test_title_a_n_p(marc_record: Record) -> None:
     """
     Subfields n and p are also included in the title
 
-    $c - Statement of responsibility, etc. (NR)
-    e.g. from qs9k7q54 (ebs83382e)
+    $n - Number of part/section of a work (R)
+    $p - Name of part/section of a work (R)
 
+    e.g. from qs9k7q54 (ebs83382e)
     """
     work = transform(marc_record)
     assert (
-        work.title
-        == "Philosophical transactions of the Royal Society of London. Series B, Biological sciences"
+            work.title
+            == "Philosophical transactions of the Royal Society of London. Series B, Biological sciences"
     )
