@@ -132,3 +132,30 @@ def test_multiple_urls(marc_record: Record) -> None:
         transform_record(marc_record).description
         == 'summary urn:isbn:9781455841653 <a href="http://example.com">http://example.com</a>'
     )
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        (
+            Field(
+                tag="520",
+                subfields=[
+                    Subfield(code="a", value="hello"),
+                ],
+            ),
+            Field(
+                tag="520",
+                subfields=[
+                    Subfield(code="a", value="world"),
+                ],
+            ),
+        )
+    ],
+    indirect=True,
+)
+def test_multiple_descriptions(marc_record: Record) -> None:
+    """
+    multiple descriptions are condensed into one big one, line-separated
+    """
+    assert transform_record(marc_record).description == "hello\nworld"
