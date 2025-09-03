@@ -6,8 +6,9 @@ from pathlib import Path
 from typing import Literal
 from urllib.parse import urlparse
 
-import config
 import smart_open
+
+import config
 from models.events import DEFAULT_INSERT_ERROR_THRESHOLD, BulkLoadPollerEvent
 from utils.aws import get_neptune_client
 from utils.slack import publish_report
