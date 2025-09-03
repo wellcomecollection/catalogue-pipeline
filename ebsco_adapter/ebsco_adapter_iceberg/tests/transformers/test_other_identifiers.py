@@ -5,6 +5,10 @@ from models.work import SourceIdentifier
 from transformers.ebsco_to_weco import transform_record
 
 
+def test_no_other_identifiers(marc_record: Record) -> None:
+    assert transform_record(marc_record).other_identifiers == []
+
+
 @pytest.mark.parametrize(
     "marc_record",
     [

@@ -4,6 +4,10 @@ from pymarc.record import Field, Indicators, Record, Subfield
 from transformers.ebsco_to_weco import transform_record
 
 
+def test_no_alternative_titles(marc_record: Record) -> None:
+    assert transform_record(marc_record).alternative_titles == []
+
+
 @pytest.mark.parametrize(
     "marc_record",
     [

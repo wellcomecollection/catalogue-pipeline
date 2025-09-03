@@ -3,6 +3,7 @@ from pymarc.record import Record
 from models.work import SourceIdentifier, SourceWork
 from transformers.alternative_titles import extract_alternative_titles
 from transformers.common import mandatory_field
+from transformers.designation import extract_designation
 from transformers.other_identifiers import extract_other_identifiers
 from transformers.title import extract_title
 
@@ -20,6 +21,7 @@ def transform_record(marc_record: Record) -> SourceWork:
         title=extract_title(marc_record),
         alternative_titles=extract_alternative_titles(marc_record),
         other_identifiers=extract_other_identifiers(marc_record),
+        designation=extract_designation(marc_record),
     )
 
 
