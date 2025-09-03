@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
 from ingestor.models.aggregate.work import WorkAggregatableValues
+from ingestor.models.debug.work import SourceWorkDebugInformation, WorkDebug
 from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
 
@@ -128,10 +131,28 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             availabilities_id=[a.id for a in work.state.availabilities],
         )
 
+    def _transform_debug(self, extracted: ExtractedWork) -> WorkDebug:
+        work = extracted.work
+        source = SourceWorkDebugInformation(
+            id=work.state.canonical_id,
+            identifier=work.state.source_identifier,
+            version=work.version,
+            modifiedTime=work.state.source_modified_time,
+        )
+
+        return WorkDebug(
+            source=source,
+            mergedTime=work.state.merged_time,
+            indexedTime=datetime.now(),
+            mergeCandidates=work.state.merge_candidates,
+        )
+
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
         return IndexableWork(
             query=self._transform_query(extracted),
             display=self._transform_display(extracted),
             aggregatableValues=self._transform_aggregate(extracted),
             filterableValues=self._transform_filter(extracted),
+            debug=self._transform_debug(extracted),
+            type="Visible",
         )

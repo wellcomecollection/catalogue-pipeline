@@ -21,7 +21,7 @@ FIELD_MAP = {
 
 def _resolve_struct_union(structs: list[pa.DataType]) -> pa.DataType:
     """
-    Merge structs into a single struct containing a union of all of their fields 
+    Merge structs into a single struct containing a union of all of their fields
     """
     merged_struct = {}
 
@@ -75,7 +75,7 @@ def python_type_to_pyarrow(annotation: type | None) -> pa.DataType:
         schema_map = pydantic_to_pyarrow_schema(annotation)
         fields = [pa.field(name, dtype) for name, dtype in schema_map.items()]
         return pa.struct(fields)
-    
+
     raise TypeError(f"Cannot convert type {annotation} to a PyArrow type.")
 
 
@@ -83,6 +83,7 @@ def pydantic_to_pyarrow_schema(model_class: type[BaseModel]) -> dict:
     """Convert a Pydantic model into a pyarrow schema"""
     schema = {}
     for field_name, field in model_class.model_fields.items():
-        schema[field_name] = python_type_to_pyarrow(field.annotation)
+        serialised_name = field.serialization_alias or field_name
+        schema[serialised_name] = python_type_to_pyarrow(field.annotation)
 
     return schema

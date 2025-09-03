@@ -29,6 +29,7 @@ ConceptSource = Literal[
 ]
 
 WorkType = Literal["Work", "Series", "Section", "Collection"]
+WorkStatus = Literal["Visible", "Redirected", "Deleted", "Invisible"]
 
 IngestorType = Literal["works", "concepts"]
 

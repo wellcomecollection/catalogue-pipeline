@@ -12,6 +12,7 @@ from ingestor.models.shared.identifier import (
 from ingestor.models.shared.image import ImageData
 from ingestor.models.shared.item import Item
 from ingestor.models.shared.location import DigitalLocation
+from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
@@ -69,8 +70,10 @@ class DenormalisedWorkState(ElasticsearchModel):
     merged_time: datetime
     source_modified_time: datetime
     availabilities: list[Id]
+    merge_candidates: list[MergeCandidate]
 
 
 class DenormalisedWork(BaseModel):
     data: DenormalisedWorkData
     state: DenormalisedWorkState
+    version: int

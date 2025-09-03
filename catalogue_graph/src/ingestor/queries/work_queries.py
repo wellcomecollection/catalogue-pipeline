@@ -16,7 +16,7 @@ WORK_ANCESTORS_QUERY = """
         MATCH (ancestor_identifier)<-[:HAS_PATH_IDENTIFIER]-(ancestor_work)
 
         WITH work.id AS id, ancestor_work, length(path) AS hops
-        ORDER BY hops DESC
+        ORDER BY hops ASC
         
         RETURN id, COLLECT(ancestor_work) AS ancestor_works;
 """

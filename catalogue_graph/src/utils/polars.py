@@ -16,8 +16,8 @@ def _resolve_struct_union(structs: list[PolarsDataType]):
             if field.name not in merged_struct:
                 merged_struct[field.name] = field.dtype
             elif merged_struct[field.name] != field.dtype:
-                return pl.Object    
-            
+                return pl.Object
+
     return pl.Struct(merged_struct)
 
 
@@ -29,7 +29,7 @@ def _resolve_union_types(annotations: typing.Iterable[type]) -> PolarsDataType:
 
     if len(set(union_types)) == 1:
         return union_types[0]
-    
+
     if all([type(u) == pl.Struct for u in union_types]):
         return _resolve_struct_union(union_types)
 
@@ -67,16 +67,16 @@ def python_type_to_polars(
     if origin in (types.UnionType, typing.Union):
         return _resolve_union_types(args)
 
-    if origin == list:
+    if origin is list:
         if args:
             return pl.List(python_type_to_polars(args[0], annotation))
 
         return pl.List(pl.Object)
-    
-    # Ensure that `annotation` is different from `parent_annotation` to prevent infinite recursion 
+
+    # Ensure that `annotation` is different from `parent_annotation` to prevent infinite recursion
     if issubclass(annotation, BaseModel) and parent_annotation != annotation:
         return pl.Struct(pydantic_to_polars_schema(annotation))
-    
+
     # Return the general `Object` type as fallback
     return pl.Object
 
