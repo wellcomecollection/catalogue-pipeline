@@ -39,3 +39,4 @@ class SourceWork(ElasticsearchModel, BaseWork):
     alternative_titles: list[str] = []
     other_identifiers: list[SourceIdentifier] = []
     designation: list[str] = []
+    description: str | None = None
