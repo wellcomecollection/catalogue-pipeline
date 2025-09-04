@@ -17,7 +17,9 @@ dependencies = [
     "boto3-stubs",
     "types-requests",
     "python-dateutil",
-    "types-python-dateutil"
+    "types-python-dateutil",
+    "pyarrow",
+    "pyarrow-stubs"
 ]
 
 [tool.uv]
