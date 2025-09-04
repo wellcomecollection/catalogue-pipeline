@@ -3,6 +3,7 @@ from pymarc.record import Record
 from models.work import SourceIdentifier, SourceWork
 from transformers.alternative_titles import extract_alternative_titles
 from transformers.common import mandatory_field
+from transformers.current_frequency import extract_current_frequency
 from transformers.description import extract_description
 from transformers.designation import extract_designation
 from transformers.other_identifiers import extract_other_identifiers
@@ -24,6 +25,7 @@ def transform_record(marc_record: Record) -> SourceWork:
         other_identifiers=extract_other_identifiers(marc_record),
         designation=extract_designation(marc_record),
         description=extract_description(marc_record),
+        current_frequency=extract_current_frequency(marc_record),
     )
 
 

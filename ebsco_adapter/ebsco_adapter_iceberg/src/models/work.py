@@ -40,3 +40,4 @@ class SourceWork(ElasticsearchModel, BaseWork):
     other_identifiers: list[SourceIdentifier] = []
     designation: list[str] = []
     description: str | None = None
+    current_frequency: str | None = None
