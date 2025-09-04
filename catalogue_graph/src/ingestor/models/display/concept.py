@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from utils.types import ConceptType
 
 from ingestor.models.shared.concept import Concept, Subject
+from utils.types import ConceptType
 
 from .identifier import DisplayIdentifier
 
@@ -43,7 +43,7 @@ class DisplaySubject(DisplayConcept):
         concept = DisplayConcept.from_concept(subject)
         return DisplaySubject(
             **concept.model_dump(),
-            concepts=[DisplayConcept.from_concept(c) for c in subject.concepts]
+            concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
         )
 
 

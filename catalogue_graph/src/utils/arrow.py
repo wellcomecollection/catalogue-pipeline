@@ -18,7 +18,6 @@ FIELD_MAP: dict[type, pa.DataType] = {
 }
 
 
-
 def _merge_structs(structs: list[pa.StructType]) -> pa.DataType:
     """Merge a union of structs into a single struct containing a union of all of their fields"""
     merged_struct = {}
@@ -83,7 +82,6 @@ def python_type_to_pyarrow(annotation: typing.Any) -> pa.DataType:
     raise TypeError(
         f"Converting type '{annotation}' to a PyArrow type is not supported. Use a different type or add support for type '{annotation}' above."
     )
-
 
 
 def pydantic_to_pyarrow_schema(model_class: type[BaseModel]) -> dict:

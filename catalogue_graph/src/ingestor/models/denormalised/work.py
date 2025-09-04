@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from pydantic import BaseModel, field_validator
-from utils.types import DisplayWorkType, WorkType
 
 from ingestor.models.shared.concept import Concept, Contributor, Genre, Subject
 from ingestor.models.shared.holdings import Holdings
@@ -17,6 +16,7 @@ from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
+from utils.types import DisplayWorkType, WorkType
 
 
 class CollectionPath(BaseModel):

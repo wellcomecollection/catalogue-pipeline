@@ -1,8 +1,6 @@
 from collections import defaultdict
 from collections.abc import Generator
 
-from utils.sort import natural_sort_key
-
 from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.concept import (
@@ -26,6 +24,7 @@ from ingestor.models.display.relation import (
     DisplayRelation,
 )
 from ingestor.models.shared.identifier import Identifiers
+from utils.sort import natural_sort_key
 
 
 class DisplayWorkTransformer:
@@ -130,9 +129,9 @@ class DisplayWorkTransformer:
     def part_of(self) -> Generator[DisplayRelation]:
         for s in self.state.relations.ancestors[::-1]:
             yield DisplayRelation.from_work_ancestor(s)
-        
+
         for a in self.hierarchy.ancestors:
-            yield DisplayRelation.from_neptune_node(a.work, a.parts) 
+            yield DisplayRelation.from_neptune_node(a.work, a.parts)
 
     @property
     def parts(self) -> list[DisplayRelation]:
