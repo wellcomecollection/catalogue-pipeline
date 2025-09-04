@@ -30,10 +30,10 @@ module "transformer_lambda" {
   }
 }
 
-# Attach read-only Iceberg access policy to transformer lambda (now using s3tables read-only doc)
-resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
+# Attach read-only Iceberg access policy to transformer lambda
+resource "aws_iam_role_policy" "transformer_lambda_iceberg_write" {
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.iceberg_read.json
+  policy = data.aws_iam_policy_document.iceberg_write.json
 }
 
 # Attach S3 read policy (same as loader) to transformer lambda
