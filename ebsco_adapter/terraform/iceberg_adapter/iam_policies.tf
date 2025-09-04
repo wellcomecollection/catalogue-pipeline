@@ -38,39 +38,6 @@ data "aws_iam_policy_document" "iceberg_write" {
   }
 }
 
-data "aws_iam_policy_document" "iceberg_read" {
-  statement {
-    actions = [
-      "lakeformation:GetDataAccess"
-    ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    actions = [
-      "glue:GetCatalog",
-      "glue:GetTable"
-    ]
-
-    resources = [
-      "arn:aws:glue:eu-west-1:760097843905:catalog",
-      "arn:aws:glue:eu-west-1:760097843905:catalog/*",
-      "arn:aws:glue:eu-west-1:760097843905:database/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue"
-    ]
-  }
-
-  statement {
-    actions = [
-      "glue:GetTable"
-    ]
-
-    resources = [
-      "arn:aws:glue:eu-west-1:760097843905:table/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue/ebsco_adapter_table"
-    ]
-  }
-}
-
 # Policy for reading from the EBSCO adapter S3 bucket
 data "aws_iam_policy_document" "s3_read" {
   statement {
