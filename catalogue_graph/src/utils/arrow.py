@@ -55,7 +55,7 @@ def _resolve_union_types(annotations: typing.Iterable[type]) -> pa.DataType:
     )
 
 
-def python_type_to_pyarrow(annotation: type | None) -> pa.DataType:
+def python_type_to_pyarrow(annotation: typing.Any) -> pa.DataType:
     """Convert a Python type annotation into a PyArrow type annotation (e.g. `int` -> `pa.int64()`)."""
 
     # Convert common primitives into PyArrow type annotations
