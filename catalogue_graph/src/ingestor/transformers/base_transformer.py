@@ -5,12 +5,14 @@ from typing import IO, Any
 
 import boto3
 import polars as pl
+import pyarrow as pa
 import smart_open
 from pydantic import BaseModel
+from utils.arrow import pydantic_to_pyarrow_schema
+from utils.types import IngestorLoadFormat
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
 from ingestor.steps.ingestor_indexer import IngestorIndexerObject
-from utils.types import IngestorLoadFormat
 
 
 class ElasticsearchBaseTransformer:
@@ -33,8 +35,12 @@ class ElasticsearchBaseTransformer:
             raise ValueError("No documents to write.")
 
         if load_format == "parquet":
-            df = pl.DataFrame(es_documents, infer_schema_length=None)
-            df.write_parquet(file)
+            schema = pydantic_to_pyarrow_schema(type(es_documents[0]))
+            table = pa.Table.from_pylist(
+                [d.model_dump(by_alias=True) for d in es_documents],
+                schema=pa.schema(schema),
+            )
+            pl.DataFrame(table).write_parquet(file)
         elif load_format == "jsonl":
             for doc in es_documents:
                 line = (json.dumps(doc.model_dump()) + "\n").encode("utf-8")
