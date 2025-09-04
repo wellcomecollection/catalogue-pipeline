@@ -41,6 +41,11 @@ class EbscoAdapterTransformerConfig(BaseModel):
     index_date: str | None = None
 
 
+class EbscoAdapterTransformerEvent(BaseModel):
+    changeset_id: str | None = None
+    index_date: str | None = None
+
+
 def _write_batch_file(
     batches_ids: list[list[str]], job_id: str, *, changeset_id: str | None
 ) -> tuple[str, str, str]:
@@ -197,7 +202,51 @@ def process_batches(
     changeset_id: str | None,
     index_date: str,
 ) -> EbscoAdapterTransformerResult:
-    """Process an Arrow table into Elasticsearch and return a result object.
+    print(f"Running transformer handler with config: {config_obj}")
+    print(f"Processing event: {event}")
+    print(f"Received job_id: {event.job_id}")
+
+    if event.changeset_id is None:
+        print("No changeset_id provided, skipping transformation.")
+        return EbscoAdapterTransformerResult()
+
+    changeset_id = event.changeset_id
+    print(f"Processing loader output with changeset_id: {changeset_id}")
+
+    if config_obj.use_glue_table:
+        print("Using AWS Glue table...")
+        table = get_glue_table(
+            s3_tables_bucket=config.S3_TABLES_BUCKET,
+            table_name=config.GLUE_TABLE_NAME,
+            namespace=config.GLUE_NAMESPACE,
+            region=config.AWS_REGION,
+            account_id=config.AWS_ACCOUNT_ID,
+        )
+    else:
+        print("Using local table...")
+        table = get_local_table(
+            table_name=config.LOCAL_TABLE_NAME,
+            namespace=config.LOCAL_NAMESPACE,
+            db_name=config.LOCAL_DB_NAME,
+        )
+
+    table_client = IcebergTableClient(table)
+
+    pa_table: pa.Table = table_client.get_records_by_changeset(changeset_id)
+    print(f"Retrieved {len(pa_table)} records from table")
+
+    es_client = get_client(
+        pipeline_date=config_obj.pipeline_date,
+        is_local=config_obj.is_local,
+        api_key_name="transformer-ebsco-test",
+    )
+    index_name = get_standard_index_name(
+        "works-source",
+        (
+            # Cascading choice for date in index name
+            event.index_date or config_obj.index_date or config_obj.pipeline_date
+        ),
+    )
 
     Responsibilities:
     - Iterate over record batches
@@ -354,7 +403,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, job_id=args.job_id, file_location=None
+        changeset_id=args.changeset_id, job_id=args.job_id
     )
     use_rest_api = args.use_rest_api_table
     config_obj = EbscoAdapterTransformerConfig(
