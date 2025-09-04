@@ -14,11 +14,12 @@ WORK_ANCESTORS_QUERY = """
         MATCH (work)-[:HAS_PATH_IDENTIFIER]->(identifier)
         MATCH path = (identifier)-[:HAS_PARENT*]->(ancestor_identifier)
         MATCH (ancestor_identifier)<-[:HAS_PATH_IDENTIFIER]-(ancestor_work)
+        MATCH (ancestor_identifier)<-[:HAS_PARENT]-(ancestor_tree_identifier)
 
-        WITH work.id AS id, ancestor_work, length(path) AS hops
-        ORDER BY hops DESC
+        WITH work.id AS id, ancestor_work, length(path) AS hops, COUNT(ancestor_tree_identifier) AS ancestor_parts
+        ORDER BY hops ASC
         
-        RETURN id, COLLECT(ancestor_work) AS ancestor_works;
+        RETURN id, COLLECT({ work: ancestor_work, parts: ancestor_parts }) AS ancestors;
 """
 
 WORK_CHILDREN_QUERY = """

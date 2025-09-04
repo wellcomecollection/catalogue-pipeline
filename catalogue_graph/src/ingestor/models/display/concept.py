@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.shared.concept import Concept
+from ingestor.models.shared.concept import Concept, Subject
 from utils.types import ConceptType
 
 from .identifier import DisplayIdentifier
@@ -14,10 +14,9 @@ class DisplayConcept(BaseModel):
 
     @staticmethod
     def from_concept(concept: Concept) -> "DisplayConcept":
-        # TODO: Should we remove the suffix here?
         return DisplayConcept(
             id=concept.id.canonical_id,
-            label=concept.label.removesuffix("."),
+            label=concept.label,
             identifiers=list(DisplayIdentifier.from_all_identifiers(concept.id)),
             type=concept.type,
         )
@@ -38,6 +37,14 @@ class DisplayContributor(BaseModel):
 class DisplaySubject(DisplayConcept):
     concepts: list[DisplayConcept]
     type: ConceptType = "Subject"
+
+    @staticmethod
+    def from_subject(subject: Subject) -> "DisplaySubject":
+        concept = DisplayConcept.from_concept(subject)
+        return DisplaySubject(
+            **concept.model_dump(),
+            concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
+        )
 
 
 class DisplayGenre(BaseModel):

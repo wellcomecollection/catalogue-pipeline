@@ -32,12 +32,12 @@ class AggregateWorkTransformer:
     @property
     def subjects(self) -> Generator[AggregatableField]:
         for subject in self.data.subjects:
-            yield get_aggregatable(subject.id, subject.label)
+            yield get_aggregatable(subject.id, subject.normalised_label)
 
     @property
     def contributors(self) -> Generator[AggregatableField]:
         for c in self.data.contributors:
-            yield get_aggregatable(c.agent.id, c.agent.label)
+            yield get_aggregatable(c.agent.id, c.agent.normalised_label)
 
     @property
     def work_type(self) -> Generator[AggregatableField]:

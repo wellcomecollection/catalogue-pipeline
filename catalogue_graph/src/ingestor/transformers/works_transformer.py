@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
 from ingestor.models.aggregate.work import WorkAggregatableValues
+from ingestor.models.debug.work import SourceWorkDebugInformation, VisibleWorkDebug
 from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
 
@@ -50,6 +53,7 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             availabilities=transformer.availabilities,
             parts=transformer.parts,
             partOf=list(transformer.part_of),
+            type=work.data.display_work_type,
         )
 
     def _transform_query(self, extracted: ExtractedWork) -> QueryWork:
@@ -107,7 +111,7 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             genres_label=[g.label for g in work.data.genres],
             genres_concepts_id=list(transformer.genre_ids),
             genres_concepts_source_identifier=list(transformer.genre_identifiers),
-            subjects_label=[s.label for s in work.data.subjects],
+            subjects_label=[s.normalised_label for s in work.data.subjects],
             subjects_concepts_id=list(transformer.subject_ids),
             subjects_concepts_source_identifier=list(transformer.subject_identifiers),
             contributors_agent_label=list(transformer.contributor_agent_labels),
@@ -128,10 +132,29 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             availabilities_id=[a.id for a in work.state.availabilities],
         )
 
+    def _transform_debug(self, extracted: ExtractedWork) -> VisibleWorkDebug:
+        work = extracted.work
+        source = SourceWorkDebugInformation(
+            id=work.state.canonical_id,
+            identifier=work.state.source_identifier,
+            version=work.version,
+            modifiedTime=work.state.source_modified_time,
+        )
+
+        return VisibleWorkDebug(
+            source=source,
+            mergedTime=work.state.merged_time,
+            indexedTime=datetime.now(),
+            mergeCandidates=work.state.merge_candidates,
+            redirectSources=work.redirect_sources,
+        )
+
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
         return IndexableWork(
             query=self._transform_query(extracted),
             display=self._transform_display(extracted),
             aggregatableValues=self._transform_aggregate(extracted),
             filterableValues=self._transform_filter(extracted),
+            debug=self._transform_debug(extracted),
+            type="Visible",
         )
