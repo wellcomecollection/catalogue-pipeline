@@ -80,7 +80,8 @@ def python_type_to_pyarrow(annotation: typing.Any) -> pa.DataType:
         return pa.struct(fields)
 
     raise TypeError(
-        f"Converting type '{annotation}' to a PyArrow type is not supported. Use a different type or add support for type '{annotation}' above."
+        f"Converting type '{annotation}' to a PyArrow type is not supported.'"
+        f"Use a different type or add support for type '{annotation}' above."
     )
 
 
@@ -88,7 +89,6 @@ def pydantic_to_pyarrow_schema(model_class: type[BaseModel]) -> dict:
     """Convert a Pydantic model into a pyarrow schema"""
     schema = {}
     for field_name, field in model_class.model_fields.items():
-        serialised_name = field.serialization_alias or field_name
-        schema[serialised_name] = python_type_to_pyarrow(field.annotation)
+        schema[field_name] = python_type_to_pyarrow(field.annotation)
 
     return schema

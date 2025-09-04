@@ -90,15 +90,15 @@ def test_cannot_resolve_union_types() -> None:
         python_type_to_pyarrow(ModelA | ModelB)
 
 
-def test_use_serialisation_alias() -> None:
+def test_do_not_use_serialisation_alias() -> None:
     class SomeModel(BaseModel):
         one: int
         two: list[str] = Field(serialization_alias="renamed_two")
 
     schema = pydantic_to_pyarrow_schema(SomeModel)
-    assert "one" in schema and "renamed_two" in schema
+    assert "one" in schema and "two" in schema
     assert schema["one"] == pa.int64()
-    assert schema["renamed_two"].value_type == pa.string()
+    assert schema["two"].value_type == pa.string()
 
 
 def test_nested_pydantic_models() -> None:
