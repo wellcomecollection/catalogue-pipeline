@@ -98,8 +98,7 @@ def handler(
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
     return handler(
-        EbscoAdapterLoaderEvent.model_validate(event),
-        EbscoAdapterLoaderConfig()
+        EbscoAdapterLoaderEvent.model_validate(event), EbscoAdapterLoaderConfig()
     ).model_dump()
 
 

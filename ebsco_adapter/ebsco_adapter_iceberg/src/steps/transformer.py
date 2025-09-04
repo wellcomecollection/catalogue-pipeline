@@ -31,6 +31,7 @@ class EbscoAdapterTransformerConfig(BaseModel):
     is_local: bool = False
     use_glue_table: bool = True
     pipeline_date: str
+    index_date: str | None = None
 
 
 class EbscoAdapterTransformerEvent(BaseModel):
@@ -198,10 +199,14 @@ def handler(
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
         is_local=config_obj.is_local,
-        api_key_name="ebsco_adapter_iceberg",
+        api_key_name="transformer-ebsco-test",
     )
     index_name = get_standard_index_name(
-        "works-source", event.index_date or config_obj.pipeline_date
+        "works-source",
+        (
+            # Cascading choice for date in index name
+            event.index_date or config_obj.index_date or config_obj.pipeline_date
+        ),
     )
 
     total_success = 0
@@ -232,7 +237,10 @@ def handler(
 def lambda_handler(event: EbscoAdapterTransformerEvent, context: Any) -> dict[str, Any]:
     return handler(
         EbscoAdapterTransformerEvent.model_validate(event),
-        EbscoAdapterTransformerConfig(pipeline_date=config.PIPELINE_DATE),
+        EbscoAdapterTransformerConfig(
+            pipeline_date=config.PIPELINE_DATE,
+            index_date=config.INDEX_DATE,
+        ),
     ).model_dump()
 
 
@@ -270,12 +278,13 @@ def local_handler() -> EbscoAdapterTransformerResult:
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, index_date=args.index_date, job_id=args.job_id
+        changeset_id=args.changeset_id, job_id=args.job_id
     )
     config_obj = EbscoAdapterTransformerConfig(
         is_local=True,
         use_glue_table=args.use_glue_table,
         pipeline_date=args.pipeline_date,
+        index_date=args.index_date,
     )
 
     return handler(event=event, config_obj=config_obj)
