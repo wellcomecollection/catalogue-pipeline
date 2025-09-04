@@ -273,7 +273,7 @@ def test_transformer_index_name_selection(
 
     # Reset collected inputs between parametrized cases
     with suppress(Exception):  # pragma: no cover - defensive
-        MockElasticsearchClient.inputs.clear() 
+        MockElasticsearchClient.inputs.clear()
 
     records_by_id = {
         "ebsIdx001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdx001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Some Title</subfield></datafield></record>",

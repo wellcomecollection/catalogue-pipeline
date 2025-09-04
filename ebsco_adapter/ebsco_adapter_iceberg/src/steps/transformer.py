@@ -248,13 +248,10 @@ def process_batches(
         ),
     )
 
-    Responsibilities:
-    - Iterate over record batches
-    - Transform / delete logic via _process_batch
-    - Accumulate counts & ids
-    - Write batch id manifest file
-    - Return EbscoAdapterTransformerResult (tracking is left to caller)
-    """
+    print(
+        f"Writing to Elasticsearch index: {index_name} in pipeline {config_obj.pipeline_date} ..."
+    )
+
     total_success = 0
     total_failed = 0
     batches_ids: list[list[str]] = []
