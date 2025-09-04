@@ -12,6 +12,14 @@ module "transformer_lambda" {
   memory_size = 4096
   timeout     = 600
 
+  vpc_config = {
+    subnet_ids = local.network_config.subnets
+    security_group_ids = [
+      aws_security_group.egress.id,
+      local.network_config.ec_privatelink_security_group_id,
+    ]
+  }
+
   environment = {
     variables = {
       PIPELINE_DATE = local.pipeline_date
