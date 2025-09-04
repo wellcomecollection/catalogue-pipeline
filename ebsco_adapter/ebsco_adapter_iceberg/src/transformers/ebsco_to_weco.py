@@ -6,6 +6,7 @@ from transformers.common import mandatory_field
 from transformers.current_frequency import extract_current_frequency
 from transformers.description import extract_description
 from transformers.designation import extract_designation
+from transformers.edition import extract_edition
 from transformers.other_identifiers import extract_other_identifiers
 from transformers.title import extract_title
 
@@ -26,6 +27,7 @@ def transform_record(marc_record: Record) -> SourceWork:
         designation=extract_designation(marc_record),
         description=extract_description(marc_record),
         current_frequency=extract_current_frequency(marc_record),
+        edition=extract_edition(marc_record),
     )
 
 

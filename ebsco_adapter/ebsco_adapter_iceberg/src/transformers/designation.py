@@ -5,14 +5,10 @@ Extract designation from field
 https://www.loc.gov/marc/bibliographic/bd362.html
 """
 
-from collections.abc import Iterable
-
 from pymarc.record import Record
+
+from transformers.common import get_a_subfields
 
 
 def extract_designation(record: Record) -> list[str]:
-    return non_empty(field.get("a", "").strip() for field in record.get_fields("362"))
-
-
-def non_empty(designations: Iterable[str | None]) -> list[str]:
-    return [designation for designation in designations if designation]
+    return get_a_subfields("362", record)

@@ -41,3 +41,4 @@ class SourceWork(ElasticsearchModel, BaseWork):
     designation: list[str] = []
     description: str | None = None
     current_frequency: str | None = None
+    edition: str | None = None

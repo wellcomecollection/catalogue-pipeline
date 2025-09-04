@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 
 from pymarc.record import Record
 
@@ -28,3 +28,13 @@ def mandatory_field(marc_code: str, field_name: str) -> Callable:
         return wrap
 
     return decorate
+
+
+def get_a_subfields(field_code: str, record: Record) -> list[str]:
+    return non_empty(
+        field.get("a", "").strip() for field in record.get_fields(field_code)
+    )
+
+
+def non_empty(value: Iterable[str | None]) -> list[str]:
+    return [value for value in value if value]
