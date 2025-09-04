@@ -209,6 +209,10 @@ def handler(
         ),
     )
 
+    print(
+        f"Writing to Elasticsearch index: {index_name} in pipeline {config_obj.pipeline_date} ..."
+    )
+
     total_success = 0
     total_failed = 0
     batches_ids: list[list[str]] = []
