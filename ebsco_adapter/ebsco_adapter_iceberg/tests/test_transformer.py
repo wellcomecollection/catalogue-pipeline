@@ -1,3 +1,4 @@
+from contextlib import suppress  # for ruff SIM105 fix
 from typing import cast  # added for dummy ES client
 
 import pyarrow as pa
@@ -71,6 +72,10 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
         ("protocol", "http"),
         ("ebsco_adapter_ideberg/api_key", ""),
         ("ebsco_adapter_iceberg/api_key", ""),  # variant used in some code paths
+        (
+            "transformer-ebsco-test/api_key",
+            "",
+        ),  # another variant observed in get_client
     ]:
         MockSecretsManagerClient.add_mock_secret(f"{secret_prefix}/{name}", value)
 
@@ -141,35 +146,50 @@ def test_transformer_no_changeset_returns_zero(monkeypatch: pytest.MonkeyPatch) 
 
 
 @pytest.mark.parametrize(
-    "index_date, pipeline_date, expected_index",
+    "event_index_date, pipeline_date, config_index_date, expected_index",
     [
-        ("2025-02-02", "dev", "works-source-2025-02-02"),  # explicit index_date
-        (None, "dev", "works-source-dev"),  # falls back to pipeline_date default
-        (
-            None,
-            "2025-05-05",
-            "works-source-2025-05-05",
-        ),  # custom pipeline_date when no index_date
+        # 1. Explicit event index date takes precedence (config None)
+        ("2025-02-02", "dev", None, "works-source-2025-02-02"),
+        # 2. Event index date None -> falls back to pipeline_date (dev)
+        (None, "dev", None, "works-source-dev"),
+        # 3. Event None, custom pipeline_date used
+        (None, "2025-05-05", None, "works-source-2025-05-05"),
+        # 4. Event None, config index date set -> uses config index date
+        (None, "dev", "2025-07-07", "works-source-2025-07-07"),
+        # 5. Event index date overrides config index date when both provided
+        ("2025-08-08", "dev", "2025-07-07", "works-source-2025-08-08"),
     ],
 )
 def test_transformer_index_name_selection(
     temporary_table: pa.Table,
     monkeypatch: pytest.MonkeyPatch,
-    index_date: str | None,
+    event_index_date: str | None,
     pipeline_date: str,
+    config_index_date: str | None,
     expected_index: str,
 ) -> None:
-    """The ES index name should use index_date if provided; otherwise pipeline_date (custom or default)."""
-    # Provide required secrets for any pipeline_date used in this parameterised test
+    """Validate full cascade: event.index_date or config.index_date or pipeline_date."""
     _add_pipeline_secrets(pipeline_date)
 
-    # single record mapping
+    # Reset collected inputs between parametrized cases
+    with suppress(Exception):  # pragma: no cover - defensive
+        MockElasticsearchClient.inputs.clear() 
+
     records_by_id = {
         "ebsIdx001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdx001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Some Title</subfield></datafield></record>",
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
-    _run_transform(changeset_id, index_date=index_date, pipeline_date=pipeline_date)
+    event = EbscoAdapterTransformerEvent(
+        changeset_id=changeset_id, index_date=event_index_date, job_id="20250101T1200"
+    )
+    config = EbscoAdapterTransformerConfig(
+        is_local=True,
+        use_glue_table=False,
+        pipeline_date=pipeline_date,
+        index_date=config_index_date,
+    )
+    handler(event=event, config_obj=config)
 
     indices = {op["_index"] for op in MockElasticsearchClient.inputs}
     assert indices == {expected_index}
