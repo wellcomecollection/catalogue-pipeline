@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta
 import polars as pl
 import pytest
 from test_mocks import MockRequest, MockSmartOpen
-from test_utils import load_fixture
+from test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 
 from graph_remover import IDS_LOG_SCHEMA, lambda_handler
 
@@ -18,14 +18,6 @@ CATALOGUE_CONCEPTS_REMOVED_IDS_URI = (
 CATALOGUE_CONCEPTS_ADDED_IDS_URI = (
     f"{REMOVER_S3_PREFIX}/added_ids/catalogue_concepts__nodes.parquet"
 )
-
-
-def add_bulk_load_file_mocks() -> None:
-    for file_name in ["catalogue_concepts__nodes", "catalogue_works__nodes"]:
-        MockSmartOpen.mock_s3_file(
-            f"s3://wellcomecollection-neptune-graph-loader/{file_name}.csv",
-            load_fixture(f"catalogue/{file_name}.csv").decode(),
-        )
 
 
 def mock_deleted_ids_log_file(age_in_days: int) -> None:
@@ -77,9 +69,13 @@ def _check_added_removed_ids(
 
 
 def test_graph_remover_first_run() -> None:
-    add_bulk_load_file_mocks()
+    add_mock_transformer_outputs_for_ontologies(["catalogue"])
 
-    event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+    }
     lambda_handler(event, None)
 
     with MockSmartOpen.open(CATALOGUE_CONCEPTS_SNAPSHOT_URI, "rb") as f:
@@ -97,12 +93,18 @@ def test_graph_remover_next_run() -> None:
         load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes.parquet"),
     )
 
-    add_bulk_load_file_mocks()
+    add_mock_transformer_outputs_for_ontologies(
+        ["catalogue"], pipeline_date="2022-02-02"
+    )
     mock_deleted_ids_log_file(age_in_days=364)
     mock_neptune_removal_response(["byzuqyr5"])
     mock_neptune_count_response()
 
-    event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "2022-02-02",
+    }
     lambda_handler(event, None)
 
     # Verify that the correct IDs are listed in the 'added IDs' file
@@ -137,14 +139,18 @@ def test_graph_remover_old_id_removal() -> None:
         load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes.parquet"),
     )
 
-    add_bulk_load_file_mocks()
+    add_mock_transformer_outputs_for_ontologies(["catalogue"])
 
     # Mock a file with existing deleted IDs which are 1+ year old
     mock_deleted_ids_log_file(age_in_days=365)
     mock_neptune_removal_response(["byzuqyr5"])
     mock_neptune_count_response()
 
-    event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+    }
     lambda_handler(event, None)
 
     # The old deleted IDs (and corresponding timestamps) should no longer be in the file
@@ -160,15 +166,23 @@ def test_graph_remover_safety_check() -> None:
         load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes_large.parquet"),
     )
 
-    add_bulk_load_file_mocks()
+    add_mock_transformer_outputs_for_ontologies(["catalogue"])
 
-    event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+    }
     with pytest.raises(ValueError):
         lambda_handler(event, None)
 
 
 def test_graph_remover_missing_bulk_load_file() -> None:
-    event = {"transformer_type": "catalogue_concepts", "entity_type": "nodes"}
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "2020-01-01",
+    }
 
     with pytest.raises(KeyError):
         lambda_handler(event, None)

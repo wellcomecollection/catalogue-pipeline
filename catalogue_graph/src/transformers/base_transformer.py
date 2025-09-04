@@ -3,22 +3,20 @@ import csv
 import os
 from collections.abc import Generator
 from itertools import islice
-from typing import Any, Literal, TextIO
+from typing import Any, TextIO
 
 import boto3
 import smart_open
 
 from clients.base_neptune_client import BaseNeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
+from models.events import EntityType
 from models.graph_edge import BaseEdge
 from models.graph_node import BaseNode
 from query_builders.cypher import construct_upsert_cypher_query
 from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
 from utils.streaming import generator_to_chunks
-
-EntityType = Literal["nodes", "edges"]
-StreamDestination = Literal["graph", "s3", "sns", "local", "void"]
 
 CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
 
@@ -95,6 +93,10 @@ class BaseTransformer:
 
         yield from entities
 
+        # Stop processing to ensure threads are terminated when sample_size is reached
+        if sample_size is not None:
+            self.source.stop_processing()
+
     def _stream_to_bulk_load_file(
         self, file: TextIO, entity_type: EntityType, sample_size: int | None = None
     ) -> None:
@@ -135,10 +137,6 @@ class BaseTransformer:
         with smart_open.open(s3_uri, "w", transport_params=transport_params) as f:
             self._stream_to_bulk_load_file(f, entity_type, sample_size)
 
-        # Stop processing to ensure threads are terminated when sample_size is reached
-        if sample_size is not None:
-            self.source.stop_processing()
-
     def stream_to_graph(
         self,
         neptune_client: BaseNeptuneClient,
@@ -175,10 +173,6 @@ class BaseTransformer:
                 for chunk in islice(chunks, len(done)):
                     futures.add(executor.submit(run_query, chunk))
 
-        # Stop processing to ensure threads are terminated when sample_size is reached
-        if sample_size is not None:
-            self.source.stop_processing()
-
     def stream_to_sns(
         self, topic_arn: str, entity_type: EntityType, sample_size: int | None = None
     ) -> None:
@@ -203,10 +197,6 @@ class BaseTransformer:
         if len(queries) > 0:
             publish_batch_to_sns(topic_arn, queries)
 
-        # Stop processing to ensure threads are terminated when sample_size is reached
-        if sample_size is not None:
-            self.source.stop_processing()
-
     def stream(
         self, entity_type: EntityType, sample_size: int | None = None
     ) -> Generator:
@@ -226,9 +216,5 @@ class BaseTransformer:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         with open(file_path, "w") as f:
             self._stream_to_bulk_load_file(f, entity_type, sample_size)
-
-        # Stop processing to ensure threads are terminated when sample_size is reached
-        if sample_size is not None:
-            self.source.stop_processing()
 
         return os.path.abspath(file_path)

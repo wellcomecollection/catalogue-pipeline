@@ -14,8 +14,8 @@ from ingestor.steps.ingestor_loader_monitor import (
     handler,
 )
 
-MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/report.loader.json"
-MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.loader.json"
+MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.loader.json"
+MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.loader.json"
 
 
 MOCK_STEP_EVENT = IngestorStepEvent(

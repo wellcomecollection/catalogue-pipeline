@@ -1,18 +1,18 @@
-from test_utils import add_mock_transformer_outputs
+from test_utils import (
+    add_mock_transformer_outputs_for_ontologies,
+)
 from test_wikidata_concepts_source import _add_mock_wikidata_requests
 
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 
 
 def test_wikidata_names_source_edges() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc", "wikidata_linked_loc"],
-        node_types=["names", "concepts", "locations"],
-    )
+    add_mock_transformer_outputs_for_ontologies(["loc", "wikidata_linked_loc"])
+
     _add_mock_wikidata_requests("edges", "names")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        node_type="names", linked_ontology="loc", entity_type="edges"
+        linked_transformer="loc_names", entity_type="edges", pipeline_date="dev"
     )
     stream_result = list(mesh_concepts_source.stream_raw())
 
@@ -44,13 +44,11 @@ def test_wikidata_names_source_edges() -> None:
 
 
 def test_wikidata_names_source_nodes() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["names", "concepts", "locations"]
-    )
+    add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("nodes", "names")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        node_type="names", linked_ontology="loc", entity_type="nodes"
+        linked_transformer="loc_names", entity_type="nodes", pipeline_date="dev"
     )
     stream_result = list(mesh_concepts_source.stream_raw())
 

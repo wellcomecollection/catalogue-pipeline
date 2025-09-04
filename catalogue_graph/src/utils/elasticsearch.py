@@ -39,9 +39,9 @@ def get_pipeline_config(
 
 
 def get_client(
-    api_key_name: str, pipeline_date: str | None = None, is_local: bool = False
+    api_key_name: str, pipeline_date: str, is_local: bool = False
 ) -> elasticsearch.Elasticsearch:
-    if pipeline_date is None or pipeline_date == "dev":
+    if pipeline_date == "dev":
         config = ElasticsearchConfig()
     else:
         config = get_pipeline_config(pipeline_date, is_local, api_key_name)

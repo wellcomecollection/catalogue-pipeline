@@ -1,12 +1,14 @@
-from typing import Literal
+from typing import get_args
 
 from config import (
     LOC_NAMES_URL,
     LOC_SUBJECT_HEADINGS_URL,
     MESH_URL,
 )
+from models.events import IncrementalWindow
+from utils.types import CatalogueTransformerType, EntityType, TransformerType
 
-from .base_transformer import BaseTransformer, EntityType
+from .base_transformer import BaseTransformer
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
 from .catalogue.work_identifiers_transformer import CatalogueWorkIdentifiersTransformer
 from .catalogue.works_transformer import CatalogueWorksTransformer
@@ -19,29 +21,22 @@ from .wikidata.concepts_transformer import WikidataConceptsTransformer
 from .wikidata.locations_transformer import WikidataLocationsTransformer
 from .wikidata.names_transformer import WikidataNamesTransformer
 
-TransformerType = Literal[
-    "loc_concepts",
-    "loc_names",
-    "loc_locations",
-    "mesh_concepts",
-    "mesh_locations",
-    "wikidata_linked_loc_concepts",
-    "wikidata_linked_loc_locations",
-    "wikidata_linked_loc_names",
-    "wikidata_linked_mesh_concepts",
-    "wikidata_linked_mesh_locations",
-    "catalogue_concepts",
-    "catalogue_works",
-    "catalogue_work_identifiers",
-]
-
 
 def create_transformer(
     transformer_type: TransformerType,
     entity_type: EntityType,
-    pipeline_date: str | None,
+    pipeline_date: str,
+    window: IncrementalWindow | None,
     is_local: bool,
 ) -> BaseTransformer:
+    if window is not None and transformer_type not in get_args(
+        CatalogueTransformerType
+    ):
+        raise ValueError(
+            f"The {transformer_type} transformer does not support incremental mode. "
+            "Only catalogue transformers support incremental (window-based) processing."
+        )
+
     if transformer_type == "loc_concepts":
         return LibraryOfCongressConceptsTransformer(LOC_SUBJECT_HEADINGS_URL)
     if transformer_type == "loc_names":
@@ -55,20 +50,22 @@ def create_transformer(
     if transformer_type == "mesh_locations":
         return MeSHLocationsTransformer(MESH_URL)
     if transformer_type == "wikidata_linked_loc_concepts":
-        return WikidataConceptsTransformer(entity_type, "loc")
+        return WikidataConceptsTransformer("loc_concepts", entity_type, pipeline_date)
     if transformer_type == "wikidata_linked_loc_locations":
-        return WikidataLocationsTransformer(entity_type, "loc")
+        return WikidataLocationsTransformer("loc_locations", entity_type, pipeline_date)
     if transformer_type == "wikidata_linked_loc_names":
-        return WikidataNamesTransformer(entity_type, "loc")
+        return WikidataNamesTransformer("loc_names", entity_type, pipeline_date)
     if transformer_type == "wikidata_linked_mesh_concepts":
-        return WikidataConceptsTransformer(entity_type, "mesh")
+        return WikidataConceptsTransformer("mesh_concepts", entity_type, pipeline_date)
     if transformer_type == "wikidata_linked_mesh_locations":
-        return WikidataLocationsTransformer(entity_type, "mesh")
+        return WikidataLocationsTransformer(
+            "mesh_locations", entity_type, pipeline_date
+        )
     if transformer_type == "catalogue_concepts":
-        return CatalogueConceptsTransformer(pipeline_date, is_local)
+        return CatalogueConceptsTransformer(pipeline_date, window, is_local)
     if transformer_type == "catalogue_works":
-        return CatalogueWorksTransformer(pipeline_date, is_local)
+        return CatalogueWorksTransformer(pipeline_date, window, is_local)
     if transformer_type == "catalogue_work_identifiers":
-        return CatalogueWorkIdentifiersTransformer(pipeline_date, is_local)
+        return CatalogueWorkIdentifiersTransformer(pipeline_date, window, is_local)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")

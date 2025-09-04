@@ -21,7 +21,7 @@ module "graph_remover_lambda" {
 
   environment = {
     variables = {
-      S3_BULK_LOAD_BUCKET_NAME = aws_s3_bucket.neptune_bulk_upload_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
     }
   }
 

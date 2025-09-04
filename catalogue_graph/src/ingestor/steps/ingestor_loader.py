@@ -4,7 +4,7 @@ import typing
 
 from pydantic import BaseModel
 
-from config import INGESTOR_S3_BUCKET, INGESTOR_S3_PREFIX
+from config import CATALOGUE_GRAPH_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -16,7 +16,7 @@ from utils.types import IngestorLoadFormat, IngestorType
 
 
 class IngestorLoaderConfig(BaseModel):
-    loader_s3_bucket: str = INGESTOR_S3_BUCKET
+    loader_s3_bucket: str = CATALOGUE_GRAPH_S3_BUCKET
     loader_s3_prefix: str = INGESTOR_S3_PREFIX
     is_local: bool = False
     load_format: IngestorLoadFormat = "parquet"
