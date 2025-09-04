@@ -126,8 +126,8 @@ def test_python_type_to_pyarrow_unsupported_type_raises() -> None:
 
 def test_resolve_literal() -> None:
     lit = typing.Literal[1, 2, None]
-    got = python_type_to_pyarrow(lit)
-    assert got == pa.int64()
+    result = python_type_to_pyarrow(lit)
+    assert result == pa.int64()
 
 
 def test_cannot_resolve_literal() -> None:

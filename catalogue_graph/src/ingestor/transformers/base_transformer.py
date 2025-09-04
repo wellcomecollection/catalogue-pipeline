@@ -35,6 +35,9 @@ class ElasticsearchBaseTransformer:
             raise ValueError("No documents to write.")
 
         if load_format == "parquet":
+            # Convert Pydantic models to Parquet:
+            # Pydantic -> dict -> PyArrow Table (with schema) -> Polars DataFrame -> Parquet
+            # Explicit schema ensures reliable types (Polars inference is not reliable).
             schema = pydantic_to_pyarrow_schema(type(es_documents[0]))
             table = pa.Table.from_pylist(
                 [d.model_dump() for d in es_documents],
