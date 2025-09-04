@@ -274,19 +274,16 @@
           {
             "id": "rqyum5sv",
             "title": "Twort, Frederick William",
-            "referenceNumber": "",
-            "partOf": [
-              {
-                "id": "dkhx5djp",
-                "title": "Case against the Medical Research Council",
-                "referenceNumber": "",
-                "partOf": null,
-                "totalParts": 1,
-                "type": "Section"
-              }
-            ],
+            "referenceNumber": "GC/176",
             "totalParts": 1,
             "type": "Collection"
+          },
+          {
+            "id": "dkhx5djp",
+            "title": "Case against the Medical Research Council",
+            "referenceNumber": "GC/176/C",
+            "totalParts": 1,
+            "type": "Section"
           }
         ],
         "type": "Work"
@@ -1102,7 +1099,7 @@
                   "type": "AccessCondition"
                 }
               ],
-              "url": "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=4205.13464940.0&epcustomerid=s7451719",
+              "url": "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=13464940.4205&epcustomerid=s7451719",
               "credit": null,
               "linkText": "Available in Eighteenth Century Collections Online.",
               "type": "DigitalLocation"
@@ -1462,28 +1459,23 @@
           {
             "id": "uad4jhwg",
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
-            "referenceNumber": "",
-            "partOf": [
-              {
-                "id": "y5tqfx79",
-                "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, lectures and broadcasts",
-                "referenceNumber": "",
-                "partOf": [
-                  {
-                    "id": "rwc5ktn9",
-                    "title": "'Somatic cell genetics and others'",
-                    "referenceNumber": "",
-                    "partOf": null,
-                    "totalParts": 1,
-                    "type": "Series"
-                  }
-                ],
-                "totalParts": 1,
-                "type": "Section"
-              }
-            ],
+            "referenceNumber": "UGC 198",
             "totalParts": 1,
             "type": "Collection"
+          },
+          {
+            "id": "y5tqfx79",
+            "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, lectures and broadcasts",
+            "referenceNumber": "UGC 198/8",
+            "totalParts": 1,
+            "type": "Section"
+          },
+          {
+            "id": "rwc5ktn9",
+            "title": "'Somatic cell genetics and others'",
+            "referenceNumber": "UGC 198/8/5",
+            "totalParts": 1,
+            "type": "Series"
           }
         ],
         "type": "Work"
@@ -3530,28 +3522,23 @@
           {
             "id": "dupg64pv",
             "title": "Rast, Dr Hugo",
-            "referenceNumber": "",
-            "partOf": [
-              {
-                "id": "f5yb28yc",
-                "title": "Personal and Miscellaneous",
-                "referenceNumber": "",
-                "partOf": [
-                  {
-                    "id": "qswamdvx",
-                    "title": "German Hospital",
-                    "referenceNumber": "",
-                    "partOf": null,
-                    "totalParts": 1,
-                    "type": "Section"
-                  }
-                ],
-                "totalParts": 1,
-                "type": "Section"
-              }
-            ],
+            "referenceNumber": "PP/RAS",
             "totalParts": 1,
             "type": "Collection"
+          },
+          {
+            "id": "f5yb28yc",
+            "title": "Personal and Miscellaneous",
+            "referenceNumber": "PP/RAS/A",
+            "totalParts": 1,
+            "type": "Section"
+          },
+          {
+            "id": "qswamdvx",
+            "title": "German Hospital",
+            "referenceNumber": "PP/RAS/A.2",
+            "totalParts": 1,
+            "type": "Section"
           }
         ],
         "type": "Work"
