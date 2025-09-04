@@ -12,10 +12,10 @@ def test_no_frequency(marc_record: Record) -> None:
     "marc_record",
     [
         (
-                Field(
-                    tag="310",
-                    subfields=[Subfield(code="a", value="Samhain")],
-                ),
+            Field(
+                tag="310",
+                subfields=[Subfield(code="a", value="Samhain")],
+            ),
         )
     ],
     indirect=True,
@@ -28,10 +28,10 @@ def test_frequency_a(marc_record: Record) -> None:
     "marc_record",
     [
         (
-                Field(
-                    tag="310",
-                    subfields=[Subfield(code="b", value="&lt;Sept. 1991-&gt;")],
-                ),
+            Field(
+                tag="310",
+                subfields=[Subfield(code="b", value="&lt;Sept. 1991-&gt;")],
+            ),
         )
     ],
     indirect=True,
@@ -44,21 +44,21 @@ def test_frequency_b(marc_record: Record) -> None:
     "marc_record",
     [
         (
-                Field(
-                    tag="310",
-                    subfields=[
-                        Subfield(code="a", value="Every lunar month"),
-                        Subfield(code="b", value="Magáksicaagli Wí 1984"),
-                    ],
-                ),
+            Field(
+                tag="310",
+                subfields=[
+                    Subfield(code="a", value="Every lunar month"),
+                    Subfield(code="b", value="Magáksicaagli Wí 1984"),
+                ],
+            ),
         )
     ],
     indirect=True,
 )
 def test_frequency_a_b(marc_record: Record) -> None:
     assert (
-            transform_record(marc_record).current_frequency
-            == "Every lunar month Magáksicaagli Wí 1984"
+        transform_record(marc_record).current_frequency
+        == "Every lunar month Magáksicaagli Wí 1984"
     )
 
 
@@ -66,26 +66,26 @@ def test_frequency_a_b(marc_record: Record) -> None:
     "marc_record",
     [
         (
-                Field(
-                    tag="310",
-                    subfields=[
-                        Subfield(code="a", value="Every lunar month"),
-                        Subfield(code="b", value="Magáksicaagli Wí 1984 - 2002"),
-                    ],
-                ),
-                Field(
-                    tag="310",
-                    subfields=[
-                        Subfield(code="a", value="Imbolc and Lammas"),
-                        Subfield(code="b", value="1666 -"),
-                    ],
-                ),
+            Field(
+                tag="310",
+                subfields=[
+                    Subfield(code="a", value="Every lunar month"),
+                    Subfield(code="b", value="Magáksicaagli Wí 1984 - 2002"),
+                ],
+            ),
+            Field(
+                tag="310",
+                subfields=[
+                    Subfield(code="a", value="Imbolc and Lammas"),
+                    Subfield(code="b", value="1666 -"),
+                ],
+            ),
         )
     ],
     indirect=True,
 )
 def test_frequency_multiple(marc_record: Record) -> None:
     assert (
-            transform_record(marc_record).current_frequency
-            == "Every lunar month Magáksicaagli Wí 1984 - 2002 Imbolc and Lammas 1666 -"
+        transform_record(marc_record).current_frequency
+        == "Every lunar month Magáksicaagli Wí 1984 - 2002 Imbolc and Lammas 1666 -"
     )
