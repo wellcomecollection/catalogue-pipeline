@@ -1,6 +1,5 @@
-import json
 from contextlib import suppress  # for ruff SIM105 fix
-from typing import Any, cast  # added for dummy ES client
+from typing import cast  # added for dummy ES client
 
 import pyarrow as pa
 import pytest
@@ -274,7 +273,7 @@ def test_transformer_index_name_selection(
 
     # Reset collected inputs between parametrized cases
     with suppress(Exception):  # pragma: no cover - defensive
-        MockElasticsearchClient.inputs.clear()
+        MockElasticsearchClient.inputs.clear() 
 
     records_by_id = {
         "ebsIdx001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdx001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Some Title</subfield></datafield></record>",
@@ -286,7 +285,7 @@ def test_transformer_index_name_selection(
     )
     config = EbscoAdapterTransformerConfig(
         is_local=True,
-        use_rest_api_table=False,
+        use_glue_table=False,
         pipeline_date=pipeline_date,
         index_date=config_index_date,
     )

@@ -73,6 +73,12 @@ data "aws_iam_policy_document" "s3_write" {
   }
 }
 
+locals {
+  // TODO: Understand how to deal with this changing!
+  pipeline_date = "2025-08-14"
+  index_date    = "2025-09-04"
+}
+
 # Allow read ssm parameters
 data "aws_iam_policy_document" "ssm_read" {
   statement {
@@ -112,7 +118,8 @@ data "aws_iam_policy_document" "transformer_allow_pipeline_storage_secret_read" 
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/private_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/port*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/protocol*",
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/transformer/api_key*"
+      # This should be just "transformer" once the pipeline secrets are properly generated
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/transformer-ebsco-test/api_key*"
     ]
   }
 }
