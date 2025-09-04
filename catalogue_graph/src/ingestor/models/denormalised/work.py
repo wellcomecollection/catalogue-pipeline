@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from utils.types import DisplayWorkType, WorkType
 
 from ingestor.models.shared.concept import Concept, Contributor, Genre, Subject
 from ingestor.models.shared.holdings import Holdings
@@ -16,12 +17,28 @@ from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
-from utils.types import DisplayWorkType, WorkType
 
 
 class CollectionPath(BaseModel):
     path: str
     label: str | None = None
+
+
+class WorkAncestor(ElasticsearchModel):
+    title: str
+    work_type: str
+    depth: int
+    num_children: int
+    num_descendents: int
+
+
+class WorkRelations(BaseModel):
+    ancestors: list[WorkAncestor] = []
+
+    @field_validator("ancestors", mode="before")
+    @classmethod
+    def convert_denormalised_type(cls, raw_ancestors: list[dict]) -> list[dict]:
+        return [a for a in raw_ancestors if a["numChildren"] == 0]
 
 
 class DenormalisedWorkData(ElasticsearchModel):
@@ -67,6 +84,7 @@ class DenormalisedWorkState(ElasticsearchModel):
     source_modified_time: datetime
     availabilities: list[Id]
     merge_candidates: list[MergeCandidate]
+    relations: WorkRelations
 
 
 class DenormalisedWork(ElasticsearchModel):

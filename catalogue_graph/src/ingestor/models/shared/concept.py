@@ -1,7 +1,6 @@
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
-
 from utils.types import ConceptType
 
 from .id_label import Label
@@ -23,11 +22,10 @@ class Concept(BaseModel):
             return "Genre"
 
         return value
-
-    @field_validator("label", mode="before")
-    @classmethod
-    def remove_label_suffix(cls, value: str) -> str:
-        return value.removesuffix(".")
+    
+    @property
+    def normalised_label(self):
+        return self.label.removesuffix(".")
 
 
 class Contributor(BaseModel):
@@ -38,6 +36,7 @@ class Contributor(BaseModel):
 
 class Subject(Concept):
     concepts: list[Concept]
+    type: ConceptType = "Subject"
 
 
 class Genre(BaseModel):

@@ -47,6 +47,9 @@ class QueryWorkTransformer:
 
     @property
     def part_of_titles(self) -> Generator[str]:
+        for item in self.state.relations.ancestors:
+            yield item.title
+
         for item in self.hierarchy.ancestors[::-1]:
             if item.work.properties.label is not None:
                 yield item.work.properties.label
@@ -60,13 +63,13 @@ class QueryWorkTransformer:
     def genre_concept_labels(self) -> Generator[str]:
         for genre in self.data.genres:
             for concept in genre.concepts:
-                yield concept.label
+                yield concept.normalised_label
 
     @property
     def subject_concept_labels(self) -> Generator[str]:
         for subject in self.data.subjects:
             for concept in subject.concepts:
-                yield concept.label
+                yield concept.normalised_label
 
     @property
     def image_ids(self) -> list[str]:
@@ -93,7 +96,7 @@ class QueryWorkTransformer:
 
     @property
     def contributor_agent_labels(self) -> list[str]:
-        return [c.agent.label for c in self.data.contributors]
+        return [c.agent.normalised_label for c in self.data.contributors]
 
     @property
     def format_id(self) -> str | None:
