@@ -24,6 +24,11 @@ class Concept(BaseModel):
 
         return value
 
+    @field_validator("label", mode="before")
+    @classmethod
+    def remove_label_suffix(cls, value: str) -> str:
+        return value.removesuffix(".")
+
 
 class Contributor(BaseModel):
     agent: Concept

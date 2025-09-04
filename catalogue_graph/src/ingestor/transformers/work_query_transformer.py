@@ -47,14 +47,14 @@ class QueryWorkTransformer:
 
     @property
     def part_of_titles(self) -> Generator[str]:
-        for work in self.hierarchy.ancestor_works[::-1]:
-            if work.properties.label is not None:
-                yield work.properties.label
+        for item in self.hierarchy.ancestors[::-1]:
+            if item.work.properties.label is not None:
+                yield item.work.properties.label
 
     @property
     def part_of_ids(self) -> Generator[str]:
-        for work in self.hierarchy.ancestor_works[::-1]:
-            yield work.properties.id
+        for item in self.hierarchy.ancestors[::-1]:
+            yield item.work.properties.id
 
     @property
     def genre_concept_labels(self) -> Generator[str]:

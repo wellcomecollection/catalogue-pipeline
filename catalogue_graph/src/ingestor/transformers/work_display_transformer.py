@@ -136,12 +136,12 @@ class DisplayWorkTransformer:
     @property
     def part_of(self) -> list[DisplayRelation]:
         # TODO: Handle series
-        if len(self.hierarchy.ancestor_works) == 0:
+        if len(self.hierarchy.ancestors) == 0:
             return []
 
         return [
-            DisplayRelation.from_neptune_node(w, 1)
-            for w in self.hierarchy.ancestor_works
+            DisplayRelation.from_neptune_node(a.work, a.parts)
+            for a in self.hierarchy.ancestors
         ]
 
     @property

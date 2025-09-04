@@ -38,7 +38,7 @@ def mock_graph_relationships(
 ) -> None:
     ancestors, children, concepts = [], [], []
     if "ancestors" in include:
-        ancestors = [{"id": work_id, "ancestor_works": ANCESTORS_FIXTURE}]
+        ancestors = [{"id": work_id, "ancestors": ANCESTORS_FIXTURE}]
     if "children" in include:
         children = [{"id": work_id, "children": CHILDREN_FIXTURE}]
     if "concepts" in include:
@@ -63,7 +63,7 @@ def test_with_ancestors() -> None:
     assert extracted_items[0] == ExtractedWork(
         work=DENORMALISED_FIXTURE,
         hierarchy=WorkHierarchy(
-            id="a24esypq", ancestor_works=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE
+            id="a24esypq", ancestors=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE
         ),
         concepts=[],
     )
@@ -80,7 +80,7 @@ def test_with_concepts() -> None:
     assert len(extracted_items) == 1
     assert extracted_items[0] == ExtractedWork(
         work=DENORMALISED_FIXTURE,
-        hierarchy=WorkHierarchy(id="a24esypq", ancestor_works=[], children=[]),
+        hierarchy=WorkHierarchy(id="a24esypq", ancestors=[], children=[]),
         concepts=CONCEPTS_FIXTURE,
     )
 
@@ -96,7 +96,7 @@ def test_without_graph_relationships() -> None:
     assert len(extracted_items) == 1
     assert extracted_items[0] == ExtractedWork(
         work=DENORMALISED_FIXTURE,
-        hierarchy=WorkHierarchy(id="a24esypq", ancestor_works=[], children=[]),
+        hierarchy=WorkHierarchy(id="a24esypq", ancestors=[], children=[]),
         concepts=[],
     )
 
@@ -129,13 +129,13 @@ def test_multiple_works() -> None:
     expected_results = [
         ExtractedWork(
             work=DENORMALISED_FIXTURE,
-            hierarchy=WorkHierarchy(id="123", ancestor_works=[], children=[]),
+            hierarchy=WorkHierarchy(id="123", ancestors=[], children=[]),
             concepts=[],
         ),
         ExtractedWork(
             work=DENORMALISED_FIXTURE,
             hierarchy=WorkHierarchy(
-                id="456", ancestor_works=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE
+                id="456", ancestors=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE
             ),
             concepts=CONCEPTS_FIXTURE,
         ),

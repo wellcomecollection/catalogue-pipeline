@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Literal
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel
 
 from ingestor.models.shared.concept import Concept, Contributor, Genre, Subject
 from ingestor.models.shared.holdings import Holdings
 from ingestor.models.shared.id_label import Id, IdLabel
 from ingestor.models.shared.identifier import (
+    Identifiers,
     SourceIdentifier,
 )
 from ingestor.models.shared.image import ImageData
@@ -16,7 +16,7 @@ from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
-from utils.types import WorkType
+from utils.types import DisplayWorkType, WorkType
 
 
 class CollectionPath(BaseModel):
@@ -47,21 +47,17 @@ class DenormalisedWorkData(ElasticsearchModel):
     collection_path: CollectionPath | None = None
     reference_number: str | None = None
     image_data: list[ImageData] = []
-    work_type: WorkType = "Work"
+    work_type: WorkType = "Standard"
     current_frequency: str | None = None
     former_frequency: list[str] = []
     designation: list[str] = []
 
-    @field_validator("work_type", mode="before")
-    @classmethod
-    def convert_denormalised_type(
-        cls, value: WorkType | Literal["Standard"]
-    ) -> WorkType:
-        # In the denormalised index, the 'Work' type is called 'Standard'
-        if value == "Standard":
+    @property
+    def display_work_type(self) -> DisplayWorkType:
+        if self.work_type == "Standard":
             return "Work"
 
-        return value
+        return self.work_type
 
 
 class DenormalisedWorkState(ElasticsearchModel):
@@ -73,7 +69,8 @@ class DenormalisedWorkState(ElasticsearchModel):
     merge_candidates: list[MergeCandidate]
 
 
-class DenormalisedWork(BaseModel):
+class DenormalisedWork(ElasticsearchModel):
     data: DenormalisedWorkData
     state: DenormalisedWorkState
     version: int
+    redirect_sources: list[Identifiers]

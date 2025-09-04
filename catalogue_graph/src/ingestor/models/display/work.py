@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from utils.types import DisplayWorkType
+
 from .concept import DisplayConcept, DisplayContributor, DisplayGenre, DisplaySubject
 from .holdings import DisplayHoldings
 from .id_label import DisplayId, DisplayIdLabel
@@ -40,4 +42,4 @@ class DisplayWork(BaseModel):
     images: list[DisplayId]
     parts: list[DisplayRelation]
     partOf: list[DisplayRelation]
-    type: str = "Work"
+    type: DisplayWorkType

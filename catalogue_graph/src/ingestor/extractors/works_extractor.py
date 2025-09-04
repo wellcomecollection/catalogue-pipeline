@@ -101,7 +101,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
             work_hierarchy = WorkHierarchy(
                 id=work_id,
-                ancestor_works=all_ancestors.get(work_id, {}).get("ancestor_works", []),
+                ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
                 children=all_children.get(work_id, {}).get("children", []),
             )
 

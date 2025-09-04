@@ -14,10 +14,9 @@ class DisplayConcept(BaseModel):
 
     @staticmethod
     def from_concept(concept: Concept) -> "DisplayConcept":
-        # TODO: Should we remove the suffix here?
         return DisplayConcept(
             id=concept.id.canonical_id,
-            label=concept.label.removesuffix("."),
+            label=concept.label,
             identifiers=list(DisplayIdentifier.from_all_identifiers(concept.id)),
             type=concept.type,
         )

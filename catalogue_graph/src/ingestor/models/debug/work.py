@@ -14,14 +14,14 @@ class SourceWorkDebugInformation(BaseModel):
     modifiedTime: datetime
 
 
-class WorkDebug(BaseModel):
+class BaseWorkDebug(BaseModel):
     source: SourceWorkDebugInformation
     mergedTime: datetime
     indexedTime: datetime
     mergeCandidates: list[MergeCandidate]
 
 
-class VisibleWorkDebug(WorkDebug):
+class VisibleWorkDebug(BaseWorkDebug):
     redirectSources: list[Identifiers]
 
 
@@ -38,8 +38,12 @@ class InvisibleReason(BaseModel):
     message: str | None = None
 
 
-class InvisibleWorkDebug(WorkDebug):
+class InvisibleWorkDebug(BaseWorkDebug):
     invisibilityReasons: list[InvisibleReason]
+
+
+class RedirectedWorkDebug(BaseWorkDebug):
+    pass
 
 
 class DeletedReason(BaseModel):
@@ -47,5 +51,10 @@ class DeletedReason(BaseModel):
     info: str | None = None
 
 
-class DeletedWorkDebug(WorkDebug):
+class DeletedWorkDebug(BaseWorkDebug):
     deletedReason: DeletedReason
+
+
+WorkDebug = (
+    VisibleWorkDebug | InvisibleWorkDebug | DeletedWorkDebug | RedirectedWorkDebug
+)

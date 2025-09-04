@@ -19,7 +19,7 @@ FIELD_MAP = {
 }
 
 
-def _resolve_struct_union(structs: list[pa.DataType]) -> pa.DataType:
+def _resolve_struct_union(structs: list[pa.StructType]) -> pa.DataType:
     """
     Merge structs into a single struct containing a union of all of their fields
     """
@@ -47,7 +47,6 @@ def _resolve_union_types(annotations: typing.Iterable[type]) -> pa.DataType:
         return union_types[0]
 
     if all(type(u) is pa.StructType for u in union_types):
-        print(union_types)
         return _resolve_struct_union(union_types)
 
     return pa.binary()
@@ -62,13 +61,13 @@ def python_type_to_pyarrow(annotation: type | None) -> pa.DataType:
     if annotation in FIELD_MAP:
         return FIELD_MAP[annotation]
 
-    if origin == typing.Literal:
+    if origin is typing.Literal:
         return _resolve_union_types([type(arg) for arg in args])
 
     if origin in (types.UnionType, typing.Union):
         return _resolve_union_types(args)
 
-    if origin == list:
+    if origin is list:
         return pa.list_(python_type_to_pyarrow(args[0]))
 
     if issubclass(annotation, BaseModel):
