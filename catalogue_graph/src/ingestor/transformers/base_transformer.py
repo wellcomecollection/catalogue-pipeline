@@ -8,11 +8,11 @@ import polars as pl
 import pyarrow as pa
 import smart_open
 from pydantic import BaseModel
-from utils.arrow import pydantic_to_pyarrow_schema
-from utils.types import IngestorLoadFormat
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
 from ingestor.steps.ingestor_indexer import IngestorIndexerObject
+from utils.arrow import pydantic_to_pyarrow_schema
+from utils.types import IngestorLoadFormat
 
 
 class ElasticsearchBaseTransformer:
