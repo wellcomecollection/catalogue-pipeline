@@ -25,7 +25,7 @@ class Concept(BaseModel):
         return value
 
     @property
-    def normalised_label(self):
+    def normalised_label(self) -> str:
         return self.label.removesuffix(".")
 
 

@@ -47,12 +47,12 @@ class QueryWorkTransformer:
 
     @property
     def part_of_titles(self) -> Generator[str]:
-        for item in self.state.relations.ancestors:
-            yield item.title
+        for series_item in self.state.relations.ancestors:
+            yield series_item.title
 
-        for item in self.hierarchy.ancestors[::-1]:
-            if item.work.properties.label is not None:
-                yield item.work.properties.label
+        for collection_item in self.hierarchy.ancestors[::-1]:
+            if collection_item.work.properties.label is not None:
+                yield collection_item.work.properties.label
 
     @property
     def part_of_ids(self) -> Generator[str]:
