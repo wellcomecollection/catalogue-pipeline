@@ -9,7 +9,7 @@ module "transformer_lambda" {
   filename = data.archive_file.empty_zip.output_path
 
   handler     = "steps.transformer.lambda_handler"
-  memory_size = 1024
+  memory_size = 4096
   timeout     = 600
 
   environment = {
