@@ -13,6 +13,8 @@ WikidataEdgeQueryType = Literal[
     "has_sibling",
     "has_spouse",
     "has_child",
+    "has_founder",
+    "has_industry"
 ]
 
 
@@ -155,6 +157,10 @@ class SparqlQueryBuilder:
             property_path = "wdt:P279"
         elif edge_type == "has_field_of_work":
             property_path = "wdt:P101"
+        elif edge_type == "has_founder":
+            property_path = "wdt:P112"
+        elif edge_type == "has_industry":
+            property_path = "wdt:P452"
         elif edge_type == "has_father":
             property_path = "wdt:P22"
         elif edge_type == "has_mother":
