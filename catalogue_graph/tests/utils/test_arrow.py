@@ -28,13 +28,16 @@ def test_primitive_types() -> None:
 def test_list_type() -> None:
     result = python_type_to_pyarrow(list[int])
     assert isinstance(result, pa.ListType)
+    # mypy narrows after isinstance check
     assert result.value_type == pa.int64()
 
     # Nested lists should be converted recursively
     nested_result = python_type_to_pyarrow(list[list[str]])
     assert isinstance(nested_result, pa.ListType)
-    assert isinstance(nested_result.value_type, pa.ListType)
-    assert nested_result.value_type.value_type == pa.string()
+    outer = nested_result
+    assert isinstance(outer.value_type, pa.ListType)
+    inner = outer.value_type
+    assert inner.value_type == pa.string()
 
 
 def test_resolve_optional_type() -> None:
@@ -98,6 +101,8 @@ def test_do_not_use_serialisation_alias() -> None:
     schema = pydantic_to_pyarrow_schema(SomeModel)
     assert "one" in schema and "two" in schema
     assert schema["one"] == pa.int64()
+    # Field is a list of strings -> ListType whose value_type is string
+    assert isinstance(schema["two"], pa.ListType)
     assert schema["two"].value_type == pa.string()
 
 
@@ -110,9 +115,10 @@ def test_nested_pydantic_models() -> None:
 
     schema = pydantic_to_pyarrow_schema(SomeModel)
     assert isinstance(schema["one"], pa.ListType)
-    assert isinstance(schema["one"].value_type, pa.StructType)
+    list_type = schema["one"]
+    assert isinstance(list_type.value_type, pa.StructType)
 
-    fields = _get_struct_fields(schema["one"].value_type)
+    fields = _get_struct_fields(list_type.value_type)
     assert fields == {"two": pa.int64()}
 
 

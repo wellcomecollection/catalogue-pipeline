@@ -85,7 +85,7 @@ def python_type_to_pyarrow(annotation: typing.Any) -> pa.DataType:
     )
 
 
-def pydantic_to_pyarrow_schema(model_class: type[BaseModel]) -> dict:
+def pydantic_to_pyarrow_schema(model_class: type[BaseModel]) -> dict[str, pa.DataType]:
     """Convert a Pydantic model into a pyarrow schema"""
     schema = {}
     for field_name, field in model_class.model_fields.items():
