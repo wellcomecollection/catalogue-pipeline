@@ -9,20 +9,29 @@ module "transformer_lambda" {
   filename = data.archive_file.empty_zip.output_path
 
   handler     = "steps.transformer.lambda_handler"
-  memory_size = 1024
+  memory_size = 4096
   timeout     = 600
+
+  vpc_config = {
+    subnet_ids = local.network_config.subnets
+    security_group_ids = [
+      aws_security_group.egress.id,
+      local.network_config.ec_privatelink_security_group_id,
+    ]
+  }
 
   environment = {
     variables = {
       PIPELINE_DATE = local.pipeline_date
+      INDEX_DATE    = local.index_date
     }
   }
 }
 
 # Attach read-only Iceberg access policy to transformer lambda
-resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
+resource "aws_iam_role_policy" "transformer_lambda_iceberg_write" {
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.iceberg_read.json
+  policy = data.aws_iam_policy_document.iceberg_write.json
 }
 
 # Attach S3 read policy (same as loader) to transformer lambda

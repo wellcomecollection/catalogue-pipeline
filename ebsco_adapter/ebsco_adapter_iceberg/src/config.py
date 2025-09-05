@@ -24,6 +24,7 @@ ES_LOCAL_SCHEME = os.environ.get("ES_LOCAL_SCHEME", "http")
 ES_LOCAL_API_KEY = os.environ.get("ES_LOCAL_API_KEY")
 
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
+INDEX_DATE = os.getenv("INDEX_DATE")  # New optional variable for index date
 
 # EBSCO Adapter Trigger Configuration (moved from steps/trigger.py)
 SSM_PARAM_PREFIX = "/catalogue_pipeline/ebsco_adapter"
