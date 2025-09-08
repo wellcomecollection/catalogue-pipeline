@@ -1,3 +1,10 @@
+"""Trigger step for the EBSCO adapter.
+
+Fetches the latest valid MARC XML file from the source FTP server, uploads it
+to S3 if not already present, and emits a loader event (job-scoped) pointing to
+the chosen S3 object.
+"""
+
 import argparse
 import re
 import tempfile
@@ -18,15 +25,6 @@ from models.step_events import (
     EbscoAdapterTriggerEvent,
 )
 from utils.aws import get_ssm_parameter, list_s3_keys
-
-"""Trigger step: now only responsible for syncing latest source file to S3.
-
-Previously this step also looked up prior processing metadata and threaded a
-``changeset_id`` downstream; that responsibility has been moved to the loader
-which can now independently decide whether to short‑circuit.
-"""
-
-# No tracking imports needed here anymore.
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
