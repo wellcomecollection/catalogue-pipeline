@@ -1,3 +1,10 @@
+"""Loader step for the EBSCO adapter.
+
+Reads a MARC XML file (local path or S3 URI), extracts record IDs + raw XML,
+and upserts them into the Iceberg table (Glue or local). Returns a changeset
+identifier used by the transformer; skips work if the file was already loaded.
+"""
+
 import argparse
 from datetime import datetime
 from typing import IO, Any, cast

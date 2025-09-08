@@ -1,8 +1,8 @@
-"""
-Transformer step for EBSCO adapter pipeline.
+"""Transformer step for the EBSCO adapter.
 
-Transforms data from the loader output into the final format for downstream
-processing (currently indexing into Elasticsearch).
+Converts Iceberg loader output (all records or a changeset) into `SourceWork` /
+`DeletedWork` documents and indexes them into Elasticsearch, writing a batch
+ID manifest for downstream consumers; idempotent on previously processed files.
 """
 
 import argparse
