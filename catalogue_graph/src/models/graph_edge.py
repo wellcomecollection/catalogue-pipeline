@@ -114,6 +114,13 @@ class SourceConceptHasIndustry(BaseEdge):
     directed: bool = True
 
 
+class SourceConceptHasFieldOfActivity(BaseEdge):
+    from_type: str = "SourceName"
+    to_type: str = "SourceConcept"
+    relationship: str = "HAS_FIELD_OF_ACTIVITY"
+    directed: bool = True
+
+
 class WorkHasConcept(BaseEdge):
     from_type: str = "Work"
     to_type: str = "Concept"
