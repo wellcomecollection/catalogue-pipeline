@@ -62,6 +62,14 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
 def sync_files(
     ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
 ) -> str:
+    """Ensure the latest FTP source file is present in S3 and return the newest S3 object URI.
+
+    Behaviour:
+      * Identify the most recent valid FTP file.
+      * If that exact file already exists in S3 (determined via list_s3_keys), we do not download it.
+      * Otherwise download to a temp directory then upload via smart_open for consistency with other steps.
+      * Finally, list S3 keys and return the URI of the most recent valid file present (may be newer than FTP file if pre‑seeded).
+    """
     ftp_files = ebsco_ftp.list_files()
     most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
     if most_recent_ftp_file is None:
@@ -72,21 +80,14 @@ def sync_files(
     existing_keys = list_s3_keys(s3_bucket, s3_prefix)
     existing_filenames = {key.split("/")[-1] for key in existing_keys}
 
-    # Check if the file already exists in S3
-    try:
-        s3_store.head_object(Bucket=s3_bucket, Key=s3_key)
-        print(f"File {most_recent_ftp_file} already exists in S3. No need to download.")
+    if most_recent_ftp_file in existing_filenames:
+        print(
+            f"File {most_recent_ftp_file} already exists in s3://{s3_bucket}/{s3_prefix}; reusing."
+        )
         most_recent_s3_object = get_most_recent_valid_file(
             [key.split("/")[-1] for key in existing_keys]
         )
         return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
-    except Exception as e:  # noqa: BLE001 - broad for fallback behaviour
-        if "NoSuchKey" in str(e):
-            print(f"{most_recent_ftp_file} not found in S3. Will download and upload.")
-        else:
-            print(
-                f"Error checking S3 (head_object) for {most_recent_ftp_file}: {e}. Proceeding to download."
-            )
 
     # Need to retrieve + upload the latest FTP file
     try:
@@ -115,9 +116,8 @@ def sync_files(
     # Refresh S3 key listing to determine most recent object to pass downstream
     refreshed_keys = list_s3_keys(s3_bucket, s3_prefix)
     most_recent_s3_object = get_most_recent_valid_file(
-        [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
+        [key.split("/")[-1] for key in refreshed_keys]
     )
-
     return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
 
 
@@ -146,9 +146,7 @@ def handler(
         )
 
     print(f"Sending S3 location downstream: {s3_location}")
-    # We no longer look up prior processing here; loader is responsible for
-    # determining if this source file has already been loaded (and can then
-    # short-circuit).
+
     return EbscoAdapterLoaderEvent(job_id=job_id, file_location=s3_location)
 
 
