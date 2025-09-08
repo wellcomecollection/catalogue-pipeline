@@ -17,12 +17,13 @@ class DisplayRelation(BaseModel):
             id=node.properties.id,
             title=node.properties.label,
             type=node.properties.type,
-            referenceNumber=node.properties.reference_number,
+            referenceNumber=node.properties.hierarchy_reference_number,
             totalParts=total_parts,
         )
 
     @staticmethod
     def from_work_ancestor(ancestor: WorkAncestor) -> "DisplayRelation":
+        # Used for 'Series' relationships
         return DisplayRelation(
             id=None,
             title=ancestor.title,
