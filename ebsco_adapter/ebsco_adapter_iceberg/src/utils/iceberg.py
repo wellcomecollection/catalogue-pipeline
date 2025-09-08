@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 import pyarrow as pa
 import pyarrow.compute as pc
-from pyiceberg.expressions import BooleanExpression, EqualTo, In
+from pyiceberg.expressions import BooleanExpression, EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
@@ -61,6 +61,20 @@ class IcebergTableClient:
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
         return self.table.scan(row_filter=EqualTo("changeset", changeset_id)).to_arrow()
+
+    def get_all_records(self, include_deleted: bool = False) -> pa.Table:
+        """Return all records in the table.
+
+        By default, rows whose content field is null (i.e. soft-deleted) are excluded.
+
+        During a full reindex we are writing into an empty index,
+        so no need to include deleted rows to overwrite documents.
+
+        Set include_deleted=True to return them as well.
+        """
+        if include_deleted:
+            return self.table.scan().to_arrow()
+        return self.table.scan(row_filter=Not(IsNull("content"))).to_arrow()
 
     def _upsert_with_markers(
         self, changes: pa.Table | None, inserts: pa.Table | None

@@ -132,17 +132,28 @@ def test_transformer_creates_deletedwork_for_empty_content(
     assert alive_docs[0]["_source"]["title"] == "Alive Title"
 
 
-def test_transformer_no_changeset_returns_zero(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_transformer_full_retransform_when_no_changeset(
+    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """When no changeset_id is supplied the transformer reprocesses all existing records."""
+    # Seed the table with two MARC records via a changeset so they exist in storage.
+    seed_records = {
+        "ebsFull001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsFull001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Full Title 1</subfield></datafield></record>",
+        "ebsFull002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsFull002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Full Title 2</subfield></datafield></record>",
+    }
+    # Reuse helper to insert (also patches get_local_table to return the real temporary_table)
+    _prepare_changeset(temporary_table, monkeypatch, seed_records)
+
+    # Now call handler with no changeset_id -> full re-transform path
     event = EbscoAdapterTransformerEvent(changeset_id=None, job_id="20250101T1200")
     config = EbscoAdapterTransformerConfig(
         is_local=True, use_glue_table=False, pipeline_date="dev"
     )
-
     result = handler(event=event, config_obj=config)
-    assert result.batches == []
-    assert result.success_count == 0
+
     assert result.failure_count == 0
-    assert MockElasticsearchClient.inputs == []
+    assert result.success_count == 2
+    assert result.batches == [["ebsFull001", "ebsFull002"]]
 
 
 @pytest.mark.parametrize(
