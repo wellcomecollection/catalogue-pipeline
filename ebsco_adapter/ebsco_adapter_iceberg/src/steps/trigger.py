@@ -25,7 +25,15 @@ from models.step_events import (
     EbscoAdapterTriggerEvent,
 )
 from utils.aws import get_ssm_parameter, list_s3_keys
-from utils.tracking import ProcessedFileRecord, is_file_already_processed
+
+"""Trigger step: now only responsible for syncing latest source file to S3.
+
+Previously this step also looked up prior processing metadata and threaded a
+``changeset_id`` downstream; that responsibility has been moved to the loader
+which can now independently decide whether to short‑circuit.
+"""
+
+# No tracking imports needed here anymore.
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
@@ -53,7 +61,7 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
 
 def sync_files(
     ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
-) -> tuple[str, ProcessedFileRecord | None]:
+) -> str:
     ftp_files = ebsco_ftp.list_files()
     most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
     if most_recent_ftp_file is None:
@@ -64,25 +72,21 @@ def sync_files(
     existing_keys = list_s3_keys(s3_bucket, s3_prefix)
     existing_filenames = {key.split("/")[-1] for key in existing_keys}
 
-    if most_recent_ftp_file in existing_filenames:
-        print(
-            f"File {most_recent_ftp_file} already exists in s3://{s3_bucket}/{s3_prefix}; reusing."
-        )
+    # Check if the file already exists in S3
+    try:
+        s3_store.head_object(Bucket=s3_bucket, Key=s3_key)
+        print(f"File {most_recent_ftp_file} already exists in S3. No need to download.")
         most_recent_s3_object = get_most_recent_valid_file(
             [key.split("/")[-1] for key in existing_keys]
         )
-        processed_record = is_file_already_processed(
-            s3_bucket, f"{s3_prefix}/{most_recent_s3_object}", step="loaded"
-        )
-        return (
-            f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
-            processed_record,
-        )
-    except Exception as e:
+        return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
+    except Exception as e:  # noqa: BLE001 - broad for fallback behaviour
         if "NoSuchKey" in str(e):
             print(f"{most_recent_ftp_file} not found in S3. Will download and upload.")
         else:
-            print(f"Error checking S3: {e}. Will proceed with download and upload.")
+            print(
+                f"Error checking S3 (head_object) for {most_recent_ftp_file}: {e}. Proceeding to download."
+            )
 
     # Need to retrieve + upload the latest FTP file
     try:
@@ -114,13 +118,6 @@ def sync_files(
         [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
     )
 
-    processed_record = is_file_already_processed(
-        s3_bucket, f"{s3_prefix}/{most_recent_s3_object}", step="loaded"
-    )
-    return (
-        f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
-        processed_record,
-    )
     return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
 
 
@@ -149,11 +146,10 @@ def handler(
         )
 
     print(f"Sending S3 location downstream: {s3_location}")
-    return EbscoAdapterLoaderEvent(
-        job_id=job_id,
-        file_location=s3_location,
-        changeset_id=(is_processed.changeset_id if is_processed else None),
-    )
+    # We no longer look up prior processing here; loader is responsible for
+    # determining if this source file has already been loaded (and can then
+    # short-circuit).
+    return EbscoAdapterLoaderEvent(job_id=job_id, file_location=s3_location)
 
 
 def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, Any]:

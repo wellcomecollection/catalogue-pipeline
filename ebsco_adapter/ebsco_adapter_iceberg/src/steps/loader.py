@@ -23,7 +23,7 @@ from models.step_events import (
 from schemata import ARROW_SCHEMA
 from table_config import get_glue_table, get_local_table
 from utils.iceberg import IcebergTableClient
-from utils.tracking import record_processed_file
+from utils.tracking import is_file_already_processed, record_processed_file
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
@@ -74,14 +74,14 @@ def handler(
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
-    # Short-circuit: if we already have a changeset_id, skip re-processing
-    # and hand it straight to the transformer.
-    if event.changeset_id is not None:
+    prior_record = is_file_already_processed(event.file_location, step="loaded")
+
+    if prior_record:
         print(
             "Source file previously processed; skipping loader work and forwarding prior changeset_id"
         )
         return EbscoAdapterTransformerEvent(
-            changeset_id=event.changeset_id,
+            changeset_id=prior_record.changeset_id,
             job_id=event.job_id,
             index_date=event.index_date,
             file_location=event.file_location,
@@ -150,11 +150,7 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
-    event = EbscoAdapterLoaderEvent(
-        file_location=args.xmlfile,
-        changeset_id=None,
-        job_id=job_id,
-    )
+    event = EbscoAdapterLoaderEvent(file_location=args.xmlfile, job_id=job_id)
     config_obj = EbscoAdapterLoaderConfig(use_glue_table=args.use_glue_table)
 
     return handler(event=event, config_obj=config_obj)
@@ -167,8 +163,7 @@ def main() -> None:
         if not args.file_location
         else handler(
             EbscoAdapterLoaderEvent(
-                file_location=args.xmlfile,
-                changeset_id=None,
+                file_location=args.file_location,
                 job_id=datetime.now().strftime("%Y%m%dT%H%M"),
             ),
             EbscoAdapterLoaderConfig(use_glue_table=False),
