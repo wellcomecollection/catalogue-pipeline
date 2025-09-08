@@ -46,7 +46,7 @@ class CatalogueWorkIdentifiersTransformer(BaseTransformer):
         if raw_work.path_identifier is not None:
             return PathIdentifier(
                 id=raw_work.path_identifier,
-                label=None,
+                label=raw_work.path_label,
             )
 
         return None

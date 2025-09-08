@@ -94,6 +94,15 @@ class RawCatalogueWork:
         return self.raw_path.rstrip("/")
 
     @property
+    def path_label(self) -> str | None:
+        label: str | None = self.work_data.get("collectionPath", {}).get("label")
+
+        if label is None or len(label) == 0:
+            return None
+
+        return label
+
+    @property
     def path_identifier(self) -> str | None:
         if self.path is None:
             return None
