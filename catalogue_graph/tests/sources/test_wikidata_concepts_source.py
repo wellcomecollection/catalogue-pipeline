@@ -48,7 +48,7 @@ def test_wikidata_concepts_source_edges() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"], "2020-05-05")
     _add_mock_wikidata_requests("edges", "concepts")
 
-    mesh_concepts_source = WikidataLinkedOntologySource(
+    loc_concepts_source = WikidataLinkedOntologySource(
         linked_transformer="loc_concepts",
         entity_type="edges",
         pipeline_date="2020-05-05",

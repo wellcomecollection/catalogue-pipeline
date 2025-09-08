@@ -220,7 +220,7 @@ class WikidataLinkedOntologySource(BaseSource):
         print("Streaming HAS_INDUSTRY edges...")
         for edge in self._stream_all_has_industry_edges():
             if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
-                edge["to_id"], "wikidata"
+                edge["to_id"], "wikidata", self.pipeline_date
             ):
                 yield {**edge, "type": "HAS_INDUSTRY"}
 
@@ -252,7 +252,7 @@ class WikidataLinkedOntologySource(BaseSource):
             print("Streaming HAS_FOUNDER edges...")
             for edge in self._stream_all_has_founder_edges():
                 if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
-                    edge["to_id"], "wikidata"
+                    edge["to_id"], "wikidata", self.pipeline_date
                 ):
                     yield {**edge, "type": "HAS_FOUNDER"}
 
