@@ -40,7 +40,7 @@ class ElasticsearchBaseTransformer:
             # Explicit schema ensures reliable types (Polars inference is not reliable).
             schema = pydantic_to_pyarrow_schema(type(es_documents[0]))
             table = pa.Table.from_pylist(
-                [d.model_dump() for d in es_documents],
+                [d.model_dump(by_alias=False) for d in es_documents],
                 schema=pa.schema(schema),
             )
             pl.DataFrame(table).write_parquet(file)

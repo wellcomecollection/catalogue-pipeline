@@ -1,5 +1,4 @@
-from pydantic import BaseModel
-
+from ingestor.models.shared.serialisable import ElasticsearchModel
 from utils.types import DisplayWorkType
 
 from .concept import DisplayConcept, DisplayContributor, DisplayGenre, DisplaySubject
@@ -13,16 +12,16 @@ from .production_event import DisplayProductionEvent
 from .relation import DisplayRelation
 
 
-class DisplayWork(BaseModel):
+class DisplayWork(ElasticsearchModel):
     id: str
     title: str | None
-    alternativeTitles: list[str]
-    referenceNumber: str | None
+    alternative_titles: list[str]
+    reference_number: str | None
     description: str | None
-    physicalDescription: str | None
-    workType: DisplayIdLabel | None
+    physical_description: str | None
+    work_type: DisplayIdLabel | None
     lettering: str | None
-    createdDate: DisplayConcept | None
+    created_date: DisplayConcept | None
     contributors: list[DisplayContributor]
     identifiers: list[DisplayIdentifier]
     subjects: list[DisplaySubject]
@@ -36,10 +35,10 @@ class DisplayWork(BaseModel):
     edition: str | None
     notes: list[DisplayNote]
     duration: int | None
-    currentFrequency: str | None
-    formerFrequency: list[str]
+    current_frequency: str | None
+    former_frequency: list[str]
     designation: list[str]
     images: list[DisplayId]
     parts: list[DisplayRelation]
-    partOf: list[DisplayRelation]
+    part_of: list[DisplayRelation]
     type: DisplayWorkType

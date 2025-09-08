@@ -5,24 +5,25 @@ from pydantic import BaseModel
 
 from ingestor.models.shared.identifier import Identifiers, SourceIdentifier
 from ingestor.models.shared.merge_candidate import MergeCandidate
+from ingestor.models.shared.serialisable import ElasticsearchModel
 
 
-class SourceWorkDebugInformation(BaseModel):
+class SourceWorkDebugInformation(ElasticsearchModel):
     id: str
     identifier: SourceIdentifier
     version: int
-    modifiedTime: datetime
+    modified_time: datetime
 
 
-class BaseWorkDebug(BaseModel):
+class BaseWorkDebug(ElasticsearchModel):
     source: SourceWorkDebugInformation
-    mergedTime: datetime
-    indexedTime: datetime
-    mergeCandidates: list[MergeCandidate]
+    merged_time: datetime
+    indexed_time: datetime
+    merge_candidates: list[MergeCandidate]
 
 
 class VisibleWorkDebug(BaseWorkDebug):
-    redirectSources: list[Identifiers]
+    redirect_sources: list[Identifiers]
 
 
 class InvisibleReason(BaseModel):
@@ -39,7 +40,7 @@ class InvisibleReason(BaseModel):
 
 
 class InvisibleWorkDebug(BaseWorkDebug):
-    invisibilityReasons: list[InvisibleReason]
+    invisibility_reasons: list[InvisibleReason]
 
 
 class RedirectedWorkDebug(BaseWorkDebug):
@@ -52,7 +53,7 @@ class DeletedReason(BaseModel):
 
 
 class DeletedWorkDebug(BaseWorkDebug):
-    deletedReason: DeletedReason
+    deleted_reason: DeletedReason
 
 
 WorkDebug = (

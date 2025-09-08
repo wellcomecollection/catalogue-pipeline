@@ -10,8 +10,8 @@ from utils.types import WorkStatus
 class IndexableWork(IndexableRecord):
     query: QueryWork
     display: DisplayWork
-    aggregatableValues: WorkAggregatableValues
-    filterableValues: WorkFilterableValues
+    aggregatable_values: WorkAggregatableValues
+    filterable_values: WorkFilterableValues
     type: WorkStatus
     debug: WorkDebug
 
