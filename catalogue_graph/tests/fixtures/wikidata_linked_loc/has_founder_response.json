@@ -4,11 +4,11 @@
       {
         "fromItem": {
           "type": "uri",
-          "value": "http://www.wikidata.org/entity/Q101"
+          "value": "http://www.wikidata.org/entity/Q1"
         },
         "toItem": {
           "type": "uri",
-          "value": "http://www.wikidata.org/entity/Q100"
+          "value": "http://www.wikidata.org/entity/Q101"
         }
       }
     ]
