@@ -16,7 +16,6 @@
         "label": "Circle of State Librarians Conference 1979 : Kew, England)",
         "displayLabel": "Circle of State Librarians Conference 1979 : Kew, England)",
         "alternativeLabels": [],
-        "description": null,
         "type": "Meeting",
         "relatedConcepts": {
           "relatedTo": [],
@@ -63,7 +62,6 @@
         "label": "Nelson, Geoffrey B. (Geoffrey Brian)",
         "displayLabel": "Nelson, Geoffrey B. (Geoffrey Brian)",
         "alternativeLabels": [],
-        "description": null,
         "type": "Person",
         "relatedConcepts": {
           "relatedTo": [],
@@ -97,7 +95,6 @@
         "label": "Wolff, G.",
         "displayLabel": "Wolff, G.",
         "alternativeLabels": [],
-        "description": null,
         "type": "Person",
         "relatedConcepts": {
           "relatedTo": [],
@@ -144,7 +141,6 @@
         "label": "Jones, John E.",
         "displayLabel": "Jones, John E.",
         "alternativeLabels": [],
-        "description": null,
         "type": "Person",
         "relatedConcepts": {
           "relatedTo": [],
@@ -185,7 +181,6 @@
         "label": "Hulverscheidt, Marion, 1970-",
         "displayLabel": "Hulverscheidt, Marion, 1970-",
         "alternativeLabels": [],
-        "description": null,
         "type": "Person",
         "relatedConcepts": {
           "relatedTo": [],
@@ -232,7 +227,6 @@
         "label": "Zimmermann, Wilhelm",
         "displayLabel": "Zimmermann, Wilhelm",
         "alternativeLabels": [],
-        "description": null,
         "type": "Person",
         "relatedConcepts": {
           "relatedTo": [],
@@ -285,7 +279,6 @@
         "alternativeLabels": [
           "June Gaur"
         ],
-        "description": null,
         "type": "Person",
         "relatedConcepts": {
           "relatedTo": [],
@@ -340,7 +333,6 @@
           "South Cambridgeshire (Cambridgeshire)",
           "South Cambridgeshire, Eng."
         ],
-        "description": null,
         "type": "Subject",
         "relatedConcepts": {
           "relatedTo": [],
@@ -414,7 +406,6 @@
         "label": "Orel, Harold, 1926-2017",
         "displayLabel": "Harold Orel",
         "alternativeLabels": [],
-        "description": null,
         "type": "Person",
         "relatedConcepts": {
           "relatedTo": [],
@@ -437,7 +428,6 @@
     "_source": {
       "display": {
         "alternativeLabels": [],
-        "description": null,
         "displayLabel": "Brown, Bruce, 1942-",
         "id": "a22d7muq",
         "identifiers": [],
