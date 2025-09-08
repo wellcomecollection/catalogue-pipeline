@@ -37,7 +37,7 @@ def generate_operations(
         yield {
             "_index": index_name,
             "_id": datum.get_id(),
-            "_source": datum.model_dump(),
+            "_source": datum.model_dump(exclude_none=True),
         }
 
 
