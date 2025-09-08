@@ -23,6 +23,7 @@ from models.work import BaseWork, DeletedWork, SourceWork
 from table_config import get_glue_table, get_local_table
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient
+from utils.tracking import record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
@@ -165,7 +166,7 @@ def handler(
     # We now allow a full re-transform when no changeset is supplied
     full_retransform = event.changeset_id is None
     if full_retransform:
-        print("No changeset_id provided; performing full re-transform of all records.")
+        print("No changeset_id provided; performing full reindex of records.")
     else:
         print(f"Processing loader output with changeset_id: {event.changeset_id}")
 
@@ -189,10 +190,8 @@ def handler(
     table_client = IcebergTableClient(table)
 
     if full_retransform:
-        # For a full re-transform we need deleted rows too so that deletion markers
-        # are re-sent downstream if required.
-        pa_table = table_client.get_all_records(include_deleted=True)
-        print(f"Retrieved ALL {len(pa_table)} records from table for full re-transform")
+        pa_table = table_client.get_all_records()
+        print(f"Retrieved {len(pa_table)} records from table for reindex")
     else:
         pa_table = table_client.get_records_by_changeset(event.changeset_id)  # type: ignore[arg-type]
         print(
@@ -236,6 +235,17 @@ def handler(
     print(
         f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={total_failed}"
     )
+
+    # Record completion of transformer step for traceability if we have an
+    # originating file_location (skip for full reindex runs not tied to
+    # a single source file).
+    if event.file_location:
+        record_processed_file(
+            job_id=event.job_id,
+            file_location=event.file_location,
+            changeset_id=event.changeset_id,
+            step="transformed",
+        )
 
     # No longer raise on failures; caller can inspect failure_count
     return result
@@ -285,7 +295,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, job_id=args.job_id
+        changeset_id=args.changeset_id, job_id=args.job_id, file_location=None
     )
     config_obj = EbscoAdapterTransformerConfig(
         is_local=True,
