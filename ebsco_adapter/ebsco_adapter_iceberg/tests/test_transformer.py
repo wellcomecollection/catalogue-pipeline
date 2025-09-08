@@ -1,3 +1,4 @@
+import json
 from contextlib import suppress  # for ruff SIM105 fix
 from typing import cast  # added for dummy ES client
 
@@ -5,19 +6,26 @@ import pyarrow as pa
 import pytest
 from elasticsearch import Elasticsearch  # added
 
-from models.step_events import EbscoAdapterTransformerEvent
+from models.step_events import (
+    EbscoAdapterTransformerEvent,
+    EbscoAdapterTransformerResult,
+)
 from models.work import SourceWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
-    EbscoAdapterTransformerResult,
     handler,
     load_data,
     transform,
 )
 from utils.iceberg import IcebergTableClient
+from utils.tracking import ProcessedFileRecord
 
 from .helpers import data_to_namespaced_table
-from .test_mocks import MockElasticsearchClient, MockSecretsManagerClient
+from .test_mocks import (
+    MockElasticsearchClient,
+    MockSecretsManagerClient,
+    MockSmartOpen,
+)
 
 # --------------------------------------------------------------------------------------
 # Helpers
@@ -85,6 +93,45 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
 # --------------------------------------------------------------------------------------
 
 
+def test_transformer_short_circuit_when_prior_processed_detected(
+    monkeypatch: pytest.MonkeyPatch, temporary_table: pa.Table
+) -> None:
+    """Transformer should short-circuit using existing tracking file for the same source file.
+
+    We simulate a prior transformed tracking JSON so the handler exits early without indexing.
+    """
+    file_uri = "s3://bucket/path/file.xml"
+    tracking_uri = f"{file_uri}.transformed.json"
+    # Existing tracking file with payload including prior batch_file_location
+    prior_result = EbscoAdapterTransformerResult(
+        job_id="20250101T1200",
+        batch_file_location="s3://bucket/path/20250101T1200.json",
+        success_count=10,
+        failure_count=0,
+    )
+    tracking_record = ProcessedFileRecord(
+        job_id="20250101T1200", step="transformed", payload=prior_result.model_dump()
+    )
+    MockSmartOpen.mock_s3_file(tracking_uri, json.dumps(tracking_record.model_dump()))
+
+    # Prepare an event that would otherwise trigger processing (with a changeset id)
+    event = EbscoAdapterTransformerEvent(
+        changeset_id="new-change-456", job_id="20250101T1200", file_location=file_uri
+    )
+    config = EbscoAdapterTransformerConfig(
+        is_local=True, use_glue_table=False, pipeline_date="dev"
+    )
+
+    # Run handler
+    result = handler(event=event, config_obj=config)
+
+    # Expect short-circuit with preserved prior batch_file_location and no ES interactions
+    assert result.batch_file_location == prior_result.batch_file_location
+    assert result.success_count == 0
+    assert result.failure_count == 0
+    assert MockElasticsearchClient.inputs == []
+
+
 def test_transformer_end_to_end_with_local_table(
     temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -96,9 +143,14 @@ def test_transformer_end_to_end_with_local_table(
 
     result = _run_transform(changeset_id, index_date="2025-01-01")
 
-    assert result.batches == [list(records_by_id.keys())]
+    assert result.batch_file_location is not None
     assert result.success_count == 2
     assert result.failure_count == 0
+    # Validate file contents written to mock S3
+    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    with open(batch_contents_path, encoding="utf-8") as f:
+        data = json.loads(f.read())
+    assert data == [list(records_by_id.keys())]
     titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
@@ -116,8 +168,12 @@ def test_transformer_creates_deletedwork_for_empty_content(
     result = _run_transform(changeset_id, index_date="2025-03-01")
 
     # Both IDs should appear (one DeletedWork, one SourceWork)
-    assert result.batches == [["ebsDel001", "ebsDel002"]]
+    assert result.batch_file_location is not None
     assert result.success_count == 2
+    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    with open(batch_contents_path, encoding="utf-8") as f:
+        data = json.loads(f.read())
+    assert data == [["ebsDel001", "ebsDel002"]]
     deleted_docs = [
         op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel001"
     ]
@@ -153,7 +209,11 @@ def test_transformer_full_retransform_when_no_changeset(
 
     assert result.failure_count == 0
     assert result.success_count == 2
-    assert result.batches == [["ebsFull001", "ebsFull002"]]
+    assert result.batch_file_location is not None
+    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    with open(batch_contents_path, encoding="utf-8") as f:
+        data = json.loads(f.read())
+    assert data == [["ebsFull001", "ebsFull002"]]
 
 
 @pytest.mark.parametrize(
