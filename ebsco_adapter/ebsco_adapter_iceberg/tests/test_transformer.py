@@ -5,10 +5,10 @@ import pyarrow as pa
 import pytest
 from elasticsearch import Elasticsearch  # added
 
+from models.step_events import EbscoAdapterTransformerEvent
 from models.work import SourceWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
-    EbscoAdapterTransformerEvent,
     EbscoAdapterTransformerResult,
     handler,
     load_data,

@@ -5,7 +5,7 @@ from unittest.mock import Mock as _Mock
 import pytest
 
 from ebsco_ftp import EbscoFtp
-from steps.loader import EbscoAdapterLoaderEvent
+from models.step_events import EbscoAdapterLoaderEvent
 from steps.trigger import (
     EventBridgeScheduledEvent,
     get_most_recent_valid_file,
@@ -125,7 +125,7 @@ class TestSyncFiles:
 
         expected_result = (
             f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240325-1.xml",
-            False,
+            None,
         )
         assert result == expected_result
 
@@ -167,7 +167,7 @@ class TestSyncFiles:
         # Should return S3 URL without downloading or uploading
         expected_result = (
             f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml",
-            False,
+            None,
         )
         assert result == expected_result
         self.mock_ebsco_ftp.download_file.assert_not_called()
@@ -192,7 +192,7 @@ class TestSyncFiles:
             "test-prefix/ebz-s7451719-20240322-1.xml"
         ]
 
-        mock_is_file_processed.return_value = True
+        mock_is_file_processed.return_value = object()  # truthy sentinel
 
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -204,7 +204,7 @@ class TestSyncFiles:
         # Should return S3 URL without downloading or uploading
         expected_result = (
             f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml",
-            True,
+            mock_is_file_processed.return_value,
         )
         assert result == expected_result
         self.mock_ebsco_ftp.download_file.assert_not_called()
@@ -286,7 +286,7 @@ class TestSyncFiles:
         # Should select the newest file in s3 (20240428)
         expected_result = (
             f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240428-1.xml",
-            False,
+            None,
         )
         assert result == expected_result
 
@@ -320,7 +320,7 @@ class TestSyncFiles:
 
         expected_result = (
             f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml",
-            False,
+            None,
         )
         assert result == expected_result
 
