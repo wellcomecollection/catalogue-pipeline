@@ -140,10 +140,12 @@ def handler(
 
 
 def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, Any]:
+    eventbridge_event = EventBridgeScheduledEvent.model_validate(event)
+
     # Convert external scheduled event into internal trigger event with job_id
-    job_id = datetime.fromisoformat(event.time.replace("Z", "+00:00")).strftime(
-        "%Y%m%dT%H%M"
-    )
+    job_id = datetime.fromisoformat(
+        eventbridge_event.time.replace("Z", "+00:00")
+    ).strftime("%Y%m%dT%H%M")
     internal_event = EbscoAdapterTriggerEvent(job_id=job_id)
     return handler(internal_event, EbscoAdapterTriggerConfig()).model_dump()
 

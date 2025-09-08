@@ -62,7 +62,8 @@ data "aws_iam_policy_document" "s3_write" {
 
     resources = [
       "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter",
-      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*"
+      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*",
+      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/batches/*"
     ]
   }
 }
