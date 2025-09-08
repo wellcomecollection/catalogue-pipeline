@@ -21,11 +21,14 @@ from pymarc import parse_xml_to_array
 
 import config
 from models.marc import MarcRecord
-from models.step_events import EbscoAdapterTransformerEvent
+from models.step_events import (
+    EbscoAdapterTransformerEvent,
+    EbscoAdapterTransformerResult,
+)
 from models.work import BaseWork, DeletedWork, SourceWork
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient
-from utils.tracking import record_processed_file
+from utils.tracking import is_file_already_processed, record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
@@ -38,17 +41,27 @@ class EbscoAdapterTransformerConfig(BaseModel):
     index_date: str | None = None
 
 
-class EbscoAdapterTransformerResult(BaseModel):
-    """Result of transformer execution.
+def _write_batch_file(batches_ids: list[list[str]], job_id: str) -> str | None:
+    """Persist batch id lists to S3 and return the S3 URI, or None on failure.
 
-    with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
-        # Write NDJSON: one JSON object per line -> one Distributed Map item per line
-        # Line shape: {"ids": ["id1", "id2", ...]}
-        for ids in batches_ids:
-            f.write(json.dumps({"ids": ids}) + "\n")
+    The file format is a JSON array of arrays (each inner list is the ordered
+    sequence of work IDs for a processed Arrow RecordBatch). We keep this
+    separate from the step result to avoid large payloads in state transitions.
+    """
+    if not batches_ids:
+        return None
 
-    print(f"Wrote batch id file to {batch_file_location}")
-    return batch_file_location, bucket, key.as_posix()
+    batch_file_location = (
+        f"s3://{config.S3_BUCKET}/{config.S3_PREFIX.rstrip('/')}/{job_id}.json"
+    )
+    try:
+        with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
+            f.write(json.dumps(batches_ids))
+        print(f"Wrote batch id file to {batch_file_location}")
+        return batch_file_location
+    except Exception as exc:  # pragma: no cover - defensive logging only
+        print(f"Failed to write batch id file {batch_file_location}: {exc}")
+        return None
 
 
 def transform(work_id: str, content: str) -> list[SourceWork]:
@@ -191,7 +204,28 @@ def process_batches(
     print(f"Processing event: {event}")
     print(f"Received job_id: {event.job_id}")
 
-    # We now allow a full re-transform when no changeset is supplied
+    # Short-circuit if this file has already been transformed (mirrors loader behaviour)
+    if event.file_location:
+        prior_record = is_file_already_processed(
+            event.file_location, step="transformed"
+        )
+        if prior_record:
+            print(
+                "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
+            )
+            prior_batch = prior_record.get("batch_file_location")
+            idx_date = (
+                event.index_date or config_obj.index_date or config_obj.pipeline_date
+            )
+            return EbscoAdapterTransformerResult(
+                index_date=idx_date,
+                job_id=event.job_id,
+                batch_file_location=prior_batch,
+                success_count=0,
+                failure_count=0,
+            )
+
+    # Perform a reindex when no changeset is supplied
     full_retransform = event.changeset_id is None
     if full_retransform:
         print("No changeset_id provided; performing full reindex of records.")
@@ -254,9 +288,8 @@ def process_batches(
         if ids:
             batches_ids.append(ids)
 
-    batch_file_location, batch_file_bucket, batch_file_key = _write_batch_file(
-        batches_ids, job_id, changeset_id=changeset_id
-    )
+    # Persist batch ids (if any) and get location for downstream step
+    batch_file_location = _write_batch_file(batches_ids, event.job_id)
 
     total_batches = len(batches_ids)
     total_ids = sum(len(b) for b in batches_ids)
@@ -264,18 +297,23 @@ def process_batches(
         f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={total_failed}"
     )
 
-    # Record completion of transformer step for traceability if we have an
-    # originating file_location (skip for full reindex runs not tied to
-    # a single source file).
+    idx_date = event.index_date or config_obj.index_date or config_obj.pipeline_date
+    result = EbscoAdapterTransformerResult(
+        index_date=idx_date,
+        job_id=event.job_id,
+        batch_file_location=batch_file_location,
+        success_count=total_success,
+        failure_count=total_failed,
+    )
+
     if event.file_location:
         record_processed_file(
             job_id=event.job_id,
             file_location=event.file_location,
-            changeset_id=event.changeset_id,
             step="transformed",
+            payload_obj=result,
         )
 
-    # No longer raise on failures; caller can inspect failure_count
     return result
 
 
