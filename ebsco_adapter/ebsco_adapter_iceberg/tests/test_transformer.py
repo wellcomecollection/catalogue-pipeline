@@ -4,14 +4,11 @@ from typing import cast  # added for dummy ES client
 import pyarrow as pa
 import pytest
 
-import config as adapter_config
-from models.step_events import (
-    EbscoAdapterTransformerEvent,
-    EbscoAdapterTransformerResult,
-)
+from models.step_events import EbscoAdapterTransformerEvent
 from models.work import SourceWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
+    EbscoAdapterTransformerResult,
     handler,
     load_data,
     transform,

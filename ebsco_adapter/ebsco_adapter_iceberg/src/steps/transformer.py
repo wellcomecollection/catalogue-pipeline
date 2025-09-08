@@ -21,10 +21,7 @@ from pymarc import parse_xml_to_array
 
 import config
 from models.marc import MarcRecord
-from models.step_events import (
-    EbscoAdapterTransformerEvent,
-    EbscoAdapterTransformerResult,
-)
+from models.step_events import EbscoAdapterTransformerEvent
 from models.work import BaseWork, DeletedWork, SourceWork
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
@@ -41,20 +38,8 @@ class EbscoAdapterTransformerConfig(BaseModel):
     index_date: str | None = None
 
 
-class EbscoAdapterTransformerEvent(BaseModel):
-    changeset_id: str | None = None
-    index_date: str | None = None
-
-
-def _write_batch_file(
-    batches_ids: list[list[str]], job_id: str, *, changeset_id: str | None
-) -> tuple[str, str, str]:
-    # Build the S3 key using PurePosixPath for clean joining (no leading // issues)
-    # Prefer .ndjson to signal line-delimited JSON (supported by Step Functions)
-    file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.ndjson"
-    key = PurePosixPath(config.BATCH_S3_PREFIX) / file_name
-    bucket = config.S3_BUCKET
-    batch_file_location = f"s3://{bucket}/{key.as_posix()}"
+class EbscoAdapterTransformerResult(BaseModel):
+    """Result of transformer execution.
 
     with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
         # Write NDJSON: one JSON object per line -> one Distributed Map item per line
@@ -239,7 +224,9 @@ def process_batches(
         print(f"Retrieved ALL {len(pa_table)} records from table for full re-transform")
     else:
         pa_table = table_client.get_records_by_changeset(event.changeset_id)  # type: ignore[arg-type]
-        print(f"Retrieved {len(pa_table)} records from table for changeset {event.changeset_id}")
+        print(
+            f"Retrieved {len(pa_table)} records from table for changeset {event.changeset_id}"
+        )
 
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
