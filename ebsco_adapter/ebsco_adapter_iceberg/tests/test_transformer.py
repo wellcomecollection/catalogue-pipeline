@@ -5,6 +5,7 @@ from typing import cast  # added for dummy ES client
 import pyarrow as pa
 import pytest
 
+import config as adapter_config
 from models.step_events import (
     EbscoAdapterTransformerEvent,
     EbscoAdapterTransformerResult,
@@ -209,10 +210,40 @@ def test_transformer_full_retransform_when_no_changeset(
     assert result.failure_count == 0
     assert result.success_count == 2
     assert result.batch_file_location is not None
+    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.S3_PREFIX}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.json"
+    assert result.batch_file_location == expected_reindex_path
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
         data = json.loads(f.read())
     assert data == [["ebsFull001", "ebsFull002"]]
+
+
+def test_transformer_batch_file_location_with_changeset(
+    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """When a changeset exists the batch file path uses the changeset pattern under the batches prefix (file_location irrelevant)."""
+    job_id = "20250101T1200"
+    records_by_id = {
+        "ebsReIdx001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>X</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+
+    event = EbscoAdapterTransformerEvent(
+        changeset_id=changeset_id,
+        job_id=job_id,
+    )
+    config = EbscoAdapterTransformerConfig(
+        is_local=True, use_glue_table=False, pipeline_date="dev"
+    )
+    result = handler(event=event, config_obj=config)
+
+    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.S3_PREFIX}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.json"
+    assert result.batch_file_location == expected_path
+    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    with open(batch_contents_path, encoding="utf-8") as f:
+        data = json.loads(f.read())
+    # Only one batch with a single id
+    assert len(data) == 1 and len(data[0]) == 1
 
 
 @pytest.mark.parametrize(
@@ -374,7 +405,7 @@ def test_transformer_raises_when_batch_file_write_fails(
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_rest_api_table=False, pipeline_date="dev"
+        is_local=True, use_glue_table=False, pipeline_date="dev"
     )
 
     with pytest.raises(OSError, match="simulated write failure"):
