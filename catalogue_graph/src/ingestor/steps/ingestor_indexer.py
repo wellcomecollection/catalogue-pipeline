@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-
 import argparse
+import json
 import typing
 from collections.abc import Generator
 
@@ -34,10 +34,11 @@ def generate_operations(
     index_name: str, indexable_data: list[IndexableRecord]
 ) -> Generator[dict]:
     for datum in indexable_data:
+        source = json.loads(datum.model_dump_json(exclude_none=True))
         yield {
             "_index": index_name,
             "_id": datum.get_id(),
-            "_source": datum.model_dump(exclude_none=True),
+            "_source": source,
         }
 
 

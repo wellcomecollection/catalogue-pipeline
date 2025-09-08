@@ -1,4 +1,3 @@
-import json
 import os
 from collections.abc import Generator
 from typing import IO, Any
@@ -46,7 +45,7 @@ class ElasticsearchBaseTransformer:
             pl.DataFrame(table).write_parquet(file)
         elif load_format == "jsonl":
             for doc in es_documents:
-                line = (json.dumps(doc.model_dump()) + "\n").encode("utf-8")
+                line = (doc.model_dump_json() + "\n").encode("utf-8")
                 file.write(line)
         else:
             raise ValueError(f"Unknown load file format {load_format}")
