@@ -46,8 +46,8 @@ data "aws_iam_policy_document" "neptune_s3_read_only_policy" {
       "s3:ListBucket"
     ]
     resources = [
-      aws_s3_bucket.neptune_bulk_upload_bucket.arn,
-      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
+      aws_s3_bucket.catalogue_graph_bucket.arn,
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/*"
     ]
   }
 }

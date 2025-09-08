@@ -1,8 +1,9 @@
 from collections.abc import Generator
 
+from models.events import IncrementalWindow
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
-from sources.elasticsearch_source import ElasticsearchSource
+from sources.elasticsearch_source import MergedWorksSource
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork
@@ -23,8 +24,15 @@ ES_FIELDS = [
 
 
 class CatalogueWorksTransformer(BaseTransformer):
-    def __init__(self, pipeline_date: str | None, is_local: bool):
-        self.source = ElasticsearchSource(pipeline_date, is_local, ES_QUERY, ES_FIELDS)
+    def __init__(
+        self,
+        pipeline_date: str,
+        window: IncrementalWindow | None,
+        is_local: bool,
+    ):
+        self.source = MergedWorksSource(
+            pipeline_date, ES_QUERY, ES_FIELDS, window, is_local
+        )
 
     def transform_node(self, raw_node: dict) -> Work:
         raw_work = RawCatalogueWork(raw_node)

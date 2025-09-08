@@ -11,15 +11,20 @@ from models.graph_edge import (
 from models.graph_node import SourceConcept
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 from transformers.base_transformer import BaseTransformer, EntityType
-from utils.types import OntologyType
+from utils.types import TransformerType
 
 from .raw_concept import RawWikidataConcept
 
 
 class WikidataConceptsTransformer(BaseTransformer):
-    def __init__(self, entity_type: EntityType, linked_ontology: OntologyType):
+    def __init__(
+        self,
+        linked_transformer: TransformerType,
+        entity_type: EntityType,
+        pipeline_date: str,
+    ):
         self.source = WikidataLinkedOntologySource(
-            "concepts", linked_ontology, entity_type
+            linked_transformer, entity_type, pipeline_date
         )
 
     def transform_node(self, raw_node: dict) -> SourceConcept | None:
