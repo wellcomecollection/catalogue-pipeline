@@ -41,19 +41,18 @@ def record_processed_file(
 
 
 def is_file_already_processed(
-    bucket: str, key: str, step: str = "loaded"
+    file_location: str, step: str = "loaded"
 ) -> ProcessedFileRecord | None:
     """Return the stored ``ProcessedFileRecord`` for a step if this file was processed.
 
-    Looks for an object at ``{key}.{step}.json`` within ``bucket``. If present the
-    JSON contents are deserialised & validated. Any failure results in ``None``.
+    Accepts the base *file* S3 URI (e.g. ``s3://bucket/path/file.xml``) and attempts
+    to read ``<file>.{step}.json`` using ``smart_open``. Any error (missing object,
+    invalid JSON, validation issues) results in ``None``.
     """
-    s3_client = boto3.client("s3")
-    tracking_key = f"{key}.{step}.json"
+    tracking_file_uri = f"{file_location}.{step}.json"
     try:
-        obj = s3_client.get_object(Bucket=bucket, Key=tracking_key)
-        body = obj["Body"].read().decode("utf-8")
-        data = json.loads(body)
+        with smart_open.open(tracking_file_uri, "r", encoding="utf-8") as f:
+            data = json.loads(f.read())
         return ProcessedFileRecord.model_validate(data)
     except Exception:
         return None
