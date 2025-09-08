@@ -18,7 +18,7 @@ dependencies = [
     "types-requests",
     "python-dateutil",
     "types-python-dateutil",
-    "pyarrow",
+    "pyarrow~=20.0",
     "pyarrow-stubs"
 ]
 

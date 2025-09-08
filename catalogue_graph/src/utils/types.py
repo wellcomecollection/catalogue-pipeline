@@ -2,7 +2,12 @@ from typing import Literal
 
 NodeType = Literal["concepts", "names", "locations"]
 OntologyType = Literal[
-    "mesh", "loc", "wikidata_linked_mesh", "wikidata_linked_loc", "wikidata"
+    "mesh",
+    "loc",
+    "wikidata_linked_mesh",
+    "wikidata_linked_loc",
+    "wikidata",
+    "catalogue",
 ]
 
 WorkConceptKey = Literal["subjects", "genres", "contributors"]
@@ -35,3 +40,33 @@ WorkStatus = Literal["Visible", "Redirected", "Deleted", "Invisible"]
 IngestorType = Literal["works", "concepts"]
 
 IngestorLoadFormat = Literal["parquet", "jsonl"]
+
+
+LocTransformerType = Literal["loc_concepts", "loc_names", "loc_locations"]
+MeshTransformerType = Literal["mesh_concepts", "mesh_locations"]
+
+WikidataLinkedLocTransformerType = Literal[
+    "wikidata_linked_loc_concepts",
+    "wikidata_linked_loc_locations",
+    "wikidata_linked_loc_names",
+]
+WikidataLinkedMeshTransformerType = Literal[
+    "wikidata_linked_mesh_concepts",
+    "wikidata_linked_mesh_locations",
+]
+WikidataTransformerType = Literal[
+    WikidataLinkedLocTransformerType, WikidataLinkedMeshTransformerType
+]
+CatalogueTransformerType = Literal[
+    "catalogue_concepts", "catalogue_works", "catalogue_work_identifiers"
+]
+TransformerType = Literal[
+    LocTransformerType,
+    MeshTransformerType,
+    WikidataTransformerType,
+    CatalogueTransformerType,
+]
+
+
+EntityType = Literal["nodes", "edges"]
+StreamDestination = Literal["graph", "s3", "sns", "local", "void"]

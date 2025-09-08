@@ -128,7 +128,7 @@ data "aws_iam_policy_document" "s3_bulk_load_read" {
     ]
 
     resources = [
-      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_bulk_loader/*"
     ]
   }
 }
@@ -140,7 +140,7 @@ data "aws_iam_policy_document" "s3_bulk_load_write" {
     ]
 
     resources = [
-      "${aws_s3_bucket.neptune_bulk_upload_bucket.arn}/*"
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_bulk_loader/*"
     ]
   }
 }

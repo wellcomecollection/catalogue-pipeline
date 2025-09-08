@@ -2,7 +2,7 @@ import json
 import math
 
 import pytest
-from test_utils import add_mock_transformer_outputs, load_fixture
+from test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 from test_wikidata_concepts_source import _add_mock_wikidata_requests
 
 from models.graph_edge import SourceConceptSameAs, SourceConceptSameAsAttributes
@@ -12,14 +12,10 @@ from transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataNa
 
 
 def test_wikidata_concepts_nodes_transformer() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("nodes", "concepts")
 
-    transformer = WikidataConceptsTransformer(
-        entity_type="nodes", linked_ontology="loc"
-    )
+    transformer = WikidataConceptsTransformer("loc_concepts", "nodes", "dev")
 
     nodes = list(transformer._stream_entities(entity_type="nodes"))
 
@@ -36,14 +32,10 @@ def test_wikidata_concepts_nodes_transformer() -> None:
 
 
 def test_wikidata_concepts_edges_transformer() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("edges", "concepts")
 
-    transformer = WikidataConceptsTransformer(
-        entity_type="edges", linked_ontology="loc"
-    )
+    transformer = WikidataConceptsTransformer("loc_concepts", "edges", "dev")
 
     edges = list(transformer._stream_entities(entity_type="edges"))
     assert len(list(edges)) == 7
