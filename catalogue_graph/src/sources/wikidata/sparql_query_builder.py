@@ -14,7 +14,7 @@ WikidataEdgeQueryType = Literal[
     "has_spouse",
     "has_child",
     "has_founder",
-    "has_industry"
+    "has_industry",
 ]
 
 

@@ -99,17 +99,20 @@ class SourceConceptHasFieldOfWork(BaseEdge):
     relationship: str = "HAS_FIELD_OF_WORK"
     directed: bool = True
 
+
 class SourceConceptHasFounder(BaseEdge):
     from_type: str = "SourceConcept"
-    to_type: str = "SourceName" # ?? 
+    to_type: str = "SourceName"
     relationship: str = "HAS_FOUNDER"
     directed: bool = True
 
+
 class SourceConceptHasIndustry(BaseEdge):
     from_type: str = "SourceConcept"
-    to_type: str = "SourceConcept" # ?? 
+    to_type: str = "SourceConcept"
     relationship: str = "HAS_INDUSTRY"
     directed: bool = True
+
 
 class WorkHasConcept(BaseEdge):
     from_type: str = "Work"

@@ -15,12 +15,13 @@ def test_wikidata_names_source_edges() -> None:
         node_type="names", linked_ontology="loc", entity_type="edges"
     )
     stream_result = list(mesh_concepts_source.stream_raw())
+    assert len(stream_result) == 6
 
-    assert len(stream_result) == 5
 
     same_as_edges = set()
     has_field_of_work_edges = set()
     related_to_edges = set()
+    has_industry_edges = set()
     for edge in stream_result:
         if edge["type"] == "SAME_AS":
             same_as_edges.add((edge["from_id"], edge["to_id"]))
@@ -28,6 +29,8 @@ def test_wikidata_names_source_edges() -> None:
             has_field_of_work_edges.add((edge["from_id"], edge["to_id"]))
         elif edge["type"] == "RELATED_TO":
             related_to_edges.add((edge["from_id"], edge["to_id"], edge["subtype"]))
+        elif edge["type"] == "HAS_INDUSTRY":
+            has_industry_edges.add((edge["from_id"], edge["to_id"]))
         else:
             raise ValueError(f"Unknown edge type {edge['type']}")
 
@@ -41,6 +44,9 @@ def test_wikidata_names_source_edges() -> None:
     assert len(related_to_edges) == 2
     assert ("Q100", "Q101", "has_mother") in related_to_edges
     assert ("Q101", "Q100", "has_child") in related_to_edges
+
+    assert len(has_industry_edges) == 1
+    assert ("Q100", "Q2") in has_industry_edges
 
 
 def test_wikidata_names_source_nodes() -> None:

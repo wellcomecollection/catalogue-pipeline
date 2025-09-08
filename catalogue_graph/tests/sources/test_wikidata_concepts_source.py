@@ -23,9 +23,12 @@ def _add_mock_wikidata_requests(
         "has_sibling",
         "has_spouse",
         "has_child",
+        "has_industry",
     ]
     if entity_type == "nodes":
         query_types.append(f"{node_type}/items")
+    if node_type == "concepts":
+        query_types.append("has_founder")
     if node_type == "names":
         query_types.append("has_field_of_work")
 
@@ -47,20 +50,26 @@ def test_wikidata_concepts_source_edges() -> None:
     )
     _add_mock_wikidata_requests("edges", "concepts")
 
-    mesh_concepts_source = WikidataLinkedOntologySource(
+    loc_concepts_source = WikidataLinkedOntologySource(
         node_type="concepts", linked_ontology="loc", entity_type="edges"
     )
-    stream_result = list(mesh_concepts_source.stream_raw())
+    stream_result = list(loc_concepts_source.stream_raw())
 
     assert len(stream_result) == 5
-
+    print(f"STREAM RESULT : {stream_result}")
     same_as_edges = set()
     has_parent_edges = set()
+    has_industry_edges = set()
+    has_founder_edges = set()
     for edge in stream_result:
         if edge["type"] == "SAME_AS":
             same_as_edges.add((edge["from_id"], edge["to_id"]))
         elif edge["type"] == "HAS_PARENT":
             has_parent_edges.add((edge["from_id"], edge["to_id"]))
+        elif edge["type"] == "HAS_INDUSTRY":
+            has_industry_edges.add((edge["from_id"], edge["to_id"]))
+        elif edge["type"] == "HAS_FOUNDER":
+            has_founder_edges.add((edge["from_id"], edge["to_id"]))
         else:
             raise ValueError(f"Unknown edge type {edge['type']}")
 
@@ -72,6 +81,12 @@ def test_wikidata_concepts_source_edges() -> None:
     assert ("Q1", "Q4") in has_parent_edges
     assert ("Q2", "Q1") in has_parent_edges
     assert ("Q2", "Q3") in has_parent_edges
+
+    assert len(has_founder_edges) == 1
+    assert ("Q101", "Q100") in has_founder_edges
+
+    assert len(has_industry_edges) == 1
+    assert ("Q100", "Q2") in has_industry_edges
 
 
 def test_wikidata_concepts_source_nodes() -> None:

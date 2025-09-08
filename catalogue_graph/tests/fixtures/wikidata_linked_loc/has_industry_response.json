@@ -1,0 +1,16 @@
+{
+  "results": {
+    "bindings": [
+      {
+        "fromItem": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q100"
+        },
+        "toItem": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2"
+        }
+      }
+    ]
+  }
+}
