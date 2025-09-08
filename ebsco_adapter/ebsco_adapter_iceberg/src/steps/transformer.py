@@ -9,6 +9,7 @@ import argparse
 import io
 import json
 from collections.abc import Generator, Iterable
+from pathlib import PurePosixPath
 from typing import Any
 
 import elasticsearch.helpers
@@ -41,27 +42,19 @@ class EbscoAdapterTransformerConfig(BaseModel):
     index_date: str | None = None
 
 
-def _write_batch_file(batches_ids: list[list[str]], job_id: str) -> str | None:
-    """Persist batch id lists to S3 and return the S3 URI, or None on failure.
+def _write_batch_file(
+    batches_ids: list[list[str]], job_id: str, *, changeset_id: str | None
+) -> str:
+    # Build the S3 key using PurePosixPath for clean joining (no leading // issues)
+    file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.json"
+    key = PurePosixPath(config.S3_PREFIX) / config.BATCH_S3_PREFIX / file_name
+    batch_file_location = f"s3://{config.S3_BUCKET}/{key.as_posix()}"
 
-    The file format is a JSON array of arrays (each inner list is the ordered
-    sequence of work IDs for a processed Arrow RecordBatch). We keep this
-    separate from the step result to avoid large payloads in state transitions.
-    """
-    if not batches_ids:
-        return None
+    with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
+        f.write(json.dumps(batches_ids))
 
-    batch_file_location = (
-        f"s3://{config.S3_BUCKET}/{config.S3_PREFIX.rstrip('/')}/{job_id}.json"
-    )
-    try:
-        with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
-            f.write(json.dumps(batches_ids))
-        print(f"Wrote batch id file to {batch_file_location}")
-        return batch_file_location
-    except Exception as exc:  # pragma: no cover - defensive logging only
-        print(f"Failed to write batch id file {batch_file_location}: {exc}")
-        return None
+    print(f"Wrote batch id file to {batch_file_location}")
+    return batch_file_location
 
 
 def transform(work_id: str, content: str) -> list[SourceWork]:
@@ -261,11 +254,12 @@ def handler(
         success, failed, ids = _process_batch(batch, index_name, es_client)
         total_success += success
         total_failed += failed
-        if ids:  # only record non-empty batches
+        if ids:
             batches_ids.append(ids)
 
-    # Persist batch ids (if any) and get location for downstream step
-    batch_file_location = _write_batch_file(batches_ids, event.job_id)
+    batch_file_location = _write_batch_file(
+        batches_ids, event.job_id, changeset_id=event.changeset_id
+    )
 
     total_batches = len(batches_ids)
     total_ids = sum(len(b) for b in batches_ids)
@@ -289,6 +283,8 @@ def handler(
             step="transformed",
             payload_obj=result,
         )
+    else:
+        print("No file location provided for tracking, skipping!")
 
     return result
 
