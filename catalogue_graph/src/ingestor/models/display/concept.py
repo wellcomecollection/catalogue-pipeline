@@ -14,10 +14,12 @@ class DisplayConcept(BaseModel):
 
     @staticmethod
     def from_concept(concept: Concept) -> "DisplayConcept":
+        identifiers = list(DisplayIdentifier.from_all_identifiers(concept.id))
+
         return DisplayConcept(
             id=concept.id.canonical_id,
             label=concept.label,
-            identifiers=list(DisplayIdentifier.from_all_identifiers(concept.id)),
+            identifiers=None if len(identifiers) == 0 else identifiers,
             type=concept.type,
         )
 
