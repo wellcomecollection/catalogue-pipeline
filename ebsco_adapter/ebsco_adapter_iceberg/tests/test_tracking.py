@@ -24,11 +24,14 @@ class TestRecordProcessedFile:
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
         changeset_id = "I have changed"
-        record = record_processed_file(job_id, file_location, changeset_id)
+        record = record_processed_file(
+            job_id, file_location, changeset_id, step="loaded"
+        )
 
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == job_id
         assert record.changeset_id == changeset_id
+        assert record.step == "loaded"
 
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == job_id
@@ -42,10 +45,11 @@ class TestRecordProcessedFile:
         # Verify the JSON was written correctly
         # Order of keys in JSON dump isn't guaranteed; compare via parsed dict
         written_args = self.mock_file.write.call_args[0][0]
-        data = json.loads(written_args)
-        assert data["job_id"] == job_id
-        assert data["step"] == "loaded"
-        assert data["payload"]["changeset_id"] == "I have changed"
+        assert json.loads(written_args) == {
+            "job_id": job_id,
+            "changeset_id": changeset_id,
+            "step": "loaded",
+        }
 
 
 class TestIsFileAlreadyProcessed:
@@ -60,13 +64,12 @@ class TestIsFileAlreadyProcessed:
     def test_file_already_processed(self) -> None:
         bucket = "test-bucket"
         key = "dev/ftp_v2/existing-file.xml"
-
-        record_dict = {"job_id": "jid", "changeset_id": "cid"}
+        record_dict = {"job_id": "jid", "changeset_id": "cid", "step": "loaded"}
         body_mock = Mock()
         body_mock.read.return_value = json.dumps(record_dict).encode("utf-8")
         self.mock_s3.get_object.return_value = {"Body": body_mock}
 
-        record = is_file_already_processed(bucket, key)
+        record = is_file_already_processed(bucket, key, step="loaded")
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == "jid"
         assert record.changeset_id == "cid"
@@ -75,5 +78,5 @@ class TestIsFileAlreadyProcessed:
         bucket = "test-bucket"
         key = "dev/ftp_v2/non-existent-file.xml"
         self.mock_s3.get_object.side_effect = Exception()
-        record = is_file_already_processed(bucket, key)
+        record = is_file_already_processed(bucket, key, step="loaded")
         assert record is None

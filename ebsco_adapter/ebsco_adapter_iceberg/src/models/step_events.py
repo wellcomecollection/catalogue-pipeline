@@ -26,9 +26,16 @@ class EbscoAdapterTriggerEvent(EbscoAdapterEvent):
 class EbscoAdapterLoaderEvent(EbscoAdapterEvent):
     job_id: str
     file_location: str
-    is_processed: bool
+    # If the source file was already processed, this carries the existing changeset id
+    # allowing the loader to skip work and the transformer to re-use it.
+    changeset_id: str | None = None
 
 
 class EbscoAdapterTransformerEvent(EbscoAdapterEvent):
-    changeset_id: str | None = None
     job_id: str
+    # Propagate original source file location so transformer can record tracking.
+    # Optional to allow full re-transform runs that aren't tied to a single source file.
+    file_location: str | None = None
+    changeset_id: str | None = None
+
+

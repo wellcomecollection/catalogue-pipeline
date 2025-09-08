@@ -74,10 +74,27 @@ def handler(
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
-    prior_record = is_file_already_processed(event.file_location, step="loaded")
-    if prior_record:
+    # Short-circuit: if we already have a changeset_id, skip re-processing
+    # and hand it straight to the transformer.
+    if event.changeset_id is not None:
         print(
             "Source file previously processed; skipping loader work and forwarding prior changeset_id"
+        )
+        return EbscoAdapterTransformerEvent(
+            changeset_id=event.changeset_id,
+            job_id=event.job_id,
+            index_date=event.index_date,
+            file_location=event.file_location,
+        )
+
+    if config_obj.use_glue_table:
+        print("Using AWS Glue table...")
+        table = get_glue_table(
+            s3_tables_bucket=config.S3_TABLES_BUCKET,
+            table_name=config.GLUE_TABLE_NAME,
+            namespace=config.GLUE_NAMESPACE,
+            region=config.AWS_REGION,
+            account_id=config.AWS_ACCOUNT_ID,
         )
         prior_changeset = prior_record.get("changeset_id")
         return EbscoAdapterTransformerEvent(
@@ -93,21 +110,14 @@ def handler(
 
     # Record the processed file to S3
     record_processed_file(
-        job_id=event.job_id,
-        file_location=event.file_location,
-        step="loaded",
-        payload_obj=EbscoAdapterTransformerEvent(
-            changeset_id=changeset_id,
-            job_id=event.job_id,
-            index_date=event.index_date,
-            file_location=event.file_location,
-        ),
+        event.job_id, event.file_location, changeset_id, step="loaded"
     )
 
     return EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
         job_id=event.job_id,
         index_date=event.index_date,
+        file_location=event.file_location,
     )
 
 
@@ -140,9 +150,12 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
-    event = EbscoAdapterLoaderEvent(file_location=args.xmlfile, job_id=job_id)
-    use_rest_api = args.use_rest_api_table
-    config_obj = EbscoAdapterLoaderConfig(use_rest_api_table=use_rest_api)
+    event = EbscoAdapterLoaderEvent(
+        file_location=args.xmlfile,
+        changeset_id=None,
+        job_id=job_id,
+    )
+    config_obj = EbscoAdapterLoaderConfig(use_glue_table=args.use_glue_table)
 
     return handler(event=event, config_obj=config_obj)
 
@@ -151,10 +164,17 @@ def main() -> None:
     print("Running loader handler...")
     try:
         local_handler()
-
-    except Exception as exc:  # surface failures clearly in local runs
-        print(f"Loader failed: {exc}")
-        raise
+        if not args.file_location
+        else handler(
+            EbscoAdapterLoaderEvent(
+                file_location=args.xmlfile,
+                changeset_id=None,
+                job_id=datetime.now().strftime("%Y%m%dT%H%M"),
+            ),
+            EbscoAdapterLoaderConfig(use_glue_table=False),
+        )
+    )
+    print(result)
 
 
 if __name__ == "__main__":

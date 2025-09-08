@@ -24,8 +24,8 @@ from models.marc import MarcRecord
 from models.step_events import EbscoAdapterTransformerEvent
 from models.work import BaseWork, DeletedWork, SourceWork
 from utils.elasticsearch import get_client, get_standard_index_name
-from utils.iceberg import IcebergTableClient, get_iceberg_table
-from utils.tracking import is_file_already_processed, record_processed_file
+from utils.iceberg import IcebergTableClient
+from utils.tracking import record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
@@ -194,7 +194,7 @@ def process_batches(
     # We now allow a full re-transform when no changeset is supplied
     full_retransform = event.changeset_id is None
     if full_retransform:
-        print("No changeset_id provided; performing full re-transform of all records.")
+        print("No changeset_id provided; performing full reindex of records.")
     else:
         print(f"Processing loader output with changeset_id: {event.changeset_id}")
 
@@ -218,10 +218,8 @@ def process_batches(
     table_client = IcebergTableClient(table)
 
     if full_retransform:
-        # For a full re-transform we need deleted rows too so that deletion markers
-        # are re-sent downstream if required.
-        pa_table = table_client.get_all_records(include_deleted=True)
-        print(f"Retrieved ALL {len(pa_table)} records from table for full re-transform")
+        pa_table = table_client.get_all_records()
+        print(f"Retrieved {len(pa_table)} records from table for reindex")
     else:
         pa_table = table_client.get_records_by_changeset(event.changeset_id)  # type: ignore[arg-type]
         print(
@@ -266,86 +264,18 @@ def process_batches(
         f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={total_failed}"
     )
 
-    return EbscoAdapterTransformerResult(
-        index_date=index_date,
-        job_id=job_id,
-        batch_file_location=batch_file_location,
-        batch_file_bucket=batch_file_bucket,
-        batch_file_key=batch_file_key,
-        success_count=total_success,
-        failure_count=total_failed,
-    )
-
-
-def handler(
-    event: EbscoAdapterTransformerEvent, config_obj: EbscoAdapterTransformerConfig
-) -> EbscoAdapterTransformerResult:
-    print(f"Running transformer handler with config: {config_obj}")
-    print(f"Processing event: {event}")
-    print(f"Received job_id: {event.job_id}")
-
-    # Determine index date by cascading choice: event > config > pipeline_date
-    index_date = event.index_date or config_obj.index_date or config_obj.pipeline_date
-
-    prior_record = None
+    # Record completion of transformer step for traceability if we have an
+    # originating file_location (skip for full reindex runs not tied to
+    # a single source file).
     if event.file_location:
-        prior_record = is_file_already_processed(
-            event.file_location, step="transformed"
-        )
-
-    # Short-circuit if this file has already been transformed (mirrors loader behaviour)
-    if prior_record:
-        print(
-            "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
-        )
-        prior_batch = prior_record.get("batch_file_location")
-        prior_bucket = prior_record.get("batch_file_bucket")
-        prior_key = prior_record.get("batch_file_key")
-
-        return EbscoAdapterTransformerResult(
-            index_date=index_date,
+        record_processed_file(
             job_id=event.job_id,
-            batch_file_location=prior_batch,
-            batch_file_bucket=prior_bucket,
-            batch_file_key=prior_key,
-            success_count=0,
-            failure_count=0,
+            file_location=event.file_location,
+            changeset_id=event.changeset_id,
+            step="transformed",
         )
 
-    table = get_iceberg_table(config_obj.use_rest_api_table)
-    table_client = IcebergTableClient(table)
-
-    # Perform a reindex when no changeset is supplied
-    if event.changeset_id is None:
-        print("No changeset_id provided; performing full reindex of records.")
-        pa_table = table_client.get_all_records()
-    else:
-        print(f"Processing loader output with changeset_id: {event.changeset_id}")
-        pa_table = table_client.get_records_by_changeset(event.changeset_id)
-
-    print(f"Retrieved {len(pa_table)} records from table for processing")
-
-    es_client = get_client(
-        pipeline_date=config_obj.pipeline_date,
-        is_local=config_obj.is_local,
-        api_key_name="transformer-ebsco-test",
-    )
-    index_name = get_standard_index_name("works-source", index_date)
-
-    print(
-        f"Writing to Elasticsearch index: {index_name} in pipeline {config_obj.pipeline_date} ..."
-    )
-
-    result = process_batches(
-        pa_table,
-        es_client,
-        index_name=index_name,
-        job_id=event.job_id,
-        changeset_id=event.changeset_id,
-        index_date=index_date,
-    )
-    _record_transformed_file(event, result)
-
+    # No longer raise on failures; caller can inspect failure_count
     return result
 
 
@@ -393,7 +323,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, job_id=args.job_id
+        changeset_id=args.changeset_id, job_id=args.job_id, file_location=None
     )
     use_rest_api = args.use_rest_api_table
     config_obj = EbscoAdapterTransformerConfig(
