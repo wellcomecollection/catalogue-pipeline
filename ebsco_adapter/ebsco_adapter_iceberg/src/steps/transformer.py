@@ -18,6 +18,7 @@ from pymarc import parse_xml_to_array
 
 import config
 from models.marc import MarcRecord
+from models.step_events import EbscoAdapterTransformerEvent
 from models.work import BaseWork, DeletedWork, SourceWork
 from table_config import get_glue_table, get_local_table
 from utils.elasticsearch import get_client, get_standard_index_name
@@ -32,12 +33,6 @@ class EbscoAdapterTransformerConfig(BaseModel):
     use_glue_table: bool = True
     pipeline_date: str
     index_date: str | None = None
-
-
-class EbscoAdapterTransformerEvent(BaseModel):
-    changeset_id: str | None = None
-    index_date: str | None = None
-    job_id: str  # required
 
 
 class EbscoAdapterTransformerResult(BaseModel):
@@ -200,7 +195,9 @@ def handler(
         print(f"Retrieved ALL {len(pa_table)} records from table for full re-transform")
     else:
         pa_table = table_client.get_records_by_changeset(event.changeset_id)  # type: ignore[arg-type]
-        print(f"Retrieved {len(pa_table)} records from table for changeset {event.changeset_id}")
+        print(
+            f"Retrieved {len(pa_table)} records from table for changeset {event.changeset_id}"
+        )
 
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,

@@ -2,6 +2,7 @@ import json
 from unittest.mock import Mock, patch
 
 from utils.tracking import (
+    ProcessedFileRecord,
     is_file_already_processed,
     record_processed_file,
 )
@@ -22,10 +23,11 @@ class TestRecordProcessedFile:
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
         changeset_id = "I have changed"
-
         record = record_processed_file(job_id, file_location, changeset_id)
 
-        assert record == {"job_id": job_id, "changeset_id": changeset_id}
+        assert isinstance(record, ProcessedFileRecord)
+        assert record.job_id == job_id
+        assert record.changeset_id == changeset_id
 
         # Verify smart_open was called with the correct S3 URI
         self.mock_smart_open.assert_called_once_with(
@@ -39,28 +41,30 @@ class TestRecordProcessedFile:
 
 class TestIsFileAlreadyProcessed:
     def setup_method(self) -> None:
-        """Setup method run before each test."""
         self.mock_boto3_client = patch("utils.tracking.boto3.client").start()
         self.mock_s3 = Mock()
         self.mock_boto3_client.return_value = self.mock_s3
 
     def teardown_method(self) -> None:
-        """Teardown method run after each test."""
         patch("utils.tracking.boto3.client").stop()
 
     def test_file_already_processed(self) -> None:
         bucket = "test-bucket"
-        key = "dev/ftp_v2/existing-file.xml.loaded.json"
+        key = "dev/ftp_v2/existing-file.xml"
 
-        self.mock_s3.head_object.return_value = {}
+        record_dict = {"job_id": "jid", "changeset_id": "cid"}
+        body_mock = Mock()
+        body_mock.read.return_value = json.dumps(record_dict).encode("utf-8")
+        self.mock_s3.get_object.return_value = {"Body": body_mock}
 
-        assert is_file_already_processed(bucket, key)
+        record = is_file_already_processed(bucket, key)
+        assert isinstance(record, ProcessedFileRecord)
+        assert record.job_id == "jid"
+        assert record.changeset_id == "cid"
 
     def test_file_not_yet_processed(self) -> None:
         bucket = "test-bucket"
-        key = "dev/ftp_v2/non-existent-file.xml.loaded.json"
-
-        # if head_object throws for whatever reason, we consider the file not processed
-        self.mock_s3.head_object.side_effect = Exception()
-
-        assert not is_file_already_processed(bucket, key)
+        key = "dev/ftp_v2/non-existent-file.xml"
+        self.mock_s3.get_object.side_effect = Exception()
+        record = is_file_already_processed(bucket, key)
+        assert record is None

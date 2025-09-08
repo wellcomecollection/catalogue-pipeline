@@ -9,8 +9,11 @@ from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
 import config
+from models.step_events import (
+    EbscoAdapterLoaderEvent,
+    EbscoAdapterTransformerEvent,
+)
 from schemata import ARROW_SCHEMA
-from steps.transformer import EbscoAdapterTransformerEvent
 from table_config import get_glue_table, get_local_table
 from utils.iceberg import IcebergTableClient
 from utils.tracking import record_processed_file
@@ -21,12 +24,6 @@ EBSCO_NAMESPACE = "ebsco"
 
 class EbscoAdapterLoaderConfig(BaseModel):
     use_glue_table: bool = True
-
-
-class EbscoAdapterLoaderEvent(BaseModel):
-    job_id: str
-    file_location: str
-    is_processed: bool
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> str | None:
@@ -93,7 +90,11 @@ def handler(
     # Record the processed file to S3
     record_processed_file(event.job_id, event.file_location, changeset_id)
 
-    return EbscoAdapterTransformerEvent(changeset_id=changeset_id, job_id=event.job_id)
+    return EbscoAdapterTransformerEvent(
+        changeset_id=changeset_id,
+        job_id=event.job_id,
+        index_date=event.index_date,
+    )
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
