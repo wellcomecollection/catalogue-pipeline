@@ -127,11 +127,11 @@ class DisplayWorkTransformer:
 
     @property
     def part_of(self) -> Generator[DisplayRelation]:
-        for s in self.state.relations.ancestors[::-1]:
-            yield DisplayRelation.from_work_ancestor(s)
+        for series in self.state.relations.ancestors[::-1]:
+            yield DisplayRelation.from_work_ancestor(series)
 
-        for a in self.hierarchy.ancestors:
-            yield DisplayRelation.from_neptune_node(a.work, a.parts)
+        for ancestor in self.hierarchy.ancestors:
+            yield DisplayRelation.from_neptune_node(ancestor.work, ancestor.parts)
 
     @property
     def parts(self) -> list[DisplayRelation]:
