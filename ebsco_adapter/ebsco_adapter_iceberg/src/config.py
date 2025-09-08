@@ -31,3 +31,4 @@ SSM_PARAM_PREFIX = "/catalogue_pipeline/ebsco_adapter"
 S3_BUCKET = os.getenv("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
 S3_PREFIX = os.getenv("S3_PREFIX", "dev")  # corresponds to previous s3_prefix
 FTP_S3_PREFIX = os.path.join(S3_PREFIX, "ftp_v2")
+BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")
