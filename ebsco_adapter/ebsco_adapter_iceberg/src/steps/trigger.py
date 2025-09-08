@@ -13,17 +13,16 @@ from config import (
     SSM_PARAM_PREFIX,
 )
 from ebsco_ftp import EbscoFtp
-from steps.loader import EbscoAdapterLoaderEvent
+from models.step_events import (
+    EbscoAdapterLoaderEvent,
+    EbscoAdapterTriggerEvent,
+)
 from utils.aws import get_ssm_parameter, list_s3_keys
-from utils.tracking import is_file_already_processed
+from utils.tracking import ProcessedFileRecord, is_file_already_processed
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
     is_local: bool = False
-
-
-class EbscoAdapterTriggerEvent(BaseModel):
-    job_id: str
 
 
 class EventBridgeScheduledEvent(BaseModel):
@@ -47,7 +46,7 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
 
 def sync_files(
     ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
-) -> tuple[str, bool]:
+) -> tuple[str, ProcessedFileRecord | None]:
     ftp_files = ebsco_ftp.list_files()
 
     most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
@@ -68,11 +67,12 @@ def sync_files(
         most_recent_s3_object = get_most_recent_valid_file(
             [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
         )
+        processed_record = is_file_already_processed(
+            s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
+        )
         return (
             f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
-            is_file_already_processed(
-                s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
-            ),
+            processed_record,
         )
     except Exception as e:
         if "NoSuchKey" in str(e):
@@ -102,9 +102,12 @@ def sync_files(
         [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
     )
 
+    processed_record = is_file_already_processed(
+        s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
+    )
     return (
         f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
-        is_file_already_processed(s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"),
+        processed_record,
     )
 
 
@@ -134,7 +137,9 @@ def handler(
 
     print(f"Sending S3 location downstream: {s3_location}")
     return EbscoAdapterLoaderEvent(
-        job_id=job_id, file_location=s3_location, is_processed=is_processed
+        job_id=job_id,
+        file_location=s3_location,
+        is_processed=bool(is_processed),
     )
 
 
