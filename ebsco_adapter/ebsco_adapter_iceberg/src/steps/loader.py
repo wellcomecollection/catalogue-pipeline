@@ -68,13 +68,13 @@ def handler(
     print(f"Processing event: {event}")
 
     prior_record = is_file_already_processed(event.file_location, step="loaded")
-
     if prior_record:
         print(
             "Source file previously processed; skipping loader work and forwarding prior changeset_id"
         )
+        prior_changeset = prior_record.get("changeset_id")
         return EbscoAdapterTransformerEvent(
-            changeset_id=prior_record.changeset_id,
+            changeset_id=prior_changeset,
             job_id=event.job_id,
             index_date=event.index_date,
             file_location=event.file_location,
@@ -102,7 +102,15 @@ def handler(
 
     # Record the processed file to S3
     record_processed_file(
-        event.job_id, event.file_location, changeset_id, step="loaded"
+        job_id=event.job_id,
+        file_location=event.file_location,
+        step="loaded",
+        payload_obj=EbscoAdapterTransformerEvent(
+            changeset_id=changeset_id,
+            job_id=event.job_id,
+            index_date=event.index_date,
+            file_location=event.file_location,
+        ),
     )
 
     return EbscoAdapterTransformerEvent(

@@ -17,20 +17,36 @@ class EbscoAdapterEvent(BaseModel):
     """
 
     index_date: str | None = None
+    job_id: str
 
 
 class EbscoAdapterTriggerEvent(EbscoAdapterEvent):
-    job_id: str
+    pass
 
 
 class EbscoAdapterLoaderEvent(EbscoAdapterEvent):
-    job_id: str
     file_location: str
 
 
 class EbscoAdapterTransformerEvent(EbscoAdapterEvent):
-    job_id: str
     # Propagate original source file location so transformer can record tracking.
     # Optional to allow full re-transform runs that aren't tied to a single source file.
     file_location: str | None = None
     changeset_id: str | None = None
+
+
+class EbscoAdapterTransformerResult(EbscoAdapterEvent):
+    """Result of transformer execution passed to the next step.
+
+    Instead of embedding potentially large batch id lists directly in the
+    state machine event, we persist them to S3 and return the location.
+
+    batch_file_location: S3 URI (s3://bucket/prefix/<job_id>.json) containing a
+    JSON array of arrays (each inner list is the ordered IDs for a processed
+    RecordBatch). ``None`` when no work was performed (e.g. idempotent skip).
+    success_count / failure_count: indexing outcome totals.
+    """
+
+    batch_file_location: str | None = None
+    success_count: int = 0
+    failure_count: int = 0
