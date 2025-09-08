@@ -35,7 +35,6 @@ dev = [
     "ruff",
     "ipykernel>=6.30.0",
     "pandas>=2.3.1",
-    "deepdiff"
 ]
 
 [tool.pytest.ini_options]
