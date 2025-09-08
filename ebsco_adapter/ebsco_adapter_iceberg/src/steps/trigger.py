@@ -68,7 +68,7 @@ def sync_files(
             [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
         )
         processed_record = is_file_already_processed(
-            s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
+            s3_bucket, f"{s3_prefix}/{most_recent_s3_object}", step="loaded"
         )
         return (
             f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
@@ -103,7 +103,7 @@ def sync_files(
     )
 
     processed_record = is_file_already_processed(
-        s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
+        s3_bucket, f"{s3_prefix}/{most_recent_s3_object}", step="loaded"
     )
     return (
         f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
@@ -139,7 +139,7 @@ def handler(
     return EbscoAdapterLoaderEvent(
         job_id=job_id,
         file_location=s3_location,
-        is_processed=bool(is_processed),
+        changeset_id=(is_processed.changeset_id if is_processed else None),
     )
 
 

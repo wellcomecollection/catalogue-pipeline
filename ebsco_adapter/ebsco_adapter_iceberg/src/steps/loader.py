@@ -67,6 +67,19 @@ def handler(
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
+    # Short-circuit: if we already have a changeset_id, skip re-processing
+    # and hand it straight to the transformer.
+    if event.changeset_id is not None:
+        print(
+            "Source file previously processed; skipping loader work and forwarding prior changeset_id"
+        )
+        return EbscoAdapterTransformerEvent(
+            changeset_id=event.changeset_id,
+            job_id=event.job_id,
+            index_date=event.index_date,
+            file_location=event.file_location,
+        )
+
     if config_obj.use_glue_table:
         print("Using AWS Glue table...")
         table = get_glue_table(
@@ -88,12 +101,15 @@ def handler(
         changeset_id = update_from_xml_file(table, f)
 
     # Record the processed file to S3
-    record_processed_file(event.job_id, event.file_location, changeset_id)
+    record_processed_file(
+        event.job_id, event.file_location, changeset_id, step="loaded"
+    )
 
     return EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
         job_id=event.job_id,
         index_date=event.index_date,
+        file_location=event.file_location,
     )
 
 
@@ -128,7 +144,7 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 
     event = EbscoAdapterLoaderEvent(
         file_location=args.xmlfile,
-        is_processed=False,
+        changeset_id=None,
         job_id=job_id,
     )
     config_obj = EbscoAdapterLoaderConfig(use_glue_table=args.use_glue_table)
@@ -148,7 +164,7 @@ def main() -> None:
         else handler(
             EbscoAdapterLoaderEvent(
                 file_location=args.xmlfile,
-                is_processed=False,
+                changeset_id=None,
                 job_id=datetime.now().strftime("%Y%m%dT%H%M"),
             ),
             EbscoAdapterLoaderConfig(use_glue_table=False),
