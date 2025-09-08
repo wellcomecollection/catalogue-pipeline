@@ -48,30 +48,22 @@ class TestRecordProcessedFile:
 
 
 class TestIsFileAlreadyProcessed:
-    def setup_method(self) -> None:
-        self.mock_boto3_client = patch("utils.tracking.boto3.client").start()
-        self.mock_s3 = Mock()
-        self.mock_boto3_client.return_value = self.mock_s3
-
-    def teardown_method(self) -> None:
-        patch("utils.tracking.boto3.client").stop()
+    # No boto3 patching required now that lookup uses smart_open directly.
 
     def test_file_already_processed(self) -> None:
-        bucket = "test-bucket"
-        key = "dev/ftp_v2/existing-file.xml"
+        file_location = "s3://test-bucket/dev/ftp_v2/existing-file.xml"
         record_dict = {"job_id": "jid", "changeset_id": "cid", "step": "loaded"}
-        body_mock = Mock()
-        body_mock.read.return_value = json.dumps(record_dict).encode("utf-8")
-        self.mock_s3.get_object.return_value = {"Body": body_mock}
-
-        record = is_file_already_processed(bucket, key, step="loaded")
+        # monkeypatch smart_open rather than boto3 now; reuse existing patch approach for simplicity
+        with patch("utils.tracking.smart_open.open") as mock_open:
+            mock_file = Mock()
+            mock_open.return_value.__enter__.return_value = mock_file
+            mock_file.read.return_value = json.dumps(record_dict)
+            record = is_file_already_processed(file_location, step="loaded")
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == "jid"
         assert record.changeset_id == "cid"
 
     def test_file_not_yet_processed(self) -> None:
-        bucket = "test-bucket"
-        key = "dev/ftp_v2/non-existent-file.xml"
-        self.mock_s3.get_object.side_effect = Exception()
-        record = is_file_already_processed(bucket, key, step="loaded")
+        file_location = "s3://test-bucket/dev/ftp_v2/non-existent-file.xml"
+        record = is_file_already_processed(file_location, step="loaded")
         assert record is None
