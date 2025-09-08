@@ -3,12 +3,12 @@ from collections.abc import Generator
 from models.graph_edge import (
     BaseEdge,
     SourceConceptHasFieldOfWork,
-    SourceNameRelatedTo,
-    SourceNameRelatedToAttributes,
     SourceConceptHasIndustry,
     SourceConceptHasParent,
     SourceConceptSameAs,
     SourceConceptSameAsAttributes,
+    SourceNameRelatedTo,
+    SourceNameRelatedToAttributes,
 )
 from models.graph_node import SourceName
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
@@ -78,4 +78,3 @@ class WikidataNamesTransformer(WikidataConceptsTransformer):
             )
         else:
             raise ValueError(f"Unknown edge type {raw_node['type']}")
-

@@ -17,7 +17,6 @@ def test_wikidata_names_source_edges() -> None:
     stream_result = list(mesh_concepts_source.stream_raw())
     assert len(stream_result) == 6
 
-
     same_as_edges = set()
     has_field_of_work_edges = set()
     related_to_edges = set()
