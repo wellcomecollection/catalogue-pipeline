@@ -1,9 +1,9 @@
 import os
 from collections import defaultdict
-from itertools import product
 
-from utils.aws import NodeType, OntologyType, fetch_transformer_output_from_s3
-from utils.types import ConceptSource, ConceptType
+import utils.bulk_load as bulk_load
+from utils.aws import get_csv_from_s3
+from utils.types import ConceptSource, ConceptType, TransformerType
 
 AGENT_TYPES = ("Person", "Agent", "Organisation")
 SOURCES_BY_PRIORITY: list[ConceptSource] = ["nlm-mesh", "lc-subjects", "lc-names"]
@@ -29,11 +29,7 @@ class IdLabelChecker:
     A set of methods for checking catalogue concepts against data from source ontologies.
     """
 
-    def __init__(
-        self,
-        node_types: list[NodeType],
-        sources: list[OntologyType],
-    ):
+    def __init__(self, transformers: list[TransformerType], pipeline_date: str):
         # Nested dictionaries mapping source ids to labels/alternative labels and vice versa.
         # The dictionaries are nested to group ids/labels by source ontology.
         self.ids_to_labels: dict[ConceptSource, dict[str, str]] = defaultdict(
@@ -49,8 +45,9 @@ class IdLabelChecker:
             defaultdict(lambda: defaultdict(list))
         )
 
-        for node_type, source in product(node_types, sources):
-            for row in fetch_transformer_output_from_s3(node_type, source):
+        for transformer in transformers:
+            s3_uri = bulk_load.get_s3_uri(transformer, "nodes", pipeline_date)
+            for row in get_csv_from_s3(s3_uri):
                 source_id = row[":ID"]
                 label = row["label:String"].lower()
                 alternative_labels = [

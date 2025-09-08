@@ -2,11 +2,11 @@ import json
 from typing import Literal
 
 from test_mocks import MockRequest
-from test_utils import add_mock_transformer_outputs, load_fixture
+from test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 
 from config import WIKIDATA_SPARQL_URL
 from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
-from utils.ontology_id_checker import is_id_classified_as_node_type, is_id_in_ontology
+from utils.ontology import get_extracted_ids, is_id_in_ontology
 
 
 def _add_mock_wikidata_requests(
@@ -42,13 +42,13 @@ def _add_mock_wikidata_requests(
 
 
 def test_wikidata_concepts_source_edges() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs_for_ontologies(["loc"], "2020-05-05")
     _add_mock_wikidata_requests("edges", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        node_type="concepts", linked_ontology="loc", entity_type="edges"
+        linked_transformer="loc_concepts",
+        entity_type="edges",
+        pipeline_date="2020-05-05",
     )
     stream_result = list(mesh_concepts_source.stream_raw())
 
@@ -75,13 +75,11 @@ def test_wikidata_concepts_source_edges() -> None:
 
 
 def test_wikidata_concepts_source_nodes() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs_for_ontologies(["loc"])
     _add_mock_wikidata_requests("nodes", "concepts")
 
     mesh_concepts_source = WikidataLinkedOntologySource(
-        node_type="concepts", linked_ontology="loc", entity_type="nodes"
+        linked_transformer="loc_concepts", entity_type="nodes", pipeline_date="dev"
     )
 
     stream_result = list(mesh_concepts_source.stream_raw())
@@ -95,13 +93,11 @@ def test_wikidata_concepts_source_nodes() -> None:
 
 
 def test_wikidata_linked_ontology_id_checker() -> None:
-    add_mock_transformer_outputs(
-        sources=["loc"], node_types=["concepts", "locations", "names"]
-    )
+    add_mock_transformer_outputs_for_ontologies(["loc"], "1900-01-01")
 
-    assert is_id_in_ontology("sh00000001", "loc")
-    assert not is_id_in_ontology("sh00000001000", "loc")
+    assert is_id_in_ontology("sh00000001", "loc", "1900-01-01")
+    assert not is_id_in_ontology("sh00000001000", "loc", "1900-01-01")
 
-    assert not is_id_classified_as_node_type("sh00000001", "loc", "locations")
-    assert not is_id_classified_as_node_type("tgrefwdw", "loc", "locations")
-    assert is_id_classified_as_node_type("sh00000015", "loc", "locations")
+    assert "sh00000001" not in get_extracted_ids("loc_locations", "1900-01-01")
+    assert "tgrefwdw" not in get_extracted_ids("loc_locations", "1900-01-01")
+    assert "sh00000015" in get_extracted_ids("loc_locations", "1900-01-01")

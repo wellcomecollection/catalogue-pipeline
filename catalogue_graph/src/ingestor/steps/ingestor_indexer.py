@@ -44,7 +44,7 @@ def generate_operations(
 def load_data(
     ingestor_type: IngestorType,
     indexable_data: list[IndexableRecord],
-    pipeline_date: str | None,
+    pipeline_date: str,
     index_date: str | None,
     is_local: bool,
 ) -> int:
