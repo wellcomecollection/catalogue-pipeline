@@ -26,15 +26,6 @@ from models.step_events import (
 )
 from utils.aws import get_ssm_parameter, list_s3_keys
 
-"""Trigger step: now only responsible for syncing latest source file to S3.
-
-Previously this step also looked up prior processing metadata and threaded a
-``changeset_id`` downstream; that responsibility has been moved to the loader
-which can now independently decide whether to short‑circuit.
-"""
-
-# No tracking imports needed here anymore.
-
 
 class EbscoAdapterTriggerConfig(BaseModel):
     is_local: bool = False
