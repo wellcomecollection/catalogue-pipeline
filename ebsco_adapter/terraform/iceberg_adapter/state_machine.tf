@@ -7,7 +7,7 @@ locals {
       TriggerStep = {
         Type     = "Task"
         Resource = module.trigger_lambda.lambda.arn
-        Next     = "TransitionStep"
+        Next     = "LoaderStep"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -16,17 +16,6 @@ locals {
             BackoffRate     = 2.0
           }
         ]
-      }
-      TransitionStep = {
-        Type = "Choice"
-        Choices = [
-          {
-            Variable      = "$.is_processed"
-            BooleanEquals = true
-            Next          = "Success"
-          }
-        ]
-        Default = "LoaderStep"
       }
       LoaderStep = {
         Type     = "Task"
