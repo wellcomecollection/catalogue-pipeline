@@ -11,9 +11,9 @@ class DisplayRelation(BaseModel):
     totalParts: int
     type: str = "Work"
 
-    @classmethod
-    def from_neptune_node(cls, node: WorkNode, total_parts: int) -> "DisplayRelation":
-        return cls(
+    @staticmethod
+    def from_neptune_node(node: WorkNode, total_parts: int) -> "DisplayRelation":
+        return DisplayRelation(
             id=node.properties.id,
             title=node.properties.label,
             type=node.properties.type,
@@ -21,9 +21,9 @@ class DisplayRelation(BaseModel):
             totalParts=total_parts,
         )
 
-    @classmethod
-    def from_work_ancestor(cls, ancestor: WorkAncestor) -> "DisplayRelation":
-        return cls(
+    @staticmethod
+    def from_work_ancestor(ancestor: WorkAncestor) -> "DisplayRelation":
+        return DisplayRelation(
             id=None,
             title=ancestor.title,
             type=ancestor.work_type,

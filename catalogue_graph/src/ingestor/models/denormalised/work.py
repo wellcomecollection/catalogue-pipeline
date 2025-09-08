@@ -38,6 +38,7 @@ class WorkRelations(BaseModel):
     @field_validator("ancestors", mode="before")
     @classmethod
     def convert_denormalised_type(cls, raw_ancestors: list[dict]) -> list[dict]:
+        # TODO: This is a temporary 'Series' filter which won't be needed once we remove the relation embedder service
         return [a for a in raw_ancestors if a["numChildren"] == 0]
 
 

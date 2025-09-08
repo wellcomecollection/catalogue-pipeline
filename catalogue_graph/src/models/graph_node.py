@@ -49,6 +49,7 @@ class Work(BaseNode):
     type: DisplayWorkType
     alternative_labels: list[str] = []
     reference_number: str | None = None
+    hierarchy_reference_number: str | None = None
 
 
 class PathIdentifier(BaseNode):
