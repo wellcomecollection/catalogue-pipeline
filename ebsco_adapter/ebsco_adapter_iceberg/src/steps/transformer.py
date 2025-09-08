@@ -206,12 +206,12 @@ def process_batches(
     print(f"Processing event: {event}")
     print(f"Received job_id: {event.job_id}")
 
-    if event.changeset_id is None:
-        print("No changeset_id provided, skipping transformation.")
-        return EbscoAdapterTransformerResult()
-
-    changeset_id = event.changeset_id
-    print(f"Processing loader output with changeset_id: {changeset_id}")
+    # We now allow a full re-transform when no changeset is supplied
+    full_retransform = event.changeset_id is None
+    if full_retransform:
+        print("No changeset_id provided; performing full re-transform of all records.")
+    else:
+        print(f"Processing loader output with changeset_id: {event.changeset_id}")
 
     if config_obj.use_glue_table:
         print("Using AWS Glue table...")
@@ -232,8 +232,14 @@ def process_batches(
 
     table_client = IcebergTableClient(table)
 
-    pa_table: pa.Table = table_client.get_records_by_changeset(changeset_id)
-    print(f"Retrieved {len(pa_table)} records from table")
+    if full_retransform:
+        # For a full re-transform we need deleted rows too so that deletion markers
+        # are re-sent downstream if required.
+        pa_table = table_client.get_all_records(include_deleted=True)
+        print(f"Retrieved ALL {len(pa_table)} records from table for full re-transform")
+    else:
+        pa_table = table_client.get_records_by_changeset(event.changeset_id)  # type: ignore[arg-type]
+        print(f"Retrieved {len(pa_table)} records from table for changeset {event.changeset_id}")
 
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
