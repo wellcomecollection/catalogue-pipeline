@@ -4,7 +4,7 @@ import tempfile
 from datetime import datetime
 from typing import Any
 
-import boto3
+import smart_open
 from pydantic import BaseModel
 
 from config import (
@@ -55,56 +55,62 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
 def sync_files(
     ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
 ) -> str:
+    """Ensure the latest FTP source file is present in S3 and return the newest S3 object URI.
+
+    Behaviour:
+      * Identify the most recent valid FTP file.
+      * If that exact file already exists in S3 (determined via list_s3_keys), we do not download it.
+      * Otherwise download to a temp directory then upload via smart_open for consistency with other steps.
+      * Finally, list S3 keys and return the URI of the most recent valid file present (may be newer than FTP file if pre‑seeded).
+    """
     ftp_files = ebsco_ftp.list_files()
-
     most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
-
     if most_recent_ftp_file is None:
         raise ValueError("No valid files found on FTP server")
 
     print(f"Most recent ftp file: {most_recent_ftp_file}")
 
-    s3_store = boto3.client("s3")
-    s3_key = f"{s3_prefix}/{most_recent_ftp_file}"
+    existing_keys = list_s3_keys(s3_bucket, s3_prefix)
+    existing_filenames = {key.split("/")[-1] for key in existing_keys}
 
-    # Check if the file already exists in S3
-    try:
-        s3_store.head_object(Bucket=s3_bucket, Key=s3_key)
-        print(f"File {most_recent_ftp_file} already exists in S3. No need to download.")
+    if most_recent_ftp_file in existing_filenames:
+        print(
+            f"File {most_recent_ftp_file} already exists in s3://{s3_bucket}/{s3_prefix}; reusing."
+        )
         most_recent_s3_object = get_most_recent_valid_file(
-            [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
+            [key.split("/")[-1] for key in existing_keys]
         )
         return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
-    except Exception as e:  # noqa: BLE001 - broad for fallback behaviour
-        if "NoSuchKey" in str(e):
-            print(f"{most_recent_ftp_file} not found in S3. Will download and upload.")
-        else:
-            print(
-                f"Error checking S3 (head_object) for {most_recent_ftp_file}: {e}. Proceeding to download."
-            )
 
-    # Download the most recent file from FTP
+    # Need to retrieve + upload the latest FTP file
     try:
         download_location = ebsco_ftp.download_file(
             most_recent_ftp_file, target_directory
         )
-    except Exception as e:
+    except Exception as e:  # noqa: BLE001
         raise RuntimeError(
             f"Failed to download {most_recent_ftp_file} from FTP: {e}"
         ) from e
 
-    # Upload the downloaded file to S3
+    destination_uri = f"s3://{s3_bucket}/{s3_prefix}/{most_recent_ftp_file}"
     try:
-        s3_store.upload_file(download_location, s3_bucket, s3_key)
-        print(f"Successfully uploaded {most_recent_ftp_file} to {s3_bucket}/{s3_key}")
-    except Exception as e:
-        raise RuntimeError(f"Failed to upload {most_recent_ftp_file} to S3: {e}") from e
+        # Stream local file -> S3 using smart_open for consistency across steps
+        with (
+            open(download_location, "rb") as src,
+            smart_open.open(destination_uri, "wb") as dst,
+        ):
+            dst.write(src.read())
+        print(f"Successfully uploaded {most_recent_ftp_file} to {destination_uri}")
+    except Exception as e:  # noqa: BLE001
+        raise RuntimeError(
+            f"Failed to upload {most_recent_ftp_file} to {destination_uri}: {e}"
+        ) from e
 
-    # list what's in s3 and get the file with the highest date to send downstream
+    # Refresh S3 key listing to determine most recent object to pass downstream
+    refreshed_keys = list_s3_keys(s3_bucket, s3_prefix)
     most_recent_s3_object = get_most_recent_valid_file(
-        [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
+        [key.split("/")[-1] for key in refreshed_keys]
     )
-
     return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
 
 
@@ -133,9 +139,7 @@ def handler(
         )
 
     print(f"Sending S3 location downstream: {s3_location}")
-    # We no longer look up prior processing here; loader is responsible for
-    # determining if this source file has already been loaded (and can then
-    # short-circuit).
+
     return EbscoAdapterLoaderEvent(job_id=job_id, file_location=s3_location)
 
 

@@ -36,13 +36,9 @@ class TestSyncFiles:
         self.s3_bucket = "test-bucket"
         self.s3_prefix = "test-prefix"
         self.mock_list_s3_keys = patch("steps.trigger.list_s3_keys").start()
-        self.mock_boto3 = patch("steps.trigger.boto3").start()
-        self.mock_s3_client = Mock()
-        self.mock_boto3.client.return_value = self.mock_s3_client
 
     def teardown_method(self) -> None:
         self.mock_list_s3_keys.stop()
-        self.mock_boto3.stop()
 
     def test_successful_download_and_upload(self) -> None:
         ftp_files = [
@@ -53,10 +49,20 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.list_files.return_value = ftp_files
         download_path = "/tmp/test/ebz-s7451719-20240325-1.xml"
         self.mock_ebsco_ftp.download_file.return_value = download_path
-        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
-        self.mock_list_s3_keys.return_value = [
-            "test-prefix/ebz-s7451719-20240325-1.xml",
-            "test-prefix/older.xml",
+        # create dummy downloaded file
+        import os
+
+        os.makedirs(os.path.dirname(download_path), exist_ok=True)
+        with open(download_path, "wb") as f:
+            f.write(b"<xml></xml>")
+        # Start with S3 missing the file -> list returns some older key
+        self.mock_list_s3_keys.side_effect = [
+            ["test-prefix/ebz-s7451719-20240320-1.xml"],  # initial existence check list
+            [  # refreshed after upload
+                "test-prefix/ebz-s7451719-20240315-1.xml",
+                "test-prefix/ebz-s7451719-20240320-1.xml",
+                "test-prefix/ebz-s7451719-20240325-1.xml",
+            ],
         ]
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
@@ -67,7 +73,6 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.download_file.assert_called_once_with(
             "ebz-s7451719-20240325-1.xml", self.target_directory
         )
-        self.mock_s3_client.upload_file.assert_called_once()
         assert (
             result == f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240325-1.xml"
         )
@@ -78,7 +83,7 @@ class TestSyncFiles:
             "ebz-s7451719-20240322-1.xml",
         ]
         self.mock_ebsco_ftp.list_files.return_value = ftp_files
-        self.mock_s3_client.head_object.return_value = {}
+        # First list shows file already present -> no download
         self.mock_list_s3_keys.return_value = [
             "test-prefix/ebz-s7451719-20240322-1.xml"
         ]
@@ -92,7 +97,6 @@ class TestSyncFiles:
             result == f"s3://{self.s3_bucket}/test-prefix/ebz-s7451719-20240322-1.xml"
         )
         self.mock_ebsco_ftp.download_file.assert_not_called()
-        self.mock_s3_client.upload_file.assert_not_called()
 
     def test_no_xml_files_found(self) -> None:
         self.mock_ebsco_ftp.list_files.return_value = []
@@ -107,7 +111,6 @@ class TestSyncFiles:
     def test_download_failure(self) -> None:
         self.mock_ebsco_ftp.list_files.return_value = ["ebz-s7451719-20240322-1.xml"]
         self.mock_ebsco_ftp.download_file.side_effect = Exception("fail")
-        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
         with pytest.raises(RuntimeError):
             sync_files(
                 ebsco_ftp=self.mock_ebsco_ftp,
@@ -119,9 +122,21 @@ class TestSyncFiles:
     def test_upload_failure(self) -> None:
         self.mock_ebsco_ftp.list_files.return_value = ["ebz-s7451719-20240322-1.xml"]
         self.mock_ebsco_ftp.download_file.return_value = "/tmp/test/file.xml"
-        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
-        self.mock_s3_client.upload_file.side_effect = Exception("Denied")
-        with pytest.raises(RuntimeError):
+        # ensure dummy file exists so failure is due to smart_open, not missing file
+        import os
+
+        os.makedirs("/tmp/test", exist_ok=True)
+        with open("/tmp/test/file.xml", "wb") as f:
+            f.write(b"content")
+        # First list shows file absent, second list call should not occur due to upload failure
+        self.mock_list_s3_keys.side_effect = [
+            [],  # before upload
+        ]
+
+        # Patch smart_open to raise on write
+        with patch(
+            "steps.trigger.smart_open.open", side_effect=OSError("Denied")
+        ), pytest.raises(RuntimeError, match="Denied"):
             sync_files(
                 ebsco_ftp=self.mock_ebsco_ftp,
                 target_directory=self.target_directory,
@@ -138,11 +153,11 @@ class TestSyncFiles:
         self.mock_ebsco_ftp.download_file.return_value = (
             "/tmp/test/ebz-s7451719-20240425-1.xml"
         )
-        self.mock_s3_client.head_object.side_effect = Exception("NoSuchKey")
-        self.mock_list_s3_keys.return_value = (
+        # S3 already has a newer file than any on FTP; list shows newer first
+        self.mock_list_s3_keys.return_value = [
             "test-prefix/ebz-s7451719-20240428-1.xml",
             "test-prefix/ebz-s7451719-20240425-1.xml",
-        )
+        ]
         result = sync_files(
             ebsco_ftp=self.mock_ebsco_ftp,
             target_directory=self.target_directory,
