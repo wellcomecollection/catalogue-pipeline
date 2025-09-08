@@ -21,17 +21,16 @@ class TestRecordProcessedFile:
         patch("utils.tracking.smart_open.open").stop()
 
     def test_record_processed_file(self) -> None:
+        from models.step_events import EbscoAdapterTransformerEvent
+
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
-        changeset_id = "I have changed"
-        record = record_processed_file(
-            job_id, file_location, changeset_id, step="loaded"
+        event = EbscoAdapterTransformerEvent(
+            changeset_id="I have changed", job_id=job_id, file_location=file_location
         )
-
-        assert isinstance(record, ProcessedFileRecord)
-        assert record.job_id == job_id
-        assert record.changeset_id == changeset_id
-        assert record.step == "loaded"
+        record = record_processed_file(
+            job_id=job_id, file_location=file_location, step="loaded", payload_obj=event
+        )
 
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == job_id
@@ -45,11 +44,10 @@ class TestRecordProcessedFile:
         # Verify the JSON was written correctly
         # Order of keys in JSON dump isn't guaranteed; compare via parsed dict
         written_args = self.mock_file.write.call_args[0][0]
-        assert json.loads(written_args) == {
-            "job_id": job_id,
-            "changeset_id": changeset_id,
-            "step": "loaded",
-        }
+        data = json.loads(written_args)
+        assert data["job_id"] == job_id
+        assert data["step"] == "loaded"
+        assert data["payload"]["changeset_id"] == "I have changed"
 
 
 class TestIsFileAlreadyProcessed:
@@ -57,16 +55,22 @@ class TestIsFileAlreadyProcessed:
 
     def test_file_already_processed(self) -> None:
         file_location = "s3://test-bucket/dev/ftp_v2/existing-file.xml"
-        record_dict = {"job_id": "jid", "changeset_id": "cid", "step": "loaded"}
-        # monkeypatch smart_open rather than boto3 now; reuse existing patch approach for simplicity
+        from models.step_events import EbscoAdapterTransformerEvent
+
+        prior_event = EbscoAdapterTransformerEvent(
+            job_id="jid", file_location=file_location, changeset_id="cid"
+        )
+        stored = ProcessedFileRecord(
+            job_id="jid", step="loaded", payload=prior_event.model_dump()
+        )
         with patch("utils.tracking.smart_open.open") as mock_open:
             mock_file = Mock()
             mock_open.return_value.__enter__.return_value = mock_file
-            mock_file.read.return_value = json.dumps(record_dict)
+            mock_file.read.return_value = json.dumps(stored.model_dump())
             record = is_file_already_processed(file_location, step="loaded")
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == "jid"
-        assert record.changeset_id == "cid"
+        assert record.get("changeset_id") == "cid"
 
     def test_file_not_yet_processed(self) -> None:
         file_location = "s3://test-bucket/dev/ftp_v2/non-existent-file.xml"
