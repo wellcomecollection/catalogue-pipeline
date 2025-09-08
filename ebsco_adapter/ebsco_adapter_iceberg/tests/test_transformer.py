@@ -210,7 +210,7 @@ def test_transformer_full_retransform_when_no_changeset(
     assert result.failure_count == 0
     assert result.success_count == 2
     assert result.batch_file_location is not None
-    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.S3_PREFIX}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.json"
+    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.json"
     assert result.batch_file_location == expected_reindex_path
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
@@ -237,7 +237,7 @@ def test_transformer_batch_file_location_with_changeset(
     )
     result = handler(event=event, config_obj=config)
 
-    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.S3_PREFIX}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.json"
+    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.json"
     assert result.batch_file_location == expected_path
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:

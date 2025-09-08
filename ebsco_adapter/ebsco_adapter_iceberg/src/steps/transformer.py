@@ -46,7 +46,7 @@ def _write_batch_file(
 ) -> str:
     # Build the S3 key using PurePosixPath for clean joining (no leading // issues)
     file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.json"
-    key = PurePosixPath(config.S3_PREFIX) / config.BATCH_S3_PREFIX / file_name
+    key = PurePosixPath(config.BATCH_S3_PREFIX) / file_name
     batch_file_location = f"s3://{config.S3_BUCKET}/{key.as_posix()}"
 
     with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
