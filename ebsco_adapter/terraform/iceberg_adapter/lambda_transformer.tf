@@ -24,6 +24,8 @@ module "transformer_lambda" {
     variables = {
       PIPELINE_DATE = local.pipeline_date
       INDEX_DATE    = local.index_date
+      S3_BUCKET     = data.aws_s3_bucket.ebsco_adapter.id
+      S3_PREFIX     = "prod"
     }
   }
 }
