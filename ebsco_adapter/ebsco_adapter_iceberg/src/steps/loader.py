@@ -15,20 +15,22 @@ from lxml import etree
 from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
+import config
 from models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
 )
 from schemata import ARROW_SCHEMA
-from utils.iceberg import IcebergTableClient, get_iceberg_table
-from utils.tracking import is_file_already_processed, record_processed_file
+from table_config import get_glue_table, get_local_table
+from utils.iceberg import IcebergTableClient
+from utils.tracking import record_processed_file
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
 
 
 class EbscoAdapterLoaderConfig(BaseModel):
-    use_rest_api_table: bool = True
+    use_glue_table: bool = True
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> str | None:
@@ -106,7 +108,6 @@ def handler(
         changeset_id=changeset_id,
         job_id=event.job_id,
         index_date=event.index_date,
-        file_location=event.file_location,
     )
 
 

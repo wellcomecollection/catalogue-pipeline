@@ -25,6 +25,7 @@ from models.step_events import (
     EbscoAdapterTriggerEvent,
 )
 from utils.aws import get_ssm_parameter, list_s3_keys
+from utils.tracking import ProcessedFileRecord, is_file_already_processed
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
@@ -52,15 +53,7 @@ def get_most_recent_valid_file(filenames: list[str]) -> str | None:
 
 def sync_files(
     ebsco_ftp: EbscoFtp, target_directory: str, s3_bucket: str, s3_prefix: str
-) -> str:
-    """Ensure the latest FTP source file is present in S3 and return the newest S3 object URI.
-
-    Behaviour:
-      * Identify the most recent valid FTP file.
-      * If that exact file already exists in S3 (determined via list_s3_keys), we do not download it.
-      * Otherwise download to a temp directory then upload via smart_open for consistency with other steps.
-      * Finally, list S3 keys and return the URI of the most recent valid file present (may be newer than FTP file if pre‑seeded).
-    """
+) -> tuple[str, ProcessedFileRecord | None]:
     ftp_files = ebsco_ftp.list_files()
     most_recent_ftp_file = get_most_recent_valid_file(ftp_files)
     if most_recent_ftp_file is None:
@@ -78,7 +71,18 @@ def sync_files(
         most_recent_s3_object = get_most_recent_valid_file(
             [key.split("/")[-1] for key in existing_keys]
         )
-        return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
+        processed_record = is_file_already_processed(
+            s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
+        )
+        return (
+            f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
+            processed_record,
+        )
+    except Exception as e:
+        if "NoSuchKey" in str(e):
+            print(f"{most_recent_ftp_file} not found in S3. Will download and upload.")
+        else:
+            print(f"Error checking S3: {e}. Will proceed with download and upload.")
 
     # Need to retrieve + upload the latest FTP file
     try:
@@ -107,7 +111,15 @@ def sync_files(
     # Refresh S3 key listing to determine most recent object to pass downstream
     refreshed_keys = list_s3_keys(s3_bucket, s3_prefix)
     most_recent_s3_object = get_most_recent_valid_file(
-        [key.split("/")[-1] for key in refreshed_keys]
+        [key.split("/")[-1] for key in list_s3_keys(s3_bucket, s3_prefix)]
+    )
+
+    processed_record = is_file_already_processed(
+        s3_bucket, f"{s3_prefix}/{most_recent_s3_object}"
+    )
+    return (
+        f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}",
+        processed_record,
     )
     return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
 
@@ -137,8 +149,11 @@ def handler(
         )
 
     print(f"Sending S3 location downstream: {s3_location}")
-
-    return EbscoAdapterLoaderEvent(job_id=job_id, file_location=s3_location)
+    return EbscoAdapterLoaderEvent(
+        job_id=job_id,
+        file_location=s3_location,
+        is_processed=bool(is_processed),
+    )
 
 
 def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, Any]:

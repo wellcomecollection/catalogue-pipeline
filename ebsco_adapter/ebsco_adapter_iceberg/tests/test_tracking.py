@@ -23,12 +23,12 @@ class TestRecordProcessedFile:
     def test_record_processed_file(self) -> None:
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
-        event = EbscoAdapterTransformerEvent(
-            changeset_id="I have changed", job_id=job_id, file_location=file_location
-        )
-        record = record_processed_file(
-            job_id=job_id, file_location=file_location, step="loaded", payload_obj=event
-        )
+        changeset_id = "I have changed"
+        record = record_processed_file(job_id, file_location, changeset_id)
+
+        assert isinstance(record, ProcessedFileRecord)
+        assert record.job_id == job_id
+        assert record.changeset_id == changeset_id
 
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == job_id
@@ -49,27 +49,31 @@ class TestRecordProcessedFile:
 
 
 class TestIsFileAlreadyProcessed:
-    # No boto3 patching required now that lookup uses smart_open directly.
+    def setup_method(self) -> None:
+        self.mock_boto3_client = patch("utils.tracking.boto3.client").start()
+        self.mock_s3 = Mock()
+        self.mock_boto3_client.return_value = self.mock_s3
+
+    def teardown_method(self) -> None:
+        patch("utils.tracking.boto3.client").stop()
 
     def test_file_already_processed(self) -> None:
-        file_location = "s3://test-bucket/dev/ftp_v2/existing-file.xml"
+        bucket = "test-bucket"
+        key = "dev/ftp_v2/existing-file.xml"
 
-        prior_event = EbscoAdapterTransformerEvent(
-            job_id="jid", file_location=file_location, changeset_id="cid"
-        )
-        stored = ProcessedFileRecord(
-            job_id="jid", step="loaded", payload=prior_event.model_dump()
-        )
-        with patch("utils.tracking.smart_open.open") as mock_open:
-            mock_file = Mock()
-            mock_open.return_value.__enter__.return_value = mock_file
-            mock_file.read.return_value = json.dumps(stored.model_dump())
-            record = is_file_already_processed(file_location, step="loaded")
+        record_dict = {"job_id": "jid", "changeset_id": "cid"}
+        body_mock = Mock()
+        body_mock.read.return_value = json.dumps(record_dict).encode("utf-8")
+        self.mock_s3.get_object.return_value = {"Body": body_mock}
+
+        record = is_file_already_processed(bucket, key)
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == "jid"
-        assert record.get("changeset_id") == "cid"
+        assert record.changeset_id == "cid"
 
     def test_file_not_yet_processed(self) -> None:
-        file_location = "s3://test-bucket/dev/ftp_v2/non-existent-file.xml"
-        record = is_file_already_processed(file_location, step="loaded")
+        bucket = "test-bucket"
+        key = "dev/ftp_v2/non-existent-file.xml"
+        self.mock_s3.get_object.side_effect = Exception()
+        record = is_file_already_processed(bucket, key)
         assert record is None
