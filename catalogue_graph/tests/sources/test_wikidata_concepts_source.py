@@ -44,7 +44,9 @@ def _add_mock_wikidata_requests(
 
 
 def test_wikidata_concepts_source_edges() -> None:
-    add_mock_transformer_outputs_for_ontologies(["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"])
+    add_mock_transformer_outputs_for_ontologies(
+        ["loc", "mesh", "wikidata_linked_loc", "wikidata_linked_mesh"]
+    )
     _add_mock_wikidata_requests("edges", "concepts")
 
     loc_concepts_source = WikidataLinkedOntologySource(
