@@ -4,10 +4,6 @@ from models.events import EntityType
 from models.graph_edge import (
     BaseEdge,
     SourceConceptHasFieldOfWork,
-    SourceConceptHasIndustry,
-    SourceConceptHasParent,
-    SourceConceptSameAs,
-    SourceConceptSameAsAttributes,
     SourceNameRelatedTo,
     SourceNameRelatedToAttributes,
 )
@@ -45,28 +41,6 @@ class WikidataNamesTransformer(WikidataConceptsTransformer):
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
-        if raw_node["type"] == "SAME_AS":
-            edge_attributes = SourceConceptSameAsAttributes(source="wikidata")
-            yield SourceConceptSameAs(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
-                attributes=edge_attributes,
-            )
-            yield SourceConceptSameAs(
-                from_id=raw_node["to_id"],
-                to_id=raw_node["from_id"],
-                attributes=edge_attributes,
-            )
-        elif raw_node["type"] == "HAS_PARENT":
-            yield SourceConceptHasParent(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
-            )
-        elif raw_node["type"] == "HAS_INDUSTRY":
-            yield SourceConceptHasIndustry(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
-            )
         if raw_node["type"] == "HAS_FIELD_OF_WORK":
             yield SourceConceptHasFieldOfWork(
                 from_id=raw_node["from_id"],
@@ -82,4 +56,4 @@ class WikidataNamesTransformer(WikidataConceptsTransformer):
                 attributes=attributes,
             )
         else:
-            raise ValueError(f"Unknown edge type {raw_node['type']}")
+            yield from super().extract_edges(raw_node)

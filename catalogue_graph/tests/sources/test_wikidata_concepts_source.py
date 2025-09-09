@@ -24,11 +24,10 @@ def _add_mock_wikidata_requests(
         "has_spouse",
         "has_child",
         "has_industry",
+        "has_founder",
     ]
     if entity_type == "nodes":
         query_types.append(f"{node_type}/items")
-    if node_type == "concepts":
-        query_types.append("has_founder")
     if node_type == "names":
         query_types.append("has_field_of_work")
 

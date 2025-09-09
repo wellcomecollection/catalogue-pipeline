@@ -224,6 +224,13 @@ class WikidataLinkedOntologySource(BaseSource):
             ):
                 yield {**edge, "type": "HAS_INDUSTRY"}
 
+        print("Streaming HAS_FOUNDER edges...")
+        for edge in self._stream_all_has_founder_edges():
+            if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
+                edge["to_id"], "wikidata", self.pipeline_date
+            ):
+                yield {**edge, "type": "HAS_FOUNDER"}
+
         # The following edges only apply to people (SourceName) nodes
         if self.node_type == "names":
             print("Streaming HAS_FIELD_OF_WORK edges...")
@@ -246,15 +253,6 @@ class WikidataLinkedOntologySource(BaseSource):
                             "type": "RELATED_TO",
                             "subtype": relationship_type,
                         }
-
-        # The following edges only apply to concepts (SourceConcepts) nodes
-        if self.node_type == "concepts":
-            print("Streaming HAS_FOUNDER edges...")
-            for edge in self._stream_all_has_founder_edges():
-                if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
-                    edge["to_id"], "wikidata", self.pipeline_date
-                ):
-                    yield {**edge, "type": "HAS_FOUNDER"}
 
     def _stream_raw_nodes(self) -> Generator[dict]:
         """

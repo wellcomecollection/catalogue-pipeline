@@ -298,6 +298,7 @@ class TestNarrower:
         }
         assert concept.narrower_concept_ids == ["sh00000029"]
 
+
 class TestFieldOfActivity:
     def test_no_field_of_activity(self) -> None:
         concept = RawLibraryOfCongressConcept(
@@ -316,7 +317,7 @@ class TestFieldOfActivity:
             }
         }
         assert concept.has_field_of_activity_ids == ["sh00000029"]
- 
+
     def test_multiple_field_of_activity(self) -> None:
         concept = RawLibraryOfCongressConcept(
             {"@id": "/authorities/names/sh2010105253", "@graph": []}
