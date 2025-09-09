@@ -20,6 +20,12 @@ ENV use_downstream=stdio
 
 CMD [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda", "weco.pipeline.id_minter.LambdaMain::handleRequest"]
 
+FROM base AS stepfunction
+
+ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
+
+CMD ["weco.pipeline.id_minter.StepFunctionMain::handleRequest"]
+
 FROM base
 
 ENTRYPOINT [ "/usr/bin/java", "com.amazonaws.services.lambda.runtime.api.client.AWSLambda" ]
