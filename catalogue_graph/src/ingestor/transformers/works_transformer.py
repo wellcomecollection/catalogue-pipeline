@@ -49,7 +49,7 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             subjects=list(transformer.subjects),
             availabilities=transformer.availabilities,
             parts=transformer.parts,
-            partOf=transformer.part_of,
+            partOf=list(transformer.part_of),
         )
 
     def _transform_query(self, extracted: ExtractedWork) -> QueryWork:
