@@ -44,17 +44,22 @@ class EbscoAdapterTransformerConfig(BaseModel):
 
 def _write_batch_file(
     batches_ids: list[list[str]], job_id: str, *, changeset_id: str | None
-) -> str:
+) -> tuple[str, str, str]:
     # Build the S3 key using PurePosixPath for clean joining (no leading // issues)
-    file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.json"
+    # Prefer .ndjson to signal line-delimited JSON (supported by Step Functions)
+    file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.ndjson"
     key = PurePosixPath(config.BATCH_S3_PREFIX) / file_name
-    batch_file_location = f"s3://{config.S3_BUCKET}/{key.as_posix()}"
+    bucket = config.S3_BUCKET
+    batch_file_location = f"s3://{bucket}/{key.as_posix()}"
 
     with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
-        f.write(json.dumps(batches_ids))
+        # Write NDJSON: one JSON object per line -> one Distributed Map item per line
+        # Line shape: {"ids": ["id1", "id2", ...]}
+        for ids in batches_ids:
+            f.write(json.dumps({"ids": ids}) + "\n")
 
     print(f"Wrote batch id file to {batch_file_location}")
-    return batch_file_location
+    return batch_file_location, bucket, key.as_posix()
 
 
 def transform(work_id: str, content: str) -> list[SourceWork]:
@@ -181,6 +186,8 @@ def handler(
                 "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
             )
             prior_batch = prior_record.get("batch_file_location")
+            prior_bucket = prior_record.get("batch_file_bucket")
+            prior_key = prior_record.get("batch_file_key")
             idx_date = (
                 event.index_date or config_obj.index_date or config_obj.pipeline_date
             )
@@ -188,6 +195,8 @@ def handler(
                 index_date=idx_date,
                 job_id=event.job_id,
                 batch_file_location=prior_batch,
+                batch_file_bucket=prior_bucket,
+                batch_file_key=prior_key,
                 success_count=0,
                 failure_count=0,
             )
@@ -257,7 +266,7 @@ def handler(
         if ids:
             batches_ids.append(ids)
 
-    batch_file_location = _write_batch_file(
+    batch_file_location, batch_file_bucket, batch_file_key = _write_batch_file(
         batches_ids, event.job_id, changeset_id=event.changeset_id
     )
 
@@ -272,6 +281,8 @@ def handler(
         index_date=idx_date,
         job_id=event.job_id,
         batch_file_location=batch_file_location,
+        batch_file_bucket=batch_file_bucket,
+        batch_file_key=batch_file_key,
         success_count=total_success,
         failure_count=total_failed,
     )
