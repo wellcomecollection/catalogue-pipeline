@@ -1,13 +1,12 @@
-version: '3.3'
 services:
   mysql:
-    image: "public.ecr.aws/docker/library/mysql:8.0"
+    image: "mysql:8.0"
     ports:
       - "3307:3306"
     environment:
         - "MYSQL_ROOT_PASSWORD=password"
   localstack:
-    image: "public.ecr.aws/localstack/localstack:3.5.0"
+    image: "localstack/localstack:3.5.0"
     environment:
       - SERVICES=sqs
       - ALLOW_NONSTANDARD_REGIONS=1
