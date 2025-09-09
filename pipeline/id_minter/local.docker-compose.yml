@@ -28,6 +28,39 @@ services:
     env_file:
       - .env
 
+  stepfunction-lambda:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: lambda_rie
+    volumes:
+      - ~/.aws:/root/.aws
+    ports:
+      - "9001:8080"
+    environment:
+      - AWS_PROFILE=platform-developer
+      - metrics_namespace=catalogue-dev_id_minter
+      - cluster_url=mysql
+      - cluster_url_readonly=mysql
+      - db_port=3306
+      - db_username=pipeline-user
+      - db_password=pipeline-password
+      - max_connections=1
+      - es_downstream_host=elasticsearch-local
+      - es_downstream_port=9200
+      - es_downstream_protocol=http
+      - es_downstream_username=itsme
+      - es_downstream_password=itreallyis
+      - es_identified_index=local-works-identified
+    env_file:
+      - .env
+    command:
+      [
+        "/usr/bin/java",
+        "com.amazonaws.services.lambda.runtime.api.client.AWSLambda",
+        "weco.pipeline.id_minter.StepFunctionMain::handleRequest",
+      ]
+
   mysql:
     image: "public.ecr.aws/docker/library/mysql:8.0"
     ports:
