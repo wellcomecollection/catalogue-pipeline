@@ -236,7 +236,9 @@ def handler(
         "works-source",
         (
             # Cascading choice for date in index name
-            event.index_date or config_obj.index_date or config_obj.pipeline_date
+            event.index_date
+            or config_obj.index_date
+            or config_obj.pipeline_date
         ),
     )
 
