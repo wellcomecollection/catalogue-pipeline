@@ -1,10 +1,9 @@
 import json
 from contextlib import suppress  # for ruff SIM105 fix
-from typing import cast  # added for dummy ES client
+from typing import Any, cast  # added for dummy ES client
 
 import pyarrow as pa
 import pytest
-from elasticsearch import Elasticsearch  # added
 
 import config as adapter_config
 from models.step_events import (
@@ -147,11 +146,11 @@ def test_transformer_end_to_end_with_local_table(
     assert result.batch_file_location is not None
     assert result.success_count == 2
     assert result.failure_count == 0
-    # Validate file contents written to mock S3
+    # Validate file contents written to mock S3 (NDJSON)
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    assert data == [list(records_by_id.keys())]
+        lines = [json.loads(line) for line in f if line.strip()]
+    assert lines == [{"ids": list(records_by_id.keys())}]
     titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
@@ -173,8 +172,8 @@ def test_transformer_creates_deletedwork_for_empty_content(
     assert result.success_count == 2
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    assert data == [["ebsDel001", "ebsDel002"]]
+        lines = [json.loads(line) for line in f if line.strip()]
+    assert lines == [{"ids": ["ebsDel001", "ebsDel002"]}]
     deleted_docs = [
         op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel001"
     ]
@@ -211,12 +210,12 @@ def test_transformer_full_retransform_when_no_changeset(
     assert result.failure_count == 0
     assert result.success_count == 2
     assert result.batch_file_location is not None
-    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.json"
+    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
     assert result.batch_file_location == expected_reindex_path
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    assert data == [["ebsFull001", "ebsFull002"]]
+        lines = [json.loads(line) for line in f if line.strip()]
+    assert lines == [{"ids": ["ebsFull001", "ebsFull002"]}]
 
 
 def test_transformer_batch_file_location_with_changeset(
@@ -238,13 +237,13 @@ def test_transformer_batch_file_location_with_changeset(
     )
     result = handler(event=event, config_obj=config)
 
-    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.json"
+    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
     assert result.batch_file_location == expected_path
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    # Only one batch with a single id
-    assert len(data) == 1 and len(data[0]) == 1
+        lines = [json.loads(line) for line in f if line.strip()]
+    # Only one batch line with a single id
+    assert len(lines) == 1 and len(lines[0]["ids"]) == 1
 
 
 @pytest.mark.parametrize(
@@ -346,7 +345,7 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
         SourceWork(id="id1", title="Title 1"),
         SourceWork(id="id2", title="Title 2"),
     ]
-    dummy_client = cast(Elasticsearch, object())
+    dummy_client = cast(Any, object())
     success, errors = load_data(
         elastic_client=dummy_client, records=records, index_name="works-source-dev"
     )
@@ -373,7 +372,7 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
     records = [SourceWork(id="id1", title="Bad Title")]
-    dummy_client = cast(Elasticsearch, object())
+    dummy_client = cast(Any, object())
     success, errors = load_data(
         elastic_client=dummy_client, records=records, index_name="works-source-dev"
     )
