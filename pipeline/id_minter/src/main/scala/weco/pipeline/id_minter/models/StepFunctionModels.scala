@@ -12,8 +12,12 @@ case class StepFunctionMintingRequest(
       Left("sourceIdentifiers cannot be empty")
     } else if (sourceIdentifiers.exists(_.trim.isEmpty)) {
       Left("sourceIdentifiers cannot contain empty strings")
-    } else if (sourceIdentifiers.size > StepFunctionMintingRequest.MaxBatchSize) {
-      Left(s"sourceIdentifiers cannot contain more than ${StepFunctionMintingRequest.MaxBatchSize} items")
+    } else if (
+      sourceIdentifiers.size > StepFunctionMintingRequest.MaxBatchSize
+    ) {
+      Left(
+        s"sourceIdentifiers cannot contain more than ${StepFunctionMintingRequest.MaxBatchSize} items"
+      )
     } else {
       Right(this)
     }
@@ -45,10 +49,12 @@ object StepFunctionMintingResponse {
     // The MintingResponse.successes contains canonical IDs, but we need source IDs
     // We can determine successful source IDs by excluding the failed ones
     val failedSourceIds = mintingResponse.failures.toSet
-    val successfulSourceIds = originalSourceIds.filterNot(failedSourceIds.contains)
+    val successfulSourceIds =
+      originalSourceIds.filterNot(failedSourceIds.contains)
 
-    val failures = mintingResponse.failures.map { sourceId =>
-      StepFunctionMintingFailure(sourceId, s"Failed to mint ID for $sourceId")
+    val failures = mintingResponse.failures.map {
+      sourceId =>
+        StepFunctionMintingFailure(sourceId, s"Failed to mint ID for $sourceId")
     }.toList
 
     StepFunctionMintingResponse(successfulSourceIds, failures, jobId)

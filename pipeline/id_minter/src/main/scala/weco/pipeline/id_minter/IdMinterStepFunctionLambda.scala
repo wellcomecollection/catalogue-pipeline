@@ -21,7 +21,7 @@ trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
   override def processRequest(
     input: StepFunctionMintingRequest
   ): Future[StepFunctionMintingResponse] = {
-    
+
     // Validate input first
     input.validate match {
       case Left(validationError) =>
@@ -37,15 +37,16 @@ trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
           jobId = input.jobId
         )
         Future.successful(response)
-        
+
       case Right(validInput) =>
         // Process using the existing MintingRequestProcessor
-        processor.process(validInput.sourceIdentifiers).map { mintingResponse =>
-          StepFunctionMintingResponse.fromMintingResponse(
-            mintingResponse,
-            validInput.sourceIdentifiers,
-            validInput.jobId
-          )
+        processor.process(validInput.sourceIdentifiers).map {
+          mintingResponse =>
+            StepFunctionMintingResponse.fromMintingResponse(
+              mintingResponse,
+              validInput.sourceIdentifiers,
+              validInput.jobId
+            )
         }
     }
   }
