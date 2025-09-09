@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.graph_edge import SourceConceptHasFieldOfActivity, SourceConceptRelatedTo
+from models.graph_edge import SourceConceptHasFieldOfWork, SourceConceptRelatedTo
 from models.graph_node import SourceName
 from sources.gzip_source import GZipSource
 from transformers.base_transformer import BaseTransformer
@@ -26,7 +26,7 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
 
     def extract_edges(
         self, raw_node: dict
-    ) -> Generator[SourceConceptRelatedTo | SourceConceptHasFieldOfActivity]:
+    ) -> Generator[SourceConceptRelatedTo | SourceConceptHasFieldOfWork]:
         raw_concept = RawLibraryOfCongressConcept(raw_node)
 
         if raw_concept.exclude() or raw_concept.is_geographic:
@@ -40,6 +40,6 @@ class LibraryOfCongressNamesTransformer(BaseTransformer):
                 from_id=related_id, to_id=raw_concept.source_id
             )
         for field_of_activity_id in raw_concept.has_field_of_activity_ids:
-            yield SourceConceptHasFieldOfActivity(
+            yield SourceConceptHasFieldOfWork(
                 from_id=raw_concept.source_id, to_id=field_of_activity_id
             )

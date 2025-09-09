@@ -3,7 +3,6 @@ from collections.abc import Generator
 from models.events import EntityType
 from models.graph_edge import (
     BaseEdge,
-    SourceConceptHasFieldOfWork,
     SourceNameRelatedTo,
     SourceNameRelatedToAttributes,
 )
@@ -41,12 +40,7 @@ class WikidataNamesTransformer(WikidataConceptsTransformer):
         )
 
     def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
-        if raw_node["type"] == "HAS_FIELD_OF_WORK":
-            yield SourceConceptHasFieldOfWork(
-                from_id=raw_node["from_id"],
-                to_id=raw_node["to_id"],
-            )
-        elif raw_node["type"] == "RELATED_TO":
+        if raw_node["type"] == "RELATED_TO":
             attributes = SourceNameRelatedToAttributes(
                 relationship_type=raw_node["subtype"]
             )

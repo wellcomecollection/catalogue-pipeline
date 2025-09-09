@@ -2,8 +2,8 @@ from collections.abc import Generator
 
 from models.graph_edge import (
     BaseEdge,
+    SourceConceptHasFieldOfWork,
     SourceConceptHasFounder,
-    SourceConceptHasIndustry,
     SourceConceptHasParent,
     SourceConceptSameAs,
     SourceConceptSameAsAttributes,
@@ -61,8 +61,11 @@ class WikidataConceptsTransformer(BaseTransformer):
                 from_id=raw_node["from_id"],
                 to_id=raw_node["to_id"],
             )
-        elif raw_node["type"] == "HAS_INDUSTRY":
-            yield SourceConceptHasIndustry(
+        elif (
+            raw_node["type"] == "HAS_INDUSTRY"
+            or raw_node["type"] == "HAS_FIELD_OF_WORK"
+        ):
+            yield SourceConceptHasFieldOfWork(
                 from_id=raw_node["from_id"],
                 to_id=raw_node["to_id"],
             )
