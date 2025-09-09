@@ -16,7 +16,8 @@ case class StepFunctionIdMinterConfig(
   targetIndex: String
 ) extends ApplicationConfig
 
-trait StepFunctionIdMinterConfigurable extends LambdaConfigurable[StepFunctionIdMinterConfig] {
+trait StepFunctionIdMinterConfigurable
+    extends LambdaConfigurable[StepFunctionIdMinterConfig] {
   def build(rawConfig: Config): StepFunctionIdMinterConfig = {
     StepFunctionIdMinterConfig(
       rdsClientConfig = RDSClientConfig(rawConfig),
