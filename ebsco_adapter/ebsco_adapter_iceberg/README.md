@@ -54,3 +54,22 @@ For manual deployment:
   ```shell
   ./scripts/local/deploy_python_lambda.sh ebsco_adapter/ebsco_adapter_iceberg <function-name>
   ```
+
+## Lake Formation permissions (manual step)
+
+Managing the Lake Formation permissions for the S3 Tables Catalog resources via Terraform is currently unreliable due to a provider limitation. Until this is resolved, apply the required permissions with the helper script in this repo:
+
+- Script: `ebsco_adapter/ebsco_adapter_iceberg/scripts/create_permissions.sh`
+- Requirements: AWS CLI and `jq`; ensure you are authenticated (e.g., via `aws sso login`).
+- Idempotent: safe to re-run; apply after stack creation and whenever principals change.
+
+Run locally:
+
+```bash
+bash ebsco_adapter/ebsco_adapter_iceberg/scripts/create_permissions.sh
+```
+
+Background and tracking:
+
+- Internal discussion: https://wellcome.slack.com/archives/C02ANCYL90E/p1756830340467749
+- Potential fix in provider: https://github.com/hashicorp/terraform-provider-aws/pull/43931
