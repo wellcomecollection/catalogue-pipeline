@@ -7,8 +7,8 @@
 module "ingestor_trigger_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-trigger"
-  description = "Triggers the ingestor lambdas"
+  name         = "catalogue-graph-ingestor-trigger"
+  description  = "Triggers the ingestor lambdas"
   package_type = "Image"
   image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:latest"
 
