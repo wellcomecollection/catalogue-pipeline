@@ -54,7 +54,7 @@ jobs:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
-  build-unified-pipleline-image:
+  build-unified-pipeline-image:
     runs-on: ubuntu-latest
     needs: [python-checks]
     steps:
