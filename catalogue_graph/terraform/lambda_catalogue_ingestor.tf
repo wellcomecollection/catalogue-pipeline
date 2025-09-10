@@ -9,12 +9,13 @@ module "ingestor_trigger_lambda" {
 
   name        = "catalogue-graph-ingestor-trigger"
   description = "Triggers the ingestor lambdas"
-  runtime     = "python3.13"
-  publish     = true
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:latest"
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["ingestor.steps.ingestor_trigger.lambda_handler"]
+  }
 
-  handler     = "ingestor.steps.ingestor_trigger.lambda_handler"
   memory_size = 1024
   timeout     = 300
   vpc_config = {
