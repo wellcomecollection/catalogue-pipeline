@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
@@ -26,5 +28,45 @@ class DeletedWork(ElasticsearchModel, BaseWork):
     deleted_reason: str
 
 
+# TODO: This is from catalogue_graph.ingestor.models.
+# import it rather than copy
+class SourceIdentifier(ElasticsearchModel):
+    identifier_type: str
+    ontology_type: str
+    value: str
+
+
+ConceptType = Literal[
+    "Person",
+    "Concept",
+    "Organisation",
+    "Place",
+    "Agent",
+    "Meeting",
+    "Genre",
+    "Period",
+    "Subject",
+]
+
+
+class Concept(BaseModel):
+    id: SourceIdentifier
+    label: str
+    type: ConceptType = "Concept"
+
+
+class Contributor(BaseModel):
+    agent: Concept
+    roles: list[str] = []
+    primary: bool = True
+
+
 class SourceWork(ElasticsearchModel, BaseWork):
     title: str
+    alternative_titles: list[str] = []
+    other_identifiers: list[SourceIdentifier] = []
+    designation: list[str] = []
+    description: str | None = None
+    current_frequency: str | None = None
+    edition: str | None = None
+    contributors: list[Contributor] = []
