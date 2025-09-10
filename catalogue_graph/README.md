@@ -12,7 +12,9 @@ See the following RFCs for more context:
 ## Architecture overview
 
 The catalogue graph pipeline extracts concepts from various sources (e.g. LoC, MeSH) and stores them into the catalogue
-graph database (running in Amazon Neptune). It consists of several Lambda functions:
+graph database (running in Amazon Neptune). All Lambda functions now run from a single shared container image
+(`unified_pipeline_lambda`) published to ECR; each function specifies its own module entrypoint via `image_config.command`
+in Terraform (no per-function zip/runtimes are built anymore). It consists of several Lambda functions:
 
 * `extractor`: Extracts a single entity type (nodes or edges) from a single source (e.g. LoC Names) and streams the
   transformed entities into the specified destination. To support longer execution times, the `extractor` is also
@@ -86,11 +88,20 @@ in the following format:
 
 ## Source code organisation
 
-The `src` directory contains all Python source code for the graph pipeline. (In production, we use Python 3.13.)
+The `src` directory contains all Python source code for the graph pipeline (Python 3.13). Each Lambda's handler lives in a
+module exposing a `lambda_handler` function (invoked by AWS) and often a `local_handler` for ad‑hoc local runs.
 
-The root of the directory contains a Python file for each Lambda function in the pipeline. Each file has
-a `lambda_handler` function (used when running in production) and a `local_handler` function (used when running
-locally).
+Because all Lambdas share one container image, anything added to `src` (and declared in `pyproject.toml`) becomes
+immediately available to every function after the next image build. Terraform modules set:
+
+```
+package_type = "Image"
+image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+image_config = { command = ["path.to.module.lambda_handler"] }
+```
+
+This simplifies dependency management and keeps runtime versions consistent. There are no `.zip` artifacts or
+per-function `runtime`/`filename` settings anymore.
 
 Subdirectories contain various modules and are shared by all Lambda functions.
 
@@ -120,46 +131,43 @@ Run `uv sync` to install the project dependencies.
 
 ## Deployment
 
-The pipeline deploys automatically on push to main via
-the [catalogue-graph-ci](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/.github/workflows/catalogue-graph-ci.yml)
-GitHub action. This action deploys the latest code to all Lambda functions and publishes a new image to ECR.
+The pipeline deploys automatically on push to main via the
+[catalogue-graph-ci](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/.github/workflows/catalogue-graph-ci.yml)
+GitHub action. This builds & pushes the unified container image to ECR and updates all Lambda functions (Terraform apply).
 
 ### Manual deployment
 
-For manual deployment:
+For ad‑hoc (non‑CI) deployment of the shared Lambda image:
 
-* **Lambda functions**: Use the local deployment script from the repository root:
-  ```shell
-  ./scripts/local/deplot_python_lambda.sh catalogue_graph <function-name>
-  ```
+```shell
+# From catalogue_graph/
+TAG=dev \
+REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
+docker compose build unified_pipeline_lambda
+docker compose push unified_pipeline_lambda
 
-* **Extractor container**: Use docker compose commands from the catalogue_graph directory:
-  ```shell
-  # Build the container
-  TAG=dev \
-  REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
-  PYTHON_IMAGE_VERSION=3.13-slim \
-  docker compose build extractor
-  
-  # Push to ECR (requires appropriate AWS credentials)
-  TAG=dev \
-  REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
-  PYTHON_IMAGE_VERSION=3.13-slim \
-  docker compose push extractor
-  ```
+# (Optional) apply infrastructure changes
+cd terraform
+terraform plan
+terraform apply
+```
+
+Extractor ECS image (separate service) can still be built/pushed similarly using the `extractor` target.
 
 
 
 ## Local execution
 
-To run one of the Lambda functions locally, navigate to the `src` directory and then run the chosen function via the
-command line. For example, to check the status of a bulk load job, run the following:
+You can invoke handlers directly without building the container (fast iteration) or run inside the container for closer
+parity.
+
+Direct module invocation (bulk load status example):
 
 ```shell
 AWS_PROFILE=platform-developer uv run bulk_load_poller.py --load-id=<some_id>
 ```
 
-To run an extractor, use the following:
+Extractor example:
 
 ```shell
 S3_BULK_LOAD_BUCKET_NAME=wellcomecollection-neptune-graph-loader \
@@ -189,5 +197,26 @@ To run Elasticsearch locally, you can use `elasticsearch.docker-compose.yml` to 
 
 `docker compose -f elasticsearch.docker-compose.yml up`
 
-This will start Elasticsearch on `localhost:9200`, and Kibana on `localhost:5601`. Lambda functions can be configured to
-use this Elasticsearch instance by setting the relevant environment variables when starting the Lambda function locally.
+This will start Elasticsearch on `localhost:9200`, and Kibana on `localhost:5601`. Point local scripts or the container
+at it via the normal env vars.
+
+## Container entrypoints summary
+
+| Lambda (logical name) | image_config.command |
+|-----------------------|----------------------|
+| bulk_loader           | bulk_loader.lambda_handler |
+| bulk_load_poller      | bulk_load_poller.lambda_handler |
+| graph_remover         | graph_remover.lambda_handler |
+| graph_status_poller   | graph_status_poller.lambda_handler |
+| graph_scaler          | graph_scaler.lambda_handler |
+| indexer               | indexer.lambda_handler |
+| ingestor_trigger      | ingestor.steps.ingestor_trigger.lambda_handler |
+| ingestor_trigger_monitor | ingestor.steps.ingestor_trigger_monitor.lambda_handler |
+| ingestor_loader       | ingestor.steps.ingestor_loader.lambda_handler |
+| ingestor_loader_monitor | ingestor.steps.ingestor_loader_monitor.lambda_handler |
+| ingestor_indexer      | ingestor.steps.ingestor_indexer.lambda_handler |
+| ingestor_indexer_monitor | ingestor.steps.ingestor_indexer_monitor.lambda_handler |
+| ingestor_deletions    | ingestor.steps.ingestor_deletions.lambda_handler |
+| ingestor_reporter     | ingestor.steps.ingestor_reporter.lambda_handler |
+
+All use the same ECR image tagged `:prod` in Terraform (promotion strategy can be revised later to use digests or staged tags).
