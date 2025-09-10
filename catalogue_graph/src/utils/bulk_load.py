@@ -1,9 +1,9 @@
 from datetime import datetime
 from pathlib import PurePosixPath
 
+import config
 from pydantic import BaseModel
 
-import config
 from utils.types import (
     EntityType,
     TransformerType,
@@ -13,6 +13,17 @@ from utils.types import (
 class IncrementalWindow(BaseModel):
     start_time: datetime
     end_time: datetime
+    
+    def to_merged_works_filter(self):
+        # Windows are based on the 'mergedTime' field, which indicates when the document was last updated
+        return {
+            "range": {
+                "state.mergedTime": {
+                    "gte": self.start_time.isoformat(),
+                    "lte": self.end_time.isoformat(),
+                }
+            }
+        }
 
 
 def get_file_path(

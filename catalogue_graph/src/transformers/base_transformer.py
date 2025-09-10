@@ -7,7 +7,6 @@ from typing import Any, TextIO
 
 import boto3
 import smart_open
-
 from clients.base_neptune_client import BaseNeptuneClient
 from converters.cypher.bulk_load_converter import CypherBulkLoadConverter
 from models.events import EntityType
@@ -92,10 +91,6 @@ class BaseTransformer:
             raise ValueError("Unsupported entity type.")
 
         yield from entities
-
-        # Stop processing to ensure threads are terminated when sample_size is reached
-        if sample_size is not None:
-            self.source.stop_processing()
 
     def _stream_to_bulk_load_file(
         self, file: TextIO, entity_type: EntityType, sample_size: int | None = None

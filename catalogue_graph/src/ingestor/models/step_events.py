@@ -1,9 +1,9 @@
+from models.events import BasePipelineEvent
 from pydantic import BaseModel
-
 from utils.types import IngestorType
 
 
-class IngestorStepEvent(BaseModel):
+class IngestorStepEvent(BasePipelineEvent):
     ingestor_type: IngestorType
     pipeline_date: str
     index_date: str
@@ -13,10 +13,10 @@ class IngestorStepEvent(BaseModel):
 class IngestorTriggerLambdaEvent(IngestorStepEvent):
     pass
 
-
+# 'slice_index' denotes which part of the dataset to process. When using ES, this translates to a PIT slice. 
 class IngestorLoaderLambdaEvent(IngestorStepEvent):
-    start_offset: int
-    end_index: int
+    slice_index: int
+    pit_id: str | None = None
 
 
 class IngestorIndexerObject(BaseModel):

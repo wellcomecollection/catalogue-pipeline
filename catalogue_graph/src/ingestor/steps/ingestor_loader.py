@@ -2,9 +2,10 @@
 import argparse
 import typing
 
-from pydantic import BaseModel
-
 from config import CATALOGUE_GRAPH_S3_BUCKET, INGESTOR_S3_PREFIX
+from pydantic import BaseModel
+from utils.types import IngestorLoadFormat, IngestorType
+
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -12,7 +13,6 @@ from ingestor.models.step_events import (
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.types import IngestorLoadFormat, IngestorType
 
 
 class IngestorLoaderConfig(BaseModel):
@@ -31,14 +31,14 @@ def create_transformer(
         )
     if event.ingestor_type == "works":
         return ElasticsearchWorksTransformer(
-            event.pipeline_date, event.start_offset, event.end_index, config.is_local
+            event.pipeline_date, event.window, config.is_local
         )
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
 
 def get_filename(event: IngestorLoaderLambdaEvent) -> str:
-    return f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}"
+    return f"{str(event.slice_index).zfill(8)}-{str(event.slice_index).zfill(8)}"
 
 
 def handler(
@@ -86,7 +86,7 @@ def local_handler() -> None:
         required=True,
     )
     parser.add_argument(
-        "--start-offset",
+        "--slice-index",
         type=int,
         help="The start index of the records to process.",
         required=False,
@@ -136,9 +136,21 @@ def local_handler() -> None:
         choices=["parquet", "jsonl"],
         default="parquet",
     )
+    parser.add_argument(
+        "--window-start",
+        type=str,
+        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
+        "--window-end",
+        type=str,
+        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
 
     args = parser.parse_args()
-    event = IngestorLoaderLambdaEvent(**args.__dict__)
+    event = IngestorLoaderLambdaEvent.from_argparser(args)
     config = IngestorLoaderConfig(is_local=True, load_format=args.load_format)
 
     if args.load_destination == "local":

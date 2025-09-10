@@ -3,7 +3,8 @@ from collections.abc import Generator
 from models.events import IncrementalWindow
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
-from sources.elasticsearch_source import MergedWorksSource
+from sources.catalogue.merged_works_source import MergedWorksSource
+
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork

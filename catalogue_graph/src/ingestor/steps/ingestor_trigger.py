@@ -5,9 +5,10 @@ import datetime
 import pprint
 import typing
 
-from pydantic import BaseModel
+from utils.aws import get_neptune_client
+from utils.types import IngestorType
 
-from config import INGESTOR_SHARD_SIZE
+from ingestor.extractors.works_extractor import GraphWorksExtractor
 from ingestor.models.step_events import (
     IngestorLoaderLambdaEvent,
     IngestorTriggerLambdaEvent,
@@ -15,13 +16,6 @@ from ingestor.models.step_events import (
 )
 from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
 from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
-from utils.aws import get_neptune_client
-from utils.types import IngestorType
-
-
-class IngestorTriggerConfig(BaseModel):
-    is_local: bool = False
-    shard_size: int = INGESTOR_SHARD_SIZE
 
 
 def create_job_id() -> str:
@@ -30,60 +24,46 @@ def create_job_id() -> str:
 
 
 def extract_data(ingestor_type: IngestorType, is_local: bool) -> int:
-    print("Extracting record count from Neptune ...")
-    client = get_neptune_client(is_local)
-
+    # Can't enforce fix slice size when using ES pit!
     if ingestor_type == "concepts":
+        print("Extracting record count from Neptune ...")
+        client = get_neptune_client(is_local)
         count_query = "MATCH (c:Concept) RETURN count(*) as count"
+        count_result = client.run_open_cypher_query(count_query)
+        record_count = int(count_result[0]["count"])
+        pit_id = None
     elif ingestor_type == "works":
-        count_query = "MATCH (w:Work) RETURN count(*) as count"
+        source = GraphWorksExtractor("2025-08-14", 0, 10000, is_local)        
+        pit_id, record_count = source.test(None)
     else:
         raise ValueError(f"Unknown ingestor type: {ingestor_type}.")
 
-    count_result = client.run_open_cypher_query(count_query)
-    number_records = int(count_result[0]["count"])
+    print(f"Retrieved record count: {record_count}")
 
-    print(f"Retrieved record count: {number_records}")
-
-    return number_records
-
-
-def transform_data(
-    record_count: int, event: IngestorTriggerLambdaEvent, config: IngestorTriggerConfig
-) -> list[IngestorLoaderLambdaEvent]:
-    print("Transforming record count to shard ranges ...")
-
-    # generate shard ranges based on the record count and shard size
-    shard_ranges = []
-
-    for start_offset in range(0, record_count, config.shard_size):
-        end_index = min(start_offset + config.shard_size, record_count)
-        shard_ranges.append(
-            IngestorLoaderLambdaEvent(
-                **event.model_dump(),
-                start_offset=start_offset,
-                end_index=end_index,
-            )
-        )
-
-    return shard_ranges
+    return pit_id, record_count
 
 
 def handler(
-    event: IngestorTriggerLambdaEvent, config: IngestorTriggerConfig
+    event: IngestorTriggerLambdaEvent, is_local: bool = False
 ) -> IngestorTriggerMonitorLambdaEvent:
-    print(f"Received event: {event} with config {config}")
+    pit_id, record_count = extract_data(event.ingestor_type, is_local)
+        
+    # In incremental mode, we only want one worker to prevent processing related works multiple times! 
+    events = []
+    for i in range(5):
+        events.append(
+            IngestorLoaderLambdaEvent(
+                **event.model_dump(),
+                pit_id=pit_id,
+                slice_index=i,
+            )
+        )
 
-    extracted_data = extract_data(event.ingestor_type, config.is_local)
-    transformed_data = transform_data(
-        record_count=extracted_data, event=event, config=config
-    )
-
-    print(f"Shard ranges ({len(transformed_data)}) generated successfully.")
+    print(f"Shard ranges ({len(events)}) generated successfully.")
 
     return IngestorTriggerMonitorLambdaEvent(
         **event.model_dump(),
-        events=transformed_data,
+        events=events,
     )
 
 
@@ -91,9 +71,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
     if "job_id" not in event:
         event["job_id"] = create_job_id()
 
-    return handler(
-        IngestorTriggerLambdaEvent(**event), IngestorTriggerConfig()
-    ).model_dump()
+    return handler(IngestorTriggerLambdaEvent(**event)).model_dump()
 
 
 def local_handler() -> None:
@@ -141,9 +119,8 @@ def local_handler() -> None:
 
     args = parser.parse_args()
     event = IngestorTriggerLambdaEvent(**args.__dict__)
-    config = IngestorTriggerConfig(is_local=True)
 
-    result = handler(event, config)
+    result = handler(event, is_local=True)
 
     if args.monitoring:
         trigger_monitor_handler(result, IngestorTriggerMonitorConfig())
