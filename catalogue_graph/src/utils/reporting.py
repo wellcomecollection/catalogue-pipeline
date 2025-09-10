@@ -27,7 +27,7 @@ class PipelineReport(BaseModel):
         else:
             report_prefix = f"{pipeline_date}/{index_date}"
 
-        return f"s3://{CATALOGUE_GRAPH_S3_BUCKET}/{INGESTOR_S3_PREFIX}/{report_prefix}/{report_name}"
+        return f"s3://{CATALOGUE_GRAPH_S3_BUCKET}/{INGESTOR_S3_PREFIX}_{ingestor_type}/{report_prefix}/{report_name}"
 
     @classmethod
     def read(
