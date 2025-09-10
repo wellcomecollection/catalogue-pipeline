@@ -13,8 +13,8 @@ from ingestor.steps.ingestor_trigger_monitor import (
     handler,
 )
 
-MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/report.trigger.json"
-MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor/2025-01-01/2025-03-01/123/report.trigger.json"
+MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/report.trigger.json"
+MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.trigger.json"
 
 
 def get_mock_expected_report(record_count: int) -> dict:
