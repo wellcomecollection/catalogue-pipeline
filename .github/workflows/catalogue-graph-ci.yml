@@ -69,6 +69,43 @@ jobs:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
+  retag-unified-pipeline-image:
+    runs-on: ubuntu-latest
+    needs: [build-unified-pipeline-image]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - uses: ./.github/actions/retag-docker-image
+        with:
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          image_name: unified_pipeline_lambda
+          source_tag: ${{ github.sha }}
+          target_tag: prod
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+
+  deploy-unified-pipeline-lambdas:
+    runs-on: ubuntu-latest
+    needs: [retag-unified-pipeline-image]
+    strategy:
+      matrix:
+        lambda_name:
+          [
+            catalogue-graph-ingestor-trigger,
+          ]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/deploy-lambda-image
+        with:
+          lambda_name: ${{ matrix.lambda_name }}
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          image_name: unified_pipeline_lambda
+          deploy_tag: prod
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+
+
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [build-extractor-image, build-lambda-zip]

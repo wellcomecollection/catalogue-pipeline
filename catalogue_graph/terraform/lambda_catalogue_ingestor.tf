@@ -11,6 +11,7 @@ module "ingestor_trigger_lambda" {
   description  = "Triggers the ingestor lambdas"
   package_type = "Image"
   image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:latest"
+  publish      = true
 
   image_config = {
     command = ["ingestor.steps.ingestor_trigger.lambda_handler"]
