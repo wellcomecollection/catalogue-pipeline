@@ -1,16 +1,19 @@
 module "indexer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-indexer"
-  description = "Indexes nodes and edges into the Neptune catalogue graph cluster."
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-indexer"
+  description  = "Indexes nodes and edges into the Neptune catalogue graph cluster."
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
   // New versions are automatically deployed through a GitHub action.
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
-  filename = data.archive_file.empty_zip.output_path
 
-  handler     = "indexer.lambda_handler"
+  image_config = {
+    command = ["indexer.lambda_handler"]
+  }
+
   memory_size = 128
   timeout     = 60 // 1 minute
 

@@ -10,7 +10,7 @@ module "ingestor_trigger_lambda" {
   name         = "catalogue-graph-ingestor-trigger"
   description  = "Triggers the ingestor lambdas"
   package_type = "Image"
-  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:latest"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   publish      = true
 
   image_config = {
@@ -48,14 +48,16 @@ resource "aws_iam_role_policy" "ingestor_trigger_lambda_read_secrets_policy" {
 module "ingestor_trigger_monitor_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-trigger-monitor"
-  description = "Monitors the output of ingestor_trigger lambda"
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-ingestor-trigger-monitor"
+  description  = "Monitors the output of ingestor_trigger lambda"
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["ingestor.steps.ingestor_trigger_monitor.lambda_handler"]
+  }
 
-  handler     = "ingestor.steps.ingestor_trigger_monitor.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -94,14 +96,16 @@ resource "aws_iam_role_policy" "ingestor_trigger_monitor_cloudwatch_write_policy
 module "ingestor_loader_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-loader"
-  description = "Loads catalogue concepts into S3 from Neptune"
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-ingestor-loader"
+  description  = "Loads catalogue concepts into S3 from Neptune"
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["ingestor.steps.ingestor_loader.lambda_handler"]
+  }
 
-  handler     = "ingestor.steps.ingestor_loader.lambda_handler"
   memory_size = 1024
   timeout     = 900
 
@@ -146,14 +150,16 @@ resource "aws_iam_role_policy" "ingestor_loader_lambda_neptune_read_policy" {
 module "ingestor_loader_monitor_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-loader-monitor"
-  description = "Monitors the output of ingestor_loader lambda"
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-ingestor-loader-monitor"
+  description  = "Monitors the output of ingestor_loader lambda"
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["ingestor.steps.ingestor_loader_monitor.lambda_handler"]
+  }
 
-  handler     = "ingestor.steps.ingestor_loader_monitor.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -192,14 +198,16 @@ resource "aws_iam_role_policy" "ingestor_loader_monitor_lambda_cloudwatch_write_
 module "ingestor_indexer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-indexer"
-  description = "Indexes catalogue concepts into elasticsearch"
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-ingestor-indexer"
+  description  = "Indexes catalogue concepts into elasticsearch"
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["ingestor.steps.ingestor_indexer.lambda_handler"]
+  }
 
-  handler     = "ingestor.steps.ingestor_indexer.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -238,14 +246,16 @@ resource "aws_iam_role_policy" "ingestor_indexer_lambda_s3_read_policy" {
 module "ingestor_indexer_monitor_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-indexer-monitor"
-  description = "Monitors the output of ingestor_indexer lambda"
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-ingestor-indexer-monitor"
+  description  = "Monitors the output of ingestor_indexer lambda"
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["ingestor.steps.ingestor_indexer_monitor.lambda_handler"]
+  }
 
-  handler     = "ingestor.steps.ingestor_indexer_monitor.lambda_handler"
   memory_size = 1024
   timeout     = 300
 
@@ -284,14 +294,16 @@ resource "aws_iam_role_policy" "ingestor_indexer_monitor_lambda_cloudwatch_write
 module "ingestor_deletions_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-deletions"
-  description = "Removes concepts which no longer exist in the catalogue graph from the Elasticsearch index."
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-ingestor-deletions"
+  description  = "Removes concepts which no longer exist in the catalogue graph from the Elasticsearch index."
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["ingestor.steps.ingestor_deletions.lambda_handler"]
+  }
 
-  handler     = "ingestor.steps.ingestor_deletions.lambda_handler"
   memory_size = 1024
   timeout     = 60 // 1 minute
 
@@ -339,16 +351,19 @@ resource "aws_iam_role_policy" "ingestor_deletions_lambda_s3_policy" {
 module "ingestor_reporter_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-ingestor-reporter"
-  description = "Generates a report on the latest pipeline run and posts it to #wc-search-alerts"
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-ingestor-reporter"
+  description  = "Generates a report on the latest pipeline run and posts it to #wc-search-alerts"
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
   // New versions are automatically deployed through a GitHub action.
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
-  filename = data.archive_file.empty_zip.output_path
 
-  handler     = "ingestor.steps.ingestor_reporter.lambda_handler"
+  image_config = {
+    command = ["ingestor.steps.ingestor_reporter.lambda_handler"]
+  }
+
   memory_size = 128
   timeout     = 300
 
