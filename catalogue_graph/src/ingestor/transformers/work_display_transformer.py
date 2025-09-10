@@ -134,15 +134,14 @@ class DisplayWorkTransformer:
             yield DisplayRelation.from_neptune_node(ancestor.work, ancestor.parts)
 
     @property
-    def parts(self) -> list[DisplayRelation]:
-        parts = [
-            DisplayRelation.from_neptune_node(c.work, c.parts)
-            for c in self.hierarchy.children
-        ]
-
-        return sorted(
-            parts, key=lambda item: natural_sort_key(item.referenceNumber or item.title)
+    def parts(self) -> Generator[DisplayRelation]:
+        sorted_children = sorted(
+            self.hierarchy.children,
+            key=lambda c: natural_sort_key(c.work.properties.collection_path),
         )
+
+        for child in sorted_children:
+            yield DisplayRelation.from_neptune_node(child.work, child.parts)
 
     @property
     def contributors(self) -> Generator[DisplayContributor]:

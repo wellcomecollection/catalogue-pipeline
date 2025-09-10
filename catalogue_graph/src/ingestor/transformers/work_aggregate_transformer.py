@@ -1,3 +1,4 @@
+import re
 from collections.abc import Generator
 
 from ingestor.extractors.works_extractor import ExtractedWork
@@ -65,8 +66,12 @@ class AggregateWorkTransformer:
         for event in self.data.production:
             for date in event.dates:
                 if date.range is not None:
-                    from_year = date.range.from_time.split("-")[0]
-                    yield AggregatableField(id=from_year, label=from_year)
+                    from_year_match = re.match(r"^-?\d+", date.range.from_time)
+                    if not from_year_match:
+                        raise ValueError(f"Invalid date format: {date.range.from_time}")
+
+                    year = from_year_match.group()
+                    yield AggregatableField(id=year, label=year)
 
     @property
     def languages(self) -> Generator[AggregatableField]:

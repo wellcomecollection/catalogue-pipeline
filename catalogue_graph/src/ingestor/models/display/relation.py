@@ -17,7 +17,7 @@ class DisplayRelation(BaseModel):
             id=node.properties.id,
             title=node.properties.label,
             type=node.properties.type,
-            referenceNumber=node.properties.hierarchy_reference_number,
+            referenceNumber=node.properties.collection_path_label,
             totalParts=total_parts,
         )
 

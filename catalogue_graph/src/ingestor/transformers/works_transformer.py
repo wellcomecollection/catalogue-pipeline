@@ -51,7 +51,7 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             genres=list(transformer.genres),
             subjects=list(transformer.subjects),
             availabilities=transformer.availabilities,
-            parts=transformer.parts,
+            parts=list(transformer.parts),
             part_of=list(transformer.part_of),
             type=work.data.display_work_type,
         )

@@ -6,6 +6,12 @@ from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
 from ingestor.models.shared.location import PhysicalLocation
 
+# The Scala pipeline uses the date `-9999-01-01T00:00:00Z` as 'negative infinity'. The Python standard library doesn't
+# support dates with negative years, and so we hardcode the corresponding Unix timestamp here instead of installing
+# an external library to calculate it.
+NEGATIVE_INFINITY_DATE = "-9999-01-01T00:00:00Z"
+NEGATIVE_INFINITY_UNIX_TIMESTAMP = -377705116800000
+
 
 class QueryWorkTransformer:
     def __init__(self, extracted: ExtractedWork):
@@ -118,8 +124,11 @@ class QueryWorkTransformer:
         for event in self.data.production:
             for date in event.dates:
                 if date.range is not None:
-                    # Number of milliseconds since the Unix epoch
-                    yield int(parser.parse(date.range.from_time).timestamp() * 1000)
+                    if date.range.from_time == NEGATIVE_INFINITY_DATE:
+                        yield NEGATIVE_INFINITY_UNIX_TIMESTAMP
+                    else:
+                        # Number of milliseconds since the Unix epoch
+                        yield int(parser.parse(date.range.from_time).timestamp() * 1000)
 
     @property
     def genre_ids(self) -> Generator[str]:
