@@ -79,6 +79,8 @@ class MergedWorksSource(BaseSource):
         q: Queue = Queue(maxsize=ES_BATCH_SIZE)
         threads = []
         for i in range(config.ES_SOURCE_PARALLELISM):
+            # Run threads as daemons so that they automatically exit when the main thread throws an exception.
+            # See https://docs.python.org/3/library/threading.html for more info.
             t = Thread(target=self.search_with_pit, args=(pit["id"], i, q), daemon=True)
             t.start()
             threads.append(t)
