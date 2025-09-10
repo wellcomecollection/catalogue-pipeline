@@ -19,3 +19,7 @@ RUN uv pip install --system .
 
 # Copy application source code
 COPY src/ ${LAMBDA_TASK_ROOT}
+
+FROM base AS unified_pipeline_lambda
+
+CMD [ "default.lambda_handler" ]
