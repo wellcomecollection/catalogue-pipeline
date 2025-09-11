@@ -181,6 +181,9 @@ def handler(
         prior_record = is_file_already_processed(
             event.file_location, step="transformed"
         )
+        index_date = (
+            event.index_date or config_obj.index_date or config_obj.pipeline_date
+        )
         if prior_record:
             print(
                 "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
@@ -188,11 +191,9 @@ def handler(
             prior_batch = prior_record.get("batch_file_location")
             prior_bucket = prior_record.get("batch_file_bucket")
             prior_key = prior_record.get("batch_file_key")
-            idx_date = (
-                event.index_date or config_obj.index_date or config_obj.pipeline_date
-            )
+            
             return EbscoAdapterTransformerResult(
-                index_date=idx_date,
+                index_date=index_date,
                 job_id=event.job_id,
                 batch_file_location=prior_batch,
                 batch_file_bucket=prior_bucket,
