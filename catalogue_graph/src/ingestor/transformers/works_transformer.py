@@ -6,7 +6,15 @@ from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtract
 from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.debug.work import SourceWorkDebugInformation, VisibleWorkDebug
 from ingestor.models.filter.work import WorkFilterableValues
-from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
+from ingestor.models.indexable_work import (
+    DeletedIndexableWork,
+    DisplayWork,
+    IndexableWork,
+    InvisibleIndexableWork,
+    QueryWork,
+    RedirectedIndexableWork,
+    VisibleIndexableWork,
+)
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .work_aggregate_transformer import AggregateWorkTransformer
@@ -150,11 +158,21 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
         )
 
     def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
-        return IndexableWork(
-            query=self._transform_query(extracted),
-            display=self._transform_display(extracted),
-            aggregatable_values=self._transform_aggregate(extracted),
-            filterable_values=self._transform_filter(extracted),
-            debug=self._transform_debug(extracted),
-            type="Visible",
-        )
+        if extracted.work.type == "Visible":
+            return VisibleIndexableWork(
+                query=self._transform_query(extracted),
+                display=self._transform_display(extracted),
+                aggregatable_values=self._transform_aggregate(extracted),
+                filterable_values=self._transform_filter(extracted),
+                debug=self._transform_debug(extracted),
+                type="Visible",
+            )
+        
+        if extracted.work.type == "Invisible":
+            return InvisibleIndexableWork.from_denormalised_work(extracted.work)
+
+        if extracted.work.type == "Deleted":
+            return DeletedIndexableWork.from_denormalised_work(extracted.work)
+
+        if extracted.work.type == "Redirected":
+            return RedirectedIndexableWork.from_denormalised_work(extracted.work)
