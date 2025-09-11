@@ -5,6 +5,9 @@ from models.events import IncrementalWindow
 from pydantic import BaseModel
 from sources.catalogue.merged_works_source import MergedWorksSource
 from utils.aws import get_neptune_client
+import config
+from pydantic import BaseModel
+from utils.elasticsearch import get_client, get_standard_index_name
 
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
@@ -12,7 +15,8 @@ from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
     WORK_CHILDREN_QUERY,
     WORK_CONCEPTS_QUERY,
-)
+
+from .base_extractor import GraphBaseExtractor
 
 
 class ExtractedWork(BaseModel):
@@ -28,7 +32,7 @@ class GraphWorksExtractor:
         self.neptune_client = get_neptune_client(is_local)
         self.pipeline_date = pipeline_date
         self.source = MergedWorksSource(pipeline_date=pipeline_date, pit_id="", slice_id=0, max_slices=0, window=window, is_local=is_local, query={"match": {"type": "Visible"}})
-    
+
     def make_neptune_query(self, query: str, ids: list[str], label: str) -> list[dict]:
         return self.neptune_client.time_open_cypher_query(query, {"ids": ids}, label)
 
