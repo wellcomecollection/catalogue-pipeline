@@ -1,9 +1,9 @@
 from collections.abc import Generator
-from itertools import batched
+from queue import Queue
 
 from models.events import IncrementalWindow
 from pydantic import BaseModel
-from sources.catalogue.merged_works_source import MergedWorksSource
+from sources.threaded_es_source import ThreadedElasticsearchSource
 from utils.aws import get_neptune_client
 
 from ingestor.models.denormalised.work import BaseDenormalisedWork, DenormalisedWork
@@ -21,17 +21,15 @@ class ExtractedWork(BaseModel):
     concepts: list[WorkConcept]
 
 
-class GraphWorksExtractor:
+class GraphWorksExtractor(ThreadedElasticsearchSource):
     def __init__(
         self, pipeline_date: str, window: IncrementalWindow = None, is_local: bool = False
     ):
+        super().__init__(pipeline_date=pipeline_date, window=window, is_local=is_local)
         self.neptune_client = get_neptune_client(is_local)
-        self.pipeline_date = pipeline_date
-        # {"match": {"type": "Visible"}}
-        self.source = MergedWorksSource(pipeline_date=pipeline_date, window=window, is_local=is_local)
 
     def make_neptune_query(self, query: str, ids: list[str], label: str) -> list[dict]:
-        return list(self.neptune_client.get_in_parallel(query, ids, label))
+        return list(self.neptune_client.time_open_cypher_query(query, {"ids": ids}, label))
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:
         """Return all ancestors of each work in the current batch."""
@@ -48,41 +46,49 @@ class GraphWorksExtractor:
         results = self.make_neptune_query(WORK_CONCEPTS_QUERY, ids, "work concepts")
         return {item["id"]: item["concepts"] for item in results}
 
-    def extract_raw(self) -> Generator[ExtractedWork]:
-        streamed_ids = set()
-        related_ids = set()
-        
-        es_documents = self.source.stream_raw()
-        for batch in batched(es_documents, 10_000, strict=False):
-            es_works = [BaseDenormalisedWork.from_es_document(doc) for doc in batch]
-            
+    def worker_target(self, slice_index: int, queue: Queue) -> None:
+        search_after = None
+        while hits := self.search(slice_index, search_after):
+            es_works = [BaseDenormalisedWork.from_es_document(hit["_source"]) for hit in hits]
+
             visible_ids = [w.state.canonical_id for w in es_works if w.type == "Visible"]
             all_ancestors = self._get_work_ancestors(visible_ids)
             all_children = self._get_work_children(visible_ids)
             all_concepts = self._get_work_concepts(visible_ids)
-            
+
             for es_work in es_works:
                 work_id = es_work.state.canonical_id
-                streamed_ids.add(work_id)
-
+                
                 work_hierarchy = WorkHierarchy(
                     id=work_id,
                     ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
                     children=all_children.get(work_id, {}).get("children", []),
                 )
 
-                related_ids.update(set(c.work.properties.id for c in work_hierarchy.children))
-                related_ids.update(set(c.work.properties.id for c in work_hierarchy.ancestors))
-
                 work_concepts = []
                 for raw_concept in all_concepts.get(work_id, []):
                     work_concepts.append(WorkConcept(**raw_concept))
-    
-                yield ExtractedWork(
+
+                queue.put(ExtractedWork(
                     work=es_work,
                     hierarchy=work_hierarchy,
                     concepts=work_concepts,
-                )
-        
+                ))
+                
+            search_after = hits[-1]["sort"]
+    
+        queue.put(None)
+
+    def extract_raw(self) -> Generator[ExtractedWork]:
+        streamed_ids = set()
+        related_ids = set()
+            
+        for item in self.stream_raw():
+            streamed_ids.add(item.work.state.canonical_id)
+            related_ids.update(c.work.properties.id for c in item.hierarchy.children)
+            related_ids.update(c.work.properties.id for c in item.hierarchy.ancestors)
+            
+            yield item
+
         print(len(related_ids))
         print(len(related_ids.difference(streamed_ids)))
