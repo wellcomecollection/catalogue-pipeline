@@ -1,6 +1,7 @@
 import json
 from unittest.mock import Mock, patch
 
+from models.step_events import EbscoAdapterTransformerEvent
 from utils.tracking import (
     ProcessedFileRecord,
     is_file_already_processed,
@@ -20,8 +21,6 @@ class TestRecordProcessedFile:
         patch("utils.tracking.smart_open.open").stop()
 
     def test_record_processed_file(self) -> None:
-        from models.step_events import EbscoAdapterTransformerEvent
-
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
         event = EbscoAdapterTransformerEvent(
