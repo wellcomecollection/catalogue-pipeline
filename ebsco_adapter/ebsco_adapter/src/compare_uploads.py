@@ -97,12 +97,12 @@ def compare_uploads(
         candidates_to_extract, xml_s3_prefix, target_directory, s3_store
     )
 
-    assert (
-        0 < len(records) <= 2
-    ), f"Unexpected number of uploads to compare (got {len(records)}), stopping."
-    assert (
-        dates_to_compare["current"] in records
-    ), "Current upload not found in extracted records, stopping."
+    assert 0 < len(records) <= 2, (
+        f"Unexpected number of uploads to compare (got {len(records)}), stopping."
+    )
+    assert dates_to_compare["current"] in records, (
+        "Current upload not found in extracted records, stopping."
+    )
 
     previous_available_count = (
         len(records[dates_to_compare["previous"]])

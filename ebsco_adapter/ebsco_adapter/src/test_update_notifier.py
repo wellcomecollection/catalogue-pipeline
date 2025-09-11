@@ -71,8 +71,8 @@ def test_update_notifier():
     )
     published_messages = fake_sns_client.test_get_published_messages()
 
-    assert (
-        len(published_messages) == number_of_updates + number_of_deleted
-    ), f"Expected {number_of_updates} update messages to be published, but got {len(published_messages)}"
+    assert len(published_messages) == number_of_updates + number_of_deleted, (
+        f"Expected {number_of_updates} update messages to be published, but got {len(published_messages)}"
+    )
 
     assert published_messages == expected_messages

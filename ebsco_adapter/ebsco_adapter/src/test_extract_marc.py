@@ -52,9 +52,9 @@ def test_extract_marc_records_reads_from_download_location():
         results = extract_marc_records(
             available_files, xml_s3_prefix, temp_dir, s3_store
         )
-        assert (
-            results == expected_results
-        ), "Unexpected results from extract_marc_records"
+        assert results == expected_results, (
+            "Unexpected results from extract_marc_records"
+        )
 
 
 def test_extract_marc_records_reads_from_upload_location():
@@ -71,6 +71,6 @@ def test_extract_marc_records_reads_from_upload_location():
         results = extract_marc_records(
             available_files, xml_s3_prefix, temp_dir, s3_store
         )
-        assert (
-            results == expected_results
-        ), "Unexpected results from extract_marc_records"
+        assert results == expected_results, (
+            "Unexpected results from extract_marc_records"
+        )
