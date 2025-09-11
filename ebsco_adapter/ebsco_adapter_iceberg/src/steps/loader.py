@@ -91,8 +91,8 @@ def handler(
         print("Using S3 Tables Iceberg REST API table...")
         table = get_rest_api_table(
             s3_tables_bucket=config.S3_TABLES_BUCKET,
-            table_name=config.GLUE_TABLE_NAME,
-            namespace=config.GLUE_NAMESPACE,
+            table_name=config.REST_API_TABLE_NAME,
+            namespace=config.REST_API_NAMESPACE,
             region=config.AWS_REGION,
             account_id=config.AWS_ACCOUNT_ID,
             create_if_not_exists=True,
