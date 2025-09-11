@@ -1,12 +1,12 @@
 import elasticsearch
-from pydantic import BaseModel
-
 from config import (
     ES_LOCAL_API_KEY,
     ES_LOCAL_HOST,
     ES_LOCAL_PORT,
     ES_LOCAL_SCHEME,
 )
+from pydantic import BaseModel
+
 from utils.aws import get_secret
 
 
