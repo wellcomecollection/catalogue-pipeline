@@ -48,4 +48,4 @@ def get_client(
 
     host_config = f"{config.scheme}://{config.host}:{config.port}"
     print(f"Creating Elasticsearch client for {host_config}")
-    return elasticsearch.Elasticsearch(host_config, api_key=config.apikey)
+    return elasticsearch.Elasticsearch(host_config, api_key=config.apikey, timeout=60)

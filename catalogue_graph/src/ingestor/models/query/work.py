@@ -1,36 +1,44 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from ingestor.models.shared.serialisable import ElasticsearchModel
 
 
-class QueryWork(BaseModel):
+class QueryWork(ElasticsearchModel):
     id: str
     title: str | None
-    referenceNumber: str | None
-    physicalDescription: str | None
+    reference_number: str | None
+    physical_description: str | None
     lettering: str | None
     edition: str | None
     description: str | None
-    alternativeTitles: list[str]
-    languagesLabel: list[str] = Field(serialization_alias="languages.label")
-    sourceIdentifierValue: str = Field(serialization_alias="sourceIdentifier.value")
-    identifiersValue: list[str] = Field(serialization_alias="identifiers.value")
-    imagesId: list[str] = Field(serialization_alias="images.id")
-    imagesIdentifiersValue: list[str] = Field(
+    alternative_titles: list[str]
+    languages_label: list[str] = Field(serialization_alias="languages.label")
+    source_identifier_value: str = Field(serialization_alias="sourceIdentifier.value")
+    identifiers_value: list[str] = Field(serialization_alias="identifiers.value")
+    images_id: list[str] = Field(serialization_alias="images.id")
+    images_identifiers_value: list[str] = Field(
         serialization_alias="images.identifiers.value"
     )
-    itemsIdentifiersValue: list[str] = Field(
+    items_identifiers_value: list[str] = Field(
         serialization_alias="items.identifiers.value"
     )
-    itemsId: list[str] = Field(serialization_alias="items.id")
-    itemsShelfmarksValue: list[str] = Field(serialization_alias="items.shelfmark.value")
-    notesContents: list[str] = Field(serialization_alias="notes.contents")
-    partOfTitle: list[str] = Field(serialization_alias="partOf.title")
-    productionLabel: list[str] = Field(serialization_alias="production.label")
-    subjectsConceptsLabel: list[str] = Field(
+    items_id: list[str] = Field(serialization_alias="items.id")
+    items_shelfmarks_value: list[str] = Field(
+        serialization_alias="items.shelfmark.value"
+    )
+    notes_contents: list[str] = Field(serialization_alias="notes.contents")
+    part_of_title: list[str] = Field(serialization_alias="partOf.title")
+    production_label: list[str] = Field(serialization_alias="production.label")
+    subjects_concepts_label: list[str] = Field(
         serialization_alias="subjects.concepts.label"
     )
-    contributorsAgentLabel: list[str] = Field(
+    contributors_agent_label: list[str] = Field(
         serialization_alias="contributors.agent.label"
     )
-    genresConceptsLabel: list[str] = Field(serialization_alias="genres.concepts.label")
-    collectionPathLabel: str | None = Field(serialization_alias="collectionPath.label")
-    collectionPathPath: str | None = Field(serialization_alias="collectionPath.path")
+    genres_concepts_label: list[str] = Field(
+        serialization_alias="genres.concepts.label"
+    )
+    collection_path_label: str | None = Field(
+        serialization_alias="collectionPath.label"
+    )
+    collection_path_path: str | None = Field(serialization_alias="collectionPath.path")

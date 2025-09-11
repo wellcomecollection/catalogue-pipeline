@@ -1,42 +1,51 @@
 [
   {
-    "~id": "uad4jhwg",
-    "~entityType": "node",
-    "~labels": [
-      "Work"
-    ],
-    "~properties": {
-      "id": "uad4jhwg",
-      "label": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
-      "reference_number": "UGC 198",
-      "type": "Collection"
-    }
+    "work": {
+      "~id": "uad4jhwg",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "uad4jhwg",
+        "label": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
+        "reference_number": "UGC 198",
+        "type": "Collection"
+      }
+    },
+    "parts": 2
   },
   {
-    "~id": "dpv99u52",
-    "~entityType": "node",
-    "~labels": [
-      "Work"
-    ],
-    "~properties": {
-      "id": "dpv99u52",
-      "label": "Papers of Guido Pontecorvo, personal and family photographs and negatives",
-      "reference_number": "UGC 198/10",
-      "type": "Section"
-    }
+    "work": {
+      "~id": "dpv99u52",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "dpv99u52",
+        "label": "Papers of Guido Pontecorvo, personal and family photographs and negatives",
+        "reference_number": "UGC 198/10",
+        "type": "Section"
+      }
+    },
+    "parts": 2
   },
   {
-    "~id": "bw4rp3qt",
-    "~entityType": "node",
-    "~labels": [
-      "Work"
-    ],
-    "~properties": {
-      "id": "bw4rp3qt",
-      "label": "Photographs of conferences, lectures and genetics colleagues",
-      "reference_number": "UGC 198/10/3",
-      "type": "Series"
-    }
+    "work": {
+      "~id": "bw4rp3qt",
+      "~entityType": "node",
+      "~labels": [
+        "Work"
+      ],
+      "~properties": {
+        "id": "bw4rp3qt",
+        "label": "Photographs of conferences, lectures and genetics colleagues",
+        "reference_number": "UGC 198/10/3",
+        "type": "Series"
+      }
+    },
+    "parts": 2
   }
 ]
 
