@@ -1,4 +1,3 @@
-import json
 from collections.abc import Iterable
 from itertools import chain
 from typing import Any
@@ -7,7 +6,7 @@ import polars
 import pydantic_core
 import pytest
 from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
-from test_utils import load_fixture
+from test_utils import load_fixture, load_json_fixture
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
@@ -41,9 +40,7 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
     )
     MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
-    expected_inputs = json.loads(
-        load_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
-    )
+    expected_inputs = load_json_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
 
     result = handler(event, config)
     assert len(MockElasticsearchClient.inputs) == 10

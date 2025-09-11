@@ -59,21 +59,24 @@ class GraphWorksExtractor:
             
             for es_work in es_works:
                 work_id = es_work.state.canonical_id
+
                 work_hierarchy = WorkHierarchy(
                     id=work_id,
-                    ancestor_works=all_ancestors.get(work_id, {}).get("ancestor_works", []),
+                    ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
                     children=all_children.get(work_id, {}).get("children", []),
                 )
-    
+
+                related_child_ids = [c.work.properties.id for c in work_hierarchy.children]
+                related_ancestor_ids = [c.work.properties.id for c in work_hierarchy.ancestors]
+
                 work_concepts = []
                 for raw_concept in all_concepts.get(work_id, []):
                     work_concepts.append(WorkConcept(**raw_concept))
-                    
-                related_ids = [c.work.properties.id for c in work_hierarchy.children]
-                related_ids = [c.work.properties.id for c in work_hierarchy.children]
     
                 yield ExtractedWork(
-                    work=es_work,
+                    work=DenormalisedWork(**es_work),
                     hierarchy=work_hierarchy,
                     concepts=work_concepts,
                 )
+        
+        

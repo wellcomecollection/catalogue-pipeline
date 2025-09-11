@@ -1,7 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from ingestor.models.shared.serialisable import ElasticsearchModel
 
 
-class WorkFilterableValues(BaseModel):
+class WorkFilterableValues(ElasticsearchModel):
     format_id: str | None = Field(serialization_alias="format.id")
     work_type: str = Field(serialization_alias="workType")
     production_dates_range_from: list[int] = Field(

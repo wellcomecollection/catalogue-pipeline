@@ -26,20 +26,6 @@ jobs:
         with:
           folder: catalogue_graph
 
-  build-lambda-zip:
-    runs-on: ubuntu-latest
-    needs: [python-checks]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/build-lambda-zip
-        with:
-          folder: catalogue_graph
-          upload_to_s3: true
-          s3_bucket: wellcomecollection-platform-infra
-          s3_prefix: lambdas/catalogue_graph
-          s3_tag: ${{ github.sha }}
-          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
-
   build-extractor-image:
     runs-on: ubuntu-latest
     needs: [python-checks]
@@ -54,9 +40,24 @@ jobs:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
+  build-unified-pipeline-image:
+    runs-on: ubuntu-latest
+    needs: [python-checks]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: wellcomecollection/.github/.github/actions/docker-build-and-push@main
+        with:
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          folder: catalogue_graph
+          target: unified_pipeline_lambda
+          dockerfile: lambda.Dockerfile
+          tag: ${{ github.sha }}
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          publish_latest: ${{ github.ref == 'refs/heads/main' }}
+
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [build-extractor-image, build-lambda-zip]
+    needs: [build-extractor-image, build-unified-pipeline-image]
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
       deploy_tag: ${{ github.sha }}

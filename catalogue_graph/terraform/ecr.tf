@@ -1,13 +1,14 @@
+resource "aws_ecr_repository" "unified_pipeline_lambda" {
+  name = "uk.ac.wellcome/unified_pipeline_lambda"
+}
+
 resource "aws_ecr_repository" "catalogue_graph_extractor" {
   name = "uk.ac.wellcome/catalogue_graph_extractor"
 }
 
-// This policy will expire old images in the repository, when we decide
-// deployment strategy we can update this policy to match the desired tags in use
-// and the number of images to keep.
-resource "aws_ecr_lifecycle_policy" "expire_old_images" {
-  repository = aws_ecr_repository.catalogue_graph_extractor.name
-  policy = jsonencode({
+// Shared lifecycle policy JSON for both repositories
+locals {
+  ecr_lifecycle_policy = jsonencode({
     rules = [
       {
         rulePriority = 1
@@ -18,9 +19,7 @@ resource "aws_ecr_lifecycle_policy" "expire_old_images" {
           countType     = "imageCountMoreThan"
           countNumber   = 1
         }
-        action = {
-          type = "expire"
-        }
+        action = { type = "expire" }
       },
       {
         rulePriority = 2
@@ -31,9 +30,7 @@ resource "aws_ecr_lifecycle_policy" "expire_old_images" {
           countType     = "imageCountMoreThan"
           countNumber   = 1
         }
-        action = {
-          type = "expire"
-        }
+        action = { type = "expire" }
       },
       {
         rulePriority = 3
@@ -44,9 +41,7 @@ resource "aws_ecr_lifecycle_policy" "expire_old_images" {
           countType     = "imageCountMoreThan"
           countNumber   = 1
         }
-        action = {
-          type = "expire"
-        }
+        action = { type = "expire" }
       },
       {
         rulePriority = 4
@@ -57,9 +52,7 @@ resource "aws_ecr_lifecycle_policy" "expire_old_images" {
           countType      = "imageCountMoreThan"
           countNumber    = 50
         }
-        action = {
-          type = "expire"
-        }
+        action = { type = "expire" }
       },
       {
         rulePriority = 5
@@ -69,10 +62,21 @@ resource "aws_ecr_lifecycle_policy" "expire_old_images" {
           countType   = "imageCountMoreThan"
           countNumber = 5
         }
-        action = {
-          type = "expire"
-        }
+        action = { type = "expire" }
       }
     ]
   })
+}
+
+// This policy will expire old images in the repository, when we decide
+// deployment strategy we can update this policy to match the desired tags in use
+// and the number of images to keep.
+resource "aws_ecr_lifecycle_policy" "expire_old_images" {
+  repository = aws_ecr_repository.catalogue_graph_extractor.name
+  policy     = local.ecr_lifecycle_policy
+}
+
+resource "aws_ecr_lifecycle_policy" "expire_old_images_unified_pipeline_lambda" {
+  repository = aws_ecr_repository.unified_pipeline_lambda.name
+  policy     = local.ecr_lifecycle_policy
 }

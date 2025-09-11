@@ -7,4 +7,12 @@ services:
       args:
         - PYTHON_IMAGE_VERSION=${PYTHON_IMAGE_VERSION:-latest}
       dockerfile: Dockerfile
+  unified_pipeline_lambda:
+    image: ${REPOSITORY_PREFIX:-}unified_pipeline_lambda:${TAG:-dev}
+    platform: linux/amd64
+    build:
+      context: .
+      args:
+        - PYTHON_IMAGE_VERSION=${PYTHON_IMAGE_VERSION:-latest}
+      dockerfile: lambda.Dockerfile
   

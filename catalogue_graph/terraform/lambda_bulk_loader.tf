@@ -1,16 +1,19 @@
 module "bulk_loader_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-bulk-loader"
-  description = "Bulk loads entities from an S3 bucket into the Neptune database."
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-bulk-loader"
+  description  = "Bulk loads entities from an S3 bucket into the Neptune database."
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
   // New versions are automatically deployed through a GitHub action.
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
-  filename = data.archive_file.empty_zip.output_path
 
-  handler     = "bulk_loader.lambda_handler"
+  image_config = {
+    command = ["bulk_loader.lambda_handler"]
+  }
+
   memory_size = 128
   timeout     = 30 // 30 seconds
 

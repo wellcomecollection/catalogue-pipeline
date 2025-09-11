@@ -20,7 +20,9 @@ from ingestor.models.display.location import (
 )
 from ingestor.models.display.note import DisplayNote
 from ingestor.models.display.production_event import DisplayProductionEvent
-from ingestor.models.display.relation import DisplayRelation
+from ingestor.models.display.relation import (
+    DisplayRelation,
+)
 from ingestor.models.shared.identifier import Identifiers
 from utils.sort import natural_sort_key
 
@@ -115,15 +117,7 @@ class DisplayWorkTransformer:
     @property
     def subjects(self) -> Generator[DisplaySubject]:
         for subject in self.data.subjects:
-            subject_id = None
-            if subject.id is not None:
-                subject_id = subject.id.canonical_id
-
-            yield DisplaySubject(
-                label=subject.label,
-                id=subject_id,
-                concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
-            )
+            yield DisplaySubject.from_subject(subject)
 
     @property
     def availabilities(self) -> list[DisplayIdLabel]:
@@ -133,20 +127,21 @@ class DisplayWorkTransformer:
 
     @property
     def part_of(self) -> Generator[DisplayRelation]:
-        # TODO: Handle series
-        for ancestor in self.hierarchy.ancestor_works:
-            yield DisplayRelation.from_neptune_node(ancestor, 1)
+        for series in self.state.relations.ancestors[::-1]:
+            yield DisplayRelation.from_work_ancestor(series)
+
+        for ancestor in self.hierarchy.ancestors:
+            yield DisplayRelation.from_neptune_node(ancestor.work, ancestor.parts)
 
     @property
-    def parts(self) -> list[DisplayRelation]:
-        parts = [
-            DisplayRelation.from_neptune_node(c.work, c.parts)
-            for c in self.hierarchy.children
-        ]
-
-        return sorted(
-            parts, key=lambda item: natural_sort_key(item.referenceNumber or item.title)
+    def parts(self) -> Generator[DisplayRelation]:
+        sorted_children = sorted(
+            self.hierarchy.children,
+            key=lambda c: natural_sort_key(c.work.properties.collection_path),
         )
+
+        for child in sorted_children:
+            yield DisplayRelation.from_neptune_node(child.work, child.parts)
 
     @property
     def contributors(self) -> Generator[DisplayContributor]:

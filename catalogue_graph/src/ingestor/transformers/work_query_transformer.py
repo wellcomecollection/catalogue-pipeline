@@ -6,6 +6,12 @@ from ingestor.extractors.works_extractor import ExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
 from ingestor.models.shared.location import PhysicalLocation
 
+# The Scala pipeline uses the date `-9999-01-01T00:00:00Z` as 'negative infinity'. The Python standard library doesn't
+# support dates with negative years, and so we hardcode the corresponding Unix timestamp here instead of installing
+# an external library to calculate it.
+NEGATIVE_INFINITY_DATE = "-9999-01-01T00:00:00Z"
+NEGATIVE_INFINITY_UNIX_TIMESTAMP = -377705116800000
+
 
 class QueryWorkTransformer:
     def __init__(self, extracted: ExtractedWork):
@@ -47,26 +53,29 @@ class QueryWorkTransformer:
 
     @property
     def part_of_titles(self) -> Generator[str]:
-        for work in self.hierarchy.ancestor_works:
-            if work.properties.label is not None:
-                yield work.properties.label
+        for series_item in self.state.relations.ancestors:
+            yield series_item.title
+
+        for collection_item in self.hierarchy.ancestors[::-1]:
+            if collection_item.work.properties.label is not None:
+                yield collection_item.work.properties.label
 
     @property
     def part_of_ids(self) -> Generator[str]:
-        for work in self.hierarchy.ancestor_works:
-            yield work.properties.id
+        for item in self.hierarchy.ancestors[::-1]:
+            yield item.work.properties.id
 
     @property
     def genre_concept_labels(self) -> Generator[str]:
         for genre in self.data.genres:
             for concept in genre.concepts:
-                yield concept.label
+                yield concept.normalised_label
 
     @property
     def subject_concept_labels(self) -> Generator[str]:
         for subject in self.data.subjects:
             for concept in subject.concepts:
-                yield concept.label
+                yield concept.normalised_label
 
     @property
     def image_ids(self) -> list[str]:
@@ -93,7 +102,7 @@ class QueryWorkTransformer:
 
     @property
     def contributor_agent_labels(self) -> list[str]:
-        return [c.agent.label for c in self.data.contributors]
+        return [c.agent.normalised_label for c in self.data.contributors]
 
     @property
     def format_id(self) -> str | None:
@@ -115,8 +124,11 @@ class QueryWorkTransformer:
         for event in self.data.production:
             for date in event.dates:
                 if date.range is not None:
-                    # Number of milliseconds since the Unix epoch
-                    yield int(parser.parse(date.range.from_time).timestamp() * 1000)
+                    if date.range.from_time == NEGATIVE_INFINITY_DATE:
+                        yield NEGATIVE_INFINITY_UNIX_TIMESTAMP
+                    else:
+                        # Number of milliseconds since the Unix epoch
+                        yield int(parser.parse(date.range.from_time).timestamp() * 1000)
 
     @property
     def genre_ids(self) -> Generator[str]:

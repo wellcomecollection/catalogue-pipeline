@@ -33,7 +33,9 @@ ConceptSource = Literal[
     "label-derived", "nlm-mesh", "lc-subjects", "lc-names", "viaf", "fihrist"
 ]
 
-WorkType = Literal["Work", "Series", "Section", "Collection"]
+WorkType = Literal["Standard", "Series", "Section", "Collection"]
+DisplayWorkType = Literal["Work", "Series", "Section", "Collection"]
+WorkStatus = Literal["Visible", "Redirected", "Deleted", "Invisible"]
 
 IngestorType = Literal["works", "concepts"]
 

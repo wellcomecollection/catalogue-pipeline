@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from pydantic import BaseModel
+from ingestor.models.shared.serialisable import ElasticsearchModel
 
 
-class IndexableRecord(BaseModel, ABC):
+class IndexableRecord(ElasticsearchModel, ABC):
     @abstractmethod
     def get_id(self) -> str:
         raise NotImplementedError

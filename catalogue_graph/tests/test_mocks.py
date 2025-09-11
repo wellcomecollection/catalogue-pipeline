@@ -315,7 +315,9 @@ class MockElasticsearchClient:
     pit_index: str
     queries: list[dict] = []
 
-    def __init__(self, config: dict, api_key: str) -> None:
+    def __init__(
+        self, config: dict, api_key: str, timeout: float | None = None
+    ) -> None:
         pass
 
     @classmethod

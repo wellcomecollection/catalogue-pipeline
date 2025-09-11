@@ -8,13 +8,10 @@
         "title": "'An Outline'; 'Opening Statement to 1933 only'; 'List of chief scientific writings up to 1940'; 'List of Exhibits'",
         "referenceNumber": "GC/176/C/1",
         "physicalDescription": "1 file",
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [],
-        "languagesLabel": [],
-        "sourceIdentifierValue": "e6606c3a-5404-4c5b-8337-3936d3d5f30b",
-        "identifiersValue": [
+        "languages.label": [],
+        "sourceIdentifier.value": "e6606c3a-5404-4c5b-8337-3936d3d5f30b",
+        "identifiers.value": [
           "e6606c3a-5404-4c5b-8337-3936d3d5f30b",
           "GC176/C/1",
           "GC/176/C/1",
@@ -23,44 +20,41 @@
           "digadhoc",
           "b18659135"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [
           "i17461248",
           "1746124"
         ],
-        "itemsId": [
+        "items.id": [
           "wdtdsz2g"
         ],
-        "itemsShelfmarksValue": [],
-        "notesContents": [],
-        "partOfTitle": [
+        "items.shelfmark.value": [],
+        "notes.contents": [],
+        "partOf.title": [
           "Twort, Frederick William",
           "Case against the Medical Research Council"
         ],
-        "productionLabel": [
+        "production.label": [
           "c.1930s-1940s"
         ],
-        "subjectsConceptsLabel": [],
-        "contributorsAgentLabel": [],
-        "genresConceptsLabel": [],
-        "collectionPathLabel": "GC/176/C/1",
-        "collectionPathPath": "GC176/C/1"
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [],
+        "genres.concepts.label": [],
+        "collectionPath.label": "GC/176/C/1",
+        "collectionPath.path": "GC176/C/1"
       },
       "display": {
         "id": "a222zvge",
         "title": "'An Outline'; 'Opening Statement to 1933 only'; 'List of chief scientific writings up to 1940'; 'List of Exhibits'",
         "alternativeTitles": [],
         "referenceNumber": "GC/176/C/1",
-        "description": null,
         "physicalDescription": "1 file",
         "workType": {
           "id": "h",
           "type": "Format",
           "label": "Archives and manuscripts"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [],
         "identifiers": [
           {
@@ -129,7 +123,6 @@
         ],
         "subjects": [],
         "genres": [],
-        "thumbnail": null,
         "items": [
           {
             "id": "wdtdsz2g",
@@ -153,8 +146,6 @@
                 }
               }
             ],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -162,7 +153,6 @@
                   "type": "LocationType",
                   "label": "Closed stores"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -175,23 +165,17 @@
                       "type": "AccessStatus",
                       "label": "Open"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "label": "Closed stores",
-                "shelfmark": null,
                 "type": "PhysicalLocation"
               }
             ],
             "type": "Item"
           },
           {
-            "id": null,
             "identifiers": [],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -217,14 +201,10 @@
                       "type": "AccessStatus",
                       "label": "Open with advisory"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b18659135",
-                "credit": null,
-                "linkText": null,
                 "type": "DigitalLocation"
               }
             ],
@@ -251,39 +231,33 @@
             "agents": [],
             "dates": [
               {
-                "id": null,
                 "label": "c.1930s-1940s",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
         "languages": [],
-        "edition": null,
         "notes": [],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
         "partOf": [
           {
-            "id": "rqyum5sv",
-            "title": "Twort, Frederick William",
-            "referenceNumber": "GC/176",
-            "totalParts": 1,
-            "type": "Collection"
-          },
-          {
             "id": "dkhx5djp",
             "title": "Case against the Medical Research Council",
             "referenceNumber": "GC/176/C",
-            "totalParts": 1,
+            "totalParts": 2,
             "type": "Section"
+          },
+          {
+            "id": "rqyum5sv",
+            "title": "Twort, Frederick William",
+            "referenceNumber": "GC/176",
+            "totalParts": 3,
+            "type": "Collection"
           }
         ],
         "type": "Work"
@@ -298,14 +272,14 @@
         "genres": [],
         "subjects": [],
         "languages": [],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1920",
             "label": "1920"
           }
         ],
-        "contributors": [],
-        "itemLicenses": [
+        "contributors.agent": [],
+        "items.locations.license": [
           {
             "id": "inc",
             "label": "In copyright"
@@ -323,22 +297,22 @@
         ]
       },
       "filterableValues": {
-        "format_id": "h",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "h",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -1577923200000
         ],
-        "languages_id": [],
-        "genres_label": [],
-        "genres_concepts_id": [],
-        "genres_concepts_source_identifier": [],
-        "subjects_label": [],
-        "subjects_concepts_id": [],
-        "subjects_concepts_source_identifier": [],
-        "contributors_agent_label": [],
-        "contributors_agent_id": [],
-        "contributors_agent_source_identifier": [],
-        "identifiers_value": [
+        "languages.id": [],
+        "genres.label": [],
+        "genres.concepts.id": [],
+        "genres.concepts.sourceIdentifier": [],
+        "subjects.label": [],
+        "subjects.concepts.id": [],
+        "subjects.concepts.sourceIdentifier": [],
+        "contributors.agent.label": [],
+        "contributors.agent.id": [],
+        "contributors.agent.sourceIdentifier": [],
+        "identifiers.value": [
           "e6606c3a-5404-4c5b-8337-3936d3d5f30b",
           "GC176/C/1",
           "GC/176/C/1",
@@ -347,35 +321,92 @@
           "digadhoc",
           "b18659135"
         ],
-        "items_locations_license_id": [
+        "items.locations.license.id": [
           "inc"
         ],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.accessConditions.status.id": [
           "open",
           "open-with-advisory"
         ],
-        "items_id": [
+        "items.id": [
           "wdtdsz2g"
         ],
-        "items_identifiers_value": [
+        "items.identifiers.value": [
           "i17461248",
           "1746124"
         ],
-        "items_locations_location_type_id": [
+        "items.locations.locationType.id": [
           "closed-stores",
           "iiif-presentation"
         ],
-        "part_of_id": [
+        "partOf.id": [
           "rqyum5sv",
           "dkhx5djp"
         ],
-        "part_of_title": [
+        "partOf.title": [
           "Twort, Frederick William",
           "Case against the Medical Research Council"
         ],
-        "availabilities_id": [
+        "availabilities.id": [
           "closed-stores",
           "online"
+        ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a222zvge",
+          "identifier": {
+            "identifierType": {
+              "id": "calm-record-id"
+            },
+            "ontologyType": "Work",
+            "value": "e6606c3a-5404-4c5b-8337-3936d3d5f30b"
+          },
+          "version": 13,
+          "modifiedTime": "2025-06-30T16:20:14"
+        },
+        "mergedTime": "2025-08-19T19:23:53.532022",
+        "indexedTime": "2025-09-08T17:23:33.132490",
+        "mergeCandidates": [
+          {
+            "id": {
+              "canonicalId": "jqd7k4sp",
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "calm-ref-no"
+                },
+                "ontologyType": "Work",
+                "value": "GC176/C/1"
+              },
+              "otherIdentifiers": []
+            },
+            "reason": "Archivematica work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "canonicalId": "w4bajds8",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b18659135"
+            },
+            "otherIdentifiers": []
+          },
+          {
+            "canonicalId": "dfcyrkxh",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b18659135"
+            },
+            "otherIdentifiers": []
+          }
         ]
       }
     }
@@ -386,76 +417,66 @@
     "_source": {
       "query": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
-        "referenceNumber": null,
+        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
         "physicalDescription": "69 pages ; 23 cm",
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [],
-        "languagesLabel": [
+        "languages.label": [
           "German"
         ],
-        "sourceIdentifierValue": "b15192982",
-        "identifiersValue": [
+        "sourceIdentifier.value": "b15192982",
+        "identifiers.value": [
           "b15192982",
           "1519298",
           "b30598977",
           "3059897",
           "digukmhl"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [
           "i14248517",
           "1424851",
           "i14489478",
           "1448947"
         ],
-        "itemsId": [
+        "items.id": [
           "v9m3ewes",
           "kjvkk3vx"
         ],
-        "itemsShelfmarksValue": [
+        "items.shelfmark.value": [
           "QZ200:276",
           "QZ200:276:22"
         ],
-        "notesContents": [
-          "Universit\u00e4t Leipzig."
+        "notes.contents": [
+          "Universität Leipzig."
         ],
-        "partOfTitle": [],
-        "productionLabel": [
+        "partOf.title": [],
+        "production.label": [
           "Leipzig",
           "Bruno Georgi",
           "1900"
         ],
-        "subjectsConceptsLabel": [
+        "subjects.concepts.label": [
           "Nose Neoplasms"
         ],
-        "contributorsAgentLabel": [
+        "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universit\u00e4t Leipzig (1409-1953)"
+          "Universität Leipzig (1409-1953)"
         ],
-        "genresConceptsLabel": [
+        "genres.concepts.label": [
           "Academic dissertations"
-        ],
-        "collectionPathLabel": null,
-        "collectionPathPath": null
+        ]
       },
       "display": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
+        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
         "alternativeTitles": [],
-        "referenceNumber": null,
-        "description": null,
         "physicalDescription": "69 pages ; 23 cm",
         "workType": {
           "id": "a",
           "type": "Format",
           "label": "Books"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [
           {
             "agent": {
@@ -481,7 +502,7 @@
           {
             "agent": {
               "id": "un9788h3",
-              "label": "Universit\u00e4t Leipzig (1409-1953)",
+              "label": "Universität Leipzig (1409-1953)",
               "identifiers": [
                 {
                   "value": "n85086716",
@@ -551,7 +572,17 @@
           {
             "id": "yahbdexx",
             "label": "Nose Neoplasms",
-            "identifiers": null,
+            "identifiers": [
+              {
+                "value": "D009669",
+                "type": "Identifier",
+                "identifierType": {
+                  "id": "nlm-mesh",
+                  "type": "IdentifierType",
+                  "label": "Medical Subject Headings (MeSH) identifier"
+                }
+              }
+            ],
             "type": "Subject",
             "concepts": [
               {
@@ -611,8 +642,6 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b30598977_0001.jp2/full/!200,200/0/default.jpg",
-          "credit": null,
-          "linkText": null,
           "type": "DigitalLocation"
         },
         "items": [
@@ -638,8 +667,6 @@
                 }
               }
             ],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -647,7 +674,6 @@
                   "type": "LocationType",
                   "label": "Closed stores"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -660,8 +686,6 @@
                       "type": "AccessStatus",
                       "label": "Open"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
@@ -694,8 +718,6 @@
                 }
               }
             ],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -703,7 +725,6 @@
                   "type": "LocationType",
                   "label": "Closed stores"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -711,8 +732,6 @@
                       "type": "AccessMethod",
                       "label": "Not requestable"
                     },
-                    "status": null,
-                    "terms": null,
                     "note": "Please request top item.",
                     "type": "AccessCondition"
                   }
@@ -725,10 +744,7 @@
             "type": "Item"
           },
           {
-            "id": null,
             "identifiers": [],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -754,14 +770,10 @@
                       "type": "AccessStatus",
                       "label": "Open"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b30598977",
-                "credit": null,
-                "linkText": null,
                 "type": "DigitalLocation"
               }
             ],
@@ -786,29 +798,22 @@
             "label": "Leipzig : Bruno Georgi, 1900.",
             "places": [
               {
-                "id": null,
                 "label": "Leipzig",
-                "identifiers": null,
                 "type": "Place"
               }
             ],
             "agents": [
               {
-                "id": null,
                 "label": "Bruno Georgi",
-                "identifiers": null,
                 "type": "Agent"
               }
             ],
             "dates": [
               {
-                "id": null,
                 "label": "1900",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
@@ -819,11 +824,10 @@
             "label": "German"
           }
         ],
-        "edition": null,
         "notes": [
           {
             "contents": [
-              "Universit\u00e4t Leipzig."
+              "Universität Leipzig."
             ],
             "noteType": {
               "id": "dissertation-note",
@@ -833,8 +837,6 @@
             "type": "Note"
           }
         ],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
@@ -867,23 +869,23 @@
             "label": "German"
           }
         ],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1900",
             "label": "1900"
           }
         ],
-        "contributors": [
+        "contributors.agent": [
           {
             "id": "eq9qvtwy",
             "label": "Wolter, Hermann (Wilhelm Victor Hermann), 1868-"
           },
           {
             "id": "un9788h3",
-            "label": "Universit\u00e4t Leipzig (1409-1953)"
+            "label": "Universität Leipzig (1409-1953)"
           }
         ],
-        "itemLicenses": [
+        "items.locations.license": [
           {
             "id": "inc",
             "label": "In copyright"
@@ -901,78 +903,135 @@
         ]
       },
       "filterableValues": {
-        "format_id": "a",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "a",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -2208988800000
         ],
-        "languages_id": [
+        "languages.id": [
           "ger"
         ],
-        "genres_label": [
+        "genres.label": [
           "Academic dissertations"
         ],
-        "genres_concepts_id": [
+        "genres.concepts.id": [
           "k3rcbzvs"
         ],
-        "genres_concepts_source_identifier": [
+        "genres.concepts.sourceIdentifier": [
           "academic dissertations"
         ],
-        "subjects_label": [
+        "subjects.label": [
           "Nose Neoplasms"
         ],
-        "subjects_concepts_id": [
+        "subjects.concepts.id": [
           "yahbdexx"
         ],
-        "subjects_concepts_source_identifier": [
+        "subjects.concepts.sourceIdentifier": [
           "D009669"
         ],
-        "contributors_agent_label": [
+        "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universit\u00e4t Leipzig (1409-1953)"
+          "Universität Leipzig (1409-1953)"
         ],
-        "contributors_agent_id": [
+        "contributors.agent.id": [
           "eq9qvtwy",
           "un9788h3"
         ],
-        "contributors_agent_source_identifier": [
+        "contributors.agent.sourceIdentifier": [
           "wolter, hermann (wilhelm victor hermann), 1868-",
           "n85086716"
         ],
-        "identifiers_value": [
+        "identifiers.value": [
           "b15192982",
           "1519298",
           "b30598977",
           "3059897",
           "digukmhl"
         ],
-        "items_locations_license_id": [
+        "items.locations.license.id": [
           "inc"
         ],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.accessConditions.status.id": [
           "open",
           "open"
         ],
-        "items_id": [
+        "items.id": [
           "v9m3ewes",
           "kjvkk3vx"
         ],
-        "items_identifiers_value": [
+        "items.identifiers.value": [
           "i14248517",
           "1424851",
           "i14489478",
           "1448947"
         ],
-        "items_locations_location_type_id": [
+        "items.locations.locationType.id": [
           "closed-stores",
           "closed-stores",
           "iiif-presentation"
         ],
-        "part_of_id": [],
-        "part_of_title": [],
-        "availabilities_id": [
+        "partOf.id": [],
+        "partOf.title": [],
+        "availabilities.id": [
           "closed-stores",
           "online"
+        ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2239muq",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b15192982"
+          },
+          "version": 58,
+          "modifiedTime": "2025-07-17T13:07:35"
+        },
+        "mergedTime": "2025-08-19T18:10:40.041562",
+        "indexedTime": "2025-09-08T17:23:33.141933",
+        "mergeCandidates": [
+          {
+            "id": {
+              "canonicalId": "hcqs6xp6",
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "sierra-system-number"
+                },
+                "ontologyType": "Work",
+                "value": "b30598977"
+              },
+              "otherIdentifiers": []
+            },
+            "reason": "Physical/digitised Sierra work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "canonicalId": "jstyg2xn",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b30598977"
+            },
+            "otherIdentifiers": []
+          },
+          {
+            "canonicalId": "hcqs6xp6",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b30598977"
+            },
+            "otherIdentifiers": []
+          }
         ]
       }
     }
@@ -984,36 +1043,31 @@
       "query": {
         "id": "a223k4ra",
         "title": "The danger and mischiefs of popery, set forth by the late Bishop of London, in his fifth pastoral letter",
-        "referenceNumber": null,
-        "physicalDescription": null,
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [
           "Danger and mischiefs of popery, set forth by the late Bishop of London, in his fifth pastoral letter (Online)"
         ],
-        "languagesLabel": [],
-        "sourceIdentifierValue": "ebs13464940e",
-        "identifiersValue": [
+        "languages.label": [],
+        "sourceIdentifier.value": "ebs13464940e",
+        "identifiers.value": [
           "ebs13464940e"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [],
-        "itemsId": [],
-        "itemsShelfmarksValue": [],
-        "notesContents": [],
-        "partOfTitle": [],
-        "productionLabel": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [],
+        "items.id": [],
+        "items.shelfmark.value": [],
+        "notes.contents": [],
+        "partOf.title": [
+          "Eighteenth Century Collections Online"
+        ],
+        "production.label": [
           "[1763]"
         ],
-        "subjectsConceptsLabel": [],
-        "contributorsAgentLabel": [
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [
           "Church of England"
         ],
-        "genresConceptsLabel": [],
-        "collectionPathLabel": null,
-        "collectionPathPath": null
+        "genres.concepts.label": []
       },
       "display": {
         "id": "a223k4ra",
@@ -1021,16 +1075,11 @@
         "alternativeTitles": [
           "Danger and mischiefs of popery, set forth by the late Bishop of London, in his fifth pastoral letter (Online)"
         ],
-        "referenceNumber": null,
-        "description": null,
-        "physicalDescription": null,
         "workType": {
           "id": "v",
           "type": "Format",
           "label": "E-books"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [
           {
             "agent": {
@@ -1067,11 +1116,9 @@
         ],
         "subjects": [],
         "genres": [],
-        "thumbnail": null,
         "items": [],
         "holdings": [
           {
-            "note": null,
             "enumeration": [
               "Full text available: 1763."
             ],
@@ -1081,7 +1128,6 @@
                 "type": "LocationType",
                 "label": "Online resource"
               },
-              "license": null,
               "accessConditions": [
                 {
                   "method": {
@@ -1094,13 +1140,10 @@
                     "type": "AccessStatus",
                     "label": "Licensed resources"
                   },
-                  "terms": null,
-                  "note": null,
                   "type": "AccessCondition"
                 }
               ],
-              "url": "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=13464940.4205&epcustomerid=s7451719",
-              "credit": null,
+              "url": "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=4205.13464940.0&epcustomerid=s7451719",
               "linkText": "Available in Eighteenth Century Collections Online.",
               "type": "DigitalLocation"
             },
@@ -1121,26 +1164,26 @@
             "agents": [],
             "dates": [
               {
-                "id": null,
                 "label": "[1763]",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
         "languages": [],
-        "edition": null,
         "notes": [],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
-        "partOf": [],
+        "partOf": [
+          {
+            "title": "Eighteenth Century Collections Online",
+            "totalParts": 0,
+            "type": "Series"
+          }
+        ],
         "type": "Work"
       },
       "aggregatableValues": {
@@ -1153,19 +1196,19 @@
         "genres": [],
         "subjects": [],
         "languages": [],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1763",
             "label": "1763"
           }
         ],
-        "contributors": [
+        "contributors.agent": [
           {
             "id": "ewv5v694",
             "label": "Church of England"
           }
         ],
-        "itemLicenses": [],
+        "items.locations.license": [],
         "availabilities": [
           {
             "id": "online",
@@ -1174,40 +1217,61 @@
         ]
       },
       "filterableValues": {
-        "format_id": "v",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "v",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -6532272000000
         ],
-        "languages_id": [],
-        "genres_label": [],
-        "genres_concepts_id": [],
-        "genres_concepts_source_identifier": [],
-        "subjects_label": [],
-        "subjects_concepts_id": [],
-        "subjects_concepts_source_identifier": [],
-        "contributors_agent_label": [
+        "languages.id": [],
+        "genres.label": [],
+        "genres.concepts.id": [],
+        "genres.concepts.sourceIdentifier": [],
+        "subjects.label": [],
+        "subjects.concepts.id": [],
+        "subjects.concepts.sourceIdentifier": [],
+        "contributors.agent.label": [
           "Church of England"
         ],
-        "contributors_agent_id": [
+        "contributors.agent.id": [
           "ewv5v694"
         ],
-        "contributors_agent_source_identifier": [
+        "contributors.agent.sourceIdentifier": [
           "church of england"
         ],
-        "identifiers_value": [
+        "identifiers.value": [
           "ebs13464940e"
         ],
-        "items_locations_license_id": [],
-        "items_locations_access_conditions_status_id": [],
-        "items_id": [],
-        "items_identifiers_value": [],
-        "items_locations_location_type_id": [],
-        "part_of_id": [],
-        "part_of_title": [],
-        "availabilities_id": [
+        "items.locations.license.id": [],
+        "items.locations.accessConditions.status.id": [],
+        "items.id": [],
+        "items.identifiers.value": [],
+        "items.locations.locationType.id": [],
+        "partOf.id": [],
+        "partOf.title": [
+          "Eighteenth Century Collections Online"
+        ],
+        "availabilities.id": [
           "online"
         ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a223k4ra",
+          "identifier": {
+            "identifierType": {
+              "id": "ebsco-alt-lookup"
+            },
+            "ontologyType": "Work",
+            "value": "ebs13464940e"
+          },
+          "version": 20250904,
+          "modifiedTime": "2025-09-05T12:35:57.811942"
+        },
+        "mergedTime": "2025-09-05T15:04:54.894994",
+        "indexedTime": "2025-09-08T17:23:33.142879",
+        "mergeCandidates": [],
+        "redirectSources": []
       }
     }
   },
@@ -1220,13 +1284,11 @@
         "title": "Draft manuscript notes for a seminar at the Institute de Biologie Moleculaire, Universite Paris",
         "referenceNumber": "UGC 198/8/5/8",
         "physicalDescription": "9 pages Draft notes (9 pages)",
-        "lettering": null,
-        "edition": null,
         "description": "<p>Marked number V11. Given by Pontecorvo on 19 April 1977, with corrections, notes and list of slides.</p>",
         "alternativeTitles": [],
-        "languagesLabel": [],
-        "sourceIdentifierValue": "129b0826-3ac4-4aea-8b0c-490d5889df46",
-        "identifiersValue": [
+        "languages.label": [],
+        "sourceIdentifier.value": "129b0826-3ac4-4aea-8b0c-490d5889df46",
+        "identifiers.value": [
           "129b0826-3ac4-4aea-8b0c-490d5889df46",
           "UGC198/8/5/8",
           "UGC 198/8/5/8",
@@ -1235,29 +1297,29 @@
           "diggenetics",
           "b19871831"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [],
-        "itemsId": [],
-        "itemsShelfmarksValue": [],
-        "notesContents": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [],
+        "items.id": [],
+        "items.shelfmark.value": [],
+        "notes.contents": [
           "A digitised copy is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics.",
           "The original material is held at <a href=\"http://www.gla.ac.uk/services/archives/\" rel=\"nofollow\">Glasgow University Archive Services.</a> This catalogue is held by the Wellcome Library as part of Codebreakers: Makers of Modern Genetics.",
           "Open and available at Glasgow University Archives Service."
         ],
-        "partOfTitle": [
+        "partOf.title": [
           "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
           "Papers of Guido Pellegrino Arrigo Pontecorvo, lectures and broadcasts",
           "'Somatic cell genetics and others'"
         ],
-        "productionLabel": [
+        "production.label": [
           "19 Apr 1977"
         ],
-        "subjectsConceptsLabel": [],
-        "contributorsAgentLabel": [],
-        "genresConceptsLabel": [],
-        "collectionPathLabel": "UGC 198/8/5/8",
-        "collectionPathPath": "UGC198/8/5/8"
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [],
+        "genres.concepts.label": [],
+        "collectionPath.label": "UGC 198/8/5/8",
+        "collectionPath.path": "UGC198/8/5/8"
       },
       "display": {
         "id": "a2242545",
@@ -1271,8 +1333,6 @@
           "type": "Format",
           "label": "Archives and manuscripts"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [],
         "identifiers": [
           {
@@ -1341,13 +1401,9 @@
         ],
         "subjects": [],
         "genres": [],
-        "thumbnail": null,
         "items": [
           {
-            "id": null,
             "identifiers": [],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -1374,13 +1430,10 @@
                       "label": "Open with advisory"
                     },
                     "terms": "Works in this archive created by Guido Pontecorvo are available under a CC-BY-NC license. Please be aware that works in this archive created by other organisations and individuals are not covered under this license, and you should obtain any necessary permissions before copyright or adapting any such works.",
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b19871831",
-                "credit": null,
-                "linkText": null,
                 "type": "DigitalLocation"
               }
             ],
@@ -1402,18 +1455,14 @@
             "agents": [],
             "dates": [
               {
-                "id": null,
                 "label": "19 Apr 1977",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
         "languages": [],
-        "edition": null,
         "notes": [
           {
             "contents": [
@@ -1449,33 +1498,31 @@
             "type": "Note"
           }
         ],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
         "partOf": [
           {
-            "id": "uad4jhwg",
-            "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
-            "referenceNumber": "UGC 198",
-            "totalParts": 1,
-            "type": "Collection"
+            "id": "rwc5ktn9",
+            "title": "'Somatic cell genetics and others'",
+            "referenceNumber": "UGC 198/8/5",
+            "totalParts": 11,
+            "type": "Series"
           },
           {
             "id": "y5tqfx79",
             "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, lectures and broadcasts",
             "referenceNumber": "UGC 198/8",
-            "totalParts": 1,
+            "totalParts": 8,
             "type": "Section"
           },
           {
-            "id": "rwc5ktn9",
-            "title": "'Somatic cell genetics and others'",
-            "referenceNumber": "UGC 198/8/5",
-            "totalParts": 1,
-            "type": "Series"
+            "id": "uad4jhwg",
+            "title": "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
+            "referenceNumber": "UGC 198",
+            "totalParts": 10,
+            "type": "Collection"
           }
         ],
         "type": "Work"
@@ -1490,14 +1537,14 @@
         "genres": [],
         "subjects": [],
         "languages": [],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1977",
             "label": "1977"
           }
         ],
-        "contributors": [],
-        "itemLicenses": [
+        "contributors.agent": [],
+        "items.locations.license": [
           {
             "id": "inc",
             "label": "In copyright"
@@ -1511,22 +1558,22 @@
         ]
       },
       "filterableValues": {
-        "format_id": "h",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "h",
+        "workType": "Standard",
+        "production.dates.range.from": [
           230256000000
         ],
-        "languages_id": [],
-        "genres_label": [],
-        "genres_concepts_id": [],
-        "genres_concepts_source_identifier": [],
-        "subjects_label": [],
-        "subjects_concepts_id": [],
-        "subjects_concepts_source_identifier": [],
-        "contributors_agent_label": [],
-        "contributors_agent_id": [],
-        "contributors_agent_source_identifier": [],
-        "identifiers_value": [
+        "languages.id": [],
+        "genres.label": [],
+        "genres.concepts.id": [],
+        "genres.concepts.sourceIdentifier": [],
+        "subjects.label": [],
+        "subjects.concepts.id": [],
+        "subjects.concepts.sourceIdentifier": [],
+        "contributors.agent.label": [],
+        "contributors.agent.id": [],
+        "contributors.agent.sourceIdentifier": [],
+        "identifiers.value": [
           "129b0826-3ac4-4aea-8b0c-490d5889df46",
           "UGC198/8/5/8",
           "UGC 198/8/5/8",
@@ -1535,29 +1582,86 @@
           "diggenetics",
           "b19871831"
         ],
-        "items_locations_license_id": [
+        "items.locations.license.id": [
           "inc"
         ],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.accessConditions.status.id": [
           "open-with-advisory"
         ],
-        "items_id": [],
-        "items_identifiers_value": [],
-        "items_locations_location_type_id": [
+        "items.id": [],
+        "items.identifiers.value": [],
+        "items.locations.locationType.id": [
           "iiif-presentation"
         ],
-        "part_of_id": [
+        "partOf.id": [
           "uad4jhwg",
           "y5tqfx79",
           "rwc5ktn9"
         ],
-        "part_of_title": [
+        "partOf.title": [
           "Papers of Guido Pellegrino Arrigo Pontecorvo, geneticist, Professor of Genetics, University of Glasgow, Scotland",
           "Papers of Guido Pellegrino Arrigo Pontecorvo, lectures and broadcasts",
           "'Somatic cell genetics and others'"
         ],
-        "availabilities_id": [
+        "availabilities.id": [
           "online"
+        ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2242545",
+          "identifier": {
+            "identifierType": {
+              "id": "calm-record-id"
+            },
+            "ontologyType": "Work",
+            "value": "129b0826-3ac4-4aea-8b0c-490d5889df46"
+          },
+          "version": 7,
+          "modifiedTime": "2023-12-04T12:35:47"
+        },
+        "mergedTime": "2025-08-19T20:00:15.198906",
+        "indexedTime": "2025-09-08T17:23:33.143605",
+        "mergeCandidates": [
+          {
+            "id": {
+              "canonicalId": "hmy2udbf",
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "calm-ref-no"
+                },
+                "ontologyType": "Work",
+                "value": "UGC198/8/5/8"
+              },
+              "otherIdentifiers": []
+            },
+            "reason": "Archivematica work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "canonicalId": "adyxgsj4",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b19871831"
+            },
+            "otherIdentifiers": []
+          },
+          {
+            "canonicalId": "ugpnzjrn",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b19871831"
+            },
+            "otherIdentifiers": []
+          }
         ]
       }
     }
@@ -1569,59 +1673,52 @@
       "query": {
         "id": "a22526q9",
         "title": "Prediche quadragesimali dell' anno 1495: Registro della prediche fatte nel 1495",
-        "referenceNumber": null,
         "physicalDescription": "Online resource (v., ill.).",
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [],
-        "languagesLabel": [
+        "languages.label": [
           "Italian"
         ],
-        "sourceIdentifierValue": "b31012152",
-        "identifiersValue": [
+        "sourceIdentifier.value": "b31012152",
+        "identifiers.value": [
           "b31012152",
           "3101215"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [],
-        "itemsId": [],
-        "itemsShelfmarksValue": [],
-        "notesContents": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [],
+        "items.id": [],
+        "items.shelfmark.value": [],
+        "notes.contents": [
           "Reproduction of original in Biblioteca Nazionale Centrale di Firenze.",
           "Electronic reproduction. Cambridge, UK : ProQuest, 2014. (Early European Books)"
         ],
-        "partOfTitle": [],
-        "productionLabel": [
+        "partOf.title": [
+          "Early European Books.",
+          "Early European Books : Printed sources to 1700"
+        ],
+        "production.label": [
           "Florence",
           "Libri, Bartolommeo di, fl. 1482-1511",
           "[1496-1497?]"
         ],
-        "subjectsConceptsLabel": [],
-        "contributorsAgentLabel": [
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [
           "Savonarola, Girolamo 1452-1498"
         ],
-        "genresConceptsLabel": [
+        "genres.concepts.label": [
           "Electronic books"
-        ],
-        "collectionPathLabel": null,
-        "collectionPathPath": null
+        ]
       },
       "display": {
         "id": "a22526q9",
         "title": "Prediche quadragesimali dell' anno 1495: Registro della prediche fatte nel 1495",
         "alternativeTitles": [],
-        "referenceNumber": null,
-        "description": null,
         "physicalDescription": "Online resource (v., ill.).",
         "workType": {
           "id": "a",
           "type": "Format",
           "label": "Books"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [
           {
             "agent": {
@@ -1690,13 +1787,9 @@
             "type": "Genre"
           }
         ],
-        "thumbnail": null,
         "items": [
           {
-            "id": null,
             "identifiers": [],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -1704,7 +1797,6 @@
                   "type": "LocationType",
                   "label": "Online resource"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -1717,13 +1809,10 @@
                       "type": "AccessStatus",
                       "label": "Licensed resources"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "url": "https://www.proquest.com/docview/2090333870/shibboleth?accountid=14952",
-                "credit": null,
                 "linkText": "Library member access",
                 "type": "DigitalLocation"
               }
@@ -1744,29 +1833,22 @@
             "label": "Florence: Libri, Bartolommeo di, fl. 1482-1511, [1496-1497?].",
             "places": [
               {
-                "id": null,
                 "label": "Florence",
-                "identifiers": null,
                 "type": "Place"
               }
             ],
             "agents": [
               {
-                "id": null,
                 "label": "Libri, Bartolommeo di, fl. 1482-1511",
-                "identifiers": null,
                 "type": "Agent"
               }
             ],
             "dates": [
               {
-                "id": null,
                 "label": "[1496-1497?]",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
@@ -1777,7 +1859,6 @@
             "label": "Italian"
           }
         ],
-        "edition": null,
         "notes": [
           {
             "contents": [
@@ -1802,13 +1883,22 @@
             "type": "Note"
           }
         ],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
-        "partOf": [],
+        "partOf": [
+          {
+            "title": "Early European Books : Printed sources to 1700",
+            "totalParts": 0,
+            "type": "Series"
+          },
+          {
+            "title": "Early European Books.",
+            "totalParts": 0,
+            "type": "Series"
+          }
+        ],
         "type": "Work"
       },
       "aggregatableValues": {
@@ -1831,19 +1921,19 @@
             "label": "Italian"
           }
         ],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1496",
             "label": "1496"
           }
         ],
-        "contributors": [
+        "contributors.agent": [
           {
             "id": "kvj8dyu2",
             "label": "Savonarola, Girolamo 1452-1498"
           }
         ],
-        "itemLicenses": [],
+        "items.locations.license": [],
         "availabilities": [
           {
             "id": "online",
@@ -1852,53 +1942,75 @@
         ]
       },
       "filterableValues": {
-        "format_id": "a",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "a",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -14958000000000
         ],
-        "languages_id": [
+        "languages.id": [
           "ita"
         ],
-        "genres_label": [
+        "genres.label": [
           "Electronic books"
         ],
-        "genres_concepts_id": [
+        "genres.concepts.id": [
           "kqkakf66"
         ],
-        "genres_concepts_source_identifier": [
+        "genres.concepts.sourceIdentifier": [
           "electronic books"
         ],
-        "subjects_label": [],
-        "subjects_concepts_id": [],
-        "subjects_concepts_source_identifier": [],
-        "contributors_agent_label": [
+        "subjects.label": [],
+        "subjects.concepts.id": [],
+        "subjects.concepts.sourceIdentifier": [],
+        "contributors.agent.label": [
           "Savonarola, Girolamo 1452-1498"
         ],
-        "contributors_agent_id": [
+        "contributors.agent.id": [
           "kvj8dyu2"
         ],
-        "contributors_agent_source_identifier": [
+        "contributors.agent.sourceIdentifier": [
           "savonarola, girolamo 1452-1498"
         ],
-        "identifiers_value": [
+        "identifiers.value": [
           "b31012152",
           "3101215"
         ],
-        "items_locations_license_id": [],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.license.id": [],
+        "items.locations.accessConditions.status.id": [
           "licensed-resources"
         ],
-        "items_id": [],
-        "items_identifiers_value": [],
-        "items_locations_location_type_id": [
+        "items.id": [],
+        "items.identifiers.value": [],
+        "items.locations.locationType.id": [
           "online-resource"
         ],
-        "part_of_id": [],
-        "part_of_title": [],
-        "availabilities_id": [
+        "partOf.id": [],
+        "partOf.title": [
+          "Early European Books.",
+          "Early European Books : Printed sources to 1700"
+        ],
+        "availabilities.id": [
           "online"
         ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a22526q9",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b31012152"
+          },
+          "version": 13,
+          "modifiedTime": "2022-01-12T10:29:21"
+        },
+        "mergedTime": "2025-08-19T18:37:10.778558",
+        "indexedTime": "2025-09-08T17:23:33.144325",
+        "mergeCandidates": [],
+        "redirectSources": []
       }
     }
   },
@@ -1909,79 +2021,69 @@
       "query": {
         "id": "a2262ru9",
         "title": "\"The parish of St George-the-martyr is a veritable hospital town\" : medical treatment available to the Holborn poor during the second half of the nineteenth century / Jacqueline Watson.",
-        "referenceNumber": null,
         "physicalDescription": "72 leaves ; 30 cm",
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [],
-        "languagesLabel": [
+        "languages.label": [
           "English"
         ],
-        "sourceIdentifierValue": "b16699178",
-        "identifiersValue": [
+        "sourceIdentifier.value": "b16699178",
+        "identifiers.value": [
           "b16699178",
           "1669917"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [
           "i16063156",
           "1606315"
         ],
-        "itemsId": [
+        "items.id": [
           "vphnmzg9"
         ],
-        "itemsShelfmarksValue": [
+        "items.shelfmark.value": [
           "2008 /WAT"
         ],
-        "notesContents": [
+        "notes.contents": [
           "MA University College London 2008.",
           "Includes bibliographical references.",
           "Reproduction of any part of this work is not permitted, except by written permission of the author."
         ],
-        "partOfTitle": [],
-        "productionLabel": [
+        "partOf.title": [],
+        "production.label": [
           "[London]",
           "[The author]",
           "2008"
         ],
-        "subjectsConceptsLabel": [
+        "subjects.concepts.label": [
           "19th century",
           "Hospitals",
           "history",
           "London (England)"
         ],
-        "contributorsAgentLabel": [
-          "Watson, Jacqueline.",
-          "Wellcome Trust Centre for the History of Medicine at UCL.",
-          "University College, London."
+        "contributors.agent.label": [
+          "Watson, Jacqueline",
+          "Wellcome Trust Centre for the History of Medicine at UCL",
+          "University College, London"
         ],
-        "genresConceptsLabel": [
+        "genres.concepts.label": [
           "Academic dissertations"
-        ],
-        "collectionPathLabel": null,
-        "collectionPathPath": null
+        ]
       },
       "display": {
         "id": "a2262ru9",
         "title": "\"The parish of St George-the-martyr is a veritable hospital town\" : medical treatment available to the Holborn poor during the second half of the nineteenth century / Jacqueline Watson.",
         "alternativeTitles": [],
-        "referenceNumber": null,
-        "description": null,
         "physicalDescription": "72 leaves ; 30 cm",
         "workType": {
           "id": "w",
           "type": "Format",
           "label": "Student dissertations"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [
           {
             "agent": {
               "id": "pgzux8up",
-              "label": "Watson, Jacqueline",
+              "label": "Watson, Jacqueline.",
               "identifiers": [
                 {
                   "value": "watson, jacqueline",
@@ -2002,7 +2104,7 @@
           {
             "agent": {
               "id": "vnrmny4u",
-              "label": "Wellcome Trust Centre for the History of Medicine at UCL",
+              "label": "Wellcome Trust Centre for the History of Medicine at UCL.",
               "identifiers": [
                 {
                   "value": "n2001127327",
@@ -2023,7 +2125,7 @@
           {
             "agent": {
               "id": "xym5tsh4",
-              "label": "University College, London",
+              "label": "University College, London.",
               "identifiers": [
                 {
                   "value": "n80001195",
@@ -2066,7 +2168,17 @@
           {
             "id": "dtr393ay",
             "label": "19th century",
-            "identifiers": null,
+            "identifiers": [
+              {
+                "value": "19th century",
+                "type": "Identifier",
+                "identifierType": {
+                  "id": "label-derived",
+                  "type": "IdentifierType",
+                  "label": "Identifier derived from the label of the referent"
+                }
+              }
+            ],
             "type": "Subject",
             "concepts": [
               {
@@ -2090,7 +2202,17 @@
           {
             "id": "a4gnqrs5",
             "label": "Hospitals - history",
-            "identifiers": null,
+            "identifiers": [
+              {
+                "value": "D006761Q000266",
+                "type": "Identifier",
+                "identifierType": {
+                  "id": "nlm-mesh",
+                  "type": "IdentifierType",
+                  "label": "Medical Subject Headings (MeSH) identifier"
+                }
+              }
+            ],
             "type": "Subject",
             "concepts": [
               {
@@ -2130,7 +2252,17 @@
           {
             "id": "a7gmt7ff",
             "label": "London (England)",
-            "identifiers": null,
+            "identifiers": [
+              {
+                "value": "n79005665",
+                "type": "Identifier",
+                "identifierType": {
+                  "id": "lc-names",
+                  "type": "IdentifierType",
+                  "label": "Library of Congress Name authority records"
+                }
+              }
+            ],
             "type": "Subject",
             "concepts": [
               {
@@ -2176,7 +2308,6 @@
             "type": "Genre"
           }
         ],
-        "thumbnail": null,
         "items": [
           {
             "id": "vphnmzg9",
@@ -2200,8 +2331,6 @@
                 }
               }
             ],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -2209,7 +2338,6 @@
                   "type": "LocationType",
                   "label": "Closed stores"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -2222,8 +2350,6 @@
                       "type": "AccessStatus",
                       "label": "Open"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
@@ -2248,29 +2374,22 @@
             "label": "[London] : [The author], 2008.",
             "places": [
               {
-                "id": null,
                 "label": "[London]",
-                "identifiers": null,
                 "type": "Place"
               }
             ],
             "agents": [
               {
-                "id": null,
                 "label": "[The author]",
-                "identifiers": null,
                 "type": "Agent"
               }
             ],
             "dates": [
               {
-                "id": null,
                 "label": "2008",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
@@ -2281,7 +2400,6 @@
             "label": "English"
           }
         ],
-        "edition": null,
         "notes": [
           {
             "contents": [
@@ -2317,8 +2435,6 @@
             "type": "Note"
           }
         ],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
@@ -2359,27 +2475,27 @@
             "label": "English"
           }
         ],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "2008",
             "label": "2008"
           }
         ],
-        "contributors": [
+        "contributors.agent": [
           {
             "id": "pgzux8up",
-            "label": "Watson, Jacqueline."
+            "label": "Watson, Jacqueline"
           },
           {
             "id": "vnrmny4u",
-            "label": "Wellcome Trust Centre for the History of Medicine at UCL."
+            "label": "Wellcome Trust Centre for the History of Medicine at UCL"
           },
           {
             "id": "xym5tsh4",
-            "label": "University College, London."
+            "label": "University College, London"
           }
         ],
-        "itemLicenses": [],
+        "items.locations.license": [],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -2388,76 +2504,95 @@
         ]
       },
       "filterableValues": {
-        "format_id": "w",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "w",
+        "workType": "Standard",
+        "production.dates.range.from": [
           1199145600000
         ],
-        "languages_id": [
+        "languages.id": [
           "eng"
         ],
-        "genres_label": [
+        "genres.label": [
           "Academic dissertations"
         ],
-        "genres_concepts_id": [
+        "genres.concepts.id": [
           "k3rcbzvs"
         ],
-        "genres_concepts_source_identifier": [
+        "genres.concepts.sourceIdentifier": [
           "academic dissertations"
         ],
-        "subjects_label": [
+        "subjects.label": [
           "19th century",
           "Hospitals - history",
           "London (England)"
         ],
-        "subjects_concepts_id": [
+        "subjects.concepts.id": [
           "dtr393ay",
           "a4gnqrs5",
           "a7gmt7ff"
         ],
-        "subjects_concepts_source_identifier": [
+        "subjects.concepts.sourceIdentifier": [
           "19th century",
           "D006761Q000266",
           "n79005665"
         ],
-        "contributors_agent_label": [
-          "Watson, Jacqueline.",
-          "Wellcome Trust Centre for the History of Medicine at UCL.",
-          "University College, London."
+        "contributors.agent.label": [
+          "Watson, Jacqueline",
+          "Wellcome Trust Centre for the History of Medicine at UCL",
+          "University College, London"
         ],
-        "contributors_agent_id": [
+        "contributors.agent.id": [
           "pgzux8up",
           "vnrmny4u",
           "xym5tsh4"
         ],
-        "contributors_agent_source_identifier": [
+        "contributors.agent.sourceIdentifier": [
           "watson, jacqueline",
           "n2001127327",
           "n80001195"
         ],
-        "identifiers_value": [
+        "identifiers.value": [
           "b16699178",
           "1669917"
         ],
-        "items_locations_license_id": [],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.license.id": [],
+        "items.locations.accessConditions.status.id": [
           "open"
         ],
-        "items_id": [
+        "items.id": [
           "vphnmzg9"
         ],
-        "items_identifiers_value": [
+        "items.identifiers.value": [
           "i16063156",
           "1606315"
         ],
-        "items_locations_location_type_id": [
+        "items.locations.locationType.id": [
           "closed-stores"
         ],
-        "part_of_id": [],
-        "part_of_title": [],
-        "availabilities_id": [
+        "partOf.id": [],
+        "partOf.title": [],
+        "availabilities.id": [
           "closed-stores"
         ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2262ru9",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b16699178"
+          },
+          "version": 28,
+          "modifiedTime": "2024-07-03T16:07:56"
+        },
+        "mergedTime": "2025-08-19T21:17:47.025238",
+        "indexedTime": "2025-09-08T17:23:33.145771",
+        "mergeCandidates": [],
+        "redirectSources": []
       }
     }
   },
@@ -2468,65 +2603,58 @@
       "query": {
         "id": "a226rz35",
         "title": "Prodigiorum ac ostentorum chronicon / [Konrad Lykosthenes].",
-        "referenceNumber": null,
         "physicalDescription": "Online resource (6 unnumbered leaves, 670 pages, 1 unnumbered leaf : woodcuts , (fol.)).",
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [],
-        "languagesLabel": [
+        "languages.label": [
           "Latin"
         ],
-        "sourceIdentifierValue": "b31244361",
-        "identifiersValue": [
+        "sourceIdentifier.value": "b31244361",
+        "identifiers.value": [
           "b31244361",
           "3124436"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [],
-        "itemsId": [],
-        "itemsShelfmarksValue": [],
-        "notesContents": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [],
+        "items.id": [],
+        "items.shelfmark.value": [],
+        "notes.contents": [
           "Reproduction of original in The Wellcome Library, London.",
           "Electronic reproduction. Cambridge, UK : ProQuest, 2014. (Early European Books)"
         ],
-        "partOfTitle": [],
-        "productionLabel": [
+        "partOf.title": [
+          "Early European Books.",
+          "Early European Books : Printed sources to 1700"
+        ],
+        "production.label": [
           "Basel",
           "Petri, Heinrich, 1508-1579",
           "1557"
         ],
-        "subjectsConceptsLabel": [],
-        "contributorsAgentLabel": [
-          "Lykosthenes, Konrad, 1518-1561.",
-          "Wellcome Library."
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [
+          "Lykosthenes, Konrad, 1518-1561",
+          "Wellcome Library"
         ],
-        "genresConceptsLabel": [
+        "genres.concepts.label": [
           "Electronic books"
-        ],
-        "collectionPathLabel": null,
-        "collectionPathPath": null
+        ]
       },
       "display": {
         "id": "a226rz35",
         "title": "Prodigiorum ac ostentorum chronicon / [Konrad Lykosthenes].",
         "alternativeTitles": [],
-        "referenceNumber": null,
-        "description": null,
         "physicalDescription": "Online resource (6 unnumbered leaves, 670 pages, 1 unnumbered leaf : woodcuts , (fol.)).",
         "workType": {
           "id": "a",
           "type": "Format",
           "label": "Books"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [
           {
             "agent": {
               "id": "ebtmhydq",
-              "label": "Lykosthenes, Konrad, 1518-1561",
+              "label": "Lykosthenes, Konrad, 1518-1561.",
               "identifiers": [
                 {
                   "value": "lykosthenes, konrad, 1518-1561",
@@ -2547,7 +2675,7 @@
           {
             "agent": {
               "id": "m5y9bsmy",
-              "label": "Wellcome Library",
+              "label": "Wellcome Library.",
               "identifiers": [
                 {
                   "value": "no2006065766",
@@ -2611,13 +2739,9 @@
             "type": "Genre"
           }
         ],
-        "thumbnail": null,
         "items": [
           {
-            "id": null,
             "identifiers": [],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -2625,7 +2749,6 @@
                   "type": "LocationType",
                   "label": "Online resource"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -2638,13 +2761,10 @@
                       "type": "AccessStatus",
                       "label": "Licensed resources"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "url": "https://search.proquest.com/docview/2090366780/geoauth",
-                "credit": null,
                 "linkText": "Free UK access",
                 "type": "DigitalLocation"
               }
@@ -2665,29 +2785,22 @@
             "label": "Basel : Petri, Heinrich, 1508-1579, 1557.",
             "places": [
               {
-                "id": null,
                 "label": "Basel",
-                "identifiers": null,
                 "type": "Place"
               }
             ],
             "agents": [
               {
-                "id": null,
                 "label": "Petri, Heinrich, 1508-1579",
-                "identifiers": null,
                 "type": "Agent"
               }
             ],
             "dates": [
               {
-                "id": null,
                 "label": "1557",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
@@ -2698,7 +2811,6 @@
             "label": "Latin"
           }
         ],
-        "edition": null,
         "notes": [
           {
             "contents": [
@@ -2723,13 +2835,22 @@
             "type": "Note"
           }
         ],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
-        "partOf": [],
+        "partOf": [
+          {
+            "title": "Early European Books : Printed sources to 1700",
+            "totalParts": 0,
+            "type": "Series"
+          },
+          {
+            "title": "Early European Books.",
+            "totalParts": 0,
+            "type": "Series"
+          }
+        ],
         "type": "Work"
       },
       "aggregatableValues": {
@@ -2752,23 +2873,23 @@
             "label": "Latin"
           }
         ],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1557",
             "label": "1557"
           }
         ],
-        "contributors": [
+        "contributors.agent": [
           {
             "id": "ebtmhydq",
-            "label": "Lykosthenes, Konrad, 1518-1561."
+            "label": "Lykosthenes, Konrad, 1518-1561"
           },
           {
             "id": "m5y9bsmy",
-            "label": "Wellcome Library."
+            "label": "Wellcome Library"
           }
         ],
-        "itemLicenses": [],
+        "items.locations.license": [],
         "availabilities": [
           {
             "id": "online",
@@ -2777,56 +2898,78 @@
         ]
       },
       "filterableValues": {
-        "format_id": "a",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "a",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -13033008000000
         ],
-        "languages_id": [
+        "languages.id": [
           "lat"
         ],
-        "genres_label": [
+        "genres.label": [
           "Electronic books"
         ],
-        "genres_concepts_id": [
+        "genres.concepts.id": [
           "kqkakf66"
         ],
-        "genres_concepts_source_identifier": [
+        "genres.concepts.sourceIdentifier": [
           "electronic books"
         ],
-        "subjects_label": [],
-        "subjects_concepts_id": [],
-        "subjects_concepts_source_identifier": [],
-        "contributors_agent_label": [
-          "Lykosthenes, Konrad, 1518-1561.",
-          "Wellcome Library."
+        "subjects.label": [],
+        "subjects.concepts.id": [],
+        "subjects.concepts.sourceIdentifier": [],
+        "contributors.agent.label": [
+          "Lykosthenes, Konrad, 1518-1561",
+          "Wellcome Library"
         ],
-        "contributors_agent_id": [
+        "contributors.agent.id": [
           "ebtmhydq",
           "m5y9bsmy"
         ],
-        "contributors_agent_source_identifier": [
+        "contributors.agent.sourceIdentifier": [
           "lykosthenes, konrad, 1518-1561",
           "no2006065766"
         ],
-        "identifiers_value": [
+        "identifiers.value": [
           "b31244361",
           "3124436"
         ],
-        "items_locations_license_id": [],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.license.id": [],
+        "items.locations.accessConditions.status.id": [
           "licensed-resources"
         ],
-        "items_id": [],
-        "items_identifiers_value": [],
-        "items_locations_location_type_id": [
+        "items.id": [],
+        "items.identifiers.value": [],
+        "items.locations.locationType.id": [
           "online-resource"
         ],
-        "part_of_id": [],
-        "part_of_title": [],
-        "availabilities_id": [
+        "partOf.id": [],
+        "partOf.title": [
+          "Early European Books.",
+          "Early European Books : Printed sources to 1700"
+        ],
+        "availabilities.id": [
           "online"
         ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a226rz35",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b31244361"
+          },
+          "version": 19,
+          "modifiedTime": "2023-08-18T11:38:24"
+        },
+        "mergedTime": "2025-08-19T16:26:08.065319",
+        "indexedTime": "2025-09-08T17:23:33.147668",
+        "mergeCandidates": [],
+        "redirectSources": []
       }
     }
   },
@@ -2836,70 +2979,62 @@
     "_source": {
       "query": {
         "id": "a227dajt",
-        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
-        "referenceNumber": null,
+        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
         "physicalDescription": "93 pages ; 25 cm",
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [],
-        "languagesLabel": [
+        "languages.label": [
           "French"
         ],
-        "sourceIdentifierValue": "b21053613",
-        "identifiersValue": [
+        "sourceIdentifier.value": "b21053613",
+        "identifiers.value": [
           "b21053613",
           "2105361",
           "digmhl"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [],
-        "itemsId": [],
-        "itemsShelfmarksValue": [],
-        "notesContents": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [],
+        "items.id": [],
+        "items.shelfmark.value": [],
+        "notes.contents": [
           "Includes bibliographical references",
           "This material has been provided by the Francis A. Countway Library of Medicine, through the Medical Heritage Library. The original may be consulted at the Francis A. Countway Library of Medicine, Harvard Medical School."
         ],
-        "partOfTitle": [],
-        "productionLabel": [
+        "partOf.title": [
+          "Medical Heritage Library"
+        ],
+        "production.label": [
           "Bruxelles",
           "Mayolez",
           "1877"
         ],
-        "subjectsConceptsLabel": [
+        "subjects.concepts.label": [
           "Homeopathy",
           "Homeopathy"
         ],
-        "contributorsAgentLabel": [
-          "Gailliard, Delphin Louis.",
+        "contributors.agent.label": [
+          "Gailliard, Delphin Louis",
           "Francis A. Countway Library of Medicine"
         ],
-        "genresConceptsLabel": [
+        "genres.concepts.label": [
           "Electronic books"
-        ],
-        "collectionPathLabel": null,
-        "collectionPathPath": null
+        ]
       },
       "display": {
         "id": "a227dajt",
-        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
+        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
         "alternativeTitles": [],
-        "referenceNumber": null,
-        "description": null,
         "physicalDescription": "93 pages ; 25 cm",
         "workType": {
           "id": "a",
           "type": "Format",
           "label": "Books"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [
           {
             "agent": {
               "id": "y6hdqsq5",
-              "label": "Gailliard, Delphin Louis",
+              "label": "Gailliard, Delphin Louis.",
               "identifiers": [
                 {
                   "value": "gailliard, delphin louis",
@@ -2977,7 +3112,17 @@
           {
             "id": "h9x349hf",
             "label": "Homeopathy",
-            "identifiers": null,
+            "identifiers": [
+              {
+                "value": "sh85061725",
+                "type": "Identifier",
+                "identifierType": {
+                  "id": "lc-subjects",
+                  "type": "IdentifierType",
+                  "label": "Library of Congress Subject Headings (LCSH)"
+                }
+              }
+            ],
             "type": "Subject",
             "concepts": [
               {
@@ -3001,7 +3146,17 @@
           {
             "id": "mfqrm9h2",
             "label": "Homeopathy",
-            "identifiers": null,
+            "identifiers": [
+              {
+                "value": "D006705",
+                "type": "Identifier",
+                "identifierType": {
+                  "id": "nlm-mesh",
+                  "type": "IdentifierType",
+                  "label": "Medical Subject Headings (MeSH) identifier"
+                }
+              }
+            ],
             "type": "Subject",
             "concepts": [
               {
@@ -3061,16 +3216,11 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b21053613_0011.jp2/full/!200,200/0/default.jpg",
-          "credit": null,
-          "linkText": null,
           "type": "DigitalLocation"
         },
         "items": [
           {
-            "id": null,
             "identifiers": [],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -3096,14 +3246,10 @@
                       "type": "AccessStatus",
                       "label": "Open"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b21053613",
-                "credit": null,
-                "linkText": null,
                 "type": "DigitalLocation"
               }
             ],
@@ -3123,29 +3269,22 @@
             "label": "Bruxelles : Mayolez, 1877.",
             "places": [
               {
-                "id": null,
                 "label": "Bruxelles",
-                "identifiers": null,
                 "type": "Place"
               }
             ],
             "agents": [
               {
-                "id": null,
                 "label": "Mayolez",
-                "identifiers": null,
                 "type": "Agent"
               }
             ],
             "dates": [
               {
-                "id": null,
                 "label": "1877",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
@@ -3156,7 +3295,6 @@
             "label": "French"
           }
         ],
-        "edition": null,
         "notes": [
           {
             "contents": [
@@ -3181,13 +3319,17 @@
             "type": "Note"
           }
         ],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
-        "partOf": [],
+        "partOf": [
+          {
+            "title": "Medical Heritage Library",
+            "totalParts": 0,
+            "type": "Series"
+          }
+        ],
         "type": "Work"
       },
       "aggregatableValues": {
@@ -3219,23 +3361,23 @@
             "label": "French"
           }
         ],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1877",
             "label": "1877"
           }
         ],
-        "contributors": [
+        "contributors.agent": [
           {
             "id": "y6hdqsq5",
-            "label": "Gailliard, Delphin Louis."
+            "label": "Gailliard, Delphin Louis"
           },
           {
             "id": "szxgyp8p",
             "label": "Francis A. Countway Library of Medicine"
           }
         ],
-        "itemLicenses": [
+        "items.locations.license": [
           {
             "id": "pdm",
             "label": "Public Domain Mark"
@@ -3249,67 +3391,100 @@
         ]
       },
       "filterableValues": {
-        "format_id": "a",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "a",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -2934748800000
         ],
-        "languages_id": [
+        "languages.id": [
           "fre"
         ],
-        "genres_label": [
+        "genres.label": [
           "Electronic books"
         ],
-        "genres_concepts_id": [
+        "genres.concepts.id": [
           "kqkakf66"
         ],
-        "genres_concepts_source_identifier": [
+        "genres.concepts.sourceIdentifier": [
           "electronic books"
         ],
-        "subjects_label": [
+        "subjects.label": [
           "Homeopathy",
           "Homeopathy"
         ],
-        "subjects_concepts_id": [
+        "subjects.concepts.id": [
           "h9x349hf",
           "mfqrm9h2"
         ],
-        "subjects_concepts_source_identifier": [
+        "subjects.concepts.sourceIdentifier": [
           "sh85061725",
           "D006705"
         ],
-        "contributors_agent_label": [
-          "Gailliard, Delphin Louis.",
+        "contributors.agent.label": [
+          "Gailliard, Delphin Louis",
           "Francis A. Countway Library of Medicine"
         ],
-        "contributors_agent_id": [
+        "contributors.agent.id": [
           "y6hdqsq5",
           "szxgyp8p"
         ],
-        "contributors_agent_source_identifier": [
+        "contributors.agent.sourceIdentifier": [
           "gailliard, delphin louis",
           "n83030968"
         ],
-        "identifiers_value": [
+        "identifiers.value": [
           "b21053613",
           "2105361",
           "digmhl"
         ],
-        "items_locations_license_id": [
+        "items.locations.license.id": [
           "pdm"
         ],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.accessConditions.status.id": [
           "open"
         ],
-        "items_id": [],
-        "items_identifiers_value": [],
-        "items_locations_location_type_id": [
+        "items.id": [],
+        "items.identifiers.value": [],
+        "items.locations.locationType.id": [
           "iiif-presentation"
         ],
-        "part_of_id": [],
-        "part_of_title": [],
-        "availabilities_id": [
+        "partOf.id": [],
+        "partOf.title": [
+          "Medical Heritage Library"
+        ],
+        "availabilities.id": [
           "online"
+        ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a227dajt",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b21053613"
+          },
+          "version": 14,
+          "modifiedTime": "2023-08-18T15:49:59"
+        },
+        "mergedTime": "2025-08-19T18:37:19.909853",
+        "indexedTime": "2025-09-08T17:23:33.148976",
+        "mergeCandidates": [],
+        "redirectSources": [
+          {
+            "canonicalId": "gqj73sk6",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "mets"
+              },
+              "ontologyType": "Work",
+              "value": "b21053613"
+            },
+            "otherIdentifiers": []
+          }
         ]
       }
     }
@@ -3323,43 +3498,41 @@
         "title": "Wartime, bombing",
         "referenceNumber": "PP/RAS/A.2/1",
         "physicalDescription": "1 file",
-        "lettering": null,
-        "edition": null,
         "description": "Note on the German Hospital, 28 May 1940, and its lack of any relationship to the German state; letter to A G Maitland Jones re bombs falling in the vicinity of the hospital, 8 Sep 1940; photographs of the investigation of the bombs by Royal Engineers",
         "alternativeTitles": [],
-        "languagesLabel": [],
-        "sourceIdentifierValue": "bff9122c-212a-4dbe-89fe-f355a5185cca",
-        "identifiersValue": [
+        "languages.label": [],
+        "sourceIdentifier.value": "bff9122c-212a-4dbe-89fe-f355a5185cca",
+        "identifiers.value": [
           "bff9122c-212a-4dbe-89fe-f355a5185cca",
           "PPRAS/A/2/1",
           "PP/RAS/A.2/1",
           "b19603782",
           "1960378"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [
           "i18151747",
           "1815174"
         ],
-        "itemsId": [
+        "items.id": [
           "bf3zp84j"
         ],
-        "itemsShelfmarksValue": [],
-        "notesContents": [],
-        "partOfTitle": [
+        "items.shelfmark.value": [],
+        "notes.contents": [],
+        "partOf.title": [
           "Rast, Dr Hugo",
           "Personal and Miscellaneous",
           "German Hospital"
         ],
-        "productionLabel": [
+        "production.label": [
           "1940"
         ],
-        "subjectsConceptsLabel": [],
-        "contributorsAgentLabel": [],
-        "genresConceptsLabel": [],
-        "collectionPathLabel": "PP/RAS/A.2/1",
-        "collectionPathPath": "PPRAS/A/2/1"
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [],
+        "genres.concepts.label": [],
+        "collectionPath.label": "PP/RAS/A.2/1",
+        "collectionPath.path": "PPRAS/A/2/1"
       },
       "display": {
         "id": "a227y9ye",
@@ -3373,8 +3546,6 @@
           "type": "Format",
           "label": "Archives and manuscripts"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [],
         "identifiers": [
           {
@@ -3425,7 +3596,6 @@
         ],
         "subjects": [],
         "genres": [],
-        "thumbnail": null,
         "items": [
           {
             "id": "bf3zp84j",
@@ -3449,8 +3619,6 @@
                 }
               }
             ],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -3458,7 +3626,6 @@
                   "type": "LocationType",
                   "label": "Closed stores"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -3471,13 +3638,10 @@
                       "type": "AccessStatus",
                       "label": "Open"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "label": "Closed stores",
-                "shelfmark": null,
                 "type": "PhysicalLocation"
               }
             ],
@@ -3499,46 +3663,40 @@
             "agents": [],
             "dates": [
               {
-                "id": null,
                 "label": "1940",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
         "languages": [],
-        "edition": null,
         "notes": [],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
         "partOf": [
           {
-            "id": "dupg64pv",
-            "title": "Rast, Dr Hugo",
-            "referenceNumber": "PP/RAS",
-            "totalParts": 1,
-            "type": "Collection"
+            "id": "qswamdvx",
+            "title": "German Hospital",
+            "referenceNumber": "PP/RAS/A.2",
+            "totalParts": 2,
+            "type": "Section"
           },
           {
             "id": "f5yb28yc",
             "title": "Personal and Miscellaneous",
             "referenceNumber": "PP/RAS/A",
-            "totalParts": 1,
+            "totalParts": 2,
             "type": "Section"
           },
           {
-            "id": "qswamdvx",
-            "title": "German Hospital",
-            "referenceNumber": "PP/RAS/A.2",
-            "totalParts": 1,
-            "type": "Section"
+            "id": "dupg64pv",
+            "title": "Rast, Dr Hugo",
+            "referenceNumber": "PP/RAS",
+            "totalParts": 4,
+            "type": "Collection"
           }
         ],
         "type": "Work"
@@ -3553,14 +3711,14 @@
         "genres": [],
         "subjects": [],
         "languages": [],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1940",
             "label": "1940"
           }
         ],
-        "contributors": [],
-        "itemLicenses": [],
+        "contributors.agent": [],
+        "items.locations.license": [],
         "availabilities": [
           {
             "id": "closed-stores",
@@ -3569,54 +3727,100 @@
         ]
       },
       "filterableValues": {
-        "format_id": "h",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "h",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -946771200000
         ],
-        "languages_id": [],
-        "genres_label": [],
-        "genres_concepts_id": [],
-        "genres_concepts_source_identifier": [],
-        "subjects_label": [],
-        "subjects_concepts_id": [],
-        "subjects_concepts_source_identifier": [],
-        "contributors_agent_label": [],
-        "contributors_agent_id": [],
-        "contributors_agent_source_identifier": [],
-        "identifiers_value": [
+        "languages.id": [],
+        "genres.label": [],
+        "genres.concepts.id": [],
+        "genres.concepts.sourceIdentifier": [],
+        "subjects.label": [],
+        "subjects.concepts.id": [],
+        "subjects.concepts.sourceIdentifier": [],
+        "contributors.agent.label": [],
+        "contributors.agent.id": [],
+        "contributors.agent.sourceIdentifier": [],
+        "identifiers.value": [
           "bff9122c-212a-4dbe-89fe-f355a5185cca",
           "PPRAS/A/2/1",
           "PP/RAS/A.2/1",
           "b19603782",
           "1960378"
         ],
-        "items_locations_license_id": [],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.license.id": [],
+        "items.locations.accessConditions.status.id": [
           "open"
         ],
-        "items_id": [
+        "items.id": [
           "bf3zp84j"
         ],
-        "items_identifiers_value": [
+        "items.identifiers.value": [
           "i18151747",
           "1815174"
         ],
-        "items_locations_location_type_id": [
+        "items.locations.locationType.id": [
           "closed-stores"
         ],
-        "part_of_id": [
+        "partOf.id": [
           "dupg64pv",
           "f5yb28yc",
           "qswamdvx"
         ],
-        "part_of_title": [
+        "partOf.title": [
           "Rast, Dr Hugo",
           "Personal and Miscellaneous",
           "German Hospital"
         ],
-        "availabilities_id": [
+        "availabilities.id": [
           "closed-stores"
+        ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a227y9ye",
+          "identifier": {
+            "identifierType": {
+              "id": "calm-record-id"
+            },
+            "ontologyType": "Work",
+            "value": "bff9122c-212a-4dbe-89fe-f355a5185cca"
+          },
+          "version": 13,
+          "modifiedTime": "2025-07-31T10:24:39"
+        },
+        "mergedTime": "2025-08-19T19:29:45.995295",
+        "indexedTime": "2025-09-08T17:23:33.151936",
+        "mergeCandidates": [
+          {
+            "id": {
+              "canonicalId": "zyphxyta",
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "calm-ref-no"
+                },
+                "ontologyType": "Work",
+                "value": "PPRAS/A/2/1"
+              },
+              "otherIdentifiers": []
+            },
+            "reason": "Archivematica work"
+          }
+        ],
+        "redirectSources": [
+          {
+            "canonicalId": "cpmtamr5",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Work",
+              "value": "b19603782"
+            },
+            "otherIdentifiers": []
+          }
         ]
       }
     }
@@ -3628,59 +3832,52 @@
       "query": {
         "id": "a2284uhb",
         "title": "Index locorum in commentario Caesaris Belli gallici descriptorum (Rev: Bonus Accursius)",
-        "referenceNumber": null,
         "physicalDescription": "Online resource (v., ill.).",
-        "lettering": null,
-        "edition": null,
-        "description": null,
         "alternativeTitles": [],
-        "languagesLabel": [
+        "languages.label": [
           "Latin"
         ],
-        "sourceIdentifierValue": "b30948988",
-        "identifiersValue": [
+        "sourceIdentifier.value": "b30948988",
+        "identifiers.value": [
           "b30948988",
           "3094898"
         ],
-        "imagesId": [],
-        "imagesIdentifiersValue": [],
-        "itemsIdentifiersValue": [],
-        "itemsId": [],
-        "itemsShelfmarksValue": [],
-        "notesContents": [
+        "images.id": [],
+        "images.identifiers.value": [],
+        "items.identifiers.value": [],
+        "items.id": [],
+        "items.shelfmark.value": [],
+        "notes.contents": [
           "Reproduction of original in Biblioteca Nazionale Centrale di Firenze.",
           "Electronic reproduction. Cambridge, UK : ProQuest, 2014. (Early European Books)"
         ],
-        "partOfTitle": [],
-        "productionLabel": [
+        "partOf.title": [
+          "Early European Books.",
+          "Early European Books : Printed sources to 1700"
+        ],
+        "production.label": [
           "Milan",
           "Buonaccorsi, Francesco, fl. 1485-1497",
           "1478"
         ],
-        "subjectsConceptsLabel": [],
-        "contributorsAgentLabel": [
+        "subjects.concepts.label": [],
+        "contributors.agent.label": [
           "Marlianus, Raimundus approximately 1420-1475"
         ],
-        "genresConceptsLabel": [
+        "genres.concepts.label": [
           "Electronic books"
-        ],
-        "collectionPathLabel": null,
-        "collectionPathPath": null
+        ]
       },
       "display": {
         "id": "a2284uhb",
         "title": "Index locorum in commentario Caesaris Belli gallici descriptorum (Rev: Bonus Accursius)",
         "alternativeTitles": [],
-        "referenceNumber": null,
-        "description": null,
         "physicalDescription": "Online resource (v., ill.).",
         "workType": {
           "id": "a",
           "type": "Format",
           "label": "Books"
         },
-        "lettering": null,
-        "createdDate": null,
         "contributors": [
           {
             "agent": {
@@ -3749,13 +3946,9 @@
             "type": "Genre"
           }
         ],
-        "thumbnail": null,
         "items": [
           {
-            "id": null,
             "identifiers": [],
-            "title": null,
-            "note": null,
             "locations": [
               {
                 "locationType": {
@@ -3763,7 +3956,6 @@
                   "type": "LocationType",
                   "label": "Online resource"
                 },
-                "license": null,
                 "accessConditions": [
                   {
                     "method": {
@@ -3776,13 +3968,10 @@
                       "type": "AccessStatus",
                       "label": "Licensed resources"
                     },
-                    "terms": null,
-                    "note": null,
                     "type": "AccessCondition"
                   }
                 ],
                 "url": "https://www.proquest.com/docview/2090328290/shibboleth?accountid=14952",
-                "credit": null,
                 "linkText": "Library member access",
                 "type": "DigitalLocation"
               }
@@ -3803,29 +3992,22 @@
             "label": "Milan: Buonaccorsi, Francesco, fl. 1485-1497, 1478.",
             "places": [
               {
-                "id": null,
                 "label": "Milan",
-                "identifiers": null,
                 "type": "Place"
               }
             ],
             "agents": [
               {
-                "id": null,
                 "label": "Buonaccorsi, Francesco, fl. 1485-1497",
-                "identifiers": null,
                 "type": "Agent"
               }
             ],
             "dates": [
               {
-                "id": null,
                 "label": "1478",
-                "identifiers": null,
                 "type": "Period"
               }
             ],
-            "function": null,
             "type": "ProductionEvent"
           }
         ],
@@ -3836,7 +4018,6 @@
             "label": "Latin"
           }
         ],
-        "edition": null,
         "notes": [
           {
             "contents": [
@@ -3861,13 +4042,22 @@
             "type": "Note"
           }
         ],
-        "duration": null,
-        "currentFrequency": null,
         "formerFrequency": [],
         "designation": [],
         "images": [],
         "parts": [],
-        "partOf": [],
+        "partOf": [
+          {
+            "title": "Early European Books : Printed sources to 1700",
+            "totalParts": 0,
+            "type": "Series"
+          },
+          {
+            "title": "Early European Books.",
+            "totalParts": 0,
+            "type": "Series"
+          }
+        ],
         "type": "Work"
       },
       "aggregatableValues": {
@@ -3890,19 +4080,19 @@
             "label": "Latin"
           }
         ],
-        "productionDates": [
+        "production.dates": [
           {
             "id": "1478",
             "label": "1478"
           }
         ],
-        "contributors": [
+        "contributors.agent": [
           {
             "id": "vvtan9dz",
             "label": "Marlianus, Raimundus approximately 1420-1475"
           }
         ],
-        "itemLicenses": [],
+        "items.locations.license": [],
         "availabilities": [
           {
             "id": "online",
@@ -3911,53 +4101,75 @@
         ]
       },
       "filterableValues": {
-        "format_id": "a",
-        "work_type": "Work",
-        "production_dates_range_from": [
+        "format.id": "a",
+        "workType": "Standard",
+        "production.dates.range.from": [
           -15525993600000
         ],
-        "languages_id": [
+        "languages.id": [
           "lat"
         ],
-        "genres_label": [
+        "genres.label": [
           "Electronic books"
         ],
-        "genres_concepts_id": [
+        "genres.concepts.id": [
           "kqkakf66"
         ],
-        "genres_concepts_source_identifier": [
+        "genres.concepts.sourceIdentifier": [
           "electronic books"
         ],
-        "subjects_label": [],
-        "subjects_concepts_id": [],
-        "subjects_concepts_source_identifier": [],
-        "contributors_agent_label": [
+        "subjects.label": [],
+        "subjects.concepts.id": [],
+        "subjects.concepts.sourceIdentifier": [],
+        "contributors.agent.label": [
           "Marlianus, Raimundus approximately 1420-1475"
         ],
-        "contributors_agent_id": [
+        "contributors.agent.id": [
           "vvtan9dz"
         ],
-        "contributors_agent_source_identifier": [
+        "contributors.agent.sourceIdentifier": [
           "marlianus, raimundus approximately 1420-1475"
         ],
-        "identifiers_value": [
+        "identifiers.value": [
           "b30948988",
           "3094898"
         ],
-        "items_locations_license_id": [],
-        "items_locations_access_conditions_status_id": [
+        "items.locations.license.id": [],
+        "items.locations.accessConditions.status.id": [
           "licensed-resources"
         ],
-        "items_id": [],
-        "items_identifiers_value": [],
-        "items_locations_location_type_id": [
+        "items.id": [],
+        "items.identifiers.value": [],
+        "items.locations.locationType.id": [
           "online-resource"
         ],
-        "part_of_id": [],
-        "part_of_title": [],
-        "availabilities_id": [
+        "partOf.id": [],
+        "partOf.title": [
+          "Early European Books.",
+          "Early European Books : Printed sources to 1700"
+        ],
+        "availabilities.id": [
           "online"
         ]
+      },
+      "type": "Visible",
+      "debug": {
+        "source": {
+          "id": "a2284uhb",
+          "identifier": {
+            "identifierType": {
+              "id": "sierra-system-number"
+            },
+            "ontologyType": "Work",
+            "value": "b30948988"
+          },
+          "version": 15,
+          "modifiedTime": "2022-01-12T10:28:08"
+        },
+        "mergedTime": "2025-08-19T20:22:07.952627",
+        "indexedTime": "2025-09-08T17:23:33.153066",
+        "mergeCandidates": [],
+        "redirectSources": []
       }
     }
   }

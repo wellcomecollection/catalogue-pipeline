@@ -1,16 +1,19 @@
 module "graph_remover_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "catalogue-graph-remover"
-  description = "Takes snapshots of items bulk loaded into the catalogue graph and handles the removal of nodes/edges."
-  runtime     = "python3.13"
-  publish     = true
+  name         = "catalogue-graph-remover"
+  description  = "Takes snapshots of items bulk loaded into the catalogue graph and handles the removal of nodes/edges."
+  package_type = "Image"
+  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
   // New versions are automatically deployed through a GitHub action.
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
-  filename = data.archive_file.empty_zip.output_path
 
-  handler     = "graph_remover.lambda_handler"
+  image_config = {
+    command = ["graph_remover.lambda_handler"]
+  }
+
   memory_size = 4096
   timeout     = 900 // 15 minutes
 

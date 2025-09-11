@@ -18,6 +18,7 @@ def test_catalogue_works_transformer_nodes() -> None:
         type="Work",
         alternative_labels=[],
         reference_number=None,
+        collection_path="147150i/569755i",
     )
     assert any(node == expected_work for node in nodes)
 
