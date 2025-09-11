@@ -26,7 +26,7 @@ from models.step_events import (
     EbscoAdapterTransformerResult,
 )
 from models.work import BaseWork, DeletedWork, SourceWork
-from table_config import get_glue_table, get_local_table
+from table_config import get_local_table, get_rest_api_table
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient
 from utils.tracking import is_file_already_processed, record_processed_file
@@ -37,7 +37,7 @@ BATCH_SIZE = 10_000
 
 class EbscoAdapterTransformerConfig(BaseModel):
     is_local: bool = False
-    use_glue_table: bool = True
+    use_rest_api_table: bool = True
     pipeline_date: str
     index_date: str | None = None
 
@@ -208,9 +208,9 @@ def handler(
     else:
         print(f"Processing loader output with changeset_id: {event.changeset_id}")
 
-    if config_obj.use_glue_table:
-        print("Using AWS Glue table...")
-        table = get_glue_table(
+    if config_obj.use_rest_api_table:
+        print("Using S3 Tables Iceberg REST API table...")
+        table = get_rest_api_table(
             s3_tables_bucket=config.S3_TABLES_BUCKET,
             table_name=config.GLUE_TABLE_NAME,
             namespace=config.GLUE_NAMESPACE,
@@ -314,9 +314,9 @@ def local_handler() -> EbscoAdapterTransformerResult:
         "--changeset-id", type=str, help="Changeset ID from loader output to transform"
     )
     parser.add_argument(
-        "--use-glue-table",
+        "--use-rest-api-table",
         action="store_true",
-        help="Use AWS Glue table instead of local table",
+        help="Use S3 Tables Iceberg REST API table instead of local table",
     )
     parser.add_argument(
         "--pipeline-date",
@@ -344,9 +344,10 @@ def local_handler() -> EbscoAdapterTransformerResult:
     event = EbscoAdapterTransformerEvent(
         changeset_id=args.changeset_id, job_id=args.job_id, file_location=None
     )
+    use_rest_api = args.use_rest_api_table
     config_obj = EbscoAdapterTransformerConfig(
         is_local=True,
-        use_glue_table=args.use_glue_table,
+        use_rest_api_table=use_rest_api,
         pipeline_date=args.pipeline_date,
         index_date=args.index_date,
     )

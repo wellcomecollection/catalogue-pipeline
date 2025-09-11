@@ -56,7 +56,7 @@ def get_table(
     return catalogue.load_table(table_fullname)
 
 
-def get_glue_table(
+def get_rest_api_table(
     s3_tables_bucket: str,
     table_name: str,
     namespace: str,
@@ -66,12 +66,12 @@ def get_glue_table(
     account_id: str | None = None,
 ) -> IcebergTable:
     """
-    Get a table from the Glue catalog.
+    Get a table from an S3 Tables Iceberg REST API catalog.
 
     Args:
-        region: AWS region where the Glue catalog is located
+        region: AWS region where the S3 Table is located
         account_id: AWS account ID
-        s3_tables_bucket: S3 bucket for the Glue catalog
+        s3_tables_bucket: S3 bucket for the S3 Table
         table_name: Name of the table
         namespace: Namespace for the table
     Returns:

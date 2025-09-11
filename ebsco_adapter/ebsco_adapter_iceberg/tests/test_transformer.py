@@ -65,7 +65,7 @@ def _run_transform(
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date=pipeline_date
+        is_local=True, use_rest_api_table=False, pipeline_date=pipeline_date
     )
     return handler(event=event, config_obj=config)
 
@@ -119,7 +119,7 @@ def test_transformer_short_circuit_when_prior_processed_detected(
         changeset_id="new-change-456", job_id="20250101T1200", file_location=file_uri
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
+        is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
 
     # Run handler
@@ -203,7 +203,7 @@ def test_transformer_full_retransform_when_no_changeset(
     # Now call handler with no changeset_id -> full re-transform path
     event = EbscoAdapterTransformerEvent(changeset_id=None, job_id="20250101T1200")
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
+        is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
     result = handler(event=event, config_obj=config)
 
@@ -233,7 +233,7 @@ def test_transformer_batch_file_location_with_changeset(
         job_id=job_id,
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
+        is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
     result = handler(event=event, config_obj=config)
 
@@ -286,7 +286,7 @@ def test_transformer_index_name_selection(
     )
     config = EbscoAdapterTransformerConfig(
         is_local=True,
-        use_glue_table=False,
+        use_rest_api_table=False,
         pipeline_date=pipeline_date,
         index_date=config_index_date,
     )
@@ -405,7 +405,7 @@ def test_transformer_raises_when_batch_file_write_fails(
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
+        is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
 
     with pytest.raises(OSError, match="simulated write failure"):

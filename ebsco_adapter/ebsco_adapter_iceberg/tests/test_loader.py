@@ -31,7 +31,7 @@ class TestLoaderHandler:
         )
 
         event = EbscoAdapterLoaderEvent(job_id="20250101T1200", file_location=file_uri)
-        config = EbscoAdapterLoaderConfig(use_glue_table=False)
+        config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
         result = handler(event=event, config_obj=config)
 
         assert isinstance(result, EbscoAdapterTransformerEvent)
@@ -54,7 +54,7 @@ class TestLoaderHandler:
         )
 
         event = EbscoAdapterLoaderEvent(job_id="20250101T1200", file_location=file_uri)
-        config = EbscoAdapterLoaderConfig(use_glue_table=False)
+        config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
         result = handler(event=event, config_obj=config)
 
         assert isinstance(result, EbscoAdapterTransformerEvent)
