@@ -55,10 +55,10 @@ def handler(
         )
 
     transformer = create_transformer(event, config)
-    s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"
-    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.ingestor_type}/{s3_object_key}"
+    #s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"
+    s3_prefix = event.to_s3_prefix()
     result = transformer.load_documents_to_s3(
-        s3_uri=s3_uri, load_format=config.load_format
+        s3_prefix=s3_prefix, load_format=config.load_format
     )
 
     return IngestorIndexerLambdaEvent(

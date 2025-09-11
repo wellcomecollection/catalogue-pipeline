@@ -1,3 +1,6 @@
+from pathlib import PurePosixPath
+
+import config
 from models.events import BasePipelineEvent
 from pydantic import BaseModel
 from utils.types import IngestorType
@@ -9,14 +12,18 @@ class IngestorStepEvent(BasePipelineEvent):
     index_date: str
     job_id: str
 
+    def to_s3_prefix(self) -> str: 
+        parts: list[str] = [config.CATALOGUE_GRAPH_S3_BUCKET, f"{config.INGESTOR_S3_PREFIX}_{self.ingestor_type}", self.pipeline_date, self.index_date, self.job_id]
+        s3_prefix = PurePosixPath(*parts)
+        return str(s3_prefix)
+
 
 class IngestorTriggerLambdaEvent(IngestorStepEvent):
     pass
 
-# 'slice_index' denotes which part of the dataset to process. When using ES, this translates to a PIT slice. 
+
 class IngestorLoaderLambdaEvent(IngestorStepEvent):
-    slice_index: int
-    pit_id: str | None = None
+    pass
 
 
 class IngestorIndexerObject(BaseModel):

@@ -2,7 +2,10 @@ import json
 import os
 import time
 import typing
+from collections.abc import Generator
 from itertools import batched
+from queue import Queue
+from threading import Thread
 
 import backoff
 import boto3
@@ -20,6 +23,7 @@ ID_DELETE_BATCH_SIZE = 1000
 
 ALLOW_DATABASE_RESET = False
 
+PARALLELISM = 5
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
@@ -228,3 +232,34 @@ class BaseNeptuneClient:
 
         node_count: int = self.run_open_cypher_query(query)[0]["nodeCount"]
         return node_count
+
+    def parallel(self, query: str, ids: list[str], label: str, queue: Queue) -> None:
+        for batch in batched(ids, 1000, strict=False):
+            results = self.time_open_cypher_query(query, {"ids": batch}, label)
+
+            for item in results:
+                queue.put(item)
+        
+        queue.put(None)
+
+    def _run_parallel_queries(self, query: str, ids: list[str], label: str, queue: Queue):
+        """Extract documents in parallel, with all threads adding resulting documents to the same queue"""
+        chunks = [ids[i::PARALLELISM] for i in range(PARALLELISM)]
+
+        for chunk in chunks:
+            # Run threads as daemons so that they automatically exit when the main thread throws an exception.
+            # See https://docs.python.org/3/library/threading.html for more info.
+            t = Thread(target=self.parallel, args=(query, chunk, label, queue), daemon=True)
+            t.start()
+
+    def get_in_parallel(self, query: str, ids: list[str], label: str) -> Generator[dict]:
+        queue: Queue = Queue(maxsize=1000)
+        self._run_parallel_queries(query, ids, label, queue)
+
+        done_signals = 0
+        while done_signals < PARALLELISM:
+            item = queue.get()
+            if item is None:
+                done_signals += 1
+            else:
+                yield item
