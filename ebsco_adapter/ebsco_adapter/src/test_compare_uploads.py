@@ -67,9 +67,9 @@ def test_compare_uploads_with_one_file():
 
         assert "ebs9579e.xml" in stored_files, "Expected ebs9579e.xml to be uploaded"
         assert "ebs29555e.xml" in stored_files, "Expected ebs29555e.xml to be uploaded"
-        assert "completed.flag" in stored_files, (
-            "Expected completed.flag to be uploaded"
-        )
+        assert (
+            "completed.flag" in stored_files
+        ), "Expected completed.flag to be uploaded"
 
         target_objects = fake_s3_client.list_objects_v2("test_bucket", "xml/2024-03-22")
 
@@ -147,9 +147,9 @@ def test_compare_uploads_with_two_files_first_notified():
         assert len(stored_files) == 2, "Expected 2 files to be uploaded"
 
         assert "ebs9579e.xml" in stored_files, "Expected ebs9579e.xml to be uploaded"
-        assert "completed.flag" in stored_files, (
-            "Expected completed.flag to be uploaded"
-        )
+        assert (
+            "completed.flag" in stored_files
+        ), "Expected completed.flag to be uploaded"
 
         target_objects = fake_s3_client.list_objects_v2("test_bucket", "xml/2024-03-22")
 
@@ -232,9 +232,9 @@ def test_compare_uploads_with_two_files_first_notified_with_record_modified():
         assert len(stored_files) == 2, "Expected 2 files to be uploaded"
 
         assert "ebs9579e.xml" in stored_files, "Expected ebs9579e.xml to be uploaded"
-        assert "completed.flag" in stored_files, (
-            "Expected completed.flag to be uploaded"
-        )
+        assert (
+            "completed.flag" in stored_files
+        ), "Expected completed.flag to be uploaded"
 
         target_objects = fake_s3_client.list_objects_v2("test_bucket", "xml/2024-03-22")
 
@@ -313,9 +313,9 @@ def test_compare_uploads_with_two_files_no_notified():
 
         assert len(stored_files) == 2, "Expected 2 files to be uploaded"
         assert "ebs9579e.xml" in stored_files, "Expected ebs9579e.xml to be uploaded"
-        assert "completed.flag" in stored_files, (
-            "Expected completed.flag to be uploaded"
-        )
+        assert (
+            "completed.flag" in stored_files
+        ), "Expected completed.flag to be uploaded"
 
         target_objects = fake_s3_client.list_objects_v2("test_bucket", "xml/2024-03-22")
 
