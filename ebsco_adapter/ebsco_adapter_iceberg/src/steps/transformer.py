@@ -282,7 +282,7 @@ def handler(
         pa_table = table_client.get_all_records()
     else:
         print(f"Processing loader output with changeset_id: {event.changeset_id}")
-        pa_table = table_client.get_records_by_changeset(event.changeset_id)  # type: ignore[arg-type]
+        pa_table = table_client.get_records_by_changeset(event.changeset_id)
 
     print(f"Retrieved {len(pa_table)} records from table for processing")
 
