@@ -299,6 +299,41 @@ class TestNarrower:
         assert concept.narrower_concept_ids == ["sh00000029"]
 
 
+class TestFieldOfActivity:
+    def test_no_field_of_activity(self) -> None:
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "/authorities/subjects/sh2010105253", "@graph": []}
+        )
+        concept._field_of_activity_node = {}
+        assert concept.has_field_of_activity_ids == []
+
+    def test_single_field_of_activity(self) -> None:
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "/authorities/names/sh2010105253", "@graph": []}
+        )
+        concept._field_of_activity_node = {
+            "madsrdf:fieldOfActivity": {
+                "@id": "http://id.loc.gov/authorities/subjects/sh00000029"
+            }
+        }
+        assert concept.has_field_of_activity_ids == ["sh00000029"]
+
+    def test_multiple_field_of_activity(self) -> None:
+        concept = RawLibraryOfCongressConcept(
+            {"@id": "/authorities/names/sh2010105253", "@graph": []}
+        )
+        concept._field_of_activity_node = {
+            "madsrdf:fieldOfActivity": [
+                {"@id": "http://id.loc.gov/authorities/subjects/sh00000029"},
+                {"@id": "http://id.loc.gov/authorities/subjects/sh00000014"},
+            ]
+        }
+        assert set(concept.has_field_of_activity_ids) == {
+            "sh00000029",
+            "sh00000014",
+        }
+
+
 def test_alternative_labels() -> None:
     concept = RawLibraryOfCongressConcept(
         json.loads(load_fixture("loc/mads_related_concept.json"))

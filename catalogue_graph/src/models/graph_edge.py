@@ -100,6 +100,13 @@ class SourceConceptHasFieldOfWork(BaseEdge):
     directed: bool = True
 
 
+class SourceConceptHasFounder(BaseEdge):
+    from_type: str = "SourceConcept"
+    to_type: str = "SourceName"
+    relationship: str = "HAS_FOUNDER"
+    directed: bool = True
+
+
 class WorkHasConcept(BaseEdge):
     from_type: str = "Work"
     to_type: str = "Concept"

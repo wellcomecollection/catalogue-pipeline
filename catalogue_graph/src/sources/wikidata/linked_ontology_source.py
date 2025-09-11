@@ -153,6 +153,12 @@ class WikidataLinkedOntologySource(BaseSource):
         yield from self._stream_all_edges_by_type("instance_of")
         yield from self._stream_all_edges_by_type("subclass_of")
 
+    def _stream_all_has_founder_edges(self) -> Generator[dict]:
+        yield from self._stream_all_edges_by_type("has_founder")
+
+    def _stream_all_has_industry_edges(self) -> Generator[dict]:
+        yield from self._stream_all_edges_by_type("has_industry")
+
     def _stream_filtered_wikidata_ids(self) -> Generator[str]:
         """Streams all wikidata ids to be processed as nodes given the selected `node_type`."""
         seen = set()
@@ -210,6 +216,20 @@ class WikidataLinkedOntologySource(BaseSource):
             if edge["from_id"] in streamed_wikidata_ids:
                 streamed_wikidata_ids.add(edge["to_id"])
                 yield {**edge, "type": "HAS_PARENT"}
+
+        print("Streaming HAS_INDUSTRY edges...")
+        for edge in self._stream_all_has_industry_edges():
+            if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
+                edge["to_id"], "wikidata", self.pipeline_date
+            ):
+                yield {**edge, "type": "HAS_INDUSTRY"}
+
+        print("Streaming HAS_FOUNDER edges...")
+        for edge in self._stream_all_has_founder_edges():
+            if edge["from_id"] in streamed_wikidata_ids and is_id_in_ontology(
+                edge["to_id"], "wikidata", self.pipeline_date
+            ):
+                yield {**edge, "type": "HAS_FOUNDER"}
 
         # The following edges only apply to people (SourceName) nodes
         if self.node_type == "names":
