@@ -50,7 +50,7 @@ class TestLoaderHandler:
         MockSmartOpen.mock_s3_file(file_uri, sample_xml.encode("utf-8"))
 
         monkeypatch.setattr(
-            "steps.loader.get_local_table", lambda **kwargs: temporary_table
+            "utils.iceberg.get_local_table", lambda **kwargs: temporary_table
         )
 
         event = EbscoAdapterLoaderEvent(job_id="20250101T1200", file_location=file_uri)

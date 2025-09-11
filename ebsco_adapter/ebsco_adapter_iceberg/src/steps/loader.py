@@ -15,14 +15,12 @@ from lxml import etree
 from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
-import config
 from models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
 )
 from schemata import ARROW_SCHEMA
-from table_config import get_local_table, get_rest_api_table
-from utils.iceberg import IcebergTableClient
+from utils.iceberg import IcebergTableClient, get_iceberg_table
 from utils.tracking import is_file_already_processed, record_processed_file
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
@@ -87,24 +85,7 @@ def handler(
             file_location=event.file_location,
         )
 
-    if config_obj.use_rest_api_table:
-        print("Using S3 Tables Iceberg REST API table...")
-        table = get_rest_api_table(
-            s3_tables_bucket=config.S3_TABLES_BUCKET,
-            table_name=config.REST_API_TABLE_NAME,
-            namespace=config.REST_API_NAMESPACE,
-            region=config.AWS_REGION,
-            account_id=config.AWS_ACCOUNT_ID,
-            create_if_not_exists=True,
-        )
-    else:
-        print("Using local table...")
-        table = get_local_table(
-            table_name=config.LOCAL_TABLE_NAME,
-            namespace=config.LOCAL_NAMESPACE,
-            db_name=config.LOCAL_DB_NAME,
-        )
-
+    table = get_iceberg_table(config_obj.use_rest_api_table)
     with smart_open.open(event.file_location, "rb") as f:
         changeset_id = update_from_xml_file(table, f)
 

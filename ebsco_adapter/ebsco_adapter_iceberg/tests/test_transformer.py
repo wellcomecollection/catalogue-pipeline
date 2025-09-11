@@ -51,7 +51,7 @@ def _prepare_changeset(
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
-        "steps.transformer.get_local_table", lambda **kwargs: temporary_table
+        "utils.iceberg.get_local_table", lambda **kwargs: temporary_table
     )
     return changeset_id
 
