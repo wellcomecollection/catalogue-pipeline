@@ -57,9 +57,9 @@ def run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at):
 
 def run_reindex(s3_store, sns_publisher, invoked_at, reindex_type, ids=None):
     assert reindex_type in ["reindex-full", "reindex-partial"], "Invalid reindex type"
-    assert ids is not None or reindex_type == "reindex-full", (
-        "You must provide IDs for partial reindexing"
-    )
+    assert (
+        ids is not None or reindex_type == "reindex-full"
+    ), "You must provide IDs for partial reindexing"
 
     print(f"Running reindex with type {reindex_type} and ids {ids} ...")
     files = list_files(ftp_s3_prefix, s3_store)
@@ -181,8 +181,8 @@ if __name__ == "__main__":
                 reindex_ids,
             )
         else:
-            assert process_type == "scheduled", (
-                "Invalid process type, arg validation failed?!"
-            )
+            assert (
+                process_type == "scheduled"
+            ), "Invalid process type, arg validation failed?!"
             sns_publisher = SnsPublisher(output_topic_arn)
             run_process(temp_dir, ebsco_ftp, s3_store, sns_publisher, invoked_at)
