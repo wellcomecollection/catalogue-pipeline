@@ -2,18 +2,26 @@
 Shared table configuration for the EBSCO adapter.
 """
 
+import contextlib
 import os
 from typing import Any
 
 import boto3
 from pyiceberg.catalog import load_catalog
+from pyiceberg.exceptions import (
+    NamespaceAlreadyExistsError,
+)
 from pyiceberg.table import Table as IcebergTable
 
 from schemata import SCHEMA
 
 
 def get_table(
-    catalogue_namespace: str, table_name: str, catalogue_name: str, **params: Any
+    catalogue_namespace: str,
+    table_name: str,
+    catalogue_name: str,
+    create_if_not_exists: bool,
+    **params: Any,
 ) -> IcebergTable:
     """
     Generic table getter that can be used by any module.
@@ -37,17 +45,23 @@ def get_table(
 
     print(f"Using {table_fullname} in {catalogue_namespace} catalog")
 
-    catalogue.create_namespace_if_not_exists(catalogue_namespace)
-    table = catalogue.create_table_if_not_exists(
-        identifier=table_fullname, schema=SCHEMA
-    )
-    return table
+    if create_if_not_exists:
+        with contextlib.suppress(NamespaceAlreadyExistsError):
+            catalogue.create_namespace(catalogue_namespace)
+
+        return catalogue.create_table_if_not_exists(
+            identifier=table_fullname, schema=SCHEMA
+        )
+
+    return catalogue.load_table(table_fullname)
 
 
 def get_glue_table(
     s3_tables_bucket: str,
     table_name: str,
     namespace: str,
+    create_if_not_exists: bool = False,
+    *,
     region: str | None = None,
     account_id: str | None = None,
 ) -> IcebergTable:
@@ -68,17 +82,42 @@ def get_glue_table(
     region = region or session.region_name
     account_id = account_id or session.client("sts").get_caller_identity()["Account"]
 
+    # Use credentials resolved for this session (env vars, shared config, SSO, etc.)
+    creds = session.get_credentials()
+    if creds is None:
+        raise RuntimeError(
+            "AWS credentials could not be obtained from the boto3 session."
+        )
+
+    frozen = creds.get_frozen_credentials()
+    access_key = frozen.access_key
+    secret_key = frozen.secret_key
+    token = frozen.token
+    if not access_key or not secret_key:
+        raise RuntimeError(
+            "Incomplete AWS credentials: access key or secret key is missing."
+        )
+
     return get_table(
         catalogue_namespace=namespace,
         table_name=table_name,
         catalogue_name="s3tablescatalog",
+        create_if_not_exists=create_if_not_exists,
         **{
             "type": "rest",
-            "warehouse": f"{account_id}:s3tablescatalog/{s3_tables_bucket}",
-            "uri": f"https://glue.{region}.amazonaws.com/iceberg",
+            "warehouse": f"arn:aws:s3tables:{region}:{account_id}:bucket/{s3_tables_bucket}",
+            "uri": f"https://s3tables.{region}.amazonaws.com/iceberg",
             "rest.sigv4-enabled": "true",
-            "rest.signing-name": "glue",
+            "rest.signing-name": "s3tables",
             "rest.signing-region": region,
+            # As we are using the Iceberg REST API exposed by S3 Tables,
+            # instead of the Glue catalog, we need S3 credentials here.
+            # Using the Glue catalog requires provisioning more complex
+            # Lake Formation permissions, which are not required.
+            "s3.access-key-id": access_key,
+            "s3.secret-access-key": secret_key,
+            "s3.session-token": token,
+            "s3.region": region,
         },
     )
 
@@ -116,6 +155,7 @@ def get_local_table(
         catalogue_namespace=namespace,
         table_name=table_name,
         catalogue_name="local",
+        create_if_not_exists=True,
         **{
             "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
             "warehouse": f"file://{warehouse_dir}/",

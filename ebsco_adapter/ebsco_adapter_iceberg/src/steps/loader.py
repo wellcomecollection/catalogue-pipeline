@@ -95,6 +95,7 @@ def handler(
             namespace=config.GLUE_NAMESPACE,
             region=config.AWS_REGION,
             account_id=config.AWS_ACCOUNT_ID,
+            create_if_not_exists=True,
         )
     else:
         print("Using local table...")
@@ -164,23 +165,13 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 
 
 def main() -> None:
-    """Entry point for the loader script"""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("file_location")
-    args = parser.parse_args()
-
-    result = (
+    print("Running loader handler...")
+    try:
         local_handler()
-        if not args.file_location
-        else handler(
-            EbscoAdapterLoaderEvent(
-                file_location=args.file_location,
-                job_id=datetime.now().strftime("%Y%m%dT%H%M"),
-            ),
-            EbscoAdapterLoaderConfig(use_glue_table=False),
-        )
-    )
-    print(result)
+
+    except Exception as exc:  # surface failures clearly in local runs
+        print(f"Loader failed: {exc}")
+        raise
 
 
 if __name__ == "__main__":
