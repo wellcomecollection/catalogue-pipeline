@@ -1,0 +1,40 @@
+name: "Deploy Lambda Image"
+description: "Deploys (updates) an AWS Lambda function to use a new container image in ECR"
+inputs:
+  lambda_name:
+    description: "Name of the Lambda function to deploy"
+    required: true
+  registry:
+    description: "ECR registry (e.g. 123456789012.dkr.ecr.eu-west-1.amazonaws.com)"
+    required: true
+  image_name:
+    description: "Repository/image name in the registry"
+    required: true
+  deploy_tag:
+    description: "Tag of the image to deploy"
+    required: true
+  role_to_assume:
+    description: "AWS role to assume for deployment"
+    required: true
+  aws_region:
+    description: "AWS region of the Lambda/ECR"
+    required: false
+    default: "eu-west-1"
+runs:
+  using: "composite"
+  steps:
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-region: ${{ inputs.aws_region }}
+        role-to-assume: ${{ inputs.role_to_assume }}
+
+    - name: Deploy Lambda container image
+      shell: bash
+      run: |
+        "${{ github.action_path }}/deploy.sh" \
+          "${{ inputs.lambda_name }}" \
+          "${{ inputs.registry }}" \
+          "${{ inputs.image_name }}" \
+          "${{ inputs.deploy_tag }}" \
+
