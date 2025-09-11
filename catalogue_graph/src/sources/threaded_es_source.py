@@ -55,7 +55,7 @@ class ThreadedElasticsearchSource(BaseSource):
         self.window = window
         self.fields = fields
         self.query = query
-
+        
         index_name = get_standard_index_name(
             config.ES_DENORMALISED_INDEX_NAME, pipeline_date
         )
