@@ -1,39 +1,74 @@
-# IAM Policy Documents for S3 Tables Iceberg access
+#############################
+# S3 Tables (Iceberg) access #
+#############################
+# Updated to use native s3tables IAM actions & ARNs instead of Glue/LakeFormation integration.
+# Bucket & table names derived from previous Glue ARNs:
+#   Bucket: wellcomecollection-platform-ebsco-adapter
+#   Namespace: wellcomecollection_catalogue (not directly encoded in ARNs, but kept for context)
+#   Table: ebsco_adapter_table
 
+# Write policy (create/update table + read/write data & metadata)
 data "aws_iam_policy_document" "iceberg_write" {
+  # Bucket-level operations needed for managing (creating/listing) namespaces & tables
   statement {
     actions = [
-      "lakeformation:GetDataAccess"
+      "s3tables:CreateNamespace",
+      "s3tables:GetNamespace",
+      "s3tables:ListNamespaces",
+      "s3tables:CreateTable",
+      "s3tables:ListTables",
+      "s3tables:GetTableBucket",
+      "s3tables:GetTableMetadataLocation",
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
+    ]
+  }
+
+  # Table-level operations for reading & writing Iceberg (metadata + data files commits)
+  statement {
+    actions = [
+      "s3tables:GetTableMetadataLocation",
+      "s3tables:ListTables",
+      "s3tables:GetTable",
+      "s3tables:GetTableData",
+      "s3tables:PutTableData",
+      "s3tables:UpdateTableMetadataLocation"
     ]
 
-    resources = ["*"]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
+    ]
+  }
+}
+
+# Read-only policy (no mutations): list & read table and data objects
+data "aws_iam_policy_document" "iceberg_read" {
+  statement {
+    actions = [
+      "s3tables:GetNamespace",
+      "s3tables:ListNamespaces",
+      "s3tables:ListTables",
+      "s3tables:GetTableBucket",
+      "s3tables:GetTableMetadataLocation",
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
+    ]
   }
 
   statement {
     actions = [
-      "glue:GetCatalog",
-      "glue:CreateDatabase",
-      "glue:CreateTable",
-      "glue:GetTable",
-      "glue:UpdateTable"
+      "s3tables:GetTableMetadataLocation",
+      "s3tables:ListTables",
+      "s3tables:GetTable",
+      "s3tables:GetTableData",
+      "s3tables:UpdateTableMetadataLocation"
     ]
-
     resources = [
-      "arn:aws:glue:eu-west-1:760097843905:catalog",
-      "arn:aws:glue:eu-west-1:760097843905:catalog/*",
-      "arn:aws:glue:eu-west-1:760097843905:database/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue"
-    ]
-  }
-
-  statement {
-    actions = [
-      "glue:CreateTable",
-      "glue:GetTable",
-      "glue:UpdateTable"
-    ]
-
-    resources = [
-      "arn:aws:glue:eu-west-1:760097843905:table/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue/ebsco_adapter_table"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
     ]
   }
 }

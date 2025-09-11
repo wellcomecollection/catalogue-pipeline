@@ -21,7 +21,7 @@ from models.step_events import (
     EbscoAdapterTransformerEvent,
 )
 from schemata import ARROW_SCHEMA
-from table_config import get_glue_table, get_local_table
+from table_config import get_local_table, get_rest_api_table
 from utils.iceberg import IcebergTableClient
 from utils.tracking import is_file_already_processed, record_processed_file
 
@@ -30,7 +30,7 @@ EBSCO_NAMESPACE = "ebsco"
 
 
 class EbscoAdapterLoaderConfig(BaseModel):
-    use_glue_table: bool = True
+    use_rest_api_table: bool = True
 
 
 def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> str | None:
@@ -87,14 +87,15 @@ def handler(
             file_location=event.file_location,
         )
 
-    if config_obj.use_glue_table:
-        print("Using AWS Glue table...")
-        table = get_glue_table(
+    if config_obj.use_rest_api_table:
+        print("Using S3 Tables Iceberg REST API table...")
+        table = get_rest_api_table(
             s3_tables_bucket=config.S3_TABLES_BUCKET,
-            table_name=config.GLUE_TABLE_NAME,
-            namespace=config.GLUE_NAMESPACE,
+            table_name=config.REST_API_TABLE_NAME,
+            namespace=config.REST_API_NAMESPACE,
             region=config.AWS_REGION,
             account_id=config.AWS_ACCOUNT_ID,
+            create_if_not_exists=True,
         )
     else:
         print("Using local table...")
@@ -142,9 +143,9 @@ def local_handler() -> EbscoAdapterTransformerEvent:
         help="Path to the XML file to process (supports local paths and S3 URLs)",
     )
     parser.add_argument(
-        "--use-glue-table",
+        "--use-rest-api-table",
         action="store_true",
-        help="Use AWS Glue table instead of local table",
+        help="Use S3 Tables Iceberg REST API table instead of local table",
     )
     parser.add_argument(
         "--job-id",
@@ -158,29 +159,20 @@ def local_handler() -> EbscoAdapterTransformerEvent:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
     event = EbscoAdapterLoaderEvent(file_location=args.xmlfile, job_id=job_id)
-    config_obj = EbscoAdapterLoaderConfig(use_glue_table=args.use_glue_table)
+    use_rest_api = args.use_rest_api_table
+    config_obj = EbscoAdapterLoaderConfig(use_rest_api_table=use_rest_api)
 
     return handler(event=event, config_obj=config_obj)
 
 
 def main() -> None:
-    """Entry point for the loader script"""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("file_location")
-    args = parser.parse_args()
-
-    result = (
+    print("Running loader handler...")
+    try:
         local_handler()
-        if not args.file_location
-        else handler(
-            EbscoAdapterLoaderEvent(
-                file_location=args.file_location,
-                job_id=datetime.now().strftime("%Y%m%dT%H%M"),
-            ),
-            EbscoAdapterLoaderConfig(use_glue_table=False),
-        )
-    )
-    print(result)
+
+    except Exception as exc:  # surface failures clearly in local runs
+        print(f"Loader failed: {exc}")
+        raise
 
 
 if __name__ == "__main__":
