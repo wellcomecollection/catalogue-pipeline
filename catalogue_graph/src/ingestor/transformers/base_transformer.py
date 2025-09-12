@@ -20,7 +20,7 @@ class ElasticsearchBaseTransformer:
             start_offset, end_index, is_local
         )
 
-    def transform_document(self, raw_document: Any) -> BaseModel | None:
+    def transform_document(self, raw_item: Any) -> BaseModel | None:
         """
         Accepts raw data representing the item to be transformed and returns an indexable document as a Pydantic model.
         """
