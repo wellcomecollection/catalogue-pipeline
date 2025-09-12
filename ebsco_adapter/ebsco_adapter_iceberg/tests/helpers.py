@@ -10,8 +10,13 @@ import pyarrow as pa
 from steps.loader import EBSCO_NAMESPACE, data_to_pa_table
 
 
+def lone_element(list_of_one: list) -> Any:
+    assert len(list_of_one) == 1
+    return list_of_one[0]
+
+
 def add_namespace(
-    data_dict: dict[str, Any], namespace: str | None = None
+        data_dict: dict[str, Any], namespace: str | None = None
 ) -> dict[str, Any]:
     """
     Add a namespace field to a data dictionary.
@@ -30,7 +35,7 @@ def add_namespace(
 
 
 def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]], namespace: str | None = None
+        unqualified_data: list[dict[str, Any]], namespace: str | None = None
 ) -> pa.Table:
     """
     Convert a list of data dictionaries to a PyArrow table with namespace added.

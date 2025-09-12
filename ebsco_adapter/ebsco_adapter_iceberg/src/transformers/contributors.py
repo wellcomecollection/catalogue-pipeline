@@ -17,7 +17,7 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
-from models.work import Concept, ConceptType, Contributor, SourceIdentifier
+from models.work import SourceConcept, ConceptType, Contributor, SourceIdentifier
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -56,7 +56,8 @@ def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
         for (k, v) in all_contributors
         if not v.primary and k not in primary_contributors
     ]
-    # Now we have all the
+    # Now we have all the primaries, and all the non-primaries in two separate lists
+    # use an OrderedDict to uniquify them without messing up the order.
     as_ordered_dict = OrderedDict(
         chain(primary_contributors.items(), secondary_contributors)
     )
@@ -81,11 +82,11 @@ def format_field(field: Field) -> Contributor:
     contributor_type = type_of_contributor[tag[1:]]
     label = label_from_field(field, label_subfields[tag[1:]])
     return Contributor(
-        agent=Concept(
+        agent=SourceConcept(
             label=label,
             type=contributor_type,
             id=SourceIdentifier(
-                value=label,
+                value=label,  # todo: normalise
                 ontology_type=contributor_type,
                 identifier_type="label-derived",
             ),

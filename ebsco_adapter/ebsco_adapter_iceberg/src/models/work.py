@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from pydantic.alias_generators import to_camel
 
 
@@ -49,16 +49,34 @@ ConceptType = Literal[
 ]
 
 
-class Concept(BaseModel):
-    id: SourceIdentifier
+class SourceConcept(BaseModel):
+    id: SourceIdentifier | None = None
     label: str
     type: ConceptType = "Concept"
 
 
 class Contributor(BaseModel):
-    agent: Concept
+    agent: SourceConcept
     roles: list[str] = []
     primary: bool = True
+
+
+class DateTimeRange(BaseModel):
+    from_time: str = Field(alias="from")
+    to_time: str = Field(alias="to")
+    label: str | None = None
+
+
+class Period(SourceConcept):
+    range: DateTimeRange | None = None
+
+
+class ProductionEvent(BaseModel):
+    label: str
+    places: list[SourceConcept]
+    agents: list[SourceConcept]
+    dates: list[Period]
+    function: SourceConcept | None = None
 
 
 class SourceWork(ElasticsearchModel, BaseWork):
@@ -70,3 +88,4 @@ class SourceWork(ElasticsearchModel, BaseWork):
     current_frequency: str | None = None
     edition: str | None = None
     contributors: list[Contributor] = []
+    production: list[ProductionEvent] = []
