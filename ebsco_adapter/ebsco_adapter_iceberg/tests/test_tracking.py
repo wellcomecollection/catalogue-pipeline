@@ -53,7 +53,6 @@ class TestIsFileAlreadyProcessed:
 
     def test_file_already_processed(self) -> None:
         file_location = "s3://test-bucket/dev/ftp_v2/existing-file.xml"
-        from models.step_events import EbscoAdapterTransformerEvent
 
         prior_event = EbscoAdapterTransformerEvent(
             job_id="jid", file_location=file_location, changeset_id="cid"
