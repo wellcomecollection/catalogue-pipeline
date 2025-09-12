@@ -93,6 +93,11 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     )
 
     _add_neptune_mock_response(
+        expected_query=get_related_query("HAS_FOUNDER"),
+        mock_results=[],
+    )
+
+    _add_neptune_mock_response(
         expected_query=get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
         mock_results=broader_than_results,
     )
@@ -239,6 +244,7 @@ def get_catalogue_concept_mock(
                 people=people,
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -279,7 +285,7 @@ def test_ingestor_loader(
     result = handler(loader_event, MOCK_INGESTOR_LOADER_CONFIG)
 
     assert result == indexer_event
-    assert len(MockRequest.calls) == 8
+    assert len(MockRequest.calls) == 9
 
     request = MockRequest.calls[0]
     assert request["method"] == "POST"

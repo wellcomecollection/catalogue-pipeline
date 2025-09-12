@@ -24,7 +24,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": []
       }
@@ -70,7 +71,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a223f5a6"
@@ -103,7 +105,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": []
       }
@@ -156,7 +159,8 @@
               "relationshipType": ""
             }
           ],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a224b9mp"
@@ -189,7 +193,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": []
       }
@@ -235,7 +240,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a224tns9"
@@ -287,7 +293,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a2258t8s"
@@ -414,7 +421,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a22d6ehy"
@@ -439,7 +447,8 @@
           "narrowerThan": [],
           "people": [],
           "relatedTo": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [],
         "type": "Person"
