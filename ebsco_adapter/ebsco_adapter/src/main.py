@@ -164,11 +164,11 @@ if __name__ == "__main__":
         reindex_ids = [rid.strip() for rid in reindex_ids]
 
     # Run the process
-    with ProcessMetrics(
-        process_type
-    ) as metrics, tempfile.TemporaryDirectory() as temp_dir, EbscoFtp(
-        ftp_server, ftp_username, ftp_password, ftp_remote_dir
-    ) as ebsco_ftp:
+    with (
+        ProcessMetrics(process_type) as metrics,
+        tempfile.TemporaryDirectory() as temp_dir,
+        EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp,
+    ):
         s3_store = S3Store(s3_bucket)
 
         if process_type in reindex_processes:

@@ -1,7 +1,9 @@
 import json
 from unittest.mock import Mock, patch
 
+from models.step_events import EbscoAdapterTransformerEvent
 from utils.tracking import (
+    ProcessedFileRecord,
     is_file_already_processed,
     record_processed_file,
 )
@@ -21,46 +23,53 @@ class TestRecordProcessedFile:
     def test_record_processed_file(self) -> None:
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
-        changeset_id = "I have changed"
+        event = EbscoAdapterTransformerEvent(
+            changeset_id="I have changed", job_id=job_id, file_location=file_location
+        )
+        record = record_processed_file(
+            job_id=job_id, file_location=file_location, step="loaded", payload_obj=event
+        )
 
-        record = record_processed_file(job_id, file_location, changeset_id)
-
-        assert record == {"job_id": job_id, "changeset_id": changeset_id}
-
+        assert isinstance(record, ProcessedFileRecord)
+        assert record.job_id == job_id
+        assert record.payload["changeset_id"] == "I have changed"  # type: ignore[index]
+        assert record.step == "loaded"
         # Verify smart_open was called with the correct S3 URI
         self.mock_smart_open.assert_called_once_with(
             "s3://s3-bucket/is-a/file.xml.loaded.json", "w", encoding="utf-8"
         )
 
         # Verify the JSON was written correctly
-        expected_json = json.dumps({"job_id": job_id, "changeset_id": changeset_id})
-        self.mock_file.write.assert_called_once_with(expected_json)
+        # Order of keys in JSON dump isn't guaranteed; compare via parsed dict
+        written_args = self.mock_file.write.call_args[0][0]
+        data = json.loads(written_args)
+        assert data["job_id"] == job_id
+        assert data["step"] == "loaded"
+        assert data["payload"]["changeset_id"] == "I have changed"
 
 
 class TestIsFileAlreadyProcessed:
-    def setup_method(self) -> None:
-        """Setup method run before each test."""
-        self.mock_boto3_client = patch("utils.tracking.boto3.client").start()
-        self.mock_s3 = Mock()
-        self.mock_boto3_client.return_value = self.mock_s3
-
-    def teardown_method(self) -> None:
-        """Teardown method run after each test."""
-        patch("utils.tracking.boto3.client").stop()
+    # No boto3 patching required now that lookup uses smart_open directly.
 
     def test_file_already_processed(self) -> None:
-        bucket = "test-bucket"
-        key = "dev/ftp_v2/existing-file.xml.loaded.json"
+        file_location = "s3://test-bucket/dev/ftp_v2/existing-file.xml"
 
-        self.mock_s3.head_object.return_value = {}
-
-        assert is_file_already_processed(bucket, key)
+        prior_event = EbscoAdapterTransformerEvent(
+            job_id="jid", file_location=file_location, changeset_id="cid"
+        )
+        stored = ProcessedFileRecord(
+            job_id="jid", step="loaded", payload=prior_event.model_dump()
+        )
+        with patch("utils.tracking.smart_open.open") as mock_open:
+            mock_file = Mock()
+            mock_open.return_value.__enter__.return_value = mock_file
+            mock_file.read.return_value = json.dumps(stored.model_dump())
+            record = is_file_already_processed(file_location, step="loaded")
+        assert isinstance(record, ProcessedFileRecord)
+        assert record.job_id == "jid"
+        assert record.get("changeset_id") == "cid"
 
     def test_file_not_yet_processed(self) -> None:
-        bucket = "test-bucket"
-        key = "dev/ftp_v2/non-existent-file.xml.loaded.json"
-
-        # if head_object throws for whatever reason, we consider the file not processed
-        self.mock_s3.head_object.side_effect = Exception()
-
-        assert not is_file_already_processed(bucket, key)
+        file_location = "s3://test-bucket/dev/ftp_v2/non-existent-file.xml"
+        record = is_file_already_processed(file_location, step="loaded")
+        assert record is None
