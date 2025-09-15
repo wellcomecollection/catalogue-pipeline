@@ -31,7 +31,7 @@ class TestLoaderHandler:
         )
 
         event = EbscoAdapterLoaderEvent(job_id="20250101T1200", file_location=file_uri)
-        config = EbscoAdapterLoaderConfig(use_glue_table=False)
+        config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
         result = handler(event=event, config_obj=config)
 
         assert isinstance(result, EbscoAdapterTransformerEvent)
@@ -50,11 +50,11 @@ class TestLoaderHandler:
         MockSmartOpen.mock_s3_file(file_uri, sample_xml.encode("utf-8"))
 
         monkeypatch.setattr(
-            "steps.loader.get_local_table", lambda **kwargs: temporary_table
+            "utils.iceberg.get_local_table", lambda **kwargs: temporary_table
         )
 
         event = EbscoAdapterLoaderEvent(job_id="20250101T1200", file_location=file_uri)
-        config = EbscoAdapterLoaderConfig(use_glue_table=False)
+        config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
         result = handler(event=event, config_obj=config)
 
         assert isinstance(result, EbscoAdapterTransformerEvent)
