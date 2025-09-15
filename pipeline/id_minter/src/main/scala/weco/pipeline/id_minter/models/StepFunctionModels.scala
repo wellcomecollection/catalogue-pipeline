@@ -12,12 +12,6 @@ case class StepFunctionMintingRequest(
       Left("sourceIdentifiers cannot be empty")
     } else if (sourceIdentifiers.exists(_.trim.isEmpty)) {
       Left("sourceIdentifiers cannot contain empty strings")
-    } else if (
-      sourceIdentifiers.size > StepFunctionMintingRequest.MaxBatchSize
-    ) {
-      Left(
-        s"sourceIdentifiers cannot contain more than ${StepFunctionMintingRequest.MaxBatchSize} items"
-      )
     } else {
       Right(this)
     }
@@ -25,8 +19,6 @@ case class StepFunctionMintingRequest(
 }
 
 object StepFunctionMintingRequest {
-  val MaxBatchSize: Int = 100
-
   implicit val decoder: Decoder[StepFunctionMintingRequest] = deriveDecoder
   implicit val encoder: Encoder[StepFunctionMintingRequest] = deriveEncoder
 }
