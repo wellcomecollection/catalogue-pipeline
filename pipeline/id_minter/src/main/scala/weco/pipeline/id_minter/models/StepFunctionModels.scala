@@ -5,16 +5,17 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 case class StepFunctionMintingRequest(
   sourceIdentifiers: List[String],
-  jobId: Option[String] = None
+  jobId: String
 ) {
   def validate: Either[String, StepFunctionMintingRequest] = {
-    if (sourceIdentifiers.isEmpty) {
+    if (sourceIdentifiers.isEmpty)
       Left("sourceIdentifiers cannot be empty")
-    } else if (sourceIdentifiers.exists(_.trim.isEmpty)) {
+    else if (sourceIdentifiers.exists(_.trim.isEmpty))
       Left("sourceIdentifiers cannot contain empty strings")
-    } else {
+    else if (jobId.trim.isEmpty)
+      Left("jobId cannot be empty")
+    else
       Right(this)
-    }
   }
 }
 
@@ -26,7 +27,7 @@ object StepFunctionMintingRequest {
 case class StepFunctionMintingResponse(
   successes: List[String], // Just the source identifiers that succeeded
   failures: List[StepFunctionMintingFailure],
-  jobId: Option[String] = None
+  jobId: String
 )
 
 object StepFunctionMintingResponse {
@@ -36,7 +37,7 @@ object StepFunctionMintingResponse {
   def fromMintingResponse(
     mintingResponse: weco.pipeline.id_minter.MintingResponse,
     originalSourceIds: List[String],
-    jobId: Option[String]
+    jobId: String
   ): StepFunctionMintingResponse = {
     // The MintingResponse.successes contains canonical IDs, but we need source IDs
     // We can determine successful source IDs by excluding the failed ones

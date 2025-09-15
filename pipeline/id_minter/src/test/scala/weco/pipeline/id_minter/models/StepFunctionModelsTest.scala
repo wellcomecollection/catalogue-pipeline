@@ -13,18 +13,7 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
     it("serializes to and from JSON correctly") {
       val request = StepFunctionMintingRequest(
         sourceIdentifiers = List("sierra-123", "miro-456"),
-        jobId = Some("test-job-001")
-      )
-
-      val json = request.asJson
-      val decoded = decode[StepFunctionMintingRequest](json.noSpaces)
-
-      decoded shouldBe Right(request)
-    }
-
-    it("handles missing jobId") {
-      val request = StepFunctionMintingRequest(
-        sourceIdentifiers = List("sierra-123")
+        jobId = "test-job-001"
       )
 
       val json = request.asJson
@@ -36,7 +25,8 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
     describe("validation") {
       it("accepts valid requests") {
         val request = StepFunctionMintingRequest(
-          sourceIdentifiers = List("sierra-123", "miro-456")
+          sourceIdentifiers = List("sierra-123", "miro-456"),
+          jobId = "job-1"
         )
 
         request.validate shouldBe Right(request)
@@ -44,7 +34,8 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
 
       it("rejects empty sourceIdentifiers") {
         val request = StepFunctionMintingRequest(
-          sourceIdentifiers = List.empty
+          sourceIdentifiers = List.empty,
+          jobId = "job-1"
         )
 
         request.validate shouldBe Left("sourceIdentifiers cannot be empty")
@@ -52,7 +43,8 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
 
       it("rejects empty string identifiers") {
         val request = StepFunctionMintingRequest(
-          sourceIdentifiers = List("sierra-123", "", "miro-456")
+          sourceIdentifiers = List("sierra-123", "", "miro-456"),
+          jobId = "job-1"
         )
 
         request.validate shouldBe Left("sourceIdentifiers cannot contain empty strings")
@@ -60,26 +52,21 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
 
       it("rejects whitespace-only identifiers") {
         val request = StepFunctionMintingRequest(
-          sourceIdentifiers = List("sierra-123", "   ", "miro-456")
+          sourceIdentifiers = List("sierra-123", "   ", "miro-456"),
+          jobId = "job-1"
         )
 
         request.validate shouldBe Left("sourceIdentifiers cannot contain empty strings")
       }
 
-      it("rejects batches that are too large") {
+      // Removed: batch size validation tests no longer applicable
+
+      it("rejects empty jobId") {
         val request = StepFunctionMintingRequest(
-          sourceIdentifiers = (1 to 101).map(i => s"sierra-$i").toList
+          sourceIdentifiers = List("sierra-123"),
+          jobId = "   "
         )
-
-        request.validate shouldBe Left("sourceIdentifiers cannot contain more than 100 items")
-      }
-
-      it("accepts maximum batch size") {
-        val request = StepFunctionMintingRequest(
-          sourceIdentifiers = (1 to 100).map(i => s"sierra-$i").toList
-        )
-
-        request.validate shouldBe Right(request)
+        request.validate shouldBe Left("jobId cannot be empty")
       }
     }
   }
@@ -91,7 +78,7 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
         failures = List(
           StepFunctionMintingFailure("calm-789", "Failed to mint ID for calm-789")
         ),
-        jobId = Some("test-job-001")
+        jobId = "test-job-001"
       )
 
       val json = response.asJson
@@ -100,17 +87,7 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
       decoded shouldBe Right(response)
     }
 
-    it("handles missing jobId") {
-      val response = StepFunctionMintingResponse(
-        successes = List("sierra-123"),
-        failures = List.empty
-      )
-
-      val json = response.asJson
-      val decoded = decode[StepFunctionMintingResponse](json.noSpaces)
-
-      decoded shouldBe Right(response)
-    }
+    // Removed: response jobId now mandatory
 
     describe("fromMintingResponse") {
       it("creates response from successful minting") {
@@ -123,13 +100,13 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
         val result = StepFunctionMintingResponse.fromMintingResponse(
           mintingResponse,
           sourceIds,
-          Some("test-job")
+          "test-job"
         )
 
         result.successes should have size 2
         result.successes should contain allOf("sierra-123", "miro-456")
         result.failures shouldBe empty
-        result.jobId shouldBe Some("test-job")
+  result.jobId shouldBe "test-job"
       }
 
       it("creates response with failures") {
@@ -144,14 +121,14 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
         val result = StepFunctionMintingResponse.fromMintingResponse(
           mintingResponse,
           sourceIds,
-          Some("test-job")
+          "test-job"
         )
 
         result.successes should have size 1
         result.successes should contain("sierra-123")
         result.failures should have size 1
         result.failures should contain(StepFunctionMintingFailure(failedSourceId, s"Failed to mint ID for $failedSourceId"))
-        result.jobId shouldBe Some("test-job")
+  result.jobId shouldBe "test-job"
       }
 
       it("handles mixed success and failure") {
@@ -166,13 +143,13 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
         val result = StepFunctionMintingResponse.fromMintingResponse(
           mintingResponse,
           sourceIds,
-          None
+          "test-job"
         )
 
-        result.successes should have size 1
-        result.successes should contain("sierra-123")
-        result.failures should have size 2
-        result.jobId shouldBe None
+    result.successes should have size 1
+    result.successes should contain("sierra-123")
+    result.failures should have size 2
+    result.jobId shouldBe "test-job"
       }
     }
   }

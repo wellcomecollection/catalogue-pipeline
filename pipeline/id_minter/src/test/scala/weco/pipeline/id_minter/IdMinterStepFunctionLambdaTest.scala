@@ -45,14 +45,14 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
         val mockProcessor = createMockProcessor(successfulSourceIds = sourceIds)
         
         val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-        val request = StepFunctionMintingRequest(sourceIds, Some("test-job"))
+  val request = StepFunctionMintingRequest(sourceIds, "test-job")
         
         val result = lambda.processRequest(request).futureValue
         
         result.successes should have size 2
         result.successes should contain allOf("sierra-123", "miro-456")
         result.failures shouldBe empty
-        result.jobId shouldBe Some("test-job")
+  result.jobId shouldBe "test-job"
       }
 
       it("handles partial and complete minting failure scenarios") {
@@ -71,7 +71,7 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
             )
 
             val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-            val request = StepFunctionMintingRequest(sourceIds, Some("test-job"))
+            val request = StepFunctionMintingRequest(sourceIds, "test-job")
 
             val result = lambda.processRequest(request).futureValue
 
@@ -88,7 +88,7 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
               result.failures shouldBe empty
             }
 
-            result.jobId shouldBe Some("test-job")
+            result.jobId shouldBe "test-job"
           }
         }
       }
@@ -97,43 +97,39 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
         val mockProcessor = createMockProcessor(successfulSourceIds = List.empty)
         
         val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-        val request = StepFunctionMintingRequest(List.empty, Some("test-job"))
+  val request = StepFunctionMintingRequest(List.empty, "test-job")
         
         val result = lambda.processRequest(request).futureValue
         
         result.successes shouldBe empty
         result.failures should have size 1
         result.failures.head.error should include("sourceIdentifiers cannot be empty")
-        result.jobId shouldBe Some("test-job")
+  result.jobId shouldBe "test-job"
       }
 
       it("handles invalid input validation") {
         val mockProcessor = createMockProcessor(successfulSourceIds = List.empty)
         
         val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-        val request = StepFunctionMintingRequest(List("sierra-123", ""), Some("test-job"))
+  val request = StepFunctionMintingRequest(List("sierra-123", ""), "test-job")
         
         val result = lambda.processRequest(request).futureValue
         
         result.successes shouldBe empty
         result.failures should have size 1
         result.failures.head.error should include("sourceIdentifiers cannot contain empty strings")
-        result.jobId shouldBe Some("test-job")
+  result.jobId shouldBe "test-job"
       }
 
-      it("handles requests without jobId") {
+      it("fails validation when jobId is blank") {
         val sourceIds = List("sierra-123")
         val mockProcessor = createMockProcessor(successfulSourceIds = sourceIds)
-        
         val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-        val request = StepFunctionMintingRequest(sourceIds, None)
-        
+        val request = StepFunctionMintingRequest(sourceIds, "   ")
         val result = lambda.processRequest(request).futureValue
-        
-        result.successes should have size 1
-        result.successes should contain("sierra-123")
-        result.failures shouldBe empty
-        result.jobId shouldBe None
+        result.successes shouldBe empty
+        result.failures should have size 1
+        result.failures.head.error should include ("jobId cannot be empty")
       }
     }
   }
