@@ -137,13 +137,11 @@ class StepFunctionMainTest
         override protected val processor = testProcessor
       }
 
-      // Test empty source identifiers
-  val emptyRequest = StepFunctionMintingRequest(List.empty, "test-job")
-      val emptyResult = testMain.processRequest(emptyRequest).futureValue
-      
-      emptyResult.successes shouldBe empty
-      emptyResult.failures should have size 1
-      emptyResult.failures.head.error should include("sourceIdentifiers cannot be empty")
+    // Empty list now returns an empty success/failure response (no error)
+    val emptyRequest = StepFunctionMintingRequest(List.empty, "test-job")
+    val emptyResult = testMain.processRequest(emptyRequest).futureValue
+    emptyResult.successes shouldBe empty
+    emptyResult.failures shouldBe empty
 
       // Removed: batch size limit validation no longer enforced
     }

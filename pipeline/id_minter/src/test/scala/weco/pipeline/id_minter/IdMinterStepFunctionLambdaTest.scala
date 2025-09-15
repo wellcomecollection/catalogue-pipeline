@@ -93,18 +93,20 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
         }
       }
 
-      it("handles empty source identifiers") {
-        val mockProcessor = createMockProcessor(successfulSourceIds = List.empty)
-        
+      it("returns empty response (no failures) when source identifiers list is empty and does not invoke processor") {
+        @volatile var invoked = false
+        val mockProcessor = new MintingRequestProcessor(null, null)(ExecutionContext.global) {
+          override def process(sourceIdentifiers: Seq[String]): Future[MintingResponse] = {
+            invoked = true; Future.successful(MintingResponse(Nil, Nil))
+          }
+        }
         val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-  val request = StepFunctionMintingRequest(List.empty, "test-job")
-        
+        val request = StepFunctionMintingRequest(Nil, "test-job")
         val result = lambda.processRequest(request).futureValue
-        
         result.successes shouldBe empty
-        result.failures should have size 1
-        result.failures.head.error should include("sourceIdentifiers cannot be empty")
-  result.jobId shouldBe "test-job"
+        result.failures shouldBe empty
+        result.jobId shouldBe "test-job"
+        invoked shouldBe false
       }
 
       it("handles invalid input validation") {

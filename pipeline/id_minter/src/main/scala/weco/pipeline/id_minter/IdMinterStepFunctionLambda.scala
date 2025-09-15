@@ -39,6 +39,16 @@ trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
         Future.successful(response)
 
       case Right(validInput) =>
+        // If there is nothing to process, return an empty success/failure response
+        if (validInput.sourceIdentifiers.isEmpty) {
+          Future.successful(
+            StepFunctionMintingResponse(
+              successes = Nil,
+              failures = Nil,
+              jobId = validInput.jobId
+            )
+          )
+        } else {
         // Process using the existing MintingRequestProcessor
         processor.process(validInput.sourceIdentifiers).map {
           mintingResponse =>
@@ -47,6 +57,7 @@ trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
               validInput.sourceIdentifiers,
               validInput.jobId
             )
+        }
         }
     }
   }

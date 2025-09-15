@@ -8,9 +8,7 @@ case class StepFunctionMintingRequest(
   jobId: String
 ) {
   def validate: Either[String, StepFunctionMintingRequest] = {
-    if (sourceIdentifiers.isEmpty)
-      Left("sourceIdentifiers cannot be empty")
-    else if (sourceIdentifiers.exists(_.trim.isEmpty))
+    if (sourceIdentifiers.exists(_.trim.isEmpty))
       Left("sourceIdentifiers cannot contain empty strings")
     else if (jobId.trim.isEmpty)
       Left("jobId cannot be empty")
