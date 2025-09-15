@@ -40,7 +40,7 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
 
   describe("IdMinterStepFunctionLambda") {
     describe("processRequest") {
-      it("handles successful minting and indexing") {
+  it("handles all minting successes") {
         val sourceIds = List("sierra-123", "miro-456")
         val mockProcessor = createMockProcessor(successfulSourceIds = sourceIds)
         
@@ -55,37 +55,42 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
         result.jobId shouldBe Some("test-job")
       }
 
-      it("handles minting failures") {
-        val successfulId = "sierra-123"
-        val failedSourceId = "sierra-failed-123"
-        val sourceIds = List(successfulId, failedSourceId)
-        val mockProcessor = createMockProcessor(successfulSourceIds = List(successfulId), failedSourceIds = List(failedSourceId))
-        
-        val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-        val request = StepFunctionMintingRequest(sourceIds, Some("test-job"))
-        
-        val result = lambda.processRequest(request).futureValue
-        
-        result.successes should have size 1
-        result.successes should contain(successfulId)
-        result.failures should have size 1
-        result.failures should contain(StepFunctionMintingFailure(failedSourceId, s"Failed to mint ID for $failedSourceId"))
-        result.jobId shouldBe Some("test-job")
-      }
+      it("handles partial and complete minting failure scenarios") {
+        val scenarios = Seq(
+          // name, sourceIds, successfulIds
+          ("partial failure", List("sierra-123", "miro-456"), List("sierra-123")),
+          ("complete failure", List("sierra-123", "miro-456"), Nil)
+        )
 
-      it("handles indexing failures") {
-        val sourceIds = List("sierra-123", "miro-456")
-        val mockProcessor = createMockProcessor(successfulSourceIds = List.empty, failedSourceIds = sourceIds) // All fail
-        
-        val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-        val request = StepFunctionMintingRequest(sourceIds, Some("test-job"))
-        
-        val result = lambda.processRequest(request).futureValue
-        
-        result.successes shouldBe empty
-        result.failures should have size 2
-        result.failures.map(_.sourceIdentifier) should contain allOf("sierra-123", "miro-456")
-        result.jobId shouldBe Some("test-job")
+        scenarios.foreach { case (name, sourceIds, successfulIds) =>
+          withClue(s"Scenario: $name => ") {
+            val failedIds = sourceIds.diff(successfulIds)
+            val mockProcessor = createMockProcessor(
+              successfulSourceIds = successfulIds,
+              failedSourceIds = failedIds
+            )
+
+            val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
+            val request = StepFunctionMintingRequest(sourceIds, Some("test-job"))
+
+            val result = lambda.processRequest(request).futureValue
+
+            result.successes.toSet shouldBe successfulIds.toSet
+            result.failures.map(_.sourceIdentifier).toSet shouldBe failedIds.toSet
+
+            if (failedIds.nonEmpty) {
+              failedIds.foreach { fid =>
+                result.failures should contain(
+                  StepFunctionMintingFailure(fid, s"Failed to mint ID for $fid")
+                )
+              }
+            } else {
+              result.failures shouldBe empty
+            }
+
+            result.jobId shouldBe Some("test-job")
+          }
+        }
       }
 
       it("handles empty source identifiers") {
