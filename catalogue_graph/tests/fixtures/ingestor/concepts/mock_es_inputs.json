@@ -319,7 +319,7 @@
           "South Cambridgeshire (Cambridgeshire)",
           "South Cambridgeshire, Eng."
         ],
-        "type": "Subject"
+        "type": "Place"
       },
       "display": {
         "id": "a22auf32",
@@ -340,7 +340,7 @@
           "South Cambridgeshire (Cambridgeshire)",
           "South Cambridgeshire, Eng."
         ],
-        "type": "Subject",
+        "type": "Place",
         "relatedConcepts": {
           "relatedTo": [],
           "fieldsOfWork": [],
@@ -352,28 +352,29 @@
               "label": "Disease Outbreaks",
               "id": "d6jhgxuc",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             },
             {
               "label": "Public Health",
               "id": "uj4hz4ct",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             },
             {
               "label": "Sanitation",
               "id": "eva7r2dw",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             },
             {
               "label": "Water Supply",
               "id": "gtf5s7h7",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             }
           ],
-          "frequentCollaborators": []
+          "frequentCollaborators": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a22auf32"
