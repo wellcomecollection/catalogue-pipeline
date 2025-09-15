@@ -1,175 +1,215 @@
+import time
 from collections import defaultdict
 from collections.abc import Generator
-from queue import Queue
-from typing import Iterable
+from concurrent.futures import ThreadPoolExecutor
+from itertools import batched
+from typing import Iterable, Literal, get_args
 
 from models.events import IncrementalWindow
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.threaded_es_source import ThreadedElasticsearchSource
 from utils.aws import get_neptune_client
+from utils.streaming import process_stream_in_parallel
 
 from ingestor.models.neptune.query_result import NeptuneConcept
 from ingestor.queries.concept_queries import (
     CONCEPT_QUERY,
     CONCEPT_TYPE_QUERY,
-    REFERENCED_TOGETHER_QUERY,
     SAME_AS_CONCEPT_QUERY,
     SOURCE_CONCEPT_QUERY,
+    get_referenced_together_query,
     get_related_query,
 )
 
-# Maximum number of related nodes to return for each relationship type
-RELATED_TO_LIMIT = 10
+NEPTUNE_PARAMS = {
+    # There are a few Wikidata supernodes which cause performance issues in queries.
+    # We need to filter them out when running queries to get related nodes.
+    # Q5 -> 'human', Q151885 -> 'concept'
+    "ignored_wikidata_ids": ["Q5", "Q151885"],
+    # Maximum number of related nodes to return for each relationship type
+    "related_to_limit": 10,
+    # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
+    "shared_works_count_threshold": 3,
+}
 
-# Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
-NUMBER_OF_SHARED_WORKS_THRESHOLD = 3
+ES_QUERY = {"match": {"type": "Visible"}}
+ES_FIELDS = [
+    "data.subjects",
+    "data.contributors",
+    "data.genres",
+]
 
-# There are a few Wikidata supernodes which cause performance issues in queries.
-# We need to filter them out when running queries to get related nodes.
-# Q5 -> 'human', Q151885 -> 'concept'
-IGNORED_WIKIDATA_IDS = ["Q5", "Q151885"]
+RelatedQuery = Literal["related_to", "fields_of_work", "narrower_than", "broader_than", "people"]
+ReferencedTogetherQuery = Literal["frequent_collaborators", "related_topics"]
+ConceptQuery = Literal["concept", "concept_type", "source_concept", "same_as_concept", RelatedQuery, ReferencedTogetherQuery]
 
+NEPTUNE_QUERIES = {
+    "concept": CONCEPT_QUERY,
+    "concept_type": CONCEPT_TYPE_QUERY,
+    "source_concept": SOURCE_CONCEPT_QUERY,
+    "same_as_concept": SAME_AS_CONCEPT_QUERY, 
+    "related_to": get_related_query("RELATED_TO"),
+    "fields_of_work": get_related_query("HAS_FIELD_OF_WORK"),
+    "narrower_than": get_related_query("NARROWER_THAN"),
+    "broader_than": get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
+    "people": get_related_query("HAS_FIELD_OF_WORK", "to"),
+    # Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
+    "frequent_collaborators": get_referenced_together_query(
+        source_referenced_types=["Person", "Organisation"],
+        related_referenced_types=["Person", "Organisation"],
+        source_referenced_in=["contributors"],
+        related_referenced_in=["contributors"],
+    ),
+    # Do not include agents/people/orgs in the list of related topics.
+    "related_topics": get_referenced_together_query(
+        related_referenced_types=[
+            "Concept",
+            "Subject",
+            "Place",
+            "Meeting",
+            "Period",
+            "Genre",
+        ],
+        related_referenced_in=["subjects"],
+    )
+}
 
 LinkedConcepts = dict[str, list[dict]]
 
 
-def _related_query_result_to_dict(related_to: list[dict]) -> LinkedConcepts:
-    """
-    Transform a list of dictionaries mapping a concept ID to a list of related concepts into a single dictionary
-    (with concept IDs as keys and related concepts as values).
-    """
-    return {item["id"]: item["related"] for item in related_to}
-
-
-class GraphConceptsExtractor(ThreadedElasticsearchSource):
+class GraphConceptsExtractor:
     def __init__(self, pipeline_date: str, window: IncrementalWindow = None, is_local: bool = False):
-        super().__init__(pipeline_date=pipeline_date, window=window, is_local=is_local)
-        self.query = {"match": {"type": "Visible"}}
+        self.es_source = ThreadedElasticsearchSource(pipeline_date=pipeline_date, query=ES_QUERY, fields=ES_FIELDS, window=window, is_local=is_local)
         self.neptune_client = get_neptune_client(is_local)
             
-        # TODO: Use locking
-        self.processed_concepts = set()
         self.redirect_map = {}
+        self.same_as_map = {}
 
-    def get_neptune_query_params(self, ids: list[str]) -> dict:
-        return {
-            "ids": ids,
-            "ignored_wikidata_ids": IGNORED_WIKIDATA_IDS,
-            "related_to_limit": RELATED_TO_LIMIT,
-            "shared_works_count_threshold": NUMBER_OF_SHARED_WORKS_THRESHOLD,
-        }
-
-    def make_neptune_query(self, query: str, ids: Iterable[str], label: str, params: dict | None = None) -> dict:
-        params = {**self.get_neptune_query_params(list(ids)), **(params or {})}
-        result = self.neptune_client.time_open_cypher_query(query, params, label)
-        
-        return {item['id']: item for item in result}
+    def make_neptune_query(self, query_type: ConceptQuery, ids: Iterable[str]) -> dict:
+        chunk_size = 1000 if query_type in {"related_topics", "frequent_collaborators"} else 5000
+        query_count = 0
     
-    def get_concept_types(self, ids: Iterable[str]):
-        result = self.make_neptune_query(SAME_AS_CONCEPT_QUERY, ids, 'same as')
-        
+        def _make_query(chunk: Iterable[str]):
+            nonlocal query_count
+            query_count += 1
+            return self.neptune_client.run_open_cypher_query(
+                NEPTUNE_QUERIES[query_type], NEPTUNE_PARAMS | {"ids": chunk}
+            )
+    
+        start = time.time()
+        raw_result = process_stream_in_parallel(ids, _make_query, chunk_size, 5)
+        results = {item["id"]: item for item in raw_result}
+    
+        print(
+            f"Ran {query_count} '{query_type}' queries in {round(time.time() - start)}s, "
+            f"retrieving {len(results)} records."
+        )
+        return results
+    
+    def same_as(self, concept_id: str):
+        primary_id = self.redirect_map[concept_id]
+        return self.same_as_map[primary_id]
+    
+    def get_concept_types(self, ids: Iterable[str]):        
         all_ids = set(ids)
-        for item in result.values():
-            all_ids.update(item['same_as_ids'])
+        for i in ids:
+            all_ids.update(self.same_as(i))
 
-        types_result = self.make_neptune_query(CONCEPT_TYPE_QUERY, all_ids, 'concept type')
+        types_result = self.make_neptune_query('concept_type', all_ids)
         
-        concept_types = defaultdict(set)
-        for concept_id in result:
-            for same_as_concept_id in result[concept_id]['same_as_ids']:
-                concept_types[concept_id].update(types_result[same_as_concept_id]['types'])
+        concept_types = defaultdict(lambda: {"Concept"})
+        for concept_id in ids:
+            for same_as_concept_id in self.same_as(concept_id):
+                if same_as_concept_id in types_result:
+                    concept_types[concept_id].update(types_result[same_as_concept_id]['types'])
         
         return concept_types
 
     def get_concepts(self, ids: Iterable[str]):
-        concepts = self.make_neptune_query(CONCEPT_QUERY, ids, 'concept')
-        source_concepts = self.make_neptune_query(SOURCE_CONCEPT_QUERY, ids, 'source concept')
-        same_as_concepts = self.make_neptune_query(SAME_AS_CONCEPT_QUERY, ids, 'same as')
+        concepts = self.make_neptune_query("concept", ids)
+        source_concepts = self.make_neptune_query("source_concept", ids)
         concept_types = self.get_concept_types(ids)
         
         full_concepts = {}
         for concept_id in concepts:
+            source = source_concepts.get(concept_id, {})
+            
             neptune_concept = NeptuneConcept(
                 concept=concepts[concept_id]["concept"],
-                source_concepts=source_concepts.get(concept_id, {}).get("source_concepts", []),
-                types=concept_types.get(concept_id, ["Concept"]),
-                same_as=same_as_concepts.get(concept_id, {}).get("same_as_ids", []),
-                linked_source_concept=None
+                types=concept_types["concept_id"],
+                source_concepts=source.get("source_concepts", []),
+                same_as=self.same_as(concept_id),
+                linked_source_concept=source.get("linked_source_concepts", [None])[0]
             )
             full_concepts[concept_id] = neptune_concept
         
         return full_concepts
 
     def get_same_as_redirect(self, ids):
-        result = self.make_neptune_query(SAME_AS_CONCEPT_QUERY, ids, 'same as')
-    
-        redirect_map = {i: i for i in ids}
+        to_process = set()
+        for i in ids:
+            if i not in self.redirect_map:
+                to_process.add(i)
+
+        result = self.make_neptune_query("same_as_concept", to_process)
+        
+        for i in to_process:
+            if i not in self.redirect_map:
+                self.redirect_map[i] = i
+            if i not in self.same_as_map:
+                self.same_as_map[i] = [i]
+
         for concept_id, item in result.items():
+            same_as_ids = [concept_id] + item['same_as_ids']
+
             # Alphabetical ID-based prioritisation
-            all_same_as = [concept_id] + item['same_as_ids']
-            redirect_id = sorted(all_same_as)[0]
-            
-            redirect_map[concept_id] = redirect_id
-            for same_as_id in item['same_as_ids']:
-                redirect_map[same_as_id] = redirect_id
+            primary_id = sorted(same_as_ids)[0]
+
+            self.same_as_map[primary_id] = same_as_ids
+            for same_as_id in same_as_ids:
+                self.redirect_map[same_as_id] = primary_id
+                
+        return result
     
-        return redirect_map
+    def get_related_concepts(self, query_type: ConceptQuery, ids: Iterable[str]) -> LinkedConcepts:
+        result = self.make_neptune_query(query_type, ids)
+        
+        related_ids = set()
+        for item in result.values():
+            related_ids.update([i["id"] for i in item["related"]])
 
-    def get_related_concepts(self, ids: list[str]) -> LinkedConcepts:
-        query = get_related_query("RELATED_TO")
-        result = self.make_neptune_query(query, ids, "related to")
-        return _related_query_result_to_dict(result)
+        self.get_same_as_redirect(related_ids)
+        
+        full_related_concepts = self.get_concepts(related_ids)
 
-    def get_field_of_work_concepts(self, ids: list[str]) -> LinkedConcepts:
-        query = get_related_query("HAS_FIELD_OF_WORK")
-        result = self.make_neptune_query(query, ids, "field of work")
-        return _related_query_result_to_dict(result)
+        full_result = defaultdict(list)
+    
+        for concept_id in ids:
+            for item in result.get(concept_id, {}).get("related", []):
+                full_result[concept_id].append(full_related_concepts[item["id"]])
+        
+        return full_result
 
-    def get_narrower_concepts(self, ids: list[str]) -> LinkedConcepts:
-        query = get_related_query("NARROWER_THAN")
-        result = self.make_neptune_query(query, ids, "narrower than")
-        return _related_query_result_to_dict(result)
-
-    def get_broader_concepts(self, ids: list[str]) -> LinkedConcepts:
-        query = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
-        result = self.make_neptune_query(query, ids, "broader than")
-        return _related_query_result_to_dict(result)
-
-    def get_people_concepts(self, ids: list[str]) -> LinkedConcepts:
-        query = get_related_query("HAS_FIELD_OF_WORK", "to")
-        result = self.make_neptune_query(query, ids, "people")
-        return _related_query_result_to_dict(result)
-
-    def get_collaborator_concepts(self, ids: list[str]) -> LinkedConcepts:
-        redirect_to = self.get_same_as_redirect(ids)
-        all_ids = redirect_to.keys()
-
-        # Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
-        params = {
-            "referenced_in": ["contributors"],
-            "referenced_type": ["Person", "Organisation"],
-            "related_referenced_in": ["contributors"],
-            "related_referenced_type": ["Person", "Organisation"]
-        }
-        result = self.make_neptune_query(REFERENCED_TOGETHER_QUERY, all_ids, "frequent collaborators", params)
-
+    def get_referenced_together_concepts(self, query_type: ConceptQuery, ids: Iterable[str]):
+        result = self.make_neptune_query(query_type, ids)
+        
         related_ids = set()
         for item in result.values():
             for related in item['related']:
                 related_ids.add(related['id'])
         
-        related_redirect_to = self.get_same_as_redirect(related_ids)
+        self.get_same_as_redirect(related_ids)
         
         # Merge results across *same as* concepts and related concepts
         merged_frequent_collaborators = defaultdict(lambda: defaultdict(lambda: 0))
         for concept_id, item in result.items():
-            primary_id = redirect_to[concept_id]
+            primary_id = self.redirect_map[concept_id]
         
             for related in item["related"]:
-                primary_related_id = related_redirect_to[related['id']]
-                
+                primary_related_id = self.redirect_map[related['id']]
+        
                 # Make sure a concept does not reference itself
-                if redirect_to[primary_id] != related_redirect_to[primary_related_id]:
+                if self.redirect_map[primary_id] != self.redirect_map[primary_related_id]:
                     merged_frequent_collaborators[primary_id][primary_related_id] += related['count']
         
         sorted_frequent_collaborators = {}
@@ -181,62 +221,64 @@ class GraphConceptsExtractor(ThreadedElasticsearchSource):
         related_concept_ids = set()
         for related_ids in merged_frequent_collaborators.values():
             related_concept_ids.update(related_ids)
-
+        
         full_related_concepts = self.get_concepts(related_concept_ids)
         
         full_frequent_collaborators = defaultdict(list)
         
         for concept_id in ids:
-            for related_id in full_frequent_collaborators[concept_id]:
+            for related_id in sorted_frequent_collaborators.get(concept_id, []):
                 full_frequent_collaborators[concept_id].append(full_related_concepts[related_id])
-            
-        return full_frequent_collaborators
+        
+        return full_frequent_collaborators        
 
-    def get_related_topics(self, ids: list[str]) -> LinkedConcepts:
-        # Do not include agents/people/orgs in the list of related topics.
-        params = {
-            "referenced_in": ["subjects", "contributors", "genres"],
-            "referenced_type": ["Organisation", "Agent", "Person", "Concept", "Subject", "Place", "Meeting", "Period", "Genre"],
-            "related_referenced_in": ["subjects"],
-            "related_referenced_type": ["Concept", "Subject", "Place", "Meeting", "Period", "Genre"]
-        }
-        result = self.make_neptune_query(REFERENCED_TOGETHER_QUERY, ids, "related topics", params)
-        return _related_query_result_to_dict(result)
+    def concept_ids_from_works(self) -> Generator[str]:
+        for work in self.es_source.stream_raw():
+            for concept, _ in extract_concepts_from_work(work["data"]): 
+                try:
+                    yield concept["id"]["canonicalId"]
+                except:
+                    print(concept, work)
+    
+    def same_as_concepts(self) -> Generator[str]:
+        processed_ids = set()
 
-    def worker_target(self, slice_index: int, queue: Queue) -> None:
-        search_after = None
-        while hits := self.search(slice_index, search_after):
-            # TODO: Error handling in threads!
-            concept_ids = set()
-            for hit in hits:
-                for concept, _ in extract_concepts_from_work(hit["_source"]["data"]):
-                    concept_id = concept["id"]["canonicalId"]
-                    if concept_id not in self.processed_concepts:
-                        self.processed_concepts.add(concept_id)
-                        concept_ids.add(concept_id)
+        for extracted_ids in batched(self.concept_ids_from_works(), 10_000, strict=False):
+            same_as_result = self.get_same_as_redirect(extracted_ids)
+            for concept_id in extracted_ids:
+                if concept_id not in processed_ids:
+                    for same_as_id in same_as_result.get(concept_id, {}).get("same_as_ids", []) + [concept_id]:
+                        processed_ids.add(same_as_id)
+                        yield same_as_id
+                # query = """
+        #     MATCH (concept:Concept)
+        #     WITH concept ORDER BY concept.id
+        #     SKIP 0 LIMIT 10000
+        #     RETURN concept.id AS id
+        # """
+        # 
+        # result = self.neptune_client.run_open_cypher_query(query)
+        # for i in result:
+        #     self.redirect_map[i["id"]] = i["id"]
+        #     yield i["id"]
+                  
+    def extract_raw(self) -> Generator[tuple]:
+        for concept_ids in batched(self.same_as_concepts(), 10_000, strict=False):
+            concepts = self.get_concepts(concept_ids).items()
 
-            concept_ids = list(concept_ids)
-            all_related_concepts = {
-                # "related_to": self.get_related_concepts(concept_ids),
-                # "fields_of_work": self.get_field_of_work_concepts(concept_ids),
-                # "narrower_than": self.get_narrower_concepts(concept_ids),
-                # "broader_than": self.get_broader_concepts(concept_ids),
-                # "people": self.get_people_concepts(concept_ids),
-                "frequent_collaborators": self.get_collaborator_concepts(concept_ids),
-                #"related_topics": self.get_related_topics(concept_ids),
-            }
+            with ThreadPoolExecutor() as executor:
+                futures = {}
+                for query in get_args(RelatedQuery):
+                    futures[query] = executor.submit(self.get_related_concepts, query, concept_ids)
+                for query in get_args(ReferencedTogetherQuery):
+                    futures[query] = executor.submit(self.get_referenced_together_concepts, query, concept_ids)                    
 
-            for concept_id, concept in self.get_concepts(concept_ids).items():
+                all_related_concepts = {key: future.result() for key, future in futures.items()}
+        
+            for concept_id, concept in concepts:
                 related_concepts = {}
                 for key in all_related_concepts:
                     if concept_id in all_related_concepts[key]:
                         related_concepts[key] = all_related_concepts[key][concept_id]
-    
-                queue.put((concept, related_concepts))
-
-            search_after = hits[-1]["sort"]
-
-        queue.put(None)
-
-    def extract_raw(self) -> Generator[tuple]:
-        yield from self.stream_raw()
+                
+                yield concept, related_concepts

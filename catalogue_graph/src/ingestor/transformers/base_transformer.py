@@ -59,11 +59,15 @@ class ElasticsearchBaseTransformer:
 
         return len(es_documents)
     
-    def _load_to_jsonl(self, es_documents: Generator[BaseModel], file: IO):
+    def _load_to_jsonl(self, es_documents: Generator[BaseModel], file: IO) -> int:
+        counter = 0
         for doc in es_documents:
+            counter += 1
             line = (doc.model_dump_json() + "\n").encode("utf-8")
             file.write(line)
         
+        return counter
+
     def _load_to_file(self, es_documents: Generator[BaseModel], file: IO, load_format: IngestorLoadFormat) -> int:
         if load_format == "parquet":
             return self._load_to_parquet(list(es_documents), file)
@@ -80,7 +84,7 @@ class ElasticsearchBaseTransformer:
         
         for i, batch in enumerate(self.stream_batches()):
             file_name = f"{str(i*S3_BATCH_SIZE).zfill(8)}-{str(i*S3_BATCH_SIZE + len(batch)).zfill(8)}"
-            s3_uri = f"s3://{s3_prefix}/{file_name}"
+            s3_uri = f"s3://{s3_prefix}/{file_name}.{load_format}"
             
             with smart_open.open(s3_uri, "wb", transport_params=transport_params) as f:
                 record_count = self._load_to_file(batch, f, load_format)
