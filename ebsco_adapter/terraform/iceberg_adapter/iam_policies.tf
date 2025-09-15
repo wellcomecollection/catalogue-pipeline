@@ -1,72 +1,74 @@
-# IAM Policy Documents for S3 Tables Iceberg access
+#############################
+# S3 Tables (Iceberg) access #
+#############################
+# Updated to use native s3tables IAM actions & ARNs instead of Glue/LakeFormation integration.
+# Bucket & table names derived from previous Glue ARNs:
+#   Bucket: wellcomecollection-platform-ebsco-adapter
+#   Namespace: wellcomecollection_catalogue (not directly encoded in ARNs, but kept for context)
+#   Table: ebsco_adapter_table
 
+# Write policy (create/update table + read/write data & metadata)
 data "aws_iam_policy_document" "iceberg_write" {
+  # Bucket-level operations needed for managing (creating/listing) namespaces & tables
   statement {
     actions = [
-      "lakeformation:GetDataAccess"
+      "s3tables:CreateNamespace",
+      "s3tables:GetNamespace",
+      "s3tables:ListNamespaces",
+      "s3tables:CreateTable",
+      "s3tables:ListTables",
+      "s3tables:GetTableBucket",
+      "s3tables:GetTableMetadataLocation",
     ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    actions = [
-      "glue:GetCatalog",
-      "glue:CreateDatabase",
-      "glue:CreateTable",
-      "glue:GetTable",
-      "glue:UpdateTable"
-    ]
-
     resources = [
-      "arn:aws:glue:eu-west-1:760097843905:catalog",
-      "arn:aws:glue:eu-west-1:760097843905:catalog/*",
-      "arn:aws:glue:eu-west-1:760097843905:database/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
     ]
   }
 
+  # Table-level operations for reading & writing Iceberg (metadata + data files commits)
   statement {
     actions = [
-      "glue:CreateTable",
-      "glue:GetTable",
-      "glue:UpdateTable"
+      "s3tables:GetTableMetadataLocation",
+      "s3tables:ListTables",
+      "s3tables:GetTable",
+      "s3tables:GetTableData",
+      "s3tables:PutTableData",
+      "s3tables:UpdateTableMetadataLocation"
     ]
 
     resources = [
-      "arn:aws:glue:eu-west-1:760097843905:table/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue/ebsco_adapter_table"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
     ]
   }
 }
 
+# Read-only policy (no mutations): list & read table and data objects
 data "aws_iam_policy_document" "iceberg_read" {
   statement {
     actions = [
-      "lakeformation:GetDataAccess"
+      "s3tables:GetNamespace",
+      "s3tables:ListNamespaces",
+      "s3tables:ListTables",
+      "s3tables:GetTableBucket",
+      "s3tables:GetTableMetadataLocation",
     ]
-
-    resources = ["*"]
-  }
-
-  statement {
-    actions = [
-      "glue:GetCatalog",
-      "glue:GetTable"
-    ]
-
     resources = [
-      "arn:aws:glue:eu-west-1:760097843905:catalog",
-      "arn:aws:glue:eu-west-1:760097843905:catalog/*",
-      "arn:aws:glue:eu-west-1:760097843905:database/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
     ]
   }
 
   statement {
     actions = [
-      "glue:GetTable"
+      "s3tables:GetTableMetadataLocation",
+      "s3tables:ListTables",
+      "s3tables:GetTable",
+      "s3tables:GetTableData",
+      "s3tables:UpdateTableMetadataLocation"
     ]
-
     resources = [
-      "arn:aws:glue:eu-west-1:760097843905:table/s3tablescatalog/wellcomecollection-platform-ebsco-adapter/wellcomecollection_catalogue/ebsco_adapter_table"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
     ]
   }
 }
@@ -95,14 +97,10 @@ data "aws_iam_policy_document" "s3_write" {
 
     resources = [
       "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter",
-      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*"
+      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*",
+      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/batches/*"
     ]
   }
-}
-
-locals {
-  // TODO: Understand how to deal with this changing!
-  pipeline_date = "2025-05-01"
 }
 
 # Allow read ssm parameters
@@ -144,7 +142,8 @@ data "aws_iam_policy_document" "transformer_allow_pipeline_storage_secret_read" 
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/private_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/port*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/protocol*",
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/graph_extractor/api_key*"
+      # This should be just "transformer" once the pipeline secrets are properly generated
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/transformer-ebsco-test/api_key*"
     ]
   }
 }

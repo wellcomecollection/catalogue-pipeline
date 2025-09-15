@@ -1,27 +1,34 @@
-"""
-Transformer step for EBSCO adapter pipeline.
+"""Transformer step for the EBSCO adapter.
 
-Transforms data from the loader output into the final format for downstream
-processing (currently indexing into Elasticsearch).
+Converts Iceberg loader output (all records or a changeset) into `SourceWork` /
+`DeletedWork` documents and indexes them into Elasticsearch, writing a batch
+ID manifest for downstream consumers; idempotent on previously processed files.
 """
 
 import argparse
 import io
+import json
 from collections.abc import Generator, Iterable
+from pathlib import PurePosixPath
 from typing import Any
 
 import elasticsearch.helpers
 import pyarrow as pa
+import smart_open
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 
 import config
 from models.marc import MarcRecord
+from models.step_events import (
+    EbscoAdapterTransformerEvent,
+    EbscoAdapterTransformerResult,
+)
 from models.work import BaseWork, DeletedWork, SourceWork
-from table_config import get_glue_table, get_local_table
 from utils.elasticsearch import get_client, get_standard_index_name
-from utils.iceberg import IcebergTableClient
+from utils.iceberg import IcebergTableClient, get_iceberg_table
+from utils.tracking import is_file_already_processed, record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
@@ -29,27 +36,29 @@ BATCH_SIZE = 10_000
 
 class EbscoAdapterTransformerConfig(BaseModel):
     is_local: bool = False
-    use_glue_table: bool = True
+    use_rest_api_table: bool = True
     pipeline_date: str
-
-
-class EbscoAdapterTransformerEvent(BaseModel):
-    changeset_id: str | None = None
     index_date: str | None = None
-    job_id: str  # required
 
 
-class EbscoAdapterTransformerResult(BaseModel):
-    """Result of transformer execution.
+def _write_batch_file(
+    batches_ids: list[list[str]], job_id: str, *, changeset_id: str | None
+) -> tuple[str, str, str]:
+    # Build the S3 key using PurePosixPath for clean joining (no leading // issues)
+    # Prefer .ndjson to signal line-delimited JSON (supported by Step Functions)
+    file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.ndjson"
+    key = PurePosixPath(config.BATCH_S3_PREFIX) / file_name
+    bucket = config.S3_BUCKET
+    batch_file_location = f"s3://{bucket}/{key.as_posix()}"
 
-    batches contains one entry per processed RecordBatch; each inner list is the
-    ordered list of IDs successfully transformed & sent for indexing for that batch.
-    An empty result (no changeset or no valid records) yields batches=[].
-    """
+    with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
+        # Write NDJSON: one JSON object per line -> one Distributed Map item per line
+        # Line shape: {"ids": ["id1", "id2", ...]}
+        for ids in batches_ids:
+            f.write(json.dumps({"ids": ids}) + "\n")
 
-    batches: list[list[str]] = []
-    success_count: int = 0
-    failure_count: int = 0
+    print(f"Wrote batch id file to {batch_file_location}")
+    return batch_file_location, bucket, key.as_posix()
 
 
 def transform(work_id: str, content: str) -> list[SourceWork]:
@@ -159,51 +168,44 @@ def _process_batch(
     return success, failed, ids
 
 
-def handler(
-    event: EbscoAdapterTransformerEvent, config_obj: EbscoAdapterTransformerConfig
+def _record_transformed_file(
+    event: EbscoAdapterTransformerEvent, result: EbscoAdapterTransformerResult
+) -> None:
+    """Record that a source file was transformed (idempotency tracking).
+
+    Separated from the main handler for clarity & easier testing.
+    Safe no-op when no file_location is supplied (e.g. local runs without S3 input).
+    """
+    if not event.file_location:
+        print("No file location provided for tracking, skipping!")
+        return
+
+    record_processed_file(
+        job_id=event.job_id,
+        file_location=event.file_location,
+        step="transformed",
+        payload_obj=result,
+    )
+
+
+def process_batches(
+    pa_table: pa.Table,
+    es_client: Elasticsearch,
+    *,
+    index_name: str,
+    job_id: str,
+    changeset_id: str | None,
+    index_date: str,
 ) -> EbscoAdapterTransformerResult:
-    print(f"Running transformer handler with config: {config_obj}")
-    print(f"Processing event: {event}")
-    print(f"Received job_id: {event.job_id}")
+    """Process an Arrow table into Elasticsearch and return a result object.
 
-    if event.changeset_id is None:
-        print("No changeset_id provided, skipping transformation.")
-        return EbscoAdapterTransformerResult()
-
-    changeset_id = event.changeset_id
-    print(f"Processing loader output with changeset_id: {changeset_id}")
-
-    if config_obj.use_glue_table:
-        print("Using AWS Glue table...")
-        table = get_glue_table(
-            s3_tables_bucket=config.S3_TABLES_BUCKET,
-            table_name=config.GLUE_TABLE_NAME,
-            namespace=config.GLUE_NAMESPACE,
-            region=config.AWS_REGION,
-            account_id=config.AWS_ACCOUNT_ID,
-        )
-    else:
-        print("Using local table...")
-        table = get_local_table(
-            table_name=config.LOCAL_TABLE_NAME,
-            namespace=config.LOCAL_NAMESPACE,
-            db_name=config.LOCAL_DB_NAME,
-        )
-
-    table_client = IcebergTableClient(table)
-
-    pa_table: pa.Table = table_client.get_records_by_changeset(changeset_id)
-    print(f"Retrieved {len(pa_table)} records from table")
-
-    es_client = get_client(
-        pipeline_date=config_obj.pipeline_date,
-        is_local=config_obj.is_local,
-        api_key_name="ebsco_adapter_iceberg",
-    )
-    index_name = get_standard_index_name(
-        "works-source", event.index_date or config_obj.pipeline_date
-    )
-
+    Responsibilities:
+    - Iterate over record batches
+    - Transform / delete logic via _process_batch
+    - Accumulate counts & ids
+    - Write batch id manifest file
+    - Return EbscoAdapterTransformerResult (tracking is left to caller)
+    """
     total_success = 0
     total_failed = 0
     batches_ids: list[list[str]] = []
@@ -212,27 +214,109 @@ def handler(
         success, failed, ids = _process_batch(batch, index_name, es_client)
         total_success += success
         total_failed += failed
-        if ids:  # only record non-empty batches
+        if ids:
             batches_ids.append(ids)
 
-    result = EbscoAdapterTransformerResult(
-        batches=batches_ids, success_count=total_success, failure_count=total_failed
+    batch_file_location, batch_file_bucket, batch_file_key = _write_batch_file(
+        batches_ids, job_id, changeset_id=changeset_id
     )
 
-    total_batches = len(result.batches)
-    total_ids = sum(len(b) for b in result.batches)
+    total_batches = len(batches_ids)
+    total_ids = sum(len(b) for b in batches_ids)
     print(
         f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={total_failed}"
     )
 
-    # No longer raise on failures; caller can inspect failure_count
+    return EbscoAdapterTransformerResult(
+        index_date=index_date,
+        job_id=job_id,
+        batch_file_location=batch_file_location,
+        batch_file_bucket=batch_file_bucket,
+        batch_file_key=batch_file_key,
+        success_count=total_success,
+        failure_count=total_failed,
+    )
+
+
+def handler(
+    event: EbscoAdapterTransformerEvent, config_obj: EbscoAdapterTransformerConfig
+) -> EbscoAdapterTransformerResult:
+    print(f"Running transformer handler with config: {config_obj}")
+    print(f"Processing event: {event}")
+    print(f"Received job_id: {event.job_id}")
+
+    # Determine index date by cascading choice: event > config > pipeline_date
+    index_date = event.index_date or config_obj.index_date or config_obj.pipeline_date
+
+    prior_record = None
+    if event.file_location:
+        prior_record = is_file_already_processed(
+            event.file_location, step="transformed"
+        )
+
+    # Short-circuit if this file has already been transformed (mirrors loader behaviour)
+    if prior_record:
+        print(
+            "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
+        )
+        prior_batch = prior_record.get("batch_file_location")
+        prior_bucket = prior_record.get("batch_file_bucket")
+        prior_key = prior_record.get("batch_file_key")
+
+        return EbscoAdapterTransformerResult(
+            index_date=index_date,
+            job_id=event.job_id,
+            batch_file_location=prior_batch,
+            batch_file_bucket=prior_bucket,
+            batch_file_key=prior_key,
+            success_count=0,
+            failure_count=0,
+        )
+
+    table = get_iceberg_table(config_obj.use_rest_api_table)
+    table_client = IcebergTableClient(table)
+
+    # Perform a reindex when no changeset is supplied
+    if event.changeset_id is None:
+        print("No changeset_id provided; performing full reindex of records.")
+        pa_table = table_client.get_all_records()
+    else:
+        print(f"Processing loader output with changeset_id: {event.changeset_id}")
+        pa_table = table_client.get_records_by_changeset(event.changeset_id)
+
+    print(f"Retrieved {len(pa_table)} records from table for processing")
+
+    es_client = get_client(
+        pipeline_date=config_obj.pipeline_date,
+        is_local=config_obj.is_local,
+        api_key_name="transformer-ebsco-test",
+    )
+    index_name = get_standard_index_name("works-source", index_date)
+
+    print(
+        f"Writing to Elasticsearch index: {index_name} in pipeline {config_obj.pipeline_date} ..."
+    )
+
+    result = process_batches(
+        pa_table,
+        es_client,
+        index_name=index_name,
+        job_id=event.job_id,
+        changeset_id=event.changeset_id,
+        index_date=index_date,
+    )
+    _record_transformed_file(event, result)
+
     return result
 
 
 def lambda_handler(event: EbscoAdapterTransformerEvent, context: Any) -> dict[str, Any]:
     return handler(
         EbscoAdapterTransformerEvent.model_validate(event),
-        EbscoAdapterTransformerConfig(pipeline_date=config.PIPELINE_DATE),
+        EbscoAdapterTransformerConfig(
+            pipeline_date=config.PIPELINE_DATE,
+            index_date=config.INDEX_DATE,
+        ),
     ).model_dump()
 
 
@@ -242,9 +326,9 @@ def local_handler() -> EbscoAdapterTransformerResult:
         "--changeset-id", type=str, help="Changeset ID from loader output to transform"
     )
     parser.add_argument(
-        "--use-glue-table",
+        "--use-rest-api-table",
         action="store_true",
-        help="Use AWS Glue table instead of local table",
+        help="Use S3 Tables Iceberg REST API table instead of local table",
     )
     parser.add_argument(
         "--pipeline-date",
@@ -270,12 +354,14 @@ def local_handler() -> EbscoAdapterTransformerResult:
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, index_date=args.index_date, job_id=args.job_id
+        changeset_id=args.changeset_id, job_id=args.job_id, file_location=None
     )
+    use_rest_api = args.use_rest_api_table
     config_obj = EbscoAdapterTransformerConfig(
         is_local=True,
-        use_glue_table=args.use_glue_table,
+        use_rest_api_table=use_rest_api,
         pipeline_date=args.pipeline_date,
+        index_date=args.index_date,
     )
 
     return handler(event=event, config_obj=config_obj)

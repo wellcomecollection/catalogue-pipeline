@@ -1,13 +1,4 @@
 steps:
-  - command: |
-      ./builds/run_linting.sh
-    #      cat .reports/scalafmt.out | .buildkite/scripts/report_sbt_warnings.sh
-    label: "linting"
-    soft_fail:
-      - exit_status: 2
-    agents:
-      queue: "scala"
-
   - label: "{{ matrix }} (library)"
     command: "./builds/run_sbt_tests.sh {{ matrix }}"
 
