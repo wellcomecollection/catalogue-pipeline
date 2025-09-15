@@ -60,13 +60,13 @@ class StepFunctionMainTest
         override protected val processor = testProcessor
       }
 
-      val request = StepFunctionMintingRequest(sourceIds, Some("test-job-001"))
+  val request = StepFunctionMintingRequest(sourceIds, "test-job-001")
       val result = testMain.processRequest(request).futureValue
 
       result.successes should have size 2
       result.successes should contain allOf(sourceIds.head, sourceIds.tail.head)
       result.failures shouldBe empty
-      result.jobId shouldBe Some("test-job-001")
+  result.jobId shouldBe "test-job-001"
     }
 
     it("handles mixed success and failure scenarios") {
@@ -86,14 +86,14 @@ class StepFunctionMainTest
         override protected val processor = testProcessor
       }
 
-      val request = StepFunctionMintingRequest(sourceIds, Some("test-job-002"))
+  val request = StepFunctionMintingRequest(sourceIds, "test-job-002")
       val result = testMain.processRequest(request).futureValue
 
       result.successes should have size 1
       result.successes should contain(successfulWork.sourceIdentifier.toString)
       result.failures should have size 1
       result.failures.head.sourceIdentifier shouldBe failedSourceId
-      result.jobId shouldBe Some("test-job-002")
+  result.jobId shouldBe "test-job-002"
     }
 
     it("handles indexing failures") {
@@ -114,14 +114,14 @@ class StepFunctionMainTest
         override protected val processor = testProcessor
       }
 
-      val request = StepFunctionMintingRequest(sourceIds, Some("test-job-003"))
+  val request = StepFunctionMintingRequest(sourceIds, "test-job-003")
       val result = testMain.processRequest(request).futureValue
 
       result.successes should have size 1
       result.successes should contain(successfulWork.sourceIdentifier.toString)
       result.failures should have size 1
       result.failures.head.sourceIdentifier shouldBe failedWork.sourceIdentifier.toString
-      result.jobId shouldBe Some("test-job-003")
+  result.jobId shouldBe "test-job-003"
     }
 
     it("validates input parameters correctly") {
@@ -138,48 +138,33 @@ class StepFunctionMainTest
       }
 
       // Test empty source identifiers
-      val emptyRequest = StepFunctionMintingRequest(List.empty, Some("test-job"))
+  val emptyRequest = StepFunctionMintingRequest(List.empty, "test-job")
       val emptyResult = testMain.processRequest(emptyRequest).futureValue
       
       emptyResult.successes shouldBe empty
       emptyResult.failures should have size 1
       emptyResult.failures.head.error should include("sourceIdentifiers cannot be empty")
 
-      // Test batch size limit
-      val largeRequest = StepFunctionMintingRequest(
-        (1 to 101).map(i => s"sierra-$i").toList,
-        Some("test-job")
-      )
-      val largeResult = testMain.processRequest(largeRequest).futureValue
-      
-      largeResult.successes shouldBe empty
-      largeResult.failures should have size 1
-      largeResult.failures.head.error should include("sourceIdentifiers cannot contain more than 100 items")
+      // Removed: batch size limit validation no longer enforced
     }
 
-    it("handles requests without jobId") {
-      val work = identifiedWork()
-      val sourceIds = List(work.sourceIdentifier.toString)
-      
+    it("fails validation if jobId is empty") {
       val testProcessor = new MintingRequestProcessor(
-        minter = new MockMinter(Seq(Right(work))),
-        workIndexer = new MockIndexer(Right(Seq(work)))
+        minter = new MockMinter(Seq.empty),
+        workIndexer = new MockIndexer(Right(Seq.empty))
       )
 
       val testMain = new IdMinterStepFunctionLambda[TestConfig] {
         override val config: TestConfig = TestConfig()
         override def build(rawConfig: com.typesafe.config.Config): TestConfig = TestConfig()
-        
         override protected val processor = testProcessor
       }
 
-      val request = StepFunctionMintingRequest(sourceIds, None)
+      val request = StepFunctionMintingRequest(List("sierra-1"), "   ")
       val result = testMain.processRequest(request).futureValue
-
-      result.successes should have size 1
-      result.successes should contain(work.sourceIdentifier.toString)
-      result.failures shouldBe empty
-      result.jobId shouldBe None
+      result.successes shouldBe empty
+      result.failures should have size 1
+      result.failures.head.error should include ("jobId cannot be empty")
     }
   }
 }

@@ -36,7 +36,7 @@ class IdMinterStepFunctionFeatureTest
           eventuallyTableExists(identifiersTableConfig)
 
           val sourceIds = List(work.sourceIdentifier.toString)
-          val request = StepFunctionMintingRequest(sourceIds, Some("test-job"))
+          val request = StepFunctionMintingRequest(sourceIds, "test-job")
 
           // Process the same request multiple times
           val results = (1 to 3).map { _ =>
@@ -47,7 +47,7 @@ class IdMinterStepFunctionFeatureTest
           results.foreach { result =>
             result.successes should have size 1
             result.failures shouldBe empty
-            result.jobId shouldBe Some("test-job")
+            result.jobId shouldBe "test-job"
           }
 
           // Verify the work was stored correctly
@@ -72,14 +72,14 @@ class IdMinterStepFunctionFeatureTest
           eventuallyTableExists(identifiersTableConfig)
 
           val sourceIds = List(work.sourceIdentifier.toString)
-          val request = StepFunctionMintingRequest(sourceIds, Some("test-job"))
+          val request = StepFunctionMintingRequest(sourceIds, "test-job")
 
           val result = lambda.processRequest(request).futureValue
 
           result.successes should have size 1
           result.successes should contain(work.sourceIdentifier.toString)
           result.failures shouldBe empty
-          result.jobId shouldBe Some("test-job")
+          result.jobId shouldBe "test-job"
 
           // Verify the work was stored correctly
           outputIndex should have size 1
@@ -101,7 +101,7 @@ class IdMinterStepFunctionFeatureTest
           eventuallyTableExists(identifiersTableConfig)
 
           val sourceIds = List(work.sourceIdentifier.toString)
-          val request = StepFunctionMintingRequest(sourceIds, Some("no-sqs-test"))
+          val request = StepFunctionMintingRequest(sourceIds, "no-sqs-test")
 
           val result = lambda.processRequest(request).futureValue
 
