@@ -3,10 +3,11 @@ from functools import lru_cache
 from typing import cast
 
 from models.events import EntityType
-from sources.base_source import BaseSource
 from utils.ontology import get_extracted_ids, is_id_in_ontology
 from utils.streaming import process_stream_in_parallel
 from utils.types import NodeType, OntologyType, TransformerType
+
+from sources.base_source import BaseSource
 
 from .sparql_client import SPARQL_MAX_PARALLEL_QUERIES, WikidataSparqlClient
 from .sparql_query_builder import SparqlQueryBuilder, WikidataEdgeQueryType
@@ -34,7 +35,7 @@ def _parallelise_sparql_requests(
         run_sparql_query,
         SPARQL_ITEMS_CHUNK_SIZE,
         SPARQL_MAX_PARALLEL_QUERIES,
-    )
+    )   
 
 
 def extract_wikidata_id(item: dict, key: str = "item") -> str | None:
