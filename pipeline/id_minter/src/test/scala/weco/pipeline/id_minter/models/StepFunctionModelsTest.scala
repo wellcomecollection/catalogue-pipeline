@@ -32,13 +32,12 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
         request.validate shouldBe Right(request)
       }
 
-      it("rejects empty sourceIdentifiers") {
+      it("accepts empty sourceIdentifiers (no work to do)") {
         val request = StepFunctionMintingRequest(
           sourceIdentifiers = List.empty,
           jobId = "job-1"
         )
-
-        request.validate shouldBe Left("sourceIdentifiers cannot be empty")
+        request.validate shouldBe Right(request)
       }
 
       it("rejects empty string identifiers") {
