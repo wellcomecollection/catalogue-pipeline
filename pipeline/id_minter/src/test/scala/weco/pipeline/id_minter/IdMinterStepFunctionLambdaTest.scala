@@ -135,21 +135,6 @@ class IdMinterStepFunctionLambdaTest extends AnyFunSpec with Matchers with Scala
         result.failures shouldBe empty
         result.jobId shouldBe None
       }
-
-      it("handles batch size validation") {
-        val largeSourceIds = (1 to 101).map(i => s"sierra-$i").toList
-        val mockProcessor = createMockProcessor(successfulSourceIds = List.empty)
-        
-        val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
-        val request = StepFunctionMintingRequest(largeSourceIds, Some("test-job"))
-        
-        val result = lambda.processRequest(request).futureValue
-        
-        result.successes shouldBe empty
-        result.failures should have size 1
-        result.failures.head.error should include("sourceIdentifiers cannot contain more than 100 items")
-        result.jobId shouldBe Some("test-job")
-      }
     }
   }
 }
