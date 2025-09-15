@@ -49,15 +49,15 @@ trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
             )
           )
         } else {
-        // Process using the existing MintingRequestProcessor
-        processor.process(validInput.sourceIdentifiers).map {
-          mintingResponse =>
-            StepFunctionMintingResponse.fromMintingResponse(
-              mintingResponse,
-              validInput.sourceIdentifiers,
-              validInput.jobId
-            )
-        }
+          // Process using the existing MintingRequestProcessor
+          processor.process(validInput.sourceIdentifiers).map {
+            mintingResponse =>
+              StepFunctionMintingResponse.fromMintingResponse(
+                mintingResponse,
+                validInput.sourceIdentifiers,
+                validInput.jobId
+              )
+          }
         }
     }
   }
