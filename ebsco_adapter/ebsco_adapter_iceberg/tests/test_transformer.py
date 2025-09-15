@@ -1,6 +1,6 @@
 import json
 from contextlib import suppress  # for ruff SIM105 fix
-from typing import cast  # added for dummy ES client
+from typing import Any, cast  # added for dummy ES client
 
 import pyarrow as pa
 import pytest
@@ -119,7 +119,7 @@ def test_transformer_short_circuit_when_prior_processed_detected(
         changeset_id="new-change-456", job_id="20250101T1200", file_location=file_uri
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
+        is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
 
     # Run handler
@@ -146,11 +146,11 @@ def test_transformer_end_to_end_with_local_table(
     assert result.batch_file_location is not None
     assert result.success_count == 2
     assert result.failure_count == 0
-    # Validate file contents written to mock S3
+    # Validate file contents written to mock S3 (NDJSON)
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    assert data == [list(records_by_id.keys())]
+        lines = [json.loads(line) for line in f if line.strip()]
+    assert lines == [{"ids": list(records_by_id.keys())}]
     titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
@@ -172,8 +172,8 @@ def test_transformer_creates_deletedwork_for_empty_content(
     assert result.success_count == 2
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    assert data == [["ebsDel001", "ebsDel002"]]
+        lines = [json.loads(line) for line in f if line.strip()]
+    assert lines == [{"ids": ["ebsDel001", "ebsDel002"]}]
     deleted_docs = [
         op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel001"
     ]
@@ -210,12 +210,12 @@ def test_transformer_full_retransform_when_no_changeset(
     assert result.failure_count == 0
     assert result.success_count == 2
     assert result.batch_file_location is not None
-    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.json"
+    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
     assert result.batch_file_location == expected_reindex_path
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    assert data == [["ebsFull001", "ebsFull002"]]
+        lines = [json.loads(line) for line in f if line.strip()]
+    assert lines == [{"ids": ["ebsFull001", "ebsFull002"]}]
 
 
 def test_transformer_batch_file_location_with_changeset(
@@ -233,17 +233,17 @@ def test_transformer_batch_file_location_with_changeset(
         job_id=job_id,
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
+        is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
     result = handler(event=event, config_obj=config)
 
-    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.json"
+    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
     assert result.batch_file_location == expected_path
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
-        data = json.loads(f.read())
-    # Only one batch with a single id
-    assert len(data) == 1 and len(data[0]) == 1
+        lines = [json.loads(line) for line in f if line.strip()]
+    # Only one batch line with a single id
+    assert len(lines) == 1 and len(lines[0]["ids"]) == 1
 
 
 @pytest.mark.parametrize(
@@ -286,7 +286,7 @@ def test_transformer_index_name_selection(
     )
     config = EbscoAdapterTransformerConfig(
         is_local=True,
-        use_glue_table=False,
+        use_rest_api_table=False,
         pipeline_date=pipeline_date,
         index_date=config_index_date,
     )
@@ -405,7 +405,7 @@ def test_transformer_raises_when_batch_file_write_fails(
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_glue_table=False, pipeline_date="dev"
+        is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
 
     with pytest.raises(OSError, match="simulated write failure"):

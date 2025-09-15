@@ -21,8 +21,6 @@ class TestRecordProcessedFile:
         patch("utils.tracking.smart_open.open").stop()
 
     def test_record_processed_file(self) -> None:
-        from models.step_events import EbscoAdapterTransformerEvent
-
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
         event = EbscoAdapterTransformerEvent(
@@ -55,7 +53,6 @@ class TestIsFileAlreadyProcessed:
 
     def test_file_already_processed(self) -> None:
         file_location = "s3://test-bucket/dev/ftp_v2/existing-file.xml"
-        from models.step_events import EbscoAdapterTransformerEvent
 
         prior_event = EbscoAdapterTransformerEvent(
             job_id="jid", file_location=file_location, changeset_id="cid"

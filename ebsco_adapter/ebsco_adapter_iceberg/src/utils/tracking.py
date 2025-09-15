@@ -45,7 +45,7 @@ def record_processed_file(
 
 
 def is_file_already_processed(
-    file_location: str, step: str = "loaded"
+    file_location: str, step: str
 ) -> ProcessedFileRecord | None:
     """Return the stored ``ProcessedFileRecord`` for a step if this file was processed.
 

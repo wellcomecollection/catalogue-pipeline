@@ -134,9 +134,10 @@ class TestSyncFiles:
         ]
 
         # Patch smart_open to raise on write
-        with patch(
-            "steps.trigger.smart_open.open", side_effect=OSError("Denied")
-        ), pytest.raises(RuntimeError, match="Denied"):
+        with (
+            patch("steps.trigger.smart_open.open", side_effect=OSError("Denied")),
+            pytest.raises(RuntimeError, match="Denied"),
+        ):
             sync_files(
                 ebsco_ftp=self.mock_ebsco_ftp,
                 target_directory=self.target_directory,

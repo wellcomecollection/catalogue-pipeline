@@ -43,6 +43,36 @@ data "aws_iam_policy_document" "iceberg_write" {
   }
 }
 
+# Read-only policy (no mutations): list & read table and data objects
+data "aws_iam_policy_document" "iceberg_read" {
+  statement {
+    actions = [
+      "s3tables:GetNamespace",
+      "s3tables:ListNamespaces",
+      "s3tables:ListTables",
+      "s3tables:GetTableBucket",
+      "s3tables:GetTableMetadataLocation",
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
+    ]
+  }
+
+  statement {
+    actions = [
+      "s3tables:GetTableMetadataLocation",
+      "s3tables:ListTables",
+      "s3tables:GetTable",
+      "s3tables:GetTableData",
+      "s3tables:UpdateTableMetadataLocation"
+    ]
+    resources = [
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
+    ]
+  }
+}
+
 # Policy for reading from the EBSCO adapter S3 bucket
 data "aws_iam_policy_document" "s3_read" {
   statement {
