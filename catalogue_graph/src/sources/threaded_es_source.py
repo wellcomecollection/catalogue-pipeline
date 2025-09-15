@@ -1,8 +1,8 @@
 import time
 from collections.abc import Generator
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import timedelta
 from queue import Queue
+from threading import Thread
 from typing import Any
 
 import config
@@ -12,7 +12,7 @@ from utils.elasticsearch import get_client, get_standard_index_name
 from sources.base_source import BaseSource
 
 ES_BATCH_SIZE = 2000
-NUM_SLICES = 15
+NUM_SLICES = 30
 
 
 def build_merged_index_query(query: dict | None, window: IncrementalWindow | None, i: int) -> dict:
@@ -55,7 +55,6 @@ class ThreadedElasticsearchSource(BaseSource):
         self.window = window
         self.fields = fields
         self.query = query
-        
         index_name = get_standard_index_name(
             config.ES_DENORMALISED_INDEX_NAME, pipeline_date
         )
@@ -77,7 +76,7 @@ class ThreadedElasticsearchSource(BaseSource):
             body["_source"] = self.fields
         if search_after is not None:
             body["search_after"] = search_after
-        
+
         start_time = time.time()
         hits = self.es_client.search(body=body)["hits"]["hits"]
         duration = round(time.time() - start_time)
@@ -85,29 +84,37 @@ class ThreadedElasticsearchSource(BaseSource):
         print(
             f"Ran Elasticsearch query (slice {slice_index}) in {duration} seconds, retrieving {len(hits)} records."
         )
-            
+
         return hits
-    
+
     def worker_target(self, slice_index: int, queue: Queue) -> None:
         raise NotImplementedError()
 
+    def run_worker(self, slice_index: int, queue: Queue):
+        # Run threads as daemons so that they automatically exit when the main thread throws an exception.
+        # See https://docs.python.org/3/library/threading.html for more info.
+        t = Thread(target=self.worker_target, args=(slice_index, queue), daemon=True)
+        t.start()
+
     def stream_raw(self) -> Generator[Any]:
         queue: Queue = Queue(maxsize=ES_BATCH_SIZE)
-        
+
+        counter = 0
+        # Extract documents in parallel, with all threads adding resulting documents to the same queue
+        for i in range(self.parallelism):
+            self.run_worker(i, queue)
+            counter += 1
+
         done_signals = 0
-        with ThreadPoolExecutor(max_workers=self.parallelism) as executor:
-            futures = [executor.submit(self.worker_target, i, queue) for i in range(NUM_SLICES)]
-    
-            # Consume results from queue while workers are running
-            while done_signals < NUM_SLICES:
-                item = queue.get()
-                if item is None:
-                    done_signals += 1
-                else:
-                    yield item
-    
-            # Ensure all futures finish / propagate errors
-            for f in as_completed(futures):
-                f.result()
+        while done_signals < self.parallelism:
+            item = queue.get()
+            if item is None:
+                done_signals += 1
+
+                if counter < NUM_SLICES:
+                    self.run_worker(counter, queue)
+                    counter += 1
+            else:
+                yield item
 
         self.es_client.close_point_in_time(body={"id": self.pit_id})

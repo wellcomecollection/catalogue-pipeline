@@ -11,16 +11,23 @@ from pydantic import BaseModel
 from utils.arrow import pydantic_to_pyarrow_schema
 from utils.types import IngestorLoadFormat
 
-from ingestor.extractors.base_extractor import GraphBaseExtractor
 from ingestor.steps.ingestor_indexer import IngestorIndexerObject
 
 S3_BATCH_SIZE = 10_000 
 
+
+
+class BaseExtractor:
+    def extract_raw(self) -> Generator[Any]:
+        """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
+        raise NotImplementedError(
+            "Each extractor must implement an `extract_raw` method."
+        )
+
+
 class ElasticsearchBaseTransformer:
     def __init__(self, start_offset: int, end_index: int, is_local: bool) -> None:
-        self.source: GraphBaseExtractor = GraphBaseExtractor(
-            start_offset, end_index, is_local
-        )
+        self.source: BaseExtractor
 
     def transform_document(self, raw_document: Any) -> BaseModel | None:
         """
@@ -81,7 +88,7 @@ class ElasticsearchBaseTransformer:
             print(f"{record_count} items loaded to '{s3_uri}'.")
 
     def load_documents_to_local_file(
-        self, file_name: str, load_format: IngestorLoadFormat
+            self, file_name: str, load_format: IngestorLoadFormat
     ) -> str:
         """Load transformed documents into a local JSONL file for testing purposes."""
         file_path = f"../ingestor_outputs/{file_name}.{load_format}"

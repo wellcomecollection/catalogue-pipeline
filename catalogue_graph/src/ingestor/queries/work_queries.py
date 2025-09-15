@@ -1,7 +1,6 @@
 WORK_ANCESTORS_QUERY = """
         UNWIND $ids AS id
-        MATCH (work:Work {id: id})
-        WITH work ORDER BY id(work)
+        MATCH (work:Work {`~id`: id})
 
         MATCH (work)-[:HAS_PATH_IDENTIFIER]->(identifier)
         MATCH path = (identifier)-[:HAS_PARENT*]->(ancestor_identifier)
@@ -16,8 +15,7 @@ WORK_ANCESTORS_QUERY = """
 
 WORK_CHILDREN_QUERY = """
         UNWIND $ids AS id
-        MATCH (work:Work {id: id})
-        WITH work ORDER BY id(work)
+        MATCH (work:Work {`~id`: id})
 
         MATCH (work)-[:HAS_PATH_IDENTIFIER]->(identifier)
         MATCH (identifier)<-[:HAS_PARENT]-(child_identifier)<-[:HAS_PATH_IDENTIFIER]-(child_work)
@@ -29,8 +27,7 @@ WORK_CHILDREN_QUERY = """
 
 WORK_CONCEPTS_QUERY = """
         UNWIND $ids AS id
-        MATCH (work:Work {id: id})
-        WITH work ORDER BY id(work)
+        MATCH (work:Work {`~id`: id})
         
         MATCH (work)-[:HAS_CONCEPT]->(concept)
         OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)

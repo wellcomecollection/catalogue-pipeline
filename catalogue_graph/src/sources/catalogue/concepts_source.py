@@ -1,9 +1,10 @@
 from collections.abc import Generator
 
 from models.events import IncrementalWindow
-from sources.base_source import BaseSource
-from sources.elasticsearch_source import MergedWorksSource
 from utils.types import WorkConceptKey
+
+from sources.base_source import BaseSource
+from sources.catalogue.merged_works_source import MergedWorksSource
 
 
 def extract_concepts_from_work(

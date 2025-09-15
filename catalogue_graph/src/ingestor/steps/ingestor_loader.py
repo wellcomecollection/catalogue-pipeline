@@ -27,7 +27,7 @@ def create_transformer(
 ) -> ElasticsearchBaseTransformer:
     if event.ingestor_type == "concepts":
         return ElasticsearchConceptsTransformer(
-            event.start_offset, event.end_index, config.is_local
+            event.pipeline_date, event.window, config.is_local
         )
     if event.ingestor_type == "works":
         return ElasticsearchWorksTransformer(
