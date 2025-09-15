@@ -1,45 +1,68 @@
-import sys
-import requests
-import json
-import uuid
+"""Send a Step Function-style request to the locally running id-minter lambda.
 
+Simplified version: reads ONLY newline-separated source identifiers from STDIN
+and posts a single JSON object to the local lambda runtime API on port 9000.
 
-def format_message(source_id):
-    return {
-        "messageId": str(uuid.uuid1()),
-        "receiptHandle": "MessageReceiptHandle",
-        "body": json.dumps(
-            {
-                "Type": "Notification",
-                "MessageId": str(uuid.uuid1()),
-                "TopicArn": "arn:aws:sns:eu-west-1:999999999999:my_upstream_topic",
-                "Subject": "Sent from the transformer",
-                "Message": source_id,
-                "Timestamp": "2024-11-06T10:50:43.532Z",
-                "SignatureVersion": "1",
-                "Signature": "BigLoadOfBase64==",
-                "SigningCertURL": "https://sns.eu-west-1.amazonaws.com/Its_Me-Honest_It_Is.pem",
-                "UnsubscribeURL": "https://sns.eu-west-1.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:eu-west-1:999999999999:my_upstream_topic",
-            }
-        ),
-        "attributes": {
-            "ApproximateReceiveCount": "1",
-            "SentTimestamp": "0",
-            "SenderId": "123456789012",
-            "ApproximateFirstReceiveTimestamp": "1",
-        },
-        "messageAttributes": {},
-        "md5OfBody": "no one cares",
-        "eventSource": "aws:sqs",
-        "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
-        "awsRegion": "mars-north-1",
+Expected payload shape:
+    {
+        "sourceIdentifiers": ["id1", "id2", ...],
+        "jobId": "local-<uuid>"
     }
 
+Usage:
+    # Install deps (from this directory) with uv:
+    #   uv sync
+    # Run:
+    cat source_ids.txt | uv run post_to_rie.py
 
-payload = {
-    "Records": [format_message(source_id) for source_id in sys.stdin.readlines()]
-}
-requests.post(
-    "http://localhost:9000/2015-03-31/functions/function/invocations",
-    data=json.dumps(payload),
-)
+If run without piped input, the script exits with an error.
+
+Note: Duplicate source identifiers are preserved (useful for testing error /
+idempotency scenarios).
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import uuid
+from typing import List
+
+import requests
+
+DEFAULT_URL = "http://localhost:9000/2015-03-31/functions/function/invocations"
+
+
+def read_stdin_source_ids() -> List[str]:
+    if sys.stdin.isatty():
+        print("Expected newline-separated source IDs on stdin", file=sys.stderr)
+        sys.exit(1)
+    return [line.strip() for line in sys.stdin if line.strip()]
+
+
+def build_payload(source_ids: List[str]) -> dict:
+    return {"sourceIdentifiers": source_ids, "jobId": f"local-{uuid.uuid4()}"}
+
+
+def main():
+    source_ids = read_stdin_source_ids()
+    if not source_ids:
+        print("No source identifiers provided on stdin. Nothing to do.", file=sys.stderr)
+        sys.exit(1)
+
+    payload = build_payload(source_ids)
+    data = json.dumps(payload)
+
+    resp = requests.post(DEFAULT_URL, data=data, headers={"Content-Type": "application/json"})
+    try:
+        resp.raise_for_status()
+    except Exception as e:  # pragma: no cover - simple debug output
+        print(f"Request failed: {e}\nStatus: {resp.status_code}\nBody: {resp.text}", file=sys.stderr)
+        sys.exit(2)
+
+    # Print the lambda response (already JSON)
+    print(resp.text)
+
+
+if __name__ == "__main__":  # pragma: no cover
+    main()
