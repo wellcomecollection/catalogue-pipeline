@@ -11,9 +11,12 @@ import org.scalatestplus.mockito.MockitoSugar
 
 import scala.concurrent.{Future, Promise, TimeoutException}
 import scala.concurrent.duration._
-import JavaMapJsonCodec.{jsonToJavaMap, javaMapToJson}
+import JavaMapJsonCodec.{javaMapToJson, jsonToJavaMap}
 
-class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSugar {
+class StepFunctionLambdaAppTest
+    extends AnyFunSpec
+    with Matchers
+    with MockitoSugar {
 
   case class TestInput(message: String, value: Int)
   case class TestOutput(result: String, processed: Boolean)
@@ -30,16 +33,17 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
   }
 
   class TestStepFunctionLambdaApp(
-    processResult: Future[TestOutput] = Future.successful(TestOutput("success", true)),
+    processResult: Future[TestOutput] =
+      Future.successful(TestOutput("success", true)),
     timeout: FiniteDuration = 15.minutes
   ) extends StepFunctionLambdaApp[TestInput, TestOutput, TestConfig] {
-    
+
     import com.typesafe.config.Config
-    
+
     override protected val maximumExecutionTime: FiniteDuration = timeout
-    
+
     override val config: TestConfig = TestConfig()
-    
+
     override def build(rawConfig: Config): TestConfig = TestConfig()
 
     override def processRequest(input: TestInput): Future[TestOutput] = {
@@ -57,17 +61,17 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
 
     describe("handleRequest") {
       it("processes successful requests") {
-            val input = TestInput("test", 42)
-            val expectedOutput = TestOutput("processed: test-42", true)
+        val input = TestInput("test", 42)
+        val expectedOutput = TestOutput("processed: test-42", true)
 
-            val app = new TestStepFunctionLambdaApp(
-              processResult = Future.successful(expectedOutput)
-            )
+        val app = new TestStepFunctionLambdaApp(
+          processResult = Future.successful(expectedOutput)
+        )
 
-            val mapIn = jsonToJavaMap(input.asJson)
-            val mapOut = app.handleRequest(mapIn, mockContext)
-            val jsonOut = javaMapToJson(mapOut)
-            jsonOut.as[TestOutput].right.get shouldBe expectedOutput
+        val mapIn = jsonToJavaMap(input.asJson)
+        val mapOut = app.handleRequest(mapIn, mockContext)
+        val jsonOut = javaMapToJson(mapOut)
+        jsonOut.as[TestOutput].right.get shouldBe expectedOutput
       }
 
       it("handles processing failures") {
@@ -76,8 +80,10 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
         val app = new TestStepFunctionLambdaApp(
           processResult = Future.failed(exception)
         )
-            val mapIn = jsonToJavaMap(input.asJson)
-            val thrown = intercept[RuntimeException] { app.handleRequest(mapIn, mockContext) }
+        val mapIn = jsonToJavaMap(input.asJson)
+        val thrown = intercept[RuntimeException] {
+          app.handleRequest(mapIn, mockContext)
+        }
         thrown.getMessage shouldBe "Processing failed"
       }
 
@@ -89,8 +95,8 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
           processResult = neverCompletingFuture,
           timeout = 100.millis
         )
-            val mapIn = jsonToJavaMap(input.asJson)
-            intercept[TimeoutException] { app.handleRequest(mapIn, mockContext) }
+        val mapIn = jsonToJavaMap(input.asJson)
+        intercept[TimeoutException] { app.handleRequest(mapIn, mockContext) }
       }
 
       it("handles execution exceptions") {
@@ -99,8 +105,10 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
         val app = new TestStepFunctionLambdaApp(
           processResult = Future.failed(exception)
         )
-            val mapIn = jsonToJavaMap(input.asJson)
-            val thrown = intercept[IllegalArgumentException] { app.handleRequest(mapIn, mockContext) }
+        val mapIn = jsonToJavaMap(input.asJson)
+        val thrown = intercept[IllegalArgumentException] {
+          app.handleRequest(mapIn, mockContext)
+        }
         thrown.getMessage shouldBe "Invalid input"
       }
 
@@ -110,29 +118,36 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
         val app = new TestStepFunctionLambdaApp(
           processResult = Future.successful(expectedOutput)
         )
-            val mapIn = jsonToJavaMap(input.asJson)
-            val mapOut = app.handleRequest(mapIn, mockContext)
-            val jsonOut = javaMapToJson(mapOut)
-            jsonOut.as[TestOutput].right.get shouldBe expectedOutput
+        val mapIn = jsonToJavaMap(input.asJson)
+        val mapOut = app.handleRequest(mapIn, mockContext)
+        val jsonOut = javaMapToJson(mapOut)
+        jsonOut.as[TestOutput].right.get shouldBe expectedOutput
       }
 
       it("fails on invalid JSON input") {
         val app = new TestStepFunctionLambdaApp()
-    // Build a malformed structure by forcing a value that will not decode to TestInput
-            // For TestInput(message: String, value: Int) supply a map missing fields
-            val badMap = new java.util.LinkedHashMap[String, AnyRef]()
-            badMap.put("unexpected", "field")
-            val thrown = intercept[RuntimeException] { app.handleRequest(badMap, mockContext) }
-            thrown.getMessage should include ("Failed to decode input")
+        // Build a malformed structure by forcing a value that will not decode to TestInput
+        // For TestInput(message: String, value: Int) supply a map missing fields
+        val badMap = new java.util.LinkedHashMap[String, AnyRef]()
+        badMap.put("unexpected", "field")
+        val thrown = intercept[RuntimeException] {
+          app.handleRequest(badMap, mockContext)
+        }
+        thrown.getMessage should include("Failed to decode input")
       }
 
       it("fails on structurally incorrect JSON") {
         // Missing required fields for TestInput (message, value)
         val app = new TestStepFunctionLambdaApp()
-            val wrongTypeMap = new java.util.LinkedHashMap[String, AnyRef]()
-            wrongTypeMap.put("message", Int.box(123)) // wrong type for message (expects String)
-            val thrown = intercept[RuntimeException] { app.handleRequest(wrongTypeMap, mockContext) }
-        thrown.getMessage should include ("Failed to decode input")
+        val wrongTypeMap = new java.util.LinkedHashMap[String, AnyRef]()
+        wrongTypeMap.put(
+          "message",
+          Int.box(123)
+        ) // wrong type for message (expects String)
+        val thrown = intercept[RuntimeException] {
+          app.handleRequest(wrongTypeMap, mockContext)
+        }
+        thrown.getMessage should include("Failed to decode input")
       }
     }
 
