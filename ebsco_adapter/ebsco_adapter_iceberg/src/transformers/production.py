@@ -16,6 +16,13 @@ def extract_production_from_fields(fields: Iterable[Field]):
             if production is not None and production.label]
 
 
+def extract_production_from_008(field: str):
+    pass
+
+
+#    cat 008s | sed -rn 's/.*>(.*)<\/controlfield>/\1/p' | sort | uniq | sed -rn 's/.{15}(...).*/\1/p' | sort | uniq
+
+
 IND2_264_MAP = {
     "0": "Production",
     "1": "Publication",
