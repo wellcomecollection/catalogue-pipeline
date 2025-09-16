@@ -3,8 +3,9 @@ package weco.lambda
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import grizzled.slf4j.Logging
 import io.circe.{Decoder, Encoder}
+import io.circe.parser.decode
+import io.circe.syntax._
 import org.apache.pekko.actor.ActorSystem
-
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -33,7 +34,7 @@ abstract class StepFunctionLambdaApp[
   implicit val inputDecoder: Decoder[InputType],
   implicit val outputEncoder: Encoder[OutputType],
   val ct: ClassTag[InputType]
-) extends RequestHandler[InputType, OutputType]
+) extends RequestHandler[String, String]
     with LambdaConfigurable[Config]
     with Logging {
 
@@ -57,50 +58,58 @@ abstract class StepFunctionLambdaApp[
     */
   def processRequest(input: InputType): Future[OutputType]
 
-  /** AWS Lambda entry point.
+  /** AWS Lambda entry point handling raw JSON input/output.
     *
-    * This method handles the Lambda invocation lifecycle:
-    *   1. Validates input (already parsed by AWS Lambda runtime) 2. Calls
-    *      processRequest with the input 3. Waits for the result within the
-    *      timeout 4. Returns the output or throws an exception
-    *
-    * @param input
-    *   The input payload (already parsed from JSON by AWS Lambda runtime)
-    * @param context
-    *   The Lambda context
-    * @return
-    *   The output response
+    * Lifecycle:
+    *   1. Decode raw JSON string into InputType using an implicit Decoder
+    *   2. Invoke processRequest with parsed input
+    *   3. Await result (bounded by maximumExecutionTime)
+    *   4. Encode OutputType to JSON string using an implicit Encoder
+    *   5. Return JSON string or fail with an exception (causing Step Function task failure)
     */
   override def handleRequest(
-    input: InputType,
+    input: String,
     context: Context
-  ): OutputType = {
+  ): String = {
     info(
-      s"Processing Step Function request with input type: ${ct.runtimeClass.getSimpleName}"
+      s"Processing Step Function request; expected input type: ${ct.runtimeClass.getSimpleName}"
     )
     debug(
       s"Lambda context - request ID: ${context.getAwsRequestId}, remaining time: ${context.getRemainingTimeInMillis}ms"
     )
 
-    Try {
+    // Step 1: Decode JSON
+    val parsedInput: InputType = decode[InputType](input) match {
+      case Left(err) =>
+        error(s"Failed to decode input JSON: ${err.getMessage}")
+        throw new RuntimeException(s"Failed to decode input: ${err.getMessage}", err)
+      case Right(value) => value
+    }
+
+    // Step 2 & 3: Process with timeout & error handling
+    val output: OutputType = Try {
       Await.result(
-        processRequest(input).recover {
-          case ex: Exception =>
-            error(
-              s"Error processing Step Function request: ${ex.getMessage}",
-              ex
-            )
-            throw ex
+        processRequest(parsedInput).recover { case ex: Exception =>
+          error(s"Error processing Step Function request: ${ex.getMessage}", ex)
+          throw ex
         },
         maximumExecutionTime
       )
     } match {
-      case Success(output) =>
+      case Success(o) =>
         info("Successfully processed Step Function request")
-        output
+        o
       case Failure(ex) =>
         error(s"Failed to process Step Function request: ${ex.getMessage}", ex)
         throw ex
+    }
+
+    // Step 4: Encode output
+    Try(output.asJson.noSpaces) match {
+      case Success(json) => json
+      case Failure(err) =>
+        error(s"Failed to encode output: ${err.getMessage}", err)
+        throw new RuntimeException(s"Failed to encode output: ${err.getMessage}", err)
     }
   }
 }
