@@ -441,3 +441,75 @@ def test_get_records_by_changeset(temporary_table: IcebergTable) -> None:
     # Test retrieving with a non-existent changeset ID returns empty result
     empty_result = client.get_records_by_changeset("non-existent-changeset")
     assert empty_result.num_rows == 0
+
+
+def test_get_all_records_empty(temporary_table: IcebergTable) -> None:
+    """When the table is empty, get_all_records returns an empty Arrow table."""
+    client = IcebergTableClient(temporary_table)
+    all_records = client.get_all_records()
+    assert all_records.num_rows == 0
+
+
+def test_get_all_records_after_update(temporary_table: IcebergTable) -> None:
+    """After update, default get_all_records excludes deleted rows."""
+    # Initial data
+    temporary_table.append(
+        data_to_namespaced_table(
+            [
+                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0002", "content": "byebye"},
+                {"id": "eb0003", "content": "greetings"},
+            ]
+        )
+    )
+
+    # New data deletes eb0002 (by absence), updates eb0003, inserts eb0004, leaves eb0001 unchanged
+    new_data = data_to_namespaced_table(
+        [
+            {"id": "eb0001", "content": "hello"},
+            {"id": "eb0003", "content": "god aften"},
+            {"id": "eb0004", "content": "noswaith dda"},
+        ]
+    )
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.update(new_data, "ebsco_test")
+    assert changeset_id is not None
+
+    # get_all_records should EXCLUDE deleted by default -> eb0002 gone
+    all_records = client.get_all_records()
+    assert all_records.num_rows == 3
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+    assert set(rows.keys()) == {"eb0001", "eb0003", "eb0004"}
+    assert rows["eb0003"]["content"] == "god aften"  # updated
+    assert rows["eb0004"]["content"] == "noswaith dda"  # inserted
+    assert rows["eb0001"]["content"] == "hello"  # unchanged
+
+
+def test_get_all_records_include_deleted_after_update(
+    temporary_table: IcebergTable,
+) -> None:
+    """With include_deleted=True the deleted rows are present."""
+    temporary_table.append(
+        data_to_namespaced_table(
+            [
+                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0002", "content": "byebye"},
+                {"id": "eb0003", "content": "greetings"},
+            ]
+        )
+    )
+    new_data = data_to_namespaced_table(
+        [
+            {"id": "eb0001", "content": "hello"},
+            {"id": "eb0003", "content": "god aften"},
+            {"id": "eb0004", "content": "noswaith dda"},
+        ]
+    )
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.update(new_data, "ebsco_test")
+    assert changeset_id is not None
+    all_with_deleted = client.get_all_records(include_deleted=True)
+    assert all_with_deleted.num_rows == 4
+    rows = {row["id"]: row for row in all_with_deleted.to_pylist()}
+    assert set(rows.keys()) == {"eb0001", "eb0002", "eb0003", "eb0004"}
+    assert rows["eb0002"]["content"] is None  # deleted present

@@ -1,7 +1,7 @@
 from typing import TypedDict
 
 from sources.catalogue.concepts_source import extract_concepts_from_work
-from utils.types import ConceptType, WorkConceptKey, WorkType
+from utils.types import ConceptType, DisplayWorkType, WorkConceptKey
 
 from .raw_concept import RawCatalogueConcept
 
@@ -29,11 +29,13 @@ class RawCatalogueWork:
         return label
 
     @property
-    def type(self) -> WorkType:
+    def type(self) -> DisplayWorkType:
         raw_work_type = self.work_data["workType"]
 
         # Replace the type 'Standard' (used in the denormalised index) with type 'Work' (used in the final index).
-        work_type: WorkType = "Work" if raw_work_type == "Standard" else raw_work_type
+        work_type: DisplayWorkType = (
+            "Work" if raw_work_type == "Standard" else raw_work_type
+        )
         return work_type
 
     @property
@@ -90,6 +92,15 @@ class RawCatalogueWork:
         # A small number of works have a trailing slash in their collection path which must be removed
         # to correctly extract parent path identifiers
         return self.raw_path.rstrip("/")
+
+    @property
+    def path_label(self) -> str | None:
+        label: str | None = self.work_data.get("collectionPath", {}).get("label")
+
+        if label is None or len(label) == 0:
+            return None
+
+        return label
 
     @property
     def path_identifier(self) -> str | None:

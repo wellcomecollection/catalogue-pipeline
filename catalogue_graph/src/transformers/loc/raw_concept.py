@@ -35,6 +35,7 @@ class RawLibraryOfCongressConcept:
     def __init__(self, raw_concept: dict):
         self.raw_concept = raw_concept
         self._raw_concept_node = self._extract_concept_node()
+        self._field_of_activity_node = self._extract_field_of_activity_node()
 
     def _extract_concept_node(self) -> dict | None:
         graph: list[dict] = self.raw_concept.get("@graph", [])
@@ -54,6 +55,17 @@ class RawLibraryOfCongressConcept:
             ):
                 return node
 
+        return None
+
+    def _extract_field_of_activity_node(self) -> dict | None:
+        graph: list[dict] = self.raw_concept.get("@graph", [])
+
+        if extract_source_id(self.raw_concept) is None:
+            return None
+
+        for node in graph:
+            if "madsrdf:fieldOfActivity" in node:
+                return node
         return None
 
     @property
@@ -136,6 +148,16 @@ class RawLibraryOfCongressConcept:
             self._raw_concept_node.get("madsrdf:hasReciprocalAuthority", [])
         )
         return extract_source_ids(raw_related_ids)
+
+    @property
+    def has_field_of_activity_ids(self) -> list[str]:
+        """Returns a list of IDs representing fields of activity in which the current concept is involved."""
+        if self._field_of_activity_node is not None:
+            raw_field_of_activity_ids = _as_list(
+                self._field_of_activity_node.get("madsrdf:fieldOfActivity", [])
+            )
+            return extract_source_ids(raw_field_of_activity_ids)
+        return []
 
     @staticmethod
     def _extract_value(dict_or_str: str | dict[str, str]) -> str:

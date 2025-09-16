@@ -2,7 +2,7 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, StringConstraints
 
-from utils.types import ConceptSource, WorkType
+from utils.types import ConceptSource, DisplayWorkType
 
 # Matches a Wikidata date, such as 1976-01-01T00:00:00Z or -0005-12-12T00:00:00Z
 WIKIDATA_DATE_PATTERN = r"-?\d\d\d\d-\d\d-\d\dT\d\d:\d\d:\d\dZ"
@@ -46,9 +46,11 @@ class Concept(BaseNode):
 
 
 class Work(BaseNode):
-    type: WorkType
+    type: DisplayWorkType
     alternative_labels: list[str] = []
     reference_number: str | None = None
+    collection_path: str | None = None
+    collection_path_label: str | None = None
 
 
 class PathIdentifier(BaseNode):

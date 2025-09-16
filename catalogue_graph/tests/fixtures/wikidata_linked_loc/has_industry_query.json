@@ -1,0 +1,4 @@
+{
+  "format": "json",
+  "query": "SELECT DISTINCT ?fromItem ?toItem WHERE { VALUES ?fromItem { wd:Q1 wd:Q100 wd:Q101 wd:Q2 } ?fromItem wdt:P452 ?toItem. FILTER (!wikibase:isSomeValue(?toItem)) }"
+}

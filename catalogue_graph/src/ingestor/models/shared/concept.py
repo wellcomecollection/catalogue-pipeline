@@ -24,6 +24,10 @@ class Concept(BaseModel):
 
         return value
 
+    @property
+    def normalised_label(self) -> str:
+        return self.label.removesuffix(".")
+
 
 class Contributor(BaseModel):
     agent: Concept
@@ -33,6 +37,7 @@ class Contributor(BaseModel):
 
 class Subject(Concept):
     concepts: list[Concept]
+    type: ConceptType = "Subject"
 
 
 class Genre(BaseModel):

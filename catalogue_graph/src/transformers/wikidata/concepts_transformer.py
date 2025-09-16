@@ -2,6 +2,8 @@ from collections.abc import Generator
 
 from models.graph_edge import (
     BaseEdge,
+    SourceConceptHasFieldOfWork,
+    SourceConceptHasFounder,
     SourceConceptHasParent,
     SourceConceptSameAs,
     SourceConceptSameAsAttributes,
@@ -36,23 +38,36 @@ class WikidataConceptsTransformer(BaseTransformer):
             description=raw_concept.description,
         )
 
-    def extract_edges(self, raw_edge: dict) -> Generator[BaseEdge]:
-        if raw_edge["type"] == "SAME_AS":
+    def extract_edges(self, raw_node: dict) -> Generator[BaseEdge]:
+        if raw_node["type"] == "SAME_AS":
             edge_attributes = SourceConceptSameAsAttributes(source="wikidata")
             yield SourceConceptSameAs(
-                from_id=raw_edge["from_id"],
-                to_id=raw_edge["to_id"],
+                from_id=raw_node["from_id"],
+                to_id=raw_node["to_id"],
                 attributes=edge_attributes,
             )
             yield SourceConceptSameAs(
-                from_id=raw_edge["to_id"],
-                to_id=raw_edge["from_id"],
+                from_id=raw_node["to_id"],
+                to_id=raw_node["from_id"],
                 attributes=edge_attributes,
             )
-        elif raw_edge["type"] == "HAS_PARENT":
+        elif raw_node["type"] == "HAS_PARENT":
             yield SourceConceptHasParent(
-                from_id=raw_edge["from_id"],
-                to_id=raw_edge["to_id"],
+                from_id=raw_node["from_id"],
+                to_id=raw_node["to_id"],
+            )
+        elif raw_node["type"] == "HAS_FOUNDER":
+            yield SourceConceptHasFounder(
+                from_id=raw_node["from_id"],
+                to_id=raw_node["to_id"],
+            )
+        elif (
+            raw_node["type"] == "HAS_INDUSTRY"
+            or raw_node["type"] == "HAS_FIELD_OF_WORK"
+        ):
+            yield SourceConceptHasFieldOfWork(
+                from_id=raw_node["from_id"],
+                to_id=raw_node["to_id"],
             )
         else:
-            raise ValueError(f"Unknown edge type {raw_edge['type']}")
+            raise ValueError(f"Unknown edge type {raw_node['type']}")
