@@ -2,11 +2,11 @@ package weco.lambda
 
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import grizzled.slf4j.Logging
-import io.circe.{Decoder, Encoder, Json, JsonObject}
+import io.circe.{Decoder, Encoder, Json}
 import io.circe.syntax._
 import org.apache.pekko.actor.ActorSystem
 
-import scala.collection.JavaConverters._
+import weco.lambda.JavaMapJsonCodec._
 import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.reflect.ClassTag
@@ -39,51 +39,7 @@ abstract class StepFunctionLambdaApp[
   implicit val ec: ExecutionContext =
     actorSystem.dispatcher
 
-  // --- JSON <-> Java object graph conversion helpers ---
-
-  protected def anyRefToJson(value: AnyRef): Json = value match {
-    case null => Json.Null
-    case m: java.util.Map[_, _] @unchecked =>
-      val fields = m.asInstanceOf[java.util.Map[String, AnyRef]].asScala.map {
-        case (k, v) => (k, anyRefToJson(v))
-      }
-      Json.obj(fields.toSeq: _*)
-    case l: java.util.List[_] @unchecked =>
-      Json.fromValues(l.asInstanceOf[java.util.List[AnyRef]].asScala.map(anyRefToJson))
-    case b: java.lang.Boolean => Json.fromBoolean(b.booleanValue())
-    case n: java.lang.Integer => Json.fromInt(n.intValue())
-    case n: java.lang.Long => Json.fromLong(n.longValue())
-    case n: java.lang.Double => Json.fromDoubleOrNull(n.doubleValue())
-    case n: java.lang.Float => Json.fromFloatOrNull(n.floatValue())
-    case n: java.math.BigDecimal => Json.fromBigDecimal(scala.math.BigDecimal(n))
-    case n: java.lang.Number => Json.fromBigDecimal(BigDecimal(n.toString))
-    case s: String => Json.fromString(s)
-    case other => Json.fromString(other.toString) // Fallback
-  }
-
-  protected def jsonToAnyRef(json: Json): AnyRef = json.fold[AnyRef](
-    null,
-    bool => java.lang.Boolean.valueOf(bool),
-    num => num.toBigDecimal.map { bd =>
-      if (bd.isValidInt) Int.box(bd.toInt)
-      else if (bd.isValidLong) Long.box(bd.toLong)
-      else new java.math.BigDecimal(bd.toString)
-    }.orNull,
-    str => str,
-    arr => {
-      val list = new java.util.ArrayList[AnyRef](arr.size)
-      arr.foreach { j => list.add(jsonToAnyRef(j)) }
-      list
-    },
-    obj => jsonObjectToMap(obj)
-  )
-
-  protected def jsonObjectToMap(obj: JsonObject): java.util.LinkedHashMap[String, AnyRef] = {
-    val map = new java.util.LinkedHashMap[String, AnyRef]()
-    obj.toMap.foreach { case (k, v) => map.put(k, jsonToAnyRef(v)) }
-    map
-  }
-
+  // Conversion helpers now come from JavaMapJsonCodec (imported above)
   protected def javaMapToJson(map: java.util.LinkedHashMap[String, AnyRef]): Json = anyRefToJson(map)
 
   /** Implementations supply business logic here. */
