@@ -7,7 +7,10 @@ import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.generators.WorkGenerators
 import weco.pipeline.id_minter.MintingResponse
 
-class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerators {
+class StepFunctionModelsTest
+    extends AnyFunSpec
+    with Matchers
+    with WorkGenerators {
 
   describe("StepFunctionMintingRequest") {
     it("serializes to and from JSON correctly") {
@@ -46,7 +49,9 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
           jobId = "job-1"
         )
 
-        request.validate shouldBe Left("sourceIdentifiers cannot contain empty strings")
+        request.validate shouldBe Left(
+          "sourceIdentifiers cannot contain empty strings"
+        )
       }
 
       it("rejects whitespace-only identifiers") {
@@ -55,7 +60,9 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
           jobId = "job-1"
         )
 
-        request.validate shouldBe Left("sourceIdentifiers cannot contain empty strings")
+        request.validate shouldBe Left(
+          "sourceIdentifiers cannot contain empty strings"
+        )
       }
 
       // Removed: batch size validation tests no longer applicable
@@ -75,7 +82,10 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
       val response = StepFunctionMintingResponse(
         successes = List("sierra-123", "miro-456"),
         failures = List(
-          StepFunctionMintingFailure("calm-789", "Failed to mint ID for calm-789")
+          StepFunctionMintingFailure(
+            "calm-789",
+            "Failed to mint ID for calm-789"
+          )
         ),
         jobId = "test-job-001"
       )
@@ -92,7 +102,10 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
       it("creates response from successful minting") {
         val sourceIds = List("sierra-123", "miro-456")
         val mintingResponse = MintingResponse(
-          successes = Seq("canonical-id-1", "canonical-id-2"), // Canonical IDs don't matter for response
+          successes = Seq(
+            "canonical-id-1",
+            "canonical-id-2"
+          ), // Canonical IDs don't matter for response
           failures = Seq.empty
         )
 
@@ -103,15 +116,15 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
         )
 
         result.successes should have size 2
-        result.successes should contain allOf("sierra-123", "miro-456")
+        result.successes should contain allOf ("sierra-123", "miro-456")
         result.failures shouldBe empty
-  result.jobId shouldBe "test-job"
+        result.jobId shouldBe "test-job"
       }
 
       it("creates response with failures") {
         val sourceIds = List("sierra-123", "sierra-failed-456")
         val failedSourceId = "sierra-failed-456"
-        
+
         val mintingResponse = MintingResponse(
           successes = Seq("canonical-id-1"),
           failures = Seq(failedSourceId)
@@ -126,14 +139,20 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
         result.successes should have size 1
         result.successes should contain("sierra-123")
         result.failures should have size 1
-        result.failures should contain(StepFunctionMintingFailure(failedSourceId, s"Failed to mint ID for $failedSourceId"))
-  result.jobId shouldBe "test-job"
+        result.failures should contain(
+          StepFunctionMintingFailure(
+            failedSourceId,
+            s"Failed to mint ID for $failedSourceId"
+          )
+        )
+        result.jobId shouldBe "test-job"
       }
 
       it("handles mixed success and failure") {
-        val sourceIds = List("sierra-123", "sierra-failed-456", "miro-failed-789")
+        val sourceIds =
+          List("sierra-123", "sierra-failed-456", "miro-failed-789")
         val failedSourceIds = List("sierra-failed-456", "miro-failed-789")
-        
+
         val mintingResponse = MintingResponse(
           successes = Seq("canonical-id-1"),
           failures = failedSourceIds
@@ -145,19 +164,18 @@ class StepFunctionModelsTest extends AnyFunSpec with Matchers with WorkGenerator
           "test-job"
         )
 
-    result.successes should have size 1
-    result.successes should contain("sierra-123")
-    result.failures should have size 2
-    result.jobId shouldBe "test-job"
+        result.successes should have size 1
+        result.successes should contain("sierra-123")
+        result.failures should have size 2
+        result.jobId shouldBe "test-job"
       }
     }
   }
 
-
-
   describe("StepFunctionMintingFailure") {
     it("serializes to and from JSON correctly") {
-      val failure = StepFunctionMintingFailure("sierra-123", "Failed to mint ID")
+      val failure =
+        StepFunctionMintingFailure("sierra-123", "Failed to mint ID")
 
       val json = failure.asJson
       val decoded = decode[StepFunctionMintingFailure](json.noSpaces)

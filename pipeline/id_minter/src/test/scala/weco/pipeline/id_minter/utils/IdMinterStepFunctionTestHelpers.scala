@@ -60,25 +60,29 @@ trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
       identifiersTableConfig
     )
 
-    withMemoryRetriever(mergedIndex) { retriever =>
-      withMemoryIndexer(identifiedIndex) { indexer =>
-        val lambda = new IdMinterStepFunctionLambda[StepFunctionTestConfig] {
-          override val config: StepFunctionTestConfig = StepFunctionTestConfig()
-          override def build(rawConfig: Config): StepFunctionTestConfig =
-            StepFunctionTestConfig()
+    withMemoryRetriever(mergedIndex) {
+      retriever =>
+        withMemoryIndexer(identifiedIndex) {
+          indexer =>
+            val lambda =
+              new IdMinterStepFunctionLambda[StepFunctionTestConfig] {
+                override val config: StepFunctionTestConfig =
+                  StepFunctionTestConfig()
+                override def build(rawConfig: Config): StepFunctionTestConfig =
+                  StepFunctionTestConfig()
 
-          override protected val processor: MintingRequestProcessor =
-            new MintingRequestProcessor(
-              new MultiIdMinter(
-                retriever,
-                new SingleDocumentIdMinter(idGenerator)
-              ),
-              indexer
-            )(ExecutionContext.global)
+                override protected val processor: MintingRequestProcessor =
+                  new MintingRequestProcessor(
+                    new MultiIdMinter(
+                      retriever,
+                      new SingleDocumentIdMinter(idGenerator)
+                    ),
+                    indexer
+                  )(ExecutionContext.global)
+              }
+
+            testWith(lambda)
         }
-
-        testWith(lambda)
-      }
     }
   }
 
@@ -87,7 +91,9 @@ trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
     identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty
   )(
     testWith: TestWith[
-      IdentifiersTableConfig => IdMinterStepFunctionLambda[StepFunctionTestConfig],
+      IdentifiersTableConfig => IdMinterStepFunctionLambda[
+        StepFunctionTestConfig
+      ],
       R
     ]
   ): R = {
@@ -107,7 +113,9 @@ trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
         override protected val processor: MintingRequestProcessor =
           new MintingRequestProcessor(
             new MultiIdMinter(
-              new MemoryRetriever[Json](index = mutable.Map(mergedIndex.toSeq: _*)),
+              new MemoryRetriever[Json](index =
+                mutable.Map(mergedIndex.toSeq: _*)
+              ),
               new SingleDocumentIdMinter(idGenerator)
             ),
             new MemoryIndexer[Work[Identified]](index = identifiedIndex)

@@ -8,7 +8,10 @@ import org.scalatest.{Inspectors, OptionValues}
 import scalikejdbc._
 import weco.fixtures.TestWith
 import weco.catalogue.internal_model.generators.IdentifiersGenerators
-import weco.catalogue.internal_model.identifiers.{IdentifierType, SourceIdentifier}
+import weco.catalogue.internal_model.identifiers.{
+  IdentifierType,
+  SourceIdentifier
+}
 import weco.pipeline.id_minter.config.models.IdentifiersTableConfig
 import weco.pipeline.id_minter.database.IdentifiersDao
 import weco.pipeline.id_minter.fixtures.IdentifiersDatabase
@@ -338,7 +341,7 @@ class IdentifierGeneratorTest
           "Agent",
           "Meeting",
           "Genre",
-          "Period",
+          "Period"
         )
 
         // Create the same source identifier for every possible concept type

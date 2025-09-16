@@ -27,7 +27,10 @@ abstract class StepFunctionLambdaApp[
   implicit val inputDecoder: Decoder[InputType],
   implicit val outputEncoder: Encoder[OutputType],
   val ct: ClassTag[InputType]
-) extends RequestHandler[java.util.LinkedHashMap[String, AnyRef], java.util.LinkedHashMap[String, AnyRef]]
+) extends RequestHandler[
+      java.util.LinkedHashMap[String, AnyRef],
+      java.util.LinkedHashMap[String, AnyRef]
+    ]
     with LambdaConfigurable[Config]
     with Logging {
 
@@ -40,12 +43,15 @@ abstract class StepFunctionLambdaApp[
     actorSystem.dispatcher
 
   // Conversion helpers now come from JavaMapJsonCodec (imported above)
-  protected def javaMapToJson(map: java.util.LinkedHashMap[String, AnyRef]): Json = anyRefToJson(map)
+  protected def javaMapToJson(
+    map: java.util.LinkedHashMap[String, AnyRef]
+  ): Json = anyRefToJson(map)
 
   /** Implementations supply business logic here. */
   def processRequest(input: InputType): Future[OutputType]
 
-  /** AWS Lambda entry point handling LinkedHashMap-based (already parsed) JSON. */
+  /** AWS Lambda entry point handling LinkedHashMap-based (already parsed) JSON.
+    */
   override def handleRequest(
     rawInput: java.util.LinkedHashMap[String, AnyRef],
     context: Context
@@ -62,16 +68,23 @@ abstract class StepFunctionLambdaApp[
     val parsedInput: InputType = inputJson.as[InputType] match {
       case Left(err) =>
         error(s"Failed to decode input JSON: ${err.getMessage}")
-        throw new RuntimeException(s"Failed to decode input: ${err.getMessage}", err)
+        throw new RuntimeException(
+          s"Failed to decode input: ${err.getMessage}",
+          err
+        )
       case Right(value) => value
     }
 
     // Process with timeout + recovery logging
     val output: OutputType = Try {
       Await.result(
-        processRequest(parsedInput).recover { case ex: Exception =>
-          error(s"Error processing Step Function request: ${ex.getMessage}", ex)
-          throw ex
+        processRequest(parsedInput).recover {
+          case ex: Exception =>
+            error(
+              s"Error processing Step Function request: ${ex.getMessage}",
+              ex
+            )
+            throw ex
         },
         maximumExecutionTime
       )
@@ -89,9 +102,10 @@ abstract class StepFunctionLambdaApp[
     outputJson.asObject match {
       case Some(obj) => jsonObjectToMap(obj)
       case None =>
-        error("Output JSON was not an object; cannot serialise to LinkedHashMap")
+        error(
+          "Output JSON was not an object; cannot serialise to LinkedHashMap"
+        )
         throw new RuntimeException("Output JSON must be a JSON object")
     }
   }
 }
-
