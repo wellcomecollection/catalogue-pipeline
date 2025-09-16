@@ -11,6 +11,8 @@ import weco.pipeline_storage.Indexer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import weco.lambda.helpers.MemoryDownstream
+import weco.lambda.Downstream
 
 class StepFunctionMainTest
     extends AnyFunSpec
@@ -53,12 +55,15 @@ class StepFunctionMainTest
         workIndexer = new MockIndexer(Right(works))
       )
 
-      val testMain = new IdMinterStepFunctionLambda[TestConfig] {
+      val testMain = new IdMinterStepFunctionLambda[TestConfig]
+        with MemoryDownstream {
         override val config: TestConfig = TestConfig()
         override def build(rawConfig: com.typesafe.config.Config): TestConfig =
           TestConfig()
 
         override protected val processor = testProcessor
+        override protected val downstream: Downstream =
+          new MemorySNSDownstream()
       }
 
       val request = StepFunctionMintingRequest(sourceIds, "test-job-001")
@@ -82,12 +87,15 @@ class StepFunctionMainTest
         workIndexer = new MockIndexer(Right(Seq(successfulWork)))
       )
 
-      val testMain = new IdMinterStepFunctionLambda[TestConfig] {
+      val testMain = new IdMinterStepFunctionLambda[TestConfig]
+        with MemoryDownstream {
         override val config: TestConfig = TestConfig()
         override def build(rawConfig: com.typesafe.config.Config): TestConfig =
           TestConfig()
 
         override protected val processor = testProcessor
+        override protected val downstream: Downstream =
+          new MemorySNSDownstream()
       }
 
       val request = StepFunctionMintingRequest(sourceIds, "test-job-002")
@@ -112,12 +120,15 @@ class StepFunctionMainTest
           new MockIndexer(Left(Seq(failedWork))) // First work fails indexing
       )
 
-      val testMain = new IdMinterStepFunctionLambda[TestConfig] {
+      val testMain = new IdMinterStepFunctionLambda[TestConfig]
+        with MemoryDownstream {
         override val config: TestConfig = TestConfig()
         override def build(rawConfig: com.typesafe.config.Config): TestConfig =
           TestConfig()
 
         override protected val processor = testProcessor
+        override protected val downstream: Downstream =
+          new MemorySNSDownstream()
       }
 
       val request = StepFunctionMintingRequest(sourceIds, "test-job-003")
@@ -136,12 +147,15 @@ class StepFunctionMainTest
         workIndexer = new MockIndexer(Right(Seq.empty))
       )
 
-      val testMain = new IdMinterStepFunctionLambda[TestConfig] {
+      val testMain = new IdMinterStepFunctionLambda[TestConfig]
+        with MemoryDownstream {
         override val config: TestConfig = TestConfig()
         override def build(rawConfig: com.typesafe.config.Config): TestConfig =
           TestConfig()
 
         override protected val processor = testProcessor
+        override protected val downstream: Downstream =
+          new MemorySNSDownstream()
       }
 
       // Empty list now returns an empty success/failure response (no error)
@@ -159,11 +173,14 @@ class StepFunctionMainTest
         workIndexer = new MockIndexer(Right(Seq.empty))
       )
 
-      val testMain = new IdMinterStepFunctionLambda[TestConfig] {
+      val testMain = new IdMinterStepFunctionLambda[TestConfig]
+        with MemoryDownstream {
         override val config: TestConfig = TestConfig()
         override def build(rawConfig: com.typesafe.config.Config): TestConfig =
           TestConfig()
         override protected val processor = testProcessor
+        override protected val downstream: Downstream =
+          new MemorySNSDownstream()
       }
 
       val request = StepFunctionMintingRequest(List("sierra-1"), "   ")

@@ -13,6 +13,7 @@ import weco.pipeline.id_minter.config.models.{
 }
 import weco.pipeline.id_minter.database.RDSIdentifierGenerator
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
+import weco.lambda.{Downstream, DownstreamBuilder}
 
 object StepFunctionMain
     extends IdMinterStepFunctionLambda[StepFunctionIdMinterConfig]
@@ -48,4 +49,8 @@ object StepFunctionMain
 
   override protected val processor =
     new MintingRequestProcessor(minter, workIndexer)
+
+  // Build downstream using configured target (sns/stdio) under namespace if required
+  override protected val downstream: Downstream =
+    Downstream(DownstreamBuilder.buildDownstreamTarget(rawConfig))
 }

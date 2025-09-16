@@ -1,6 +1,6 @@
 package weco.pipeline.id_minter
 
-import weco.lambda.{ApplicationConfig, StepFunctionLambdaApp}
+import weco.lambda.{ApplicationConfig, Downstream, StepFunctionLambdaApp}
 import weco.pipeline.id_minter.models.{
   StepFunctionMintingFailure,
   StepFunctionMintingRequest,
@@ -17,6 +17,7 @@ trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
     ] {
 
   protected val processor: MintingRequestProcessor
+  protected val downstream: Downstream
 
   override def processRequest(
     input: StepFunctionMintingRequest
@@ -52,6 +53,9 @@ trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
           // Process using the existing MintingRequestProcessor
           processor.process(validInput.sourceIdentifiers).map {
             mintingResponse =>
+              // Notify downstream of each successfully processed source identifier
+              mintingResponse.successes.foreach(downstream.notify)
+
               StepFunctionMintingResponse.fromMintingResponse(
                 mintingResponse,
                 validInput.sourceIdentifiers,

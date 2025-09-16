@@ -7,7 +7,8 @@ import weco.catalogue.internal_model.Implicits._
 import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.{Identified, Source}
 import weco.fixtures.TestWith
-import weco.lambda.ApplicationConfig
+import weco.lambda.{ApplicationConfig, Downstream}
+import weco.lambda.helpers.MemoryDownstream
 import weco.pipeline.id_minter.config.models.IdentifiersTableConfig
 import weco.pipeline.id_minter.database.RDSIdentifierGenerator
 import weco.pipeline.id_minter.fixtures.IdentifiersDatabase
@@ -24,7 +25,9 @@ import scala.concurrent.ExecutionContext
 
 case class StepFunctionTestConfig() extends ApplicationConfig
 
-trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
+trait IdMinterStepFunctionTestHelpers
+    extends IdentifiersDatabase
+    with MemoryDownstream {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   def createIndex(works: List[Work[Source]]): Map[String, Json] =
@@ -51,7 +54,8 @@ trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
   def withIdMinterStepFunctionLambda[R](
     identifiersTableConfig: IdentifiersTableConfig,
     mergedIndex: Map[String, Json] = Map.empty,
-    identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty
+    identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty,
+    memoryDownstream: Downstream = new MemorySNSDownstream()
   )(
     testWith: TestWith[IdMinterStepFunctionLambda[StepFunctionTestConfig], R]
   ): R = {
@@ -79,6 +83,7 @@ trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
                     ),
                     indexer
                   )(ExecutionContext.global)
+                override protected val downstream: Downstream = memoryDownstream
               }
 
             testWith(lambda)
@@ -91,15 +96,17 @@ trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
     identifiedIndex: mutable.Map[String, Work[Identified]] = mutable.Map.empty
   )(
     testWith: TestWith[
-      IdentifiersTableConfig => IdMinterStepFunctionLambda[
-        StepFunctionTestConfig
-      ],
+      IdentifiersTableConfig => (
+        Downstream => IdMinterStepFunctionLambda[
+          StepFunctionTestConfig
+        ]
+      ),
       R
     ]
   ): R = {
     def buildLambda(
       identifiersTableConfig: IdentifiersTableConfig
-    ): IdMinterStepFunctionLambda[StepFunctionTestConfig] = {
+    )(ds: Downstream): IdMinterStepFunctionLambda[StepFunctionTestConfig] = {
       val idGenerator = RDSIdentifierGenerator(
         rdsClientConfig,
         identifiersTableConfig
@@ -120,6 +127,7 @@ trait IdMinterStepFunctionTestHelpers extends IdentifiersDatabase {
             ),
             new MemoryIndexer[Work[Identified]](index = identifiedIndex)
           )(ExecutionContext.global)
+        override protected val downstream: Downstream = ds
       }
     }
 

@@ -5,7 +5,8 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import weco.catalogue.internal_model.work.generators.WorkGenerators
-import weco.lambda.ApplicationConfig
+import weco.lambda.{ApplicationConfig, Downstream}
+import weco.lambda.helpers.MemoryDownstream
 import weco.pipeline.id_minter.models.{
   StepFunctionMintingFailure,
   StepFunctionMintingRequest
@@ -17,18 +18,21 @@ class IdMinterStepFunctionLambdaTest
     extends AnyFunSpec
     with Matchers
     with ScalaFutures
-    with WorkGenerators {
+    with WorkGenerators
+    with MemoryDownstream {
 
   case class TestConfig() extends ApplicationConfig
 
   class TestIdMinterStepFunctionLambda(
-    testProcessor: MintingRequestProcessor
+    testProcessor: MintingRequestProcessor,
+    testDownstream: Downstream = new MemorySNSDownstream()
   ) extends IdMinterStepFunctionLambda[TestConfig] {
 
     override val config: TestConfig = TestConfig()
     override def build(rawConfig: Config): TestConfig = TestConfig()
 
     override protected val processor: MintingRequestProcessor = testProcessor
+    override protected val downstream: Downstream = testDownstream
   }
 
   // Helper to create a mock processor that succeeds for given source IDs
@@ -56,11 +60,12 @@ class IdMinterStepFunctionLambdaTest
 
   describe("IdMinterStepFunctionLambda") {
     describe("processRequest") {
-      it("handles all minting successes") {
+      it("handles all minting successes and notifies downstream") {
         val sourceIds = List("sierra-123", "miro-456")
         val mockProcessor = createMockProcessor(successfulSourceIds = sourceIds)
-
-        val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
+        val memoryDownstream = new MemorySNSDownstream()
+        val lambda =
+          new TestIdMinterStepFunctionLambda(mockProcessor, memoryDownstream)
         val request = StepFunctionMintingRequest(sourceIds, "test-job")
 
         val result = lambda.processRequest(request).futureValue
@@ -69,6 +74,10 @@ class IdMinterStepFunctionLambdaTest
         result.successes should contain allOf ("sierra-123", "miro-456")
         result.failures shouldBe empty
         result.jobId shouldBe "test-job"
+        // Downstream should have been notified once per success with the minted canonical ID
+        memoryDownstream.msgSender.messages.map(_.body).toSet shouldBe Set(
+          "minted-id"
+        )
       }
 
       it("handles partial and complete minting failure scenarios") {
@@ -91,7 +100,11 @@ class IdMinterStepFunctionLambdaTest
                 failedSourceIds = failedIds
               )
 
-              val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
+              val memoryDownstream = new MemorySNSDownstream()
+              val lambda = new TestIdMinterStepFunctionLambda(
+                mockProcessor,
+                memoryDownstream
+              )
               val request = StepFunctionMintingRequest(sourceIds, "test-job")
 
               val result = lambda.processRequest(request).futureValue
@@ -116,6 +129,12 @@ class IdMinterStepFunctionLambdaTest
               }
 
               result.jobId shouldBe "test-job"
+              // Downstream notified only for successes (all to the same minted canonical ID in mock)
+              val downstreamBodies =
+                memoryDownstream.msgSender.messages.map(_.body)
+              if (successfulIds.nonEmpty)
+                downstreamBodies.toSet shouldBe Set("minted-id")
+              else downstreamBodies shouldBe empty
             }
         }
       }
@@ -132,20 +151,26 @@ class IdMinterStepFunctionLambdaTest
               invoked = true; Future.successful(MintingResponse(Nil, Nil))
             }
           }
-        val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
+        val memoryDownstream = new MemorySNSDownstream()
+        val lambda =
+          new TestIdMinterStepFunctionLambda(mockProcessor, memoryDownstream)
         val request = StepFunctionMintingRequest(Nil, "test-job")
         val result = lambda.processRequest(request).futureValue
         result.successes shouldBe empty
         result.failures shouldBe empty
         result.jobId shouldBe "test-job"
         invoked shouldBe false
+        // No downstream notifications
+        memoryDownstream.msgSender.messages shouldBe empty
       }
 
       it("handles invalid input validation") {
         val mockProcessor =
           createMockProcessor(successfulSourceIds = List.empty)
 
-        val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
+        val memoryDownstream = new MemorySNSDownstream()
+        val lambda =
+          new TestIdMinterStepFunctionLambda(mockProcessor, memoryDownstream)
         val request =
           StepFunctionMintingRequest(List("sierra-123", ""), "test-job")
 
@@ -162,7 +187,9 @@ class IdMinterStepFunctionLambdaTest
       it("fails validation when jobId is blank") {
         val sourceIds = List("sierra-123")
         val mockProcessor = createMockProcessor(successfulSourceIds = sourceIds)
-        val lambda = new TestIdMinterStepFunctionLambda(mockProcessor)
+        val memoryDownstream = new MemorySNSDownstream()
+        val lambda =
+          new TestIdMinterStepFunctionLambda(mockProcessor, memoryDownstream)
         val request = StepFunctionMintingRequest(sourceIds, "   ")
         val result = lambda.processRequest(request).futureValue
         result.successes shouldBe empty

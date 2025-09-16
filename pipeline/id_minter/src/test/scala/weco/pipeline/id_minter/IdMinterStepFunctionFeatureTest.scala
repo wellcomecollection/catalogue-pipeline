@@ -29,10 +29,12 @@ class IdMinterStepFunctionFeatureTest
           val inputIndex = createIndex(List(work))
           val outputIndex = mutable.Map.empty[String, Work[Identified]]
 
+          val memoryDownstream = new MemorySNSDownstream()
           withIdMinterStepFunctionLambda(
             identifiersTableConfig,
             inputIndex,
-            outputIndex
+            outputIndex,
+            memoryDownstream
           ) {
             lambda =>
               eventuallyTableExists(identifiersTableConfig)
@@ -54,10 +56,16 @@ class IdMinterStepFunctionFeatureTest
                   result.jobId shouldBe "test-job"
               }
 
-              // Verify the work was stored correctly
+              // Verify the work was stored correctly (key = canonical ID)
               outputIndex should have size 1
+              val canonicalId = outputIndex.keys.head
               val identifiedWork = outputIndex.values.head
               identifiedWork.sourceIdentifier shouldBe work.sourceIdentifier
+
+              // We invoked the lambda 3 times; expect 3 downstream notifications, all for the canonical ID
+              val msgs = memoryDownstream.msgSender.messages.map(_.body)
+              msgs should have size 3
+              msgs.distinct should contain only canonicalId
           }
       }
     }
@@ -69,10 +77,12 @@ class IdMinterStepFunctionFeatureTest
           val inputIndex = createIndex(List(work))
           val outputIndex = mutable.Map.empty[String, Work[Identified]]
 
+          val memoryDownstream = new MemorySNSDownstream()
           withIdMinterStepFunctionLambda(
             identifiersTableConfig,
             inputIndex,
-            outputIndex
+            outputIndex,
+            memoryDownstream
           ) {
             lambda =>
               eventuallyTableExists(identifiersTableConfig)
@@ -89,42 +99,14 @@ class IdMinterStepFunctionFeatureTest
 
               // Verify the work was stored correctly
               outputIndex should have size 1
+              val canonicalId = outputIndex.keys.head
+              // Expect exactly one downstream notification for the canonical ID
+              memoryDownstream.msgSender.messages.map(
+                _.body
+              ) should contain only canonicalId
           }
       }
     }
 
-    it("ensures no downstream SQS messages are sent") {
-      withIdentifiersTable {
-        identifiersTableConfig =>
-          val work = sourceWork()
-          val inputIndex = createIndex(List(work))
-          val outputIndex = mutable.Map.empty[String, Work[Identified]]
-
-          withIdMinterStepFunctionLambda(
-            identifiersTableConfig,
-            inputIndex,
-            outputIndex
-          ) {
-            lambda =>
-              eventuallyTableExists(identifiersTableConfig)
-
-              val sourceIds = List(work.sourceIdentifier.toString)
-              val request = StepFunctionMintingRequest(sourceIds, "no-sqs-test")
-
-              val result = lambda.processRequest(request).futureValue
-
-              result.successes should have size 1
-              result.failures shouldBe empty
-
-              // The key difference from SQS interface: no downstream messages
-              // This is verified by the fact that we only get success/failure indicators
-              // in the response, not the actual canonical IDs
-              result.successes should contain(work.sourceIdentifier.toString)
-
-              // Verify work was still stored in the index (business logic still works)
-              outputIndex should have size 1
-          }
-      }
-    }
   }
 }
