@@ -4,6 +4,8 @@ import com.amazonaws.services.lambda.runtime.Context
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
+import io.circe.{Json, JsonObject}
+import scala.collection.JavaConverters._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.mockito.Mockito._
@@ -11,6 +13,7 @@ import org.scalatestplus.mockito.MockitoSugar
 
 import scala.concurrent.{Future, Promise, TimeoutException}
 import scala.concurrent.duration._
+import StepFunctionLambdaAppTestHelpers.{jsonToJavaMap, javaMapToJson}
 
 class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSugar {
 
@@ -63,9 +66,10 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
               processResult = Future.successful(expectedOutput)
             )
 
-            val jsonIn = input.asJson.noSpaces
-            val jsonOut = app.handleRequest(jsonIn, mockContext)
-            io.circe.parser.decode[TestOutput](jsonOut).right.get shouldBe expectedOutput
+            val mapIn = jsonToJavaMap(input.asJson)
+            val mapOut = app.handleRequest(mapIn, mockContext)
+            val jsonOut = javaMapToJson(mapOut)
+            jsonOut.as[TestOutput].right.get shouldBe expectedOutput
       }
 
       it("handles processing failures") {
@@ -74,8 +78,8 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
         val app = new TestStepFunctionLambdaApp(
           processResult = Future.failed(exception)
         )
-        val jsonIn = input.asJson.noSpaces
-        val thrown = intercept[RuntimeException] { app.handleRequest(jsonIn, mockContext) }
+            val mapIn = jsonToJavaMap(input.asJson)
+            val thrown = intercept[RuntimeException] { app.handleRequest(mapIn, mockContext) }
         thrown.getMessage shouldBe "Processing failed"
       }
 
@@ -87,8 +91,8 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
           processResult = neverCompletingFuture,
           timeout = 100.millis
         )
-        val jsonIn = input.asJson.noSpaces
-        intercept[TimeoutException] { app.handleRequest(jsonIn, mockContext) }
+            val mapIn = jsonToJavaMap(input.asJson)
+            intercept[TimeoutException] { app.handleRequest(mapIn, mockContext) }
       }
 
       it("handles execution exceptions") {
@@ -97,8 +101,8 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
         val app = new TestStepFunctionLambdaApp(
           processResult = Future.failed(exception)
         )
-        val jsonIn = input.asJson.noSpaces
-        val thrown = intercept[IllegalArgumentException] { app.handleRequest(jsonIn, mockContext) }
+            val mapIn = jsonToJavaMap(input.asJson)
+            val thrown = intercept[IllegalArgumentException] { app.handleRequest(mapIn, mockContext) }
         thrown.getMessage shouldBe "Invalid input"
       }
 
@@ -108,23 +112,28 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
         val app = new TestStepFunctionLambdaApp(
           processResult = Future.successful(expectedOutput)
         )
-        val jsonIn = input.asJson.noSpaces
-        val jsonOut = app.handleRequest(jsonIn, mockContext)
-        io.circe.parser.decode[TestOutput](jsonOut).right.get shouldBe expectedOutput
+            val mapIn = jsonToJavaMap(input.asJson)
+            val mapOut = app.handleRequest(mapIn, mockContext)
+            val jsonOut = javaMapToJson(mapOut)
+            jsonOut.as[TestOutput].right.get shouldBe expectedOutput
       }
 
       it("fails on invalid JSON input") {
         val app = new TestStepFunctionLambdaApp()
-        val badJson = "{not valid json" // malformed
-        val thrown = intercept[RuntimeException] { app.handleRequest(badJson, mockContext) }
-        thrown.getMessage should include ("Failed to decode input")
+    // Build a malformed structure by forcing a value that will not decode to TestInput
+            // For TestInput(message: String, value: Int) supply a map missing fields
+            val badMap = new java.util.LinkedHashMap[String, AnyRef]()
+            badMap.put("unexpected", "field")
+            val thrown = intercept[RuntimeException] { app.handleRequest(badMap, mockContext) }
+            thrown.getMessage should include ("Failed to decode input")
       }
 
       it("fails on structurally incorrect JSON") {
         // Missing required fields for TestInput (message, value)
         val app = new TestStepFunctionLambdaApp()
-        val json = "{\"message\":123}" // wrong type & missing value
-        val thrown = intercept[RuntimeException] { app.handleRequest(json, mockContext) }
+            val wrongTypeMap = new java.util.LinkedHashMap[String, AnyRef]()
+            wrongTypeMap.put("message", Int.box(123)) // wrong type for message (expects String)
+            val thrown = intercept[RuntimeException] { app.handleRequest(wrongTypeMap, mockContext) }
         thrown.getMessage should include ("Failed to decode input")
       }
     }
@@ -170,4 +179,55 @@ class StepFunctionLambdaAppTest extends AnyFunSpec with Matchers with MockitoSug
       }
     }
   }
+}
+
+// Helper functions (top-level) mirroring conversion logic in StepFunctionLambdaApp for tests
+private object StepFunctionLambdaAppTestHelpers {
+  def jsonToJavaMap(json: Json): java.util.LinkedHashMap[String, AnyRef] = {
+    json.asObject match {
+      case Some(obj) => jsonObjectToMap(obj)
+      case None => throw new IllegalArgumentException("Top-level JSON must be an object for this test")
+    }
+  }
+
+  private def jsonToAnyRef(json: Json): AnyRef = json.fold[AnyRef](
+    null,
+    bool => java.lang.Boolean.valueOf(bool),
+    num => num.toBigDecimal.map { bd =>
+      if (bd.isValidInt) Int.box(bd.toInt)
+      else if (bd.isValidLong) Long.box(bd.toLong)
+      else new java.math.BigDecimal(bd.toString)
+    }.orNull,
+    str => str,
+    arr => {
+      val list = new java.util.ArrayList[AnyRef](arr.size)
+      arr.foreach(j => list.add(jsonToAnyRef(j)))
+      list
+    },
+    obj => jsonObjectToMap(obj)
+  )
+
+  private def jsonObjectToMap(obj: JsonObject): java.util.LinkedHashMap[String, AnyRef] = {
+    val m = new java.util.LinkedHashMap[String, AnyRef]()
+    obj.toMap.foreach { case (k, v) => m.put(k, jsonToAnyRef(v)) }
+    m
+  }
+
+  private def anyRefToJson(value: AnyRef): Json = value match {
+    case null => Json.Null
+    case m: java.util.Map[_, _] @unchecked =>
+      Json.obj(m.asInstanceOf[java.util.Map[String, AnyRef]].asScala.map { case (k, v) => (k, anyRefToJson(v)) }.toSeq: _*)
+    case l: java.util.List[_] @unchecked => Json.fromValues(l.asInstanceOf[java.util.List[AnyRef]].asScala.map(anyRefToJson))
+    case b: java.lang.Boolean => Json.fromBoolean(b)
+    case n: java.lang.Integer => Json.fromInt(n)
+    case n: java.lang.Long => Json.fromLong(n)
+    case n: java.lang.Double => Json.fromDoubleOrNull(n)
+    case n: java.lang.Float => Json.fromFloatOrNull(n)
+    case n: java.math.BigDecimal => Json.fromBigDecimal(scala.math.BigDecimal(n))
+    case n: java.lang.Number => Json.fromBigDecimal(BigDecimal(n.toString))
+    case s: String => Json.fromString(s)
+    case other => Json.fromString(other.toString)
+  }
+
+  def javaMapToJson(map: java.util.LinkedHashMap[String, AnyRef]): Json = anyRefToJson(map)
 }
