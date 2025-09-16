@@ -5,8 +5,8 @@ import scala.collection.JavaConverters._
 
 /** Utility for converting between the untyped Java object graph produced by the
   * AWS Java Lambda runtime (LinkedHashMap / java.util.List / boxed primitives)
-  * and Circe Json. This logic is extracted from the StepFunctionLambdaApp
-  * so it can be reused and unit-tested independently.
+  * and Circe Json. This logic is extracted from the StepFunctionLambdaApp so it
+  * can be reused and unit-tested independently.
   */
 object JavaMapJsonCodec {
   def anyRefToJson(value: AnyRef): Json = value match {
