@@ -21,12 +21,12 @@ from pymarc import parse_xml_to_array
 from pymarc.record import Record
 
 import config
-from models.marc import MarcRecord
 from models.step_events import (
     EbscoAdapterTransformerEvent,
     EbscoAdapterTransformerResult,
 )
 from models.work import BaseWork, DeletedWork, SourceWork
+from transformers.ebsco_to_weco import transform_record
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
 from utils.tracking import is_file_already_processed, record_processed_file
