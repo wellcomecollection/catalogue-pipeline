@@ -1,10 +1,18 @@
 import pytest
-from pymarc.record import Field, Record, Subfield
+from pymarc.record import Field, Record
 
 from transformers.ebsco_to_weco import transform_record
 
 
 def test_no_format(marc_record: Record) -> None:
+    assert transform_record(marc_record).format is None
+
+
+def test_no_006_no_format(marc_record: Record) -> None:
+    """
+    Can't work out the format if there's no 006
+    """
+    marc_record.leader = "|||||am||||"
     assert transform_record(marc_record).format is None
 
 
@@ -63,6 +71,7 @@ def test_ebook(marc_record: Record) -> None:
     """
     marc_record.leader = "00000nam a22000003a 4500"
     format = transform_record(marc_record).format
+    assert format is not None
     assert format.id == "v"
     assert format.label == "E-Books"
 
@@ -78,5 +87,6 @@ def test_ejournal(marc_record: Record) -> None:
     """
     marc_record.leader = "00000nas a22000003i 450"
     format = transform_record(marc_record).format
+    assert format is not None
     assert format.id == "j"
     assert format.label == "E-Journals"

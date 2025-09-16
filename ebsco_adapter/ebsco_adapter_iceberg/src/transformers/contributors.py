@@ -17,7 +17,7 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
-from models.work import SourceConcept, ConceptType, Contributor, SourceIdentifier
+from models.work import ConceptType, Contributor, SourceConcept, SourceIdentifier
 
 
 def extract_contributors(record: Record) -> list[Contributor]:

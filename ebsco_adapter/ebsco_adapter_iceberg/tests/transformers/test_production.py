@@ -1,7 +1,8 @@
-from pymarc.record import Record, Field, Subfield
 import pytest
+from pymarc.record import Field, Indicators, Record, Subfield
 
 from transformers.ebsco_to_weco import transform_record
+
 from ..helpers import lone_element
 
 
@@ -36,7 +37,7 @@ def test_empty_production_is_no_production(marc_record: Record) -> None:
             [
                 Field(
                     tag=code,
-                    indicators=(" ", "1"),
+                    indicators=Indicators(" ", "1"),
                     subfields=[
                         Subfield(code="c", value="1998"),
                         Subfield(code="b", value="Mankind"),
@@ -68,7 +69,7 @@ def test_production_from_abc(marc_record: Record) -> None:
             [
                 Field(
                     tag=code,
-                    indicators=(" ", "1"),
+                    indicators=Indicators(" ", "1"),
                     subfields=[
                         Subfield(code="c", value="1998"),
                         Subfield(code="b", value="Mankind"),
@@ -106,12 +107,12 @@ def test_production_multiple_subfields(marc_record: Record) -> None:
             [
                 Field(
                     tag=code,
-                    indicators=(" ", "2"),
+                    indicators=Indicators(" ", "2"),
                     subfields=[Subfield(code="a", value="London")],
                 ),
                 Field(
                     tag=code,
-                    indicators=(" ", "1"),
+                    indicators=Indicators(" ", "1"),
                     subfields=[Subfield(code="a", value="Paris")],
                 ),
             ],
@@ -133,7 +134,7 @@ def test_multiple_productions(marc_record: Record) -> None:
         pytest.param(
             [
                 Field(
-                    tag=260,
+                    tag="260",
                     subfields=[
                         Subfield(code="a", value="New York"),
                         Subfield(code="e", value="Munich"),
@@ -167,8 +168,8 @@ def test_manufacture_fields(marc_record: Record) -> None:
         pytest.param(
             [
                 Field(
-                    tag=264,
-                    indicators=(" ", ind2),
+                    tag="264",
+                    indicators=Indicators(" ", ind2),
                     subfields=[
                         Subfield(code="a", value="New York"),
                     ],
@@ -201,8 +202,8 @@ def test_indicator2(marc_record: Record, production_function: str) -> None:
         pytest.param(
             [
                 Field(
-                    tag=264,
-                    indicators=(" ", ind2),
+                    tag="264",
+                    indicators=Indicators(" ", ind2),
                     subfields=[
                         Subfield(code="a", value="New York"),
                     ],
@@ -227,15 +228,15 @@ def test_unwanted_indicator2(marc_record: Record) -> None:
         pytest.param(
             [
                 Field(
-                    tag=264,
-                    indicators=(" ", "1"),
+                    tag="264",
+                    indicators=Indicators(" ", "1"),
                     subfields=[
                         Subfield(code="a", value="New York"),
                     ],
                 ),
                 Field(
-                    tag=260,
-                    indicators=(" ", " "),
+                    tag="260",
+                    indicators=Indicators(" ", " "),
                     subfields=[
                         Subfield(code="a", value="Düsseldorf City"),
                     ],

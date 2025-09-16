@@ -8,10 +8,10 @@ from transformers.current_frequency import extract_current_frequency
 from transformers.description import extract_description
 from transformers.designation import extract_designation
 from transformers.edition import extract_edition
-from transformers.other_identifiers import extract_other_identifiers
-from transformers.title import extract_title
-from transformers.production import extract_production
 from transformers.format import extract_format
+from transformers.other_identifiers import extract_other_identifiers
+from transformers.production import extract_production
+from transformers.title import extract_title
 
 
 def ebsco_source_identifier(id_value: str) -> SourceIdentifier:

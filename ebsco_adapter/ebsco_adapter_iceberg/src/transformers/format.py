@@ -1,7 +1,7 @@
 from pymarc.record import Record
-from transformers.parsers import field006, leader
 
-from models.work import Format, EJournals, EBooks
+from models.work import EBooks, EJournals, Format
+from transformers.parsers import field006, leader
 
 BIBLIOGRAPHIC_LEVELS = {"m": EBooks, "s": EJournals}
 

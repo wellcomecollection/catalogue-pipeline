@@ -1,8 +1,9 @@
 from collections.abc import Iterable
+
 from pymarc.field import Field
 from pymarc.record import Record
 
-from models.work import SourceConcept, ProductionEvent, Period, DateTimeRange
+from models.work import DateTimeRange, Period, ProductionEvent, SourceConcept
 
 
 def extract_production(record: Record) -> list[ProductionEvent]:
@@ -11,19 +12,12 @@ def extract_production(record: Record) -> list[ProductionEvent]:
     return extract_production_from_fields(record.get_fields("264"))
 
 
-def extract_production_from_fields(fields: Iterable[Field]):
+def extract_production_from_fields(fields: Iterable[Field]) -> list[ProductionEvent]:
     return [
         production
         for production in (single_production_event(field) for field in fields)
         if production is not None and production.label
     ]
-
-
-def extract_production_from_008(field: str):
-    pass
-
-
-#    cat 008s | sed -rn 's/.*>(.*)<\/controlfield>/\1/p' | sort | uniq | sed -rn 's/.{15}(...).*/\1/p' | sort | uniq
 
 
 IND2_264_MAP = {

@@ -11,7 +11,7 @@ class RawField006:
     def __init__(self, field_value: str):
         self.field_value = field_value
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         print(self.field_value)
         return bool(self.field_value)
 
