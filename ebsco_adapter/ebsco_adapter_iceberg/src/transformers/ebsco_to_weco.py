@@ -33,7 +33,7 @@ def transform_record(marc_record: Record) -> SourceWork:
         edition=extract_edition(marc_record),
         contributors=extract_contributors(marc_record),
         production=extract_production(marc_record),
-        format=extract_format(marc_record)
+        format=extract_format(marc_record),
     )
 
 

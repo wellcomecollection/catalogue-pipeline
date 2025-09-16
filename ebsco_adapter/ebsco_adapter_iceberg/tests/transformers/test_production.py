@@ -40,7 +40,7 @@ def test_empty_production_is_no_production(marc_record: Record) -> None:
                     subfields=[
                         Subfield(code="c", value="1998"),
                         Subfield(code="b", value="Mankind"),
-                        Subfield(code="a", value="Announcer's Table")
+                        Subfield(code="a", value="Announcer's Table"),
                     ],
                 )
             ],
@@ -75,7 +75,7 @@ def test_production_from_abc(marc_record: Record) -> None:
                         Subfield(code="a", value="Announcer's Table"),
                         Subfield(code="c", value="nineteen ninety eight"),
                         Subfield(code="b", value="Undertaker"),
-                        Subfield(code="a", value="Hell in a Cell")
+                        Subfield(code="a", value="Hell in a Cell"),
                     ],
                 )
             ],
@@ -87,7 +87,10 @@ def test_production_from_abc(marc_record: Record) -> None:
 )
 def test_production_multiple_subfields(marc_record: Record) -> None:
     production = lone_element(transform_record(marc_record).production)
-    assert production.label == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
+    assert (
+        production.label
+        == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
+    )
     assert production.places[0].label == "Announcer's Table"
     assert production.places[1].label == "Hell in a Cell"
     assert production.agents[0].label == "Mankind"
@@ -104,17 +107,13 @@ def test_production_multiple_subfields(marc_record: Record) -> None:
                 Field(
                     tag=code,
                     indicators=(" ", "2"),
-                    subfields=[
-                        Subfield(code="a", value="London")
-                    ],
+                    subfields=[Subfield(code="a", value="London")],
                 ),
                 Field(
                     tag=code,
                     indicators=(" ", "1"),
-                    subfields=[
-                        Subfield(code="a", value="Paris")
-                    ],
-                )
+                    subfields=[Subfield(code="a", value="Paris")],
+                ),
             ],
             id=f"MARC field code: {code}",
         )
@@ -139,8 +138,8 @@ def test_multiple_productions(marc_record: Record) -> None:
                         Subfield(code="a", value="New York"),
                         Subfield(code="e", value="Munich"),
                         Subfield(code="f", value="R. Scott"),
-                        Subfield(code="g", value="1979")
-                    ]
+                        Subfield(code="g", value="1979"),
+                    ],
                 )
             ],
         )
@@ -149,10 +148,10 @@ def test_multiple_productions(marc_record: Record) -> None:
 )
 def test_manufacture_fields(marc_record: Record) -> None:
     """
-     A 260 field with any of the manufacture subfields e,f,g
-     has a production function of "Manufacture",
-     Each of the manufacture subfields will be added to the appropriate
-     places/agents/dates field
+    A 260 field with any of the manufacture subfields e,f,g
+    has a production function of "Manufacture",
+    Each of the manufacture subfields will be added to the appropriate
+    places/agents/dates field
     """
     production = lone_element(transform_record(marc_record).production)
     assert production.function.label == "Manufacture"
@@ -172,24 +171,24 @@ def test_manufacture_fields(marc_record: Record) -> None:
                     indicators=(" ", ind2),
                     subfields=[
                         Subfield(code="a", value="New York"),
-                    ]
+                    ],
                 )
             ],
             fn,
             id=f"260: {ind2}->{fn}",
         )
         for (ind2, fn) in [
-        ("0", "Production"),
-        ("1", "Publication"),
-        ("2", "Distribution"),
-        ("3", "Manufacture")]
-
+            ("0", "Production"),
+            ("1", "Publication"),
+            ("2", "Distribution"),
+            ("3", "Manufacture"),
+        ]
     ],
     indirect=["marc_record"],
 )
 def test_indicator2(marc_record: Record, production_function: str) -> None:
     """
-     The indicator2 value on a 264 field reveals the function.
+    The indicator2 value on a 264 field reveals the function.
     """
     production = lone_element(transform_record(marc_record).production)
     assert production.function.label == production_function
@@ -206,7 +205,7 @@ def test_indicator2(marc_record: Record, production_function: str) -> None:
                     indicators=(" ", ind2),
                     subfields=[
                         Subfield(code="a", value="New York"),
-                    ]
+                    ],
                 )
             ],
             id=f'264: ind2="{ind2}"',
@@ -232,17 +231,17 @@ def test_unwanted_indicator2(marc_record: Record) -> None:
                     indicators=(" ", "1"),
                     subfields=[
                         Subfield(code="a", value="New York"),
-                    ]
+                    ],
                 ),
                 Field(
                     tag=260,
                     indicators=(" ", " "),
                     subfields=[
                         Subfield(code="a", value="Düsseldorf City"),
-                    ]
-                )
+                    ],
+                ),
             ],
-            id='',
+            id="",
         )
     ],
     indirect=["marc_record"],

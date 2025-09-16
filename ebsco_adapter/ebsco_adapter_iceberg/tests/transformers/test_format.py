@@ -10,14 +10,7 @@ def test_no_format(marc_record: Record) -> None:
 
 @pytest.mark.parametrize(
     "marc_record",
-    [
-        (
-                Field(
-                    tag="006",
-                    data="||||||o|||||"
-                ),
-        )
-    ],
+    [(Field(tag="006", data="||||||o|||||"),)],
     indirect=True,
 )
 def test_bad_biblevel_is_no_format(marc_record: Record) -> None:
@@ -31,13 +24,7 @@ def test_bad_biblevel_is_no_format(marc_record: Record) -> None:
 
 @pytest.mark.parametrize(
     "marc_record",
-    [
-        (
-                Field(
-                    tag="006",
-                    data="||||||o|||||"
-                ),
-        )],
+    [(Field(tag="006", data="||||||o|||||"),)],
     indirect=True,
 )
 def test_bad_record_type_is_no_format(marc_record: Record) -> None:
@@ -52,13 +39,7 @@ def test_bad_record_type_is_no_format(marc_record: Record) -> None:
 
 @pytest.mark.parametrize(
     "marc_record",
-    [
-        (
-                Field(
-                    tag="006",
-                    data="||||||q|||||"
-                ),
-        )],
+    [(Field(tag="006", data="||||||q|||||"),)],
     indirect=True,
 )
 def test_offline_is_no_format(marc_record: Record) -> None:
@@ -73,13 +54,7 @@ def test_offline_is_no_format(marc_record: Record) -> None:
 
 @pytest.mark.parametrize(
     "marc_record",
-    [
-        (
-                Field(
-                    tag="006",
-                    data="m     o  d  ||||||"
-                ),
-        )],
+    [(Field(tag="006", data="m     o  d  ||||||"),)],
     indirect=True,
 )
 def test_ebook(marc_record: Record) -> None:
@@ -94,13 +69,7 @@ def test_ebook(marc_record: Record) -> None:
 
 @pytest.mark.parametrize(
     "marc_record",
-    [
-        (
-                Field(
-                    tag="006",
-                    data="m     o  d  ||||||"
-                ),
-        )],
+    [(Field(tag="006", data="m     o  d  ||||||"),)],
     indirect=True,
 )
 def test_ejournal(marc_record: Record) -> None:

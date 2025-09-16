@@ -16,7 +16,7 @@ class RawField006:
         return bool(self.field_value)
 
     @staticmethod
-    def from_record(record: Record) -> 'RawField006 | None':
+    def from_record(record: Record) -> "RawField006 | None":
         if field := record.get("006"):
             return RawField006(field.value())
         return None

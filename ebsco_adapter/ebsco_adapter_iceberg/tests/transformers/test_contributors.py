@@ -53,10 +53,10 @@ def test_contributor_from_field(marc_record: Record, field_code: str) -> None:
             id=concept_type,
         )
         for (code_suffix, concept_type) in [
-        ("00", "Person"),
-        ("10", "Organisation"),
-        ("11", "Meeting"),
-    ]
+            ("00", "Person"),
+            ("10", "Organisation"),
+            ("11", "Meeting"),
+        ]
     ],
     indirect=["marc_record"],
 )
@@ -94,10 +94,10 @@ def test_distinct_by_label(marc_record: Record) -> None:
             id=concept_type,
         )
         for (code_suffix, concept_type) in [
-        ("00", "Person"),
-        ("10", "Organisation"),
-        ("11", "Meeting"),
-    ]
+            ("00", "Person"),
+            ("10", "Organisation"),
+            ("11", "Meeting"),
+        ]
     ],
     indirect=["marc_record"],
 )
@@ -173,11 +173,11 @@ def test_distinct_by_label_and_type(marc_record: Record) -> None:
             id=concept_type,
         )
         for (code_suffix, concept_type) in [
-        ("00", "Person"),
-        ("10", "Organisation"),
-        # Watch this.  The correct role subfield for meeting is "j", but EBSCO data includes it in "e"
-        ("11", "Meeting"),
-    ]
+            ("00", "Person"),
+            ("10", "Organisation"),
+            # Watch this.  The correct role subfield for meeting is "j", but EBSCO data includes it in "e"
+            ("11", "Meeting"),
+        ]
     ],
     indirect=["marc_record"],
 )
@@ -222,16 +222,16 @@ def test_distinct_by_label_and_role(marc_record: Record) -> None:
             id=f"{code}: {ontology_type}",
         )
         for (code, ontology_type, primary) in [
-        ("100", "Person", True),
-        ("700", "Person", False),
-        ("110", "Organisation", True),
-        ("710", "Organisation", False),
-    ]
+            ("100", "Person", True),
+            ("700", "Person", False),
+            ("110", "Organisation", True),
+            ("710", "Organisation", False),
+        ]
     ],
     indirect=["marc_record"],
 )
 def test_contributor_all_fields(
-        marc_record: Record, field_code: str, ontology_type: ConceptType, primary: bool
+    marc_record: Record, field_code: str, ontology_type: ConceptType, primary: bool
 ) -> None:
     # A previous incarnation of this transformer included fields t,n,p and l in the label.
     # Collectively, those fields identified some work by the named person, as though citing
@@ -292,14 +292,14 @@ def test_contributor_all_fields(
             id=f"{code}",
         )
         for (code, primary) in [
-        ("111", True),
-        ("711", False),
-    ]
+            ("111", True),
+            ("711", False),
+        ]
     ],
     indirect=["marc_record"],
 )
 def test_meeting_contributor_all_fields(
-        marc_record: Record, field_code: str, primary: bool
+    marc_record: Record, field_code: str, primary: bool
 ) -> None:
     # meetings are fundamentally different to Organisations and People, in
     # terms of the subfields they use - some have different meanings,

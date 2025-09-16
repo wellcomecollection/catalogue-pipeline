@@ -12,6 +12,7 @@ https://www.loc.gov/marc/bibliographic/bd008a.html
 #   I'm also a little uncertain as to whether the logic in the Scala
 #   correct.
 
+
 class RawField008:
     """
     008 is a fixed width field, properties are extracted from
