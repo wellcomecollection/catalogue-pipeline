@@ -47,17 +47,24 @@ def build_payload(source_ids: List[str]) -> dict:
 def main():
     source_ids = read_stdin_source_ids()
     if not source_ids:
-        print("No source identifiers provided on stdin. Nothing to do.", file=sys.stderr)
+        print(
+            "No source identifiers provided on stdin. Nothing to do.", file=sys.stderr
+        )
         sys.exit(1)
 
     payload = build_payload(source_ids)
     data = json.dumps(payload)
 
-    resp = requests.post(DEFAULT_URL, data=data, headers={"Content-Type": "application/json"})
+    resp = requests.post(
+        DEFAULT_URL, data=data, headers={"Content-Type": "application/json"}
+    )
     try:
         resp.raise_for_status()
     except Exception as e:  # pragma: no cover - simple debug output
-        print(f"Request failed: {e}\nStatus: {resp.status_code}\nBody: {resp.text}", file=sys.stderr)
+        print(
+            f"Request failed: {e}\nStatus: {resp.status_code}\nBody: {resp.text}",
+            file=sys.stderr,
+        )
         sys.exit(2)
 
     # Print the lambda response (already JSON)
