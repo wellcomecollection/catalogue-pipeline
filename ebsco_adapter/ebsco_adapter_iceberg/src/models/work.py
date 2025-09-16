@@ -79,9 +79,17 @@ class ProductionEvent(BaseModel):
     function: SourceConcept | None = None
 
 
-class Format(BaseModel):
+class IdLabel(BaseModel):
     id: str
     label: str
+
+
+class Language(IdLabel):
+    pass
+
+
+class Format(IdLabel):
+    pass
 
 
 EBooks = Format(id="v", label="E-Books")
@@ -99,3 +107,4 @@ class SourceWork(ElasticsearchModel, BaseWork):
     contributors: list[Contributor] = []
     production: list[ProductionEvent] = []
     format: Format | None = None
+    languages: list[Language] = []

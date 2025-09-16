@@ -3,7 +3,7 @@ from pymarc.record import Record
 from models.work import EBooks, EJournals, Format
 from transformers.parsers import field006, leader
 
-BIBLIOGRAPHIC_LEVELS = {"m": EBooks, "s": EJournals}
+BIBLIOGRAPHIC_LEVELS: dict[str, Format] = {"m": EBooks, "s": EJournals}
 
 
 def extract_format(record: Record) -> Format | None:

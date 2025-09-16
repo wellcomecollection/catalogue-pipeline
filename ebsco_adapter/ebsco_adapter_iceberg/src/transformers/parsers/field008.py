@@ -3,8 +3,7 @@ Functions for extracting data from the 008 control field
 https://www.loc.gov/marc/bibliographic/bd008a.html
 """
 
-
-# TODO: This is not plumbed in, I want to investigate whether
+# TODO: The date/place stuff in here is not plumbed in, I want to investigate whether
 #    it is needed at all for MARC data before I carry on.
 #    It is needed if there exists one of:
 #       * A record with no 260/264
@@ -12,15 +11,25 @@ https://www.loc.gov/marc/bibliographic/bd008a.html
 #   I'm also a little uncertain as to whether the logic in the Scala
 #   correct.
 
+from transformers.parsers.positional_field import PositionalField
 
-class RawField008:
+
+class RawField008(PositionalField):
     """
     008 is a fixed width field, properties are extracted from
     specific character ranges within the field value
     """
 
-    def __init__(self, field_value: str):
-        self.field_value = field_value
+    control_field_code = "008"
+
+    @property
+    def languagecode(self) -> str:
+        """
+        characters 35-37 contain the language code
+        >>> RawField008("900716s1991    maub    ob    001 0 lat  ").languagecode
+        'lat'
+        """
+        return self.field_value[35:38]
 
     @property
     def placecode(self) -> str:

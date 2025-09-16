@@ -1,25 +1,14 @@
-from pymarc.record import Record
+from transformers.parsers.positional_field import PositionalField
 
 
-class RawField006:
+class RawField006(PositionalField):
     """
     006 is a fixed width field, properties are extracted from
     specific character ranges within the field value
     https://www.loc.gov/marc/bibliographic/bd006.html
     """
 
-    def __init__(self, field_value: str):
-        self.field_value = field_value
-
-    def __bool__(self) -> bool:
-        print(self.field_value)
-        return bool(self.field_value)
-
-    @staticmethod
-    def from_record(record: Record) -> "RawField006 | None":
-        if field := record.get("006"):
-            return RawField006(field.value())
-        return None
+    control_field_code = "006"
 
     @property
     def form_of_item(self) -> str:
