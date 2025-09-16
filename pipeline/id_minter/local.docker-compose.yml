@@ -48,6 +48,7 @@ services:
     environment:
       - AWS_PROFILE=platform-developer
       - metrics_namespace=catalogue-dev_id_minter
+      - use_downstream=stdio
       - cluster_url=mysql
       - cluster_url_readonly=mysql
       - db_port=3306
