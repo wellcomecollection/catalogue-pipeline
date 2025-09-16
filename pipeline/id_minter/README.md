@@ -69,30 +69,15 @@ It updates all SourceIdentifier objects in the JSON, even if they're deeply nest
 
 ## Running locally
 
-### SQS Lambda Interface (Default)
+### Step Function Lambda Interface (Default)
+
+The ID minter also provides a Step Function interface for direct invocation within AWS Step Functions.
+This interface processes source identifiers directly without SQS messaging. This is the default interface
+for running locally as it is simpler to provide the necessary input.
 
 You can run the Lambda version locally from the repository root thus:
 
 `./scripts/run_local.sh <PROJECT_ID> [<PIPELINE_DATE>] [--skip-build]`
-
-You can now post JSON SQS messages to it. Because SQS-fed-by-SNS is so awkwardly verbose,
-a convenience script will fill out the boilerplate for you. As with CLIMain, you can pipe some
-paths to it, from scripts folder in this project directory:
-
-`cat scripts/source_ids.txt | python scripts/post_to_rie.py`
-
-### Step Function Lambda Interface
-
-The ID minter also provides a Step Function interface for direct invocation within AWS Step Functions.
-This interface processes source identifiers directly without SQS messaging.
-
-To run the Step Function Lambda locally:
-
-```bash
-# Build and run the Step Function Lambda
-docker compose -f local.docker-compose.yml build stepfunction-lambda
-docker compose -f local.docker-compose.yml run --rm --service-ports stepfunction-lambda
-```
 
 The Step Function Lambda will be available at `http://localhost:9001/2015-03-31/functions/function/invocations`
 
@@ -112,9 +97,3 @@ Example response:
   "jobId": "step-function-job-001"
 }
 ```
-
-For more details, see [Step Function Implementation Guide](./docs/stepfunction-guide.md).
-
-## Connecting to the ID minter database
-
-If you need to connect to the ID minter database, there are [some notes on how to do so](./connect_to_the_database.md).
