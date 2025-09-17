@@ -14,6 +14,11 @@ class IncrementalWindow(BaseModel):
     start_time: datetime
     end_time: datetime
 
+    def to_formatted_string(self):
+        start = self.start_time.strftime("%Y%m%dT%H%M")
+        end = self.end_time.strftime("%Y%m%dT%H%M")
+        return f"{start}-{end}"
+
 
 def get_file_path(
     transformer_type: TransformerType,
@@ -26,9 +31,7 @@ def get_file_path(
 
     parts: list[str] = [pipeline_date]
     if window is not None:
-        start = window.start_time.strftime("%Y%m%dT%H%M")
-        end = window.end_time.strftime("%Y%m%dT%H%M")
-        parts += ["windows", f"{start}-{end}"]
+        parts += ["windows", window.to_formatted_string()]
 
     file_path = PurePosixPath(*parts) / file_name
     return str(file_path)

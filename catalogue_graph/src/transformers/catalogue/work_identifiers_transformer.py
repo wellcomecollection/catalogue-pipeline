@@ -6,7 +6,7 @@ from models.graph_edge import (
     WorkHasPathIdentifier,
 )
 from models.graph_node import PathIdentifier
-from sources.elasticsearch_source import MergedWorksSource
+from sources.merged_works_source import MergedWorksSource
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork

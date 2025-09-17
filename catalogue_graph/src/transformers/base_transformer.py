@@ -93,10 +93,6 @@ class BaseTransformer:
 
         yield from entities
 
-        # Stop processing to ensure threads are terminated when sample_size is reached
-        if sample_size is not None:
-            self.source.stop_processing()
-
     def _stream_to_bulk_load_file(
         self, file: TextIO, entity_type: EntityType, sample_size: int | None = None
     ) -> None:

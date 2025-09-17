@@ -1,6 +1,6 @@
 import concurrent.futures
 from collections.abc import Callable, Generator, Iterator
-from itertools import islice
+from itertools import batched, islice
 from typing import Any, TypeVar
 
 T = TypeVar("T")
@@ -33,7 +33,7 @@ def process_stream_in_parallel(
     Items are consumed from `stream` in chunks of size `chunk_size`. The `process` function is applied to each chunk in
     a separate thread. The number of parallel threads is kept under `thread_count`.
     """
-    chunks = generator_to_chunks(stream, chunk_size)
+    chunks = batched(stream, chunk_size, strict=False)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Run the first `thread_count` threads in parallel

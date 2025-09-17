@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import argparse
+import datetime
 import typing
 
-from pydantic import BaseModel
+from utils.types import IngestorType
 
-from config import CATALOGUE_GRAPH_S3_BUCKET, INGESTOR_S3_PREFIX
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -12,39 +12,30 @@ from ingestor.models.step_events import (
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
-from utils.types import IngestorLoadFormat, IngestorType
 
 
-class IngestorLoaderConfig(BaseModel):
-    loader_s3_bucket: str = CATALOGUE_GRAPH_S3_BUCKET
-    loader_s3_prefix: str = INGESTOR_S3_PREFIX
-    is_local: bool = False
-    load_format: IngestorLoadFormat = "parquet"
+def create_job_id() -> str:
+    """Generate a job_id based on the current time using an iso8601 format like 20210701T1300"""
+    return datetime.datetime.now().strftime("%Y%m%dT%H%M")
 
 
 def create_transformer(
-    event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
+    event: IngestorLoaderLambdaEvent, is_local: bool = False
 ) -> ElasticsearchBaseTransformer:
     if event.ingestor_type == "concepts":
-        return ElasticsearchConceptsTransformer(
-            event.start_offset, event.end_index, config.is_local
-        )
-    if event.ingestor_type == "works":
-        return ElasticsearchWorksTransformer(
-            event.pipeline_date, event.start_offset, event.end_index, config.is_local
-        )
+        transformer_class = ElasticsearchConceptsTransformer
+    elif event.ingestor_type == "works":
+        transformer_class = ElasticsearchWorksTransformer
+    else:
+        raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
-    raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
-
-
-def get_filename(event: IngestorLoaderLambdaEvent) -> str:
-    return f"{str(event.start_offset).zfill(8)}-{str(event.end_index).zfill(8)}"
+    return transformer_class(event.pipeline_date, event.window, is_local)
 
 
 def handler(
-    event: IngestorLoaderLambdaEvent, config: IngestorLoaderConfig
+    event: IngestorLoaderLambdaEvent, is_local: bool = False
 ) -> IngestorIndexerLambdaEvent:
-    print(f"Received event: {event} with config {config}")
+    print(f"Received event: {event}")
 
     pipeline_date = event.pipeline_date
     index_date = event.index_date
@@ -54,26 +45,19 @@ def handler(
             "No pipeline date specified. Will connect to a local Elasticsearch instance."
         )
 
-    transformer = create_transformer(event, config)
-    s3_object_key = f"{pipeline_date}/{index_date}/{event.job_id}/{get_filename(event)}.{config.load_format}"
-    s3_uri = f"s3://{config.loader_s3_bucket}/{config.loader_s3_prefix}_{event.ingestor_type}/{s3_object_key}"
-    result = transformer.load_documents_to_s3(
-        s3_uri=s3_uri, load_format=config.load_format
-    )
+    transformer = create_transformer(event, is_local)
+    transformer.load_documents(event)
 
     return IngestorIndexerLambdaEvent(
         ingestor_type=event.ingestor_type,
         pipeline_date=pipeline_date,
         index_date=index_date,
-        job_id=event.job_id,
-        object_to_index=result,
+        job_id=event.job_id
     )
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:
-    return handler(
-        IngestorLoaderLambdaEvent(**event), IngestorLoaderConfig()
-    ).model_dump()
+    return handler(IngestorLoaderLambdaEvent(**event)).model_dump()
 
 
 def local_handler() -> None:
@@ -86,25 +70,23 @@ def local_handler() -> None:
         required=True,
     )
     parser.add_argument(
-        "--start-offset",
-        type=int,
-        help="The start index of the records to process.",
+        "--window-start",
+        type=str,
+        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
         required=False,
-        default=0,
     )
     parser.add_argument(
-        "--end-index",
-        type=int,
-        help="The end index of the records to process.",
+        "--window-end",
+        type=str,
+        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
         required=False,
-        default=100,
     )
     parser.add_argument(
         "--job-id",
         type=str,
-        help='The job identifier used in the S3 path, will default to "dev".',
+        help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
         required=False,
-        default="dev",
+        default=create_job_id(),
     )
     parser.add_argument(
         "--pipeline-date",
@@ -138,17 +120,13 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
-    event = IngestorLoaderLambdaEvent(**args.__dict__)
-    config = IngestorLoaderConfig(is_local=True, load_format=args.load_format)
+    event = IngestorLoaderLambdaEvent.from_argparser(args)
 
     if args.load_destination == "local":
-        transformer = create_transformer(event, config)
-        file_path = transformer.load_documents_to_local_file(
-            get_filename(event), config.load_format
-        )
-        print(f"Documents loaded to local file: {file_path}")
+        transformer = create_transformer(event, True)
+        transformer.load_documents(event, "local")
     else:
-        handler(event, config)
+        handler(event, True)
 
 
 if __name__ == "__main__":

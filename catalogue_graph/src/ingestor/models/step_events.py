@@ -1,32 +1,38 @@
-from pydantic import BaseModel
+from pathlib import PurePosixPath
 
-from utils.types import IngestorType
+import config
+from models.events import BasePipelineEvent
+from utils.types import IngestorLoadFormat, IngestorType
 
 
-class IngestorStepEvent(BaseModel):
+class IngestorStepEvent(BasePipelineEvent):
     ingestor_type: IngestorType
     pipeline_date: str
     index_date: str
     job_id: str
+    load_format: IngestorLoadFormat = "parquet"
 
+    def get_path_prefix(self) -> str:
+        parts: list[str] = [
+            config.CATALOGUE_GRAPH_S3_BUCKET,
+            f"{config.INGESTOR_S3_PREFIX}_{self.ingestor_type}",
+            self.pipeline_date,
+            self.index_date,
+            self.job_id,
+        ]
+        return str(PurePosixPath(*parts))
 
-class IngestorTriggerLambdaEvent(IngestorStepEvent):
-    pass
+    def get_s3_uri(self, file_name: str) -> str:
+        prefix = self.get_path_prefix()
+        return f"s3://{prefix}/{file_name}.{self.load_format}"
 
 
 class IngestorLoaderLambdaEvent(IngestorStepEvent):
-    start_offset: int
-    end_index: int
-
-
-class IngestorIndexerObject(BaseModel):
-    s3_uri: str
-    content_length: int | None = None
-    record_count: int | None = None
+    pass
 
 
 class IngestorIndexerLambdaEvent(IngestorStepEvent):
-    object_to_index: IngestorIndexerObject
+    pass
 
 
 class IngestorMonitorStepEvent(IngestorStepEvent):
@@ -40,7 +46,3 @@ class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):
 
 class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
     events: list[IngestorIndexerLambdaEvent]
-
-
-class IngestorTriggerMonitorLambdaEvent(IngestorMonitorStepEvent):
-    events: list[IngestorLoaderLambdaEvent]

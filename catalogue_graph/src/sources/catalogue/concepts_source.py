@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 from models.events import IncrementalWindow
 from sources.base_source import BaseSource
-from sources.elasticsearch_source import MergedWorksSource
+from sources.merged_works_source import MergedWorksSource
 from utils.types import WorkConceptKey
 
 

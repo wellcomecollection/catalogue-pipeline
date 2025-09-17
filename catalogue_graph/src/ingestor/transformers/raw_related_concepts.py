@@ -1,3 +1,5 @@
+from ingestor.models.neptune.query_result import NeptuneConcept
+
 from .raw_concept import (
     DISPLAY_SOURCE_PRIORITY,
     get_most_specific_concept_type,
@@ -6,36 +8,32 @@ from .raw_concept import (
 
 
 class RawNeptuneRelatedConcept:
-    def __init__(self, neptune_related_concept: dict):
+    def __init__(self, neptune_related_concept: NeptuneConcept):
         self.raw_related_concept = neptune_related_concept
-        self.node = self.raw_related_concept["concept_node"]
-        self.edge = self.raw_related_concept.get("edge")
-        self.source_nodes = self.raw_related_concept["source_concept_nodes"]
+        self.node = self.raw_related_concept.concept
+        # self.edge = self.raw_related_concept.get("edge")
+        self.edge = None
+        self.source_nodes = self.raw_related_concept.source_concepts
 
     @property
     def display_label(self) -> str:
-        label, _ = get_priority_label(
-            self.node, self.source_nodes, DISPLAY_SOURCE_PRIORITY
-        )
+        label, _ = get_priority_label(self.raw_related_concept, DISPLAY_SOURCE_PRIORITY)
         return label
 
     @property
     def wellcome_id(self) -> str:
-        wellcome_id = self.node["~properties"]["id"]
-        assert isinstance(wellcome_id, str)
-        return wellcome_id
+        return self.node.properties.id
 
     @property
     def relationship_type(self) -> str | None:
-        return (
-            ""
-            if self.edge is None
-            else self.edge["~properties"].get("relationship_type", "")
-        )
+        if self.edge is None:
+            return ""
+
+        return self.edge.properties.relationship_type
 
     @property
     def concept_type(self) -> str:
-        concept_types = self.raw_related_concept.get("concept_types", ["Concept"])
+        concept_types = self.raw_related_concept.types
         return get_most_specific_concept_type(concept_types)
 
 
