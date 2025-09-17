@@ -341,7 +341,7 @@ class IdentifierGeneratorTest
           "Agent",
           "Meeting",
           "Genre",
-          "Period"
+          "Period",
         )
 
         // Create the same source identifier for every possible concept type
