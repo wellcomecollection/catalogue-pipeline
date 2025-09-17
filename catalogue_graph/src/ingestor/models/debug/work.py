@@ -24,7 +24,7 @@ class BaseWorkDebug(ElasticsearchModel):
     merged_time: datetime
     indexed_time: datetime
     merge_candidates: list[MergeCandidate]
-    
+
     @classmethod
     def from_denormalised_work(cls, work: DenormalisedWork):
         source = SourceWorkDebugInformation(
@@ -33,14 +33,14 @@ class BaseWorkDebug(ElasticsearchModel):
             version=work.version,
             modified_time=work.state.source_modified_time,
         )
-    
+
         return cls(
             source=source,
             merged_time=work.state.merged_time,
             indexed_time=datetime.now(),
-            merge_candidates=work.state.merge_candidates
+            merge_candidates=work.state.merge_candidates,
         )
-    
+
 
 class VisibleWorkDebug(BaseWorkDebug):
     redirect_sources: list[Identifiers]
@@ -53,7 +53,7 @@ class InvisibleWorkDebug(BaseWorkDebug):
     def from_denormalised_work(cls, work: InvisibleDenormalisedWork):
         return InvisibleWorkDebug(
             **BaseWorkDebug.from_denormalised_work(work).model_dump(),
-            invisibility_reasons=work.invisibility_reasons
+            invisibility_reasons=work.invisibility_reasons,
         )
 
 
@@ -68,7 +68,7 @@ class DeletedWorkDebug(BaseWorkDebug):
     def from_denormalised_work(cls, work: DeletedDenormalisedWork):
         return DeletedWorkDebug(
             **BaseWorkDebug.from_denormalised_work(work).model_dump(),
-            deleted_reason=work.deleted_reason
+            deleted_reason=work.deleted_reason,
         )
 
 

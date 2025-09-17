@@ -23,9 +23,10 @@ ALLOW_DATABASE_RESET = False
 
 NEPTUNE_MAX_PARALLEL_QUERIES = 10
 
+
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
-    #print(backoff_details)
+    # print(backoff_details)
     print(f"Neptune request failed due to '{exception_name}'. Retrying...")
 
 
@@ -40,7 +41,9 @@ class BaseNeptuneClient:
     def __init__(self, neptune_endpoint: str) -> None:
         self.session: boto3.Session | None = None
         self.neptune_endpoint: str = neptune_endpoint
-        self.parallel_query_semaphore = threading.Semaphore(NEPTUNE_MAX_PARALLEL_QUERIES)
+        self.parallel_query_semaphore = threading.Semaphore(
+            NEPTUNE_MAX_PARALLEL_QUERIES
+        )
 
     def _get_client_url(self) -> str:
         raise NotImplementedError()

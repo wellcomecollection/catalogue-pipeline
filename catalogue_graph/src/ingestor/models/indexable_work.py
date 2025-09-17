@@ -1,5 +1,3 @@
-from utils.types import WorkStatus
-
 from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.debug.work import (
     DeletedWorkDebug,
@@ -14,6 +12,7 @@ from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable import IndexableRecord
 from ingestor.models.query.work import QueryWork
 from ingestor.models.shared.identifier import Identifiers
+from utils.types import WorkStatus
 
 
 class IndexableWork(IndexableRecord):
@@ -34,19 +33,25 @@ class VisibleIndexableWork(IndexableWork):
 
 class InvisibleIndexableWork(IndexableWork):
     debug: InvisibleWorkDebug
-    
+
     @staticmethod
     def from_denormalised_work(work: DenormalisedWork):
-        return InvisibleIndexableWork(type=work.type, debug=InvisibleWorkDebug.from_denormalised_work(work))
+        return InvisibleIndexableWork(
+            type=work.type, debug=InvisibleWorkDebug.from_denormalised_work(work)
+        )
 
-    
+
 class RedirectedIndexableWork(IndexableWork):
     debug: RedirectedWorkDebug
     redirect_target: Identifiers
 
     @staticmethod
     def from_denormalised_work(work: DenormalisedWork):
-        return RedirectedIndexableWork(type=work.type, debug=RedirectedWorkDebug.from_denormalised_work(work), redirect_target=work.redirect_target)
+        return RedirectedIndexableWork(
+            type=work.type,
+            debug=RedirectedWorkDebug.from_denormalised_work(work),
+            redirect_target=work.redirect_target,
+        )
 
 
 class DeletedIndexableWork(IndexableWork):
@@ -54,4 +59,6 @@ class DeletedIndexableWork(IndexableWork):
 
     @staticmethod
     def from_denormalised_work(work: DenormalisedWork):
-        return DeletedIndexableWork(type=work.type, debug=DeletedWorkDebug.from_denormalised_work(work))
+        return DeletedIndexableWork(
+            type=work.type, debug=DeletedWorkDebug.from_denormalised_work(work)
+        )

@@ -1,8 +1,9 @@
 import argparse
 from typing import Self
 
-import utils.bulk_load as bulk_load
 from pydantic import BaseModel
+
+import utils.bulk_load as bulk_load
 from utils.bulk_load import IncrementalWindow
 from utils.types import EntityType, StreamDestination, TransformerType
 
@@ -20,13 +21,13 @@ class BasePipelineEvent(BaseModel):
                 start_time=args.window_start, end_time=args.window_end
             )
 
-        return cls(**args.__dict__, window=window)    
+        return cls(**args.__dict__, window=window)
 
 
 class GraphPipelineEvent(BasePipelineEvent):
     transformer_type: TransformerType
     entity_type: EntityType
-    
+
     pipeline_date: str
 
     def get_bulk_load_s3_uri(self) -> str:

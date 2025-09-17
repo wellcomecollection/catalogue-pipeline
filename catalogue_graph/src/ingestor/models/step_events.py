@@ -1,8 +1,9 @@
 from pathlib import PurePosixPath
 
+from pydantic import BaseModel
+
 import config
 from models.events import BasePipelineEvent
-from pydantic import BaseModel
 from utils.types import IngestorType
 
 
@@ -12,8 +13,14 @@ class IngestorStepEvent(BasePipelineEvent):
     index_date: str
     job_id: str
 
-    def to_s3_prefix(self) -> str: 
-        parts: list[str] = [config.CATALOGUE_GRAPH_S3_BUCKET, f"{config.INGESTOR_S3_PREFIX}_{self.ingestor_type}", self.pipeline_date, self.index_date, self.job_id]
+    def to_s3_prefix(self) -> str:
+        parts: list[str] = [
+            config.CATALOGUE_GRAPH_S3_BUCKET,
+            f"{config.INGESTOR_S3_PREFIX}_{self.ingestor_type}",
+            self.pipeline_date,
+            self.index_date,
+            self.job_id,
+        ]
         s3_prefix = PurePosixPath(*parts)
         return str(s3_prefix)
 

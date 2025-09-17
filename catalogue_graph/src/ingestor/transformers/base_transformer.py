@@ -8,13 +8,12 @@ import polars as pl
 import pyarrow as pa
 import smart_open
 from pydantic import BaseModel
+
+from ingestor.steps.ingestor_indexer import IngestorIndexerObject
 from utils.arrow import pydantic_to_pyarrow_schema
 from utils.types import IngestorLoadFormat
 
-from ingestor.steps.ingestor_indexer import IngestorIndexerObject
-
-S3_BATCH_SIZE = 10_000 
-
+S3_BATCH_SIZE = 10_000
 
 
 class BaseExtractor:
@@ -42,10 +41,10 @@ class ElasticsearchBaseTransformer:
             pydantic_document = self.transform_document(raw_item)
             if pydantic_document:
                 yield pydantic_document
-    
+
     def stream_batches(self):
         yield from batched(self.stream_es_documents(), S3_BATCH_SIZE, strict=False)
-        
+
     def _load_to_parquet(self, es_documents: list[BaseModel], file: IO) -> int:
         # Convert Pydantic models to Parquet:
         # Pydantic -> dict -> PyArrow Table (with schema) -> Polars DataFrame -> Parquet
@@ -58,17 +57,22 @@ class ElasticsearchBaseTransformer:
         pl.DataFrame(table).write_parquet(file)
 
         return len(es_documents)
-    
+
     def _load_to_jsonl(self, es_documents: Generator[BaseModel], file: IO) -> int:
         counter = 0
         for doc in es_documents:
             counter += 1
             line = (doc.model_dump_json() + "\n").encode("utf-8")
             file.write(line)
-        
+
         return counter
 
-    def _load_to_file(self, es_documents: Generator[BaseModel], file: IO, load_format: IngestorLoadFormat) -> int:
+    def _load_to_file(
+        self,
+        es_documents: Generator[BaseModel],
+        file: IO,
+        load_format: IngestorLoadFormat,
+    ) -> int:
         if load_format == "parquet":
             return self._load_to_parquet(list(es_documents), file)
         elif load_format == "jsonl":
@@ -81,18 +85,18 @@ class ElasticsearchBaseTransformer:
     ) -> IngestorIndexerObject:
         """Load transformed documents into a parquet file in S3."""
         transport_params = {"client": boto3.client("s3")}
-        
+
         for i, batch in enumerate(self.stream_batches()):
-            file_name = f"{str(i*S3_BATCH_SIZE).zfill(8)}-{str(i*S3_BATCH_SIZE + len(batch)).zfill(8)}"
+            file_name = f"{str(i * S3_BATCH_SIZE).zfill(8)}-{str(i * S3_BATCH_SIZE + len(batch)).zfill(8)}"
             s3_uri = f"s3://{s3_prefix}/{file_name}.{load_format}"
-            
+
             with smart_open.open(s3_uri, "wb", transport_params=transport_params) as f:
                 record_count = self._load_to_file(batch, f, load_format)
 
             print(f"{record_count} items loaded to '{s3_uri}'.")
 
     def load_documents_to_local_file(
-            self, file_name: str, load_format: IngestorLoadFormat
+        self, file_name: str, load_format: IngestorLoadFormat
     ) -> str:
         """Load transformed documents into a local JSONL file for testing purposes."""
         file_path = f"../ingestor_outputs/{file_name}.{load_format}"

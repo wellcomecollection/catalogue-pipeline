@@ -7,7 +7,6 @@ from models.graph_edge import (
 )
 from models.graph_node import PathIdentifier
 from sources.catalogue.merged_works_source import MergedWorksSource
-
 from transformers.base_transformer import BaseTransformer
 
 from .raw_work import RawCatalogueWork

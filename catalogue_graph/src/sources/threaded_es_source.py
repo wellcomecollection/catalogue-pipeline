@@ -7,15 +7,16 @@ from typing import Any
 
 import config
 from models.events import IncrementalWindow
-from utils.elasticsearch import get_client, get_standard_index_name
-
 from sources.base_source import BaseSource
+from utils.elasticsearch import get_client, get_standard_index_name
 
 ES_BATCH_SIZE = 2000
 NUM_SLICES = 30
 
 
-def build_merged_index_query(query: dict | None, window: IncrementalWindow | None, i: int) -> dict:
+def build_merged_index_query(
+    query: dict | None, window: IncrementalWindow | None, i: int
+) -> dict:
     full_query = {"match_all": {}} if query is None else query
     if window is not None:
         range_filter = split_time_window(window, i)
@@ -40,15 +41,16 @@ def split_time_window(window, i: int):
         }
     }
 
+
 class ThreadedElasticsearchSource(BaseSource):
     def __init__(
-            self,
-            pipeline_date: str,
-            query: dict | None = None,
-            fields: list | None = None,
-            window: IncrementalWindow | None = None,
-            is_local: bool = False,
-            parallelism: int = config.ES_SOURCE_PARALLELISM
+        self,
+        pipeline_date: str,
+        query: dict | None = None,
+        fields: list | None = None,
+        window: IncrementalWindow | None = None,
+        is_local: bool = False,
+        parallelism: int = config.ES_SOURCE_PARALLELISM,
     ):
         self.es_client = get_client("graph_extractor", pipeline_date, is_local)
         self.parallelism = parallelism
@@ -88,14 +90,14 @@ class ThreadedElasticsearchSource(BaseSource):
         return hits
 
     def worker_target(self, slice_index: int, queue: Queue) -> None:
-            search_after = None
-            while hits := self.search(slice_index, search_after):
-                for hit in hits:
-                    queue.put(hit["_source"])
+        search_after = None
+        while hits := self.search(slice_index, search_after):
+            for hit in hits:
+                queue.put(hit["_source"])
 
-                search_after = hits[-1]["sort"]
+            search_after = hits[-1]["sort"]
 
-            queue.put(None)
+        queue.put(None)
 
     def run_worker(self, slice_index: int, queue: Queue):
         # Run threads as daemons so that they automatically exit when the main thread throws an exception.

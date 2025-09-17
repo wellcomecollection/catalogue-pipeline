@@ -1,5 +1,3 @@
-from utils.types import ConceptType
-
 from ingestor.models.display.identifier import DisplayIdentifier
 from ingestor.models.indexable_concept import (
     ConceptDescription,
@@ -8,6 +6,7 @@ from ingestor.models.indexable_concept import (
 from ingestor.models.neptune.query_result import NeptuneConcept
 from ingestor.models.shared.id_label import Id
 from ingestor.models.shared.identifier import SourceIdentifier
+from utils.types import ConceptType
 
 # Sources sorted by priority for querying purposes.
 QUERY_SOURCE_PRIORITY = [
@@ -64,7 +63,7 @@ def get_priority_label(
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.
     (For example, if a `label` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.)
     """
-        
+
     labels = {"label-derived": raw_concept.concept.properties.label}
 
     for source_concept in raw_concept.source_concepts:
@@ -146,7 +145,7 @@ class RawNeptuneConcept:
     @property
     def identifiers(self) -> list[ConceptIdentifier]:
         ids = []
-        
+
         if self.raw_concept.linked_source_concept is not None:
             properties = self.raw_concept.linked_source_concept.properties
             identifier = ConceptIdentifier(

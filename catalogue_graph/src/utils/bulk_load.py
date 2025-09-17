@@ -1,9 +1,9 @@
 from datetime import datetime
 from pathlib import PurePosixPath
 
-import config
 from pydantic import BaseModel
 
+import config
 from utils.types import (
     EntityType,
     TransformerType,
@@ -13,7 +13,7 @@ from utils.types import (
 class IncrementalWindow(BaseModel):
     start_time: datetime
     end_time: datetime
-    
+
     def to_merged_works_filter(self):
         # Windows are based on the 'mergedTime' field, which indicates when the document was last updated
         return {
@@ -24,7 +24,7 @@ class IncrementalWindow(BaseModel):
                 }
             }
         }
-    
+
     def to_formatted_string(self):
         start = self.start_time.strftime("%Y%m%dT%H%M")
         end = self.end_time.strftime("%Y%m%dT%H%M")

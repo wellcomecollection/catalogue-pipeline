@@ -5,9 +5,6 @@ import datetime
 import pprint
 import typing
 
-from utils.aws import get_neptune_client
-from utils.types import IngestorType
-
 from ingestor.extractors.works_extractor import GraphWorksExtractor
 from ingestor.models.step_events import (
     IngestorLoaderLambdaEvent,
@@ -16,6 +13,8 @@ from ingestor.models.step_events import (
 )
 from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
 from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
+from utils.aws import get_neptune_client
+from utils.types import IngestorType
 
 
 def create_job_id() -> str:
@@ -33,7 +32,7 @@ def extract_data(ingestor_type: IngestorType, is_local: bool) -> int:
         record_count = int(count_result[0]["count"])
         pit_id = None
     elif ingestor_type == "works":
-        source = GraphWorksExtractor("2025-08-14", 0, 10000, is_local)        
+        source = GraphWorksExtractor("2025-08-14", 0, 10000, is_local)
         pit_id, record_count = source.test(None)
     else:
         raise ValueError(f"Unknown ingestor type: {ingestor_type}.")
@@ -47,8 +46,8 @@ def handler(
     event: IngestorTriggerLambdaEvent, is_local: bool = False
 ) -> IngestorTriggerMonitorLambdaEvent:
     pit_id, record_count = extract_data(event.ingestor_type, is_local)
-        
-    # In incremental mode, we only want one worker to prevent processing related works multiple times! 
+
+    # In incremental mode, we only want one worker to prevent processing related works multiple times!
     events = []
     for i in range(5):
         events.append(

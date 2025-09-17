@@ -11,7 +11,7 @@ class RawNeptuneRelatedConcept:
     def __init__(self, neptune_related_concept: NeptuneConcept):
         self.raw_related_concept = neptune_related_concept
         self.node = self.raw_related_concept.concept
-        #self.edge = self.raw_related_concept.get("edge")
+        # self.edge = self.raw_related_concept.get("edge")
         self.edge = None
         self.source_nodes = self.raw_related_concept.source_concepts
 

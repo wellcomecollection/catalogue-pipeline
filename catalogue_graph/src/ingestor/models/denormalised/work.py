@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from pydantic import BaseModel, field_validator
-from utils.types import DisplayWorkType, WorkStatus, WorkType
 
 from ingestor.models.shared.concept import Concept, Contributor, Genre, Subject
 from ingestor.models.shared.deleted_reason import DeletedReason
@@ -19,6 +18,7 @@ from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
+from utils.types import DisplayWorkType, WorkStatus, WorkType
 
 
 class CollectionPath(BaseModel):
@@ -94,7 +94,7 @@ class BaseDenormalisedWork(ElasticsearchModel):
     state: DenormalisedWorkState
     version: int
     type: WorkStatus
-    
+
     @staticmethod
     def from_es_document(work: dict):
         if work["type"] == "Visible":
@@ -104,7 +104,7 @@ class BaseDenormalisedWork(ElasticsearchModel):
         if work["type"] == "Redirected":
             return RedirectedDenormalisedWork(**work)
         if work["type"] == "Deleted":
-            return DeletedDenormalisedWork(**work)        
+            return DeletedDenormalisedWork(**work)
 
 
 class VisibleDenormalisedWork(BaseDenormalisedWork):
@@ -123,4 +123,10 @@ class DeletedDenormalisedWork(BaseDenormalisedWork):
 class RedirectedDenormalisedWork(BaseDenormalisedWork):
     redirect_target: Identifiers
 
-DenormalisedWork = VisibleDenormalisedWork | InvisibleDenormalisedWork | DeletedDenormalisedWork | RedirectedDenormalisedWork 
+
+DenormalisedWork = (
+    VisibleDenormalisedWork
+    | InvisibleDenormalisedWork
+    | DeletedDenormalisedWork
+    | RedirectedDenormalisedWork
+)

@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from models.events import IncrementalWindow
-
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
 from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.debug.work import SourceWorkDebugInformation, VisibleWorkDebug
@@ -15,6 +13,7 @@ from ingestor.models.indexable_work import (
     RedirectedIndexableWork,
     VisibleIndexableWork,
 )
+from models.events import IncrementalWindow
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .work_aggregate_transformer import AggregateWorkTransformer
@@ -167,7 +166,7 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
                 debug=self._transform_debug(extracted),
                 type="Visible",
             )
-        
+
         if extracted.work.type == "Invisible":
             return InvisibleIndexableWork.from_denormalised_work(extracted.work)
 

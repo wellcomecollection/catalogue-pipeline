@@ -92,21 +92,21 @@ def get_related_query(
 
 
 def _get_referenced_together_filter(
-        property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
+    property_key: str, allowed_values: list[ConceptType] | list[WorkConceptKey] | None
 ) -> str:
     """Return a Cypher filter in the form `AND property_key IN ['some allowed value', 'another value']`."""
     if allowed_values is not None and len(allowed_values) > 0:
         comma_separated_values = ", ".join([f"'{t}'" for t in allowed_values])
         return f"AND {property_key} IN [{comma_separated_values}]"
-    
+
     return ""
 
 
 def get_referenced_together_query(
-        source_referenced_types: list[ConceptType] | None = None,
-        related_referenced_types: list[ConceptType] | None = None,
-        source_referenced_in: list[WorkConceptKey] | None = None,
-        related_referenced_in: list[WorkConceptKey] | None = None,
+    source_referenced_types: list[ConceptType] | None = None,
+    related_referenced_types: list[ConceptType] | None = None,
+    source_referenced_in: list[WorkConceptKey] | None = None,
+    related_referenced_in: list[WorkConceptKey] | None = None,
 ) -> str:
     """
     Return a parameterized Neptune query to fetch concepts frequently co-occurring together in works.
