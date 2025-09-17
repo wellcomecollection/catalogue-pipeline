@@ -13,18 +13,21 @@ class IngestorStepEvent(BasePipelineEvent):
     load_format: IngestorLoadFormat = "parquet"
 
     def get_path_prefix(self) -> str:
+        job_id = self.job_id
+        if self.window is not None:
+            job_id = self.window.to_formatted_string()
+
         parts: list[str] = [
-            config.CATALOGUE_GRAPH_S3_BUCKET,
             f"{config.INGESTOR_S3_PREFIX}_{self.ingestor_type}",
             self.pipeline_date,
             self.index_date,
-            self.job_id,
+            job_id,
         ]
         return str(PurePosixPath(*parts))
 
     def get_s3_uri(self, file_name: str) -> str:
         prefix = self.get_path_prefix()
-        return f"s3://{prefix}/{file_name}.{self.load_format}"
+        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}.{self.load_format}"
 
 
 class IngestorLoaderLambdaEvent(IngestorStepEvent):

@@ -5,12 +5,6 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
 from typing import Literal, get_args
 
-from models.events import IncrementalWindow
-from sources.catalogue.concepts_source import extract_concepts_from_work
-from sources.merged_works_source import MergedWorksSource
-from utils.aws import get_neptune_client
-from utils.streaming import process_stream_in_parallel
-
 from ingestor.models.neptune.query_result import NeptuneConcept
 from ingestor.queries.concept_queries import (
     CONCEPT_QUERY,
@@ -20,6 +14,11 @@ from ingestor.queries.concept_queries import (
     get_referenced_together_query,
     get_related_query,
 )
+from models.events import IncrementalWindow
+from sources.catalogue.concepts_source import extract_concepts_from_work
+from sources.merged_works_source import MergedWorksSource
+from utils.aws import get_neptune_client
+from utils.streaming import process_stream_in_parallel
 
 NEPTUNE_PARAMS = {
     # There are a few Wikidata supernodes which cause performance issues in queries.
@@ -233,27 +232,32 @@ class GraphConceptsExtractor:
     def get_concepts_from_works(self) -> Generator[str]:
         for work in self.es_source.stream_raw():
             for concept, _ in extract_concepts_from_work(work["data"]):
-                try:
-                    yield concept["id"]["canonicalId"]
-                except:
-                    print(concept, work)
+                concept_id = concept["id"].get("canonicalId")
 
-    def get_concept_stream(self) -> Generator[str]:
+                if concept_id:
+                    yield concept_id
+                else:
+                    print(f"Concept {concept} does not have an ID.")
+
+    def get_concept_stream(self) -> Generator[set[str]]:
         processed_ids = set()
 
-        for extracted_ids in batched(
-            self.get_concepts_from_works(), 10_000, strict=False
-        ):
-            extracted_ids = set(extracted_ids).difference(processed_ids)
-            self._update_same_as_map(extracted_ids)
+        extracted_ids = self.get_concepts_from_works()
+        for extracted_batch in batched(extracted_ids, 10_000, strict=False):
+            extracted_batch = set(extracted_batch).difference(processed_ids)
+            self._update_same_as_map(extracted_batch)
 
-            for concept_id in extracted_ids:
+            # All 'same as' concepts must be processed as part of the same batch to get consistent results
+            full_batch = set()
+            for concept_id in extracted_batch:
                 for same_as_id in self.get_same_as(concept_id):
                     processed_ids.add(same_as_id)
-                    yield same_as_id
+                    full_batch.add(same_as_id)
+
+            yield full_batch
 
     def extract_raw(self) -> Generator[tuple]:
-        for concept_ids in batched(self.get_concept_stream(), 10_000, strict=False):
+        for concept_ids in self.get_concept_stream():
             print(f"Will process a batch of {len(concept_ids)} concepts.")
             concepts = self.get_concepts(concept_ids).items()
 
@@ -269,9 +273,10 @@ class GraphConceptsExtractor:
                 }
 
             for concept_id, concept in concepts:
+                primary_id = self.get_primary(concept_id)
                 related_concepts = {}
                 for key in all_related_concepts:
-                    if concept_id in all_related_concepts[key]:
-                        related_concepts[key] = all_related_concepts[key][concept_id]
+                    if primary_id in all_related_concepts[key]:
+                        related_concepts[key] = all_related_concepts[key][primary_id]
 
                 yield concept, related_concepts

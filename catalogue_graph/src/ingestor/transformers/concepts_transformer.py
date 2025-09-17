@@ -22,7 +22,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
     def __init__(
         self,
         pipeline_date: str,
-        window: IncrementalWindow,
+        window: IncrementalWindow | None,
         is_local: bool,
         overrides: TextIO | None = None,
     ) -> None:

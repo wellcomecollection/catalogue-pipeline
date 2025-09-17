@@ -95,6 +95,13 @@ def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
         df.write_parquet(f)
 
 
+def dicts_from_s3_jsonl(s3_uri: str) -> list[dict]:
+    """Create a JSON file from a Pydantic model and save it to S3."""
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
+        return [json.loads(line) for line in f.read().splitlines() if line.strip()]
+
+
 def pydantic_to_s3_json(model: BaseModel, s3_uri: str) -> None:
     """Create a JSON file from a Pydantic model and save it to S3."""
     transport_params = {"client": boto3.client("s3")}
@@ -116,3 +123,13 @@ def pydantic_from_s3_json[T: BaseModel](
             return None
 
         raise FileNotFoundError(f"S3 file not found: {e}") from e
+
+
+def get_s3_uris_by_type(bucket: str, prefix: str, data_type: str) -> Generator[str]:
+    s3 = boto3.client("s3")
+    paginator = s3.get_paginator("list_objects_v2")
+
+    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
+        for s3_object in page.get("Contents", []):
+            if s3_object["Key"].endswith(f".{data_type}"):
+                yield f"s3://{bucket}/{s3_object['Key']}"

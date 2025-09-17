@@ -3,8 +3,6 @@ import argparse
 import datetime
 import typing
 
-from utils.types import IngestorType
-
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -12,6 +10,7 @@ from ingestor.models.step_events import (
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
+from utils.types import IngestorType
 
 
 def create_job_id() -> str:
@@ -52,11 +51,14 @@ def handler(
         ingestor_type=event.ingestor_type,
         pipeline_date=pipeline_date,
         index_date=index_date,
-        job_id=event.job_id
+        job_id=event.job_id,
     )
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
+
     return handler(IngestorLoaderLambdaEvent(**event)).model_dump()
 
 
@@ -68,6 +70,20 @@ def local_handler() -> None:
         choices=typing.get_args(IngestorType),
         help="Which ingestor to run (works or concepts).",
         required=True,
+    )
+    parser.add_argument(
+        "--pipeline-date",
+        type=str,
+        help='The pipeline that is being ingested to, will default to "dev".',
+        required=False,
+        default="dev",
+    )
+    parser.add_argument(
+        "--index-date",
+        type=str,
+        help='The index date that is being ingested to, will default to "dev".',
+        required=False,
+        default="dev",
     )
     parser.add_argument(
         "--window-start",
@@ -87,20 +103,6 @@ def local_handler() -> None:
         help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
         required=False,
         default=create_job_id(),
-    )
-    parser.add_argument(
-        "--pipeline-date",
-        type=str,
-        help='The pipeline that is being ingested to, will default to "dev".',
-        required=False,
-        default="dev",
-    )
-    parser.add_argument(
-        "--index-date",
-        type=str,
-        help='The index date that is being ingested to, will default to "dev".',
-        required=False,
-        default="dev",
     )
     parser.add_argument(
         "--load-destination",

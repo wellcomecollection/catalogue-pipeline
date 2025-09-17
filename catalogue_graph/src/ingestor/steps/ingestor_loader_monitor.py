@@ -8,7 +8,6 @@ from ingestor.models.step_events import (
     IngestorLoaderMonitorLambdaEvent,
 )
 from utils.reporting import LoaderReport
-from utils.safety import validate_fractional_change
 
 
 class IngestorLoaderMonitorConfig(BaseModel):
@@ -61,28 +60,7 @@ def run_check(
         total_file_size=sum_file_size,
     )
 
-    latest_report: LoaderReport | None = LoaderReport.read(
-        pipeline_date=pipeline_date,
-        index_date=index_date,
-        ingestor_type=ingestor_type,
-        # load latest report by not passing job_id
-        ignore_missing=True,
-    )
-
-    if latest_report is not None:
-        # check if the sum file size has changed by more than the threshold,
-        # we are ignoring the record count for now, as this will be the same as the trigger step
-        delta = current_report.total_file_size - latest_report.total_file_size
-        validate_fractional_change(
-            modified_size=delta,
-            total_size=latest_report.total_file_size,
-            fractional_threshold=config.percentage_threshold,
-            force_pass=event.force_pass,
-        )
-
     current_report.write()
-    current_report.write(latest=True)
-
     return current_report
 
 

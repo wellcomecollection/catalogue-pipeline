@@ -10,7 +10,6 @@ from test_utils import load_fixture, load_json_fixture
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
-    IngestorIndexerObject,
 )
 from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
 from utils.types import IngestorType

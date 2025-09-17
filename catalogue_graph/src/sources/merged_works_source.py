@@ -7,9 +7,8 @@ from typing import Any
 
 import config
 from models.events import IncrementalWindow
-from utils.elasticsearch import get_client, get_standard_index_name
-
 from sources.base_source import BaseSource
+from utils.elasticsearch import get_client, get_standard_index_name
 
 ES_BATCH_SIZE = 2000
 NUM_SLICES = 30

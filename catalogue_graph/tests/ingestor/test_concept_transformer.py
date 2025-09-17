@@ -84,7 +84,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
+    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
     raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -135,7 +135,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
+    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
     raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -202,7 +202,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
+    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
     raw_data = (mock_concept, related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -277,7 +277,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
+    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
     raw_data = (mock_concept, related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -354,7 +354,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
+    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
     raw_data = (mock_concept, related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -441,7 +441,9 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         aaaaaaaa,Roland le Petour,
         abcd2345,Le Pétomane,
         """)
-    transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)
+    transformer = ElasticsearchConceptsTransformer(
+        "2025-08-10", None, True, overrides=overrides
+    )
     raw_data = (mock_concept, related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -572,7 +574,9 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
         id, Wellcome Label, Wellcome Description
         """)
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)
+    transformer = ElasticsearchConceptsTransformer(
+        "2025-08-10", None, True, overrides=overrides
+    )
     raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
