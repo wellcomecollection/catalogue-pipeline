@@ -4,8 +4,8 @@ locals {
     StartAt = "EbscoIdMinterMap"
     States = {
       EbscoIdMinterMap = {
-        Type = "Map"
-        MaxConcurrency = 2
+        Type                  = "Map"
+        MaxConcurrency        = 2
         ToleratedFailureCount = 0
         ItemReader = {
           Resource = "arn:aws:states:::s3:getObject"
@@ -55,21 +55,21 @@ locals {
 }
 
 data "aws_s3_bucket" "ebsco_adapter_bucket" {
-    bucket = "wellcomecollection-platform-ebsco-adapter"
+  bucket = "wellcomecollection-platform-ebsco-adapter"
 }
 
 # IAM policy allowing the state machine to read from S3 bucket
 data "aws_iam_policy_document" "state_machine_s3_read_policy" {
-    statement {
-        actions = [
-            "s3:GetObject",
-            "s3:ListBucket"
-        ]
-        resources = [
-            "${data.aws_s3_bucket.ebsco_adapter_bucket.arn}/prod/batches/*",
-            "${data.aws_s3_bucket.ebsco_adapter_bucket.arn}"
-        ]
-    }
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      "${data.aws_s3_bucket.ebsco_adapter_bucket.arn}/prod/batches/*",
+      "${data.aws_s3_bucket.ebsco_adapter_bucket.arn}"
+    ]
+  }
 }
 
 module "ebsco_transformer_state_machine" {

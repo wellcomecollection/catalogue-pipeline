@@ -81,7 +81,7 @@ module "id_minter_lambda_step_function" {
   timeout = 60 * 5 # 10 Minutes
 
   image_config = {
-    command     = ["weco.pipeline.id_minter.StepFunctionMain::handleRequest"]
+    command = ["weco.pipeline.id_minter.StepFunctionMain::handleRequest"]
   }
 
   ecr_repository_name = "uk.ac.wellcome/id_minter"

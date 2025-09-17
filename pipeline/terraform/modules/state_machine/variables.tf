@@ -1,15 +1,15 @@
 variable "name" {
-  type = string 
+  type = string
 }
 
 variable "state_machine_definition" {}
 
 variable "invokable_lambda_arns" {
-  type = list(string)
+  type    = list(string)
   default = []
 }
 
 variable "state_machine_iam_policy" {
-    type    = string
-    default = null
+  type    = string
+  default = null
 }

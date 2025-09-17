@@ -52,23 +52,23 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
 resource "aws_iam_policy" "state_machine_self_start_execution_policy" {
   name        = "${var.name}-sfn-self-start-execution-policy"
   description = "Allow state machine to start executions of itself"
-    policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-        {
-            Effect = "Allow"
-            Action = [
-            "states:StartExecution"
-            ]
-            Resource = aws_sfn_state_machine.ebsco_transformer.arn
-        }
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "states:StartExecution"
         ]
-    })
+        Resource = aws_sfn_state_machine.ebsco_transformer.arn
+      }
+    ]
+  })
 }
 
 # IAM Policy for State Machine CloudWatch Logging
 resource "aws_iam_policy" "state_machine_logging_policy" {
-  name        =  "${var.name}-sfn-logging-policy"
+  name        = "${var.name}-sfn-logging-policy"
   description = "Allow state machine to write logs to CloudWatch"
 
   policy = jsonencode({
@@ -94,10 +94,10 @@ resource "aws_iam_policy" "state_machine_logging_policy" {
 
 # If a custom IAM policy is provided, attach it to the role
 resource "aws_iam_policy" "custom_state_machine_policy" {
-    count       = var.state_machine_iam_policy != null ? 1 : 0
-    name        = "${var.name}-custom-sfn-policy"
-    description = "Custom IAM policy for state machine"
-    policy      = var.state_machine_iam_policy
+  count       = var.state_machine_iam_policy != null ? 1 : 0
+  name        = "${var.name}-custom-sfn-policy"
+  description = "Custom IAM policy for state machine"
+  policy      = var.state_machine_iam_policy
 }
 
 # Attach the policies to the role
@@ -112,9 +112,9 @@ resource "aws_iam_role_policy_attachment" "state_machine_logging_policy_attachme
 }
 
 resource "aws_iam_role_policy_attachment" "custom_state_machine_policy_attachment" {
-    count      = var.state_machine_iam_policy != null ? 1 : 0
-    role       = aws_iam_role.state_machine_role.name
-    policy_arn = aws_iam_policy.custom_state_machine_policy[0].arn
+  count      = var.state_machine_iam_policy != null ? 1 : 0
+  role       = aws_iam_role.state_machine_role.name
+  policy_arn = aws_iam_policy.custom_state_machine_policy[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "state_machine_self_start_execution_policy_attachment" {
