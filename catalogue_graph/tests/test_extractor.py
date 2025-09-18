@@ -215,8 +215,6 @@ def test_incremental_mode() -> None:
     assert len(MockSmartOpen.file_lookup) == 1
     assert expected_s3_uri in MockSmartOpen.file_lookup
 
-    print(MockElasticsearchClient.queries)
-
     # We expect two ES queries. The second returns no results, after which the loop inside `search_with_pit` stops.
     assert len(MockElasticsearchClient.queries) == 2
     assert MockElasticsearchClient.queries[0] == {

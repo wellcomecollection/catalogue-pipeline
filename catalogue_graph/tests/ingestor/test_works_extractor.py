@@ -11,7 +11,6 @@ from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
     WORK_CHILDREN_QUERY,
     WORK_CONCEPTS_QUERY,
-    WORK_QUERY,
 )
 
 DENORMALISED_FIXTURE = load_json_fixture("ingestor/single_denormalised.json")
@@ -30,7 +29,7 @@ def mock_es_work(work_id: str) -> None:
 
 def mock_work_ids(ids: list[str]) -> None:
     neptune_ids = [{"id": _id} for _id in ids]
-    add_neptune_mock_response(WORK_QUERY, EXPECTED_NEPTUNE_PARAMS, neptune_ids)
+    # add_neptune_mock_response(WORK_QUERY, EXPECTED_NEPTUNE_PARAMS, neptune_ids)
 
 
 def mock_graph_relationships(
@@ -50,7 +49,7 @@ def mock_graph_relationships(
 
 
 def test_with_ancestors() -> None:
-    extractor = GraphWorksExtractor("dev", 0, 10, False)
+    extractor = GraphWorksExtractor("dev", None, False)
 
     mock_work_ids(["a24esypq"])
     mock_graph_relationships("a24esypq", ["ancestors", "children"])
@@ -70,7 +69,7 @@ def test_with_ancestors() -> None:
 
 
 def test_with_concepts() -> None:
-    extractor = GraphWorksExtractor("dev", 0, 10, False)
+    extractor = GraphWorksExtractor("dev", None, False)
 
     mock_work_ids(["a24esypq"])
     mock_graph_relationships("a24esypq", ["concepts"])
@@ -86,7 +85,7 @@ def test_with_concepts() -> None:
 
 
 def test_without_graph_relationships() -> None:
-    extractor = GraphWorksExtractor("dev", 0, 10, False)
+    extractor = GraphWorksExtractor("dev", None, False)
 
     mock_work_ids(["a24esypq"])
     mock_graph_relationships("a24esypq", [])
@@ -102,7 +101,7 @@ def test_without_graph_relationships() -> None:
 
 
 def test_missing_in_denormalised() -> None:
-    extractor = GraphWorksExtractor("dev", 0, 10, False)
+    extractor = GraphWorksExtractor("dev", None, False)
 
     mock_work_ids(["a24esypq"])
     mock_graph_relationships("a24esypq", ["concepts", "ancestors", "children"])
@@ -113,7 +112,7 @@ def test_missing_in_denormalised() -> None:
 
 
 def test_multiple_works() -> None:
-    extractor = GraphWorksExtractor("dev", 0, 10, False)
+    extractor = GraphWorksExtractor("dev", None, False)
 
     # Add three works to the catalogue graph
     ids = ["123", "456", "789"]
@@ -147,7 +146,7 @@ def test_multiple_works() -> None:
 
 
 def test_elasticsearch_error() -> None:
-    extractor = GraphWorksExtractor("dev", 0, 10, False)
+    extractor = GraphWorksExtractor("dev", None, False)
 
     mock_work_ids(["123", "456", "789"])
     mock_graph_relationships("456", [])

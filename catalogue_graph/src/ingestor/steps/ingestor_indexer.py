@@ -14,8 +14,10 @@ from ingestor.models.indexable_work import IndexableWork
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerMonitorLambdaEvent,
+    IngestorIndexerObject,
+    IngestorStepEvent,
 )
-from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl, get_s3_uris_by_type
+from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl, get_s3_objects_by_type
 from utils.elasticsearch import get_standard_index_name
 from utils.types import IngestorType
 
@@ -63,22 +65,15 @@ def handler(
 
     record_class = RECORD_CLASSES[event.ingestor_type]
 
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-    prefix = event.get_path_prefix()
-    print(
-        f"Will process all {event.load_format} files prefixed with 's3://{bucket}/{prefix}/*'."
-    )
-    file_uris = list(get_s3_uris_by_type(bucket, prefix, event.load_format))
-
-    if len(file_uris) == 0:
-        print("No files to process.")
+    if len(event.objects_to_index) == 0:
+        raise ValueError("No files to process.")
 
     total_success_count = 0
-    for s3_uri in file_uris:
+    for s3_object in event.objects_to_index:
         if event.load_format == "parquet":
-            data = df_from_s3_parquet(s3_uri).to_dicts()
+            data = df_from_s3_parquet(s3_object.s3_uri).to_dicts()
         else:
-            data = dicts_from_s3_jsonl(s3_uri)
+            data = dicts_from_s3_jsonl(s3_object.s3_uri)
 
         print(f"Extracted {len(data)} records.")
         success_count = load_data(
@@ -154,8 +149,36 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
-    event = IngestorIndexerLambdaEvent.from_argparser(args)
+    base_event = IngestorStepEvent.from_argparser(args)
+
+    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
+    prefix = base_event.get_path_prefix()
+    objects_to_index = _get_objects_to_index(bucket, prefix, base_event.load_format)
+
+    event = IngestorIndexerLambdaEvent(
+        **base_event.model_dump(), objects_to_index=objects_to_index
+    )
     handler(event, is_local=True)
+
+
+def _get_objects_to_index(
+    bucket_name: str, prefix: str, load_format: str
+) -> Generator[IngestorIndexerObject]:
+    """Manually construct `IngestorIndexerObject` items based on objects in a given S3 location. Local runs only."""
+    print(
+        f"Will process all {load_format} files prefixed with 's3://{bucket_name}/{prefix}/*'."
+    )
+    for s3_object in get_s3_objects_by_type(bucket_name, prefix, load_format):
+        if s3_object["Key"].endswith(f".{load_format}"):
+            # Given a key like 'some/prefix/00000000-00002070.format', extract '00000000-00002070'
+            range_suffix = s3_object["Key"].split("/")[-1].split(".")[0]
+            range_start, range_end = map(int, range_suffix.split("-"))
+
+            yield IngestorIndexerObject(
+                s3_uri=f"s3://{bucket_name}/{s3_object['Key']}",
+                content_length=s3_object["Size"],
+                record_count=range_end - range_start,
+            )
 
 
 if __name__ == "__main__":

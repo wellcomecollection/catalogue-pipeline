@@ -9,6 +9,7 @@ import pyarrow as pa
 import smart_open
 from pydantic import BaseModel
 
+from ingestor.extractors.base_extractor import GraphBaseExtractor
 from ingestor.models.step_events import IngestorIndexerObject, IngestorLoaderLambdaEvent
 from utils.arrow import pydantic_to_pyarrow_schema
 
@@ -18,17 +19,9 @@ S3_BATCH_SIZE = 10_000
 LoadDestination = Literal["s3", "local"]
 
 
-class BaseExtractor:
-    def extract_raw(self) -> Generator[Any]:
-        """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
-        raise NotImplementedError(
-            "Each extractor must implement an `extract_raw` method."
-        )
-
-
 class ElasticsearchBaseTransformer:
     def __init__(self) -> None:
-        self.source: BaseExtractor = BaseExtractor()
+        self.source: GraphBaseExtractor = GraphBaseExtractor()
 
     def transform_document(self, raw_document: Any) -> BaseModel | None:
         """

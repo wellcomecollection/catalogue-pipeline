@@ -1,4 +1,4 @@
-from ingestor.models.neptune.query_result import NeptuneRelatedConcept
+from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
 
 
 def a_related_concept() -> NeptuneRelatedConcept:
@@ -40,7 +40,9 @@ def a_related_concept() -> NeptuneRelatedConcept:
         "same_as": [],
     }
 
-    return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")
+    return NeptuneRelatedConcept(
+        target=NeptuneConcept(**raw_concept), relationship_type="has_sibling"
+    )
 
 
 def a_related_concept_with_no_label() -> NeptuneRelatedConcept:
@@ -85,7 +87,9 @@ def a_related_concept_with_no_label() -> NeptuneRelatedConcept:
         "same_as": [],
     }
 
-    return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")
+    return NeptuneRelatedConcept(
+        target=NeptuneConcept(**raw_concept), relationship_type="has_sibling"
+    )
 
 
 def a_related_concept_with_two_source_nodes() -> NeptuneRelatedConcept:
@@ -140,4 +144,6 @@ def a_related_concept_with_two_source_nodes() -> NeptuneRelatedConcept:
         "same_as": [],
     }
 
-    return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")
+    return NeptuneRelatedConcept(
+        target=NeptuneConcept(**raw_concept), relationship_type="has_sibling"
+    )

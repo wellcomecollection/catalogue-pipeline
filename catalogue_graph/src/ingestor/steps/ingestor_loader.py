@@ -22,13 +22,15 @@ def create_transformer(
     event: IngestorLoaderLambdaEvent, is_local: bool = False
 ) -> ElasticsearchBaseTransformer:
     if event.ingestor_type == "concepts":
-        transformer_class = ElasticsearchConceptsTransformer
-    elif event.ingestor_type == "works":
-        transformer_class = ElasticsearchWorksTransformer
-    else:
-        raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
+        return ElasticsearchConceptsTransformer(
+            event.pipeline_date, event.window, is_local
+        )
+    if event.ingestor_type == "works":
+        return ElasticsearchWorksTransformer(
+            event.pipeline_date, event.window, is_local
+        )
 
-    return transformer_class(event.pipeline_date, event.window, is_local)
+    raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
 
 def handler(

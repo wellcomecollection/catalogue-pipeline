@@ -25,7 +25,9 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
         job_id="123",
         objects_to_index=[
             IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
+                s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet",
+                record_count=10,
+                content_length=500,
             )
         ],
     )
@@ -72,6 +74,13 @@ def failure_params_missing_file(record_type: IngestorType) -> tuple:
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
+            objects_to_index=[
+                IngestorIndexerObject(
+                    s3_uri="s3://test-catalogue-graph/ghost-file",
+                    content_length=0,
+                    record_count=0,
+                )
+            ],
         ),
         None,
         KeyError,
@@ -87,6 +96,13 @@ def failure_params_malformed_parquet(record_type: IngestorType) -> tuple:
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
+            objects_to_index=[
+                IngestorIndexerObject(
+                    s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl",
+                    content_length=10,
+                    record_count=10,
+                )
+            ],
         ),
         "catalogue/denormalised_works_example.jsonl",
         polars.exceptions.ComputeError,
@@ -104,6 +120,13 @@ def failure_params_wrong_content(
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
+            objects_to_index=[
+                IngestorIndexerObject(
+                    s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet",
+                    content_length=10,
+                    record_count=10,
+                )
+            ],
         ),
         f"ingestor/{actual_type}/00000000-00000010.parquet",
         pydantic_core.ValidationError,

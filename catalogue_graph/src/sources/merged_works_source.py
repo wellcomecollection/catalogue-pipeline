@@ -37,10 +37,8 @@ class MergedWorksSource(BaseSource):
         fields: list | None = None,
         window: IncrementalWindow | None = None,
         is_local: bool = False,
-        parallelism: int = config.ES_SOURCE_PARALLELISM,
     ):
         self.es_client = get_client("graph_extractor", pipeline_date, is_local)
-        self.parallelism = parallelism
         self.window = window
         self.fields = fields
         self.query = query
@@ -97,7 +95,7 @@ class MergedWorksSource(BaseSource):
 
         next_thread_index = 0
         # Extract documents in parallel, with all threads adding resulting documents to the same queue
-        for i in range(self.parallelism):
+        for i in range(config.ES_SOURCE_PARALLELISM):
             self.run_worker(i, queue)
             next_thread_index += 1
 

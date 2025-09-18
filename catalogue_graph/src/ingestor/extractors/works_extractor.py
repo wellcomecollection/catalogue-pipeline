@@ -1,18 +1,12 @@
-import time
 from collections.abc import Generator
+from itertools import batched
 
 from pydantic import BaseModel
 
-import config
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
-from ingestor.queries.work_queries import (
-    WORK_ANCESTORS_QUERY,
-    WORK_CHILDREN_QUERY,
-    WORK_CONCEPTS_QUERY,
-    WORK_QUERY,
-)
-from utils.elasticsearch import get_client, get_standard_index_name
+from models.events import IncrementalWindow
+from sources.merged_works_source import MergedWorksSource
 
 from .base_extractor import GraphBaseExtractor
 
@@ -25,92 +19,72 @@ class ExtractedWork(BaseModel):
 
 class GraphWorksExtractor(GraphBaseExtractor):
     def __init__(
-        self, pipeline_date: str, start_offset: int, end_index: int, is_local: bool
+        self,
+        pipeline_date: str,
+        window: IncrementalWindow | None,
+        is_local: bool = False,
     ):
-        super().__init__(start_offset, end_index, is_local)
-        self.pipeline_date = pipeline_date
-
-    def get_es_works(self, work_ids: list[str]) -> dict:
-        es_client = get_client("graph_extractor", self.pipeline_date, True)
-        index_name = get_standard_index_name(
-            config.ES_DENORMALISED_INDEX_NAME, self.pipeline_date
+        super().__init__(is_local)
+        self.es_source = MergedWorksSource(
+            pipeline_date=pipeline_date,
+            window=window,
+            is_local=is_local,
         )
 
-        start_time = time.time()
-        result = es_client.mget(index=index_name, body={"ids": work_ids})
-        duration = round(time.time() - start_time)
+    def _get_work_ancestors(self, ids: list[str]) -> dict:
+        """Return all ancestors of each work in the current batch."""
+        return self.make_neptune_query("work_ancestors", ids)
 
-        work_mapping = {}
-        for work in result["docs"]:
-            work_id = work["_id"]
+    def _get_work_children(self, ids: list[str]) -> dict:
+        """Return all children of each work in the current batch."""
+        return self.make_neptune_query("work_children", ids)
 
-            if "error" in work:
-                raise ValueError(
-                    f"Failed to retrieve work from Elasticsearch: {work['error']}"
+    def _get_work_concepts(self, ids: list[str]) -> dict:
+        """Return all concepts of each work in the current batch."""
+        return self.make_neptune_query("work_concepts", ids)
+
+    def get_works(self) -> Generator[DenormalisedWork]:
+        for work in self.es_source.stream_raw():
+            yield DenormalisedWork(**work)
+
+    def get_work_stream(self) -> Generator[tuple[DenormalisedWork]]:
+        yield from batched(self.get_works(), 10_000, strict=False)
+
+    def extract_raw(self) -> Generator[ExtractedWork]:
+        streamed_ids: set[str] = set()
+        related_ids: set[str] = set()
+
+        for es_works in self.get_work_stream():
+            visible_work_ids = [
+                w.state.canonical_id for w in es_works if w.type == "Visible"
+            ]
+            all_ancestors = self._get_work_ancestors(visible_work_ids)
+            all_children = self._get_work_children(visible_work_ids)
+            all_concepts = self._get_work_concepts(visible_work_ids)
+
+            for es_work in es_works:
+                work_id = es_work.state.canonical_id
+
+                work_hierarchy = WorkHierarchy(
+                    id=work_id,
+                    ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
+                    children=all_children.get(work_id, {}).get("children", []),
                 )
 
-            if not work["found"]:
-                print(f"Work {work_id} does not exist in the denormalised index.")
-                continue
+                work_concepts = []
+                for raw_concept in all_concepts.get(work_id, []):
+                    work_concepts.append(WorkConcept(**raw_concept))
 
-            work_mapping[work_id] = work["_source"]
+                streamed_ids.add(es_work.state.canonical_id)
+                related_ids.update(
+                    c.work.properties.id for c in work_hierarchy.children
+                )
+                related_ids.update(
+                    c.work.properties.id for c in work_hierarchy.ancestors
+                )
 
-        print(
-            f"Ran 'es works' query in {duration} seconds, retrieving {len(work_mapping)} records."
-        )
-        return work_mapping
-
-    def _get_work_ids(self) -> Generator[str]:
-        """Return a list of all work IDs belonging to the current batch."""
-        for item in self.make_neptune_query(WORK_QUERY, "works"):
-            yield item["id"]
-
-    def _get_work_ancestors(self) -> dict:
-        """Return all ancestors of each work in the current batch."""
-        results = self.make_neptune_query(WORK_ANCESTORS_QUERY, "work ancestors")
-        return {item["id"]: item for item in results}
-
-    def _get_work_children(self) -> dict:
-        """Return all children of each work in the current batch."""
-        results = self.make_neptune_query(WORK_CHILDREN_QUERY, "work children")
-        return {item["id"]: item for item in results}
-
-    def _get_work_concepts(self) -> dict:
-        """Return all concepts of each work in the current batch."""
-        results = self.make_neptune_query(WORK_CONCEPTS_QUERY, "work concepts")
-        return {item["id"]: item["concepts"] for item in results}
-
-    def extract_raw(
-        self,
-    ) -> Generator[ExtractedWork]:
-        work_ids = list(self._get_work_ids())
-        all_ancestors = self._get_work_ancestors()
-        all_children = self._get_work_children()
-        all_concepts = self._get_work_concepts()
-        all_es_works = self.get_es_works(work_ids)
-
-        for work_id in work_ids:
-            es_work = all_es_works.get(work_id)
-
-            # Normally, the catalogue graph only stores `Visible` works extracted from the denormalised index. However,
-            # in cases where the status of a work changes from `Visible` to some other status (e.g. `Deleted`), it might
-            # take a while for this change to propagate to the graph. Therefore, it is possible for a work which exists
-            # in the graph to not exist as a `Visible` work in the denormalised index. When this happens, skip the work.
-            if es_work is None or es_work["type"] != "Visible":
-                continue
-
-            work_hierarchy = WorkHierarchy(
-                id=work_id,
-                ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
-                children=all_children.get(work_id, {}).get("children", []),
-            )
-
-            work_concepts = []
-            for raw_concept in all_concepts.get(work_id, []):
-                work_concepts.append(WorkConcept(**raw_concept))
-
-            yield ExtractedWork(
-                work=DenormalisedWork(**es_work),
-                hierarchy=work_hierarchy,
-                concepts=work_concepts,
-            )
+                yield ExtractedWork(
+                    work=es_work,
+                    hierarchy=work_hierarchy,
+                    concepts=work_concepts,
+                )

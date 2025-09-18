@@ -1,14 +1,88 @@
-from collections.abc import Generator
-from typing import Any
+import time
+from collections.abc import Generator, Iterable
+from typing import Any, Literal
 
+from ingestor.queries.concept_queries import (
+    CONCEPT_QUERY,
+    CONCEPT_TYPE_QUERY,
+    SAME_AS_CONCEPT_QUERY,
+    SOURCE_CONCEPT_QUERY,
+    get_referenced_together_query,
+    get_related_query,
+)
+from ingestor.queries.work_queries import (
+    WORK_ANCESTORS_QUERY,
+    WORK_CHILDREN_QUERY,
+    WORK_CONCEPTS_QUERY,
+)
 from utils.aws import get_neptune_client
+from utils.streaming import process_stream_in_parallel
+
+ConceptRelatedQuery = Literal[
+    "related_to", "fields_of_work", "narrower_than", "broader_than", "people"
+]
+ConceptReferencedTogetherQuery = Literal["frequent_collaborators", "related_topics"]
+ConceptQuery = Literal[
+    "concept",
+    "concept_type",
+    "source_concept",
+    "same_as_concept",
+    ConceptRelatedQuery,
+    ConceptReferencedTogetherQuery,
+]
+WorkQuery = Literal["work_children", "work_ancestors", "work_concepts"]
+
+NEPTUNE_PARAMS = {
+    # There are a few Wikidata supernodes which cause performance issues in queries.
+    # We need to filter them out when running queries to get related nodes.
+    # Q5 -> 'human', Q151885 -> 'concept'
+    "ignored_wikidata_ids": ["Q5", "Q151885"],
+    # Maximum number of related nodes to return for each relationship type
+    "related_to_limit": 10,
+    # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
+    "shared_works_count_threshold": 3,
+}
+
+EXPENSIVE_QUERIES = {"related_topics", "frequent_collaborators"}
+
+NEPTUNE_QUERIES = {
+    "work_children": WORK_CHILDREN_QUERY,
+    "work_ancestors": WORK_ANCESTORS_QUERY,
+    "work_concepts": WORK_CONCEPTS_QUERY,
+    "concept": CONCEPT_QUERY,
+    "concept_type": CONCEPT_TYPE_QUERY,
+    "source_concept": SOURCE_CONCEPT_QUERY,
+    "same_as_concept": SAME_AS_CONCEPT_QUERY,
+    "related_to": get_related_query("RELATED_TO"),
+    "fields_of_work": get_related_query("HAS_FIELD_OF_WORK"),
+    "narrower_than": get_related_query("NARROWER_THAN"),
+    "broader_than": get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
+    "people": get_related_query("HAS_FIELD_OF_WORK", "to"),
+    # Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
+    "frequent_collaborators": get_referenced_together_query(
+        source_referenced_types=["Person", "Organisation"],
+        related_referenced_types=["Person", "Organisation"],
+        source_referenced_in=["contributors"],
+        related_referenced_in=["contributors"],
+    ),
+    # Do not include agents/people/orgs in the list of related topics.
+    "related_topics": get_referenced_together_query(
+        related_referenced_types=[
+            "Concept",
+            "Subject",
+            "Place",
+            "Meeting",
+            "Period",
+            "Genre",
+        ],
+        related_referenced_in=["subjects"],
+    ),
+}
 
 
 class GraphBaseExtractor:
-    def __init__(self, start_offset: int, end_index: int, is_local: bool):
+    def __init__(self, is_local: bool):
         self.neptune_client = get_neptune_client(is_local)
-        self.start_offset = start_offset
-        self.end_index = end_index
 
     def extract_raw(self) -> Generator[Any]:
         """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
@@ -16,12 +90,22 @@ class GraphBaseExtractor:
             "Each extractor must implement an `extract_raw` method."
         )
 
-    def get_neptune_query_params(self) -> dict:
-        return {
-            "start_offset": self.start_offset,
-            "limit": self.end_index - self.start_offset,
-        }
+    def make_neptune_query(
+        self, query_type: ConceptQuery | WorkQuery, ids: Iterable[str]
+    ) -> dict:
+        chunk_size = 1000 if query_type in EXPENSIVE_QUERIES else 5000
 
-    def make_neptune_query(self, query: str, label: str) -> list[dict]:
-        params = self.get_neptune_query_params()
-        return self.neptune_client.time_open_cypher_query(query, params, label)
+        def _run_query(chunk: Iterable[str]) -> list[dict]:
+            return self.neptune_client.run_open_cypher_query(
+                NEPTUNE_QUERIES[query_type], NEPTUNE_PARAMS | {"ids": chunk}
+            )
+
+        start = time.time()
+        raw_result = process_stream_in_parallel(ids, _run_query, chunk_size, 5)
+        results = {item["id"]: item for item in raw_result}
+
+        print(
+            f"Ran a set of '{query_type}' queries in {round(time.time() - start)}s, "
+            f"retrieving {len(results)} records."
+        )
+        return results
