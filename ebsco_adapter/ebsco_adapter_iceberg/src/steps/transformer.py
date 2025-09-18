@@ -38,6 +38,7 @@ class EbscoAdapterTransformerConfig(BaseModel):
     is_local: bool = False
     use_rest_api_table: bool = True
     pipeline_date: str
+    # Optional override for index naming. When None we use pipeline_date.
     index_date: str | None = None
 
 
@@ -195,7 +196,6 @@ def process_batches(
     index_name: str,
     job_id: str,
     changeset_id: str | None,
-    index_date: str,
 ) -> EbscoAdapterTransformerResult:
     """Process an Arrow table into Elasticsearch and return a result object.
 
@@ -228,7 +228,6 @@ def process_batches(
     )
 
     return EbscoAdapterTransformerResult(
-        index_date=index_date,
         job_id=job_id,
         batch_file_location=batch_file_location,
         batch_file_bucket=batch_file_bucket,
@@ -245,8 +244,8 @@ def handler(
     print(f"Processing event: {event}")
     print(f"Received job_id: {event.job_id}")
 
-    # Determine index date by cascading choice: event > config > pipeline_date
-    index_date = event.index_date or config_obj.index_date or config_obj.pipeline_date
+    # Determine index date from config override or fallback to pipeline date
+    index_date = config_obj.index_date or config_obj.pipeline_date
 
     prior_record = None
     if event.file_location:
@@ -264,7 +263,6 @@ def handler(
         prior_key = prior_record.get("batch_file_key")
 
         return EbscoAdapterTransformerResult(
-            index_date=index_date,
             job_id=event.job_id,
             batch_file_location=prior_batch,
             batch_file_bucket=prior_bucket,
@@ -303,7 +301,6 @@ def handler(
         index_name=index_name,
         job_id=event.job_id,
         changeset_id=event.changeset_id,
-        index_date=index_date,
     )
     _record_transformed_file(event, result)
 
@@ -340,7 +337,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The index date to use (defaults to pipeline date).",
+        help="Optional index date override (defaults to pipeline date).",
         required=False,
     )
     parser.add_argument(

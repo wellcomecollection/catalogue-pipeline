@@ -57,15 +57,20 @@ def _prepare_changeset(
 
 
 def _run_transform(
-    changeset_id: str, index_date: str | None, pipeline_date: str = "dev"
+    changeset_id: str,
+    *,
+    index_date: str | None = None,
+    pipeline_date: str = "dev",
 ) -> EbscoAdapterTransformerResult:
     event = EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
-        index_date=index_date,
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_rest_api_table=False, pipeline_date=pipeline_date
+        is_local=True,
+        use_rest_api_table=False,
+        pipeline_date=pipeline_date,
+        index_date=index_date,
     )
     return handler(event=event, config_obj=config)
 
@@ -247,32 +252,23 @@ def test_transformer_batch_file_location_with_changeset(
 
 
 @pytest.mark.parametrize(
-    "event_index_date, pipeline_date, config_index_date, expected_index",
+    "pipeline_date, index_date, expected_index",
     [
-        # 1. Explicit event index date takes precedence (config None)
-        ("2025-02-02", "dev", None, "works-source-2025-02-02"),
-        # 2. Event index date None -> falls back to pipeline_date (dev)
-        (None, "dev", None, "works-source-dev"),
-        # 3. Event None, custom pipeline_date used
-        (None, "2025-05-05", None, "works-source-2025-05-05"),
-        # 4. Event None, config index date set -> uses config index date
-        (None, "dev", "2025-07-07", "works-source-2025-07-07"),
-        # 5. Event index date overrides config index date when both provided
-        ("2025-08-08", "dev", "2025-07-07", "works-source-2025-08-08"),
+        ("dev", None, "works-source-dev"),
+        ("2025-05-05", None, "works-source-2025-05-05"),
+        ("dev", "2025-07-07", "works-source-2025-07-07"),
     ],
 )
 def test_transformer_index_name_selection(
     temporary_table: pa.Table,
     monkeypatch: pytest.MonkeyPatch,
-    event_index_date: str | None,
     pipeline_date: str,
-    config_index_date: str | None,
+    index_date: str | None,
     expected_index: str,
 ) -> None:
-    """Validate full cascade: event.index_date or config.index_date or pipeline_date."""
+    """Validate cascade: config.index_date or pipeline_date (event no longer provides override)."""
     _add_pipeline_secrets(pipeline_date)
 
-    # Reset collected inputs between parametrized cases
     with suppress(Exception):  # pragma: no cover - defensive
         MockElasticsearchClient.inputs.clear()
 
@@ -282,13 +278,13 @@ def test_transformer_index_name_selection(
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id, index_date=event_index_date, job_id="20250101T1200"
+        changeset_id=changeset_id, job_id="20250101T1200"
     )
     config = EbscoAdapterTransformerConfig(
         is_local=True,
         use_rest_api_table=False,
         pipeline_date=pipeline_date,
-        index_date=config_index_date,
+        index_date=index_date,
     )
     handler(event=event, config_obj=config)
 
