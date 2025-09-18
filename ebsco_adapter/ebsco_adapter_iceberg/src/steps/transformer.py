@@ -2,7 +2,7 @@
 
 Converts Iceberg loader output (all records or a changeset) into `SourceWork` /
 `DeletedWork` documents and indexes them into Elasticsearch, writing a batch
-ID manifest for downstream consumers; idempotent on previously processed files.
+ID manifest for downstream consumers.
 """
 
 import argparse
@@ -28,7 +28,6 @@ from models.step_events import (
 from models.work import BaseWork, DeletedWork, SourceWork
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
-from utils.tracking import record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
@@ -173,24 +172,6 @@ def _process_batch(
     return success, failed, ids
 
 
-def _record_transformed_file(
-    event: EbscoAdapterTransformerEvent, result: EbscoAdapterTransformerResult
-) -> None:
-    """Record that a source file was transformed (idempotency tracking).
-
-    Separated from the main handler for clarity & easier testing.
-    Safe no-op when no file_location is supplied (e.g. local runs without S3 input).
-    """
-    if not event.file_location:
-        print("No file location provided for tracking, skipping!")
-        return
-
-    record_processed_file(
-        job_id=event.job_id,
-        file_location=event.file_location,
-        step="transformed",
-        payload_obj=result,
-    )
 
 
 def process_batches(
@@ -281,8 +262,6 @@ def handler(
         job_id=event.job_id,
         changeset_id=event.changeset_id,
     )
-    _record_transformed_file(event, result)
-
     return result
 
 
