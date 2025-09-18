@@ -2,6 +2,19 @@ from enum import Enum, auto
 
 import polars as pl
 import pytest
+from test_mocks import (
+    MockElasticsearchClient,
+    MockRequest,
+    MockSmartOpen,
+    add_neptune_mock_response,
+    get_mock_ingestor_indexer_event,
+    get_mock_ingestor_loader_event,
+    mock_es_secrets,
+)
+from test_utils import (
+    load_json_fixture,
+)
+
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
     ConceptDescription,
@@ -21,18 +34,6 @@ from ingestor.queries.concept_queries import (
     get_related_query,
 )
 from ingestor.steps.ingestor_loader import handler
-from test_mocks import (
-    MockElasticsearchClient,
-    MockRequest,
-    MockSmartOpen,
-    add_neptune_mock_response,
-    get_mock_ingestor_indexer_event,
-    get_mock_ingestor_loader_event,
-    mock_es_secrets,
-)
-from test_utils import (
-    load_json_fixture,
-)
 
 
 def mock_denormalised_work(pipeline_date: str) -> None:
@@ -361,9 +362,7 @@ def test_ingestor_loader(
 
     loader_event = get_mock_ingestor_loader_event("123")
     indexer_event = get_mock_ingestor_indexer_event("123")
-    # loader_s3_bucket="test-bucket",
-    # loader_s3_prefix="test-prefix",
-    result = handler(loader_event, is_local=True)
+    result = handler(loader_event)
 
     assert result == indexer_event
     assert len(MockRequest.calls) == 11
@@ -393,6 +392,4 @@ def test_ingestor_loader_bad_neptune_response() -> None:
 
     with pytest.raises(LookupError):
         event = get_mock_ingestor_loader_event("123")
-        # loader_s3_bucket="test-bucket",
-        # loader_s3_prefix="test-prefix",
-        handler(event, is_local=True)
+        handler(event)
