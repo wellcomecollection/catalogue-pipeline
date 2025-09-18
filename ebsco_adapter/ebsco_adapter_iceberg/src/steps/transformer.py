@@ -172,8 +172,6 @@ def _process_batch(
     return success, failed, ids
 
 
-
-
 def process_batches(
     pa_table: pa.Table,
     es_client: Elasticsearch,
@@ -309,7 +307,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, job_id=args.job_id, file_location=None
+        changeset_id=args.changeset_id, job_id=args.job_id
     )
     use_rest_api = args.use_rest_api_table
     config_obj = EbscoAdapterTransformerConfig(

@@ -26,9 +26,6 @@ class EbscoAdapterLoaderEvent(EbscoAdapterEvent):
 
 
 class EbscoAdapterTransformerEvent(EbscoAdapterEvent):
-    # Propagate original source file location so transformer can record tracking.
-    # Optional to allow full re-transform runs that aren't tied to a single source file.
-    file_location: str | None = None
     changeset_id: str | None = None
 
 

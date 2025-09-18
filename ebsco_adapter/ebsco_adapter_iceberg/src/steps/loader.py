@@ -81,7 +81,6 @@ def handler(
         return EbscoAdapterTransformerEvent(
             changeset_id=prior_changeset,
             job_id=event.job_id,
-            file_location=event.file_location,
         )
 
     table = get_iceberg_table(config_obj.use_rest_api_table)
@@ -96,14 +95,12 @@ def handler(
         payload_obj=EbscoAdapterTransformerEvent(
             changeset_id=changeset_id,
             job_id=event.job_id,
-            file_location=event.file_location,
         ),
     )
 
     return EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
         job_id=event.job_id,
-        file_location=event.file_location,
     )
 
 
