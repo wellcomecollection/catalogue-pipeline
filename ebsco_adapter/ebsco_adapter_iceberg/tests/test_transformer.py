@@ -155,7 +155,7 @@ def test_transformer_end_to_end_with_local_table(
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    assert lines == [{"ids": list(records_by_id.keys())}]
+    assert lines == [{"ids": [f"Work[ebsco-alt-lookup/{i}]" for i in records_by_id]}]
     titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
@@ -178,7 +178,14 @@ def test_transformer_creates_deletedwork_for_empty_content(
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    assert lines == [{"ids": ["ebsDel001", "ebsDel002"]}]
+    assert lines == [
+        {
+            "ids": [
+                "Work[ebsco-alt-lookup/ebsDel001]",
+                "Work[ebsco-alt-lookup/ebsDel002]",
+            ]
+        }
+    ]
     deleted_docs = [
         op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel001"
     ]
@@ -220,7 +227,14 @@ def test_transformer_full_retransform_when_no_changeset(
     batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    assert lines == [{"ids": ["ebsFull001", "ebsFull002"]}]
+    assert lines == [
+        {
+            "ids": [
+                "Work[ebsco-alt-lookup/ebsFull001]",
+                "Work[ebsco-alt-lookup/ebsFull002]",
+            ]
+        }
+    ]
 
 
 def test_transformer_batch_file_location_with_changeset(
