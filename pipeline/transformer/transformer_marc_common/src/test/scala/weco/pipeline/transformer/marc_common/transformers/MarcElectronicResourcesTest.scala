@@ -10,6 +10,8 @@ import weco.pipeline.transformer.marc_common.generators.MarcTestRecord
 import weco.pipeline.transformer.marc_common.logging.LoggingContext
 import weco.pipeline.transformer.marc_common.models.{MarcField, MarcSubfield}
 
+import scala.collection.Seq
+
 class MarcElectronicResourcesTest
     extends AnyFunSpec
     with Matchers
@@ -63,6 +65,58 @@ class MarcElectronicResourcesTest
       )
     )
     MarcElectronicResources(record) shouldBe Nil
+  }
+
+  describe("to holdings") {
+
+    it("returns nothing when an 856 field has no ǂz subfield") {
+      val record = MarcTestRecord(fields =
+        Seq(
+          MarcField(
+            "856",
+            subfields =
+              Seq(MarcSubfield(tag = "u", content = "https://www.example.com/"))
+          )
+        )
+      )
+      MarcElectronicResources.toHoldings(record) shouldBe Nil
+    }
+
+    it("returns nothing when an 856 field has no ǂ3 subfield") {
+      val record = MarcTestRecord(fields =
+        Seq(
+          MarcField(
+            "856",
+            subfields = Seq(
+              MarcSubfield(tag = "u", content = "https://www.example.com/"),
+              MarcSubfield(tag = "z", content = "click here")
+            )
+          )
+        )
+      )
+      MarcElectronicResources.toHoldings(record) shouldBe Nil
+    }
+
+    it("only returns holdings with all three subfields") {
+      val record = MarcTestRecord(fields =
+        Seq(
+          MarcField(
+            "856",
+            subfields = Seq(
+              MarcSubfield(tag = "u", content = "https://www.example.com/"),
+              MarcSubfield(tag = "z", content = "click here"),
+              MarcSubfield(tag = "3", content = "enum")
+            )
+          )
+        )
+      )
+      val holdings = MarcElectronicResources.toHoldings(record).loneElement
+      val location = holdings.location.get.asInstanceOf[DigitalLocation]
+      location.url shouldBe "https://www.example.com/"
+      location.linkText.get shouldBe "click here"
+      holdings.enumeration.loneElement shouldBe "enum"
+    }
+
   }
 
 }

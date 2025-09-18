@@ -18,14 +18,15 @@ import smart_open
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 from pymarc import parse_xml_to_array
+from pymarc.record import Record
 
 import config
-from models.marc import MarcRecord
 from models.step_events import (
     EbscoAdapterTransformerEvent,
     EbscoAdapterTransformerResult,
 )
 from models.work import BaseWork, DeletedWork, SourceWork
+from transformers.ebsco_to_weco import transform_record
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
 from utils.tracking import is_file_already_processed, record_processed_file
@@ -68,16 +69,12 @@ def transform(work_id: str, content: str) -> list[SourceWork]:
         return bool(record and getattr(record, "title", None))
 
     try:
-        marc_records: list[MarcRecord] = parse_xml_to_array(io.StringIO(content))
+        marc_records: list[Record] = parse_xml_to_array(io.StringIO(content))
     except Exception as exc:  # broad, but we want to skip bad MARC payloads only
         print(f"Failed to parse MARC content for id={work_id}: {exc}")
         return []
 
-    return [
-        SourceWork(id=work_id, title=str(record.title))
-        for record in marc_records
-        if valid_record(record)
-    ]
+    return [transform_record(record) for record in marc_records if valid_record(record)]
 
 
 def _generate_actions(
