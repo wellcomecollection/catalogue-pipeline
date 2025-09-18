@@ -21,5 +21,18 @@ class FailureManifest(BaseModel):
 
 
 class TransformerManifest(BaseModel):
+    job_id: str
     successes: SuccessManifest
     failures: FailureManifest | None = None
+
+
+# These are consumed by a Scala service, so for convenience
+# we keep the field names in camelCase
+class SuccessBatchLine(BaseModel):
+    sourceIdentifiers: list[str]
+    jobId: str
+
+
+class ErrorLine(BaseModel):
+    id: str
+    message: str
