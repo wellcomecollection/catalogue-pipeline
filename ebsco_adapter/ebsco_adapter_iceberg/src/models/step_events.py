@@ -35,12 +35,9 @@ class EbscoAdapterTransformerEvent(EbscoAdapterEvent):
 class EbscoAdapterTransformerResult(EbscoAdapterEvent):
     """Result of transformer execution passed to the next step.
 
-    Large lists of batch ids are written to S3 (one JSON line per batch) and
-    we return the S3 location + explicit bucket/key to simplify downstream
-    ItemReader configuration.
+    Large lists of batch ids are written to S3 (one JSON line per batch).
     """
 
-    batch_file_location: str | None = None
     batch_file_bucket: str | None = None
     batch_file_key: str | None = None
     success_count: int = 0

@@ -107,10 +107,11 @@ def test_transformer_short_circuit_when_prior_processed_detected(
     """
     file_uri = "s3://bucket/path/file.xml"
     tracking_uri = f"{file_uri}.transformed.json"
-    # Existing tracking file with payload including prior batch_file_location
+    # Existing tracking file with payload including prior batch_file bucket/key (legacy field removed)
     prior_result = EbscoAdapterTransformerResult(
         job_id="20250101T1200",
-        batch_file_location="s3://bucket/path/20250101T1200.json",
+        batch_file_bucket="bucket",
+        batch_file_key="path/20250101T1200.json",
         success_count=10,
         failure_count=0,
     )
@@ -130,8 +131,9 @@ def test_transformer_short_circuit_when_prior_processed_detected(
     # Run handler
     result = handler(event=event, config_obj=config)
 
-    # Expect short-circuit with preserved prior batch_file_location and no ES interactions
-    assert result.batch_file_location == prior_result.batch_file_location
+    # Expect short-circuit with preserved prior batch_file bucket/key and no ES interactions
+    assert result.batch_file_bucket == prior_result.batch_file_bucket
+    assert result.batch_file_key == prior_result.batch_file_key
     assert result.success_count == 0
     assert result.failure_count == 0
     assert MockElasticsearchClient.inputs == []
@@ -148,11 +150,12 @@ def test_transformer_end_to_end_with_local_table(
 
     result = _run_transform(changeset_id, index_date="2025-01-01")
 
-    assert result.batch_file_location is not None
+    assert result.batch_file_bucket is not None and result.batch_file_key is not None
     assert result.success_count == 2
     assert result.failure_count == 0
     # Validate file contents written to mock S3 (NDJSON)
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
     assert lines == [{"ids": [f"Work[ebsco-alt-lookup/{i}]" for i in records_by_id]}]
@@ -173,9 +176,10 @@ def test_transformer_creates_deletedwork_for_empty_content(
     result = _run_transform(changeset_id, index_date="2025-03-01")
 
     # Both IDs should appear (one DeletedWork, one SourceWork)
-    assert result.batch_file_location is not None
+    assert result.batch_file_bucket is not None and result.batch_file_key is not None
     assert result.success_count == 2
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
     assert lines == [
@@ -221,10 +225,11 @@ def test_transformer_full_retransform_when_no_changeset(
 
     assert result.failure_count == 0
     assert result.success_count == 2
-    assert result.batch_file_location is not None
-    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
-    assert result.batch_file_location == expected_reindex_path
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    assert result.batch_file_bucket == adapter_config.S3_BUCKET
+    expected_key = f"{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
+    assert result.batch_file_key == expected_key
+    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
     assert lines == [
@@ -237,7 +242,7 @@ def test_transformer_full_retransform_when_no_changeset(
     ]
 
 
-def test_transformer_batch_file_location_with_changeset(
+def test_transformer_batch_file_key_with_changeset(
     temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """When a changeset exists the batch file path uses the changeset pattern under the batches prefix (file_location irrelevant)."""
@@ -256,9 +261,13 @@ def test_transformer_batch_file_location_with_changeset(
     )
     result = handler(event=event, config_obj=config)
 
-    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
-    assert result.batch_file_location == expected_path
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    expected_key = (
+        f"{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
+    )
+    assert result.batch_file_bucket == adapter_config.S3_BUCKET
+    assert result.batch_file_key == expected_key
+    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
     # Only one batch line with a single id
