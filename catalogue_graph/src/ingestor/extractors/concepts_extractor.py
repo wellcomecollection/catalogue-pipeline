@@ -192,18 +192,17 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             # Since we only ask for concept fields, works with no concepts are returned as empty dictionaries
             if "data" in work:
                 for concept, _ in extract_concepts_from_work(work["data"]):
-                    concept_id = concept["id"].get("canonicalId")
-
-                    if concept_id:
-                        yield concept_id
-                    else:
+                    if "id" not in concept:
                         print(f"Concept {concept} does not have an ID.")
+                        continue
+
+                    yield concept["id"]["canonicalId"]
 
     def get_concept_stream(self) -> Generator[set[str]]:
         processed_ids: set[str] = set()
 
         extracted_ids = self.get_concepts_from_works()
-        for extracted_batch in batched(extracted_ids, 10_000, strict=False):
+        for extracted_batch in batched(extracted_ids, 40_000, strict=False):
             batch = set(extracted_batch).difference(processed_ids)
             self._update_same_as_map(batch)
 
