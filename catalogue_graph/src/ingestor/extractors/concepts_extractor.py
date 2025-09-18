@@ -101,8 +101,6 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             # Remove `concept_id` from the list of 'same as' concepts
             same_as = set(self.get_same_as(concept_id)).difference([concept_id])
 
-            print(source.get("source_concepts"))
-
             concepts[concept_id] = NeptuneConcept(
                 concept=concept["concept"],
                 types=list(concept_types[concept_id]),

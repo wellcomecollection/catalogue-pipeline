@@ -97,8 +97,7 @@ class ElasticsearchBaseTransformer:
                 elif event.load_format == "jsonl":
                     self._load_to_jsonl(documents, f)
 
-                boto_s3_object = f.to_boto3(boto3.resource("s3"))
-                content_length = boto_s3_object.content_length
+                content_length = f.tell()
 
             loaded_objects.append(
                 IngestorIndexerObject(
