@@ -84,7 +84,7 @@ ES_FIELDS = [
     "data.genres",
 ]
 
-RelatedConcepts = dict[str, list[NeptuneConcept]]
+RelatedConcepts = dict[str, list[NeptuneRelatedConcept]]
 
 
 class GraphConceptsExtractor:
@@ -103,10 +103,10 @@ class GraphConceptsExtractor:
         )
         self.neptune_client = get_neptune_client(is_local)
 
-        self.primary_map = {}
-        self.same_as_map = {}
+        self.primary_map: dict[str, str] = {}
+        self.same_as_map: dict[str, list[str]] = {}
 
-    def get_primary(self, concept_id: str):
+    def get_primary(self, concept_id: str) -> str:
         """
         Given a `concept_id`, return its primary 'same as' concept ID. Each group of 'same as' concepts has exactly
         one primary ID.
@@ -121,7 +121,7 @@ class GraphConceptsExtractor:
     def make_neptune_query(self, query_type: ConceptQuery, ids: Iterable[str]) -> dict:
         chunk_size = 1000 if query_type in EXPENSIVE_QUERIES else 5000
 
-        def _run_query(chunk: Iterable[str]):
+        def _run_query(chunk: Iterable[str]) -> list[dict]:
             return self.neptune_client.run_open_cypher_query(
                 NEPTUNE_QUERIES[query_type], NEPTUNE_PARAMS | {"ids": chunk}
             )
@@ -136,7 +136,7 @@ class GraphConceptsExtractor:
         )
         return results
 
-    def get_concept_types(self, concept_ids: Iterable[str]):
+    def get_concept_types(self, concept_ids: Iterable[str]) -> dict[str, set[str]]:
         """Given a set of `concept_ids`, return all types associated with each concept via HAS_CONCEPT edges."""
 
         # Types are shared across all 'same as' concepts
@@ -153,7 +153,7 @@ class GraphConceptsExtractor:
 
         return concept_types
 
-    def get_concepts(self, ids: Iterable[str]):
+    def get_concepts(self, ids: Iterable[str]) -> dict[str, NeptuneConcept]:
         concept_result = self.make_neptune_query("concept", ids)
         source_concept_result = self.make_neptune_query("source_concept", ids)
         concept_types = self.get_concept_types(ids)
@@ -172,7 +172,7 @@ class GraphConceptsExtractor:
 
         return concepts
 
-    def _update_same_as_map(self, concept_ids: Iterable[str]):
+    def _update_same_as_map(self, concept_ids: Iterable[str]) -> None:
         # Remove concepts whose 'same as' IDs were already calculated as part of a previous batch
         concept_ids = set(concept_ids).difference(self.primary_map.keys())
 
@@ -188,8 +188,6 @@ class GraphConceptsExtractor:
             for same_as_id in same_as_ids:
                 self.primary_map[same_as_id] = primary_id
 
-        return result
-
     def _get_related_concepts(
         self, query_type: ConceptQuery, ids: Iterable[str]
     ) -> RelatedConcepts:
@@ -202,7 +200,7 @@ class GraphConceptsExtractor:
         self._update_same_as_map(related_ids)
 
         # Merge results across 'same as' concepts and related concepts
-        merged_result = defaultdict(dict)
+        merged_result: dict[str, dict] = defaultdict(dict)
         for concept_id, item in result.items():
             primary_id = self.get_primary(concept_id)
 
@@ -256,16 +254,16 @@ class GraphConceptsExtractor:
                     print(f"Concept {concept} does not have an ID.")
 
     def get_concept_stream(self) -> Generator[set[str]]:
-        processed_ids = set()
+        processed_ids: set[str] = set()
 
         extracted_ids = self.get_concepts_from_works()
         for extracted_batch in batched(extracted_ids, 10_000, strict=False):
-            extracted_batch = set(extracted_batch).difference(processed_ids)
-            self._update_same_as_map(extracted_batch)
+            batch = set(extracted_batch).difference(processed_ids)
+            self._update_same_as_map(batch)
 
             # All 'same as' concepts must be processed as part of the same batch to get consistent results
             full_batch = set()
-            for concept_id in extracted_batch:
+            for concept_id in batch:
                 for same_as_id in self.get_same_as(concept_id):
                     processed_ids.add(same_as_id)
                     full_batch.add(same_as_id)

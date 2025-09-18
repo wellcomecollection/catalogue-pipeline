@@ -115,9 +115,7 @@ def handler(event: IngestorMonitorStepEvent, is_local: bool = False) -> None:
         deleted_count=deleted_count,
         date=datetime.today().strftime("%Y-%m-%d"),
     )
-
     report.write()
-    report.write(latest=True)
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:
@@ -143,7 +141,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--index-date",
         type=str,
-        help='The concepts index date that is being ingested to, will default to "dev".',
+        help='The concepts index date that is being removed from, will default to "dev".',
         required=False,
         default="dev",
     )

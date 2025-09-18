@@ -1,5 +1,7 @@
 from pathlib import PurePosixPath
 
+from pydantic import BaseModel
+
 import config
 from models.events import BasePipelineEvent
 from utils.types import IngestorLoadFormat, IngestorType
@@ -34,8 +36,14 @@ class IngestorLoaderLambdaEvent(IngestorStepEvent):
     pass
 
 
+class IngestorIndexerObject(BaseModel):
+    s3_uri: str
+    content_length: int
+    record_count: int
+
+
 class IngestorIndexerLambdaEvent(IngestorStepEvent):
-    pass
+    objects_to_index: list[IngestorIndexerObject] | None = None
 
 
 class IngestorMonitorStepEvent(IngestorStepEvent):
@@ -45,7 +53,3 @@ class IngestorMonitorStepEvent(IngestorStepEvent):
 
 class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):
     success_count: int
-
-
-class IngestorLoaderMonitorLambdaEvent(IngestorMonitorStepEvent):
-    events: list[IngestorIndexerLambdaEvent]

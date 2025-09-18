@@ -1,7 +1,7 @@
-from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
+from ingestor.models.neptune.query_result import NeptuneRelatedConcept
 
 
-def a_related_concept() -> NeptuneConcept:
+def a_related_concept() -> NeptuneRelatedConcept:
     raw_concept = {
         "concept": {
             "~id": "tzrtx26u",
@@ -43,7 +43,7 @@ def a_related_concept() -> NeptuneConcept:
     return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")
 
 
-def a_related_concept_with_no_label() -> NeptuneConcept:
+def a_related_concept_with_no_label() -> NeptuneRelatedConcept:
     """
     This concept can be used to demonstrate how we handle bad records
     """
@@ -88,7 +88,7 @@ def a_related_concept_with_no_label() -> NeptuneConcept:
     return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")
 
 
-def a_related_concept_with_two_source_nodes() -> NeptuneConcept:
+def a_related_concept_with_two_source_nodes() -> NeptuneRelatedConcept:
     """
     This related concept can be used to demonstrate label precedence
     """

@@ -80,7 +80,7 @@ def get_priority_label(
     )
 
 
-def get_most_specific_concept_type(concept_types: list[str]) -> ConceptType:
+def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
     # Concepts which are not connected to any Works will not have any types associated with them. We periodically
     # remove such concepts from the graph, but there might be a few of them at any given point.
     if len(concept_types) == 0:

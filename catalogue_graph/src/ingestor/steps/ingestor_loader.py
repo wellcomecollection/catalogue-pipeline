@@ -45,13 +45,14 @@ def handler(
         )
 
     transformer = create_transformer(event, is_local)
-    transformer.load_documents(event)
+    objects_to_index = transformer.load_documents(event)
 
     return IngestorIndexerLambdaEvent(
         ingestor_type=event.ingestor_type,
         pipeline_date=pipeline_date,
         index_date=index_date,
         job_id=event.job_id,
+        objects_to_index=objects_to_index,
     )
 
 

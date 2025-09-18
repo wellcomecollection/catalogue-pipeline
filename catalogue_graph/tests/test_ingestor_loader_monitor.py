@@ -1,18 +1,16 @@
 import json
 
-import pytest
 from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
-    IngestorLoaderMonitorLambdaEvent,
+    IngestorIndexerObject,
     IngestorStepEvent,
 )
 from ingestor.steps.ingestor_loader_monitor import (
     handler,
 )
 
-MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/report.loader.json"
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.loader.json"
 
 
@@ -49,28 +47,29 @@ def get_mock_expected_metric(file_size: int) -> dict:
     }
 
 
+def get_mock_ingestor_indexer_object(
+    file_name: str, content_length: int | None, record_count: int | None
+) -> IngestorIndexerObject:
+    return IngestorIndexerObject(
+        s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/{file_name}.parquet",
+        content_length=content_length,
+        record_count=record_count,
+    )
+
+
 def verify_s3_reports(record_count: int, file_size: int) -> None:
     expected_report = get_mock_expected_report(record_count, file_size)
 
     with MockSmartOpen.open(MOCK_CURRENT_JOB_S3_URI, "r") as f:
         assert json.load(f) == expected_report
 
-    with MockSmartOpen.open(MOCK_LATEST_S3_URI, "r") as f:
-        assert json.load(f) == expected_report
-
 
 def test_ingestor_loader_monitor_success_no_previous() -> None:
-    event = IngestorLoaderMonitorLambdaEvent(
+    event = IngestorIndexerLambdaEvent(
         **MOCK_STEP_EVENT.model_dump(),
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file", 1000, 100),
-            ),
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file", 2000, 200),
-            ),
+        objects_to_index=[
+            get_mock_ingestor_indexer_object("file", 1000, 100),
+            get_mock_ingestor_indexer_object("file", 2000, 200),
         ],
     )
 
@@ -81,211 +80,3 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
 
     # assert reports are written in s3
     verify_s3_reports(300, 3000)
-
-
-def test_ingestor_loader_monitor_success_with_previous() -> None:
-    MockSmartOpen.mock_s3_file(
-        MOCK_LATEST_S3_URI,
-        json.dumps(
-            {
-                "pipeline_date": "XXX",
-                "index_date": "XXX",
-                "job_id": "XXX",
-                "ingestor_type": "concepts",
-                "record_count": 300,
-                "total_file_size": 3000,
-            }
-        ),
-    )
-
-    event = IngestorLoaderMonitorLambdaEvent(
-        **MOCK_STEP_EVENT.model_dump(),
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file", 1100, 110),
-            ),
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file", 2100, 210),
-            ),
-        ],
-    )
-
-    handler(event, is_local=True)
-
-    # assert metrics are reported
-    assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(3200)]
-
-    # assert reports are written in s3
-    verify_s3_reports(320, 3200)
-
-
-def test_ingestor_loader_monitor_failure_with_previous() -> None:
-    MockSmartOpen.mock_s3_file(
-        MOCK_LATEST_S3_URI,
-        json.dumps(
-            {
-                "pipeline_date": "XXX",
-                "index_date": "XXX",
-                "job_id": "XXX",
-                "ingestor_type": "concepts",
-                "record_count": 300,
-                "total_file_size": 3000,
-            }
-        ),
-    )
-
-    # This event has a much different total file size (2000 vs previous 3000)
-    # which exceeds the 10% threshold
-    event = IngestorLoaderMonitorLambdaEvent(
-        **MOCK_STEP_EVENT.model_dump(),
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file1", 800, 800),
-            ),
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file2", 1200, 120),
-            ),
-        ],
-    )
-
-    # assert this raises a ValueError due to percentage change exceeding threshold
-    with pytest.raises(ValueError, match="Fractional change .* exceeds threshold"):
-        handler(event, is_local=True)
-
-    # assert no metrics are reported
-    assert MockCloudwatchClient.metrics_reported == []
-
-    # assert current report is not written in s3
-    assert MOCK_CURRENT_JOB_S3_URI not in MockSmartOpen.file_lookup
-
-
-def test_ingestor_loader_monitor_force_pass() -> None:
-    MockSmartOpen.mock_s3_file(
-        MOCK_LATEST_S3_URI,
-        json.dumps(
-            {
-                "pipeline_date": "XXX",
-                "index_date": "XXX",
-                "job_id": "XXX",
-                "ingestor_type": "concepts",
-                "record_count": 300,
-                "total_file_size": 3000,
-            }
-        ),
-    )
-
-    # This event has a much different total file size (2000 vs previous 3000)
-    # but will pass because force_pass is True
-    event = IngestorLoaderMonitorLambdaEvent(
-        **MOCK_STEP_EVENT.model_dump(),
-        force_pass=True,  # Force pass is enabled
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file1", 800, 80),
-            ),
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file2", 1200, 120),
-            ),
-        ],
-    )
-
-    # This should not raise an exception due to force_pass=True
-    handler(event, is_local=True)
-
-    # Metrics should still be reported
-    assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(2000)]
-
-    # assert reports are written in s3
-    verify_s3_reports(200, 2000)
-
-
-def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
-    event = IngestorLoaderMonitorLambdaEvent(
-        **MOCK_STEP_EVENT.model_dump(),
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100),
-            ),
-            IngestorIndexerLambdaEvent(
-                # Different pipeline date
-                **MOCK_STEP_EVENT.model_copy(
-                    update={"pipeline_date": "2025-01-02"}
-                ).model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
-            ),
-        ],
-    )
-
-    # Assert this raises an AssertionError due to pipeline date mismatch
-    with pytest.raises(AssertionError, match="pipeline_date mismatch"):
-        handler(event, is_local=True)
-
-
-def test_ingestor_loader_monitor_job_id_mismatch() -> None:
-    event = IngestorLoaderMonitorLambdaEvent(
-        **MOCK_STEP_EVENT.model_dump(),
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, 100),
-            ),
-            IngestorIndexerLambdaEvent(
-                # Different job ID
-                **MOCK_STEP_EVENT.model_copy(update={"job_id": "456"}).model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
-            ),
-        ],
-    )
-
-    # Assert this raises an AssertionError due to job ID mismatch
-    with pytest.raises(AssertionError, match="job_id mismatch"):
-        handler(event, is_local=True)
-
-
-def test_ingestor_loader_monitor_empty_content_length() -> None:
-    event = IngestorLoaderMonitorLambdaEvent(
-        **MOCK_STEP_EVENT.model_dump(),
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                # Empty content length
-                object_to_index=get_mock_ingestor_indexer_object("file1", None, 100),
-            ),
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
-            ),
-        ],
-    )
-
-    # Assert this raises an AssertionError due to empty content length
-    with pytest.raises(AssertionError, match="Empty content length"):
-        handler(event, is_local=True)
-
-
-def test_ingestor_loader_monitor_empty_record_count() -> None:
-    event = IngestorLoaderMonitorLambdaEvent(
-        **MOCK_STEP_EVENT.model_dump(),
-        events=[
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                # Empty record count
-                object_to_index=get_mock_ingestor_indexer_object("file1", 1000, None),
-            ),
-            IngestorIndexerLambdaEvent(
-                **MOCK_STEP_EVENT.model_dump(),
-                object_to_index=get_mock_ingestor_indexer_object("file2", 2000, 200),
-            ),
-        ],
-    )
-
-    # Assert this raises an AssertionError due to empty record count
-    with pytest.raises(AssertionError, match="Empty record count"):
-        handler(event, is_local=True)

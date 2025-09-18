@@ -38,7 +38,8 @@ def process_stream_in_parallel(
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Run the first `thread_count` threads in parallel
         futures = {
-            executor.submit(process, chunk) for chunk in islice(chunks, thread_count)
+            executor.submit(process, list(chunk))
+            for chunk in islice(chunks, thread_count)
         }
 
         while futures:

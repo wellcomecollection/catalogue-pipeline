@@ -14,7 +14,7 @@ class IncrementalWindow(BaseModel):
     start_time: datetime
     end_time: datetime
 
-    def to_formatted_string(self):
+    def to_formatted_string(self) -> str:
         start = self.start_time.strftime("%Y%m%dT%H%M")
         end = self.end_time.strftime("%Y%m%dT%H%M")
         return f"{start}-{end}"

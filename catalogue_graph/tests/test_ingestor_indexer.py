@@ -10,6 +10,7 @@ from test_utils import load_fixture, load_json_fixture
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
 )
 from ingestor.steps.ingestor_indexer import handler
 from utils.types import IngestorType
@@ -22,6 +23,11 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
         pipeline_date="2025-01-01",
         index_date="2025-01-01",
         job_id="123",
+        objects_to_index=[
+            IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
+            )
+        ],
     )
 
     _mock_es_secrets()
@@ -33,7 +39,7 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
         "s3://test-catalogue-graph/00000000-00000010.parquet",
         load_fixture(f"ingestor/{record_type}/00000000-00000010.parquet"),
     )
-    MockSmartOpen.open(event.object_to_index.s3_uri, "r")
+    MockSmartOpen.open(event.objects_to_index[0].s3_uri, "r")
 
     expected_inputs = load_json_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
 
@@ -124,9 +130,9 @@ def test_ingestor_indexer_failure(
     with pytest.raises(expected_exception=expected_error, match=error_message):
         if description != "the file at s3_uri doesn't exist":
             MockSmartOpen.mock_s3_file(
-                event.object_to_index.s3_uri, load_fixture(fixture)
+                event.objects_to_index[0].s3_uri, load_fixture(fixture)
             )
-        MockSmartOpen.open(event.object_to_index.s3_uri, "r")
+        MockSmartOpen.open(event.objects_to_index[0].s3_uri, "r")
 
         handler(event)
 

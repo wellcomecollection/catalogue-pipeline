@@ -9,9 +9,7 @@ import pyarrow as pa
 import smart_open
 from pydantic import BaseModel
 
-from ingestor.models.step_events import (
-    IngestorLoaderLambdaEvent,
-)
+from ingestor.models.step_events import IngestorIndexerObject, IngestorLoaderLambdaEvent
 from utils.arrow import pydantic_to_pyarrow_schema
 
 S3_BATCH_SIZE = 10_000
@@ -46,7 +44,7 @@ class ElasticsearchBaseTransformer:
             if pydantic_document:
                 yield pydantic_document
 
-    def stream_batches(self):
+    def stream_batches(self) -> Generator[tuple]:
         yield from batched(self.stream_es_documents(), S3_BATCH_SIZE, strict=False)
 
     def _load_to_parquet(self, es_documents: list[BaseModel], file: IO) -> None:
@@ -70,7 +68,7 @@ class ElasticsearchBaseTransformer:
         event: IngestorLoaderLambdaEvent,
         destination: LoadDestination,
         file_name: str,
-    ):
+    ) -> str:
         if destination == "s3":
             full_path = event.get_s3_uri(file_name)
         elif destination == "local":
@@ -86,8 +84,8 @@ class ElasticsearchBaseTransformer:
         self,
         event: IngestorLoaderLambdaEvent,
         destination: LoadDestination = "s3",
-    ):
-        total_count = 0
+    ) -> list[IngestorIndexerObject]:
+        loaded_objects: list[IngestorIndexerObject] = []
 
         transport_params = None
         if destination == "s3":
@@ -106,7 +104,17 @@ class ElasticsearchBaseTransformer:
                 elif event.load_format == "jsonl":
                     self._load_to_jsonl(documents, f)
 
-            total_count += len(documents)
+                boto_s3_object = f.to_boto3(boto3.resource("s3"))
+                content_length = boto_s3_object.content_length
+
+            loaded_objects.append(
+                IngestorIndexerObject(
+                    s3_uri=full_path,
+                    content_length=content_length,
+                    record_count=len(documents),
+                )
+            )
+
             print(f"{len(documents)} items loaded to '{full_path}'.")
 
-        return total_count
+        return loaded_objects

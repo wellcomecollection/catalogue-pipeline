@@ -401,16 +401,12 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     return FixedDateTime
 
 
-def get_mock_ingestor_loader_event(
-    job_id: str, start_offset: int, end_index: int
-) -> IngestorLoaderLambdaEvent:
+def get_mock_ingestor_loader_event(job_id: str) -> IngestorLoaderLambdaEvent:
     return IngestorLoaderLambdaEvent(
         ingestor_type="concepts",
         pipeline_date="2025-01-01",
         index_date="2025-03-01",
         job_id=job_id,
-        start_offset=start_offset,
-        end_index=end_index,
     )
 
 

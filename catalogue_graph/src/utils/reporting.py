@@ -56,11 +56,6 @@ class PipelineReport(BaseModel):
         pydantic_to_s3_json(self, s3_url)
 
 
-class TriggerReport(PipelineReport):
-    label: ClassVar[str] = "trigger"
-    record_count: int
-
-
 class LoaderReport(PipelineReport):
     label: ClassVar[str] = "loader"
     record_count: int
@@ -76,4 +71,3 @@ class DeletionReport(PipelineReport):
 class IndexerReport(PipelineReport):
     label: ClassVar[str] = "indexer"
     success_count: int | None = None
-    previous_job_id: str | None = None

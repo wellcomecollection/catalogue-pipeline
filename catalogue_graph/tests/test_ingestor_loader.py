@@ -269,7 +269,7 @@ def test_ingestor_loader(
     expected_concept = get_catalogue_concept_mock(included_response_items)
     mock_neptune_responses(included_response_items)
 
-    loader_event = get_mock_ingestor_loader_event("123", 0, 1)
+    loader_event = get_mock_ingestor_loader_event("123")
     indexer_event = get_mock_ingestor_indexer_event("123")
     # loader_s3_bucket="test-bucket",
     # loader_s3_prefix="test-prefix",

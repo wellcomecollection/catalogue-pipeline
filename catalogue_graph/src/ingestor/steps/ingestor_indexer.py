@@ -73,6 +73,7 @@ def handler(
     if len(file_uris) == 0:
         print("No files to process.")
 
+    total_success_count = 0
     for s3_uri in file_uris:
         if event.load_format == "parquet":
             data = df_from_s3_parquet(s3_uri).to_dicts()
@@ -89,12 +90,12 @@ def handler(
         )
         print(f"Successfully indexed {success_count} documents.")
 
-        print(
-            IngestorIndexerMonitorLambdaEvent(
-                **event.model_dump(),
-                success_count=success_count,
-            )
-        )
+        total_success_count += success_count
+
+    return IngestorIndexerMonitorLambdaEvent(
+        **event.model_dump(),
+        success_count=total_success_count,
+    )
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
