@@ -29,10 +29,15 @@ CONCEPT_QUERY_PARAMS = {
 }
 
 ES_QUERY = {"match": {"type": "Visible"}}
+# Only retrieve the fields we need (concept IDs and types)
 ES_FIELDS = [
-    "data.subjects",
-    "data.contributors",
-    "data.genres",
+    "data.subjects.id.canonicalId",
+    "data.subjects.concepts.id.canonicalId",
+    "data.subjects.concepts.type",
+    "data.subjects.type",
+    "data.contributors.agent.id.canonicalId",
+    "data.genres.concepts.id.canonicalId",
+    "data.genres.concepts.type",
 ]
 
 RelatedConcepts = dict[str, list[NeptuneRelatedConcept]]
@@ -100,8 +105,6 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
             # Remove `concept_id` from the list of 'same as' concepts
             same_as = set(self.get_same_as(concept_id)).difference([concept_id])
-
-            print(source.get("source_concepts"))
 
             concepts[concept_id] = NeptuneConcept(
                 concept=concept["concept"],
@@ -186,13 +189,15 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
     def get_concepts_from_works(self) -> Generator[str]:
         for work in self.es_source.stream_raw():
-            for concept, _ in extract_concepts_from_work(work["data"]):
-                concept_id = concept["id"].get("canonicalId")
+            # Since we only ask for concept fields, works with no concepts are returned as empty dictionaries
+            if "data" in work:
+                for concept, _ in extract_concepts_from_work(work["data"]):
+                    concept_id = concept["id"].get("canonicalId")
 
-                if concept_id:
-                    yield concept_id
-                else:
-                    print(f"Concept {concept} does not have an ID.")
+                    if concept_id:
+                        yield concept_id
+                    else:
+                        print(f"Concept {concept} does not have an ID.")
 
     def get_concept_stream(self) -> Generator[set[str]]:
         processed_ids: set[str] = set()

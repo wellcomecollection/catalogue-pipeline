@@ -45,7 +45,6 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
     def get_works(self) -> Generator[DenormalisedWork]:
         for work in self.es_source.stream_raw():
-            print(work)
             yield DenormalisedWork(**work)
 
     def get_work_stream(self) -> Generator[tuple[DenormalisedWork]]:
