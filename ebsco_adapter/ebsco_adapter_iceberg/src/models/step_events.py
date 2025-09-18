@@ -8,8 +8,6 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
-from models.manifests import TransformerManifest
-
 
 class EbscoAdapterEvent(BaseModel):
     """Base event for all EBSCO adapter steps.
