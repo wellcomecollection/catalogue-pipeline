@@ -86,6 +86,7 @@ then
   echo "Deploying λ pipeline services to catalogue-$PIPELINE_DATE"
   "$ROOT/builds/deploy_lambda_services.sh" \
     id_minter:id_minter \
+    id_minter:id_minter_step_function \
     matcher:matcher \
     merger:merger \
     batcher:r_embed_batcher \

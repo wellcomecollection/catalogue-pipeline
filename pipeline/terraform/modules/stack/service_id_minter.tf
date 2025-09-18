@@ -5,20 +5,15 @@ module "id_minter_output_topic" {
   role_names = [module.id_minter_lambda.lambda_role_name]
 }
 
-module "id_minter_lambda" {
-  source = "../pipeline_lambda"
-
-  pipeline_date = var.pipeline_date
-  service_name  = "id_minter"
-
-  environment_variables = {
+locals {
+  id_minter_environment_variables = {
     topic_arn           = module.id_minter_output_topic.arn
     max_connections     = local.id_minter_task_max_connections
     es_source_index     = local.es_works_source_index
     es_identified_index = local.es_works_identified_index
   }
 
-  vpc_config = {
+  id_minter_vpc_config = {
     subnet_ids = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
@@ -27,7 +22,7 @@ module "id_minter_lambda" {
     ]
   }
 
-  secret_env_vars = merge({
+  id_minter_secret_env_vars = merge({
     cluster_url          = "rds/identifiers-serverless/endpoint"
     cluster_url_readonly = "rds/identifiers-serverless/reader_endpoint"
     db_port              = "rds/identifiers-serverless/port"
@@ -46,6 +41,17 @@ module "id_minter_lambda" {
       es_upstream_apikey   = local.pipeline_storage_es_service_secrets["id_minter"]["es_apikey"]
     }
   )
+}
+
+module "id_minter_lambda" {
+  source = "../pipeline_lambda"
+
+  pipeline_date = var.pipeline_date
+  service_name  = "id_minter"
+
+  environment_variables = local.id_minter_environment_variables
+  vpc_config            = local.id_minter_vpc_config
+  secret_env_vars       = local.id_minter_secret_env_vars
 
   timeout = 60 * 5 # 10 Minutes
 
@@ -57,6 +63,25 @@ module "id_minter_lambda" {
 
     visibility_timeout_seconds = 60 * 5 # 10 Minutes, same or higher than lambda timeout
     batching_window_seconds    = 60     # How long to wait to accumulate message: 1 minute
+  }
+
+  ecr_repository_name = "uk.ac.wellcome/id_minter"
+}
+
+module "id_minter_lambda_step_function" {
+  source = "../pipeline_lambda"
+
+  pipeline_date = var.pipeline_date
+  service_name  = "id_minter_step_function"
+
+  environment_variables = local.id_minter_environment_variables
+  vpc_config            = local.id_minter_vpc_config
+  secret_env_vars       = local.id_minter_secret_env_vars
+
+  timeout = 60 * 5 # 10 Minutes
+
+  image_config = {
+    command = ["weco.pipeline.id_minter.StepFunctionMain::handleRequest"]
   }
 
   ecr_repository_name = "uk.ac.wellcome/id_minter"
