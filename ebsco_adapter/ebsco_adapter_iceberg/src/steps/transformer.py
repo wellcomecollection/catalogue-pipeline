@@ -46,7 +46,7 @@ class EbscoAdapterTransformerConfig(BaseModel):
 
 def _write_batch_file(
     batches_ids: list[list[str]], job_id: str, *, changeset_id: str | None
-) -> tuple[str, str, str]:
+) -> tuple[str, str]:
     # Build the S3 key using PurePosixPath for clean joining (no leading // issues)
     # Prefer .ndjson to signal line-delimited JSON (supported by Step Functions)
     file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.ndjson"
@@ -66,7 +66,7 @@ def _write_batch_file(
             f.write(json.dumps({"ids": wrapped_ids}) + "\n")
 
     print(f"Wrote batch id file to {batch_file_location}")
-    return batch_file_location, bucket, key.as_posix()
+    return bucket, key.as_posix()
 
 
 def transform(work_id: str, content: str) -> list[SourceWork]:
@@ -224,7 +224,7 @@ def process_batches(
         if ids:
             batches_ids.append(ids)
 
-    batch_file_location, batch_file_bucket, batch_file_key = _write_batch_file(
+    batch_file_bucket, batch_file_key = _write_batch_file(
         batches_ids, job_id, changeset_id=changeset_id
     )
 
@@ -236,7 +236,6 @@ def process_batches(
 
     return EbscoAdapterTransformerResult(
         job_id=job_id,
-        batch_file_location=batch_file_location,
         batch_file_bucket=batch_file_bucket,
         batch_file_key=batch_file_key,
         success_count=total_success,
@@ -265,13 +264,11 @@ def handler(
         print(
             "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
         )
-        prior_batch = prior_record.get("batch_file_location")
         prior_bucket = prior_record.get("batch_file_bucket")
         prior_key = prior_record.get("batch_file_key")
 
         return EbscoAdapterTransformerResult(
             job_id=event.job_id,
-            batch_file_location=prior_batch,
             batch_file_bucket=prior_bucket,
             batch_file_key=prior_key,
             success_count=0,
