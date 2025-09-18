@@ -29,7 +29,6 @@ class IdMinterFeatureTest
       queue =>
         withIdentifiersTable {
           identifiersTableConfig =>
-
             val work = sourceWork()
             val inputIndex = createIndex(List(work))
             val outputIndex = mutable.Map.empty[String, Work[Identified]]
