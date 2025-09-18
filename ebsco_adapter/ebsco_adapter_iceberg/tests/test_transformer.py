@@ -98,16 +98,15 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
 # --------------------------------------------------------------------------------------
 
 
-def test_transformer_short_circuit_when_prior_processed_detected(
+def test_transformer_reprocesses_even_if_prior_processed_detected(
     monkeypatch: pytest.MonkeyPatch, temporary_table: pa.Table
 ) -> None:
-    """Transformer should short-circuit using existing tracking file for the same source file.
+    """Transformer should reprocess even if a prior tracking JSON exists.
 
-    We simulate a prior transformed tracking JSON so the handler exits early without indexing.
+    Previously we short-circuited; now we expect a full re-run producing a NEW batch file.
     """
     file_uri = "s3://bucket/path/file.xml"
     tracking_uri = f"{file_uri}.transformed.json"
-    # Existing tracking file with payload including prior batch_file bucket/key (legacy field removed)
     prior_result = EbscoAdapterTransformerResult(
         job_id="20250101T1200",
         batch_file_bucket="bucket",
@@ -120,23 +119,39 @@ def test_transformer_short_circuit_when_prior_processed_detected(
     )
     MockSmartOpen.mock_s3_file(tracking_uri, json.dumps(tracking_record.model_dump()))
 
-    # Prepare an event that would otherwise trigger processing (with a changeset id)
+    # Create a new changeset so the handler does real work
+    records_by_id = {
+        "ebsAgain001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsAgain001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Replay Title</subfield></datafield></record>",
+    }
+    rows = [
+        {"id": rid, "content": record_xml} for rid, record_xml in records_by_id.items()
+    ]
+    pa_table_initial = data_to_namespaced_table(rows)
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.update(pa_table_initial, "ebsco")
+
+    # Ensure transformer uses our temporary table
+    monkeypatch.setattr(
+        "utils.iceberg.get_local_table", lambda **kwargs: temporary_table
+    )
+
     event = EbscoAdapterTransformerEvent(
-        changeset_id="new-change-456", job_id="20250101T1200", file_location=file_uri
+        changeset_id=changeset_id, job_id="20250101T1200", file_location=file_uri
     )
     config = EbscoAdapterTransformerConfig(
         is_local=True, use_rest_api_table=False, pipeline_date="dev"
     )
 
-    # Run handler
     result = handler(event=event, config_obj=config)
 
-    # Expect short-circuit with preserved prior batch_file bucket/key and no ES interactions
-    assert result.batch_file_bucket == prior_result.batch_file_bucket
-    assert result.batch_file_key == prior_result.batch_file_key
-    assert result.success_count == 0
+    # We expect NOT to reuse prior batch file bucket/key; a new batch file is written
+    assert result.batch_file_bucket == adapter_config.S3_BUCKET
+    assert result.batch_file_key != prior_result.batch_file_key
+    assert result.success_count == 1
     assert result.failure_count == 0
-    assert MockElasticsearchClient.inputs == []
+    # Elasticsearch inputs should include the replayed record
+    ids = {op["_id"] for op in MockElasticsearchClient.inputs}
+    assert "ebsAgain001" in ids
 
 
 def test_transformer_end_to_end_with_local_table(

@@ -28,7 +28,7 @@ from models.step_events import (
 from models.work import BaseWork, DeletedWork, SourceWork
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
-from utils.tracking import is_file_already_processed, record_processed_file
+from utils.tracking import record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
@@ -56,11 +56,8 @@ def _write_batch_file(
 
     with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
         # Write NDJSON: one JSON object per line -> one Distributed Map item per line
-        # Required line shape now wraps each original ID for downstream decoding:
+        # Required line shape wraps each original ID for downstream decoding:
         #   {"ids": ["Work[ebsco-alt-lookup/<id1>]", ...]}
-        # We intentionally don't mutate upstream IDs before this point to keep
-        # transformation logic (and tests around record IDs) focused; formatting is
-        # an output concern of the batch file only.
         for ids in batches_ids:
             wrapped_ids = [SOURCE_ID_TEMPLATE.format(i) for i in ids]
             f.write(json.dumps({"ids": wrapped_ids}) + "\n")
@@ -252,28 +249,6 @@ def handler(
 
     # Determine index date from config override or fallback to pipeline date
     index_date = config_obj.index_date or config_obj.pipeline_date
-
-    prior_record = None
-    if event.file_location:
-        prior_record = is_file_already_processed(
-            event.file_location, step="transformed"
-        )
-
-    # Short-circuit if this file has already been transformed (mirrors loader behaviour)
-    if prior_record:
-        print(
-            "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
-        )
-        prior_bucket = prior_record.get("batch_file_bucket")
-        prior_key = prior_record.get("batch_file_key")
-
-        return EbscoAdapterTransformerResult(
-            job_id=event.job_id,
-            batch_file_bucket=prior_bucket,
-            batch_file_key=prior_key,
-            success_count=0,
-            failure_count=0,
-        )
 
     table = get_iceberg_table(config_obj.use_rest_api_table)
     table_client = IcebergTableClient(table)
