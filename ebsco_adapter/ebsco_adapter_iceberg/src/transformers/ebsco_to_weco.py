@@ -9,6 +9,7 @@ from transformers.description import extract_description
 from transformers.designation import extract_designation
 from transformers.edition import extract_edition
 from transformers.format import extract_format
+from transformers.holdings import extract_holdings
 from transformers.language import extract_languages
 from transformers.other_identifiers import extract_other_identifiers
 from transformers.production import extract_production
@@ -36,6 +37,7 @@ def transform_record(marc_record: Record) -> SourceWork:
         production=extract_production(marc_record),
         format=extract_format(marc_record),
         languages=extract_languages(marc_record),
+        holdings=extract_holdings(marc_record),
     )
 
 
