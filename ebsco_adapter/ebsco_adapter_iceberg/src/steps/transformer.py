@@ -7,28 +7,25 @@ ID manifest for downstream consumers.
 
 import argparse
 import io
-import json
 from collections.abc import Generator, Iterable
-from pathlib import PurePosixPath
 from typing import Any
 
 import elasticsearch.helpers
 import pyarrow as pa
-import smart_open
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 
 import config
+from manifests import ManifestWriter
+from models.manifests import ErrorLine, TransformerManifest
 from models.marc import MarcRecord
 from models.step_events import (
     EbscoAdapterTransformerEvent,
 )
-from models.manifests import TransformerManifest
 from models.work import BaseWork, DeletedWork, SourceWork
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
-from manifests import ManifestWriter
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
@@ -47,7 +44,30 @@ class EbscoAdapterTransformerConfig(BaseModel):
 # _write_batch_file replaced by ManifestWriter (see manifests.py)
 
 
-def transform(work_id: str, content: str) -> tuple[list[SourceWork], list[dict[str, Any]]]:
+def _to_error_line(err: dict[str, Any]) -> ErrorLine | None:
+    """Convert a raw error dict into an ErrorLine.
+
+    The message is a deterministic '; ' joined list of key=value pairs (excluding 'id')
+    sorted by key name. None values are skipped. Returns None if no id present.
+    """
+    rec_id = err.get("id")
+    if not rec_id:
+        return None
+    parts: list[str] = []
+    for k in sorted(err.keys()):
+        if k == "id":
+            continue
+        v = err[k]
+        if v is None:
+            continue
+        parts.append(f"{k}={v}")
+    message = "; ".join(parts)
+    return ErrorLine(id=str(rec_id), message=message)
+
+
+def transform(
+    work_id: str, content: str
+) -> tuple[list[SourceWork], list[dict[str, Any]]]:
     """Parse a MARC XML string into SourceWork records.
 
     Returns (works, errors). Each error is a dict with at minimum stage, id, reason.
@@ -67,7 +87,14 @@ def transform(work_id: str, content: str) -> tuple[list[SourceWork], list[dict[s
     except Exception as exc:  # broad, skip bad MARC payloads only
         detail = str(exc)[:200]
         print(f"Failed to parse MARC content for id={work_id}: {detail}")
-        errors.append({"stage": "transform", "id": work_id, "reason": "parse_error", "detail": detail})
+        errors.append(
+            {
+                "stage": "transform",
+                "id": work_id,
+                "reason": "parse_error",
+                "detail": detail,
+            }
+        )
         return [], errors
 
     works = [
@@ -106,7 +133,9 @@ def load_data(
         stats_only=False,
     )
 
-    error_items: list[Any] = [] if not errors or isinstance(errors, int) else list(errors)
+    error_items: list[Any] = (
+        [] if not errors or isinstance(errors, int) else list(errors)
+    )
     error_details: list[dict[str, Any]] = []
     for e in error_items:
         try:
@@ -123,7 +152,9 @@ def load_data(
             error_details.append({"stage": "index", "raw": str(e)[:500]})
 
     if error_details:
-        preview = [f"id={d.get('id')} type={d.get('error_type')}" for d in error_details[:5]]
+        preview = [
+            f"id={d.get('id')} type={d.get('error_type')}" for d in error_details[:5]
+        ]
         print(
             f"Encountered {len(error_details)} indexing errors (showing up to 5):\n"
             + "\n".join(preview)
@@ -207,6 +238,13 @@ def process_batches(
         if errors:
             all_errors.extend(errors)
 
+    error_lines: list[ErrorLine] = []
+    if all_errors:
+        for e in all_errors:
+            line = _to_error_line(e)
+            if line:
+                error_lines.append(line)
+
     writer = ManifestWriter(
         job_id=job_id,
         changeset_id=changeset_id,
@@ -217,13 +255,13 @@ def process_batches(
     result_manifest = writer.build_manifest(
         job_id=job_id,
         batches_ids=batches_ids,
-        errors=all_errors,
+        errors=error_lines,
         success_count=total_success,
     )
     total_batches = len(batches_ids)
     total_ids = sum(len(b) for b in batches_ids)
     print(
-        f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={len(all_errors)}"
+        f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={len(error_lines)}"
     )
     return result_manifest
 

@@ -4,10 +4,11 @@ from typing import Any, cast  # added for dummy ES client
 
 import pyarrow as pa
 import pytest
+import smart_open
 
 import config as adapter_config
-from models.step_events import EbscoAdapterTransformerEvent
 from models.manifests import TransformerManifest
+from models.step_events import EbscoAdapterTransformerEvent
 from models.work import SourceWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
@@ -16,7 +17,6 @@ from steps.transformer import (
     transform,
 )
 from utils.iceberg import IcebergTableClient
-from utils.tracking import ProcessedFileRecord
 
 from .helpers import data_to_namespaced_table
 from .test_mocks import (
@@ -95,6 +95,7 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
 # Tests
 # --------------------------------------------------------------------------------------
 
+
 def test_transformer_end_to_end_with_local_table(
     temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -113,7 +114,13 @@ def test_transformer_end_to_end_with_local_table(
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    assert lines == [{"ids": [f"Work[ebsco-alt-lookup/{i}]" for i in records_by_id]}]
+    # Success lines include sourceIdentifiers and jobId
+    assert lines == [
+        {
+            "sourceIdentifiers": [f"Work[ebsco-alt-lookup/{i}]" for i in records_by_id],
+            "jobId": "20250101T1200",
+        }
+    ]
     titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
@@ -139,10 +146,11 @@ def test_transformer_creates_deletedwork_for_empty_content(
         lines = [json.loads(line) for line in f if line.strip()]
     assert lines == [
         {
-            "ids": [
+            "sourceIdentifiers": [
                 "Work[ebsco-alt-lookup/ebsDel001]",
                 "Work[ebsco-alt-lookup/ebsDel002]",
-            ]
+            ],
+            "jobId": "20250101T1200",
         }
     ]
     deleted_docs = [
@@ -189,10 +197,11 @@ def test_transformer_full_retransform_when_no_changeset(
         lines = [json.loads(line) for line in f if line.strip()]
     assert lines == [
         {
-            "ids": [
+            "sourceIdentifiers": [
                 "Work[ebsco-alt-lookup/ebsFull001]",
                 "Work[ebsco-alt-lookup/ebsFull002]",
-            ]
+            ],
+            "jobId": event.job_id,
         }
     ]
 
@@ -225,8 +234,8 @@ def test_transformer_batch_file_key_with_changeset(
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    # Only one batch line with a single id
-    assert len(lines) == 1 and len(lines[0]["ids"]) == 1
+    # Only one batch line with a single sourceIdentifier
+    assert len(lines) == 1 and len(lines[0]["sourceIdentifiers"]) == 1
 
 
 @pytest.mark.parametrize(
@@ -304,25 +313,17 @@ def test_transformer_creates_failure_manifest_for_parse_errors(
     assert result.failures.count >= 1
 
     # Read the failure file
-    failure_path_full = (
-        f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
-    )
+    failure_path_full = f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
     failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
     with open(failure_contents_path, encoding="utf-8") as f:
         failure_lines = [json.loads(line) for line in f if line.strip()]
 
     # Expect exactly one parse error line referencing the bad XML id
-    expected_failure = {
-        "stage": "transform",
-        "id": "ebsBadXml001",
-        "reason": "parse_error",
-    }
-    # Allow presence of optional detail field (truncate if present for comparison)
-    normalized = [
-        {k: v for k, v in line.items() if k in {"stage", "id", "reason"}}
+    # Failure lines now have shape {id, message}; parse_error must appear in message
+    assert any(
+        line["id"] == "ebsBadXml001" and "reason=parse_error" in line["message"]
         for line in failure_lines
-    ]
-    assert normalized == [expected_failure]
+    )
 
 
 def test_transformer_creates_failure_manifest_for_index_errors(
@@ -355,28 +356,15 @@ def test_transformer_creates_failure_manifest_for_index_errors(
     assert result.failures is not None
     assert result.failures.count == 1
 
-    failure_path_full = (
-        f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
-    )
+    failure_path_full = f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
     failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
     with open(failure_contents_path, encoding="utf-8") as f:
         failure_lines = [json.loads(line) for line in f if line.strip()]
-    expected_index_failure = {
-        "stage": "index",
-        "id": "ebsIdxErr001",
-        "status": 400,
-        "error_type": "mapper_parsing_exception",
-    }
-    # Normalize to only fields we assert against (some defensive future-proofing)
-    normalized = [
-        {
-            k: v
-            for k, v in line.items()
-            if k in {"stage", "id", "status", "error_type"}
-        }
-        for line in failure_lines
-    ]
-    assert normalized == [expected_index_failure]
+    # Expect a single failure line with id and message containing status & error_type
+    assert len(failure_lines) == 1
+    msg = failure_lines[0]["message"]
+    assert failure_lines[0]["id"] == "ebsIdxErr001"
+    assert "status=400" in msg and "error_type=mapper_parsing_exception" in msg
 
 
 def test_transform_valid_marcxml_returns_work() -> None:
@@ -469,7 +457,8 @@ def test_transformer_raises_when_batch_file_write_fails(
     def failing_open(*args, **kwargs):  # type: ignore[no-untyped-def]
         raise OSError("simulated write failure")
 
-    monkeypatch.setattr("steps.transformer.smart_open.open", failing_open)
+    # Patch smart_open globally; transformer references the imported module so this applies
+    monkeypatch.setattr(smart_open, "open", failing_open)
 
     event = EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
