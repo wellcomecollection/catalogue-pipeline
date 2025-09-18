@@ -79,7 +79,7 @@ You can run the Lambda version locally from the repository root thus:
 
 `./scripts/run_local.sh <PROJECT_ID> [<PIPELINE_DATE>] [--skip-build]`
 
-The Step Function Lambda will be available at `http://localhost:9001/2015-03-31/functions/function/invocations`
+The Step Function Lambda will be available at `http://localhost:9000/2015-03-31/functions/function/invocations`
 
 Example request payload:
 ```json

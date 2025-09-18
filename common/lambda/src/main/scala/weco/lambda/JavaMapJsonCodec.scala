@@ -2,13 +2,15 @@ package weco.lambda
 
 import io.circe.{Json, JsonObject}
 import scala.collection.JavaConverters._
+import grizzled.slf4j.Logging
 
 /** Utility for converting between the untyped Java object graph produced by the
   * AWS Java Lambda runtime (LinkedHashMap / java.util.List / boxed primitives)
   * and Circe Json. This logic is extracted from the StepFunctionLambdaApp so it
   * can be reused and unit-tested independently.
   */
-object JavaMapJsonCodec {
+
+object JavaMapJsonCodec extends Logging {
   def anyRefToJson(value: AnyRef): Json = value match {
     case null => Json.Null
     case m: java.util.Map[_, _] @unchecked =>
@@ -29,7 +31,10 @@ object JavaMapJsonCodec {
       Json.fromBigDecimal(scala.math.BigDecimal(n))
     case n: java.lang.Number => Json.fromBigDecimal(BigDecimal(n.toString))
     case s: String           => Json.fromString(s)
-    case other => Json.fromString(other.toString) // Fallback to toString
+    case other => {
+      warn(s"Unexpected type in anyRefToJson: ${other.getClass}")
+      Json.fromString(other.toString) // Fallback to toString
+    }
   }
 
   def jsonToAnyRef(json: Json): AnyRef = json.fold[AnyRef](

@@ -28,6 +28,7 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "people": [],
     "frequent_collaborators": [],
     "related_topics": [],
+    "founded_by": [],
 }
 
 
@@ -80,6 +81,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
                 people=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -131,6 +133,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
                 people=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -198,6 +201,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
                 people=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -273,6 +277,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
                 people=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -350,6 +355,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
                 people=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -432,6 +438,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
                 people=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -565,6 +572,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
                 people=[],
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )

@@ -2,7 +2,7 @@ package weco.lambda
 
 import com.amazonaws.services.lambda.runtime.{Context, RequestHandler}
 import grizzled.slf4j.Logging
-import io.circe.{Decoder, Encoder, Json}
+import io.circe.{Decoder, Encoder}
 import io.circe.syntax._
 import org.apache.pekko.actor.ActorSystem
 
@@ -41,11 +41,6 @@ abstract class StepFunctionLambdaApp[
     ActorSystem("main-actor-system")
   implicit val ec: ExecutionContext =
     actorSystem.dispatcher
-
-  // Conversion helpers now come from JavaMapJsonCodec (imported above)
-  protected def javaMapToJson(
-    map: java.util.LinkedHashMap[String, AnyRef]
-  ): Json = anyRefToJson(map)
 
   /** Implementations supply business logic here. */
   def processRequest(input: InputType): Future[OutputType]

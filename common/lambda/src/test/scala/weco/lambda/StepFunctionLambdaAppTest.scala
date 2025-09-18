@@ -112,18 +112,6 @@ class StepFunctionLambdaAppTest
         thrown.getMessage shouldBe "Invalid input"
       }
 
-      it("logs request processing") {
-        val input = TestInput("test", 42)
-        val expectedOutput = TestOutput("success", true)
-        val app = new TestStepFunctionLambdaApp(
-          processResult = Future.successful(expectedOutput)
-        )
-        val mapIn = jsonToJavaMap(input.asJson)
-        val mapOut = app.handleRequest(mapIn, mockContext)
-        val jsonOut = javaMapToJson(mapOut)
-        jsonOut.as[TestOutput].right.get shouldBe expectedOutput
-      }
-
       it("fails on invalid JSON input") {
         val app = new TestStepFunctionLambdaApp()
         // Build a malformed structure by forcing a value that will not decode to TestInput

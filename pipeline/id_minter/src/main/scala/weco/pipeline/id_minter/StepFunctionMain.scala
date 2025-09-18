@@ -8,16 +8,16 @@ import weco.catalogue.internal_model.work.Work
 import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.elasticsearch.typesafe.ElasticBuilder
 import weco.pipeline.id_minter.config.models.{
-  StepFunctionIdMinterConfig,
-  StepFunctionIdMinterConfigurable
+  IdMinterConfig,
+  IdMinterConfigurable
 }
 import weco.pipeline.id_minter.database.RDSIdentifierGenerator
 import weco.pipeline_storage.elastic.{ElasticIndexer, ElasticSourceRetriever}
-import weco.lambda.{Downstream, DownstreamBuilder}
+import weco.lambda.Downstream
 
 object StepFunctionMain
-    extends IdMinterStepFunctionLambda[StepFunctionIdMinterConfig]
-    with StepFunctionIdMinterConfigurable
+    extends IdMinterStepFunctionLambda[IdMinterConfig]
+    with IdMinterConfigurable
     with Logging {
 
   private val identifierGenerator = RDSIdentifierGenerator(
@@ -51,6 +51,7 @@ object StepFunctionMain
     new MintingRequestProcessor(minter, workIndexer)
 
   // Build downstream using configured target (sns/stdio) under namespace if required
-  override protected val downstream: Downstream =
-    Downstream(DownstreamBuilder.buildDownstreamTarget(rawConfig))
+  override protected val downstream: Downstream = Downstream(
+    config.downstreamConfig
+  )
 }

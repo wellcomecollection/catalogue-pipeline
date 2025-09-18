@@ -30,6 +30,7 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
     )
 
     _mock_es_secrets()
+    # TO DO: generate a new parquet file the matches the RelatedConcepts model once the graph as been updated
 
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
