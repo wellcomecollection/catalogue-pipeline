@@ -32,6 +32,8 @@ from utils.tracking import is_file_already_processed, record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
 BATCH_SIZE = 10_000
+# Template for wrapping source IDs in the required format
+SOURCE_ID_TEMPLATE = "Work[ebsco-alt-lookup/{}]"
 
 
 class EbscoAdapterTransformerConfig(BaseModel):
@@ -54,9 +56,14 @@ def _write_batch_file(
 
     with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
         # Write NDJSON: one JSON object per line -> one Distributed Map item per line
-        # Line shape: {"ids": ["id1", "id2", ...]}
+        # Required line shape now wraps each original ID for downstream decoding:
+        #   {"ids": ["Work[ebsco-alt-lookup/<id1>]", ...]}
+        # We intentionally don't mutate upstream IDs before this point to keep
+        # transformation logic (and tests around record IDs) focused; formatting is
+        # an output concern of the batch file only.
         for ids in batches_ids:
-            f.write(json.dumps({"ids": ids}) + "\n")
+            wrapped_ids = [SOURCE_ID_TEMPLATE.format(i) for i in ids]
+            f.write(json.dumps({"ids": wrapped_ids}) + "\n")
 
     print(f"Wrote batch id file to {batch_file_location}")
     return batch_file_location, bucket, key.as_posix()
