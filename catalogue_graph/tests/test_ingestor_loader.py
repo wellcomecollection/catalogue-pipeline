@@ -8,6 +8,7 @@ from test_mocks import (
     add_neptune_mock_response,
     get_mock_ingestor_indexer_event,
     get_mock_ingestor_loader_event,
+    mock_es_secrets,
 )
 from test_utils import load_json_fixture
 
@@ -266,6 +267,8 @@ def build_test_matrix() -> list[tuple]:
 def test_ingestor_loader(
     description: str, included_response_items: list[MockNeptuneResponseItem]
 ) -> None:
+    mock_es_secrets("graph_extractor", "2025-01-01", is_local=True)
+
     expected_concept = get_catalogue_concept_mock(included_response_items)
     mock_neptune_responses(included_response_items)
 
@@ -273,7 +276,7 @@ def test_ingestor_loader(
     indexer_event = get_mock_ingestor_indexer_event("123")
     # loader_s3_bucket="test-bucket",
     # loader_s3_prefix="test-prefix",
-    result = handler(loader_event)
+    result = handler(loader_event, is_local=True)
 
     assert result == indexer_event
     assert len(MockRequest.calls) == 8
@@ -302,7 +305,7 @@ def test_ingestor_loader_bad_neptune_response() -> None:
     )
 
     with pytest.raises(LookupError):
-        event = get_mock_ingestor_loader_event("123", 0, 1)
+        event = get_mock_ingestor_loader_event("123")
         # loader_s3_bucket="test-bucket",
         # loader_s3_prefix="test-prefix",
-        handler(event)
+        handler(event, is_local=True)

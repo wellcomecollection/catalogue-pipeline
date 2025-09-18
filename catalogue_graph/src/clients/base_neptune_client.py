@@ -41,6 +41,8 @@ class BaseNeptuneClient:
     def __init__(self, neptune_endpoint: str) -> None:
         self.session: boto3.Session | None = None
         self.neptune_endpoint: str = neptune_endpoint
+
+        # Throttle the number of parallel requests to prevent overwhelming the cluster
         self.parallel_query_semaphore = threading.Semaphore(
             NEPTUNE_MAX_PARALLEL_QUERIES
         )

@@ -32,16 +32,6 @@ ConceptQuery = Literal[
 ]
 WorkQuery = Literal["work_children", "work_ancestors", "work_concepts"]
 
-NEPTUNE_PARAMS = {
-    # There are a few Wikidata supernodes which cause performance issues in queries.
-    # We need to filter them out when running queries to get related nodes.
-    # Q5 -> 'human', Q151885 -> 'concept'
-    "ignored_wikidata_ids": ["Q5", "Q151885"],
-    # Maximum number of related nodes to return for each relationship type
-    "related_to_limit": 10,
-    # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
-    "shared_works_count_threshold": 3,
-}
 
 EXPENSIVE_QUERIES = {"related_topics", "frequent_collaborators"}
 
@@ -81,8 +71,9 @@ NEPTUNE_QUERIES = {
 
 
 class GraphBaseExtractor:
-    def __init__(self, is_local: bool):
+    def __init__(self, is_local: bool = False):
         self.neptune_client = get_neptune_client(is_local)
+        self.neptune_params: dict[str, Any] = {}
 
     def extract_raw(self) -> Generator[Any]:
         """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
@@ -97,7 +88,7 @@ class GraphBaseExtractor:
 
         def _run_query(chunk: Iterable[str]) -> list[dict]:
             return self.neptune_client.run_open_cypher_query(
-                NEPTUNE_QUERIES[query_type], NEPTUNE_PARAMS | {"ids": chunk}
+                NEPTUNE_QUERIES[query_type], self.neptune_params | {"ids": chunk}
             )
 
         start = time.time()

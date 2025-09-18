@@ -130,5 +130,4 @@ def get_s3_objects_by_type(bucket: str, prefix: str, data_type: str) -> Generato
     paginator = s3.get_paginator("list_objects_v2")
 
     for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
-        for s3_object in page.get("Contents", []):
-            yield s3_object
+        yield from page.get("Contents", [])

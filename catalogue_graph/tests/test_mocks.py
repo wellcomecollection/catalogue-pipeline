@@ -13,6 +13,7 @@ from botocore.credentials import Credentials
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
     IngestorLoaderLambdaEvent,
 )
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
@@ -412,7 +413,14 @@ def get_mock_ingestor_loader_event(job_id: str) -> IngestorLoaderLambdaEvent:
 
 def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
     return IngestorIndexerLambdaEvent(
-        **dict(get_mock_ingestor_loader_event(job_id)),
+        **get_mock_ingestor_loader_event(job_id).model_dump(),
+        objects_to_index=[
+            IngestorIndexerObject(
+                s3_uri=f"s3://test-bucket/test-prefix_concepts/2025-01-01/2025-03-01/{job_id}/00000000-00000001.parquet",
+                content_length=1,
+                record_count=1,
+            )
+        ],
     )
 
 
