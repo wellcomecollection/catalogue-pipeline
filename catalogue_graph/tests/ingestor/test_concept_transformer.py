@@ -13,6 +13,7 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
+from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
 from ingestor.transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
@@ -36,11 +37,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
         "neptune/concept_query_single_alternative_labels.json"
     )
 
-    alternative_labels = [
-        "Alternative label",
-        "Another alternative label",
-        "MeSH alternative label",
-    ]
+    alternative_labels = ["Alternative label", "Another alternative label"]
 
     expected_result = IndexableConcept(
         query=ConceptQuery(
@@ -84,8 +81,8 @@ def test_catalogue_concept_from_neptune_result() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
-    raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    raw_data = (NeptuneConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -97,7 +94,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         query=ConceptQuery(
             id="id",
             identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
-            label="LoC label",
+            label="MeSH label",
             alternativeLabels=[],
             type="Person",
         ),
@@ -113,8 +110,8 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
                     ),
                 )
             ],
-            label="LoC label",
-            displayLabel="Wikidata label",
+            label="MeSH label",
+            displayLabel="MeSH label",
             alternativeLabels=[],
             description=ConceptDescription(
                 text="Description",
@@ -135,8 +132,8 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
-    raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    raw_data = (NeptuneConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -148,7 +145,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
-        "related_to": mock_related_to,
+        "related_to": [NeptuneRelatedConcept(**c) for c in mock_related_to],
     }
 
     expected_result = IndexableConcept(
@@ -202,8 +199,8 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
-    raw_data = (mock_concept, related_concepts)
+    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -277,8 +274,8 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
-    raw_data = (mock_concept, related_concepts)
+    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -354,8 +351,8 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("2025-08-10", None, True)
-    raw_data = (mock_concept, related_concepts)
+    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -442,9 +439,9 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         abcd2345,Le Pétomane,
         """)
     transformer = ElasticsearchConceptsTransformer(
-        "2025-08-10", None, True, overrides=overrides
+        "dev", None, True, overrides=overrides
     )
-    raw_data = (mock_concept, related_concepts)
+    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -533,7 +530,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
         query=ConceptQuery(
             id="id",
             identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
-            label="LoC label",
+            label="MeSH label",
             alternativeLabels=[],
             type="Person",
         ),
@@ -549,7 +546,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
                     ),
                 )
             ],
-            label="LoC label",
+            label="MeSH label",
             displayLabel="Wellcome Label",
             alternativeLabels=[],
             description=ConceptDescription(
@@ -575,8 +572,8 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
         """)
 
     transformer = ElasticsearchConceptsTransformer(
-        "2025-08-10", None, True, overrides=overrides
+        "dev", None, True, overrides=overrides
     )
-    raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    raw_data = (NeptuneConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result

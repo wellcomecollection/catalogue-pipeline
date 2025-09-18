@@ -28,3 +28,8 @@ class NeptuneConcept(BaseModel):
     source_concepts: list[SourceConceptNode]
     types: list[ConceptType]
     same_as: list[str]
+
+
+class NeptuneRelatedConcept(BaseModel):
+    target: NeptuneConcept
+    relationship_type: str | None

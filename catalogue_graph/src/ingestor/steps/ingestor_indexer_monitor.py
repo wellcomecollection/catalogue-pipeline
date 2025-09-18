@@ -33,13 +33,11 @@ def build_indexer_report(events: list[IngestorIndexerMonitorLambdaEvent]) -> Non
     )
 
     current_report.write()
-    current_report.write(latest=True)
 
 
 def handler(events: list[IngestorIndexerMonitorLambdaEvent]) -> None:
     print("Preparing concepts pipeline reports ...")
     build_indexer_report(events)
-    print("Report complete.")
 
 
 def lambda_handler(events: list[dict], context: typing.Any) -> dict:

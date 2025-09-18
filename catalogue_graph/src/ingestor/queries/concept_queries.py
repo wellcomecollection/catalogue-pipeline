@@ -68,11 +68,11 @@ def get_related_query(
         Yield all related source concepts based on the specified relationship type and direction
         (e.g. `edge_type="NARROWER_THAN"` combined with `direction="from"` would yield broader source concepts).
         */  
-        MATCH (source_concept){left_arrow}-[rel:{edge_type}]-{right_arrow}(linked_related_source_concept)
+        MATCH (source_concept){left_arrow}-[relationship_edge:{edge_type}]-{right_arrow}(linked_related_source_concept)
         WHERE NOT linked_related_source_concept.id IN $ignored_wikidata_ids
         AND NOT (linked_source_concept)-[:SAME_AS*0..2]->(linked_related_source_concept)
 
-        WITH DISTINCT concept, linked_related_source_concept
+        WITH DISTINCT concept, relationship_edge, linked_related_source_concept
 
         MATCH (linked_related_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
         WHERE NOT related_source_concept.id IN $ignored_wikidata_ids
@@ -82,12 +82,22 @@ def get_related_query(
         MATCH (related_concept)<-[work_edge:HAS_CONCEPT]-(work)
         {label_filter}
 
-        WITH concept, linked_related_source_concept, collect(related_concept.id) AS related_ids, COUNT(work) AS work_count
+        WITH concept,
+            relationship_edge.relationship_type AS relationship_type,
+            linked_related_source_concept,
+            collect(related_concept.id) AS related_ids,
+            COUNT(work) AS work_count
         
-        WITH concept, head(related_ids) AS related_id, SUM(work_count) AS work_count
+        WITH concept, relationship_type, head(related_ids) AS related_id, SUM(work_count) AS work_count
         ORDER BY work_count DESC
 
-        RETURN concept.id AS id, collect({{id: related_id, count: work_count}})[0..$related_to_limit] AS related
+        RETURN
+            concept.id AS id,
+            collect({{
+                id: related_id,
+                relationship_type: relationship_type,
+                count: work_count
+            }})[0..$related_to_limit] AS related
     """
 
 

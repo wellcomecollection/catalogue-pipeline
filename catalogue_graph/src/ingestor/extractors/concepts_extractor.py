@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
 from typing import Literal, get_args
 
-from ingestor.models.neptune.query_result import NeptuneConcept
+from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
 from ingestor.queries.concept_queries import (
     CONCEPT_QUERY,
     CONCEPT_TYPE_QUERY,
@@ -84,7 +84,7 @@ ES_FIELDS = [
     "data.genres",
 ]
 
-LinkedConcepts = dict[str, list[dict]]
+RelatedConcepts = dict[str, list[NeptuneConcept]]
 
 
 class GraphConceptsExtractor:
@@ -190,7 +190,9 @@ class GraphConceptsExtractor:
 
         return result
 
-    def _get_related_concepts(self, query_type: ConceptQuery, ids: Iterable[str]):
+    def _get_related_concepts(
+        self, query_type: ConceptQuery, ids: Iterable[str]
+    ) -> RelatedConcepts:
         result = self.make_neptune_query(query_type, ids)
 
         related_ids = set()
@@ -200,31 +202,45 @@ class GraphConceptsExtractor:
         self._update_same_as_map(related_ids)
 
         # Merge results across 'same as' concepts and related concepts
-        merged_result = defaultdict(lambda: defaultdict(lambda: 0))
+        merged_result = defaultdict(dict)
         for concept_id, item in result.items():
             primary_id = self.get_primary(concept_id)
 
             for related in item["related"]:
                 primary_related_id = self.get_primary(related["id"])
 
-                # Make sure a concept is not related to itself
+                # Skip if a concept is related to itself
                 if self.get_primary(primary_id) != self.get_primary(primary_related_id):
-                    merged_result[primary_id][primary_related_id] += related["count"]
+                    entry = merged_result[primary_id].setdefault(
+                        primary_related_id,
+                        {
+                            "id": primary_related_id,
+                            "count": 0,
+                            "relationship_type": set(),
+                        },
+                    )
+                    entry["count"] += related["count"]
+                    if related.get("relationship_type"):
+                        entry["relationship_type"].add(related["relationship_type"])
 
-        sorted_result = {}
-        for concept_id, related in merged_result.items():
-            sorted_items = sorted(related.items(), key=lambda i: -i[1])
-            limit = NEPTUNE_PARAMS["related_to_limit"]
-            sorted_result[concept_id] = [i[0] for i in sorted_items[:limit]]
+        limit = NEPTUNE_PARAMS["related_to_limit"]
+        sorted_result = {
+            concept_id: sorted(entries.values(), key=lambda i: -i["count"])[:limit]
+            for concept_id, entries in merged_result.items()
+        }
 
         primary_related_ids = {self.get_primary(i) for i in related_ids}
         full_related_concepts = self.get_concepts(primary_related_ids)
 
         full_result = defaultdict(list)
-
         for concept_id in ids:
-            for related_id in sorted_result.get(concept_id, []):
-                related_concept = full_related_concepts[related_id]
+            for entry in sorted_result.get(concept_id, []):
+                related_concept = NeptuneRelatedConcept(
+                    target=full_related_concepts[entry["id"]],
+                    # Pick one relationship type if present, else None
+                    relationship_type=next(iter(entry["relationship_type"]), None),
+                )
+
                 full_result[concept_id].append(related_concept)
 
         return full_result

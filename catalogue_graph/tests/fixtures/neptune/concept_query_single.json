@@ -1,14 +1,22 @@
 {
   "concept": {
+    "~id": "id",
+    "~labels": [
+      "Concept"
+    ],
     "~properties": {
       "id": "id",
       "label": "label",
-      "type": "type"
+      "type": "type",
+      "source": "nlm-mesh"
     }
   },
-  "relationships": [],
   "source_concepts": [
     {
+      "~id": "123",
+      "~labels": [
+        "SourceConcept"
+      ],
       "~properties": {
         "id": "123",
         "source": "lc-names",
@@ -16,6 +24,10 @@
       }
     },
     {
+      "~id": "456",
+      "~labels": [
+        "SourceConcept"
+      ],
       "~properties": {
         "id": "456",
         "source": "wikidata",
@@ -24,22 +36,34 @@
       }
     },
     {
+      "~id": "789",
+      "~labels": [
+        "SourceConcept"
+      ],
       "~properties": {
         "id": "789",
         "source": "nlm-mesh",
-        "description": "mesh description"
+        "description": "mesh description",
+        "label": "MeSH label"
       }
     }
   ],
-  "linked_source_concepts": [
-    {
-      "~properties": {
-        "id": "123",
-        "source": "lc-names",
-        "label": "LoC label"
-      }
+  "linked_source_concept": {
+    "~id": "123",
+    "~labels": [
+      "SourceConcept"
+    ],
+    "~properties": {
+      "id": "123",
+      "source": "lc-names",
+      "label": "LoC label"
     }
-  ],
-  "same_as_concept_ids": [],
-  "concept_types": ["Concept", "Person"]
+  },
+  "same_as": [],
+  "types": [
+    "Concept",
+    "Person"
+  ]
 }
+
+

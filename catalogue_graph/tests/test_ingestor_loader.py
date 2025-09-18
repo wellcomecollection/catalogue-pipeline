@@ -26,12 +26,7 @@ from ingestor.queries.concept_queries import (
     get_referenced_together_query,
     get_related_query,
 )
-from ingestor.steps.ingestor_loader import IngestorLoaderConfig, handler
-
-MOCK_INGESTOR_LOADER_CONFIG = IngestorLoaderConfig(
-    loader_s3_bucket="test-bucket",
-    loader_s3_prefix="test-prefix",
-)
+from ingestor.steps.ingestor_loader import handler
 
 
 class MockNeptuneResponseItem(Enum):
@@ -276,7 +271,9 @@ def test_ingestor_loader(
 
     loader_event = get_mock_ingestor_loader_event("123", 0, 1)
     indexer_event = get_mock_ingestor_indexer_event("123")
-    result = handler(loader_event, MOCK_INGESTOR_LOADER_CONFIG)
+    # loader_s3_bucket="test-bucket",
+    # loader_s3_prefix="test-prefix",
+    result = handler(loader_event)
 
     assert result == indexer_event
     assert len(MockRequest.calls) == 8
@@ -306,4 +303,6 @@ def test_ingestor_loader_bad_neptune_response() -> None:
 
     with pytest.raises(LookupError):
         event = get_mock_ingestor_loader_event("123", 0, 1)
-        handler(event, MOCK_INGESTOR_LOADER_CONFIG)
+        # loader_s3_bucket="test-bucket",
+        # loader_s3_prefix="test-prefix",
+        handler(event)

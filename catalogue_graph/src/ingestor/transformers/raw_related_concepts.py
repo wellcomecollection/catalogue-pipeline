@@ -1,4 +1,4 @@
-from ingestor.models.neptune.query_result import NeptuneConcept
+from ingestor.models.neptune.query_result import NeptuneRelatedConcept
 
 from .raw_concept import (
     DISPLAY_SOURCE_PRIORITY,
@@ -8,12 +8,9 @@ from .raw_concept import (
 
 
 class RawNeptuneRelatedConcept:
-    def __init__(self, neptune_related_concept: NeptuneConcept):
-        self.raw_related_concept = neptune_related_concept
-        self.node = self.raw_related_concept.concept
-        # self.edge = self.raw_related_concept.get("edge")
-        self.edge = None
-        self.source_nodes = self.raw_related_concept.source_concepts
+    def __init__(self, neptune_related_concept: NeptuneRelatedConcept):
+        self.raw_related_concept = neptune_related_concept.target
+        self.relationship_type = neptune_related_concept.relationship_type
 
     @property
     def display_label(self) -> str:
@@ -22,14 +19,7 @@ class RawNeptuneRelatedConcept:
 
     @property
     def wellcome_id(self) -> str:
-        return self.node.properties.id
-
-    @property
-    def relationship_type(self) -> str | None:
-        if self.edge is None:
-            return ""
-
-        return self.edge.properties.relationship_type
+        return self.raw_related_concept.concept.properties.id
 
     @property
     def concept_type(self) -> str:

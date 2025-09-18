@@ -1,6 +1,5 @@
 import time
 from collections.abc import Generator
-from datetime import timedelta
 from queue import Queue
 from threading import Thread
 from typing import Any
@@ -10,36 +9,24 @@ from models.events import IncrementalWindow
 from sources.base_source import BaseSource
 from utils.elasticsearch import get_client, get_standard_index_name
 
-ES_BATCH_SIZE = 2000
-NUM_SLICES = 30
-
 
 def build_merged_index_query(
-    query: dict | None, window: IncrementalWindow | None, i: int
+    query: dict | None,
+    window: IncrementalWindow | None,
 ) -> dict:
     full_query = {"match_all": {}} if query is None else query
     if window is not None:
-        range_filter = split_time_window(window, i)
+        range_filter = {
+            "range": {
+                "state.mergedTime": {
+                    "gte": window.start_time.isoformat(),
+                    "lte": window.end_time.isoformat(),
+                }
+            }
+        }
         full_query = {"bool": {"must": [full_query, range_filter]}}
 
     return full_query
-
-
-def split_time_window(window, i: int):
-    total_seconds = (window.end_time - window.start_time).total_seconds()
-    step = total_seconds / NUM_SLICES
-
-    start_time = window.start_time + timedelta(seconds=i * step)
-    end_time = window.start_time + timedelta(seconds=(i + 1) * step)
-
-    return {
-        "range": {
-            "state.mergedTime": {
-                "gte": start_time.isoformat(),
-                "lte": end_time.isoformat(),
-            }
-        }
-    }
 
 
 class MergedWorksSource(BaseSource):
@@ -64,16 +51,16 @@ class MergedWorksSource(BaseSource):
         self.pit_id = pit["id"]
 
     def search(self, slice_index: int, search_after: str | None = None) -> list[dict]:
-        query = build_merged_index_query(self.query, self.window, slice_index)
+        query = build_merged_index_query(self.query, self.window)
         body = {
             "query": query,
-            "size": ES_BATCH_SIZE,
+            "size": config.ES_SOURCE_BATCH_SIZE,
             "pit": {"id": self.pit_id, "keep_alive": "15m"},
             "sort": [{"_shard_doc": "asc"}],
         }
 
-        # if NUM_SLICES > 1:
-        #     body["slice"] = {"id": slice_index, "max": NUM_SLICES}
+        if config.ES_SOURCE_SLICE_COUNT > 1:
+            body["slice"] = {"id": slice_index, "max": config.ES_SOURCE_SLICE_COUNT}
         if self.fields is not None:
             body["_source"] = self.fields
         if search_after is not None:
@@ -106,7 +93,7 @@ class MergedWorksSource(BaseSource):
         t.start()
 
     def stream_raw(self) -> Generator[Any]:
-        queue: Queue = Queue(maxsize=ES_BATCH_SIZE)
+        queue: Queue = Queue(maxsize=config.ES_SOURCE_BATCH_SIZE)
 
         next_thread_index = 0
         # Extract documents in parallel, with all threads adding resulting documents to the same queue
@@ -115,12 +102,12 @@ class MergedWorksSource(BaseSource):
             next_thread_index += 1
 
         done_signals = 0
-        while done_signals < NUM_SLICES:
+        while done_signals < config.ES_SOURCE_SLICE_COUNT:
             item = queue.get()
             if item is None:
                 done_signals += 1
 
-                if next_thread_index < NUM_SLICES:
+                if next_thread_index < config.ES_SOURCE_SLICE_COUNT:
                     self.run_worker(next_thread_index, queue)
                     next_thread_index += 1
             else:

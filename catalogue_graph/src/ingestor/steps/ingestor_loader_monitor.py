@@ -1,7 +1,5 @@
 import typing
 
-from pydantic import BaseModel
-
 from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
@@ -10,64 +8,25 @@ from ingestor.models.step_events import (
 from utils.reporting import LoaderReport
 
 
-class IngestorLoaderMonitorConfig(BaseModel):
-    percentage_threshold: float = 0.1
-    is_local: bool = False
-
-
-def validate_events(events: list[IngestorIndexerLambdaEvent]) -> None:
-    distinct_pipeline_dates = {e.pipeline_date for e in events}
-    assert len(distinct_pipeline_dates) == 1, "pipeline_date mismatch! Stopping."
-
-    distinct_index_dates = {e.index_date for e in events}
-    assert len(distinct_index_dates) == 1, "index_date mismatch! Stopping."
-
-    distinct_job_ids = {e.job_id for e in events}
-    assert len(distinct_job_ids) == 1, "job_id mismatch! Stopping."
-
-    # assert there are no empty content lengths
-    content_lengths = [e.object_to_index.content_length for e in events]
-    assert all(content_lengths), "Empty content length found! Stopping."
-
-    # assert there are no empty record counts
-    record_counts = [e.object_to_index.record_count for e in events]
-    assert all(record_counts), "Empty record count found! Stopping."
-
-
-def run_check(
-    event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
-) -> LoaderReport:
+def write_s3_report(event: IngestorLoaderMonitorLambdaEvent) -> LoaderReport:
     pipeline_date = event.pipeline_date
-    index_date = event.index_date
-    ingestor_type = event.ingestor_type
     job_id = event.job_id
 
-    print(
-        f"Checking loader events for pipeline_date: {pipeline_date}:{job_id}, force_pass: {event.force_pass} ..."
-    )
-
-    validate_events(event.events)
+    print(f"Checking loader events for pipeline_date: {pipeline_date}:{job_id}...")
 
     sum_file_size = sum((e.object_to_index.content_length or 0) for e in event.events)
     sum_record_count = sum((e.object_to_index.record_count or 0) for e in event.events)
 
-    current_report = LoaderReport(
-        pipeline_date=pipeline_date,
-        index_date=index_date,
-        ingestor_type=ingestor_type,
-        job_id=job_id,
+    report = LoaderReport(
+        **event,
         record_count=sum_record_count,
         total_file_size=sum_file_size,
     )
+    report.write()
+    return report
 
-    current_report.write()
-    return current_report
 
-
-def report_results(
-    report: LoaderReport,
-    send_report: bool,
-) -> None:
+def put_metrics(report: LoaderReport) -> None:
     dimensions = {
         "pipeline_date": report.pipeline_date,
         "index_date": report.index_date,
@@ -76,29 +35,24 @@ def report_results(
     }
 
     print(f"Reporting results {report}, {dimensions} ...")
-    if send_report:
-        reporter = MetricReporter("catalogue_graph_ingestor")
-        reporter.put_metric_data(
-            metric_name="total_file_size",
-            value=report.total_file_size,
-            dimensions=dimensions,
-        )
+    reporter = MetricReporter("catalogue_graph_ingestor")
+    reporter.put_metric_data(
+        metric_name="total_file_size",
+        value=report.total_file_size,
+        dimensions=dimensions,
+    )
+
+
+def handler(event: IngestorLoaderMonitorLambdaEvent) -> None:
+    report = write_s3_report(event)
+
+    if event.report_results:
+        put_metrics(report)
     else:
         print("Skipping sending report metrics.")
 
 
-def handler(
-    event: IngestorLoaderMonitorLambdaEvent, config: IngestorLoaderMonitorConfig
-) -> None:
-    print("Checking output of ingestor_loader ...")
-
-    report = run_check(event, config)
-    report_results(report, event.report_results)
-
-    print("Check complete.")
-
-
-def lambda_handler(event: list[dict] | dict, context: typing.Any) -> list[dict]:
+def lambda_handler(event: dict, context: typing.Any) -> list[dict]:
     # When running in production, 'event' stores a list of IngestorIndexerLambdaEvent items.
     # When running locally, it stores an IngestorLoaderMonitorLambdaEvent object.
     if isinstance(event, list):
@@ -109,5 +63,5 @@ def lambda_handler(event: list[dict] | dict, context: typing.Any) -> list[dict]:
     else:
         handler_event = IngestorLoaderMonitorLambdaEvent(**event)
 
-    handler(handler_event, IngestorLoaderMonitorConfig())
+    handler(handler_event)
     return [e.model_dump() for e in handler_event.events]

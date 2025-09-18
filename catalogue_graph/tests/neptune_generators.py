@@ -1,6 +1,9 @@
-def a_related_concept() -> dict:
-    return {
-        "concept_node": {
+from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
+
+
+def a_related_concept() -> NeptuneConcept:
+    raw_concept = {
+        "concept": {
             "~id": "tzrtx26u",
             "~entityType": "node",
             "~labels": ["Concept"],
@@ -11,15 +14,7 @@ def a_related_concept() -> dict:
                 "type": "Person",
             },
         },
-        "edge": {
-            "~id": "RELATED_TO:Q26255666-->Q26257473",
-            "~entityType": "relationship",
-            "~start": "Q26255666",
-            "~end": "Q26257473",
-            "~type": "RELATED_TO",
-            "~properties": {"relationship_type": "has_sibling"},
-        },
-        "source_concept_nodes": [
+        "source_concepts": [
             {
                 "~id": "n2006095131",
                 "~entityType": "node",
@@ -31,16 +26,29 @@ def a_related_concept() -> dict:
                 },
             }
         ],
-        "concept_types": ["Person", "Concept"],
+        "linked_source_concept": {
+            "~id": "n2006095131",
+            "~entityType": "node",
+            "~labels": ["SourceName"],
+            "~properties": {
+                "id": "n2006095131",
+                "label": "Hilton, Violet, 1908-1969",
+                "source": "lc-names",
+            },
+        },
+        "types": ["Person", "Concept"],
+        "same_as": [],
     }
 
+    return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")
 
-def a_related_concept_with_no_label() -> dict:
+
+def a_related_concept_with_no_label() -> NeptuneConcept:
     """
     This concept can be used to demonstrate how we handle bad records
     """
-    return {
-        "concept_node": {
+    raw_concept = {
+        "concept": {
             "~id": "aaaaaaaa",
             "~entityType": "node",
             "~labels": ["Concept"],
@@ -51,15 +59,7 @@ def a_related_concept_with_no_label() -> dict:
                 "type": "Person",
             },
         },
-        "edge": {
-            "~id": "RELATED_TO:Q26255666-->Q26257473",
-            "~entityType": "relationship",
-            "~start": "Q26255666",
-            "~end": "Q26257473",
-            "~type": "RELATED_TO",
-            "~properties": {"relationship_type": "has_sibling"},
-        },
-        "source_concept_nodes": [
+        "source_concepts": [
             {
                 "~id": "n2006095131",
                 "~entityType": "node",
@@ -71,16 +71,29 @@ def a_related_concept_with_no_label() -> dict:
                 },
             }
         ],
-        "concept_types": ["Person", "Concept"],
+        "linked_source_concept": {
+            "~id": "n2006095131",
+            "~entityType": "node",
+            "~labels": ["SourceName"],
+            "~properties": {
+                "id": "n2006095131",
+                "label": None,
+                "source": "lc-names",
+            },
+        },
+        "types": ["Person", "Concept"],
+        "same_as": [],
     }
 
+    return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")
 
-def a_related_concept_with_two_source_nodes() -> dict:
+
+def a_related_concept_with_two_source_nodes() -> NeptuneConcept:
     """
     This related concept can be used to demonstrate label precedence
     """
-    return {
-        "concept_node": {
+    raw_concept = {
+        "concept": {
             "~id": "abcd2345",
             "~entityType": "node",
             "~labels": ["Concept"],
@@ -91,15 +104,7 @@ def a_related_concept_with_two_source_nodes() -> dict:
                 "type": "Person",
             },
         },
-        "edge": {
-            "~id": "RELATED_TO:Q26255666-->Q26257473",
-            "~entityType": "relationship",
-            "~start": "Q26255666",
-            "~end": "Q26257473",
-            "~type": "RELATED_TO",
-            "~properties": {"relationship_type": "has_sibling"},
-        },
-        "source_concept_nodes": [
+        "source_concepts": [
             {
                 "~id": "n84165387",
                 "~entityType": "node",
@@ -121,5 +126,18 @@ def a_related_concept_with_two_source_nodes() -> dict:
                 },
             },
         ],
-        "concept_types": ["Person", "Concept"],
+        "linked_source_concept": {
+            "~id": "n84165387",
+            "~entityType": "node",
+            "~labels": ["SourceName"],
+            "~properties": {
+                "id": "n84165387",
+                "label": "Pujol, Joseph, 1857-1945.",
+                "source": "lc-names",
+            },
+        },
+        "types": ["Person", "Concept"],
+        "same_as": [],
     }
+
+    return NeptuneRelatedConcept(target=raw_concept, relationship_type="has_sibling")

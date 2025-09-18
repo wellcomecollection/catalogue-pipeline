@@ -13,9 +13,7 @@ from botocore.credentials import Credentials
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
-    IngestorIndexerObject,
     IngestorLoaderLambdaEvent,
-    IngestorTriggerLambdaEvent,
 )
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
@@ -371,8 +369,7 @@ class MockElasticsearchClient:
 
         items = []
         for document in sorted_documents:
-            item = dict(document)
-            item["sort"] = item["_id"]
+            item = {**document, "sort": document["_id"]}
             if search_after is None or item["sort"] > search_after:
                 items.append(item)
 
@@ -404,20 +401,14 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     return FixedDateTime
 
 
-def get_mock_ingestor_trigger_event(job_id: str) -> IngestorTriggerLambdaEvent:
-    return IngestorTriggerLambdaEvent(
-        ingestor_type="concepts",
-        pipeline_date="2025-01-01",
-        index_date="2025-03-01",
-        job_id=job_id,
-    )
-
-
 def get_mock_ingestor_loader_event(
     job_id: str, start_offset: int, end_index: int
 ) -> IngestorLoaderLambdaEvent:
     return IngestorLoaderLambdaEvent(
-        **dict(get_mock_ingestor_trigger_event(job_id)),
+        ingestor_type="concepts",
+        pipeline_date="2025-01-01",
+        index_date="2025-03-01",
+        job_id=job_id,
         start_offset=start_offset,
         end_index=end_index,
     )
@@ -425,12 +416,7 @@ def get_mock_ingestor_loader_event(
 
 def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
     return IngestorIndexerLambdaEvent(
-        **dict(get_mock_ingestor_trigger_event(job_id)),
-        object_to_index=IngestorIndexerObject(
-            s3_uri=f"s3://test-bucket/test-prefix_concepts/2025-01-01/2025-03-01/{job_id}/00000000-00000001.parquet",
-            content_length=1,
-            record_count=1,
-        ),
+        **dict(get_mock_ingestor_loader_event(job_id)),
     )
 
 

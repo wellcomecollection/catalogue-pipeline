@@ -17,6 +17,9 @@ from utils.arrow import pydantic_to_pyarrow_schema
 S3_BATCH_SIZE = 10_000
 
 
+LoadDestination = Literal["s3", "local"]
+
+
 class BaseExtractor:
     def extract_raw(self) -> Generator[Any]:
         """Returns a generator of raw data corresponding to items extracted from the catalogue graph."""
@@ -62,26 +65,37 @@ class ElasticsearchBaseTransformer:
             line = (doc.model_dump_json() + "\n").encode("utf-8")
             file.write(line)
 
+    def _get_file_path(
+        self,
+        event: IngestorLoaderLambdaEvent,
+        destination: LoadDestination,
+        file_name: str,
+    ):
+        if destination == "s3":
+            full_path = event.get_s3_uri(file_name)
+        elif destination == "local":
+            relative_path = f"../ingestor_outputs/{file_name}.{event.load_format}"
+            full_path = os.path.abspath(relative_path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        else:
+            raise ValueError(f"Unknown destination: '{destination}'.")
+
+        return full_path
+
     def load_documents(
         self,
         event: IngestorLoaderLambdaEvent,
-        destination: Literal["s3", "local"] = "s3",
+        destination: LoadDestination = "s3",
     ):
+        total_count = 0
+
         transport_params = None
         if destination == "s3":
             transport_params = {"client": boto3.client("s3")}
 
         for i, batch in enumerate(self.stream_batches()):
             file_name = f"{str(i * S3_BATCH_SIZE).zfill(8)}-{str(i * S3_BATCH_SIZE + len(batch)).zfill(8)}"
-
-            if destination == "s3":
-                full_path = event.get_s3_uri(file_name)
-            elif destination == "local":
-                relative_path = f"../ingestor_outputs/{file_name}.{event.load_format}"
-                full_path = os.path.abspath(relative_path)
-                os.makedirs(os.path.dirname(full_path), exist_ok=True)
-            else:
-                raise ValueError(f"Unknown destination: '{destination}'.")
+            full_path = self._get_file_path(event, destination, file_name)
 
             with smart_open.open(
                 full_path, "wb", transport_params=transport_params
@@ -92,4 +106,7 @@ class ElasticsearchBaseTransformer:
                 elif event.load_format == "jsonl":
                     self._load_to_jsonl(documents, f)
 
+            total_count += len(documents)
             print(f"{len(documents)} items loaded to '{full_path}'.")
+
+        return total_count

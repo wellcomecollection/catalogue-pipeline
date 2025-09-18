@@ -1,33 +1,36 @@
-
 {
   "id": "id",
   "related": [
     {
-      "concept_node": {
-        "~id": "tzrtx26u",
-        "~entityType": "node",
-        "~labels": [
-          "Concept"
+      "target": {
+        "concept": {
+          "~id": "tzrtx26u",
+          "~entityType": "node",
+          "~labels": [
+            "Concept"
+          ],
+          "~properties": {
+            "id": "tzrtx26u",
+            "label": "Hilton, Violet, 1908-1969.",
+            "source": "lc-names",
+            "type": "Person"
+          }
+        },
+        "source_concepts": [
+          {
+            "~id": "n2006095131",
+            "~entityType": "node",
+            "~labels": [
+              "SourceName"
+            ],
+            "~properties": {
+              "id": "n2006095131",
+              "label": "Hilton, Violet, 1908-1969",
+              "source": "lc-names"
+            }
+          }
         ],
-        "~properties": {
-          "id": "tzrtx26u",
-          "label": "Hilton, Violet, 1908-1969.",
-          "source": "lc-names",
-          "type": "Person"
-        }
-      },
-      "edge": {
-        "~id": "RELATED_TO:Q26255666-->Q26257473",
-        "~entityType": "relationship",
-        "~start": "Q26255666",
-        "~end": "Q26257473",
-        "~type": "RELATED_TO",
-        "~properties": {
-          "relationship_type": "has_sibling"
-        }
-      },
-      "source_concept_nodes": [
-        {
+        "linked_source_concept": {
           "~id": "n2006095131",
           "~entityType": "node",
           "~labels": [
@@ -38,9 +41,14 @@
             "label": "Hilton, Violet, 1908-1969",
             "source": "lc-names"
           }
-        }
-      ],
-      "concept_types": ["Person", "Concept"]
+        },
+        "types": [
+          "Person",
+          "Concept"
+        ],
+        "same_as": []
+      },
+      "relationship_type": "has_sibling"
     }
   ]
 }

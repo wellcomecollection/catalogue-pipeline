@@ -11,21 +11,17 @@ from test_utils import load_fixture, load_json_fixture
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
 )
-from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
+from ingestor.steps.ingestor_indexer import handler
 from utils.types import IngestorType
 
 
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
 def test_ingestor_indexer_success(record_type: IngestorType) -> None:
-    config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date="2025-01-01",
         index_date="2025-01-01",
         job_id="123",
-        object_to_index=IngestorIndexerObject(
-            s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
-        ),
     )
 
     _mock_es_secrets()
@@ -41,7 +37,7 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
 
     expected_inputs = load_json_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
 
-    result = handler(event, config)
+    result = handler(event)
     assert len(MockElasticsearchClient.inputs) == 10
     assert result.success_count == 10
     assert MockElasticsearchClient.inputs == expected_inputs
@@ -70,9 +66,6 @@ def failure_params_missing_file(record_type: IngestorType) -> tuple:
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
-            object_to_index=IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/ghost-file"
-            ),
         ),
         None,
         KeyError,
@@ -88,9 +81,6 @@ def failure_params_malformed_parquet(record_type: IngestorType) -> tuple:
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
-            object_to_index=IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
-            ),
         ),
         "catalogue/denormalised_works_example.jsonl",
         polars.exceptions.ComputeError,
@@ -108,9 +98,6 @@ def failure_params_wrong_content(
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
-            object_to_index=IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet"
-            ),
         ),
         f"ingestor/{actual_type}/00000000-00000010.parquet",
         pydantic_core.ValidationError,
@@ -134,8 +121,6 @@ def test_ingestor_indexer_failure(
     expected_error: Any | tuple,
     error_message: str,
 ) -> None:
-    config = IngestorIndexerConfig()
-
     with pytest.raises(expected_exception=expected_error, match=error_message):
         if description != "the file at s3_uri doesn't exist":
             MockSmartOpen.mock_s3_file(
@@ -143,7 +128,7 @@ def test_ingestor_indexer_failure(
             )
         MockSmartOpen.open(event.object_to_index.s3_uri, "r")
 
-        handler(event, config)
+        handler(event)
 
 
 def _mock_es_secrets() -> None:

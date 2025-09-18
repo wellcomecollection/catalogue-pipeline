@@ -5,12 +5,10 @@ from test_mocks import MockCloudwatchClient, MockSmartOpen
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
-    IngestorIndexerObject,
     IngestorLoaderMonitorLambdaEvent,
     IngestorStepEvent,
 )
 from ingestor.steps.ingestor_loader_monitor import (
-    IngestorLoaderMonitorConfig,
     handler,
 )
 
@@ -51,16 +49,6 @@ def get_mock_expected_metric(file_size: int) -> dict:
     }
 
 
-def get_mock_ingestor_indexer_object(
-    file_name: str, content_length: int | None, record_count: int | None
-) -> IngestorIndexerObject:
-    return IngestorIndexerObject(
-        s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/{file_name}.parquet",
-        content_length=content_length,
-        record_count=record_count,
-    )
-
-
 def verify_s3_reports(record_count: int, file_size: int) -> None:
     expected_report = get_mock_expected_report(record_count, file_size)
 
@@ -86,9 +74,7 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
-    handler(event, config)
+    handler(event)
 
     # assert metrics are reported
     assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(3000)]
@@ -126,9 +112,7 @@ def test_ingestor_loader_monitor_success_with_previous() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
-    handler(event, config)
+    handler(event, is_local=True)
 
     # assert metrics are reported
     assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(3200)]
@@ -168,11 +152,9 @@ def test_ingestor_loader_monitor_failure_with_previous() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
     # assert this raises a ValueError due to percentage change exceeding threshold
     with pytest.raises(ValueError, match="Fractional change .* exceeds threshold"):
-        handler(event, config)
+        handler(event, is_local=True)
 
     # assert no metrics are reported
     assert MockCloudwatchClient.metrics_reported == []
@@ -213,10 +195,8 @@ def test_ingestor_loader_monitor_force_pass() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
     # This should not raise an exception due to force_pass=True
-    handler(event, config)
+    handler(event, is_local=True)
 
     # Metrics should still be reported
     assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(2000)]
@@ -243,11 +223,9 @@ def test_ingestor_loader_monitor_pipeline_date_mismatch() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
     # Assert this raises an AssertionError due to pipeline date mismatch
     with pytest.raises(AssertionError, match="pipeline_date mismatch"):
-        handler(event, config)
+        handler(event, is_local=True)
 
 
 def test_ingestor_loader_monitor_job_id_mismatch() -> None:
@@ -266,11 +244,9 @@ def test_ingestor_loader_monitor_job_id_mismatch() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
     # Assert this raises an AssertionError due to job ID mismatch
     with pytest.raises(AssertionError, match="job_id mismatch"):
-        handler(event, config)
+        handler(event, is_local=True)
 
 
 def test_ingestor_loader_monitor_empty_content_length() -> None:
@@ -289,11 +265,9 @@ def test_ingestor_loader_monitor_empty_content_length() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
     # Assert this raises an AssertionError due to empty content length
     with pytest.raises(AssertionError, match="Empty content length"):
-        handler(event, config)
+        handler(event, is_local=True)
 
 
 def test_ingestor_loader_monitor_empty_record_count() -> None:
@@ -312,8 +286,6 @@ def test_ingestor_loader_monitor_empty_record_count() -> None:
         ],
     )
 
-    config = IngestorLoaderMonitorConfig(percentage_threshold=0.1, is_local=True)
-
     # Assert this raises an AssertionError due to empty record count
     with pytest.raises(AssertionError, match="Empty record count"):
-        handler(event, config)
+        handler(event, is_local=True)
