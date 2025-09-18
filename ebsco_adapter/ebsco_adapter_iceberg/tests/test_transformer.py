@@ -6,10 +6,8 @@ import pyarrow as pa
 import pytest
 
 import config as adapter_config
-from models.step_events import (
-    EbscoAdapterTransformerEvent,
-    EbscoAdapterTransformerResult,
-)
+from models.step_events import EbscoAdapterTransformerEvent
+from models.manifests import TransformerManifest
 from models.work import SourceWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
@@ -61,7 +59,7 @@ def _run_transform(
     *,
     index_date: str | None = None,
     pipeline_date: str = "dev",
-) -> EbscoAdapterTransformerResult:
+) -> TransformerManifest:
     event = EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
         job_id="20250101T1200",
@@ -108,11 +106,10 @@ def test_transformer_end_to_end_with_local_table(
 
     result = _run_transform(changeset_id, index_date="2025-01-01")
 
-    assert result.batch_file_bucket is not None and result.batch_file_key is not None
-    assert result.success_count == 2
-    assert result.failure_count == 0
+    assert result.successes.count == 2
+    assert result.failures is None
     # Validate file contents written to mock S3 (NDJSON)
-    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
@@ -134,9 +131,9 @@ def test_transformer_creates_deletedwork_for_empty_content(
     result = _run_transform(changeset_id, index_date="2025-03-01")
 
     # Both IDs should appear (one DeletedWork, one SourceWork)
-    assert result.batch_file_bucket is not None and result.batch_file_key is not None
-    assert result.success_count == 2
-    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    assert result.successes.count == 2
+    assert result.failures is None
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
@@ -181,12 +178,12 @@ def test_transformer_full_retransform_when_no_changeset(
     )
     result = handler(event=event, config_obj=config)
 
-    assert result.failure_count == 0
-    assert result.success_count == 2
-    assert result.batch_file_bucket == adapter_config.S3_BUCKET
+    assert result.failures is None
+    assert result.successes.count == 2
+    assert result.successes.batch_file_location.bucket == adapter_config.S3_BUCKET
     expected_key = f"{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
-    assert result.batch_file_key == expected_key
-    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    assert result.successes.batch_file_location.key == expected_key
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
@@ -222,9 +219,9 @@ def test_transformer_batch_file_key_with_changeset(
     expected_key = (
         f"{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
     )
-    assert result.batch_file_bucket == adapter_config.S3_BUCKET
-    assert result.batch_file_key == expected_key
-    batch_path_full = f"s3://{result.batch_file_bucket}/{result.batch_file_key}"
+    assert result.successes.batch_file_location.bucket == adapter_config.S3_BUCKET
+    assert result.successes.batch_file_location.key == expected_key
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
@@ -278,13 +275,108 @@ def test_transformer_index_name_selection(
 # --------------------------------------------------------------------------------------
 
 
-def test_transform_empty_content_returns_empty_list() -> None:
-    assert transform("work1", "") == []
+def test_transform_empty_content_returns_error() -> None:
+    works, errors = transform("work1", "")
+    assert works == []
+    assert errors and errors[0]["reason"] == "empty_content"
 
 
-def test_transform_invalid_xml_returns_empty_list() -> None:
-    # malformed XML so pymarc should throw and transform should swallow
-    assert transform("work2", "<record><leader>bad") == []
+def test_transform_invalid_xml_returns_parse_error() -> None:
+    works, errors = transform("work2", "<record><leader>bad")
+    assert works == []
+    assert errors and errors[0]["reason"] == "parse_error"
+
+
+def test_transformer_creates_failure_manifest_for_parse_errors(
+    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A malformed MARC record should produce a failure manifest with parse_error reason."""
+    records_by_id = {
+        "ebsBadXml001": "<record><leader>bad",  # malformed
+        "ebsGood001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsGood001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Valid Title</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+    result = _run_transform(changeset_id, index_date="2025-09-01")
+
+    # We expect one success (good record) and one transform error
+    assert result.successes.count == 1
+    assert result.failures is not None
+    assert result.failures.count >= 1
+
+    # Read the failure file
+    failure_path_full = (
+        f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
+    )
+    failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
+    with open(failure_contents_path, encoding="utf-8") as f:
+        failure_lines = [json.loads(line) for line in f if line.strip()]
+
+    # Expect exactly one parse error line referencing the bad XML id
+    expected_failure = {
+        "stage": "transform",
+        "id": "ebsBadXml001",
+        "reason": "parse_error",
+    }
+    # Allow presence of optional detail field (truncate if present for comparison)
+    normalized = [
+        {k: v for k, v in line.items() if k in {"stage", "id", "reason"}}
+        for line in failure_lines
+    ]
+    assert normalized == [expected_failure]
+
+
+def test_transformer_creates_failure_manifest_for_index_errors(
+    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Simulate ES indexing errors and ensure they are captured in failure manifest."""
+    # Create a single valid record
+    records_by_id = {
+        "ebsIdxErr001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdxErr001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Index Error Title</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+
+    # Monkeypatch bulk to force an indexing error
+    def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
+        actions_list = list(actions)
+        # pretend success count is number of actions even with error
+        return len(actions_list), [
+            {
+                "index": {
+                    "_id": actions_list[0]["_id"],
+                    "status": 400,
+                    "error": {"type": "mapper_parsing_exception"},
+                }
+            }
+        ]
+
+    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+    result = _run_transform(changeset_id, index_date="2025-09-02")
+    assert result.failures is not None
+    assert result.failures.count == 1
+
+    failure_path_full = (
+        f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
+    )
+    failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
+    with open(failure_contents_path, encoding="utf-8") as f:
+        failure_lines = [json.loads(line) for line in f if line.strip()]
+    expected_index_failure = {
+        "stage": "index",
+        "id": "ebsIdxErr001",
+        "status": 400,
+        "error_type": "mapper_parsing_exception",
+    }
+    # Normalize to only fields we assert against (some defensive future-proofing)
+    normalized = [
+        {
+            k: v
+            for k, v in line.items()
+            if k in {"stage", "id", "status", "error_type"}
+        }
+        for line in failure_lines
+    ]
+    assert normalized == [expected_index_failure]
 
 
 def test_transform_valid_marcxml_returns_work() -> None:
@@ -297,10 +389,11 @@ def test_transform_valid_marcxml_returns_work() -> None:
         "</datafield>"
         "</record>"
     )
-    result = transform("ebs12345", xml)
-    assert len(result) == 1
-    assert result[0].id == "ebs12345"
-    assert result[0].title == "A Useful Title"
+    works, errors = transform("ebs12345", xml)
+    assert not errors
+    assert len(works) == 1
+    assert works[0].id == "ebs12345"
+    assert works[0].title == "A Useful Title"
 
 
 # --------------------------------------------------------------------------------------
@@ -328,7 +421,7 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     assert success == 2
-    assert errors == 0
+    assert errors == []
     assert {a["_id"] for a in collected} == {"id1", "id2"}
     assert {a["_source"]["title"] for a in collected} == {"Title 1", "Title 2"}
 
@@ -355,7 +448,8 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     assert success == 1
-    assert errors == 1
+    assert len(errors) == 1
+    assert errors[0]["error_type"] == "mapper_parsing_exception"
 
 
 def test_transformer_raises_when_batch_file_write_fails(

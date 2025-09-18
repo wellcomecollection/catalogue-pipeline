@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 
+from models.manifests import TransformerManifest
+
 
 class EbscoAdapterEvent(BaseModel):
     """Base event for all EBSCO adapter steps.
@@ -27,15 +29,3 @@ class EbscoAdapterLoaderEvent(EbscoAdapterEvent):
 
 class EbscoAdapterTransformerEvent(EbscoAdapterEvent):
     changeset_id: str | None = None
-
-
-class EbscoAdapterTransformerResult(EbscoAdapterEvent):
-    """Result of transformer execution passed to the next step.
-
-    Large lists of batch ids are written to S3 (one JSON line per batch).
-    """
-
-    batch_file_bucket: str | None = None
-    batch_file_key: str | None = None
-    success_count: int = 0
-    failure_count: int = 0
