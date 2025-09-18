@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import BaseModel, StringConstraints
 
@@ -18,7 +18,7 @@ class BaseNode(BaseModel):
 # Represents a LoC, MeSH, or Wikidata concept.
 # The `id` field stores a unique identifier provided by the source vocabulary/ontology
 class SourceConcept(BaseNode):
-    source: Literal["nlm-mesh", "lc-subjects", "lc-names", "wikidata"]
+    source: ConceptSource
     # For example MeSH tree numbers or other identifiers from Wikidata
     alternative_ids: list[str] = []
     # LoC variants, MeSH concepts other than preferred term

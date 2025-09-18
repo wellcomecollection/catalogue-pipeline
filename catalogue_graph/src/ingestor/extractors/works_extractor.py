@@ -45,6 +45,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
     def get_works(self) -> Generator[DenormalisedWork]:
         for work in self.es_source.stream_raw():
+            print(work)
             yield DenormalisedWork(**work)
 
     def get_work_stream(self) -> Generator[tuple[DenormalisedWork]]:
@@ -72,7 +73,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
                 )
 
                 work_concepts = []
-                for raw_concept in all_concepts.get(work_id, []):
+                for raw_concept in all_concepts.get(work_id, {}).get("concepts", []):
                     work_concepts.append(WorkConcept(**raw_concept))
 
                 streamed_ids.add(es_work.state.canonical_id)

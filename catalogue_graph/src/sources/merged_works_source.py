@@ -65,7 +65,7 @@ class MergedWorksSource(BaseSource):
             body["search_after"] = search_after
 
         start_time = time.time()
-        hits = self.es_client.search(body=body)["hits"]["hits"]
+        hits: list[dict] = self.es_client.search(body=body)["hits"]["hits"]
         duration = round(time.time() - start_time)
 
         print(
@@ -84,7 +84,7 @@ class MergedWorksSource(BaseSource):
 
         queue.put(None)
 
-    def run_worker(self, slice_index: int, queue: Queue):
+    def run_worker(self, slice_index: int, queue: Queue) -> None:
         # Run threads as daemons so that they automatically exit when the main thread throws an exception.
         # See https://docs.python.org/3/library/threading.html for more info.
         t = Thread(target=self.worker_target, args=(slice_index, queue), daemon=True)

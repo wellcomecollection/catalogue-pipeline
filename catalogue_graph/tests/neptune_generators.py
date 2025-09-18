@@ -2,7 +2,7 @@ from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedC
 
 
 def a_related_concept() -> NeptuneRelatedConcept:
-    raw_concept = {
+    raw_concept: dict = {
         "concept": {
             "~id": "tzrtx26u",
             "~entityType": "node",
@@ -49,7 +49,7 @@ def a_related_concept_with_no_label() -> NeptuneRelatedConcept:
     """
     This concept can be used to demonstrate how we handle bad records
     """
-    raw_concept = {
+    raw_concept: dict = {
         "concept": {
             "~id": "aaaaaaaa",
             "~entityType": "node",
@@ -96,7 +96,7 @@ def a_related_concept_with_two_source_nodes() -> NeptuneRelatedConcept:
     """
     This related concept can be used to demonstrate label precedence
     """
-    raw_concept = {
+    raw_concept: dict = {
         "concept": {
             "~id": "abcd2345",
             "~entityType": "node",

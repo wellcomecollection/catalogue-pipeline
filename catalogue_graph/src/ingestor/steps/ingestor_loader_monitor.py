@@ -20,7 +20,7 @@ def write_s3_report(event: IngestorIndexerLambdaEvent) -> LoaderReport:
     sum_record_count = sum(o.record_count for o in event.objects_to_index)
 
     report = LoaderReport(
-        **event,
+        **event.model_dump(),
         record_count=sum_record_count,
         total_file_size=sum_file_size,
     )
@@ -48,11 +48,7 @@ def put_metrics(report: LoaderReport) -> None:
 
 def handler(event: IngestorIndexerLambdaEvent) -> None:
     report = write_s3_report(event)
-
-    if event.report_results:
-        put_metrics(report)
-    else:
-        print("Skipping sending report metrics.")
+    put_metrics(report)
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict:

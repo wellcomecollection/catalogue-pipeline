@@ -5,7 +5,6 @@ from test_mocks import MockSmartOpen
 from ingestor.models.step_events import IngestorIndexerMonitorLambdaEvent
 from ingestor.steps.ingestor_indexer_monitor import handler
 
-MOCK_LATEST_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/report.indexer.json"
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.indexer.json"
 
 pipeline_date = "2025-01-01"
@@ -18,7 +17,6 @@ def get_mock_expected_report(success_count: int, previous_job_id: str | None) ->
         "index_date": index_date,
         "ingestor_type": "concepts",
         "job_id": "123",
-        "previous_job_id": previous_job_id,
         "success_count": success_count,
     }
 
@@ -29,49 +27,8 @@ def verify_s3_reports(success_count: int, previous_job_id: str | None) -> None:
     with MockSmartOpen.open(MOCK_CURRENT_JOB_S3_URI, "r") as f:
         assert json.load(f) == expected_report
 
-    with MockSmartOpen.open(MOCK_LATEST_S3_URI, "r") as f:
-        assert json.load(f) == expected_report
 
-
-def test_ingestor_loader_monitor_success_no_previous() -> None:
-    events = [
-        IngestorIndexerMonitorLambdaEvent(
-            ingestor_type="concepts",
-            pipeline_date=pipeline_date,
-            index_date=index_date,
-            job_id="123",
-            success_count=23,
-        ),
-        IngestorIndexerMonitorLambdaEvent(
-            ingestor_type="concepts",
-            pipeline_date=pipeline_date,
-            index_date=index_date,
-            job_id="123",
-            success_count=27,
-        ),
-    ]
-
-    handler(events)
-
-    # assert reports are written in s3
-    verify_s3_reports(50, None)
-
-
-def test_ingestor_loader_monitor_success_with_previous() -> None:
-    MockSmartOpen.mock_s3_file(
-        MOCK_LATEST_S3_URI,
-        json.dumps(
-            {
-                "pipeline_date": pipeline_date,
-                "job_id": "122",
-                "index_date": index_date,
-                "ingestor_type": "concepts",
-                "previous_job_id": "121",
-                "success_count": 62,
-            }
-        ),
-    )
-
+def test_ingestor_indexer_monitor_success() -> None:
     events = [
         IngestorIndexerMonitorLambdaEvent(
             ingestor_type="concepts",

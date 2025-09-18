@@ -156,7 +156,7 @@ def local_handler() -> None:
     objects_to_index = _get_objects_to_index(bucket, prefix, base_event.load_format)
 
     event = IngestorIndexerLambdaEvent(
-        **base_event.model_dump(), objects_to_index=objects_to_index
+        **base_event.model_dump(), objects_to_index=list(objects_to_index)
     )
     handler(event, is_local=True)
 

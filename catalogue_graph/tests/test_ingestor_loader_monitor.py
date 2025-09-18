@@ -39,6 +39,7 @@ def get_mock_expected_metric(file_size: int) -> dict:
         "value": file_size,
         "metric_name": "total_file_size",
         "dimensions": {
+            "ingestor_type": "concepts",
             "pipeline_date": "2025-01-01",
             "index_date": "2025-03-01",
             "job_id": "123",
@@ -48,7 +49,7 @@ def get_mock_expected_metric(file_size: int) -> dict:
 
 
 def get_mock_ingestor_indexer_object(
-    file_name: str, content_length: int | None, record_count: int | None
+    file_name: str, content_length: int, record_count: int
 ) -> IngestorIndexerObject:
     return IngestorIndexerObject(
         s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/{file_name}.parquet",

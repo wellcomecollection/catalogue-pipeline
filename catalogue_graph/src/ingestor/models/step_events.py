@@ -48,8 +48,7 @@ class IngestorIndexerLambdaEvent(IngestorStepEvent):
 
 class IngestorMonitorStepEvent(IngestorStepEvent):
     force_pass: bool = False
-    report_results: bool = True
 
 
-class IngestorIndexerMonitorLambdaEvent(IngestorMonitorStepEvent):
+class IngestorIndexerMonitorLambdaEvent(IngestorStepEvent):
     success_count: int

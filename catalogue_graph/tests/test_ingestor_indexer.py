@@ -5,7 +5,11 @@ from typing import Any
 import polars
 import pydantic_core
 import pytest
-from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
+from test_mocks import (
+    MockElasticsearchClient,
+    MockSmartOpen,
+    mock_es_secrets,
+)
 from test_utils import load_fixture, load_json_fixture
 
 from ingestor.models.step_events import (
@@ -32,7 +36,7 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
         ],
     )
 
-    _mock_es_secrets()
+    mock_es_secrets("concepts_ingestor", "2025-01-01")
 
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
@@ -158,19 +162,3 @@ def test_ingestor_indexer_failure(
         MockSmartOpen.open(event.objects_to_index[0].s3_uri, "r")
 
         handler(event)
-
-
-def _mock_es_secrets() -> None:
-    # Using a non-null pipeline_date connects to the production ES cluster, so we need to mock some secrets
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/private_host", "test"
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/port", 80
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/protocol", "http"
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/concept_ingestor/api_key", ""
-    )

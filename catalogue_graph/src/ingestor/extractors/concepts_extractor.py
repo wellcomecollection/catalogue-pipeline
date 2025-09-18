@@ -8,14 +8,25 @@ from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedC
 from models.events import IncrementalWindow
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.merged_works_source import MergedWorksSource
+from utils.types import ConceptType
 
 from .base_extractor import (
-    NEPTUNE_PARAMS,
     ConceptQuery,
     ConceptReferencedTogetherQuery,
     ConceptRelatedQuery,
     GraphBaseExtractor,
 )
+
+CONCEPT_QUERY_PARAMS = {
+    # There are a few Wikidata supernodes which cause performance issues in queries.
+    # We need to filter them out when running queries to get related nodes.
+    # Q5 -> 'human', Q151885 -> 'concept'
+    "ignored_wikidata_ids": ["Q5", "Q151885"],
+    # Maximum number of related nodes to return for each relationship type
+    "related_to_limit": 10,
+    # Minimum number of works in which two concepts must co-occur to be considered 'frequently referenced together'
+    "shared_works_count_threshold": 3,
+}
 
 ES_QUERY = {"match": {"type": "Visible"}}
 ES_FIELDS = [
@@ -46,6 +57,8 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         self.primary_map: dict[str, str] = {}
         self.same_as_map: dict[str, list[str]] = {}
 
+        self.neptune_params = CONCEPT_QUERY_PARAMS
+
     def get_primary(self, concept_id: str) -> str:
         """
         Given a `concept_id`, return its primary 'same as' concept ID. Each group of 'same as' concepts has exactly
@@ -58,9 +71,10 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         primary_id = self.get_primary(concept_id)
         return self.same_as_map.get(primary_id, [primary_id])
 
-    def get_concept_types(self, concept_ids: Iterable[str]) -> dict[str, set[str]]:
+    def get_concept_types(
+        self, concept_ids: Iterable[str]
+    ) -> dict[str, set[ConceptType]]:
         """Given a set of `concept_ids`, return all types associated with each concept via HAS_CONCEPT edges."""
-
         # Types are shared across all 'same as' concepts
         concept_ids = set().union(*(self.get_same_as(i) for i in concept_ids))
 
@@ -70,7 +84,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         for concept_id in concept_ids:
             for same_as_id in self.get_same_as(concept_id):
                 # Use the 'Concept' type by default if no other type available
-                types = result.get(same_as_id, ["Concept"])
+                types = result.get(same_as_id, {}).get("types")
                 concept_types[concept_id].update(types)
 
         return concept_types
@@ -84,10 +98,15 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         for concept_id, concept in concept_result.items():
             source = source_concept_result.get(concept_id, {})
 
+            # Remove `concept_id` from the list of 'same as' concepts
+            same_as = set(self.get_same_as(concept_id)).difference([concept_id])
+
+            print(source.get("source_concepts"))
+
             concepts[concept_id] = NeptuneConcept(
                 concept=concept["concept"],
-                types=concept_types["concept_id"],
-                same_as=self.get_same_as(concept_id),
+                types=list(concept_types[concept_id]),
+                same_as=list(same_as),
                 linked_source_concept=source.get("linked_source_concepts", [None])[0],
                 source_concepts=source.get("source_concepts", []),
             )
@@ -143,7 +162,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
                     if related.get("relationship_type"):
                         entry["relationship_type"].add(related["relationship_type"])
 
-        limit = NEPTUNE_PARAMS["related_to_limit"]
+        limit = self.neptune_params["related_to_limit"]
         sorted_result = {
             concept_id: sorted(entries.values(), key=lambda i: -i["count"])[:limit]
             for concept_id, entries in merged_result.items()

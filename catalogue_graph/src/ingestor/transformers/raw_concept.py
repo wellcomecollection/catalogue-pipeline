@@ -6,10 +6,10 @@ from ingestor.models.indexable_concept import (
 from ingestor.models.neptune.query_result import NeptuneConcept
 from ingestor.models.shared.id_label import Id
 from ingestor.models.shared.identifier import SourceIdentifier
-from utils.types import ConceptType
+from utils.types import ConceptSource, ConceptType
 
 # Sources sorted by priority for querying purposes.
-QUERY_SOURCE_PRIORITY = [
+QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
     "nlm-mesh",
     "lc-subjects",
     "lc-names",
@@ -19,7 +19,7 @@ QUERY_SOURCE_PRIORITY = [
 
 # Sources sorted by priority for display purposes. Wikidata is prioritised over Library of Congress Names since Wikidata
 # person names work better as theme page titles (e.g. 'Florence Nightingale' vs 'Nightingale, Florence, 1820-1910').
-DISPLAY_SOURCE_PRIORITY = [
+DISPLAY_SOURCE_PRIORITY: list[ConceptSource] = [
     "nlm-mesh",
     "lc-subjects",
     "wikidata",
@@ -57,7 +57,7 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
 
 def get_priority_label(
     raw_concept: NeptuneConcept,
-    source_priority: list[str],
+    source_priority: list[ConceptSource],
 ) -> tuple[str, str]:
     """
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.

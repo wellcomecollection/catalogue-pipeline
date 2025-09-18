@@ -3,13 +3,17 @@ from enum import Enum, auto
 import polars as pl
 import pytest
 from test_mocks import (
+    MockElasticsearchClient,
     MockRequest,
     MockSmartOpen,
     add_neptune_mock_response,
     get_mock_ingestor_indexer_event,
     get_mock_ingestor_loader_event,
+    mock_es_secrets,
 )
-from test_utils import load_json_fixture
+from test_utils import (
+    load_json_fixture,
+)
 
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
@@ -23,10 +27,33 @@ from ingestor.models.indexable_concept import (
 )
 from ingestor.queries.concept_queries import (
     CONCEPT_QUERY,
+    CONCEPT_TYPE_QUERY,
+    SAME_AS_CONCEPT_QUERY,
+    SOURCE_CONCEPT_QUERY,
     get_referenced_together_query,
     get_related_query,
 )
 from ingestor.steps.ingestor_loader import handler
+
+
+def mock_denormalised_work(pipeline_date: str) -> None:
+    fixture = {
+        "data": {
+            "contributors": [
+                {
+                    "agent": {
+                        "id": {
+                            "canonicalId": "id",
+                        },
+                        "type": "Person",
+                    }
+                }
+            ],
+        },
+    }
+
+    index_name = f"works-denormalised-{pipeline_date}"
+    MockElasticsearchClient.index(index_name, "123", fixture)
 
 
 class MockNeptuneResponseItem(Enum):
@@ -50,11 +77,10 @@ def get_mock_neptune_concept(include: list[MockNeptuneResponseItem]) -> dict:
 
 def _add_neptune_mock_response(expected_query: str, mock_results: list[dict]) -> None:
     expected_params = {
-        "start_offset": 0,
-        "limit": 1,
         "ignored_wikidata_ids": ["Q5", "Q151885"],
         "related_to_limit": 10,
-        "number_of_shared_works_threshold": 3,
+        "shared_works_count_threshold": 3,
+        "ids": ["id"],
     }
     add_neptune_mock_response(expected_query, expected_params, mock_results)
 
@@ -73,8 +99,70 @@ def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
     if MockNeptuneResponseItem.CONCEPT_RELATED_TO in include:
         related_to_results = [load_json_fixture("neptune/related_to_query_single.json")]
 
+    concept = {
+        "~id": "id",
+        "~labels": ["Person"],
+        "~properties": {
+            "id": "id",
+            "label": "label",
+            "type": "type",
+            "source": "nlm-mesh",
+        },
+    }
+
     _add_neptune_mock_response(
-        expected_query=CONCEPT_QUERY, mock_results=[get_mock_neptune_concept(include)]
+        expected_query=CONCEPT_QUERY, mock_results=[{"id": "id", "concept": concept}]
+    )
+
+    _add_neptune_mock_response(
+        expected_query=CONCEPT_TYPE_QUERY,
+        mock_results=[{"id": "id", "types": ["Concept", "Person"]}],
+    )
+
+    source_concepts_response = {
+        "id": "id",
+        "source_concepts": [
+            {
+                "~id": "123",
+                "~labels": ["SourceConcept"],
+                "~properties": {
+                    "id": "123",
+                    "source": "lc-names",
+                    "label": "LoC label",
+                },
+            },
+            {
+                "~id": "456",
+                "~labels": ["SourceConcept"],
+                "~properties": {
+                    "id": "456",
+                    "source": "wikidata",
+                    "description": "description",
+                    "label": "Wikidata label",
+                },
+            },
+        ],
+        "linked_source_concepts": [
+            {
+                "~id": "123",
+                "~labels": ["SourceConcept"],
+                "~properties": {
+                    "id": "123",
+                    "source": "lc-names",
+                    "label": "LoC label",
+                },
+            }
+        ],
+    }
+
+    _add_neptune_mock_response(
+        expected_query=SOURCE_CONCEPT_QUERY,
+        mock_results=[source_concepts_response],
+    )
+
+    _add_neptune_mock_response(
+        expected_query=SAME_AS_CONCEPT_QUERY,
+        mock_results=[{"id": "123", "same_as_ids": []}],
     )
 
     _add_neptune_mock_response(
@@ -266,6 +354,8 @@ def build_test_matrix() -> list[tuple]:
 def test_ingestor_loader(
     description: str, included_response_items: list[MockNeptuneResponseItem]
 ) -> None:
+    mock_es_secrets("graph_extractor", "2025-01-01")
+    mock_denormalised_work("2025-01-01")
     expected_concept = get_catalogue_concept_mock(included_response_items)
     mock_neptune_responses(included_response_items)
 
@@ -276,13 +366,13 @@ def test_ingestor_loader(
     result = handler(loader_event)
 
     assert result == indexer_event
-    assert len(MockRequest.calls) == 8
+    assert len(MockRequest.calls) == 11
 
     request = MockRequest.calls[0]
     assert request["method"] == "POST"
     assert request["url"] == "https://test-host.com:8182/openCypher"
 
-    with MockSmartOpen.open(indexer_event.object_to_index.s3_uri, "rb") as f:
+    with MockSmartOpen.open(indexer_event.objects_to_index[0].s3_uri, "rb") as f:
         df = pl.read_parquet(f)
         assert len(df) == 1
 
@@ -302,7 +392,7 @@ def test_ingestor_loader_bad_neptune_response() -> None:
     )
 
     with pytest.raises(LookupError):
-        event = get_mock_ingestor_loader_event("123", 0, 1)
+        event = get_mock_ingestor_loader_event("123")
         # loader_s3_bucket="test-bucket",
         # loader_s3_prefix="test-prefix",
         handler(event)

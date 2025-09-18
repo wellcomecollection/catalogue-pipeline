@@ -13,11 +13,12 @@ from botocore.credentials import Credentials
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
     IngestorLoaderLambdaEvent,
 )
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
-MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
+MOCK_PUBLIC_ENDPOINT = "test-public-host.com"
 MOCK_INSTANCE_ENDPOINT = "test-host.com"
 MOCK_CREDENTIALS = Credentials(
     access_key="test_access_key",
@@ -93,7 +94,7 @@ class MockSecretsManagerClient(MockAwsService):
 
     def get_secret_value(self, SecretId: str) -> dict:
         if SecretId == LOAD_BALANCER_SECRET_NAME:
-            secret_value = MOCK_API_KEY
+            secret_value = MOCK_PUBLIC_ENDPOINT
         elif SecretId == INSTANCE_ENDPOINT_SECRET_NAME:
             secret_value = MOCK_INSTANCE_ENDPOINT
         elif SecretId in self.secrets:
@@ -277,7 +278,6 @@ class MockRequest:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
-
         for response in MockRequest.responses:
             if (
                 response["method"] == method
@@ -412,7 +412,14 @@ def get_mock_ingestor_loader_event(job_id: str) -> IngestorLoaderLambdaEvent:
 
 def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
     return IngestorIndexerLambdaEvent(
-        **dict(get_mock_ingestor_loader_event(job_id)),
+        **get_mock_ingestor_loader_event(job_id).model_dump(),
+        objects_to_index=[
+            IngestorIndexerObject(
+                s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/{job_id}/00000000-00000001.parquet",
+                content_length=1,
+                record_count=1,
+            )
+        ],
     )
 
 
