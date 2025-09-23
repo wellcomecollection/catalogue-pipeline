@@ -9,13 +9,14 @@ from collections import OrderedDict
 
 from pymarc.field import Field
 from pymarc.record import Record
+from transformers.common import non_empty
 
 
 def extract_alternative_titles(record: Record) -> list[str]:
     title_fields = record.get_fields("130", "240", "246")
-    return distinct(
+    return non_empty(distinct(
         [field.format_field() for field in title_fields if not is_caption(field)]
-    )
+    ))
 
 
 def distinct(titles: list[str]) -> list[str]:

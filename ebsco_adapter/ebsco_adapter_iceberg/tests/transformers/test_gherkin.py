@@ -3,6 +3,7 @@ from pytest_bdd import scenarios, given, when, then, parsers
 from pymarc import Record, Field, Subfield
 
 from transformers.ebsco_to_weco import transform_record
+import re
 
 scenarios("features/designation.feature")
 
@@ -21,10 +22,13 @@ def marc_record():
     return record
 
 
-@given(parsers.re(r'the MARC record has (?:a|another) 362 field with subfield "(?P<code>.+)" value "(?P<value>.*)"'))
-def add_362_field(marc_record, code, value):
-    record_field = Field(tag="362", subfields=[Subfield(code=code, value=value)])
-    marc_record.add_field(record_field)
+@given(parsers.re(
+    r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?P<subs>(?: (?:with|and) subfield "[^"]+" value "[^"*]*")+)'
+))
+def add_field(marc_record, tag, subs):
+    matches = re.findall(r' with subfield "([^"]+)" value "([^"]*)"', subs)
+    subfields = [Subfield(code=code, value=value) for code, value in matches]
+    marc_record.add_field(Field(tag=tag, subfields=subfields))
 
 
 @when("I transform the MARC record")
