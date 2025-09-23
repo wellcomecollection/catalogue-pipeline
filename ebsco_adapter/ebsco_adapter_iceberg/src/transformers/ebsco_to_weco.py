@@ -14,6 +14,8 @@ from transformers.language import extract_languages
 from transformers.other_identifiers import extract_other_identifiers
 from transformers.production import extract_production
 from transformers.title import extract_title
+from transformers.genres import extract_genres
+from transformers.subjects import extract_subjects
 
 
 def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
@@ -38,6 +40,8 @@ def transform_record(marc_record: Record) -> SourceWork:
         format=extract_format(marc_record),
         languages=extract_languages(marc_record),
         holdings=extract_holdings(marc_record),
+        genres=extract_genres(marc_record),
+        subjects=extract_subjects(marc_record)
     )
 
 

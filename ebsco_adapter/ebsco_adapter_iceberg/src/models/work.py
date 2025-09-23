@@ -61,6 +61,10 @@ class Contributor(BaseModel):
     primary: bool = True
 
 
+class Genre(SourceConcept):
+    pass
+
+
 class DateTimeRange(BaseModel):
     from_time: str = Field(alias="from")
     to_time: str = Field(alias="to")
@@ -181,3 +185,5 @@ class SourceWork(ElasticsearchModel, BaseWork):
     format: Format | None = None
     languages: list[Language] = []
     holdings: list[Holdings] = []
+    subjects: list[SourceConcept] = []
+    genres: list[Genre] = []
