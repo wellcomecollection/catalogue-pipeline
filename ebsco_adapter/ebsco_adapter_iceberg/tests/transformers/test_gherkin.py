@@ -18,13 +18,17 @@ def marc_record():
     record = Record()
     # For 001, use data instead of value
     record.add_field(Field(tag="001", data="test001"))
-    record.add_field(Field(tag="245", subfields=[Subfield(code="a", value="Test Title")]))
+    record.add_field(
+        Field(tag="245", subfields=[Subfield(code="a", value="Test Title")])
+    )
     return record
 
 
-@given(parsers.re(
-    r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?P<subs>(?: (?:with|and) subfield "[^"]+" value "[^"*]*")+)'
-))
+@given(
+    parsers.re(
+        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?P<subs>(?: (?:with|and) subfield "[^"]+" value "[^"*]*")+)'
+    )
+)
 def add_field(marc_record, tag, subs):
     matches = re.findall(r' with subfield "([^"]+)" value "([^"]*)"', subs)
     subfields = [Subfield(code=code, value=value) for code, value in matches]
@@ -62,7 +66,7 @@ def check_second_designation(context, designation):
     assert designations[1] == designation
 
 
-@then(parsers.parse('there are exactly {count:d} designations'))
+@then(parsers.parse("there are exactly {count:d} designations"))
 def check_exact_designation_count(context, count):
     designations = context["result"].designation
     assert len(designations) == count

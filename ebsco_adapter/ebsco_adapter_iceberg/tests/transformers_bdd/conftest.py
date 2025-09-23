@@ -43,7 +43,9 @@ def context():
 def marc_record():
     record = Record()
     record.add_field(Field(tag="001", data="test001"))
-    record.add_field(Field(tag="245", subfields=[Subfield(code="a", value="Test Title")]))
+    record.add_field(
+        Field(tag="245", subfields=[Subfield(code="a", value="Test Title")])
+    )
     return record
 
 
@@ -51,7 +53,7 @@ def marc_record():
 # Generic MARC field builder
 # ------------------------------------------------------------------
 field_step_regex = parsers.re(
-    r'the MARC record has (?:a|another) (?P<tag>\d{3}) field'
+    r"the MARC record has (?:a|another) (?P<tag>\d{3}) field"
     r'(?: with indicators "(?P<ind1>[^"])" "(?P<ind2>[^"])"|)'
     r'(?P<subs>(?: with subfield "[^"]+" value "[^"]*")+)'  # one or more subfield/value pairs
 )
@@ -77,13 +79,14 @@ def do_transform(context, marc_record):
 # Generic list assertion steps
 # ------------------------------------------------------------------
 
+
 # there are {count} designations / there are {count} alternative titles
 @then(parsers.parse("there are {count:d} {attr_phrase}"))
 def generic_count(context, count, attr_phrase):
     values = _get_attr_list(context, attr_phrase)
-    assert len(values) == count, (
-        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
-    )
+    assert (
+        len(values) == count
+    ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
 
 
 # there are no alternative titles / there are no designations
@@ -98,21 +101,23 @@ def generic_none(context, attr_phrase):
 def generic_only(context, attr_phrase, value):
     # Accept singular phrase preferred here (but mapping handles plural too)
     values = _get_attr_list(context, attr_phrase)
-    assert len(values) == 1 and values[0] == value, (
-        f"Expected only {attr_phrase} '{value}', got {values}"
-    )
+    assert (
+        len(values) == 1 and values[0] == value
+    ), f"Expected only {attr_phrase} '{value}', got {values}"
 
 
 # the 1st alternative title is "..." / the 2nd designation is "..."
-@then(parsers.re(
-    r'the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>alternative title|alternative titles|designation|designations) is "(?P<value>.*)"'
-))
+@then(
+    parsers.re(
+        r'the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>alternative title|alternative titles|designation|designations) is "(?P<value>.*)"'
+    )
+)
 def generic_ordinal(context, index, attr_phrase, value):
     idx = int(index) - 1
     values = _get_attr_list(context, attr_phrase)
-    assert 0 <= idx < len(values), (
-        f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
-    )
-    assert values[idx] == value, (
-        f"Expected {attr_phrase} at position {index} == {value!r}, got {values[idx]!r}"
-    )
+    assert (
+        0 <= idx < len(values)
+    ), f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
+    assert (
+        values[idx] == value
+    ), f"Expected {attr_phrase} at position {index} == {value!r}, got {values[idx]!r}"
