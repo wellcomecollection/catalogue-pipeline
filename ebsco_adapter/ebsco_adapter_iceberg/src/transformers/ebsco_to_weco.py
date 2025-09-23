@@ -41,7 +41,7 @@ def transform_record(marc_record: Record) -> SourceWork:
         languages=extract_languages(marc_record),
         holdings=extract_holdings(marc_record),
         genres=extract_genres(marc_record),
-        subjects=extract_subjects(marc_record)
+        subjects=extract_subjects(marc_record),
     )
 
 
