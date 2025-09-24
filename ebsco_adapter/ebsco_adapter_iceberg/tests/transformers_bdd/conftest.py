@@ -13,7 +13,7 @@ ATTR_ALIASES = {
     "designations": "designation",
     "alternative title": "alternative_titles",
     "alternative titles": "alternative_titles",
-    "genre": "genres"
+    "genre": "genres",
 }
 
 
@@ -81,7 +81,7 @@ def do_transform(context, marc_record):
 def generic_count(context, count, attr_phrase):
     values = _get_attr_list(context, attr_phrase)
     assert (
-            len(values) == count
+        len(values) == count
     ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
 
 
@@ -98,7 +98,7 @@ def generic_only(context, attr_phrase, value):
     # Accept singular phrase preferred here (but mapping handles plural too)
     values = _get_attr_list(context, attr_phrase)
     assert (
-            len(values) == 1 and values[0] == value
+        len(values) == 1 and values[0] == value
     ), f"Expected only {attr_phrase} '{value}', got {values}"
 
 
@@ -112,18 +112,22 @@ def generic_ordinal(context, index, attr_phrase, value):
     idx = int(index) - 1
     values = _get_attr_list(context, attr_phrase)
     assert (
-            0 <= idx < len(values)
+        0 <= idx < len(values)
     ), f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
     assert (
-            values[idx] == value
+        values[idx] == value
     ), f"Expected {attr_phrase} at position {index} == {value!r}, got {values[idx]!r}"
 
 
 @then(parsers.parse('the only genre has the label "{label}"'))
 def only_genre_has_label(context, label):
     genres = getattr(context["result"], "genres", [])
-    assert len(genres) == 1, f"Expected exactly one genre, found {len(genres)}: {genres}"
-    assert genres[0].label == label, f"Expected label {label!r}, got {genres[0].label!r}"
+    assert (
+        len(genres) == 1
+    ), f"Expected exactly one genre, found {len(genres)}: {genres}"
+    assert (
+        genres[0].label == label
+    ), f"Expected label {label!r}, got {genres[0].label!r}"
     # store index for subsequent 'its ...' steps
     context["_last_single_genre_index"] = 0
 
@@ -137,9 +141,9 @@ def only_genre_identifier_value(context, value):
     )
     g = genres[context.get("_last_single_genre_index", 0)]
     # Adjust attribute access if your SourceIdentifier differs
-    assert getattr(g.source, "value") == value, (
-        f"Expected identifier value {value!r}, got {g.source.value!r}"
-    )
+    assert (
+        getattr(g.source, "value") == value
+    ), f"Expected identifier value {value!r}, got {g.source.value!r}"
 
 
 @then(parsers.parse('its identifier type is "{ctype}"'))
@@ -160,4 +164,6 @@ def only_genre_identifier_type(context, ctype):
         actual_str = actual.name.title()  # e.g. GENRE -> Genre
     else:
         actual_str = str(actual)
-    assert actual_str == ctype, f"Expected identifier type {ctype!r}, got {actual_str!r}"
+    assert (
+        actual_str == ctype
+    ), f"Expected identifier type {ctype!r}, got {actual_str!r}"
