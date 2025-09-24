@@ -116,8 +116,8 @@ resource "aws_iam_role_policy_attachment" "state_machine_logging_policy_attachme
 }
 
 # State Machine
-resource "aws_sfn_state_machine" "ebsco_adapter_pipeline" {
-  name       = "ebsco-adapter-pipeline"
+resource "aws_sfn_state_machine" "state_machine" {
+  name       = "ebsco-adapter"
   role_arn   = aws_iam_role.state_machine_role.arn
   definition = local.state_machine_definition
 
