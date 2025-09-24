@@ -1,5 +1,5 @@
 # State Machine
-resource "aws_sfn_state_machine" "ebsco_transformer" {
+resource "aws_sfn_state_machine" "state_machine" {
   name       = var.name
   role_arn   = aws_iam_role.state_machine_role.arn
   definition = var.state_machine_definition
@@ -32,7 +32,7 @@ resource "aws_iam_role" "state_machine_role" {
 # IAM Policy for State Machine to invoke Lambda functions
 resource "aws_iam_policy" "state_machine_lambda_policy" {
   name        = "${var.name}-sfn-lambda-policy"
-  description = "Allow state machine to invoke EBSCO adapter Lambda functions"
+  description = "Allow state machine to invoke Lambda functions"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -60,7 +60,7 @@ resource "aws_iam_policy" "state_machine_self_start_execution_policy" {
         Action = [
           "states:StartExecution"
         ]
-        Resource = aws_sfn_state_machine.ebsco_transformer.arn
+        Resource = aws_sfn_state_machine.state_machine.arn
       }
     ]
   })
