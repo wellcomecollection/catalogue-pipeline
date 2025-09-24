@@ -1,7 +1,7 @@
 # State Machine Definition
 locals {
   state_machine_definition = jsonencode({
-    Comment = "EBSCO Adapter Pipeline - Trigger -> Loader -> Transformer"
+    Comment = "EBSCO Adapter Pipeline - Trigger -> Loader -> PublishEvent"
     StartAt = "TriggerStep"
     States = {
       TriggerStep = {
@@ -20,10 +20,34 @@ locals {
       LoaderStep = {
         Type     = "Task"
         Resource = module.loader_lambda.lambda.arn
-        Next     = "Success"
+        Next     = "PublishEvent"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
+            IntervalSeconds = 2
+            MaxAttempts     = 3
+            BackoffRate     = 2.0
+          }
+        ]
+      }
+      PublishEvent = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::events:putEvents"
+        Parameters = {
+          Entries = [
+            {
+              "Detail.$"    = "$"
+              DetailType     = "ebsco-adapter.completed"
+              EventBusName   = aws_cloudwatch_event_bus.event_bus.name
+              Source         = "ebsco.adapter.pipeline"
+            }
+          ]
+        }
+        ResultPath = null
+        Next       = "Success"
+        Retry = [
+          {
+            ErrorEquals     = ["States.ALL"]
             IntervalSeconds = 2
             MaxAttempts     = 3
             BackoffRate     = 2.0
@@ -78,6 +102,27 @@ resource "aws_iam_policy" "state_machine_lambda_policy" {
   })
 }
 
+# IAM Policy allowing the state machine to put events onto the shared adapter event bus
+resource "aws_iam_policy" "state_machine_eventbridge_put_policy" {
+  name        = "ebsco-adapter-state-machine-eventbridge-put-policy"
+  description = "Allow state machine to put events on the adapter event bus"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "events:PutEvents"
+        ]
+        Resource = [
+          aws_cloudwatch_event_bus.event_bus.arn
+        ]
+      }
+    ]
+  })
+}
+
 # IAM Policy for State Machine CloudWatch Logging
 resource "aws_iam_policy" "state_machine_logging_policy" {
   name        = "ebsco-adapter-state-machine-logging-policy"
@@ -113,6 +158,11 @@ resource "aws_iam_role_policy_attachment" "state_machine_lambda_policy_attachmen
 resource "aws_iam_role_policy_attachment" "state_machine_logging_policy_attachment" {
   role       = aws_iam_role.state_machine_role.name
   policy_arn = aws_iam_policy.state_machine_logging_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "state_machine_eventbridge_put_policy_attachment" {
+  role       = aws_iam_role.state_machine_role.name
+  policy_arn = aws_iam_policy.state_machine_eventbridge_put_policy.arn
 }
 
 # State Machine
@@ -176,7 +226,7 @@ resource "aws_iam_policy" "eventbridge_state_machine_policy" {
           "states:StartExecution"
         ]
         Resource = [
-          aws_sfn_state_machine.ebsco_adapter_pipeline.arn
+          aws_sfn_state_machine.state_machine.arn
         ]
       }
     ]
@@ -206,7 +256,7 @@ resource "aws_cloudwatch_event_rule" "daily_schedule" {
 resource "aws_cloudwatch_event_target" "state_machine_target" {
   rule      = aws_cloudwatch_event_rule.daily_schedule.name
   target_id = "EbscoAdapterStateMachineTarget"
-  arn       = aws_sfn_state_machine.ebsco_adapter_pipeline.arn
+  arn       = aws_sfn_state_machine.state_machine.arn
   role_arn  = aws_iam_role.eventbridge_state_machine_role.arn
 
   input = jsonencode({
@@ -215,10 +265,15 @@ resource "aws_cloudwatch_event_target" "state_machine_target" {
   })
 }
 
+# Event bus to enable communication with the currrent pipeline
+resource "aws_cloudwatch_event_bus" "event_bus" {
+  name = "catalogue-pipeline-adapter-event-bus"
+}
+
 # Outputs
 output "state_machine_arn" {
   description = "ARN of the EBSCO adapter state machine"
-  value       = aws_sfn_state_machine.ebsco_adapter_pipeline.arn
+  value       = aws_sfn_state_machine.state_machine.arn
 }
 
 output "daily_schedule_rule_name" {
@@ -228,7 +283,7 @@ output "daily_schedule_rule_name" {
 
 output "state_machine_execution_url" {
   description = "URL to view state machine executions in AWS Console"
-  value       = "https://console.aws.amazon.com/states/home?region=${data.aws_region.current.name}#/statemachines/view/${aws_sfn_state_machine.ebsco_adapter_pipeline.arn}"
+  value       = "https://console.aws.amazon.com/states/home?region=${data.aws_region.current.name}#/statemachines/view/${aws_sfn_state_machine.state_machine.arn}"
 }
 
 # Data source for current AWS region
