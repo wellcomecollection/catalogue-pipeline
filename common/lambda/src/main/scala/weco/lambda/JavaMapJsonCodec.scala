@@ -9,6 +9,7 @@ import grizzled.slf4j.Logging
   * and Circe Json. This logic is extracted from the StepFunctionLambdaApp so it
   * can be reused and unit-tested independently.
   */
+
 object JavaMapJsonCodec extends Logging {
   def anyRefToJson(value: AnyRef): Json = value match {
     case null => Json.Null
