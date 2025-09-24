@@ -1,5 +1,6 @@
 Feature: Extract designations from MARC 362 $a
   The designation list is derived from every non-empty 362 $a subfield in order of appearance.
+
   Background:
     Given a valid MARC record
 
@@ -35,7 +36,7 @@ Feature: Extract designations from MARC 362 $a
     And the 3rd designation is "Vol. 3 (Mar. 1999)-"
 
   Scenario: Mixed useful and ignored subfields in same field
-    Given the MARC record has a 362 field with subfield "a" value "Issue 1 (Spring 2000)" with subfield "z" value "Some note"
+    Given the MARC record has a 362 field with subfield "a" value "Issue 1 (Spring 2000)" and subfield "z" value "Some note"
     And the MARC record has another 362 field with subfield "z" value "Only a note"
     And the MARC record has another 362 field with subfield "a" value "Issue 2 (Summer 2000)"
     When I transform the MARC record
@@ -62,7 +63,7 @@ Feature: Extract designations from MARC 362 $a
     Given the MARC record has a 260 field with subfield "a" value "London"
     And the MARC record has a 245 field with subfield "a" value "Some Title"
     When I transform the MARC record
-    Then there are 0 designations
+    Then there are no designations
 
   Scenario: Interleaved 362 and other tags
     Given the MARC record has a 245 field with subfield "a" value "Host Title"
