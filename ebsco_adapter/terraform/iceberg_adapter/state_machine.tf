@@ -20,7 +20,7 @@ locals {
       LoaderStep = {
         Type     = "Task"
         Resource = module.loader_lambda.lambda.arn
-        Next     = "TransformerStep"
+        Next     = "Success"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -29,19 +29,6 @@ locals {
             BackoffRate     = 2.0
           }
         ]
-      }
-      TransformerStep = {
-        Type     = "Task"
-        Resource = module.transformer_lambda.lambda.arn
-        Retry = [
-          {
-            ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
-            IntervalSeconds = 2
-            MaxAttempts     = 3
-            BackoffRate     = 2.0
-          }
-        ]
-        Next = "Success"
       }
       Success = {
         Type = "Succeed"
