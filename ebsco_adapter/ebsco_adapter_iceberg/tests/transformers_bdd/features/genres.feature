@@ -10,6 +10,8 @@ Feature: Extracting genres from MARC 655
 
   Scenario: A simple genre
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
+    When I transform the MARC record
     Then the only genre has the label "Disco Polo"
     And its identifier value is "disco polo"
-    And its identifier type is "Genre"
+    And its ontology type is "Genre"
+    And its identifier type is "label-derived"

@@ -117,3 +117,47 @@ def generic_ordinal(context, index, attr_phrase, value):
     assert (
             values[idx] == value
     ), f"Expected {attr_phrase} at position {index} == {value!r}, got {values[idx]!r}"
+
+
+@then(parsers.parse('the only genre has the label "{label}"'))
+def only_genre_has_label(context, label):
+    genres = getattr(context["result"], "genres", [])
+    assert len(genres) == 1, f"Expected exactly one genre, found {len(genres)}: {genres}"
+    assert genres[0].label == label, f"Expected label {label!r}, got {genres[0].label!r}"
+    # store index for subsequent 'its ...' steps
+    context["_last_single_genre_index"] = 0
+
+
+@then(parsers.parse('its identifier value is "{value}"'))
+def only_genre_identifier_value(context, value):
+    genres = getattr(context["result"], "genres", [])
+    assert len(genres) == 1, (
+        "Step 'its identifier value is ...' assumes exactly one genre; "
+        f"found {len(genres)}"
+    )
+    g = genres[context.get("_last_single_genre_index", 0)]
+    # Adjust attribute access if your SourceIdentifier differs
+    assert getattr(g.source, "value") == value, (
+        f"Expected identifier value {value!r}, got {g.source.value!r}"
+    )
+
+
+@then(parsers.parse('its identifier type is "{ctype}"'))
+def only_genre_identifier_type(context, ctype):
+    genres = getattr(context["result"], "genres", [])
+    assert len(genres) == 1, (
+        "Step 'its identifier type is ...' assumes exactly one genre; "
+        f"found {len(genres)}"
+    )
+    g = genres[context.get("_last_single_genre_index", 0)]
+    # Depending on how ConceptType serialises, we compare its name or value.
+    # If ConceptType.GENRE -> "Genre" via .value or .name adjust accordingly.
+    actual = getattr(g.source, "identifierType", None)
+    # Try common representations
+    if hasattr(actual, "value"):
+        actual_str = actual.value
+    elif hasattr(actual, "name"):
+        actual_str = actual.name.title()  # e.g. GENRE -> Genre
+    else:
+        actual_str = str(actual)
+    assert actual_str == ctype, f"Expected identifier type {ctype!r}, got {actual_str!r}"

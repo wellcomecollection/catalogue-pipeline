@@ -62,7 +62,7 @@ class Contributor(BaseModel):
 
 
 class Genre(SourceConcept):
-    pass
+    type: ConceptType = "Genre"
 
 
 class DateTimeRange(BaseModel):
