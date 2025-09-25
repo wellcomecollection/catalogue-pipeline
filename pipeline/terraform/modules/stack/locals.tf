@@ -1,3 +1,16 @@
+
+// This file is used to create an empty zip file for Lambda functions that
+// don't have any code yet. If we move to container images for all Lambdas
+// we can probably delete this.
+data "archive_file" "empty_zip" {
+  output_path = "data/empty.zip"
+  type        = "zip"
+  source {
+    content  = "// This file is intentionally left empty"
+    filename = "lambda.py"
+  }
+}
+
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
