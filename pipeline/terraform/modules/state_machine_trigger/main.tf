@@ -6,7 +6,7 @@ resource "aws_iam_role" "eventbridge_invoke_role" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
+        Effect    = "Allow"
         Principal = { Service = "events.amazonaws.com" }
         Action    = "sts:AssumeRole"
       }
@@ -22,8 +22,8 @@ resource "aws_iam_policy" "eventbridge_invoke_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow"
-        Action = ["states:StartExecution"]
+        Effect   = "Allow"
+        Action   = ["states:StartExecution"]
         Resource = var.state_machine_arn
       }
     ]
@@ -43,9 +43,9 @@ resource "aws_cloudwatch_event_rule" "trigger_rule" {
 }
 
 resource "aws_cloudwatch_event_target" "trigger_target" {
-  rule      = aws_cloudwatch_event_rule.trigger_rule.name
-  arn       = var.state_machine_arn
-  role_arn  = aws_iam_role.eventbridge_invoke_role.arn
+  rule           = aws_cloudwatch_event_rule.trigger_rule.name
+  arn            = var.state_machine_arn
+  role_arn       = aws_iam_role.eventbridge_invoke_role.arn
   event_bus_name = var.event_bus_name
 
   dynamic "input_transformer" {

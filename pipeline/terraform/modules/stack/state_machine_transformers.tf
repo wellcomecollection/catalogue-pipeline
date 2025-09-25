@@ -33,9 +33,9 @@ module "ebsco_transformer_lambda" {
       PIPELINE_DATE = var.pipeline_date
       // This is a hardcoded date for now in order to test the 
       // new transformer against a fixed non-production index
-      INDEX_DATE    = local.ebsco_transformer_lambda_index_date
-      S3_BUCKET     = local.ebsco_adapter_bucket
-      S3_PREFIX     = "prod"
+      INDEX_DATE = local.ebsco_transformer_lambda_index_date
+      S3_BUCKET  = local.ebsco_adapter_bucket
+      S3_PREFIX  = "prod"
     }
   }
 }
@@ -71,10 +71,10 @@ locals {
     StartAt = "TransformerStep"
     States = {
       TransformerStep = {
-        Type     = "Task"
+        Type      = "Task"
         Resource  = module.ebsco_transformer_lambda.lambda.arn
         InputPath = "$.detail"
-        Next     = "EbscoIdMinterMap"
+        Next      = "EbscoIdMinterMap"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -144,7 +144,7 @@ module "ebsco_transformer_state_machine" {
 
   name                     = "ebsco-transformer-${var.pipeline_date}"
   state_machine_definition = local.ebsco_transformer_state_machine_definition
-  invokable_lambda_arns    = [
+  invokable_lambda_arns = [
     module.ebsco_transformer_lambda.lambda.arn,
     module.id_minter_lambda_step_function.lambda_arn
   ]
@@ -155,11 +155,11 @@ module "ebsco_transformer_state_machine" {
 module "ebsco_transformer_trigger" {
   source = "../state_machine_trigger"
 
-  name             = "ebsco-transformer-${var.pipeline_date}"
-  event_bus_name   = data.aws_cloudwatch_event_bus.adapter_event_bus.name
+  name              = "ebsco-transformer-${var.pipeline_date}"
+  event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.ebsco_transformer_state_machine.state_machine_arn
   event_pattern = {
-    source       = ["ebsco.adapter"],
+    source        = ["ebsco.adapter"],
     "detail-type" = ["ebsco.adapter.completed"]
   }
   // Unfortunately the input template needs to be a full JSON object, 

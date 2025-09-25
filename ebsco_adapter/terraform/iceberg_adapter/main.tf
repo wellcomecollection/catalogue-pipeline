@@ -36,10 +36,10 @@ locals {
         Parameters = {
           Entries = [
             {
-              "Detail.$"    = "$"
-              DetailType     = "ebsco.adapter.completed"
-              EventBusName   = aws_cloudwatch_event_bus.event_bus.name
-              Source         = "ebsco.adapter"
+              "Detail.$"   = "$"
+              DetailType   = "ebsco.adapter.completed"
+              EventBusName = aws_cloudwatch_event_bus.event_bus.name
+              Source       = "ebsco.adapter"
             }
           ]
         }
