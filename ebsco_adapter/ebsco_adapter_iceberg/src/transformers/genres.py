@@ -50,6 +50,7 @@ def extract_genres(record: Record) -> List[Genre]:
 
 # ----------------- Helpers ----------------- #
 
+
 def _build_genre_from_field(field: Field) -> Genre | None:
     a_values = [v.strip() for v in field.get_subfields("a") if v and v.strip()]
 
