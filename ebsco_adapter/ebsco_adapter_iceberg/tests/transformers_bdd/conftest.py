@@ -291,31 +291,30 @@ def only_genre_label_startswith(context, prefix):
     genres = getattr(context["result"], "genres", [])
     assert len(genres) == 1, f"Expected exactly one genre, found {len(genres)}"
     actual = genres[0].label
-    assert actual.startswith(prefix), (
-        f'Expected genre label to start with "{prefix}", got "{actual}"'
-    )
+    assert actual.startswith(
+        prefix
+    ), f'Expected genre label to start with "{prefix}", got "{actual}"'
 
 
 @then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the type "(?P<ctype>.*)"'))
 def ordinal_concept_type(context, ord, ctype):
     # Reuse existing helpers if desired; inline here to avoid altering existing code.
     import re as _re
+
     m = _re.match(r"(\d+)", ord)
     assert m, f"Unrecognised ordinal: {ord}"
     idx = int(m.group(1)) - 1
 
     genres = getattr(context["result"], "genres", [])
-    assert len(genres) == 1, (
-        "Ordinal concept type step assumes a single genre in context."
-    )
+    assert (
+        len(genres) == 1
+    ), "Ordinal concept type step assumes a single genre in context."
     genre = genres[0]
-    assert 0 <= idx < len(genre.concepts), (
-        f"Concept index {idx} out of range (have {len(genre.concepts)})"
-    )
+    assert (
+        0 <= idx < len(genre.concepts)
+    ), f"Concept index {idx} out of range (have {len(genre.concepts)})"
     actual = genre.concepts[idx].type
-    assert actual == ctype, (
-        f'Expected {ord} concept type "{ctype}", got "{actual}"'
-    )
+    assert actual == ctype, f'Expected {ord} concept type "{ctype}", got "{actual}"'
 
 
 @given(parsers.parse('the 655 field has a subfield "{code}" with value "{value}"'))
