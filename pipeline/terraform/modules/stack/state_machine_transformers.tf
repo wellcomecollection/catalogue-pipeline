@@ -31,7 +31,8 @@ module "ebsco_transformer_lambda" {
   environment = {
     variables = {
       PIPELINE_DATE = var.pipeline_date
-      // This is a hardcoded date for now, in order to test the new transformer against a fixed index
+      // This is a hardcoded date for now in order to test the 
+      // new transformer against a fixed non-production index
       INDEX_DATE    = local.ebsco_transformer_lambda_index_date
       S3_BUCKET     = local.ebsco_adapter_bucket
       S3_PREFIX     = "prod"
@@ -159,7 +160,7 @@ module "ebsco_transformer_trigger" {
   }
   // Unfortunately the input template needs to be a full JSON object, 
   // so we must wrap the detail in another object and then unwrap in 
-  // the state machine (it's not possible to just pass the detail directly)
+  // the state machine (it's not possible to just pass the detail directly).
   input_paths = {
     detail = "$.detail"
   }
