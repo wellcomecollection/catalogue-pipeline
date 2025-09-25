@@ -4,6 +4,7 @@ from pytest_bdd import given, when, then, parsers
 from pymarc import Record, Field, Subfield, Indicators
 
 from transformers.ebsco_to_weco import transform_record
+import logging
 
 # ------------------------------------------------------------------
 # Attribute phrase -> model attribute mapping (extendable)
@@ -57,9 +58,11 @@ field_step_regex = parsers.re(
 
 @given(field_step_regex)
 def add_field(marc_record, tag, subs, ind1=None, ind2=None):
-    matches = re.findall(r' with subfield "([^"]+)" value "([^"]*)"', subs)
+    matches = re.findall(r' (?:with|and) subfield "([^"]+)" value "([^"]*)"', subs)
+    print(matches)
     subfields = [Subfield(code=c, value=v) for c, v in matches]
     indicators = Indicators(ind1, ind2) if ind1 and ind2 else None
+    print(Field(tag=tag, indicators=indicators, subfields=subfields))
     marc_record.add_field(Field(tag=tag, indicators=indicators, subfields=subfields))
 
 
@@ -67,7 +70,7 @@ def add_field(marc_record, tag, subs, ind1=None, ind2=None):
 # Transformation
 # ------------------------------------------------------------------
 @when("I transform the MARC record")
-def do_transform(context, marc_record):
+def do_transform(context, marc_record, caplog):
     context["result"] = transform_record(marc_record)
 
 
@@ -81,7 +84,7 @@ def do_transform(context, marc_record):
 def generic_count(context, count, attr_phrase):
     values = _get_attr_list(context, attr_phrase)
     assert (
-        len(values) == count
+            len(values) == count
     ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
 
 
@@ -98,7 +101,7 @@ def generic_only(context, attr_phrase, value):
     # Accept singular phrase preferred here (but mapping handles plural too)
     values = _get_attr_list(context, attr_phrase)
     assert (
-        len(values) == 1 and values[0] == value
+            len(values) == 1 and values[0] == value
     ), f"Expected only {attr_phrase} '{value}', got {values}"
 
 
@@ -112,10 +115,10 @@ def generic_ordinal(context, index, attr_phrase, value):
     idx = int(index) - 1
     values = _get_attr_list(context, attr_phrase)
     assert (
-        0 <= idx < len(values)
+            0 <= idx < len(values)
     ), f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
     assert (
-        values[idx] == value
+            values[idx] == value
     ), f"Expected {attr_phrase} at position {index} == {value!r}, got {values[idx]!r}"
 
 
@@ -123,10 +126,10 @@ def generic_ordinal(context, index, attr_phrase, value):
 def only_genre_has_label(context, label):
     genres = getattr(context["result"], "genres", [])
     assert (
-        len(genres) == 1
+            len(genres) == 1
     ), f"Expected exactly one genre, found {len(genres)}: {genres}"
     assert (
-        genres[0].label == label
+            genres[0].label == label
     ), f"Expected label {label!r}, got {genres[0].label!r}"
     # store index for subsequent 'its ...' steps
     context["_last_single_genre_index"] = 0
@@ -142,7 +145,7 @@ def only_genre_identifier_value(context, value):
     g = genres[context.get("_last_single_genre_index", 0)]
     # Adjust attribute access if your SourceIdentifier differs
     assert (
-        getattr(g.source, "value") == value
+            getattr(g.source, "value") == value
     ), f"Expected identifier value {value!r}, got {g.source.value!r}"
 
 
@@ -165,5 +168,114 @@ def only_genre_identifier_type(context, ctype):
     else:
         actual_str = str(actual)
     assert (
-        actual_str == ctype
+            actual_str == ctype
     ), f"Expected identifier type {ctype!r}, got {actual_str!r}"
+
+
+# ------------- Utility accessors ------------- #
+
+def _get_genres(context):
+    return getattr(context["result"], "genres", [])
+
+
+def _assert_single_genre(context):
+    genres = _get_genres(context)
+    assert len(genres) == 1, f"Expected exactly one genre, got {len(genres)}"
+    return genres[0]
+
+
+def _ordinal_index(ord_with_suffix: str) -> int:
+    # Accept any numeric + suffix combination (e.g., "1st", "2st", "3st" as in feature file)
+    m = re.match(r"(\d+)", ord_with_suffix)
+    assert m, f"Unrecognised ordinal: {ord_with_suffix}"
+    return int(m.group(1)) - 1
+
+
+# ------------- New Step Definitions (Genres) ------------- #
+
+@then(parsers.parse("the genre has {count:d} concept"))
+@then(parsers.parse("the genre has {count:d} concepts"))
+def step_genre_concept_count(context, count):
+    genre = _assert_single_genre(context)
+    actual = len(genre.concepts)
+    assert actual == count, f"Expected {count} concepts, got {actual}"
+
+
+@then(parsers.parse('the concept has an identifier with value "{value}"'))
+def step_single_concept_identifier_value(context, value):
+    genre = _assert_single_genre(context)
+    assert len(genre.concepts) == 1, (
+        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    )
+    concept = genre.concepts[0]
+    assert concept.id is not None, "Concept missing identifier"
+    assert concept.id.value == value, f"Expected identifier value {value!r}, got {concept.id.value!r}"
+
+
+@then(parsers.parse('the identifier\'s ontology type is "{ontology}"'))
+def step_concept_identifier_ontology(context, ontology):
+    genre = _assert_single_genre(context)
+    assert len(genre.concepts) == 1, (
+        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    )
+    concept = genre.concepts[0]
+    assert concept.id is not None, "Concept missing identifier"
+    assert concept.id.ontology_type == ontology, (
+        f"Expected ontology type {ontology!r}, got {concept.id.ontology_type!r}"
+    )
+
+
+@then(parsers.parse('its identifier\'s identifier type is "{itype}"'))
+def step_concept_identifier_identifier_type(context, itype):
+    genre = _assert_single_genre(context)
+    assert len(genre.concepts) == 1, (
+        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    )
+    concept = genre.concepts[0]
+    assert concept.id is not None, "Concept missing identifier"
+    assert concept.id.identifier_type == itype, (
+        f"Expected identifier type {itype!r}, got {concept.id.identifier_type!r}"
+    )
+
+
+# Ordinal genre labels (supports incorrect suffixes like 2st, 3st as in feature file)
+@then(parsers.re(r'the (?P<ord>\d+\w{2}) genre has the label "(?P<label>.*)"'))
+def step_ordinal_genre_label(context, ord, label):
+    genres = _get_genres(context)
+    idx = _ordinal_index(ord)
+    assert 0 <= idx < len(genres), (
+        f"Genre index {idx} out of range (have {len(genres)})"
+    )
+    actual = genres[idx].label
+    assert actual == label, f"Expected genre {ord} label {label!r}, got {actual!r}"
+
+
+# Ordinal concept labels within the only genre
+@then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the label "(?P<label>.*)"'))
+def step_ordinal_concept_label(context, ord, label):
+    genre = _assert_single_genre(context)
+    idx = _ordinal_index(ord)
+    assert 0 <= idx < len(genre.concepts), (
+        f"Concept index {idx} out of range (have {len(genre.concepts)})"
+    )
+    actual = genre.concepts[idx].label
+    assert actual == label, f"Expected concept {ord} label {label!r}, got {actual!r}"
+
+
+@then(parsers.parse('an error "{message}" is logged'))
+def step_error_logged(caplog, message: str):
+    """
+    Assert that an ERROR-level log record exactly matching the given message was emitted.
+
+    Usage in feature:
+      Then an error "Repeated Non-repeating field $a found in 655 field" is logged
+    """
+    matches = [
+        rec for rec in caplog.records
+        if rec.levelno >= logging.ERROR and rec.getMessage() == message
+    ]
+    assert matches, (
+            f'Expected an ERROR log with message: "{message}". '
+            f"Captured log messages were:\n" +
+            "\n".join(f"[{r.levelname}] {r.getMessage()}" for r in caplog.records)
+    )

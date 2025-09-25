@@ -11,7 +11,7 @@ Feature: Extracting genres from MARC 655
   Scenario: A poorly formed genre
   "a" is a non-repeating field. if there is more than one,
   it should be discarded and an error logged
-    Given the MARC record has a 655 field with subfield "a" value "Disco Polo" and "a" value "Rominimal"
+    Given the MARC record has a 655 field with subfield "a" value "Disco Polo" and subfield "a" value "Rominimal"
     When I transform the MARC record
     Then an error "Repeated Non-repeating field $a found in 655 field" is logged
     And there are no genres
@@ -51,3 +51,34 @@ Feature: Extracting genres from MARC 655
     And the 3rd concept has the label "Literature"
     And the 4th concept has the label "1897-1900"
     And the 5th concept has the label "Dublin"
+
+
+  Scenario: subfield a comes first
+  Regardless of where it is in the subfield list, $a is always the first concept
+  and the first part of the label
+    Given the MARC record has a 655 field with subfield "v" value "Specimens"
+    And the 655 field has a subfield "x" with value "Literature"
+    And the 655 field has a subfield "y" with value "1897-1900"
+    And the 655 field has a subfield "a" with value "Euskal Reggae"
+    And the 655 field has a subfield "z" with value "Dublin."
+    When I transform the MARC record
+    Then the only genre has a label starting with "Euskal Regge"
+    And the 1st concept has the label "Euskal Regge"
+
+
+  Scenario Outline: subdivision types
+    Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
+    And the 655 field has a subfield "<code>" with value "<text>"
+    When I transform the MARC record
+    Then the only genre has the label "Disco Polo <text>"
+    And the genre has 2 concepts
+    And the 1st concept has the label "Disco Polo"
+    And the 2nd concept has the label "<text>"
+    And the 2nd concept has the type "<type>"
+    Examples:
+      | code | text    | type    |
+      | v    | Form    | Concept |
+      | x    | General | Concept |
+      | y    | Chrono  | Period  |
+      | z    | Geo     | Place   |
+
