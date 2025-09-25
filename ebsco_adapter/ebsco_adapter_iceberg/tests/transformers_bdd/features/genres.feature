@@ -39,10 +39,10 @@ Feature: Extracting genres from MARC 655
   The label is made from subfields a,v,x,y,z - and each subdivision field
   yields its own concept
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
-    And the 655 field has a subfield "v" with value "Specimens"
-    And the 655 field has a subfield "x" with value "Literature"
-    And the 655 field has a subfield "y" with value "1897-1900"
-    And the 655 field has a subfield "z" with value "Dublin."
+    And that field has a subfield "v" with value "Specimens"
+    And that field has a subfield "x" with value "Literature"
+    And that field has a subfield "y" with value "1897-1900"
+    And that field has a subfield "z" with value "Dublin."
     When I transform the MARC record
     Then the only genre has the label "Disco Polo Specimens Literature 1897-1900 Dublin."
     And the genre has 5 concepts
@@ -57,10 +57,10 @@ Feature: Extracting genres from MARC 655
   Regardless of where it is in the subfield list, $a is always the first concept
   and the first part of the label
     Given the MARC record has a 655 field with subfield "v" value "Specimens"
-    And the 655 field has a subfield "x" with value "Literature"
-    And the 655 field has a subfield "y" with value "1897-1900"
-    And the 655 field has a subfield "a" with value "Euskal Reggae"
-    And the 655 field has a subfield "z" with value "Dublin."
+    And that field has a subfield "x" with value "Literature"
+    And that field has a subfield "y" with value "1897-1900"
+    And that field has a subfield "a" with value "Euskal Reggae"
+    And that field has a subfield "z" with value "Dublin."
     When I transform the MARC record
     Then the only genre has a label starting with "Euskal Reggae"
     And the 1st concept has the label "Euskal Reggae"
@@ -68,7 +68,7 @@ Feature: Extracting genres from MARC 655
 
   Scenario Outline: subdivision types
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
-    And the 655 field has a subfield "<code>" with value "<text>"
+    And that field has a subfield "<code>" with value "<text>"
     When I transform the MARC record
     Then the only genre has the label "Disco Polo <text>"
     And the genre has 2 concepts
