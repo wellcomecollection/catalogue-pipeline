@@ -307,11 +307,11 @@ def ordinal_concept_type(context, ord, ctype):
 
     genres = getattr(context["result"], "genres", [])
     assert (
-        len(genres) == 1
+            len(genres) == 1
     ), "Ordinal concept type step assumes a single genre in context."
     genre = genres[0]
     assert (
-        0 <= idx < len(genre.concepts)
+            0 <= idx < len(genre.concepts)
     ), f"Concept index {idx} out of range (have {len(genre.concepts)})"
     actual = genre.concepts[idx].type
     assert actual == ctype, f'Expected {ord} concept type "{ctype}", got "{actual}"'
@@ -330,3 +330,22 @@ def add_subfield_to_last_field(marc_record, code, value):
       ...
     """
     marc_record.fields[-1].add_subfield(code, value)
+
+
+@then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the identifier value "(?P<value>.*)"'))
+def step_ordinal_concept_identifier_value(context, ord, value):
+    """
+    Assert the Nth concept (ordinal like 1st/2nd/3rd/4th etc.) of the only genre
+    has the given identifier value.
+    """
+    genre = _assert_single_genre(context)  # relies on helper already defined above
+    idx = _ordinal_index(ord)
+    assert 0 <= idx < len(genre.concepts), (
+        f"Concept index {idx} out of range (have {len(genre.concepts)})"
+    )
+    concept = genre.concepts[idx]
+    assert concept.id is not None, f"Concept {ord} is missing an identifier"
+    actual = concept.id.value
+    assert actual == value, (
+        f'Expected {ord} concept identifier value "{value}", got "{actual}"'
+    )

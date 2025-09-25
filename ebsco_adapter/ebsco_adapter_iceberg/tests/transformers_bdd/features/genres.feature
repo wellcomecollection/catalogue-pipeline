@@ -75,10 +75,11 @@ Feature: Extracting genres from MARC 655
     And the 1st concept has the label "Disco Polo"
     And the 2nd concept has the label "<text>"
     And the 2nd concept has the type "<type>"
+    And the 2nd concept has the identifier value "<id>"
     Examples:
-      | code | text    | type    |
-      | v    | Form    | Concept |
-      | x    | General | Concept |
-      | y    | Chrono  | Period  |
-      | z    | Geo     | Place   |
+      | code | text    | type    | id      |
+      | v    | Form    | Concept | form    |
+      | x    | General | Concept | general |
+      | y    | Chrono  | Period  | chrono  |
+      | z    | Geo     | Place   | geo     |
 
