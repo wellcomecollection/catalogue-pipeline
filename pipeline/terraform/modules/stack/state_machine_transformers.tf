@@ -114,6 +114,10 @@ locals {
             IdMinterStep = {
               Type     = "Task"
               Resource = module.id_minter_lambda_step_function.lambda_arn
+              ResultSelector = {
+                "failures.$" = "$.failures"
+                "jobId.$"    = "$.jobId"
+              }
               Retry = [
                 {
                   ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
