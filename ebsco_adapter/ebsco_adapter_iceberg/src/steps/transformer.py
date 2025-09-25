@@ -28,7 +28,9 @@ from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
 
 # Batch size for converting Arrow tables to Python objects before indexing
-BATCH_SIZE = 10_000
+# This must result in batches of output ids that fit in the 256kb item 
+# limit for step function invocations (with some margin).
+BATCH_SIZE = 5_000
 # Template for wrapping source IDs in the required format (kept for transform context)
 SOURCE_ID_TEMPLATE = "Work[ebsco-alt-lookup/{}]"
 
@@ -292,6 +294,7 @@ def handler(
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
         is_local=config_obj.is_local,
+        # This is a hardcoded to make sure we use the manually created test key for now
         api_key_name="transformer-ebsco-test",
     )
     index_name = get_standard_index_name("works-source", index_date)

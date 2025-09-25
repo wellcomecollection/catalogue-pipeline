@@ -5,9 +5,23 @@ module "id_minter_output_topic" {
   role_names = [module.id_minter_lambda.lambda_role_name]
 }
 
+module "id_minter_step_function_output_topic" {
+  source = "../topic"
+
+  name       = "${local.namespace}_id_minter_step_function_output"
+  role_names = [module.id_minter_lambda_step_function.lambda_role_name]
+}
+
 locals {
   id_minter_environment_variables = {
     topic_arn           = module.id_minter_output_topic.arn
+    max_connections     = local.id_minter_task_max_connections
+    es_source_index     = local.es_works_source_index
+    es_identified_index = local.es_works_identified_index
+  }
+
+  id_minter_step_function_environment_variables = {
+    topic_arn           = module.id_minter_step_function_output_topic.arn
     max_connections     = local.id_minter_task_max_connections
     es_source_index     = local.es_works_source_index
     es_identified_index = local.es_works_identified_index
@@ -74,9 +88,11 @@ module "id_minter_lambda_step_function" {
   pipeline_date = var.pipeline_date
   service_name  = "id_minter_step_function"
 
-  environment_variables = local.id_minter_environment_variables
+  environment_variables = local.id_minter_step_function_environment_variables
   vpc_config            = local.id_minter_vpc_config
   secret_env_vars       = local.id_minter_secret_env_vars
+
+  memory_size = 4096
 
   timeout = 60 * 5 # 10 Minutes
 
