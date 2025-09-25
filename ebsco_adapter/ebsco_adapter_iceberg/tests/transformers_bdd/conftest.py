@@ -284,3 +284,58 @@ def step_error_logged(caplog, message: str):
         f"Captured log messages were:\n"
         + "\n".join(f"[{r.levelname}] {r.getMessage()}" for r in caplog.records)
     )
+
+
+@then(parsers.parse('the only genre has a label starting with "{prefix}"'))
+def only_genre_label_startswith(context, prefix):
+    genres = getattr(context["result"], "genres", [])
+    assert len(genres) == 1, f"Expected exactly one genre, found {len(genres)}"
+    actual = genres[0].label
+    assert actual.startswith(prefix), (
+        f'Expected genre label to start with "{prefix}", got "{actual}"'
+    )
+
+
+@then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the type "(?P<ctype>.*)"'))
+def ordinal_concept_type(context, ord, ctype):
+    # Reuse existing helpers if desired; inline here to avoid altering existing code.
+    import re as _re
+    m = _re.match(r"(\d+)", ord)
+    assert m, f"Unrecognised ordinal: {ord}"
+    idx = int(m.group(1)) - 1
+
+    genres = getattr(context["result"], "genres", [])
+    assert len(genres) == 1, (
+        "Ordinal concept type step assumes a single genre in context."
+    )
+    genre = genres[0]
+    assert 0 <= idx < len(genre.concepts), (
+        f"Concept index {idx} out of range (have {len(genre.concepts)})"
+    )
+    actual = genre.concepts[idx].type
+    assert actual == ctype, (
+        f'Expected {ord} concept type "{ctype}", got "{actual}"'
+    )
+
+
+@given(parsers.parse('the 655 field has a subfield "{code}" with value "{value}"'))
+def add_subfield_to_existing_655(marc_record, code, value):
+    """
+    Append a subfield to the most recently added 655 field.
+
+    Assumes a prior step like:
+      Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
+
+    This allows follow-on steps:
+      And the 655 field has a subfield "v" with value "Specimens"
+      And the 655 field has a subfield "x" with value "Literature"
+      ...
+
+    If no 655 field exists yet, this step will fail loudly to signal
+    incorrect scenario ordering.
+    """
+    fields_655 = marc_record.get_fields("655")
+    assert fields_655, "No existing 655 field to add a subfield to. Add one first."
+    target_field = fields_655[-1]  # modify the most recently defined 655
+    # pymarc Field has add_subfield(code, value)
+    target_field.add_subfield(code, value)

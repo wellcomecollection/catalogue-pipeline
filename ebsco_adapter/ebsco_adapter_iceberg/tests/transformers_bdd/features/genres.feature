@@ -62,8 +62,8 @@ Feature: Extracting genres from MARC 655
     And the 655 field has a subfield "a" with value "Euskal Reggae"
     And the 655 field has a subfield "z" with value "Dublin."
     When I transform the MARC record
-    Then the only genre has a label starting with "Euskal Regge"
-    And the 1st concept has the label "Euskal Regge"
+    Then the only genre has a label starting with "Euskal Reggae"
+    And the 1st concept has the label "Euskal Reggae"
 
 
   Scenario Outline: subdivision types
