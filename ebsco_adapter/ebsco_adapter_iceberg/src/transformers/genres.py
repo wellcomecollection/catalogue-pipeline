@@ -1,56 +1,35 @@
+from __future__ import annotations
+
 import logging
-from typing import List, Tuple
 
-from pymarc.record import Record
 from pymarc.field import Field
+from pymarc.record import Record
 
-from models.work import Genre, SourceIdentifier, SourceConcept
+from models.work import ConceptType, Genre, SourceConcept, SourceIdentifier
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 # Subfields that contribute to the genre label (order & inclusion)
 # Ordering here enforces $a first in both label & concept list regardless of
 # its physical position in the field.
-LABEL_SUBFIELDS = ["a", "v", "x", "y", "z"]
+LABEL_SUBFIELDS: list[str] = ["a", "v", "x", "y", "z"]
 
 # Mapping of subdivision code -> SourceConcept.type override
-CONCEPT_TYPE_MAP = {
+CONCEPT_TYPE_MAP: dict[str, ConceptType] = {
     "y": "Period",
     "z": "Place",
     # 'a', 'v', 'x' default to 'Concept'
 }
 
 
-def extract_genres(record: Record) -> List[Genre]:
+def extract_genres(record: Record) -> list[Genre]:
     """
     Build a list of Genre objects from MARC 655 fields.
-
-    Rules (augmented for new scenarios):
-      - A genre is produced for each 655 field that has exactly one (non-empty) $a.
-      - If a 655 field has >1 $a, discard the entire field and log:
-            "Repeated Non-repeating field $a found in 655 field"
-      - Subfields a,v,x,y,z (if present, non-empty) form:
-            * The genre label: concatenated in canonical order a v x y z separated by single spaces,
-              regardless of their order in the MARC field.
-            * A concept per participating subfield value, in the same canonical order.
-      - $a always appears first in the label & concept list even if it occurs later in the raw data.
-      - Concept labels have trailing punctuation . , ; : stripped (scenario expects stripping for e.g. "Dublin.")
-        but the overall genre label preserves original punctuation.
-      - Concept.type is derived:
-            y -> Period
-            z -> Place
-            else -> Concept
-      - Each concept gets a SourceIdentifier:
-            identifier_type = "label-derived"
-            ontology_type   = "Genre"   (kept uniform; existing scenarios assert this for simple case)
-            value           = normalised concept label (lowercase, collapsed internal spaces)
-      - Genre.id remains None (not asserted yet).
-      - Genre.type set to "Genre".
     """
-    genres: List[Genre] = []
+    genres: list[Genre] = []
 
     for field in record.get_fields("655"):
-        genre = _build_genre_from_field(field)
+        genre: Genre | None = _build_genre_from_field(field)
         if genre is not None:
             genres.append(genre)
 
@@ -61,8 +40,13 @@ def extract_genres(record: Record) -> List[Genre]:
 
 
 def _build_genre_from_field(field: Field) -> Genre | None:
-    # Gather non-empty $a values
-    a_values = [v.strip() for v in field.get_subfields("a") if v and v.strip()]
+    """
+    Construct a Genre from a single 655 field, or return None if the field is
+    invalid (e.g., missing/duplicate $a) per the business rules.
+    """
+    a_values: list[str] = [
+        v.strip() for v in field.get_subfields("a") if v and v.strip()
+    ]
 
     if len(a_values) == 0:
         return None
@@ -72,9 +56,11 @@ def _build_genre_from_field(field: Field) -> Genre | None:
         return None
 
     # Collect (code, raw_value) pairs in canonical order ignoring actual sequence in field
-    ordered_pairs: list[Tuple[str, str]] = []
+    ordered_pairs: list[tuple[str, str]] = []
     for code in LABEL_SUBFIELDS:
-        raw_values = [v for v in field.get_subfields(code) if v and v.strip()]
+        raw_values: list[str] = [
+            v for v in field.get_subfields(code) if v and v.strip()
+        ]
         for raw in raw_values:
             ordered_pairs.append((code, raw.strip()))
 
@@ -82,12 +68,12 @@ def _build_genre_from_field(field: Field) -> Genre | None:
         return None
 
     # Build genre label preserving raw punctuation
-    genre_label = " ".join(v for _, v in ordered_pairs)
+    genre_label: str = " ".join(v for _, v in ordered_pairs)
 
     concepts: list[SourceConcept] = []
     for code, raw_value in ordered_pairs:
-        concept_label = _clean_concept_label(raw_value)
-        identifier = SourceIdentifier(
+        concept_label: str = _clean_concept_label(raw_value)
+        identifier: SourceIdentifier = SourceIdentifier(
             identifier_type="label-derived",
             ontology_type="Genre",
             value=_normalise_identifier_value(concept_label),

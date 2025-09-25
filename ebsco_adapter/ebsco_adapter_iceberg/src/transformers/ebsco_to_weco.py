@@ -9,13 +9,13 @@ from transformers.description import extract_description
 from transformers.designation import extract_designation
 from transformers.edition import extract_edition
 from transformers.format import extract_format
+from transformers.genres import extract_genres
 from transformers.holdings import extract_holdings
 from transformers.language import extract_languages
 from transformers.other_identifiers import extract_other_identifiers
 from transformers.production import extract_production
-from transformers.title import extract_title
-from transformers.genres import extract_genres
 from transformers.subjects import extract_subjects
+from transformers.title import extract_title
 
 
 def ebsco_source_identifier(id_value: str) -> SourceIdentifier:

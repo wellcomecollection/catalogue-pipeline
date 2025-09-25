@@ -1,15 +1,26 @@
-import re
-import pytest
-from pytest_bdd import given, when, then, parsers
-from pymarc import Record, Field, Subfield, Indicators
+from __future__ import annotations
 
-from transformers.ebsco_to_weco import transform_record
 import logging
+import re
+from collections.abc import Sequence
+from typing import Any
+
+import pytest
+from _pytest.logging import LogCaptureFixture
+from pymarc.record import Field, Indicators, Record, Subfield
+from pytest_bdd import given, parsers, then, when
+
+from models.work import SourceConcept
+from transformers.ebsco_to_weco import transform_record
+
+# mypy: allow-untyped-calls
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------
 # Attribute phrase -> model attribute mapping (extendable)
 # ------------------------------------------------------------------
-ATTR_ALIASES = {
+ATTR_ALIASES: dict[str, str] = {
     "designation": "designation",
     "designations": "designation",
     "alternative title": "alternative_titles",
@@ -23,7 +34,7 @@ def _normalise_attr_phrase(attr_phrase: str) -> str:
     return ATTR_ALIASES.get(key, key)
 
 
-def _get_attr_list(context, attr_phrase: str):
+def _get_attr_list(context: dict[str, Any], attr_phrase: str) -> Any:
     attr_name = _normalise_attr_phrase(attr_phrase)
     return getattr(context["result"], attr_name)
 
@@ -32,12 +43,12 @@ def _get_attr_list(context, attr_phrase: str):
 # Fixtures
 # ------------------------------------------------------------------
 @pytest.fixture
-def context():
+def context() -> dict[str, Any]:
     return {}
 
 
 @given("a valid MARC record", target_fixture="marc_record")
-def marc_record():
+def marc_record() -> Record:
     record = Record()
     record.add_field(Field(tag="001", data="test001"))
     record.add_field(
@@ -57,12 +68,18 @@ field_step_regex = parsers.re(
 
 
 @given(field_step_regex)
-def add_field(marc_record, tag, subs, ind1=None, ind2=None):
-    matches = re.findall(r' (?:with|and) subfield "([^"]+)" value "([^"]*)"', subs)
-    print(matches)
-    subfields = [Subfield(code=c, value=v) for c, v in matches]
-    indicators = Indicators(ind1, ind2) if ind1 and ind2 else None
-    print(Field(tag=tag, indicators=indicators, subfields=subfields))
+def add_field(
+    marc_record: Record,
+    tag: str,
+    subs: str,
+    ind1: str | None = None,
+    ind2: str | None = None,
+) -> None:
+    matches: list[tuple[str, str]] = re.findall(
+        r' (?:with|and) subfield "([^"]+)" value "([^"]*)"', subs
+    )
+    subfields: list[Subfield] = [Subfield(code=c, value=v) for c, v in matches]
+    indicators: Indicators | None = Indicators(ind1, ind2) if ind1 and ind2 else None
     marc_record.add_field(Field(tag=tag, indicators=indicators, subfields=subfields))
 
 
@@ -70,7 +87,9 @@ def add_field(marc_record, tag, subs, ind1=None, ind2=None):
 # Transformation
 # ------------------------------------------------------------------
 @when("I transform the MARC record")
-def do_transform(context, marc_record, caplog):
+def do_transform(
+    context: dict[str, Any], marc_record: Record, caplog: LogCaptureFixture
+) -> None:
     context["result"] = transform_record(marc_record)
 
 
@@ -79,201 +98,183 @@ def do_transform(context, marc_record, caplog):
 # ------------------------------------------------------------------
 
 
-# there are {count} designations / there are {count} alternative titles
 @then(parsers.parse("there are {count:d} {attr_phrase}"))
-def generic_count(context, count, attr_phrase):
-    values = _get_attr_list(context, attr_phrase)
-    assert (
-        len(values) == count
-    ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+def generic_count(context: dict[str, Any], count: int, attr_phrase: str) -> None:
+    values: Sequence[Any] = _get_attr_list(context, attr_phrase)
+    assert len(values) == count, (
+        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
+    )
 
 
-# there are no alternative titles / there are no designations
 @then(parsers.parse("there are no {attr_phrase}"))
-def generic_none(context, attr_phrase):
-    values = _get_attr_list(context, attr_phrase)
+def generic_none(context: dict[str, Any], attr_phrase: str) -> None:
+    values: Sequence[Any] = _get_attr_list(context, attr_phrase)
     assert len(values) == 0, f"Expected no {attr_phrase}, got {values}"
 
 
-# the only alternative title is "..." / the only designation is "..."
 @then(parsers.parse('the only {attr_phrase} is "{value}"'))
-def generic_only(context, attr_phrase, value):
-    # Accept singular phrase preferred here (but mapping handles plural too)
-    values = _get_attr_list(context, attr_phrase)
-    assert (
-        len(values) == 1 and values[0] == value
-    ), f"Expected only {attr_phrase} '{value}', got {values}"
+def generic_only(context: dict[str, Any], attr_phrase: str, value: str) -> None:
+    values: Sequence[Any] = _get_attr_list(context, attr_phrase)
+    assert len(values) == 1 and values[0] == value, (
+        f"Expected only {attr_phrase} '{value}', got {values}"
+    )
 
 
-# the 1st alternative title is "..." / the 2nd designation is "..."
 @then(
     parsers.re(
         r'the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>alternative title|alternative titles|designation|designations) is "(?P<value>.*)"'
     )
 )
-def generic_ordinal(context, index, attr_phrase, value):
+def generic_ordinal(
+    context: dict[str, Any], index: str, attr_phrase: str, value: str
+) -> None:
     idx = int(index) - 1
-    values = _get_attr_list(context, attr_phrase)
-    assert (
-        0 <= idx < len(values)
-    ), f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
-    assert (
-        values[idx] == value
-    ), f"Expected {attr_phrase} at position {index} == {value!r}, got {values[idx]!r}"
+    values: Sequence[Any] = _get_attr_list(context, attr_phrase)
+    assert 0 <= idx < len(values), (
+        f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
+    )
+    assert values[idx] == value, (
+        f"Expected {attr_phrase} at position {index} == {value!r}, got {values[idx]!r}"
+    )
 
 
 @then(parsers.parse('the only genre has the label "{label}"'))
-def only_genre_has_label(context, label):
-    genres = getattr(context["result"], "genres", [])
-    assert (
-        len(genres) == 1
-    ), f"Expected exactly one genre, found {len(genres)}: {genres}"
-    assert (
-        genres[0].label == label
-    ), f"Expected label {label!r}, got {genres[0].label!r}"
-    # store index for subsequent 'its ...' steps
+def only_genre_has_label(context: dict[str, Any], label: str) -> None:
+    genres: list[Any] = getattr(context["result"], "genres", [])
+    assert len(genres) == 1, (
+        f"Expected exactly one genre, found {len(genres)}: {genres}"
+    )
+    assert genres[0].label == label, (
+        f"Expected label {label!r}, got {genres[0].label!r}"
+    )
     context["_last_single_genre_index"] = 0
 
 
 @then(parsers.parse('its identifier value is "{value}"'))
-def only_genre_identifier_value(context, value):
-    genres = getattr(context["result"], "genres", [])
+def only_genre_identifier_value(context: dict[str, Any], value: str) -> None:
+    genres: list[Any] = getattr(context["result"], "genres", [])
     assert len(genres) == 1, (
         "Step 'its identifier value is ...' assumes exactly one genre; "
         f"found {len(genres)}"
     )
     g = genres[context.get("_last_single_genre_index", 0)]
-    # Adjust attribute access if your SourceIdentifier differs
-    assert (
-        getattr(g.source, "value") == value
-    ), f"Expected identifier value {value!r}, got {g.source.value!r}"
+    assert g.source.value == value, (
+        f"Expected identifier value {value!r}, got {g.source.value!r}"
+    )
 
 
 @then(parsers.parse('its identifier type is "{ctype}"'))
-def only_genre_identifier_type(context, ctype):
-    genres = getattr(context["result"], "genres", [])
+def only_genre_identifier_type(context: dict[str, Any], ctype: str) -> None:
+    genres: list[Any] = getattr(context["result"], "genres", [])
     assert len(genres) == 1, (
         "Step 'its identifier type is ...' assumes exactly one genre; "
         f"found {len(genres)}"
     )
     g = genres[context.get("_last_single_genre_index", 0)]
-    # Depending on how ConceptType serialises, we compare its name or value.
-    # If ConceptType.GENRE -> "Genre" via .value or .name adjust accordingly.
     actual = getattr(g.source, "identifierType", None)
-    # Try common representations
+    assert isinstance(actual, SourceConcept)
     if hasattr(actual, "value"):
         actual_str = actual.value
     elif hasattr(actual, "name"):
-        actual_str = actual.name.title()  # e.g. GENRE -> Genre
+        actual_str = actual.name.title()
     else:
         actual_str = str(actual)
-    assert (
-        actual_str == ctype
-    ), f"Expected identifier type {ctype!r}, got {actual_str!r}"
+    assert actual_str == ctype, (
+        f"Expected identifier type {ctype!r}, got {actual_str!r}"
+    )
 
 
 # ------------- Utility accessors ------------- #
-
-
-def _get_genres(context):
+def _get_genres(context: dict[str, Any]) -> list[Any]:
     return getattr(context["result"], "genres", [])
 
 
-def _assert_single_genre(context):
+def _assert_single_genre(context: dict[str, Any]) -> Any:
     genres = _get_genres(context)
     assert len(genres) == 1, f"Expected exactly one genre, got {len(genres)}"
     return genres[0]
 
 
 def _ordinal_index(ord_with_suffix: str) -> int:
-    # Accept any numeric + suffix combination (e.g., "1st", "2st", "3st" as in feature file)
     m = re.match(r"(\d+)", ord_with_suffix)
     assert m, f"Unrecognised ordinal: {ord_with_suffix}"
     return int(m.group(1)) - 1
 
 
 # ------------- New Step Definitions (Genres) ------------- #
-
-
 @then(parsers.parse("the genre has {count:d} concept"))
 @then(parsers.parse("the genre has {count:d} concepts"))
-def step_genre_concept_count(context, count):
+def step_genre_concept_count(context: dict[str, Any], count: int) -> None:
     genre = _assert_single_genre(context)
     actual = len(genre.concepts)
     assert actual == count, f"Expected {count} concepts, got {actual}"
 
 
 @then(parsers.parse('the concept has an identifier with value "{value}"'))
-def step_single_concept_identifier_value(context, value):
+def step_single_concept_identifier_value(context: dict[str, Any], value: str) -> None:
     genre = _assert_single_genre(context)
-    assert (
-        len(genre.concepts) == 1
-    ), f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    assert len(genre.concepts) == 1, (
+        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    )
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert (
-        concept.id.value == value
-    ), f"Expected identifier value {value!r}, got {concept.id.value!r}"
+    assert concept.id.value == value, (
+        f"Expected identifier value {value!r}, got {concept.id.value!r}"
+    )
 
 
 @then(parsers.parse('the identifier\'s ontology type is "{ontology}"'))
-def step_concept_identifier_ontology(context, ontology):
+def step_concept_identifier_ontology(context: dict[str, Any], ontology: str) -> None:
     genre = _assert_single_genre(context)
-    assert (
-        len(genre.concepts) == 1
-    ), f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    assert len(genre.concepts) == 1, (
+        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    )
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert (
-        concept.id.ontology_type == ontology
-    ), f"Expected ontology type {ontology!r}, got {concept.id.ontology_type!r}"
+    assert concept.id.ontology_type == ontology, (
+        f"Expected ontology type {ontology!r}, got {concept.id.ontology_type!r}"
+    )
 
 
 @then(parsers.parse('its identifier\'s identifier type is "{itype}"'))
-def step_concept_identifier_identifier_type(context, itype):
+def step_concept_identifier_identifier_type(
+    context: dict[str, Any], itype: str
+) -> None:
     genre = _assert_single_genre(context)
-    assert (
-        len(genre.concepts) == 1
-    ), f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    assert len(genre.concepts) == 1, (
+        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
+    )
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert (
-        concept.id.identifier_type == itype
-    ), f"Expected identifier type {itype!r}, got {concept.id.identifier_type!r}"
+    assert concept.id.identifier_type == itype, (
+        f"Expected identifier type {itype!r}, got {concept.id.identifier_type!r}"
+    )
 
 
-# Ordinal genre labels (supports incorrect suffixes like 2st, 3st as in feature file)
 @then(parsers.re(r'the (?P<ord>\d+\w{2}) genre has the label "(?P<label>.*)"'))
-def step_ordinal_genre_label(context, ord, label):
+def step_ordinal_genre_label(context: dict[str, Any], ord: str, label: str) -> None:
     genres = _get_genres(context)
     idx = _ordinal_index(ord)
-    assert (
-        0 <= idx < len(genres)
-    ), f"Genre index {idx} out of range (have {len(genres)})"
+    assert 0 <= idx < len(genres), (
+        f"Genre index {idx} out of range (have {len(genres)})"
+    )
     actual = genres[idx].label
     assert actual == label, f"Expected genre {ord} label {label!r}, got {actual!r}"
 
 
-# Ordinal concept labels within the only genre
 @then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the label "(?P<label>.*)"'))
-def step_ordinal_concept_label(context, ord, label):
+def step_ordinal_concept_label(context: dict[str, Any], ord: str, label: str) -> None:
     genre = _assert_single_genre(context)
     idx = _ordinal_index(ord)
-    assert (
-        0 <= idx < len(genre.concepts)
-    ), f"Concept index {idx} out of range (have {len(genre.concepts)})"
+    assert 0 <= idx < len(genre.concepts), (
+        f"Concept index {idx} out of range (have {len(genre.concepts)})"
+    )
     actual = genre.concepts[idx].label
     assert actual == label, f"Expected concept {ord} label {label!r}, got {actual!r}"
 
 
 @then(parsers.parse('an error "{message}" is logged'))
-def step_error_logged(caplog, message: str):
-    """
-    Assert that an ERROR-level log record exactly matching the given message was emitted.
-
-    Usage in feature:
-      Then an error "Repeated Non-repeating field $a found in 655 field" is logged
-    """
+def step_error_logged(caplog: LogCaptureFixture, message: str) -> None:
     matches = [
         rec
         for rec in caplog.records
@@ -287,53 +288,53 @@ def step_error_logged(caplog, message: str):
 
 
 @then(parsers.parse('the only genre has a label starting with "{prefix}"'))
-def only_genre_label_startswith(context, prefix):
-    genres = getattr(context["result"], "genres", [])
+def only_genre_label_startswith(context: dict[str, Any], prefix: str) -> None:
+    genres: list[Any] = getattr(context["result"], "genres", [])
     assert len(genres) == 1, f"Expected exactly one genre, found {len(genres)}"
     actual = genres[0].label
-    assert actual.startswith(
-        prefix
-    ), f'Expected genre label to start with "{prefix}", got "{actual}"'
+    assert actual.startswith(prefix), (
+        f'Expected genre label to start with "{prefix}", got "{actual}"'
+    )
 
 
 @then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the type "(?P<ctype>.*)"'))
-def ordinal_concept_type(context, ord, ctype):
-    # Reuse existing helpers if desired; inline here to avoid altering existing code.
-    import re as _re
-
-    m = _re.match(r"(\d+)", ord)
+def ordinal_concept_type(context: dict[str, Any], ord: str, ctype: str) -> None:
+    m = re.match(r"(\d+)", ord)
     assert m, f"Unrecognised ordinal: {ord}"
     idx = int(m.group(1)) - 1
 
-    genres = getattr(context["result"], "genres", [])
-    assert (
-            len(genres) == 1
-    ), "Ordinal concept type step assumes a single genre in context."
+    genres: list[Any] = getattr(context["result"], "genres", [])
+    assert len(genres) == 1, (
+        "Ordinal concept type step assumes a single genre in context."
+    )
     genre = genres[0]
-    assert (
-            0 <= idx < len(genre.concepts)
-    ), f"Concept index {idx} out of range (have {len(genre.concepts)})"
+    assert 0 <= idx < len(genre.concepts), (
+        f"Concept index {idx} out of range (have {len(genre.concepts)})"
+    )
     actual = genre.concepts[idx].type
     assert actual == ctype, f'Expected {ord} concept type "{ctype}", got "{actual}"'
 
 
 @given(parsers.parse('that field has a subfield "{code}" with value "{value}"'))
-def add_subfield_to_last_field(marc_record, code, value):
+def add_subfield_to_last_field(marc_record: Record, code: str, value: str) -> None:
     """
-    Append a subfield to the most recently added 655 field.
+    Append a subfield to the most recently added field (e.g. a 655).
 
-    Assumes a prior step like:
+    Assumes a prior step created the field, e.g.:
       Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
-
-    This allows follow-on steps like :
-      And that field has a subfield "v" with value "Specimens"
-      ...
     """
+    assert marc_record.fields, "No fields present to append a subfield to."
     marc_record.fields[-1].add_subfield(code, value)
 
 
-@then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the identifier value "(?P<value>.*)"'))
-def step_ordinal_concept_identifier_value(context, ord, value):
+@then(
+    parsers.re(
+        r'the (?P<ord>\d+\w{2}) concept has the identifier value "(?P<value>.*)"'
+    )
+)
+def step_ordinal_concept_identifier_value(
+    context: dict[str, Any], ord: str, value: str
+) -> None:
     """
     Assert the Nth concept (ordinal like 1st/2nd/3rd/4th etc.) of the only genre
     has the given identifier value.

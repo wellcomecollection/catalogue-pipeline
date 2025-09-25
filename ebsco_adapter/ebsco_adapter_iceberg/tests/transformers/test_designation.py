@@ -2,7 +2,6 @@ import pytest
 from pymarc.record import Field, Record, Subfield
 
 from transformers.ebsco_to_weco import transform_record
-from ..helpers import lone_element
 
 
 def test_no_designation(marc_record: Record) -> None:

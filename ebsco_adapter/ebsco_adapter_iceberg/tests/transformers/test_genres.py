@@ -1,10 +1,6 @@
-import pytest
-from pymarc.record import Field, Record, Subfield
+from pymarc.record import Record
 
-from models.work import ConceptType, SourceConcept, SourceIdentifier
 from transformers.ebsco_to_weco import transform_record
-
-from ..helpers import lone_element
 
 
 def test_no_genres(marc_record: Record) -> None:
