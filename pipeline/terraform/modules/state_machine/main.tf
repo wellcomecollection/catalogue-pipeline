@@ -130,3 +130,9 @@ resource "aws_cloudwatch_log_group" "state_machine_logs" {
 
 # Data source for current AWS region
 data "aws_region" "current" {}
+
+# Outputs
+output "state_machine_arn" {
+  description = "ARN of the created Step Functions state machine"
+  value       = aws_sfn_state_machine.state_machine.arn
+}
