@@ -65,6 +65,20 @@ Feature: Extracting genres from MARC 655
     Then the only genre has a label starting with "Euskal Reggae"
     And the 1st concept has the label "Euskal Reggae"
 
+  Scenario Outline: subfield a comes first
+  The remaining fields are in document order
+    Given the MARC record has a 655 field with subfield "a" value "a"
+    And that field has a subfield "<code1>" with value "<code1>"
+    And that field has a subfield "<code2>" with value "<code2>"
+    And that field has a subfield "<code3>" with value "<code3>"
+    And that field has a subfield "<code4>" with value "<code4>"
+    When I transform the MARC record
+    Then the only genre has the label "a <code1> <code2> <code3> <code4>"
+    Examples:
+      | code1 | code2 | code3 | code4 |
+      | x     | y     | z     | v     |
+      | z     | y     | x     | x     |
+      | y     | z     | v     | y     |
 
   Scenario Outline: subdivision types
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
