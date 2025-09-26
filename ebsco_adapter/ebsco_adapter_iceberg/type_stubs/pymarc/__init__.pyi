@@ -1,5 +1,5 @@
 from typing import IO
 
-from models.marc import MarcRecord
+from pymarc.record import Record
 
-def parse_xml_to_array(handle: IO[str]) -> list[MarcRecord]: ...
+def parse_xml_to_array(handle: IO[str]) -> list[Record]: ...
