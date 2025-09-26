@@ -17,12 +17,9 @@ from models.manifests import (
 )
 
 
-def _success_lines(
-    batches_ids: list[list[str]], source_id_template: str, job_id: str
-) -> Iterable[str]:
+def _success_lines(batches_ids: list[list[str]], job_id: str) -> Iterable[str]:
     for ids in batches_ids:
-        wrapped_ids = [source_id_template.format(i) for i in ids]
-        line = SuccessBatchLine(sourceIdentifiers=wrapped_ids, jobId=job_id)
+        line = SuccessBatchLine(sourceIdentifiers=ids, jobId=job_id)
         yield line.model_dump_json()
 
 
@@ -45,23 +42,19 @@ class ManifestWriter:
         *,
         bucket: str,
         prefix: str,
-        source_id_template: str,
     ) -> None:
         base = f"{changeset_id or 'reindex'}.{job_id}.ids"
         self.success_filename = f"{base}.ndjson"
         self.failure_filename = f"{base}.failures.ndjson"
         self.prefix = prefix
         self.bucket = bucket
-        self.source_id_template = source_id_template
         self.job_id = job_id
 
     def write_success(self, batches_ids: list[list[str]]) -> S3Location:
         key = PurePosixPath(self.prefix) / self.success_filename
         uri = f"s3://{self.bucket}/{key.as_posix()}"
         with smart_open.open(uri, "w", encoding="utf-8") as f:
-            for line in _success_lines(
-                batches_ids, self.source_id_template, self.job_id
-            ):
+            for line in _success_lines(batches_ids, self.job_id):
                 f.write(line + "\n")
         return S3Location(bucket=self.bucket, key=key.as_posix())
 

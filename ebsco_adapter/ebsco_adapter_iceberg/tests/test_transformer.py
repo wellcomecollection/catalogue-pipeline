@@ -154,14 +154,18 @@ def test_transformer_creates_deletedwork_for_empty_content(
         }
     ]
     deleted_docs = [
-        op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel001"
+        op
+        for op in MockElasticsearchClient.inputs
+        if op["_id"] == "Work[ebsco-alt-lookup/ebsDel001]"
     ]
     assert len(deleted_docs) == 1
     deleted_source = deleted_docs[0]["_source"]
     assert deleted_source["deletedReason"] == "not found in EBSCO source"
     # Ensure normal record still indexed
     alive_docs = [
-        op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel002"
+        op
+        for op in MockElasticsearchClient.inputs
+        if op["_id"] == "Work[ebsco-alt-lookup/ebsDel002]"
     ]
     assert len(alive_docs) == 1
     assert alive_docs[0]["_source"]["title"] == "Alive Title"
@@ -288,12 +292,15 @@ def test_transform_empty_content_returns_error() -> None:
     works, errors = transform("work1", "")
     assert works == []
     assert errors and errors[0]["reason"] == "empty_content"
+    # IDs in errors are now wrapped
+    assert errors[0]["id"] == "work1"
 
 
 def test_transform_invalid_xml_returns_parse_error() -> None:
     works, errors = transform("work2", "<record><leader>bad")
     assert works == []
     assert errors and errors[0]["reason"] == "parse_error"
+    assert errors[0]["id"] == "work2"
 
 
 def test_transformer_creates_failure_manifest_for_parse_errors(
@@ -363,7 +370,7 @@ def test_transformer_creates_failure_manifest_for_index_errors(
     # Expect a single failure line with id and message containing status & error_type
     assert len(failure_lines) == 1
     msg = failure_lines[0]["message"]
-    assert failure_lines[0]["id"] == "ebsIdxErr001"
+    assert failure_lines[0]["id"] == "Work[ebsco-alt-lookup/ebsIdxErr001]"
     assert "status=400" in msg and "error_type=mapper_parsing_exception" in msg
 
 
@@ -380,7 +387,7 @@ def test_transform_valid_marcxml_returns_work() -> None:
     works, errors = transform("ebs12345", xml)
     assert not errors
     assert len(works) == 1
-    assert works[0].id == "ebs12345"
+    assert str(works[0].source_identifier) == "Work[ebsco-alt-lookup/ebs12345]"
     assert works[0].title == "A Useful Title"
 
 
@@ -399,9 +406,22 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
+    from models.work import SourceIdentifier
+
+    IDENT_TYPE = "ebsco-alt-lookup"
     records = [
-        SourceWork(id="id1", title="Title 1"),
-        SourceWork(id="id2", title="Title 2"),
+        SourceWork(
+            title="Title 1",
+            source_identifier=SourceIdentifier(
+                identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+            ),
+        ),
+        SourceWork(
+            title="Title 2",
+            source_identifier=SourceIdentifier(
+                identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
+            ),
+        ),
     ]
     dummy_client = cast(Any, object())
     success, errors = load_data(
@@ -410,7 +430,10 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert success == 2
     assert errors == []
-    assert {a["_id"] for a in collected} == {"id1", "id2"}
+    assert {a["_id"] for a in collected} == {
+        "Work[ebsco-alt-lookup/id1]",
+        "Work[ebsco-alt-lookup/id2]",
+    }
     assert {a["_source"]["title"] for a in collected} == {"Title 1", "Title 2"}
 
 
@@ -429,7 +452,17 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    records = [SourceWork(id="id1", title="Bad Title")]
+    from models.work import SourceIdentifier
+
+    IDENT_TYPE = "ebsco-alt-lookup"
+    records = [
+        SourceWork(
+            title="Bad Title",
+            source_identifier=SourceIdentifier(
+                identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+            ),
+        )
+    ]
     dummy_client = cast(Any, object())
     success, errors = load_data(
         elastic_client=dummy_client, records=records, index_name="works-source-dev"

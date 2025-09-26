@@ -23,16 +23,17 @@ from models.marc import MarcRecord
 from models.step_events import (
     EbscoAdapterTransformerEvent,
 )
-from models.work import BaseWork, DeletedWork, SourceWork
+from models.work import BaseWork, DeletedWork, SourceIdentifier, SourceWork
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
 
 # Batch size for converting Arrow tables to Python objects before indexing
-# This must result in batches of output ids that fit in the 256kb item 
+# This must result in batches of output ids that fit in the 256kb item
 # limit for step function invocations (with some margin).
 BATCH_SIZE = 5_000
-# Template for wrapping source IDs in the required format (kept for transform context)
-SOURCE_ID_TEMPLATE = "Work[ebsco-alt-lookup/{}]"
+
+# Local namespace constant for this adapter (passed as identifier_type)
+EBSCO_IDENTIFIER_TYPE = "ebsco-alt-lookup"
 
 
 class EbscoAdapterTransformerConfig(BaseModel):
@@ -41,9 +42,6 @@ class EbscoAdapterTransformerConfig(BaseModel):
     pipeline_date: str
     # Optional override for index naming. When None we use pipeline_date.
     index_date: str | None = None
-
-
-# _write_batch_file replaced by ManifestWriter (see manifests.py)
 
 
 def _to_error_line(err: dict[str, Any]) -> ErrorLine | None:
@@ -77,6 +75,7 @@ def transform(
     """
 
     errors: list[dict[str, Any]] = []
+
     if not content:
         errors.append({"stage": "transform", "id": work_id, "reason": "empty_content"})
         return [], errors
@@ -100,10 +99,18 @@ def transform(
         return [], errors
 
     works = [
-        SourceWork(id=work_id, title=str(record.title))
+        SourceWork(
+            title=str(record.title),
+            source_identifier=SourceIdentifier(
+                identifier_type=EBSCO_IDENTIFIER_TYPE,
+                ontology_type="Work",
+                value=work_id,
+            ),
+        )
         for record in marc_records
         if valid_record(record)
     ]
+
     if not works:
         errors.append({"stage": "transform", "id": work_id, "reason": "no_valid_title"})
     return works, errors
@@ -116,7 +123,9 @@ def _generate_actions(
     for record in records:
         yield {
             "_index": index_name,
-            "_id": record.id,
+            "_id": str(
+                record.source_identifier
+            ),  # Use formatted string id via SourceIdentifier
             "_source": record.model_dump(),
         }
 
@@ -196,8 +205,12 @@ def _process_batch(
             # deletion marker -> DeletedWork counts as success (not an error)
             transformed.append(
                 DeletedWork(
-                    id=work_id,
                     deleted_reason="not found in EBSCO source",
+                    source_identifier=SourceIdentifier(
+                        identifier_type=EBSCO_IDENTIFIER_TYPE,
+                        ontology_type="Work",
+                        value=work_id,
+                    ),
                 )
             )
 
@@ -207,7 +220,7 @@ def _process_batch(
 
     success, index_errors = load_data(es_client, transformed, index_name)
     errors.extend(index_errors)
-    ids = [t.id for t in transformed]
+    ids = [str(t.source_identifier) for t in transformed]
     return success, ids, errors
 
 
@@ -252,7 +265,6 @@ def process_batches(
         changeset_id=changeset_id,
         bucket=config.S3_BUCKET,
         prefix=config.BATCH_S3_PREFIX,
-        source_id_template=SOURCE_ID_TEMPLATE,
     )
     result_manifest = writer.build_manifest(
         job_id=job_id,
