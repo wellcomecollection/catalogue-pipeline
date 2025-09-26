@@ -21,9 +21,11 @@ def test_manifest_writer_writes_success_only() -> None:
         changeset_id="chgABC",
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
-        source_id_template="Work[ebsco-alt-lookup/{}]",
     )
-    batches_ids = [["id1", "id2"], ["id3"]]
+    batches_ids = [
+        ["Work[ebsco-alt-lookup/id1]", "Work[ebsco-alt-lookup/id2]"],
+        ["Work[ebsco-alt-lookup/id3]"],
+    ]
     manifest = writer.build_manifest(
         job_id="job123", batches_ids=batches_ids, errors=[], success_count=3
     )
@@ -52,7 +54,6 @@ def test_manifest_writer_writes_failures() -> None:
         changeset_id=None,  # triggers 'reindex' naming
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
-        source_id_template="Work[ebsco-alt-lookup/{}]",
     )
 
     error_lines = [
@@ -64,7 +65,10 @@ def test_manifest_writer_writes_failures() -> None:
     ]
 
     manifest = writer.build_manifest(
-        job_id="job999", batches_ids=[["idA"]], errors=error_lines, success_count=1
+        job_id="job999",
+        batches_ids=[["Work[ebsco-alt-lookup/idA]"]],
+        errors=error_lines,
+        success_count=1,
     )
     assert manifest.failures is not None
     assert manifest.failures.count == 2
@@ -98,7 +102,6 @@ def test_manifest_writer_handles_empty_batches() -> None:
         changeset_id="chgEmpty",
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
-        source_id_template="Work[ebsco-alt-lookup/{}]",
     )
     # Even with zero success_count we still write an (empty) success manifest file with 0 count
     manifest = writer.build_manifest(
@@ -143,12 +146,11 @@ def test_manifest_file_naming_patterns(
         changeset_id=changeset_id,
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
-        source_id_template="Work[ebsco-alt-lookup/{}]",
     )
     # include an error to force failure file creation
     manifest = writer.build_manifest(
         job_id=job_id,
-        batches_ids=[["only1"]],
+        batches_ids=[["Work[ebsco-alt-lookup/only1]"]],
         errors=[ErrorLine(id="x", message="stage=transform; reason=parse_error")],
         success_count=1,
     )
