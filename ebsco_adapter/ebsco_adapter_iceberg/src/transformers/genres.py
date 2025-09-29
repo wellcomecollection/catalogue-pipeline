@@ -24,8 +24,11 @@ def extract_genres(record: Record) -> list[Genre]:
     """
     Build a list of Genre objects from MARC 655 fields.
     """
-    return [genre for genre in (extract_genre(field) for field in record.get_fields("655")) if
-            genre is not None]
+    return [
+        genre
+        for genre in (extract_genre(field) for field in record.get_fields("655"))
+        if genre is not None
+    ]
 
 
 def extract_genre(field: Field) -> Genre | None:
@@ -42,8 +45,9 @@ def extract_genre(field: Field) -> Genre | None:
     genre_label = " ".join(chain(a_subfields, subdivision_subfields))
 
     concepts = [_extract_concept_from_subfield_value("a", a_subfields[0])] + [
-        _extract_concept_from_subfield(subfield) for subfield in field.subfields if
-        subfield.code in SUBDIVISION_SUBFIELDS
+        _extract_concept_from_subfield(subfield)
+        for subfield in field.subfields
+        if subfield.code in SUBDIVISION_SUBFIELDS
     ]
 
     return Genre(
