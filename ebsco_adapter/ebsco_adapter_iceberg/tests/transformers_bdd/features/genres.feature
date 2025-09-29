@@ -65,8 +65,7 @@ Feature: Extracting genres from MARC 655
     Then the only genre has a label starting with "Euskal Reggae"
     And the 1st concept has the label "Euskal Reggae"
 
-  Scenario Outline: subfield a comes first
-  The remaining fields are in document order
+  Scenario Outline: subdivision fields preserve document order
     Given the MARC record has a 655 field with subfield "a" value "a"
     And that field has a subfield "<code1>" with value "<code1>"
     And that field has a subfield "<code2>" with value "<code2>"

@@ -1,18 +1,16 @@
 from __future__ import annotations
 
 import logging
-
+from itertools import chain
 from pymarc.field import Field
-from pymarc.record import Record
+from pymarc.record import Record, Subfield
 
 from models.work import ConceptType, Genre, SourceConcept, SourceIdentifier
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-# Subfields that contribute to the genre label (order & inclusion)
-# Ordering here enforces $a first in both label & concept list regardless of
-# its physical position in the field.
-LABEL_SUBFIELDS: list[str] = ["a", "v", "x", "y", "z"]
+SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]
+LABEL_SUBFIELDS: list[str] = ["a"] + SUBDIVISION_SUBFIELDS
 
 # Mapping of subdivision code -> SourceConcept.type override
 CONCEPT_TYPE_MAP: dict[str, ConceptType] = {
@@ -26,72 +24,51 @@ def extract_genres(record: Record) -> list[Genre]:
     """
     Build a list of Genre objects from MARC 655 fields.
     """
-    genres: list[Genre] = []
-
-    for field in record.get_fields("655"):
-        genre: Genre | None = _build_genre_from_field(field)
-        if genre is not None:
-            genres.append(genre)
-
-    return genres
+    return [genre for genre in (extract_genre(field) for field in record.get_fields("655")) if
+            genre is not None]
 
 
-# ----------------- Helpers ----------------- #
-
-
-def _build_genre_from_field(field: Field) -> Genre | None:
+def extract_genre(field: Field) -> Genre | None:
     """
-    Construct a Genre from a single 655 field, or return None if the field is
-    invalid (e.g., missing/duplicate $a) per the business rules.
+    Create a Genre from a single 655 field or return None if invalid.
     """
-    a_values: list[str] = [
-        v.strip() for v in field.get_subfields("a") if v and v.strip()
-    ]
-
-    if len(a_values) == 0:
+    a_subfields = field.get_subfields("a")
+    if len(a_subfields) == 0:
         return None
-
-    if len(a_values) > 1:
+    if len(a_subfields) > 1:
         logger.error("Repeated Non-repeating field $a found in 655 field")
         return None
+    subdivision_subfields = field.get_subfields("v", "x", "y", "z")
+    genre_label = " ".join(chain(a_subfields, subdivision_subfields))
 
-    # Collect (code, raw_value) pairs in canonical order ignoring actual sequence in field
-    ordered_pairs: list[tuple[str, str]] = []
-    for code in LABEL_SUBFIELDS:
-        raw_values: list[str] = [
-            v for v in field.get_subfields(code) if v and v.strip()
-        ]
-        for raw in raw_values:
-            ordered_pairs.append((code, raw.strip()))
-
-    if not ordered_pairs:
-        return None
-
-    # Build genre label preserving raw punctuation
-    genre_label: str = " ".join(v for _, v in ordered_pairs)
-
-    concepts: list[SourceConcept] = []
-    for code, raw_value in ordered_pairs:
-        concept_label: str = _clean_concept_label(raw_value)
-        identifier: SourceIdentifier = SourceIdentifier(
-            identifier_type="label-derived",
-            ontology_type="Genre",
-            value=_normalise_identifier_value(concept_label),
-        )
-        concept_type = CONCEPT_TYPE_MAP.get(code, "Concept")
-        concepts.append(
-            SourceConcept(
-                id=identifier,
-                label=concept_label,
-                type=concept_type,  # "Concept" / "Period" / "Place"
-            )
-        )
+    concepts = [_extract_concept_from_subfield_value("a", a_subfields[0])] + [
+        _extract_concept_from_subfield(subfield) for subfield in field.subfields if
+        subfield.code in SUBDIVISION_SUBFIELDS
+    ]
 
     return Genre(
         id=None,
         label=genre_label,
         type="Genre",
         concepts=concepts,
+    )
+
+
+def _extract_concept_from_subfield(subfield: Subfield) -> SourceConcept:
+    return _extract_concept_from_subfield_value(subfield.code, subfield.value)
+
+
+def _extract_concept_from_subfield_value(code: str, value: str) -> SourceConcept:
+    concept_label = _clean_concept_label(value)
+    identifier = SourceIdentifier(
+        identifier_type="label-derived",
+        ontology_type="Genre",
+        value=_normalise_identifier_value(concept_label),
+    )
+    return SourceConcept(
+        id=identifier,
+        label=concept_label,
+        type=CONCEPT_TYPE_MAP.get(code, "Concept"),
     )
 
 
