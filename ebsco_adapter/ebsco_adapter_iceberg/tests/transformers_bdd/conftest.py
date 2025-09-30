@@ -113,17 +113,17 @@ def do_transform(context: dict[str, Any], marc_record: Record) -> None:
 @then(parsers.parse("there are {count:d} {attr_phrase}"))
 def list_member_count(work, count: int, attr_phrase: str) -> None:
     values: Sequence[Any] = _get_attr_list(work, attr_phrase)
-    assert len(values) == count, (
-        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
-    )
+    assert (
+        len(values) == count
+    ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
 
 
 @then(parsers.parse("it has {count:d} {attr_phrase}"))
 def child_list_member_count(antecedent: Any, count: int, attr_phrase: str) -> None:
     values: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
-    assert len(values) == count, (
-        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
-    )
+    assert (
+        len(values) == count
+    ), f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
 
 
 @then(parsers.parse("it has {count:d} {attr_phrase}:"))
@@ -131,9 +131,9 @@ def child_list_member_datatable(
     antecedent: Any, datatable: list[list[str]], count: int, attr_phrase: str
 ) -> None:
     members: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
-    assert len(members) == count, (
-        f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
-    )
+    assert (
+        len(members) == count
+    ), f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
     headings = datatable[0]
     for index, row in enumerate(datatable[1:]):
         member = members[index]
@@ -155,9 +155,9 @@ def list_member_only(work, attr_phrase: str, value: str) -> None:
 def _list_member_nth(parent: Any, index: str, attr_phrase: str) -> Any:
     idx = int(index) - 1
     values: Sequence[Any] = _get_attr_list(parent, attr_phrase)
-    assert 0 <= idx < len(values), (
-        f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
-    )
+    assert (
+        0 <= idx < len(values)
+    ), f"Index {index} out of range (have {len(values)} {attr_phrase}: {values})"
     member = values[idx]
     return member
 
@@ -169,9 +169,9 @@ def _list_member_nth(parent: Any, index: str, attr_phrase: str) -> Any:
 )
 def list_member_nth_is(work, index: str, attr_phrase: str, value: str) -> None:
     nth_member = _list_member_nth(work, index, attr_phrase)
-    assert nth_member == value, (
-        f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
-    )
+    assert (
+        nth_member == value
+    ), f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
     return nth_member
 
 
@@ -227,9 +227,9 @@ def only_genre_identifier_value(context: dict[str, Any], value: str) -> None:
         f"found {len(genres)}"
     )
     g = genres[context.get("_last_single_genre_index", 0)]
-    assert g.source.value == value, (
-        f"Expected identifier value {value!r}, got {g.source.value!r}"
-    )
+    assert (
+        g.source.value == value
+    ), f"Expected identifier value {value!r}, got {g.source.value!r}"
 
 
 @then(parsers.parse('its identifier type is "{ctype}"'))
@@ -248,9 +248,9 @@ def only_genre_identifier_type(context: dict[str, Any], ctype: str) -> None:
         actual_str = actual.name.title()
     else:
         actual_str = str(actual)
-    assert actual_str == ctype, (
-        f"Expected identifier type {ctype!r}, got {actual_str!r}"
-    )
+    assert (
+        actual_str == ctype
+    ), f"Expected identifier type {ctype!r}, got {actual_str!r}"
 
 
 # ------------- Utility accessors ------------- #
@@ -282,27 +282,27 @@ def step_genre_concept_count(context: dict[str, Any], count: int) -> None:
 @then(parsers.parse('the concept has an identifier with value "{value}"'))
 def step_single_concept_identifier_value(context: dict[str, Any], value: str) -> None:
     genre = _assert_single_genre(context)
-    assert len(genre.concepts) == 1, (
-        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
-    )
+    assert (
+        len(genre.concepts) == 1
+    ), f"Expected exactly one concept for this step, found {len(genre.concepts)}"
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert concept.id.value == value, (
-        f"Expected identifier value {value!r}, got {concept.id.value!r}"
-    )
+    assert (
+        concept.id.value == value
+    ), f"Expected identifier value {value!r}, got {concept.id.value!r}"
 
 
 @then(parsers.parse('the identifier\'s ontology type is "{ontology}"'))
 def step_concept_identifier_ontology(context: dict[str, Any], ontology: str) -> None:
     genre = _assert_single_genre(context)
-    assert len(genre.concepts) == 1, (
-        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
-    )
+    assert (
+        len(genre.concepts) == 1
+    ), f"Expected exactly one concept for this step, found {len(genre.concepts)}"
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert concept.id.ontology_type == ontology, (
-        f"Expected ontology type {ontology!r}, got {concept.id.ontology_type!r}"
-    )
+    assert (
+        concept.id.ontology_type == ontology
+    ), f"Expected ontology type {ontology!r}, got {concept.id.ontology_type!r}"
 
 
 @then(parsers.parse('its identifier\'s identifier type is "{itype}"'))
@@ -310,23 +310,23 @@ def step_concept_identifier_identifier_type(
     context: dict[str, Any], itype: str
 ) -> None:
     genre = _assert_single_genre(context)
-    assert len(genre.concepts) == 1, (
-        f"Expected exactly one concept for this step, found {len(genre.concepts)}"
-    )
+    assert (
+        len(genre.concepts) == 1
+    ), f"Expected exactly one concept for this step, found {len(genre.concepts)}"
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert concept.id.identifier_type == itype, (
-        f"Expected identifier type {itype!r}, got {concept.id.identifier_type!r}"
-    )
+    assert (
+        concept.id.identifier_type == itype
+    ), f"Expected identifier type {itype!r}, got {concept.id.identifier_type!r}"
 
 
 @then(parsers.re(r'the (?P<ord>\d+\w{2}) genre has the label "(?P<label>.*)"'))
 def step_ordinal_genre_label(context: dict[str, Any], ord: str, label: str) -> None:
     genres = _get_genres(context)
     idx = _ordinal_index(ord)
-    assert 0 <= idx < len(genres), (
-        f"Genre index {idx} out of range (have {len(genres)})"
-    )
+    assert (
+        0 <= idx < len(genres)
+    ), f"Genre index {idx} out of range (have {len(genres)})"
     actual = genres[idx].label
     assert actual == label, f"Expected genre {ord} label {label!r}, got {actual!r}"
 
@@ -335,9 +335,9 @@ def step_ordinal_genre_label(context: dict[str, Any], ord: str, label: str) -> N
 def step_ordinal_concept_label(context: dict[str, Any], ord: str, label: str) -> None:
     genre = _assert_single_genre(context)
     idx = _ordinal_index(ord)
-    assert 0 <= idx < len(genre.concepts), (
-        f"Concept index {idx} out of range (have {len(genre.concepts)})"
-    )
+    assert (
+        0 <= idx < len(genre.concepts)
+    ), f"Concept index {idx} out of range (have {len(genre.concepts)})"
     actual = genre.concepts[idx].label
     assert actual == label, f"Expected concept {ord} label {label!r}, got {actual!r}"
 
@@ -347,9 +347,9 @@ def only_genre_label_startswith(context: dict[str, Any], prefix: str) -> None:
     genres: list[Any] = getattr(context["result"], "genres", [])
     assert len(genres) == 1, f"Expected exactly one genre, found {len(genres)}"
     actual = genres[0].label
-    assert actual.startswith(prefix), (
-        f'Expected genre label to start with "{prefix}", got "{actual}"'
-    )
+    assert actual.startswith(
+        prefix
+    ), f'Expected genre label to start with "{prefix}", got "{actual}"'
 
 
 @then(parsers.re(r'the (?P<ord>\d+\w{2}) concept has the type "(?P<ctype>.*)"'))
@@ -359,13 +359,13 @@ def ordinal_concept_type(context: dict[str, Any], ord: str, ctype: str) -> None:
     idx = int(m.group(1)) - 1
 
     genres: list[Any] = getattr(context["result"], "genres", [])
-    assert len(genres) == 1, (
-        "Ordinal concept type step assumes a single genre in context."
-    )
+    assert (
+        len(genres) == 1
+    ), "Ordinal concept type step assumes a single genre in context."
     genre = genres[0]
-    assert 0 <= idx < len(genre.concepts), (
-        f"Concept index {idx} out of range (have {len(genre.concepts)})"
-    )
+    assert (
+        0 <= idx < len(genre.concepts)
+    ), f"Concept index {idx} out of range (have {len(genre.concepts)})"
     actual = genre.concepts[idx].type
     assert actual == ctype, f'Expected {ord} concept type "{ctype}", got "{actual}"'
 
@@ -396,12 +396,12 @@ def step_ordinal_concept_identifier_value(
     """
     genre = _assert_single_genre(context)  # relies on helper already defined above
     idx = _ordinal_index(ord)
-    assert 0 <= idx < len(genre.concepts), (
-        f"Concept index {idx} out of range (have {len(genre.concepts)})"
-    )
+    assert (
+        0 <= idx < len(genre.concepts)
+    ), f"Concept index {idx} out of range (have {len(genre.concepts)})"
     concept = genre.concepts[idx]
     assert concept.id is not None, f"Concept {ord} is missing an identifier"
     actual = concept.id.value
-    assert actual == value, (
-        f'Expected {ord} concept identifier value "{value}", got "{actual}"'
-    )
+    assert (
+        actual == value
+    ), f'Expected {ord} concept identifier value "{value}", got "{actual}"'
