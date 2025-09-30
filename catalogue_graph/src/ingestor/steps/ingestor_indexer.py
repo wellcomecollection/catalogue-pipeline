@@ -4,6 +4,7 @@ import json
 import typing
 from collections.abc import Generator
 
+import boto3
 import elasticsearch.helpers
 
 import config
@@ -17,7 +18,7 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
     IngestorStepEvent,
 )
-from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl, get_s3_objects_by_type
+from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import get_standard_index_name
 from utils.types import IngestorType
 
@@ -168,17 +169,20 @@ def _get_objects_to_index(
     print(
         f"Will process all {load_format} files prefixed with 's3://{bucket_name}/{prefix}/*'."
     )
-    for s3_object in get_s3_objects_by_type(bucket_name, prefix, load_format):
-        if s3_object["Key"].endswith(f".{load_format}"):
-            # Given a key like 'some/prefix/00000000-00002070.format', extract '00000000-00002070'
-            range_suffix = s3_object["Key"].split("/")[-1].split(".")[0]
-            range_start, range_end = map(int, range_suffix.split("-"))
 
-            yield IngestorIndexerObject(
-                s3_uri=f"s3://{bucket_name}/{s3_object['Key']}",
-                content_length=s3_object["Size"],
-                record_count=range_end - range_start,
-            )
+    paginator = boto3.client("s3").get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix):
+        for s3_object in page.get("Contents", []):
+            if s3_object["Key"].endswith(f".{load_format}"):
+                # Given a key like 'some/prefix/00000000-00002070.format', extract '00000000-00002070'
+                range_suffix = s3_object["Key"].split("/")[-1].split(".")[0]
+                range_start, range_end = map(int, range_suffix.split("-"))
+
+                yield IngestorIndexerObject(
+                    s3_uri=f"s3://{bucket_name}/{s3_object['Key']}",
+                    content_length=s3_object["Size"],
+                    record_count=range_end - range_start,
+                )
 
 
 if __name__ == "__main__":
