@@ -4,12 +4,12 @@ import logging
 from itertools import chain
 
 from pymarc.field import Field
-from pymarc.record import Record, Subfield
+from pymarc.record import Record
 
-from models.work import ConceptType, Genre, SourceConcept, SourceIdentifier
+from models.work import ConceptType, Genre
 from transformers.common import (
-    non_empty,
     extract_concept_from_subfield_value,
+    non_empty,
     subdivision_concepts,
 )
 
@@ -30,7 +30,7 @@ def extract_genres(record: Record) -> list[Genre]:
     """
     Build a list of Genre objects from MARC 655 fields.
     """
-    return non_empty((extract_genre(field) for field in record.get_fields("655")))
+    return non_empty(extract_genre(field) for field in record.get_fields("655"))
 
 
 def extract_genre(field: Field) -> Genre | None:

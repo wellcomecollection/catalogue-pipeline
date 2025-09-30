@@ -1,7 +1,7 @@
 from collections.abc import Callable, Iterable
 from urllib.parse import urlparse
 
-from pymarc.record import Record, Field, Subfield
+from pymarc.record import Field, Record, Subfield
 
 from models.work import SourceConcept, SourceIdentifier
 
