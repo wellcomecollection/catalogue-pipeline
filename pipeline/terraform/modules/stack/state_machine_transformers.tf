@@ -178,7 +178,7 @@ module "ebsco_reindex_transformer_trigger" {
   name              = "ebsco-reindex-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.ebsco_transformer_state_machine.state_machine_arn
-  
+
   // Expect events like:
   // {
   //   "source": "weco.pipeline.reindex",
