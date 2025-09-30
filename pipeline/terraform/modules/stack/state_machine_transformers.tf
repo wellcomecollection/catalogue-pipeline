@@ -151,8 +151,8 @@ module "ebsco_transformer_state_machine" {
   state_machine_iam_policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
 }
 
-# EventBridge trigger module for transformer - listens to adapter completion events
-module "ebsco_transformer_trigger" {
+# Trigger State Machine on ebsco.adapter.completed events
+module "ebsco_adapter_transformer_trigger" {
   source = "../state_machine_trigger"
 
   name              = "ebsco-transformer-${var.pipeline_date}"
@@ -171,7 +171,33 @@ module "ebsco_transformer_trigger" {
   input_template = "{\"detail\": <detail>}"
 }
 
-output "ebsco_transformer_trigger_rule_name" {
-  value       = module.ebsco_transformer_trigger.rule_name
-  description = "Name of the EventBridge rule that triggers the transformer state machine"
+# Trigger State Machine on weco.pipeline.reindex events
+module "ebsco_reindex_transformer_trigger" {
+  source = "../state_machine_trigger"
+
+  name              = "ebsco-reindex-${var.pipeline_date}"
+  event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
+  state_machine_arn = module.ebsco_transformer_state_machine.state_machine_arn
+  
+  // Expect events like:
+  // {
+  //   "source": "weco.pipeline.reindex",
+  //   "detail-type": "weco.pipeline.reindex.requested",
+  //   "detail": {
+  //     "reindex_targets": ["ebsco"],
+  //     "job_id": "some-unique-id"
+  //   }
+  // }
+  event_pattern = {
+    source        = ["weco.pipeline.reindex"],
+    "detail-type" = ["weco.pipeline.reindex.requested"],
+    detail = {
+      reindex_targets = ["ebsco"]
+    }
+  }
+
+  input_paths = {
+    job_id = "$.detail.job_id"
+  }
+  input_template = "{\"detail\": {\"job_id\": <job_id>}}"
 }
