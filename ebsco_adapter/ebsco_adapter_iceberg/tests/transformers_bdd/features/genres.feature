@@ -38,11 +38,13 @@ Feature: Extracting genres from MARC 655
   Scenario: v, x, y, and z subfields
   The label is made from subfields a,v,x,y,z - and each subdivision field
   yields its own concept
-    Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
-    And that field has a subfield "v" with value "Specimens"
-    And that field has a subfield "x" with value "Literature"
-    And that field has a subfield "y" with value "1897-1900"
-    And that field has a subfield "z" with value "Dublin."
+    Given the MARC record has a 655 field with subfields:
+      | code | value      |
+      | a    | Disco Polo |
+      | v    | Specimens  |
+      | x    | Literature |
+      | y    | 1897-1900  |
+      | z    | Dublin.    |
     When I transform the MARC record
     Then the only genre has the label "Disco Polo Specimens Literature 1897-1900 Dublin."
     And the genre has 5 concepts

@@ -1,5 +1,9 @@
 Feature: MARC record alternative titles extraction
-  Validates extraction, ordering, de-duplication, exclusion rules, and construction from multiple subfields.
+  Alternative Titles are derived from the MARC 130, 240 and 246 fields
+  - http://www.loc.gov/marc/bibliographic/bd130.html
+  - https://www.loc.gov/marc/bibliographic/bd240.html
+  - https://www.loc.gov/marc/bibliographic/bd246.html
+
 
   Background:
     Given a valid MARC record
