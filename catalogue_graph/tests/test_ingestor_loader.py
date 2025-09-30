@@ -1,5 +1,16 @@
 import polars as pl
 import pytest
+from test_mocks import (
+    MockElasticsearchClient,
+    MockRequest,
+    MockSmartOpen,
+    add_neptune_mock_response,
+    mock_es_secrets,
+)
+from test_utils import (
+    load_json_fixture,
+)
+
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
@@ -31,16 +42,6 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
-from test_mocks import (
-    MockElasticsearchClient,
-    MockRequest,
-    MockSmartOpen,
-    add_neptune_mock_response,
-    mock_es_secrets,
-)
-from test_utils import (
-    load_json_fixture,
-)
 
 MOCK_CONCEPT_ID = "jbxfbpzq"
 MOCK_JOB_ID = "20250929T12:00"
@@ -275,7 +276,6 @@ def get_catalogue_concept_mock(
 
 def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> None:
     with MockSmartOpen.open(s3_uri, "rb") as f:
-
         df = pl.read_parquet(f)
         assert len(df) == 1
 
@@ -291,14 +291,14 @@ def test_ingestor_loader_no_related_concepts() -> None:
     mock_denormalised_work()
     mock_neptune_responses([])
 
-    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=19243)
+    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=20691)
     result = handler(MOCK_LOADER_EVENT)
 
     # We expect a total of 11 API calls:
     # * 4 to retrieve concept data (concept query, types query, same as query, and source concepts query)
-    # * 7 to retrieve related concept data (one for each related concept category, such as 'people' or 'broader than')
+    # * 8 to retrieve related concept data (one for each related concept category, such as 'people' or 'broader than')
     assert result == indexer_event
-    assert len(MockRequest.calls) == 11
+    assert len(MockRequest.calls) == 12
 
     expected_concept = get_catalogue_concept_mock([])
     check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
@@ -308,14 +308,14 @@ def test_ingestor_loader_with_broader_than_concepts() -> None:
     mock_denormalised_work()
     mock_neptune_responses(["broader_than"])
 
-    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=19654)
+    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=21092)
     result = handler(MOCK_LOADER_EVENT)
 
     # We expect a total of 15 API calls:
-    # * 11 to retrieve the same data as the `test_ingestor_loader_no_related_concepts` test case
+    # * 12 to retrieve the same data as the `test_ingestor_loader_no_related_concepts` test case
     # * 4 to retrieve concept data for broader than concepts
     assert result == indexer_event
-    assert len(MockRequest.calls) == 15
+    assert len(MockRequest.calls) == 16
 
     expected_concept = get_catalogue_concept_mock(["broader_than"])
     check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
@@ -325,13 +325,13 @@ def test_ingestor_loader_with_related_to_concepts() -> None:
     mock_denormalised_work()
     mock_neptune_responses(["related_to", "people"])
 
-    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=20205)
+    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=21638)
     result = handler(MOCK_LOADER_EVENT)
 
     # Since we're including two separate groups of related concepts, we expect 4 additional API calls
     # on top of those in `test_ingestor_loader_with_broader_than_concepts`
     assert result == indexer_event
-    assert len(MockRequest.calls) == 19
+    assert len(MockRequest.calls) == 20
 
     expected_concept = get_catalogue_concept_mock(["related_to", "people"])
     check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)

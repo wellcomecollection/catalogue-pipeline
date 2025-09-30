@@ -5,17 +5,18 @@ from typing import Any
 import polars
 import pydantic_core
 import pytest
-from ingestor.models.step_events import (
-    IngestorIndexerLambdaEvent,
-    IngestorIndexerObject,
-)
-from ingestor.steps.ingestor_indexer import handler
 from test_mocks import (
     MockElasticsearchClient,
     MockSmartOpen,
     mock_es_secrets,
 )
 from test_utils import load_fixture, load_json_fixture
+
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
+)
+from ingestor.steps.ingestor_indexer import handler
 from utils.types import IngestorType
 
 

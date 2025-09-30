@@ -8,6 +8,7 @@ from ingestor.queries.concept_queries import (
     CONCEPT_TYPE_QUERY,
     FIELDS_OF_WORK_QUERY,
     FREQUENT_COLLABORATORS_QUERY,
+    HAS_FOUNDER_QUERY,
     NARROWER_THAN_QUERY,
     PEOPLE_QUERY,
     RELATED_TO_QUERY,
@@ -24,7 +25,12 @@ from utils.aws import get_neptune_client
 from utils.streaming import process_stream_in_parallel
 
 ConceptRelatedQuery = Literal[
-    "related_to", "fields_of_work", "narrower_than", "broader_than", "people"
+    "related_to",
+    "fields_of_work",
+    "narrower_than",
+    "broader_than",
+    "people",
+    "has_founder",
 ]
 ConceptReferencedTogetherQuery = Literal["frequent_collaborators", "related_topics"]
 ConceptQuery = Literal[
@@ -55,6 +61,7 @@ NEPTUNE_QUERIES = {
     "people": PEOPLE_QUERY,
     "frequent_collaborators": FREQUENT_COLLABORATORS_QUERY,
     "related_topics": RELATED_TOPICS_QUERY,
+    "has_founder": HAS_FOUNDER_QUERY,
 }
 
 

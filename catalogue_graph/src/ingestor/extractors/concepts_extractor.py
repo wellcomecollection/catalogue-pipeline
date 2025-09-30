@@ -4,12 +4,11 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
 from typing import get_args
 
+from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
 from models.events import IncrementalWindow
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.merged_works_source import MergedWorksSource
 from utils.types import ConceptType
-
-from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
 
 from .base_extractor import (
     ConceptQuery,

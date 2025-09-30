@@ -200,3 +200,5 @@ RELATED_TOPICS_QUERY = get_referenced_together_query(
     ],
     related_referenced_in=["subjects"],
 )
+
+HAS_FOUNDER_QUERY = get_related_query("HAS_FOUNDER")
