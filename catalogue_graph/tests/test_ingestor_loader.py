@@ -1,16 +1,5 @@
 import polars as pl
 import pytest
-from test_mocks import (
-    MockElasticsearchClient,
-    MockRequest,
-    MockSmartOpen,
-    add_neptune_mock_response,
-    mock_es_secrets,
-)
-from test_utils import (
-    load_json_fixture,
-)
-
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
@@ -33,6 +22,7 @@ from ingestor.queries.concept_queries import (
     CONCEPT_TYPE_QUERY,
     FIELDS_OF_WORK_QUERY,
     FREQUENT_COLLABORATORS_QUERY,
+    HAS_FOUNDER_QUERY,
     NARROWER_THAN_QUERY,
     PEOPLE_QUERY,
     RELATED_TO_QUERY,
@@ -41,6 +31,16 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
+from test_mocks import (
+    MockElasticsearchClient,
+    MockRequest,
+    MockSmartOpen,
+    add_neptune_mock_response,
+    mock_es_secrets,
+)
+from test_utils import (
+    load_json_fixture,
+)
 
 MOCK_CONCEPT_ID = "jbxfbpzq"
 MOCK_JOB_ID = "20250929T12:00"
@@ -166,6 +166,7 @@ def mock_neptune_responses(include: list[ConceptRelatedQuery]) -> None:
     add_mock_related([MOCK_CONCEPT_ID], [], NARROWER_THAN_QUERY)
     add_mock_related([MOCK_CONCEPT_ID], [], FREQUENT_COLLABORATORS_QUERY)
     add_mock_related([MOCK_CONCEPT_ID], [], RELATED_TOPICS_QUERY)
+    add_mock_related([MOCK_CONCEPT_ID], [], HAS_FOUNDER_QUERY)
 
 
 def get_catalogue_concept_mock(
@@ -266,6 +267,7 @@ def get_catalogue_concept_mock(
                 people=people,
                 frequentCollaborators=[],
                 relatedTopics=[],
+                foundedBy=[],
             ),
         ),
     )
@@ -273,6 +275,7 @@ def get_catalogue_concept_mock(
 
 def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> None:
     with MockSmartOpen.open(s3_uri, "rb") as f:
+
         df = pl.read_parquet(f)
         assert len(df) == 1
 

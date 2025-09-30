@@ -23,7 +23,7 @@ class ElasticsearchBaseTransformer:
     def __init__(self) -> None:
         self.source: GraphBaseExtractor = GraphBaseExtractor()
 
-    def transform_document(self, raw_document: Any) -> BaseModel | None:
+    def transform_document(self, raw_item: Any) -> BaseModel | None:
         """
         Accepts raw data representing the item to be transformed and returns an indexable document as a Pydantic model.
         """

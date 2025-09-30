@@ -79,3 +79,10 @@ class RawNeptuneRelatedConcepts:
             RawNeptuneRelatedConcept(concept)
             for concept in self.raw_related_concepts.get("related_to", [])
         ]
+
+    @property
+    def founded_by(self) -> list[RawNeptuneRelatedConcept]:
+        return [
+            RawNeptuneRelatedConcept(concept)
+            for concept in self.raw_related_concepts.get("founded_by", [])
+        ]

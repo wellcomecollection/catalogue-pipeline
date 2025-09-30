@@ -148,12 +148,12 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
             redirect_sources=work.redirect_sources,
         )
 
-    def transform_document(self, extracted: ExtractedWork) -> IndexableWork:
+    def transform_document(self, raw_item: ExtractedWork) -> IndexableWork:
         return IndexableWork(
-            query=self._transform_query(extracted),
-            display=self._transform_display(extracted),
-            aggregatable_values=self._transform_aggregate(extracted),
-            filterable_values=self._transform_filter(extracted),
-            debug=self._transform_debug(extracted),
+            query=self._transform_query(raw_item),
+            display=self._transform_display(raw_item),
+            aggregatable_values=self._transform_aggregate(raw_item),
+            filterable_values=self._transform_filter(raw_item),
+            debug=self._transform_debug(raw_item),
             type="Visible",
         )

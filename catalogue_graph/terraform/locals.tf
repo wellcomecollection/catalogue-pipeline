@@ -80,6 +80,16 @@ locals {
       "entity_type" : "nodes"
     },
     {
+      "label" : "Wikidata Linked MeSH Concept Nodes",
+      "transformer_type" : "wikidata_linked_mesh_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Wikidata Linked MeSH Location Nodes",
+      "transformer_type" : "wikidata_linked_mesh_locations",
+      "entity_type" : "nodes"
+    },
+    {
       "label" : "Wikidata Linked LoC Concept Edges",
       "transformer_type" : "wikidata_linked_loc_concepts",
       "entity_type" : "edges",
@@ -96,16 +106,6 @@ locals {
       "transformer_type" : "wikidata_linked_loc_names",
       "entity_type" : "edges",
       "insert_error_threshold" : 1 / 2000
-    },
-    {
-      "label" : "Wikidata Linked MeSH Concept Nodes",
-      "transformer_type" : "wikidata_linked_mesh_concepts",
-      "entity_type" : "nodes"
-    },
-    {
-      "label" : "Wikidata Linked MeSH Location Nodes",
-      "transformer_type" : "wikidata_linked_mesh_locations",
-      "entity_type" : "nodes"
     },
     {
       "label" : "Wikidata Linked MeSH Concept Edges",

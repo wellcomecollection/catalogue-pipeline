@@ -69,16 +69,31 @@ It updates all SourceIdentifier objects in the JSON, even if they're deeply nest
 
 ## Running locally
 
+### Step Function Lambda Interface (Default)
+
+The ID minter also provides a Step Function interface for direct invocation within AWS Step Functions.
+This interface processes source identifiers directly without SQS messaging. This is the default interface
+for running locally as it is simpler to provide the necessary input.
+
 You can run the Lambda version locally from the repository root thus:
 
 `./scripts/run_local.sh <PROJECT_ID> [<PIPELINE_DATE>] [--skip-build]`
 
-You can now post JSON SQS messages to it. Because SQS-fed-by-SNS is so awkwardly verbose,
-a convenience script will fill out the boilerplate for you. As with CLIMain, you can pipe some
-paths to it, from scripts folder in this project directory:
+The Step Function Lambda will be available at `http://localhost:9000/2015-03-31/functions/function/invocations`
 
-`cat scripts/source_ids.txt | python scripts/post_to_rie.py`
+Example request payload:
+```json
+{
+  "sourceIdentifiers": ["sierra-123456", "miro-789012"],
+  "jobId": "step-function-job-001"
+}
+```
 
-## Connecting to the ID minter database
-
-If you need to connect to the ID minter database, there are [some notes on how to do so](./connect_to_the_database.md).
+Example response:
+```json
+{
+  "successes": ["sierra-123456", "miro-789012"],
+  "failures": [],
+  "jobId": "step-function-job-001"
+}
+```

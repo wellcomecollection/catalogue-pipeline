@@ -26,6 +26,7 @@ class RelatedConcepts(BaseModel):
     people: list[ConceptRelatedTo]
     frequentCollaborators: list[ConceptRelatedTo]
     relatedTopics: list[ConceptRelatedTo]
+    foundedBy: list[ConceptRelatedTo]
 
 
 class ConceptIdentifier(BaseModel):

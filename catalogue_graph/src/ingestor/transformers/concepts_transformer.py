@@ -97,6 +97,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
                 relatedTopics=self._transform_related_concepts(
                     neptune_related.related_topics
                 ),
+                foundedBy=self._transform_related_concepts(neptune_related.founded_by),
             ),
         )
 
