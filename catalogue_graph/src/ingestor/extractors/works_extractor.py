@@ -10,6 +10,8 @@ from sources.merged_works_source import MergedWorksSource
 
 from .base_extractor import GraphBaseExtractor
 
+ES_QUERY = {"match": {"type": "Visible"}}
+
 
 class ExtractedWork(BaseModel):
     work: DenormalisedWork
@@ -29,6 +31,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
             pipeline_date=pipeline_date,
             window=window,
             is_local=is_local,
+            query=ES_QUERY,
         )
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:
