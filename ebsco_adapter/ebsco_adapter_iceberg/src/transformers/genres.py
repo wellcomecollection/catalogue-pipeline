@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import logging
 from itertools import chain
+
 from pymarc.field import Field
 from pymarc.record import Record, Subfield
 
 from models.work import ConceptType, Genre, SourceConcept, SourceIdentifier
+from transformers.common import non_empty, extract_concept_from_subfield_value, subdivision_concepts
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -24,11 +26,7 @@ def extract_genres(record: Record) -> list[Genre]:
     """
     Build a list of Genre objects from MARC 655 fields.
     """
-    return [
-        genre
-        for genre in (extract_genre(field) for field in record.get_fields("655"))
-        if genre is not None
-    ]
+    return non_empty((extract_genre(field) for field in record.get_fields("655")))
 
 
 def extract_genre(field: Field) -> Genre | None:
@@ -44,11 +42,9 @@ def extract_genre(field: Field) -> Genre | None:
     subdivision_subfields = field.get_subfields("v", "x", "y", "z")
     genre_label = " ".join(chain(a_subfields, subdivision_subfields))
 
-    concepts = [_extract_concept_from_subfield_value("a", a_subfields[0])] + [
-        _extract_concept_from_subfield(subfield)
-        for subfield in field.subfields
-        if subfield.code in SUBDIVISION_SUBFIELDS
-    ]
+    concepts = [
+                   extract_concept_from_subfield_value("a", a_subfields[0])
+               ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
 
     return Genre(
         id=None,
@@ -56,35 +52,3 @@ def extract_genre(field: Field) -> Genre | None:
         type="Genre",
         concepts=concepts,
     )
-
-
-def _extract_concept_from_subfield(subfield: Subfield) -> SourceConcept:
-    return _extract_concept_from_subfield_value(subfield.code, subfield.value)
-
-
-def _extract_concept_from_subfield_value(code: str, value: str) -> SourceConcept:
-    concept_label = _clean_concept_label(value)
-    identifier = SourceIdentifier(
-        identifier_type="label-derived",
-        ontology_type="Genre",
-        value=_normalise_identifier_value(concept_label),
-    )
-    return SourceConcept(
-        id=identifier,
-        label=concept_label,
-        type=CONCEPT_TYPE_MAP.get(code, "Concept"),
-    )
-
-
-def _clean_concept_label(value: str) -> str:
-    """
-    Remove trailing punctuation (.,;:) and trim whitespace for concept labels.
-    """
-    return value.rstrip(".,;:").strip()
-
-
-def _normalise_identifier_value(label: str) -> str:
-    """
-    Lowercase & collapse internal whitespace for identifier values.
-    """
-    return " ".join(label.split()).lower()
