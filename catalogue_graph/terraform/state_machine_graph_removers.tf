@@ -9,7 +9,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
     States = {
       "Run graph removers" = {
         Type           = "Map",
-        Items = local.concepts_pipeline_inputs_monthly
+        Items          = local.concepts_pipeline_inputs_monthly
         MaxConcurrency = 2
         ItemProcessor = {
           ProcessorConfig = {
