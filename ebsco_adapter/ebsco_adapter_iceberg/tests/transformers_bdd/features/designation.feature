@@ -21,6 +21,7 @@ Feature: Extract designations from MARC 362 $a
       When I transform the MARC record
       Then there are no designations
 
+  Rule: a designation is created for each valid 362 field
     Scenario: Single 362 $a
       Given the MARC record has a 362 field with subfield "a" value "Vol. 1 (Jan. 1999)-"
       When I transform the MARC record
