@@ -119,14 +119,17 @@ resource "aws_iam_role" "eventbridge_state_machine_role" {
   name = "ebsco-adapter-eventbridge-state-machine-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
+        Effect = "Allow",
         Principal = {
-          Service = "events.amazonaws.com"
-        }
+          Service = [
+            "states.amazonaws.com",
+            "scheduler.amazonaws.com"
+          ]
+        },
+        Action = "sts:AssumeRole"
       }
     ]
   })
@@ -138,27 +141,21 @@ resource "aws_iam_role_policy_attachment" "eventbridge_state_machine_policy_atta
   policy_arn = aws_iam_policy.eventbridge_state_machine_policy.arn
 }
 
-# EventBridge Rule for Daily Schedule (initially disabled)
-resource "aws_cloudwatch_event_rule" "daily_schedule" {
-  name                = "ebsco-adapter-daily-schedule"
-  description         = "Trigger EBSCO adapter pipeline daily at 2 AM UTC"
-  schedule_expression = "cron(0 2 * * ? *)"
+# Schedule to trigger the State Machine daily at 2 AM UTC
+resource "aws_scheduler_schedule" "ebsco_adapter_daily_run" {
+  name = "ebsco_adapter_daily_run"
+
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  schedule_expression = "cron(0 2 * * ? *)" # Daily at 2 AM UTC
   state               = "DISABLED"
 
-  event_bus_name = aws_cloudwatch_event_bus.event_bus.name
-}
-
-# EventBridge Target to trigger State Machine
-resource "aws_cloudwatch_event_target" "state_machine_target" {
-  rule      = aws_cloudwatch_event_rule.daily_schedule.name
-  target_id = "EbscoAdapterStateMachineTarget"
-  arn       = aws_sfn_state_machine.state_machine.arn
-  role_arn  = aws_iam_role.eventbridge_state_machine_role.arn
-
-  input = jsonencode({
-    job_id = "daily-scheduled-run"
-    source = "eventbridge-schedule"
-  })
+  target {
+    arn      = aws_sfn_state_machine.state_machine.arn
+    role_arn = aws_iam_role.eventbridge_state_machine_role.arn
+  }
 }
 
 # Event bus to enable communication with the current pipeline
