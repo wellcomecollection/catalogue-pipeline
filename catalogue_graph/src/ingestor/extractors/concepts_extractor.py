@@ -89,7 +89,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         for concept_id in concept_ids:
             for same_as_id in self.get_same_as(concept_id):
                 # Use the 'Concept' type by default if no other type available
-                types = result.get(same_as_id, {}).get("types")
+                types = result.get(same_as_id, {}).get("types", ["Concept"])
                 concept_types[concept_id].update(types)
 
         return concept_types
@@ -106,11 +106,17 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             # Remove `concept_id` from the list of 'same as' concepts
             same_as = set(self.get_same_as(concept_id)).difference([concept_id])
 
+            # Each concept should have at most one linked source concept
+            if len(source.get("linked_source_concepts", [])) == 0:
+                linked_source_concept = None
+            else:
+                linked_source_concept = source["linked_source_concepts"][0]
+
             concepts[concept_id] = NeptuneConcept(
                 concept=concept["concept"],
                 types=list(concept_types[concept_id]),
                 same_as=list(same_as),
-                linked_source_concept=source.get("linked_source_concepts", [None])[0],
+                linked_source_concept=linked_source_concept,
                 source_concepts=source.get("source_concepts", []),
             )
 
@@ -139,6 +145,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
         related_ids = set()
         for item in result.values():
+            print(item)
             related_ids.update([i["id"] for i in item["related"]])
 
         self._update_same_as_map(related_ids)

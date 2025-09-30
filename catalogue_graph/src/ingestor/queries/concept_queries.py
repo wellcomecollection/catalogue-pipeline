@@ -172,3 +172,31 @@ def get_referenced_together_query(
         
         RETURN concept.id AS id, related
     """
+
+
+RELATED_TO_QUERY = get_related_query("RELATED_TO")
+FIELDS_OF_WORK_QUERY = get_related_query("HAS_FIELD_OF_WORK")
+NARROWER_THAN_QUERY = get_related_query("NARROWER_THAN")
+BROADER_THAN_QUERY = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
+PEOPLE_QUERY = get_related_query("HAS_FIELD_OF_WORK", "to")
+
+# Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
+FREQUENT_COLLABORATORS_QUERY = get_referenced_together_query(
+    source_referenced_types=["Person", "Organisation"],
+    related_referenced_types=["Person", "Organisation"],
+    source_referenced_in=["contributors"],
+    related_referenced_in=["contributors"],
+)
+
+# Do not include agents/people/orgs in the list of related topics
+RELATED_TOPICS_QUERY = get_referenced_together_query(
+    related_referenced_types=[
+        "Concept",
+        "Subject",
+        "Place",
+        "Meeting",
+        "Period",
+        "Genre",
+    ],
+    related_referenced_in=["subjects"],
+)

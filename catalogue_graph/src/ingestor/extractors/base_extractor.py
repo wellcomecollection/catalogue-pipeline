@@ -3,12 +3,17 @@ from collections.abc import Generator, Iterable
 from typing import Any, Literal
 
 from ingestor.queries.concept_queries import (
+    BROADER_THAN_QUERY,
     CONCEPT_QUERY,
     CONCEPT_TYPE_QUERY,
+    FIELDS_OF_WORK_QUERY,
+    FREQUENT_COLLABORATORS_QUERY,
+    NARROWER_THAN_QUERY,
+    PEOPLE_QUERY,
+    RELATED_TO_QUERY,
+    RELATED_TOPICS_QUERY,
     SAME_AS_CONCEPT_QUERY,
     SOURCE_CONCEPT_QUERY,
-    get_referenced_together_query,
-    get_related_query,
 )
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
@@ -43,30 +48,13 @@ NEPTUNE_QUERIES = {
     "concept_type": CONCEPT_TYPE_QUERY,
     "source_concept": SOURCE_CONCEPT_QUERY,
     "same_as_concept": SAME_AS_CONCEPT_QUERY,
-    "related_to": get_related_query("RELATED_TO"),
-    "fields_of_work": get_related_query("HAS_FIELD_OF_WORK"),
-    "narrower_than": get_related_query("NARROWER_THAN"),
-    "broader_than": get_related_query("NARROWER_THAN|HAS_PARENT", "to"),
-    "people": get_related_query("HAS_FIELD_OF_WORK", "to"),
-    # Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
-    "frequent_collaborators": get_referenced_together_query(
-        source_referenced_types=["Person", "Organisation"],
-        related_referenced_types=["Person", "Organisation"],
-        source_referenced_in=["contributors"],
-        related_referenced_in=["contributors"],
-    ),
-    # Do not include agents/people/orgs in the list of related topics.
-    "related_topics": get_referenced_together_query(
-        related_referenced_types=[
-            "Concept",
-            "Subject",
-            "Place",
-            "Meeting",
-            "Period",
-            "Genre",
-        ],
-        related_referenced_in=["subjects"],
-    ),
+    "related_to": RELATED_TO_QUERY,
+    "fields_of_work": FIELDS_OF_WORK_QUERY,
+    "narrower_than": NARROWER_THAN_QUERY,
+    "broader_than": BROADER_THAN_QUERY,
+    "people": PEOPLE_QUERY,
+    "frequent_collaborators": FREQUENT_COLLABORATORS_QUERY,
+    "related_topics": RELATED_TOPICS_QUERY,
 }
 
 

@@ -11,7 +11,9 @@ from ingestor.transformers.raw_concept import RawNeptuneConcept
 
 @pytest.fixture
 def concept() -> RawNeptuneConcept:
-    concept = NeptuneConcept(**load_json_fixture("neptune/concept_query_single.json"))
+    concept = NeptuneConcept(
+        **load_json_fixture("ingestor/extractor/concept_single.json")
+    )
     return RawNeptuneConcept(concept)
 
 

@@ -34,7 +34,7 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
 
 def test_catalogue_concept_from_neptune_result() -> None:
     mock_concept = load_json_fixture(
-        "neptune/concept_query_single_alternative_labels.json"
+        "ingestor/extractor/concept_single_alternative_labels.json"
     )
 
     alternative_labels = ["Alternative label", "Another alternative label"]
@@ -88,7 +88,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
 
 
 def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
 
     expected_result = IndexableConcept(
         query=ConceptQuery(
@@ -139,7 +139,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
 
 
 def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
     mock_related_to = load_json_fixture("neptune/related_to_query_single.json")[
         "related"
     ]
@@ -206,7 +206,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
 
 
 def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
         ng.a_related_concept(),
@@ -281,7 +281,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
 
 
 def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
         ng.a_related_concept_with_no_label(),
@@ -358,7 +358,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
 
 
 def test_catalogue_concept_overridden_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
         ng.a_related_concept_with_no_label(),
@@ -524,7 +524,7 @@ def test_concept_type_place_precedence() -> None:
 def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> (
     None
 ):
-    mock_concept = load_json_fixture("neptune/concept_query_single.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
 
     expected_result = IndexableConcept(
         query=ConceptQuery(

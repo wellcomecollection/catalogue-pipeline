@@ -14,7 +14,7 @@ class ConceptDescription(BaseModel):
 class ConceptRelatedTo(BaseModel):
     label: str
     id: str
-    relationshipType: str | None
+    relationshipType: str | None = None
     conceptType: str
 
 
