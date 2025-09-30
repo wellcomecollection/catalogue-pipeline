@@ -140,7 +140,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
 
 def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
     mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
-    mock_related_to = load_json_fixture("neptune/related_to_query_single.json")[
+    mock_related_to = load_json_fixture("ingestor/extractor/related_to_single.json")[
         "related"
     ]
 

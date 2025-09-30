@@ -11,11 +11,6 @@ from typing import Any, TypedDict
 import polars as pl
 from botocore.credentials import Credentials
 
-from ingestor.models.step_events import (
-    IngestorIndexerLambdaEvent,
-    IngestorIndexerObject,
-    IngestorLoaderLambdaEvent,
-)
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
 MOCK_PUBLIC_ENDPOINT = "test-public-host.com"
@@ -399,30 +394,6 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
             return cls(year, month, day)
 
     return FixedDateTime
-
-
-def get_mock_ingestor_loader_event(job_id: str) -> IngestorLoaderLambdaEvent:
-    return IngestorLoaderLambdaEvent(
-        ingestor_type="concepts",
-        pipeline_date="2025-01-01",
-        index_date="2025-03-01",
-        job_id=job_id,
-    )
-
-
-def get_mock_ingestor_indexer_event(
-    job_id: str, content_length: int
-) -> IngestorIndexerLambdaEvent:
-    return IngestorIndexerLambdaEvent(
-        **get_mock_ingestor_loader_event(job_id).model_dump(),
-        objects_to_index=[
-            IngestorIndexerObject(
-                s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/{job_id}/00000000-00000001.parquet",
-                content_length=content_length,
-                record_count=1,
-            )
-        ],
-    )
 
 
 def mock_es_secrets(

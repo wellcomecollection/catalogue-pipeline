@@ -1,5 +1,3 @@
-from enum import Enum, auto
-
 import polars as pl
 import pytest
 from test_mocks import (
@@ -7,14 +5,13 @@ from test_mocks import (
     MockRequest,
     MockSmartOpen,
     add_neptune_mock_response,
-    get_mock_ingestor_indexer_event,
-    get_mock_ingestor_loader_event,
     mock_es_secrets,
 )
 from test_utils import (
     load_json_fixture,
 )
 
+from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
     ConceptDescription,
@@ -24,6 +21,11 @@ from ingestor.models.indexable_concept import (
     ConceptRelatedTo,
     IndexableConcept,
     RelatedConcepts,
+)
+from ingestor.models.step_events import (
+    IngestorIndexerLambdaEvent,
+    IngestorIndexerObject,
+    IngestorLoaderLambdaEvent,
 )
 from ingestor.queries.concept_queries import (
     BROADER_THAN_QUERY,
@@ -39,21 +41,44 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
-from models.graph_node import Concept, SourceConcept
+
+MOCK_CONCEPT_ID = "jbxfbpzq"
+MOCK_JOB_ID = "20250929T12:00"
+MOCK_PIPELINE_DATE = "2025-01-01"
+MOCK_INDEX_DATE = "2025-03-01"
+
+MOCK_LOADER_EVENT = IngestorLoaderLambdaEvent(
+    ingestor_type="concepts",
+    pipeline_date=MOCK_PIPELINE_DATE,
+    index_date=MOCK_INDEX_DATE,
+    job_id=MOCK_JOB_ID,
+)
 
 
-class MockSourceConcept(SourceConcept):
-    alternative_labels: str
+def get_mock_ingestor_indexer_event(
+    job_id: str, content_length: int
+) -> IngestorIndexerLambdaEvent:
+    return IngestorIndexerLambdaEvent(
+        **MOCK_LOADER_EVENT.model_dump(),
+        objects_to_index=[
+            IngestorIndexerObject(
+                s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/{MOCK_PIPELINE_DATE}/{MOCK_INDEX_DATE}/{job_id}/00000000-00000001.parquet",
+                content_length=content_length,
+                record_count=1,
+            )
+        ],
+    )
 
 
-def mock_denormalised_work(pipeline_date: str) -> None:
+def mock_denormalised_work() -> None:
+    """Include a single work containing a single concept in the denormalised index"""
     fixture = {
         "data": {
             "contributors": [
                 {
                     "agent": {
                         "id": {
-                            "canonicalId": "jbxfbpzq",
+                            "canonicalId": MOCK_CONCEPT_ID,
                         },
                         "type": "Person",
                     }
@@ -62,105 +87,29 @@ def mock_denormalised_work(pipeline_date: str) -> None:
         },
     }
 
-    index_name = f"works-denormalised-{pipeline_date}"
+    index_name = f"works-denormalised-{MOCK_PIPELINE_DATE}"
     MockElasticsearchClient.index(index_name, "123", fixture)
 
-
-class MockNeptuneResponseItem(Enum):
-    CONCEPT_RELATED_TO = auto()
-    CONCEPT_BROADER_THAN = auto()
-    CONCEPT_PEOPLE = auto()
+    mock_es_secrets("graph_extractor", MOCK_PIPELINE_DATE)
 
 
-def get_mock_neptune_params(ids: list[str]):
-    return {
-        "ignored_wikidata_ids": ["Q5", "Q151885"],
-        "related_to_limit": 10,
-        "shared_works_count_threshold": 3,
-        "ids": ids,
-    }
+def add_mock_related(ids: list[str], related_ids: list[str], query: str) -> None:
+    relationship_types = {"tzrtx26u": "has_sibling"}
 
-
-def add_mock_concept(concepts: list[Concept]):
     response = []
-    for concept in concepts:
+    if len(related_ids) > 0:
         response.append(
             {
-                "id": concept.id,
-                "concept": {
-                    "~id": concept.id,
-                    "~labels": ["Concept"],
-                    "~properties": {
-                        "id": concept.id,
-                        "label": concept.label,
-                        "source": concept.source,
-                    },
-                },
-            }
-        )
-
-    ids = [concept.id for concept in concepts]
-    _add_neptune_mock_response(ids, CONCEPT_QUERY, response)
-
-
-def add_mock_type(ids: list[str], type_map: dict[str, list]):
-    # Construct the expected Neptune response
-    response = []
-    for concept_id, types in type_map.items():
-        response.append({"id": concept_id, "types": types})
-
-    _add_neptune_mock_response(ids, CONCEPT_TYPE_QUERY, response)
-
-
-def add_mock_same_as(ids: list[str], same_as_map: dict[str, list]):
-    # Construct the expected Neptune response
-    response = []
-    for concept_id, same_as_ids in same_as_map.items():
-        response.append({"id": concept_id, "same_as_ids": [same_as_ids]})
-
-    _add_neptune_mock_response(ids, SAME_AS_CONCEPT_QUERY, response)
-
-
-def add_mock_source_concepts(
-    ids: list[str],
-    source_concept_map: dict[str, list],
-    linked_source_concept_map: dict[str, list],
-):
-    def _hi(source_concept: MockSourceConcept):
-        return {
-            "~id": source_concept.id,
-            "~labels": ["SourceConcept"],
-            "~properties": {
-                "id": source_concept.id,
-                "source": source_concept.source,
-                "label": source_concept.label,
-                "alternative_labels": source_concept.alternative_labels,
-                "description": source_concept.description,
-            },
-        }
-
-    response = []
-    for concept_id in ids:
-        response.append(
-            {
-                "id": concept_id,
-                "source_concepts": [
-                    _hi(i) for i in source_concept_map.get(concept_id, [])
-                ],
-                "linked_source_concepts": [
-                    _hi(i) for i in linked_source_concept_map.get(concept_id, [])
+                "id": MOCK_CONCEPT_ID,
+                "related": [
+                    {
+                        "id": i,
+                        "count": 1,
+                        "relationship_type": relationship_types.get(i),
+                    }
+                    for i in related_ids
                 ],
             }
-        )
-
-    _add_neptune_mock_response(ids, SOURCE_CONCEPT_QUERY, response)
-
-
-def add_mock_related(ids: list[str], related_map: dict[str, list], query: str):
-    response = []
-    for concept_id, related_ids in related_map.items():
-        response.append(
-            {"id": concept_id, "related": [{"id": i, "count": 1} for i in related_ids]}
         )
 
     _add_neptune_mock_response(ids, query, response)
@@ -169,81 +118,58 @@ def add_mock_related(ids: list[str], related_map: dict[str, list], query: str):
 def _add_neptune_mock_response(
     ids: list[str], expected_query: str, mock_results: list[dict]
 ) -> None:
-    expected_params = get_mock_neptune_params(ids)
+    expected_params = {
+        "ignored_wikidata_ids": ["Q5", "Q151885"],
+        "related_to_limit": 10,
+        "shared_works_count_threshold": 3,
+        "ids": ids,
+    }
     add_neptune_mock_response(expected_query, expected_params, mock_results)
 
 
-def mock_neptune_responses(include: list[MockNeptuneResponseItem]) -> None:
-    broader_than_map = {}
-    related_to_map = {}
-    people_map = {}
+def add_mock_responses_for_ids(ids: list[str], fixture_prefix: str = "") -> None:
+    response = load_json_fixture(f"neptune/{fixture_prefix}concept_query.json")
+    _add_neptune_mock_response(ids, CONCEPT_QUERY, response)
 
-    if MockNeptuneResponseItem.CONCEPT_BROADER_THAN in include:
-        broader_than_map = {"jbxfbpzq": ["hstuwwsu", "hv6pemej", "ugcgqepy"]}
-        add_mock_concept(
-            [
-                Concept(
-                    id="hstuwwsu",
-                    label="Electromagnetic Radiation",
-                    source="label-derived",
-                ),
-                Concept(id="hv6pemej", label="Wave mechanics", source="nlm-mesh"),
-                Concept(id="ugcgqepy", label="Electric waves", source="nlm-mesh"),
-            ]
-        )
-        add_mock_same_as(["hstuwwsu", "hv6pemej", "ugcgqepy"], {})
-        add_mock_type(["hstuwwsu", "hv6pemej", "ugcgqepy"], {})
-        add_mock_source_concepts(["hstuwwsu", "hv6pemej", "ugcgqepy"], {}, {})
-    if MockNeptuneResponseItem.CONCEPT_PEOPLE in include:
-        people_results = [load_json_fixture("neptune/people_query_single.json")]
-    if MockNeptuneResponseItem.CONCEPT_RELATED_TO in include:
-        related_to_results = [load_json_fixture("neptune/related_to_query_single.json")]
+    response = load_json_fixture(f"neptune/{fixture_prefix}concept_same_as_query.json")
+    _add_neptune_mock_response(ids, SAME_AS_CONCEPT_QUERY, response)
 
-    add_mock_concept([Concept(id="jbxfbpzq", label="some concept", source="nlm-mesh")])
-    add_mock_same_as(["jbxfbpzq"], {})
-    add_mock_type(["jbxfbpzq"], {"jbxfbpzq": ["Concept", "Person"]})
-    add_mock_source_concepts(
-        ["jbxfbpzq"],
-        {
-            "jbxfbpzq": [
-                MockSourceConcept(
-                    id="123",
-                    source="lc-names",
-                    label="LoC label",
-                    alternative_labels="Alternative label||another alternative label",
-                ),
-                MockSourceConcept(
-                    id="456",
-                    source="wikidata",
-                    label="Wikidata label",
-                    alternative_labels="Wikidata alternative label",
-                    description="Description",
-                ),
-            ]
-        },
-        {
-            "jbxfbpzq": [
-                MockSourceConcept(
-                    id="123",
-                    source="lc-names",
-                    label="LoC label",
-                    alternative_labels="Alternative label||another alternative label",
-                ),
-            ]
-        },
-    )
+    response = load_json_fixture(f"neptune/{fixture_prefix}concept_types_query.json")
+    _add_neptune_mock_response(ids, CONCEPT_TYPE_QUERY, response)
 
-    add_mock_related(["jbxfbpzq"], broader_than_map, BROADER_THAN_QUERY)
-    add_mock_related(["jbxfbpzq"], related_to_map, RELATED_TO_QUERY)
-    add_mock_related(["jbxfbpzq"], people_map, PEOPLE_QUERY)
-    add_mock_related(["jbxfbpzq"], {}, FIELDS_OF_WORK_QUERY)
-    add_mock_related(["jbxfbpzq"], {}, NARROWER_THAN_QUERY)
-    add_mock_related(["jbxfbpzq"], {}, FREQUENT_COLLABORATORS_QUERY)
-    add_mock_related(["jbxfbpzq"], {}, RELATED_TOPICS_QUERY)
+    response = load_json_fixture(f"neptune/{fixture_prefix}source_concepts_query.json")
+    _add_neptune_mock_response(ids, SOURCE_CONCEPT_QUERY, response)
+
+
+def mock_neptune_responses(include: list[ConceptRelatedQuery]) -> None:
+    add_mock_responses_for_ids([MOCK_CONCEPT_ID])
+
+    broader_than_ids = []
+    if "broader_than" in include:
+        broader_than_ids = ["hstuwwsu", "hv6pemej", "ugcgqepy"]
+        add_mock_responses_for_ids(broader_than_ids, fixture_prefix="broader_than/")
+
+    related_to_ids = []
+    if "related_to" in include:
+        related_to_ids = ["tzrtx26u"]
+        add_mock_responses_for_ids(related_to_ids, fixture_prefix="related_to/")
+
+    people_ids = []
+    if "people" in include:
+        people_ids = ["garjbvhe", "vc6xrky5"]
+        add_mock_responses_for_ids(people_ids, fixture_prefix="people/")
+
+    add_mock_related([MOCK_CONCEPT_ID], broader_than_ids, BROADER_THAN_QUERY)
+    add_mock_related([MOCK_CONCEPT_ID], related_to_ids, RELATED_TO_QUERY)
+    add_mock_related([MOCK_CONCEPT_ID], people_ids, PEOPLE_QUERY)
+    add_mock_related([MOCK_CONCEPT_ID], [], FIELDS_OF_WORK_QUERY)
+    add_mock_related([MOCK_CONCEPT_ID], [], NARROWER_THAN_QUERY)
+    add_mock_related([MOCK_CONCEPT_ID], [], FREQUENT_COLLABORATORS_QUERY)
+    add_mock_related([MOCK_CONCEPT_ID], [], RELATED_TOPICS_QUERY)
 
 
 def get_catalogue_concept_mock(
-    include: list[MockNeptuneResponseItem],
+    include: list[ConceptRelatedQuery],
 ) -> IndexableConcept:
     alternative_labels = [
         "Alternative label",
@@ -252,7 +178,7 @@ def get_catalogue_concept_mock(
     ]
 
     broader_than = []
-    if MockNeptuneResponseItem.CONCEPT_BROADER_THAN in include:
+    if "broader_than" in include:
         broader_than = [
             ConceptRelatedTo(
                 label="Electromagnetic Radiation",
@@ -272,22 +198,22 @@ def get_catalogue_concept_mock(
         ]
 
     people = []
-    if MockNeptuneResponseItem.CONCEPT_PEOPLE in include:
+    if "people" in include:
         people = [
-            ConceptRelatedTo(
-                label="Tegart, W. J. McG.",
-                id="vc6xrky5",
-                conceptType="Person",
-            ),
             ConceptRelatedTo(
                 label="Bube, Richard H., 1927-",
                 id="garjbvhe",
                 conceptType="Person",
             ),
+            ConceptRelatedTo(
+                label="Tegart, W. J. McG.",
+                id="vc6xrky5",
+                conceptType="Person",
+            ),
         ]
 
     related_to = []
-    if MockNeptuneResponseItem.CONCEPT_RELATED_TO in include:
+    if "related_to" in include:
         related_to = [
             ConceptRelatedTo(
                 label="Hilton, Violet, 1908-1969",
@@ -299,7 +225,7 @@ def get_catalogue_concept_mock(
 
     return IndexableConcept(
         query=ConceptQuery(
-            id="jbxfbpzq",
+            id=MOCK_CONCEPT_ID,
             label="LoC label",
             type="Person",
             identifiers=[
@@ -311,7 +237,7 @@ def get_catalogue_concept_mock(
             alternativeLabels=alternative_labels,
         ),
         display=ConceptDisplay(
-            id="jbxfbpzq",
+            id=MOCK_CONCEPT_ID,
             label="LoC label",
             displayLabel="Wikidata label",
             type="Person",
@@ -345,71 +271,81 @@ def get_catalogue_concept_mock(
     )
 
 
+def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> None:
+    with MockSmartOpen.open(s3_uri, "rb") as f:
+        df = pl.read_parquet(f)
+        assert len(df) == 1
+
+        catalogue_concepts = [
+            IndexableConcept.model_validate(row) for row in df.to_dicts()
+        ]
+
+        assert len(catalogue_concepts) == 1
+        assert catalogue_concepts[0] == expected_concept
+
+
 def test_ingestor_loader_no_related_concepts() -> None:
-    mock_es_secrets("graph_extractor", "2025-01-01")
-    mock_denormalised_work("2025-01-01")
+    mock_denormalised_work()
+    mock_neptune_responses([])
 
-    included_response_items = []
-    expected_concept = get_catalogue_concept_mock(included_response_items)
-    mock_neptune_responses(included_response_items)
+    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=19243)
+    result = handler(MOCK_LOADER_EVENT)
 
-    loader_event = get_mock_ingestor_loader_event("123")
-    indexer_event = get_mock_ingestor_indexer_event("123", content_length=19243)
-    result = handler(loader_event)
-
+    # We expect a total of 11 API calls:
+    # * 4 to retrieve concept data (concept query, types query, same as query, and source concepts query)
+    # * 7 to retrieve related concept data (one for each related concept category, such as 'people' or 'broader than')
     assert result == indexer_event
     assert len(MockRequest.calls) == 11
 
-    request = MockRequest.calls[0]
-    assert request["method"] == "POST"
-    assert request["url"] == "https://test-host.com:8182/openCypher"
-
-    with MockSmartOpen.open(indexer_event.objects_to_index[0].s3_uri, "rb") as f:
-        df = pl.read_parquet(f)
-        assert len(df) == 1
-
-        catalogue_concepts = [
-            IndexableConcept.model_validate(row) for row in df.to_dicts()
-        ]
-
-        assert len(catalogue_concepts) == 1
-        assert catalogue_concepts[0] == expected_concept
+    expected_concept = get_catalogue_concept_mock([])
+    check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
 
 
 def test_ingestor_loader_with_broader_than_concepts() -> None:
-    mock_es_secrets("graph_extractor", "2025-01-01")
-    mock_denormalised_work("2025-01-01")
+    mock_denormalised_work()
+    mock_neptune_responses(["broader_than"])
 
-    included_response_items = [MockNeptuneResponseItem.CONCEPT_BROADER_THAN]
-    expected_concept = get_catalogue_concept_mock(included_response_items)
-    mock_neptune_responses(included_response_items)
+    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=19654)
+    result = handler(MOCK_LOADER_EVENT)
 
-    loader_event = get_mock_ingestor_loader_event("123")
-    indexer_event = get_mock_ingestor_indexer_event("123", content_length=19654)
-    result = handler(loader_event)
-
+    # We expect a total of 15 API calls:
+    # * 11 to retrieve the same data as the `test_ingestor_loader_no_related_concepts` test case
+    # * 4 to retrieve concept data for broader than concepts
     assert result == indexer_event
     assert len(MockRequest.calls) == 15
 
-    with MockSmartOpen.open(indexer_event.objects_to_index[0].s3_uri, "rb") as f:
-        df = pl.read_parquet(f)
-        assert len(df) == 1
+    expected_concept = get_catalogue_concept_mock(["broader_than"])
+    check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
 
-        catalogue_concepts = [
-            IndexableConcept.model_validate(row) for row in df.to_dicts()
-        ]
 
-        assert len(catalogue_concepts) == 1
-        assert catalogue_concepts[0] == expected_concept
+def test_ingestor_loader_with_related_to_concepts() -> None:
+    mock_denormalised_work()
+    mock_neptune_responses(["related_to", "people"])
+
+    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=20205)
+    result = handler(MOCK_LOADER_EVENT)
+
+    # Since we're including two separate groups of related concepts, we expect 4 additional API calls
+    # on top of those in `test_ingestor_loader_with_broader_than_concepts`
+    assert result == indexer_event
+    assert len(MockRequest.calls) == 19
+
+    expected_concept = get_catalogue_concept_mock(["related_to", "people"])
+    check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
+
+
+def test_ingestor_loader_no_concepts_to_process() -> None:
+    result = handler(MOCK_LOADER_EVENT)
+    assert len(result.objects_to_index) == 0
+    assert len(MockRequest.calls) == 0
 
 
 def test_ingestor_loader_bad_neptune_response() -> None:
-    MockRequest.mock_response(
-        method="POST",
-        url="https://test-host.com:8182/openCypher",
-        json_data={"results": [{"foo": "bar"}]},
+    mock_denormalised_work()
+
+    _add_neptune_mock_response(
+        [MOCK_CONCEPT_ID], SAME_AS_CONCEPT_QUERY, [{"foo": "bar"}]
     )
 
-    with pytest.raises(LookupError):
-        event = get_mock_ingestor_loader_event("123")
-        handler(event)
+    with pytest.raises(KeyError):
+        handler(MOCK_LOADER_EVENT)
