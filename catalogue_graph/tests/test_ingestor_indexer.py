@@ -36,7 +36,7 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
         ],
     )
 
-    mock_es_secrets("concepts_ingestor", "2025-01-01")
+    mock_es_secrets("concept_ingestor", "2025-01-01")
 
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
