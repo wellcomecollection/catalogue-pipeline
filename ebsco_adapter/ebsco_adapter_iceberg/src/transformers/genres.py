@@ -7,7 +7,11 @@ from pymarc.field import Field
 from pymarc.record import Record, Subfield
 
 from models.work import ConceptType, Genre, SourceConcept, SourceIdentifier
-from transformers.common import non_empty, extract_concept_from_subfield_value, subdivision_concepts
+from transformers.common import (
+    non_empty,
+    extract_concept_from_subfield_value,
+    subdivision_concepts,
+)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -43,8 +47,8 @@ def extract_genre(field: Field) -> Genre | None:
     genre_label = " ".join(chain(a_subfields, subdivision_subfields))
 
     concepts = [
-                   extract_concept_from_subfield_value("a", a_subfields[0])
-               ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
+        extract_concept_from_subfield_value("a", a_subfields[0])
+    ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
 
     return Genre(
         id=None,

@@ -61,16 +61,16 @@ def is_url(maybe_url: str) -> bool:
     return bool(url.scheme in ["http", "https"] and url.netloc)
 
 
-SUBFIELD_TO_TYPE = {
-    "y": "Period",
-    "z": "Place"
-}
+SUBFIELD_TO_TYPE = {"y": "Period", "z": "Place"}
 
 
-def subdivision_concepts(field: Field, subdivision_subfields: list[str]) -> list[SourceConcept]:
+def subdivision_concepts(
+    field: Field, subdivision_subfields: list[str]
+) -> list[SourceConcept]:
     return [
-        extract_concept_from_subfield(subfield) for subfield in field.subfields if
-        subfield.code in subdivision_subfields
+        extract_concept_from_subfield(subfield)
+        for subfield in field.subfields
+        if subfield.code in subdivision_subfields
     ]
 
 
