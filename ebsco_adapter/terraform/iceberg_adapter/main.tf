@@ -145,10 +145,7 @@ resource "aws_cloudwatch_event_rule" "daily_schedule" {
   schedule_expression = "cron(0 2 * * ? *)"
   state               = "DISABLED"
 
-  tags = {
-    Environment = "production"
-    Service     = "ebsco-adapter"
-  }
+  event_bus_name = aws_cloudwatch_event_bus.event_bus.name
 }
 
 # EventBridge Target to trigger State Machine
