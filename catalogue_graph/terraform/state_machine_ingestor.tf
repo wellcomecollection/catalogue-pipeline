@@ -34,7 +34,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           Payload      = "{% $states.input %}"
         },
         Retry = local.DefaultRetry,
-        Next = "Monitor loader"
+        Next  = "Monitor loader"
       }
       "Monitor loader" = {
         Type     = "Task",
@@ -45,7 +45,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           Payload      = "{% $states.input %}"
         },
         Retry = local.DefaultRetry,
-        Next = "Run indexer"
+        Next  = "Run indexer"
       },
       "Run indexer" = {
         Type     = "Task",
