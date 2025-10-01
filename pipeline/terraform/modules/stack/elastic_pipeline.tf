@@ -187,7 +187,7 @@ locals {
       write = ["${local.es_concepts_index_prefix}*"]
     }
     works_ingestor = {
-      read  = [local.es_works_denormalised_index]
+      read = [local.es_works_denormalised_index]
       # For now only allow writing to the `dev` index for safety
       write = ["works-indexed-dev"]
     }
