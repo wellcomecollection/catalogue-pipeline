@@ -3,7 +3,7 @@ import logging
 from pymarc.field import Field
 from pymarc.record import Record
 
-from models.work import SourceConcept, SourceIdentifier, Subject
+from models.work import ConceptType, SourceConcept, SourceIdentifier, Subject
 from transformers.common import (
     non_empty,
     normalise_identifier_value,
@@ -12,7 +12,7 @@ from transformers.common import (
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
 logger: logging.Logger = logging.getLogger(__name__)
-FIELD_TO_TYPE = {
+FIELD_TO_TYPE: dict[str, ConceptType] = {
     "600": "Person",
     "610": "Organisation",
     "611": "Meeting",

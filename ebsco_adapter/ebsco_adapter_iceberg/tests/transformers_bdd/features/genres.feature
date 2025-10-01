@@ -20,7 +20,7 @@ Feature: Extracting genres from MARC 655
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
     When I transform the MARC record
     Then the only genre has the label "Disco Polo"
-    And the genre has 1 concept
+    And that genre has 1 concept
     And the concept has an identifier with value "disco polo"
     And the identifier's ontology type is "Genre"
     And its identifier's identifier type is "label-derived"
@@ -47,7 +47,7 @@ Feature: Extracting genres from MARC 655
       | z    | Dublin.    |
     When I transform the MARC record
     Then the only genre has the label "Disco Polo Specimens Literature 1897-1900 Dublin."
-    And the genre has 5 concepts
+    And that genre has 5 concepts
     And the 1st concept has the label "Disco Polo"
     And the 2nd concept has the label "Specimens"
     And the 3rd concept has the label "Literature"
@@ -86,11 +86,11 @@ Feature: Extracting genres from MARC 655
     And that field has a subfield "<code>" with value "<text>"
     When I transform the MARC record
     Then the only genre has the label "Disco Polo <text>"
-    And the genre has 2 concepts
-    And the 1st concept has the label "Disco Polo"
-    And the 2nd concept has the label "<text>"
-    And the 2nd concept has the type "<type>"
-    And the 2nd concept has the identifier value "<id>"
+    And that genre has 2 concepts
+    And that genre's 1st concept has the label "Disco Polo"
+    And that genre's 2nd concept has the label "<text>"
+    And that genre's 2nd concept has the type "<type>"
+    And that genre's 2nd concept has the identifier value "<id>"
     Examples:
       | code | text    | type    | id      |
       | v    | Form    | Concept | form    |

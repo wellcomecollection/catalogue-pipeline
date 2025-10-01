@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 
 from pymarc.record import Field, Record, Subfield
 
-from models.work import SourceConcept, SourceIdentifier
+from models.work import ConceptType, SourceConcept, SourceIdentifier
 
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
@@ -39,7 +39,7 @@ def get_a_subfields(field_code: str, record: Record) -> list[str]:
     )
 
 
-def non_empty(value: Iterable[str | None]) -> list[str]:
+def non_empty[T](value: Iterable[T | None]) -> list[T]:
     return [value for value in value if value]
 
 
@@ -61,7 +61,7 @@ def is_url(maybe_url: str) -> bool:
     return bool(url.scheme in ["http", "https"] and url.netloc)
 
 
-SUBFIELD_TO_TYPE = {"y": "Period", "z": "Place"}
+SUBFIELD_TO_TYPE: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
 
 
 def subdivision_concepts(
