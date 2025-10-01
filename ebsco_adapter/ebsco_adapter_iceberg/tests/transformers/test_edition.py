@@ -73,9 +73,7 @@ def test_extract_edition_from_250(marc_record: Record) -> None:
     indirect=True,
 )
 def test_multiple_editions(marc_record: Record) -> None:
-    assert (
-        transform_record(marc_record).edition == "Édition franc̦aise. Rhifyn Cymraeg"
-    )
+    assert transform_record(marc_record).edition == "Édition franc̦aise. Rhifyn Cymraeg"
 
 
 @pytest.mark.parametrize(

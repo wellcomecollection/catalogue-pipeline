@@ -1,7 +1,9 @@
 from collections.abc import Callable, Iterable
 from urllib.parse import urlparse
 
-from pymarc.record import Record
+from pymarc.record import Field, Record, Subfield
+
+from models.work import ConceptType, SourceConcept, SourceIdentifier
 
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
@@ -37,7 +39,7 @@ def get_a_subfields(field_code: str, record: Record) -> list[str]:
     )
 
 
-def non_empty(value: Iterable[str | None]) -> list[str]:
+def non_empty[T](value: Iterable[T | None]) -> list[T]:
     return [value for value in value if value]
 
 
@@ -57,3 +59,48 @@ def is_url(maybe_url: str) -> bool:
     # So we need to do a bit of extra checking to see if it really
     # looks like a URL.
     return bool(url.scheme in ["http", "https"] and url.netloc)
+
+
+SUBFIELD_TO_TYPE: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
+
+
+def subdivision_concepts(
+    field: Field, subdivision_subfields: list[str]
+) -> list[SourceConcept]:
+    return [
+        extract_concept_from_subfield(subfield)
+        for subfield in field.subfields
+        if subfield.code in subdivision_subfields
+    ]
+
+
+def extract_concept_from_subfield(subfield: Subfield) -> SourceConcept:
+    return extract_concept_from_subfield_value(subfield.code, subfield.value)
+
+
+def extract_concept_from_subfield_value(code: str, value: str) -> SourceConcept:
+    concept_label = _clean_concept_label(value)
+    identifier = SourceIdentifier(
+        identifier_type="label-derived",
+        ontology_type="Genre",
+        value=normalise_identifier_value(concept_label),
+    )
+    return SourceConcept(
+        id=identifier,
+        label=concept_label,
+        type=SUBFIELD_TO_TYPE.get(code, "Concept"),
+    )
+
+
+def _clean_concept_label(value: str) -> str:
+    """
+    Remove trailing punctuation (.,;:) and trim whitespace for concept labels.
+    """
+    return value.rstrip(".,;:").strip()
+
+
+def normalise_identifier_value(label: str) -> str:
+    """
+    Lowercase & collapse internal whitespace for identifier values.
+    """
+    return " ".join(label.split()).lower()

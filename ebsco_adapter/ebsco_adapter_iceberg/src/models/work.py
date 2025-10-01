@@ -55,6 +55,12 @@ class SourceConcept(BaseModel):
     type: ConceptType = "Concept"
 
 
+class Subject(SourceConcept):
+    concepts: list[SourceConcept] = []
+    label: str
+    type: ConceptType = "Subject"
+
+
 class Contributor(BaseModel):
     agent: SourceConcept
     roles: list[str] = []
@@ -62,7 +68,8 @@ class Contributor(BaseModel):
 
 
 class Genre(SourceConcept):
-    pass
+    label: str
+    concepts: list[SourceConcept]
 
 
 class DateTimeRange(BaseModel):
@@ -185,5 +192,5 @@ class SourceWork(ElasticsearchModel, BaseWork):
     format: Format | None = None
     languages: list[Language] = []
     holdings: list[Holdings] = []
-    subjects: list[SourceConcept] = []
+    subjects: list[Subject] = []
     genres: list[Genre] = []
