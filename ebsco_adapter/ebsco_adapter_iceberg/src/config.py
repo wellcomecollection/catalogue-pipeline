@@ -16,7 +16,6 @@ LOCAL_TABLE_NAME = os.getenv("LOCAL_TABLE_NAME", "mytable")
 LOCAL_NAMESPACE = os.getenv("LOCAL_NAMESPACE", "default")
 LOCAL_DB_NAME = os.getenv("LOCAL_DB_NAME", "catalog")
 
-
 # Local Elasticsearch Configuration
 ES_LOCAL_HOST = os.environ.get("ES_LOCAL_HOST", "localhost")
 ES_LOCAL_PORT = int(os.environ.get("ES_LOCAL_PORT", "9200"))

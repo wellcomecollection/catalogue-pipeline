@@ -4,12 +4,11 @@ from typing import Any, cast  # added for dummy ES client
 
 import pyarrow as pa
 import pytest
+import smart_open
 
 import config as adapter_config
-from models.step_events import (
-    EbscoAdapterTransformerEvent,
-    EbscoAdapterTransformerResult,
-)
+from models.manifests import TransformerManifest
+from models.step_events import EbscoAdapterTransformerEvent
 from models.work import SourceWork
 from steps.transformer import (
     EbscoAdapterTransformerConfig,
@@ -18,7 +17,6 @@ from steps.transformer import (
     transform,
 )
 from utils.iceberg import IcebergTableClient
-from utils.tracking import ProcessedFileRecord
 
 from .helpers import data_to_namespaced_table
 from .test_mocks import (
@@ -57,15 +55,20 @@ def _prepare_changeset(
 
 
 def _run_transform(
-    changeset_id: str, index_date: str | None, pipeline_date: str = "dev"
-) -> EbscoAdapterTransformerResult:
+    changeset_id: str,
+    *,
+    index_date: str | None = None,
+    pipeline_date: str = "dev",
+) -> TransformerManifest:
     event = EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
-        index_date=index_date,
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_rest_api_table=False, pipeline_date=pipeline_date
+        is_local=True,
+        use_rest_api_table=False,
+        pipeline_date=pipeline_date,
+        index_date=index_date,
     )
     return handler(event=event, config_obj=config)
 
@@ -89,47 +92,8 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
 
 
 # --------------------------------------------------------------------------------------
-# Tests (existing end-to-end & integration)
+# Tests
 # --------------------------------------------------------------------------------------
-
-
-def test_transformer_short_circuit_when_prior_processed_detected(
-    monkeypatch: pytest.MonkeyPatch, temporary_table: pa.Table
-) -> None:
-    """Transformer should short-circuit using existing tracking file for the same source file.
-
-    We simulate a prior transformed tracking JSON so the handler exits early without indexing.
-    """
-    file_uri = "s3://bucket/path/file.xml"
-    tracking_uri = f"{file_uri}.transformed.json"
-    # Existing tracking file with payload including prior batch_file_location
-    prior_result = EbscoAdapterTransformerResult(
-        job_id="20250101T1200",
-        batch_file_location="s3://bucket/path/20250101T1200.json",
-        success_count=10,
-        failure_count=0,
-    )
-    tracking_record = ProcessedFileRecord(
-        job_id="20250101T1200", step="transformed", payload=prior_result.model_dump()
-    )
-    MockSmartOpen.mock_s3_file(tracking_uri, json.dumps(tracking_record.model_dump()))
-
-    # Prepare an event that would otherwise trigger processing (with a changeset id)
-    event = EbscoAdapterTransformerEvent(
-        changeset_id="new-change-456", job_id="20250101T1200", file_location=file_uri
-    )
-    config = EbscoAdapterTransformerConfig(
-        is_local=True, use_rest_api_table=False, pipeline_date="dev"
-    )
-
-    # Run handler
-    result = handler(event=event, config_obj=config)
-
-    # Expect short-circuit with preserved prior batch_file_location and no ES interactions
-    assert result.batch_file_location == prior_result.batch_file_location
-    assert result.success_count == 0
-    assert result.failure_count == 0
-    assert MockElasticsearchClient.inputs == []
 
 
 def test_transformer_end_to_end_with_local_table(
@@ -143,14 +107,20 @@ def test_transformer_end_to_end_with_local_table(
 
     result = _run_transform(changeset_id, index_date="2025-01-01")
 
-    assert result.batch_file_location is not None
-    assert result.success_count == 2
-    assert result.failure_count == 0
+    assert result.successes.count == 2
+    assert result.failures is None
     # Validate file contents written to mock S3 (NDJSON)
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    assert lines == [{"ids": list(records_by_id.keys())}]
+    # Success lines include sourceIdentifiers and jobId
+    assert lines == [
+        {
+            "sourceIdentifiers": [f"Work[ebsco-alt-lookup/{i}]" for i in records_by_id],
+            "jobId": "20250101T1200",
+        }
+    ]
     titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
@@ -168,21 +138,34 @@ def test_transformer_creates_deletedwork_for_empty_content(
     result = _run_transform(changeset_id, index_date="2025-03-01")
 
     # Both IDs should appear (one DeletedWork, one SourceWork)
-    assert result.batch_file_location is not None
-    assert result.success_count == 2
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    assert result.successes.count == 2
+    assert result.failures is None
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    assert lines == [{"ids": ["ebsDel001", "ebsDel002"]}]
+    assert lines == [
+        {
+            "sourceIdentifiers": [
+                "Work[ebsco-alt-lookup/ebsDel001]",
+                "Work[ebsco-alt-lookup/ebsDel002]",
+            ],
+            "jobId": "20250101T1200",
+        }
+    ]
     deleted_docs = [
-        op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel001"
+        op
+        for op in MockElasticsearchClient.inputs
+        if op["_id"] == "Work[ebsco-alt-lookup/ebsDel001]"
     ]
     assert len(deleted_docs) == 1
     deleted_source = deleted_docs[0]["_source"]
     assert deleted_source["deletedReason"] == "not found in EBSCO source"
     # Ensure normal record still indexed
     alive_docs = [
-        op for op in MockElasticsearchClient.inputs if op["_id"] == "ebsDel002"
+        op
+        for op in MockElasticsearchClient.inputs
+        if op["_id"] == "Work[ebsco-alt-lookup/ebsDel002]"
     ]
     assert len(alive_docs) == 1
     assert alive_docs[0]["_source"]["title"] == "Alive Title"
@@ -207,21 +190,30 @@ def test_transformer_full_retransform_when_no_changeset(
     )
     result = handler(event=event, config_obj=config)
 
-    assert result.failure_count == 0
-    assert result.success_count == 2
-    assert result.batch_file_location is not None
-    expected_reindex_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
-    assert result.batch_file_location == expected_reindex_path
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    assert result.failures is None
+    assert result.successes.count == 2
+    assert result.successes.batch_file_location.bucket == adapter_config.S3_BUCKET
+    expected_key = f"{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
+    assert result.successes.batch_file_location.key == expected_key
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    assert lines == [{"ids": ["ebsFull001", "ebsFull002"]}]
+    assert lines == [
+        {
+            "sourceIdentifiers": [
+                "Work[ebsco-alt-lookup/ebsFull001]",
+                "Work[ebsco-alt-lookup/ebsFull002]",
+            ],
+            "jobId": event.job_id,
+        }
+    ]
 
 
-def test_transformer_batch_file_location_with_changeset(
+def test_transformer_batch_file_key_with_changeset(
     temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """When a changeset exists the batch file path uses the changeset pattern under the batches prefix (file_location irrelevant)."""
+    """When a changeset exists the batch file path uses the changeset pattern under the batches prefix."""
     job_id = "20250101T1200"
     records_by_id = {
         "ebsReIdx001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>X</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title</subfield></datafield></record>",
@@ -237,42 +229,37 @@ def test_transformer_batch_file_location_with_changeset(
     )
     result = handler(event=event, config_obj=config)
 
-    expected_path = f"s3://{adapter_config.S3_BUCKET}/{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
-    assert result.batch_file_location == expected_path
-    batch_contents_path = MockSmartOpen.file_lookup[result.batch_file_location]
+    expected_key = (
+        f"{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
+    )
+    assert result.successes.batch_file_location.bucket == adapter_config.S3_BUCKET
+    assert result.successes.batch_file_location.key == expected_key
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
-    # Only one batch line with a single id
-    assert len(lines) == 1 and len(lines[0]["ids"]) == 1
+    # Only one batch line with a single sourceIdentifier
+    assert len(lines) == 1 and len(lines[0]["sourceIdentifiers"]) == 1
 
 
 @pytest.mark.parametrize(
-    "event_index_date, pipeline_date, config_index_date, expected_index",
+    "pipeline_date, index_date, expected_index",
     [
-        # 1. Explicit event index date takes precedence (config None)
-        ("2025-02-02", "dev", None, "works-source-2025-02-02"),
-        # 2. Event index date None -> falls back to pipeline_date (dev)
-        (None, "dev", None, "works-source-dev"),
-        # 3. Event None, custom pipeline_date used
-        (None, "2025-05-05", None, "works-source-2025-05-05"),
-        # 4. Event None, config index date set -> uses config index date
-        (None, "dev", "2025-07-07", "works-source-2025-07-07"),
-        # 5. Event index date overrides config index date when both provided
-        ("2025-08-08", "dev", "2025-07-07", "works-source-2025-08-08"),
+        ("dev", None, "works-source-dev"),
+        ("2025-05-05", None, "works-source-2025-05-05"),
+        ("dev", "2025-07-07", "works-source-2025-07-07"),
     ],
 )
 def test_transformer_index_name_selection(
     temporary_table: pa.Table,
     monkeypatch: pytest.MonkeyPatch,
-    event_index_date: str | None,
     pipeline_date: str,
-    config_index_date: str | None,
+    index_date: str | None,
     expected_index: str,
 ) -> None:
-    """Validate full cascade: event.index_date or config.index_date or pipeline_date."""
+    """Validate cascade: config.index_date or pipeline_date (event no longer provides override)."""
     _add_pipeline_secrets(pipeline_date)
 
-    # Reset collected inputs between parametrized cases
     with suppress(Exception):  # pragma: no cover - defensive
         MockElasticsearchClient.inputs.clear()
 
@@ -282,13 +269,13 @@ def test_transformer_index_name_selection(
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id, index_date=event_index_date, job_id="20250101T1200"
+        changeset_id=changeset_id, job_id="20250101T1200"
     )
     config = EbscoAdapterTransformerConfig(
         is_local=True,
         use_rest_api_table=False,
         pipeline_date=pipeline_date,
-        index_date=config_index_date,
+        index_date=index_date,
     )
     handler(event=event, config_obj=config)
 
@@ -301,13 +288,90 @@ def test_transformer_index_name_selection(
 # --------------------------------------------------------------------------------------
 
 
-def test_transform_empty_content_returns_empty_list() -> None:
-    assert transform("work1", "") == []
+def test_transform_empty_content_returns_error() -> None:
+    works, errors = transform("work1", "")
+    assert works == []
+    assert errors and errors[0]["reason"] == "empty_content"
+    # IDs in errors are now wrapped
+    assert errors[0]["id"] == "work1"
 
 
-def test_transform_invalid_xml_returns_empty_list() -> None:
-    # malformed XML so pymarc should throw and transform should swallow
-    assert transform("work2", "<record><leader>bad") == []
+def test_transform_invalid_xml_returns_parse_error() -> None:
+    works, errors = transform("work2", "<record><leader>bad")
+    assert works == []
+    assert errors and errors[0]["reason"] == "parse_error"
+    assert errors[0]["id"] == "work2"
+
+
+def test_transformer_creates_failure_manifest_for_parse_errors(
+    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A malformed MARC record should produce a failure manifest with parse_error reason."""
+    records_by_id = {
+        "ebsBadXml001": "<record><leader>bad",  # malformed
+        "ebsGood001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsGood001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Valid Title</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+    result = _run_transform(changeset_id, index_date="2025-09-01")
+
+    # We expect one success (good record) and one transform error
+    assert result.successes.count == 1
+    assert result.failures is not None
+    assert result.failures.count >= 1
+
+    # Read the failure file
+    failure_path_full = f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
+    failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
+    with open(failure_contents_path, encoding="utf-8") as f:
+        failure_lines = [json.loads(line) for line in f if line.strip()]
+
+    # Expect exactly one parse error line referencing the bad XML id
+    # Failure lines now have shape {id, message}; parse_error must appear in message
+    assert any(
+        line["id"] == "ebsBadXml001" and "reason=parse_error" in line["message"]
+        for line in failure_lines
+    )
+
+
+def test_transformer_creates_failure_manifest_for_index_errors(
+    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Simulate ES indexing errors and ensure they are captured in failure manifest."""
+    # Create a single valid record
+    records_by_id = {
+        "ebsIdxErr001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdxErr001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Index Error Title</subfield></datafield></record>",
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+
+    # Monkeypatch bulk to force an indexing error
+    def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
+        actions_list = list(actions)
+        # pretend success count is number of actions even with error
+        return len(actions_list), [
+            {
+                "index": {
+                    "_id": actions_list[0]["_id"],
+                    "status": 400,
+                    "error": {"type": "mapper_parsing_exception"},
+                }
+            }
+        ]
+
+    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+    result = _run_transform(changeset_id, index_date="2025-09-02")
+    assert result.failures is not None
+    assert result.failures.count == 1
+
+    failure_path_full = f"s3://{result.failures.error_file_location.bucket}/{result.failures.error_file_location.key}"
+    failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
+    with open(failure_contents_path, encoding="utf-8") as f:
+        failure_lines = [json.loads(line) for line in f if line.strip()]
+    # Expect a single failure line with id and message containing status & error_type
+    assert len(failure_lines) == 1
+    msg = failure_lines[0]["message"]
+    assert failure_lines[0]["id"] == "Work[ebsco-alt-lookup/ebsIdxErr001]"
+    assert "status=400" in msg and "error_type=mapper_parsing_exception" in msg
 
 
 def test_transform_valid_marcxml_returns_work() -> None:
@@ -320,10 +384,11 @@ def test_transform_valid_marcxml_returns_work() -> None:
         "</datafield>"
         "</record>"
     )
-    result = transform("ebs12345", xml)
-    assert len(result) == 1
-    assert result[0].id == "ebs12345"
-    assert result[0].title == "A Useful Title"
+    works, errors = transform("ebs12345", xml)
+    assert not errors
+    assert len(works) == 1
+    assert str(works[0].source_identifier) == "Work[ebsco-alt-lookup/ebs12345]"
+    assert works[0].title == "A Useful Title"
 
 
 # --------------------------------------------------------------------------------------
@@ -341,9 +406,22 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
+    from models.work import SourceIdentifier
+
+    IDENT_TYPE = "ebsco-alt-lookup"
     records = [
-        SourceWork(id="id1", title="Title 1"),
-        SourceWork(id="id2", title="Title 2"),
+        SourceWork(
+            title="Title 1",
+            source_identifier=SourceIdentifier(
+                identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+            ),
+        ),
+        SourceWork(
+            title="Title 2",
+            source_identifier=SourceIdentifier(
+                identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
+            ),
+        ),
     ]
     dummy_client = cast(Any, object())
     success, errors = load_data(
@@ -351,8 +429,11 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     assert success == 2
-    assert errors == 0
-    assert {a["_id"] for a in collected} == {"id1", "id2"}
+    assert errors == []
+    assert {a["_id"] for a in collected} == {
+        "Work[ebsco-alt-lookup/id1]",
+        "Work[ebsco-alt-lookup/id2]",
+    }
     assert {a["_source"]["title"] for a in collected} == {"Title 1", "Title 2"}
 
 
@@ -371,14 +452,25 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    records = [SourceWork(id="id1", title="Bad Title")]
+    from models.work import SourceIdentifier
+
+    IDENT_TYPE = "ebsco-alt-lookup"
+    records = [
+        SourceWork(
+            title="Bad Title",
+            source_identifier=SourceIdentifier(
+                identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+            ),
+        )
+    ]
     dummy_client = cast(Any, object())
     success, errors = load_data(
         elastic_client=dummy_client, records=records, index_name="works-source-dev"
     )
 
     assert success == 1
-    assert errors == 1
+    assert len(errors) == 1
+    assert errors[0]["error_type"] == "mapper_parsing_exception"
 
 
 def test_transformer_raises_when_batch_file_write_fails(
@@ -398,7 +490,8 @@ def test_transformer_raises_when_batch_file_write_fails(
     def failing_open(*args, **kwargs):  # type: ignore[no-untyped-def]
         raise OSError("simulated write failure")
 
-    monkeypatch.setattr("steps.transformer.smart_open.open", failing_open)
+    # Patch smart_open globally; transformer references the imported module so this applies
+    monkeypatch.setattr(smart_open, "open", failing_open)
 
     event = EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,

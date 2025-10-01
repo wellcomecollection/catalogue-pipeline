@@ -1,3 +1,5 @@
+package weco.pipeline.transformer.sierra
+
 import software.amazon.awssdk.services.s3.S3Client
 import org.scalatest.EitherValues
 import org.scalatest.funspec.AnyFunSpec
@@ -8,14 +10,15 @@ import software.amazon.awssdk.auth.credentials.{
   StaticCredentialsProvider
 }
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+// You may need to update the sierraTransformerDependencies 
+// dependencies in to include "ExternalDependencies.awsSSODependencies"
 import software.amazon.awssdk.services.sts.StsClient
 import software.amazon.awssdk.services.sts.model.AssumeRoleRequest
 import weco.catalogue.source_model.sierra.SierraTransformable
 import weco.json.JsonUtil._
-import weco.pipeline.transformer.sierra.SierraTransformer
 import weco.sierra.models.identifiers.SierraBibNumber
 import weco.storage.dynamo.DynamoConfig
-import weco.storage.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
+import weco.storage.providers.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.dynamo.{DynamoHashStore, DynamoHybridStore}
 import weco.storage.store.s3.S3TypedStore
 import weco.storage.store.{HybridStoreWithMaxima, VersionedHybridStore}
@@ -39,7 +42,7 @@ class SierraLiveDataTransformerTest
     val tableName = "vhs-sierra-sierra-adapter-20200604"
 
     val bnumbers = Seq(
-      "2400080",
+      "1310783",
       "3083353",
       "3162948",
       "1465374",
