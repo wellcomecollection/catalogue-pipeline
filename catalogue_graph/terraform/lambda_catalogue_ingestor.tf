@@ -17,7 +17,7 @@ module "ingestor_loader_lambda" {
     command = ["ingestor.steps.ingestor_loader.lambda_handler"]
   }
 
-  memory_size = 1024
+  memory_size = 2048
   timeout     = 900
 
   vpc_config = {
@@ -302,8 +302,3 @@ resource "aws_iam_role_policy" "ingestor_reporter_lambda_s3_read_policy" {
   role   = module.ingestor_reporter_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.ingestor_s3_read.json
 }
-
-
-
-
-

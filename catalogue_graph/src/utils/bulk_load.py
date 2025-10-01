@@ -1,7 +1,8 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import PurePosixPath
 
-from pydantic import BaseModel
+import dateutil.parser
+from pydantic import BaseModel, model_validator
 
 import config
 from utils.types import (
@@ -9,10 +10,23 @@ from utils.types import (
     TransformerType,
 )
 
+DEFAULT_WINDOW_MINUTES = 15
+
 
 class IncrementalWindow(BaseModel):
     start_time: datetime
     end_time: datetime
+
+    @model_validator(mode="before")
+    @classmethod
+    def calculate_start_time(cls, data: dict) -> dict:
+        # If no `start_time` is provided, calculate it by subtracting `DEFAULT_WINDOW_MINUTES` from `end_time`
+        if data.get("start_time") is None:
+            end_time = dateutil.parser.parse(data["end_time"])
+            data["start_time"] = end_time - timedelta(minutes=DEFAULT_WINDOW_MINUTES)
+            data["end_time"] = end_time
+
+        return data
 
     def to_formatted_string(self) -> str:
         start = self.start_time.strftime("%Y%m%dT%H%M")
