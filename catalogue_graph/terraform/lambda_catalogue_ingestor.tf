@@ -3,95 +3,6 @@
 // New versions of the lambdas are automatically deployed through a GitHub action.
 // To deploy manually, see `scripts/deploy_lambda_zip.sh`
 
-# ingestor_trigger
-module "ingestor_trigger_lambda" {
-  source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
-
-  name         = "catalogue-graph-ingestor-trigger"
-  description  = "Triggers the ingestor lambdas"
-  package_type = "Image"
-  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
-  publish      = true
-
-  image_config = {
-    command = ["ingestor.steps.ingestor_trigger.lambda_handler"]
-  }
-
-  memory_size = 1024
-  timeout     = 300
-  vpc_config = {
-    subnet_ids = local.private_subnets
-    security_group_ids = [
-      aws_security_group.egress.id,
-      aws_security_group.neptune_service_security_group.id
-    ]
-  }
-  environment = {
-    variables = {
-      INGESTOR_SHARD_SIZE = 10000
-    }
-  }
-}
-
-resource "aws_iam_role_policy" "ingestor_trigger_lambda_neptune_read_policy" {
-  role   = module.ingestor_trigger_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.neptune_read.json
-}
-
-resource "aws_iam_role_policy" "ingestor_trigger_lambda_read_secrets_policy" {
-  role   = module.ingestor_trigger_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_secret_read.json
-}
-
-
-# ingestor_trigger_monitor
-module "ingestor_trigger_monitor_lambda" {
-  source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
-
-  name         = "catalogue-graph-ingestor-trigger-monitor"
-  description  = "Monitors the output of ingestor_trigger lambda"
-  package_type = "Image"
-  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
-  publish      = true
-
-  image_config = {
-    command = ["ingestor.steps.ingestor_trigger_monitor.lambda_handler"]
-  }
-
-  memory_size = 1024
-  timeout     = 300
-
-  vpc_config = {
-    subnet_ids = local.private_subnets
-    security_group_ids = [
-      aws_security_group.egress.id,
-    ]
-  }
-
-  environment = {
-    variables = {
-      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
-      INGESTOR_S3_PREFIX        = "ingestor"
-    }
-  }
-}
-
-resource "aws_iam_role_policy" "ingestor_trigger_monitor_lambda_s3_write_policy" {
-  role   = module.ingestor_trigger_monitor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.ingestor_s3_write.json
-}
-
-resource "aws_iam_role_policy" "ingestor_trigger_monitor_lambda_s3_read_policy" {
-  role   = module.ingestor_trigger_monitor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.ingestor_s3_read.json
-}
-
-resource "aws_iam_role_policy" "ingestor_trigger_monitor_cloudwatch_write_policy" {
-  role   = module.ingestor_trigger_monitor_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.cloudwatch_write.json
-}
-
-
 # ingestor_loader
 module "ingestor_loader_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
@@ -113,7 +24,8 @@ module "ingestor_loader_lambda" {
     subnet_ids = local.private_subnets
     security_group_ids = [
       aws_security_group.egress.id,
-      aws_security_group.neptune_service_security_group.id
+      aws_security_group.neptune_service_security_group.id,
+      local.ec_privatelink_security_group_id
     ]
   }
 
@@ -128,6 +40,11 @@ module "ingestor_loader_lambda" {
 resource "aws_iam_role_policy" "ingestor_loader_lambda_read_secrets_policy" {
   role   = module.ingestor_loader_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.allow_secret_read.json
+}
+
+resource "aws_iam_role_policy" "ingestor_loader_lambda_read_pipeline_secrets_policy" {
+  role   = module.ingestor_loader_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.extractor_allow_pipeline_storage_secret_read.json
 }
 
 resource "aws_iam_role_policy" "ingestor_loader_lambda_s3_read_policy" {

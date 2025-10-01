@@ -145,7 +145,6 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
         related_ids = set()
         for item in result.values():
-            print(item)
             related_ids.update([i["id"] for i in item["related"]])
 
         self._update_same_as_map(related_ids)
