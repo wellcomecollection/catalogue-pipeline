@@ -15,9 +15,3 @@ docker run --tty --rm \
 	"public.ecr.aws/hashicorp/terraform:light" fmt -recursive
 
 ./builds/run_sbt_task_in_docker.sh "scalafmt" | tee .reports/scalafmt.out
-
-docker run --tty --rm \
-	--volume "$ROOT:/repo" \
-  --workdir /repo \
-	"$ECR_REGISTRY/pyfound/black" \
-  black --exclude ".lambda_zips/|.terraform/|target/|catalogue_graph/" .

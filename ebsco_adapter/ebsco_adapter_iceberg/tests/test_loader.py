@@ -20,7 +20,6 @@ class TestLoaderHandler:
         tracking_uri = f"{file_uri}.loaded.json"
         prior_event = EbscoAdapterTransformerEvent(
             job_id="20250101T1200",
-            file_location=file_uri,
             changeset_id="prev-change-123",
         )
         tracking_record = ProcessedFileRecord(
