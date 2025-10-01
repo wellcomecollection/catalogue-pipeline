@@ -44,7 +44,7 @@ resource "aws_iam_role_policy" "ingestor_loader_lambda_read_secrets_policy" {
 
 resource "aws_iam_role_policy" "ingestor_loader_lambda_read_pipeline_secrets_policy" {
   role   = module.ingestor_loader_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.extractor_allow_pipeline_storage_secret_read.json
+  policy = data.aws_iam_policy_document.ingestor_allow_pipeline_storage_secret_read.json
 }
 
 resource "aws_iam_role_policy" "ingestor_loader_lambda_s3_read_policy" {

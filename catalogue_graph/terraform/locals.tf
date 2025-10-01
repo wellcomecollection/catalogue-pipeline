@@ -21,6 +21,8 @@ locals {
   pipeline_date       = "2025-08-14"
   concepts_index_date = "2025-08-21"
 
+  ingestor_types = ["concepts", "works"]
+
   bulk_loader_default_insert_error_threshold = 1 / 10000
 
   concepts_pipeline_inputs_monthly = [
