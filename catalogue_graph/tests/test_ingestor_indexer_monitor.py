@@ -11,7 +11,7 @@ pipeline_date = "2025-01-01"
 index_date = "2025-03-01"
 
 
-def get_mock_expected_report(success_count: int, previous_job_id: str | None) -> dict:
+def get_mock_expected_report(success_count: int) -> dict:
     return {
         "pipeline_date": pipeline_date,
         "index_date": index_date,
@@ -21,32 +21,22 @@ def get_mock_expected_report(success_count: int, previous_job_id: str | None) ->
     }
 
 
-def verify_s3_reports(success_count: int, previous_job_id: str | None) -> None:
-    expected_report = get_mock_expected_report(success_count, previous_job_id)
+def verify_s3_reports(success_count: int) -> None:
+    expected_report = get_mock_expected_report(success_count)
 
     with MockSmartOpen.open(MOCK_CURRENT_JOB_S3_URI, "r") as f:
         assert json.load(f) == expected_report
 
 
 def test_ingestor_indexer_monitor_success() -> None:
-    events = [
-        IngestorIndexerMonitorLambdaEvent(
-            ingestor_type="concepts",
-            pipeline_date=pipeline_date,
-            index_date=index_date,
-            job_id="123",
-            success_count=250,
-        ),
-        IngestorIndexerMonitorLambdaEvent(
-            ingestor_type="concepts",
-            pipeline_date=pipeline_date,
-            index_date=index_date,
-            job_id="123",
-            success_count=250,
-        ),
-    ]
-
-    handler(events)
+    event = IngestorIndexerMonitorLambdaEvent(
+        ingestor_type="concepts",
+        pipeline_date=pipeline_date,
+        index_date=index_date,
+        job_id="123",
+        success_count=500,
+    )
+    handler(event)
 
     # assert reports are written in s3
-    verify_s3_reports(500, "122")
+    verify_s3_reports(500)
