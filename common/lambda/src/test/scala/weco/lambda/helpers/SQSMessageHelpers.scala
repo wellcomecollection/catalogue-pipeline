@@ -6,9 +6,11 @@ import weco.fixtures.RandomGenerators
 
 import scala.collection.JavaConverters._
 
-trait SQSMessageHelpers
-  extends RandomGenerators {
-  def createSQSEventsWithId(messages: List[(String, String)], wrapMessage: Boolean = true): SQSEvent = {
+trait SQSMessageHelpers extends RandomGenerators {
+  def createSQSEventsWithId(
+    messages: List[(String, String)],
+    wrapMessage: Boolean = true
+  ): SQSEvent = {
     val sqsMessages = messages.map {
       case (body, messageId) =>
         val message = new SQSMessage()
@@ -28,9 +30,13 @@ trait SQSMessageHelpers
     sqsEvent
   }
 
-  def createSQSEvents(messages: List[String], wrapMessage: Boolean = true): SQSEvent = {
-    val messageTupleWithId = messages.map { message =>
-      (message, randomUUID.toString)
+  def createSQSEvents(
+    messages: List[String],
+    wrapMessage: Boolean = true
+  ): SQSEvent = {
+    val messageTupleWithId = messages.map {
+      message =>
+        (message, randomUUID.toString)
     }
     createSQSEventsWithId(messageTupleWithId, wrapMessage)
   }

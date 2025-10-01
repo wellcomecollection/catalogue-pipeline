@@ -24,7 +24,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": []
       }
@@ -70,7 +71,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a223f5a6"
@@ -103,7 +105,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": []
       }
@@ -156,7 +159,8 @@
               "relationshipType": ""
             }
           ],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a224b9mp"
@@ -189,7 +193,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": []
       }
@@ -235,7 +240,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a224tns9"
@@ -287,7 +293,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a2258t8s"
@@ -312,7 +319,7 @@
           "South Cambridgeshire (Cambridgeshire)",
           "South Cambridgeshire, Eng."
         ],
-        "type": "Subject"
+        "type": "Place"
       },
       "display": {
         "id": "a22auf32",
@@ -333,7 +340,7 @@
           "South Cambridgeshire (Cambridgeshire)",
           "South Cambridgeshire, Eng."
         ],
-        "type": "Subject",
+        "type": "Place",
         "relatedConcepts": {
           "relatedTo": [],
           "fieldsOfWork": [],
@@ -345,28 +352,29 @@
               "label": "Disease Outbreaks",
               "id": "d6jhgxuc",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             },
             {
               "label": "Public Health",
               "id": "uj4hz4ct",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             },
             {
               "label": "Sanitation",
               "id": "eva7r2dw",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             },
             {
               "label": "Water Supply",
               "id": "gtf5s7h7",
               "relationshipType": "",
-              "conceptType": "Subject"
+              "conceptType": "Concept"
             }
           ],
-          "frequentCollaborators": []
+          "frequentCollaborators": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a22auf32"
@@ -414,7 +422,8 @@
           "broaderThan": [],
           "people": [],
           "frequentCollaborators": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [
           "a22d6ehy"
@@ -439,7 +448,8 @@
           "narrowerThan": [],
           "people": [],
           "relatedTo": [],
-          "relatedTopics": []
+          "relatedTopics": [],
+          "foundedBy": []
         },
         "sameAs": [],
         "type": "Person"

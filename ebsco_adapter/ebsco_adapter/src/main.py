@@ -25,7 +25,7 @@ reindex_topic_arn = os.environ.get("REINDEX_TOPIC_ARN")
 s3_bucket = os.environ.get("S3_BUCKET", "wellcomecollection-platform-ebsco-adapter")
 s3_prefix = os.environ.get("S3_PREFIX", "dev")
 
-ftp_s3_prefix = os.path.join(s3_prefix, "ftp")
+ftp_s3_prefix = os.path.join(s3_prefix, "ftp/")
 xml_s3_prefix = os.path.join(s3_prefix, "xml")
 
 

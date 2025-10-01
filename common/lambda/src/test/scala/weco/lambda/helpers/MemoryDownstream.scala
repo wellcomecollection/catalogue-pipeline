@@ -8,8 +8,9 @@ import scala.util.Try
 
 trait MemoryDownstream {
 
-  class MemorySNSDownstream(sender: MemoryMessageSender = new MemoryMessageSender)
-    extends Downstream {
+  class MemorySNSDownstream(
+    sender: MemoryMessageSender = new MemoryMessageSender
+  ) extends Downstream {
 
     val msgSender: MemoryMessageSender = sender
 

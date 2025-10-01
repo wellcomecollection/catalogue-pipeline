@@ -9,10 +9,7 @@ import scala.collection.JavaConverters._
 import weco.json.JsonUtil._
 import weco.lambda.helpers.SQSMessageHelpers
 
-class SQSEventOpsTest
-  extends AnyFunSpec
-    with Matchers
-    with SQSMessageHelpers {
+class SQSEventOpsTest extends AnyFunSpec with Matchers with SQSMessageHelpers {
 
   import SQSEventOps._
 

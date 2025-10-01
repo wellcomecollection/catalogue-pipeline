@@ -82,6 +82,7 @@ data "aws_iam_policy_document" "neptune_delete" {
 data "aws_iam_policy_document" "ingestor_s3_read" {
   statement {
     actions = [
+      "s3:ListBucket",
       "s3:GetObject",
       "s3:HeadObject",
     ]
@@ -123,6 +124,7 @@ data "aws_iam_policy_document" "ingestor_s3_write" {
 data "aws_iam_policy_document" "s3_bulk_load_read" {
   statement {
     actions = [
+      "s3:ListBucket",
       "s3:HeadObject",
       "s3:GetObject"
     ]
@@ -148,6 +150,7 @@ data "aws_iam_policy_document" "s3_bulk_load_write" {
 data "aws_iam_policy_document" "ingestor_deletions_s3_policy" {
   statement {
     actions = [
+      "s3:ListBucket",
       "s3:HeadObject",
       "s3:GetObject"
     ]

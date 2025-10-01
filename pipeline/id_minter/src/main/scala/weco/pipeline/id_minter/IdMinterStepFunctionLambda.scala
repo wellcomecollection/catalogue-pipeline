@@ -1,0 +1,68 @@
+package weco.pipeline.id_minter
+
+import weco.lambda.{ApplicationConfig, Downstream, StepFunctionLambdaApp}
+import weco.pipeline.id_minter.models.{
+  StepFunctionMintingFailure,
+  StepFunctionMintingRequest,
+  StepFunctionMintingResponse
+}
+
+import scala.concurrent.Future
+
+trait IdMinterStepFunctionLambda[Config <: ApplicationConfig]
+    extends StepFunctionLambdaApp[
+      StepFunctionMintingRequest,
+      StepFunctionMintingResponse,
+      Config
+    ] {
+
+  protected val processor: MintingRequestProcessor
+  protected val downstream: Downstream
+
+  override def processRequest(
+    input: StepFunctionMintingRequest
+  ): Future[StepFunctionMintingResponse] = {
+
+    // Validate input first
+    input.validate match {
+      case Left(validationError) =>
+        // Return validation error as a failure response
+        val response = StepFunctionMintingResponse(
+          successes = List.empty,
+          failures = List(
+            StepFunctionMintingFailure(
+              sourceIdentifier = "",
+              error = s"Invalid input: $validationError"
+            )
+          ),
+          jobId = input.jobId
+        )
+        Future.successful(response)
+
+      case Right(validInput) =>
+        // If there is nothing to process, return an empty success/failure response
+        if (validInput.sourceIdentifiers.isEmpty) {
+          Future.successful(
+            StepFunctionMintingResponse(
+              successes = Nil,
+              failures = Nil,
+              jobId = validInput.jobId
+            )
+          )
+        } else {
+          // Process using the existing MintingRequestProcessor
+          processor.process(validInput.sourceIdentifiers).map {
+            mintingResponse =>
+              // Notify downstream of each successfully processed source identifier
+              mintingResponse.successes.foreach(downstream.notify)
+
+              StepFunctionMintingResponse.fromMintingResponse(
+                mintingResponse,
+                validInput.sourceIdentifiers,
+                validInput.jobId
+              )
+          }
+        }
+    }
+  }
+}

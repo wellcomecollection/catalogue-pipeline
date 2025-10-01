@@ -45,6 +45,11 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         result = self.make_neptune_query(query, "field of work")
         return _related_query_result_to_dict(result)
 
+    def get_founded_by_concepts(self) -> LinkedConcepts:
+        query = get_related_query("HAS_FOUNDER")
+        result = self.make_neptune_query(query, "founded by")
+        return _related_query_result_to_dict(result)
+
     def get_narrower_concepts(self) -> LinkedConcepts:
         query = get_related_query("NARROWER_THAN")
         result = self.make_neptune_query(query, "narrower than")
@@ -99,6 +104,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         all_related_concepts = {
             "related_to": self.get_related_concepts(),
             "fields_of_work": self.get_field_of_work_concepts(),
+            "founded_by": self.get_founded_by_concepts(),
             "narrower_than": self.get_narrower_concepts(),
             "broader_than": self.get_broader_concepts(),
             "people": self.get_people_concepts(),

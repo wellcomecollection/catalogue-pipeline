@@ -1,6 +1,6 @@
 from pymarc.record import Record
 
-from models.work import SourceIdentifier, SourceWork
+from models.work import DeletedWork, SourceIdentifier, SourceWork
 from transformers.alternative_titles import extract_alternative_titles
 from transformers.common import mandatory_field
 from transformers.contributors import extract_contributors
@@ -18,9 +18,12 @@ from transformers.genres import extract_genres
 from transformers.subjects import extract_subjects
 
 
+EBSCO_IDENTIFIER_TYPE="ebsco-alt-lookup"
+
+
 def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
     return SourceIdentifier(
-        identifier_type="ebsco-alt-lookup", ontology_type="Work", value=id_value
+        identifier_type=EBSCO_IDENTIFIER_TYPE, ontology_type="Work", value=id_value
     )
 
 
@@ -28,6 +31,7 @@ def transform_record(marc_record: Record) -> SourceWork:
     work_id = extract_id(marc_record)
     return SourceWork(
         id=work_id,
+        source_identifier=ebsco_source_identifier(work_id),
         title=extract_title(marc_record),
         alternative_titles=extract_alternative_titles(marc_record),
         other_identifiers=extract_other_identifiers(marc_record),
@@ -42,6 +46,14 @@ def transform_record(marc_record: Record) -> SourceWork:
         holdings=extract_holdings(marc_record),
         genres=extract_genres(marc_record),
         subjects=extract_subjects(marc_record),
+    )
+    
+def create_deleted_work(marc_record: Record) -> DeletedWork:
+    work_id = extract_id(marc_record)
+    return DeletedWork(
+        id=work_id,
+        deleted_reason="Record deleted in source system",
+        source_identifier=ebsco_source_identifier(work_id),
     )
 
 

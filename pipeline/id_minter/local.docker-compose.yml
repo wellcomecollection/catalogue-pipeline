@@ -1,4 +1,3 @@
-# Run locally using `docker compose build lambda && docker compose run --rm  --service-ports lambda`
 services:
   lambda:
     build:
@@ -27,11 +26,17 @@ services:
       - es_identified_index=local-works-identified
     env_file:
       - .env
+    command:
+      [
+        "/usr/bin/java",
+        "com.amazonaws.services.lambda.runtime.api.client.AWSLambda",
+        "weco.pipeline.id_minter.StepFunctionMain::handleRequest",
+      ]
 
   mysql:
     image: "public.ecr.aws/docker/library/mysql:8.0"
     ports:
-      - "3307:3306"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: identifiers

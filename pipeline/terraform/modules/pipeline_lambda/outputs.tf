@@ -3,5 +3,10 @@ output "lambda_role_name" {
 }
 
 output "queue_url" {
-  value = module.input_queue.url
+  value = length(module.input_queue) > 0 ? module.input_queue[0].url : null
+}
+
+
+output "lambda_arn" {
+  value = module.pipeline_step.lambda.arn
 }

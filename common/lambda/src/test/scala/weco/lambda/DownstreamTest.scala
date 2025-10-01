@@ -5,9 +5,10 @@ import org.scalatest.matchers.should.Matchers
 import weco.lambda.helpers.ConfigurationTestHelpers
 import weco.messaging.sns.SNSConfig
 
-class DownstreamTest extends AnyFunSpec
-  with ConfigurationTestHelpers
-  with Matchers {
+class DownstreamTest
+    extends AnyFunSpec
+    with ConfigurationTestHelpers
+    with Matchers {
 
   describe("DownstreamBuilder") {
     it("builds a StdOut downstream target") {
@@ -16,7 +17,7 @@ class DownstreamTest extends AnyFunSpec
           |downstream.target = "stdio"
           |""".asConfig
 
-        DownstreamBuilder.buildDownstreamTarget(config) shouldBe StdOut
+      DownstreamBuilder.buildDownstreamTarget(config) shouldBe StdOut
     }
 
     it("builds an SNS downstream target") {
@@ -26,14 +27,16 @@ class DownstreamTest extends AnyFunSpec
           |aws.sns.topic.arn = "arn:aws:sns:eu-west-1:123456789012:my-topic"
           |""".asConfig
 
-        DownstreamBuilder.buildDownstreamTarget(config) shouldBe SNS(
-          config = SNSConfig(
-            topicArn = "arn:aws:sns:eu-west-1:123456789012:my-topic"
-          )
+      DownstreamBuilder.buildDownstreamTarget(config) shouldBe SNS(
+        config = SNSConfig(
+          topicArn = "arn:aws:sns:eu-west-1:123456789012:my-topic"
         )
+      )
     }
 
-    it("builds a StdOut downstream target if no downstream target is specified") {
+    it(
+      "builds a StdOut downstream target if no downstream target is specified"
+    ) {
       val config =
         """
           |""".asConfig

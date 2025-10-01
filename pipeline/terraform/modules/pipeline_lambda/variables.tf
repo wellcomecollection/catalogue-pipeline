@@ -67,10 +67,20 @@ variable "queue_config" {
     # Scaling configuration
     maximum_concurrency = optional(number, 2)
   })
+  default = null
 }
 
 variable "event_source_enabled" {
   type    = bool
   default = true
+}
+
+variable "image_config" {
+  type = object({
+    command           = optional(set(string))
+    entry_point       = optional(set(string))
+    working_directory = optional(string)
+  })
+  default = null
 }
 

@@ -1,12 +1,3 @@
-#############################
-# S3 Tables (Iceberg) access #
-#############################
-# Updated to use native s3tables IAM actions & ARNs instead of Glue/LakeFormation integration.
-# Bucket & table names derived from previous Glue ARNs:
-#   Bucket: wellcomecollection-platform-ebsco-adapter
-#   Namespace: wellcomecollection_catalogue (not directly encoded in ARNs, but kept for context)
-#   Table: ebsco_adapter_table
-
 # Write policy (create/update table + read/write data & metadata)
 data "aws_iam_policy_document" "iceberg_write" {
   # Bucket-level operations needed for managing (creating/listing) namespaces & tables
@@ -43,36 +34,6 @@ data "aws_iam_policy_document" "iceberg_write" {
   }
 }
 
-# Read-only policy (no mutations): list & read table and data objects
-data "aws_iam_policy_document" "iceberg_read" {
-  statement {
-    actions = [
-      "s3tables:GetNamespace",
-      "s3tables:ListNamespaces",
-      "s3tables:ListTables",
-      "s3tables:GetTableBucket",
-      "s3tables:GetTableMetadataLocation",
-    ]
-    resources = [
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
-    ]
-  }
-
-  statement {
-    actions = [
-      "s3tables:GetTableMetadataLocation",
-      "s3tables:ListTables",
-      "s3tables:GetTable",
-      "s3tables:GetTableData",
-      "s3tables:UpdateTableMetadataLocation"
-    ]
-    resources = [
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
-    ]
-  }
-}
-
 # Policy for reading from the EBSCO adapter S3 bucket
 data "aws_iam_policy_document" "s3_read" {
   statement {
@@ -96,9 +57,7 @@ data "aws_iam_policy_document" "s3_write" {
     ]
 
     resources = [
-      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter",
       "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/ftp_v2/*",
-      "arn:aws:s3:::wellcomecollection-platform-ebsco-adapter/prod/batches/*"
     ]
   }
 }
@@ -135,15 +94,92 @@ data "aws_iam_policy_document" "ssm_read" {
   }
 }
 
-data "aws_iam_policy_document" "transformer_allow_pipeline_storage_secret_read" {
-  statement {
-    actions = ["secretsmanager:GetSecretValue"]
-    resources = [
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/private_host*",
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/port*",
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/protocol*",
-      # This should be just "transformer" once the pipeline secrets are properly generated
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${local.pipeline_date}/transformer-ebsco-test/api_key*"
+# IAM Policy for State Machine to invoke Lambda functions
+resource "aws_iam_policy" "state_machine_lambda_policy" {
+  name        = "ebsco-adapter-state-machine-lambda-policy"
+  description = "Allow state machine to invoke EBSCO adapter Lambda functions"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction"
+        ]
+        Resource = [
+          module.trigger_lambda.lambda.arn,
+          module.loader_lambda.lambda.arn,
+        ]
+      }
     ]
-  }
+  })
+}
+
+# IAM Policy allowing the state machine to put events onto the shared adapter event bus
+resource "aws_iam_policy" "state_machine_eventbridge_put_policy" {
+  name        = "ebsco-adapter-state-machine-eventbridge-put-policy"
+  description = "Allow state machine to put events on the adapter event bus"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "events:PutEvents"
+        ]
+        Resource = [
+          aws_cloudwatch_event_bus.event_bus.arn
+        ]
+      }
+    ]
+  })
+}
+
+# IAM Policy for State Machine CloudWatch Logging
+resource "aws_iam_policy" "state_machine_logging_policy" {
+  name        = "ebsco-adapter-state-machine-logging-policy"
+  description = "Allow state machine to write logs to CloudWatch"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogDelivery",
+          "logs:GetLogDelivery",
+          "logs:UpdateLogDelivery",
+          "logs:DeleteLogDelivery",
+          "logs:ListLogDeliveries",
+          "logs:PutResourcePolicy",
+          "logs:DescribeResourcePolicies",
+          "logs:DescribeLogGroups"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# IAM Policy for EventBridge to start State Machine executions
+resource "aws_iam_policy" "eventbridge_state_machine_policy" {
+  name        = "ebsco-adapter-eventbridge-state-machine-policy"
+  description = "Allow EventBridge to start EBSCO adapter state machine executions"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "states:StartExecution"
+        ]
+        Resource = [
+          aws_sfn_state_machine.state_machine.arn
+        ]
+      }
+    ]
+  })
 }

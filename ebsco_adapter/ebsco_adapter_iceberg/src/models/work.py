@@ -15,25 +15,24 @@ class ElasticsearchModel(BaseModel):
         serialize_by_alias=True,
     )
 
+class SourceIdentifier(ElasticsearchModel):
+    identifier_type: str
+    ontology_type: str
+    value: str
+    
+    def __str__(self) -> str:
+        return f"Work[{self.identifier_type}/{self.value}]"
 
 class BaseWork(BaseModel):
     """
     Base class for work models, providing common attributes and methods.
     """
 
-    id: str
+    source_identifier: SourceIdentifier
 
 
 class DeletedWork(ElasticsearchModel, BaseWork):
     deleted_reason: str
-
-
-# TODO: This is from catalogue_graph.ingestor.models.
-# import it rather than copy
-class SourceIdentifier(ElasticsearchModel):
-    identifier_type: str
-    ontology_type: str
-    value: str
 
 
 ConceptType = Literal[
