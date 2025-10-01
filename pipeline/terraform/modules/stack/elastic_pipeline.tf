@@ -160,6 +160,7 @@ locals {
       read  = [local.es_works_denormalised_index]
       write = [local.es_works_denormalised_index]
     }
+    # TODO: Remove `work_ingestor` once we switch to new works ingestor
     work_ingestor = {
       read  = [local.es_works_denormalised_index]
       write = [local.es_works_index]
@@ -176,9 +177,19 @@ locals {
       read  = [local.es_images_augmented_index]
       write = [local.es_images_index]
     }
+    # TODO: Remove `concept_ingestor` once we deploy incremental mode
     concept_ingestor = {
       read  = ["${local.es_concepts_index_prefix}*"]
       write = ["${local.es_concepts_index_prefix}*"]
+    }
+    concepts_ingestor = {
+      read  = ["${local.es_concepts_index_prefix}*", local.es_works_denormalised_index]
+      write = ["${local.es_concepts_index_prefix}*"]
+    }
+    works_ingestor = {
+      read  = [local.es_works_denormalised_index]
+      # For now only allow writing to the `dev` index for safety
+      write = ["works-indexed-dev"]
     }
     snapshot_generator = {
       read  = [local.es_works_index, local.es_images_index]

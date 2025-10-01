@@ -75,7 +75,7 @@ def test_ingestor_deletions_line_new_index_run() -> None:
     job_id = "test-job-id"
     index_name = f"concepts-indexed-{index_date}"
 
-    mock_es_secrets("concept_ingestor", pipeline_date)
+    mock_es_secrets("concepts_ingestor", pipeline_date)
 
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], index_name)
 

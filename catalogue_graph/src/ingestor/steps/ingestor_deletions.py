@@ -16,7 +16,7 @@ from utils.safety import validate_fractional_change
 def get_current_id_count(event: IngestorMonitorStepEvent, is_local: bool) -> int:
     """Return the number of documents currently stored in ES in the concepts index."""
     es = utils.elasticsearch.get_client(
-        "concept_ingestor", event.pipeline_date, is_local
+        "concepts_ingestor", event.pipeline_date, is_local
     )
 
     response = es.count(
@@ -33,7 +33,7 @@ def delete_concepts_from_elasticsearch(
 ) -> int:
     """Remove documents matching `deleted_ids` from the concepts ES index."""
     es = utils.elasticsearch.get_client(
-        "concept_ingestor", event.pipeline_date, is_local
+        "concepts_ingestor", event.pipeline_date, is_local
     )
     index_name = get_standard_index_name("concepts-indexed", event.index_date)
 

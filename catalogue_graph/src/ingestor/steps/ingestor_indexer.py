@@ -51,7 +51,9 @@ def load_data(
     print(
         f"Loading {len(indexable_data)} Indexable {ingestor_type} to ES index: {index_name} ..."
     )
-    es = utils.elasticsearch.get_client("concept_ingestor", pipeline_date, is_local)
+    es = utils.elasticsearch.get_client(
+        f"{ingestor_type}_ingestor", pipeline_date, is_local
+    )
     success_count, _ = elasticsearch.helpers.bulk(
         es, generate_operations(index_name, indexable_data)
     )
