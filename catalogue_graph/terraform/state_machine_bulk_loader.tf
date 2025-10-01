@@ -40,20 +40,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           {
             "Variable" : "$.status",
             "StringEquals" : "SUCCEEDED",
-            "Next" : "Remove unused entities"
+            "Next" : "Success"
           }
         ],
         "Default" : "Wait 30 seconds"
-      },
-      "Remove unused entities" : {
-        "Type" : "Task",
-        "Resource" : "arn:aws:states:::lambda:invoke",
-        "OutputPath" : "$.Payload",
-        "Parameters" : {
-          "FunctionName" : module.graph_remover_lambda.lambda.arn,
-          "Payload.$" : "$$.Execution.Input",
-        },
-        "Next" : "Success"
       },
       "Success" : {
         "Type" : "Succeed"
