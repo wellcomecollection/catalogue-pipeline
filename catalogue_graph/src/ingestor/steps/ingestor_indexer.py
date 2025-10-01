@@ -67,7 +67,7 @@ def handler(
     record_class = RECORD_CLASSES[event.ingestor_type]
 
     if len(event.objects_to_index) == 0:
-        raise ValueError("No files to process.")
+        print("Will not index any documents. There are no files to process.")
 
     total_success_count = 0
     for s3_object in event.objects_to_index:
