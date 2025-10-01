@@ -15,7 +15,7 @@ resource "aws_scheduler_schedule" "concepts_pipeline_monthly" {
 
 resource "aws_scheduler_schedule" "concepts_pipeline_incremental" {
   name                = "concepts_pipeline_incremental_run"
-  schedule_expression = "cron(0,15,30,45 * * * ? *)"
+  schedule_expression = "cron(0,15,30,45 * * * ? *)" # Every 15 minutes
 
   flexible_time_window {
     mode = "OFF"
