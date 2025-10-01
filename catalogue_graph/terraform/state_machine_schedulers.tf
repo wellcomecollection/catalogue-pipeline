@@ -13,8 +13,10 @@ resource "aws_scheduler_schedule" "concepts_pipeline_monthly" {
   }
 }
 
-resource "aws_scheduler_schedule" "concepts_pipeline_incremental" {
-  name                = "concepts_pipeline_incremental_run"
+resource "aws_scheduler_schedule" "ingestor_pipeline_incremental" {
+  for_each = { for t in local.ingestor_types : t => t }
+
+  name                = "${each.key}_pipeline_incremental_run"
   schedule_expression = "cron(0,15,30,45 * * * ? *)" # Every 15 minutes
 
   flexible_time_window {
@@ -28,7 +30,7 @@ resource "aws_scheduler_schedule" "concepts_pipeline_incremental" {
     # TODO: Replace 'dev' with production index date
     input = <<JSON
     {
-      "ingestor_type": "concepts",
+      "ingestor_type": "${each.key}",
       "pipeline_date": "${local.pipeline_date}",
       "index_date": "dev",
       "window": {
