@@ -56,7 +56,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
     if "job_id" not in event:
         event["job_id"] = create_job_id()
 
-    return handler(IngestorLoaderLambdaEvent(**event)).model_dump()
+    return handler(IngestorLoaderLambdaEvent(**event)).model_dump(mode="json")
 
 
 def local_handler() -> None:

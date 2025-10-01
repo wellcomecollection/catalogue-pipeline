@@ -95,7 +95,7 @@ def handler(
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
-    return handler(IngestorIndexerLambdaEvent(**event)).model_dump()
+    return handler(IngestorIndexerLambdaEvent(**event)).model_dump(mode="json")
 
 
 def local_handler() -> None:
