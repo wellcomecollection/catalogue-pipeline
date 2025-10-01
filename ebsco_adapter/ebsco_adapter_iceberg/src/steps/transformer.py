@@ -2,79 +2,107 @@
 
 Converts Iceberg loader output (all records or a changeset) into `SourceWork` /
 `DeletedWork` documents and indexes them into Elasticsearch, writing a batch
-ID manifest for downstream consumers; idempotent on previously processed files.
+ID manifest for downstream consumers.
 """
 
 import argparse
 import io
-import json
 from collections.abc import Generator, Iterable
-from pathlib import PurePosixPath
 from typing import Any
 
 import elasticsearch.helpers
 import pyarrow as pa
-import smart_open
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 from pymarc import parse_xml_to_array
-from pymarc.record import Record
+from pymarc.record import Record as MarcRecord
 
 import config
+from manifests import ManifestWriter
+from models.manifests import ErrorLine, TransformerManifest
 from models.step_events import (
     EbscoAdapterTransformerEvent,
-    EbscoAdapterTransformerResult,
 )
-from models.work import BaseWork, DeletedWork, SourceWork
-from transformers.ebsco_to_weco import transform_record
+from models.work import BaseWork, DeletedWork, SourceIdentifier, SourceWork
+from transformers.ebsco_to_weco import EBSCO_IDENTIFIER_TYPE, transform_record
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
-from utils.tracking import is_file_already_processed, record_processed_file
 
 # Batch size for converting Arrow tables to Python objects before indexing
-BATCH_SIZE = 10_000
+# This must result in batches of output ids that fit in the 256kb item
+# limit for step function invocations (with some margin).
+BATCH_SIZE = 5_000
 
 
 class EbscoAdapterTransformerConfig(BaseModel):
     is_local: bool = False
     use_rest_api_table: bool = True
     pipeline_date: str
+    # Optional override for index naming. When None we use pipeline_date.
     index_date: str | None = None
 
 
-def _write_batch_file(
-    batches_ids: list[list[str]], job_id: str, *, changeset_id: str | None
-) -> tuple[str, str, str]:
-    # Build the S3 key using PurePosixPath for clean joining (no leading // issues)
-    # Prefer .ndjson to signal line-delimited JSON (supported by Step Functions)
-    file_name = f"{changeset_id or 'reindex'}.{job_id}.ids.ndjson"
-    key = PurePosixPath(config.BATCH_S3_PREFIX) / file_name
-    bucket = config.S3_BUCKET
-    batch_file_location = f"s3://{bucket}/{key.as_posix()}"
+def _to_error_line(err: dict[str, Any]) -> ErrorLine | None:
+    """Convert a raw error dict into an ErrorLine.
 
-    with smart_open.open(batch_file_location, "w", encoding="utf-8") as f:
-        # Write NDJSON: one JSON object per line -> one Distributed Map item per line
-        # Line shape: {"ids": ["id1", "id2", ...]}
-        for ids in batches_ids:
-            f.write(json.dumps({"ids": ids}) + "\n")
+    The message is a deterministic '; ' joined list of key=value pairs (excluding 'id')
+    sorted by key name. None values are skipped. Returns None if no id present.
+    """
+    rec_id = err.get("id")
+    if not rec_id:
+        return None
+    parts: list[str] = []
+    for k in sorted(err.keys()):
+        if k == "id":
+            continue
+        v = err[k]
+        if v is None:
+            continue
+        parts.append(f"{k}={v}")
+    message = "; ".join(parts)
+    return ErrorLine(id=str(rec_id), message=message)
 
-    print(f"Wrote batch id file to {batch_file_location}")
-    return batch_file_location, bucket, key.as_posix()
 
+def transform(
+    work_id: str, content: str
+) -> tuple[list[SourceWork], list[dict[str, Any]]]:
+    """Parse a MARC XML string into SourceWork records.
 
-def transform(work_id: str, content: str) -> list[SourceWork]:
-    """Parse a MARC XML string into TransformedWork records."""
+    Returns (works, errors). Each error is a dict with at minimum stage, id, reason.
+    Reasons: empty_content | parse_error | no_valid_title
+    """
+
+    errors: list[dict[str, Any]] = []
+
+    if not content:
+        errors.append({"stage": "transform", "id": work_id, "reason": "empty_content"})
+        return [], errors
 
     def valid_record(record: Any) -> bool:  # local for clarity
         return bool(record and getattr(record, "title", None))
 
     try:
-        marc_records: list[Record] = parse_xml_to_array(io.StringIO(content))
-    except Exception as exc:  # broad, but we want to skip bad MARC payloads only
-        print(f"Failed to parse MARC content for id={work_id}: {exc}")
-        return []
+        marc_records: list[MarcRecord] = parse_xml_to_array(io.StringIO(content))
+    except Exception as exc:  # broad, skip bad MARC payloads only
+        detail = str(exc)[:200]
+        print(f"Failed to parse MARC content for id={work_id}: {detail}")
+        errors.append(
+            {
+                "stage": "transform",
+                "id": work_id,
+                "reason": "parse_error",
+                "detail": detail,
+            }
+        )
+        return [], errors
 
-    return [transform_record(record) for record in marc_records if valid_record(record)]
+    works = [
+        transform_record(record) for record in marc_records if valid_record(record)
+    ]
+
+    if not works:
+        errors.append({"stage": "transform", "id": work_id, "reason": "no_valid_title"})
+    return works, errors
 
 
 def _generate_actions(
@@ -84,15 +112,20 @@ def _generate_actions(
     for record in records:
         yield {
             "_index": index_name,
-            "_id": record.id,
+            "_id": str(
+                record.source_identifier
+            ),  # Use formatted string id via SourceIdentifier
             "_source": record.model_dump(),
         }
 
 
 def load_data(
     elastic_client: Elasticsearch, records: Iterable[BaseWork], index_name: str
-) -> tuple[int, int]:
-    """Index records; return (success_count, error_count)."""
+) -> tuple[int, list[dict[str, Any]]]:
+    """Index records; return (success_count, error_details list).
+
+    error_details elements shaped as {"stage": "index", "id": str, "status": int, "error_type": str}
+    """
     success_count, errors = elasticsearch.helpers.bulk(
         elastic_client,
         _generate_actions(records, index_name),
@@ -100,89 +133,84 @@ def load_data(
         stats_only=False,
     )
 
-    # ES8 helper returns a list of error items when raise_on_error=False; may be empty
-    error_items: list[Any]
-    error_items = [] if not errors or isinstance(errors, int) else list(errors)
-    error_count = len(error_items)
+    error_items: list[Any] = (
+        [] if not errors or isinstance(errors, int) else list(errors)
+    )
+    error_details: list[dict[str, Any]] = []
+    for e in error_items:
+        try:
+            idx_error = e.get("index", {})
+            error_details.append(
+                {
+                    "stage": "index",
+                    "id": idx_error.get("_id"),
+                    "status": idx_error.get("status"),
+                    "error_type": (idx_error.get("error") or {}).get("type"),
+                }
+            )
+        except Exception:  # pragma: no cover - defensive
+            error_details.append({"stage": "index", "raw": str(e)[:500]})
 
-    if error_items:
-        printed: list[str] = []
-        for e in error_items[:5]:
-            try:
-                idx_error = e.get("index", {})
-                printed.append(
-                    f"id={idx_error.get('_id')} status={idx_error.get('status')} error={idx_error.get('error', {}).get('type')}"
-                )
-            except Exception:  # pragma: no cover - defensive
-                printed.append(str(e)[:200])
+    if error_details:
+        preview = [
+            f"id={d.get('id')} type={d.get('error_type')}" for d in error_details[:5]
+        ]
         print(
-            f"Encountered {error_count} indexing errors (showing up to 5):\n"
-            + "\n".join(printed)
+            f"Encountered {len(error_details)} indexing errors (showing up to 5):\n"
+            + "\n".join(preview)
         )
     else:
         print(
             f"Successfully stored {success_count} transformed records in index: {index_name}"
         )
 
-    return success_count, error_count
+    return success_count, error_details
 
 
 def _process_batch(
     batch: pa.RecordBatch,
     index_name: str,
     es_client: Elasticsearch,
-) -> tuple[int, int, list[str]]:
-    """Process a single Arrow RecordBatch; return (success_count, failure_count, ids).
+) -> tuple[int, list[str], list[dict[str, Any]]]:
+    """Process a single Arrow RecordBatch.
 
-    Empty content denotes a deletion; in that case we index a DeletedWork with a
-    standard reason so downstream consumers know the record was removed at source.
+    Returns (success_count, ids, errors_list).
+    errors_list contains per-record transformation or indexing errors.
     """
     print(f"Processing batch with {len(batch)} rows")
 
     transformed: list[BaseWork] = []
+    errors: list[dict[str, Any]] = []
 
-    # Schema (see schemata.py): namespace, id, content, changeset, last_modified
     for row in batch.to_pylist():
-        work_id = row["id"]  # guaranteed by schema
-        content = row.get("content")  # optional per schema
+        work_id = str(row["id"])  # guaranteed by schema
+        content = row.get("content")
         if content:
-            transformed.extend(transform(str(work_id), content))
+            works, t_errors = transform(work_id, content)
+            transformed.extend(works)
+            if t_errors:
+                errors.extend(t_errors)
         else:
-            # Create a DeletedWork marker document
+            # deletion marker -> DeletedWork counts as success (not an error)
             transformed.append(
                 DeletedWork(
-                    id=str(work_id),
                     deleted_reason="not found in EBSCO source",
+                    source_identifier=SourceIdentifier(
+                        identifier_type=EBSCO_IDENTIFIER_TYPE,
+                        ontology_type="Work",
+                        value=work_id,
+                    ),
                 )
             )
 
-    if not transformed:
+    if not transformed and not errors:
         print("No valid records produced from batch")
-        return 0, 0, []
+        return 0, [], errors
 
-    success, failed = load_data(es_client, transformed, index_name)
-    ids = [t.id for t in transformed]
-    return success, failed, ids
-
-
-def _record_transformed_file(
-    event: EbscoAdapterTransformerEvent, result: EbscoAdapterTransformerResult
-) -> None:
-    """Record that a source file was transformed (idempotency tracking).
-
-    Separated from the main handler for clarity & easier testing.
-    Safe no-op when no file_location is supplied (e.g. local runs without S3 input).
-    """
-    if not event.file_location:
-        print("No file location provided for tracking, skipping!")
-        return
-
-    record_processed_file(
-        job_id=event.job_id,
-        file_location=event.file_location,
-        step="transformed",
-        payload_obj=result,
-    )
+    success, index_errors = load_data(es_client, transformed, index_name)
+    errors.extend(index_errors)
+    ids = [str(t.source_identifier) for t in transformed]
+    return success, ids, errors
 
 
 def process_batches(
@@ -192,8 +220,7 @@ def process_batches(
     index_name: str,
     job_id: str,
     changeset_id: str | None,
-    index_date: str,
-) -> EbscoAdapterTransformerResult:
+) -> TransformerManifest:
     """Process an Arrow table into Elasticsearch and return a result object.
 
     Responsibilities:
@@ -204,71 +231,53 @@ def process_batches(
     - Return EbscoAdapterTransformerResult (tracking is left to caller)
     """
     total_success = 0
-    total_failed = 0
     batches_ids: list[list[str]] = []
+    all_errors: list[dict[str, Any]] = []
 
     for batch in pa_table.to_batches(max_chunksize=BATCH_SIZE):
-        success, failed, ids = _process_batch(batch, index_name, es_client)
+        success, ids, errors = _process_batch(batch, index_name, es_client)
         total_success += success
-        total_failed += failed
         if ids:
             batches_ids.append(ids)
+        if errors:
+            all_errors.extend(errors)
 
-    batch_file_location, batch_file_bucket, batch_file_key = _write_batch_file(
-        batches_ids, job_id, changeset_id=changeset_id
+    error_lines: list[ErrorLine] = []
+    if all_errors:
+        for e in all_errors:
+            line = _to_error_line(e)
+            if line:
+                error_lines.append(line)
+
+    writer = ManifestWriter(
+        job_id=job_id,
+        changeset_id=changeset_id,
+        bucket=config.S3_BUCKET,
+        prefix=config.BATCH_S3_PREFIX,
     )
-
+    result_manifest = writer.build_manifest(
+        job_id=job_id,
+        batches_ids=batches_ids,
+        errors=error_lines,
+        success_count=total_success,
+    )
     total_batches = len(batches_ids)
     total_ids = sum(len(b) for b in batches_ids)
     print(
-        f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={total_failed}"
+        f"Transformer summary: batches={total_batches} total_ids={total_ids} success={total_success} failures={len(error_lines)}"
     )
-
-    return EbscoAdapterTransformerResult(
-        index_date=index_date,
-        job_id=job_id,
-        batch_file_location=batch_file_location,
-        batch_file_bucket=batch_file_bucket,
-        batch_file_key=batch_file_key,
-        success_count=total_success,
-        failure_count=total_failed,
-    )
+    return result_manifest
 
 
 def handler(
     event: EbscoAdapterTransformerEvent, config_obj: EbscoAdapterTransformerConfig
-) -> EbscoAdapterTransformerResult:
+) -> TransformerManifest:
     print(f"Running transformer handler with config: {config_obj}")
     print(f"Processing event: {event}")
     print(f"Received job_id: {event.job_id}")
 
-    # Determine index date by cascading choice: event > config > pipeline_date
-    index_date = event.index_date or config_obj.index_date or config_obj.pipeline_date
-
-    prior_record = None
-    if event.file_location:
-        prior_record = is_file_already_processed(
-            event.file_location, step="transformed"
-        )
-
-    # Short-circuit if this file has already been transformed (mirrors loader behaviour)
-    if prior_record:
-        print(
-            "Source file previously transformed; skipping transformer work (idempotent short-circuit)."
-        )
-        prior_batch = prior_record.get("batch_file_location")
-        prior_bucket = prior_record.get("batch_file_bucket")
-        prior_key = prior_record.get("batch_file_key")
-
-        return EbscoAdapterTransformerResult(
-            index_date=index_date,
-            job_id=event.job_id,
-            batch_file_location=prior_batch,
-            batch_file_bucket=prior_bucket,
-            batch_file_key=prior_key,
-            success_count=0,
-            failure_count=0,
-        )
+    # Determine index date from config override or fallback to pipeline date
+    index_date = config_obj.index_date or config_obj.pipeline_date
 
     table = get_iceberg_table(config_obj.use_rest_api_table)
     table_client = IcebergTableClient(table)
@@ -286,6 +295,7 @@ def handler(
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
         is_local=config_obj.is_local,
+        # This is a hardcoded to make sure we use the manually created test key for now
         api_key_name="transformer-ebsco-test",
     )
     index_name = get_standard_index_name("works-source", index_date)
@@ -300,10 +310,7 @@ def handler(
         index_name=index_name,
         job_id=event.job_id,
         changeset_id=event.changeset_id,
-        index_date=index_date,
     )
-    _record_transformed_file(event, result)
-
     return result
 
 
@@ -317,7 +324,7 @@ def lambda_handler(event: EbscoAdapterTransformerEvent, context: Any) -> dict[st
     ).model_dump()
 
 
-def local_handler() -> EbscoAdapterTransformerResult:
+def local_handler() -> TransformerManifest:
     parser = argparse.ArgumentParser(description="Transform EBSCO adapter data")
     parser.add_argument(
         "--changeset-id", type=str, help="Changeset ID from loader output to transform"
@@ -337,7 +344,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
     parser.add_argument(
         "--index-date",
         type=str,
-        help="The index date to use (defaults to pipeline date).",
+        help="Optional index date override (defaults to pipeline date).",
         required=False,
     )
     parser.add_argument(
@@ -351,7 +358,7 @@ def local_handler() -> EbscoAdapterTransformerResult:
     args = parser.parse_args()
 
     event = EbscoAdapterTransformerEvent(
-        changeset_id=args.changeset_id, job_id=args.job_id, file_location=None
+        changeset_id=args.changeset_id, job_id=args.job_id
     )
     use_rest_api = args.use_rest_api_table
     config_obj = EbscoAdapterTransformerConfig(

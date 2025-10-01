@@ -5,9 +5,6 @@ from pydantic.alias_generators import to_camel
 
 
 class ElasticsearchModel(BaseModel):
-    # This model config automatically converts between snake_case and camelCase when validating and serialising.
-    # Instances of this model (and its subclasses) can be constructed using both snake_case and camelCase properties,
-    # allowing us to continue using snake_case in Python code and camelCase in Elasticsearch documents.
     model_config = ConfigDict(
         alias_generator=to_camel,
         validate_by_name=True,
@@ -16,24 +13,21 @@ class ElasticsearchModel(BaseModel):
     )
 
 
-class BaseWork(BaseModel):
-    """
-    Base class for work models, providing common attributes and methods.
-    """
+class SourceIdentifier(ElasticsearchModel):
+    identifier_type: str  # e.g. 'ebsco-alt-lookup'
+    ontology_type: str  # always 'Work' for this adapter
+    value: str  # raw source ID
 
-    id: str
+    def __str__(self) -> str:
+        return f"Work[{self.identifier_type}/{self.value}]"
+
+
+class BaseWork(BaseModel):
+    source_identifier: SourceIdentifier
 
 
 class DeletedWork(ElasticsearchModel, BaseWork):
     deleted_reason: str
-
-
-# TODO: This is from catalogue_graph.ingestor.models.
-# import it rather than copy
-class SourceIdentifier(ElasticsearchModel):
-    identifier_type: str
-    ontology_type: str
-    value: str
 
 
 ConceptType = Literal[

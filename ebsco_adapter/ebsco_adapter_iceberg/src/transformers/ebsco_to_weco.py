@@ -17,6 +17,8 @@ from transformers.production import extract_production
 from transformers.subjects import extract_subjects
 from transformers.title import extract_title
 
+EBSCO_IDENTIFIER_TYPE = "ebsco-alt-lookup"
+
 
 def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
     return SourceIdentifier(
@@ -27,7 +29,6 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
 def transform_record(marc_record: Record) -> SourceWork:
     work_id = extract_id(marc_record)
     return SourceWork(
-        id=work_id,
         title=extract_title(marc_record),
         alternative_titles=extract_alternative_titles(marc_record),
         other_identifiers=extract_other_identifiers(marc_record),
@@ -42,6 +43,11 @@ def transform_record(marc_record: Record) -> SourceWork:
         holdings=extract_holdings(marc_record),
         genres=extract_genres(marc_record),
         subjects=extract_subjects(marc_record),
+        source_identifier=SourceIdentifier(
+            identifier_type=EBSCO_IDENTIFIER_TYPE,
+            ontology_type="Work",
+            value=work_id,
+        ),
     )
 
 
