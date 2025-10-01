@@ -38,10 +38,7 @@ def handler(
 ) -> IngestorIndexerLambdaEvent:
     print(f"Received event: {event}")
 
-    pipeline_date = event.pipeline_date
-    index_date = event.index_date
-
-    if pipeline_date == "dev":
+    if event.pipeline_date == "dev":
         print(
             "No pipeline date specified. Will connect to a local Elasticsearch instance."
         )
@@ -50,10 +47,7 @@ def handler(
     objects_to_index = transformer.load_documents(event)
 
     return IngestorIndexerLambdaEvent(
-        ingestor_type=event.ingestor_type,
-        pipeline_date=pipeline_date,
-        index_date=index_date,
-        job_id=event.job_id,
+        **event.model_dump(),
         objects_to_index=objects_to_index,
     )
 
