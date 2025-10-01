@@ -1,6 +1,6 @@
 import argparse
 import typing
-from datetime import date, datetime
+from datetime import datetime
 
 import polars as pl
 
@@ -61,32 +61,13 @@ def get_ids_to_delete(event: IngestorMonitorStepEvent) -> set[str]:
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
     df = df_from_s3_parquet(s3_file_uri)
 
-    try:
-        # Filter for IDs which were added to the log file since the last run of the ingestor_deletion.
-        cutoff_date = get_last_run_date(event)
-        df = df.filter(pl.col("timestamp") >= cutoff_date)
-    except FileNotFoundError:
-        # If the file does not exist, it means we did not run ingestor deletions on the current index yet.
-        # In this case, we can use the index date as a filter (since all IDs which were removed from the graph before
-        # the index was created cannot exist in the index).
-        if event.index_date and _is_valid_date(event.index_date):
-            index_date = datetime.strptime(event.index_date, "%Y-%m-%d").date()
-            df = df.filter(pl.col("timestamp") >= index_date)
+    # TODO: Fix this based on https://github.com/wellcomecollection/platform/issues/6121
+    if event.index_date and _is_valid_date(event.index_date):
+        index_date = datetime.strptime(event.index_date, "%Y-%m-%d").date()
+        df = df.filter(pl.col("timestamp") >= index_date)
 
     ids = pl.Series(df.select(pl.col("id"))).to_list()
     return set(ids)
-
-
-def get_last_run_date(event: IngestorMonitorStepEvent) -> date:
-    """Return a date corresponding to the last time we ran the ingestor_deletion Lambda."""
-    ingestor_deletion_report: DeletionReport | None = DeletionReport.read(
-        pipeline_date=event.pipeline_date,
-        index_date=event.index_date,
-        ingestor_type=event.ingestor_type,
-    )
-    assert isinstance(ingestor_deletion_report, DeletionReport)
-
-    return datetime.strptime(ingestor_deletion_report.date, "%Y-%m-%d").date()
 
 
 def handler(event: IngestorMonitorStepEvent, is_local: bool = False) -> None:
@@ -108,10 +89,7 @@ def handler(event: IngestorMonitorStepEvent, is_local: bool = False) -> None:
         )
 
     report = DeletionReport(
-        pipeline_date=event.pipeline_date,
-        index_date=event.index_date,
-        ingestor_type=event.ingestor_type,
-        job_id=event.job_id,
+        **event.model_dump(),
         deleted_count=deleted_count,
         date=datetime.today().strftime("%Y-%m-%d"),
     )

@@ -1,5 +1,3 @@
-import json
-
 import polars as pl
 import pytest
 from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
@@ -49,54 +47,6 @@ def test_ingestor_deletions_line_first_run() -> None:
     indexed_concepts = get_indexed_concepts()
     assert len(indexed_concepts) == 1
     assert list(indexed_concepts.keys())[0] == "someid12"
-
-
-def test_ingestor_deletions_line_next_run() -> None:
-    mock_deleted_ids_log_file()
-
-    pipeline_date = "2025-01-01"
-    index_date = "2025-02-02"
-    job_id = "test-job-id"
-    index_name = f"concepts-indexed-{index_date}"
-
-    mock_es_secrets("concept_ingestor", pipeline_date)
-
-    # Mock a file storing the date of the last index remover run
-    MockSmartOpen.mock_s3_file(
-        f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/{pipeline_date}/{index_date}/report.deletions.json",
-        json.dumps(
-            {
-                "pipeline_date": pipeline_date,
-                "index_date": index_date,
-                "job_id": "20240103T1200",
-                "ingestor_type": "concepts",
-                "deleted_count": 2,
-                "date": "2025-04-07",
-            }
-        ),
-    )
-
-    index_concepts(
-        ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"], index_name
-    )
-
-    assert len(get_indexed_concepts(index_name)) == 5
-
-    event = {
-        "ingestor_type": "concepts",
-        "pipeline_date": pipeline_date,
-        "index_date": index_date,
-        "job_id": job_id,
-        "force_pass": True,
-    }
-    lambda_handler(event, None)
-
-    indexed_concepts = get_indexed_concepts(index_name)
-
-    # Only two of the concepts in the mock file were inserted after the last run, so only those two should be removed
-    # from the index
-    assert len(indexed_concepts) == 3
-    assert set(indexed_concepts.keys()) == {"u6jve2vb", "amzfbrbz", "someid12"}
 
 
 def test_ingestor_deletions_line_safety_check() -> None:

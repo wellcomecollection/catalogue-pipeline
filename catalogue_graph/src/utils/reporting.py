@@ -1,59 +1,24 @@
 from typing import ClassVar, Self
 
-from pydantic import BaseModel
-
-from config import CATALOGUE_GRAPH_S3_BUCKET, INGESTOR_S3_PREFIX
+from ingestor.models.step_events import (
+    IngestorStepEvent,
+)
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 
 
-class PipelineReport(BaseModel):
+class PipelineReport(IngestorStepEvent):
     label: ClassVar[str]
-    pipeline_date: str
-    index_date: str
-    ingestor_type: str
-    job_id: str | None
-
-    @staticmethod
-    def _get_report_s3_url(
-        report_type: type["PipelineReport"],
-        pipeline_date: str,
-        index_date: str,
-        ingestor_type: str,
-        job_id: str | None = None,
-    ) -> str:
-        report_name = f"report.{report_type.label}.json"
-        if job_id is not None:
-            report_prefix = f"{pipeline_date}/{index_date}/{job_id}"
-        else:
-            report_prefix = f"{pipeline_date}/{index_date}"
-
-        return f"s3://{CATALOGUE_GRAPH_S3_BUCKET}/{INGESTOR_S3_PREFIX}_{ingestor_type}/{report_prefix}/{report_name}"
 
     @classmethod
     def read(
-        cls,
-        pipeline_date: str,
-        index_date: str,
-        ingestor_type: str,
-        job_id: str | None = None,
-        ignore_missing: bool = False,
+        cls, event: IngestorStepEvent, ignore_missing: bool = False
     ) -> Self | None:
-        s3_url = PipelineReport._get_report_s3_url(
-            cls, pipeline_date, index_date, ingestor_type, job_id
-        )
+        s3_uri = event.get_s3_uri(f"report.{cls.label}", "json")
+        return pydantic_from_s3_json(cls, s3_uri, ignore_missing=ignore_missing)
 
-        return pydantic_from_s3_json(cls, s3_url, ignore_missing=ignore_missing)
-
-    def write(self, latest: bool = False) -> None:
-        s3_url = PipelineReport._get_report_s3_url(
-            self.__class__,
-            self.pipeline_date,
-            self.index_date,
-            self.ingestor_type,
-            job_id=self.job_id if not latest else None,
-        )
-
-        pydantic_to_s3_json(self, s3_url)
+    def write(self) -> None:
+        s3_uri = self.get_s3_uri(f"report.{self.label}", "json")
+        pydantic_to_s3_json(self, s3_uri)
 
 
 class LoaderReport(PipelineReport):

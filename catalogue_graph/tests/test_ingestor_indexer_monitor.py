@@ -17,6 +17,8 @@ def get_mock_expected_report(success_count: int) -> dict:
         "index_date": index_date,
         "ingestor_type": "concepts",
         "job_id": "123",
+        "load_format": "parquet",
+        "window": None,
         "success_count": success_count,
     }
 

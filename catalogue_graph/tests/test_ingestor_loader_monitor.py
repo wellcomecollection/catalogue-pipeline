@@ -24,10 +24,7 @@ MOCK_STEP_EVENT = IngestorStepEvent(
 
 def get_mock_expected_report(record_count: int, file_size: int) -> dict:
     return {
-        "pipeline_date": "2025-01-01",
-        "index_date": "2025-03-01",
-        "job_id": "123",
-        "ingestor_type": "concepts",
+        **MOCK_STEP_EVENT.model_dump(),
         "record_count": record_count,
         "total_file_size": file_size,
     }
