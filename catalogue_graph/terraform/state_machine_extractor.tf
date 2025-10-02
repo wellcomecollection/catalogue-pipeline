@@ -38,7 +38,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
                   "--stream-destination",
                   "{% $states.input.stream_destination %}",
                   "{% $states.context.Execution.Input.window ? '--window-end' : '' %}",
-                  "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : '' %}",
+                  "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window.end_time : '' %}",
                   "--pipeline-date",
                   local.pipeline_date,
                 ]
