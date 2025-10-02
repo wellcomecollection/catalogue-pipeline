@@ -8,15 +8,17 @@ import graph_remover
 import utils.elasticsearch
 from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
 from utils.aws import df_from_s3_parquet
-from utils.elasticsearch import get_standard_index_name
+from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
 
 
-def get_current_id_count(event: IngestorMonitorStepEvent, is_local: bool) -> int:
+def get_current_id_count(
+    event: IngestorMonitorStepEvent, es_mode: ElasticsearchMode
+) -> int:
     """Return the number of documents currently stored in ES in the concepts index."""
     es = utils.elasticsearch.get_client(
-        "concepts_ingestor", event.pipeline_date, is_local
+        "concepts_ingestor", event.pipeline_date, es_mode
     )
 
     response = es.count(
@@ -29,11 +31,11 @@ def get_current_id_count(event: IngestorMonitorStepEvent, is_local: bool) -> int
 def delete_concepts_from_elasticsearch(
     deleted_ids: set[str],
     event: IngestorMonitorStepEvent,
-    is_local: bool,
+    es_mode: ElasticsearchMode,
 ) -> int:
     """Remove documents matching `deleted_ids` from the concepts ES index."""
     es = utils.elasticsearch.get_client(
-        "concepts_ingestor", event.pipeline_date, is_local
+        "concepts_ingestor", event.pipeline_date, es_mode
     )
     index_name = get_standard_index_name("concepts-indexed", event.index_date)
 
@@ -70,9 +72,11 @@ def get_ids_to_delete(event: IngestorMonitorStepEvent) -> set[str]:
     return set(ids)
 
 
-def handler(event: IngestorMonitorStepEvent, is_local: bool = False) -> None:
+def handler(
+    event: IngestorMonitorStepEvent, es_mode: ElasticsearchMode = "private"
+) -> None:
     ids_to_delete = get_ids_to_delete(event)
-    current_id_count = get_current_id_count(event, is_local)
+    current_id_count = get_current_id_count(event, es_mode)
 
     # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
     # (set to 5%), an exception will be raised.
@@ -85,7 +89,7 @@ def handler(event: IngestorMonitorStepEvent, is_local: bool = False) -> None:
     if len(ids_to_delete) > 0:
         # Delete the corresponding items from the graph
         deleted_count = delete_concepts_from_elasticsearch(
-            ids_to_delete, event, is_local
+            ids_to_delete, event, es_mode
         )
 
     report = DeletionReport(
@@ -133,7 +137,7 @@ def local_handler() -> None:
 
     args = parser.parse_args()
     event = IngestorMonitorStepEvent(**args.__dict__, ingestor_type="concepts")
-    handler(event, is_local=True)
+    handler(event, es_mode="public")
 
 
 if __name__ == "__main__":

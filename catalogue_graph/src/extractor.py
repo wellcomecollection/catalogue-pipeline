@@ -20,21 +20,13 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
         f"Transforming {event.sample_size or 'all'} {event.entity_type} using the {event.transformer_type} "
         f"transformer and streaming them into {event.stream_destination}."
     )
-    if event.pipeline_date == "dev":
-        print(
-            "No pipeline date specified. Will connect to a local Elasticsearch instance."
-        )
-    elif is_local:
-        print("Will connect to the public Elasticsearch host (is_local=True).")
-    else:
-        print("Will connect to the private Elasticsearch host (is_local=False).")
 
     transformer: BaseTransformer = create_transformer(
         event.transformer_type,
         event.entity_type,
         event.pipeline_date,
         event.window,
-        is_local=is_local,
+        es_mode="public" if is_local else "private",
     )
 
     if event.stream_destination == "graph":

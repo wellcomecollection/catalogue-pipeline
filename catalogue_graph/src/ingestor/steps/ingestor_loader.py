@@ -10,6 +10,7 @@ from ingestor.models.step_events import (
 from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
+from utils.elasticsearch import ElasticsearchMode
 from utils.types import IngestorType
 
 
@@ -19,31 +20,24 @@ def create_job_id() -> str:
 
 
 def create_transformer(
-    event: IngestorLoaderLambdaEvent, is_local: bool = False
+    event: IngestorLoaderLambdaEvent, es_mode: ElasticsearchMode
 ) -> ElasticsearchBaseTransformer:
     if event.ingestor_type == "concepts":
         return ElasticsearchConceptsTransformer(
-            event.pipeline_date, event.window, is_local
+            event.pipeline_date, event.window, es_mode
         )
     if event.ingestor_type == "works":
-        return ElasticsearchWorksTransformer(
-            event.pipeline_date, event.window, is_local
-        )
+        return ElasticsearchWorksTransformer(event.pipeline_date, event.window, es_mode)
 
     raise ValueError(f"Unknown transformer type: {event.ingestor_type}")
 
 
 def handler(
-    event: IngestorLoaderLambdaEvent, is_local: bool = False
+    event: IngestorLoaderLambdaEvent, es_mode: ElasticsearchMode = "private"
 ) -> IngestorIndexerLambdaEvent:
     print(f"Received event: {event}")
 
-    if event.pipeline_date == "dev":
-        print(
-            "No pipeline date specified. Will connect to a local Elasticsearch instance."
-        )
-
-    transformer = create_transformer(event, is_local)
+    transformer = create_transformer(event, es_mode)
     objects_to_index = transformer.load_documents(event)
 
     return IngestorIndexerLambdaEvent(
@@ -110,22 +104,22 @@ def local_handler() -> None:
         default="s3",
     )
     parser.add_argument(
-        "--load-format",
+        "--es-mode",
         type=str,
-        help='The format of loaded documents, will default to "parquet".',
+        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
         required=False,
-        choices=["parquet", "jsonl"],
-        default="parquet",
+        choices=["local", "public"],
+        default="local",
     )
 
     args = parser.parse_args()
     event = IngestorLoaderLambdaEvent.from_argparser(args)
 
     if args.load_destination == "local":
-        transformer = create_transformer(event, True)
+        transformer = create_transformer(event, args.es_mode)
         transformer.load_documents(event, "local")
     else:
-        handler(event, True)
+        handler(event, args.es_mode)
 
 
 if __name__ == "__main__":

@@ -71,8 +71,8 @@ NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
 
 
 class GraphBaseExtractor:
-    def __init__(self, is_local: bool = False):
-        self.neptune_client = get_neptune_client(is_local)
+    def __init__(self, use_public_endpoint: bool = False):
+        self.neptune_client = get_neptune_client(use_public_endpoint)
         self.neptune_params: dict[str, Any] = {}
 
     def extract_raw(self) -> Generator[Any]:

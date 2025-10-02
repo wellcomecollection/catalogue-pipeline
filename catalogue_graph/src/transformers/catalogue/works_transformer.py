@@ -5,6 +5,7 @@ from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from sources.merged_works_source import MergedWorksSource
 from transformers.base_transformer import BaseTransformer
+from utils.elasticsearch import ElasticsearchMode
 
 from .raw_work import RawCatalogueWork
 
@@ -29,10 +30,10 @@ class CatalogueWorksTransformer(BaseTransformer):
         self,
         pipeline_date: str,
         window: IncrementalWindow | None,
-        is_local: bool,
+        es_mode: ElasticsearchMode,
     ):
         self.source = MergedWorksSource(
-            pipeline_date, ES_QUERY, ES_FIELDS, window, is_local
+            pipeline_date, ES_QUERY, ES_FIELDS, window, es_mode
         )
 
     def transform_node(self, raw_node: dict) -> Work:

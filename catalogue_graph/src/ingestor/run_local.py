@@ -17,7 +17,7 @@ from utils.types import IngestorType
 def run_load(
     loader_event: IngestorLoaderLambdaEvent, args: argparse.Namespace
 ) -> IngestorIndexerLambdaEvent:
-    loader_result = loader_handler(loader_event, is_local=True)
+    loader_result = loader_handler(loader_event, es_mode="public")
 
     if args.monitoring:
         loader_monitor_handler(loader_result)
@@ -26,7 +26,7 @@ def run_load(
 
 
 def run_index(loader_result: IngestorIndexerLambdaEvent) -> None:
-    result = indexer_handler(loader_result, is_local=True)
+    result = indexer_handler(loader_result, es_mode="public")
     print(f"Indexed {result.success_count} documents.")
 
 

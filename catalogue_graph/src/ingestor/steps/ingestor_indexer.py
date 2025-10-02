@@ -19,7 +19,7 @@ from ingestor.models.step_events import (
     IngestorStepEvent,
 )
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
-from utils.elasticsearch import get_standard_index_name
+from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.types import IngestorType
 
 RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
@@ -44,15 +44,15 @@ def load_data(
     ingestor_type: IngestorType,
     indexable_data: list[IndexableRecord],
     pipeline_date: str,
-    index_date: str | None,
-    is_local: bool,
+    index_date: str,
+    es_mode: ElasticsearchMode,
 ) -> int:
     index_name = get_standard_index_name(f"{ingestor_type}-indexed", index_date)
     print(
         f"Loading {len(indexable_data)} Indexable {ingestor_type} to ES index: {index_name} ..."
     )
     es = utils.elasticsearch.get_client(
-        f"{ingestor_type}_ingestor", pipeline_date, is_local
+        f"{ingestor_type}_ingestor", pipeline_date, es_mode
     )
     success_count, _ = elasticsearch.helpers.bulk(
         es, generate_operations(index_name, indexable_data)
@@ -62,7 +62,7 @@ def load_data(
 
 
 def handler(
-    event: IngestorIndexerLambdaEvent, is_local: bool = False
+    event: IngestorIndexerLambdaEvent, es_mode: ElasticsearchMode = "private"
 ) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event}.")
 
@@ -84,7 +84,7 @@ def handler(
             indexable_data=[record_class.model_validate(row) for row in data],
             pipeline_date=event.pipeline_date,
             index_date=event.index_date,
-            is_local=is_local,
+            es_mode=es_mode,
         )
         print(f"Successfully indexed {success_count} documents.")
 
@@ -150,6 +150,14 @@ def local_handler() -> None:
         choices=["parquet", "jsonl"],
         default="parquet",
     )
+    parser.add_argument(
+        "--es-mode",
+        type=str,
+        help="Where to index documents. Use 'public' to connect to the production cluster.",
+        required=False,
+        choices=["local", "public"],
+        default="local",
+    )
 
     args = parser.parse_args()
     base_event = IngestorStepEvent.from_argparser(args)
@@ -161,7 +169,7 @@ def local_handler() -> None:
     event = IngestorIndexerLambdaEvent(
         **base_event.model_dump(), objects_to_index=list(objects_to_index)
     )
-    handler(event, is_local=True)
+    handler(event, es_mode=args.es_mode)
 
 
 def _get_objects_to_index(

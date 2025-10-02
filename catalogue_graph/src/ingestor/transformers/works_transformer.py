@@ -6,6 +6,7 @@ from ingestor.models.debug.work import SourceWorkDebugInformation, VisibleWorkDe
 from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
 from models.events import IncrementalWindow
+from utils.elasticsearch import ElasticsearchMode
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .work_aggregate_transformer import AggregateWorkTransformer
@@ -15,9 +16,12 @@ from .work_query_transformer import QueryWorkTransformer
 
 class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
     def __init__(
-        self, pipeline_date: str, window: IncrementalWindow | None, is_local: bool
+        self,
+        pipeline_date: str,
+        window: IncrementalWindow | None,
+        es_mode: ElasticsearchMode,
     ) -> None:
-        self.source = GraphWorksExtractor(pipeline_date, window, is_local)
+        self.source = GraphWorksExtractor(pipeline_date, window, es_mode)
 
     def _transform_display(self, extracted: ExtractedWork) -> DisplayWork:
         work = extracted.work

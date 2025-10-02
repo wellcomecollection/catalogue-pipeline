@@ -32,7 +32,10 @@ def mock_deleted_ids_log_file() -> None:
     MockSmartOpen.mock_s3_parquet_file(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, df)
 
 
-def test_ingestor_deletions_line_first_run() -> None:
+def test_ingestor_deletions_linetest_ingestor_deletions_line_safety_check_first_run() -> (
+    None
+):
+    mock_es_secrets("concepts_ingestor", "dev")
     mock_deleted_ids_log_file()
 
     # Index some empty documents with the same IDs as those stored in the parquet mock

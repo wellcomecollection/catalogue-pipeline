@@ -397,10 +397,10 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
 
 
 def mock_es_secrets(
-    service_name: str, pipeline_date: str, is_local: bool = False
+    service_name: str, pipeline_date: str, is_public: bool = False
 ) -> None:
     """Mock AWS Secrets Manager secrets to simulate connecting to the production cluster."""
-    host = "public" if is_local else "private"
+    host = "public" if is_public else "private"
     prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/{host}_host", "test")
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/port", 80)

@@ -11,6 +11,7 @@ from ingestor.models.neptune.query_result import (
 from models.events import IncrementalWindow
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.merged_works_source import MergedWorksSource
+from utils.elasticsearch import ElasticsearchMode
 from utils.types import ConceptType
 
 from .base_extractor import (
@@ -50,15 +51,15 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         self,
         pipeline_date: str,
         window: IncrementalWindow | None,
-        is_local: bool = False,
+        es_mode: ElasticsearchMode,
     ):
-        super().__init__(is_local)
+        super().__init__(es_mode != "private")
         self.es_source = MergedWorksSource(
             pipeline_date=pipeline_date,
             query=ES_QUERY,
             fields=ES_FIELDS,
             window=window,
-            is_local=is_local,
+            es_mode=es_mode,
         )
 
         self.primary_map: dict[str, str] = {}

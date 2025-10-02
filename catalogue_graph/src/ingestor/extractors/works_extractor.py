@@ -7,6 +7,7 @@ from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from models.events import IncrementalWindow
 from sources.merged_works_source import MergedWorksSource
+from utils.elasticsearch import ElasticsearchMode
 
 from .base_extractor import GraphBaseExtractor
 
@@ -24,13 +25,13 @@ class GraphWorksExtractor(GraphBaseExtractor):
         self,
         pipeline_date: str,
         window: IncrementalWindow | None,
-        is_local: bool = False,
+        es_mode: ElasticsearchMode,
     ):
-        super().__init__(is_local)
+        super().__init__(es_mode != "private")
         self.es_source = MergedWorksSource(
             pipeline_date=pipeline_date,
             window=window,
-            is_local=is_local,
+            es_mode=es_mode,
             query=ES_QUERY,
         )
 

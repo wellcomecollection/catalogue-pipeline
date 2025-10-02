@@ -6,6 +6,7 @@ from config import (
     MESH_URL,
 )
 from models.events import IncrementalWindow
+from utils.elasticsearch import ElasticsearchMode
 from utils.types import CatalogueTransformerType, EntityType, TransformerType
 
 from .base_transformer import BaseTransformer
@@ -27,7 +28,7 @@ def create_transformer(
     entity_type: EntityType,
     pipeline_date: str,
     window: IncrementalWindow | None,
-    is_local: bool,
+    es_mode: ElasticsearchMode,
 ) -> BaseTransformer:
     if window is not None and transformer_type not in get_args(
         CatalogueTransformerType
@@ -62,10 +63,10 @@ def create_transformer(
             "mesh_locations", entity_type, pipeline_date
         )
     if transformer_type == "catalogue_concepts":
-        return CatalogueConceptsTransformer(pipeline_date, window, is_local)
+        return CatalogueConceptsTransformer(pipeline_date, window, es_mode)
     if transformer_type == "catalogue_works":
-        return CatalogueWorksTransformer(pipeline_date, window, is_local)
+        return CatalogueWorksTransformer(pipeline_date, window, es_mode)
     if transformer_type == "catalogue_work_identifiers":
-        return CatalogueWorkIdentifiersTransformer(pipeline_date, window, is_local)
+        return CatalogueWorkIdentifiersTransformer(pipeline_date, window, es_mode)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")

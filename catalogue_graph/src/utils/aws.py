@@ -46,12 +46,12 @@ def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
     )
 
 
-def get_neptune_client(is_local: bool) -> BaseNeptuneClient:
+def get_neptune_client(use_public_endpoint: bool) -> BaseNeptuneClient:
     """
-    Returns an instance of LambdaNeptuneClient or LocalNeptuneClient (if `is_local` is True). LocalNeptuneClient
-    should only be used when connecting to the cluster from outside the VPC.
+    Returns an instance of LambdaNeptuneClient or LocalNeptuneClient (if `use_public_endpoint` is True).
+    LocalNeptuneClient should only be used when connecting to the cluster from outside the VPC.
     """
-    if is_local:
+    if use_public_endpoint:
         return LocalNeptuneClient(
             get_secret(LOAD_BALANCER_SECRET_NAME),
             get_secret(INSTANCE_ENDPOINT_SECRET_NAME),

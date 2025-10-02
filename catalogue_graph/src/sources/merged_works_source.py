@@ -7,7 +7,7 @@ from typing import Any
 import config
 from models.events import IncrementalWindow
 from sources.base_source import BaseSource
-from utils.elasticsearch import get_client, get_standard_index_name
+from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
 def build_merged_index_query(
@@ -36,9 +36,9 @@ class MergedWorksSource(BaseSource):
         query: dict | None = None,
         fields: list | None = None,
         window: IncrementalWindow | None = None,
-        is_local: bool = False,
+        es_mode: ElasticsearchMode = "private",
     ):
-        self.es_client = get_client("graph_extractor", pipeline_date, is_local)
+        self.es_client = get_client("graph_extractor", pipeline_date, es_mode)
         self.window = window
         self.fields = fields
         self.query = query

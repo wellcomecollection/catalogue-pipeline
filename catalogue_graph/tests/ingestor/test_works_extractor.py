@@ -1,7 +1,11 @@
 import copy
 from typing import Literal
 
-from test_mocks import MockElasticsearchClient, add_neptune_mock_response
+from test_mocks import (
+    MockElasticsearchClient,
+    add_neptune_mock_response,
+    mock_es_secrets,
+)
 from test_utils import load_json_fixture
 
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
@@ -53,7 +57,8 @@ def mock_graph_relationships(
 
 
 def test_with_ancestors() -> None:
-    extractor = GraphWorksExtractor("dev", None, False)
+    mock_es_secrets("graph_extractor", "dev")
+    extractor = GraphWorksExtractor("dev", None, "private")
 
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], ["ancestors", "children"])
@@ -70,7 +75,8 @@ def test_with_ancestors() -> None:
 
 
 def test_with_concepts() -> None:
-    extractor = GraphWorksExtractor("dev", None, False)
+    mock_es_secrets("graph_extractor", "dev")
+    extractor = GraphWorksExtractor("dev", None, "private")
 
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], ["concepts"])
@@ -85,7 +91,8 @@ def test_with_concepts() -> None:
 
 
 def test_without_graph_relationships() -> None:
-    extractor = GraphWorksExtractor("dev", None, False)
+    mock_es_secrets("graph_extractor", "dev")
+    extractor = GraphWorksExtractor("dev", None, "private")
 
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], [])
@@ -100,7 +107,8 @@ def test_without_graph_relationships() -> None:
 
 
 def test_missing_in_denormalised() -> None:
-    extractor = GraphWorksExtractor("dev", None, False)
+    mock_es_secrets("graph_extractor", "dev")
+    extractor = GraphWorksExtractor("dev", None, "private")
 
     mock_graph_relationships(
         "a24esypq", ["a24esypq"], ["concepts", "ancestors", "children"]
@@ -112,7 +120,8 @@ def test_missing_in_denormalised() -> None:
 
 
 def test_multiple_works() -> None:
-    extractor = GraphWorksExtractor("dev", None, False)
+    mock_es_secrets("graph_extractor", "dev")
+    extractor = GraphWorksExtractor("dev", None, "private")
 
     for work_id in ["123", "456"]:
         mock_es_work(work_id)

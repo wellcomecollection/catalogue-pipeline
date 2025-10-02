@@ -14,6 +14,7 @@ from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
 from models.events import IncrementalWindow
+from utils.elasticsearch import ElasticsearchMode
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .raw_concept import MissingLabelError
@@ -25,10 +26,10 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         self,
         pipeline_date: str,
         window: IncrementalWindow | None,
-        is_local: bool,
+        es_mode: ElasticsearchMode,
         overrides: TextIO | None = None,
     ) -> None:
-        self.source = GraphConceptsExtractor(pipeline_date, window, is_local)
+        self.source = GraphConceptsExtractor(pipeline_date, window, es_mode)
         self.override_provider = ConceptTextOverrideProvider(overrides)
 
     def _transform_related_concept(

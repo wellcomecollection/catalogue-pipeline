@@ -1,3 +1,4 @@
+from test_mocks import mock_es_secrets
 from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
 
 from models.graph_edge import (
@@ -11,9 +12,10 @@ from transformers.catalogue.work_identifiers_transformer import (
 
 
 def test_catalogue_work_identifiers_transformer_nodes() -> None:
+    mock_es_secrets("graph_extractor", "dev")
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorkIdentifiersTransformer("dev", None, True)
+    transformer = CatalogueWorkIdentifiersTransformer("dev", None, "public")
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 3
@@ -29,9 +31,11 @@ def test_catalogue_work_identifiers_transformer_nodes() -> None:
 
 
 def test_catalogue_work_identifiers_transformer_edges() -> None:
+    mock_es_secrets("graph_extractor", "dev")
+
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorkIdentifiersTransformer("dev", None, True)
+    transformer = CatalogueWorkIdentifiersTransformer("dev", None, "public")
     edges = list(transformer._stream_edges())
 
     assert len(edges) == 6

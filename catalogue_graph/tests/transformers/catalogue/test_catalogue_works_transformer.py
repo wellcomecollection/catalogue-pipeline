@@ -8,7 +8,7 @@ from transformers.catalogue.works_transformer import CatalogueWorksTransformer
 def test_catalogue_works_transformer_nodes() -> None:
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorksTransformer("dev", None, True)
+    transformer = CatalogueWorksTransformer("dev", None, "local")
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 3
@@ -26,7 +26,7 @@ def test_catalogue_works_transformer_nodes() -> None:
 def test_catalogue_works_transformer_edges() -> None:
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorksTransformer("dev", None, True)
+    transformer = CatalogueWorksTransformer("dev", None, "local")
     edges = list(transformer._stream_edges())
 
     assert len(edges) == 15

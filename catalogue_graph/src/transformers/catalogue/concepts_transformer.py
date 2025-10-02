@@ -5,6 +5,7 @@ from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAt
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
 from transformers.base_transformer import BaseTransformer
+from utils.elasticsearch import ElasticsearchMode
 from utils.ontology import get_transformers_from_ontology
 from utils.types import WorkConceptKey
 
@@ -18,10 +19,10 @@ class CatalogueConceptsTransformer(BaseTransformer):
         self,
         pipeline_date: str,
         window: IncrementalWindow | None,
-        is_local: bool,
+        es_mode: ElasticsearchMode,
     ):
         self.source = CatalogueConceptsSource(
-            pipeline_date, ES_QUERY, ES_FIELDS, window, is_local
+            pipeline_date, ES_QUERY, ES_FIELDS, window, es_mode
         )
 
         self.id_label_checker: IdLabelChecker | None = None

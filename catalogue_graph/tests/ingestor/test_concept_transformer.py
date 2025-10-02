@@ -1,6 +1,7 @@
 import io
 
 import neptune_generators as ng
+from test_mocks import mock_es_secrets
 from test_utils import load_json_fixture
 
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
@@ -37,6 +38,7 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
+    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture(
         "ingestor/extractor/concept_single_alternative_labels.json"
     )
@@ -86,13 +88,14 @@ def test_catalogue_concept_from_neptune_result() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
+    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
 
     expected_result = IndexableConcept(
@@ -138,13 +141,14 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
+    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
     mock_related_to = load_json_fixture("ingestor/extractor/related_to_single.json")[
         "related"
@@ -206,13 +210,14 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() -> None:
+    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
@@ -282,7 +287,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -360,7 +365,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, True)
+    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -449,7 +454,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         abcd2345,Le Pétomane,
         """)
     transformer = ElasticsearchConceptsTransformer(
-        "dev", None, True, overrides=overrides
+        "dev", None, "private", overrides=overrides
     )
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
@@ -583,7 +588,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
         """)
 
     transformer = ElasticsearchConceptsTransformer(
-        "dev", None, True, overrides=overrides
+        "dev", None, "private", overrides=overrides
     )
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
