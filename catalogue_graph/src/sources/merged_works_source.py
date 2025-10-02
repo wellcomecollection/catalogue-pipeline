@@ -42,11 +42,31 @@ class MergedWorksSource(BaseSource):
         self.window = window
         self.fields = fields
         self.query = query
-        index_name = get_standard_index_name(
+        self.index_name = get_standard_index_name(
             config.ES_DENORMALISED_INDEX_NAME, pipeline_date
         )
-        pit = self.es_client.open_point_in_time(index=index_name, keep_alive="15m")
+        pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="15m")
         self.pit_id = pit["id"]
+
+    def mget(self, work_ids: list[str]) -> Generator[dict]:
+        """Retrieve work documents by ID"""
+        start_time = time.time()
+        result = self.es_client.mget(index=self.index_name, body={"ids": work_ids})
+        duration = round(time.time() - start_time)
+
+        print(
+            f"Ran Elasticsearch query in {duration} seconds, retrieving {len(result['docs'])} records."
+        )
+
+        for work in result["docs"]:
+            if "error" in work:
+                raise ValueError(
+                    f"Failed to retrieve work from Elasticsearch: {work['error']}"
+                )
+            if not work["found"]:
+                print(f"Work {work['_id']} does not exist in the denormalised index.")
+            else:
+                yield work["_source"]
 
     def search(self, slice_index: int, search_after: str | None = None) -> list[dict]:
         query = build_merged_index_query(self.query, self.window)

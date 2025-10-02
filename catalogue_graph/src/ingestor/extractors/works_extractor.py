@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import Generator, Iterator
 from itertools import batched
 
 from pydantic import BaseModel
@@ -48,45 +48,51 @@ class GraphWorksExtractor(GraphBaseExtractor):
         """Return all concepts of each work in the current batch."""
         return self.make_neptune_query("work_concepts", ids)
 
-    def get_works(self) -> Generator[DenormalisedWork]:
-        for work in self.es_source.stream_raw():
-            yield DenormalisedWork(**work)
-
-    def extract_raw(self) -> Generator[ExtractedWork]:
-        streamed_ids: set[str] = set()
-        related_ids: set[str] = set()
-
-        for es_works in batched(self.get_works(), WORKS_BATCH_SIZE, strict=False):
+    def process_es_works(
+        self, es_works: Iterator[DenormalisedWork]
+    ) -> Generator[ExtractedWork]:
+        for es_batch in batched(es_works, WORKS_BATCH_SIZE, strict=False):
             visible_work_ids = [
-                w.state.canonical_id for w in es_works if w.type == "Visible"
+                w.state.canonical_id for w in es_batch if w.type == "Visible"
             ]
             all_ancestors = self._get_work_ancestors(visible_work_ids)
             all_children = self._get_work_children(visible_work_ids)
             all_concepts = self._get_work_concepts(visible_work_ids)
 
-            for es_work in es_works:
+            for es_work in es_batch:
                 work_id = es_work.state.canonical_id
-
-                work_hierarchy = WorkHierarchy(
-                    id=work_id,
-                    ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
-                    children=all_children.get(work_id, {}).get("children", []),
-                )
-
-                work_concepts = []
-                for raw_concept in all_concepts.get(work_id, {}).get("concepts", []):
-                    work_concepts.append(WorkConcept(**raw_concept))
-
-                streamed_ids.add(es_work.state.canonical_id)
-                related_ids.update(
-                    c.work.properties.id for c in work_hierarchy.children
-                )
-                related_ids.update(
-                    c.work.properties.id for c in work_hierarchy.ancestors
-                )
-
                 yield ExtractedWork(
                     work=es_work,
-                    hierarchy=work_hierarchy,
-                    concepts=work_concepts,
+                    hierarchy=WorkHierarchy(
+                        id=work_id,
+                        ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
+                        children=all_children.get(work_id, {}).get("children", []),
+                    ),
+                    concepts=all_concepts.get(work_id, {}).get("concepts", []),
                 )
+
+    def extract_raw(self) -> Generator[ExtractedWork]:
+        streamed_ids: set[str] = set()
+        related_ids: set[str] = set()
+
+        works_stream = (DenormalisedWork(**w) for w in self.es_source.stream_raw())
+        for extracted_work in self.process_es_works(works_stream):
+            streamed_ids.add(extracted_work.work.state.canonical_id)
+
+            # When a work is reprocessed, all of its children and ancestors must be reprocessed too for consistency.
+            related_ids.update(
+                c.work.properties.id for c in extracted_work.hierarchy.children
+            )
+            related_ids.update(
+                c.work.properties.id for c in extracted_work.hierarchy.ancestors
+            )
+
+            yield extracted_work
+
+        # Only process related works which were not already processed above
+        related_ids = related_ids.difference(streamed_ids)
+        print(f"Will process a total of {len(related_ids)} related works.")
+        related_works_stream = (
+            DenormalisedWork(**w) for w in self.es_source.mget(list(related_ids))
+        )
+        yield from self.process_es_works(related_works_stream)
