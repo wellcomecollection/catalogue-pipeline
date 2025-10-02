@@ -85,7 +85,7 @@ class GraphBaseExtractor:
         self, query_type: ConceptQuery | WorkQuery, ids: Iterable[str]
     ) -> dict[str, dict]:
         """
-        Split the specified ids into chunks and run the selected query against each chunk.
+        Split the specified ids into chunks and run the selected query against each chunk in parallel.
         Return a dictionary mapping each id to its corresponding result.
         """
         chunk_size = NEPTUNE_CHUNK_SIZE
