@@ -35,7 +35,7 @@ def extract_subject(field: Field) -> Subject | None:
     ):
         return None
     if len(a_subfields) > 1:
-        logger.error("Repeated Non-repeating field $a found in 600 field")
+        logger.error(f"Repeated Non-repeating field $a found in {field.tag} field")
 
     if field.tag == "600":
         main_concept_label_fields = field.get_subfields(
