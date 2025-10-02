@@ -49,6 +49,8 @@ NEPTUNE_CHUNK_SIZE = 5000
 EXPENSIVE_QUERIES = {"related_topics", "frequent_collaborators"}
 NEPTUNE_EXPENSIVE_CHUNK_SIZE = 1000
 
+QUERY_THREAD_COUNT = 5
+
 NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
     "work_children": WORK_CHILDREN_QUERY,
     "work_ancestors": WORK_ANCESTORS_QUERY,
@@ -84,7 +86,7 @@ class GraphBaseExtractor:
     ) -> dict[str, dict]:
         """
         Split the specified ids into chunks and run the selected query against each chunk.
-        Results are returned as a dictionary mapping each id to its corresponding result.
+        Return a dictionary mapping each id to its corresponding result.
         """
         chunk_size = NEPTUNE_CHUNK_SIZE
         if query_type in EXPENSIVE_QUERIES:
@@ -97,7 +99,9 @@ class GraphBaseExtractor:
             )
 
         start = time.time()
-        raw_results = process_stream_in_parallel(ids, _run_query, chunk_size, 5)
+        raw_results = process_stream_in_parallel(
+            ids, _run_query, chunk_size, QUERY_THREAD_COUNT
+        )
         results = {item["id"]: item for item in raw_results}
 
         print(
