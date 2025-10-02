@@ -3,7 +3,7 @@ from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
-from ingestor.models.neptune.query_result import NeptuneConcept
+from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.models.shared.id_label import Id
 from ingestor.models.shared.identifier import SourceIdentifier
 from utils.types import ConceptSource, ConceptType
@@ -56,7 +56,7 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
 
 
 def get_priority_label(
-    raw_concept: NeptuneConcept,
+    raw_concept: ExtractedConcept,
     source_priority: list[ConceptSource],
 ) -> tuple[str, str]:
     """
@@ -113,7 +113,7 @@ def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptT
 
 
 class RawNeptuneConcept:
-    def __init__(self, neptune_concept: NeptuneConcept):
+    def __init__(self, neptune_concept: ExtractedConcept):
         self.raw_concept = neptune_concept
 
     @property

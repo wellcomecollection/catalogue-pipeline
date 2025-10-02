@@ -4,7 +4,10 @@ from concurrent.futures import ThreadPoolExecutor
 from itertools import batched
 from typing import get_args
 
-from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 from models.events import IncrementalWindow
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.merged_works_source import MergedWorksSource
@@ -39,7 +42,7 @@ ES_FIELDS = [
     "data.genres.concepts.type",
 ]
 
-RelatedConcepts = dict[str, list[NeptuneRelatedConcept]]
+RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 
 
 class GraphConceptsExtractor(GraphBaseExtractor):
@@ -93,7 +96,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
         return concept_types
 
-    def get_concepts(self, ids: Iterable[str]) -> dict[str, NeptuneConcept]:
+    def get_concepts(self, ids: Iterable[str]) -> dict[str, ExtractedConcept]:
         concept_result = self.make_neptune_query("concept", ids)
         source_concept_result = self.make_neptune_query("source_concept", ids)
         concept_types = self.get_concept_types(ids)
@@ -111,7 +114,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             else:
                 linked_source_concept = source["linked_source_concepts"][0]
 
-            concepts[concept_id] = NeptuneConcept(
+            concepts[concept_id] = ExtractedConcept(
                 concept=concept["concept"],
                 types=list(concept_types[concept_id]),
                 same_as=list(same_as),
@@ -182,7 +185,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         full_result = defaultdict(list)
         for concept_id in ids:
             for entry in sorted_result.get(concept_id, []):
-                related_concept = NeptuneRelatedConcept(
+                related_concept = ExtractedRelatedConcept(
                     target=full_related_concepts[entry["id"]],
                     # Pick one relationship type if present, else None
                     relationship_type=next(iter(entry["relationship_type"]), None),

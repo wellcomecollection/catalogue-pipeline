@@ -1,7 +1,10 @@
-from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 
 
-def a_related_concept() -> NeptuneRelatedConcept:
+def a_related_concept() -> ExtractedRelatedConcept:
     raw_concept: dict = {
         "concept": {
             "~id": "tzrtx26u",
@@ -40,12 +43,12 @@ def a_related_concept() -> NeptuneRelatedConcept:
         "same_as": [],
     }
 
-    return NeptuneRelatedConcept(
-        target=NeptuneConcept(**raw_concept), relationship_type="has_sibling"
+    return ExtractedRelatedConcept(
+        target=ExtractedConcept(**raw_concept), relationship_type="has_sibling"
     )
 
 
-def a_related_concept_with_no_label() -> NeptuneRelatedConcept:
+def a_related_concept_with_no_label() -> ExtractedRelatedConcept:
     """
     This concept can be used to demonstrate how we handle bad records
     """
@@ -87,12 +90,12 @@ def a_related_concept_with_no_label() -> NeptuneRelatedConcept:
         "same_as": [],
     }
 
-    return NeptuneRelatedConcept(
-        target=NeptuneConcept(**raw_concept), relationship_type="has_sibling"
+    return ExtractedRelatedConcept(
+        target=ExtractedConcept(**raw_concept), relationship_type="has_sibling"
     )
 
 
-def a_related_concept_with_two_source_nodes() -> NeptuneRelatedConcept:
+def a_related_concept_with_two_source_nodes() -> ExtractedRelatedConcept:
     """
     This related concept can be used to demonstrate label precedence
     """
@@ -144,6 +147,6 @@ def a_related_concept_with_two_source_nodes() -> NeptuneRelatedConcept:
         "same_as": [],
     }
 
-    return NeptuneRelatedConcept(
-        target=NeptuneConcept(**raw_concept), relationship_type="has_sibling"
+    return ExtractedRelatedConcept(
+        target=ExtractedConcept(**raw_concept), relationship_type="has_sibling"
     )

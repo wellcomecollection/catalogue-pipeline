@@ -8,7 +8,7 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from ingestor.models.neptune.query_result import NeptuneConcept
+from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
@@ -102,7 +102,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def transform_document(
-        self, raw_item: tuple[NeptuneConcept, dict]
+        self, raw_item: tuple[ExtractedConcept, dict]
     ) -> IndexableConcept | None:
         neptune_concept = RawNeptuneConcept(raw_item[0])
         neptune_related = RawNeptuneRelatedConcepts(raw_item[1])

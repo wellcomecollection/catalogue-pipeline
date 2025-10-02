@@ -4,14 +4,14 @@ import pytest
 from test_utils import load_json_fixture
 
 from ingestor.models.indexable_concept import ConceptDescription
-from ingestor.models.neptune.query_result import NeptuneConcept
+from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 
 
 @pytest.fixture
 def concept() -> RawNeptuneConcept:
-    concept = NeptuneConcept(
+    concept = ExtractedConcept(
         **load_json_fixture("ingestor/extractor/concept_single.json")
     )
     return RawNeptuneConcept(concept)

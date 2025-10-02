@@ -1,5 +1,5 @@
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
-from ingestor.models.neptune.query_result import NeptuneRelatedConcept
+from ingestor.models.neptune.query_result import ExtractedRelatedConcept
 
 from .raw_concept import (
     DISPLAY_SOURCE_PRIORITY,
@@ -9,7 +9,7 @@ from .raw_concept import (
 
 
 class RawNeptuneRelatedConcept:
-    def __init__(self, neptune_related_concept: NeptuneRelatedConcept):
+    def __init__(self, neptune_related_concept: ExtractedRelatedConcept):
         self.raw_related_concept = neptune_related_concept.target
         self.relationship_type = neptune_related_concept.relationship_type
 

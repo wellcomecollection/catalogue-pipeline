@@ -13,7 +13,10 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
-from ingestor.models.neptune.query_result import NeptuneConcept, NeptuneRelatedConcept
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 from ingestor.transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
@@ -84,7 +87,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
     )
 
     transformer = ElasticsearchConceptsTransformer("dev", None, True)
-    raw_data = (NeptuneConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
+    raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -136,7 +139,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
     )
 
     transformer = ElasticsearchConceptsTransformer("dev", None, True)
-    raw_data = (NeptuneConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
+    raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -148,7 +151,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
-        "related_to": [NeptuneRelatedConcept(**c) for c in mock_related_to],
+        "related_to": [ExtractedRelatedConcept(**c) for c in mock_related_to],
     }
 
     expected_result = IndexableConcept(
@@ -204,7 +207,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
     )
 
     transformer = ElasticsearchConceptsTransformer("dev", None, True)
-    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -280,7 +283,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
     )
 
     transformer = ElasticsearchConceptsTransformer("dev", None, True)
-    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -358,7 +361,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
     )
 
     transformer = ElasticsearchConceptsTransformer("dev", None, True)
-    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -448,7 +451,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
     transformer = ElasticsearchConceptsTransformer(
         "dev", None, True, overrides=overrides
     )
-    raw_data = (NeptuneConcept(**mock_concept), related_concepts)
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -582,6 +585,6 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
     transformer = ElasticsearchConceptsTransformer(
         "dev", None, True, overrides=overrides
     )
-    raw_data = (NeptuneConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
+    raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
