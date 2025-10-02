@@ -17,7 +17,7 @@ module "ingestor_loader_lambda" {
     command = ["ingestor.steps.ingestor_loader.lambda_handler"]
   }
 
-  memory_size = 2048
+  memory_size = 4096
   timeout     = 900
 
   vpc_config = {

@@ -30,7 +30,7 @@ ConceptRelatedQuery = Literal[
     "narrower_than",
     "broader_than",
     "people",
-    "has_founder",
+    "founded_by",
 ]
 ConceptReferencedTogetherQuery = Literal["frequent_collaborators", "related_topics"]
 ConceptQuery = Literal[
@@ -61,7 +61,7 @@ NEPTUNE_QUERIES = {
     "people": PEOPLE_QUERY,
     "frequent_collaborators": FREQUENT_COLLABORATORS_QUERY,
     "related_topics": RELATED_TOPICS_QUERY,
-    "has_founder": HAS_FOUNDER_QUERY,
+    "founded_by": HAS_FOUNDER_QUERY,
 }
 
 
