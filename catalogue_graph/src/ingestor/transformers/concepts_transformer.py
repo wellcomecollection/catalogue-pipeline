@@ -1,5 +1,6 @@
 from typing import TextIO
 
+from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.extractors.concepts_extractor import GraphConceptsExtractor
 from ingestor.models.indexable_concept import (
     ConceptDisplay,
@@ -102,7 +103,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def transform_document(
-        self, raw_item: tuple[ExtractedConcept, dict]
+        self, raw_item: tuple[ExtractedConcept, dict[ConceptRelatedQuery, list]]
     ) -> IndexableConcept | None:
         neptune_concept = RawNeptuneConcept(raw_item[0])
         neptune_related = RawNeptuneRelatedConcepts(raw_item[1])
