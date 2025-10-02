@@ -69,7 +69,7 @@ def extract_subject(field: Field) -> Subject | None:
                 type=FIELD_TO_TYPE.get(field.tag, "Concept"),
                 id=SourceIdentifier(
                     identifier_type="label-derived",
-                    ontology_type="Concept",
+                    ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
                     value=normalise_identifier_value(main_concept_label),
                 ),
             )
