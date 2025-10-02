@@ -101,7 +101,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
         MaxConcurrency = 2
 
         ItemSelector = {
-          "ingestor_type" : "{% $states.context.Map.Item.Value.ingestor_type %}",
+          "ingestor_type" : "{% $states.context.Map.Item.Value %}",
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
           "index_date" : "{% $states.context.Execution.Input.index_date %}",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",

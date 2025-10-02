@@ -34,6 +34,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_incremental" {
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
+    QueryLanguage = "JSONata"
     Comment = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
     StartAt = "Load ${local.concepts_pipeline_inputs_incremental[0].label}"
     States = merge(tomap({
@@ -41,7 +42,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_incremental" {
       "Load ${task_input.label}" => {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
-        Parameters = {
+        Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
           Input = {
             "transformer_type" : task_input.transformer_type,
