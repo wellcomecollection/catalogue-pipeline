@@ -35,8 +35,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_incremental" {
 
   definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
-    StartAt = "Load ${local.concepts_pipeline_inputs_incremental[0].label}"
+    Comment       = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
+    StartAt       = "Load ${local.concepts_pipeline_inputs_incremental[0].label}"
     States = merge(tomap({
       for index, task_input in local.concepts_pipeline_inputs_incremental :
       "Load ${task_input.label}" => {
