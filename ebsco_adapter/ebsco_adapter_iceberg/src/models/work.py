@@ -63,7 +63,7 @@ class Contributor(BaseModel):
 
 class Genre(SourceConcept):
     label: str
-    concepts: list[SourceConcept]
+    concepts: list[SourceConcept] = Field(default_factory=list)
 
 
 class DateTimeRange(BaseModel):
