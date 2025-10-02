@@ -1,3 +1,4 @@
+from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.neptune.query_result import NeptuneRelatedConcept
 
 from .raw_concept import (
@@ -28,7 +29,7 @@ class RawNeptuneRelatedConcept:
 
 
 class RawNeptuneRelatedConcepts:
-    def __init__(self, related_concepts: dict):
+    def __init__(self, related_concepts: dict[ConceptRelatedQuery, list]):
         self.raw_related_concepts = related_concepts
 
     @property

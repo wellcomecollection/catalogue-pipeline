@@ -12,7 +12,6 @@ from utils.types import ConceptType
 
 from .base_extractor import (
     ConceptQuery,
-    ConceptReferencedTogetherQuery,
     ConceptRelatedQuery,
     GraphBaseExtractor,
 )
@@ -229,13 +228,11 @@ class GraphConceptsExtractor(GraphBaseExtractor):
             # Run related concept queries in parallel
             with ThreadPoolExecutor() as executor:
                 futures = {}
-                for query in get_args(ConceptRelatedQuery) + get_args(
-                    ConceptReferencedTogetherQuery
-                ):
+                for query in get_args(ConceptRelatedQuery):
                     target = self._get_related_concepts
                     futures[query] = executor.submit(target, query, concept_ids)
 
-                all_related_concepts = {
+                all_related_concepts: dict[ConceptRelatedQuery, dict] = {
                     key: future.result() for key, future in futures.items()
                 }
 

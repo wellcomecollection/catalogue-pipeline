@@ -31,22 +31,25 @@ ConceptRelatedQuery = Literal[
     "broader_than",
     "people",
     "founded_by",
+    "frequent_collaborators",
+    "related_topics",
 ]
-ConceptReferencedTogetherQuery = Literal["frequent_collaborators", "related_topics"]
 ConceptQuery = Literal[
     "concept",
     "concept_type",
     "source_concept",
     "same_as_concept",
     ConceptRelatedQuery,
-    ConceptReferencedTogetherQuery,
 ]
 WorkQuery = Literal["work_children", "work_ancestors", "work_concepts"]
 
+NEPTUNE_CHUNK_SIZE = 5000
 
+# Computationally expensive queries work more reliably with smaller chunk sizes
 EXPENSIVE_QUERIES = {"related_topics", "frequent_collaborators"}
+NEPTUNE_EXPENSIVE_CHUNK_SIZE = 1000
 
-NEPTUNE_QUERIES = {
+NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
     "work_children": WORK_CHILDREN_QUERY,
     "work_ancestors": WORK_ANCESTORS_QUERY,
     "work_concepts": WORK_CONCEPTS_QUERY,
@@ -78,8 +81,14 @@ class GraphBaseExtractor:
 
     def make_neptune_query(
         self, query_type: ConceptQuery | WorkQuery, ids: Iterable[str]
-    ) -> dict:
-        chunk_size = 1000 if query_type in EXPENSIVE_QUERIES else 5000
+    ) -> dict[str, dict]:
+        """
+        Split the specified ids into chunks and run the selected query against each chunk.
+        Results are returned as a dictionary mapping each id to its corresponding result.
+        """
+        chunk_size = NEPTUNE_CHUNK_SIZE
+        if query_type in EXPENSIVE_QUERIES:
+            chunk_size = NEPTUNE_EXPENSIVE_CHUNK_SIZE
 
         def _run_query(chunk: Iterable[str]) -> list[dict]:
             return self.neptune_client.run_open_cypher_query(
