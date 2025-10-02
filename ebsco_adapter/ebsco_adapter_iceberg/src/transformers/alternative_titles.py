@@ -15,11 +15,11 @@ from transformers.common import non_empty
 
 def extract_alternative_titles(record: Record) -> list[str]:
     title_fields = record.get_fields("130", "240", "246")
-    return non_empty(
-        distinct(
-            [field.format_field() for field in title_fields if not is_caption(field)]
-        )
-    )
+    # Trim, filter out empty, and deduplicate based on trimmed values
+    raw_titles = [field.format_field() for field in title_fields if not is_caption(field)]
+    trimmed_titles = [title.strip() for title in raw_titles]
+    non_blank_titles = [title for title in trimmed_titles if title]
+    return distinct(non_blank_titles)
 
 
 def distinct(titles: list[str]) -> list[str]:
