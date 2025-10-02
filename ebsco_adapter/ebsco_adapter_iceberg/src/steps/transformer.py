@@ -15,15 +15,16 @@ import pyarrow as pa
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 from pymarc import parse_xml_to_array
+from pymarc.record import Record as MarcRecord
 
 import config
 from manifests import ManifestWriter
 from models.manifests import ErrorLine, TransformerManifest
-from models.marc import MarcRecord
 from models.step_events import (
     EbscoAdapterTransformerEvent,
 )
 from models.work import BaseWork, DeletedWork, SourceIdentifier, SourceWork
+from transformers.ebsco_to_weco import EBSCO_IDENTIFIER_TYPE, transform_record
 from utils.elasticsearch import get_client, get_standard_index_name
 from utils.iceberg import IcebergTableClient, get_iceberg_table
 
@@ -31,9 +32,6 @@ from utils.iceberg import IcebergTableClient, get_iceberg_table
 # This must result in batches of output ids that fit in the 256kb item
 # limit for step function invocations (with some margin).
 BATCH_SIZE = 5_000
-
-# Local namespace constant for this adapter (passed as identifier_type)
-EBSCO_IDENTIFIER_TYPE = "ebsco-alt-lookup"
 
 
 class EbscoAdapterTransformerConfig(BaseModel):
@@ -99,16 +97,7 @@ def transform(
         return [], errors
 
     works = [
-        SourceWork(
-            title=str(record.title),
-            source_identifier=SourceIdentifier(
-                identifier_type=EBSCO_IDENTIFIER_TYPE,
-                ontology_type="Work",
-                value=work_id,
-            ),
-        )
-        for record in marc_records
-        if valid_record(record)
+        transform_record(record) for record in marc_records if valid_record(record)
     ]
 
     if not works:
