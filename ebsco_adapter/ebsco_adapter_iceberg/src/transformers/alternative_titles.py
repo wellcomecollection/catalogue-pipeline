@@ -10,13 +10,13 @@ from collections import OrderedDict
 from pymarc.field import Field
 from pymarc.record import Record
 
-from transformers.common import non_empty
-
 
 def extract_alternative_titles(record: Record) -> list[str]:
     title_fields = record.get_fields("130", "240", "246")
     # Trim, filter out empty, and deduplicate based on trimmed values
-    raw_titles = [field.format_field() for field in title_fields if not is_caption(field)]
+    raw_titles = [
+        field.format_field() for field in title_fields if not is_caption(field)
+    ]
     trimmed_titles = [title.strip() for title in raw_titles]
     non_blank_titles = [title for title in trimmed_titles if title]
     return distinct(non_blank_titles)
