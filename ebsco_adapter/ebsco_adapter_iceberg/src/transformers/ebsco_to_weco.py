@@ -22,7 +22,7 @@ EBSCO_IDENTIFIER_TYPE = "ebsco-alt-lookup"
 
 def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
     return SourceIdentifier(
-        identifier_type=EBSCO_IDENTIFIER_TYPE ontology_type="Work", value=id_value
+        identifier_type=EBSCO_IDENTIFIER_TYPE, ontology_type="Work", value=id_value
     )
 
 
