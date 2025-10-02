@@ -26,7 +26,6 @@ NEPTUNE_MAX_PARALLEL_QUERIES = 10
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
-    # print(backoff_details)
     print(f"Neptune request failed due to '{exception_name}'. Retrying...")
 
 
