@@ -9,11 +9,11 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
     States = merge(tomap({
       for index, task_input in local.concepts_pipeline_inputs_monthly :
       "Extract ${task_input.label}" => {
-        Type       = "Task"
-        Resource   = "arn:aws:states:::states:startExecution.sync:2",
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
-          Input           = {
+          Input = {
             "stream_destination" : "s3",
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
@@ -23,7 +23,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Extract ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
-    }), {
+      }), {
       Success = {
         Type = "Succeed"
       }
@@ -47,23 +47,23 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_daily" {
         MaxConcurrency = 10
 
         ItemSelector = {
-          "transformer_type"          = "{% $states.context.Map.Item.Value.transformer_type %}",
-          "entity_type"          = "{% $states.context.Map.Item.Value.entity_type %}",
+          "transformer_type" = "{% $states.context.Map.Item.Value.transformer_type %}",
+          "entity_type"      = "{% $states.context.Map.Item.Value.entity_type %}",
           "pipeline_date" : local.pipeline_date,
           "stream_destination" : "s3",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
         }
 
-        ItemProcessor  = {
+        ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Run extractor",
-          States  = {
+          States = {
             "Run extractor" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::states:startExecution.sync:2",
+              Type     = "Task",
+              Resource = "arn:aws:states:::states:startExecution.sync:2",
               Arguments = {
                 StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
                 Input           = "{% $states.input %}"
