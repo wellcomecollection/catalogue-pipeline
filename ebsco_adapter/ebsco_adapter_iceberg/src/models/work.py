@@ -169,22 +169,22 @@ class PhysicalLocation(Location):
 
 class Holdings(BaseModel):
     note: str | None = None
-    enumeration: list[str] = []
+    enumeration: list[str] = Field(default_factory=list)
     location: PhysicalLocation | DigitalLocation | None = None
 
 
 class SourceWork(ElasticsearchModel, BaseWork):
     title: str
-    alternative_titles: list[str] = []
-    other_identifiers: list[SourceIdentifier] = []
-    designation: list[str] = []
+    alternative_titles: list[str] = Field(default_factory=list)
+    other_identifiers: list[SourceIdentifier] = Field(default_factory=list)
+    designation: list[str] = Field(default_factory=list)
     description: str | None = None
     current_frequency: str | None = None
     edition: str | None = None
-    contributors: list[Contributor] = []
-    production: list[ProductionEvent] = []
+    contributors: list[Contributor] = Field(default_factory=list)
+    production: list[ProductionEvent] = Field(default_factory=list)
     format: Format | None = None
-    languages: list[Language] = []
-    holdings: list[Holdings] = []
-    subjects: list[Subject] = []
-    genres: list[Genre] = []
+    languages: list[Language] = Field(default_factory=list)
+    holdings: list[Holdings] = Field(default_factory=list)
+    subjects: list[Subject] = Field(default_factory=list)
+    genres: list[Genre] = Field(default_factory=list)
