@@ -12,6 +12,7 @@ from utils.elasticsearch import ElasticsearchMode
 from .base_extractor import GraphBaseExtractor
 
 ES_QUERY = {"match": {"type": "Visible"}}
+WORKS_BATCH_SIZE = 10_000
 
 
 class ExtractedWork(BaseModel):
@@ -51,14 +52,11 @@ class GraphWorksExtractor(GraphBaseExtractor):
         for work in self.es_source.stream_raw():
             yield DenormalisedWork(**work)
 
-    def get_work_stream(self) -> Generator[tuple[DenormalisedWork]]:
-        yield from batched(self.get_works(), 10_000, strict=False)
-
     def extract_raw(self) -> Generator[ExtractedWork]:
         streamed_ids: set[str] = set()
         related_ids: set[str] = set()
 
-        for es_works in self.get_work_stream():
+        for es_works in batched(self.get_works(), WORKS_BATCH_SIZE, strict=False):
             visible_work_ids = [
                 w.state.canonical_id for w in es_works if w.type == "Visible"
             ]

@@ -45,6 +45,8 @@ ES_FIELDS = [
 
 RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 
+CONCEPTS_BATCH_SIZE = 40_000
+
 
 class GraphConceptsExtractor(GraphBaseExtractor):
     def __init__(
@@ -211,7 +213,9 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         processed_ids: set[str] = set()
 
         extracted_ids = self.get_concepts_from_works()
-        for extracted_batch in batched(extracted_ids, 40_000, strict=False):
+        for extracted_batch in batched(
+            extracted_ids, CONCEPTS_BATCH_SIZE, strict=False
+        ):
             batch = set(extracted_batch).difference(processed_ids)
             self._update_same_as_map(batch)
 
