@@ -92,10 +92,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
   definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Ingest catalogue works and concepts into the pipeline Elasticsearch cluster."
-    StartAt       = "Extractors"
+    StartAt       = "Ingestors"
 
     States = {
-      "Extractors" = {
+      "Ingestors" = {
         Type           = "Map",
         Items          = local.ingestor_types
         MaxConcurrency = 2

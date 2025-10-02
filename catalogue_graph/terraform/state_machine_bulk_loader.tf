@@ -16,12 +16,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           "Payload.$" : "$"
         },
         Retry = local.DefaultRetry,
-        "Next" : "Wait 10 seconds"
+        "Next" : "Wait 5 seconds"
       },
-      "Wait 10 seconds" : {
+      "Wait 5 seconds" : {
         "Type" : "Wait",
         "Next" : "Check load status",
-        "Seconds" : 10
+        "Seconds" : 5
       },
       "Check load status" : {
         "Type" : "Task",
@@ -43,7 +43,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
             "Next" : "Success"
           }
         ],
-        "Default" : "Wait 10 seconds"
+        "Default" : "Wait 5 seconds"
       },
       "Success" : {
         "Type" : "Succeed"
