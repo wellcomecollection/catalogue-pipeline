@@ -1,31 +1,13 @@
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.neptune.query_result import ExtractedRelatedConcept
 
-from .raw_concept import (
-    DISPLAY_SOURCE_PRIORITY,
-    get_most_specific_concept_type,
-    get_priority_label,
-)
+from .raw_concept import RawNeptuneConcept
 
 
-class RawNeptuneRelatedConcept:
-    def __init__(self, neptune_related_concept: ExtractedRelatedConcept):
-        self.raw_related_concept = neptune_related_concept.target
-        self.relationship_type = neptune_related_concept.relationship_type
-
-    @property
-    def display_label(self) -> str:
-        label, _ = get_priority_label(self.raw_related_concept, DISPLAY_SOURCE_PRIORITY)
-        return label
-
-    @property
-    def wellcome_id(self) -> str:
-        return self.raw_related_concept.concept.properties.id
-
-    @property
-    def concept_type(self) -> str:
-        concept_types = self.raw_related_concept.types
-        return get_most_specific_concept_type(concept_types)
+class RawNeptuneRelatedConcept(RawNeptuneConcept):
+    def __init__(self, extracted_related_concept: ExtractedRelatedConcept):
+        super().__init__(extracted_related_concept.target)
+        self.relationship_type = extracted_related_concept.relationship_type
 
 
 class RawNeptuneRelatedConcepts:

@@ -113,14 +113,12 @@ def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptT
 
 
 class RawNeptuneConcept:
-    def __init__(self, neptune_concept: ExtractedConcept):
-        self.raw_concept = neptune_concept
+    def __init__(self, extracted_concept: ExtractedConcept):
+        self.raw_concept = extracted_concept
 
     @property
     def wellcome_id(self) -> str:
-        wellcome_id = self.raw_concept.concept.properties.id
-        assert isinstance(wellcome_id, str)
-        return wellcome_id
+        return self.raw_concept.concept.properties.id
 
     @property
     def label(self) -> str:
