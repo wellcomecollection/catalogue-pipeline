@@ -1,5 +1,5 @@
 resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
-  name     = "catalogue-graph-extractors_monthly"
+  name     = "catalogue-graph-extractors-monthly"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -9,11 +9,11 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
     States = merge(tomap({
       for index, task_input in local.concepts_pipeline_inputs_monthly :
       "Extract ${task_input.label}" => {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type       = "Task"
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
-          Input = {
+          Input           = {
             "stream_destination" : "s3",
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
@@ -23,7 +23,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Extract ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
-      }), {
+    }), {
       Success = {
         Type = "Succeed"
       }
@@ -31,8 +31,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
   })
 }
 
-resource "aws_sfn_state_machine" "catalogue_graph_extractors_daily" {
-  name     = "catalogue-graph-extractors_daily"
+resource "aws_sfn_state_machine" "catalogue_graph_extractors_incremental" {
+  name     = "catalogue-graph-extractors-incremental"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -43,13 +43,13 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_daily" {
     States = {
       "Extractors" = {
         Type           = "Map",
-        Items          = local.concepts_pipeline_inputs_daily
+        Items          = local.concepts_pipeline_inputs_incremental
         MaxConcurrency = 10
 
         ItemSelector = {
-          "transformer_type" = "{% $states.context.Map.Item.Value.transformer_type %}",
-          "entity_type"      = "{% $states.context.Map.Item.Value.entity_type %}",
-          "pipeline_date" : local.pipeline_date,
+          "transformer_type" : "{% $states.context.Map.Item.Value.transformer_type %}",
+          "entity_type" : "{% $states.context.Map.Item.Value.entity_type %}",
+          "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
           "stream_destination" : "s3",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
         }
@@ -60,10 +60,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_daily" {
             ExecutionType = "STANDARD"
           },
           StartAt = "Run extractor",
-          States = {
+          States  = {
             "Run extractor" = {
-              Type     = "Task",
-              Resource = "arn:aws:states:::states:startExecution.sync:2",
+              Type      = "Task",
+              Resource  = "arn:aws:states:::states:startExecution.sync:2",
               Arguments = {
                 StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
                 Input           = "{% $states.input %}"

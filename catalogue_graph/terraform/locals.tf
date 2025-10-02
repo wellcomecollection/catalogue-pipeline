@@ -123,7 +123,7 @@ locals {
     }
   ]
 
-  concepts_pipeline_inputs_daily = [
+  concepts_pipeline_inputs_incremental = [
     {
       "label" : "Catalogue Concept Nodes",
       "transformer_type" : "catalogue_concepts",

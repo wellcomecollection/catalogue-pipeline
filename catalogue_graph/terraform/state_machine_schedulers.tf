@@ -8,15 +8,13 @@ resource "aws_scheduler_schedule" "concepts_pipeline_monthly" {
   schedule_expression = "cron(20 9 ? 1/1 MON#1 *)" # 1st Monday of the month at 9:20am
 
   target {
-    arn      = aws_sfn_state_machine.concepts_pipeline_monthly.arn
+    arn      = aws_sfn_state_machine.catalogue_graph_pipeline_monthly.arn
     role_arn = aws_iam_role.state_machine_execution_role.arn
   }
 }
 
-resource "aws_scheduler_schedule" "ingestor_pipeline_incremental" {
-  for_each = { for t in local.ingestor_types : t => t }
-
-  name                = "${each.key}_pipeline_incremental_run"
+resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
+  name                = "catalogue_graph_pipeline_incremental_run"
   schedule_expression = "cron(0,15,30,45 * * * ? *)" # Every 15 minutes
 
   flexible_time_window {
@@ -24,13 +22,12 @@ resource "aws_scheduler_schedule" "ingestor_pipeline_incremental" {
   }
 
   target {
-    arn      = aws_sfn_state_machine.catalogue_graph_ingestor.arn
+    arn      = aws_sfn_state_machine.catalogue_graph_pipeline_incremental.arn
     role_arn = aws_iam_role.state_machine_execution_role.arn
 
     # TODO: Replace 'dev' with production index date
     input = <<JSON
     {
-      "ingestor_type": "${each.key}",
       "pipeline_date": "${local.pipeline_date}",
       "index_date": "dev",
       "window": {
