@@ -16,7 +16,7 @@ class BasePipelineEvent(BaseModel):
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
         window = None
-        if args.window_start is not None and args.window_end is not None:
+        if args.window_start is not None or args.window_end is not None:
             window = IncrementalWindow(
                 start_time=args.window_start, end_time=args.window_end
             )
