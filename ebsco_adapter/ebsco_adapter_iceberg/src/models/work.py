@@ -50,14 +50,14 @@ class SourceConcept(BaseModel):
 
 
 class Subject(SourceConcept):
-    concepts: list[SourceConcept] = []
+    concepts: list[SourceConcept] = Field(default_factory=list)
     label: str
     type: ConceptType = "Subject"
 
 
 class Contributor(BaseModel):
     agent: SourceConcept
-    roles: list[str] = []
+    roles: list[str] = Field(default_factory=list)
     primary: bool = True
 
 
