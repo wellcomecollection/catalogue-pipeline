@@ -68,7 +68,7 @@ module "matcher_lambda" {
     es_index = local.es_works_identified_index
   }
 
-  secret_env_vars = local.pipeline_storage_es_service_secrets["matcher"]
+  secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["matcher"]
 
   ecr_repository_name = "uk.ac.wellcome/matcher"
   queue_config = {

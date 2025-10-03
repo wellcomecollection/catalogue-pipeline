@@ -45,7 +45,7 @@ module "ingestor_images" {
     ingest_batch_size = 10
   }
 
-  secret_env_vars = local.pipeline_storage_es_service_secrets["image_ingestor"]
+  secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["image_ingestor"]
 
   cpu    = 512
   memory = 4096

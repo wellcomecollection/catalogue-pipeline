@@ -65,7 +65,7 @@ module "transformers" {
   depends_on = [
     # This updates the API key.  If the transformer is not restarted, then the
     # running container will continue using the old, defunct key, and will fail.
-    module.pipeline_services
+    module.elastic
   ]
 
   adapter_config      = local.adapter_config[each.key]
@@ -85,7 +85,7 @@ module "transformers" {
     flush_interval_seconds = lookup(each.value, "flush_interval_seconds", 30)
   }
 
-  secret_env_vars = local.pipeline_storage_es_service_secrets["transformer"]
+  secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["transformer"]
 
   min_capacity = var.min_capacity
   max_capacity = local.max_capacity

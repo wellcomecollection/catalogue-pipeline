@@ -14,19 +14,16 @@ data "archive_file" "empty_zip" {
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
+  // Default index names for services that need to know where to write/read from
+  // These presume that the indexes exist and are created by the index_config
   es_works_source_index       = "works-source-${var.pipeline_date}"
   es_works_identified_index   = "works-identified-${var.pipeline_date}"
   es_works_denormalised_index = "works-denormalised-${var.pipeline_date}"
   es_works_index              = "works-indexed-${var.pipeline_date}"
-
-  es_concepts_index_prefix = "concepts-indexed"
-
-  es_images_initial_index   = "images-initial-${var.pipeline_date}"
-  es_images_augmented_index = "images-augmented-${var.pipeline_date}"
-  es_images_index           = "images-indexed-${var.pipeline_date}"
-
-  # Path to folder containing mappings and analysis settings for Elasticsearch Index creation
-  es_config_path = "${path.root}/../../../index_config"
+  es_concepts_index           = "concepts-indexed-${var.pipeline_date}"
+  es_images_initial_index     = "images-initial-${var.pipeline_date}"
+  es_images_augmented_index   = "images-augmented-${var.pipeline_date}"
+  es_images_index             = "images-indexed-${var.pipeline_date}"
 
   # The max number of connections allowed by the instance.
   # specified at /infrastructure/critical/rds_id_minter.tf

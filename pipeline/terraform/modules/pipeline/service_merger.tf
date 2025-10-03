@@ -53,18 +53,18 @@ module "merger_lambda" {
 
   }
   secret_env_vars = merge(
-    local.pipeline_storage_es_service_secrets["merger"], // old config, to be removed
+    module.elastic.pipeline_storage_es_service_secrets["merger"], // old config, to be removed
     {
 
-      es_upstream_host     = local.pipeline_storage_private_host
-      es_upstream_port     = local.pipeline_storage_port
-      es_upstream_protocol = local.pipeline_storage_protocol
-      es_upstream_apikey   = local.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
+      es_upstream_host     = module.elastic.pipeline_storage_private_host
+      es_upstream_port     = module.elastic.pipeline_storage_port
+      es_upstream_protocol = module.elastic.pipeline_storage_protocol
+      es_upstream_apikey   = module.elastic.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
 
-      es_downstream_host     = local.pipeline_storage_private_host
-      es_downstream_port     = local.pipeline_storage_port
-      es_downstream_protocol = local.pipeline_storage_protocol
-      es_downstream_apikey   = local.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
+      es_downstream_host     = module.elastic.pipeline_storage_private_host
+      es_downstream_port     = module.elastic.pipeline_storage_port
+      es_downstream_protocol = module.elastic.pipeline_storage_protocol
+      es_downstream_apikey   = module.elastic.pipeline_storage_es_service_secrets["merger"]["es_apikey"]
     }
   )
 

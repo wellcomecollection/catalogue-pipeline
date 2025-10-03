@@ -156,7 +156,7 @@ module "image_inferrer" {
     batch_size = 25
   }
 
-  manager_secret_env_vars = local.pipeline_storage_es_service_secrets["inferrer"]
+  manager_secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["inferrer"]
 
   # Any higher than this currently causes latency spikes from Loris
   # TODO: Now these images are served by DLCS, not Loris, can we increase

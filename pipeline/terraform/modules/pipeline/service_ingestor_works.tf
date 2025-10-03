@@ -96,7 +96,7 @@ module "ingestor_works" {
     ingest_batch_size = var.reindexing_state.scale_up_tasks ? 100 : 10
   }
 
-  secret_env_vars = local.pipeline_storage_es_service_secrets["work_ingestor"]
+  secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["work_ingestor"]
 
   cpu    = 2048
   memory = 8192

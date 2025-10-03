@@ -6,7 +6,7 @@ module "relation_embedder_sub" {
   reindexing_state = var.reindexing_state
 
   es_works_denormalised_index         = local.es_works_denormalised_index
-  pipeline_storage_es_service_secrets = local.pipeline_storage_es_service_secrets
+  pipeline_storage_es_service_secrets = module.elastic.pipeline_storage_es_service_secrets
 
   # path_concatenator
   path_concatenator_image           = local.path_concatenator_image

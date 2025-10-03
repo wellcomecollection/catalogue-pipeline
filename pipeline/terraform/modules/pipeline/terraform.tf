@@ -145,11 +145,3 @@ data "terraform_remote_state" "inferrer" {
     region = "eu-west-1"
   }
 }
-
-provider "elasticstack" {
-  elasticsearch {
-    username  = ec_deployment.pipeline.elasticsearch_username
-    password  = ec_deployment.pipeline.elasticsearch_password
-    endpoints = [ec_deployment.pipeline.elasticsearch[0].https_endpoint]
-  }
-}

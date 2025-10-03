@@ -10,35 +10,26 @@ module "pipeline" {
   }
 
   index_config = {
-    works = {
-      identified   = {
-        local.pipeline_date = "works_identified.2023-05-26"
+    (local.pipeline_date) = {
+      works = {
+        source       = "works_source.2025-10-02"
+        identified   = "works_identified.2023-05-26"
+        denormalised = "works_denormalised.2025-08-14"
+        indexed      = "works_indexed.2024-11-14"
       }
-      denormalised = {
-        local.pipeline_date = "works_denormalised.2025-08-14"
+      images = {
+        initial   = "empty" 
+        augmented = "empty"
+        indexed   = "images_indexed.2024-11-14"
       }
-      indexed      = {
-        local.pipeline_date = "works_indexed.2024-11-14"
-      }
-      source       = {
-        local.pipeline_date = "works_source.2025-10-02"
-      }
-    }
-    images = {
-      initial        = {
-        local.pipeline_date = "empty"
-      }
-      augmented      = {
-        local.pipeline_date = "empty"
-      }
-      indexed        = {
-        local.pipeline_date = "images_indexed.2024-11-14"
+      concepts = {
+        indexed = "concepts_indexed.2025-06-17"
       }
     }
-    concepts = {
-      indexed = {
-        local.pipeline_date = "concepts_indexed.2025-06-17"
-      }
+    "2025-11-01" = {
+      works    = { indexed = "works_indexed.2024-11-14" }
+      images   = {}
+      concepts = {}
     }
   }
 
@@ -47,7 +38,10 @@ module "pipeline" {
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date
 
+  version_regex = "9.1.?"
+
   providers = {
+    aws = aws
     aws.catalogue = aws.catalogue
   }
 }

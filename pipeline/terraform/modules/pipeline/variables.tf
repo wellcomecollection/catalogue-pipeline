@@ -57,24 +57,23 @@ locals {
 }
 
 variable "index_config" {
-  type = object({
-    works = object({
-      identified   = map(string)
-      denormalised = map(string)
-      indexed      = map(string)
-      source       = map(string)
-    })
-
-    concepts = object({
-      indexed = map(string)
-    })
-
-    images = object({
-      initial        = map(string)
-      augmented      = map(string)
-      indexed        = map(string)
-    })
-  })
+  type = map(object({
+    works = optional(object({
+      source       = optional(string)
+      identified   = optional(string)
+      denormalised = optional(string)
+      indexed      = optional(string)
+    }), {})
+    images = optional(object({
+      initial   = optional(string)
+      augmented = optional(string)
+      indexed   = optional(string)
+    }), {})
+    concepts = optional(object({
+      indexed = optional(string)
+    }), {})
+  }))
+  description = "Index configuration keyed by pipeline date. Omit a field to skip creation of that index."
 }
 
 variable "allow_delete_indices" {
@@ -86,4 +85,8 @@ variable "ami_id" {
   type        = string
   default     = null // Uses the latest ECS-optimised AMI by default
   description = "AMI to use for the ECS EC2 cluster host"
+}
+
+variable "version_regex" {
+  type = string
 }
