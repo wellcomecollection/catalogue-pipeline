@@ -18,7 +18,7 @@ module "pipeline" {
         indexed      = "works_indexed.2024-11-14"
       }
       images = {
-        initial   = "empty" 
+        initial   = "empty"
         augmented = "empty"
         indexed   = "images_indexed.2024-11-14"
       }
@@ -41,7 +41,7 @@ module "pipeline" {
   version_regex = "9.1.?"
 
   providers = {
-    aws = aws
+    aws           = aws
     aws.catalogue = aws.catalogue
   }
 }

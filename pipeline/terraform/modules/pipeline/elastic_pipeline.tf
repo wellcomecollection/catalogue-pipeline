@@ -13,7 +13,7 @@ module "elastic" {
   version_regex                  = var.version_regex
 
   providers = {
-    aws = aws
+    aws           = aws
     aws.catalogue = aws.catalogue
   }
 }
