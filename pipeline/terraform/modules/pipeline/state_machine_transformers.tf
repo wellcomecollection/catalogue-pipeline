@@ -9,7 +9,7 @@ locals {
 module "ebsco_transformer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "ebsco-adapter-transformer"
+  name        = "${local.namespace}-transformer_ebsco"
   description = "Lambda function to transform EBSCO data"
   runtime     = "python3.12"
   publish     = true
