@@ -125,8 +125,8 @@ module "ingestor_indexer_lambda" {
     command = ["ingestor.steps.ingestor_indexer.lambda_handler"]
   }
 
-  memory_size = 1024
-  timeout     = 300
+  memory_size = 4096
+  timeout     = 900
 
   vpc_config = {
     subnet_ids = local.private_subnets

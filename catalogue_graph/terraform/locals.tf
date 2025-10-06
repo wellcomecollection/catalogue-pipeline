@@ -144,10 +144,12 @@ locals {
       "transformer_type" : "catalogue_work_identifiers",
       "entity_type" : "edges",
       # When bulk loading work identifier edges, we are expecting a small number of insert failures due to missing
-      # parent nodes (currently about 1.2% of the total). This is because some extracted parent_path_identifier values
-      # do not exist in the collection. For example, we might have a child path identifier 'A/B/123' for which we
-      # extract the parent identifier 'A/B', but there is no guarantee that a work with this identifier exists.
-      "insert_error_threshold" : 1.5 / 100
+      # parent nodes. This is because some extracted parent_path_identifier values do not exist in the collection.
+      # (For example, we might have a child path identifier 'A/B/123' for which we extract the parent identifier 'A/B',
+      # but there is no guarantee that a work with this identifier exists.)
+      # When running in incremental mode, we cannot predict how many of these missing path identifiers will exist
+      # in any given batch, and so we allow any number of insert errors.
+      "insert_error_threshold" : 1
     },
     {
       "label" : "Catalogue Work Nodes",
