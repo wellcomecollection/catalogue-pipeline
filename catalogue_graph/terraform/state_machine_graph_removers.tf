@@ -4,7 +4,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
 
   definition = jsonencode({
     QueryLanguage = "JSONata"
-    Comment       = ""
+    Comment       = "Remove unused source concepts and corresponding edges"
     StartAt       = "Run graph removers"
     States = {
       "Run graph removers" = {
