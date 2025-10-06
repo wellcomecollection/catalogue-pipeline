@@ -9,8 +9,8 @@ locals {
 module "ebsco_transformer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "${local.namespace}-transformer_ebsco"
-  description = "Lambda function to transform EBSCO data"
+  name         = "${local.namespace}-transformer_ebsco"
+  description  = "Lambda function to transform EBSCO data"
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   publish      = true
