@@ -30,11 +30,11 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
     QueryLanguage = "JSONata"
     Comment       = "Ingest catalogue works/concepts into the pipeline Elasticsearch cluster."
     StartAt       = "Run loader"
-    States        = {
+    States = {
       "Run loader" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_loader_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -43,9 +43,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Monitor loader"
       }
       "Monitor loader" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_loader_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -54,9 +54,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Next  = "Run indexer"
       },
       "Run indexer" = {
-        Type      = "Task",
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_indexer_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -66,17 +66,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
             ErrorEquals     = local.DefaultErrorEquals,
             IntervalSeconds = 300,
             # Don't try again yet!
-            MaxAttempts     = 1,
-            BackoffRate     = 2,
-            JitterStrategy  = "FULL"
+            MaxAttempts    = 1,
+            BackoffRate    = 2,
+            JitterStrategy = "FULL"
           }
         ],
         Next = "Monitor indexer"
       }
       "Monitor indexer" = {
-        Type      = "Task"
-        Resource  = "arn:aws:states:::lambda:invoke",
-        Output    = "{% $states.result.Payload %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.ingestor_indexer_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
@@ -119,10 +119,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
             ExecutionType = "STANDARD"
           },
           StartAt = "Run ingestor",
-          States  = {
+          States = {
             "Run ingestor" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::states:startExecution.sync:2",
+              Type     = "Task",
+              Resource = "arn:aws:states:::states:startExecution.sync:2",
               Arguments = {
                 StateMachineArn = aws_sfn_state_machine.catalogue_graph_ingestor.arn
                 Input           = "{% $states.input %}"
