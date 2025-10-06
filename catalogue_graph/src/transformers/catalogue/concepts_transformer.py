@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.events import IncrementalWindow
+from models.events import BasePipelineEvent
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
 from sources.catalogue.concepts_source import CatalogueConceptsSource
@@ -17,17 +17,16 @@ from .works_transformer import ES_FIELDS, ES_QUERY
 class CatalogueConceptsTransformer(BaseTransformer):
     def __init__(
         self,
-        pipeline_date: str,
-        window: IncrementalWindow | None,
+        event: BasePipelineEvent,
         es_mode: ElasticsearchMode,
     ):
         self.source = CatalogueConceptsSource(
-            pipeline_date, ES_QUERY, ES_FIELDS, window, es_mode
+            event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
         )
 
         self.id_label_checker: IdLabelChecker | None = None
         self.id_lookup: set = set()
-        self.pipeline_date = pipeline_date
+        self.pipeline_date = event.pipeline_date
 
     def transform_node(self, raw_data: tuple[dict, WorkConceptKey]) -> Concept | None:
         raw_concept = RawCatalogueConcept(raw_data, self.id_label_checker)

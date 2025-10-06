@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.events import IncrementalWindow
+from models.events import BasePipelineEvent
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from sources.merged_works_source import MergedWorksSource
@@ -28,12 +28,11 @@ ES_FIELDS = [
 class CatalogueWorksTransformer(BaseTransformer):
     def __init__(
         self,
-        pipeline_date: str,
-        window: IncrementalWindow | None,
+        event: BasePipelineEvent,
         es_mode: ElasticsearchMode,
     ):
         self.source = MergedWorksSource(
-            pipeline_date, ES_QUERY, ES_FIELDS, window, es_mode
+            event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
         )
 
     def transform_node(self, raw_node: dict) -> Work:

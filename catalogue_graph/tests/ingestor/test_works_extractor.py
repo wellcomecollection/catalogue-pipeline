@@ -16,6 +16,9 @@ from ingestor.queries.work_queries import (
     WORK_CHILDREN_QUERY,
     WORK_CONCEPTS_QUERY,
 )
+from models.events import BasePipelineEvent
+
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 DENORMALISED_FIXTURE = load_json_fixture("ingestor/single_denormalised.json")
 ANCESTORS_FIXTURE = load_json_fixture("neptune/work_ancestors_single.json")
@@ -58,7 +61,7 @@ def mock_graph_relationships(
 
 def test_with_ancestors() -> None:
     mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor("dev", None, "private")
+    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
 
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], ["ancestors", "children"])
@@ -76,7 +79,7 @@ def test_with_ancestors() -> None:
 
 def test_with_concepts() -> None:
     mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor("dev", None, "private")
+    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
 
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], ["concepts"])
@@ -92,7 +95,7 @@ def test_with_concepts() -> None:
 
 def test_without_graph_relationships() -> None:
     mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor("dev", None, "private")
+    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
 
     mock_es_work("a24esypq")
     mock_graph_relationships("a24esypq", ["a24esypq"], [])
@@ -108,7 +111,7 @@ def test_without_graph_relationships() -> None:
 
 def test_missing_in_denormalised() -> None:
     mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor("dev", None, "private")
+    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
 
     mock_graph_relationships(
         "a24esypq", ["a24esypq"], ["concepts", "ancestors", "children"]
@@ -121,7 +124,7 @@ def test_missing_in_denormalised() -> None:
 
 def test_multiple_works() -> None:
     mock_es_secrets("graph_extractor", "dev")
-    extractor = GraphWorksExtractor("dev", None, "private")
+    extractor = GraphWorksExtractor(MOCK_EVENT, "private")
 
     for work_id in ["123", "456"]:
         mock_es_work(work_id)

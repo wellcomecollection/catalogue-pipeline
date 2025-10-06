@@ -1,6 +1,7 @@
 from test_mocks import mock_es_secrets
 from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
 
+from models.events import BasePipelineEvent
 from models.graph_edge import (
     PathIdentifierHasParent,
     WorkHasPathIdentifier,
@@ -10,12 +11,14 @@ from transformers.catalogue.work_identifiers_transformer import (
     CatalogueWorkIdentifiersTransformer,
 )
 
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
+
 
 def test_catalogue_work_identifiers_transformer_nodes() -> None:
     mock_es_secrets("graph_extractor", "dev")
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorkIdentifiersTransformer("dev", None, "public")
+    transformer = CatalogueWorkIdentifiersTransformer(MOCK_EVENT, "public")
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 3
@@ -35,7 +38,7 @@ def test_catalogue_work_identifiers_transformer_edges() -> None:
 
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorkIdentifiersTransformer("dev", None, "public")
+    transformer = CatalogueWorkIdentifiersTransformer(MOCK_EVENT, "public")
     edges = list(transformer._stream_edges())
 
     assert len(edges) == 6

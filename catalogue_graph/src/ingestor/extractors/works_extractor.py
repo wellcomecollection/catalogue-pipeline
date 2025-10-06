@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from ingestor.models.denormalised.work import DenormalisedWork
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
-from models.events import IncrementalWindow
+from models.events import BasePipelineEvent
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
 
@@ -36,18 +36,16 @@ class ExtractedWork(BaseModel):
 class GraphWorksExtractor(GraphBaseExtractor):
     def __init__(
         self,
-        pipeline_date: str,
-        window: IncrementalWindow | None,
+        event: BasePipelineEvent,
         es_mode: ElasticsearchMode,
     ):
         super().__init__(es_mode != "private")
         self.es_source = MergedWorksSource(
-            pipeline_date=pipeline_date,
-            window=window,
-            es_mode=es_mode,
+            event,
             query=ES_QUERY,
+            es_mode=es_mode,
         )
-        self.pipeline_date = pipeline_date
+        self.event = event
         self.es_mode = es_mode
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:
@@ -111,9 +109,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         print(f"Will process a total of {len(related_ids)} related works.")
 
         related_works_source = MergedWorksSource(
-            pipeline_date=self.pipeline_date,
-            es_mode=self.es_mode,
+            event=self.event,
             query=get_related_works_query(list(related_ids)),
+            es_mode=self.es_mode,
         )
         related_works_stream = (
             DenormalisedWork(**w) for w in related_works_source.stream_raw()

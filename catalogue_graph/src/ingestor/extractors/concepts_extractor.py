@@ -8,7 +8,7 @@ from ingestor.models.neptune.query_result import (
     ExtractedConcept,
     ExtractedRelatedConcept,
 )
-from models.events import IncrementalWindow
+from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
@@ -51,16 +51,14 @@ CONCEPTS_BATCH_SIZE = 40_000
 class GraphConceptsExtractor(GraphBaseExtractor):
     def __init__(
         self,
-        pipeline_date: str,
-        window: IncrementalWindow | None,
+        event: BasePipelineEvent,
         es_mode: ElasticsearchMode,
     ):
         super().__init__(es_mode != "private")
         self.es_source = MergedWorksSource(
-            pipeline_date=pipeline_date,
+            event,
             query=ES_QUERY,
             fields=ES_FIELDS,
-            window=window,
             es_mode=es_mode,
         )
 

@@ -5,9 +5,11 @@ from config import (
     LOC_SUBJECT_HEADINGS_URL,
     MESH_URL,
 )
-from models.events import IncrementalWindow
+from models.events import (
+    ExtractorEvent,
+)
 from utils.elasticsearch import ElasticsearchMode
-from utils.types import CatalogueTransformerType, EntityType, TransformerType
+from utils.types import CatalogueTransformerType
 
 from .base_transformer import BaseTransformer
 from .catalogue.concepts_transformer import CatalogueConceptsTransformer
@@ -24,13 +26,14 @@ from .wikidata.names_transformer import WikidataNamesTransformer
 
 
 def create_transformer(
-    transformer_type: TransformerType,
-    entity_type: EntityType,
-    pipeline_date: str,
-    window: IncrementalWindow | None,
+    event: ExtractorEvent,
     es_mode: ElasticsearchMode,
 ) -> BaseTransformer:
-    if window is not None and transformer_type not in get_args(
+    transformer_type = event.transformer_type
+    entity_type = event.entity_type
+    pipeline_date = event.pipeline_date
+
+    if event.window is not None and transformer_type not in get_args(
         CatalogueTransformerType
     ):
         raise ValueError(
@@ -63,10 +66,10 @@ def create_transformer(
             "mesh_locations", entity_type, pipeline_date
         )
     if transformer_type == "catalogue_concepts":
-        return CatalogueConceptsTransformer(pipeline_date, window, es_mode)
+        return CatalogueConceptsTransformer(event, es_mode)
     if transformer_type == "catalogue_works":
-        return CatalogueWorksTransformer(pipeline_date, window, es_mode)
+        return CatalogueWorksTransformer(event, es_mode)
     if transformer_type == "catalogue_work_identifiers":
-        return CatalogueWorkIdentifiersTransformer(pipeline_date, window, es_mode)
+        return CatalogueWorkIdentifiersTransformer(event, es_mode)
 
     raise ValueError(f"Unknown transformer type: {transformer_type}")

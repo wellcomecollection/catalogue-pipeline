@@ -24,6 +24,7 @@ from ingestor.transformers.concepts_transformer import (
 from ingestor.transformers.raw_concept import (
     get_most_specific_concept_type,
 )
+from models.events import BasePipelineEvent
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": [],
@@ -35,6 +36,8 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_topics": [],
     "founded_by": [],
 }
+
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
 def test_catalogue_concept_from_neptune_result() -> None:
@@ -88,7 +91,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -141,7 +144,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -210,7 +213,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -287,7 +290,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -365,7 +368,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer("dev", None, "private")
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
@@ -454,7 +457,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         abcd2345,Le Pétomane,
         """)
     transformer = ElasticsearchConceptsTransformer(
-        "dev", None, "private", overrides=overrides
+        MOCK_EVENT, "private", overrides=overrides
     )
     raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
@@ -588,7 +591,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
         """)
 
     transformer = ElasticsearchConceptsTransformer(
-        "dev", None, "private", overrides=overrides
+        MOCK_EVENT, "private", overrides=overrides
     )
     raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)

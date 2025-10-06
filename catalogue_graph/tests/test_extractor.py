@@ -24,7 +24,7 @@ from config import (
 )
 from extractor import lambda_handler
 from models.events import EntityType, StreamDestination
-from transformers.create_transformer import TransformerType
+from utils.types import TransformerType
 
 transformer_types = get_args(TransformerType)
 entity_types = get_args(EntityType)

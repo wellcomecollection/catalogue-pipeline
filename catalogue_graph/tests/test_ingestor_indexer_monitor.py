@@ -19,6 +19,7 @@ def get_mock_expected_report(success_count: int) -> dict:
         "job_id": "123",
         "load_format": "parquet",
         "window": None,
+        "es_pit_id": None,
         "success_count": success_count,
     }
 

@@ -9,7 +9,6 @@ from utils.types import IngestorLoadFormat, IngestorType
 
 class IngestorStepEvent(BasePipelineEvent):
     ingestor_type: IngestorType
-    pipeline_date: str
     index_date: str
     job_id: str
     load_format: IngestorLoadFormat = "parquet"

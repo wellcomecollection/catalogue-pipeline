@@ -9,7 +9,7 @@ import backoff
 from pydantic import BaseModel
 
 import config
-from models.events import IncrementalWindow
+from models.events import BasePipelineEvent, IncrementalWindow
 from sources.base_source import BaseSource
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
@@ -49,21 +49,27 @@ def build_merged_index_query(
 class MergedWorksSource(BaseSource):
     def __init__(
         self,
-        pipeline_date: str,
+        event: BasePipelineEvent,
         query: dict | None = None,
         fields: list | None = None,
-        window: IncrementalWindow | None = None,
         es_mode: ElasticsearchMode = "private",
     ):
-        self.es_client = get_client("graph_extractor", pipeline_date, es_mode)
-        self.window = window
+        self.es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
+        self.window = event.window
         self.fields = fields
         self.query = query
         self.index_name = get_standard_index_name(
-            config.ES_DENORMALISED_INDEX_NAME, pipeline_date
+            config.ES_DENORMALISED_INDEX_NAME, event.pipeline_date
         )
-        pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="15m")
-        self.pit_id = pit["id"]
+
+        # Use the provided point in time (PIT) ID, or create a new one
+        if event.es_pit_id is not None:
+            self.pit_id = event.es_pit_id
+        else:
+            pit = self.es_client.open_point_in_time(
+                index=self.index_name, keep_alive="15m"
+            )
+            self.pit_id = pit["id"]
 
     @backoff.on_exception(
         backoff.constant,

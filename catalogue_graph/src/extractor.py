@@ -22,10 +22,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     )
 
     transformer: BaseTransformer = create_transformer(
-        event.transformer_type,
-        event.entity_type,
-        event.pipeline_date,
-        event.window,
+        event,
         es_mode="public" if is_local else "private",
     )
 

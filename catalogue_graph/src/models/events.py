@@ -11,7 +11,9 @@ DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
 class BasePipelineEvent(BaseModel):
+    pipeline_date: str
     window: IncrementalWindow | None = None
+    es_pit_id: str | None = None
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
@@ -27,7 +29,6 @@ class BasePipelineEvent(BaseModel):
 class GraphPipelineEvent(BasePipelineEvent):
     transformer_type: TransformerType
     entity_type: EntityType
-    pipeline_date: str
 
     def get_bulk_load_s3_uri(self) -> str:
         return bulk_load.get_s3_uri(

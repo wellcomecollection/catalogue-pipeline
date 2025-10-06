@@ -1,14 +1,17 @@
 from test_utils import add_mock_denormalised_documents, check_bulk_load_edge
 
+from models.events import BasePipelineEvent
 from models.graph_edge import WorkHasConcept, WorkHasConceptAttributes
 from models.graph_node import Work
 from transformers.catalogue.works_transformer import CatalogueWorksTransformer
+
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
 def test_catalogue_works_transformer_nodes() -> None:
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorksTransformer("dev", None, "local")
+    transformer = CatalogueWorksTransformer(MOCK_EVENT, "local")
     nodes = list(transformer._stream_nodes())
 
     assert len(nodes) == 3
@@ -26,7 +29,7 @@ def test_catalogue_works_transformer_nodes() -> None:
 def test_catalogue_works_transformer_edges() -> None:
     add_mock_denormalised_documents()
 
-    transformer = CatalogueWorksTransformer("dev", None, "local")
+    transformer = CatalogueWorksTransformer(MOCK_EVENT, "local")
     edges = list(transformer._stream_edges())
 
     assert len(edges) == 15

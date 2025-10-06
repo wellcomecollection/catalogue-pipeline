@@ -1,6 +1,6 @@
 from collections.abc import Generator
 
-from models.events import IncrementalWindow
+from models.events import BasePipelineEvent
 from sources.base_source import BaseSource
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
@@ -50,14 +50,13 @@ def extract_concepts_from_work(
 class CatalogueConceptsSource(BaseSource):
     def __init__(
         self,
-        pipeline_date: str,
+        event: BasePipelineEvent,
         query: dict | None = None,
         fields: list | None = None,
-        window: IncrementalWindow | None = None,
         es_mode: ElasticsearchMode = "private",
     ):
         self.es_source = MergedWorksSource(
-            pipeline_date, query, fields, window, es_mode
+            event, query=query, fields=fields, es_mode=es_mode
         )
 
     def stream_raw(self) -> Generator[tuple[dict, WorkConceptKey]]:
