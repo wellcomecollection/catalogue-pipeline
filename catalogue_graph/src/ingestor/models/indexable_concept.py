@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 
 from ingestor.models.display.identifier import DisplayIdentifier
+from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.indexable import IndexableRecord
 from utils.types import ConceptType
 
@@ -52,7 +53,7 @@ class ConceptDisplay(BaseModel):
     type: ConceptType
     relatedConcepts: RelatedConcepts
     sameAs: list[str]
-    displayImageUrl: list[str]
+    displayImages: list[DisplayDigitalLocation]
 
 
 class IndexableConcept(IndexableRecord):

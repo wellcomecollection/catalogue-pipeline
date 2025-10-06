@@ -2,6 +2,8 @@ import csv
 import os
 from typing import TextIO
 
+from ingestor.models.display.id_label import DisplayIdLabel
+from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.indexable_concept import ConceptDescription
 
 from .raw_concept import RawNeptuneConcept
@@ -50,8 +52,18 @@ class ConceptTextOverrideProvider:
                 )
         return raw_concept.description
 
-    def display_image(self, raw_concept: RawNeptuneConcept) -> list[str]:
+    def display_image(
+        self, raw_concept: RawNeptuneConcept
+    ) -> list[DisplayDigitalLocation]:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override and (override_image := override["image_url"].strip()):
-            return [override_image]
+            return [
+                DisplayDigitalLocation(
+                    url=override_image,
+                    locationType=DisplayIdLabel(
+                        id="iiif-image", label="IIIF Image", type="LocationType"
+                    ),
+                    accessConditions=[],
+                )
+            ]
         return []

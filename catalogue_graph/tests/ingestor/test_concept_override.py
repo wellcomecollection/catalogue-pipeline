@@ -3,6 +3,8 @@ import io
 import pytest
 from test_utils import load_json_fixture
 
+from ingestor.models.display.id_label import DisplayIdLabel
+from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.indexable_concept import ConceptDescription
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
@@ -104,4 +106,12 @@ def test_add_display_image(concept: RawNeptuneConcept) -> None:
         """)
     )
 
-    assert overrider.display_image(concept) == ["www.cat_surgery.info.json"]
+    assert overrider.display_image(concept) == [
+        DisplayDigitalLocation(
+            url="www.cat_surgery.info.json",
+            locationType=DisplayIdLabel(
+                id="iiif-image", label="IIIF Image", type="LocationType"
+            ),
+            accessConditions=[],
+        )
+    ]
