@@ -1,23 +1,10 @@
 import concurrent.futures
 from collections.abc import Callable, Generator, Iterable
 from itertools import batched, islice
-from typing import Any, TypeVar
+from typing import TypeVar
 
 T = TypeVar("T")
 S = TypeVar("S")
-
-
-def generator_to_chunks(items: Iterable[Any], chunk_size: int) -> Generator[list]:
-    """
-    Split items in a generator into chunks of size `chunk_size` and return another generator yielding the chunks
-    one by one.
-    """
-    while True:
-        chunk = list(islice(items, chunk_size))
-        if chunk:
-            yield chunk
-        else:
-            return
 
 
 def process_stream_in_parallel(

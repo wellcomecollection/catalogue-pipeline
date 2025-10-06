@@ -2,7 +2,7 @@ import concurrent.futures
 import csv
 import os
 from collections.abc import Generator
-from itertools import islice
+from itertools import batched, islice
 from typing import Any, TextIO
 
 import boto3
@@ -16,7 +16,6 @@ from models.graph_node import BaseNode
 from query_builders.cypher import construct_upsert_cypher_query
 from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
-from utils.streaming import generator_to_chunks
 
 CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
 
@@ -120,7 +119,7 @@ class BaseTransformer:
         and returns the results stream in fixed-size chunks.
         """
         entities = self._stream_entities(entity_type, sample_size)
-        yield from generator_to_chunks(entities, CHUNK_SIZE)
+        yield from batched(entities, CHUNK_SIZE, strict=False)
 
     def stream_to_s3(
         self, s3_uri: str, entity_type: EntityType, sample_size: int | None = None
