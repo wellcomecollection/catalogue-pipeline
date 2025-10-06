@@ -73,6 +73,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
             ),
             type="Person",
             sameAs=[],
+            displayImageUrl=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -125,6 +126,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             ),
             type="Person",
             sameAs=[],
+            displayImageUrl=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -186,6 +188,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImageUrl=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -256,6 +259,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImageUrl=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -334,6 +338,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImageUrl=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -411,6 +416,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImageUrl=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -443,7 +449,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         ),
     )
 
-    overrides = io.StringIO("""id,label,description
+    overrides = io.StringIO("""id,label,description,image_url
         id, Wellcome Label, Wellcome Description
         aaaaaaaa,Roland le Petour,
         abcd2345,Le Pétomane,
@@ -564,6 +570,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
             ),
             type="Person",
             sameAs=[],
+            displayImageUrl=["www.image.info.json"],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -576,8 +583,8 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
             ),
         ),
     )
-    overrides = io.StringIO("""id,label,description
-        id, Wellcome Label, Wellcome Description
+    overrides = io.StringIO("""id,label,description,image_url
+        id, Wellcome Label, Wellcome Description,www.image.info.json
         """)
 
     transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)

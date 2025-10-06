@@ -50,9 +50,7 @@ class ConceptTextOverrideProvider:
                 )
         return raw_concept.description
 
-    def display_image(
-        self, raw_concept: RawNeptuneConcept   
-    ) -> list[str]:
+    def display_image(self, raw_concept: RawNeptuneConcept) -> list[str]:
         override = self.overrides.get(raw_concept.wellcome_id)
         if override and (override_image := override["image_url"].strip()):
             return [override_image]

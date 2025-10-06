@@ -92,16 +92,16 @@ def test_change_label_and_description(concept: RawNeptuneConcept) -> None:
     assert overrider.display_label_of(concept) == "New Label"
     assert overrider.description_of(concept).text == "New Description"  # type: ignore
 
+
 def test_add_display_image(concept: RawNeptuneConcept) -> None:
     """
     Populating the image_url field with a IIIF info.json URL
-    signals that the concept should have a display image 
+    signals that the concept should have a display image
     """
     overrider = ConceptTextOverrideProvider(
         io.StringIO("""id,label,description,image_url
         id, , , www.cat_surgery.info.json
         """)
     )
-    
-    assert overrider.display_image(concept) == ["www.cat_surgery.info.json"]
 
+    assert overrider.display_image(concept) == ["www.cat_surgery.info.json"]

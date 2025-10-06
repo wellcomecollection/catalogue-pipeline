@@ -236,6 +236,7 @@ def get_catalogue_concept_mock(
                 sourceUrl="https://www.wikidata.org/wiki/456",
             ),
             sameAs=[],
+            displayImageUrl=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=related_to,
                 fieldsOfWork=[],
