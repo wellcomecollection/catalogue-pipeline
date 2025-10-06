@@ -15,7 +15,7 @@ module "elasticsearch_pit_opener_lambda" {
   timeout     = 15
 
   vpc_config = {
-    subnet_ids         = local.private_subnets
+    subnet_ids = local.private_subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.ec_privatelink_security_group_id
