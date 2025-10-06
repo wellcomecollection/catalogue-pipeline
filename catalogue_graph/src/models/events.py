@@ -13,7 +13,7 @@ DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 class BasePipelineEvent(BaseModel):
     pipeline_date: str
     window: IncrementalWindow | None = None
-    es_pit_id: str | None = None
+    pit_id: str | None = None
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:

@@ -49,38 +49,39 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline_incremental" {
       "Open PIT" = {
         Type     = "Task",
         Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
         Arguments = {
           FunctionName = module.elasticsearch_pit_opener_lambda.lambda.arn,
           Payload      = "{% $states.context.Execution.Input %}"
         },
-        Retry = local.DefaultRetry,
-        Next  = "Extractors"
+        Output = "{% $merge([$states.context.Execution.Input, $states.result.Payload ]) %}",
+        Retry  = local.DefaultRetry,
+        Next   = "Extractors"
       },
       "Extractors" = {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractors_incremental.arn
-          Input           = "{% $merge([$states.context.Execution.Input, {\"es_pit_id\": $states.input.es_pit_id}]) %}"
+          Input           = "{% $states.input %}"
         }
-        Next = "Bulk loaders"
+        Output = "{% $states.input %}",
+        Next   = "Bulk loaders"
       },
       "Bulk loaders" = {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loaders_incremental.arn
-          Input           = "{% $states.context.Execution.Input %}"
         }
-        Next = "Concepts ingestor"
+        Output = "{% $states.input %}",
+        Next   = "Concepts ingestor"
       },
       "Concepts ingestor" = {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_ingestors.arn,
-          Input           = "{% $states.context.Execution.Input %}"
+          Input           = "{% $states.input %}"
         }
         Next = "Success"
       },

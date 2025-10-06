@@ -50,7 +50,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_incremental" {
           "entity_type" : "{% $states.context.Map.Item.Value.entity_type %}",
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
-          "es_pit_id" : "{% $states.context.Execution.Input.es_pit_id ? $states.context.Execution.Input.es_pit_id : null %}",
+          "pit_id" : "{% $states.context.Execution.Input.pit_id ? $states.context.Execution.Input.pit_id : null %}",
         }
 
         ItemProcessor = {

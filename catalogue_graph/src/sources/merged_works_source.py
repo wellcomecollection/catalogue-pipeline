@@ -63,8 +63,8 @@ class MergedWorksSource(BaseSource):
         )
 
         # Use the provided point in time (PIT) ID, or create a new one
-        if event.es_pit_id is not None:
-            self.pit_id = event.es_pit_id
+        if event.pit_id is not None:
+            self.pit_id = event.pit_id
         else:
             pit = self.es_client.open_point_in_time(
                 index=self.index_name, keep_alive="15m"
