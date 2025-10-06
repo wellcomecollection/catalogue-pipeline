@@ -537,7 +537,7 @@ def test_concept_type_place_precedence() -> None:
     )
 
 
-def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> (
+def test_catalogue_concept_from_neptune_result_with_overridden_label_description_and_image() -> (
     None
 ):
     mock_concept = load_json_fixture("neptune/concept_query_single.json")
