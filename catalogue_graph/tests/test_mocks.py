@@ -355,6 +355,17 @@ class MockElasticsearchClient:
     def close_point_in_time(self, body: dict) -> None:
         pass
 
+    def _get_id_filter_from_query(self, query: dict) -> list[str] | None:
+        ids: list[str] | None = None
+        for item in query.get("bool", {}).get("must", []):
+            if item.get("ids"):
+                ids = item["ids"]["values"]
+
+        if query.get("ids"):
+            ids = query["ids"]["values"]
+
+        return ids
+
     def search(self, body: dict) -> dict:
         self.queries.append(body["query"])
         search_after = body.get("search_after")
@@ -362,9 +373,15 @@ class MockElasticsearchClient:
         all_documents = self.indexed_documents[self.pit_index].values()
         sorted_documents = sorted(all_documents, key=lambda d: d["_id"])
 
+        filtered_ids = self._get_id_filter_from_query(body["query"])
+
         items = []
         for document in sorted_documents:
             item = {**document, "sort": document["_id"]}
+
+            if filtered_ids is not None and document["_id"] not in filtered_ids:
+                continue
+
             if search_after is None or item["sort"] > search_after:
                 items.append(item)
 
