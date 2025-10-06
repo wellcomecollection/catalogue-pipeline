@@ -149,5 +149,3 @@ class MergedWorksSource(BaseSource):
                 raise item.exception
             else:
                 yield item
-
-        self.es_client.close_point_in_time(body={"id": self.pit_id})

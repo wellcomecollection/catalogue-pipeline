@@ -111,6 +111,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
           "index_date" : "{% $states.context.Execution.Input.index_date %}",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
+          "pit_id" : "{% $states.context.Execution.Input.pit_id ? $states.context.Execution.Input.pit_id : null %}",
         }
 
         ItemProcessor = {
