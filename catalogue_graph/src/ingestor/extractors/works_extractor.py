@@ -15,7 +15,7 @@ ES_QUERY = {"match": {"type": "Visible"}}
 WORKS_BATCH_SIZE = 10_000
 
 
-def get_related_works_query(related_ids: list[str]):
+def get_related_works_query(related_ids: list[str]) -> dict:
     """Return an ES query retrieving"""
     return {
         "bool": {
