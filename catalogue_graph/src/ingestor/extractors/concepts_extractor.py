@@ -214,6 +214,7 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         for extracted_batch in batched(
             extracted_ids, CONCEPTS_BATCH_SIZE, strict=False
         ):
+            # Some concepts might be duplicated (since a concept can appear in multiple works)
             batch = set(extracted_batch).difference(processed_ids)
             self._update_same_as_map(batch)
 
