@@ -2,7 +2,7 @@ module "pipeline" {
   source = "../modules/pipeline"
 
   reindexing_state = {
-    listen_to_reindexer      = false
+    listen_to_reindexer      = true
     scale_up_tasks           = false
     scale_up_elastic_cluster = false
     scale_up_id_minter_db    = false
@@ -26,8 +26,8 @@ module "pipeline" {
         indexed = "concepts_indexed.2025-06-17"
       }
     }
-    "2025-11-01" = {
-      works    = { indexed = "works_indexed.2024-11-14" }
+    "2025-10-06" = {
+      works    = { indexed = "works_source.2025-10-02" }
       images   = {}
       concepts = {}
     }
