@@ -15,6 +15,18 @@ ES_QUERY = {"match": {"type": "Visible"}}
 WORKS_BATCH_SIZE = 10_000
 
 
+def get_related_works_query(related_ids: list[str]):
+    """Return an ES query retrieving"""
+    return {
+        "bool": {
+            "must": [
+                {"ids": {"values": list(related_ids)}},
+                {"match": {"type": "Visible"}},  # Only include visible works (for now)
+            ]
+        }
+    }
+
+
 class ExtractedWork(BaseModel):
     work: DenormalisedWork
     hierarchy: WorkHierarchy
@@ -35,6 +47,8 @@ class GraphWorksExtractor(GraphBaseExtractor):
             es_mode=es_mode,
             query=ES_QUERY,
         )
+        self.pipeline_date = pipeline_date
+        self.es_mode = es_mode
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:
         """Return all ancestors of each work in the current batch."""
@@ -96,10 +110,12 @@ class GraphWorksExtractor(GraphBaseExtractor):
         related_ids = related_ids.difference(streamed_ids)
         print(f"Will process a total of {len(related_ids)} related works.")
 
-        # Only include visible works (for now)
+        related_works_source = MergedWorksSource(
+            pipeline_date=self.pipeline_date,
+            es_mode=self.es_mode,
+            query=get_related_works_query(list(related_ids)),
+        )
         related_works_stream = (
-            DenormalisedWork(**w)
-            for w in self.es_source.mget(list(related_ids))
-            if w["type"] == "Visible"
+            DenormalisedWork(**w) for w in related_works_source.stream_raw()
         )
         yield from self.process_es_works(related_works_stream)

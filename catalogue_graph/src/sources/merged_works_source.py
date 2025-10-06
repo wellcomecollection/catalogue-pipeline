@@ -1,16 +1,30 @@
+import os
 import time
 from collections.abc import Generator
-from itertools import batched
 from queue import Queue
 from threading import Thread
 from typing import Any
+
+import backoff
+from pydantic import BaseModel
 
 import config
 from models.events import IncrementalWindow
 from sources.base_source import BaseSource
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
-MGET_BATCH_SIZE = 10_000
+ES_MGET_BATCH_SIZE = 10_000
+ES_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
+ES_REQUESTS_BACKOFF_INTERVAL = 10
+
+
+class ErrorSentinel(BaseModel):
+    exception: Any
+
+
+def on_request_backoff(backoff_details: Any) -> None:
+    exception_name = type(backoff_details["exception"]).__name__
+    print(f"Elasticsearch request failed due to '{exception_name}'. Retrying...")
 
 
 def build_merged_index_query(
@@ -51,31 +65,13 @@ class MergedWorksSource(BaseSource):
         pit = self.es_client.open_point_in_time(index=self.index_name, keep_alive="15m")
         self.pit_id = pit["id"]
 
-    def mget(self, work_ids: list[str]) -> Generator[dict]:
-        """Retrieve work documents by ID"""
-        for work_ids_batch in batched(work_ids, MGET_BATCH_SIZE, strict=False):
-            start_time = time.time()
-            result = self.es_client.mget(
-                index=self.index_name, body={"ids": work_ids_batch}
-            )
-            duration = round(time.time() - start_time)
-
-            print(
-                f"Ran Elasticsearch query in {duration} seconds, retrieving {len(result['docs'])} records."
-            )
-
-            for work in result["docs"]:
-                if "error" in work:
-                    raise ValueError(
-                        f"Failed to retrieve work from Elasticsearch: {work['error']}"
-                    )
-                if not work["found"]:
-                    print(
-                        f"Work {work['_id']} does not exist in the denormalised index."
-                    )
-                else:
-                    yield work["_source"]
-
+    @backoff.on_exception(
+        backoff.constant,
+        Exception,
+        max_tries=ES_REQUESTS_BACKOFF_RETRIES,
+        interval=ES_REQUESTS_BACKOFF_INTERVAL,
+        on_backoff=on_request_backoff,
+    )
     def search(self, slice_index: int, search_after: str | None = None) -> list[dict]:
         query = build_merged_index_query(self.query, self.window)
         body = {
@@ -113,9 +109,16 @@ class MergedWorksSource(BaseSource):
         queue.put(None)
 
     def run_worker(self, slice_index: int, queue: Queue) -> None:
+        def worker() -> None:
+            # Propagate all exceptions into the main thread
+            try:
+                self.worker_target(slice_index, queue)
+            except Exception as e:
+                queue.put(ErrorSentinel(exception=e))
+
         # Run threads as daemons so that they automatically exit when the main thread throws an exception.
         # See https://docs.python.org/3/library/threading.html for more info.
-        t = Thread(target=self.worker_target, args=(slice_index, queue), daemon=True)
+        t = Thread(target=worker, daemon=True)
         t.start()
 
     def stream_raw(self) -> Generator[Any]:
@@ -136,6 +139,8 @@ class MergedWorksSource(BaseSource):
                 if next_thread_index < config.ES_SOURCE_SLICE_COUNT:
                     self.run_worker(next_thread_index, queue)
                     next_thread_index += 1
+            elif isinstance(item, ErrorSentinel):
+                raise Exception(item.exception)
             else:
                 yield item
 
