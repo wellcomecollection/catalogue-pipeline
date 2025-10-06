@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<collection xmlns="http://www.loc.gov/MARC21/slim">
-    <record>
-        <leader>00000cas a22000003 4500</leader>
-        <controlfield tag="001">ebs00001</controlfield>
-        <datafield tag="210" ind1=" " ind2=" ">
-            <subfield code="a">How to Avoid Huge Ships</subfield>
-        </datafield>

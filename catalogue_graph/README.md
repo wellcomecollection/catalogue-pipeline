@@ -180,11 +180,14 @@ apply).
 For ad‑hoc (non‑CI) deployment of the shared Lambda image:
 
 ```shell
-# From catalogue_graph/
-TAG=dev \
+# From ./catalogue_graph/
+PYTHON_IMAGE_VERSION=$(cat .python-version) \
 REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
-docker compose build unified_pipeline_lambda
-docker compose push unified_pipeline_lambda
+  docker compose build unified_pipeline_lambda
+
+PYTHON_IMAGE_VERSION=$(cat .python-version) \
+REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
+  docker compose push unified_pipeline_lambda
 
 # (Optional) apply infrastructure changes
 cd terraform
@@ -192,7 +195,7 @@ terraform plan
 terraform apply
 ```
 
-Extractor ECS image (separate service) can still be built/pushed similarly using the `extractor` target.
+Extractor ECS image (separate service) can be built/pushed similarly using the `extractor` target.
 
 ## Local execution
 

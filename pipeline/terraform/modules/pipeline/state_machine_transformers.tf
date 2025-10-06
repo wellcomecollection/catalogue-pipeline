@@ -11,12 +11,14 @@ module "ebsco_transformer_lambda" {
 
   name        = "${local.namespace}-transformer_ebsco"
   description = "Lambda function to transform EBSCO data"
-  runtime     = "python3.12"
-  publish     = true
+  package_type = "Image"
+  image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["adapters.ebsco.steps.transformer.lambda_handler"]
+  }
 
-  handler     = "steps.transformer.lambda_handler"
   memory_size = 4096
   timeout     = 600
 

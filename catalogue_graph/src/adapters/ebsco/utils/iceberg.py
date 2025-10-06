@@ -117,12 +117,22 @@ class IcebergTableClient:
     def _append_change_columns(
         changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar
     ) -> pa.Table:
+        # Build correctly-typed Arrow arrays for the metadata columns we're appending.
+        num_rows = changeset.num_rows
+        changeset_array = pa.array([changeset_id] * num_rows, type=pa.string())
+        # Convert the Arrow scalar to a Python datetime so the array constructor can repeat it
+        last_modified_py = timestamp.as_py()
+        last_modified_array = pa.array(
+            [last_modified_py] * num_rows,
+            type=pa.timestamp("us", "UTC"),
+        )
+
         changeset = changeset.append_column(
             pa.field("changeset", type=pa.string(), nullable=True),
-            [[changeset_id] * len(changeset)],
+            changeset_array,
         ).append_column(
             pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
-            [[timestamp] * len(changeset)],
+            last_modified_array,
         )
 
         return changeset
