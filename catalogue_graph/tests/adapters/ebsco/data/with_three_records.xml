@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim">
+    <record>
+        <leader>00000cas a22000003 4500</leader>
+        <controlfield tag="001">ebs00001</controlfield>
+        <datafield tag="210" ind1=" " ind2=" ">
+            <subfield code="a">How to Avoid Huge Ships</subfield>
+        </datafield>
+        <datafield tag="700" ind1=" " ind2=" ">
+            <subfield code="a">John W. Trimmer</subfield>
+        </datafield>
+    </record>
+    <record>
+        <leader>00000cas a22000003 4500</leader>
+        <controlfield tag="001">ebs00003</controlfield>
+        <datafield tag="210" ind1=" " ind2=" ">
+            <subfield code="a">European Archives of Psychiatry and Clinical Neuroscience</subfield>
+        </datafield>
+    </record>
+    <record>
+        <leader>00000cas a22000003 4500</leader>
+        <controlfield tag="001">ebs00004</controlfield>
+        <datafield tag="210" ind1=" " ind2=" ">
+            <subfield code="a">Brain: a journal of neurology</subfield>
+        </datafield>
+    </record>
+</collection>
