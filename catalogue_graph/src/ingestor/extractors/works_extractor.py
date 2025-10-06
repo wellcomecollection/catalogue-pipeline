@@ -16,12 +16,12 @@ WORKS_BATCH_SIZE = 10_000
 
 
 def get_related_works_query(related_ids: list[str]) -> dict:
-    """Return an ES query retrieving"""
+    """Return an ES query retrieving all visible works with the given IDs"""
     return {
         "bool": {
             "must": [
                 {"ids": {"values": list(related_ids)}},
-                {"match": {"type": "Visible"}},  # Only include visible works (for now)
+                {"match": {"type": "Visible"}},  # Only include visible works
             ]
         }
     }
