@@ -90,7 +90,7 @@ def local_handler() -> None:
         required=False,
     )
     parser.add_argument(
-        "--es-pit-id",
+        "--pit-id",
         type=str,
         help="An Elasticsearch point in time ID to use when extracting data from the denormalised index.",
         required=False,
