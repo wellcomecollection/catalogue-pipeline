@@ -7,7 +7,10 @@ from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
 )
-from ingestor.transformers.base_transformer import ElasticsearchBaseTransformer
+from ingestor.transformers.base_transformer import (
+    ElasticsearchBaseTransformer,
+    LoadDestination,
+)
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.elasticsearch import ElasticsearchMode
@@ -33,12 +36,14 @@ def create_transformer(
 
 
 def handler(
-    event: IngestorLoaderLambdaEvent, es_mode: ElasticsearchMode = "private"
+    event: IngestorLoaderLambdaEvent,
+    es_mode: ElasticsearchMode = "private",
+    load_destination: LoadDestination = "s3",
 ) -> IngestorIndexerLambdaEvent:
     print(f"Received event: {event}")
 
     transformer = create_transformer(event, es_mode)
-    objects_to_index = transformer.load_documents(event)
+    objects_to_index = transformer.load_documents(event, load_destination)
 
     return IngestorIndexerLambdaEvent(
         **event.model_dump(),
@@ -114,12 +119,7 @@ def local_handler() -> None:
 
     args = parser.parse_args()
     event = IngestorLoaderLambdaEvent.from_argparser(args)
-
-    if args.load_destination == "local":
-        transformer = create_transformer(event, args.es_mode)
-        transformer.load_documents(event, "local")
-    else:
-        handler(event, args.es_mode)
+    handler(event, args.es_mode, args.load_destination)
 
 
 if __name__ == "__main__":

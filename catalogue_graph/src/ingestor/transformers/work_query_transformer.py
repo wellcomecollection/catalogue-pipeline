@@ -135,9 +135,8 @@ class QueryWorkTransformer:
                             )
                         except dateutil.parser.ParserError:
                             print(
-                                f"Could not parse the production date of work {self.state.canonical_id}"
+                                f"Could not parse a production date of work {self.state.canonical_id}"
                             )
-                            yield NEGATIVE_INFINITY_UNIX_TIMESTAMP
 
     @property
     def genre_ids(self) -> Generator[str]:

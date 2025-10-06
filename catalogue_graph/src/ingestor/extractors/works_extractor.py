@@ -52,6 +52,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
         self, es_works: Iterator[DenormalisedWork]
     ) -> Generator[ExtractedWork]:
         for es_batch in batched(es_works, WORKS_BATCH_SIZE, strict=False):
+            # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
             visible_work_ids = [
                 w.state.canonical_id for w in es_batch if w.type == "Visible"
             ]
@@ -80,6 +81,8 @@ class GraphWorksExtractor(GraphBaseExtractor):
             streamed_ids.add(extracted_work.work.state.canonical_id)
 
             # When a work is reprocessed, all of its children and ancestors must be reprocessed too for consistency.
+            # (For example, if the title of a parent work changes, all of its children must be processed and reindexed
+            # to store the new title.)
             related_ids.update(
                 c.work.properties.id for c in extracted_work.hierarchy.children
             )
@@ -89,10 +92,14 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
             yield extracted_work
 
-        # Only process related works which were not already processed above
+        # Before processing related works, filter out works which were already processed above
         related_ids = related_ids.difference(streamed_ids)
         print(f"Will process a total of {len(related_ids)} related works.")
+
+        # Only include visible works (for now)
         related_works_stream = (
-            DenormalisedWork(**w) for w in self.es_source.mget(list(related_ids))
+            DenormalisedWork(**w)
+            for w in self.es_source.mget(list(related_ids))
+            if w["type"] == "Visible"
         )
         yield from self.process_es_works(related_works_stream)
