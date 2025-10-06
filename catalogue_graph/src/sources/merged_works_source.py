@@ -140,7 +140,7 @@ class MergedWorksSource(BaseSource):
                     self.run_worker(next_thread_index, queue)
                     next_thread_index += 1
             elif isinstance(item, ErrorSentinel):
-                raise Exception(item.exception)
+                raise item.exception
             else:
                 yield item
 
