@@ -181,13 +181,13 @@ For ad‑hoc (non‑CI) deployment of the shared Lambda image:
 
 ```shell
 # From ./catalogue_graph/
-PYTHON_IMAGE_VERSION=$(cat .python-version) \
-REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
-  docker compose build unified_pipeline_lambda
+docker buildx build --platform linux/amd64 \
+--provenance=false \
+-t 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/unified_pipeline_lambda:dev \
+--build-arg PYTHON_IMAGE_VERSION=$(cat .python-version) \
+-f lambda.Dockerfile .
 
-PYTHON_IMAGE_VERSION=$(cat .python-version) \
-REPOSITORY_PREFIX=760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ \
-  docker compose push unified_pipeline_lambda
+docker push 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/unified_pipeline_lambda:dev
 
 # (Optional) apply infrastructure changes
 cd terraform
