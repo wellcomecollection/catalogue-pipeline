@@ -20,7 +20,7 @@ class ConceptTextOverrideProvider:
             self._load_overrides(overrides_csv)
         else:
             with open(
-                os.path.join(HERE, "label_description_overrides.csv")
+                os.path.join(HERE, "wellcome_collection_authority.csv")
             ) as csv_file:
                 self._load_overrides(csv_file)
 
@@ -49,3 +49,11 @@ class ConceptTextOverrideProvider:
                     text=override_description, sourceUrl=None, sourceLabel=None
                 )
         return raw_concept.description
+
+    def display_image(
+        self, raw_concept: RawNeptuneConcept   
+    ) -> list[str]:
+        override = self.overrides.get(raw_concept.wellcome_id)
+        if override and (override_image := override["image_url"].strip()):
+            return [override_image]
+        return []

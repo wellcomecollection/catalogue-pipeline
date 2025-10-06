@@ -52,6 +52,7 @@ class ConceptDisplay(BaseModel):
     type: ConceptType
     relatedConcepts: RelatedConcepts
     sameAs: list[str]
+    display_image_url: list[str]
 
 
 class IndexableConcept(IndexableRecord):
