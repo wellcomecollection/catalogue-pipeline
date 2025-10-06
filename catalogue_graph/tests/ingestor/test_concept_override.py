@@ -110,7 +110,7 @@ def test_add_display_image(concept: RawNeptuneConcept) -> None:
         DisplayDigitalLocation(
             url="www.cat_surgery.info.json",
             locationType=DisplayIdLabel(
-                id="iiif-image", label="IIIF Image", type="LocationType"
+                id="iiif-image", label="IIIF Image API", type="LocationType"
             ),
             accessConditions=[],
         )

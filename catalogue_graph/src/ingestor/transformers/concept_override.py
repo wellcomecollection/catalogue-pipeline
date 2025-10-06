@@ -61,7 +61,7 @@ class ConceptTextOverrideProvider:
                 DisplayDigitalLocation(
                     url=override_image,
                     locationType=DisplayIdLabel(
-                        id="iiif-image", label="IIIF Image", type="LocationType"
+                        id="iiif-image", label="IIIF Image API", type="LocationType"
                     ),
                     accessConditions=[],
                 )

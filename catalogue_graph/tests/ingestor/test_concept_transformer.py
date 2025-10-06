@@ -576,7 +576,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
                 DisplayDigitalLocation(
                     url="www.image.info.json",
                     locationType=DisplayIdLabel(
-                        id="iiif-image", label="IIIF Image", type="LocationType"
+                        id="iiif-image", label="IIIF Image API", type="LocationType"
                     ),
                     accessConditions=[],
                 )
