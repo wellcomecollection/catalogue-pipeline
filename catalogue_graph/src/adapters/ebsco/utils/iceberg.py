@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime
+from typing import cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
@@ -89,25 +90,27 @@ class IcebergTableClient:
         """
         changeset_id = str(uuid.uuid1())
         timestamp = pa.scalar(datetime.now(UTC), pa.timestamp("us", "UTC"))
-        if changes:
+        if changes is not None:
             changes = self._append_change_columns(changes, changeset_id, timestamp)
-        if inserts:
+        if inserts is not None:
             inserts = self._append_change_columns(inserts, changeset_id, timestamp)
         with self.table.transaction() as tx:
             # Because we already know which records to overwrite and which ones to append,
             # we can avoid all the extra processing that happens inside table.upsert to find
             # matching records, check them for differences etc.
             # Just overwrite all the `changes` and append all the `inserts`
-            if changes:
+            if changes is not None:
                 overwrite_mask_predicate = self._create_match_filter(changes)
                 tx.overwrite(changes, overwrite_filter=overwrite_mask_predicate)
-            if inserts:
+            if inserts is not None:
                 tx.append(inserts)
         return changeset_id
 
     @staticmethod
     def _create_match_filter(changes: pa.Table) -> BooleanExpression:
-        change_ids = changes.column("id").to_pylist()
+        # to_pylist returns list[Any | None]; Iceberg In expects a concrete literal type.
+        raw_ids = changes.column("id").to_pylist()
+        change_ids = cast(list[str], [i for i in raw_ids if isinstance(i, str)])
         return In("id", change_ids)
 
     @staticmethod
