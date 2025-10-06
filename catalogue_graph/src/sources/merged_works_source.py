@@ -1,5 +1,6 @@
 import time
 from collections.abc import Generator
+from itertools import batched
 from queue import Queue
 from threading import Thread
 from typing import Any
@@ -8,6 +9,8 @@ import config
 from models.events import IncrementalWindow
 from sources.base_source import BaseSource
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
+
+MGET_BATCH_SIZE = 10_000
 
 
 def build_merged_index_query(
@@ -50,23 +53,28 @@ class MergedWorksSource(BaseSource):
 
     def mget(self, work_ids: list[str]) -> Generator[dict]:
         """Retrieve work documents by ID"""
-        start_time = time.time()
-        result = self.es_client.mget(index=self.index_name, body={"ids": work_ids})
-        duration = round(time.time() - start_time)
+        for work_ids_batch in batched(work_ids, MGET_BATCH_SIZE, strict=False):
+            start_time = time.time()
+            result = self.es_client.mget(
+                index=self.index_name, body={"ids": work_ids_batch}
+            )
+            duration = round(time.time() - start_time)
 
-        print(
-            f"Ran Elasticsearch query in {duration} seconds, retrieving {len(result['docs'])} records."
-        )
+            print(
+                f"Ran Elasticsearch query in {duration} seconds, retrieving {len(result['docs'])} records."
+            )
 
-        for work in result["docs"]:
-            if "error" in work:
-                raise ValueError(
-                    f"Failed to retrieve work from Elasticsearch: {work['error']}"
-                )
-            if not work["found"]:
-                print(f"Work {work['_id']} does not exist in the denormalised index.")
-            else:
-                yield work["_source"]
+            for work in result["docs"]:
+                if "error" in work:
+                    raise ValueError(
+                        f"Failed to retrieve work from Elasticsearch: {work['error']}"
+                    )
+                if not work["found"]:
+                    print(
+                        f"Work {work['_id']} does not exist in the denormalised index."
+                    )
+                else:
+                    yield work["_source"]
 
     def search(self, slice_index: int, search_after: str | None = None) -> list[dict]:
         query = build_merged_index_query(self.query, self.window)

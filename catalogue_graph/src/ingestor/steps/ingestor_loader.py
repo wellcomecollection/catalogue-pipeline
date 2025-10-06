@@ -109,6 +109,14 @@ def local_handler() -> None:
         default="s3",
     )
     parser.add_argument(
+        "--load-format",
+        type=str,
+        help="The format of loaded documents, will default to 'parquet'.",
+        required=False,
+        choices=["parquet", "jsonl"],
+        default="parquet",
+    )
+    parser.add_argument(
         "--es-mode",
         type=str,
         help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
