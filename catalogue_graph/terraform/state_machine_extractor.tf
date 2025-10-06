@@ -6,16 +6,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
     Comment       = "Run a single catalogue graph pipeline extractor task."
     QueryLanguage = "JSONata"
     StartAt       = "Extract"
-    States = {
+    States        = {
       Extract = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::ecs:runTask.sync"
-        Output   = "{% $states.input %}"
-        Next     = "Success"
+        Type      = "Task"
+        Resource  = "arn:aws:states:::ecs:runTask.sync"
+        Output    = "{% $states.input %}"
+        Retry     = local.DefaultRetry,
+        Next      = "Success"
         Arguments = {
-          Cluster        = aws_ecs_cluster.cluster.arn
-          TaskDefinition = module.extractor_ecs_task.task_definition_arn
-          LaunchType     = "FARGATE"
+          Cluster              = aws_ecs_cluster.cluster.arn
+          TaskDefinition       = module.extractor_ecs_task.task_definition_arn
+          LaunchType           = "FARGATE"
           NetworkConfiguration = {
             AwsvpcConfiguration = {
               AssignPublicIp = "DISABLED"
@@ -29,7 +30,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
           Overrides = {
             ContainerOverrides = [
               {
-                Name = "catalogue-graph_extractor"
+                Name    = "catalogue-graph_extractor"
                 Command = [
                   "--transformer-type",
                   "{% $states.input.transformer_type %}",
