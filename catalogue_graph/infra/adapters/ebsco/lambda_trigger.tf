@@ -4,8 +4,8 @@ data "aws_s3_bucket" "ebsco_adapter" {
 module "trigger_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "ebsco-adapter-trigger"
-  description = "Lambda function to trigger EBSCO adapter ingestion"
+  name         = "ebsco-adapter-trigger"
+  description  = "Lambda function to trigger EBSCO adapter ingestion"
   package_type = "Image"
   image_uri    = "${var.repository_url}:prod"
   publish      = true

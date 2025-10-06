@@ -1,8 +1,8 @@
 module "loader_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "ebsco-adapter-loader"
-  description = "Lambda function to load EBSCO data into Iceberg table"
+  name         = "ebsco-adapter-loader"
+  description  = "Lambda function to load EBSCO data into Iceberg table"
   package_type = "Image"
   image_uri    = "${var.repository_url}:prod"
   publish      = true
