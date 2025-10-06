@@ -14,7 +14,6 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
         Parameters = {
           StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
           Input = {
-            "stream_destination" : "s3",
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
             "pipeline_date" : local.pipeline_date,
@@ -50,8 +49,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_incremental" {
           "transformer_type" : "{% $states.context.Map.Item.Value.transformer_type %}",
           "entity_type" : "{% $states.context.Map.Item.Value.entity_type %}",
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
-          "stream_destination" : "s3",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
+          "es_pit_id" : "{% $states.context.Execution.Input.es_pit_id ? $states.context.Execution.Input.es_pit_id : null %}",
         }
 
         ItemProcessor = {

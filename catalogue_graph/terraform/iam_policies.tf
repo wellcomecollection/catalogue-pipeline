@@ -33,7 +33,7 @@ data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
   }
 }
 
-data "aws_iam_policy_document" "extractor_allow_pipeline_storage_secret_read" {
+data "aws_iam_policy_document" "allow_pipeline_storage_secret_read_denormalised_read_only" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [

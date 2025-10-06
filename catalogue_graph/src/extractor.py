@@ -79,13 +79,20 @@ def local_handler() -> None:
         type=str,
         choices=typing.get_args(StreamDestination),
         help="Where to stream the transformed entities.",
-        required=True,
+        default="s3",
+        required=False,
     )
     parser.add_argument(
         "--pipeline-date",
         type=str,
         help="The pipeline to extract data from. Will default to 'dev'.",
         default="dev",
+        required=False,
+    )
+    parser.add_argument(
+        "--es-pit-id",
+        type=str,
+        help="An Elasticsearch point in time ID to use when extracting data from the denormalised index.",
         required=False,
     )
     parser.add_argument(

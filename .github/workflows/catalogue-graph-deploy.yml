@@ -71,6 +71,7 @@ jobs:
             catalogue-graph-ingestor-indexer,
             catalogue-graph-ingestor-indexer-monitor,
             catalogue-graph-ingestor-deletions,
+            catalogue-graph-es-pit-opener,
           ]
     steps:
       - uses: actions/checkout@v3

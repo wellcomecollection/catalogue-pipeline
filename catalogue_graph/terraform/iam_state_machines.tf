@@ -60,7 +60,8 @@ resource "aws_iam_policy" "state_machine_policy" {
           module.ingestor_indexer_lambda.lambda.arn,
           module.ingestor_indexer_monitor_lambda.lambda.arn,
           module.ingestor_deletions_lambda.lambda.arn,
-          module.ingestor_reporter_lambda.lambda.arn
+          module.ingestor_reporter_lambda.lambda.arn,
+          module.elasticsearch_pit_opener_lambda.lambda.arn
         ]
       },
       {
