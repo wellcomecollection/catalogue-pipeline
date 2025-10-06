@@ -28,7 +28,11 @@
           "foundedBy": []
         },
         "sameAs": [],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -78,7 +82,11 @@
         "sameAs": [
           "a223f5a6"
         ],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -111,7 +119,11 @@
           "foundedBy": []
         },
         "sameAs": [],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -168,7 +180,11 @@
         "sameAs": [
           "a224b9mp"
         ],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -201,7 +217,11 @@
           "foundedBy": []
         },
         "sameAs": [],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -251,7 +271,11 @@
         "sameAs": [
           "a224tns9"
         ],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -305,7 +329,11 @@
         "sameAs": [
           "a2258t8s"
         ],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -386,7 +414,11 @@
         "sameAs": [
           "a22auf32"
         ],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -436,7 +468,11 @@
         "sameAs": [
           "a22d6ehy"
         ],
+<<<<<<< HEAD
         "displayImages": []
+=======
+        "displayImageUrl": []
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
       }
     }
   },
@@ -461,7 +497,11 @@
           "foundedBy": []
         },
         "sameAs": [],
+<<<<<<< HEAD
         "displayImages": [],
+=======
+        "displayImageUrl": [],
+>>>>>>> 2f3bb2df4 (use camelCase and update tests)
         "type": "Person"
       },
       "query": {
