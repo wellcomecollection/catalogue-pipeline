@@ -2,9 +2,9 @@ import json
 from contextlib import suppress  # for ruff SIM105 fix
 from typing import Any, cast  # added for dummy ES client
 
-import pyarrow as pa
 import pytest
 import smart_open
+from pyiceberg.table import Table as IcebergTable
 
 import adapters.ebsco.config as adapter_config
 from adapters.ebsco.models.manifests import TransformerManifest
@@ -31,7 +31,7 @@ from .test_mocks import (
 
 
 def _prepare_changeset(
-    temporary_table: pa.Table,
+    temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
     records_by_id: dict[str, str],
 ) -> str:
@@ -43,7 +43,7 @@ def _prepare_changeset(
         {"id": rid, "content": record_xml} for rid, record_xml in records_by_id.items()
     ]
     pa_table_initial = data_to_namespaced_table(rows)
-    
+
     client = IcebergTableClient(temporary_table)
     changeset_id = client.update(pa_table_initial, "ebsco")
     assert changeset_id, "Expected a changeset_id to be returned"
@@ -98,7 +98,7 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
 
 
 def test_transformer_end_to_end_with_local_table(
-    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     records_by_id = {
         "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
@@ -127,7 +127,7 @@ def test_transformer_end_to_end_with_local_table(
 
 
 def test_transformer_creates_deletedwork_for_empty_content(
-    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     # Note: empty string content indicates deletion
     records_by_id = {
@@ -173,7 +173,7 @@ def test_transformer_creates_deletedwork_for_empty_content(
 
 
 def test_transformer_full_retransform_when_no_changeset(
-    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """When no changeset_id is supplied the transformer reprocesses all existing records."""
     # Seed the table with two MARC records via a changeset so they exist in storage.
@@ -212,7 +212,7 @@ def test_transformer_full_retransform_when_no_changeset(
 
 
 def test_transformer_batch_file_key_with_changeset(
-    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """When a changeset exists the batch file path uses the changeset pattern under the batches prefix."""
     job_id = "20250101T1200"
@@ -252,7 +252,7 @@ def test_transformer_batch_file_key_with_changeset(
     ],
 )
 def test_transformer_index_name_selection(
-    temporary_table: pa.Table,
+    temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
     pipeline_date: str,
     index_date: str | None,
@@ -305,7 +305,7 @@ def test_transform_invalid_xml_returns_parse_error() -> None:
 
 
 def test_transformer_creates_failure_manifest_for_parse_errors(
-    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """A malformed MARC record should produce a failure manifest with parse_error reason."""
     records_by_id = {
@@ -335,7 +335,7 @@ def test_transformer_creates_failure_manifest_for_parse_errors(
 
 
 def test_transformer_creates_failure_manifest_for_index_errors(
-    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Simulate ES indexing errors and ensure they are captured in failure manifest."""
     # Create a single valid record
@@ -471,7 +471,7 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_transformer_raises_when_batch_file_write_fails(
-    temporary_table: pa.Table, monkeypatch: pytest.MonkeyPatch
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """If writing the batch file fails the exception should propagate and fail the step.
 
