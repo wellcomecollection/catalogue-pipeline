@@ -4,6 +4,7 @@ data "aws_cloudwatch_event_bus" "adapter_event_bus" {
 
 locals {
   ebsco_transformer_lambda_index_date = "2025-10-06"
+  es_works_delta_source_index         = "works-source-${local.ebsco_transformer_lambda_index_date}"
 }
 
 module "ebsco_transformer_lambda" {

@@ -141,7 +141,7 @@ locals {
       write = [for idx in local.works_source_list : idx.name]
     }
     id_minter = {
-      read  = [for idx in local.works_identified_list : idx.name]
+      read  = [for idx in local.works_source_list : idx.name]
       write = [for idx in local.works_identified_list : idx.name]
     }
     matcher = {
