@@ -30,7 +30,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
           Overrides = {
             ContainerOverrides = [
               {
-                Name = "catalogue-graph_extractor"
+                Name    = "catalogue-graph_extractor"
                 Command = ["--event", "{% $states.input %}"]
               }
             ]
