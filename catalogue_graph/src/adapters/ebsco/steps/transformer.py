@@ -303,8 +303,7 @@ def handler(
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
         is_local=config_obj.is_local,
-        # This is a hardcoded to make sure we use the manually created test key for now
-        api_key_name="transformer-ebsco-test",
+        api_key_name=config.ES_API_KEY_NAME,
     )
     index_name = get_standard_index_name("works-source", index_date)
 

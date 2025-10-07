@@ -82,12 +82,7 @@ def _add_pipeline_secrets(pipeline_date: str) -> None:
         ("private_host", "test"),
         ("port", 80),
         ("protocol", "http"),
-        ("ebsco_adapter_ideberg/api_key", ""),
-        ("ebsco_adapter_iceberg/api_key", ""),  # variant used in some code paths
-        (
-            "transformer-ebsco-test/api_key",
-            "",
-        ),  # another variant observed in get_client
+        ("transformer/api_key", ""),
     ]:
         MockSecretsManagerClient.add_mock_secret(f"{secret_prefix}/{name}", value)
 
