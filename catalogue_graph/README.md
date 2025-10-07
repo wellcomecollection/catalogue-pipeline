@@ -72,10 +72,24 @@ in the following format:
   "pipeline_date": "2025-08-14",
   "index_date": "dev",
   "window": {
+    "start_time": "2025-10-07T06:00:00Z",
     "end_time": "2025-10-07T08:00:00Z"
   }
 }
 ```
+
+The `start_time` property is optional. If not specified, it will automatically be set to `<end_time> - 15 minutes`.
+
+## Full reindex
+
+When running a full reindex from source data (i.e. fully populating the denormalised index), the incremental pipeline
+can keep running as usual, processing the latest 15-minute window every 15 minutes.
+
+To reprocess all works or concepts *without* repopulating the denormalised index, run the relevant state machine or 
+Lambda function in *full reindex* mode by leaving out the `window` property from the input. At the moment, some services
+(e.g. `ingestor_loader` when processing concepts, or `ingestor_indexer` when processing works) only support full reindex
+mode locally, since they are deployed as Lambda functions and processing all records would exceed the 15-minute
+execution time limit.
 
 ## Service overview
 
