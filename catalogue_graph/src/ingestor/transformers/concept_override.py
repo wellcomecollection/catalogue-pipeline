@@ -52,18 +52,20 @@ class ConceptTextOverrideProvider:
                 )
         return raw_concept.description
 
-    def display_image(
+    def display_images(
         self, raw_concept: RawNeptuneConcept
     ) -> list[DisplayDigitalLocation]:
         override = self.overrides.get(raw_concept.wellcome_id)
-        if override and (override_image := override["image_url"].strip()):
+        if override and (override_image_urls := override["image_url"].split("||")):
             return [
                 DisplayDigitalLocation(
-                    url=override_image,
+                    url=url.strip(),
                     locationType=DisplayIdLabel(
                         id="iiif-image", label="IIIF Image API", type="LocationType"
                     ),
                     accessConditions=[],
                 )
+                for url in override_image_urls
+                if url.strip()  # Filter out empty URLs
             ]
         return []

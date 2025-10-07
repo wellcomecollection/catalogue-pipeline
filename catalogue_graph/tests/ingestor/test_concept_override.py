@@ -26,7 +26,7 @@ def test_unchanged_if_not_mentioned(concept: RawNeptuneConcept) -> None:
     )
     assert overrider.display_label_of(concept) == concept.display_label
     assert overrider.description_of(concept) == concept.description
-    assert overrider.display_image(concept) == []
+    assert overrider.display_images(concept) == []
 
 
 def test_label_unchanged_if_unset(concept: RawNeptuneConcept) -> None:
@@ -106,7 +106,7 @@ def test_add_display_image(concept: RawNeptuneConcept) -> None:
         """)
     )
 
-    assert overrider.display_image(concept) == [
+    assert overrider.display_images(concept) == [
         DisplayDigitalLocation(
             url="www.cat_surgery.info.json",
             locationType=DisplayIdLabel(
@@ -114,4 +114,31 @@ def test_add_display_image(concept: RawNeptuneConcept) -> None:
             ),
             accessConditions=[],
         )
+    ]
+
+def test_add_display_images(concept: RawNeptuneConcept) -> None:
+    """
+    Populating the image_url field with || separated IIIF info.json URLs
+    signals that the concept should have multiple display images
+    """
+    overrider = ConceptTextOverrideProvider(
+        io.StringIO("""id,label,description,image_url
+        id, , , www.cat_surgery.info.json||www.cat_surgery2.info.json
+        """)
+    )
+    assert overrider.display_images(concept) == [
+        DisplayDigitalLocation(
+            url="www.cat_surgery.info.json",
+            locationType=DisplayIdLabel(
+                id="iiif-image", label="IIIF Image API", type="LocationType"
+            ),
+            accessConditions=[],
+        ),
+        DisplayDigitalLocation(
+            url="www.cat_surgery2.info.json",
+            locationType=DisplayIdLabel(
+                id="iiif-image", label="IIIF Image API", type="LocationType"
+            ),
+            accessConditions=[],
+        ),
     ]
