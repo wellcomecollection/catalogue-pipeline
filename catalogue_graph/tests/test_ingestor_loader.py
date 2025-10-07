@@ -56,19 +56,16 @@ MOCK_LOADER_EVENT = IngestorLoaderLambdaEvent(
 )
 
 
-def get_mock_ingestor_indexer_event(
-    job_id: str, content_length: int
-) -> IngestorIndexerLambdaEvent:
-    return IngestorIndexerLambdaEvent(
-        **MOCK_LOADER_EVENT.model_dump(),
-        objects_to_index=[
-            IngestorIndexerObject(
-                s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/{MOCK_PIPELINE_DATE}/{MOCK_INDEX_DATE}/{job_id}/00000000-00000001.parquet",
-                content_length=content_length,
-                record_count=1,
-            )
-        ],
-    )
+MOCK_INDEXER_EVENT = IngestorIndexerLambdaEvent(
+    **MOCK_LOADER_EVENT.model_dump(),
+    objects_to_index=[
+        IngestorIndexerObject(
+            s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/{MOCK_PIPELINE_DATE}/{MOCK_INDEX_DATE}/{MOCK_JOB_ID}/00000000-00000001.parquet",
+            content_length=1,
+            record_count=1,
+        )
+    ],
+)
 
 
 def mock_denormalised_work() -> None:
@@ -287,54 +284,61 @@ def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> 
         assert catalogue_concepts[0] == expected_concept
 
 
+def _compare_events(
+    event: IngestorIndexerLambdaEvent, expected_event: IngestorIndexerLambdaEvent
+) -> None:
+    # Parquet file sizes are an implementation detail and comparing them would lead to flaky unit tests
+    event.objects_to_index[0].content_length = 0
+    expected_event.objects_to_index[0].content_length = 0
+
+    assert event == expected_event
+
+
 def test_ingestor_loader_no_related_concepts() -> None:
     mock_denormalised_work()
     mock_neptune_responses([])
 
-    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=20691)
     result = handler(MOCK_LOADER_EVENT)
 
     # We expect a total of 11 API calls:
     # * 4 to retrieve concept data (concept query, types query, same as query, and source concepts query)
     # * 8 to retrieve related concept data (one for each related concept category, such as 'people' or 'broader than')
-    assert result == indexer_event
+    _compare_events(result, MOCK_INDEXER_EVENT)
     assert len(MockRequest.calls) == 12
 
     expected_concept = get_catalogue_concept_mock([])
-    check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
+    check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
 
 
 def test_ingestor_loader_with_broader_than_concepts() -> None:
     mock_denormalised_work()
     mock_neptune_responses(["broader_than"])
 
-    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=21092)
     result = handler(MOCK_LOADER_EVENT)
 
     # We expect a total of 15 API calls:
     # * 12 to retrieve the same data as the `test_ingestor_loader_no_related_concepts` test case
     # * 4 to retrieve concept data for broader than concepts
-    assert result == indexer_event
+    _compare_events(result, MOCK_INDEXER_EVENT)
     assert len(MockRequest.calls) == 16
 
     expected_concept = get_catalogue_concept_mock(["broader_than"])
-    check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
+    check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
 
 
 def test_ingestor_loader_with_related_to_concepts() -> None:
     mock_denormalised_work()
     mock_neptune_responses(["related_to", "people"])
 
-    indexer_event = get_mock_ingestor_indexer_event(MOCK_JOB_ID, content_length=21638)
     result = handler(MOCK_LOADER_EVENT)
 
     # Since we're including two separate groups of related concepts, we expect 4 additional API calls
     # on top of those in `test_ingestor_loader_with_broader_than_concepts`
-    assert result == indexer_event
+    _compare_events(result, MOCK_INDEXER_EVENT)
     assert len(MockRequest.calls) == 20
 
     expected_concept = get_catalogue_concept_mock(["related_to", "people"])
-    check_processed_concept(indexer_event.objects_to_index[0].s3_uri, expected_concept)
+    check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
 
 
 def test_ingestor_loader_no_concepts_to_process() -> None:
