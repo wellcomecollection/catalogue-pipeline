@@ -42,7 +42,7 @@ class GraphPipelineEvent(BasePipelineEvent):
 
 
 class ExtractorEvent(GraphPipelineEvent):
-    stream_destination: StreamDestination
+    stream_destination: StreamDestination = "s3"
     sample_size: int | None = None
 
 

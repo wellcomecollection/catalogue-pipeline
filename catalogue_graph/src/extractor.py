@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import typing
 
 import config
@@ -13,6 +14,11 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
+
+
+def raw_event(raw_input: str) -> ExtractorEvent:
+    event = json.loads(raw_input)
+    return ExtractorEvent(**event)
 
 
 def handler(event: ExtractorEvent, is_local: bool = False) -> None:
@@ -58,8 +64,18 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
     handler(ExtractorEvent(**event))
 
 
+def ecs_handler() -> None:
+    parser.add_argument(
+        "--event",
+        type=raw_event,
+        help="Raw event in JSON format.",
+        required=True,
+    )
+    ecs_args = parser.parse_args()
+    handler(ecs_args.event)
+
+
 def local_handler() -> None:
-    parser = argparse.ArgumentParser(description="")
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -112,16 +128,23 @@ def local_handler() -> None:
         help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
         required=False,
     )
-    parser.add_argument(
-        "--is-local",
-        action="store_true",
-        help="Whether to run the handler in local mode",
-    )
-    args = parser.parse_args()
-    event = ExtractorEvent.from_argparser(args)
+
+    local_args = parser.parse_args()
+    event = ExtractorEvent.from_argparser(local_args)
 
     handler(event, is_local=args.is_local)
 
 
 if __name__ == "__main__":
-    local_handler()
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        "--is-local",
+        action="store_true",
+        help="Whether to run the handler in local mode",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.is_local:
+        local_handler()
+    else:
+        ecs_handler()
