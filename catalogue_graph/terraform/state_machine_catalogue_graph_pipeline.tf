@@ -75,9 +75,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline_incremental" {
           Input           = "{% $states.input %}"
         }
         Output = "{% $states.input %}",
-        Next   = "Concepts ingestor"
+        Next   = "Ingestors"
       },
-      "Concepts ingestor" = {
+      "Ingestors" = {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
