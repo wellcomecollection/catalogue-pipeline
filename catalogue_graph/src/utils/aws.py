@@ -61,6 +61,7 @@ def get_neptune_client(use_public_endpoint: bool) -> BaseNeptuneClient:
 
 
 def get_csv_from_s3(s3_uri: str) -> Generator[Any]:
+    print(f"Downloading '{s3_uri}'...")
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
         csv_reader = csv.DictReader(f)
