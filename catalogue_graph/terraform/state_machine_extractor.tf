@@ -31,18 +31,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
             ContainerOverrides = [
               {
                 Name = "catalogue-graph_extractor"
-                Command = [
-                  "--transformer-type",
-                  "{% $states.input.transformer_type %}",
-                  "--entity-type",
-                  "{% $states.input.entity_type %}",
-                  "{% $states.context.Execution.Input.window ? '--window-end' : '' %}",
-                  "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window.end_time : '' %}",
-                  "{% $states.context.Execution.Input.pit_id ? '--pit-id' : '' %}",
-                  "{% $states.context.Execution.Input.pit_id ? $states.context.Execution.Input.pit_id : '' %}",
-                  "--pipeline-date",
-                  local.pipeline_date,
-                ]
+                Command = ["--event", "{% $states.input %}"]
               }
             ]
           }
