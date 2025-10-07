@@ -3,7 +3,9 @@ import io
 import neptune_generators as ng
 from test_utils import load_json_fixture
 
+from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
+from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptDisplay,
@@ -73,6 +75,7 @@ def test_catalogue_concept_from_neptune_result() -> None:
             ),
             type="Person",
             sameAs=[],
+            displayImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -125,6 +128,7 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
             ),
             type="Person",
             sameAs=[],
+            displayImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -186,6 +190,7 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -256,6 +261,7 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -334,6 +340,7 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -411,6 +418,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
             ),
             type="Concept",
             sameAs=["a2584ttj", "gcmn66yk"],
+            displayImages=[],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[
                     ConceptRelatedTo(
@@ -443,7 +451,7 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         ),
     )
 
-    overrides = io.StringIO("""id,label,description
+    overrides = io.StringIO("""id,label,description,image_url
         id, Wellcome Label, Wellcome Description
         aaaaaaaa,Roland le Petour,
         abcd2345,Le Pétomane,
@@ -529,7 +537,7 @@ def test_concept_type_place_precedence() -> None:
     )
 
 
-def test_catalogue_concept_from_neptune_result_with_overridden_label_and_description() -> (
+def test_catalogue_concept_from_neptune_result_with_overridden_label_description_and_image() -> (
     None
 ):
     mock_concept = load_json_fixture("neptune/concept_query_single.json")
@@ -564,6 +572,15 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
             ),
             type="Person",
             sameAs=[],
+            displayImages=[
+                DisplayDigitalLocation(
+                    url="www.image.info.json",
+                    locationType=DisplayIdLabel(
+                        id="iiif-image", label="IIIF Image API", type="LocationType"
+                    ),
+                    accessConditions=[],
+                )
+            ],
             relatedConcepts=RelatedConcepts(
                 relatedTo=[],
                 fieldsOfWork=[],
@@ -576,8 +593,8 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_and_descrip
             ),
         ),
     )
-    overrides = io.StringIO("""id,label,description
-        id, Wellcome Label, Wellcome Description
+    overrides = io.StringIO("""id,label,description,image_url
+        id, Wellcome Label, Wellcome Description,www.image.info.json
         """)
 
     transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)
