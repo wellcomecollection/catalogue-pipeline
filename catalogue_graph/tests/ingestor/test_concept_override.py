@@ -116,6 +116,7 @@ def test_add_display_image(concept: RawNeptuneConcept) -> None:
         )
     ]
 
+
 def test_add_display_images(concept: RawNeptuneConcept) -> None:
     """
     Populating the image_url field with || separated IIIF info.json URLs
