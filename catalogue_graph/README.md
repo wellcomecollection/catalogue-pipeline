@@ -1,7 +1,8 @@
 # Catalogue graph pipeline
 
-Code and infrastructure for building the catalogue graph and populating the Elasticsearch index which powers theme
-pages.
+Code and infrastructure for building the catalogue graph and populating the `works-indexed` and `concepts-indexed`
+Elasticsearch indexes which power the catalogue API. The catalogue graph is a knowledge graph storing all Wellcome
+catalogue works and concepts as well as external concepts and the relationships between them.
 
 See the following RFCs for more context:
 
@@ -9,13 +10,94 @@ See the following RFCs for more context:
 * [RFC 064: Graph data model](https://github.com/wellcomecollection/docs/tree/main/rfcs/064-graph-data-model/README.md)
 * [RFC 066: Catalogue graph pipeline](https://github.com/wellcomecollection/docs/blob/main/rfcs/066-graph_pipeline/README.md)
 
-## Architecture overview
+## Pipeline orchestration
 
-The catalogue graph pipeline extracts concepts from various sources (e.g. LoC, MeSH) and stores them into the catalogue
-graph database (running in Amazon Neptune). All Lambda functions now run from a single shared container image
-(`unified_pipeline_lambda`) published to ECR; each function specifies its own module entrypoint via `image_config.command`
-in Terraform (no per-function zip/runtimes are built anymore). It consists of several Lambda functions:
+Pipeline execution is orchestrated using several state machines defined in AWS Step Functions. There are two main state
+machines: `catalogue-pipeline-monthly` and `catalogue-pipeline-incremental`.
 
+### Catalogue pipeline monthly
+
+The monthly pipeline is responsible for downloading _source concepts_ from external sources (such as Library of
+Congress, Wikidata, and MeSH), extracting relevant _entities_ (nodes and edges), and adding them to the catalogue graph.
+Each node represents a source concept (e.g. a Library of Congress name), and each edge represents a relationship between
+two nodes (e.g. a Wikidata concept A is _broader than_ a Wikidata concept B).
+
+The `catalogue-pipeline-monthly` state machine consists of the following steps:
+
+1. _Extractors_: Extract entities from all external sources by running `extractor` ECS tasks. Stream the results to CSV
+   files stored in S3. Each task corresponds to a combination of source type and entity type (e.g. one task to extract
+   LoC Concept nodes, and a separate one to extract LoC Concept edges). Individual tasks run in sequence (Wikidata API
+   rate limits prevent us from running them in parallel).
+2. _Bulk loaders_: Load extracted entities into the catalogue graph
+   using [Neptune bulk loader](https://docs.aws.amazon.com/neptune/latest/userguide/bulk-load.html). Each CSV file
+   outputted as part of the *Extractors* step is loaded separately using the `catalogue-graph-bulk-loader` state
+   machine.
+3. _Graph removers_: Remove unused nodes and edges from the catalogue graph by comparing entities bulk loaded as
+   part of the current run to those loaded as part of the previous run.
+
+The state machine is scheduled to run on a monthly basis, but can be triggered manually when needed.
+
+### Catalogue pipeline incremental
+
+The incremental pipeline populates final works and concepts indexes using data from the catalogue graph and from
+the denormalised index (`works_denormalised`). The pipeline uses an incremental approach, only processing works
+and concepts which changed within a given time window (as determined by the `state.mergedTime` timestamp in the
+denormalised index).
+
+The `catalogue-pipeline-incremental` state machine consists of the following steps:
+
+1. _Open PIT_: Opens
+   a [point in time](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-open-point-in-time) (PIT)
+   against the denormalised index. This PIT is used by all subsequent steps when reading data from the index to ensure
+   consistency.
+2. _Extractors_: Extract entities from the denormalised index. Stream the results to CSV files stored in S3. Individual
+   extractor tasks run in parallel.
+3. _Bulk loaders_: See [Catalogue pipeline monthly](#catalogue-pipeline-monthly) section above.
+4. _Ingestors_: Index work and concept documents into final Elasticsearch indexes.
+
+The state machine is scheduled to run every 15 minutes, processing the latest 15-minute window. For example,
+the execution starting at 08:00:00 would process all denormalised work documents which were modified between 07:45:00
+and 08:00:00.
+
+## Running the pipeline manually
+
+State machines can be triggered manually via
+the [AWS console](https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines).
+
+Some state machines require JSON input. For example, the `catalogue-pipeline-incremental` requires input
+in the following format:
+
+```json
+{
+  "pipeline_date": "2025-08-14",
+  "index_date": "dev",
+  "window": {
+    "start_time": "2025-10-07T06:00:00Z",
+    "end_time": "2025-10-07T08:00:00Z"
+  }
+}
+```
+
+The `start_time` property is optional. If not specified, it will automatically be set to `<end_time> - 15 minutes`.
+
+## Full reindex
+
+When running a full reindex from source data (i.e. fully populating the denormalised index), the incremental pipeline
+can keep running as usual, processing the latest 15-minute window every 15 minutes.
+
+To reprocess all works or concepts *without* repopulating the denormalised index, run the relevant state machine or 
+Lambda function in *full reindex* mode by leaving out the `window` property from the input. At the moment, some services
+(e.g. `ingestor_loader` when processing concepts, or `ingestor_indexer` when processing works) only support full reindex
+mode locally, since they are deployed as Lambda functions and processing all records would exceed the 15-minute
+execution time limit.
+
+## Service overview
+
+The pipeline consists of several Lambda functions, all of which run from a single shared container image
+(`unified_pipeline_lambda`) published to ECR; each function specifies its own module entrypoint via
+`image_config.command` in Terraform.
+
+Graph Lambda functions:
 * `extractor`: Extracts a single entity type (nodes or edges) from a single source (e.g. LoC Names) and streams the
   transformed entities into the specified destination. To support longer execution times, the `extractor` is also
   available as an ECS task.
@@ -25,71 +107,28 @@ in Terraform (no per-function zip/runtimes are built anymore). It consists of se
     * SNS is used when loading entities using openCypher queries via the `indexer` Lambda function. This method was
       originally used for loading large numbers of entities into the cluster, but has since been superseded by the bulk
       load method and might be removed in the future.
-* `bulk_loader`: Triggers a Neptune bulk load of a single S3 file created by the `extractor` Lambda function.
+* `bulk_loader`: Triggers a Neptune bulk load of a single S3 file created by the `extractor` service.
 * `bulk_load_poller`: Checks the status of a bulk load job.
 * `indexer`: Consumes openCypher queries from the SNS topic populated by the `extractor` Lambda function and runs them
   against the Neptune cluster. (There is an SQS queue between the SNS topic and the Lambda function and queries are
   consumed via an event source mapping). (This Lambda function is not in use at the moment.)
-* Elasticsearch "Ingestor" Lambda functions:
-    * `ingestor_trigger`: Queries the graph database for catalogue originated concepts and returns a count of the
-      results.
-    * `ingestor_loader`: Queries the graph database for a subset of catalogue originated concepts and loads them into
-      S3 as a parquet file.
-    * `ingestor_indexer`: Consumes the parquet file from S3 and loads the data into Elasticsearch for retrieval by the
-      Concepts API.
 * `graph_remover`: Removes nodes and edges from the Neptune cluster. Nodes/edges are removed if they existed in a
   previous bulk load file but no longer exist in the latest one. Keeps an append-only log of deleted
   and added nodes/edges (with a retention period of one year) for debugging purposes.
-* `ingestor_deletions`: Removes indexed concepts from Elasticsearch if corresponding 'Concept' nodes were removed from the
-  catalogue graph. Uses the append-only log of deleted IDs created by the `graph_remover` to decide which
+
+Elasticsearch ingestor Lambda functions:
+* `ingestor_loader`: Queries the denormalised index for all works which changed within a given time window,
+  supplementing returned documents with data from the catalogue graph, creating final work or concept
+  documents, and loading the results into parquet files in S3.
+* `ingestor_indexer`: Consumes parquet files from S3, loading final documents into Elasticsearch.
+* `ingestor_deletions`: Removes indexed concepts from Elasticsearch if corresponding 'Concept' nodes were removed from
+  the catalogue graph. Uses the append-only log of deleted IDs created by the `graph_remover` to decide which
   documents to remove.
-
-Lambda function/ECS task execution is orchestrated via AWS Step Functions (see `terraform` directory). Several state
-machines are utilised for this purpose:
-
-* `concepts-pipeline_daily`: Represents the core concepts pipeline, extracting WC catalogue works and concepts,
-  loading them into the graph, and indexing them into Elasticsearch. Scheduled to run daily.
-* `concepts-pipeline_monthly`: Extracts source concepts (from Wikidata, MeSH, and LoC) and loads them into the
-  Neptune cluster. Scheduled to run monthly.
-* `catalogue-graph-pipeline`: Extracts all graph entities from their source and loads them into the Neptune cluster.
-  Triggers the `catalogue-graph-extractors` state machine, followed by the `catalogue-graph-bulk-loaders` state
-  machine.
-* `catalogue-graph-extractors`: Runs `extractor` ECS tasks in sequence, one for each combination of
-  source type and entity type (e.g. one for LoC Concept nodes, one for LoC Concept edges, etc.). (Note that individual
-  extractors cannot run in parallel due to Wikidata API rate limits.)
-* `catalogue-graph-bulk-loaders`: Triggers `catalogue-graph-bulk-loader` state machine instances in sequence, one for
-  each combination of transformer type and entity type.
-* `catalogue-graph-bulk-loader`: Invokes a single `bulk_loader` Lambda function to start a bulk load job. Then
-  repeatedly invokes the `bulk_load_poller` Lambda function to check the status of the job until it completes.
-* `catalogue-graph-single-extract-load`: Not part of the full pipeline. Extracts and loads a single entity type by
-  running the `extractor` ECS task, followed by the `catalogue-graph-bulk-loader` state machine. Useful for
-  updating the graph after a change in a single source/transformer without having to run the full pipeline.
-* `catalogue-graph-ingestor`: Represents the Elasticsearch ingestor pipeline. Triggers
-  the `catalogue-graph-ingestor-trigger` function, followed by the `catalogue-graph-ingestor-loader`
-  and `catalogue-graph-ingestor-indexer` functions
-  as [state map steps](https://docs.aws.amazon.com/step-functions/latest/dg/state-map.html), allowing for
-  parallelisation of the ingestor process.
-
-## Running the pipeline
-
-All state machines can be triggered manually via
-the [AWS console](https://eu-west-1.console.aws.amazon.com/states/home?region=eu-west-1#/statemachines).
-
-Some state machines require JSON input. For example, the `catalogue-graph-single-extract-load` requires input
-in the following format:
-
-```json
-{
-  "transformer_type": "loc_concepts",
-  "entity_type": "nodes",
-  "sample_size": null
-}
-```
 
 ## Source code organisation
 
-The `src` directory contains all Python source code for the graph pipeline (Python 3.13). Each Lambda's handler lives in a
-module exposing a `lambda_handler` function (invoked by AWS) and often a `local_handler` for ad‑hoc local runs.
+The `src` directory contains all Python source code for the graph pipeline (Python 3.13). Each Lambda's handler lives
+in a module exposing a `lambda_handler` function (invoked by AWS) and often a `local_handler` for ad‑hoc local runs.
 
 Because all Lambdas share one container image, anything added to `src` (and declared in `pyproject.toml`) becomes
 immediately available to every function after the next image build. Terraform modules set:
@@ -133,7 +172,8 @@ Run `uv sync` to install the project dependencies.
 
 The pipeline deploys automatically on push to main via the
 [catalogue-graph-ci](https://github.com/wellcomecollection/catalogue-pipeline/blob/main/.github/workflows/catalogue-graph-ci.yml)
-GitHub action. This builds & pushes the unified container image to ECR and updates all Lambda functions (Terraform apply).
+GitHub action. This builds & pushes the unified container image to ECR and updates all Lambda functions (Terraform
+apply).
 
 ### Manual deployment
 
@@ -154,8 +194,6 @@ terraform apply
 
 Extractor ECS image (separate service) can still be built/pushed similarly using the `extractor` target.
 
-
-
 ## Local execution
 
 You can invoke handlers directly without building the container (fast iteration) or run inside the container for closer
@@ -170,7 +208,6 @@ AWS_PROFILE=platform-developer uv run bulk_load_poller.py --load-id=<some_id>
 Extractor example:
 
 ```shell
-S3_BULK_LOAD_BUCKET_NAME=wellcomecollection-neptune-graph-loader \
 AWS_PROFILE=platform-developer \
 python3.13 extractor.py \
   --transformer-type=wikidata_linked_loc_concepts \
@@ -182,7 +219,7 @@ python3.13 extractor.py \
 ## Local Neptune experimentation
 
 To run experimental Neptune queries locally, you can use the notebook in the `notebooks` directory. This notebook
-connects to a Neptune instance running in the cloud and allows you to run openCypher queries against it. 
+connects to a Neptune instance running in the cloud and allows you to run openCypher queries against it.
 
 The notebook uses utility functions from the graph pipeline project. To ensure these functions are accessible,
 add the project to your PYTHONPATH or run Jupyter with uv:
@@ -202,21 +239,20 @@ at it via the normal env vars.
 
 ## Container entrypoints summary
 
-| Lambda (logical name) | image_config.command |
-|-----------------------|----------------------|
-| bulk_loader           | bulk_loader.lambda_handler |
-| bulk_load_poller      | bulk_load_poller.lambda_handler |
-| graph_remover         | graph_remover.lambda_handler |
-| graph_status_poller   | graph_status_poller.lambda_handler |
-| graph_scaler          | graph_scaler.lambda_handler |
-| indexer               | indexer.lambda_handler |
-| ingestor_trigger      | ingestor.steps.ingestor_trigger.lambda_handler |
-| ingestor_trigger_monitor | ingestor.steps.ingestor_trigger_monitor.lambda_handler |
-| ingestor_loader       | ingestor.steps.ingestor_loader.lambda_handler |
-| ingestor_loader_monitor | ingestor.steps.ingestor_loader_monitor.lambda_handler |
-| ingestor_indexer      | ingestor.steps.ingestor_indexer.lambda_handler |
+| Lambda (logical name)    | image_config.command                                   |
+|--------------------------|--------------------------------------------------------|
+| bulk_loader              | bulk_loader.lambda_handler                             |
+| bulk_load_poller         | bulk_load_poller.lambda_handler                        |
+| graph_remover            | graph_remover.lambda_handler                           |
+| graph_status_poller      | graph_status_poller.lambda_handler                     |
+| graph_scaler             | graph_scaler.lambda_handler                            |
+| indexer                  | indexer.lambda_handler                                 |
+| ingestor_loader          | ingestor.steps.ingestor_loader.lambda_handler          |
+| ingestor_loader_monitor  | ingestor.steps.ingestor_loader_monitor.lambda_handler  |
+| ingestor_indexer         | ingestor.steps.ingestor_indexer.lambda_handler         |
 | ingestor_indexer_monitor | ingestor.steps.ingestor_indexer_monitor.lambda_handler |
-| ingestor_deletions    | ingestor.steps.ingestor_deletions.lambda_handler |
-| ingestor_reporter     | ingestor.steps.ingestor_reporter.lambda_handler |
+| ingestor_deletions       | ingestor.steps.ingestor_deletions.lambda_handler       |
+| pit_opener               | pit_opener.lambda_handler                              |
 
-All use the same ECR image tagged `:prod` in Terraform (promotion strategy can be revised later to use digests or staged tags).
+All use the same ECR image tagged `:prod` in Terraform (promotion strategy can be revised later to use digests or staged
+tags).

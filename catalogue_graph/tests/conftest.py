@@ -31,6 +31,7 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     )
 
     monkeypatch.setattr("config.ES_SOURCE_PARALLELISM", 1)
+    monkeypatch.setattr("config.ES_SOURCE_SLICE_COUNT", 1)
 
     MockRequest.reset_mocks()
     MockSmartOpen.reset_mocks()

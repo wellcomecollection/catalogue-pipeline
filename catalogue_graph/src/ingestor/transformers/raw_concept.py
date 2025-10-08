@@ -3,12 +3,13 @@ from ingestor.models.indexable_concept import (
     ConceptDescription,
     ConceptIdentifier,
 )
+from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.models.shared.id_label import Id
 from ingestor.models.shared.identifier import SourceIdentifier
-from utils.types import ConceptType
+from utils.types import ConceptSource, ConceptType
 
 # Sources sorted by priority for querying purposes.
-QUERY_SOURCE_PRIORITY = [
+QUERY_SOURCE_PRIORITY: list[ConceptSource] = [
     "nlm-mesh",
     "lc-subjects",
     "lc-names",
@@ -18,7 +19,7 @@ QUERY_SOURCE_PRIORITY = [
 
 # Sources sorted by priority for display purposes. Wikidata is prioritised over Library of Congress Names since Wikidata
 # person names work better as theme page titles (e.g. 'Florence Nightingale' vs 'Nightingale, Florence, 1820-1910').
-DISPLAY_SOURCE_PRIORITY = [
+DISPLAY_SOURCE_PRIORITY: list[ConceptSource] = [
     "nlm-mesh",
     "lc-subjects",
     "wikidata",
@@ -55,31 +56,31 @@ def get_source_concept_url(source_concept_id: str, source: str) -> str:
 
 
 def get_priority_label(
-    concept_node: dict,
-    source_concept_nodes: list[dict],
-    source_priority: list[str],
+    raw_concept: ExtractedConcept,
+    source_priority: list[ConceptSource],
 ) -> tuple[str, str]:
     """
     Given a concept and its source concepts, extract the corresponding labels and return the highest-priority one.
     (For example, if a `label` field exists in both Wikidata and MeSH, we always prioritise the MeSH one.)
     """
-    labels = {"label-derived": concept_node["~properties"].get("label")}
 
-    for source_concept in source_concept_nodes:
-        properties = source_concept["~properties"]
-        source = properties["source"]
-        labels[source] = standardise_label(properties.get("label"))
+    labels = {"label-derived": raw_concept.concept.properties.label}
+
+    for source_concept in raw_concept.source_concepts:
+        properties = source_concept.properties
+        source = properties.source
+        labels[source] = standardise_label(properties.label)
 
     for source in source_priority:
         if (value := labels.get(source)) is not None:
             return value, source
 
     raise MissingLabelError(
-        f"Concept {concept_node['~properties']['id']} does not have a label."
+        f"Concept {raw_concept.concept.properties.id} does not have a label."
     )
 
 
-def get_most_specific_concept_type(concept_types: list[str]) -> ConceptType:
+def get_most_specific_concept_type(concept_types: list[ConceptType]) -> ConceptType:
     # Concepts which are not connected to any Works will not have any types associated with them. We periodically
     # remove such concepts from the graph, but there might be a few of them at any given point.
     if len(concept_types) == 0:
@@ -112,58 +113,41 @@ def get_most_specific_concept_type(concept_types: list[str]) -> ConceptType:
 
 
 class RawNeptuneConcept:
-    def __init__(self, neptune_concept: dict):
-        self.raw_concept = neptune_concept
+    def __init__(self, extracted_concept: ExtractedConcept):
+        self.raw_concept = extracted_concept
 
     @property
     def wellcome_id(self) -> str:
-        wellcome_id = self.raw_concept["concept"]["~properties"]["id"]
-        assert isinstance(wellcome_id, str)
-        return wellcome_id
+        return self.raw_concept.concept.properties.id
 
     @property
     def label(self) -> str:
-        concept_node = self.raw_concept["concept"]
-        source_concept_nodes = self.raw_concept["source_concepts"]
-
-        label, _ = get_priority_label(
-            concept_node, source_concept_nodes, QUERY_SOURCE_PRIORITY
-        )
-
+        label, _ = get_priority_label(self.raw_concept, QUERY_SOURCE_PRIORITY)
         assert isinstance(label, str)
         return label
 
     @property
     def display_label(self) -> str:
-        concept = self.raw_concept["concept"]
-        source_concepts = self.raw_concept["source_concepts"]
-
-        display_label, _ = get_priority_label(
-            concept, source_concepts, DISPLAY_SOURCE_PRIORITY
-        )
-
+        display_label, _ = get_priority_label(self.raw_concept, DISPLAY_SOURCE_PRIORITY)
         return display_label
 
     @property
     def same_as(self) -> list[str]:
-        same_as = self.raw_concept["same_as_concept_ids"]
-        assert isinstance(same_as, list)
-        return same_as
+        return self.raw_concept.same_as
 
     @property
     def concept_type(self) -> ConceptType:
         """If a concept is classified under more than one type, pick the most specific one and return it."""
-        concept_types = self.raw_concept.get("concept_types", [])
-        return get_most_specific_concept_type(concept_types)
+        return get_most_specific_concept_type(self.raw_concept.types)
 
     @property
     def identifiers(self) -> list[ConceptIdentifier]:
         ids = []
 
-        for source_concept in self.raw_concept["linked_source_concepts"]:
-            properties = source_concept["~properties"]
+        if self.raw_concept.linked_source_concept is not None:
+            properties = self.raw_concept.linked_source_concept.properties
             identifier = ConceptIdentifier(
-                value=properties["id"], identifierType=properties["source"]
+                value=properties.id, identifierType=properties.source
             )
             ids.append(identifier)
 
@@ -185,9 +169,8 @@ class RawNeptuneConcept:
     @property
     def alternative_labels(self) -> list[str]:
         alternative_labels: set[str] = set()
-        for source_concept in self.raw_concept["source_concepts"]:
-            raw_labels = source_concept["~properties"].get("alternative_labels", "")
-            for alternative_label in raw_labels.split("||"):
+        for source_concept in self.raw_concept.source_concepts:
+            for alternative_label in source_concept.properties.alternative_labels:
                 if len(alternative_label) > 0:
                     standardised_label = standardise_label(alternative_label)
                     if standardised_label is not None:
@@ -197,12 +180,12 @@ class RawNeptuneConcept:
 
     @property
     def description(self) -> ConceptDescription | None:
-        for source_concept in self.raw_concept["source_concepts"]:
-            properties = source_concept["~properties"]
-            description_text = standardise_label(properties.get("description"))
+        for source_concept in self.raw_concept.source_concepts:
+            properties = source_concept.properties
+            description_text = standardise_label(properties.description)
 
-            description_source = properties["source"]
-            source_concept_id = properties["id"]
+            description_source = properties.source
+            source_concept_id = properties.id
 
             # Only extract descriptions from Wikidata (MeSH also stores descriptions, but we should not surface them).
             if description_text is not None and description_source == "wikidata":

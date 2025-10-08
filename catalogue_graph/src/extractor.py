@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import json
 import typing
 
 import config
@@ -15,26 +16,20 @@ from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
 
 
+def raw_event(raw_input: str) -> ExtractorEvent:
+    event = json.loads(raw_input)
+    return ExtractorEvent(**event)
+
+
 def handler(event: ExtractorEvent, is_local: bool = False) -> None:
     print(
         f"Transforming {event.sample_size or 'all'} {event.entity_type} using the {event.transformer_type} "
         f"transformer and streaming them into {event.stream_destination}."
     )
-    if event.pipeline_date == "dev":
-        print(
-            "No pipeline date specified. Will connect to a local Elasticsearch instance."
-        )
-    elif is_local:
-        print("Will connect to the public Elasticsearch host (is_local=True).")
-    else:
-        print("Will connect to the private Elasticsearch host (is_local=False).")
 
     transformer: BaseTransformer = create_transformer(
-        event.transformer_type,
-        event.entity_type,
-        event.pipeline_date,
-        event.window,
-        is_local=is_local,
+        event,
+        es_mode="public" if is_local else "private",
     )
 
     if event.stream_destination == "graph":
@@ -69,8 +64,18 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
     handler(ExtractorEvent(**event))
 
 
+def ecs_handler() -> None:
+    parser.add_argument(
+        "--event",
+        type=raw_event,
+        help="Raw event in JSON format.",
+        required=True,
+    )
+    ecs_args = parser.parse_args()
+    handler(ecs_args.event)
+
+
 def local_handler() -> None:
-    parser = argparse.ArgumentParser(description="")
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -90,13 +95,20 @@ def local_handler() -> None:
         type=str,
         choices=typing.get_args(StreamDestination),
         help="Where to stream the transformed entities.",
-        required=True,
+        default="s3",
+        required=False,
     )
     parser.add_argument(
         "--pipeline-date",
         type=str,
         help="The pipeline to extract data from. Will default to 'dev'.",
         default="dev",
+        required=False,
+    )
+    parser.add_argument(
+        "--pit-id",
+        type=str,
+        help="An Elasticsearch point in time ID to use when extracting data from the denormalised index.",
         required=False,
     )
     parser.add_argument(
@@ -116,16 +128,23 @@ def local_handler() -> None:
         help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
         required=False,
     )
-    parser.add_argument(
-        "--is-local",
-        action="store_true",
-        help="Whether to run the handler in local mode",
-    )
-    args = parser.parse_args()
-    event = ExtractorEvent.from_argparser(args)
+
+    local_args = parser.parse_args()
+    event = ExtractorEvent.from_argparser(local_args)
 
     handler(event, is_local=args.is_local)
 
 
 if __name__ == "__main__":
-    local_handler()
+    parser = argparse.ArgumentParser(description="")
+    parser.add_argument(
+        "--is-local",
+        action="store_true",
+        help="Whether to run the handler in local mode",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.is_local:
+        local_handler()
+    else:
+        ecs_handler()

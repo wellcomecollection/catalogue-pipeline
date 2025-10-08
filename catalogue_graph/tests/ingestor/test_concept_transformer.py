@@ -1,6 +1,7 @@
 import io
 
 import neptune_generators as ng
+from test_mocks import mock_es_secrets
 from test_utils import load_json_fixture
 
 from ingestor.models.display.id_label import DisplayIdLabel
@@ -15,12 +16,17 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
+from ingestor.models.neptune.query_result import (
+    ExtractedConcept,
+    ExtractedRelatedConcept,
+)
 from ingestor.transformers.concepts_transformer import (
     ElasticsearchConceptsTransformer,
 )
 from ingestor.transformers.raw_concept import (
     get_most_specific_concept_type,
 )
+from models.events import BasePipelineEvent
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": [],
@@ -33,17 +39,16 @@ MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "founded_by": [],
 }
 
+MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
+
 
 def test_catalogue_concept_from_neptune_result() -> None:
+    mock_es_secrets("graph_extractor", "dev")
     mock_concept = load_json_fixture(
-        "neptune/concept_query_single_alternative_labels.json"
+        "ingestor/extractor/concept_single_alternative_labels.json"
     )
 
-    alternative_labels = [
-        "Alternative label",
-        "Another alternative label",
-        "MeSH alternative label",
-    ]
+    alternative_labels = ["Alternative label", "Another alternative label"]
 
     expected_result = IndexableConcept(
         query=ConceptQuery(
@@ -89,20 +94,21 @@ def test_catalogue_concept_from_neptune_result() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
-    raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
+    raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single.json")
+    mock_es_secrets("graph_extractor", "dev")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
 
     expected_result = IndexableConcept(
         query=ConceptQuery(
             id="id",
             identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
-            label="LoC label",
+            label="MeSH label",
             alternativeLabels=[],
             type="Person",
         ),
@@ -118,8 +124,8 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
                     ),
                 )
             ],
-            label="LoC label",
-            displayLabel="Wikidata label",
+            label="MeSH label",
+            displayLabel="MeSH label",
             alternativeLabels=[],
             description=ConceptDescription(
                 text="Description",
@@ -142,20 +148,21 @@ def test_catalogue_concept_from_neptune_result_without_alternative_labels() -> N
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
-    raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
+    raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
-    mock_related_to = load_json_fixture("neptune/related_to_query_single.json")[
+    mock_es_secrets("graph_extractor", "dev")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
+    mock_related_to = load_json_fixture("ingestor/extractor/related_to_single.json")[
         "related"
     ]
 
     related_concepts = MOCK_EMPTY_RELATED_CONCEPTS | {
-        "related_to": mock_related_to,
+        "related_to": [ExtractedRelatedConcept(**c) for c in mock_related_to],
     }
 
     expected_result = IndexableConcept(
@@ -211,14 +218,15 @@ def test_catalogue_concept_from_neptune_result_with_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
-    raw_data = (mock_concept, related_concepts)
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+    mock_es_secrets("graph_extractor", "dev")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
         ng.a_related_concept(),
@@ -288,14 +296,14 @@ def test_catalogue_concept_from_neptune_result_with_multiple_related_concepts() 
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
-    raw_data = (mock_concept, related_concepts)
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
         ng.a_related_concept_with_no_label(),
@@ -367,14 +375,14 @@ def test_catalogue_concept_ignore_unlabelled_related_concepts() -> None:
         ),
     )
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True)
-    raw_data = (mock_concept, related_concepts)
+    transformer = ElasticsearchConceptsTransformer(MOCK_EVENT, "private")
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
 
 def test_catalogue_concept_overridden_related_concepts() -> None:
-    mock_concept = load_json_fixture("neptune/concept_query_single_waves.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single_waves.json")
 
     mock_related_to = [
         ng.a_related_concept_with_no_label(),
@@ -456,8 +464,10 @@ def test_catalogue_concept_overridden_related_concepts() -> None:
         aaaaaaaa,Roland le Petour,
         abcd2345,Le Pétomane,
         """)
-    transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)
-    raw_data = (mock_concept, related_concepts)
+    transformer = ElasticsearchConceptsTransformer(
+        MOCK_EVENT, "private", overrides=overrides
+    )
+    raw_data = (ExtractedConcept(**mock_concept), related_concepts)
     result = transformer.transform_document(raw_data)
     assert result == expected_result
 
@@ -540,13 +550,13 @@ def test_concept_type_place_precedence() -> None:
 def test_catalogue_concept_from_neptune_result_with_overridden_label_description_and_image() -> (
     None
 ):
-    mock_concept = load_json_fixture("neptune/concept_query_single.json")
+    mock_concept = load_json_fixture("ingestor/extractor/concept_single.json")
 
     expected_result = IndexableConcept(
         query=ConceptQuery(
             id="id",
             identifiers=[ConceptIdentifier(value="123", identifierType="lc-names")],
-            label="LoC label",
+            label="MeSH label",
             alternativeLabels=[],
             type="Person",
         ),
@@ -562,7 +572,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
                     ),
                 )
             ],
-            label="LoC label",
+            label="MeSH label",
             displayLabel="Wellcome Label",
             alternativeLabels=[],
             description=ConceptDescription(
@@ -597,7 +607,9 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
         id, Wellcome Label, Wellcome Description,www.image.info.json
         """)
 
-    transformer = ElasticsearchConceptsTransformer(0, 1, True, overrides=overrides)
-    raw_data = (mock_concept, MOCK_EMPTY_RELATED_CONCEPTS)
+    transformer = ElasticsearchConceptsTransformer(
+        MOCK_EVENT, "private", overrides=overrides
+    )
+    raw_data = (ExtractedConcept(**mock_concept), MOCK_EMPTY_RELATED_CONCEPTS)
     result = transformer.transform_document(raw_data)
     assert result == expected_result

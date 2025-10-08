@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 from pydantic import BaseModel, StringConstraints
 
@@ -12,13 +12,13 @@ FormattedDateString = Annotated[str, StringConstraints(pattern=WIKIDATA_DATE_PAT
 # Each node must have a label and an id
 class BaseNode(BaseModel):
     id: str
-    label: str | None
+    label: str | None = None
 
 
 # Represents a LoC, MeSH, or Wikidata concept.
 # The `id` field stores a unique identifier provided by the source vocabulary/ontology
 class SourceConcept(BaseNode):
-    source: Literal["nlm-mesh", "lc-subjects", "lc-names", "wikidata"]
+    source: ConceptSource
     # For example MeSH tree numbers or other identifiers from Wikidata
     alternative_ids: list[str] = []
     # LoC variants, MeSH concepts other than preferred term

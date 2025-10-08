@@ -1,0 +1,35 @@
+[
+  {
+    "id": "vc6xrky5",
+    "concept": {
+      "~id": "vc6xrky5",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "vc6xrky5",
+        "label": "Tegart, W. J. McG.",
+        "source": "lc-names",
+        "type": "Person"
+      }
+    }
+  },
+  {
+    "id": "garjbvhe",
+    "concept": {
+      "~id": "garjbvhe",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "garjbvhe",
+        "label": "Bube, Richard H., 1927-",
+        "source": "lc-names",
+        "type": "Person"
+      }
+    }
+  }
+]
+

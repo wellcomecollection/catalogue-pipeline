@@ -1,5 +1,6 @@
 import json
 import os
+import threading
 import time
 import typing
 from itertools import batched
@@ -20,6 +21,8 @@ ID_DELETE_BATCH_SIZE = 1000
 
 ALLOW_DATABASE_RESET = False
 
+NEPTUNE_MAX_PARALLEL_QUERIES = 10
+
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
@@ -37,6 +40,11 @@ class BaseNeptuneClient:
     def __init__(self, neptune_endpoint: str) -> None:
         self.session: boto3.Session | None = None
         self.neptune_endpoint: str = neptune_endpoint
+
+        # Throttle the number of parallel requests to prevent overwhelming the cluster
+        self.parallel_query_semaphore = threading.Semaphore(
+            NEPTUNE_MAX_PARALLEL_QUERIES
+        )
 
     def _get_client_url(self) -> str:
         raise NotImplementedError()
@@ -64,9 +72,10 @@ class BaseNeptuneClient:
         request = AWSRequest(method=method, url=url, data=data, headers=headers)
         SigV4Auth(credentials, "neptune-db", "eu-west-1").add_auth(request)
 
-        raw_response = requests.request(
-            method, url, data=data, headers=dict(request.headers)
-        )
+        with self.parallel_query_semaphore:
+            raw_response = requests.request(
+                method, url, data=data, headers=dict(request.headers)
+            )
 
         if raw_response.status_code != 200:
             raise Exception(raw_response.content)
