@@ -1,15 +1,39 @@
+"""
+Production is derived from field 260 or 264, and also 008
+In EBSCO data, prefer field 260 over 264 but use 264 if 260 is absent or invalid
+In addition, use the date segments from 008 to add another production event.
+"""
+
 from collections.abc import Iterable
 
 from pymarc.field import Field
 from pymarc.record import Record
-
+from parsers.field008 import Field008
+from parsers.period import parse_period
 from models.work import DateTimeRange, Period, ProductionEvent, SourceConcept
 
 
 def extract_production(record: Record) -> list[ProductionEvent]:
+    production008 = extract_production_from_008
     if productions := extract_production_from_fields(record.get_fields("260")):
         return productions
     return extract_production_from_fields(record.get_fields("264"))
+
+
+def extract_production_from_008(record: Record) -> ProductionEvent | None:
+    field008 = Field008(record.get_fields("008"))
+    date_range_str = field008.maximal_date_range
+    place_str = field008.place_of_production
+    period = parse_period(date_range_str)
+    if period:
+        return ProductionEvent(
+            label=date_range_str,
+            agents=[],
+            dates=[period],
+            places=[SourceConcept(label=place_str, type="Place")],
+            function=None
+        )
+    return None
 
 
 def extract_production_from_fields(fields: Iterable[Field]) -> list[ProductionEvent]:
@@ -61,9 +85,3 @@ def single_production_event(field: Field) -> ProductionEvent | None:
     return ProductionEvent(
         label=label, places=places, agents=agents, dates=dates, function=function
     )
-
-
-def parse_period(period: str) -> Period:
-    # TODO: parse the period string into a range
-    r = DateTimeRange.model_validate({"label": period, "from": "", "to": ""})
-    return Period(label=period, range=r)
