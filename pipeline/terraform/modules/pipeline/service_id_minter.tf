@@ -24,7 +24,7 @@ locals {
     topic_arn           = module.id_minter_step_function_output_topic.arn
     max_connections     = local.id_minter_task_max_connections
     es_source_index     = local.es_works_delta_source_index
-    es_identified_index = local.es_works_identified_index
+    es_identified_index = local.es_works_delta_identified_index
   }
 
   id_minter_vpc_config = {
