@@ -14,7 +14,6 @@ from utils.elasticsearch import ElasticsearchMode
 
 from .base_extractor import GraphBaseExtractor
 
-ES_QUERY = {"match": {"type": "Visible"}}
 WORKS_BATCH_SIZE = 10_000
 
 
@@ -49,7 +48,6 @@ class GraphWorksExtractor(GraphBaseExtractor):
         super().__init__(es_mode != "private")
         self.es_source = MergedWorksSource(
             event,
-            query=ES_QUERY,
             es_mode=es_mode,
         )
         self.event = event
