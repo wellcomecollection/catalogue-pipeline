@@ -29,3 +29,9 @@ variable "input_paths" {
   type        = map(string)
   default     = {}
 }
+
+variable "enabled" {
+  type        = bool
+  description = "Whether the trigger is enabled"
+  default     = false
+}

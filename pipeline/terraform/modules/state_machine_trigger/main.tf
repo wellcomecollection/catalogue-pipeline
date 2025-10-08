@@ -40,6 +40,8 @@ resource "aws_cloudwatch_event_rule" "trigger_rule" {
   description    = "Trigger ${var.state_machine_arn} when matching events received"
   event_bus_name = var.event_bus_name
   event_pattern  = jsonencode(var.event_pattern)
+
+  state = var.enabled ? "ENABLED" : "DISABLED"
 }
 
 resource "aws_cloudwatch_event_target" "trigger_target" {
