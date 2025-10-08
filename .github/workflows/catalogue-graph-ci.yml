@@ -55,6 +55,27 @@ jobs:
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
+  # Temporarily add this here for testing
+  deploy-dated-unified-pipeline-lambdas:
+    name: Deploy dated unified pipeline lambdas
+    runs-on: ubuntu-latest
+    needs: [build-unified-pipeline-image]
+    strategy:
+      matrix:
+        component:
+          - transformer_ebsco
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy dated pipeline lambda (latest)
+        uses: ./.github/actions/deploy-dated-pipeline-lambda
+        with:
+          source_tag: ${{ github.sha }}
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          image_name: unified_pipeline_lambda
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          aws_region: eu-west-1
+          lambda_suffix: ${{ matrix.component }}
+
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [build-extractor-image, build-unified-pipeline-image]
