@@ -1,4 +1,3 @@
-from abc import ABC
 from datetime import datetime
 
 from pydantic import BaseModel, field_validator
@@ -91,7 +90,7 @@ class DenormalisedWorkState(ElasticsearchModel):
     relations: WorkRelations
 
 
-class DenormalisedWork(ElasticsearchModel, ABC):
+class DenormalisedWork(ElasticsearchModel):
     state: DenormalisedWorkState
     version: int
     type: WorkStatus

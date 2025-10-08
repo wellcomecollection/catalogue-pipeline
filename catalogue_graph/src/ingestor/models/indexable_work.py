@@ -1,6 +1,4 @@
-from abc import ABC
-
-from ingestor.extractors.works_extractor import ExtractedWork, VisibleExtractedWork
+from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.debug.work import (
     DeletedWorkDebug,
@@ -22,38 +20,12 @@ from ingestor.models.shared.identifier import Identifiers
 from utils.types import WorkStatus
 
 
-class IndexableWork(IndexableRecord, ABC):
+class IndexableWork(IndexableRecord):
     type: WorkStatus
     debug: WorkDebug
 
     def get_id(self) -> str:
         return self.debug.source.id
-
-    @classmethod
-    def from_extracted_work(cls, extracted: ExtractedWork) -> "IndexableWork":
-        work = extracted.work
-        base = IndexableWork(
-            type=work.type, debug=WorkDebug.from_denormalised_work(work)
-        ).model_dump()
-
-        if isinstance(extracted, VisibleExtractedWork):
-            return VisibleIndexableWork(
-                **base,
-                query=QueryWork.from_extracted_work(extracted),
-                display=DisplayWork.from_extracted_work(extracted),
-                aggregatable_values=WorkAggregatableValues.from_extracted_work(
-                    extracted
-                ),
-                filterable_values=WorkFilterableValues.from_extracted_work(extracted),
-            )
-        if isinstance(work, RedirectedDenormalisedWork):
-            return RedirectedIndexableWork(**base, redirect_target=work.redirect_target)
-        if isinstance(work, DeletedDenormalisedWork):
-            return DeletedIndexableWork(**base)
-        if isinstance(work, InvisibleDenormalisedWork):
-            return InvisibleIndexableWork(**base)
-
-        raise TypeError(f"Unknown work type '{type(work)}' for work {work}")
 
 
 class VisibleIndexableWork(IndexableWork):
@@ -62,16 +34,55 @@ class VisibleIndexableWork(IndexableWork):
     aggregatable_values: WorkAggregatableValues
     filterable_values: WorkFilterableValues
     debug: VisibleWorkDebug
+    type: WorkStatus = "Visible"
+
+    @classmethod
+    def from_extracted_work(
+        cls, extracted: VisibleExtractedWork
+    ) -> "VisibleIndexableWork":
+        return VisibleIndexableWork(
+            query=QueryWork.from_extracted_work(extracted),
+            display=DisplayWork.from_extracted_work(extracted),
+            aggregatable_values=WorkAggregatableValues.from_extracted_work(extracted),
+            filterable_values=WorkFilterableValues.from_extracted_work(extracted),
+            debug=VisibleWorkDebug.from_denormalised_work(extracted.work),
+        )
 
 
 class InvisibleIndexableWork(IndexableWork):
     debug: InvisibleWorkDebug
+    type: WorkStatus = "Invisible"
+
+    @classmethod
+    def from_denormalised_work(
+        cls, work: InvisibleDenormalisedWork
+    ) -> "InvisibleIndexableWork":
+        return InvisibleIndexableWork(
+            debug=InvisibleWorkDebug.from_denormalised_work(work)
+        )
 
 
 class RedirectedIndexableWork(IndexableWork):
     debug: RedirectedWorkDebug
     redirect_target: Identifiers
+    type: WorkStatus = "Redirected"
+
+    @classmethod
+    def from_denormalised_work(
+        cls, work: RedirectedDenormalisedWork
+    ) -> "RedirectedIndexableWork":
+        return RedirectedIndexableWork(
+            debug=RedirectedWorkDebug.from_denormalised_work(work),
+            redirect_target=work.redirect_target,
+        )
 
 
 class DeletedIndexableWork(IndexableWork):
     debug: DeletedWorkDebug
+    type: WorkStatus = "Deleted"
+
+    @classmethod
+    def from_denormalised_work(
+        cls, work: DeletedDenormalisedWork
+    ) -> "DeletedIndexableWork":
+        return DeletedIndexableWork(debug=DeletedWorkDebug.from_denormalised_work(work))

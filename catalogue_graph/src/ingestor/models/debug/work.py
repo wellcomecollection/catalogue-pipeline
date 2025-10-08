@@ -28,8 +28,8 @@ class WorkDebug(ElasticsearchModel):
     merge_candidates: list[MergeCandidate]
 
     @classmethod
-    def from_denormalised_work(cls, work: DenormalisedWork) -> "WorkDebug":
-        debug = WorkDebug(
+    def _from_denormalised_work(cls, work: DenormalisedWork) -> "WorkDebug":
+        return WorkDebug(
             source=SourceWorkDebugInformation(
                 id=work.state.canonical_id,
                 identifier=work.state.source_identifier,
@@ -39,33 +39,48 @@ class WorkDebug(ElasticsearchModel):
             merged_time=work.state.merged_time,
             indexed_time=datetime.now(),
             merge_candidates=work.state.merge_candidates,
-        ).model_dump()
-
-        if isinstance(work, VisibleDenormalisedWork):
-            return VisibleWorkDebug(**debug, redirect_sources=work.redirect_sources)
-        if isinstance(work, RedirectedDenormalisedWork):
-            return RedirectedWorkDebug(**debug)
-        if isinstance(work, DeletedDenormalisedWork):
-            return DeletedWorkDebug(**debug, deleted_reason=work.deleted_reason)
-        if isinstance(work, InvisibleDenormalisedWork):
-            return InvisibleWorkDebug(
-                **debug, invisibility_reasons=work.invisibility_reasons
-            )
-
-        raise TypeError(f"Unknown work type '{type(work)}' for work {work}")
+        )
 
 
 class VisibleWorkDebug(WorkDebug):
     redirect_sources: list[Identifiers]
 
+    @classmethod
+    def from_denormalised_work(
+        cls, work: VisibleDenormalisedWork
+    ) -> "VisibleWorkDebug":
+        debug = WorkDebug._from_denormalised_work(work).model_dump()
+        return VisibleWorkDebug(**debug, redirect_sources=work.redirect_sources)
+
 
 class InvisibleWorkDebug(WorkDebug):
     invisibility_reasons: list[InvisibleReason]
 
+    @classmethod
+    def from_denormalised_work(
+        cls, work: InvisibleDenormalisedWork
+    ) -> "InvisibleWorkDebug":
+        debug = WorkDebug._from_denormalised_work(work).model_dump()
+        return InvisibleWorkDebug(
+            **debug, invisibility_reasons=work.invisibility_reasons
+        )
+
 
 class RedirectedWorkDebug(WorkDebug):
-    pass
+    @classmethod
+    def from_denormalised_work(
+        cls, work: RedirectedDenormalisedWork
+    ) -> "RedirectedWorkDebug":
+        debug = WorkDebug._from_denormalised_work(work).model_dump()
+        return RedirectedWorkDebug(**debug)
 
 
 class DeletedWorkDebug(WorkDebug):
     deleted_reason: DeletedReason
+
+    @classmethod
+    def from_denormalised_work(
+        cls, work: DeletedDenormalisedWork
+    ) -> "DeletedWorkDebug":
+        debug = WorkDebug._from_denormalised_work(work).model_dump()
+        return DeletedWorkDebug(**debug, deleted_reason=work.deleted_reason)
