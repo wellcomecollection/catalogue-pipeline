@@ -27,7 +27,7 @@ module "pipeline" {
       }
     }
     "2025-10-06" = {
-      works    = { indexed = "works_source.2025-10-02" }
+      works    = { source = "works_source.2025-10-02" }
       images   = {}
       concepts = {}
     }
