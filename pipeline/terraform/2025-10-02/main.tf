@@ -27,8 +27,8 @@ module "pipeline" {
       }
     }
     "2025-10-06" = {
-      works    = { 
-        source = "works_source.2025-10-02" 
+      works = {
+        source     = "works_source.2025-10-02"
         identified = "works_identified.2023-05-26"
       }
       images   = {}
