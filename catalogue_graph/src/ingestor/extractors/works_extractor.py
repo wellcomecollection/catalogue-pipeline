@@ -99,7 +99,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
         related_ids: set[str] = set()
 
         works_stream = (
-            DenormalisedWork.from_es_document(w) for w in self.es_source.stream_raw()
+            DenormalisedWork.from_raw_document(w) for w in self.es_source.stream_raw()
         )
         for extracted_work in self.process_es_works(works_stream):
             streamed_ids.add(extracted_work.work.state.canonical_id)
@@ -126,6 +126,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
             es_mode=self.es_mode,
         )
         related_works_stream = (
-            DenormalisedWork(**w) for w in related_works_source.stream_raw()
+            DenormalisedWork.from_raw_document(**w)
+            for w in related_works_source.stream_raw()
         )
         yield from self.process_es_works(related_works_stream)

@@ -27,6 +27,19 @@ class IndexableWork(IndexableRecord):
     def get_id(self) -> str:
         return self.debug.source.id
 
+    @staticmethod
+    def from_raw_document(work: dict) -> "IndexableWork":
+        if work["type"] == "Visible":
+            return VisibleIndexableWork(**work)
+        if work["type"] == "Invisible":
+            return InvisibleIndexableWork(**work)
+        if work["type"] == "Redirected":
+            return RedirectedIndexableWork(**work)
+        if work["type"] == "Deleted":
+            return DeletedIndexableWork(**work)
+
+        raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
+
 
 class VisibleIndexableWork(IndexableWork):
     query: QueryWork

@@ -96,7 +96,7 @@ class DenormalisedWork(ElasticsearchModel):
     type: WorkStatus
 
     @staticmethod
-    def from_es_document(work: dict) -> "DenormalisedWork":
+    def from_raw_document(work: dict) -> "DenormalisedWork":
         if work["type"] == "Visible":
             return VisibleDenormalisedWork(**work)
         if work["type"] == "Invisible":

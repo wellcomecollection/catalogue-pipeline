@@ -81,7 +81,7 @@ def handler(
         print(f"Extracted {len(data)} records.")
         success_count = load_data(
             ingestor_type=event.ingestor_type,
-            indexable_data=[record_class.model_validate(row) for row in data],
+            indexable_data=[record_class.from_raw_document(row) for row in data],
             pipeline_date=event.pipeline_date,
             index_date=event.index_date,
             es_mode=es_mode,
