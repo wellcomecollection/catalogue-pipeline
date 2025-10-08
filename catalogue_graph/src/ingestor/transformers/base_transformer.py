@@ -65,7 +65,7 @@ class ElasticsearchBaseTransformer:
         if destination == "s3":
             full_path = event.get_s3_uri(file_name)
         elif destination == "local":
-            relative_path = f"../ingestor_outputs/{file_name}.{event.load_format}"
+            relative_path = f"../ingestor_outputs/{event.get_path_prefix()}/{file_name}.{event.load_format}"
             full_path = os.path.abspath(relative_path)
             os.makedirs(os.path.dirname(full_path), exist_ok=True)
         else:

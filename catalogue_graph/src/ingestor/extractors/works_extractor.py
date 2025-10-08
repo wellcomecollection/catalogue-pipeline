@@ -56,6 +56,18 @@ class GraphWorksExtractor(GraphBaseExtractor):
         self.streamed_ids: set[str] = set()
         self.related_ids: set[str] = set()
 
+    def get_related_works_source(self, related_ids: list[str]) -> MergedWorksSource:
+        # Remove `window` from event before retrieving related works. (All related works should be processed
+        # even if they aren't part of the current window.)
+        event = BasePipelineEvent(
+            pipeline_date=self.event.pipeline_date, pit_id=self.event.pit_id
+        )
+        return MergedWorksSource(
+            event=event,
+            query=get_related_works_query(related_ids),
+            es_mode=self.es_mode,
+        )
+
     def _get_work_ancestors(self, ids: list[str]) -> dict:
         """Return all ancestors of each work in the current batch."""
         return self.make_neptune_query("work_ancestors", ids)
@@ -121,13 +133,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         related_ids = self.related_ids.difference(self.streamed_ids)
         print(f"Will process a total of {len(related_ids)} related works.")
 
-        related_works_source = MergedWorksSource(
-            event=self.event,
-            query=get_related_works_query(list(related_ids)),
-            es_mode=self.es_mode,
-        )
+        related_works_source = self.get_related_works_source(list(related_ids))
         related_works_stream = (
-            DenormalisedWork.from_raw_document(**w)
+            DenormalisedWork.from_raw_document(w)
             for w in related_works_source.stream_raw()
         )
         yield from self.process_es_works(related_works_stream)

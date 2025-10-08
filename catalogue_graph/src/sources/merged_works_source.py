@@ -132,7 +132,7 @@ class MergedWorksSource(BaseSource):
 
         next_thread_index = 0
         # Extract documents in parallel, with all threads adding resulting documents to the same queue
-        for i in range(config.ES_SOURCE_PARALLELISM):
+        for i in range(min(config.ES_SOURCE_SLICE_COUNT, config.ES_SOURCE_PARALLELISM)):
             self.run_worker(i, queue)
             next_thread_index += 1
 
