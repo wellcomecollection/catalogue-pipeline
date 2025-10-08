@@ -20,7 +20,7 @@ trait WorksIndexFixtures extends IndexFixturesBase {
     withLocalElasticSearchIndex[R](config =
       getConfig(
         mappings = "mappings.works_denormalised.2025-08-14.json",
-        analysis = "analysis.works_denormalised.2023-05-26.json"
+        analysis = "analysis.works_denormalised.2025-08-14.json"
       )
     )
   }

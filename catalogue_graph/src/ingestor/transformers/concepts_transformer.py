@@ -80,6 +80,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             type=neptune_concept.concept_type,
             description=self.override_provider.description_of(neptune_concept),
             sameAs=neptune_concept.same_as,
+            displayImages=self.override_provider.display_images(neptune_concept),
             relatedConcepts=RelatedConcepts(
                 relatedTo=self._transform_related_concepts(neptune_related.related_to),
                 fieldsOfWork=self._transform_related_concepts(

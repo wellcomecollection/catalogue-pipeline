@@ -1,0 +1,35 @@
+
+{
+  "dynamic": "false",
+  "properties": {
+    "data": {
+      "properties": {
+        "otherIdentifiers": {
+          "properties": {
+            "value": {
+              "type": "keyword",
+              "normalizer": "lowercase_normalizer"
+            }
+          }
+        }
+      }
+    },
+    "state": {
+      "properties": {
+        "sourceIdentifier": {
+          "dynamic": "false",
+          "properties": {
+            "value": {
+              "type": "keyword",
+              "normalizer": "lowercase_normalizer"
+            },
+            "identifierType.id": {
+              "type": "keyword",
+              "normalizer": "lowercase_normalizer"
+            }
+          }
+        }
+      }
+    }
+  }
+}

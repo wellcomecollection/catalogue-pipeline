@@ -2,6 +2,8 @@ import csv
 import os
 from typing import TextIO
 
+from ingestor.models.display.id_label import DisplayIdLabel
+from ingestor.models.display.location import DisplayDigitalLocation
 from ingestor.models.indexable_concept import ConceptDescription
 
 from .raw_concept import RawNeptuneConcept
@@ -20,7 +22,7 @@ class ConceptTextOverrideProvider:
             self._load_overrides(overrides_csv)
         else:
             with open(
-                os.path.join(HERE, "label_description_overrides.csv")
+                os.path.join(HERE, "wellcome_collection_authority.csv")
             ) as csv_file:
                 self._load_overrides(csv_file)
 
@@ -49,3 +51,21 @@ class ConceptTextOverrideProvider:
                     text=override_description, sourceUrl=None, sourceLabel=None
                 )
         return raw_concept.description
+
+    def display_images(
+        self, raw_concept: RawNeptuneConcept
+    ) -> list[DisplayDigitalLocation]:
+        override = self.overrides.get(raw_concept.wellcome_id)
+        if override and (override_image_urls := override["image_url"].split("||")):
+            return [
+                DisplayDigitalLocation(
+                    url=url.strip(),
+                    locationType=DisplayIdLabel(
+                        id="iiif-image", label="IIIF Image API", type="LocationType"
+                    ),
+                    accessConditions=[],
+                )
+                for url in override_image_urls
+                if url.strip()  # Filter out empty URLs
+            ]
+        return []
