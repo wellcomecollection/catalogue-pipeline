@@ -8,7 +8,10 @@ from test_mocks import (
 )
 from test_utils import load_json_fixture
 
-from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
+from ingestor.extractors.works_extractor import (
+    GraphWorksExtractor,
+    VisibleExtractedWork,
+)
 from ingestor.models.denormalised.work import VisibleDenormalisedWork
 from ingestor.models.neptune.query_result import WorkHierarchy
 from ingestor.queries.work_queries import (
@@ -68,7 +71,7 @@ def test_with_ancestors() -> None:
 
     extracted_items = list(extractor.extract_raw())
     assert len(extracted_items) == 1
-    assert extracted_items[0] == ExtractedWork(
+    assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(
             id="a24esypq", ancestors=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE
@@ -86,7 +89,7 @@ def test_with_concepts() -> None:
 
     extracted_items = list(extractor.extract_raw())
     assert len(extracted_items) == 1
-    assert extracted_items[0] == ExtractedWork(
+    assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(id="a24esypq", ancestors=[], children=[]),
         concepts=CONCEPTS_FIXTURE,
@@ -102,7 +105,7 @@ def test_without_graph_relationships() -> None:
 
     extracted_items = list(extractor.extract_raw())
     assert len(extracted_items) == 1
-    assert extracted_items[0] == ExtractedWork(
+    assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(id="a24esypq", ancestors=[], children=[]),
         concepts=[],
@@ -135,12 +138,12 @@ def test_multiple_works() -> None:
     )
 
     expected_results = [
-        ExtractedWork(
+        VisibleExtractedWork(
             work=_get_work_fixture("123"),
             hierarchy=WorkHierarchy(id="123", ancestors=[], children=[]),
             concepts=[],
         ),
-        ExtractedWork(
+        VisibleExtractedWork(
             work=_get_work_fixture("456"),
             hierarchy=WorkHierarchy(
                 id="456", ancestors=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE

@@ -31,12 +31,12 @@ def get_related_works_query(related_ids: list[str]) -> dict:
 
 class ExtractedWork(BaseModel):
     work: DenormalisedWork
-    hierarchy: WorkHierarchy
-    concepts: list[WorkConcept]
 
 
 class VisibleExtractedWork(ExtractedWork):
     work: VisibleDenormalisedWork
+    hierarchy: WorkHierarchy
+    concepts: list[WorkConcept]
 
 
 class GraphWorksExtractor(GraphBaseExtractor):
@@ -52,6 +52,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         )
         self.event = event
         self.es_mode = es_mode
+
+        self.streamed_ids: set[str] = set()
+        self.related_ids: set[str] = set()
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:
         """Return all ancestors of each work in the current batch."""
@@ -81,41 +84,41 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
             for es_work in es_batch:
                 work_id = es_work.state.canonical_id
+                self.streamed_ids.add(work_id)
 
-                yield ExtractedWork(
-                    work=es_work,
-                    hierarchy=WorkHierarchy(
-                        id=work_id,
-                        ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
-                        children=all_children.get(work_id, {}).get("children", []),
-                    ),
-                    concepts=all_concepts.get(work_id, {}).get("concepts", []),
+                hierarchy = WorkHierarchy(
+                    id=work_id,
+                    ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
+                    children=all_children.get(work_id, {}).get("children", []),
+                )
+                concepts = all_concepts.get(work_id, {}).get("concepts", [])
+
+                # When a work is reprocessed, all of its children and ancestors must be reprocessed too for consistency.
+                # (For example, if the title of a parent work changes, all of its children must be processed
+                # and reindexed to store the new title.)
+                self.related_ids.update(
+                    c.work.properties.id for c in hierarchy.children
+                )
+                self.related_ids.update(
+                    c.work.properties.id for c in hierarchy.ancestors
                 )
 
-    def extract_raw(self) -> Generator[ExtractedWork]:
-        streamed_ids: set[str] = set()
-        related_ids: set[str] = set()
+                # Only visible works story hierarchy and concepts
+                if isinstance(es_work, VisibleDenormalisedWork):
+                    yield VisibleExtractedWork(
+                        work=es_work, hierarchy=hierarchy, concepts=concepts
+                    )
+                else:
+                    yield ExtractedWork(work=es_work)
 
+    def extract_raw(self) -> Generator[ExtractedWork]:
         works_stream = (
             DenormalisedWork.from_raw_document(w) for w in self.es_source.stream_raw()
         )
-        for extracted_work in self.process_es_works(works_stream):
-            streamed_ids.add(extracted_work.work.state.canonical_id)
-
-            # When a work is reprocessed, all of its children and ancestors must be reprocessed too for consistency.
-            # (For example, if the title of a parent work changes, all of its children must be processed and reindexed
-            # to store the new title.)
-            related_ids.update(
-                c.work.properties.id for c in extracted_work.hierarchy.children
-            )
-            related_ids.update(
-                c.work.properties.id for c in extracted_work.hierarchy.ancestors
-            )
-
-            yield extracted_work
+        yield from self.process_es_works(works_stream)
 
         # Before processing related works, filter out works which were already processed above
-        related_ids = related_ids.difference(streamed_ids)
+        related_ids = self.related_ids.difference(self.streamed_ids)
         print(f"Will process a total of {len(related_ids)} related works.")
 
         related_works_source = MergedWorksSource(
