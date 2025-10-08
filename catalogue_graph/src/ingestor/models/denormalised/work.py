@@ -1,8 +1,10 @@
+from abc import ABC
 from datetime import datetime
 
 from pydantic import BaseModel, field_validator
 
 from ingestor.models.shared.concept import Concept, Contributor, Genre, Subject
+from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.holdings import Holdings
 from ingestor.models.shared.id_label import Id, IdLabel
 from ingestor.models.shared.identifier import (
@@ -10,13 +12,14 @@ from ingestor.models.shared.identifier import (
     SourceIdentifier,
 )
 from ingestor.models.shared.image import ImageData
+from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.item import Item
 from ingestor.models.shared.location import DigitalLocation
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
-from utils.types import DisplayWorkType, WorkType
+from utils.types import DisplayWorkType, WorkStatus, WorkType
 
 
 class CollectionPath(BaseModel):
@@ -88,9 +91,37 @@ class DenormalisedWorkState(ElasticsearchModel):
     relations: WorkRelations
 
 
-class DenormalisedWork(ElasticsearchModel):
-    data: DenormalisedWorkData
+class DenormalisedWork(ElasticsearchModel, ABC):
     state: DenormalisedWorkState
     version: int
+    type: WorkStatus
+
+    @staticmethod
+    def from_es_document(work: dict) -> "DenormalisedWork":
+        if work["type"] == "Visible":
+            return VisibleDenormalisedWork(**work)
+        if work["type"] == "Invisible":
+            return InvisibleDenormalisedWork(**work)
+        if work["type"] == "Redirected":
+            return RedirectedDenormalisedWork(**work)
+        if work["type"] == "Deleted":
+            return DeletedDenormalisedWork(**work)
+
+        raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
+
+
+class VisibleDenormalisedWork(DenormalisedWork):
+    data: DenormalisedWorkData
     redirect_sources: list[Identifiers]
-    type: str
+
+
+class InvisibleDenormalisedWork(DenormalisedWork):
+    invisibility_reasons: list[InvisibleReason]
+
+
+class DeletedDenormalisedWork(DenormalisedWork):
+    deleted_reason: DeletedReason
+
+
+class RedirectedDenormalisedWork(DenormalisedWork):
+    redirect_target: Identifiers

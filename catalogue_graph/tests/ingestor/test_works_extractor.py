@@ -9,7 +9,7 @@ from test_mocks import (
 from test_utils import load_json_fixture
 
 from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
-from ingestor.models.denormalised.work import DenormalisedWork
+from ingestor.models.denormalised.work import VisibleDenormalisedWork
 from ingestor.models.neptune.query_result import WorkHierarchy
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
@@ -26,11 +26,11 @@ CHILDREN_FIXTURE = load_json_fixture("neptune/work_children_single.json")
 CONCEPTS_FIXTURE = load_json_fixture("neptune/work_concepts_single.json")
 
 
-def _get_work_fixture(work_id: str) -> DenormalisedWork:
+def _get_work_fixture(work_id: str) -> VisibleDenormalisedWork:
     # Adjust canonical ID in fixture
     fixture = copy.deepcopy(DENORMALISED_FIXTURE)
     fixture["state"]["canonicalId"] = work_id
-    return DenormalisedWork(**fixture)
+    return VisibleDenormalisedWork(**fixture)
 
 
 def mock_es_work(work_id: str) -> None:

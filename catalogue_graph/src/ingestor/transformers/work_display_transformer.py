@@ -1,7 +1,7 @@
 from collections import defaultdict
 from collections.abc import Generator
 
-from ingestor.extractors.works_extractor import ExtractedWork
+from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.concept import (
     DisplayConcept,
@@ -28,7 +28,7 @@ from utils.sort import natural_sort_key
 
 
 class DisplayWorkTransformer:
-    def __init__(self, extracted: ExtractedWork):
+    def __init__(self, extracted: VisibleExtractedWork):
         self.data = extracted.work.data
         self.state = extracted.work.state
         self.hierarchy = extracted.hierarchy

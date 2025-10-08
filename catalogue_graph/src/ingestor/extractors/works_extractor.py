@@ -3,7 +3,10 @@ from itertools import batched
 
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import DenormalisedWork
+from ingestor.models.denormalised.work import (
+    DenormalisedWork,
+    VisibleDenormalisedWork,
+)
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from models.events import BasePipelineEvent
 from sources.merged_works_source import MergedWorksSource
@@ -31,6 +34,10 @@ class ExtractedWork(BaseModel):
     work: DenormalisedWork
     hierarchy: WorkHierarchy
     concepts: list[WorkConcept]
+
+
+class VisibleExtractedWork(ExtractedWork):
+    work: VisibleDenormalisedWork
 
 
 class GraphWorksExtractor(GraphBaseExtractor):
@@ -66,7 +73,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         for es_batch in batched(es_works, WORKS_BATCH_SIZE, strict=False):
             # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
             visible_work_ids = [
-                w.state.canonical_id for w in es_batch if w.type == "Visible"
+                w.state.canonical_id
+                for w in es_batch
+                if isinstance(w, VisibleDenormalisedWork)
             ]
             all_ancestors = self._get_work_ancestors(visible_work_ids)
             all_children = self._get_work_children(visible_work_ids)
@@ -74,6 +83,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
             for es_work in es_batch:
                 work_id = es_work.state.canonical_id
+
                 yield ExtractedWork(
                     work=es_work,
                     hierarchy=WorkHierarchy(
@@ -88,7 +98,9 @@ class GraphWorksExtractor(GraphBaseExtractor):
         streamed_ids: set[str] = set()
         related_ids: set[str] = set()
 
-        works_stream = (DenormalisedWork(**w) for w in self.es_source.stream_raw())
+        works_stream = (
+            DenormalisedWork.from_es_document(w) for w in self.es_source.stream_raw()
+        )
         for extracted_work in self.process_es_works(works_stream):
             streamed_ids.add(extracted_work.work.state.canonical_id)
 

@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.shared.serialisable import ElasticsearchModel
-
-
-class AggregatableField(BaseModel):
-    id: str
-    label: str
+from ingestor.transformers.work_aggregate_transformer import (
+    AggregatableField,
+    AggregateWorkTransformer,
+)
 
 
 class WorkAggregatableValues(ElasticsearchModel):
@@ -25,3 +25,19 @@ class WorkAggregatableValues(ElasticsearchModel):
     availabilities: list[AggregatableField] = Field(
         serialization_alias="availabilities"
     )
+
+    @classmethod
+    def from_extracted_work(
+        cls, extracted: VisibleExtractedWork
+    ) -> "WorkAggregatableValues":
+        transformer = AggregateWorkTransformer(extracted)
+        return WorkAggregatableValues(
+            work_type=list(transformer.work_type),
+            genres=list(transformer.genres),
+            production_dates=list(transformer.production_dates),
+            subjects=list(transformer.subjects),
+            languages=list(transformer.languages),
+            contributors=list(transformer.contributors),
+            item_licenses=list(transformer.licenses),
+            availabilities=list(transformer.availabilities),
+        )
