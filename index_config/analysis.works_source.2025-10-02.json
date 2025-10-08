@@ -1,10 +1,4 @@
 {
-  "analyzer": {
-    "exact_path_analyzer": {
-      "type": "custom",
-      "tokenizer": "path_hierarchy"
-    }
-  },
   "normalizer": {
     "lowercase_normalizer": {
       "filter": [
