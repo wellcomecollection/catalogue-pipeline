@@ -1,0 +1,45 @@
+[
+  {
+    "id": "hstuwwsu",
+    "concept": {
+      "~id": "hstuwwsu",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "hstuwwsu",
+        "label": "Electromagnetic Radiation",
+        "source": "label-derived"
+      }
+    }
+  },
+  {
+    "id": "hv6pemej",
+    "concept": {
+      "~id": "hv6pemej",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "hv6pemej",
+        "label": "Wave mechanics",
+        "source": "label-derived"
+      }
+    }
+  },
+  {
+    "id": "ugcgqepy",
+    "concept": {
+      "~id": "ugcgqepy",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "ugcgqepy",
+        "label": "Electric waves",
+        "source": "lc-subjects"
+      }
+    }
+  }
+]
+

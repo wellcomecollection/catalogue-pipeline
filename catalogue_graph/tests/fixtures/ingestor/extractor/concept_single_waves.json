@@ -12,21 +12,19 @@
       "type": "Concept"
     }
   },
-  "linked_source_concepts": [
-    {
-      "~id": "sh85145789",
-      "~entityType": "node",
-      "~labels": [
-        "SourceConcept"
-      ],
-      "~properties": {
-        "id": "sh85145789",
-        "label": "Waves",
-        "source": "lc-subjects",
-        "alternative_labels": "Mechanical waves"
-      }
+  "linked_source_concept": {
+    "~id": "sh85145789",
+    "~entityType": "node",
+    "~labels": [
+      "SourceConcept"
+    ],
+    "~properties": {
+      "id": "sh85145789",
+      "label": "Waves",
+      "source": "lc-subjects",
+      "alternative_labels": "Mechanical waves"
     }
-  ],
+  },
   "source_concepts": [
     {
       "~id": "sh85145789",
@@ -56,9 +54,11 @@
       }
     }
   ],
-  "same_as_concept_ids": [
+  "same_as": [
     "a2584ttj",
     "gcmn66yk"
   ],
-  "concept_types": ["Concept"]
+  "types": [
+    "Concept"
+  ]
 }

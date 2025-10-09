@@ -34,14 +34,16 @@ resource "aws_iam_policy" "state_machine_policy" {
         Resource = [
           aws_sfn_state_machine.catalogue_graph_extractor.arn,
           aws_sfn_state_machine.catalogue_graph_extractors_monthly.arn,
-          aws_sfn_state_machine.catalogue_graph_extractors_daily.arn,
+          aws_sfn_state_machine.catalogue_graph_extractors_incremental.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loader.arn,
           aws_sfn_state_machine.catalogue_graph_bulk_loaders_monthly.arn,
-          aws_sfn_state_machine.catalogue_graph_bulk_loaders_daily.arn,
+          aws_sfn_state_machine.catalogue_graph_bulk_loaders_incremental.arn,
           aws_sfn_state_machine.catalogue_graph_ingestor.arn,
-          aws_sfn_state_machine.concepts_pipeline_monthly.arn,
-          aws_sfn_state_machine.concepts_pipeline_daily.arn,
-          aws_sfn_state_machine.catalogue_graph_scaler.arn
+          aws_sfn_state_machine.catalogue_graph_ingestors.arn,
+          aws_sfn_state_machine.catalogue_graph_pipeline_monthly.arn,
+          aws_sfn_state_machine.catalogue_graph_pipeline_incremental.arn,
+          aws_sfn_state_machine.catalogue_graph_scaler.arn,
+          aws_sfn_state_machine.catalogue_graph_removers.arn
         ]
       },
       {
@@ -53,14 +55,13 @@ resource "aws_iam_policy" "state_machine_policy" {
           module.graph_remover_lambda.lambda.arn,
           module.graph_scaler_lambda.lambda.arn,
           module.graph_status_poller_lambda.lambda.arn,
-          module.ingestor_trigger_lambda.lambda.arn,
-          module.ingestor_trigger_monitor_lambda.lambda.arn,
           module.ingestor_loader_lambda.lambda.arn,
           module.ingestor_loader_monitor_lambda.lambda.arn,
           module.ingestor_indexer_lambda.lambda.arn,
           module.ingestor_indexer_monitor_lambda.lambda.arn,
           module.ingestor_deletions_lambda.lambda.arn,
-          module.ingestor_reporter_lambda.lambda.arn
+          module.ingestor_reporter_lambda.lambda.arn,
+          module.elasticsearch_pit_opener_lambda.lambda.arn
         ]
       },
       {

@@ -30,7 +30,13 @@ ConceptType = Literal[
 ]
 
 ConceptSource = Literal[
-    "label-derived", "nlm-mesh", "lc-subjects", "lc-names", "viaf", "fihrist"
+    "label-derived",
+    "nlm-mesh",
+    "lc-subjects",
+    "lc-names",
+    "viaf",
+    "fihrist",
+    "wikidata",
 ]
 
 WorkType = Literal["Standard", "Series", "Section", "Collection"]

@@ -16,12 +16,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           "Payload.$" : "$"
         },
         Retry = local.DefaultRetry,
-        "Next" : "Wait 30 seconds"
+        "Next" : "Wait 5 seconds"
       },
-      "Wait 30 seconds" : {
+      "Wait 5 seconds" : {
         "Type" : "Wait",
         "Next" : "Check load status",
-        "Seconds" : 30
+        "Seconds" : 5
       },
       "Check load status" : {
         "Type" : "Task",
@@ -40,20 +40,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           {
             "Variable" : "$.status",
             "StringEquals" : "SUCCEEDED",
-            "Next" : "Remove unused entities"
+            "Next" : "Success"
           }
         ],
-        "Default" : "Wait 30 seconds"
-      },
-      "Remove unused entities" : {
-        "Type" : "Task",
-        "Resource" : "arn:aws:states:::lambda:invoke",
-        "OutputPath" : "$.Payload",
-        "Parameters" : {
-          "FunctionName" : module.graph_remover_lambda.lambda.arn,
-          "Payload.$" : "$$.Execution.Input",
-        },
-        "Next" : "Success"
+        "Default" : "Wait 5 seconds"
       },
       "Success" : {
         "Type" : "Succeed"

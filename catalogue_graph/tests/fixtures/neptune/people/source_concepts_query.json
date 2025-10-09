@@ -1,0 +1,38 @@
+[
+  {
+    "id": "vc6xrky5",
+    "source_concept_nodes": [
+      {
+        "~id": "n84076647",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "n84076647",
+          "label": "Tegart, W. J. McG.",
+          "source": "lc-names",
+          "alternative_labels": "Tegart, Greg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "garjbvhe",
+    "source_concept_nodes": [
+      {
+        "~id": "n50041138",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "n50041138",
+          "label": "Bube, Richard H., 1927-",
+          "source": "lc-names",
+          "alternative_labels": "Bube, Richard, 1927-||Bube, R. H. (Richard H.), 1927-"
+        }
+      }
+    ]
+  }
+]

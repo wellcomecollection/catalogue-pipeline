@@ -1,20 +1,42 @@
 from utils.types import ConceptType, WorkConceptKey
 
-# A query returning all Wellcome concepts and the corresponding `SourceConcepts`.
 CONCEPT_QUERY = """
-    MATCH (concept:Concept)
-    WITH concept ORDER BY concept.id
-    SKIP $start_offset LIMIT $limit
-    OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
-    OPTIONAL MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)
-    OPTIONAL MATCH (work)-[has_concept:HAS_CONCEPT]-(concept)
-    RETURN 
-        concept,
+    UNWIND $ids AS id
+    MATCH (concept:Concept {`~id`: id})
+    RETURN concept.id AS id, concept
+"""
+
+CONCEPT_TYPE_QUERY = """
+    UNWIND $ids AS id
+    MATCH (concept:Concept {`~id`: id})
+    MATCH (concept)<-[has_concept:HAS_CONCEPT]-(work)
+
+    WITH DISTINCT concept, has_concept.referenced_type AS concept_type
+    RETURN concept.id AS id, COLLECT(concept_type) AS types
+"""
+
+SOURCE_CONCEPT_QUERY = """
+    UNWIND $ids AS id
+    MATCH (concept:Concept {`~id`: id})
+    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
+
+    RETURN
+        concept.id AS id,
         collect(DISTINCT linked_source_concept) AS linked_source_concepts,
-        collect(DISTINCT source_concept) AS source_concepts,
-        collect(DISTINCT same_as_concept.id) AS same_as_concept_ids,
-        collect(DISTINCT has_concept.referenced_type) AS concept_types        
-    """
+        collect(DISTINCT source_concept) AS source_concepts
+"""
+
+SAME_AS_CONCEPT_QUERY = """
+    UNWIND $ids AS id
+    MATCH (concept:Concept {`~id`: id})
+    MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..]->(source_concept)
+    MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)
+    WHERE same_as_concept <> concept
+
+    RETURN
+        concept.id AS id,
+        collect(DISTINCT id(same_as_concept)) AS same_as_ids
+"""
 
 
 def get_related_query(
@@ -33,70 +55,49 @@ def get_related_query(
     right_arrow = ">" if direction == "from" else ""
 
     return f"""
-        /* Get a chunk of `Concept` nodes (Wellcome concepts) of size `limit` */
-        MATCH (concept:Concept)
-        WITH concept ORDER BY concept.id
-        SKIP $start_offset LIMIT $limit
+        UNWIND $ids AS id
+        MATCH (concept:Concept {{`~id`: id}})
+
         /* Match each concept to all of its source concepts */
         MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
         WHERE NOT source_concept.id IN $ignored_wikidata_ids
-        
+
+        WITH DISTINCT concept, linked_source_concept, source_concept
+
         /*
         Yield all related source concepts based on the specified relationship type and direction
         (e.g. `edge_type="NARROWER_THAN"` combined with `direction="from"` would yield broader source concepts).
-        */
-        MATCH (source_concept){left_arrow}-[rel:{edge_type}]-{right_arrow}(linked_related_source_concept)
-        MATCH (linked_related_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
+        */  
+        MATCH (source_concept){left_arrow}-[relationship_edge:{edge_type}]-{right_arrow}(linked_related_source_concept)
         WHERE NOT linked_related_source_concept.id IN $ignored_wikidata_ids
-            AND NOT related_source_concept.id IN $ignored_wikidata_ids
-            AND NOT (linked_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
-        
+        AND NOT (linked_source_concept)-[:SAME_AS*0..2]->(linked_related_source_concept)
+
+        WITH DISTINCT concept, relationship_edge, linked_related_source_concept
+
+        MATCH (linked_related_source_concept)-[:SAME_AS*0..2]->(related_source_concept)
+        WHERE NOT related_source_concept.id IN $ignored_wikidata_ids
+
         /* Get the Wellcome concept(s) associated with each related source concept. */
         MATCH (related_source_concept)<-[:HAS_SOURCE_CONCEPT]-(related_concept)
-        MATCH (work)-[work_edge:HAS_CONCEPT]->(related_concept)
+        MATCH (related_concept)<-[work_edge:HAS_CONCEPT]-(work)
         {label_filter}
-        
-        /*
-        Group the results into buckets, with one bucket for each combination of concept and related source concept.
-        (Note that we do not create groups based on each `related_concept`, as that would cause duplicates in cases
-        where two related concepts have the same source concept.)
-        */
+
         WITH concept,
-             linked_related_source_concept,
-             COUNT(work) AS number_of_works,
-             work_edge.referenced_type AS related_type,
-             collect(DISTINCT related_source_concept) AS related_source_concepts,
-             head(collect(related_concept)) AS selected_related_concept,
-             head(collect(rel)) AS selected_related_edge
-             
-        /* Order the resulting related concepts based on popularity (i.e. the number of works in which they appear). */
-        ORDER BY number_of_works DESC
+            relationship_edge.relationship_type AS relationship_type,
+            linked_related_source_concept,
+            collect(related_concept.id) AS related_ids,
+            COUNT(work) AS work_count
         
-        /* Collect distinct types of each `related` concept */
-        WITH concept,
-             linked_related_source_concept,
-             number_of_works,
-             collect(related_type) AS related_types,
-             related_source_concepts,
-             selected_related_concept,
-             selected_related_edge        
-        
-        /*
-        Group the results again to ensure that only one row is returned for each `concept. Limit the number of results
-        based on the value of the `related_to_limit` parameter.
-        */
-        WITH concept,
-             collect({{
-                 concept_node: selected_related_concept,
-                 source_concept_nodes: related_source_concepts,
-                 edge: selected_related_edge,
-                 concept_types: related_types
-             }})[0..$related_to_limit] AS related
-             
-        /* Return the ID of each concept and a corresponding list of related concepts. */
-        RETURN 
+        WITH concept, relationship_type, head(related_ids) AS related_id, SUM(work_count) AS work_count
+        ORDER BY work_count DESC
+
+        RETURN
             concept.id AS id,
-            related
+            collect({{
+                id: related_id,
+                relationship_type: relationship_type,
+                count: work_count
+            }})[0..$related_to_limit] AS related
     """
 
 
@@ -130,123 +131,74 @@ def get_referenced_together_query(
             Optional list of work concept keys (e.g. 'genre', 'subject') for filtering related concepts
     """
     source_referenced_type_filter = _get_referenced_together_filter(
-        "work_edge_1.referenced_type", source_referenced_types
+        "concept_edge.referenced_type", source_referenced_types
     )
     related_referenced_type_filter = _get_referenced_together_filter(
-        "work_edge_2.referenced_type", related_referenced_types
+        "related_concept_edge.referenced_type", related_referenced_types
     )
     source_referenced_in_filter = _get_referenced_together_filter(
-        "work_edge_1.referenced_in", source_referenced_in
+        "concept_edge.referenced_in", source_referenced_in
     )
     related_referenced_in_filter = _get_referenced_together_filter(
-        "work_edge_2.referenced_in", related_referenced_in
+        "related_concept_edge.referenced_in", related_referenced_in
     )
 
     return f"""
-        /* Get a chunk of `Concept` nodes of size `limit` */
-        MATCH (concept:Concept)
-        WITH concept ORDER BY concept.id 
-        SKIP $start_offset LIMIT $limit
+        UNWIND $ids AS id
+        MATCH (concept:Concept {{`~id`: id}})
     
-        /* 
-        For each `concept`, retrieve all identical ('same as') concepts by traversing its source concepts
-        */
-        OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
-        WHERE NOT source_concept.id IN $ignored_wikidata_ids
-        OPTIONAL MATCH (source_concept)<-[:HAS_SOURCE_CONCEPT]-(same_as_concept)  
-        
-        /* 
-        Deduplicate and coalesce `same_as_concept` with `concept` to handle label-derived concepts not connected to 
-        a source concept.
-        */
-        WITH DISTINCT
-            concept,
-            linked_source_concept,
-            coalesce(same_as_concept, concept) AS same_as_concept
+        CALL {{
+            WITH concept
+            MATCH (concept)<-[concept_edge:HAS_CONCEPT]-(work:Work)
     
-        /*
-        Next, for each `same_as_concept`, get all co-occurring concepts `other` (i.e. find all combinations of `other`
-        and `same_as_concept` for which there is at least one work listing both `other` and `same_as_concept`).
-        */
-        MATCH (same_as_concept)<-[work_edge_1:HAS_CONCEPT]-(w:Work)-[work_edge_2:HAS_CONCEPT]->(other)
-        WHERE same_as_concept.id <> other.id
+            WITH concept, concept_edge, work
+            LIMIT 1000
+            MATCH (work)-[related_concept_edge:HAS_CONCEPT]->(related_concept)
         
-        {source_referenced_type_filter}
-        {related_referenced_type_filter}
-        {source_referenced_in_filter}
-        {related_referenced_in_filter}
+            WHERE id(concept) <> id(related_concept)
+            {source_referenced_type_filter}
+            {related_referenced_type_filter}
+            {source_referenced_in_filter}
+            {related_referenced_in_filter}
+            
+            WITH concept, related_concept, COUNT(work) AS shared_works_count
+            WHERE shared_works_count >= $shared_works_count_threshold
         
-        /*
-        For each `other` concept, count the number of works in which it co-occurs with each `same_as_concept`, 
-        and link the results back to the original `concept` (discarding `same_as_concept` nodes).
-        (Note: We could do this in one step using `COUNT(DISTINCT w)`, but this would incur a significant performance
-        penalty.)
-        */
-        WITH DISTINCT
-            concept,
-            linked_source_concept,
-            other,
-            w.id AS work_id,
-            work_edge_2.referenced_type as other_type
-        WITH
-            concept,
-            linked_source_concept,
-            other,
-            COUNT(work_id) AS number_of_shared_works,
-            other_type
+            WITH concept, related_concept, shared_works_count
+            ORDER BY shared_works_count DESC
+    
+            RETURN collect({{id: related_concept.id, count: shared_works_count}})[0..$related_to_limit] AS related
+        }}
         
-        /*
-        Filter out `other` concepts which do not meet the minimum threshold for the number of shared works.
-        */        
-        WHERE number_of_shared_works >= $number_of_shared_works_threshold
-        AND concept.id <> other.id
-                        
-        /* Match each `other` concept with all of its source concepts. */
-        OPTIONAL MATCH (other)-[:HAS_SOURCE_CONCEPT]->(linked_other_source_concept)-[:SAME_AS*0..2]->(other_source_concept)
-            WHERE NOT other_source_concept.id IN $ignored_wikidata_ids
-            AND NOT (linked_source_concept)-[:SAME_AS*0..2]->(linked_other_source_concept)
-        
-        /*
-        We need to distinguish between cases where `linked_other_source_concept` is null because `other` is
-        a label-derived concept (in which case we should proceed and return it), and cases where it's null because it
-        was filtered out by the WHERE clause above (in which case we should not).
-        */ 
-        WITH *
-        WHERE size((other)-[:HAS_SOURCE_CONCEPT]->()) = 0 OR linked_other_source_concept IS NOT NULL
-        
-        /*
-        Group the results into buckets, with one bucket for each combination of concept and co-occurring source concept.
-        (Note that we do not create groups based on each `other` concept, as that would cause duplicates in cases
-        where two `other` concepts have the same source concept.)
-        */
-        WITH concept,
-             coalesce(linked_other_source_concept, other) AS linked_other_source_concept,
-             head(collect(other)) AS selected_other,
-             other_type,
-             collect(other_source_concept) AS related_source_concepts,
-             number_of_shared_works
-        ORDER BY number_of_shared_works DESC
-        
-        /* Collect distinct types of each `other` concept */
-        WITH concept,
-             linked_other_source_concept,
-             selected_other,
-             collect(other_type) AS other_types,
-             related_source_concepts,
-             number_of_shared_works        
-        
-        /*
-        Group the results again to ensure that only one row is returned for each `concept`. Limit the number of results
-        based on the value of the `related_to_limit` parameter.
-        */
-        WITH concept,
-            collect({{
-                concept_node: selected_other,
-                source_concept_nodes: related_source_concepts,
-                number_of_shared_works: number_of_shared_works,
-                concept_types: other_types 
-            }})[0..$related_to_limit] AS related        
-        RETURN
-            concept.id AS id,
-            related
-        """
+        RETURN concept.id AS id, related
+    """
+
+
+RELATED_TO_QUERY = get_related_query("RELATED_TO")
+FIELDS_OF_WORK_QUERY = get_related_query("HAS_FIELD_OF_WORK")
+NARROWER_THAN_QUERY = get_related_query("NARROWER_THAN")
+BROADER_THAN_QUERY = get_related_query("NARROWER_THAN|HAS_PARENT", "to")
+PEOPLE_QUERY = get_related_query("HAS_FIELD_OF_WORK", "to")
+
+# Retrieve people and orgs which are commonly referenced together as collaborators with a given person/org
+FREQUENT_COLLABORATORS_QUERY = get_referenced_together_query(
+    source_referenced_types=["Person", "Organisation"],
+    related_referenced_types=["Person", "Organisation"],
+    source_referenced_in=["contributors"],
+    related_referenced_in=["contributors"],
+)
+
+# Do not include agents/people/orgs in the list of related topics
+RELATED_TOPICS_QUERY = get_referenced_together_query(
+    related_referenced_types=[
+        "Concept",
+        "Subject",
+        "Place",
+        "Meeting",
+        "Period",
+        "Genre",
+    ],
+    related_referenced_in=["subjects"],
+)
+
+HAS_FOUNDER_QUERY = get_related_query("HAS_FOUNDER")

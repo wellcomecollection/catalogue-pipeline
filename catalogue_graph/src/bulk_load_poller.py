@@ -88,7 +88,7 @@ def handler(
         status == "LOAD_FAILED"
         and parsing_error_count == 0
         and data_type_error_count == 0
-        and (insert_error_count / processed_count < event.insert_error_threshold)
+        and (insert_error_count / processed_count <= event.insert_error_threshold)
     )
 
     if failed_below_insert_error_threshold:

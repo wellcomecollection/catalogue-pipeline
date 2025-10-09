@@ -11,15 +11,9 @@ from typing import Any, TypedDict
 import polars as pl
 from botocore.credentials import Credentials
 
-from ingestor.models.step_events import (
-    IngestorIndexerLambdaEvent,
-    IngestorIndexerObject,
-    IngestorLoaderLambdaEvent,
-    IngestorTriggerLambdaEvent,
-)
 from utils.aws import INSTANCE_ENDPOINT_SECRET_NAME, LOAD_BALANCER_SECRET_NAME
 
-MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
+MOCK_PUBLIC_ENDPOINT = "test-public-host.com"
 MOCK_INSTANCE_ENDPOINT = "test-host.com"
 MOCK_CREDENTIALS = Credentials(
     access_key="test_access_key",
@@ -95,7 +89,7 @@ class MockSecretsManagerClient(MockAwsService):
 
     def get_secret_value(self, SecretId: str) -> dict:
         if SecretId == LOAD_BALANCER_SECRET_NAME:
-            secret_value = MOCK_API_KEY
+            secret_value = MOCK_PUBLIC_ENDPOINT
         elif SecretId == INSTANCE_ENDPOINT_SECRET_NAME:
             secret_value = MOCK_INSTANCE_ENDPOINT
         elif SecretId in self.secrets:
@@ -279,7 +273,6 @@ class MockRequest:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
-
         for response in MockRequest.responses:
             if (
                 response["method"] == method
@@ -362,6 +355,17 @@ class MockElasticsearchClient:
     def close_point_in_time(self, body: dict) -> None:
         pass
 
+    def _get_id_filter_from_query(self, query: dict) -> list[str] | None:
+        ids: list[str] | None = None
+        for item in query.get("bool", {}).get("must", []):
+            if item.get("ids"):
+                ids = item["ids"]["values"]
+
+        if query.get("ids"):
+            ids = query["ids"]["values"]
+
+        return ids
+
     def search(self, body: dict) -> dict:
         self.queries.append(body["query"])
         search_after = body.get("search_after")
@@ -369,10 +373,15 @@ class MockElasticsearchClient:
         all_documents = self.indexed_documents[self.pit_index].values()
         sorted_documents = sorted(all_documents, key=lambda d: d["_id"])
 
+        filtered_ids = self._get_id_filter_from_query(body["query"])
+
         items = []
         for document in sorted_documents:
-            item = dict(document)
-            item["sort"] = item["_id"]
+            item = {**document, "sort": document["_id"]}
+
+            if filtered_ids is not None and document["_id"] not in filtered_ids:
+                continue
+
             if search_after is None or item["sort"] > search_after:
                 items.append(item)
 
@@ -404,41 +413,11 @@ def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     return FixedDateTime
 
 
-def get_mock_ingestor_trigger_event(job_id: str) -> IngestorTriggerLambdaEvent:
-    return IngestorTriggerLambdaEvent(
-        ingestor_type="concepts",
-        pipeline_date="2025-01-01",
-        index_date="2025-03-01",
-        job_id=job_id,
-    )
-
-
-def get_mock_ingestor_loader_event(
-    job_id: str, start_offset: int, end_index: int
-) -> IngestorLoaderLambdaEvent:
-    return IngestorLoaderLambdaEvent(
-        **dict(get_mock_ingestor_trigger_event(job_id)),
-        start_offset=start_offset,
-        end_index=end_index,
-    )
-
-
-def get_mock_ingestor_indexer_event(job_id: str) -> IngestorIndexerLambdaEvent:
-    return IngestorIndexerLambdaEvent(
-        **dict(get_mock_ingestor_trigger_event(job_id)),
-        object_to_index=IngestorIndexerObject(
-            s3_uri=f"s3://test-bucket/test-prefix_concepts/2025-01-01/2025-03-01/{job_id}/00000000-00000001.parquet",
-            content_length=1,
-            record_count=1,
-        ),
-    )
-
-
 def mock_es_secrets(
-    service_name: str, pipeline_date: str, is_local: bool = False
+    service_name: str, pipeline_date: str, is_public: bool = False
 ) -> None:
     """Mock AWS Secrets Manager secrets to simulate connecting to the production cluster."""
-    host = "public" if is_local else "private"
+    host = "public" if is_public else "private"
     prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/{host}_host", "test")
     MockSecretsManagerClient.add_mock_secret(f"{prefix}/port", 80)

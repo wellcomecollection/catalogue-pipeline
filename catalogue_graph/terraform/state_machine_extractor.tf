@@ -11,6 +11,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.sync"
         Output   = "{% $states.input %}"
+        Retry    = local.DefaultRetry,
         Next     = "Success"
         Arguments = {
           Cluster        = aws_ecs_cluster.cluster.arn
@@ -29,17 +30,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
           Overrides = {
             ContainerOverrides = [
               {
-                Name = "catalogue-graph_extractor"
-                Command = [
-                  "--transformer-type",
-                  "{% $states.input.transformer_type %}",
-                  "--entity-type",
-                  "{% $states.input.entity_type %}",
-                  "--stream-destination",
-                  "{% $states.input.stream_destination %}",
-                  "--pipeline-date",
-                  local.pipeline_date,
-                ]
+                Name    = "catalogue-graph_extractor"
+                Command = ["--event", "{% $string($states.input) %}"]
               }
             ]
           }

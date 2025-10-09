@@ -46,12 +46,12 @@ def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
     )
 
 
-def get_neptune_client(is_local: bool) -> BaseNeptuneClient:
+def get_neptune_client(use_public_endpoint: bool) -> BaseNeptuneClient:
     """
-    Returns an instance of LambdaNeptuneClient or LocalNeptuneClient (if `is_local` is True). LocalNeptuneClient
-    should only be used when connecting to the cluster from outside the VPC.
+    Returns an instance of LambdaNeptuneClient or LocalNeptuneClient (if `use_public_endpoint` is True).
+    LocalNeptuneClient should only be used when connecting to the cluster from outside the VPC.
     """
-    if is_local:
+    if use_public_endpoint:
         return LocalNeptuneClient(
             get_secret(LOAD_BALANCER_SECRET_NAME),
             get_secret(INSTANCE_ENDPOINT_SECRET_NAME),
@@ -61,6 +61,7 @@ def get_neptune_client(is_local: bool) -> BaseNeptuneClient:
 
 
 def get_csv_from_s3(s3_uri: str) -> Generator[Any]:
+    print(f"Downloading '{s3_uri}'...")
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
         csv_reader = csv.DictReader(f)
@@ -93,6 +94,13 @@ def df_to_s3_parquet(df: pl.DataFrame, s3_file_uri: str) -> None:
     transport_params = {"client": boto3.client("s3")}
     with smart_open.open(s3_file_uri, "wb", transport_params=transport_params) as f:
         df.write_parquet(f)
+
+
+def dicts_from_s3_jsonl(s3_uri: str) -> list[dict]:
+    """Read a JSONL file from S3 and return its contents as a list of dictionaries"""
+    transport_params = {"client": boto3.client("s3")}
+    with smart_open.open(s3_uri, "r", transport_params=transport_params) as f:
+        return [json.loads(line) for line in f.read().splitlines() if line.strip()]
 
 
 def pydantic_to_s3_json(model: BaseModel, s3_uri: str) -> None:

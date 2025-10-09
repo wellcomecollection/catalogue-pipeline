@@ -66,14 +66,12 @@ jobs:
             catalogue-graph-bulk-load-poller,
             catalogue-graph-indexer,
             catalogue-graph-remover,
-            catalogue-graph-ingestor-trigger,
-            catalogue-graph-ingestor-trigger-monitor,
             catalogue-graph-ingestor-loader,
             catalogue-graph-ingestor-loader-monitor,
             catalogue-graph-ingestor-indexer,
             catalogue-graph-ingestor-indexer-monitor,
             catalogue-graph-ingestor-deletions,
-            catalogue-graph-ingestor-reporter,
+            catalogue-graph-es-pit-opener,
           ]
     steps:
       - uses: actions/checkout@v3

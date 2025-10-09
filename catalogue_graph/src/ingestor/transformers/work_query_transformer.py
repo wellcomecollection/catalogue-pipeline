@@ -1,5 +1,6 @@
 from collections.abc import Generator
 
+import dateutil.parser
 from dateutil import parser
 
 from ingestor.extractors.works_extractor import ExtractedWork
@@ -127,8 +128,15 @@ class QueryWorkTransformer:
                     if date.range.from_time == NEGATIVE_INFINITY_DATE:
                         yield NEGATIVE_INFINITY_UNIX_TIMESTAMP
                     else:
-                        # Number of milliseconds since the Unix epoch
-                        yield int(parser.parse(date.range.from_time).timestamp() * 1000)
+                        try:
+                            # Number of milliseconds since the Unix epoch
+                            yield int(
+                                parser.parse(date.range.from_time).timestamp() * 1000
+                            )
+                        except dateutil.parser.ParserError:
+                            print(
+                                f"Could not parse a production date of work {self.state.canonical_id}"
+                            )
 
     @property
     def genre_ids(self) -> Generator[str]:

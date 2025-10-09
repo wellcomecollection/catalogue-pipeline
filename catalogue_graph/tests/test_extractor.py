@@ -24,7 +24,7 @@ from config import (
 )
 from extractor import lambda_handler
 from models.events import EntityType, StreamDestination
-from transformers.create_transformer import TransformerType
+from utils.types import TransformerType
 
 transformer_types = get_args(TransformerType)
 entity_types = get_args(EntityType)
@@ -214,8 +214,6 @@ def test_incremental_mode() -> None:
     expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/windows/20250505T1515-20250505T1530/catalogue_works__nodes.csv"
     assert len(MockSmartOpen.file_lookup) == 1
     assert expected_s3_uri in MockSmartOpen.file_lookup
-
-    print(MockElasticsearchClient.queries)
 
     # We expect two ES queries. The second returns no results, after which the loop inside `search_with_pit` stops.
     assert len(MockElasticsearchClient.queries) == 2
