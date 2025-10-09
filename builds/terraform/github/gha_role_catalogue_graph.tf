@@ -51,7 +51,7 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "lambda:UpdateFunctionCode"
     ]
     resources = [
-      "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-graph-*",
+      "arn:aws:lambda:eu-west-1:760097843905:function:catalogue-*",
     ]
   }
 }
