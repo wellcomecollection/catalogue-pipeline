@@ -30,6 +30,41 @@ def test_empty_production_is_no_production(marc_record: Record) -> None:
     assert transform_record(marc_record).production == []
 
 
+def test_no_production(marc_record: Record) -> None:
+    assert transform_record(marc_record).production == []
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="008",
+                    data="800121d19791995acafr p o o   0    0engrc",
+                ),
+                Field(
+                    tag="260",
+                    subfields=[],
+                ),
+                Field(
+                    tag="264",
+                    subfields=[],
+                )
+            ]
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_fall_back_to_008(marc_record: Record) -> None:
+    production = lone_element(transform_record(marc_record).production)
+    assert lone_element(production.places).label == "Australian Capital Territory"
+    period = lone_element(production.dates)
+    assert period.range.label == "1979-1995"
+    assert period.range.from_time == "1979-01-01T00:00:00"
+    assert period.range.to_time == "1995-12-31T23:59:59.999999"
+
+
 @pytest.mark.parametrize(
     "marc_record",
     [
@@ -58,8 +93,8 @@ def test_production_from_abc(marc_record: Record) -> None:
     assert lone_element(production.agents).label == "Mankind"
     period = lone_element(production.dates)
     assert period.range.label == "1998"
-    assert period.range.from_time == ""
-    assert period.range.to_time == ""
+    assert period.range.from_time == "1998-01-01T00:00:00"
+    assert period.range.to_time == "1998-12-31T23:59:59.999999"
 
 
 @pytest.mark.parametrize(
@@ -89,8 +124,8 @@ def test_production_from_abc(marc_record: Record) -> None:
 def test_production_multiple_subfields(marc_record: Record) -> None:
     production = lone_element(transform_record(marc_record).production)
     assert (
-        production.label
-        == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
+            production.label
+            == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
     )
     assert production.places[0].label == "Announcer's Table"
     assert production.places[1].label == "Hell in a Cell"
@@ -179,11 +214,11 @@ def test_manufacture_fields(marc_record: Record) -> None:
             id=f"260: {ind2}->{fn}",
         )
         for (ind2, fn) in [
-            ("0", "Production"),
-            ("1", "Publication"),
-            ("2", "Distribution"),
-            ("3", "Manufacture"),
-        ]
+        ("0", "Production"),
+        ("1", "Publication"),
+        ("2", "Distribution"),
+        ("3", "Manufacture"),
+    ]
     ],
     indirect=["marc_record"],
 )

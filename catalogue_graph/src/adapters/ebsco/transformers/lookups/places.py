@@ -7,7 +7,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 @cache
 def _load_places() -> dict[str, str]:
-    with open(os.path.join(HERE, "places.json"), 'r') as json_file:
+    with open(os.path.join(HERE, "places.json")) as json_file:
         return json.load(json_file)
 
 

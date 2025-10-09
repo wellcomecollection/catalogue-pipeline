@@ -1,13 +1,14 @@
 import re
 from datetime import datetime
-from models.work import DateTimeRange, Period
+
+from adapters.ebsco.models.work import DateTimeRange, Period
 
 # Explicitly discard SGML escape sequences and doubly-escaped sequences.
 # This prevents the RE_KEEP sequence misinterpreting &#40; (lparen)
 # or &amp;#41; (rparen) as the numbers 40 and 41 respectively.
-RE_DISCARD = re.compile(r'(&(amp;)?.+?;)')
+RE_DISCARD = re.compile(r"(&(amp;)?.+?;)")
 
-RE_KEEP = re.compile(r'\d{2,4}|-')
+RE_KEEP = re.compile(r"\d{2,4}|-")
 
 
 def parse_period(period: str) -> Period:
@@ -17,7 +18,7 @@ def parse_period(period: str) -> Period:
     >>> parse_period("1988-1990")
     Period(id=None, label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00', to_time='1990-01-01T23:59:59.999999', label='1988-1990'))
     """
-    return Period(label=period, range=to_range(period), type='Period')
+    return Period(label=period, range=to_range(period), type="Period")
 
 
 def to_range(period: str) -> DateTimeRange:
@@ -39,7 +40,9 @@ def to_range(period: str) -> DateTimeRange:
     '1986'
     """
     from_part, to_part = crack(preprocess(period))
-    return DateTimeRange.model_validate({"label": period, "from": start_of_year(from_part), "to": end_of_year(to_part)})
+    return DateTimeRange.model_validate(
+        {"label": period, "from": start_of_year(from_part), "to": end_of_year(to_part)}
+    )
 
 
 def preprocess(period: str):
@@ -90,7 +93,7 @@ def preprocess(period: str):
     >>> preprocess("1961-72 [v. 3, c1973]")
     '1961 - 72 1973'
     """
-    return " ".join(RE_KEEP.findall(RE_DISCARD.sub('', period)))
+    return " ".join(RE_KEEP.findall(RE_DISCARD.sub("", period)))
 
 
 def crack(range_string) -> tuple[str, str]:
@@ -135,14 +138,13 @@ def crack(range_string) -> tuple[str, str]:
     ('1961', '1973')
     """
     # if it's hyphenated - partition will put the parts in the right place.
-    (from_part, sep, to_part) = range_string.partition('-')
+    (from_part, sep, to_part) = range_string.partition("-")
     from_part = from_part.strip()
     to_part = to_part.strip()
     if from_part and sep and to_part:
-        to_part = max([
-            fill_year_prefix(from_part, to_year)
-            for to_year in to_part.split(' ')
-        ])
+        to_part = max(
+            [fill_year_prefix(from_part, to_year) for to_year in to_part.split(" ")]
+        )
         # Fill in any implied missing numbers in the to part.
 
     if not sep:
@@ -189,8 +191,10 @@ def fill_year_prefix(from_year, to_year):
 
 
 def start_of_year(year: str) -> str:
-    return (datetime(int(year), 1, 1) if year else datetime.datetime.min).isoformat()
+    return (datetime(int(year), 1, 1) if year else datetime.min).isoformat()
 
 
 def end_of_year(year: str) -> str:
-    return (datetime(int(year), 1, 1, 23, 59, 59, 1000000 - 1) if year else datetime.datetime.max).isoformat()
+    return (
+        datetime(int(year), 12, 31, 23, 59, 59, 1000000 - 1) if year else datetime.max
+    ).isoformat()

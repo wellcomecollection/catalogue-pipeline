@@ -3,20 +3,8 @@ Functions for extracting data from the 008 control field
 https://www.loc.gov/marc/bibliographic/bd008a.html
 """
 
-<<<<<<< HEAD:ebsco_adapter/ebsco_adapter_iceberg/src/transformers/parsers/field008.py
-from transformers.parsers.positional_field import PositionalField
-from transformers.lookups import places
-=======
-# TODO: The date/place stuff in here is not plumbed in, I want to investigate whether
-#    it is needed at all for MARC data before I carry on.
-#    It is needed if there exists one of:
-#       * A record with no 260/264
-#       * A record whose first 260/264 lacks a date
-#   I'm also a little uncertain as to whether the logic in the Scala
-#   correct.
-
+from adapters.ebsco.transformers.lookups import places
 from adapters.ebsco.transformers.parsers.positional_field import PositionalField
->>>>>>> main:catalogue_graph/src/adapters/ebsco/transformers/parsers/field008.py
 
 
 class RawField008(PositionalField):
@@ -139,20 +127,20 @@ class Field008:
         '1910-1959'
         """
         date_type = self.raw_field.date_type
-        if date_type in 'n|':
+        if date_type in "n|":
             # Unknown or no attempt to code
             return None
         date_1 = self.raw_field.date_1
-        if date_type in 'cu':
+        if date_type in "cu":
             # u=status unknown, so date_2 should be uuuu, but we don't care.
             # c=continuing, so date_2 should be 9999, but we don't care.
             return f"{date_1.replace('u', '0')}-"
 
-        if date_type in 'srt':
+        if date_type in "srt":
             # s = single date,
             # rt = reprint/pub+copyright - both scenarios we are only interested in date 1
             # a single date
-            if 'u' in date_1:
+            if "u" in date_1:
                 return f"{date_1.replace('u', '0')}-{date_1.replace('u', '9')}"
             return date_1
 

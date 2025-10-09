@@ -8,40 +8,44 @@ from collections.abc import Iterable
 
 from pymarc.field import Field
 from pymarc.record import Record
-<<<<<<< HEAD:ebsco_adapter/ebsco_adapter_iceberg/src/transformers/production.py
-from parsers.field008 import Field008
-from parsers.period import parse_period
-from models.work import DateTimeRange, Period, ProductionEvent, SourceConcept
-=======
 
 from adapters.ebsco.models.work import (
-    DateTimeRange,
-    Period,
     ProductionEvent,
     SourceConcept,
 )
->>>>>>> main:catalogue_graph/src/adapters/ebsco/transformers/production.py
+from adapters.ebsco.transformers.parsers.field008 import Field008
+from adapters.ebsco.transformers.parsers.period import parse_period
 
 
 def extract_production(record: Record) -> list[ProductionEvent]:
-    production008 = extract_production_from_008
+    production008 = extract_production_from_008(record)
     if productions := extract_production_from_fields(record.get_fields("260")):
-        return productions
-    return extract_production_from_fields(record.get_fields("264"))
+        pass
+    elif productions := extract_production_from_fields(record.get_fields("264")):
+        pass
+    elif production008 is not None:
+        productions = [production008]
+    else:
+        productions = []
+
+    return productions
 
 
 def extract_production_from_008(record: Record) -> ProductionEvent | None:
-    field008 = Field008(record.get_fields("008"))
+    field = record.get("008")
+    if not (field and field.data):
+        return None
+    field008 = Field008(field.data)
     date_range_str = field008.maximal_date_range
     place_str = field008.place_of_production
     period = parse_period(date_range_str)
     if period:
         return ProductionEvent(
             label=date_range_str,
+            places=[SourceConcept(label=place_str, type="Place")],
             agents=[],
             dates=[period],
-            places=[SourceConcept(label=place_str, type="Place")],
-            function=None
+            funtion=None
         )
     return None
 
