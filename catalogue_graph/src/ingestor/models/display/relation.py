@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import WorkAncestor
+from ingestor.models.merged.work import WorkAncestor
 from ingestor.models.neptune.node import WorkNode
 
 

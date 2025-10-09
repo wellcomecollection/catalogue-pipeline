@@ -39,12 +39,12 @@ class WorkRelations(BaseModel):
 
     @field_validator("ancestors", mode="before")
     @classmethod
-    def convert_denormalised_type(cls, raw_ancestors: list[dict]) -> list[dict]:
+    def convert_merged_type(cls, raw_ancestors: list[dict]) -> list[dict]:
         # TODO: This is a temporary 'Series' filter which won't be needed once we remove the relation embedder service
         return [a for a in raw_ancestors if a["numChildren"] == 0]
 
 
-class DenormalisedWorkData(ElasticsearchModel):
+class MergedWorkData(ElasticsearchModel):
     title: str | None = None
     other_identifiers: list[SourceIdentifier]
     alternative_titles: list[str]
@@ -80,7 +80,7 @@ class DenormalisedWorkData(ElasticsearchModel):
         return self.work_type
 
 
-class DenormalisedWorkState(ElasticsearchModel):
+class MergedWorkState(ElasticsearchModel):
     source_identifier: SourceIdentifier
     canonical_id: str
     merged_time: datetime
@@ -90,37 +90,37 @@ class DenormalisedWorkState(ElasticsearchModel):
     relations: WorkRelations
 
 
-class DenormalisedWork(ElasticsearchModel):
-    state: DenormalisedWorkState
+class MergedWork(ElasticsearchModel):
+    state: MergedWorkState
     version: int
     type: WorkStatus
 
     @staticmethod
-    def from_raw_document(work: dict) -> "DenormalisedWork":
+    def from_raw_document(work: dict) -> "MergedWork":
         if work["type"] == "Visible":
-            return VisibleDenormalisedWork(**work)
+            return VisibleMergedWork(**work)
         if work["type"] == "Invisible":
-            return InvisibleDenormalisedWork(**work)
+            return InvisibleMergedWork(**work)
         if work["type"] == "Redirected":
-            return RedirectedDenormalisedWork(**work)
+            return RedirectedMergedWork(**work)
         if work["type"] == "Deleted":
-            return DeletedDenormalisedWork(**work)
+            return DeletedMergedWork(**work)
 
         raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
 
 
-class VisibleDenormalisedWork(DenormalisedWork):
-    data: DenormalisedWorkData
+class VisibleMergedWork(MergedWork):
+    data: MergedWorkData
     redirect_sources: list[Identifiers]
 
 
-class InvisibleDenormalisedWork(DenormalisedWork):
+class InvisibleMergedWork(MergedWork):
     invisibility_reasons: list[InvisibleReason]
 
 
-class DeletedDenormalisedWork(DenormalisedWork):
+class DeletedMergedWork(MergedWork):
     deleted_reason: DeletedReason
 
 
-class RedirectedDenormalisedWork(DenormalisedWork):
+class RedirectedMergedWork(MergedWork):
     redirect_target: Identifiers

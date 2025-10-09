@@ -7,10 +7,10 @@ from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_inde
 
 
 def handler(event: BasePipelineEvent, es_mode: ElasticsearchMode = "private") -> dict:
-    """Create a point in time (PIT) on the denormalised index and return its PIT ID."""
+    """Create a point in time (PIT) on the merged index and return its PIT ID."""
     es_client = get_client("graph_extractor", event.pipeline_date, es_mode)
     index_name = get_standard_index_name(
-        config.ES_DENORMALISED_INDEX_NAME, event.pipeline_date
+        config.ES_MERGED_INDEX_NAME, event.pipeline_date
     )
     pit = es_client.open_point_in_time(index=index_name, keep_alive="15m")
 

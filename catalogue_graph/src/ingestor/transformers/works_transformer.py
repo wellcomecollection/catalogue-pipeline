@@ -3,17 +3,17 @@ from ingestor.extractors.works_extractor import (
     GraphWorksExtractor,
     VisibleExtractedWork,
 )
-from ingestor.models.denormalised.work import (
-    DeletedDenormalisedWork,
-    InvisibleDenormalisedWork,
-    RedirectedDenormalisedWork,
-)
 from ingestor.models.indexable_work import (
     DeletedIndexableWork,
     IndexableWork,
     InvisibleIndexableWork,
     RedirectedIndexableWork,
     VisibleIndexableWork,
+)
+from ingestor.models.merged.work import (
+    DeletedMergedWork,
+    InvisibleMergedWork,
+    RedirectedMergedWork,
 )
 from models.events import BasePipelineEvent
 from utils.elasticsearch import ElasticsearchMode
@@ -33,12 +33,12 @@ class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
         work = extracted.work
         if isinstance(extracted, VisibleExtractedWork):
             return VisibleIndexableWork.from_extracted_work(extracted)
-        if isinstance(work, RedirectedDenormalisedWork):
-            return RedirectedIndexableWork.from_denormalised_work(work)
-        if isinstance(work, DeletedDenormalisedWork):
-            return DeletedIndexableWork.from_denormalised_work(work)
-        if isinstance(work, InvisibleDenormalisedWork):
-            return InvisibleIndexableWork.from_denormalised_work(work)
+        if isinstance(work, RedirectedMergedWork):
+            return RedirectedIndexableWork.from_merged_work(work)
+        if isinstance(work, DeletedMergedWork):
+            return DeletedIndexableWork.from_merged_work(work)
+        if isinstance(work, InvisibleMergedWork):
+            return InvisibleIndexableWork.from_merged_work(work)
 
         raise TypeError(
             f"Unknown work type '{type(extracted.work)}' for work {extracted.work}"

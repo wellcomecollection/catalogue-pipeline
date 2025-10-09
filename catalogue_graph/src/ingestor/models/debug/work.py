@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from ingestor.models.denormalised.work import (
-    DeletedDenormalisedWork,
-    DenormalisedWork,
-    InvisibleDenormalisedWork,
-    RedirectedDenormalisedWork,
-    VisibleDenormalisedWork,
+from ingestor.models.merged.work import (
+    DeletedMergedWork,
+    InvisibleMergedWork,
+    MergedWork,
+    RedirectedMergedWork,
+    VisibleMergedWork,
 )
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.identifier import Identifiers, SourceIdentifier
@@ -28,7 +28,7 @@ class WorkDebug(ElasticsearchModel):
     merge_candidates: list[MergeCandidate]
 
     @classmethod
-    def _from_denormalised_work(cls, work: DenormalisedWork) -> "WorkDebug":
+    def _from_merged_work(cls, work: MergedWork) -> "WorkDebug":
         return WorkDebug(
             source=SourceWorkDebugInformation(
                 id=work.state.canonical_id,
@@ -46,10 +46,8 @@ class VisibleWorkDebug(WorkDebug):
     redirect_sources: list[Identifiers]
 
     @classmethod
-    def from_denormalised_work(
-        cls, work: VisibleDenormalisedWork
-    ) -> "VisibleWorkDebug":
-        debug = WorkDebug._from_denormalised_work(work).model_dump()
+    def from_merged_work(cls, work: VisibleMergedWork) -> "VisibleWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
         return VisibleWorkDebug(**debug, redirect_sources=work.redirect_sources)
 
 
@@ -57,10 +55,8 @@ class InvisibleWorkDebug(WorkDebug):
     invisibility_reasons: list[InvisibleReason]
 
     @classmethod
-    def from_denormalised_work(
-        cls, work: InvisibleDenormalisedWork
-    ) -> "InvisibleWorkDebug":
-        debug = WorkDebug._from_denormalised_work(work).model_dump()
+    def from_merged_work(cls, work: InvisibleMergedWork) -> "InvisibleWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
         return InvisibleWorkDebug(
             **debug, invisibility_reasons=work.invisibility_reasons
         )
@@ -68,10 +64,8 @@ class InvisibleWorkDebug(WorkDebug):
 
 class RedirectedWorkDebug(WorkDebug):
     @classmethod
-    def from_denormalised_work(
-        cls, work: RedirectedDenormalisedWork
-    ) -> "RedirectedWorkDebug":
-        debug = WorkDebug._from_denormalised_work(work).model_dump()
+    def from_merged_work(cls, work: RedirectedMergedWork) -> "RedirectedWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
         return RedirectedWorkDebug(**debug)
 
 
@@ -79,8 +73,6 @@ class DeletedWorkDebug(WorkDebug):
     deleted_reason: DeletedReason
 
     @classmethod
-    def from_denormalised_work(
-        cls, work: DeletedDenormalisedWork
-    ) -> "DeletedWorkDebug":
-        debug = WorkDebug._from_denormalised_work(work).model_dump()
+    def from_merged_work(cls, work: DeletedMergedWork) -> "DeletedWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
         return DeletedWorkDebug(**debug, deleted_reason=work.deleted_reason)

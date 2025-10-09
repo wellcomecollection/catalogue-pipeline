@@ -68,8 +68,8 @@ MOCK_INDEXER_EVENT = IngestorIndexerLambdaEvent(
 )
 
 
-def mock_denormalised_work() -> None:
-    """Include a single work containing a single concept in the denormalised index"""
+def mock_merged_work() -> None:
+    """Include a single work containing a single concept in the merged index"""
     fixture = {
         "data": {
             "contributors": [
@@ -296,7 +296,7 @@ def _compare_events(
 
 
 def test_ingestor_loader_no_related_concepts() -> None:
-    mock_denormalised_work()
+    mock_merged_work()
     mock_neptune_responses([])
 
     result = handler(MOCK_LOADER_EVENT)
@@ -312,7 +312,7 @@ def test_ingestor_loader_no_related_concepts() -> None:
 
 
 def test_ingestor_loader_with_broader_than_concepts() -> None:
-    mock_denormalised_work()
+    mock_merged_work()
     mock_neptune_responses(["broader_than"])
 
     result = handler(MOCK_LOADER_EVENT)
@@ -328,7 +328,7 @@ def test_ingestor_loader_with_broader_than_concepts() -> None:
 
 
 def test_ingestor_loader_with_related_to_concepts() -> None:
-    mock_denormalised_work()
+    mock_merged_work()
     mock_neptune_responses(["related_to", "people"])
 
     result = handler(MOCK_LOADER_EVENT)
@@ -349,7 +349,7 @@ def test_ingestor_loader_no_concepts_to_process() -> None:
 
 
 def test_ingestor_loader_bad_neptune_response() -> None:
-    mock_denormalised_work()
+    mock_merged_work()
 
     _add_neptune_mock_response(
         [MOCK_CONCEPT_ID], SAME_AS_CONCEPT_QUERY, [{"foo": "bar"}]

@@ -24,7 +24,7 @@ def get_mock_indexer_event(record_type: IngestorType) -> IngestorIndexerLambdaEv
         job_id="123",
         objects_to_index=[
             IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl",
+                s3_uri="s3://test-catalogue-graph/catalogue/merged_works_example.jsonl",
                 content_length=10,
                 record_count=10,
             )
@@ -100,7 +100,7 @@ def test_ingestor_indexer_failure_invalid_parquet(record_type: IngestorType) -> 
     event = get_mock_indexer_event(record_type)
     MockSmartOpen.mock_s3_file(
         event.objects_to_index[0].s3_uri,
-        load_fixture("catalogue/denormalised_works_example.jsonl"),
+        load_fixture("catalogue/merged_works_example.jsonl"),
     )
 
     with pytest.raises(expected_exception=polars.exceptions.ComputeError):

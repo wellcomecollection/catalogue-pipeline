@@ -59,7 +59,7 @@ class MergedWorksSource(BaseSource):
         self.fields = fields
         self.query = query
         self.index_name = get_standard_index_name(
-            config.ES_DENORMALISED_INDEX_NAME, event.pipeline_date
+            config.ES_MERGED_INDEX_NAME, event.pipeline_date
         )
 
         # Use the provided point in time (PIT) ID, or create a new one

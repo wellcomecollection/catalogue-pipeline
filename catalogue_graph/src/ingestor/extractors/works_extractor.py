@@ -3,9 +3,9 @@ from itertools import batched
 
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import (
-    DenormalisedWork,
-    VisibleDenormalisedWork,
+from ingestor.models.merged.work import (
+    MergedWork,
+    VisibleMergedWork,
 )
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from models.events import BasePipelineEvent
@@ -30,11 +30,11 @@ def get_related_works_query(related_ids: list[str]) -> dict:
 
 
 class ExtractedWork(BaseModel):
-    work: DenormalisedWork
+    work: MergedWork
 
 
 class VisibleExtractedWork(ExtractedWork):
-    work: VisibleDenormalisedWork
+    work: VisibleMergedWork
     hierarchy: WorkHierarchy
     concepts: list[WorkConcept]
 
@@ -81,14 +81,14 @@ class GraphWorksExtractor(GraphBaseExtractor):
         return self.make_neptune_query("work_concepts", ids)
 
     def process_es_works(
-        self, es_works: Iterator[DenormalisedWork]
+        self, es_works: Iterator[MergedWork]
     ) -> Generator[ExtractedWork]:
         for es_batch in batched(es_works, WORKS_BATCH_SIZE, strict=False):
             # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
             visible_work_ids = [
                 w.state.canonical_id
                 for w in es_batch
-                if isinstance(w, VisibleDenormalisedWork)
+                if isinstance(w, VisibleMergedWork)
             ]
             all_ancestors = self._get_work_ancestors(visible_work_ids)
             all_children = self._get_work_children(visible_work_ids)
@@ -116,7 +116,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
                 )
 
                 # Only visible works story hierarchy and concepts
-                if isinstance(es_work, VisibleDenormalisedWork):
+                if isinstance(es_work, VisibleMergedWork):
                     yield VisibleExtractedWork(
                         work=es_work, hierarchy=hierarchy, concepts=concepts
                     )
@@ -125,7 +125,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
     def extract_raw(self) -> Generator[ExtractedWork]:
         works_stream = (
-            DenormalisedWork.from_raw_document(w) for w in self.es_source.stream_raw()
+            MergedWork.from_raw_document(w) for w in self.es_source.stream_raw()
         )
         yield from self.process_es_works(works_stream)
 
@@ -135,7 +135,6 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
         related_works_source = self.get_related_works_source(list(related_ids))
         related_works_stream = (
-            DenormalisedWork.from_raw_document(w)
-            for w in related_works_source.stream_raw()
+            MergedWork.from_raw_document(w) for w in related_works_source.stream_raw()
         )
         yield from self.process_es_works(related_works_stream)

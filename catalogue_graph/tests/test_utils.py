@@ -59,9 +59,9 @@ def add_mock_transformer_outputs_for_ontologies(
     return add_mock_transformer_outputs(transformers, pipeline_date)
 
 
-def add_mock_denormalised_documents(pipeline_date: str = "dev") -> None:
+def add_mock_merged_documents(pipeline_date: str = "dev") -> None:
     index_name = f"works-denormalised-{pipeline_date}"
-    fixture = load_jsonl_fixture("catalogue/denormalised_works_example.jsonl")
+    fixture = load_jsonl_fixture("catalogue/merged_works_example.jsonl")
     for json_item in fixture:
         MockElasticsearchClient.index(
             index_name, json_item["state"]["canonicalId"], json_item

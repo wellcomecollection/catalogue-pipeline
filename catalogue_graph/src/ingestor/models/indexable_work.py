@@ -7,14 +7,14 @@ from ingestor.models.debug.work import (
     VisibleWorkDebug,
     WorkDebug,
 )
-from ingestor.models.denormalised.work import (
-    DeletedDenormalisedWork,
-    InvisibleDenormalisedWork,
-    RedirectedDenormalisedWork,
-)
 from ingestor.models.display.work import DisplayWork
 from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable import IndexableRecord
+from ingestor.models.merged.work import (
+    DeletedMergedWork,
+    InvisibleMergedWork,
+    RedirectedMergedWork,
+)
 from ingestor.models.query.work import QueryWork
 from ingestor.models.shared.identifier import Identifiers
 from utils.types import WorkStatus
@@ -58,7 +58,7 @@ class VisibleIndexableWork(IndexableWork):
             display=DisplayWork.from_extracted_work(extracted),
             aggregatable_values=WorkAggregatableValues.from_extracted_work(extracted),
             filterable_values=WorkFilterableValues.from_extracted_work(extracted),
-            debug=VisibleWorkDebug.from_denormalised_work(extracted.work),
+            debug=VisibleWorkDebug.from_merged_work(extracted.work),
         )
 
 
@@ -67,12 +67,8 @@ class InvisibleIndexableWork(IndexableWork):
     type: WorkStatus = "Invisible"
 
     @classmethod
-    def from_denormalised_work(
-        cls, work: InvisibleDenormalisedWork
-    ) -> "InvisibleIndexableWork":
-        return InvisibleIndexableWork(
-            debug=InvisibleWorkDebug.from_denormalised_work(work)
-        )
+    def from_merged_work(cls, work: InvisibleMergedWork) -> "InvisibleIndexableWork":
+        return InvisibleIndexableWork(debug=InvisibleWorkDebug.from_merged_work(work))
 
 
 class RedirectedIndexableWork(IndexableWork):
@@ -81,11 +77,9 @@ class RedirectedIndexableWork(IndexableWork):
     type: WorkStatus = "Redirected"
 
     @classmethod
-    def from_denormalised_work(
-        cls, work: RedirectedDenormalisedWork
-    ) -> "RedirectedIndexableWork":
+    def from_merged_work(cls, work: RedirectedMergedWork) -> "RedirectedIndexableWork":
         return RedirectedIndexableWork(
-            debug=RedirectedWorkDebug.from_denormalised_work(work),
+            debug=RedirectedWorkDebug.from_merged_work(work),
             redirect_target=work.redirect_target,
         )
 
@@ -95,7 +89,5 @@ class DeletedIndexableWork(IndexableWork):
     type: WorkStatus = "Deleted"
 
     @classmethod
-    def from_denormalised_work(
-        cls, work: DeletedDenormalisedWork
-    ) -> "DeletedIndexableWork":
-        return DeletedIndexableWork(debug=DeletedWorkDebug.from_denormalised_work(work))
+    def from_merged_work(cls, work: DeletedMergedWork) -> "DeletedIndexableWork":
+        return DeletedIndexableWork(debug=DeletedWorkDebug.from_merged_work(work))
