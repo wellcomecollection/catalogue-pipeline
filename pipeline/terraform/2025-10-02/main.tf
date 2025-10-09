@@ -34,7 +34,7 @@ module "pipeline" {
     "2025-10-09" = {
       works    = {}
       images   = {}
-      concepts = {indexed = "concepts_indexed.2025-06-17"}
+      concepts = { indexed = "concepts_indexed.2025-06-17" }
     }
   }
 

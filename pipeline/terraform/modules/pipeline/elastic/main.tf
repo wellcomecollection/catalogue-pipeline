@@ -191,7 +191,7 @@ locals {
       write = [for idx in local.concepts_indexed_list : idx.name]
     }
     works_ingestor = {
-      read  = [for idx in local.works_denormalised_list : idx.name]
+      read = [for idx in local.works_denormalised_list : idx.name]
       # For now only allow writing to a non-production index for safety
       write = ["works-indexed-2025-10-09"]
     }
