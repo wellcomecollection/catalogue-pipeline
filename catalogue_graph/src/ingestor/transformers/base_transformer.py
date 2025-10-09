@@ -58,7 +58,7 @@ class ElasticsearchBaseTransformer:
                 yield pydantic_document
 
     def stream_batches(self) -> Generator[tuple]:
-        yield from batched(self.stream_es_documents(), S3_BATCH_SIZE, strict=False)
+        yield from batched(self.stream_es_documents(), S3_BATCH_SIZE)
 
     def _load_to_parquet(
         self, es_documents: list[BaseModel], ingestor_type: IngestorType, file: IO

@@ -55,7 +55,6 @@ module "merger_lambda" {
   secret_env_vars = merge(
     module.elastic.pipeline_storage_es_service_secrets["merger"], // old config, to be removed
     {
-
       es_upstream_host     = module.elastic.pipeline_storage_private_host
       es_upstream_port     = module.elastic.pipeline_storage_port
       es_upstream_protocol = module.elastic.pipeline_storage_protocol

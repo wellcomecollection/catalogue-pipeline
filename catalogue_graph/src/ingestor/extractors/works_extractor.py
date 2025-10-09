@@ -83,7 +83,7 @@ class GraphWorksExtractor(GraphBaseExtractor):
     def process_es_works(
         self, es_works: Iterator[MergedWork]
     ) -> Generator[ExtractedWork]:
-        for es_batch in batched(es_works, WORKS_BATCH_SIZE, strict=False):
+        for es_batch in batched(es_works, WORKS_BATCH_SIZE):
             # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
             visible_work_ids = [
                 w.state.canonical_id

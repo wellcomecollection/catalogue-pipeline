@@ -20,7 +20,7 @@ def process_stream_in_parallel(
     Items are consumed from `stream` in chunks of size `chunk_size`. The `process` function is applied to each chunk in
     a separate thread. The number of parallel threads is kept under `thread_count`.
     """
-    chunks = batched(stream, chunk_size, strict=False)
+    chunks = batched(stream, chunk_size)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         # Run the first `thread_count` threads in parallel
