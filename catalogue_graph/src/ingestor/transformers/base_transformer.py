@@ -53,7 +53,7 @@ class ElasticsearchBaseTransformer:
 
     def _load_to_jsonl(self, es_documents: list[BaseModel], file: IO) -> None:
         for doc in es_documents:
-            line = (doc.model_dump_json() + "\n").encode("utf-8")
+            line = (doc.model_dump_json(by_alias=False) + "\n").encode("utf-8")
             file.write(line)
 
     def _get_file_path(
