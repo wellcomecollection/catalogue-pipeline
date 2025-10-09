@@ -18,7 +18,7 @@ locals {
   slack_webhook = "catalogue_graph_reporter/slack_webhook"
 
   # This is a hint that the ingestors might need to be in the pipeline stack!
-  pipeline_date       = "2025-08-14"
+  pipeline_date       = "2025-10-02"
   concepts_index_date = "2025-08-21"
 
   ingestor_types = ["concepts", "works"]

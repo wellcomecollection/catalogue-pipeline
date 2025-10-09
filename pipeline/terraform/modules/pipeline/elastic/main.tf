@@ -164,6 +164,7 @@ locals {
       read  = [for idx in local.works_denormalised_list : idx.name]
       write = [for idx in local.works_denormalised_list : idx.name]
     }
+    # TODO: Remove `work_ingestor` once we switch to new Python ingestor service
     work_ingestor = {
       read  = [for idx in local.works_denormalised_list : idx.name]
       write = [for idx in local.works_indexed_list : idx.name]
@@ -180,9 +181,19 @@ locals {
       read  = [for idx in local.images_augmented_list : idx.name]
       write = [for idx in local.images_indexed_list : idx.name]
     }
+    # TODO: Remove `concept_ingestor` once we deploy incremental mode
     concept_ingestor = {
       read  = [for idx in local.concepts_indexed_list : idx.name]
       write = [for idx in local.concepts_indexed_list : idx.name]
+    }
+    concepts_ingestor = {
+      read  = [for idx in local.works_denormalised_list : idx.name]
+      write = [for idx in local.concepts_indexed_list : idx.name]
+    }
+    works_ingestor = {
+      read  = [for idx in local.works_denormalised_list : idx.name]
+      # For now only allow writing to a non-production index for safety
+      write = ["works-indexed-2025-10-09"]
     }
     snapshot_generator = {
       read = concat([
