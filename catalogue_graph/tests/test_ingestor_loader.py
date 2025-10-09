@@ -3,20 +3,13 @@ from datetime import datetime
 import polars as pl
 import pytest
 from freezegun import freeze_time
-from test_mocks import (
-    MockElasticsearchClient,
-    MockRequest,
-    MockSmartOpen,
-    add_neptune_mock_response,
-    mock_es_secrets,
-)
-from test_utils import (
-    add_mock_merged_documents,
-    load_json_fixture,
-)
-
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
-from ingestor.models.debug.work import DeletedWorkDebug, WorkDebugSource
+from ingestor.models.debug.work import (
+    DeletedWorkDebug,
+    InvisibleWorkDebug,
+    RedirectedWorkDebug,
+    WorkDebugSource,
+)
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
     ConceptDescription,
@@ -34,7 +27,9 @@ from ingestor.models.indexable_work import (
 )
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.id_label import Id
-from ingestor.models.shared.identifier import SourceIdentifier
+from ingestor.models.shared.identifier import Identifiers, SourceIdentifier
+from ingestor.models.shared.invisible_reason import InvisibleReason
+from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
@@ -55,6 +50,17 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
+from test_mocks import (
+    MockElasticsearchClient,
+    MockRequest,
+    MockSmartOpen,
+    add_neptune_mock_response,
+    mock_es_secrets,
+)
+from test_utils import (
+    add_mock_merged_documents,
+    load_json_fixture,
+)
 
 MOCK_CONCEPT_ID = "jbxfbpzq"
 MOCK_JOB_ID = "20250929T12:00"
@@ -435,5 +441,76 @@ def test_ingestor_loader_non_visible_works() -> None:
             type="Deleted",
         )
 
-        InvisibleIndexableWork.model_validate(invisible_work)
-        RedirectedIndexableWork.model_validate(redirected_work)
+        assert InvisibleIndexableWork(**invisible_work) == InvisibleIndexableWork(
+            debug=InvisibleWorkDebug(
+                source=WorkDebugSource(
+                    id="sghsneca",
+                    identifier=SourceIdentifier(
+                        identifier_type=Id(id="mets"),
+                        ontology_type="Work",
+                        value="b32717714",
+                    ),
+                    version=1,
+                    modified_time=datetime.fromisoformat("2022-05-23T15:50:41.008000"),
+                ),
+                merged_time=datetime.fromisoformat("2025-10-08T15:31:52.203950"),
+                indexed_time=datetime.now(),
+                invisibility_reasons=[InvisibleReason(type="MetsWorksAreNotVisible")],
+                merge_candidates=[
+                    MergeCandidate(
+                        id=Identifiers(
+                            canonical_id="avwk5k79",
+                            source_identifier=SourceIdentifier(
+                                identifier_type=Id(id="sierra-system-number"),
+                                ontology_type="Work",
+                                value="b32717714",
+                            ),
+                            other_identifiers=[],
+                        ),
+                        reason="METS work",
+                    )
+                ],
+            ),
+            type="Invisible",
+        )
+
+        assert RedirectedIndexableWork(**redirected_work) == RedirectedIndexableWork(
+            debug=RedirectedWorkDebug(
+                source=WorkDebugSource(
+                    id="cbgkvkx5",
+                    identifier=SourceIdentifier(
+                        identifier_type=Id(id="mets"),
+                        ontology_type="Work",
+                        value="b18029048",
+                    ),
+                    version=2,
+                    modified_time=datetime.fromisoformat("2025-10-09T11:41:53.596657"),
+                ),
+                merged_time=datetime.fromisoformat("2025-10-09T12:09:04.086557"),
+                indexed_time=datetime.now(),
+                merge_candidates=[
+                    MergeCandidate(
+                        id=Identifiers(
+                            canonical_id="qcp6bq89",
+                            source_identifier=SourceIdentifier(
+                                identifier_type=Id(id="sierra-system-number"),
+                                ontology_type="Work",
+                                value="b18029048",
+                            ),
+                            other_identifiers=[],
+                        ),
+                        reason="METS work",
+                    )
+                ],
+            ),
+            redirect_target=Identifiers(
+                canonical_id="p5w7ujap",
+                source_identifier=SourceIdentifier(
+                    identifier_type=Id(id="sierra-system-number"),
+                    ontology_type="Work",
+                    value="b1206094x",
+                ),
+                other_identifiers=[],
+            ),
+            type="Redirected",
+        )
