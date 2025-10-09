@@ -42,7 +42,7 @@ def mock_neptune_response(request_data: dict, response_data: dict) -> None:
 def mock_neptune_removal_response(node_ids: list) -> None:
     mock_neptune_response(
         request_data={
-            "query": "MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE n",
+            "query": "MATCH (n) WHERE id(n) IN $nodeIds DETACH DELETE n",
             "parameters": {"nodeIds": node_ids},
         },
         response_data={"results": [{"deletedCount": 1}]},

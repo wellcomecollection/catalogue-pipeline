@@ -195,7 +195,7 @@ class BaseNeptuneClient:
     def delete_nodes_by_id(self, ids: list[str]) -> None:
         """Removes all nodes with the specified ids from the graph."""
         delete_query = """
-            MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE n
+            MATCH (n) WHERE id(n) IN $nodeIds DETACH DELETE n
         """
 
         previous_node_count = self.get_total_node_count()
