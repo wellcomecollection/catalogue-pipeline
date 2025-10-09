@@ -57,8 +57,7 @@ module "pipeline_storage_secrets" {
 module "pipeline_storage_secrets_catalogue" {
   source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
   providers     = { 
-    aws           = aws   
-    aws.catalogue = aws.catalogue 
+    aws = aws.catalogue 
   }
 
   deletion_mode = "IMMEDIATE"
