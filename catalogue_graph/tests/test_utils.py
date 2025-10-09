@@ -2,9 +2,8 @@ import json
 import os
 from typing import Any
 
-from test_mocks import MockElasticsearchClient, MockSmartOpen
-
 from models.graph_edge import BaseEdge
+from tests.mocks import MockElasticsearchClient, MockSmartOpen
 from utils.ontology import get_transformers_from_ontology
 from utils.types import OntologyType, TransformerType, WorkStatus
 
