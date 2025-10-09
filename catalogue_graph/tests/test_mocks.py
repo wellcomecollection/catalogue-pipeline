@@ -273,6 +273,7 @@ class MockRequest:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
+
         for response in MockRequest.responses:
             if (
                 response["method"] == method
