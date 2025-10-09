@@ -38,7 +38,7 @@ class TestSyncFiles:
         self.s3_bucket = "test-bucket"
         self.s3_prefix = "test-prefix"
         self.mock_list_s3_keys = patch(
-            "adapters.ebsco.steps.trigger.list_s3_keys"
+            "adapters.ebsco.steps.trigger._list_s3_keys"
         ).start()
 
     def teardown_method(self) -> None:
