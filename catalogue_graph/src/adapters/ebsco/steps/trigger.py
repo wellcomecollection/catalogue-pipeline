@@ -9,8 +9,9 @@ import argparse
 import re
 import tempfile
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
+import boto3
 import smart_open
 from pydantic import BaseModel
 
@@ -24,7 +25,6 @@ from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTriggerEvent,
 )
-from adapters.ebsco.utils.aws import get_ssm_parameter, list_s3_keys
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
@@ -33,6 +33,23 @@ class EbscoAdapterTriggerConfig(BaseModel):
 
 class EventBridgeScheduledEvent(BaseModel):
     time: str  # original EventBridge schedule event time
+
+
+def _get_ssm_parameter(parameter_name: str) -> str:
+    """Returns an AWS SSM parameter string associated with a given name."""
+    ssm_client = boto3.Session().client("ssm")
+    response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
+    return cast(str, response["Parameter"]["Value"])
+
+
+def _list_s3_keys(bucket: str, prefix: str) -> list[str]:
+    """Lists all S3 keys in a given bucket and prefix."""
+    s3_client = boto3.Session().client("s3")
+    response = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
+    keys = []
+    for s3_obj in response.get("Contents", []):
+        keys.append(s3_obj["Key"])
+    return keys
 
 
 def get_most_recent_valid_file(filenames: list[str]) -> str | None:
@@ -68,7 +85,7 @@ def sync_files(
 
     print(f"Most recent ftp file: {most_recent_ftp_file}")
 
-    existing_keys = list_s3_keys(s3_bucket, s3_prefix)
+    existing_keys = _list_s3_keys(s3_bucket, s3_prefix)
     existing_filenames = {key.split("/")[-1] for key in existing_keys}
 
     if most_recent_ftp_file in existing_filenames:
@@ -105,7 +122,7 @@ def sync_files(
         ) from e
 
     # Refresh S3 key listing to determine most recent object to pass downstream
-    refreshed_keys = list_s3_keys(s3_bucket, s3_prefix)
+    refreshed_keys = _list_s3_keys(s3_bucket, s3_prefix)
     most_recent_s3_object = get_most_recent_valid_file(
         [key.split("/")[-1] for key in refreshed_keys]
     )
@@ -120,10 +137,10 @@ def handler(
 
     job_id = event.job_id
 
-    ftp_server = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_server")
-    ftp_username = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_username")
-    ftp_password = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_password")
-    ftp_remote_dir = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_remote_dir")
+    ftp_server = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_server")
+    ftp_username = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_username")
+    ftp_password = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_password")
+    ftp_remote_dir = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_remote_dir")
 
     with (
         EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp,

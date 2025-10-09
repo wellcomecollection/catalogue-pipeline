@@ -7,7 +7,7 @@ from adapters.ebsco.config import (
     ES_LOCAL_PORT,
     ES_LOCAL_SCHEME,
 )
-from adapters.ebsco.utils.aws import get_secret
+from utils.aws import get_secret
 
 
 def get_standard_index_name(prefix: str, date: str | None) -> str:
