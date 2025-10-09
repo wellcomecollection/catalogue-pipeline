@@ -3,37 +3,12 @@ from collections.abc import Generator
 from uuid import uuid1
 
 import pytest
-from _pytest.monkeypatch import MonkeyPatch
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.ebsco.table_config import get_local_table
 
-from .test_mocks import (
-    MockBoto3Resource,
-    MockBoto3Session,
-    MockElasticsearchClient,
-    MockRequest,
-    MockSmartOpen,
-)
-
 # Add the test directory to the path so we can import from it
 HERE = os.path.dirname(os.path.realpath(__file__))
-
-
-@pytest.fixture(autouse=True)
-def common_mocks(monkeypatch: MonkeyPatch) -> Generator[None, None, None]:
-    monkeypatch.setattr("boto3.Session", MockBoto3Session)
-    monkeypatch.setattr("boto3.resource", MockBoto3Resource)
-    monkeypatch.setattr("requests.request", MockRequest.request)
-    monkeypatch.setattr("requests.get", MockRequest.get)
-    monkeypatch.setattr("smart_open.open", MockSmartOpen.open)
-    monkeypatch.setattr("elasticsearch.Elasticsearch", MockElasticsearchClient)
-    monkeypatch.setattr("elasticsearch.helpers.bulk", MockElasticsearchClient.bulk)
-
-    MockRequest.reset_mocks()
-    MockSmartOpen.reset_mocks()
-    MockElasticsearchClient.reset_mocks()
-    yield
 
 
 @pytest.fixture

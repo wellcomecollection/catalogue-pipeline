@@ -1,9 +1,8 @@
-from test_utils import (
+from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
+from tests.sources.test_wikidata_concepts_source import _add_mock_wikidata_requests
+from tests.test_utils import (
     add_mock_transformer_outputs_for_ontologies,
 )
-from test_wikidata_concepts_source import _add_mock_wikidata_requests
-
-from sources.wikidata.linked_ontology_source import WikidataLinkedOntologySource
 
 
 def test_wikidata_names_source_edges() -> None:

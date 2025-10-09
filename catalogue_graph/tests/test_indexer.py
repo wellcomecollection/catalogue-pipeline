@@ -1,8 +1,7 @@
 import json
 
-from test_mocks import MockRequest
-
 from indexer import lambda_handler
+from tests.mocks import MockRequest
 
 
 def test_lambda_handler() -> None:

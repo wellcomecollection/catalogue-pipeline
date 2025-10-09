@@ -2,19 +2,6 @@ from collections.abc import Generator
 from typing import Any, get_args
 
 import pytest
-from test_mocks import (
-    MOCK_INSTANCE_ENDPOINT,
-    MockElasticsearchClient,
-    MockRequest,
-    MockResponseInput,
-    MockSmartOpen,
-    mock_es_secrets,
-)
-from test_utils import (
-    add_mock_merged_documents,
-    add_mock_transformer_outputs_for_ontologies,
-    load_fixture,
-)
 
 from config import (
     LOC_NAMES_URL,
@@ -24,6 +11,19 @@ from config import (
 )
 from extractor import lambda_handler
 from models.events import EntityType, StreamDestination
+from tests.mocks import (
+    MOCK_INSTANCE_ENDPOINT,
+    MockElasticsearchClient,
+    MockRequest,
+    MockResponseInput,
+    MockSmartOpen,
+    mock_es_secrets,
+)
+from tests.test_utils import (
+    add_mock_merged_documents,
+    add_mock_transformer_outputs_for_ontologies,
+    load_fixture,
+)
 from utils.types import TransformerType
 
 transformer_types = get_args(TransformerType)
