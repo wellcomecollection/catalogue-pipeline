@@ -200,7 +200,7 @@ class BaseNeptuneClient:
 
         previous_node_count = self.get_total_node_count()
 
-        for batch in batched(ids, ID_DELETE_BATCH_SIZE, strict=False):
+        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
             self.run_open_cypher_query(delete_query, {"nodeIds": list(batch)})
             print(f"Deleted a batch of nodes. (Batch size: {ID_DELETE_BATCH_SIZE})")
 
@@ -215,7 +215,7 @@ class BaseNeptuneClient:
 
         previous_edge_count = self.get_total_edge_count()
 
-        for batch in batched(ids, ID_DELETE_BATCH_SIZE, strict=False):
+        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
             self.run_open_cypher_query(delete_query, {"edgeIds": list(batch)})
             print(f"Deleted a batch of edges. (Batch size: {ID_DELETE_BATCH_SIZE})")
 

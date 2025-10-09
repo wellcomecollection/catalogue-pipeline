@@ -55,8 +55,11 @@ module "pipeline_storage_secrets" {
 }
 
 module "pipeline_storage_secrets_catalogue" {
-  source        = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
-  providers     = { aws = aws.catalogue }
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
+  providers = {
+    aws = aws.catalogue
+  }
+
   deletion_mode = "IMMEDIATE"
   key_value_map = local.secrets_kv_map
 }
@@ -141,7 +144,7 @@ locals {
       write = [for idx in local.works_source_list : idx.name]
     }
     id_minter = {
-      read  = [for idx in local.works_identified_list : idx.name]
+      read  = [for idx in local.works_source_list : idx.name]
       write = [for idx in local.works_identified_list : idx.name]
     }
     matcher = {

@@ -48,8 +48,7 @@ data "aws_iam_policy_document" "read_ebsco_transformer_pipeline_storage_secrets"
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
       "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
-      # TODO: This is a manually created secret for testing the new transformer, it needs to be automated!
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer-ebsco-test/api_key*"
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/transformer/api_key*"
     ]
   }
 }
