@@ -46,7 +46,7 @@ class DisplayWork(ElasticsearchModel):
     type: DisplayWorkType
 
     @classmethod
-    def from_extracted_work(self, extracted: VisibleExtractedWork) -> "DisplayWork":
+    def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "DisplayWork":
         work = extracted.work
         transformer = DisplayWorkTransformer(extracted)
 
