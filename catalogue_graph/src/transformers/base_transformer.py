@@ -119,7 +119,7 @@ class BaseTransformer:
         and returns the results stream in fixed-size chunks.
         """
         entities = self._stream_entities(entity_type, sample_size)
-        yield from batched(entities, CHUNK_SIZE, strict=False)
+        yield from batched(entities, CHUNK_SIZE)
 
     def stream_to_s3(
         self, s3_uri: str, entity_type: EntityType, sample_size: int | None = None
