@@ -9,7 +9,7 @@ MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 
 def test_catalogue_works_transformer_nodes() -> None:
-    add_mock_merged_documents()
+    add_mock_merged_documents(work_status="Visible")
 
     transformer = CatalogueWorksTransformer(MOCK_EVENT, "local")
     nodes = list(transformer._stream_nodes())
@@ -27,7 +27,7 @@ def test_catalogue_works_transformer_nodes() -> None:
 
 
 def test_catalogue_works_transformer_edges() -> None:
-    add_mock_merged_documents()
+    add_mock_merged_documents(work_status="Visible")
 
     transformer = CatalogueWorksTransformer(MOCK_EVENT, "local")
     edges = list(transformer._stream_edges())

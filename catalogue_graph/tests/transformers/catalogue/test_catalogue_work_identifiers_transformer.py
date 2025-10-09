@@ -16,7 +16,7 @@ MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
 def test_catalogue_work_identifiers_transformer_nodes() -> None:
     mock_es_secrets("graph_extractor", "dev")
-    add_mock_merged_documents()
+    add_mock_merged_documents(work_status="Visible")
 
     transformer = CatalogueWorkIdentifiersTransformer(MOCK_EVENT, "public")
     nodes = list(transformer._stream_nodes())
@@ -36,7 +36,7 @@ def test_catalogue_work_identifiers_transformer_nodes() -> None:
 def test_catalogue_work_identifiers_transformer_edges() -> None:
     mock_es_secrets("graph_extractor", "dev")
 
-    add_mock_merged_documents()
+    add_mock_merged_documents(work_status="Visible")
 
     transformer = CatalogueWorkIdentifiersTransformer(MOCK_EVENT, "public")
     edges = list(transformer._stream_edges())
