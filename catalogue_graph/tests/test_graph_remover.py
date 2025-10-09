@@ -39,11 +39,21 @@ def mock_neptune_response(request_data: dict, response_data: dict) -> None:
     )
 
 
+def mock_neptune_get_existing_response(node_ids: list) -> None:
+    mock_neptune_response(
+        request_data={
+            "query": "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id",
+            "parameters": {"ids": node_ids},
+        },
+        response_data={"results": [{"id": i} for i in node_ids]},
+    )
+
+
 def mock_neptune_removal_response(node_ids: list) -> None:
     mock_neptune_response(
         request_data={
-            "query": "MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE n",
-            "parameters": {"nodeIds": node_ids},
+            "query": "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n",
+            "parameters": {"ids": node_ids},
         },
         response_data={"results": [{"deletedCount": 1}]},
     )
@@ -97,6 +107,7 @@ def test_graph_remover_next_run() -> None:
         ["catalogue"], pipeline_date="2022-02-02"
     )
     mock_deleted_ids_log_file(age_in_days=364)
+    mock_neptune_get_existing_response(["byzuqyr5"])
     mock_neptune_removal_response(["byzuqyr5"])
     mock_neptune_count_response()
 
@@ -143,6 +154,7 @@ def test_graph_remover_old_id_removal() -> None:
 
     # Mock a file with existing deleted IDs which are 1+ year old
     mock_deleted_ids_log_file(age_in_days=365)
+    mock_neptune_get_existing_response(["byzuqyr5"])
     mock_neptune_removal_response(["byzuqyr5"])
     mock_neptune_count_response()
 

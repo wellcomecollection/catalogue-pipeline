@@ -1,5 +1,5 @@
 import argparse
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import BaseModel
 
@@ -57,3 +57,7 @@ class BulkLoadPollerEvent(BaseModel):
 
 class GraphRemoverEvent(GraphPipelineEvent):
     override_safety_check: bool = False
+
+
+class IncrementalRemoverEvent(BasePipelineEvent):
+    remover_type: Literal["works", "concepts"]

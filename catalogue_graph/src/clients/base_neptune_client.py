@@ -24,6 +24,10 @@ ALLOW_DATABASE_RESET = False
 NEPTUNE_MAX_PARALLEL_QUERIES = 10
 
 
+GET_IDS_QUERY = """MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"""
+DELETE_IDS_QUERY = """MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"""
+
+
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
     print(f"Neptune request failed due to '{exception_name}'. Retrying...")
@@ -192,20 +196,26 @@ class BaseNeptuneClient:
 
         print(f"Removed all nodes with label '{label}'.")
 
-    def delete_nodes_by_id(self, ids: list[str]) -> None:
-        """Removes all nodes with the specified ids from the graph."""
-        delete_query = """
-            MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE n
-        """
+    def get_existing_node_ids(self, ids: list[str]) -> list[str]:
+        """Given a list of (potential) node IDs, return those which exist in the graph."""
+        result = self.run_open_cypher_query(GET_IDS_QUERY, {"ids": list(ids)})
+        return [node["id"] for node in result]
 
-        previous_node_count = self.get_total_node_count()
+    def delete_nodes_by_id(self, ids: list[str]) -> list[str]:
+        """Removes all nodes with the specified ids from the graph."""
+        deleted_ids = []
 
         for batch in batched(ids, ID_DELETE_BATCH_SIZE):
-            self.run_open_cypher_query(delete_query, {"nodeIds": list(batch)})
-            print(f"Deleted a batch of nodes. (Batch size: {ID_DELETE_BATCH_SIZE})")
+            existing_ids = self.get_existing_node_ids(ids)
+            self.run_open_cypher_query(DELETE_IDS_QUERY, {"ids": list(batch)})
 
-        total_deleted = previous_node_count - self.get_total_node_count()
-        print(f"Successfully deleted a total of {total_deleted} nodes from the graph.")
+            deleted_ids += existing_ids
+            print(f"Deleted a batch of {len(existing_ids)} nodes...")
+
+        print(
+            f"Successfully deleted a total of {len(deleted_ids)} nodes from the graph."
+        )
+        return deleted_ids
 
     def delete_edges_by_id(self, ids: list[str]) -> None:
         """Removes all edges with the specified ids from the graph."""
