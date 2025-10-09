@@ -31,6 +31,11 @@ module "pipeline" {
       images   = {}
       concepts = {}
     }
+    "2025-10-09" = {
+      works    = { indexed = "works_indexed.2024-11-14" }
+      images   = {}
+      concepts = { indexed = "concepts_indexed.2025-06-17" }
+    }
   }
 
   allow_delete_indices = true
