@@ -4,19 +4,23 @@ data "aws_cloudwatch_event_bus" "adapter_event_bus" {
 
 locals {
   ebsco_transformer_lambda_index_date = "2025-10-06"
+  es_works_delta_source_index         = "works-source-${local.ebsco_transformer_lambda_index_date}"
+  es_works_delta_identified_index     = "works-identified-${local.ebsco_transformer_lambda_index_date}"
 }
 
 module "ebsco_transformer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name        = "${local.namespace}-transformer_ebsco"
-  description = "Lambda function to transform EBSCO data"
-  runtime     = "python3.12"
-  publish     = true
+  name         = "${local.namespace}-transformer_ebsco"
+  description  = "Lambda function to transform EBSCO data"
+  package_type = "Image"
+  image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  publish      = true
 
-  filename = data.archive_file.empty_zip.output_path
+  image_config = {
+    command = ["adapters.ebsco.steps.transformer.lambda_handler"]
+  }
 
-  handler     = "steps.transformer.lambda_handler"
   memory_size = 4096
   timeout     = 600
 
