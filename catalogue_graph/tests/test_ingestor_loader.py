@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import polars as pl
 import pytest
+from freezegun import freeze_time
 from test_mocks import (
     MockElasticsearchClient,
     MockRequest,
@@ -8,10 +11,12 @@ from test_mocks import (
     mock_es_secrets,
 )
 from test_utils import (
+    add_mock_merged_documents,
     load_json_fixture,
 )
 
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
+from ingestor.models.debug.work import DeletedWorkDebug, WorkDebugSource
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.indexable_concept import (
     ConceptDescription,
@@ -22,6 +27,14 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
+from ingestor.models.indexable_work import (
+    DeletedIndexableWork,
+    InvisibleIndexableWork,
+    RedirectedIndexableWork,
+)
+from ingestor.models.shared.deleted_reason import DeletedReason
+from ingestor.models.shared.id_label import Id
+from ingestor.models.shared.identifier import SourceIdentifier
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
@@ -48,7 +61,7 @@ MOCK_JOB_ID = "20250929T12:00"
 MOCK_PIPELINE_DATE = "2025-01-01"
 MOCK_INDEX_DATE = "2025-03-01"
 
-MOCK_LOADER_EVENT = IngestorLoaderLambdaEvent(
+MOCK_LOADER_CONCEPTS_EVENT = IngestorLoaderLambdaEvent(
     ingestor_type="concepts",
     pipeline_date=MOCK_PIPELINE_DATE,
     index_date=MOCK_INDEX_DATE,
@@ -57,7 +70,7 @@ MOCK_LOADER_EVENT = IngestorLoaderLambdaEvent(
 
 
 MOCK_INDEXER_EVENT = IngestorIndexerLambdaEvent(
-    **MOCK_LOADER_EVENT.model_dump(),
+    **MOCK_LOADER_CONCEPTS_EVENT.model_dump(),
     objects_to_index=[
         IngestorIndexerObject(
             s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/{MOCK_PIPELINE_DATE}/{MOCK_INDEX_DATE}/{MOCK_JOB_ID}/00000000-00000001.parquet",
@@ -299,7 +312,7 @@ def test_ingestor_loader_no_related_concepts() -> None:
     mock_merged_work()
     mock_neptune_responses([])
 
-    result = handler(MOCK_LOADER_EVENT)
+    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
 
     # We expect a total of 11 API calls:
     # * 4 to retrieve concept data (concept query, types query, same as query, and source concepts query)
@@ -315,7 +328,7 @@ def test_ingestor_loader_with_broader_than_concepts() -> None:
     mock_merged_work()
     mock_neptune_responses(["broader_than"])
 
-    result = handler(MOCK_LOADER_EVENT)
+    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
 
     # We expect a total of 15 API calls:
     # * 12 to retrieve the same data as the `test_ingestor_loader_no_related_concepts` test case
@@ -331,7 +344,7 @@ def test_ingestor_loader_with_related_to_concepts() -> None:
     mock_merged_work()
     mock_neptune_responses(["related_to", "people"])
 
-    result = handler(MOCK_LOADER_EVENT)
+    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
 
     # Since we're including two separate groups of related concepts, we expect 4 additional API calls
     # on top of those in `test_ingestor_loader_with_broader_than_concepts`
@@ -343,7 +356,7 @@ def test_ingestor_loader_with_related_to_concepts() -> None:
 
 
 def test_ingestor_loader_no_concepts_to_process() -> None:
-    result = handler(MOCK_LOADER_EVENT)
+    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
     assert len(result.objects_to_index) == 0
     assert len(MockRequest.calls) == 0
 
@@ -356,4 +369,71 @@ def test_ingestor_loader_bad_neptune_response() -> None:
     )
 
     with pytest.raises(KeyError):
-        handler(MOCK_LOADER_EVENT)
+        handler(MOCK_LOADER_CONCEPTS_EVENT)
+
+
+@freeze_time("2025-09-09")
+def test_ingestor_loader_non_visible_works() -> None:
+    # Add one of each non-visible work type
+    add_mock_merged_documents(pipeline_date=MOCK_PIPELINE_DATE, work_status="Deleted")
+    add_mock_merged_documents(pipeline_date=MOCK_PIPELINE_DATE, work_status="Invisible")
+    add_mock_merged_documents(
+        pipeline_date=MOCK_PIPELINE_DATE, work_status="Redirected"
+    )
+
+    loader_event = IngestorLoaderLambdaEvent(
+        ingestor_type="works",
+        pipeline_date=MOCK_PIPELINE_DATE,
+        index_date=MOCK_INDEX_DATE,
+        job_id=MOCK_JOB_ID,
+    )
+    expected_indexer_event = IngestorIndexerLambdaEvent(
+        **loader_event.model_dump(),
+        objects_to_index=[
+            IngestorIndexerObject(
+                s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_works/{MOCK_PIPELINE_DATE}/{MOCK_INDEX_DATE}/{MOCK_JOB_ID}/00000000-00000003.parquet",
+                content_length=1,
+                record_count=3,
+            )
+        ],
+    )
+
+    result = handler(loader_event)
+
+    _compare_events(result, expected_indexer_event)
+    assert len(MockRequest.calls) == 0
+
+    # The dataframe should have all three works
+    with MockSmartOpen.open(result.objects_to_index[0].s3_uri, "rb") as f:
+        df = pl.read_parquet(f)
+        assert len(df) == 3
+
+        items = df.to_dicts()
+        redirected_work = [i for i in items if i["type"] == "Redirected"][0]
+        deleted_work = [i for i in items if i["type"] == "Deleted"][0]
+        invisible_work = [i for i in items if i["type"] == "Invisible"][0]
+
+        assert DeletedIndexableWork(**deleted_work) == DeletedIndexableWork(
+            debug=DeletedWorkDebug(
+                source=WorkDebugSource(
+                    id="fz655hx4",
+                    identifier=SourceIdentifier(
+                        identifier_type=Id(id="sierra-system-number"),
+                        ontology_type="Work",
+                        value="b15610512",
+                    ),
+                    version=20,
+                    modified_time=datetime.fromisoformat("2025-10-09T12:32:42"),
+                ),
+                merged_time=datetime.fromisoformat("2025-10-09T12:35:31.612637"),
+                indexed_time=datetime.now(),
+                deleted_reason=DeletedReason(
+                    info="Sierra", type="SuppressedFromSource"
+                ),
+                merge_candidates=[],
+            ),
+            type="Deleted",
+        )
+
+        InvisibleIndexableWork.model_validate(invisible_work)
+        RedirectedIndexableWork.model_validate(redirected_work)

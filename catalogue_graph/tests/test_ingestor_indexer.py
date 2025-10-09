@@ -58,7 +58,6 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
         "s3://test-catalogue-graph/00000000-00000010.parquet",
         load_fixture(f"ingestor/{record_type}/00000000-00000010.parquet"),
     )
-    MockSmartOpen.open(event.objects_to_index[0].s3_uri, "r")
 
     expected_inputs = load_json_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
 

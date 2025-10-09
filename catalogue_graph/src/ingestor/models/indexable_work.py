@@ -30,13 +30,13 @@ class IndexableWork(IndexableRecord):
     @staticmethod
     def from_raw_document(work: dict) -> "IndexableWork":
         if work["type"] == "Visible":
-            return VisibleIndexableWork(**work)
+            return VisibleIndexableWork.model_validate(work)
         if work["type"] == "Invisible":
-            return InvisibleIndexableWork(**work)
+            return InvisibleIndexableWork.model_validate(work)
         if work["type"] == "Redirected":
-            return RedirectedIndexableWork(**work)
+            return RedirectedIndexableWork.model_validate(work)
         if work["type"] == "Deleted":
-            return DeletedIndexableWork(**work)
+            return DeletedIndexableWork.model_validate(work)
 
         raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
 

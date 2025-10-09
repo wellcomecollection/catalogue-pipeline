@@ -1,6 +1,5 @@
 from collections.abc import Generator
 
-import dateutil.parser
 from dateutil import parser
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
@@ -133,7 +132,7 @@ class QueryWorkTransformer:
                             yield int(
                                 parser.parse(date.range.from_time).timestamp() * 1000
                             )
-                        except dateutil.parser.ParserError:
+                        except parser.ParserError:
                             print(
                                 f"Could not parse a production date of work {self.state.canonical_id}"
                             )

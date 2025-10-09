@@ -14,7 +14,7 @@ from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.serialisable import ElasticsearchModel
 
 
-class SourceWorkDebugInformation(ElasticsearchModel):
+class WorkDebugSource(ElasticsearchModel):
     id: str
     identifier: SourceIdentifier
     version: int
@@ -22,7 +22,7 @@ class SourceWorkDebugInformation(ElasticsearchModel):
 
 
 class WorkDebug(ElasticsearchModel):
-    source: SourceWorkDebugInformation
+    source: WorkDebugSource
     merged_time: datetime
     indexed_time: datetime
     merge_candidates: list[MergeCandidate]
@@ -30,7 +30,7 @@ class WorkDebug(ElasticsearchModel):
     @classmethod
     def _from_merged_work(cls, work: MergedWork) -> "WorkDebug":
         return WorkDebug(
-            source=SourceWorkDebugInformation(
+            source=WorkDebugSource(
                 id=work.state.canonical_id,
                 identifier=work.state.source_identifier,
                 version=work.version,

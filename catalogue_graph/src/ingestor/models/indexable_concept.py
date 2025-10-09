@@ -65,4 +65,4 @@ class IndexableConcept(IndexableRecord):
 
     @staticmethod
     def from_raw_document(concept: dict) -> "IndexableConcept":
-        return IndexableConcept(**concept)
+        return IndexableConcept.model_validate(concept)

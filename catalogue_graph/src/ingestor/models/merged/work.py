@@ -98,13 +98,13 @@ class MergedWork(ElasticsearchModel):
     @staticmethod
     def from_raw_document(work: dict) -> "MergedWork":
         if work["type"] == "Visible":
-            return VisibleMergedWork(**work)
+            return VisibleMergedWork.model_validate(work)
         if work["type"] == "Invisible":
-            return InvisibleMergedWork(**work)
+            return InvisibleMergedWork.model_validate(work)
         if work["type"] == "Redirected":
-            return RedirectedMergedWork(**work)
+            return RedirectedMergedWork.model_validate(work)
         if work["type"] == "Deleted":
-            return DeletedMergedWork(**work)
+            return DeletedMergedWork.model_validate(work)
 
         raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
 
