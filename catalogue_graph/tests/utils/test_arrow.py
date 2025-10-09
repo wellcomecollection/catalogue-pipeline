@@ -146,3 +146,32 @@ def test_cannot_resolve_literal() -> None:
     lit2 = typing.Literal[1, "a"]
     with pytest.raises(ValueError):
         python_type_to_pyarrow(lit2)
+
+
+def test_multiple_models() -> None:
+    class NestedModel(BaseModel):
+        test: str
+
+    class NestedVariant1(NestedModel):
+        same: int
+
+    class NestedVariant2(NestedModel):
+        same: int
+        extra: float
+
+    class SomeModel(BaseModel):
+        one: list[str]
+        nested: NestedVariant1
+
+    class OtherModel(BaseModel):
+        two: int
+        nested: NestedVariant2
+
+    struct_schema = pydantic_to_pyarrow_schema([SomeModel, OtherModel])
+    schema = _struct_to_dict(struct_schema)
+
+    assert isinstance(schema["one"], pa.ListType)
+    assert schema["two"] == pa.int64()
+
+    fields = _get_struct_fields(schema["nested"])
+    assert fields == {"same": pa.int64(), "test": pa.string(), "extra": pa.float64()}
