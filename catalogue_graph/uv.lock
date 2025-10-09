@@ -107,13 +107,10 @@ source = { editable = "." }
 dependencies = [
     { name = "backoff" },
     { name = "boto3" },
-    { name = "boto3-stubs" },
     { name = "elasticsearch" },
     { name = "lxml" },
-    { name = "mypy" },
     { name = "polars" },
     { name = "pyarrow" },
-    { name = "pyarrow-stubs" },
     { name = "pydantic" },
     { name = "pyiceberg", extra = ["sql-sqlite"] },
     { name = "pymarc" },
@@ -129,6 +126,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "boto3-stubs" },
     { name = "coverage" },
     { name = "freezegun" },
     { name = "ipykernel" },
@@ -136,6 +134,7 @@ dev = [
     { name = "mypy" },
     { name = "pandas" },
     { name = "polars" },
+    { name = "pyarrow-stubs" },
     { name = "pytest" },
     { name = "pytest-bdd" },
     { name = "pytest-cov" },
@@ -146,13 +145,10 @@ dev = [
 requires-dist = [
     { name = "backoff" },
     { name = "boto3" },
-    { name = "boto3-stubs" },
     { name = "elasticsearch", specifier = ">=8.11,<8.13" },
     { name = "lxml", specifier = ">=6.0.0" },
-    { name = "mypy", specifier = ">=1.16.1" },
     { name = "polars" },
     { name = "pyarrow", specifier = "~=20.0" },
-    { name = "pyarrow-stubs" },
     { name = "pydantic" },
     { name = "pydantic", specifier = ">=2.11.7" },
     { name = "pyiceberg", extras = ["sql-sqlite"], specifier = ">=0.9.1" },
@@ -170,13 +166,15 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "boto3-stubs" },
     { name = "coverage", extras = ["toml"] },
     { name = "freezegun" },
     { name = "ipykernel", specifier = ">=6.30.0" },
     { name = "lxml-stubs", specifier = ">=0.5.1" },
-    { name = "mypy" },
+    { name = "mypy", specifier = ">=1.16.1" },
     { name = "pandas", specifier = ">=2.3.1" },
     { name = "polars", specifier = ">=1.32.3" },
+    { name = "pyarrow-stubs" },
     { name = "pytest" },
     { name = "pytest", specifier = ">=8.4.0" },
     { name = "pytest-bdd", specifier = ">=8.1.0" },
