@@ -11,6 +11,10 @@ from utils.arrow import (
 )
 
 
+def _struct_to_dict(struct: pa.StructType) -> dict:
+    return {f.name: f.type for f in struct}
+
+
 def _get_struct_fields(struct: pa.DataType) -> dict:
     """Given a PyArrow struct, return a dict of `field_name -> pa.DataType`"""
     if not isinstance(struct, pa.StructType):
@@ -98,7 +102,8 @@ def test_do_not_use_serialisation_alias() -> None:
         one: int
         two: list[str] = Field(serialization_alias="renamed_two")
 
-    schema = pydantic_to_pyarrow_schema(SomeModel)
+    struct_schema = pydantic_to_pyarrow_schema([SomeModel])
+    schema = _struct_to_dict(struct_schema)
     assert "one" in schema and "two" in schema
     assert schema["one"] == pa.int64()
     # Field is a list of strings -> ListType whose value_type is string
@@ -113,7 +118,8 @@ def test_nested_pydantic_models() -> None:
     class SomeModel(BaseModel):
         one: list[NestedModel]
 
-    schema = pydantic_to_pyarrow_schema(SomeModel)
+    struct_schema = pydantic_to_pyarrow_schema([SomeModel])
+    schema = _struct_to_dict(struct_schema)
     assert isinstance(schema["one"], pa.ListType)
     list_type = schema["one"]
     assert isinstance(list_type.value_type, pa.StructType)

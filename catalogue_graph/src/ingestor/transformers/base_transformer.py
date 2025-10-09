@@ -10,13 +10,33 @@ import smart_open
 from pydantic import BaseModel
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
+from ingestor.models.indexable_concept import IndexableConcept
+from ingestor.models.indexable_work import (
+    DeletedIndexableWork,
+    InvisibleIndexableWork,
+    RedirectedIndexableWork,
+    VisibleIndexableWork,
+)
 from ingestor.models.step_events import IngestorIndexerObject, IngestorLoaderLambdaEvent
 from utils.arrow import pydantic_to_pyarrow_schema
+from utils.types import IngestorType
 
 S3_BATCH_SIZE = 10_000
 
 
 LoadDestination = Literal["s3", "local"]
+
+
+def get_pydantic_classes(ingestor_type: IngestorType) -> list[type[BaseModel]]:
+    if ingestor_type == "concepts":
+        return [IndexableConcept]
+    if ingestor_type == "works":
+        return [
+            VisibleIndexableWork,
+            InvisibleIndexableWork,
+            RedirectedIndexableWork,
+            DeletedIndexableWork,
+        ]
 
 
 class ElasticsearchBaseTransformer:
@@ -40,11 +60,14 @@ class ElasticsearchBaseTransformer:
     def stream_batches(self) -> Generator[tuple]:
         yield from batched(self.stream_es_documents(), S3_BATCH_SIZE, strict=False)
 
-    def _load_to_parquet(self, es_documents: list[BaseModel], file: IO) -> None:
+    def _load_to_parquet(
+        self, es_documents: list[BaseModel], ingestor_type: IngestorType, file: IO
+    ) -> None:
         # Convert Pydantic models to Parquet:
         # Pydantic -> dict -> PyArrow Table (with schema) -> Polars DataFrame -> Parquet
         # Explicit schema ensures reliable types (Polars inference is not reliable).
-        schema = pydantic_to_pyarrow_schema(type(es_documents[0]))
+        schema = pydantic_to_pyarrow_schema(get_pydantic_classes(ingestor_type))
+
         table = pa.Table.from_pylist(
             [d.model_dump(by_alias=False) for d in es_documents],
             schema=pa.schema(schema),
@@ -93,7 +116,7 @@ class ElasticsearchBaseTransformer:
             ) as f:
                 documents = list(batch)
                 if event.load_format == "parquet":
-                    self._load_to_parquet(documents, f)
+                    self._load_to_parquet(documents, event.ingestor_type, f)
                 elif event.load_format == "jsonl":
                     self._load_to_jsonl(documents, f)
 
