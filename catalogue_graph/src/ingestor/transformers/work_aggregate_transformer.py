@@ -1,11 +1,17 @@
 import re
 from collections.abc import Generator
 
-from ingestor.extractors.works_extractor import ExtractedWork
-from ingestor.models.aggregate.work import AggregatableField
+from pydantic import BaseModel
+
+from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
 from ingestor.models.shared.identifier import Identifiers, Unidentifiable
+
+
+class AggregatableField(BaseModel):
+    id: str
+    label: str
 
 
 def get_aggregatable(
@@ -18,7 +24,7 @@ def get_aggregatable(
 
 
 class AggregateWorkTransformer:
-    def __init__(self, extracted: ExtractedWork):
+    def __init__(self, extracted: VisibleExtractedWork):
         self.data = extracted.work.data
         self.state = extracted.work.state
 

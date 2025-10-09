@@ -18,22 +18,30 @@ FIELD_MAP: dict[type, pa.DataType] = {
 }
 
 
-def _merge_structs(structs: list[pa.StructType]) -> pa.DataType:
+def _dict_to_struct(field_map: dict) -> pa.StructType:
+    fields = [pa.field(name, dtype) for name, dtype in field_map.items()]
+    return pa.struct(fields)
+
+
+def _merge_structs(structs: list[pa.StructType]) -> pa.StructType:
     """Merge a union of structs into a single struct containing a union of all of their fields"""
-    merged_struct = {}
+    merged_struct: dict[str, pa.DataType] = {}
 
     for struct in structs:
         for field in struct:
-            if field.name not in merged_struct:
-                merged_struct[field.name] = field.type
-            elif merged_struct[field.name] != field.type:
+            existing, new = merged_struct.get(field.name), field.type
+
+            if existing is None:
+                merged_struct[field.name] = new
+            elif isinstance(existing, pa.StructType) and isinstance(new, pa.StructType):
+                merged_struct[field.name] = _merge_structs([existing, new])
+            elif existing != new:
                 # If field types conflict, we cannot produce a single merged struct
                 raise ValueError(
                     f"The following structs cannot be merged into a single PyArrow type: {structs}."
                 )
 
-    fields = [pa.field(name, dtype) for name, dtype in merged_struct.items()]
-    return pa.struct(fields)
+    return _dict_to_struct(merged_struct)
 
 
 def _resolve_union_types(annotations: typing.Iterable[type]) -> pa.DataType:
@@ -75,9 +83,7 @@ def python_type_to_pyarrow(annotation: typing.Any) -> pa.DataType:
         return pa.list_(python_type_to_pyarrow(args[0]))
 
     if issubclass(annotation, BaseModel):
-        schema_map = pydantic_to_pyarrow_schema(annotation)
-        fields = [pa.field(name, dtype) for name, dtype in schema_map.items()]
-        return pa.struct(fields)
+        return pydantic_to_pyarrow_schema([annotation])
 
     raise TypeError(
         f"Converting type '{annotation}' to a PyArrow type is not supported.'"
@@ -85,10 +91,18 @@ def python_type_to_pyarrow(annotation: typing.Any) -> pa.DataType:
     )
 
 
-def pydantic_to_pyarrow_schema(model_class: type[BaseModel]) -> dict[str, pa.DataType]:
-    """Convert a Pydantic model into a pyarrow schema"""
-    schema = {}
-    for field_name, field in model_class.model_fields.items():
-        schema[field_name] = python_type_to_pyarrow(field.annotation)
+def pydantic_to_pyarrow_schema(
+    model_classes: list[type[BaseModel]],
+) -> pa.StructType:
+    """Create a pyarrow schema compatible with all specified Pydantic model classes."""
 
-    return schema
+    if len(model_classes) > 1:
+        structs = [pydantic_to_pyarrow_schema([m]) for m in model_classes]
+        return _merge_structs(structs)
+
+    schema_map = {}
+    for field_name, field in model_classes[0].model_fields.items():
+        annotation = python_type_to_pyarrow(field.annotation)
+        schema_map[field_name] = annotation
+
+    return _dict_to_struct(schema_map)

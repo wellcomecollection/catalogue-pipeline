@@ -1,9 +1,8 @@
 from collections.abc import Generator
 
-import dateutil.parser
 from dateutil import parser
 
-from ingestor.extractors.works_extractor import ExtractedWork
+from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
 from ingestor.models.shared.location import PhysicalLocation
 
@@ -15,7 +14,7 @@ NEGATIVE_INFINITY_UNIX_TIMESTAMP = -377705116800000
 
 
 class QueryWorkTransformer:
-    def __init__(self, extracted: ExtractedWork):
+    def __init__(self, extracted: VisibleExtractedWork):
         self.data = extracted.work.data
         self.state = extracted.work.state
         self.hierarchy = extracted.hierarchy
@@ -133,7 +132,7 @@ class QueryWorkTransformer:
                             yield int(
                                 parser.parse(date.range.from_time).timestamp() * 1000
                             )
-                        except dateutil.parser.ParserError:
+                        except parser.ParserError:
                             print(
                                 f"Could not parse a production date of work {self.state.canonical_id}"
                             )

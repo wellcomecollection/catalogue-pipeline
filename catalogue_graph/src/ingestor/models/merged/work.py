@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, field_validator
 
 from ingestor.models.shared.concept import Concept, Contributor, Genre, Subject
+from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.holdings import Holdings
 from ingestor.models.shared.id_label import Id, IdLabel
 from ingestor.models.shared.identifier import (
@@ -10,13 +11,14 @@ from ingestor.models.shared.identifier import (
     SourceIdentifier,
 )
 from ingestor.models.shared.image import ImageData
+from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.item import Item
 from ingestor.models.shared.location import DigitalLocation
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
-from utils.types import DisplayWorkType, WorkType
+from utils.types import DisplayWorkType, WorkStatus, WorkType
 
 
 class CollectionPath(BaseModel):
@@ -37,12 +39,12 @@ class WorkRelations(BaseModel):
 
     @field_validator("ancestors", mode="before")
     @classmethod
-    def convert_denormalised_type(cls, raw_ancestors: list[dict]) -> list[dict]:
+    def convert_merged_type(cls, raw_ancestors: list[dict]) -> list[dict]:
         # TODO: This is a temporary 'Series' filter which won't be needed once we remove the relation embedder service
         return [a for a in raw_ancestors if a["numChildren"] == 0]
 
 
-class DenormalisedWorkData(ElasticsearchModel):
+class MergedWorkData(ElasticsearchModel):
     title: str | None = None
     other_identifiers: list[SourceIdentifier]
     alternative_titles: list[str]
@@ -78,7 +80,7 @@ class DenormalisedWorkData(ElasticsearchModel):
         return self.work_type
 
 
-class DenormalisedWorkState(ElasticsearchModel):
+class MergedWorkState(ElasticsearchModel):
     source_identifier: SourceIdentifier
     canonical_id: str
     merged_time: datetime
@@ -88,9 +90,37 @@ class DenormalisedWorkState(ElasticsearchModel):
     relations: WorkRelations
 
 
-class DenormalisedWork(ElasticsearchModel):
-    data: DenormalisedWorkData
-    state: DenormalisedWorkState
+class MergedWork(ElasticsearchModel):
+    state: MergedWorkState
     version: int
+    type: WorkStatus
+
+    @staticmethod
+    def from_raw_document(work: dict) -> "MergedWork":
+        if work["type"] == "Visible":
+            return VisibleMergedWork.model_validate(work)
+        if work["type"] == "Invisible":
+            return InvisibleMergedWork.model_validate(work)
+        if work["type"] == "Redirected":
+            return RedirectedMergedWork.model_validate(work)
+        if work["type"] == "Deleted":
+            return DeletedMergedWork.model_validate(work)
+
+        raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
+
+
+class VisibleMergedWork(MergedWork):
+    data: MergedWorkData
     redirect_sources: list[Identifiers]
-    type: str
+
+
+class InvisibleMergedWork(MergedWork):
+    invisibility_reasons: list[InvisibleReason]
+
+
+class DeletedMergedWork(MergedWork):
+    deleted_reason: DeletedReason
+
+
+class RedirectedMergedWork(MergedWork):
+    redirect_target: Identifiers

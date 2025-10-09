@@ -23,8 +23,7 @@ class SampleModel(BaseModel):
 
 
 def _arrow_schema_for(model: type[BaseModel]) -> pa.Schema:
-    schema_map = pydantic_to_pyarrow_schema(model)
-    return pa.schema([pa.field(name, dtype) for name, dtype in schema_map.items()])
+    return pa.schema(pydantic_to_pyarrow_schema([model]))
 
 
 def _is_pa_string(t: pa.DataType) -> bool:

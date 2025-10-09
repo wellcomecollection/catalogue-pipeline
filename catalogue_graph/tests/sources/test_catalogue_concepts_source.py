@@ -1,12 +1,12 @@
 from test_mocks import mock_es_secrets
-from test_utils import add_mock_denormalised_documents
+from test_utils import add_mock_merged_documents
 
 from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import CatalogueConceptsSource
 
 
 def test_catalogue_concepts_source() -> None:
-    add_mock_denormalised_documents("2025-05-05")
+    add_mock_merged_documents("2025-05-05", work_status="Visible")
     mock_es_secrets("graph_extractor", "2025-05-05")
 
     catalogue_concepts_source = CatalogueConceptsSource(

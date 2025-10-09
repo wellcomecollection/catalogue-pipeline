@@ -62,3 +62,7 @@ class IndexableConcept(IndexableRecord):
 
     def get_id(self) -> str:
         return self.query.id
+
+    @staticmethod
+    def from_raw_document(concept: dict) -> "IndexableConcept":
+        return IndexableConcept.model_validate(concept)

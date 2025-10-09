@@ -11,7 +11,7 @@ from test_mocks import (
     mock_es_secrets,
 )
 from test_utils import (
-    add_mock_denormalised_documents,
+    add_mock_merged_documents,
     add_mock_transformer_outputs_for_ontologies,
     load_fixture,
 )
@@ -208,7 +208,7 @@ def test_incremental_mode() -> None:
         "window": {"start_time": "2025-05-05T15:15", "end_time": "2025-05-05T15:30"},
         "sample_size": 100,
     }
-    add_mock_denormalised_documents("2024-06-06")
+    add_mock_merged_documents("2024-06-06", work_status="Visible")
     lambda_handler(event, None)
 
     expected_s3_uri = "s3://wellcomecollection-catalogue-graph/graph_bulk_loader/2024-06-06/windows/20250505T1515-20250505T1530/catalogue_works__nodes.csv"

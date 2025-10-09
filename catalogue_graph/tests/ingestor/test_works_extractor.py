@@ -8,8 +8,11 @@ from test_mocks import (
 )
 from test_utils import load_json_fixture
 
-from ingestor.extractors.works_extractor import ExtractedWork, GraphWorksExtractor
-from ingestor.models.denormalised.work import DenormalisedWork
+from ingestor.extractors.works_extractor import (
+    GraphWorksExtractor,
+    VisibleExtractedWork,
+)
+from ingestor.models.merged.work import VisibleMergedWork
 from ingestor.models.neptune.query_result import WorkHierarchy
 from ingestor.queries.work_queries import (
     WORK_ANCESTORS_QUERY,
@@ -20,17 +23,17 @@ from models.events import BasePipelineEvent
 
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 
-DENORMALISED_FIXTURE = load_json_fixture("ingestor/single_denormalised.json")
+MERGED_FIXTURE = load_json_fixture("ingestor/single_merged.json")
 ANCESTORS_FIXTURE = load_json_fixture("neptune/work_ancestors_single.json")
 CHILDREN_FIXTURE = load_json_fixture("neptune/work_children_single.json")
 CONCEPTS_FIXTURE = load_json_fixture("neptune/work_concepts_single.json")
 
 
-def _get_work_fixture(work_id: str) -> DenormalisedWork:
+def _get_work_fixture(work_id: str) -> VisibleMergedWork:
     # Adjust canonical ID in fixture
-    fixture = copy.deepcopy(DENORMALISED_FIXTURE)
+    fixture = copy.deepcopy(MERGED_FIXTURE)
     fixture["state"]["canonicalId"] = work_id
-    return DenormalisedWork(**fixture)
+    return VisibleMergedWork(**fixture)
 
 
 def mock_es_work(work_id: str) -> None:
@@ -68,7 +71,7 @@ def test_with_ancestors() -> None:
 
     extracted_items = list(extractor.extract_raw())
     assert len(extracted_items) == 1
-    assert extracted_items[0] == ExtractedWork(
+    assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(
             id="a24esypq", ancestors=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE
@@ -86,7 +89,7 @@ def test_with_concepts() -> None:
 
     extracted_items = list(extractor.extract_raw())
     assert len(extracted_items) == 1
-    assert extracted_items[0] == ExtractedWork(
+    assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(id="a24esypq", ancestors=[], children=[]),
         concepts=CONCEPTS_FIXTURE,
@@ -102,14 +105,14 @@ def test_without_graph_relationships() -> None:
 
     extracted_items = list(extractor.extract_raw())
     assert len(extracted_items) == 1
-    assert extracted_items[0] == ExtractedWork(
+    assert extracted_items[0] == VisibleExtractedWork(
         work=_get_work_fixture("a24esypq"),
         hierarchy=WorkHierarchy(id="a24esypq", ancestors=[], children=[]),
         concepts=[],
     )
 
 
-def test_missing_in_denormalised() -> None:
+def test_missing_in_merged_index() -> None:
     mock_es_secrets("graph_extractor", "dev")
     extractor = GraphWorksExtractor(MOCK_EVENT, "private")
 
@@ -117,7 +120,7 @@ def test_missing_in_denormalised() -> None:
         "a24esypq", ["a24esypq"], ["concepts", "ancestors", "children"]
     )
 
-    # Items which exist in the catalogue graph but do not exist in the denormalised index should not be extracted
+    # Items which exist in the catalogue graph but do not exist in the merged index should not be extracted
     extracted_items = list(extractor.extract_raw())
     assert len(extracted_items) == 0
 
@@ -135,12 +138,12 @@ def test_multiple_works() -> None:
     )
 
     expected_results = [
-        ExtractedWork(
+        VisibleExtractedWork(
             work=_get_work_fixture("123"),
             hierarchy=WorkHierarchy(id="123", ancestors=[], children=[]),
             concepts=[],
         ),
-        ExtractedWork(
+        VisibleExtractedWork(
             work=_get_work_fixture("456"),
             hierarchy=WorkHierarchy(
                 id="456", ancestors=ANCESTORS_FIXTURE, children=CHILDREN_FIXTURE

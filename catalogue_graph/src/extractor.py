@@ -108,7 +108,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--pit-id",
         type=str,
-        help="An Elasticsearch point in time ID to use when extracting data from the denormalised index.",
+        help="An Elasticsearch point in time ID to use when extracting data from the merged index.",
         required=False,
     )
     parser.add_argument(

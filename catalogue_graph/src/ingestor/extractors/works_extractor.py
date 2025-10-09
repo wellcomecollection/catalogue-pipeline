@@ -3,7 +3,10 @@ from itertools import batched
 
 from pydantic import BaseModel
 
-from ingestor.models.denormalised.work import DenormalisedWork
+from ingestor.models.merged.work import (
+    MergedWork,
+    VisibleMergedWork,
+)
 from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
 from models.events import BasePipelineEvent
 from sources.merged_works_source import MergedWorksSource
@@ -11,7 +14,6 @@ from utils.elasticsearch import ElasticsearchMode
 
 from .base_extractor import GraphBaseExtractor
 
-ES_QUERY = {"match": {"type": "Visible"}}
 WORKS_BATCH_SIZE = 10_000
 
 
@@ -28,7 +30,11 @@ def get_related_works_query(related_ids: list[str]) -> dict:
 
 
 class ExtractedWork(BaseModel):
-    work: DenormalisedWork
+    work: MergedWork
+
+
+class VisibleExtractedWork(ExtractedWork):
+    work: VisibleMergedWork
     hierarchy: WorkHierarchy
     concepts: list[WorkConcept]
 
@@ -42,11 +48,25 @@ class GraphWorksExtractor(GraphBaseExtractor):
         super().__init__(es_mode != "private")
         self.es_source = MergedWorksSource(
             event,
-            query=ES_QUERY,
             es_mode=es_mode,
         )
         self.event = event
         self.es_mode = es_mode
+
+        self.streamed_ids: set[str] = set()
+        self.related_ids: set[str] = set()
+
+    def get_related_works_source(self, related_ids: list[str]) -> MergedWorksSource:
+        # Remove `window` from event before retrieving related works. (All related works should be processed
+        # even if they aren't part of the current window.)
+        event = BasePipelineEvent(
+            pipeline_date=self.event.pipeline_date, pit_id=self.event.pit_id
+        )
+        return MergedWorksSource(
+            event=event,
+            query=get_related_works_query(related_ids),
+            es_mode=self.es_mode,
+        )
 
     def _get_work_ancestors(self, ids: list[str]) -> dict:
         """Return all ancestors of each work in the current batch."""
@@ -61,12 +81,14 @@ class GraphWorksExtractor(GraphBaseExtractor):
         return self.make_neptune_query("work_concepts", ids)
 
     def process_es_works(
-        self, es_works: Iterator[DenormalisedWork]
+        self, es_works: Iterator[MergedWork]
     ) -> Generator[ExtractedWork]:
         for es_batch in batched(es_works, WORKS_BATCH_SIZE):
             # Make graph queries to retrieve ancestors, children, and concepts for all visible works in each batch
             visible_work_ids = [
-                w.state.canonical_id for w in es_batch if w.type == "Visible"
+                w.state.canonical_id
+                for w in es_batch
+                if isinstance(w, VisibleMergedWork)
             ]
             all_ancestors = self._get_work_ancestors(visible_work_ids)
             all_children = self._get_work_children(visible_work_ids)
@@ -74,46 +96,45 @@ class GraphWorksExtractor(GraphBaseExtractor):
 
             for es_work in es_batch:
                 work_id = es_work.state.canonical_id
-                yield ExtractedWork(
-                    work=es_work,
-                    hierarchy=WorkHierarchy(
-                        id=work_id,
-                        ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
-                        children=all_children.get(work_id, {}).get("children", []),
-                    ),
-                    concepts=all_concepts.get(work_id, {}).get("concepts", []),
+                self.streamed_ids.add(work_id)
+
+                hierarchy = WorkHierarchy(
+                    id=work_id,
+                    ancestors=all_ancestors.get(work_id, {}).get("ancestors", []),
+                    children=all_children.get(work_id, {}).get("children", []),
+                )
+                concepts = all_concepts.get(work_id, {}).get("concepts", [])
+
+                # When a work is reprocessed, all of its children and ancestors must be reprocessed too for consistency.
+                # (For example, if the title of a parent work changes, all of its children must be processed
+                # and reindexed to store the new title.)
+                self.related_ids.update(
+                    c.work.properties.id for c in hierarchy.children
+                )
+                self.related_ids.update(
+                    c.work.properties.id for c in hierarchy.ancestors
                 )
 
+                # Only visible works story hierarchy and concepts
+                if isinstance(es_work, VisibleMergedWork):
+                    yield VisibleExtractedWork(
+                        work=es_work, hierarchy=hierarchy, concepts=concepts
+                    )
+                else:
+                    yield ExtractedWork(work=es_work)
+
     def extract_raw(self) -> Generator[ExtractedWork]:
-        streamed_ids: set[str] = set()
-        related_ids: set[str] = set()
-
-        works_stream = (DenormalisedWork(**w) for w in self.es_source.stream_raw())
-        for extracted_work in self.process_es_works(works_stream):
-            streamed_ids.add(extracted_work.work.state.canonical_id)
-
-            # When a work is reprocessed, all of its children and ancestors must be reprocessed too for consistency.
-            # (For example, if the title of a parent work changes, all of its children must be processed and reindexed
-            # to store the new title.)
-            related_ids.update(
-                c.work.properties.id for c in extracted_work.hierarchy.children
-            )
-            related_ids.update(
-                c.work.properties.id for c in extracted_work.hierarchy.ancestors
-            )
-
-            yield extracted_work
+        works_stream = (
+            MergedWork.from_raw_document(w) for w in self.es_source.stream_raw()
+        )
+        yield from self.process_es_works(works_stream)
 
         # Before processing related works, filter out works which were already processed above
-        related_ids = related_ids.difference(streamed_ids)
+        related_ids = self.related_ids.difference(self.streamed_ids)
         print(f"Will process a total of {len(related_ids)} related works.")
 
-        related_works_source = MergedWorksSource(
-            event=self.event,
-            query=get_related_works_query(list(related_ids)),
-            es_mode=self.es_mode,
-        )
+        related_works_source = self.get_related_works_source(list(related_ids))
         related_works_stream = (
-            DenormalisedWork(**w) for w in related_works_source.stream_raw()
+            MergedWork.from_raw_document(w) for w in related_works_source.stream_raw()
         )
         yield from self.process_es_works(related_works_stream)

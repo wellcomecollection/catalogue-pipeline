@@ -1,61 +1,78 @@
 from datetime import datetime
-from typing import Literal
 
-from pydantic import BaseModel
-
+from ingestor.models.merged.work import (
+    DeletedMergedWork,
+    InvisibleMergedWork,
+    MergedWork,
+    RedirectedMergedWork,
+    VisibleMergedWork,
+)
+from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.identifier import Identifiers, SourceIdentifier
+from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.serialisable import ElasticsearchModel
 
 
-class SourceWorkDebugInformation(ElasticsearchModel):
+class WorkDebugSource(ElasticsearchModel):
     id: str
     identifier: SourceIdentifier
     version: int
     modified_time: datetime
 
 
-class BaseWorkDebug(ElasticsearchModel):
-    source: SourceWorkDebugInformation
+class WorkDebug(ElasticsearchModel):
+    source: WorkDebugSource
     merged_time: datetime
     indexed_time: datetime
     merge_candidates: list[MergeCandidate]
 
+    @classmethod
+    def _from_merged_work(cls, work: MergedWork) -> "WorkDebug":
+        return WorkDebug(
+            source=WorkDebugSource(
+                id=work.state.canonical_id,
+                identifier=work.state.source_identifier,
+                version=work.version,
+                modified_time=work.state.source_modified_time,
+            ),
+            merged_time=work.state.merged_time,
+            indexed_time=datetime.now(),
+            merge_candidates=work.state.merge_candidates,
+        )
 
-class VisibleWorkDebug(BaseWorkDebug):
+
+class VisibleWorkDebug(WorkDebug):
     redirect_sources: list[Identifiers]
 
-
-class InvisibleReason(BaseModel):
-    type: Literal[
-        "CopyrightNotCleared",
-        "SourceFieldMissing",
-        "InvalidValueInSourceField",
-        "UnlinkedHistoricalLibraryMiro",
-        "UnableToTransform",
-        "MetsWorksAreNotVisible",
-    ]
-    info: str | None = None
-    message: str | None = None
+    @classmethod
+    def from_merged_work(cls, work: VisibleMergedWork) -> "VisibleWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
+        return VisibleWorkDebug(**debug, redirect_sources=work.redirect_sources)
 
 
-class InvisibleWorkDebug(BaseWorkDebug):
+class InvisibleWorkDebug(WorkDebug):
     invisibility_reasons: list[InvisibleReason]
 
-
-class RedirectedWorkDebug(BaseWorkDebug):
-    pass
-
-
-class DeletedReason(BaseModel):
-    type: Literal["DeletedFromSource", "SuppressedFromSource", "TeiDeletedInMerger"]
-    info: str | None = None
+    @classmethod
+    def from_merged_work(cls, work: InvisibleMergedWork) -> "InvisibleWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
+        return InvisibleWorkDebug(
+            **debug, invisibility_reasons=work.invisibility_reasons
+        )
 
 
-class DeletedWorkDebug(BaseWorkDebug):
+class RedirectedWorkDebug(WorkDebug):
+    @classmethod
+    def from_merged_work(cls, work: RedirectedMergedWork) -> "RedirectedWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
+        return RedirectedWorkDebug(**debug)
+
+
+class DeletedWorkDebug(WorkDebug):
     deleted_reason: DeletedReason
 
-
-WorkDebug = (
-    VisibleWorkDebug | InvisibleWorkDebug | DeletedWorkDebug | RedirectedWorkDebug
-)
+    @classmethod
+    def from_merged_work(cls, work: DeletedMergedWork) -> "DeletedWorkDebug":
+        debug = WorkDebug._from_merged_work(work).model_dump()
+        return DeletedWorkDebug(**debug, deleted_reason=work.deleted_reason)
