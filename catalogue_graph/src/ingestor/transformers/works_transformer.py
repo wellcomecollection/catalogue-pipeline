@@ -5,6 +5,8 @@ from ingestor.models.aggregate.work import WorkAggregatableValues
 from ingestor.models.debug.work import SourceWorkDebugInformation, VisibleWorkDebug
 from ingestor.models.filter.work import WorkFilterableValues
 from ingestor.models.indexable_work import DisplayWork, IndexableWork, QueryWork
+from models.events import BasePipelineEvent
+from utils.elasticsearch import ElasticsearchMode
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .work_aggregate_transformer import AggregateWorkTransformer
@@ -14,11 +16,11 @@ from .work_query_transformer import QueryWorkTransformer
 
 class ElasticsearchWorksTransformer(ElasticsearchBaseTransformer):
     def __init__(
-        self, pipeline_date: str, start_offset: int, end_index: int, is_local: bool
+        self,
+        event: BasePipelineEvent,
+        es_mode: ElasticsearchMode,
     ) -> None:
-        self.source = GraphWorksExtractor(
-            pipeline_date, start_offset, end_index, is_local
-        )
+        self.source = GraphWorksExtractor(event, es_mode)
 
     def _transform_display(self, extracted: ExtractedWork) -> DisplayWork:
         work = extracted.work

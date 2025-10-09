@@ -1,5 +1,6 @@
 from typing import TextIO
 
+from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.extractors.concepts_extractor import GraphConceptsExtractor
 from ingestor.models.indexable_concept import (
     ConceptDisplay,
@@ -8,9 +9,12 @@ from ingestor.models.indexable_concept import (
     IndexableConcept,
     RelatedConcepts,
 )
+from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
 from ingestor.transformers.raw_related_concepts import RawNeptuneRelatedConcepts
+from models.events import BasePipelineEvent
+from utils.elasticsearch import ElasticsearchMode
 
 from .base_transformer import ElasticsearchBaseTransformer
 from .raw_concept import MissingLabelError
@@ -20,12 +24,11 @@ from .raw_related_concepts import RawNeptuneRelatedConcept
 class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
     def __init__(
         self,
-        start_offset: int,
-        end_index: int,
-        is_local: bool,
+        event: BasePipelineEvent,
+        es_mode: ElasticsearchMode,
         overrides: TextIO | None = None,
     ) -> None:
-        self.source = GraphConceptsExtractor(start_offset, end_index, is_local)
+        self.source = GraphConceptsExtractor(event, es_mode)
         self.override_provider = ConceptTextOverrideProvider(overrides)
 
     def _transform_related_concept(
@@ -77,6 +80,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
             type=neptune_concept.concept_type,
             description=self.override_provider.description_of(neptune_concept),
             sameAs=neptune_concept.same_as,
+            displayImages=self.override_provider.display_images(neptune_concept),
             relatedConcepts=RelatedConcepts(
                 relatedTo=self._transform_related_concepts(neptune_related.related_to),
                 fieldsOfWork=self._transform_related_concepts(
@@ -100,7 +104,7 @@ class ElasticsearchConceptsTransformer(ElasticsearchBaseTransformer):
         )
 
     def transform_document(
-        self, raw_item: tuple[dict, dict]
+        self, raw_item: tuple[ExtractedConcept, dict[ConceptRelatedQuery, list]]
     ) -> IndexableConcept | None:
         neptune_concept = RawNeptuneConcept(raw_item[0])
         neptune_related = RawNeptuneRelatedConcepts(raw_item[1])

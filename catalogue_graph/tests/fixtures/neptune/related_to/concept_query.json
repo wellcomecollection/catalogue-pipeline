@@ -1,0 +1,19 @@
+[
+  {
+    "id": "tzrtx26u",
+    "concept": {
+      "~id": "tzrtx26u",
+      "~entityType": "node",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "tzrtx26u",
+        "label": "Hilton, Violet, 1908-1969.",
+        "source": "lc-names",
+        "type": "Person"
+      }
+    }
+  }
+]
+

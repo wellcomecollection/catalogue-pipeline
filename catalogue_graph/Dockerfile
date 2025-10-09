@@ -1,4 +1,4 @@
-ARG PYTHON_IMAGE_VERSION=latest 
+ARG PYTHON_IMAGE_VERSION=3.12
 FROM python:${PYTHON_IMAGE_VERSION} AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"

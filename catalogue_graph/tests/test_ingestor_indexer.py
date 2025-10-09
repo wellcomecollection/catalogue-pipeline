@@ -5,32 +5,39 @@ from typing import Any
 import polars
 import pydantic_core
 import pytest
-from test_mocks import MockElasticsearchClient, MockSecretsManagerClient, MockSmartOpen
+from test_mocks import (
+    MockElasticsearchClient,
+    MockSmartOpen,
+    mock_es_secrets,
+)
 from test_utils import load_fixture, load_json_fixture
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
 )
-from ingestor.steps.ingestor_indexer import IngestorIndexerConfig, handler
+from ingestor.steps.ingestor_indexer import handler
 from utils.types import IngestorType
 
 
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
 def test_ingestor_indexer_success(record_type: IngestorType) -> None:
-    config = IngestorIndexerConfig()
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date="2025-01-01",
         index_date="2025-01-01",
         job_id="123",
-        object_to_index=IngestorIndexerObject(
-            s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet"
-        ),
+        objects_to_index=[
+            IngestorIndexerObject(
+                s3_uri="s3://test-catalogue-graph/00000000-00000010.parquet",
+                record_count=10,
+                content_length=500,
+            )
+        ],
     )
 
-    _mock_es_secrets()
     # TO DO: generate a new parquet file the matches the RelatedConcepts model once the graph as been updated
+    mock_es_secrets(f"{record_type}_ingestor", "2025-01-01")
 
     # To regenerate this file after making ingestor changes, run the following command and retrieve the resulting file
     # from the `wellcomecollection-catalogue-graph` S3 bucket:
@@ -39,11 +46,11 @@ def test_ingestor_indexer_success(record_type: IngestorType) -> None:
         "s3://test-catalogue-graph/00000000-00000010.parquet",
         load_fixture(f"ingestor/{record_type}/00000000-00000010.parquet"),
     )
-    MockSmartOpen.open(event.object_to_index.s3_uri, "r")
+    MockSmartOpen.open(event.objects_to_index[0].s3_uri, "r")
 
     expected_inputs = load_json_fixture(f"ingestor/{record_type}/mock_es_inputs.json")
 
-    result = handler(event, config)
+    result = handler(event)
     assert len(MockElasticsearchClient.inputs) == 10
     assert result.success_count == 10
     assert MockElasticsearchClient.inputs == expected_inputs
@@ -72,9 +79,13 @@ def failure_params_missing_file(record_type: IngestorType) -> tuple:
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
-            object_to_index=IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/ghost-file"
-            ),
+            objects_to_index=[
+                IngestorIndexerObject(
+                    s3_uri="s3://test-catalogue-graph/ghost-file",
+                    content_length=0,
+                    record_count=0,
+                )
+            ],
         ),
         None,
         KeyError,
@@ -90,9 +101,13 @@ def failure_params_malformed_parquet(record_type: IngestorType) -> tuple:
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
-            object_to_index=IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl"
-            ),
+            objects_to_index=[
+                IngestorIndexerObject(
+                    s3_uri="s3://test-catalogue-graph/catalogue/denormalised_works_example.jsonl",
+                    content_length=10,
+                    record_count=10,
+                )
+            ],
         ),
         "catalogue/denormalised_works_example.jsonl",
         polars.exceptions.ComputeError,
@@ -110,9 +125,13 @@ def failure_params_wrong_content(
             pipeline_date="2021-07-01",
             index_date="2025-01-01",
             job_id="123",
-            object_to_index=IngestorIndexerObject(
-                s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet"
-            ),
+            objects_to_index=[
+                IngestorIndexerObject(
+                    s3_uri="s3://test-catalogue-graph/catalogue/00000000-00000010.parquet",
+                    content_length=10,
+                    record_count=10,
+                )
+            ],
         ),
         f"ingestor/{actual_type}/00000000-00000010.parquet",
         pydantic_core.ValidationError,
@@ -136,29 +155,11 @@ def test_ingestor_indexer_failure(
     expected_error: Any | tuple,
     error_message: str,
 ) -> None:
-    config = IngestorIndexerConfig()
-
     with pytest.raises(expected_exception=expected_error, match=error_message):
         if description != "the file at s3_uri doesn't exist":
             MockSmartOpen.mock_s3_file(
-                event.object_to_index.s3_uri, load_fixture(fixture)
+                event.objects_to_index[0].s3_uri, load_fixture(fixture)
             )
-        MockSmartOpen.open(event.object_to_index.s3_uri, "r")
+        MockSmartOpen.open(event.objects_to_index[0].s3_uri, "r")
 
-        handler(event, config)
-
-
-def _mock_es_secrets() -> None:
-    # Using a non-null pipeline_date connects to the production ES cluster, so we need to mock some secrets
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/private_host", "test"
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/port", 80
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/protocol", "http"
-    )
-    MockSecretsManagerClient.add_mock_secret(
-        "elasticsearch/pipeline_storage_2025-01-01/concept_ingestor/api_key", ""
-    )
+        handler(event)

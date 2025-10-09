@@ -1,0 +1,62 @@
+{
+  "concept": {
+    "~id": "id",
+    "~labels": [
+      "Concept"
+    ],
+    "~properties": {
+      "id": "id",
+      "label": "label",
+      "type": "type",
+      "source": "nlm-mesh"
+    }
+  },
+  "source_concepts": [
+    {
+      "~id": "123",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "123",
+        "source": "lc-names",
+        "description": "description",
+        "alternative_labels": "alternative label||another alternative label",
+        "label": "LoC label"
+      }
+    },
+    {
+      "~id": "456",
+      "~labels": [
+        "SourceConcept"
+      ],
+      "~properties": {
+        "id": "456",
+        "source": "wikidata",
+        "description": "description",
+        "label": "Wikidata label"
+      }
+    }
+  ],
+  "linked_source_concept": {
+    "~id": "123",
+    "~labels": [
+      "SourceConcept"
+    ],
+    "~properties": {
+      "id": "123",
+      "source": "lc-names",
+      "description": "description",
+      "label": "LoC label"
+    }
+  },
+  "same_as": [],
+  "types": [
+    "Concept",
+    "Person"
+  ]
+}
+
+
+
+

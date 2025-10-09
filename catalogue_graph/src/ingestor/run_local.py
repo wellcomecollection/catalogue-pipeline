@@ -5,64 +5,29 @@ import typing
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
-    IngestorLoaderMonitorLambdaEvent,
-    IngestorTriggerLambdaEvent,
-    IngestorTriggerMonitorLambdaEvent,
+    IngestorLoaderLambdaEvent,
 )
-from ingestor.steps.ingestor_indexer import IngestorIndexerConfig
 from ingestor.steps.ingestor_indexer import handler as indexer_handler
-from ingestor.steps.ingestor_loader import IngestorLoaderConfig
+from ingestor.steps.ingestor_loader import create_job_id
 from ingestor.steps.ingestor_loader import handler as loader_handler
-from ingestor.steps.ingestor_loader_monitor import IngestorLoaderMonitorConfig
 from ingestor.steps.ingestor_loader_monitor import handler as loader_monitor_handler
-from ingestor.steps.ingestor_trigger import IngestorTriggerConfig, create_job_id
-from ingestor.steps.ingestor_trigger import handler as trigger_handler
-from ingestor.steps.ingestor_trigger_monitor import IngestorTriggerMonitorConfig
-from ingestor.steps.ingestor_trigger_monitor import handler as trigger_monitor_handler
 from utils.types import IngestorType
 
 
-def run_trigger(
-    event: IngestorTriggerLambdaEvent, args: argparse.Namespace
-) -> IngestorTriggerMonitorLambdaEvent:
-    config = IngestorTriggerConfig(is_local=True)
-    trigger_result = trigger_handler(event, config)
-    trigger_result.force_pass = args.force_pass
-
-    if args.monitoring:
-        trigger_monitor_handler(trigger_result, IngestorTriggerMonitorConfig())
-
-    return trigger_result
-
-
 def run_load(
-    trigger_result: IngestorTriggerMonitorLambdaEvent, args: argparse.Namespace
-) -> list[IngestorIndexerLambdaEvent]:
-    loader_config = IngestorLoaderConfig(is_local=True)
-    limit = args.limit or len(trigger_result.events)
-    loader_results = [
-        loader_handler(e, loader_config) for e in trigger_result.events[:limit]
-    ]
+    loader_event: IngestorLoaderLambdaEvent, args: argparse.Namespace
+) -> IngestorIndexerLambdaEvent:
+    loader_result = loader_handler(loader_event, es_mode="public")
 
     if args.monitoring:
-        loader_monitor_event = IngestorLoaderMonitorLambdaEvent(
-            **loader_results[0].model_dump(),
-            events=loader_results,
-            force_pass=args.force_pass,
-        )
-        loader_monitor_handler(loader_monitor_event, IngestorLoaderMonitorConfig())
+        loader_monitor_handler(loader_result)
 
-    return loader_results
+    return loader_result
 
 
-def run_index(loader_results: list[IngestorIndexerLambdaEvent]) -> None:
-    indexer_config = IngestorIndexerConfig(is_local=True)
-    indexer_handler_responses = [
-        indexer_handler(e, indexer_config) for e in loader_results
-    ]
-
-    total_success_count = sum(res.success_count for res in indexer_handler_responses)
-    print(f"Indexed {total_success_count} documents.")
+def run_index(loader_result: IngestorIndexerLambdaEvent) -> None:
+    result = indexer_handler(loader_result, es_mode="public")
+    print(f"Indexed {result.success_count} documents.")
 
 
 # Run the whole pipeline locally.
@@ -76,13 +41,6 @@ def main() -> None:
         choices=typing.get_args(IngestorType),
         help="Which ingestor to run (works or concepts).",
         required=True,
-    )
-    parser.add_argument(
-        "--job-id",
-        type=str,
-        help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
-        required=False,
-        default=create_job_id(),
     )
     parser.add_argument(
         "--pipeline-date",
@@ -99,6 +57,25 @@ def main() -> None:
         default="dev",
     )
     parser.add_argument(
+        "--window-start",
+        type=str,
+        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
+        "--window-end",
+        type=str,
+        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        help="The ID of the job to process, will use a default based on the current timestamp if not provided.",
+        required=False,
+        default=create_job_id(),
+    )
+    parser.add_argument(
         "--limit",
         type=int,
         help="The number of shards to process, will process all if not specified.",
@@ -110,18 +87,11 @@ def main() -> None:
         help="Whether to enable monitoring, will default to False.",
         default=False,
     )
-    parser.add_argument(
-        "--force-pass",
-        action=argparse.BooleanOptionalAction,
-        help="Whether to force pass monitoring checks, will default to False.",
-        default=False,
-    )
 
     args = parser.parse_args()
+    event = IngestorLoaderLambdaEvent.from_argparser(args)
 
-    trigger_event = IngestorTriggerLambdaEvent(**args.__dict__)
-    trigger_result = run_trigger(trigger_event, args)
-    loader_results = run_load(trigger_result, args)
+    loader_results = run_load(event, args)
     run_index(loader_results)
 
 

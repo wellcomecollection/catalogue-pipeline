@@ -62,18 +62,21 @@ jobs:
       matrix:
         lambda_name:
           [
+            # Adapter lambdas
+            ebsco-adapter-trigger,
+            ebsco-adapter-loader,
+
+            # Knowledge graph lambdas
             catalogue-graph-bulk-loader,
             catalogue-graph-bulk-load-poller,
             catalogue-graph-indexer,
             catalogue-graph-remover,
-            catalogue-graph-ingestor-trigger,
-            catalogue-graph-ingestor-trigger-monitor,
             catalogue-graph-ingestor-loader,
             catalogue-graph-ingestor-loader-monitor,
             catalogue-graph-ingestor-indexer,
             catalogue-graph-ingestor-indexer-monitor,
             catalogue-graph-ingestor-deletions,
-            catalogue-graph-ingestor-reporter,
+            catalogue-graph-es-pit-opener,
           ]
     steps:
       - uses: actions/checkout@v3
@@ -84,3 +87,22 @@ jobs:
           image_name: unified_pipeline_lambda
           deploy_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+
+  deploy-dated-unified-pipeline-lambdas:
+    name: Deploy dated unified pipeline lambdas
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component:
+          - transformer_ebsco
+    steps:
+      - uses: actions/checkout@v3
+      - name: Deploy dated pipeline lambda (latest)
+        uses: ./.github/actions/deploy-dated-pipeline-lambda
+        with:
+          source_tag: ${{ inputs.deploy_tag }}
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          image_name: unified_pipeline_lambda
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          aws_region: eu-west-1
+          lambda_suffix: ${{ matrix.component }}

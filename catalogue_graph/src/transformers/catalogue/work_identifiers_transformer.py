@@ -1,13 +1,14 @@
 from collections.abc import Generator
 
-from models.events import IncrementalWindow
+from models.events import BasePipelineEvent
 from models.graph_edge import (
     PathIdentifierHasParent,
     WorkHasPathIdentifier,
 )
 from models.graph_node import PathIdentifier
-from sources.elasticsearch_source import MergedWorksSource
+from sources.merged_works_source import MergedWorksSource
 from transformers.base_transformer import BaseTransformer
+from utils.elasticsearch import ElasticsearchMode
 
 from .raw_work import RawCatalogueWork
 
@@ -32,12 +33,11 @@ ES_QUERY = {
 class CatalogueWorkIdentifiersTransformer(BaseTransformer):
     def __init__(
         self,
-        pipeline_date: str,
-        window: IncrementalWindow | None,
-        is_local: bool,
+        event: BasePipelineEvent,
+        es_mode: ElasticsearchMode,
     ) -> None:
         self.source = MergedWorksSource(
-            pipeline_date, ES_QUERY, ES_FIELDS, window, is_local
+            event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
         )
 
     def transform_node(self, raw_data: dict) -> PathIdentifier | None:

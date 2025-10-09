@@ -3,7 +3,9 @@ name = "catalogue-graph"
 version = "0.1.0"
 description = "Catalogue graph processing and indexing"
 readme = "README.md"
-requires-python = ">=3.13"
+# This project requires Python 3.12 instead of 3.13
+# Wheels for pyarrow and pyiceberg are not available for 3.13 yet (as of August 2025)
+requires-python = ">=3.12,<3.13"
 dependencies = [
     "boto3",
     "requests",
@@ -14,12 +16,16 @@ dependencies = [
     "elasticsearch>=8.11,<8.13",
     "tabulate",
     "types-tabulate",
-    "boto3-stubs",
     "types-requests",
     "python-dateutil",
     "types-python-dateutil",
     "pyarrow~=20.0",
-    "pyarrow-stubs"
+    "lxml>=6.0.0",
+    "pydantic>=2.11.7",
+    "pyiceberg[sql-sqlite]>=0.9.1",
+    "pymarc>=5.3.1",
+    "smart-open>=7.3.0.post1",
+    "tqdm>=4.67.1",
 ]
 
 [tool.uv]
@@ -27,14 +33,21 @@ package = true
 
 [dependency-groups]
 dev = [
+    "boto3-stubs",
     "coverage[toml]",
-    "mypy",
+    "mypy>=1.16.1",
     "pytest",
     "pytest-cov",
     "freezegun",
     "ruff",
+    "polars>=1.32.3",
     "ipykernel>=6.30.0",
     "pandas>=2.3.1",
+    "lxml-stubs>=0.5.1",
+    "pyarrow-stubs",
+    "pytest>=8.4.0",
+    "ipykernel>=6.30.0",
+    "pytest-bdd>=8.1.0",
 ]
 
 [tool.pytest.ini_options]
@@ -76,8 +89,9 @@ warn_no_return = true
 warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
-mypy_path = "src"
+mypy_path = "src:type_stubs"
 
+# Ignore untyped imports for external libraries without stubs
 [[tool.mypy.overrides]]
-module = ["smart_open.*"]
+module = ["pyarrow.*", "boto3.*", "smart_open.*"]
 ignore_missing_imports = true

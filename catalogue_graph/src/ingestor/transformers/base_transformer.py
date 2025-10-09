@@ -1,6 +1,7 @@
 import os
 from collections.abc import Generator
-from typing import IO, Any
+from itertools import batched
+from typing import IO, Any, Literal
 
 import boto3
 import polars as pl
@@ -9,16 +10,18 @@ import smart_open
 from pydantic import BaseModel
 
 from ingestor.extractors.base_extractor import GraphBaseExtractor
-from ingestor.steps.ingestor_indexer import IngestorIndexerObject
+from ingestor.models.step_events import IngestorIndexerObject, IngestorLoaderLambdaEvent
 from utils.arrow import pydantic_to_pyarrow_schema
-from utils.types import IngestorLoadFormat
+
+S3_BATCH_SIZE = 10_000
+
+
+LoadDestination = Literal["s3", "local"]
 
 
 class ElasticsearchBaseTransformer:
-    def __init__(self, start_offset: int, end_index: int, is_local: bool) -> None:
-        self.source: GraphBaseExtractor = GraphBaseExtractor(
-            start_offset, end_index, is_local
-        )
+    def __init__(self) -> None:
+        self.source: GraphBaseExtractor = GraphBaseExtractor()
 
     def transform_document(self, raw_item: Any) -> BaseModel | None:
         """
@@ -28,65 +31,82 @@ class ElasticsearchBaseTransformer:
             "Each Elasticsearch transformer must implement a `transform_document` method."
         )
 
-    def _load_to_file(self, file: IO, load_format: IngestorLoadFormat) -> int:
-        es_documents = list(self.stream_es_documents())
-        if len(es_documents) == 0:
-            raise ValueError("No documents to write.")
-
-        if load_format == "parquet":
-            # Convert Pydantic models to Parquet:
-            # Pydantic -> dict -> PyArrow Table (with schema) -> Polars DataFrame -> Parquet
-            # Explicit schema ensures reliable types (Polars inference is not reliable).
-            schema = pydantic_to_pyarrow_schema(type(es_documents[0]))
-            table = pa.Table.from_pylist(
-                [d.model_dump(by_alias=False) for d in es_documents],
-                schema=pa.schema(schema),
-            )
-            pl.DataFrame(table).write_parquet(file)
-        elif load_format == "jsonl":
-            for doc in es_documents:
-                line = (doc.model_dump_json() + "\n").encode("utf-8")
-                file.write(line)
-        else:
-            raise ValueError(f"Unknown load file format {load_format}")
-
-        return len(es_documents)
-
     def stream_es_documents(self) -> Generator[BaseModel]:
         for raw_item in self.source.extract_raw():
             pydantic_document = self.transform_document(raw_item)
             if pydantic_document:
                 yield pydantic_document
 
-    def load_documents_to_s3(
-        self, s3_uri: str, load_format: IngestorLoadFormat
-    ) -> IngestorIndexerObject:
-        """Load transformed documents into a parquet file in S3."""
-        print(f"Loading data to '{s3_uri}'...")
+    def stream_batches(self) -> Generator[tuple]:
+        yield from batched(self.stream_es_documents(), S3_BATCH_SIZE)
 
-        transport_params = {"client": boto3.client("s3")}
-        with smart_open.open(s3_uri, "wb", transport_params=transport_params) as f:
-            record_count = self._load_to_file(f, load_format)
-
-        boto_s3_object = f.to_boto3(boto3.resource("s3"))
-        content_length = boto_s3_object.content_length
-
-        print(f"Data loaded to '{s3_uri}' with content length {content_length}")
-
-        return IngestorIndexerObject(
-            s3_uri=s3_uri,
-            content_length=content_length,
-            record_count=record_count,
+    def _load_to_parquet(self, es_documents: list[BaseModel], file: IO) -> None:
+        # Convert Pydantic models to Parquet:
+        # Pydantic -> dict -> PyArrow Table (with schema) -> Polars DataFrame -> Parquet
+        # Explicit schema ensures reliable types (Polars inference is not reliable).
+        schema = pydantic_to_pyarrow_schema(type(es_documents[0]))
+        table = pa.Table.from_pylist(
+            [d.model_dump(by_alias=False) for d in es_documents],
+            schema=pa.schema(schema),
         )
+        pl.DataFrame(table).write_parquet(file)
 
-    def load_documents_to_local_file(
-        self, file_name: str, load_format: IngestorLoadFormat
+    def _load_to_jsonl(self, es_documents: list[BaseModel], file: IO) -> None:
+        for doc in es_documents:
+            line = (doc.model_dump_json() + "\n").encode("utf-8")
+            file.write(line)
+
+    def _get_file_path(
+        self,
+        event: IngestorLoaderLambdaEvent,
+        destination: LoadDestination,
+        file_name: str,
     ) -> str:
-        """Load transformed documents into a local JSONL file for testing purposes."""
-        file_path = f"../ingestor_outputs/{file_name}.{load_format}"
-        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        if destination == "s3":
+            full_path = event.get_s3_uri(file_name)
+        elif destination == "local":
+            relative_path = f"../ingestor_outputs/{file_name}.{event.load_format}"
+            full_path = os.path.abspath(relative_path)
+            os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        else:
+            raise ValueError(f"Unknown destination: '{destination}'.")
 
-        with open(file_path, "wb") as f:
-            self._load_to_file(f, load_format)
+        return full_path
 
-        return os.path.abspath(file_path)
+    def load_documents(
+        self,
+        event: IngestorLoaderLambdaEvent,
+        destination: LoadDestination = "s3",
+    ) -> list[IngestorIndexerObject]:
+        loaded_objects: list[IngestorIndexerObject] = []
+
+        transport_params = None
+        if destination == "s3":
+            transport_params = {"client": boto3.client("s3")}
+
+        for i, batch in enumerate(self.stream_batches()):
+            file_name = f"{str(i * S3_BATCH_SIZE).zfill(8)}-{str(i * S3_BATCH_SIZE + len(batch)).zfill(8)}"
+            full_path = self._get_file_path(event, destination, file_name)
+
+            with smart_open.open(
+                full_path, "wb", transport_params=transport_params
+            ) as f:
+                documents = list(batch)
+                if event.load_format == "parquet":
+                    self._load_to_parquet(documents, f)
+                elif event.load_format == "jsonl":
+                    self._load_to_jsonl(documents, f)
+
+                content_length = f.tell()
+
+            loaded_objects.append(
+                IngestorIndexerObject(
+                    s3_uri=full_path,
+                    content_length=content_length,
+                    record_count=len(documents),
+                )
+            )
+
+            print(f"{len(documents)} items loaded to '{full_path}'.")
+
+        return loaded_objects

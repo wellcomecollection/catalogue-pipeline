@@ -1,0 +1,17 @@
+[
+  {
+    "id": "jbxfbpzq",
+    "concept": {
+      "~id": "jbxfbpzq",
+      "~labels": [
+        "Concept"
+      ],
+      "~properties": {
+        "id": "jbxfbpzq",
+        "label": "some concept",
+        "source": "lc-subjects"
+      }
+    }
+  }
+]
+

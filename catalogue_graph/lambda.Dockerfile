@@ -1,4 +1,4 @@
-ARG PYTHON_IMAGE_VERSION=3.13 
+ARG PYTHON_IMAGE_VERSION=3.12
 FROM public.ecr.aws/lambda/python:${PYTHON_IMAGE_VERSION} AS base
 
 LABEL maintainer="Wellcome Collection <digital@wellcomecollection.org>"

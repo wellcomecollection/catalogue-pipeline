@@ -93,3 +93,4 @@ class DenormalisedWork(ElasticsearchModel):
     state: DenormalisedWorkState
     version: int
     redirect_sources: list[Identifiers]
+    type: str

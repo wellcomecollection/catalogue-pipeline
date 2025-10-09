@@ -1,0 +1,184 @@
+[
+  {
+    "id": "jbxfbpzq",
+    "source_concepts": [
+      {
+        "~id": "123",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "123",
+          "source": "lc-names",
+          "label": "LoC label",
+          "alternative_labels": "Alternative label||another alternative label"
+        }
+      },
+      {
+        "~id": "456",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "456",
+          "source": "wikidata",
+          "label": "Wikidata label",
+          "alternative_labels": "Wikidata alternative label",
+          "description": "Description"
+        }
+      }
+    ],
+    "linked_source_concepts": [
+      {
+        "~id": "123",
+        "~labels": [
+          "SourceConcept"
+        ],
+        "~properties": {
+          "id": "123",
+          "source": "lc-names",
+          "label": "LoC label",
+          "alternative_labels": "Alternative label||another alternative label"
+        }
+      }
+    ]
+  },
+  {
+    "id": "tzrtx26u",
+    "source_concepts": [
+      {
+        "~id": "n2006095131",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "n2006095131",
+          "label": "Hilton, Violet, 1908-1969",
+          "source": "lc-names"
+        }
+      }
+    ],
+    "linked_source_concept": {
+      "~id": "n2006095131",
+      "~entityType": "node",
+      "~labels": [
+        "SourceName"
+      ],
+      "~properties": {
+        "id": "n2006095131",
+        "label": "Hilton, Violet, 1908-1969",
+        "source": "lc-names"
+      }
+    }
+  },
+  {
+    "id": "vc6xrky5",
+    "source_concept_nodes": [
+      {
+        "~id": "n84076647",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "n84076647",
+          "label": "Tegart, W. J. McG.",
+          "source": "lc-names",
+          "alternative_labels": "Tegart, Greg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "garjbvhe",
+    "source_concept_nodes": [
+      {
+        "~id": "n50041138",
+        "~entityType": "node",
+        "~labels": [
+          "SourceName"
+        ],
+        "~properties": {
+          "id": "n50041138",
+          "label": "Bube, Richard H., 1927-",
+          "source": "lc-names",
+          "alternative_labels": "Bube, Richard, 1927-||Bube, R. H. (Richard H.), 1927-"
+        }
+      }
+    ]
+  },
+  {
+    "id": "id",
+    "related": [
+      {
+        "id": "hstuwwsu",
+        "source_concept_nodes": [
+          {
+            "~id": "sh85042179",
+            "~entityType": "node",
+            "~labels": [
+              "SourceConcept"
+            ],
+            "~properties": {
+              "id": "sh85042179",
+              "label": "Electromagnetic waves",
+              "source": "lc-subjects",
+              "alternative_labels": "Electromagnetic energy||Electromagnetic radiation"
+            }
+          },
+          {
+            "~id": "D060733",
+            "~entityType": "node",
+            "~labels": [
+              "SourceConcept"
+            ],
+            "~properties": {
+              "id": "D060733",
+              "label": "Electromagnetic Radiation",
+              "source": "nlm-mesh",
+              "alternative_ids": "G01.358.500.505||G01.750.250",
+              "alternative_labels": "Radiation, Electromagnetic||Electromagnetic Energy||Electromagnetic Energies||Energies, Electromagnetic||Energy, Electromagnetic||Electromagnetic Waves||Electromagnetic Wave||Wave, Electromagnetic||Waves, Electromagnetic",
+              "description": "Waves of oscillating electric and MAGNETIC FIELDS which move at right angles to each other and outward from the source.\n    "
+            }
+          }
+        ]
+      },
+      {
+        "id": "hv6pemej",
+        "source_concept_nodes": [
+          {
+            "~id": "sh85145784",
+            "~entityType": "node",
+            "~labels": [
+              "SourceConcept"
+            ],
+            "~properties": {
+              "id": "sh85145784",
+              "label": "Wave mechanics",
+              "source": "lc-subjects"
+            }
+          }
+        ]
+      },
+      {
+        "id": "ugcgqepy",
+        "source_concept_nodes": [
+          {
+            "~id": "sh85042038",
+            "~entityType": "node",
+            "~labels": [
+              "SourceConcept"
+            ],
+            "~properties": {
+              "id": "sh85042038",
+              "label": "Electric waves",
+              "source": "lc-subjects",
+              "alternative_labels": "Hertzian waves"
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
