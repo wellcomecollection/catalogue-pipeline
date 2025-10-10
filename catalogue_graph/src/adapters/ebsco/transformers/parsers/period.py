@@ -45,7 +45,7 @@ def to_range(period: str) -> DateTimeRange:
     )
 
 
-def preprocess(period: str):
+def preprocess(period: str) -> str:
     """
     Preprocessing removes various non-meaningful strings from the period string.
 
@@ -96,7 +96,7 @@ def preprocess(period: str):
     return " ".join(RE_KEEP.findall(RE_DISCARD.sub("", period)))
 
 
-def crack(range_string) -> tuple[str, str]:
+def crack(range_string: str) -> tuple[str, str]:
     """
     Crack a (possible) range string into parts representing its start and end.
     This function assumes the range string has been preprocessed
@@ -158,7 +158,7 @@ def crack(range_string) -> tuple[str, str]:
     return from_part.strip(), to_part.strip()
 
 
-def fill_year_prefix(from_year, to_year):
+def fill_year_prefix(from_year: str, to_year: str) -> str:
     """
     A common abbreviated way to express a range of years is to assume that the century
     digits of the "from" year also apply to the "to" year, and only provide the differing

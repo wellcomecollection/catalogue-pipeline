@@ -25,14 +25,16 @@ def extract_production(record: Record) -> list[ProductionEvent]:
     match (productions260_264, production008):
         case ([], None):
             return []
-        case ([], production):
+        case ([], production) if production is not None:
             return [production]
         case (productions, None):
             return productions
-        case (productions, production):
+        case (productions, production) if production is not None:
             if not productions[0].dates:
                 productions[0].dates = production.dates
             return productions
+        case _:
+            return []
 
 
 def extract_production_from_008(record: Record) -> ProductionEvent | None:
@@ -41,16 +43,18 @@ def extract_production_from_008(record: Record) -> ProductionEvent | None:
         return None
     field008 = Field008(field.data)
     date_range_str = field008.maximal_date_range
-    place_str = field008.place_of_production
-    period = parse_period(date_range_str)
-    if period:
-        return ProductionEvent(
-            label=date_range_str,
-            places=[SourceConcept(label=place_str, type="Place")],
-            agents=[],
-            dates=[period],
-            function=None,
-        )
+    if date_range_str is not None:
+        period = parse_period(date_range_str)
+        if period:
+            place = field008.place_of_production
+            places = [SourceConcept(label=place, type="Place")] if place else []
+            return ProductionEvent(
+                label=date_range_str,
+                places=places,
+                agents=[],
+                dates=[period],
+                function=None,
+            )
     return None
 
 
