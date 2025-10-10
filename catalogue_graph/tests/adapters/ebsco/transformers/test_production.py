@@ -159,8 +159,8 @@ def test_ignores_008(marc_record: Record) -> None:
 def test_production_multiple_subfields(marc_record: Record) -> None:
     production = lone_element(transform_record(marc_record).production)
     assert (
-            production.label
-            == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
+        production.label
+        == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
     )
     assert production.places[0].label == "Announcer's Table"
     assert production.places[1].label == "Hell in a Cell"
@@ -249,11 +249,11 @@ def test_manufacture_fields(marc_record: Record) -> None:
             id=f"260: {ind2}->{fn}",
         )
         for (ind2, fn) in [
-        ("0", "Production"),
-        ("1", "Publication"),
-        ("2", "Distribution"),
-        ("3", "Manufacture"),
-    ]
+            ("0", "Production"),
+            ("1", "Publication"),
+            ("2", "Distribution"),
+            ("3", "Manufacture"),
+        ]
     ],
     indirect=["marc_record"],
 )
@@ -350,7 +350,7 @@ def test_prefer_260(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_populate_first_production_with_008_dates_if_none_of_its_own(
-        marc_record: Record,
+    marc_record: Record,
 ) -> None:
     production = lone_element(transform_record(marc_record).production)
     assert lone_element(production.places).label == "New York"
