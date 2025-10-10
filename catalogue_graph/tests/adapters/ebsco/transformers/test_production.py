@@ -30,10 +30,6 @@ def test_empty_production_is_no_production(marc_record: Record) -> None:
     assert transform_record(marc_record).production == []
 
 
-def test_no_production(marc_record: Record) -> None:
-    assert transform_record(marc_record).production == []
-
-
 @pytest.mark.parametrize(
     "marc_record",
     [
@@ -50,7 +46,7 @@ def test_no_production(marc_record: Record) -> None:
                 Field(
                     tag="264",
                     subfields=[],
-                )
+                ),
             ]
         )
     ],
@@ -103,6 +99,45 @@ def test_production_from_abc(marc_record: Record) -> None:
         pytest.param(
             [
                 Field(
+                    tag="008",
+                    data="800121d18001899acafr p o o   0    0engrc",
+                ),
+                Field(
+                    tag=code,
+                    indicators=Indicators(" ", "1"),
+                    subfields=[
+                        Subfield(code="c", value="1998"),
+                        Subfield(code="b", value="Mankind"),
+                        Subfield(code="a", value="Announcer's Table"),
+                    ],
+                ),
+            ],
+            id=f"MARC field code: {code}",
+        )
+        for code in ["260", "264"]
+    ],
+    indirect=["marc_record"],
+)
+def test_ignores_008(marc_record: Record) -> None:
+    """
+    008 is to be ignored if the information in 260/264 is complete
+    """
+    production = lone_element(transform_record(marc_record).production)
+    assert production.label == "1998 Mankind Announcer's Table"
+    assert lone_element(production.places).label == "Announcer's Table"
+    assert lone_element(production.agents).label == "Mankind"
+    period = lone_element(production.dates)
+    assert period.range.label == "1998"
+    assert period.range.from_time == "1998-01-01T00:00:00"
+    assert period.range.to_time == "1998-12-31T23:59:59.999999"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
                     tag=code,
                     indicators=Indicators(" ", "1"),
                     subfields=[
@@ -124,8 +159,8 @@ def test_production_from_abc(marc_record: Record) -> None:
 def test_production_multiple_subfields(marc_record: Record) -> None:
     production = lone_element(transform_record(marc_record).production)
     assert (
-            production.label
-            == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
+        production.label
+        == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
     )
     assert production.places[0].label == "Announcer's Table"
     assert production.places[1].label == "Hell in a Cell"
@@ -214,11 +249,11 @@ def test_manufacture_fields(marc_record: Record) -> None:
             id=f"260: {ind2}->{fn}",
         )
         for (ind2, fn) in [
-        ("0", "Production"),
-        ("1", "Publication"),
-        ("2", "Distribution"),
-        ("3", "Manufacture"),
-    ]
+            ("0", "Production"),
+            ("1", "Publication"),
+            ("2", "Distribution"),
+            ("3", "Manufacture"),
+        ]
     ],
     indirect=["marc_record"],
 )
@@ -290,3 +325,35 @@ def test_prefer_260(marc_record: Record) -> None:
     production = lone_element(transform_record(marc_record).production)
     assert production.label == "Düsseldorf City"
     assert production.function is None
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="008",
+                    data="800121s1979uuuuacafr p o o   0    0engrc",
+                ),
+                Field(
+                    tag="264",
+                    indicators=Indicators(" ", "1"),
+                    subfields=[
+                        Subfield(code="a", value="New York"),
+                    ],
+                ),
+            ]
+        )
+        for code in ["260", "264"]
+    ],
+    indirect=["marc_record"],
+)
+def test_populate_first_production_with_008_dates_if_none_of_its_own(
+    marc_record: Record,
+) -> None:
+    production = lone_element(transform_record(marc_record).production)
+    assert lone_element(production.places).label == "New York"
+    period = lone_element(production.dates)
+    assert period.range.label == "1979"
+    assert period.range.from_time == "1979-01-01T00:00:00"

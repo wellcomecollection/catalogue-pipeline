@@ -19,16 +19,20 @@ from adapters.ebsco.transformers.parsers.period import parse_period
 
 def extract_production(record: Record) -> list[ProductionEvent]:
     production008 = extract_production_from_008(record)
-    if productions := extract_production_from_fields(record.get_fields("260")):
-        pass
-    elif productions := extract_production_from_fields(record.get_fields("264")):
-        pass
-    elif production008 is not None:
-        productions = [production008]
-    else:
-        productions = []
-
-    return productions
+    productions260_264 = extract_production_from_fields(
+        record.get_fields("260")
+    ) or extract_production_from_fields(record.get_fields("264"))
+    match (productions260_264, production008):
+        case ([], None):
+            return []
+        case ([], production):
+            return [production]
+        case (productions, None):
+            return productions
+        case (productions, production):
+            if not productions[0].dates:
+                productions[0].dates = production.dates
+            return productions
 
 
 def extract_production_from_008(record: Record) -> ProductionEvent | None:
@@ -45,7 +49,7 @@ def extract_production_from_008(record: Record) -> ProductionEvent | None:
             places=[SourceConcept(label=place_str, type="Place")],
             agents=[],
             dates=[period],
-            funtion=None
+            funtion=None,
         )
     return None
 
@@ -67,6 +71,10 @@ IND2_264_MAP = {
 
 
 def single_production_event(field: Field) -> ProductionEvent | None:
+    if field.tag not in ["260", "264"]:
+        raise ValueError(
+            f"Unexpected production event field: {field.tag}. Should be one of 260, 264"
+        )
     label = field.format_field()
     places = [
         SourceConcept(label=subfield, type="Place")
