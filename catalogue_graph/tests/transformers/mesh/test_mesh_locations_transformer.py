@@ -1,7 +1,6 @@
-from test_mocks import MockRequest
-from test_utils import load_fixture
-
 from models.graph_node import SourceLocation
+from tests.mocks import MockRequest
+from tests.test_utils import load_fixture
 from transformers.mesh.locations_transformer import MeSHLocationsTransformer
 
 

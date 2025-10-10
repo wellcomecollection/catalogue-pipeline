@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import gzip
 import io
@@ -8,10 +10,18 @@ from collections import defaultdict
 from collections.abc import Generator
 from typing import Any, TypedDict
 
+import polars as pl
 from botocore.credentials import Credentials
+from polars import DataFrame as PolarsDataFrame
 
-MOCK_API_KEY = "TEST_SECRET_API_KEY_123"
+from utils.aws import (
+    INSTANCE_ENDPOINT_SECRET_NAME,
+    LOAD_BALANCER_SECRET_NAME,
+)
+
+MOCK_PUBLIC_ENDPOINT = "test-public-host.com"
 MOCK_INSTANCE_ENDPOINT = "test-host.com"
+MOCK_API_KEY = "TEST_SECRET_API_KEY_123"  # legacy constant retained
 MOCK_CREDENTIALS = Credentials(
     access_key="test_access_key",
     secret_key="test",
@@ -24,9 +34,8 @@ class MockSmartOpen:
 
     @classmethod
     def reset_mocks(cls) -> None:
-        # delete any temp files created
         for file_path in cls.file_lookup.values():
-            if isinstance(file_path, str):
+            if isinstance(file_path, str) and os.path.exists(file_path):
                 os.remove(file_path)
         cls.file_lookup = {}
 
@@ -40,33 +49,40 @@ class MockSmartOpen:
             raise ValueError("Unsupported content type!")
 
     @classmethod
-    def open(cls, uri: str, mode: str, **kwargs: Any) -> Any:
-        print(f"Opening {uri} in mode {mode}")
-        if mode == "w" or mode == "wb":
-            # Create a temporary file, return a handle and save the location in the file lookup
-            # We're ignoring "SIM115 Use a context manager for opening files" as we need to keep
-            # the file around for the duration of the test, cleaning it up in reset_mocks.
-            temp_file = tempfile.NamedTemporaryFile(delete=False, mode=mode)  # noqa: SIM115
-            # Insert the to_boto3 method to simulate the method provided by smart_open
-            # https://github.com/piskvorky/smart_open/blob/develop/howto.md#how-to-access-s3-object-properties
-            temp_file.to_boto3 = lambda _: MockBotoS3Object()  # type: ignore[attr-defined]
+    def mock_s3_parquet_file(cls, uri: str, content: PolarsDataFrame) -> None:
+        if pl is None:  # pragma: no cover
+            raise RuntimeError("polars not available for parquet mock")
+        buffer = io.BytesIO()
+        content.write_parquet(buffer)
+        cls.file_lookup[uri] = buffer
 
+    @classmethod
+    def open(
+        cls, uri: str, mode: str, encoding: str | None = None, **kwargs: Any
+    ) -> Any:  # noqa: D401
+        # Intentionally simple; emulate subset of smart_open.open
+        print(f"Opening {uri} in mode {mode}")
+        if mode in ("w", "wb"):
+            # Respect text vs binary by passing encoding only for text
+            open_kwargs: dict[str, Any] = {"mode": mode}
+            if encoding and "b" not in mode:
+                open_kwargs["encoding"] = encoding
+            temp_file = tempfile.NamedTemporaryFile(delete=False, **open_kwargs)  # noqa: SIM115
+            temp_file.to_boto3 = lambda _: MockBotoS3Object()  # type: ignore[attr-defined]
             cls.file_lookup[uri] = temp_file.name
             return temp_file
-        elif mode in ["r", "rb"]:
+        if mode in ("r", "rb"):
             if uri not in cls.file_lookup:
                 raise KeyError(f"Mock S3 file {uri} does not exist.")
-            # if the file lookup is a str, then it's a file path and we should open it
-            if isinstance(cls.file_lookup[uri], str):
-                return open(cls.file_lookup[uri], mode)
-        else:
-            raise ValueError(f"Unsupported file mode: {mode}")
-
-        return cls.file_lookup[uri]
+            value = cls.file_lookup[uri]
+            if isinstance(value, str):
+                return open(value, mode)
+            return value
+        raise ValueError(f"Unsupported file mode: {mode}")
 
 
-class MockAwsService:
-    def __init__(self) -> None:
+class MockAwsService:  # pragma: no cover - structural
+    def __init__(self) -> None:  # noqa: D401
         return None
 
 
@@ -78,34 +94,29 @@ class MockSecretsManagerClient(MockAwsService):
         cls.secrets[secret_id] = value
 
     def get_secret_value(self, SecretId: str) -> dict:
-        if SecretId in self.secrets:
+        if SecretId == LOAD_BALANCER_SECRET_NAME:
+            secret_value = MOCK_PUBLIC_ENDPOINT
+        elif SecretId == INSTANCE_ENDPOINT_SECRET_NAME:
+            secret_value = MOCK_INSTANCE_ENDPOINT
+        elif SecretId in self.secrets:
             secret_value = self.secrets[SecretId]
         else:
             raise KeyError(f"Secret value '{SecretId}' does not exist.")
-
         return {"SecretString": secret_value}
 
 
-class MockS3Client(MockAwsService):
-    def __init__(self) -> None:
-        return
+class MockS3Client(MockAwsService):  # pragma: no cover - structural
+    pass
 
 
 class MockCloudwatchClient(MockAwsService):
     metrics_reported: list[dict] = []
 
-    def __init__(self) -> None:
-        return
-
     @staticmethod
     def reset_mocks() -> None:
         MockCloudwatchClient.metrics_reported = []
 
-    def put_metric_data(
-        self,
-        Namespace: str,
-        MetricData: list[dict],
-    ) -> None:
+    def put_metric_data(self, Namespace: str, MetricData: list[dict]) -> None:  # noqa: N803
         for metric in MetricData:
             dimensions = {d["Name"]: d["Value"] for d in metric["Dimensions"]}
             self.metrics_reported.append(
@@ -125,10 +136,7 @@ class MockSNSClient(MockAwsService):
     def reset_mocks() -> None:
         MockSNSClient.publish_batch_request_entries = []
 
-    def __init__(self) -> None:
-        return
-
-    def publish_batch(self, TopicArn: str, PublishBatchRequestEntries: list) -> Any:
+    def publish_batch(self, TopicArn: str, PublishBatchRequestEntries: list) -> Any:  # noqa: N803
         MockSNSClient.publish_batch_request_entries.append(
             {
                 "TopicArn": TopicArn,
@@ -137,8 +145,8 @@ class MockSNSClient(MockAwsService):
         )
 
 
-class MockBoto3Resource:
-    def __init__(self, resourceName: str) -> None:
+class MockBoto3Resource:  # pragma: no cover - structural
+    def __init__(self, resourceName: str) -> None:  # noqa: N803
         return None
 
 
@@ -159,10 +167,9 @@ class MockBoto3Session:
     def client(self, client_name: str) -> MockAwsService:
         if client_name not in self.clients:
             raise KeyError("There is no mock client for the specified client_name.")
-
         return self.clients[client_name]
 
-    def get_credentials(self) -> Credentials:
+    def get_credentials(self) -> Credentials:  # noqa: D401
         return MOCK_CREDENTIALS
 
 
@@ -177,14 +184,10 @@ class MockResponse:
         self.status_code = status_code
         self.content = content
         self.raw: Any = None
-
-        # Assume raw content is gzipped
         if content is not None:
             self.raw = io.BytesIO(gzip.compress(content))
-        else:
-            self.raw = None
 
-    def json(self) -> dict | None:
+    def json(self) -> dict | None:  # noqa: D401
         return self.json_data
 
 
@@ -259,18 +262,14 @@ class MockRequest:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
-
         for response in MockRequest.responses:
             if (
                 response["method"] == method
                 and response["url"] == url
                 and response["params"] == params
-                # If the expected response also specifies the body of the request, make sure it matches
-                # the actual response. If not, ignore it.
                 and (response.get("data") is None or response["data"] == data)
             ):
                 return response["response"]
-
         raise Exception(f"Unexpected request: {method} {url} {params} {data}")
 
     @staticmethod
@@ -293,72 +292,86 @@ class MockElasticsearchClient:
     indexed_documents: dict = defaultdict(dict[str, dict])
     inputs: list[dict] = []
     pit_index: str
+    queries: list[dict] = []
 
-    def __init__(self, config: dict, api_key: str) -> None:
+    def __init__(
+        self, config: dict, api_key: str, timeout: float | None = None
+    ) -> None:  # noqa: D401
         pass
 
     @classmethod
     def bulk(
-        cls, _: Any, operations: Generator[dict], *args: Any, **kwargs: Any
+        cls,
+        _: Any,
+        operations: Generator[dict],
+        *args: Any,
+        raise_on_error: bool | None = None,  # noqa: ARG003 - parity only
+        stats_only: bool | None = None,  # noqa: ARG003 - parity only
+        **kwargs: Any,
     ) -> tuple[int, list]:
+        # Accept elasticsearch.helpers.bulk extra parameters to avoid TypeError in tests
         for op in operations:
             cls.inputs.append(op)
-        # Emulate ES8 helpers.bulk returning (success_count, errors_list)
-        return (len(cls.inputs), [])
+        return (len(cls.inputs), [])  # emulate success_count, no errors
 
     @classmethod
     def reset_mocks(cls) -> None:
         cls.inputs = []
         cls.indexed_documents = defaultdict(dict[str, dict])
+        cls.queries = []
 
     @classmethod
-    def index(cls, index: str, id: str, document: dict) -> None:
+    def index(cls, index: str, id: str, document: dict) -> None:  # noqa: A003
         cls.indexed_documents[index][id] = {"_source": document, "_id": id}
 
-    def delete_by_query(self, index: str, body: dict) -> dict:
+    def delete_by_query(self, index: str, body: dict) -> dict:  # noqa: D401
         deleted_ids = body["query"]["ids"]["values"]
-
         new_indexed_documents = {}
-
         deleted_count = 0
         for _id, document in self.indexed_documents[index].items():
             if _id not in deleted_ids:
                 new_indexed_documents[_id] = document
             else:
                 deleted_count += 1
-
         self.indexed_documents[index] = new_indexed_documents
-
         return {"deleted": deleted_count}
 
     def count(self, index: str) -> dict:
         return {"count": len(self.indexed_documents.get(index, {}).values())}
 
-    def open_point_in_time(self, index: str, keep_alive: str) -> dict:
+    def open_point_in_time(self, index: str, keep_alive: str) -> dict:  # noqa: D401
         self.pit_index = index
         return {"id": "some_pit_id"}
 
-    def close_point_in_time(self, body: dict) -> None:
-        pass
+    def close_point_in_time(self, body: dict) -> None:  # noqa: D401
+        return None
 
-    def search(self, body: dict) -> dict:
+    def _get_id_filter_from_query(self, query: dict) -> list[str] | None:
+        ids: list[str] | None = None
+        for item in query.get("bool", {}).get("must", []):
+            if item.get("ids"):
+                ids = item["ids"]["values"]
+        if query.get("ids"):
+            ids = query["ids"]["values"]
+        return ids
+
+    def search(self, body: dict) -> dict:  # noqa: D401
+        self.queries.append(body["query"])
         search_after = body.get("search_after")
-
         all_documents = self.indexed_documents[self.pit_index].values()
         sorted_documents = sorted(all_documents, key=lambda d: d["_id"])
-
+        filtered_ids = self._get_id_filter_from_query(body["query"])
         items = []
         for document in sorted_documents:
-            item = dict(document)
-            item["sort"] = item["_id"]
+            item = {**document, "sort": document["_id"]}
+            if filtered_ids is not None and document["_id"] not in filtered_ids:
+                continue
             if search_after is None or item["sort"] > search_after:
                 items.append(item)
-
         return {"hits": {"hits": items}}
 
-    def mget(self, index: str, body: dict) -> dict:
+    def mget(self, index: str, body: dict) -> dict:  # noqa: D401
         indexed_documents = self.indexed_documents[index]
-
         items = []
         for requested_id in body["ids"]:
             item = {"_id": requested_id}
@@ -367,29 +380,45 @@ class MockElasticsearchClient:
                 item["_source"] = indexed_documents[requested_id]["_source"]
             else:
                 item["found"] = False
-
             items.append(item)
-
         return {"docs": items}
 
 
 def fixed_datetime(year: int, month: int, day: int) -> type[datetime.datetime]:
     class FixedDateTime(datetime.datetime):
         @classmethod
-        def now(cls, tz: datetime.tzinfo | None = None) -> "FixedDateTime":
+        def now(cls, tz: datetime.tzinfo | None = None) -> FixedDateTime:  # noqa: D401
             return cls(year, month, day)
 
     return FixedDateTime
+
+
+def mock_es_secrets(
+    service_name: str, pipeline_date: str, is_public: bool = False
+) -> None:
+    host = "public" if is_public else "private"
+    prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/{host}_host", "test")
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/port", 80)
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/protocol", "http")
+    MockSecretsManagerClient.add_mock_secret(f"{prefix}/{service_name}/api_key", "")
 
 
 def add_neptune_mock_response(
     mock_query: str, expected_params: dict, mock_results: list[dict]
 ) -> None:
     query = " ".join(mock_query.split())
-
     MockRequest.mock_response(
         method="POST",
         url="https://test-host.com:8182/openCypher",
         json_data={"results": mock_results},
         body=json.dumps({"query": query, "parameters": expected_params}),
     )
+
+
+def reset_all_mocks() -> None:
+    MockRequest.reset_mocks()
+    MockSmartOpen.reset_mocks()
+    MockSNSClient.reset_mocks()
+    MockElasticsearchClient.reset_mocks()
+    MockCloudwatchClient.reset_mocks()

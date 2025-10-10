@@ -1,13 +1,6 @@
 import copy
 from typing import Literal
 
-from test_mocks import (
-    MockElasticsearchClient,
-    add_neptune_mock_response,
-    mock_es_secrets,
-)
-from test_utils import load_json_fixture
-
 from ingestor.extractors.works_extractor import (
     GraphWorksExtractor,
     VisibleExtractedWork,
@@ -20,6 +13,12 @@ from ingestor.queries.work_queries import (
     WORK_CONCEPTS_QUERY,
 )
 from models.events import BasePipelineEvent
+from tests.mocks import (
+    MockElasticsearchClient,
+    add_neptune_mock_response,
+    mock_es_secrets,
+)
+from tests.test_utils import load_json_fixture
 
 MOCK_EVENT = BasePipelineEvent(pipeline_date="dev")
 

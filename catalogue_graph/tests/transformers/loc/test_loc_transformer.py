@@ -1,8 +1,7 @@
 import json
 
-from test_mocks import MockRequest
-from test_utils import load_fixture
-
+from tests.mocks import MockRequest
+from tests.test_utils import load_fixture
 from transformers.loc.concepts_transformer import LibraryOfCongressConceptsTransformer
 from transformers.loc.locations_transformer import LibraryOfCongressLocationsTransformer
 

@@ -9,8 +9,7 @@ from adapters.ebsco.models.step_events import (
 )
 from adapters.ebsco.steps.loader import EbscoAdapterLoaderConfig, handler
 from adapters.ebsco.utils.tracking import ProcessedFileRecord
-
-from .test_mocks import MockSmartOpen
+from tests.mocks import MockSmartOpen
 
 
 class TestLoaderHandler:
