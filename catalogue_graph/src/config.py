@@ -45,7 +45,7 @@ ES_LOCAL_PORT = os.environ.get("ES_LOCAL_PORT")
 ES_LOCAL_SCHEME = os.environ.get("ES_LOCAL_SCHEME")
 ES_LOCAL_API_KEY = os.environ.get("ES_LOCAL_API_KEY")
 
-ES_DENORMALISED_INDEX_NAME = "works-denormalised"
+ES_MERGED_INDEX_NAME = "works-denormalised"
 
 ES_SOURCE_PARALLELISM = 5
 ES_SOURCE_SLICE_COUNT = 30

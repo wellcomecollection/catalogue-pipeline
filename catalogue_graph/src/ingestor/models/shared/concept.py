@@ -15,10 +15,10 @@ class Concept(BaseModel):
 
     @field_validator("type", mode="before")
     @classmethod
-    def convert_denormalised_type(
+    def convert_merged_type(
         cls, value: ConceptType | Literal["GenreConcept"]
     ) -> ConceptType:
-        # In the denormalised index, the 'Genre' type is called 'GenreConcept'
+        # In the merged index, the 'Genre' type is called 'GenreConcept'
         if value == "GenreConcept":
             return "Genre"
 

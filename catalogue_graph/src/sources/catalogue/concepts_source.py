@@ -38,7 +38,7 @@ def extract_concepts_from_work(
     for genre in raw_work.get("genres", []):
         for concept in genre.get("concepts", []):
             # All concepts extracted from the 'genres' section are always of type 'Genre'
-            # (but the denormalised index uses the term 'GenreConcept').
+            # (but the merged index uses the term 'GenreConcept').
             new_concept = concept.copy()
             new_concept["type"] = "Genre"
             yield new_concept, "genres"
