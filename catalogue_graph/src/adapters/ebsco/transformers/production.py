@@ -49,7 +49,7 @@ def extract_production_from_008(record: Record) -> ProductionEvent | None:
             places=[SourceConcept(label=place_str, type="Place")],
             agents=[],
             dates=[period],
-            funtion=None,
+            function=None,
         )
     return None
 
