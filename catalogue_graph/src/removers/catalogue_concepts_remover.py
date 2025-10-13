@@ -4,18 +4,20 @@ from itertools import batched
 
 from converters.cypher.bulk_load_converter import get_graph_edge_id
 from ingestor.extractors.concepts_extractor import ES_FIELDS
+from models.events import IncrementalRemoverEvent
 from models.graph_edge import WorkHasConcept
-from removers.base_remover import BaseGraphRemover
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
 from utils.streaming import process_stream_in_parallel
 
+from .base_remover import BaseGraphRemover
+
 ES_QUERY = {"match": {"type": "Visible"}}
 
 
 class CatalogueConceptsGraphRemover(BaseGraphRemover):
-    def __init__(self, event, es_mode: ElasticsearchMode):
+    def __init__(self, event: IncrementalRemoverEvent, es_mode: ElasticsearchMode):
         super().__init__(event.entity_type, es_mode != "private")
         self.es_source = MergedWorksSource(
             event,
@@ -38,7 +40,7 @@ class CatalogueConceptsGraphRemover(BaseGraphRemover):
         return work_concept_map
 
     def _get_graph_work_concepts(self, work_ids: Iterable[str]) -> dict[str, set[str]]:
-        def run_get_query(batch: Iterator[str]) -> list[str]:
+        def run_get_query(batch: list[str]) -> list[dict]:
             return self.neptune_client.run_open_cypher_query(
                 query, {"ids": list(batch)}
             )
@@ -49,7 +51,7 @@ class CatalogueConceptsGraphRemover(BaseGraphRemover):
             RETURN id(w) AS id, collect(id(c)) AS concept_ids
         """
 
-        result = list(process_stream_in_parallel(work_ids, run_get_query, 2000, 5))
+        result = process_stream_in_parallel(work_ids, run_get_query, 2000, 5)
 
         work_concept_map = {}
         for item in result:
@@ -81,5 +83,4 @@ class CatalogueConceptsGraphRemover(BaseGraphRemover):
             for work_id, concept_ids in graph_work_concepts.items():
                 for concept_id in concept_ids.difference(es_work_concepts[work_id]):
                     edge = WorkHasConcept(from_id=work_id, to_id=concept_id)
-                    print(get_graph_edge_id(edge))
                     yield get_graph_edge_id(edge)

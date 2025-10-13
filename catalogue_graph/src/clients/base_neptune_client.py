@@ -3,7 +3,6 @@ import os
 import threading
 import time
 import typing
-from collections.abc import Iterator
 
 import backoff
 import boto3
@@ -205,13 +204,13 @@ class BaseNeptuneClient:
     def delete_entities_by_id(
         self, ids: list[str], entity_type: EntityType
     ) -> list[str]:
-        def run_get_query(batch: Iterator[str]) -> list[str]:
+        def run_get_query(batch: list[str]) -> list[str]:
             """Given a list of (potential) IDs, return those which exist in the graph."""
             result = self.run_open_cypher_query(get_query, {"ids": list(batch)})
             return [node["id"] for node in result]
 
-        def run_delete_query(batch: Iterator[str]) -> None:
-            self.run_open_cypher_query(delete_query, {"ids": list(batch)})
+        def run_delete_query(batch: list[str]) -> list:
+            return self.run_open_cypher_query(delete_query, {"ids": list(batch)})
 
         get_query = GET_NODE_IDS_QUERY if entity_type == "nodes" else GET_EDGE_IDS_QUERY
         delete_query = (

@@ -6,11 +6,13 @@ import polars as pl
 
 import config
 from models.events import IncrementalRemoverEvent
+from removers.base_remover import BaseGraphRemover
 from removers.catalogue_concepts_remover import CatalogueConceptsGraphRemover
 from removers.catalogue_works_remover import CatalogueWorksGraphRemover
 from utils.aws import (
     df_to_s3_parquet,
 )
+from utils.elasticsearch import ElasticsearchMode
 from utils.types import EntityType, IncrementalGraphRemoverType
 
 
@@ -27,8 +29,8 @@ def get_s3_uri(event: IncrementalRemoverEvent) -> str:
     )
 
 
-def get_remover(event: IncrementalRemoverEvent, is_local: bool):
-    es_mode = "public" if is_local else "private"
+def get_remover(event: IncrementalRemoverEvent, is_local: bool) -> BaseGraphRemover:
+    es_mode: ElasticsearchMode = "public" if is_local else "private"
 
     if event.remover_type == "works":
         return CatalogueWorksGraphRemover(event, es_mode)

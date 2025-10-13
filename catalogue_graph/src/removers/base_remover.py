@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from itertools import batched
 
 from utils.aws import get_neptune_client
@@ -11,10 +12,10 @@ class BaseGraphRemover:
         self.neptune_client = get_neptune_client(use_public_endpoint)
         self.entity_type = entity_type
 
-    def get_node_ids_to_remove(self):
+    def get_node_ids_to_remove(self) -> Iterator[str]:
         raise NotImplementedError()
 
-    def get_edge_ids_to_remove(self):
+    def get_edge_ids_to_remove(self) -> Iterator[str]:
         raise NotImplementedError()
 
     def remove(self) -> list[str]:
