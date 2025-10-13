@@ -5,21 +5,14 @@ from pydantic import BaseModel, field_validator
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
-from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Contributor, Genre, Subject
-from models.pipeline.holdings import Holdings
-from models.pipeline.id_label import Id, IdLabel
+from models.pipeline.id_label import Id
 from models.pipeline.identifier import (
     Identifiers,
     SourceIdentifier,
 )
-from models.pipeline.image import ImageData
-from models.pipeline.item import Item
-from models.pipeline.location import DigitalLocation
-from models.pipeline.note import Note
-from models.pipeline.production import ProductionEvent
 from models.pipeline.serialisable import ElasticsearchModel
-from utils.types import DisplayWorkType, WorkStatus, WorkType
+from models.pipeline.work_data import WorkData
+from utils.types import DisplayWorkType, WorkStatus
 
 
 class WorkAncestor(ElasticsearchModel):
@@ -40,34 +33,7 @@ class WorkRelations(BaseModel):
         return [a for a in raw_ancestors if a["numChildren"] == 0]
 
 
-class MergedWorkData(ElasticsearchModel):
-    title: str | None = None
-    other_identifiers: list[SourceIdentifier]
-    alternative_titles: list[str]
-    format: IdLabel | None = None
-    description: str | None = None
-    physical_description: str | None = None
-    lettering: str | None = None
-    created_date: Concept | None = None
-    subjects: list[Subject] = []
-    genres: list[Genre] = []
-    contributors: list[Contributor] = []
-    thumbnail: DigitalLocation | None = None
-    production: list[ProductionEvent] = []
-    languages: list[IdLabel] = []
-    edition: str | None = None
-    notes: list[Note] = []
-    duration: int | None = None
-    items: list[Item] = []
-    holdings: list[Holdings] = []
-    collection_path: CollectionPath | None = None
-    reference_number: str | None = None
-    image_data: list[ImageData] = []
-    work_type: WorkType = "Standard"
-    current_frequency: str | None = None
-    former_frequency: list[str] = []
-    designation: list[str] = []
-
+class MergedWorkData(WorkData):
     @property
     def display_work_type(self) -> DisplayWorkType:
         if self.work_type == "Standard":
