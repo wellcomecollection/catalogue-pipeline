@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.shared.concept import Concept, Subject
+from models.pipeline.concept import Concept, Subject
 from utils.types import ConceptType
 
 from .identifier import DisplayIdentifier

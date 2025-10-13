@@ -16,7 +16,7 @@ from ingestor.models.merged.work import (
     RedirectedMergedWork,
 )
 from ingestor.models.query.work import QueryWork
-from ingestor.models.shared.identifier import Identifiers
+from models.pipeline.identifier import Identifiers
 from utils.types import WorkStatus
 
 

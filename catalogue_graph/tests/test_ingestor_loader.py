@@ -27,8 +27,6 @@ from ingestor.models.indexable_work import (
     RedirectedIndexableWork,
 )
 from ingestor.models.shared.deleted_reason import DeletedReason
-from ingestor.models.shared.id_label import Id
-from ingestor.models.shared.identifier import Identifiers, SourceIdentifier
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.step_events import (
@@ -51,6 +49,8 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiers, SourceIdentifier
 from tests.mocks import (
     MockElasticsearchClient,
     MockRequest,

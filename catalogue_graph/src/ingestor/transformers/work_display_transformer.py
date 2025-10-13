@@ -23,7 +23,7 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
-from ingestor.models.shared.identifier import Identifiers
+from models.pipeline.identifier import Identifiers
 from utils.sort import natural_sort_key
 
 

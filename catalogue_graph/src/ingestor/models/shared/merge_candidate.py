@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.shared.identifier import Identifiers
+from models.pipeline.identifier import Identifiers
 
 
 class MergeCandidate(BaseModel):

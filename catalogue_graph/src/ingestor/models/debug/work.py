@@ -8,10 +8,10 @@ from ingestor.models.merged.work import (
     VisibleMergedWork,
 )
 from ingestor.models.shared.deleted_reason import DeletedReason
-from ingestor.models.shared.identifier import Identifiers, SourceIdentifier
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
-from ingestor.models.shared.serialisable import ElasticsearchModel
+from models.pipeline.identifier import Identifiers, SourceIdentifier
+from models.pipeline.serialisable import ElasticsearchModel
 
 
 class WorkDebugSource(ElasticsearchModel):

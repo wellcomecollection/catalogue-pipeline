@@ -4,8 +4,8 @@ from ingestor.models.indexable_concept import (
     ConceptIdentifier,
 )
 from ingestor.models.neptune.query_result import ExtractedConcept
-from ingestor.models.shared.id_label import Id
-from ingestor.models.shared.identifier import SourceIdentifier
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import SourceIdentifier
 from utils.types import ConceptSource, ConceptType
 
 # Sources sorted by priority for querying purposes.

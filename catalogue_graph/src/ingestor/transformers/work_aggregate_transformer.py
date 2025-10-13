@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
-from ingestor.models.shared.identifier import Identifiers, Unidentifiable
+from models.pipeline.identifier import Identifiers, Unidentifiable
 
 
 class AggregatableField(BaseModel):

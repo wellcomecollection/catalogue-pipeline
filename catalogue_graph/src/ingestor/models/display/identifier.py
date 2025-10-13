@@ -2,7 +2,7 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.models.shared.identifier import (
+from models.pipeline.identifier import (
     Identifiers,
     SourceIdentifier,
     Unidentifiable,
