@@ -1,9 +1,8 @@
 from collections.abc import Iterator
 
+from removers.base_remover import BaseGraphRemover
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
-
-from .base_remover import BaseGraphRemover
 
 ES_QUERY = {"bool": {"must_not": {"match": {"type": "Visible"}}}}
 

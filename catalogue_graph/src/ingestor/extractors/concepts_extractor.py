@@ -41,6 +41,7 @@ ES_FIELDS = [
     "data.contributors.agent.id.canonicalId",
     "data.genres.concepts.id.canonicalId",
     "data.genres.concepts.type",
+    "state.canonicalId",
 ]
 
 RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
@@ -198,14 +199,12 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
     def get_concepts_from_works(self) -> Generator[str]:
         for work in self.es_source.stream_raw():
-            # Since we only ask for concept fields, works with no concepts are returned as empty dictionaries
-            if "data" in work:
-                for concept, _ in extract_concepts_from_work(work["data"]):
-                    if "id" not in concept:
-                        print(f"Concept {concept} does not have an ID.")
-                        continue
+            for concept, _ in extract_concepts_from_work(work):
+                if "id" not in concept:
+                    print(f"Concept {concept} does not have an ID.")
+                    continue
 
-                    yield concept["id"]["canonicalId"]
+                yield concept["id"]["canonicalId"]
 
     def get_concept_stream(self) -> Generator[set[str]]:
         processed_ids: set[str] = set()

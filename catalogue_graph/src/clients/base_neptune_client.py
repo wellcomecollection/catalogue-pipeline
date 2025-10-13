@@ -30,8 +30,8 @@ NEPTUNE_MAX_PARALLEL_QUERIES = 10
 GET_NODE_IDS_QUERY = "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"
 DELETE_NODE_IDS_QUERY = "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"
 
-GET_EDGE_IDS_QUERY = "MATCH ()-[e]-() WHERE id(e) IN $ids RETURN id(e) AS id"
-DELETE_EDGE_IDS_QUERY = "MATCH ()-[e]-() WHERE id(e) IN $ids DELETE e"
+GET_EDGE_IDS_QUERY = "MATCH ()-[e]->() WHERE id(e) IN $ids RETURN id(e) AS id"
+DELETE_EDGE_IDS_QUERY = "MATCH ()-[e]->() WHERE id(e) IN $ids DELETE e"
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -211,8 +211,7 @@ class BaseNeptuneClient:
             return [node["id"] for node in result]
 
         def run_delete_query(batch: Iterator[str]) -> None:
-            print("WOULD RUN DELETE QUERY")
-            # self.run_open_cypher_query(delete_query, {"ids": list(batch)})
+            self.run_open_cypher_query(delete_query, {"ids": list(batch)})
 
         get_query = GET_NODE_IDS_QUERY if entity_type == "nodes" else GET_EDGE_IDS_QUERY
         delete_query = (

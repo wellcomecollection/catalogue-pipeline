@@ -52,7 +52,7 @@ class RawCatalogueWork:
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []
-        for raw_data in extract_concepts_from_work(self.work_data):
+        for raw_data in extract_concepts_from_work(self.raw_work):
             raw_concept = RawCatalogueConcept(raw_data)
 
             if raw_concept.is_concept and raw_concept.wellcome_id not in processed:

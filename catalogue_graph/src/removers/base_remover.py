@@ -27,9 +27,7 @@ class BaseGraphRemover:
 
         deleted_ids = []
         for batch in batched(ids_to_remove, 40_000):
-            print(
-                f"Will delete a batch of {len(batch)} up to IDs from the catalogue graph."
-            )
+            print(f"Will delete a batch of up to {len(batch)} IDs from the graph.")
             deleted_ids = self.neptune_client.delete_entities_by_id(
                 list(batch), self.entity_type
             )

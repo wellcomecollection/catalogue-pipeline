@@ -8,9 +8,12 @@ from utils.types import WorkConceptKey
 
 
 def extract_concepts_from_work(
-    raw_work: dict,
+    raw_merged_work: dict,
 ) -> Generator[tuple[dict, WorkConceptKey]]:
     """Returns all concepts associated with the given work. Does not deduplicate."""
+
+    data = raw_merged_work.get("data", {})
+
     # Some subjects contain nested component concepts. For example, the subject 'Milk - Quality' consists
     # of concepts 'Milk' and 'Quality' (each with its own Wellcome ID). For now, we are not interested in
     # extracting these component concepts, since the frontend does not make use of them and the resulting
@@ -18,7 +21,7 @@ def extract_concepts_from_work(
     # However, an exception exists for simple, non-composite subjects where the nested concept
     # is the subject itself (identified by matching IDs). In this specific case, the nested
     # concept's "Type" is more specific, so we promote it to the top-level subject.
-    for subject in raw_work.get("subjects", []):
+    for subject in data.get("subjects", []):
         new_type = "Subject"
 
         concepts = subject.get("concepts", [])
@@ -32,16 +35,14 @@ def extract_concepts_from_work(
         yield new_subject, "subjects"
 
     # Return all contributors
-    for contributor in raw_work.get("contributors", []):
+    for contributor in data.get("contributors", []):
         yield contributor["agent"], "contributors"
 
-    for genre in raw_work.get("genres", []):
+    for genre in data.get("genres", []):
         for concept in genre.get("concepts", []):
             # All concepts extracted from the 'genres' section are always of type 'Genre'
             # (but the merged index uses the term 'GenreConcept').
-            new_concept = concept.copy()
-            new_concept["type"] = "Genre"
-            yield new_concept, "genres"
+            yield {**concept, "type": "Genre"}, "genres"
             # Only extract the first item from each genre. Subsequent items are not associated with the work in
             # catalogue API filters and the resulting theme pages would be empty.
             break
@@ -62,4 +63,4 @@ class CatalogueConceptsSource(BaseSource):
     def stream_raw(self) -> Generator[tuple[dict, WorkConceptKey]]:
         """Streams raw concept nodes from a work's subjects, genres, and contributors."""
         for work in self.es_source.stream_raw():
-            yield from extract_concepts_from_work(work["data"])
+            yield from extract_concepts_from_work(work)
