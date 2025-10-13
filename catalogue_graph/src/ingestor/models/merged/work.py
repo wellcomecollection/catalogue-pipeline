@@ -11,7 +11,7 @@ from ingestor.models.shared.identifier import (
 )
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
-from ingestor.models.shared.note import Note
+from models.pipeline.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
 from models.pipeline.collection_path import CollectionPath
