@@ -3,13 +3,16 @@ import os
 import threading
 import time
 import typing
-from itertools import batched
+from collections.abc import Iterator
 
 import backoff
 import boto3
 import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
+
+from utils.streaming import process_stream_in_parallel
+from utils.types import EntityType
 
 NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
@@ -24,8 +27,11 @@ ALLOW_DATABASE_RESET = False
 NEPTUNE_MAX_PARALLEL_QUERIES = 10
 
 
-GET_IDS_QUERY = """MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"""
-DELETE_IDS_QUERY = """MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"""
+GET_NODE_IDS_QUERY = "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"
+DELETE_NODE_IDS_QUERY = "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"
+
+GET_EDGE_IDS_QUERY = "MATCH ()-[e]-() WHERE id(e) IN $ids RETURN id(e) AS id"
+DELETE_EDGE_IDS_QUERY = "MATCH ()-[e]-() WHERE id(e) IN $ids DELETE e"
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -196,41 +202,45 @@ class BaseNeptuneClient:
 
         print(f"Removed all nodes with label '{label}'.")
 
-    def get_existing_node_ids(self, ids: list[str]) -> list[str]:
-        """Given a list of (potential) node IDs, return those which exist in the graph."""
-        result = self.run_open_cypher_query(GET_IDS_QUERY, {"ids": list(ids)})
-        return [node["id"] for node in result]
+    def delete_entities_by_id(
+        self, ids: list[str], entity_type: EntityType
+    ) -> list[str]:
+        def run_get_query(batch: Iterator[str]) -> list[str]:
+            """Given a list of (potential) IDs, return those which exist in the graph."""
+            result = self.run_open_cypher_query(get_query, {"ids": list(batch)})
+            return [node["id"] for node in result]
+
+        def run_delete_query(batch: Iterator[str]) -> None:
+            print("WOULD RUN DELETE QUERY")
+            # self.run_open_cypher_query(delete_query, {"ids": list(batch)})
+
+        get_query = GET_NODE_IDS_QUERY if entity_type == "nodes" else GET_EDGE_IDS_QUERY
+        delete_query = (
+            DELETE_NODE_IDS_QUERY if entity_type == "nodes" else DELETE_EDGE_IDS_QUERY
+        )
+
+        # Filter for IDs which actually exist in the graph
+        ids_to_delete = list(
+            process_stream_in_parallel(ids, run_get_query, ID_DELETE_BATCH_SIZE, 5)
+        )
+        print(
+            f"Checked {len(ids)} IDs, {len(ids_to_delete)} of which exist in the graph."
+        )
+
+        process_stream_in_parallel(
+            ids_to_delete, run_delete_query, ID_DELETE_BATCH_SIZE, 5
+        )
+        print(f"Deleted {len(ids_to_delete)} {entity_type} from the graph.")
+
+        return ids_to_delete
 
     def delete_nodes_by_id(self, ids: list[str]) -> list[str]:
         """Removes all nodes with the specified ids from the graph."""
-        deleted_ids = []
+        return self.delete_entities_by_id(ids, "nodes")
 
-        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
-            existing_ids = self.get_existing_node_ids(ids)
-            self.run_open_cypher_query(DELETE_IDS_QUERY, {"ids": list(batch)})
-
-            deleted_ids += existing_ids
-            print(f"Deleted a batch of {len(existing_ids)} nodes...")
-
-        print(
-            f"Successfully deleted a total of {len(deleted_ids)} nodes from the graph."
-        )
-        return deleted_ids
-
-    def delete_edges_by_id(self, ids: list[str]) -> None:
+    def delete_edges_by_id(self, ids: list[str]) -> list[str]:
         """Removes all edges with the specified ids from the graph."""
-        delete_query = """
-            MATCH ()-[e]-() WHERE id(e) IN $edgeIds DELETE e
-        """
-
-        previous_edge_count = self.get_total_edge_count()
-
-        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
-            self.run_open_cypher_query(delete_query, {"edgeIds": list(batch)})
-            print(f"Deleted a batch of edges. (Batch size: {ID_DELETE_BATCH_SIZE})")
-
-        total_deleted = previous_edge_count - self.get_total_edge_count()
-        print(f"Successfully deleted a total of {total_deleted} edges from the graph.")
+        return self.delete_entities_by_id(ids, "edges")
 
     def get_total_edge_count(self) -> int:
         query = """

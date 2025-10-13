@@ -1,11 +1,16 @@
 import argparse
-from typing import Literal, Self
+from typing import Self
 
 from pydantic import BaseModel
 
 import utils.bulk_load as bulk_load
 from utils.bulk_load import IncrementalWindow
-from utils.types import EntityType, StreamDestination, TransformerType
+from utils.types import (
+    EntityType,
+    IncrementalGraphRemoverType,
+    StreamDestination,
+    TransformerType,
+)
 
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
@@ -60,4 +65,5 @@ class GraphRemoverEvent(GraphPipelineEvent):
 
 
 class IncrementalRemoverEvent(BasePipelineEvent):
-    remover_type: Literal["works", "concepts"]
+    remover_type: IncrementalGraphRemoverType
+    entity_type: EntityType

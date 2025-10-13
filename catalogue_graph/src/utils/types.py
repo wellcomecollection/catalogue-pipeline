@@ -73,6 +73,11 @@ TransformerType = Literal[
     CatalogueTransformerType,
 ]
 
+GraphRemoverType = Literal[
+    LocTransformerType, MeshTransformerType, WikidataTransformerType
+]
+IncrementalGraphRemoverType = Literal["works", "concepts", "work_identifiers"]
+
 
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["graph", "s3", "sns", "local", "void"]
