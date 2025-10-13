@@ -3,6 +3,7 @@ import os
 import threading
 import time
 import typing
+from collections.abc import Iterable
 
 import backoff
 import boto3
@@ -24,13 +25,7 @@ ID_DELETE_BATCH_SIZE = 1000
 ALLOW_DATABASE_RESET = False
 
 NEPTUNE_MAX_PARALLEL_QUERIES = 10
-
-
-GET_NODE_IDS_QUERY = "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"
-DELETE_NODE_IDS_QUERY = "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"
-
-GET_EDGE_IDS_QUERY = "MATCH ()-[e]->() WHERE id(e) IN $ids RETURN id(e) AS id"
-DELETE_EDGE_IDS_QUERY = "MATCH ()-[e]->() WHERE id(e) IN $ids DELETE e"
+NEPTUNE_QUERY_THREAD_COUNT = 5
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -204,33 +199,25 @@ class BaseNeptuneClient:
     def delete_entities_by_id(
         self, ids: list[str], entity_type: EntityType
     ) -> list[str]:
-        def run_get_query(batch: list[str]) -> list[str]:
-            """Given a list of (potential) IDs, return those which exist in the graph."""
-            result = self.run_open_cypher_query(get_query, {"ids": list(batch)})
-            return [node["id"] for node in result]
-
-        def run_delete_query(batch: list[str]) -> list:
-            return self.run_open_cypher_query(delete_query, {"ids": list(batch)})
-
-        get_query = GET_NODE_IDS_QUERY if entity_type == "nodes" else GET_EDGE_IDS_QUERY
-        delete_query = (
-            DELETE_NODE_IDS_QUERY if entity_type == "nodes" else DELETE_EDGE_IDS_QUERY
-        )
+        if entity_type == "nodes":
+            get_query = "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"
+            delete_query = "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"
+        elif entity_type == "edges":
+            get_query = "MATCH ()-[e]->() WHERE id(e) IN $ids RETURN id(e) AS id"
+            delete_query = "MATCH ()-[e]->() WHERE id(e) IN $ids DELETE e"
+        else:
+            raise ValueError(f"Unknown entity type: {entity_type}")
 
         # Filter for IDs which actually exist in the graph
-        ids_to_delete = list(
-            process_stream_in_parallel(ids, run_get_query, ID_DELETE_BATCH_SIZE, 5)
-        )
-        print(
-            f"Checked {len(ids)} IDs, {len(ids_to_delete)} of which exist in the graph."
-        )
+        delete_ids = self.run_parallel_query(ids, get_query).keys()
+        print(f"Checked {len(ids)} IDs, {len(delete_ids)} of which exist in the graph.")
 
-        process_stream_in_parallel(
-            ids_to_delete, run_delete_query, ID_DELETE_BATCH_SIZE, 5
+        self.run_parallel_query(
+            delete_ids, delete_query, chunk_size=ID_DELETE_BATCH_SIZE
         )
-        print(f"Deleted {len(ids_to_delete)} {entity_type} from the graph.")
+        print(f"Deleted {len(delete_ids)} {entity_type} from the graph.")
 
-        return ids_to_delete
+        return list(delete_ids)
 
     def delete_nodes_by_id(self, ids: list[str]) -> list[str]:
         """Removes all nodes with the specified ids from the graph."""
@@ -255,3 +242,25 @@ class BaseNeptuneClient:
 
         node_count: int = self.run_open_cypher_query(query)[0]["nodeCount"]
         return node_count
+
+    def run_parallel_query(
+        self,
+        ids: Iterable[str],
+        query: str,
+        parameters: dict[str, typing.Any] | None = None,
+        chunk_size: int = 1000,
+    ) -> dict[str, dict]:
+        """
+        Split the specified ids into chunks and run the selected query against each chunk in parallel.
+        Return a dictionary mapping each id to its corresponding result.
+        """
+
+        def _run_query(chunk: Iterable[str]) -> list[dict]:
+            all_parameters = (parameters or {}) | {"ids": sorted(chunk)}
+            return self.run_open_cypher_query(query, all_parameters)
+
+        raw_results = process_stream_in_parallel(
+            ids, _run_query, chunk_size, NEPTUNE_QUERY_THREAD_COUNT
+        )
+
+        return {item["id"]: item for item in raw_results}

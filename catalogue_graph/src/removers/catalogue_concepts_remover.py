@@ -9,7 +9,6 @@ from models.graph_edge import WorkHasConcept
 from sources.catalogue.concepts_source import extract_concepts_from_work
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
-from utils.streaming import process_stream_in_parallel
 
 from .base_remover import BaseGraphRemover
 
@@ -27,6 +26,7 @@ class CatalogueConceptsGraphRemover(BaseGraphRemover):
         )
 
     def _get_es_work_concepts(self, es_works: Iterable[dict]) -> dict[str, set[str]]:
+        """Return a dictionary mapping each work ID to a set of concept IDs based on data from the merged index."""
         work_concept_map = defaultdict(set)
 
         for work in es_works:
@@ -40,24 +40,15 @@ class CatalogueConceptsGraphRemover(BaseGraphRemover):
         return work_concept_map
 
     def _get_graph_work_concepts(self, work_ids: Iterable[str]) -> dict[str, set[str]]:
-        def run_get_query(batch: list[str]) -> list[dict]:
-            return self.neptune_client.run_open_cypher_query(
-                query, {"ids": list(batch)}
-            )
-
+        """Return a dictionary mapping each work ID to a set of concept IDs based on edges from the catalogue graph."""
         query = """
             UNWIND $ids AS id
             MATCH (w: Work {`~id`: id})-[:HAS_CONCEPT]->(c)
             RETURN id(w) AS id, collect(id(c)) AS concept_ids
         """
 
-        result = process_stream_in_parallel(work_ids, run_get_query, 2000, 5)
-
-        work_concept_map = {}
-        for item in result:
-            work_concept_map[item["id"]] = set(item["concept_ids"])
-
-        return work_concept_map
+        result = self.neptune_client.run_parallel_query(work_ids, query)
+        return {work_id: set(item["concept_ids"]) for work_id, item in result.items()}
 
     def get_node_ids_to_remove(self) -> Iterator[str]:
         """Remove the IDs of all concept nodes which are not connected to any works"""
