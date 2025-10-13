@@ -4,7 +4,7 @@ from dateutil import parser
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
-from ingestor.models.shared.location import PhysicalLocation
+from models.pipeline.location import PhysicalLocation
 
 # The Scala pipeline uses the date `-9999-01-01T00:00:00Z` as 'negative infinity'. The Python standard library doesn't
 # support dates with negative years, and so we hardcode the corresponding Unix timestamp here instead of installing

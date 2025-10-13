@@ -1,8 +1,8 @@
 from collections.abc import Generator
 from typing import Literal
 
-from models.pipeline.serialisable import ElasticsearchModel
 from models.pipeline.id_label import Id
+from models.pipeline.serialisable import ElasticsearchModel
 
 
 class SourceIdentifier(ElasticsearchModel):

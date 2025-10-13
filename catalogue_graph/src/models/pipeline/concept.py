@@ -2,11 +2,9 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-from utils.types import ConceptType
-
 from models.pipeline.id_label import Label
-
 from models.pipeline.identifier import Identifiers, Unidentifiable
+from utils.types import ConceptType
 
 
 class Concept(BaseModel):

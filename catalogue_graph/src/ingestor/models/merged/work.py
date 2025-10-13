@@ -4,26 +4,22 @@ from pydantic import BaseModel, field_validator
 
 from ingestor.models.shared.concept import Concept, Contributor, Genre, Subject
 from ingestor.models.shared.deleted_reason import DeletedReason
-from ingestor.models.shared.holdings import Holdings
 from ingestor.models.shared.id_label import Id, IdLabel
 from ingestor.models.shared.identifier import (
     Identifiers,
     SourceIdentifier,
 )
-from ingestor.models.shared.image import ImageData
 from ingestor.models.shared.invisible_reason import InvisibleReason
-from ingestor.models.shared.item import Item
-from ingestor.models.shared.location import DigitalLocation
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from ingestor.models.shared.note import Note
 from ingestor.models.shared.production import ProductionEvent
 from ingestor.models.shared.serialisable import ElasticsearchModel
+from models.pipeline.collection_path import CollectionPath
+from models.pipeline.holdings import Holdings
+from models.pipeline.image import ImageData
+from models.pipeline.item import Item
+from models.pipeline.location import DigitalLocation
 from utils.types import DisplayWorkType, WorkStatus, WorkType
-
-
-class CollectionPath(BaseModel):
-    path: str
-    label: str | None = None
 
 
 class WorkAncestor(ElasticsearchModel):

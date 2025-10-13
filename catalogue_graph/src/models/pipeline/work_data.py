@@ -1,18 +1,19 @@
 from typing import Literal
 
-from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.collection_path import CollectionPath
+from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import IdLabel
 from models.pipeline.identifier import SourceIdentifier
-from models.pipeline.concept import Concept, Subject, Contributor, Genre
-from models.pipeline.location import DigitalLocation
-from models.pipeline.production import ProductionEvent
-from models.pipeline.note import Note
-from models.pipeline.item import Item
-from models.pipeline.holdings import Holdings
-from models.pipeline.collection_path import CollectionPath
 from models.pipeline.image import ImageData
+from models.pipeline.item import Item
+from models.pipeline.location import DigitalLocation
+from models.pipeline.note import Note
+from models.pipeline.production import ProductionEvent
+from models.pipeline.serialisable import ElasticsearchModel
 
 WorkType = Literal["Standard", "Series", "Section", "Collection"]
+
 
 class WorkData(ElasticsearchModel):
     title: str | None = None

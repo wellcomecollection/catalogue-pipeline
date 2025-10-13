@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from  models.pipeline.concept import Concept, Period
+from models.pipeline.concept import Concept, Period
 
 
 class ProductionEvent(BaseModel):
