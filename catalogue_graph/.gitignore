@@ -2,6 +2,6 @@
 notebooks/*
 !notebooks/graph_query.ipynb
 !notebooks/ebsco_adapter.ipynb
-
+!notebooks/concept_overrides_transform.ipynb
 transformer_outputs/*
 ingestor_outputs/
