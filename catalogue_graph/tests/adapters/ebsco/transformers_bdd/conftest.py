@@ -12,6 +12,7 @@ from pytest_bdd import given, parsers, then, when
 
 from adapters.ebsco.models.work import SourceWork
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from models.pipeline.identifier import Id
 
 # mypy: allow-untyped-calls
 
@@ -336,7 +337,7 @@ def step_concept_identifier_identifier_type(
     )
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert concept.id.identifier_type == itype, (
+    assert concept.id.identifier_type == Id(id=itype), (
         f"Expected identifier type {itype!r}, got {concept.id.identifier_type!r}"
     )
 

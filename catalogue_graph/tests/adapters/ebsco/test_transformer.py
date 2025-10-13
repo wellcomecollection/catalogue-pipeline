@@ -9,7 +9,7 @@ from pyiceberg.table import Table as IcebergTable
 import adapters.ebsco.config as adapter_config
 from adapters.ebsco.models.manifests import TransformerManifest
 from adapters.ebsco.models.step_events import EbscoAdapterTransformerEvent
-from adapters.ebsco.models.work import SourceIdentifier, SourceWork
+from adapters.ebsco.models.work import SourceWork
 from adapters.ebsco.steps.transformer import (
     EbscoAdapterTransformerConfig,
     handler,
@@ -17,6 +17,7 @@ from adapters.ebsco.steps.transformer import (
     transform,
 )
 from adapters.ebsco.utils.iceberg import IcebergTableClient
+from models.pipeline.identifier import Id, SourceIdentifier
 from tests.mocks import (
     MockElasticsearchClient,
     MockSecretsManagerClient,
@@ -24,6 +25,9 @@ from tests.mocks import (
 )
 
 from .helpers import data_to_namespaced_table
+
+IDENT_TYPE = Id(id="ebsco-alt-lookup")
+
 
 # --------------------------------------------------------------------------------------
 # Helpers
@@ -402,19 +406,22 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    IDENT_TYPE = "ebsco-alt-lookup"
     records = [
         SourceWork(
             title="Title 1",
             source_identifier=SourceIdentifier(
                 identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
             ),
+            other_identifiers=[],
+            alternative_titles=[],
         ),
         SourceWork(
             title="Title 2",
             source_identifier=SourceIdentifier(
                 identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
             ),
+            other_identifiers=[],
+            alternative_titles=[],
         ),
     ]
     dummy_client = cast(Any, object())
@@ -446,13 +453,14 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    IDENT_TYPE = "ebsco-alt-lookup"
     records = [
         SourceWork(
             title="Bad Title",
             source_identifier=SourceIdentifier(
                 identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
             ),
+            other_identifiers=[],
+            alternative_titles=[],
         )
     ]
     dummy_client = cast(Any, object())

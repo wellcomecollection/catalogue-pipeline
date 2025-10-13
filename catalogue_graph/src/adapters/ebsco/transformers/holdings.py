@@ -9,15 +9,14 @@ from collections.abc import Iterator
 
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import (
+from adapters.ebsco.transformers.common import is_url
+from models.pipeline.access_condition import (
     AccessCondition,
-    DigitalLocation,
-    Holdings,
     LicensedResource,
-    OnlineResource,
     ViewOnline,
 )
-from adapters.ebsco.transformers.common import is_url
+from models.pipeline.holdings import Holdings
+from models.pipeline.location import DigitalLocation, OnlineResource
 
 
 def extract_holdings(record: Record) -> list[Holdings]:

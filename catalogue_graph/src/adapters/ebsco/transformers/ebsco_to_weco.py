@@ -1,6 +1,6 @@
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import SourceIdentifier, SourceWork
+from adapters.ebsco.models.work import SourceWork
 from adapters.ebsco.transformers.alternative_titles import extract_alternative_titles
 from adapters.ebsco.transformers.common import mandatory_field
 from adapters.ebsco.transformers.contributors import extract_contributors
@@ -16,8 +16,9 @@ from adapters.ebsco.transformers.other_identifiers import extract_other_identifi
 from adapters.ebsco.transformers.production import extract_production
 from adapters.ebsco.transformers.subjects import extract_subjects
 from adapters.ebsco.transformers.title import extract_title
+from models.pipeline.identifier import Id, SourceIdentifier
 
-EBSCO_IDENTIFIER_TYPE = "ebsco-alt-lookup"
+EBSCO_IDENTIFIER_TYPE = Id(id="ebsco-alt-lookup")
 
 
 def ebsco_source_identifier(id_value: str) -> SourceIdentifier:

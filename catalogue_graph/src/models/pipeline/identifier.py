@@ -10,6 +10,9 @@ class SourceIdentifier(ElasticsearchModel):
     ontology_type: str
     value: str
 
+    def __str__(self) -> str:
+        return f"Work[{self.identifier_type.id}/{self.value}]"
+
 
 class Identifiers(ElasticsearchModel):
     canonical_id: str

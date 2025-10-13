@@ -17,12 +17,10 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import (
-    ConceptType,
-    Contributor,
-    SourceConcept,
-    SourceIdentifier,
-)
+from models.pipeline.concept import Concept, Contributor
+from models.pipeline.id_label import Label
+from models.pipeline.identifier import Id, SourceIdentifier
+from utils.types import ConceptType
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -87,13 +85,13 @@ def format_field(field: Field) -> Contributor:
     contributor_type = type_of_contributor[tag[1:]]
     label = label_from_field(field, label_subfields[tag[1:]])
     return Contributor(
-        agent=SourceConcept(
+        agent=Concept(
             label=label,
             type=contributor_type,
             id=SourceIdentifier(
                 value=label,  # todo: normalise
                 ontology_type=contributor_type,
-                identifier_type="label-derived",
+                identifier_type=Id(id="label-derived"),
             ),
         ),
         roles=roles(field),
@@ -124,4 +122,4 @@ def roles(field: Field) -> list[str]:
 
     If EBSCO fix this, then we will have to update accordingly.
     """
-    return [value.strip() for value in field.get_subfields("e")]
+    return [Label(label=value.strip()) for value in field.get_subfields("e")]

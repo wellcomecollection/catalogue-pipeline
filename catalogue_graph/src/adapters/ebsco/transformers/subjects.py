@@ -3,17 +3,14 @@ import logging
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import (
-    ConceptType,
-    SourceConcept,
-    SourceIdentifier,
-    Subject,
-)
 from adapters.ebsco.transformers.common import (
     non_empty,
     normalise_identifier_value,
     subdivision_concepts,
 )
+from models.pipeline.concept import Concept, Subject
+from models.pipeline.identifier import Id, SourceIdentifier
+from utils.types import ConceptType
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
 logger: logging.Logger = logging.getLogger(__name__)
@@ -69,11 +66,11 @@ def extract_subject(field: Field) -> Subject | None:
     return Subject(
         label=label,
         concepts=[
-            SourceConcept(
+            Concept(
                 label=main_concept_label,
                 type=FIELD_TO_TYPE.get(field.tag, "Concept"),
                 id=SourceIdentifier(
-                    identifier_type="label-derived",
+                    identifier_type=Id(id="label-derived"),
                     ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
                     value=normalise_identifier_value(main_concept_label),
                 ),

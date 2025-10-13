@@ -3,8 +3,15 @@ from models.pipeline.id_label import Id
 from models.pipeline.serialisable import ElasticsearchModel
 
 
+class LocationType(Id):
+    pass
+
+
+OnlineResource = LocationType(id="online-resource")
+
+
 class Location(ElasticsearchModel):
-    location_type: Id
+    location_type: LocationType
     license: Id | None = None
     access_conditions: list[AccessCondition]
 

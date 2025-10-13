@@ -3,7 +3,9 @@ from urllib.parse import urlparse
 
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.models.work import ConceptType, SourceConcept, SourceIdentifier
+from models.pipeline.concept import Concept
+from models.pipeline.identifier import Id, SourceIdentifier
+from utils.types import ConceptType
 
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
@@ -66,7 +68,7 @@ SUBFIELD_TO_TYPE: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
 
 def subdivision_concepts(
     field: Field, subdivision_subfields: list[str]
-) -> list[SourceConcept]:
+) -> list[Concept]:
     return [
         extract_concept_from_subfield(subfield)
         for subfield in field.subfields
@@ -74,18 +76,18 @@ def subdivision_concepts(
     ]
 
 
-def extract_concept_from_subfield(subfield: Subfield) -> SourceConcept:
+def extract_concept_from_subfield(subfield: Subfield) -> Concept:
     return extract_concept_from_subfield_value(subfield.code, subfield.value)
 
 
-def extract_concept_from_subfield_value(code: str, value: str) -> SourceConcept:
+def extract_concept_from_subfield_value(code: str, value: str) -> Concept:
     concept_label = _clean_concept_label(value)
     identifier = SourceIdentifier(
-        identifier_type="label-derived",
+        identifier_type=Id(id="label-derived"),
         ontology_type="Genre",
         value=normalise_identifier_value(concept_label),
     )
-    return SourceConcept(
+    return Concept(
         id=identifier,
         label=concept_label,
         type=SUBFIELD_TO_TYPE.get(code, "Concept"),
