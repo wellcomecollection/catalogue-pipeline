@@ -4,7 +4,7 @@ from pymarc.record import Field, Record, Subfield
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.concept import Concept
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import ConceptType
 
 from ..helpers import lone_element
@@ -253,10 +253,13 @@ def test_contributor_all_fields(
     assert contributor.agent == Concept(
         type=ontology_type,
         label=label,
-        id=SourceIdentifier(
-            identifier_type=Id(id="label-derived"),
-            ontology_type=ontology_type,
-            value=label,
+        id=Identifiable(
+            source_identifier=SourceIdentifier(
+                identifier_type=Id(id="label-derived"),
+                ontology_type=ontology_type,
+                value=label,
+            ),
+            other_identifiers=[],
         ),
     )
 
@@ -317,9 +320,12 @@ def test_meeting_contributor_all_fields(
     assert contributor.agent == Concept(
         type="Meeting",
         label=label,
-        id=SourceIdentifier(
-            identifier_type=Id(id="label-derived"),
-            ontology_type="Meeting",
-            value=label,
+        id=Identifiable(
+            source_identifier=SourceIdentifier(
+                identifier_type=Id(id="label-derived"),
+                ontology_type="Meeting",
+                value=label,
+            ),
+            other_identifiers=[],
         ),
     )

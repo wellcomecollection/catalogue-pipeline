@@ -14,10 +14,23 @@ class SourceIdentifier(ElasticsearchModel):
         return f"Work[{self.identifier_type.id}/{self.value}]"
 
 
-class Identified(ElasticsearchModel):
-    canonical_id: str
+IdentifyType = Literal["Identified", "Unidentifiable"]
+
+
+class BaseIdentify(ElasticsearchModel):
+    identified_type: IdentifyType
+
+    def get_identifiers(self) -> Generator[SourceIdentifier]:
+        raise NotImplementedError()
+
+    def get_identifier_values(self) -> Generator[str]:
+        raise NotImplementedError()
+
+
+class Identifiable(BaseIdentify):
     source_identifier: SourceIdentifier
     other_identifiers: list[SourceIdentifier] = []
+    identified_type: IdentifyType = "Identified"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield self.source_identifier
@@ -27,10 +40,17 @@ class Identified(ElasticsearchModel):
         for identifier in self.get_identifiers():
             yield identifier.value
 
+    @staticmethod
+    def from_source_identifier(identifier: SourceIdentifier) -> "Identifiable":
+        return Identifiable(source_identifier=identifier, other_identifiers=[])
 
-class Unidentifiable(ElasticsearchModel):
-    canonical_id: None = None
-    type: Literal["Unidentifiable"] = "Unidentifiable"
+
+class Identified(Identifiable):
+    canonical_id: str
+
+
+class Unidentifiable(BaseIdentify):
+    identified_type: IdentifyType = "Unidentifiable"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield from []

@@ -56,7 +56,7 @@
         "dates": [
           {
             "id": {
-              "type": "Unidentifiable"
+              "identifiedType": "Unidentifiable"
             },
             "label": "1955-1978",
             "range": {
@@ -121,6 +121,7 @@
       {
         "id": {
           "canonicalId": "pawwq3yp",
+          "identifiedType": "Identified",
           "sourceIdentifier": {
             "identifierType": {
               "id": "calm-ref-no"
@@ -137,6 +138,7 @@
   "redirectSources": [
     {
       "canonicalId": "ygwq7j69",
+      "identifiedType": "Identified",
       "sourceIdentifier": {
         "identifierType": {
           "id": "sierra-system-number"

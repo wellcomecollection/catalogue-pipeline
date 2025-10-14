@@ -372,6 +372,7 @@
           {
             "id": {
               "canonicalId": "jqd7k4sp",
+              "identifiedType": "Identified",
               "sourceIdentifier": {
                 "identifierType": {
                   "id": "calm-ref-no"
@@ -387,6 +388,7 @@
         "redirectSources": [
           {
             "canonicalId": "w4bajds8",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "sierra-system-number"
@@ -398,6 +400,7 @@
           },
           {
             "canonicalId": "dfcyrkxh",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "mets"
@@ -997,6 +1000,7 @@
           {
             "id": {
               "canonicalId": "hcqs6xp6",
+              "identifiedType": "Identified",
               "sourceIdentifier": {
                 "identifierType": {
                   "id": "sierra-system-number"
@@ -1012,6 +1016,7 @@
         "redirectSources": [
           {
             "canonicalId": "jstyg2xn",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "mets"
@@ -1023,6 +1028,7 @@
           },
           {
             "canonicalId": "hcqs6xp6",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "sierra-system-number"
@@ -1627,6 +1633,7 @@
           {
             "id": {
               "canonicalId": "hmy2udbf",
+              "identifiedType": "Identified",
               "sourceIdentifier": {
                 "identifierType": {
                   "id": "calm-ref-no"
@@ -1642,6 +1649,7 @@
         "redirectSources": [
           {
             "canonicalId": "adyxgsj4",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "sierra-system-number"
@@ -1653,6 +1661,7 @@
           },
           {
             "canonicalId": "ugpnzjrn",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "mets"
@@ -3476,6 +3485,7 @@
         "redirectSources": [
           {
             "canonicalId": "gqj73sk6",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "mets"
@@ -3797,6 +3807,7 @@
           {
             "id": {
               "canonicalId": "zyphxyta",
+              "identifiedType": "Identified",
               "sourceIdentifier": {
                 "identifierType": {
                   "id": "calm-ref-no"
@@ -3812,6 +3823,7 @@
         "redirectSources": [
           {
             "canonicalId": "cpmtamr5",
+            "identifiedType": "Identified",
             "sourceIdentifier": {
               "identifierType": {
                 "id": "sierra-system-number"

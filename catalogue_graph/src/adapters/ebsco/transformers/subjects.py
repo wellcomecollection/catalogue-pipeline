@@ -9,7 +9,7 @@ from adapters.ebsco.transformers.common import (
     subdivision_concepts,
 )
 from models.pipeline.concept import Concept, Subject
-from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import ConceptType
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
@@ -69,10 +69,12 @@ def extract_subject(field: Field) -> Subject | None:
             Concept(
                 label=main_concept_label,
                 type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-                id=SourceIdentifier(
-                    identifier_type=Id(id="label-derived"),
-                    ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-                    value=normalise_identifier_value(main_concept_label),
+                id=Identifiable.from_source_identifier(
+                    SourceIdentifier(
+                        identifier_type=Id(id="label-derived"),
+                        ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
+                        value=normalise_identifier_value(main_concept_label),
+                    )
                 ),
             )
         ]

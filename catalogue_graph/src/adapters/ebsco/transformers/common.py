@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 from pymarc.record import Field, Record, Subfield
 
 from models.pipeline.concept import Concept
-from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import ConceptType
 
 
@@ -88,7 +88,7 @@ def extract_concept_from_subfield_value(code: str, value: str) -> Concept:
         value=normalise_identifier_value(concept_label),
     )
     return Concept(
-        id=identifier,
+        id=Identifiable.from_source_identifier(identifier),
         label=concept_label,
         type=SUBFIELD_TO_TYPE.get(code, "Concept"),
     )

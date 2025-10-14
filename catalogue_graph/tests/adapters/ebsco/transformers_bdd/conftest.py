@@ -137,8 +137,15 @@ def context_concept_identifier_value(
         f"Concept index {idx} out of range (have {len(thing.concepts)})"
     )
     concept = thing.concepts[idx]
+
+    source_identifiers = list(concept.id.get_identifiers())
+    assert len(source_identifiers) == 1, (
+        "Concept should have exactly one SourceIdentifier"
+    )
+    source_id = source_identifiers[0]
+
     assert concept.id is not None, f"Concept {ord} is missing an identifier"
-    actual = concept.id.value
+    actual = source_id.value
     assert actual == value, (
         f'Expected {ord} concept identifier value "{value}", got "{actual}"'
     )
@@ -309,8 +316,13 @@ def step_single_concept_identifier_value(context: dict[str, Any], value: str) ->
     )
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert concept.id.value == value, (
-        f"Expected identifier value {value!r}, got {concept.id.value!r}"
+    source_identifiers = list(concept.id.get_identifiers())
+    assert len(source_identifiers) == 1, (
+        "Concept should have exactly one SourceIdentifier"
+    )
+    source_id = source_identifiers[0]
+    assert source_id.value == value, (
+        f"Expected identifier value {value!r}, got {source_id.value!r}"
     )
 
 
@@ -322,8 +334,13 @@ def step_concept_identifier_ontology(context: dict[str, Any], ontology: str) -> 
     )
     concept = genre.concepts[0]
     assert concept.id is not None, "Concept missing identifier"
-    assert concept.id.ontology_type == ontology, (
-        f"Expected ontology type {ontology!r}, got {concept.id.ontology_type!r}"
+    source_identifiers = list(concept.id.get_identifiers())
+    assert len(source_identifiers) == 1, (
+        "Concept should have exactly one SourceIdentifier"
+    )
+    source_id = source_identifiers[0]
+    assert source_id.ontology_type == ontology, (
+        f"Expected ontology type {ontology!r}, got {source_id.ontology_type!r}"
     )
 
 
@@ -336,9 +353,14 @@ def step_concept_identifier_identifier_type(
         f"Expected exactly one concept for this step, found {len(genre.concepts)}"
     )
     concept = genre.concepts[0]
-    assert concept.id is not None, "Concept missing identifier"
-    assert concept.id.identifier_type == Id(id=itype), (
-        f"Expected identifier type {itype!r}, got {concept.id.identifier_type!r}"
+    source_identifiers = list(concept.id.get_identifiers())
+    assert len(source_identifiers) == 1, (
+        "Concept should have exactly one SourceIdentifier"
+    )
+    source_id = source_identifiers[0]
+
+    assert source_id.identifier_type == Id(id=itype), (
+        f"Expected identifier type {itype!r}, got {source_id.identifier_type!r}"
     )
 
 

@@ -19,7 +19,7 @@ from pymarc.record import Record
 
 from models.pipeline.concept import Concept, Contributor
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import ConceptType
 
 
@@ -84,15 +84,18 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     label = label_from_field(field, label_subfields[tag[1:]])
+    id = Identifiable.from_source_identifier(
+        SourceIdentifier(
+            value=label,  # todo: normalise
+            ontology_type=contributor_type,
+            identifier_type=Id(id="label-derived"),
+        )
+    )
     return Contributor(
         agent=Concept(
             label=label,
             type=contributor_type,
-            id=SourceIdentifier(
-                value=label,  # todo: normalise
-                ontology_type=contributor_type,
-                identifier_type=Id(id="label-derived"),
-            ),
+            id=id,
         ),
         roles=roles(field),
         primary=is_primary(tag),
