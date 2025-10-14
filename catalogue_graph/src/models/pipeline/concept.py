@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field, field_validator
 
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import (
-    Identifiers,
+    Identified,
     SourceIdentifier,
     Unidentifiable,
 )
@@ -12,7 +12,7 @@ from utils.types import ConceptType
 
 
 class Concept(BaseModel):
-    id: SourceIdentifier | Identifiers | Unidentifiable = Unidentifiable()
+    id: SourceIdentifier | Identified | Unidentifiable = Unidentifiable()
     label: str
     type: ConceptType = "Concept"
 

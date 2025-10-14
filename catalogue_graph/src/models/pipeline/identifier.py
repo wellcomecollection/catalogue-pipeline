@@ -14,7 +14,7 @@ class SourceIdentifier(ElasticsearchModel):
         return f"Work[{self.identifier_type.id}/{self.value}]"
 
 
-class Identifiers(ElasticsearchModel):
+class Identified(ElasticsearchModel):
     canonical_id: str
     source_identifier: SourceIdentifier
     other_identifiers: list[SourceIdentifier] = []

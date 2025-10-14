@@ -50,7 +50,7 @@ from ingestor.queries.concept_queries import (
 )
 from ingestor.steps.ingestor_loader import handler
 from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiers, SourceIdentifier
+from models.pipeline.identifier import Identified, SourceIdentifier
 from tests.mocks import (
     MockElasticsearchClient,
     MockRequest,
@@ -459,7 +459,7 @@ def test_ingestor_loader_non_visible_works() -> None:
                 invisibility_reasons=[InvisibleReason(type="MetsWorksAreNotVisible")],
                 merge_candidates=[
                     MergeCandidate(
-                        id=Identifiers(
+                        id=Identified(
                             canonical_id="avwk5k79",
                             source_identifier=SourceIdentifier(
                                 identifier_type=Id(id="sierra-system-number"),
@@ -491,7 +491,7 @@ def test_ingestor_loader_non_visible_works() -> None:
                 indexed_time=datetime.now(),
                 merge_candidates=[
                     MergeCandidate(
-                        id=Identifiers(
+                        id=Identified(
                             canonical_id="qcp6bq89",
                             source_identifier=SourceIdentifier(
                                 identifier_type=Id(id="sierra-system-number"),
@@ -504,7 +504,7 @@ def test_ingestor_loader_non_visible_works() -> None:
                     )
                 ],
             ),
-            redirect_target=Identifiers(
+            redirect_target=Identified(
                 canonical_id="p5w7ujap",
                 source_identifier=SourceIdentifier(
                     identifier_type=Id(id="sierra-system-number"),

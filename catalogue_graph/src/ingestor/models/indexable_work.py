@@ -16,7 +16,7 @@ from ingestor.models.merged.work import (
     RedirectedMergedWork,
 )
 from ingestor.models.query.work import QueryWork
-from models.pipeline.identifier import Identifiers
+from models.pipeline.identifier import Identified
 from utils.types import WorkStatus
 
 
@@ -73,7 +73,7 @@ class InvisibleIndexableWork(IndexableWork):
 
 class RedirectedIndexableWork(IndexableWork):
     debug: RedirectedWorkDebug
-    redirect_target: Identifiers
+    redirect_target: Identified
     type: WorkStatus = "Redirected"
 
     @classmethod

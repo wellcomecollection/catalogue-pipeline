@@ -7,7 +7,7 @@ from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import (
-    Identifiers,
+    Identified,
     SourceIdentifier,
 )
 from models.pipeline.serialisable import ElasticsearchModel
@@ -73,7 +73,7 @@ class MergedWork(ElasticsearchModel):
 
 class VisibleMergedWork(MergedWork):
     data: MergedWorkData
-    redirect_sources: list[Identifiers]
+    redirect_sources: list[Identified]
 
 
 class InvisibleMergedWork(MergedWork):
@@ -85,4 +85,4 @@ class DeletedMergedWork(MergedWork):
 
 
 class RedirectedMergedWork(MergedWork):
-    redirect_target: Identifiers
+    redirect_target: Identified

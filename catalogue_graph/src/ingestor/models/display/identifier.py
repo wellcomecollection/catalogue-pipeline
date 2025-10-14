@@ -3,7 +3,7 @@ from collections.abc import Generator
 from pydantic import BaseModel
 
 from models.pipeline.identifier import (
-    Identifiers,
+    Identified,
     SourceIdentifier,
     Unidentifiable,
 )
@@ -60,7 +60,7 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_all_identifiers(
-        identifier: Identifiers | Unidentifiable,
+        identifier: Identified | Unidentifiable,
     ) -> Generator["DisplayIdentifier"]:
         if isinstance(identifier, Unidentifiable):
             return
