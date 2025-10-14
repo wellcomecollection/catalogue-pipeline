@@ -1,11 +1,12 @@
 from collections.abc import Generator
+from typing import cast
 
 from pydantic import BaseModel
 
 from models.pipeline.identifier import (
-    Identified,
+    BaseIdentify,
+    Identifiable,
     SourceIdentifier,
-    Unidentifiable,
 )
 
 from .id_label import DisplayIdLabel
@@ -60,10 +61,12 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_all_identifiers(
-        identifier: Identified | Unidentifiable,
+        identifier: BaseIdentify,
     ) -> Generator["DisplayIdentifier"]:
-        if isinstance(identifier, Unidentifiable):
+        if not issubclass(identifier.__class__, Identifiable):
             return
+
+        identifier = cast(Identifiable, identifier)
 
         if identifier.source_identifier is not None:
             yield DisplayIdentifier.from_source_identifier(identifier.source_identifier)

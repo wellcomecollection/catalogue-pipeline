@@ -18,6 +18,7 @@ IdentifyType = Literal["Identified", "Unidentifiable"]
 
 
 class BaseIdentify(ElasticsearchModel):
+    canonical_id: str | None = None
     identified_type: IdentifyType
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
@@ -50,6 +51,7 @@ class Identified(Identifiable):
 
 
 class Unidentifiable(BaseIdentify):
+    canonical_id: None = None
     identified_type: IdentifyType = "Unidentifiable"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
