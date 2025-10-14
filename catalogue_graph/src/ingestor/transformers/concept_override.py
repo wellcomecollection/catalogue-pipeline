@@ -48,7 +48,7 @@ class ConceptTextOverrideProvider:
                 return None
             if override_description:
                 return ConceptDescription(
-                    text=override_description, sourceUrl=None, sourceLabel=None
+                    text=override_description, sourceUrl=None, sourceLabel="weco-authority"
                 )
         return raw_concept.description
 
