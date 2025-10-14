@@ -5,7 +5,7 @@ from pydantic import Field
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Contributor, Genre, Subject
 from models.pipeline.holdings import Holdings
-from models.pipeline.id_label import IdLabel
+from models.pipeline.id_label import Format, Language
 from models.pipeline.identifier import SourceIdentifier
 from models.pipeline.image import ImageData
 from models.pipeline.item import Item
@@ -21,7 +21,7 @@ class WorkData(ElasticsearchModel):
     title: str | None = None
     other_identifiers: list[SourceIdentifier]
     alternative_titles: list[str]
-    format: IdLabel | None = None
+    format: Format | None = None
     description: str | None = None
     physical_description: str | None = None
     lettering: str | None = None
@@ -31,7 +31,7 @@ class WorkData(ElasticsearchModel):
     contributors: list[Contributor] = Field(default_factory=list)
     thumbnail: DigitalLocation | None = None
     production: list[ProductionEvent] = Field(default_factory=list)
-    languages: list[IdLabel] = Field(default_factory=list)
+    languages: list[Language] = Field(default_factory=list)
     edition: str | None = None
     notes: list[Note] = Field(default_factory=list)
     duration: int | None = None

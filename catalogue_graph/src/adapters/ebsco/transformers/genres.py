@@ -52,8 +52,6 @@ def extract_genre(field: Field) -> Genre | None:
     ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
 
     return Genre(
-        id=None,
         label=genre_label,
-        type="Genre",
         concepts=concepts,
     )

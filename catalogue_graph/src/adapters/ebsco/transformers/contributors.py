@@ -110,7 +110,7 @@ def is_primary(tag: str) -> bool:
     return tag[0] == "1"
 
 
-def roles(field: Field) -> list[str]:
+def roles(field: Field) -> list[Label]:
     """
     Extract a list of roles from instances of the Relator Term subfield
 
