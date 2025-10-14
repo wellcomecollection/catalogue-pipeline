@@ -577,7 +577,7 @@ def test_catalogue_concept_from_neptune_result_with_overridden_label_description
             alternativeLabels=[],
             description=ConceptDescription(
                 text="Wellcome Description",
-                sourceLabel=None,
+                sourceLabel="weco-authority",
                 sourceUrl=None,
             ),
             type="Person",
