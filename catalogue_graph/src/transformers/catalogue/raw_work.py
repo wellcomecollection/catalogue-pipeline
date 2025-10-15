@@ -1,12 +1,14 @@
-from typing import TypedDict
+from pydantic import BaseModel
 
-from sources.catalogue.concepts_source import extract_concepts_from_work
+from sources.catalogue.concepts_source import (
+    MergedWorkConceptsData,
+)
 from utils.types import ConceptType, DisplayWorkType, WorkConceptKey
 
 from .raw_concept import RawCatalogueConcept
 
 
-class WorkConcept(TypedDict):
+class WorkConcept(BaseModel):
     id: str
     referenced_in: WorkConceptKey
     referenced_type: ConceptType
@@ -52,17 +54,18 @@ class RawCatalogueWork:
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []
-        for raw_data in extract_concepts_from_work(self.raw_work):
-            raw_concept = RawCatalogueConcept(raw_data)
+        work_data = MergedWorkConceptsData.model_validate(self.work_data)
 
-            if raw_concept.is_concept and raw_concept.wellcome_id not in processed:
-                processed.add(raw_concept.wellcome_id)
+        for extracted, referenced_in in work_data.extract_identified_concepts():
+            concept = RawCatalogueConcept(extracted)
+            if concept.wellcome_id not in processed:
+                processed.add(concept.wellcome_id)
                 work_concepts.append(
-                    {
-                        "id": raw_concept.wellcome_id,
-                        "referenced_in": raw_concept.referenced_in,
-                        "referenced_type": raw_concept.type,
-                    }
+                    WorkConcept(
+                        id=concept.wellcome_id,
+                        referenced_in=referenced_in,
+                        referenced_type=concept.type,
+                    )
                 )
 
         return work_concepts

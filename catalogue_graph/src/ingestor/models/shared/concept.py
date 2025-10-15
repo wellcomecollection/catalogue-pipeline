@@ -29,6 +29,16 @@ class Concept(BaseModel):
         return self.label.removesuffix(".")
 
 
+class IdentifiedConcept(Concept):
+    id: Identifiers
+
+    @staticmethod
+    def from_concept(concept: Concept) -> "IdentifiedConcept":
+        if isinstance(concept.id, Unidentifiable):
+            raise TypeError(f"Concept {concept} does not have an ID.")
+        return IdentifiedConcept(id=concept.id, label=concept.label, type=concept.type)
+
+
 class Contributor(BaseModel):
     agent: Concept
     roles: list[Label] = []

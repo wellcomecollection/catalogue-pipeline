@@ -1,6 +1,13 @@
 import re
+from typing import cast
 
-from utils.types import ConceptSource, ConceptType, WorkConceptKey
+from ingestor.models.shared.concept import (
+    IdentifiedConcept,
+)
+from ingestor.models.shared.identifier import (
+    SourceIdentifier,
+)
+from utils.types import ConceptSource
 
 from .id_label_checker import IdLabelChecker
 
@@ -8,72 +15,45 @@ from .id_label_checker import IdLabelChecker
 class RawCatalogueConcept:
     def __init__(
         self,
-        raw_data: tuple[dict, WorkConceptKey],
+        extracted: IdentifiedConcept,
         id_label_checker: IdLabelChecker | None = None,
     ):
-        self.raw_concept = raw_data[0]
-        self.referenced_in = raw_data[1]
+        self.raw_concept = extracted
         self.id_label_checker = id_label_checker
 
-    @property
-    def is_concept(self) -> bool:
-        """
-        Determines whether a given block of JSON represents a Concept as returned from the Catalogue API.
-        A Concept is a block of JSON with a type property and a list of identifiers.
-        """
-        return self.raw_concept.get("id", {}).get("canonicalId") is not None
+        self.wellcome_id = self.raw_concept.id.canonical_id
+        self.label = self.raw_concept.label
+        self.type = self.raw_concept.type
 
     @property
-    def wellcome_id(self) -> str:
-        """Returns the canonical Wellcome identifier."""
-        wellcome_id: str = self.raw_concept["id"]["canonicalId"]
-        return wellcome_id
-
-    @property
-    def label(self) -> str:
-        """Returns the concept label."""
-        label: str = self.raw_concept["label"]
-        return label
-
-    @property
-    def type(self) -> ConceptType:
-        """Returns the concept type (one of "Person", "Concept", "Genre", etc.)."""
-        concept_type: ConceptType = self.raw_concept.get("type", "Concept")
-        return concept_type
-
-    @property
-    def raw_identifier(self) -> dict:
+    def source_identifier(self) -> SourceIdentifier:
         """Returns metadata about the source identifier."""
-        raw_identifier = self.raw_concept["id"]["sourceIdentifier"]
-        assert isinstance(raw_identifier, dict)
-        return raw_identifier
+        return self.raw_concept.id.source_identifier
 
     @property
     def source(self) -> ConceptSource:
         """Returns the concept source (one of "lc-names", "label-derived", etc.)."""
-        source: ConceptSource = self.raw_identifier["identifierType"]["id"]
-        return source
+        identifier_type = self.source_identifier.identifier_type.id
+        return cast(ConceptSource, identifier_type)
 
     @property
     def mesh_qualifier(self) -> str | None:
         """Returns MeSH qualifier ID, if present."""
         if self.source == "nlm-mesh":
-            qualifier = re.search(r"Q\d+", self.raw_identifier.get("value", ""))
+            qualifier = re.search(r"Q\d+", self.source_identifier.value)
             if qualifier is not None:
                 return qualifier.group()
 
         return None
 
     @property
-    def source_concept_id(self) -> str | None:
+    def source_concept_id(self) -> str:
         """Returns ID of source concept, if present."""
-        source_id = self.raw_identifier.get("value")
-        if isinstance(source_id, str):
-            if isinstance(self.mesh_qualifier, str):
-                source_id = source_id.replace(self.mesh_qualifier, "")
-            return source_id
+        source_id = self.source_identifier.value
+        if isinstance(self.mesh_qualifier, str):
+            source_id = source_id.replace(self.mesh_qualifier, "")
 
-        return None
+        return source_id
 
     @property
     def label_matched_source_concept_id(self) -> str | None:
@@ -85,9 +65,6 @@ class RawCatalogueConcept:
     @property
     def has_valid_source_concept(self) -> bool:
         """Checks if the source concept ID format matches the specified source."""
-        if not isinstance(self.source_concept_id, str):
-            return False
-
         assert self.id_label_checker is not None
 
         # For MeSH, we not only require that the source identifier has a corresponding node in the graph,

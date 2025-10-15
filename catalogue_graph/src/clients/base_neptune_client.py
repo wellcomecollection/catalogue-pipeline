@@ -3,7 +3,7 @@ import os
 import threading
 import time
 import typing
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 
 import backoff
 import boto3
@@ -248,7 +248,7 @@ class BaseNeptuneClient:
         ids: Iterable[str],
         query: str,
         parameters: dict[str, typing.Any] | None = None,
-        chunk_size: int = 1000,
+        chunk_size: int = 2000,
     ) -> dict[str, dict]:
         """
         Split the specified ids into chunks and run the selected query against each chunk in parallel.
@@ -264,3 +264,31 @@ class BaseNeptuneClient:
         )
 
         return {item["id"]: item for item in raw_results}
+
+    def get_disconnected_node_ids(
+        self, node_label: str, edge_label: str
+    ) -> Iterator[str]:
+        """Return the IDs of all nodes which do not have any edges of the specified type"""
+        query = f"""
+            MATCH (n: {node_label})
+            WHERE NOT (n)-[:{edge_label}]-()
+            RETURN id(n) AS id
+        """
+
+        result = self.time_open_cypher_query(query, {}, "disconnected nodes")
+
+        for item in result:
+            yield item["id"]
+
+    def get_node_edges(
+        self, node_ids: Iterable[str], edge_label: str
+    ) -> dict[str, set[str]]:
+        """Return a dictionary mapping each ID to a set of edge IDs of the specified edge type."""
+        query = f"""
+            UNWIND $ids AS id
+            MATCH (n {{`~id`: id}})-[e:{edge_label}]-()
+            RETURN id(n) AS id, collect(id(e)) AS edge_ids
+        """
+
+        result = self.run_parallel_query(node_ids, query)
+        return {node_id: set(item["edge_ids"]) for node_id, item in result.items()}

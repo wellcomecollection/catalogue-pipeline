@@ -3,15 +3,16 @@ from collections.abc import Generator
 from models.events import BasePipelineEvent
 from models.graph_edge import ConceptHasSourceConcept, ConceptHasSourceConceptAttributes
 from models.graph_node import Concept
-from sources.catalogue.concepts_source import CatalogueConceptsSource
+from sources.catalogue.concepts_source import (
+    CatalogueConceptsSource,
+    ExtractedWorkConcept,
+)
 from transformers.base_transformer import BaseTransformer
 from utils.elasticsearch import ElasticsearchMode
 from utils.ontology import get_transformers_from_ontology
-from utils.types import WorkConceptKey
 
 from .id_label_checker import IdLabelChecker
 from .raw_concept import RawCatalogueConcept
-from .works_transformer import ES_FIELDS, ES_QUERY
 
 
 class CatalogueConceptsTransformer(BaseTransformer):
@@ -20,21 +21,16 @@ class CatalogueConceptsTransformer(BaseTransformer):
         event: BasePipelineEvent,
         es_mode: ElasticsearchMode,
     ):
-        self.source = CatalogueConceptsSource(
-            event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
-        )
+        self.source = CatalogueConceptsSource(event, es_mode=es_mode)
 
         self.id_label_checker: IdLabelChecker | None = None
         self.id_lookup: set = set()
         self.pipeline_date = event.pipeline_date
 
-    def transform_node(self, raw_data: tuple[dict, WorkConceptKey]) -> Concept | None:
-        raw_concept = RawCatalogueConcept(raw_data, self.id_label_checker)
+    def transform_node(self, extracted: ExtractedWorkConcept) -> Concept | None:
+        raw_concept = RawCatalogueConcept(extracted.concept, self.id_label_checker)
 
-        if not raw_concept.is_concept:
-            return None
-
-        if raw_concept.wellcome_id in self.id_lookup:
+        if raw_concept.wellcome_id is None or raw_concept.wellcome_id in self.id_lookup:
             return None
 
         self.id_lookup.add(raw_concept.wellcome_id)
@@ -46,7 +42,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
         )
 
     def extract_edges(
-        self, raw_data: tuple[dict, WorkConceptKey]
+        self, raw_data: ExtractedWorkConcept
     ) -> Generator[ConceptHasSourceConcept]:
         if self.id_label_checker is None:
             transformers = []
@@ -55,10 +51,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
 
             self.id_label_checker = IdLabelChecker(transformers, self.pipeline_date)
 
-        raw_concept = RawCatalogueConcept(raw_data, self.id_label_checker)
-
-        if not raw_concept.is_concept:
-            return
+        raw_concept = RawCatalogueConcept(raw_data.concept, self.id_label_checker)
 
         if raw_concept.wellcome_id in self.id_lookup:
             return
