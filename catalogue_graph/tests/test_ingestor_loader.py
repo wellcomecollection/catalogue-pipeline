@@ -3,6 +3,7 @@ from datetime import datetime
 import polars as pl
 import pytest
 from freezegun import freeze_time
+
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.debug.work import (
     DeletedWorkDebug,
@@ -50,18 +51,6 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
-from test_mocks import (
-    MockElasticsearchClient,
-    MockRequest,
-    MockSmartOpen,
-    add_neptune_mock_response,
-    mock_es_secrets,
-)
-from test_utils import (
-    add_mock_merged_documents,
-    load_json_fixture,
-)
-
 from tests.mocks import (
     MockElasticsearchClient,
     MockRequest,
