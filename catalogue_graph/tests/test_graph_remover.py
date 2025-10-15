@@ -9,25 +9,22 @@ from tests.mocks import MockRequest, MockSmartOpen
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 
 REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
-CATALOGUE_CONCEPTS_SNAPSHOT_URI = (
-    f"{REMOVER_S3_PREFIX}/previous_ids_snapshot/catalogue_concepts__nodes.parquet"
-)
-CATALOGUE_CONCEPTS_REMOVED_IDS_URI = (
-    f"{REMOVER_S3_PREFIX}/deleted_ids/catalogue_concepts__nodes.parquet"
-)
-CATALOGUE_CONCEPTS_ADDED_IDS_URI = (
-    f"{REMOVER_S3_PREFIX}/added_ids/catalogue_concepts__nodes.parquet"
-)
 
 
-def mock_deleted_ids_log_file(age_in_days: int) -> None:
+def get_mock_remover_uri(pipeline_date: str, folder: str) -> str:
+    return f"{REMOVER_S3_PREFIX}/{pipeline_date}/{folder}/loc_concepts__nodes.parquet"
+
+
+def mock_deleted_ids_log_file(pipeline_date: str, age_in_days: int) -> None:
     past_date = datetime.today().date() - timedelta(days=age_in_days)
     mock_data = {
         "timestamp": [past_date, past_date],
-        "id": ["u6jve2vb", "amzfbrbz"],
+        "id": ["sh00000004", "sh00000005"],
     }
     df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
-    MockSmartOpen.mock_s3_parquet_file(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, df)
+    MockSmartOpen.mock_s3_parquet_file(
+        get_mock_remover_uri(pipeline_date, "deleted_ids"), df
+    )
 
 
 def mock_neptune_response(request_data: dict, response_data: dict) -> None:
@@ -72,6 +69,7 @@ def _check_added_removed_ids(
     with MockSmartOpen.open(s3_uri, "rb") as f:
         df = pl.read_parquet(f)
         ids = pl.Series(df.select(pl.col("id"))).to_list()
+        print(s3_uri, ids)
         timestamps = pl.Series(df.select(pl.col("timestamp"))).to_list()
 
         assert set(timestamps) == expected_timestamps
@@ -79,62 +77,65 @@ def _check_added_removed_ids(
 
 
 def test_graph_remover_first_run() -> None:
-    add_mock_transformer_outputs_for_ontologies(["catalogue"])
+    add_mock_transformer_outputs_for_ontologies(["loc"])
 
     event = {
-        "transformer_type": "catalogue_concepts",
+        "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
     }
     lambda_handler(event, None)
 
-    with MockSmartOpen.open(CATALOGUE_CONCEPTS_SNAPSHOT_URI, "rb") as f:
+    with MockSmartOpen.open(
+        get_mock_remover_uri("dev", "previous_ids_snapshot"), "rb"
+    ) as f:
         df = pl.read_parquet(f)
         ids = pl.Series(df.select(pl.first())).to_list()
-        assert len(set(ids)) == 23
-        assert "vjfb76xy" in ids
+        assert len(set(ids)) == 7
+        assert "sh00000001" in ids
 
 
 def test_graph_remover_next_run() -> None:
+    pipeline_date = "2022-02-02"
     # Mock a previous concept IDs snapshot which purposefully omits some IDs from the bulk load file mock
     # and includes some IDs not in the bulk load file mock.
     MockSmartOpen.mock_s3_file(
-        CATALOGUE_CONCEPTS_SNAPSHOT_URI,
-        load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes.parquet"),
+        get_mock_remover_uri(pipeline_date, "previous_ids_snapshot"),
+        load_fixture("loc/id_snapshot_loc_concepts__nodes.parquet"),
     )
 
-    add_mock_transformer_outputs_for_ontologies(
-        ["catalogue"], pipeline_date="2022-02-02"
-    )
-    mock_deleted_ids_log_file(age_in_days=364)
-    mock_neptune_get_existing_response(["byzuqyr5"])
-    mock_neptune_removal_response(["byzuqyr5"])
+    add_mock_transformer_outputs_for_ontologies(["loc"], pipeline_date=pipeline_date)
+    mock_deleted_ids_log_file(pipeline_date, age_in_days=364)
+    mock_neptune_get_existing_response(["sh00000006"])
+    mock_neptune_removal_response(["sh00000006"])
     mock_neptune_count_response()
 
     event = {
-        "transformer_type": "catalogue_concepts",
+        "transformer_type": "loc_concepts",
         "entity_type": "nodes",
-        "pipeline_date": "2022-02-02",
+        "pipeline_date": pipeline_date,
     }
     lambda_handler(event, None)
 
     # Verify that the correct IDs are listed in the 'added IDs' file
     today = datetime.today().date()
     _check_added_removed_ids(
-        CATALOGUE_CONCEPTS_ADDED_IDS_URI,
+        get_mock_remover_uri(pipeline_date, "added_ids"),
         {today},
-        {"fqe7m83w", "pnpsyqp8", "drypfe3u"},
+        {"sh00000001", "sh00000002", "sh00000003"},
     )
 
     # Verify that the correct IDs are listed in the 'removed IDs' file
     almost_year_ago = datetime.today().date() - timedelta(days=364)
     _check_added_removed_ids(
-        CATALOGUE_CONCEPTS_REMOVED_IDS_URI,
+        get_mock_remover_uri(pipeline_date, "deleted_ids"),
         {today, almost_year_ago},
-        {"u6jve2vb", "amzfbrbz", "byzuqyr5"},
+        {"sh00000004", "sh00000005", "sh00000006"},
     )
 
-    with MockSmartOpen.open(CATALOGUE_CONCEPTS_SNAPSHOT_URI, "rb") as f:
+    with MockSmartOpen.open(
+        get_mock_remover_uri(pipeline_date, "previous_ids_snapshot"), "rb"
+    ) as f:
         df = pl.read_parquet(f)
         ids = pl.Series(df.select(pl.first())).to_list()
         assert len(set(ids)) == 23
@@ -146,20 +147,20 @@ def test_graph_remover_next_run() -> None:
 
 def test_graph_remover_old_id_removal() -> None:
     MockSmartOpen.mock_s3_file(
-        CATALOGUE_CONCEPTS_SNAPSHOT_URI,
-        load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes.parquet"),
+        get_mock_remover_uri("dev", "previous_ids_snapshot"),
+        load_fixture("loc/id_snapshot_loc_concepts__nodes.parquet"),
     )
 
-    add_mock_transformer_outputs_for_ontologies(["catalogue"])
+    add_mock_transformer_outputs_for_ontologies(["loc"])
 
     # Mock a file with existing deleted IDs which are 1+ year old
-    mock_deleted_ids_log_file(age_in_days=365)
-    mock_neptune_get_existing_response(["byzuqyr5"])
-    mock_neptune_removal_response(["byzuqyr5"])
+    mock_deleted_ids_log_file("dev", age_in_days=365)
+    mock_neptune_get_existing_response(["sh00000006"])
+    mock_neptune_removal_response(["sh00000006"])
     mock_neptune_count_response()
 
     event = {
-        "transformer_type": "catalogue_concepts",
+        "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
     }
@@ -167,21 +168,23 @@ def test_graph_remover_old_id_removal() -> None:
 
     # The old deleted IDs (and corresponding timestamps) should no longer be in the file
     today = datetime.today().date()
-    _check_added_removed_ids(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, {today}, {"byzuqyr5"})
+    _check_added_removed_ids(
+        get_mock_remover_uri("dev", "deleted_ids"), {today}, {"sh00000006"}
+    )
 
 
 def test_graph_remover_safety_check() -> None:
     # Mock a snapshot with a large number of nodes, most of which are not in the mock bulk load file.
     # This would result in a large number of deletions and should therefore trigger the safety check
     MockSmartOpen.mock_s3_file(
-        CATALOGUE_CONCEPTS_SNAPSHOT_URI,
+        get_mock_remover_uri("dev", "previous_ids_snapshot"),
         load_fixture("catalogue/id_snapshot_catalogue_concepts__nodes_large.parquet"),
     )
 
-    add_mock_transformer_outputs_for_ontologies(["catalogue"])
+    add_mock_transformer_outputs_for_ontologies(["loc"])
 
     event = {
-        "transformer_type": "catalogue_concepts",
+        "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "dev",
     }
@@ -191,7 +194,7 @@ def test_graph_remover_safety_check() -> None:
 
 def test_graph_remover_missing_bulk_load_file() -> None:
     event = {
-        "transformer_type": "catalogue_concepts",
+        "transformer_type": "loc_concepts",
         "entity_type": "nodes",
         "pipeline_date": "2020-01-01",
     }

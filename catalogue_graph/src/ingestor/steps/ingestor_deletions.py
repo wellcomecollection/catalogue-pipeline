@@ -4,9 +4,11 @@ from datetime import datetime
 
 import polars as pl
 
-import graph_remover
 import utils.elasticsearch
 from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
+from models.events import (
+    IncrementalGraphRemoverEvent,
+)
 from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.reporting import DeletionReport
@@ -58,10 +60,14 @@ def _is_valid_date(index_date: str) -> bool:
 
 def get_ids_to_delete(event: IngestorMonitorStepEvent) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
-    s3_file_uri = graph_remover.get_s3_uri("catalogue_concepts", "nodes", "deleted_ids")
+    remover_event = IncrementalGraphRemoverEvent(
+        transformer_type="catalogue_concepts",
+        entity_type="nodes",
+        pipeline_date=event.pipeline_date,
+    )
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
-    df = df_from_s3_parquet(s3_file_uri)
+    df = df_from_s3_parquet(remover_event.get_remover_s3_uri("deleted_ids"))
 
     # TODO: Fix this based on https://github.com/wellcomecollection/platform/issues/6121
     if event.index_date and _is_valid_date(event.index_date):

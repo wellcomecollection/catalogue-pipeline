@@ -1,13 +1,13 @@
 from collections.abc import Iterator
 
-from models.events import IncrementalRemoverEvent
+from models.events import IncrementalGraphRemoverEvent
 from utils.elasticsearch import ElasticsearchMode
 
 from .base_remover import BaseGraphRemover
 
 
 class CatalogueConceptsGraphRemover(BaseGraphRemover):
-    def __init__(self, event: IncrementalRemoverEvent, es_mode: ElasticsearchMode):
+    def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
         super().__init__(event.entity_type, es_mode != "private")
 
     def get_node_ids_to_remove(self) -> Iterator[str]:

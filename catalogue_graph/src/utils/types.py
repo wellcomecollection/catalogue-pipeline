@@ -73,10 +73,10 @@ TransformerType = Literal[
     CatalogueTransformerType,
 ]
 
-GraphRemoverType = Literal[
+FullGraphRemoverType = Literal[
     LocTransformerType, MeshTransformerType, WikidataTransformerType
 ]
-IncrementalGraphRemoverType = Literal["works", "concepts", "work_identifiers"]
+GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
 
 
 EntityType = Literal["nodes", "edges"]

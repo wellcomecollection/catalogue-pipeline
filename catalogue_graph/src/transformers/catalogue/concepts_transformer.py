@@ -30,7 +30,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
     def transform_node(self, extracted: ExtractedWorkConcept) -> Concept | None:
         raw_concept = RawCatalogueConcept(extracted.concept, self.id_label_checker)
 
-        if raw_concept.wellcome_id is None or raw_concept.wellcome_id in self.id_lookup:
+        if raw_concept.wellcome_id in self.id_lookup:
             return None
 
         self.id_lookup.add(raw_concept.wellcome_id)

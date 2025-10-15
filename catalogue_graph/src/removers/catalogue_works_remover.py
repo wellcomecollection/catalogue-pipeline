@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterable, Iterator
 
-from models.events import IncrementalRemoverEvent
+from models.events import IncrementalGraphRemoverEvent
 from models.graph_edge import WorkHasConcept
 from sources.catalogue.concepts_source import ES_FIELDS as ES_FIELDS_WORK_CONCEPTS
 from sources.catalogue.concepts_source import ES_QUERY as ES_QUERY_WORK_CONCEPTS
@@ -14,7 +14,7 @@ ES_QUERY_NON_VISIBLE = {"bool": {"must_not": {"match": {"type": "Visible"}}}}
 
 
 class CatalogueWorksGraphRemover(BaseGraphRemover):
-    def __init__(self, event: IncrementalRemoverEvent, es_mode: ElasticsearchMode):
+    def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
         super().__init__(event.entity_type, es_mode != "private")
         self.event = event
         self.es_mode = es_mode

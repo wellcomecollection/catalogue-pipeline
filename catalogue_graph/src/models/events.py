@@ -1,13 +1,17 @@
 import argparse
+from pathlib import PurePosixPath
 from typing import Self
 
 from pydantic import BaseModel
 
+import config
 import utils.bulk_load as bulk_load
 from utils.bulk_load import IncrementalWindow
 from utils.types import (
+    CatalogueTransformerType,
     EntityType,
-    IncrementalGraphRemoverType,
+    FullGraphRemoverType,
+    GraphRemoverFolder,
     StreamDestination,
     TransformerType,
 )
@@ -61,9 +65,35 @@ class BulkLoadPollerEvent(BaseModel):
 
 
 class GraphRemoverEvent(GraphPipelineEvent):
+    @property
+    def s3_prefix(self) -> str:
+        raise NotImplementedError()
+
+    def get_remover_s3_uri(self, folder: GraphRemoverFolder) -> str:
+        parts: list[str] = [self.s3_prefix, self.pipeline_date]
+        if self.window is not None:
+            parts += ["windows", self.window.to_formatted_string()]
+
+        parts.append(folder)
+
+        prefix = PurePosixPath(*parts)
+        file_name = f"{self.transformer_type}__{self.entity_type}.parquet"
+
+        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
+
+
+class FullGraphRemoverEvent(GraphRemoverEvent):
+    transformer_type: FullGraphRemoverType
     override_safety_check: bool = False
 
+    @property
+    def s3_prefix(self) -> str:
+        return config.GRAPH_REMOVER_S3_PREFIX
 
-class IncrementalRemoverEvent(BasePipelineEvent):
-    remover_type: IncrementalGraphRemoverType
-    entity_type: EntityType
+
+class IncrementalGraphRemoverEvent(GraphRemoverEvent):
+    transformer_type: CatalogueTransformerType
+
+    @property
+    def s3_prefix(self) -> str:
+        return config.INCREMENTAL_GRAPH_REMOVER_S3_PREFIX

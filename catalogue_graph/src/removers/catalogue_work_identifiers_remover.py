@@ -1,6 +1,6 @@
 from collections.abc import Generator, Iterable, Iterator
 
-from models.events import IncrementalRemoverEvent
+from models.events import IncrementalGraphRemoverEvent
 from models.graph_edge import (
     WorkHasPathIdentifier,
 )
@@ -13,7 +13,7 @@ from .base_remover import BaseGraphRemover
 
 
 class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemover):
-    def __init__(self, event: IncrementalRemoverEvent, es_mode: ElasticsearchMode):
+    def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
         super().__init__(event.entity_type, es_mode != "private")
         self.work_source = MergedWorksSource(
             event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
