@@ -23,9 +23,9 @@ def extract_production(record: Record) -> list[ProductionEvent]:
         record.get_fields("260")
     ) or extract_production_from_fields(record.get_fields("264"))
     match (productions260_264, production008):
-        case ([], None):
+        case (productions, None) if not productions:
             return []
-        case ([], production) if production is not None:
+        case (productions, production) if not productions and production is not None:
             return [production]
         case (productions, None):
             return productions

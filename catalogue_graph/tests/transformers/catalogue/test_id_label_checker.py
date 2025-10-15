@@ -1,5 +1,4 @@
-from test_utils import add_mock_transformer_outputs_for_ontologies
-
+from tests.test_utils import add_mock_transformer_outputs_for_ontologies
 from transformers.catalogue.id_label_checker import IdLabelChecker
 from utils.ontology import get_transformers_from_ontology
 from utils.types import OntologyType

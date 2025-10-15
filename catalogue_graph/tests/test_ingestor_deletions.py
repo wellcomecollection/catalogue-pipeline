@@ -1,10 +1,10 @@
 import polars as pl
 import pytest
-from test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
-from test_mocks import MockElasticsearchClient, MockSmartOpen, mock_es_secrets
 
 from graph_remover import IDS_LOG_SCHEMA
 from ingestor.steps.ingestor_deletions import lambda_handler
+from tests.mocks import MockElasticsearchClient, MockSmartOpen, mock_es_secrets
+from tests.test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
 
 MOCK_EVENT = {
     "ingestor_type": "concepts",

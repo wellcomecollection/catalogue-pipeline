@@ -1,9 +1,8 @@
 import json
 
-from test_mocks import MockSmartOpen
-
 from ingestor.models.step_events import IngestorIndexerMonitorLambdaEvent
 from ingestor.steps.ingestor_indexer_monitor import handler
+from tests.mocks import MockSmartOpen
 
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.indexer.json"
 

@@ -1,16 +1,15 @@
-from test_mocks import mock_es_secrets
-from test_utils import (
-    add_mock_merged_documents,
-    add_mock_transformer_outputs_for_ontologies,
-    check_bulk_load_edge,
-)
-
 from models.events import BasePipelineEvent
 from models.graph_edge import (
     ConceptHasSourceConcept,
     ConceptHasSourceConceptAttributes,
 )
 from models.graph_node import Concept
+from tests.mocks import mock_es_secrets
+from tests.test_utils import (
+    add_mock_merged_documents,
+    add_mock_transformer_outputs_for_ontologies,
+    check_bulk_load_edge,
+)
 from transformers.catalogue.concepts_transformer import CatalogueConceptsTransformer
 
 

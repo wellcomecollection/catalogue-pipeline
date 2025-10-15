@@ -33,8 +33,8 @@ from adapters.ebsco.transformers.ebsco_to_weco import (
     EBSCO_IDENTIFIER_TYPE,
     transform_record,
 )
-from adapters.ebsco.utils.elasticsearch import get_client, get_standard_index_name
 from adapters.ebsco.utils.iceberg import IcebergTableClient, get_iceberg_table
+from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 # Batch size for converting Arrow tables to Python objects before indexing
 # This must result in batches of output ids that fit in the 256kb item
@@ -43,7 +43,7 @@ BATCH_SIZE = 5_000
 
 
 class EbscoAdapterTransformerConfig(BaseModel):
-    is_local: bool = False
+    es_mode: ElasticsearchMode = "private"
     use_rest_api_table: bool = True
     pipeline_date: str
     # Optional override for index naming. When None we use pipeline_date.
@@ -302,7 +302,7 @@ def handler(
 
     es_client = get_client(
         pipeline_date=config_obj.pipeline_date,
-        is_local=config_obj.is_local,
+        es_mode=config_obj.es_mode,
         api_key_name=config.ES_API_KEY_NAME,
     )
     index_name = get_standard_index_name("works-source", index_date)
@@ -361,6 +361,14 @@ def local_handler() -> TransformerManifest:
         default="dev",
         required=False,
     )
+    parser.add_argument(
+        "--es-mode",
+        type=str,
+        help="Where to index documents. Use 'public' to connect to the production cluster.",
+        required=False,
+        choices=["local", "public"],
+        default="local",
+    )
 
     args = parser.parse_args()
 
@@ -369,7 +377,7 @@ def local_handler() -> TransformerManifest:
     )
     use_rest_api = args.use_rest_api_table
     config_obj = EbscoAdapterTransformerConfig(
-        is_local=True,
+        es_mode=args.es_mode,
         use_rest_api_table=use_rest_api,
         pipeline_date=args.pipeline_date,
         index_date=args.index_date,

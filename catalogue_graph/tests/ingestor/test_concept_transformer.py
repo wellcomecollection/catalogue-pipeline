@@ -1,9 +1,5 @@
 import io
 
-import neptune_generators as ng
-from test_mocks import mock_es_secrets
-from test_utils import load_json_fixture
-
 from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.identifier import DisplayIdentifier, DisplayIdentifierType
 from ingestor.models.display.location import DisplayDigitalLocation
@@ -27,6 +23,9 @@ from ingestor.transformers.raw_concept import (
     get_most_specific_concept_type,
 )
 from models.events import BasePipelineEvent
+from tests import neptune_generators as ng
+from tests.mocks import mock_es_secrets
+from tests.test_utils import load_json_fixture
 
 MOCK_EMPTY_RELATED_CONCEPTS: dict = {
     "related_to": [],
