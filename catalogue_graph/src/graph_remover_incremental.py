@@ -8,6 +8,9 @@ import config
 from models.events import IncrementalRemoverEvent
 from removers.base_remover import BaseGraphRemover
 from removers.catalogue_concepts_remover import CatalogueConceptsGraphRemover
+from removers.catalogue_work_identifiers_remover import (
+    CatalogueWorkIdentifiersGraphRemover,
+)
 from removers.catalogue_works_remover import CatalogueWorksGraphRemover
 from utils.aws import (
     df_to_s3_parquet,
@@ -36,6 +39,8 @@ def get_remover(event: IncrementalRemoverEvent, is_local: bool) -> BaseGraphRemo
         return CatalogueWorksGraphRemover(event, es_mode)
     if event.remover_type == "concepts":
         return CatalogueConceptsGraphRemover(event, es_mode)
+    if event.remover_type == "work_identifiers":
+        return CatalogueWorkIdentifiersGraphRemover(event, es_mode)
 
     raise ValueError(f"Unknown remover type: '{event.remover_type}'")
 
@@ -49,7 +54,11 @@ def handler(event: IncrementalRemoverEvent, is_local: bool = False) -> None:
     df = pl.DataFrame(deleted_ids)
     df_to_s3_parquet(df, s3_file_uri)
 
-    # Work identifiers?
+    print(f"List of deleted IDs saved to {s3_file_uri}.")
+
+
+def lambda_handler(event: dict, context: typing.Any) -> None:
+    handler(IncrementalRemoverEvent.model_validate(event))
 
 
 def local_handler() -> None:
@@ -58,7 +67,7 @@ def local_handler() -> None:
         "--remover-type",
         type=str,
         choices=typing.get_args(IncrementalGraphRemoverType),
-        help="Which remover to run (works or concepts).",
+        help="Which remover to run (works, concepts, or work identifiers).",
         required=True,
     )
     parser.add_argument(
@@ -74,9 +83,21 @@ def local_handler() -> None:
         help="The pipeline date associated with the removed items.",
         required=True,
     )
+    parser.add_argument(
+        "--window-start",
+        type=str,
+        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
+        "--window-end",
+        type=str,
+        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
 
     args = parser.parse_args()
-    event = IncrementalRemoverEvent(**args.__dict__)
+    event = IncrementalRemoverEvent.from_argparser(args)
 
     handler(event, is_local=True)
 

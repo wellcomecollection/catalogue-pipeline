@@ -6,6 +6,8 @@ from utils.types import EntityType
 
 ES_QUERY_NON_VISIBLE_WORKS = {"bool": {"must_not": {"match": {"type": "Visible"}}}}
 
+BATCH_SIZE = 40_000
+
 
 class BaseGraphRemover:
     def __init__(self, entity_type: EntityType, use_public_endpoint: bool):
@@ -27,7 +29,7 @@ class BaseGraphRemover:
         raise NotImplementedError()
 
     def get_edge_ids_to_remove(self) -> Iterator[str]:
-        for batch in batched(self.get_es_edges(), 40_000):
+        for batch in batched(self.get_es_edges(), BATCH_SIZE):
             es_edges = {work_id: linked_ids for work_id, linked_ids in batch}
             graph_edges = self.get_graph_edges(es_edges.keys())
 
@@ -43,7 +45,7 @@ class BaseGraphRemover:
             raise ValueError(f"Unknown entity type: {self.entity_type}")
 
         deleted_ids = []
-        for batch in batched(ids_to_remove, 40_000):
+        for batch in batched(ids_to_remove, BATCH_SIZE):
             print(f"Will delete a batch of up to {len(batch)} IDs from the graph.")
             deleted_ids += self.neptune_client.delete_entities_by_id(
                 list(batch), self.entity_type

@@ -210,7 +210,6 @@ class BaseNeptuneClient:
 
         # Filter for IDs which actually exist in the graph
         delete_ids = self.run_parallel_query(ids, get_query).keys()
-        print(f"Checked {len(ids)} IDs, {len(delete_ids)} of which exist in the graph.")
 
         self.run_parallel_query(
             delete_ids, delete_query, chunk_size=ID_DELETE_BATCH_SIZE
@@ -268,7 +267,7 @@ class BaseNeptuneClient:
     def get_disconnected_node_ids(
         self, node_label: str, edge_label: str
     ) -> Iterator[str]:
-        """Return the IDs of all nodes which do not have any edges of the specified type"""
+        """Return the IDs of all nodes which do not have any edges of the specified type."""
         query = f"""
             MATCH (n: {node_label})
             WHERE NOT (n)-[:{edge_label}]-()
