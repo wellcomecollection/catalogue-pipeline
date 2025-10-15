@@ -5,8 +5,7 @@ import pytest
 import adapters.ebsco.config as adapter_config
 from adapters.ebsco.manifests import ManifestWriter
 from adapters.ebsco.models.manifests import ErrorLine
-
-from .test_mocks import MockSmartOpen
+from tests.mocks import MockSmartOpen
 
 
 def _read_ndjson(uri: str) -> list[dict]:

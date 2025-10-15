@@ -17,13 +17,13 @@ from adapters.ebsco.steps.transformer import (
     transform,
 )
 from adapters.ebsco.utils.iceberg import IcebergTableClient
-
-from .helpers import data_to_namespaced_table
-from .test_mocks import (
+from tests.mocks import (
     MockElasticsearchClient,
     MockSecretsManagerClient,
     MockSmartOpen,
 )
+
+from .helpers import data_to_namespaced_table
 
 # --------------------------------------------------------------------------------------
 # Helpers
@@ -66,7 +66,7 @@ def _run_transform(
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True,
+        es_mode="local",
         use_rest_api_table=False,
         pipeline_date=pipeline_date,
         index_date=index_date,
@@ -182,7 +182,7 @@ def test_transformer_full_retransform_when_no_changeset(
     # Now call handler with no changeset_id -> full re-transform path
     event = EbscoAdapterTransformerEvent(changeset_id=None, job_id="20250101T1200")
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_rest_api_table=False, pipeline_date="dev"
+        es_mode="local", use_rest_api_table=False, pipeline_date="dev"
     )
     result = handler(event=event, config_obj=config)
 
@@ -221,7 +221,7 @@ def test_transformer_batch_file_key_with_changeset(
         job_id=job_id,
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_rest_api_table=False, pipeline_date="dev"
+        es_mode="local", use_rest_api_table=False, pipeline_date="dev"
     )
     result = handler(event=event, config_obj=config)
 
@@ -268,7 +268,7 @@ def test_transformer_index_name_selection(
         changeset_id=changeset_id, job_id="20250101T1200"
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True,
+        es_mode="local",
         use_rest_api_table=False,
         pipeline_date=pipeline_date,
         index_date=index_date,
@@ -490,7 +490,7 @@ def test_transformer_raises_when_batch_file_write_fails(
         job_id="20250101T1200",
     )
     config = EbscoAdapterTransformerConfig(
-        is_local=True, use_rest_api_table=False, pipeline_date="dev"
+        es_mode="local", use_rest_api_table=False, pipeline_date="dev"
     )
 
     with pytest.raises(OSError, match="simulated write failure"):

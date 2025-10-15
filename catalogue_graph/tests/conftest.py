@@ -3,7 +3,8 @@ from typing import Any
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from test_mocks import (
+
+from tests.mocks import (
     MockBoto3Resource,
     MockBoto3Session,
     MockCloudwatchClient,

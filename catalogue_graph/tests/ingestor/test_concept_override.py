@@ -1,7 +1,6 @@
 import io
 
 import pytest
-from test_utils import load_json_fixture
 
 from ingestor.models.display.id_label import DisplayIdLabel
 from ingestor.models.display.location import DisplayDigitalLocation
@@ -9,6 +8,7 @@ from ingestor.models.indexable_concept import ConceptDescription
 from ingestor.models.neptune.query_result import ExtractedConcept
 from ingestor.transformers.concept_override import ConceptTextOverrideProvider
 from ingestor.transformers.raw_concept import RawNeptuneConcept
+from tests.test_utils import load_json_fixture
 
 
 @pytest.fixture

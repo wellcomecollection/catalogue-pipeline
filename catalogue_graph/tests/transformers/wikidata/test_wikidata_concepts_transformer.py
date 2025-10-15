@@ -2,11 +2,11 @@ import json
 import math
 
 import pytest
-from test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
-from test_wikidata_concepts_source import _add_mock_wikidata_requests
 
 from models.graph_edge import SourceConceptSameAs, SourceConceptSameAsAttributes
 from models.graph_node import SourceConcept
+from tests.sources.test_wikidata_concepts_source import _add_mock_wikidata_requests
+from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 from transformers.wikidata.concepts_transformer import WikidataConceptsTransformer
 from transformers.wikidata.raw_concept import RawWikidataLocation, RawWikidataName
 

@@ -1,7 +1,5 @@
 import json
 
-from test_mocks import MockCloudwatchClient, MockSmartOpen
-
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorIndexerObject,
@@ -10,6 +8,7 @@ from ingestor.models.step_events import (
 from ingestor.steps.ingestor_loader_monitor import (
     handler,
 )
+from tests.mocks import MockCloudwatchClient, MockSmartOpen
 
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.loader.json"
 

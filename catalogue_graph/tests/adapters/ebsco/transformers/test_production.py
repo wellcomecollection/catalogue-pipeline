@@ -36,6 +36,37 @@ def test_empty_production_is_no_production(marc_record: Record) -> None:
         pytest.param(
             [
                 Field(
+                    tag="008",
+                    data="800121d19791995acafr p o o   0    0engrc",
+                ),
+                Field(
+                    tag="260",
+                    subfields=[],
+                ),
+                Field(
+                    tag="264",
+                    subfields=[],
+                ),
+            ]
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_fall_back_to_008(marc_record: Record) -> None:
+    production = lone_element(transform_record(marc_record).production)
+    assert lone_element(production.places).label == "Australian Capital Territory"
+    period = lone_element(production.dates)
+    assert period.range.label == "1979-1995"
+    assert period.range.from_time == "1979-01-01T00:00:00"
+    assert period.range.to_time == "1995-12-31T23:59:59.999999"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
                     tag=code,
                     indicators=Indicators(" ", "1"),
                     subfields=[
@@ -58,8 +89,47 @@ def test_production_from_abc(marc_record: Record) -> None:
     assert lone_element(production.agents).label == "Mankind"
     period = lone_element(production.dates)
     assert period.range.label == "1998"
-    assert period.range.from_time == ""
-    assert period.range.to_time == ""
+    assert period.range.from_time == "1998-01-01T00:00:00"
+    assert period.range.to_time == "1998-12-31T23:59:59.999999"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="008",
+                    data="800121d18001899acafr p o o   0    0engrc",
+                ),
+                Field(
+                    tag=code,
+                    indicators=Indicators(" ", "1"),
+                    subfields=[
+                        Subfield(code="c", value="1998"),
+                        Subfield(code="b", value="Mankind"),
+                        Subfield(code="a", value="Announcer's Table"),
+                    ],
+                ),
+            ],
+            id=f"MARC field code: {code}",
+        )
+        for code in ["260", "264"]
+    ],
+    indirect=["marc_record"],
+)
+def test_ignores_008(marc_record: Record) -> None:
+    """
+    008 is to be ignored if the information in 260/264 is complete
+    """
+    production = lone_element(transform_record(marc_record).production)
+    assert production.label == "1998 Mankind Announcer's Table"
+    assert lone_element(production.places).label == "Announcer's Table"
+    assert lone_element(production.agents).label == "Mankind"
+    period = lone_element(production.dates)
+    assert period.range.label == "1998"
+    assert period.range.from_time == "1998-01-01T00:00:00"
+    assert period.range.to_time == "1998-12-31T23:59:59.999999"
 
 
 @pytest.mark.parametrize(
@@ -255,3 +325,35 @@ def test_prefer_260(marc_record: Record) -> None:
     production = lone_element(transform_record(marc_record).production)
     assert production.label == "Düsseldorf City"
     assert production.function is None
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="008",
+                    data="800121s1979uuuuacafr p o o   0    0engrc",
+                ),
+                Field(
+                    tag=code,
+                    indicators=Indicators(" ", "1"),
+                    subfields=[
+                        Subfield(code="a", value="New York"),
+                    ],
+                ),
+            ]
+        )
+        for code in ["260", "264"]
+    ],
+    indirect=["marc_record"],
+)
+def test_populate_first_production_with_008_dates_if_none_of_its_own(
+    marc_record: Record,
+) -> None:
+    production = lone_element(transform_record(marc_record).production)
+    assert lone_element(production.places).label == "New York"
+    period = lone_element(production.dates)
+    assert period.range.label == "1979"
+    assert period.range.from_time == "1979-01-01T00:00:00"

@@ -1,8 +1,7 @@
-from test_mocks import mock_es_secrets
-from test_utils import add_mock_merged_documents
-
 from models.events import BasePipelineEvent
 from sources.catalogue.concepts_source import CatalogueConceptsSource
+from tests.mocks import mock_es_secrets
+from tests.test_utils import add_mock_merged_documents
 
 
 def test_catalogue_concepts_source() -> None:

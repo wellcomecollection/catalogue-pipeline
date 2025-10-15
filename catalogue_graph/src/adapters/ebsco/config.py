@@ -27,9 +27,3 @@ BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
 INDEX_DATE = os.getenv("INDEX_DATE")
 ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "transformer")
-
-## Local Elasticsearch Configuration
-ES_LOCAL_HOST = os.environ.get("ES_LOCAL_HOST", "localhost")
-ES_LOCAL_PORT = int(os.environ.get("ES_LOCAL_PORT", "9200"))
-ES_LOCAL_SCHEME = os.environ.get("ES_LOCAL_SCHEME", "http")
-ES_LOCAL_API_KEY = os.environ.get("ES_LOCAL_API_KEY")

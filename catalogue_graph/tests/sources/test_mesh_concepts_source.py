@@ -1,7 +1,6 @@
-from test_mocks import MockRequest
-from test_utils import load_fixture
-
 from sources.mesh.concepts_source import MeSHConceptsSource
+from tests.mocks import MockRequest
+from tests.test_utils import load_fixture
 
 
 def test_mesh_concepts_source() -> None:

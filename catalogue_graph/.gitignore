@@ -1,6 +1,2 @@
-# notebooks
-notebooks/*
-!notebooks/query.ipynb
-
 transformer_outputs/*
 ingestor_outputs/
