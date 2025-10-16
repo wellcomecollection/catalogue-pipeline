@@ -65,9 +65,13 @@ class BaseGraphRemoverIncremental:
         existing_ids = []
         for batch in batched(ids_to_remove, BATCH_SIZE):
             # Filter for IDs which actually exist in the graph
-            existing_ids += self.neptune_client.get_existing_ids(batch, self.entity_type)
+            existing_ids += self.neptune_client.get_existing_ids(
+                list(batch), self.entity_type
+            )
 
-        print(f"Will delete a total of {len(existing_ids)} {self.entity_type} from the graph.")
+        print(
+            f"Will delete a total of {len(existing_ids)} {self.entity_type} from the graph."
+        )
 
         # This is part of a safety mechanism. If the fraction of removed nodes/edges of the given type exceeds
         # `DEFAULT_THRESHOLD` (set to 5%), an exception will be raised.
