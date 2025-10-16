@@ -19,7 +19,7 @@ IdentifyType = Literal["Identified", "Unidentifiable"]
 
 class BaseIdentify(ElasticsearchModel):
     canonical_id: str | None = None
-    identified_type: IdentifyType
+    type: IdentifyType
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         raise NotImplementedError()
@@ -31,7 +31,7 @@ class BaseIdentify(ElasticsearchModel):
 class Identifiable(BaseIdentify):
     source_identifier: SourceIdentifier
     other_identifiers: list[SourceIdentifier] = []
-    identified_type: IdentifyType = "Identified"
+    type: IdentifyType = "Identified"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield self.source_identifier
@@ -52,7 +52,7 @@ class Identified(Identifiable):
 
 class Unidentifiable(BaseIdentify):
     canonical_id: None = None
-    identified_type: IdentifyType = "Unidentifiable"
+    type: IdentifyType = "Unidentifiable"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield from []
