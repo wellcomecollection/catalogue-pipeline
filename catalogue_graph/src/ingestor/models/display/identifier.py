@@ -1,5 +1,4 @@
 from collections.abc import Generator
-from typing import cast
 
 from pydantic import BaseModel
 
@@ -65,8 +64,6 @@ class DisplayIdentifier(BaseModel):
     ) -> Generator["DisplayIdentifier"]:
         if not isinstance(identifier, Identifiable):
             return
-
-        identifier = cast(Identifiable, identifier)
 
         if identifier.source_identifier is not None:
             yield DisplayIdentifier.from_source_identifier(identifier.source_identifier)
