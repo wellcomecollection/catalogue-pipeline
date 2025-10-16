@@ -42,6 +42,10 @@ class MergedWorkData(WorkData):
         return self.work_type
 
 
+class SourceWorkData(WorkData):
+    pass
+
+
 class WorkState(ElasticsearchModel):
     source_identifier: SourceIdentifier
     modified_time: datetime
@@ -57,7 +61,6 @@ class MergedWorkState(WorkState):
     source_modified_time: datetime
     availabilities: list[Id]
     merge_candidates: list[MergeCandidate]
-    relations: WorkRelations
 
     @model_validator(mode="before")
     @classmethod
@@ -72,6 +75,43 @@ class MergedWorkState(WorkState):
 
     def id(self) -> str:
         return self.canonical_id
+
+
+class SourceWorkState(WorkState):
+    pass
+
+
+class Work(ElasticsearchModel):
+    state: MergedWorkState | SourceWorkState
+    version: int
+    type: WorkStatus
+    data: MergedWorkData | SourceWorkData | None = None
+
+    @staticmethod
+    def from_raw_document(work: dict) -> "Work":
+        if work["type"] == "Visible":
+            return VisibleWork.model_validate(work)
+        if work["type"] == "Invisible":
+            return InvisibleWork.model_validate(work)
+        if work["type"] == "Deleted":
+            return DeletedWork.model_validate(work)
+
+        raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
+
+
+class VisibleWork(Work):
+    type: WorkStatus = "Visible"
+    redirect_sources: list[Identified]
+
+
+class InvisibleWork(Work):
+    type: WorkStatus = "Invisible"
+    invisibility_reasons: list[InvisibleReason]
+
+
+class DeletedWork(Work):
+    type: WorkStatus = "Deleted"
+    deleted_reason: DeletedReason
 
 
 class MergedWork(ElasticsearchModel):
