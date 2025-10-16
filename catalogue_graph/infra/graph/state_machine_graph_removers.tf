@@ -6,25 +6,25 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
     QueryLanguage = "JSONata"
     Comment       = "Remove unused source concept nodes/edges from the catalogue graph"
     StartAt       = "Run graph removers"
-    States        = {
+    States = {
       "Run graph removers" = {
         Type           = "Map",
         Items          = local.concepts_pipeline_inputs_monthly
         MaxConcurrency = 2
-        ItemProcessor  = {
+        ItemProcessor = {
           ProcessorConfig = {
             Mode          = "DISTRIBUTED",
             ExecutionType = "STANDARD"
           },
           StartAt = "Remove unused nodes and edges",
-          States  = {
+          States = {
             "Remove unused nodes and edges" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::lambda:invoke",
-              Output    = "{% $states.result.Payload %}",
+              Type     = "Task",
+              Resource = "arn:aws:states:::lambda:invoke",
+              Output   = "{% $states.result.Payload %}",
               Arguments = {
                 FunctionName = module.graph_remover_lambda.lambda.arn,
-                Payload      = {
+                Payload = {
                   "transformer_type" : "{% $states.input.transformer_type %}",
                   "entity_type" : "{% $states.input.entity_type %}",
                   "pipeline_date" : local.pipeline_date,
@@ -73,10 +73,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
             ExecutionType = "STANDARD"
           },
           StartAt = "Run incremental graph remover",
-          States  = {
+          States = {
             "Run incremental graph remover" = {
-              Type      = "Task",
-              Resource  = "arn:aws:states:::lambda:invoke",
+              Type     = "Task",
+              Resource = "arn:aws:states:::lambda:invoke",
               Arguments = {
                 FunctionName = module.graph_remover_incremental_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
