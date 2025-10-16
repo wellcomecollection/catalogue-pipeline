@@ -44,7 +44,7 @@ resource "aws_iam_role_policy" "graph_remover_incremental_lambda_read_secrets_po
   policy = data.aws_iam_policy_document.allow_secret_read.json
 }
 
-# Read and write ID snapshots and files storing deleted nodes/edges
+# Write files storing deleted nodes/edges
 resource "aws_iam_role_policy" "graph_remover_incremental_lambda_s3_policy" {
   role   = module.graph_remover_incremental_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.graph_remover_incremental_s3_policy.json
@@ -55,8 +55,7 @@ data "aws_iam_policy_document" "graph_remover_incremental_s3_policy" {
     actions = [
       "s3:ListBucket",
       "s3:PutObject",
-      "s3:HeadObject",
-      "s3:GetObject"
+      "s3:HeadObject"
     ]
 
     resources = [
