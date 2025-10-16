@@ -196,50 +196,42 @@ class BaseNeptuneClient:
 
         print(f"Removed all nodes with label '{label}'.")
 
-    def delete_entities_by_id(
-        self, ids: list[str], entity_type: EntityType
-    ) -> list[str]:
+    def get_existing_ids(self, ids: list[str], entity_type: EntityType) -> list[str]:
         if entity_type == "nodes":
-            get_query = "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"
-            delete_query = "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"
+            query = "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"
         elif entity_type == "edges":
-            get_query = "MATCH ()-[e]->() WHERE id(e) IN $ids RETURN id(e) AS id"
-            delete_query = "MATCH ()-[e]->() WHERE id(e) IN $ids DELETE e"
+            query = "MATCH ()-[e]->() WHERE id(e) IN $ids RETURN id(e) AS id"
         else:
             raise ValueError(f"Unknown entity type: {entity_type}")
 
-        # Filter for IDs which actually exist in the graph
-        delete_ids = self.run_parallel_query(ids, get_query).keys()
+        return list(self.run_parallel_query(ids, query).keys())
 
-        self.run_parallel_query(
-            delete_ids, delete_query, chunk_size=ID_DELETE_BATCH_SIZE
-        )
-        print(f"Deleted {len(delete_ids)} {entity_type} from the graph.")
+    def delete_entities_by_id(self, ids: list[str], entity_type: EntityType) -> None:
+        if entity_type == "nodes":
+            query = "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"
+        elif entity_type == "edges":
+            query = "MATCH ()-[e]->() WHERE id(e) IN $ids DELETE e"
+        else:
+            raise ValueError(f"Unknown entity type: {entity_type}")
 
-        return list(delete_ids)
+        self.run_parallel_query(ids, query, chunk_size=ID_DELETE_BATCH_SIZE)
 
-    def delete_nodes_by_id(self, ids: list[str]) -> list[str]:
+    def delete_nodes_by_id(self, ids: list[str]) -> None:
         """Removes all nodes with the specified ids from the graph."""
         return self.delete_entities_by_id(ids, "nodes")
 
-    def delete_edges_by_id(self, ids: list[str]) -> list[str]:
+    def delete_edges_by_id(self, ids: list[str]) -> None:
         """Removes all edges with the specified ids from the graph."""
         return self.delete_entities_by_id(ids, "edges")
 
-    def get_total_edge_count(self) -> int:
-        query = """
-            MATCH ()-[e]-() RETURN count(e) AS edgeCount
-        """
-
-        edge_count: int = self.run_open_cypher_query(query)[0]["edgeCount"]
+    def get_total_edge_count(self, label: str) -> int:
+        query = f"MATCH ()-[e:{label}]->() RETURN count(e) AS count"
+        edge_count: int = self.run_open_cypher_query(query)[0]["count"]
         return edge_count
 
-    def get_total_node_count(self) -> int:
-        query = """
-            MATCH (n) RETURN count(n) AS nodeCount
-        """
-
-        node_count: int = self.run_open_cypher_query(query)[0]["nodeCount"]
+    def get_total_node_count(self, label: str) -> int:
+        query = f"MATCH (n: {label}) RETURN count(n) AS count"
+        node_count: int = self.run_open_cypher_query(query)[0]["count"]
         return node_count
 
     def run_parallel_query(

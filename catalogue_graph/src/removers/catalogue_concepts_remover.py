@@ -10,6 +10,12 @@ class CatalogueConceptsGraphRemover(BaseGraphRemoverIncremental):
     def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
         super().__init__(event.entity_type, es_mode != "private")
 
+    def get_total_node_count(self) -> int:
+        return self.neptune_client.get_total_node_count("Concept")
+
+    def get_total_edge_count(self) -> int:
+        return 0
+
     def get_node_ids_to_remove(self) -> Iterator[str]:
         """Remove the IDs of all concept nodes which are not connected to any works"""
         yield from self.neptune_client.get_disconnected_node_ids(

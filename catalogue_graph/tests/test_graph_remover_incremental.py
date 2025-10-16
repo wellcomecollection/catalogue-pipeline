@@ -1,4 +1,8 @@
+from typing import Any
+
 import polars as pl
+import pydantic
+import pytest
 
 from graph_remover_incremental import lambda_handler
 from tests.mocks import (
@@ -15,6 +19,22 @@ def mock_neptune_get_disconnected_concept_nodes(node_ids: list) -> None:
         expected_query="MATCH (n: Concept) WHERE NOT (n)-[:HAS_CONCEPT]-() RETURN id(n) AS id",
         expected_params={},
         mock_results=[{"id": i} for i in node_ids],
+    )
+
+
+def mock_neptune_get_total_node_count(label: str, count: int) -> None:
+    add_neptune_mock_response(
+        expected_query=f"MATCH (n: {label}) RETURN count(n) AS count",
+        expected_params=None,
+        mock_results=[{"count": count}],
+    )
+
+
+def mock_neptune_get_total_edge_count(label: str, count: int) -> None:
+    add_neptune_mock_response(
+        expected_query=f"MATCH ()-[e:{label}]->() RETURN count(e) AS count",
+        expected_params=None,
+        mock_results=[{"count": count}],
     )
 
 
@@ -61,8 +81,16 @@ def mock_neptune_get_edges_response(node_ids: list[str], results: list[dict]) ->
     )
 
 
+def check_deleted_ids_log(s3_uri: str, expected_ids: set[str]) -> None:
+    with MockSmartOpen.open(s3_uri, "rb") as f:
+        df = pl.read_parquet(f)
+        ids = pl.Series(df.select(pl.first())).to_list()
+        assert set(ids) == expected_ids
+
+
 def test_graph_remover_incremental_concept_nodes() -> None:
     disconnected_ids = ["byzuqyr5", "vjfb76xy"]
+    mock_neptune_get_total_node_count("Concept", 100)
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
@@ -75,10 +103,7 @@ def test_graph_remover_incremental_concept_nodes() -> None:
     lambda_handler(event, None)
 
     s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
-    with MockSmartOpen.open(s3_uri, "rb") as f:
-        df = pl.read_parquet(f)
-        ids = pl.Series(df.select(pl.first())).to_list()
-        assert set(ids) == set(disconnected_ids)
+    check_deleted_ids_log(s3_uri, set(disconnected_ids))
 
 
 def test_graph_remover_incremental_concept_edges() -> None:
@@ -101,6 +126,7 @@ def test_graph_remover_incremental_concept_edges() -> None:
 def test_graph_remover_incremental_work_edges() -> None:
     # Add three visible works to the merged index.
     add_mock_merged_documents("2024-06-06", work_status="Visible")
+    mock_neptune_get_total_edge_count("HAS_CONCEPT", 12345)
 
     # Mock HAS_CONCEPT graph relationships for all three works, some of which also exist in the merged index,
     # and some of which only exist in the graph (and should be removed).
@@ -149,10 +175,7 @@ def test_graph_remover_incremental_work_edges() -> None:
     s3_uri = (
         f"{REMOVER_S3_PREFIX}/2024-06-06/deleted_ids/catalogue_works__edges.parquet"
     )
-    with MockSmartOpen.open(s3_uri, "rb") as f:
-        df = pl.read_parquet(f)
-        ids = pl.Series(df.select(pl.first())).to_list()
-        assert set(ids) == set(edges_to_remove)
+    check_deleted_ids_log(s3_uri, set(edges_to_remove))
 
 
 def test_graph_remover_incremental_work_nodes() -> None:
@@ -160,6 +183,7 @@ def test_graph_remover_incremental_work_nodes() -> None:
     add_mock_merged_documents("dev", work_status="Invisible")
     mock_neptune_get_existing_nodes_response(["sghsneca"])
     mock_neptune_delete_nodes_response(["sghsneca"])
+    mock_neptune_get_total_node_count("Work", 100)
 
     event = {
         "transformer_type": "catalogue_works",
@@ -169,7 +193,42 @@ def test_graph_remover_incremental_work_nodes() -> None:
     lambda_handler(event, None)
 
     s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_works__nodes.parquet"
-    with MockSmartOpen.open(s3_uri, "rb") as f:
-        df = pl.read_parquet(f)
-        ids = pl.Series(df.select(pl.first())).to_list()
-        assert set(ids) == {"sghsneca"}
+    check_deleted_ids_log(s3_uri, {"sghsneca"})
+
+
+def test_graph_remover_catalogue_failure() -> None:
+    # LoC concepts can only be removed using the full graph remover
+    event = {
+        "transformer_type": "loc_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+    }
+
+    with pytest.raises(pydantic.ValidationError):
+        lambda_handler(event, None)
+
+
+def test_graph_remover_safety_mechanism() -> None:
+    disconnected_ids = ["byzuqyr5", "vjfb76xy"]
+    mock_neptune_get_total_node_count("Concept", 20)
+    mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
+    mock_neptune_get_existing_nodes_response(disconnected_ids)
+    mock_neptune_delete_nodes_response(disconnected_ids)
+
+    event: dict[str, Any] = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+    }
+
+    # Safety check enabled
+    with pytest.raises(
+        ValueError, match="Fractional change 0.1 exceeds threshold 0.05!"
+    ):
+        lambda_handler(event, None)
+
+    # Safety check disabled
+    event["override_safety_check"] = True
+    lambda_handler(event, None)
+    s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
+    check_deleted_ids_log(s3_uri, set(disconnected_ids))

@@ -2,6 +2,7 @@ from collections.abc import Iterable, Iterator
 from itertools import batched
 
 from utils.aws import get_neptune_client
+from utils.safety import validate_fractional_change
 from utils.types import EntityType
 
 ES_QUERY_NON_VISIBLE_WORKS = {"bool": {"must_not": {"match": {"type": "Visible"}}}}
@@ -13,6 +14,12 @@ class BaseGraphRemoverIncremental:
     def __init__(self, entity_type: EntityType, use_public_endpoint: bool):
         self.neptune_client = get_neptune_client(use_public_endpoint)
         self.entity_type = entity_type
+
+    def get_total_node_count(self) -> int:
+        raise NotImplementedError()
+
+    def get_total_edge_count(self) -> int:
+        raise NotImplementedError()
 
     def get_node_ids_to_remove(self) -> Iterator[str]:
         """Return an iterator of node IDs which should be removed from the catalogue graph."""
@@ -45,23 +52,33 @@ class BaseGraphRemoverIncremental:
             for work_id, graph_edge_ids in graph_edges.items():
                 yield from graph_edge_ids.difference(es_edges.get(work_id, set()))
 
-    def remove(self) -> list[str]:
+    def remove(self, override_safety_check: bool = False) -> list[str]:
         if self.entity_type == "nodes":
-            ids_to_remove = self.get_node_ids_to_remove()
+            total_count = self.get_total_node_count()
+            ids_to_remove = list(self.get_node_ids_to_remove())
         elif self.entity_type == "edges":
-            ids_to_remove = self.get_edge_ids_to_remove()
+            total_count = self.get_total_edge_count()
+            ids_to_remove = list(self.get_edge_ids_to_remove())
         else:
             raise ValueError(f"Unknown entity type: {self.entity_type}")
 
-        deleted_ids = []
-        for batch in batched(ids_to_remove, BATCH_SIZE):
-            print(f"Will delete a batch of up to {len(batch)} IDs from the graph.")
-            deleted_ids += self.neptune_client.delete_entities_by_id(
-                list(batch), self.entity_type
-            )
+        print(f"Will delete up to {len(ids_to_remove)} IDs from the graph.")
 
-        print(
-            f"Deleted a total of {len(deleted_ids)} {self.entity_type} from the graph."
+        # Filter for IDs which actually exist in the graph
+        existing_ids = self.neptune_client.get_existing_ids(
+            ids_to_remove, self.entity_type
         )
 
-        return deleted_ids
+        # This is part of a safety mechanism. If the fraction of removed nodes/edges of the given type exceeds
+        # `DEFAULT_THRESHOLD` (set to 5%), an exception will be raised.
+        validate_fractional_change(
+            modified_size=len(existing_ids),
+            total_size=total_count,
+            force_pass=override_safety_check,
+        )
+
+        self.neptune_client.delete_entities_by_id(existing_ids, self.entity_type)
+
+        print(f"Deleted {len(existing_ids)} {self.entity_type} from the graph.")
+
+        return existing_ids

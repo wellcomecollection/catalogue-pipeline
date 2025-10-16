@@ -71,17 +71,6 @@ def log_ids(
     df_to_s3_parquet(df, s3_file_uri)
 
 
-def delete_ids_from_neptune(
-    deleted_ids: set[str], entity_type: EntityType, is_local: bool
-) -> None:
-    """Delete all nodes/edges with matching IDs from the Neptune cluster"""
-    client = get_neptune_client(is_local)
-    if entity_type == "nodes":
-        client.delete_nodes_by_id(list(deleted_ids))
-    else:
-        client.delete_edges_by_id(list(deleted_ids))
-
-
 def handler(event: FullGraphRemoverEvent, is_local: bool = False) -> None:
     try:
         # Retrieve a list of all ids which were loaded into the graph as part of the previous run
@@ -120,7 +109,8 @@ def handler(event: FullGraphRemoverEvent, is_local: bool = False) -> None:
 
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
-        delete_ids_from_neptune(deleted_ids, event.entity_type, is_local)
+        client = get_neptune_client(is_local)
+        client.delete_entities_by_id(list(deleted_ids), event.entity_type)
 
     # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
     log_ids(event, deleted_ids, "deleted_ids")

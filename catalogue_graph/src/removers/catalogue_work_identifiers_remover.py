@@ -19,6 +19,12 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
             event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
         )
 
+    def get_total_node_count(self) -> int:
+        return self.neptune_client.get_total_node_count("PathIdentifier")
+
+    def get_total_edge_count(self) -> int:
+        return self.neptune_client.get_total_edge_count("HAS_PATH_IDENTIFIER")
+
     def get_node_ids_to_remove(self) -> Iterator[str]:
         """Remove the IDs of all path identifier nodes which are not connected to any works"""
         yield from self.neptune_client.get_disconnected_node_ids(

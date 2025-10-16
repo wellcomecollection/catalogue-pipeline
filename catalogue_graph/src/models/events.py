@@ -65,6 +65,8 @@ class BulkLoadPollerEvent(BaseModel):
 
 
 class GraphRemoverEvent(GraphPipelineEvent):
+    override_safety_check: bool = False
+
     @property
     def s3_prefix(self) -> str:
         raise NotImplementedError()
@@ -84,7 +86,6 @@ class GraphRemoverEvent(GraphPipelineEvent):
 
 class FullGraphRemoverEvent(GraphRemoverEvent):
     transformer_type: FullGraphRemoverType
-    override_safety_check: bool = False
 
     @property
     def s3_prefix(self) -> str:

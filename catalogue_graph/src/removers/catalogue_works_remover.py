@@ -19,6 +19,12 @@ class CatalogueWorksGraphRemover(BaseGraphRemoverIncremental):
         self.event = event
         self.es_mode = es_mode
 
+    def get_total_node_count(self) -> int:
+        return self.neptune_client.get_total_node_count("Work")
+
+    def get_total_edge_count(self) -> int:
+        return self.neptune_client.get_total_edge_count("HAS_CONCEPT")
+
     def get_node_ids_to_remove(self) -> Iterator[str]:
         """
         Return the ids of all works which are not 'Visible' and which were modified within the specified time window.
