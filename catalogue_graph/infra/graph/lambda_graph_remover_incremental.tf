@@ -11,7 +11,7 @@ module "graph_remover_incremental_lambda" {
   // To deploy manually, see `scripts/deploy_lambda_zip.sh`
 
   image_config = {
-    command = ["graph_remover.lambda_handler"]
+    command = ["graph_remover_incremental.lambda_handler"]
   }
 
   memory_size = 2048

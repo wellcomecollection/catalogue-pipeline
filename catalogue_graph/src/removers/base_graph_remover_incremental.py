@@ -55,19 +55,19 @@ class BaseGraphRemoverIncremental:
     def remove(self, override_safety_check: bool = False) -> list[str]:
         if self.entity_type == "nodes":
             total_count = self.get_total_node_count()
-            ids_to_remove = list(self.get_node_ids_to_remove())
+            ids_to_remove = self.get_node_ids_to_remove()
         elif self.entity_type == "edges":
             total_count = self.get_total_edge_count()
-            ids_to_remove = list(self.get_edge_ids_to_remove())
+            ids_to_remove = self.get_edge_ids_to_remove()
         else:
             raise ValueError(f"Unknown entity type: {self.entity_type}")
 
-        print(f"Will delete up to {len(ids_to_remove)} IDs from the graph.")
+        existing_ids = []
+        for batch in batched(ids_to_remove, BATCH_SIZE):
+            # Filter for IDs which actually exist in the graph
+            existing_ids += self.neptune_client.get_existing_ids(batch, self.entity_type)
 
-        # Filter for IDs which actually exist in the graph
-        existing_ids = self.neptune_client.get_existing_ids(
-            ids_to_remove, self.entity_type
-        )
+        print(f"Will delete a total of {len(existing_ids)} {self.entity_type} from the graph.")
 
         # This is part of a safety mechanism. If the fraction of removed nodes/edges of the given type exceeds
         # `DEFAULT_THRESHOLD` (set to 5%), an exception will be raised.
