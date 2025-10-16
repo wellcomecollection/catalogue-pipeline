@@ -71,7 +71,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline_incremental" {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
-          StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loaders_incremental.arn,
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_graph_removers_incremental.arn,
           Input           = "{% $states.input %}"
         }
         Output = "{% $states.input %}",
