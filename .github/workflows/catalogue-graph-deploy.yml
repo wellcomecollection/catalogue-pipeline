@@ -71,6 +71,7 @@ jobs:
             catalogue-graph-bulk-load-poller,
             catalogue-graph-indexer,
             catalogue-graph-remover,
+            catalogue-graph-remover-incremental,
             catalogue-graph-ingestor-loader,
             catalogue-graph-ingestor-loader-monitor,
             catalogue-graph-ingestor-indexer,
