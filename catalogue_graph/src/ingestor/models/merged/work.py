@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, model_validator
 
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
@@ -42,14 +42,36 @@ class MergedWorkData(WorkData):
         return self.work_type
 
 
-class MergedWorkState(ElasticsearchModel):
+class WorkState(ElasticsearchModel):
     source_identifier: SourceIdentifier
+    modified_time: datetime
+    relations: WorkRelations
+
+    def id(self) -> str:
+        raise NotImplementedError()
+
+
+class MergedWorkState(WorkState):
     canonical_id: str
     merged_time: datetime
     source_modified_time: datetime
     availabilities: list[Id]
     merge_candidates: list[MergeCandidate]
     relations: WorkRelations
+
+    @model_validator(mode="before")
+    @classmethod
+    def _set_modified_time(cls, data: dict) -> dict:
+        if isinstance(data, dict) and ("merged_time" in data or "mergedTime" in data):
+            d = dict(data)
+            # Prefer snake_case if present else camelCase
+            merged_val = d.get("merged_time", d.get("mergedTime"))
+            d["modified_time"] = merged_val
+            return d
+        return data
+
+    def id(self) -> str:
+        return self.canonical_id
 
 
 class MergedWork(ElasticsearchModel):
