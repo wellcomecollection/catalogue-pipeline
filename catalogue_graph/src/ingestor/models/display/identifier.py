@@ -2,10 +2,10 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.models.shared.identifier import (
-    Identifiers,
+from models.pipeline.identifier import (
+    BaseIdentify,
+    Identifiable,
     SourceIdentifier,
-    Unidentifiable,
 )
 
 from .id_label import DisplayIdLabel
@@ -60,9 +60,9 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_all_identifiers(
-        identifier: Identifiers | Unidentifiable,
+        identifier: BaseIdentify,
     ) -> Generator["DisplayIdentifier"]:
-        if isinstance(identifier, Unidentifiable):
+        if not isinstance(identifier, Identifiable):
             return
 
         if identifier.source_identifier is not None:

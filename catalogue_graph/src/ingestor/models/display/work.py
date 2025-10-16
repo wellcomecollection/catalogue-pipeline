@@ -1,6 +1,6 @@
 from ingestor.extractors.works_extractor import VisibleExtractedWork
-from ingestor.models.shared.serialisable import ElasticsearchModel
 from ingestor.transformers.work_display_transformer import DisplayWorkTransformer
+from models.pipeline.serialisable import ElasticsearchModel
 from utils.types import DisplayWorkType
 
 from .concept import DisplayConcept, DisplayContributor, DisplayGenre, DisplaySubject

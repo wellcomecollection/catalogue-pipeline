@@ -1,12 +1,18 @@
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.models.work import SourceIdentifier
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from models.pipeline.identifier import Id, SourceIdentifier
 
 
 def test_no_other_identifiers(marc_record: Record) -> None:
     assert transform_record(marc_record).other_identifiers == []
+
+
+def build_source_identifier(id_type: str, value: str) -> SourceIdentifier:
+    return SourceIdentifier(
+        identifier_type=Id(id=id_type), ontology_type="Work", value=value
+    )
 
 
 @pytest.mark.parametrize(
@@ -24,9 +30,7 @@ def test_no_other_identifiers(marc_record: Record) -> None:
 def test_isbn(marc_record: Record) -> None:
     work = transform_record(marc_record)
     assert work.other_identifiers == [
-        SourceIdentifier(
-            identifier_type="isbn", ontology_type="Work", value="978-1-890159-02-3"
-        )
+        build_source_identifier("isbn", "978-1-890159-02-3")
     ]
 
 
@@ -44,11 +48,7 @@ def test_isbn(marc_record: Record) -> None:
 )
 def test_issn(marc_record: Record) -> None:
     work = transform_record(marc_record)
-    assert work.other_identifiers == [
-        SourceIdentifier(
-            identifier_type="issn", ontology_type="Work", value="1890-6729"
-        )
-    ]
+    assert work.other_identifiers == [build_source_identifier("issn", "1890-6729")]
 
 
 @pytest.mark.parametrize(
@@ -70,12 +70,8 @@ def test_issn(marc_record: Record) -> None:
 def test_both(marc_record: Record) -> None:
     work = transform_record(marc_record)
     assert work.other_identifiers == [
-        SourceIdentifier(
-            identifier_type="isbn", ontology_type="Work", value="978-1-890159-02-3"
-        ),
-        SourceIdentifier(
-            identifier_type="issn", ontology_type="Work", value="1890-6729"
-        ),
+        build_source_identifier("isbn", "978-1-890159-02-3"),
+        build_source_identifier("issn", "1890-6729"),
     ]
 
 
@@ -108,12 +104,8 @@ def test_only_take_current_identifiers(marc_record: Record) -> None:
     """
     work = transform_record(marc_record)
     assert work.other_identifiers == [
-        SourceIdentifier(
-            identifier_type="issn", ontology_type="Work", value="0046-8541"
-        ),
-        SourceIdentifier(
-            identifier_type="isbn", ontology_type="Work", value="978-1984857132"
-        ),
+        build_source_identifier("issn", "0046-8541"),
+        build_source_identifier("isbn", "978-1984857132"),
     ]
 
 

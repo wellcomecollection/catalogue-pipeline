@@ -8,10 +8,10 @@ from ingestor.models.merged.work import (
     VisibleMergedWork,
 )
 from ingestor.models.shared.deleted_reason import DeletedReason
-from ingestor.models.shared.identifier import Identifiers, SourceIdentifier
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
-from ingestor.models.shared.serialisable import ElasticsearchModel
+from models.pipeline.identifier import Identified, SourceIdentifier
+from models.pipeline.serialisable import ElasticsearchModel
 
 
 class WorkDebugSource(ElasticsearchModel):
@@ -43,7 +43,7 @@ class WorkDebug(ElasticsearchModel):
 
 
 class VisibleWorkDebug(WorkDebug):
-    redirect_sources: list[Identifiers]
+    redirect_sources: list[Identified]
 
     @classmethod
     def from_merged_work(cls, work: VisibleMergedWork) -> "VisibleWorkDebug":

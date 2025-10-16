@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
-from ingestor.models.shared.identifier import Identifiers, Unidentifiable
+from models.pipeline.identifier import BaseIdentify, Identified
 
 
 class AggregatableField(BaseModel):
@@ -14,10 +14,8 @@ class AggregatableField(BaseModel):
     label: str
 
 
-def get_aggregatable(
-    ids: Identifiers | Unidentifiable | None, label: str
-) -> AggregatableField:
-    if ids is None or isinstance(ids, Unidentifiable):
+def get_aggregatable(ids: BaseIdentify | None, label: str) -> AggregatableField:
+    if ids is None or ids.canonical_id is None:
         return AggregatableField(id=label, label=label)
 
     return AggregatableField(id=ids.canonical_id, label=label)
@@ -31,7 +29,7 @@ class AggregateWorkTransformer:
     @property
     def genres(self) -> Generator[AggregatableField]:
         for genre in self.data.genres:
-            assert isinstance(genre.concepts[0].id, Identifiers)
+            assert isinstance(genre.concepts[0].id, Identified)
             concept_id = genre.concepts[0].id.canonical_id
 
             yield AggregatableField(id=concept_id, label=genre.label)

@@ -1,11 +1,11 @@
 from pydantic import Field
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
-from ingestor.models.shared.serialisable import ElasticsearchModel
 from ingestor.transformers.work_aggregate_transformer import (
     AggregatableField,
     AggregateWorkTransformer,
 )
+from models.pipeline.serialisable import ElasticsearchModel
 
 
 class WorkAggregatableValues(ElasticsearchModel):

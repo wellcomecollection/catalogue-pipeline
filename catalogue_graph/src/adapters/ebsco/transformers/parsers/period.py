@@ -1,7 +1,7 @@
 import re
 from datetime import datetime
 
-from adapters.ebsco.models.work import DateTimeRange, Period
+from models.pipeline.concept import DateTimeRange, Period
 
 # Explicitly discard SGML escape sequences and doubly-escaped sequences.
 # This prevents the RE_KEEP sequence misinterpreting &#40; (lparen)

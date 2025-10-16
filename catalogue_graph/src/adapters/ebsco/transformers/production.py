@@ -9,12 +9,10 @@ from collections.abc import Iterable
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import (
-    ProductionEvent,
-    SourceConcept,
-)
 from adapters.ebsco.transformers.parsers.field008 import Field008
 from adapters.ebsco.transformers.parsers.period import parse_period
+from models.pipeline.concept import Concept
+from models.pipeline.production import ProductionEvent
 
 
 def extract_production(record: Record) -> list[ProductionEvent]:
@@ -47,7 +45,7 @@ def extract_production_from_008(record: Record) -> ProductionEvent | None:
         period = parse_period(date_range_str)
         if period:
             place = field008.place_of_production
-            places = [SourceConcept(label=place, type="Place")] if place else []
+            places = [Concept(label=place, type="Place")] if place else []
             return ProductionEvent(
                 label=date_range_str,
                 places=places,
@@ -81,32 +79,30 @@ def single_production_event(field: Field) -> ProductionEvent | None:
         )
     label = field.format_field()
     places = [
-        SourceConcept(label=subfield, type="Place")
-        for subfield in field.get_subfields("a")
+        Concept(label=subfield, type="Place") for subfield in field.get_subfields("a")
     ]
     agents = [
-        SourceConcept(label=subfield, type="Agent")
-        for subfield in field.get_subfields("b")
+        Concept(label=subfield, type="Agent") for subfield in field.get_subfields("b")
     ]
     dates = [parse_period(subfield) for subfield in field.get_subfields("c")]
     function = None
     if field.tag == "260" and field.get_subfields("e", "f", "g"):
         places += [
-            SourceConcept(label=subfield, type="Place")
+            Concept(label=subfield, type="Place")
             for subfield in field.get_subfields("e")
         ]
         agents += [
-            SourceConcept(label=subfield, type="Agent")
+            Concept(label=subfield, type="Agent")
             for subfield in field.get_subfields("f")
         ]
         dates += [parse_period(subfield) for subfield in field.get_subfields("g")]
-        function = SourceConcept(label="Manufacture")
+        function = Concept(label="Manufacture")
 
     if field.tag == "264":
         if field.indicator2 in ["4", " "]:
             return None
         else:
-            function = SourceConcept(label=IND2_264_MAP[field.indicator2])
+            function = Concept(label=IND2_264_MAP[field.indicator2])
 
     return ProductionEvent(
         label=label, places=places, agents=agents, dates=dates, function=function

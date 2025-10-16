@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from ingestor.models.shared.id_label import IdLabel
+from models.pipeline.id_label import IdLabel
 
 
 class DisplayId(BaseModel):

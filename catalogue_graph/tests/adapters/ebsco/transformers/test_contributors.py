@@ -1,8 +1,11 @@
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.models.work import ConceptType, SourceConcept, SourceIdentifier
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from models.pipeline.concept import Concept
+from models.pipeline.id_label import Label
+from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
+from utils.types import ConceptType
 
 from ..helpers import lone_element
 
@@ -185,8 +188,8 @@ def test_distinct_by_label_and_type(marc_record: Record) -> None:
 def test_distinct_by_label_and_role(marc_record: Record) -> None:
     work = transform_record(marc_record)
     assert len(work.contributors) == 2
-    assert work.contributors[1].roles == ["Author"]
-    assert work.contributors[0].roles == ["Mastermind"]
+    assert work.contributors[1].roles == [Label(label="Author")]
+    assert work.contributors[0].roles == [Label(label="Mastermind")]
 
 
 @pytest.mark.parametrize(
@@ -242,18 +245,21 @@ def test_contributor_all_fields(
     # This is not necessary, as the only field that now differs between the two is $q,
     # which does not exist on x10 fields.
     contributor = transform_record(marc_record).contributors[0]
-    assert contributor.roles == ["key grip", "best boy"]
+    assert contributor.roles == [Label(label="key grip"), Label(label="best boy")]
     label = "Churchill, Randolph Spencer IV, Lady, 1856-1939 (nee Jennie Jerome)"
     assert contributor.primary == primary
     assert contributor.agent.label == label
 
-    assert contributor.agent == SourceConcept(
+    assert contributor.agent == Concept(
         type=ontology_type,
         label=label,
-        id=SourceIdentifier(
-            identifier_type="label-derived",
-            ontology_type=ontology_type,
-            value=label,
+        id=Identifiable(
+            source_identifier=SourceIdentifier(
+                identifier_type=Id(id="label-derived"),
+                ontology_type=ontology_type,
+                value=label,
+            ),
+            other_identifiers=[],
         ),
     )
 
@@ -307,16 +313,19 @@ def test_meeting_contributor_all_fields(
     # The most important one is $n, which refers to the meeting, whereas
     # it refers to a work by the agent in the other fields.
     contributor = transform_record(marc_record).contributors[0]
-    assert contributor.roles == ["key grip", "best boy"]
+    assert contributor.roles == [Label(label="key grip"), Label(label="best boy")]
     label = "Council of Elrond (1 - October TA 3018: Rivendell)"
     assert contributor.primary == primary
     assert contributor.agent.label == label
-    assert contributor.agent == SourceConcept(
+    assert contributor.agent == Concept(
         type="Meeting",
         label=label,
-        id=SourceIdentifier(
-            identifier_type="label-derived",
-            ontology_type="Meeting",
-            value=label,
+        id=Identifiable(
+            source_identifier=SourceIdentifier(
+                identifier_type=Id(id="label-derived"),
+                ontology_type="Meeting",
+                value=label,
+            ),
+            other_identifiers=[],
         ),
     )

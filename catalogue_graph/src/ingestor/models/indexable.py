@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from ingestor.models.shared.serialisable import ElasticsearchModel
+from models.pipeline.serialisable import ElasticsearchModel
 
 
 class IndexableRecord(ElasticsearchModel, ABC):

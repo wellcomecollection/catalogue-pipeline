@@ -4,7 +4,7 @@ from functools import cache
 
 from lxml import etree
 
-from adapters.ebsco.models.work import Language
+from models.pipeline.id_label import Language
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CODELIST_NS = "info:lc/xmlns/codelist-v1"
