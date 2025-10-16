@@ -9,10 +9,10 @@ from transformers.catalogue.raw_work import RawCatalogueWork
 from transformers.catalogue.work_identifiers_transformer import ES_FIELDS, ES_QUERY
 from utils.elasticsearch import ElasticsearchMode
 
-from .base_remover import BaseGraphRemover
+from .base_graph_remover_incremental import BaseGraphRemoverIncremental
 
 
-class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemover):
+class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemoverIncremental):
     def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
         super().__init__(event.entity_type, es_mode != "private")
         self.work_source = MergedWorksSource(

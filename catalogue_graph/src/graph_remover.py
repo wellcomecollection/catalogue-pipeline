@@ -22,12 +22,10 @@ IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
 def get_previous_ids(event: FullGraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest snapshot for the specified transformer and entity type."""
     s3_file_uri = event.get_remover_s3_uri("previous_ids_snapshot")
-    print(event, s3_file_uri, "HEHY")
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
     print(f"Retrieved {len(ids)} ids archived from a previous bulk loader file.")
-    print("AWDRSG", ids)
     return set(ids)
 
 
@@ -37,7 +35,6 @@ def get_current_ids(event: FullGraphRemoverEvent) -> set[str]:
 
     ids = set(row[":ID"] for row in get_csv_from_s3(s3_file_uri))
     print(f"Retrieved {len(ids)} ids from the current bulk loader file.")
-    print("AWDawdRSG", ids)
     return ids
 
 
@@ -53,7 +50,6 @@ def log_ids(
 ) -> None:
     """Append IDs which were added/removed as part of this run to the corresponding log file."""
     s3_file_uri = event.get_remover_s3_uri(folder)
-    print(ids)
 
     try:
         df = df_from_s3_parquet(s3_file_uri)

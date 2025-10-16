@@ -193,6 +193,7 @@ def test_graph_remover_missing_bulk_load_file() -> None:
 
 
 def test_graph_remover_catalogue_failure() -> None:
+    # Catalogue concepts can only be removed using the incremental graph remover
     event = {
         "transformer_type": "catalogue_concepts",
         "entity_type": "nodes",

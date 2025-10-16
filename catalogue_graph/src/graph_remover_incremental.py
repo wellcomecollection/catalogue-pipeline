@@ -4,7 +4,7 @@ import typing
 import polars as pl
 
 from models.events import IncrementalGraphRemoverEvent
-from removers.base_remover import BaseGraphRemover
+from removers.base_graph_remover_incremental import BaseGraphRemoverIncremental
 from removers.catalogue_concepts_remover import CatalogueConceptsGraphRemover
 from removers.catalogue_work_identifiers_remover import (
     CatalogueWorkIdentifiersGraphRemover,
@@ -19,7 +19,7 @@ from utils.types import CatalogueTransformerType, EntityType
 
 def get_remover(
     event: IncrementalGraphRemoverEvent, is_local: bool
-) -> BaseGraphRemover:
+) -> BaseGraphRemoverIncremental:
     es_mode: ElasticsearchMode = "public" if is_local else "private"
 
     if event.transformer_type == "catalogue_works":

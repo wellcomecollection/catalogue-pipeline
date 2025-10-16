@@ -89,12 +89,12 @@ def test_graph_remover_incremental_concept_edges() -> None:
     }
     lambda_handler(event, None)
 
-    # There are no concept edges to remove
     s3_uri = (
         f"{REMOVER_S3_PREFIX}/2024-06-06/deleted_ids/catalogue_concepts__edges.parquet"
     )
     with MockSmartOpen.open(s3_uri, "rb") as f:
         df = pl.read_parquet(f)
+        # There are no concept edges to remove
         assert len(df) == 0
 
 
@@ -111,14 +111,14 @@ def test_graph_remover_incremental_work_edges() -> None:
                 "HAS_CONCEPT:f33w7jru-->kpeywdvq",
                 "HAS_CONCEPT:f33w7jru-->vykuavkt",
                 "HAS_CONCEPT:f33w7jru-->s6s24vd9",
-                "HAS_CONCEPT:f33w7jru-->123",  # should remove
-                "HAS_CONCEPT:f33w7jru-->456",  # should remove
+                "HAS_CONCEPT:f33w7jru-->123",  # should be removed
+                "HAS_CONCEPT:f33w7jru-->456",  # should be removed
             ],
         },
         {
             "id": "m4u8drnu",
             "edge_ids": [
-                "HAS_CONCEPT:m4u8drnu-->789",  # should remove
+                "HAS_CONCEPT:m4u8drnu-->789",  # should be removed
             ],
         },
         {

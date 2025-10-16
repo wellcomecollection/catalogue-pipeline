@@ -8,12 +8,12 @@ from sources.merged_works_source import MergedWorksSource
 from transformers.catalogue.raw_work import RawCatalogueWork
 from utils.elasticsearch import ElasticsearchMode
 
-from .base_remover import BaseGraphRemover
+from .base_graph_remover_incremental import BaseGraphRemoverIncremental
 
 ES_QUERY_NON_VISIBLE = {"bool": {"must_not": {"match": {"type": "Visible"}}}}
 
 
-class CatalogueWorksGraphRemover(BaseGraphRemover):
+class CatalogueWorksGraphRemover(BaseGraphRemoverIncremental):
     def __init__(self, event: IncrementalGraphRemoverEvent, es_mode: ElasticsearchMode):
         super().__init__(event.entity_type, es_mode != "private")
         self.event = event
