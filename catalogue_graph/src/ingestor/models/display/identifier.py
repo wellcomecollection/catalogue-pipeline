@@ -63,7 +63,7 @@ class DisplayIdentifier(BaseModel):
     def from_all_identifiers(
         identifier: BaseIdentify,
     ) -> Generator["DisplayIdentifier"]:
-        if not issubclass(identifier.__class__, Identifiable):
+        if not isinstance(identifier, Identifiable):
             return
 
         identifier = cast(Identifiable, identifier)
