@@ -2,14 +2,14 @@ from collections.abc import Generator
 
 from pydantic import BaseModel
 
-from ingestor.models.shared.concept import (
+from models.events import BasePipelineEvent
+from models.pipeline.concept import (
     Concept,
     Contributor,
     Genre,
     IdentifiedConcept,
     Subject,
 )
-from models.events import BasePipelineEvent
 from sources.base_source import BaseSource
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode

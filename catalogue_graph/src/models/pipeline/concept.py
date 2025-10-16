@@ -3,10 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import (
-    BaseIdentify,
-    Unidentifiable,
-)
+from models.pipeline.identifier import BaseIdentify, Identified, Unidentifiable
 from utils.types import ConceptType
 
 
@@ -32,11 +29,11 @@ class Concept(BaseModel):
 
 
 class IdentifiedConcept(Concept):
-    id: Identifiers
+    id: Identified
 
     @staticmethod
     def from_concept(concept: Concept) -> "IdentifiedConcept":
-        if isinstance(concept.id, Unidentifiable):
+        if not isinstance(concept.id, Identified):
             raise TypeError(f"Concept {concept} does not have an ID.")
         return IdentifiedConcept(id=concept.id, label=concept.label, type=concept.type)
 

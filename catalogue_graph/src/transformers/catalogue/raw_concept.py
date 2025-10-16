@@ -1,10 +1,10 @@
 import re
 from typing import cast
 
-from ingestor.models.shared.concept import (
+from models.pipeline.concept import (
     IdentifiedConcept,
 )
-from ingestor.models.shared.identifier import (
+from models.pipeline.identifier import (
     SourceIdentifier,
 )
 from utils.types import ConceptSource
