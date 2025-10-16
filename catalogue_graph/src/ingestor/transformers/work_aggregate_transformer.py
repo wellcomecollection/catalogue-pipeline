@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
-from models.pipeline.identifier import BaseIdentify, Identified
+from models.pipeline.identifier import BaseIdentify
 
 
 class AggregatableField(BaseModel):
@@ -29,8 +29,9 @@ class AggregateWorkTransformer:
     @property
     def genres(self) -> Generator[AggregatableField]:
         for genre in self.data.genres:
-            assert isinstance(genre.concepts[0].id, Identified)
             concept_id = genre.concepts[0].id.canonical_id
+            if concept_id is None:
+                raise ValueError(f"Concept {genre.concepts[0]} does not have an ID.")
 
             yield AggregatableField(id=concept_id, label=genre.label)
 
