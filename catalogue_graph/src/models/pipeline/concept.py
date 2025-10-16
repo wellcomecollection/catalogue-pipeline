@@ -1,14 +1,18 @@
 from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
+from utils.types import ConceptType
 
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import BaseIdentify, Identified, Unidentifiable
-from utils.types import ConceptType
+from models.pipeline.identifier import (
+    Identifiable,
+    Identified,
+    Unidentifiable,
+)
 
 
 class Concept(BaseModel):
-    id: BaseIdentify = Unidentifiable()
+    id: Identifiable | Identified | Unidentifiable = Unidentifiable()
     label: str
     type: ConceptType = "Concept"
 
