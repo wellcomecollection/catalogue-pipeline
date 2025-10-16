@@ -4,7 +4,13 @@ import pytest
 from graph_remover import IDS_LOG_SCHEMA
 from ingestor.steps.ingestor_deletions import lambda_handler
 from tests.mocks import MockElasticsearchClient, MockSmartOpen, mock_es_secrets
-from tests.test_graph_remover import CATALOGUE_CONCEPTS_REMOVED_IDS_URI
+
+REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
+
+
+def get_mock_remover_uri(pipeline_date: str) -> str:
+    return f"{REMOVER_S3_PREFIX}/{pipeline_date}/deleted_ids/catalogue_concepts__nodes.parquet"
+
 
 MOCK_EVENT = {
     "ingestor_type": "concepts",
@@ -23,20 +29,18 @@ def get_indexed_concepts(index_name: str = "concepts-indexed-dev") -> dict:
     return MockElasticsearchClient.indexed_documents[index_name] or {}
 
 
-def mock_deleted_ids_log_file() -> None:
+def mock_deleted_ids_log_file(pipeline_date: str) -> None:
     mock_data = {
         "timestamp": ["2025-04-03", "2025-04-03", "2025-04-07", "2025-04-07"],
         "id": ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"],
     }
     df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
-    MockSmartOpen.mock_s3_parquet_file(CATALOGUE_CONCEPTS_REMOVED_IDS_URI, df)
+    MockSmartOpen.mock_s3_parquet_file(get_mock_remover_uri(pipeline_date), df)
 
 
-def test_ingestor_deletions_linetest_ingestor_deletions_line_safety_check_first_run() -> (
-    None
-):
+def test_ingestor_deletions_safety_check_first_run() -> None:
     mock_es_secrets("concepts_ingestor", "dev")
-    mock_deleted_ids_log_file()
+    mock_deleted_ids_log_file("dev")
 
     # Index some empty documents with the same IDs as those stored in the parquet mock
     # (plus an extra document which shouldn't be removed).
@@ -54,7 +58,7 @@ def test_ingestor_deletions_linetest_ingestor_deletions_line_safety_check_first_
 
 def test_ingestor_deletions_line_safety_check() -> None:
     # Mock a scenario which would result in a significant percentage of IDs being deleted
-    mock_deleted_ids_log_file()
+    mock_deleted_ids_log_file("dev")
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
 
     with pytest.raises(ValueError):
@@ -70,14 +74,13 @@ def test_ingestor_deletions_line_no_deleted_ids_file() -> None:
 
 
 def test_ingestor_deletions_line_new_index_run() -> None:
-    mock_deleted_ids_log_file()
-
     # Mock an index which was created *after* some IDs were deleted from the graph
     pipeline_date = "2025-01-01"
     index_date = "2025-04-07"
     job_id = "test-job-id"
     index_name = f"concepts-indexed-{index_date}"
 
+    mock_deleted_ids_log_file(pipeline_date)
     mock_es_secrets("concepts_ingestor", pipeline_date)
 
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], index_name)

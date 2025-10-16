@@ -73,6 +73,11 @@ TransformerType = Literal[
     CatalogueTransformerType,
 ]
 
+FullGraphRemoverType = Literal[
+    LocTransformerType, MeshTransformerType, WikidataTransformerType
+]
+GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
+
 
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["graph", "s3", "sns", "local", "void"]

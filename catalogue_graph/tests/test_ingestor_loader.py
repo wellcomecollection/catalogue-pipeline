@@ -97,12 +97,19 @@ def mock_merged_work() -> None:
                     "agent": {
                         "id": {
                             "canonicalId": MOCK_CONCEPT_ID,
+                            "sourceIdentifier": {
+                                "identifier_type": {"id": "nlm-mesh"},
+                                "ontology_type": "Concept",
+                                "value": "123",
+                            },
                         },
+                        "label": "Some label",
                         "type": "Person",
                     }
                 }
             ],
         },
+        "state": {"canonicalId": "some-work-id"},
     }
 
     index_name = f"works-denormalised-{MOCK_PIPELINE_DATE}"

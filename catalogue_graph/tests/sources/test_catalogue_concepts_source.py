@@ -15,4 +15,4 @@ def test_catalogue_concepts_source() -> None:
 
     # Do some simple checks on mesh source decoding based on known data
     assert len(stream_result) == 15
-    assert any(item[0]["label"] == "Human anatomy" for item in stream_result)
+    assert any(item.concept.label == "Human anatomy" for item in stream_result)

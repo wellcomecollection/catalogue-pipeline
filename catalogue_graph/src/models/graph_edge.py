@@ -50,6 +50,10 @@ class BaseEdge(BaseModel):
     directed: bool
     attributes: EdgeAttributes = EdgeAttributes()
 
+    @property
+    def edge_id(self) -> str:
+        return f"{self.relationship}:{self.from_id}-->{self.to_id}"
+
 
 class SourceConceptNarrowerThan(BaseEdge):
     from_type: str = "SourceConcept"

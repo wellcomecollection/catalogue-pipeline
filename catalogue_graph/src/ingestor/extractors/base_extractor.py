@@ -22,7 +22,6 @@ from ingestor.queries.work_queries import (
     WORK_CONCEPTS_QUERY,
 )
 from utils.aws import get_neptune_client
-from utils.streaming import process_stream_in_parallel
 
 ConceptRelatedQuery = Literal[
     "related_to",
@@ -48,8 +47,6 @@ NEPTUNE_CHUNK_SIZE = 5000
 # Computationally expensive queries work more reliably with smaller chunk sizes
 EXPENSIVE_QUERIES = {"related_topics", "frequent_collaborators"}
 NEPTUNE_EXPENSIVE_CHUNK_SIZE = 1000
-
-QUERY_THREAD_COUNT = 5
 
 NEPTUNE_QUERIES: dict[ConceptQuery | WorkQuery, str] = {
     "work_children": WORK_CHILDREN_QUERY,
@@ -92,20 +89,16 @@ class GraphBaseExtractor:
         if query_type in EXPENSIVE_QUERIES:
             chunk_size = NEPTUNE_EXPENSIVE_CHUNK_SIZE
 
-        def _run_query(chunk: Iterable[str]) -> list[dict]:
-            return self.neptune_client.run_open_cypher_query(
-                NEPTUNE_QUERIES[query_type],
-                self.neptune_params | {"ids": sorted(chunk)},
-            )
-
         start = time.time()
-        raw_results = process_stream_in_parallel(
-            ids, _run_query, chunk_size, QUERY_THREAD_COUNT
+        results = self.neptune_client.run_parallel_query(
+            ids=ids,
+            query=NEPTUNE_QUERIES[query_type],
+            parameters=self.neptune_params,
+            chunk_size=chunk_size,
         )
-        results = {item["id"]: item for item in raw_results}
-
         print(
             f"Ran a set of '{query_type}' queries in {round(time.time() - start)}s, "
             f"retrieving {len(results)} records."
         )
+
         return results

@@ -3,13 +3,16 @@ import os
 import threading
 import time
 import typing
-from itertools import batched
+from collections.abc import Iterable, Iterator
 
 import backoff
 import boto3
 import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
+
+from utils.streaming import process_stream_in_parallel
+from utils.types import EntityType
 
 NEPTUNE_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
 NEPTUNE_REQUESTS_BACKOFF_INTERVAL = 10
@@ -22,6 +25,7 @@ ID_DELETE_BATCH_SIZE = 1000
 ALLOW_DATABASE_RESET = False
 
 NEPTUNE_MAX_PARALLEL_QUERIES = 10
+NEPTUNE_QUERY_THREAD_COUNT = 5
 
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
@@ -192,48 +196,90 @@ class BaseNeptuneClient:
 
         print(f"Removed all nodes with label '{label}'.")
 
+    def get_existing_ids(self, ids: list[str], entity_type: EntityType) -> list[str]:
+        if entity_type == "nodes":
+            query = "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id"
+        elif entity_type == "edges":
+            query = "MATCH ()-[e]->() WHERE id(e) IN $ids RETURN id(e) AS id"
+        else:
+            raise ValueError(f"Unknown entity type: {entity_type}")
+
+        return list(self.run_parallel_query(ids, query).keys())
+
+    def delete_entities_by_id(self, ids: list[str], entity_type: EntityType) -> None:
+        if entity_type == "nodes":
+            query = "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n"
+        elif entity_type == "edges":
+            query = "MATCH ()-[e]->() WHERE id(e) IN $ids DELETE e"
+        else:
+            raise ValueError(f"Unknown entity type: {entity_type}")
+
+        self.run_parallel_query(ids, query, chunk_size=ID_DELETE_BATCH_SIZE)
+
     def delete_nodes_by_id(self, ids: list[str]) -> None:
         """Removes all nodes with the specified ids from the graph."""
-        delete_query = """
-            MATCH (n) WHERE n.id IN $nodeIds DETACH DELETE n
-        """
-
-        previous_node_count = self.get_total_node_count()
-
-        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
-            self.run_open_cypher_query(delete_query, {"nodeIds": list(batch)})
-            print(f"Deleted a batch of nodes. (Batch size: {ID_DELETE_BATCH_SIZE})")
-
-        total_deleted = previous_node_count - self.get_total_node_count()
-        print(f"Successfully deleted a total of {total_deleted} nodes from the graph.")
+        return self.delete_entities_by_id(ids, "nodes")
 
     def delete_edges_by_id(self, ids: list[str]) -> None:
         """Removes all edges with the specified ids from the graph."""
-        delete_query = """
-            MATCH ()-[e]-() WHERE id(e) IN $edgeIds DELETE e
-        """
+        return self.delete_entities_by_id(ids, "edges")
 
-        previous_edge_count = self.get_total_edge_count()
-
-        for batch in batched(ids, ID_DELETE_BATCH_SIZE):
-            self.run_open_cypher_query(delete_query, {"edgeIds": list(batch)})
-            print(f"Deleted a batch of edges. (Batch size: {ID_DELETE_BATCH_SIZE})")
-
-        total_deleted = previous_edge_count - self.get_total_edge_count()
-        print(f"Successfully deleted a total of {total_deleted} edges from the graph.")
-
-    def get_total_edge_count(self) -> int:
-        query = """
-            MATCH ()-[e]-() RETURN count(e) AS edgeCount
-        """
-
-        edge_count: int = self.run_open_cypher_query(query)[0]["edgeCount"]
+    def get_total_edge_count(self, label: str) -> int:
+        query = f"MATCH ()-[e:{label}]->() RETURN count(e) AS count"
+        edge_count: int = self.run_open_cypher_query(query)[0]["count"]
         return edge_count
 
-    def get_total_node_count(self) -> int:
-        query = """
-            MATCH (n) RETURN count(n) AS nodeCount
+    def get_total_node_count(self, label: str) -> int:
+        query = f"MATCH (n: {label}) RETURN count(n) AS count"
+        node_count: int = self.run_open_cypher_query(query)[0]["count"]
+        return node_count
+
+    def run_parallel_query(
+        self,
+        ids: Iterable[str],
+        query: str,
+        parameters: dict[str, typing.Any] | None = None,
+        chunk_size: int = 2000,
+    ) -> dict[str, dict]:
+        """
+        Split the specified ids into chunks and run the selected query against each chunk in parallel.
+        Return a dictionary mapping each id to its corresponding result.
         """
 
-        node_count: int = self.run_open_cypher_query(query)[0]["nodeCount"]
-        return node_count
+        def _run_query(chunk: Iterable[str]) -> list[dict]:
+            all_parameters = (parameters or {}) | {"ids": sorted(chunk)}
+            return self.run_open_cypher_query(query, all_parameters)
+
+        raw_results = process_stream_in_parallel(
+            ids, _run_query, chunk_size, NEPTUNE_QUERY_THREAD_COUNT
+        )
+
+        return {item["id"]: item for item in raw_results}
+
+    def get_disconnected_node_ids(
+        self, node_label: str, edge_label: str
+    ) -> Iterator[str]:
+        """Return the IDs of all nodes which do not have any edges of the specified type."""
+        query = f"""
+            MATCH (n: {node_label})
+            WHERE NOT (n)-[:{edge_label}]-()
+            RETURN id(n) AS id
+        """
+
+        result = self.time_open_cypher_query(query, {}, "disconnected nodes")
+
+        for item in result:
+            yield item["id"]
+
+    def get_node_edges(
+        self, node_ids: Iterable[str], edge_label: str
+    ) -> dict[str, set[str]]:
+        """Return a dictionary mapping each ID to a set of edge IDs of the specified edge type."""
+        query = f"""
+            UNWIND $ids AS id
+            MATCH (n {{`~id`: id}})-[e:{edge_label}]-()
+            RETURN id(n) AS id, collect(id(e)) AS edge_ids
+        """
+
+        result = self.run_parallel_query(node_ids, query)
+        return {node_id: set(item["edge_ids"]) for node_id, item in result.items()}
