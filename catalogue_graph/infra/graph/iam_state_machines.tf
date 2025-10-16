@@ -43,7 +43,8 @@ resource "aws_iam_policy" "state_machine_policy" {
           aws_sfn_state_machine.catalogue_graph_pipeline_monthly.arn,
           aws_sfn_state_machine.catalogue_graph_pipeline_incremental.arn,
           aws_sfn_state_machine.catalogue_graph_scaler.arn,
-          aws_sfn_state_machine.catalogue_graph_removers.arn
+          aws_sfn_state_machine.catalogue_graph_removers.arn,
+          aws_sfn_state_machine.catalogue_graph_graph_removers_incremental.arn
         ]
       },
       {

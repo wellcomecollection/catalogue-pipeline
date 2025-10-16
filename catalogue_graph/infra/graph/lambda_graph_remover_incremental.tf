@@ -19,7 +19,10 @@ module "graph_remover_incremental_lambda" {
 
   vpc_config = {
     subnet_ids         = local.private_subnets
-    security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+    security_group_ids = [
+      aws_security_group.egress.id,
+      aws_security_group.neptune_service_security_group.id,
+      local.ec_privatelink_security_group_id]
   }
 
   environment = {
@@ -64,3 +67,7 @@ data "aws_iam_policy_document" "graph_remover_incremental_s3_policy" {
   }
 }
 
+resource "aws_iam_role_policy" "graph_remover_incremental_ecs_read_pipeline_secrets_policy" {
+  role   = module.graph_remover_incremental_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read_denormalised_read_only.json
+}
