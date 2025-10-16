@@ -15,11 +15,13 @@ def get_mock_remover_uri(pipeline_date: str, folder: str) -> str:
     return f"{REMOVER_S3_PREFIX}/{pipeline_date}/{folder}/loc_concepts__nodes.parquet"
 
 
-def mock_deleted_ids_log_file(pipeline_date: str, age_in_days: int) -> None:
+def mock_deleted_ids_log_file(
+    ids: list[str], pipeline_date: str, age_in_days: int
+) -> None:
     past_date = datetime.today().date() - timedelta(days=age_in_days)
     mock_data = {
         "timestamp": [past_date, past_date],
-        "id": ["sh00000004", "sh00000005"],
+        "id": ids,
     }
     df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
     MockSmartOpen.mock_s3_parquet_file(
@@ -91,21 +93,27 @@ def test_graph_remover_first_run() -> None:
     ) as f:
         df = pl.read_parquet(f)
         ids = pl.Series(df.select(pl.first())).to_list()
-        assert len(set(ids)) == 7
+        assert len(set(ids)) == 30
         assert "sh00000001" in ids
 
 
 def test_graph_remover_next_run() -> None:
     pipeline_date = "2022-02-02"
     # Mock a previous concept IDs snapshot which purposefully omits some IDs from the bulk load file mock
-    # and includes some IDs not in the bulk load file mock.
+    # (sh00000001, sh00000002, sh00000003) and includes some IDs not in the bulk load file mock
+    # (sh00000004, sh00000005, sh00000006).
     MockSmartOpen.mock_s3_file(
         get_mock_remover_uri(pipeline_date, "previous_ids_snapshot"),
         load_fixture("loc/id_snapshot_loc_concepts__nodes.parquet"),
     )
 
     add_mock_transformer_outputs_for_ontologies(["loc"], pipeline_date=pipeline_date)
-    mock_deleted_ids_log_file(pipeline_date, age_in_days=364)
+
+    # Mock a deleted ids snapshot which includes two of the redundant IDs (sh00000004, sh00000005), leaving
+    # sh00000006 as the only ID which should be removed as part of this run.
+    mock_deleted_ids_log_file(
+        ["sh00000004", "sh00000005"], pipeline_date, age_in_days=364
+    )
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
     mock_neptune_count_response()
@@ -138,11 +146,11 @@ def test_graph_remover_next_run() -> None:
     ) as f:
         df = pl.read_parquet(f)
         ids = pl.Series(df.select(pl.first())).to_list()
-        assert len(set(ids)) == 23
-        assert "vjfb76xy" in ids
-        assert "byzuqyr5" not in ids
-        assert "fqe7m83w" in ids
-        assert "drypfe3u" in ids
+        assert len(set(ids)) == 30
+        assert "sh00000001" in ids
+        assert "sh00000002" in ids
+        assert "sh00000003" in ids
+        assert "sh00000006" not in ids
 
 
 def test_graph_remover_old_id_removal() -> None:
@@ -154,7 +162,7 @@ def test_graph_remover_old_id_removal() -> None:
     add_mock_transformer_outputs_for_ontologies(["loc"])
 
     # Mock a file with existing deleted IDs which are 1+ year old
-    mock_deleted_ids_log_file("dev", age_in_days=365)
+    mock_deleted_ids_log_file(["sh00000004", "sh00000005"], "dev", age_in_days=365)
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
     mock_neptune_count_response()
