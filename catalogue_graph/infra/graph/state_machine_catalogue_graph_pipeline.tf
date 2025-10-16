@@ -75,6 +75,16 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline_incremental" {
           Input           = "{% $states.input %}"
         }
         Output = "{% $states.input %}",
+        Next   = "Graph removers"
+      },
+      "Graph removers" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Arguments = {
+          StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loaders_incremental.arn,
+          Input           = "{% $states.input %}"
+        }
+        Output = "{% $states.input %}",
         Next   = "Ingestors"
       },
       "Ingestors" = {
