@@ -4,14 +4,15 @@ from pydantic import BaseModel, Field, field_validator
 
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import (
-    BaseIdentify,
+    Identifiable,
+    Identified,
     Unidentifiable,
 )
 from utils.types import ConceptType
 
 
 class Concept(BaseModel):
-    id: BaseIdentify = Unidentifiable()
+    id: Identifiable | Identified | Unidentifiable = Unidentifiable()
     label: str
     type: ConceptType = "Concept"
 
