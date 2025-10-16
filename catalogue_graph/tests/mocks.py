@@ -406,9 +406,9 @@ def mock_es_secrets(
 
 
 def add_neptune_mock_response(
-    mock_query: str, expected_params: dict, mock_results: list[dict]
+    expected_query: str, expected_params: dict, mock_results: list[dict]
 ) -> None:
-    query = " ".join(mock_query.split())
+    query = " ".join(expected_query.split())
     MockRequest.mock_response(
         method="POST",
         url="https://test-host.com:8182/openCypher",

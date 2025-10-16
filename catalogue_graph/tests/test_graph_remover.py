@@ -1,11 +1,14 @@
-import json
 from datetime import date, datetime, timedelta
 
 import polars as pl
+import pydantic
 import pytest
 
 from graph_remover import IDS_LOG_SCHEMA, lambda_handler
-from tests.mocks import MockRequest, MockSmartOpen
+from tests.mocks import (
+    MockSmartOpen,
+    add_neptune_mock_response,
+)
 from tests.test_utils import add_mock_transformer_outputs_for_ontologies, load_fixture
 
 REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover"
@@ -29,39 +32,19 @@ def mock_deleted_ids_log_file(
     )
 
 
-def mock_neptune_response(request_data: dict, response_data: dict) -> None:
-    MockRequest.mock_response(
-        method="POST",
-        url="https://test-host.com:8182/openCypher",
-        json_data=response_data,
-        body=json.dumps(request_data),
-    )
-
-
 def mock_neptune_get_existing_response(node_ids: list) -> None:
-    mock_neptune_response(
-        request_data={
-            "query": "MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id",
-            "parameters": {"ids": node_ids},
-        },
-        response_data={"results": [{"id": i} for i in node_ids]},
+    add_neptune_mock_response(
+        expected_query="MATCH (n) WHERE id(n) IN $ids RETURN id(n) AS id",
+        expected_params={"ids": node_ids},
+        mock_results=[{"id": i} for i in node_ids],
     )
 
 
 def mock_neptune_removal_response(node_ids: list) -> None:
-    mock_neptune_response(
-        request_data={
-            "query": "MATCH (n) WHERE id(n) IN $ids DETACH DELETE n",
-            "parameters": {"ids": node_ids},
-        },
-        response_data={"results": []},
-    )
-
-
-def mock_neptune_count_response() -> None:
-    mock_neptune_response(
-        request_data={"query": "MATCH (n) RETURN count(n) AS nodeCount"},
-        response_data={"results": [{"nodeCount": 1}]},
+    add_neptune_mock_response(
+        expected_query="MATCH (n) WHERE id(n) IN $ids DETACH DELETE n",
+        expected_params={"ids": node_ids},
+        mock_results=[],
     )
 
 
@@ -116,7 +99,6 @@ def test_graph_remover_next_run() -> None:
     )
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
-    mock_neptune_count_response()
 
     event = {
         "transformer_type": "loc_concepts",
@@ -165,7 +147,6 @@ def test_graph_remover_old_id_removal() -> None:
     mock_deleted_ids_log_file(["sh00000004", "sh00000005"], "dev", age_in_days=365)
     mock_neptune_get_existing_response(["sh00000006"])
     mock_neptune_removal_response(["sh00000006"])
-    mock_neptune_count_response()
 
     event = {
         "transformer_type": "loc_concepts",
@@ -208,4 +189,15 @@ def test_graph_remover_missing_bulk_load_file() -> None:
     }
 
     with pytest.raises(KeyError):
+        lambda_handler(event, None)
+
+
+def test_graph_remover_catalogue_failure() -> None:
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+    }
+
+    with pytest.raises(pydantic.ValidationError):
         lambda_handler(event, None)

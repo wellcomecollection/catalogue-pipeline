@@ -20,13 +20,15 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemover):
         )
 
     def get_node_ids_to_remove(self) -> Iterator[str]:
-        """Remove the IDs of all concept nodes which are not connected to any works"""
+        """Remove the IDs of all path identifier nodes which are not connected to any works"""
         yield from self.neptune_client.get_disconnected_node_ids(
             node_label="PathIdentifier", edge_label="HAS_PATH_IDENTIFIER"
         )
 
     def get_es_edges(self) -> Generator[tuple[str, set[str]]]:
-        """Return a dictionary mapping each work ID to a set of concept IDs based on data from the merged index."""
+        """
+        Return a dictionary mapping each work ID to a set of path identifier IDs based on data from the merged index.
+        """
         for work_document in self.work_source.stream_raw():
             raw_work = RawCatalogueWork(work_document)
 
@@ -40,7 +42,9 @@ class CatalogueWorkIdentifiersGraphRemover(BaseGraphRemover):
             yield raw_work.wellcome_id, to_ids
 
     def get_graph_edges(self, start_ids: Iterable[str]) -> dict[str, set[str]]:
-        """Return a dictionary mapping each work ID to a set of HAS_CONCEPT edge IDs from the catalogue graph."""
+        """
+        Return a dictionary mapping each work ID to a set of HAS_PATH_IDENTIFIER edge IDs from the catalogue graph.
+        """
         return self.neptune_client.get_node_edges(
             start_ids, edge_label="HAS_PATH_IDENTIFIER"
         )
