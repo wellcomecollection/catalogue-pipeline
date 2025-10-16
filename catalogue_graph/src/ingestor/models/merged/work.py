@@ -35,6 +35,7 @@ class WorkRelations(BaseModel):
 
 class WorkState(ElasticsearchModel):
     source_identifier: SourceIdentifier
+    source_modified_time: datetime
     modified_time: datetime
     relations: WorkRelations
 
@@ -45,7 +46,6 @@ class WorkState(ElasticsearchModel):
 class MergedWorkState(WorkState):
     canonical_id: str
     merged_time: datetime
-    source_modified_time: datetime
     availabilities: list[Id]
     merge_candidates: list[MergeCandidate]
 
