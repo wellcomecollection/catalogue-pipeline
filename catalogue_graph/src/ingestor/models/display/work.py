@@ -1,6 +1,7 @@
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.transformers.work_display_transformer import DisplayWorkTransformer
 from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.work_data import WorkData
 from utils.types import DisplayWorkType
 
 from .concept import DisplayConcept, DisplayContributor, DisplayGenre, DisplaySubject
@@ -46,6 +47,13 @@ class DisplayWork(ElasticsearchModel):
     type: DisplayWorkType
 
     @classmethod
+    def _display_work_type(cls, work_data: WorkData) -> DisplayWorkType:
+        if work_data.work_type == "Standard":
+            return "Work"
+
+        return work_data.work_type
+
+    @classmethod
     def from_extracted_work(cls, extracted: VisibleExtractedWork) -> "DisplayWork":
         work = extracted.work
         transformer = DisplayWorkTransformer(extracted)
@@ -79,5 +87,5 @@ class DisplayWork(ElasticsearchModel):
             availabilities=transformer.availabilities,
             parts=list(transformer.parts),
             part_of=list(transformer.part_of),
-            type=work.data.display_work_type,
+            type=cls._display_work_type(work.data),
         )
