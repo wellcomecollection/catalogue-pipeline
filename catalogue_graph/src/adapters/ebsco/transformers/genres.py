@@ -6,12 +6,13 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import ConceptType, Genre
 from adapters.ebsco.transformers.common import (
     extract_concept_from_subfield_value,
     non_empty,
     subdivision_concepts,
 )
+from models.pipeline.concept import Genre
+from utils.types import ConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -51,8 +52,6 @@ def extract_genre(field: Field) -> Genre | None:
     ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
 
     return Genre(
-        id=None,
         label=genre_label,
-        type="Genre",
         concepts=concepts,
     )

@@ -1,4 +1,4 @@
-from ingestor.models.shared.id_label import Id
+from models.pipeline.id_label import Id
 
 from .id_label import DisplayIdLabel
 

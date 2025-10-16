@@ -18,6 +18,7 @@ shared_infra/.releases
 .pytest-cache
 .pytest_cache
 node_modules
+ingestor_outputs
 
 # output from code checkers, tests etc.
 .reports

@@ -1,8 +1,8 @@
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.models.work import DigitalLocation
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from models.pipeline.location import DigitalLocation
 
 from ..helpers import lone_element
 

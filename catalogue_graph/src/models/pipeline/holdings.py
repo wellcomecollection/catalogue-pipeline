@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from .location import DigitalLocation, PhysicalLocation
+from models.pipeline.location import DigitalLocation, PhysicalLocation
 
 
 class Holdings(BaseModel):

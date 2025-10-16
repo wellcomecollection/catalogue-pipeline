@@ -23,7 +23,7 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
-from ingestor.models.shared.identifier import Identifiers
+from models.pipeline.identifier import Identified
 from utils.sort import natural_sort_key
 
 
@@ -36,7 +36,7 @@ class DisplayWorkTransformer:
 
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
-        all_ids = Identifiers(
+        all_ids = Identified(
             canonical_id=self.state.canonical_id,
             source_identifier=self.state.source_identifier,
             other_identifiers=self.data.other_identifiers,

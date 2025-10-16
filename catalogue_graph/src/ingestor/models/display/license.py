@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ingestor.models.shared.location import Location
+from models.pipeline.location import Location
 
 from .id_label import DisplayIdLabel
 

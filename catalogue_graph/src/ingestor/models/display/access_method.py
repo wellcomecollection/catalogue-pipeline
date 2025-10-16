@@ -1,4 +1,4 @@
-from ingestor.models.shared.access_condition import AccessCondition
+from models.pipeline.access_condition import AccessCondition
 
 from .id_label import DisplayIdLabel
 

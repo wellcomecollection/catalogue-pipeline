@@ -17,12 +17,10 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import (
-    ConceptType,
-    Contributor,
-    SourceConcept,
-    SourceIdentifier,
-)
+from models.pipeline.concept import Concept, Contributor
+from models.pipeline.id_label import Label
+from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
+from utils.types import ConceptType
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -86,15 +84,18 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     label = label_from_field(field, label_subfields[tag[1:]])
+    id = Identifiable.from_source_identifier(
+        SourceIdentifier(
+            value=label,  # todo: normalise
+            ontology_type=contributor_type,
+            identifier_type=Id(id="label-derived"),
+        )
+    )
     return Contributor(
-        agent=SourceConcept(
+        agent=Concept(
             label=label,
             type=contributor_type,
-            id=SourceIdentifier(
-                value=label,  # todo: normalise
-                ontology_type=contributor_type,
-                identifier_type="label-derived",
-            ),
+            id=id,
         ),
         roles=roles(field),
         primary=is_primary(tag),
@@ -109,7 +110,7 @@ def is_primary(tag: str) -> bool:
     return tag[0] == "1"
 
 
-def roles(field: Field) -> list[str]:
+def roles(field: Field) -> list[Label]:
     """
     Extract a list of roles from instances of the Relator Term subfield
 
@@ -124,4 +125,4 @@ def roles(field: Field) -> list[str]:
 
     If EBSCO fix this, then we will have to update accordingly.
     """
-    return [value.strip() for value in field.get_subfields("e")]
+    return [Label(label=value.strip()) for value in field.get_subfields("e")]

@@ -12,3 +12,15 @@ class Label(BaseModel):
 class IdLabel(BaseModel):
     id: str
     label: str
+
+
+class Format(IdLabel):
+    pass
+
+
+EBooks = Format(id="v", label="E-Books")
+EJournals = Format(id="j", label="E-Journals")
+
+
+class Language(IdLabel):
+    pass
