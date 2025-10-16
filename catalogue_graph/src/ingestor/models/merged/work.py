@@ -12,7 +12,7 @@ from models.pipeline.identifier import (
 )
 from models.pipeline.serialisable import ElasticsearchModel
 from models.pipeline.work_data import WorkData
-from utils.types import DisplayWorkType, WorkStatus
+from utils.types import WorkStatus
 
 
 class WorkAncestor(ElasticsearchModel):
@@ -31,19 +31,6 @@ class WorkRelations(BaseModel):
     def convert_merged_type(cls, raw_ancestors: list[dict]) -> list[dict]:
         # TODO: This is a temporary 'Series' filter which won't be needed once we remove the relation embedder service
         return [a for a in raw_ancestors if a["numChildren"] == 0]
-
-
-class MergedWorkData(WorkData):
-    @property
-    def display_work_type(self) -> DisplayWorkType:
-        if self.work_type == "Standard":
-            return "Work"
-
-        return self.work_type
-
-
-class SourceWorkData(WorkData):
-    pass
 
 
 class WorkState(ElasticsearchModel):
@@ -85,7 +72,7 @@ class Work(ElasticsearchModel):
     state: MergedWorkState | SourceWorkState
     version: int
     type: WorkStatus
-    data: MergedWorkData | SourceWorkData | None = None
+    data: WorkData | None = None
 
     @staticmethod
     def from_raw_document(work: dict) -> "Work":
@@ -134,7 +121,7 @@ class MergedWork(ElasticsearchModel):
 
 
 class VisibleMergedWork(MergedWork):
-    data: MergedWorkData
+    data: WorkData
     redirect_sources: list[Identified]
 
 
