@@ -19,8 +19,8 @@ WorkType = Literal["Standard", "Series", "Section", "Collection"]
 
 class WorkData(ElasticsearchModel):
     title: str | None = None
-    other_identifiers: list[SourceIdentifier]
-    alternative_titles: list[str]
+    other_identifiers: list[SourceIdentifier] = Field(default_factory=list)
+    alternative_titles: list[str] = Field(default_factory=list)
     format: Format | None = None
     description: str | None = None
     physical_description: str | None = None
