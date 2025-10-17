@@ -50,7 +50,7 @@ def test_title_a(marc_record: Record) -> None:
     $a - Title
     """
     work = transform_record(marc_record)
-    assert work.title == "How to Avoid Huge Ships"
+    assert work.data.title == "How to Avoid Huge Ships"
 
 
 @pytest.mark.parametrize(
@@ -79,7 +79,7 @@ def test_title_a_b(marc_record: Record) -> None:
     """
     work = transform_record(marc_record)
     assert (
-        work.title
+        work.data.title
         == "101 Ways to Know If Your Cat Is French: How To Talk to Your Cat About Their Secret Life"
     )
 
@@ -109,7 +109,10 @@ def test_title_a_b_c(marc_record: Record) -> None:
 
     """
     work = transform_record(marc_record)
-    assert work.title == "BMJ : British medical journal / British Medical Association."
+    assert (
+        work.data.title
+        == "BMJ : British medical journal / British Medical Association."
+    )
 
 
 @pytest.mark.parametrize(
@@ -141,7 +144,7 @@ def test_exclude_electronic_resource(marc_record: Record) -> None:
     """
     work = transform_record(marc_record)
     assert (
-        work.title
+        work.data.title
         == "The Oxford and Cambridge magazine / conducted by members of the two universities."
     )
 
@@ -176,6 +179,6 @@ def test_title_a_n_p(marc_record: Record) -> None:
     """
     work = transform_record(marc_record)
     assert (
-        work.title
+        work.data.title
         == "Philosophical transactions of the Royal Society of London. Series B, Biological sciences"
     )

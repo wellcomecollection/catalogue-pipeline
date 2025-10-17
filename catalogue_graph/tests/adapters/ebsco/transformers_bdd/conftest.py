@@ -3,16 +3,16 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from _pytest.logging import LogCaptureFixture
 from pymarc.record import Field, Indicators, Record, Subfield
 from pytest_bdd import given, parsers, then, when
 
-from adapters.ebsco.models.work import SourceWork
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.identifier import Id
+from models.pipeline.source.work import VisibleSourceWork
 
 # mypy: allow-untyped-calls
 
@@ -38,8 +38,11 @@ def _normalise_attr_phrase(attr_phrase: str) -> str:
 
 
 def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
+    """Resolve attribute phrase to list-like attribute."""
     attr_name = _normalise_attr_phrase(attr_phrase)
-    return getattr(parent, attr_name)
+    if hasattr(parent, attr_name):
+        return getattr(parent, attr_name)
+    return []
 
 
 @pytest.fixture
@@ -100,7 +103,7 @@ def field_from_table(marc_record: Record, datatable: list[list[str]], tag: str) 
 # Transformation
 # ------------------------------------------------------------------
 @when("I transform the MARC record", target_fixture="work")
-def do_transform(context: dict[str, Any], marc_record: Record) -> SourceWork:
+def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceWork:
     work = transform_record(marc_record)
     context["result"] = work
     return work
@@ -112,8 +115,8 @@ def do_transform(context: dict[str, Any], marc_record: Record) -> SourceWork:
 
 
 @then(parsers.parse("there are {count:d} {attr_phrase}"))
-def list_member_count(work: SourceWork, count: int, attr_phrase: str) -> None:
-    values: Sequence[Any] = _get_attr_list(work, attr_phrase)
+def list_member_count(work: VisibleSourceWork, count: int, attr_phrase: str) -> None:
+    values: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
     assert len(values) == count, (
         f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
     )
@@ -185,12 +188,12 @@ def child_list_member_datatable(
 
 
 @then(parsers.parse("there are no {attr_phrase}"))
-def list_member_empty(work: SourceWork, attr_phrase: str) -> None:
+def list_member_empty(work: VisibleSourceWork, attr_phrase: str) -> None:
     list_member_count(work, 0, attr_phrase)
 
 
 @then(parsers.parse('the only {attr_phrase} is "{value}"'))
-def list_member_only(work: SourceWork, attr_phrase: str, value: str) -> Any:
+def list_member_only(work: VisibleSourceWork, attr_phrase: str, value: str) -> Any:
     list_member_count(work, 1, attr_phrase)
     return list_member_nth_is(work, 1, attr_phrase, value)
 
@@ -211,9 +214,9 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     )
 )
 def list_member_nth_is(
-    work: SourceWork, index: str | int, attr_phrase: str, value: str
+    work: VisibleSourceWork, index: str | int, attr_phrase: str, value: str
 ) -> Any:
-    nth_member = _list_member_nth(work, index, attr_phrase)
+    nth_member = _list_member_nth(work.data, index, attr_phrase)
     assert nth_member == value, (
         f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
     )
@@ -226,12 +229,12 @@ def list_member_nth_is(
 )
 def only_root_list_member_has(
     context: dict[str, Any],
-    work: SourceWork,
+    work: VisibleSourceWork,
     attr_phrase: str,
     property: str,
     value: str,
 ) -> Any:
-    member = _list_member_nth(work, 1, attr_phrase)
+    member = _list_member_nth(work.data, 1, attr_phrase)
     assert getattr(member, property) == value
     context[attr_phrase] = member
     return member
@@ -269,6 +272,7 @@ def only_list_member_has(
     property: str,
     value: str,
 ) -> None:
+    # Callers should pass .data if required; use antecedent directly.
     member = _list_member_nth(antecedent, 1, attr_phrase)
     assert getattr(member, property) == value
     context[attr_phrase] = member
@@ -290,7 +294,9 @@ def step_error_logged(caplog: LogCaptureFixture, message: str) -> None:
 
 # ------------- Utility accessors ------------- #
 def _get_genres(context: dict[str, Any]) -> list[Any]:
-    return getattr(context["result"], "genres", [])
+    # Cast context['result'] to VisibleSourceWork to satisfy mypy; runtime guarantees this via do_transform
+    work = cast(VisibleSourceWork, context["result"])
+    return work.data.genres
 
 
 def _assert_single_genre(context: dict[str, Any]) -> Any:
@@ -388,7 +394,7 @@ def step_ordinal_concept_label(context: dict[str, Any], ord: str, label: str) ->
 
 @then(parsers.parse('the only genre has a label starting with "{prefix}"'))
 def only_genre_label_startswith(context: dict[str, Any], prefix: str) -> None:
-    genres: list[Any] = getattr(context["result"], "genres", [])
+    genres = context["result"].data.genres
     assert len(genres) == 1, f"Expected exactly one genre, found {len(genres)}"
     actual = genres[0].label
     assert actual.startswith(prefix), (
@@ -401,8 +407,7 @@ def ordinal_concept_type(context: dict[str, Any], ord: str, ctype: str) -> None:
     m = re.match(r"(\d+)", ord)
     assert m, f"Unrecognised ordinal: {ord}"
     idx = int(m.group(1)) - 1
-
-    genres: list[Any] = getattr(context["result"], "genres", [])
+    genres = context["result"].data.genres
     assert len(genres) == 1, (
         "Ordinal concept type step assumes a single genre in context."
     )

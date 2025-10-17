@@ -11,7 +11,7 @@ from ..helpers import lone_element
 
 
 def test_no_contributors(marc_record: Record) -> None:
-    assert transform_record(marc_record).contributors == []
+    assert transform_record(marc_record).data.contributors == []
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,10 @@ def test_no_contributors(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_contributor_from_field(marc_record: Record, field_code: str) -> None:
-    assert transform_record(marc_record).contributors[0].agent.label == "J. R. Hartley"
+    assert (
+        transform_record(marc_record).data.contributors[0].agent.label
+        == "J. R. Hartley"
+    )
 
 
 @pytest.mark.parametrize(
@@ -66,7 +69,7 @@ def test_contributor_from_field(marc_record: Record, field_code: str) -> None:
 )
 def test_distinct_by_label(marc_record: Record) -> None:
     work = transform_record(marc_record)
-    contributor = lone_element(work.contributors)
+    contributor = lone_element(work.data.contributors)
     #    assert len(work.contributors) == 1
     assert contributor.agent.label == "James Moriarty"
     # if one is primary and the other not, then the primary one is retained
@@ -107,12 +110,12 @@ def test_distinct_by_label(marc_record: Record) -> None:
 )
 def test_distinct_by_label_no_primary(marc_record: Record) -> None:
     work = transform_record(marc_record)
-    assert len(work.contributors) == 1
-    assert work.contributors[0].agent.label == "James Moriarty"
+    assert len(work.data.contributors) == 1
+    assert work.data.contributors[0].agent.label == "James Moriarty"
     # there are no examples of this in real data, where neither
     # matching subfield is a primary (Main Entry) type,
     # but we shouldn't be making up primary contributors when there are none
-    assert not work.contributors[0].primary
+    assert not work.data.contributors[0].primary
 
 
 @pytest.mark.parametrize(
@@ -147,11 +150,11 @@ def test_distinct_by_label_and_type(marc_record: Record) -> None:
     :return:
     """
     work = transform_record(marc_record)
-    assert len(work.contributors) == 2
-    assert work.contributors[0].agent.label == "Dora Milaje"
-    assert work.contributors[1].agent.label == "Dora Milaje"
-    assert work.contributors[0].agent.type == "Person"
-    assert work.contributors[1].agent.type == "Organisation"
+    assert len(work.data.contributors) == 2
+    assert work.data.contributors[0].agent.label == "Dora Milaje"
+    assert work.data.contributors[1].agent.label == "Dora Milaje"
+    assert work.data.contributors[0].agent.type == "Person"
+    assert work.data.contributors[1].agent.type == "Organisation"
 
 
 @pytest.mark.parametrize(
@@ -187,9 +190,9 @@ def test_distinct_by_label_and_type(marc_record: Record) -> None:
 )
 def test_distinct_by_label_and_role(marc_record: Record) -> None:
     work = transform_record(marc_record)
-    assert len(work.contributors) == 2
-    assert work.contributors[1].roles == [Label(label="Author")]
-    assert work.contributors[0].roles == [Label(label="Mastermind")]
+    assert len(work.data.contributors) == 2
+    assert work.data.contributors[1].roles == [Label(label="Author")]
+    assert work.data.contributors[0].roles == [Label(label="Mastermind")]
 
 
 @pytest.mark.parametrize(
@@ -244,7 +247,7 @@ def test_contributor_all_fields(
     # Similarly, the previous incarnation had differing subfiueld lists for Organisation and Person.
     # This is not necessary, as the only field that now differs between the two is $q,
     # which does not exist on x10 fields.
-    contributor = transform_record(marc_record).contributors[0]
+    contributor = transform_record(marc_record).data.contributors[0]
     assert contributor.roles == [Label(label="key grip"), Label(label="best boy")]
     label = "Churchill, Randolph Spencer IV, Lady, 1856-1939 (nee Jennie Jerome)"
     assert contributor.primary == primary
@@ -312,7 +315,7 @@ def test_meeting_contributor_all_fields(
     # terms of the subfields they use - some have different meanings,
     # The most important one is $n, which refers to the meeting, whereas
     # it refers to a work by the agent in the other fields.
-    contributor = transform_record(marc_record).contributors[0]
+    contributor = transform_record(marc_record).data.contributors[0]
     assert contributor.roles == [Label(label="key grip"), Label(label="best boy")]
     label = "Council of Elrond (1 - October TA 3018: Rivendell)"
     assert contributor.primary == primary

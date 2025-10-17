@@ -10,7 +10,7 @@ from adapters.ebsco.transformers.ebsco_to_weco import transform_record
     "marc_record", [(Field(tag="001", data="ebs999"),)], indirect=True
 )
 def test_extract_id_from_001(marc_record: Record) -> None:
-    assert transform_record(marc_record).source_identifier.value == "ebs999"
+    assert transform_record(marc_record).state.source_identifier.value == "ebs999"
 
 
 def test_id_is_mandatory(marc_record: Record) -> None:

@@ -7,7 +7,7 @@ from ..helpers import lone_element
 
 
 def test_no_008_no_language(marc_record: Record) -> None:
-    assert transform_record(marc_record).languages == []
+    assert transform_record(marc_record).data.languages == []
 
 
 @pytest.mark.parametrize(
@@ -16,7 +16,7 @@ def test_no_008_no_language(marc_record: Record) -> None:
     indirect=True,
 )
 def test_no_attempt_to_code_language(marc_record: Record) -> None:
-    assert transform_record(marc_record).languages == []
+    assert transform_record(marc_record).data.languages == []
 
 
 @pytest.mark.parametrize(
@@ -25,7 +25,7 @@ def test_no_attempt_to_code_language(marc_record: Record) -> None:
     indirect=True,
 )
 def test_unknown_language(marc_record: Record) -> None:
-    assert transform_record(marc_record).languages == []
+    assert transform_record(marc_record).data.languages == []
 
 
 @pytest.mark.parametrize(
@@ -34,7 +34,7 @@ def test_unknown_language(marc_record: Record) -> None:
     indirect=True,
 )
 def test_known_language(marc_record: Record) -> None:
-    language = lone_element(transform_record(marc_record).languages)
+    language = lone_element(transform_record(marc_record).data.languages)
     assert language.id == "lat"
     assert language.label == "Latin"
 
@@ -49,6 +49,6 @@ def test_multi_language(marc_record: Record) -> None:
     The source data format only supports one language, but there
     is a "language" called "Multiple Languages"
     """
-    language = lone_element(transform_record(marc_record).languages)
+    language = lone_element(transform_record(marc_record).data.languages)
     assert language.id == "mul"
     assert language.label == "Multiple languages"

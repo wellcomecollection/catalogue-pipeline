@@ -5,7 +5,7 @@ from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 
 
 def test_no_frequency(marc_record: Record) -> None:
-    assert transform_record(marc_record).current_frequency is None
+    assert transform_record(marc_record).data.current_frequency is None
 
 
 @pytest.mark.parametrize(
@@ -21,7 +21,7 @@ def test_no_frequency(marc_record: Record) -> None:
     indirect=True,
 )
 def test_frequency_a(marc_record: Record) -> None:
-    assert transform_record(marc_record).current_frequency == "Samhain"
+    assert transform_record(marc_record).data.current_frequency == "Samhain"
 
 
 @pytest.mark.parametrize(
@@ -37,7 +37,7 @@ def test_frequency_a(marc_record: Record) -> None:
     indirect=True,
 )
 def test_frequency_b(marc_record: Record) -> None:
-    assert transform_record(marc_record).current_frequency == "&lt;Sept. 1991-&gt;"
+    assert transform_record(marc_record).data.current_frequency == "&lt;Sept. 1991-&gt;"
 
 
 @pytest.mark.parametrize(
@@ -57,7 +57,7 @@ def test_frequency_b(marc_record: Record) -> None:
 )
 def test_frequency_a_b(marc_record: Record) -> None:
     assert (
-        transform_record(marc_record).current_frequency
+        transform_record(marc_record).data.current_frequency
         == "Every lunar month Magáksicaagli Wí 1984"
     )
 
@@ -86,6 +86,6 @@ def test_frequency_a_b(marc_record: Record) -> None:
 )
 def test_frequency_multiple(marc_record: Record) -> None:
     assert (
-        transform_record(marc_record).current_frequency
+        transform_record(marc_record).data.current_frequency
         == "Every lunar month Magáksicaagli Wí 1984 - 2002 Imbolc and Lammas 1666 -"
     )

@@ -8,7 +8,7 @@ from ..helpers import lone_element
 
 
 def test_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).holdings == []
+    assert transform_record(marc_record).data.holdings == []
 
 
 @pytest.mark.parametrize(
@@ -24,7 +24,7 @@ def test_no_holdings(marc_record: Record) -> None:
     indirect=True,
 )
 def test_no_url_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).holdings == []
+    assert transform_record(marc_record).data.holdings == []
 
 
 @pytest.mark.parametrize(
@@ -52,7 +52,7 @@ def test_no_url_no_holdings(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_incomplete_record_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).holdings == []
+    assert transform_record(marc_record).data.holdings == []
 
 
 @pytest.mark.parametrize(
@@ -74,7 +74,7 @@ def test_incomplete_record_no_holdings(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_dodgy_url_is_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).holdings == []
+    assert transform_record(marc_record).data.holdings == []
 
 
 @pytest.mark.parametrize(
@@ -96,7 +96,7 @@ def test_dodgy_url_is_no_holdings(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_single_holdings(marc_record: Record) -> None:
-    holdings = lone_element(transform_record(marc_record).holdings)
+    holdings = lone_element(transform_record(marc_record).data.holdings)
     assert lone_element(holdings.enumeration) == "Full text since time immemorial"
     assert holdings.location.url == "https://example.com"
     assert holdings.location.link_text == "Click Here for access!"
@@ -142,8 +142,8 @@ def test_single_holdings(marc_record: Record) -> None:
 )
 def test_multiple_holdings(marc_record: Record) -> None:
     transformed = transform_record(marc_record)
-    assert len(transformed.holdings) == 2
-    assert isinstance(transformed.holdings[0].location, DigitalLocation)
-    assert isinstance(transformed.holdings[1].location, DigitalLocation)
-    assert transformed.holdings[0].location.url == "https://example.com"
-    assert transformed.holdings[1].location.url == "https://example.com/something"
+    assert len(transformed.data.holdings) == 2
+    assert isinstance(transformed.data.holdings[0].location, DigitalLocation)
+    assert isinstance(transformed.data.holdings[1].location, DigitalLocation)
+    assert transformed.data.holdings[0].location.url == "https://example.com"
+    assert transformed.data.holdings[1].location.url == "https://example.com/something"

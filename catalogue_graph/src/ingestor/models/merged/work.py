@@ -52,17 +52,17 @@ class MergedWork(Work):
         raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
 
 
-class VisibleMergedWork(MergedWork, VisibleWork):
+class VisibleMergedWork(VisibleWork, MergedWork):
     pass
 
 
-class InvisibleMergedWork(MergedWork, InvisibleWork):
+class InvisibleMergedWork(InvisibleWork, MergedWork):
     pass
 
 
-class DeletedMergedWork(MergedWork, DeletedWork):
+class DeletedMergedWork(DeletedWork, MergedWork):
     pass
 
 
-class RedirectedMergedWork(MergedWork, RedirectedWork):
+class RedirectedMergedWork(RedirectedWork, MergedWork):
     pass
