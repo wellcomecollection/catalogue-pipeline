@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
-from ingestor.models.merged.work import WorkAncestor
 from ingestor.models.neptune.node import WorkNode
+from models.pipeline.work_state import WorkAncestor
 
 
 class DisplayRelation(BaseModel):
