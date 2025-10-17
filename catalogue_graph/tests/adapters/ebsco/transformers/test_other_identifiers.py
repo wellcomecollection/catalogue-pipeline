@@ -6,7 +6,7 @@ from models.pipeline.identifier import Id, SourceIdentifier
 
 
 def test_no_other_identifiers(marc_record: Record) -> None:
-    assert transform_record(marc_record).other_identifiers == []
+    assert transform_record(marc_record).data.other_identifiers == []
 
 
 def build_source_identifier(id_type: str, value: str) -> SourceIdentifier:
@@ -29,7 +29,7 @@ def build_source_identifier(id_type: str, value: str) -> SourceIdentifier:
 )
 def test_isbn(marc_record: Record) -> None:
     work = transform_record(marc_record)
-    assert work.other_identifiers == [
+    assert work.data.other_identifiers == [
         build_source_identifier("isbn", "978-1-890159-02-3")
     ]
 
@@ -48,7 +48,7 @@ def test_isbn(marc_record: Record) -> None:
 )
 def test_issn(marc_record: Record) -> None:
     work = transform_record(marc_record)
-    assert work.other_identifiers == [build_source_identifier("issn", "1890-6729")]
+    assert work.data.other_identifiers == [build_source_identifier("issn", "1890-6729")]
 
 
 @pytest.mark.parametrize(
@@ -69,7 +69,7 @@ def test_issn(marc_record: Record) -> None:
 )
 def test_both(marc_record: Record) -> None:
     work = transform_record(marc_record)
-    assert work.other_identifiers == [
+    assert work.data.other_identifiers == [
         build_source_identifier("isbn", "978-1-890159-02-3"),
         build_source_identifier("issn", "1890-6729"),
     ]
@@ -103,7 +103,7 @@ def test_only_take_current_identifiers(marc_record: Record) -> None:
     as well as the actual current identifier.  We do not extract the non-current ones.
     """
     work = transform_record(marc_record)
-    assert work.other_identifiers == [
+    assert work.data.other_identifiers == [
         build_source_identifier("issn", "0046-8541"),
         build_source_identifier("isbn", "978-1984857132"),
     ]
@@ -131,4 +131,4 @@ def test_ignore_empty_identifiers(marc_record: Record) -> None:
     as we do not extract these, that field is to be completely ignored
     """
     work = transform_record(marc_record)
-    assert work.other_identifiers == []
+    assert work.data.other_identifiers == []

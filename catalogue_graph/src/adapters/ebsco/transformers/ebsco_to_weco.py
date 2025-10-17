@@ -1,6 +1,7 @@
+from datetime import datetime
+
 from pymarc.record import Record
 
-from adapters.ebsco.models.work import SourceWork
 from adapters.ebsco.transformers.alternative_titles import extract_alternative_titles
 from adapters.ebsco.transformers.common import mandatory_field
 from adapters.ebsco.transformers.contributors import extract_contributors
@@ -17,6 +18,8 @@ from adapters.ebsco.transformers.production import extract_production
 from adapters.ebsco.transformers.subjects import extract_subjects
 from adapters.ebsco.transformers.title import extract_title
 from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
+from models.pipeline.work_data import WorkData
 
 EBSCO_IDENTIFIER_TYPE = Id(id="ebsco-alt-lookup")
 
@@ -27,9 +30,21 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
     )
 
 
-def transform_record(marc_record: Record) -> SourceWork:
+def ebsco_source_work_state(id_value: str) -> SourceWorkState:
+    current_time: datetime = datetime.now()
+
+    return SourceWorkState(
+        source_identifier=ebsco_source_identifier(id_value),
+        # Using current time for both source_modified_time and modified_time
+        # as we are not currently extracting a specific modified time from the record.
+        source_modified_time=current_time,
+        modified_time=current_time,
+    )
+
+
+def transform_record(marc_record: Record) -> VisibleSourceWork:
     work_id = extract_id(marc_record)
-    return SourceWork(
+    work_data = WorkData(
         title=extract_title(marc_record),
         alternative_titles=extract_alternative_titles(marc_record),
         other_identifiers=extract_other_identifiers(marc_record),
@@ -44,11 +59,18 @@ def transform_record(marc_record: Record) -> SourceWork:
         holdings=extract_holdings(marc_record),
         genres=extract_genres(marc_record),
         subjects=extract_subjects(marc_record),
-        source_identifier=SourceIdentifier(
-            identifier_type=EBSCO_IDENTIFIER_TYPE,
-            ontology_type="Work",
-            value=work_id,
-        ),
+    )
+
+    work_state = ebsco_source_work_state(work_id)
+
+    return VisibleSourceWork(
+        # This version is a required field downstream, but we
+        # do not create versions in the EBSCO adapter, so we
+        # use a timestamp-based version, to ensure downstream
+        # events are always seen as newer than prior ones.
+        version=int(work_state.source_modified_time.timestamp()),
+        state=work_state,
+        data=work_data,
     )
 
 

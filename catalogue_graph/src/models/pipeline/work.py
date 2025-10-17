@@ -4,7 +4,7 @@ from models.pipeline.identifier import (
     Identified,
 )
 from models.pipeline.serialisable import ElasticsearchModel
-from models.pipeline.work_data import WorkData
+from models.pipeline.work_data import Field, WorkData
 from utils.types import WorkStatus
 
 
@@ -16,7 +16,7 @@ class Work(ElasticsearchModel):
 
 class VisibleWork(Work):
     type: WorkStatus = "Visible"
-    redirect_sources: list[Identified]
+    redirect_sources: list[Identified] = Field(default_factory=list)
 
 
 class InvisibleWork(Work):

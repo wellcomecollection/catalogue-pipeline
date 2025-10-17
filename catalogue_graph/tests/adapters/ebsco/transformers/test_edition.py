@@ -5,7 +5,7 @@ from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 
 
 def test_no_edition(marc_record: Record) -> None:
-    assert transform_record(marc_record).edition is None
+    assert transform_record(marc_record).data.edition is None
 
 
 @pytest.mark.parametrize(
@@ -21,7 +21,7 @@ def test_no_edition(marc_record: Record) -> None:
     indirect=True,
 )
 def test_empty_edition_is_no_edition(marc_record: Record) -> None:
-    assert transform_record(marc_record).edition is None
+    assert transform_record(marc_record).data.edition is None
 
 
 @pytest.mark.parametrize(
@@ -37,7 +37,7 @@ def test_empty_edition_is_no_edition(marc_record: Record) -> None:
     indirect=True,
 )
 def test_tidies_value(marc_record: Record) -> None:
-    assert transform_record(marc_record).edition == "hello, I'm in space!"
+    assert transform_record(marc_record).data.edition == "hello, I'm in space!"
 
 
 @pytest.mark.parametrize(
@@ -53,7 +53,7 @@ def test_tidies_value(marc_record: Record) -> None:
     indirect=True,
 )
 def test_extract_edition_from_250(marc_record: Record) -> None:
-    assert transform_record(marc_record).edition == "Édition franc̦aise."
+    assert transform_record(marc_record).data.edition == "Édition franc̦aise."
 
 
 @pytest.mark.parametrize(
@@ -73,7 +73,10 @@ def test_extract_edition_from_250(marc_record: Record) -> None:
     indirect=True,
 )
 def test_multiple_editions(marc_record: Record) -> None:
-    assert transform_record(marc_record).edition == "Édition franc̦aise. Rhifyn Cymraeg"
+    assert (
+        transform_record(marc_record).data.edition
+        == "Édition franc̦aise. Rhifyn Cymraeg"
+    )
 
 
 @pytest.mark.parametrize(
@@ -92,7 +95,7 @@ def test_multiple_editions(marc_record: Record) -> None:
     indirect=True,
 )
 def test_ignore_other_subfields(marc_record: Record) -> None:
-    assert transform_record(marc_record).edition == "Større utgave"
+    assert transform_record(marc_record).data.edition == "Større utgave"
 
 
 @pytest.mark.parametrize(
@@ -123,4 +126,4 @@ def test_ignore_other_subfields(marc_record: Record) -> None:
     indirect=True,
 )
 def test_empty_editions_are_ignored(marc_record: Record) -> None:
-    assert transform_record(marc_record).edition == "This one"
+    assert transform_record(marc_record).data.edition == "This one"

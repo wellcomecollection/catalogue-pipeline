@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from models.pipeline.identifier import (
     SourceIdentifier,
@@ -17,7 +17,7 @@ class WorkAncestor(ElasticsearchModel):
 
 
 class WorkRelations(BaseModel):
-    ancestors: list[WorkAncestor] = []
+    ancestors: list[WorkAncestor] = Field(default_factory=list)
 
     @field_validator("ancestors", mode="before")
     @classmethod
@@ -30,7 +30,7 @@ class WorkState(ElasticsearchModel):
     source_identifier: SourceIdentifier
     source_modified_time: datetime
     modified_time: datetime
-    relations: WorkRelations
+    relations: WorkRelations | None = None
 
     def id(self) -> str:
         raise NotImplementedError()
