@@ -1,46 +1,17 @@
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import model_validator
 
-from ingestor.models.shared.deleted_reason import DeletedReason
-from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.id_label import Id
-from models.pipeline.identifier import (
-    Identified,
-    SourceIdentifier,
+from models.pipeline.work import (
+    DeletedWork,
+    InvisibleWork,
+    RedirectedWork,
+    VisibleWork,
+    Work,
 )
-from models.pipeline.serialisable import ElasticsearchModel
-from models.pipeline.work_data import WorkData
-from utils.types import WorkStatus
-
-
-class WorkAncestor(ElasticsearchModel):
-    title: str
-    work_type: str
-    depth: int
-    num_children: int
-    num_descendents: int
-
-
-class WorkRelations(BaseModel):
-    ancestors: list[WorkAncestor] = []
-
-    @field_validator("ancestors", mode="before")
-    @classmethod
-    def convert_merged_type(cls, raw_ancestors: list[dict]) -> list[dict]:
-        # TODO: This is a temporary 'Series' filter which won't be needed once we remove the relation embedder service
-        return [a for a in raw_ancestors if a["numChildren"] == 0]
-
-
-class WorkState(ElasticsearchModel):
-    source_identifier: SourceIdentifier
-    source_modified_time: datetime
-    modified_time: datetime
-    relations: WorkRelations
-
-    def id(self) -> str:
-        raise NotImplementedError()
+from models.pipeline.work_state import WorkState
 
 
 class MergedWorkState(WorkState):
@@ -64,47 +35,8 @@ class MergedWorkState(WorkState):
         return self.canonical_id
 
 
-class SourceWorkState(WorkState):
-    pass
-
-
-class Work(ElasticsearchModel):
-    state: MergedWorkState | SourceWorkState
-    version: int
-    type: WorkStatus
-    data: WorkData | None = None
-
-    @staticmethod
-    def from_raw_document(work: dict) -> "Work":
-        if work["type"] == "Visible":
-            return VisibleWork.model_validate(work)
-        if work["type"] == "Invisible":
-            return InvisibleWork.model_validate(work)
-        if work["type"] == "Deleted":
-            return DeletedWork.model_validate(work)
-
-        raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
-
-
-class VisibleWork(Work):
-    type: WorkStatus = "Visible"
-    redirect_sources: list[Identified]
-
-
-class InvisibleWork(Work):
-    type: WorkStatus = "Invisible"
-    invisibility_reasons: list[InvisibleReason]
-
-
-class DeletedWork(Work):
-    type: WorkStatus = "Deleted"
-    deleted_reason: DeletedReason
-
-
-class MergedWork(ElasticsearchModel):
+class MergedWork(Work):
     state: MergedWorkState
-    version: int
-    type: WorkStatus
 
     @staticmethod
     def from_raw_document(work: dict) -> "MergedWork":
@@ -120,18 +52,17 @@ class MergedWork(ElasticsearchModel):
         raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
 
 
-class VisibleMergedWork(MergedWork):
-    data: WorkData
-    redirect_sources: list[Identified]
+class VisibleMergedWork(MergedWork, VisibleWork):
+    pass
 
 
-class InvisibleMergedWork(MergedWork):
-    invisibility_reasons: list[InvisibleReason]
+class InvisibleMergedWork(MergedWork, InvisibleWork):
+    pass
 
 
-class DeletedMergedWork(MergedWork):
-    deleted_reason: DeletedReason
+class DeletedMergedWork(MergedWork, DeletedWork):
+    pass
 
 
-class RedirectedMergedWork(MergedWork):
-    redirect_target: Identified
+class RedirectedMergedWork(MergedWork, RedirectedWork):
+    pass
