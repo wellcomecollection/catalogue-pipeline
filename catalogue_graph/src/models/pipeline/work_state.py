@@ -17,7 +17,7 @@ class WorkAncestor(ElasticsearchModel):
 
 
 class WorkRelations(BaseModel):
-    ancestors: list[WorkAncestor] = []
+    ancestors: list[WorkAncestor] = Field(default_factory=list)
 
     @field_validator("ancestors", mode="before")
     @classmethod
