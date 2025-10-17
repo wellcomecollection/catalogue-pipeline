@@ -114,7 +114,9 @@ def transform(
 
 
 def _generate_actions(
-    records: Iterable[VisibleSourceWork],  # accept any pydantic model with model_dump
+    records: Iterable[
+        VisibleSourceWork | DeletedSourceWork
+    ],  # accept visible or deleted works
     index_name: str,
 ) -> Generator[dict[str, Any]]:
     for record in records:
@@ -128,7 +130,9 @@ def _generate_actions(
 
 
 def load_data(
-    elastic_client: Elasticsearch, records: Iterable[VisibleSourceWork], index_name: str
+    elastic_client: Elasticsearch,
+    records: Iterable[VisibleSourceWork | DeletedSourceWork],
+    index_name: str,
 ) -> tuple[int, list[dict[str, Any]]]:
     """Index records; return (success_count, error_details list).
 
@@ -187,7 +191,7 @@ def _process_batch(
     """
     print(f"Processing batch with {len(batch)} rows")
 
-    transformed: list[VisibleSourceWork] = []
+    transformed: list[VisibleSourceWork | DeletedSourceWork] = []
     errors: list[dict[str, Any]] = []
 
     for row in batch.to_pylist():

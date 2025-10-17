@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from _pytest.logging import LogCaptureFixture
@@ -294,7 +294,9 @@ def step_error_logged(caplog: LogCaptureFixture, message: str) -> None:
 
 # ------------- Utility accessors ------------- #
 def _get_genres(context: dict[str, Any]) -> list[Any]:
-    return context["result"].data.genres
+    # Cast context['result'] to VisibleSourceWork to satisfy mypy; runtime guarantees this via do_transform
+    work = cast(VisibleSourceWork, context["result"])
+    return work.data.genres
 
 
 def _assert_single_genre(context: dict[str, Any]) -> Any:

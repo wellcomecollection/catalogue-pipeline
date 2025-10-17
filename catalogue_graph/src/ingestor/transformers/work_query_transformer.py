@@ -53,8 +53,9 @@ class QueryWorkTransformer:
 
     @property
     def part_of_titles(self) -> Generator[str]:
-        for series_item in self.state.relations.ancestors:
-            yield series_item.title
+        if self.state.relations is not None:
+            for series_item in self.state.relations.ancestors:
+                yield series_item.title
 
         for collection_item in self.hierarchy.ancestors[::-1]:
             if collection_item.work.properties.label is not None:
