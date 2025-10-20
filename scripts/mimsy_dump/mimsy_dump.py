@@ -143,6 +143,7 @@ def main():
             "VW_DISPOSAL_SOURCES",
             "VW_EXHIBITION_ITEMS",
             "VW_EXHIBITION_ITEMS_STATUS",
+            "VW_HAZARD",
             "VW_EXHIBITIONS",
             "VW_INSTRUCTIONS",
             "VW_ITEM_DESCRIPTIONS",
