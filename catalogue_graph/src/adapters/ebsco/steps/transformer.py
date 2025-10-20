@@ -118,7 +118,6 @@ def transform(
                     "detail": detail,
                 }
             )
-
     return works, errors
 
 

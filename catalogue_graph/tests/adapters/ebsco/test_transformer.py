@@ -391,6 +391,45 @@ def test_transform_valid_marcxml_returns_work() -> None:
     assert works[0].title == "A Useful Title"
 
 
+def test_transform_handles_transform_record_exception(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """If a record raises in transform_record we should capture a transform_error and continue.
+
+    Since transform() groups all records under the supplied work_id, the error id should be that work_id.
+    """
+
+    # Patch transform_record to raise for any input
+    def raising_transform_record(_record: Any):  # type: ignore[no-untyped-def]
+        raise ValueError("boom: bad data")
+
+    # Patch the symbol as imported into the transformer module (not the source module)
+    monkeypatch.setattr(
+        "adapters.ebsco.steps.transformer.transform_record",
+        raising_transform_record,
+    )
+
+    xml = (
+        "<record>"
+        "<leader>00000nam a2200000   4500</leader>"
+        "<controlfield tag='001'>ebsErr123</controlfield>"
+        "<datafield tag='245' ind1='0' ind2='0'>"
+        "<subfield code='a'>Will Fail</subfield>"
+        "</datafield>"
+        "</record>"
+    )
+    works, errors = transform("ebsErr123", xml)
+
+    # No works produced due to exception
+    assert works == []
+    reasons = {e["reason"] for e in errors}
+    assert "transform_error" in reasons
+
+    # Ensure detail captured & truncated
+    transform_errors = [e for e in errors if e["reason"] == "transform_error"]
+    assert transform_errors and "boom: bad data" in transform_errors[0]["detail"]
+
+
 # --------------------------------------------------------------------------------------
 # Tests for load_data()
 # --------------------------------------------------------------------------------------
