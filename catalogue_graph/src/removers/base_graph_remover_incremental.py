@@ -10,19 +10,17 @@ ES_QUERY_NON_VISIBLE_WORKS = {"bool": {"must_not": {"match": {"type": "Visible"}
 BATCH_SIZE = 40_000
 
 
-class BaseGraphRemoverIncremental:
-    def __init__(self, entity_type: EntityType, use_public_endpoint: bool):
-        self.neptune_client = get_neptune_client(use_public_endpoint)
-        self.entity_type = entity_type
-
+class BaseGraphNodeRemover:
     def get_total_node_count(self) -> int:
-        raise NotImplementedError()
-
-    def get_total_edge_count(self) -> int:
         raise NotImplementedError()
 
     def get_node_ids_to_remove(self) -> Iterator[str]:
         """Return an iterator of node IDs which should be removed from the catalogue graph."""
+        raise NotImplementedError()
+
+
+class BaseGraphEdgeRemover:
+    def get_total_edge_count(self) -> int:
         raise NotImplementedError()
 
     def get_es_edges(self) -> Iterator[tuple[str, set[str]]]:
@@ -51,6 +49,12 @@ class BaseGraphRemoverIncremental:
             # Remove all edges which exist in the graph but not in the merged index.
             for work_id, graph_edge_ids in graph_edges.items():
                 yield from graph_edge_ids.difference(es_edges.get(work_id, set()))
+
+
+class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
+    def __init__(self, entity_type: EntityType, use_public_endpoint: bool):
+        self.neptune_client = get_neptune_client(use_public_endpoint)
+        self.entity_type = entity_type
 
     def remove(self, override_safety_check: bool = False) -> list[str]:
         if self.entity_type == "nodes":
