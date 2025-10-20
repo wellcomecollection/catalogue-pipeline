@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 
-from sources.catalogue.concepts_source import (
-    MergedWorkConceptsData,
-)
+from models.pipeline.work_data import WorkData
+from sources.catalogue.concepts_source import extract_identified_concepts
 from utils.types import ConceptType, DisplayWorkType, WorkConceptKey
 
 from .raw_concept import RawCatalogueConcept
@@ -54,9 +53,9 @@ class RawCatalogueWork:
     def concepts(self) -> list[WorkConcept]:
         processed = set()
         work_concepts: list[WorkConcept] = []
-        work_data = MergedWorkConceptsData.model_validate(self.work_data)
+        work_data = WorkData.model_validate(self.work_data)
 
-        for extracted, referenced_in in work_data.extract_identified_concepts():
+        for extracted, referenced_in in extract_identified_concepts(work_data):
             concept = RawCatalogueConcept(extracted)
             if concept.wellcome_id not in processed:
                 processed.add(concept.wellcome_id)

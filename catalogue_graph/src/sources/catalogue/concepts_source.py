@@ -5,56 +5,52 @@ from pydantic import BaseModel
 from models.events import BasePipelineEvent
 from models.pipeline.concept import (
     Concept,
-    Contributor,
-    Genre,
     IdentifiedConcept,
-    Subject,
 )
+from models.pipeline.work_data import WorkData
 from sources.base_source import BaseSource
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
 from utils.types import WorkConceptKey
 
 
-class MergedWorkConceptsData(BaseModel):
-    subjects: list[Subject] = []
-    genres: list[Genre] = []
-    contributors: list[Contributor] = []
+def extract_concepts(data: WorkData) -> Generator[tuple[Concept, WorkConceptKey]]:
+    """
+    Return all concepts associated with the work.
+    """
 
-    def extract_concepts(self) -> Generator[tuple[Concept, WorkConceptKey]]:
-        """Return all concepts associated with the work."""
+    # Some subjects contain nested component concepts. For example, the subject 'Milk - Quality' consists
+    # of concepts 'Milk' and 'Quality' (each with its own Wellcome ID). For now, we are not interested in
+    # extracting these component concepts, since the frontend does not make use of them and the resulting
+    # theme pages would be empty.
+    # However, an exception exists for simple, non-composite subjects where the nested concept
+    # is the subject itself (identified by matching IDs). In this specific case, the nested
+    # concept's "Type" is more specific, so we promote it to the top-level subject.
+    for subject in data.subjects:
+        new_type = "Subject"
+        if len(subject.concepts) == 1 and subject.concepts[0].id == subject.id:
+            # If the case matches, use the concept's type
+            new_type = subject.concepts[0].type
 
-        # Some subjects contain nested component concepts. For example, the subject 'Milk - Quality' consists
-        # of concepts 'Milk' and 'Quality' (each with its own Wellcome ID). For now, we are not interested in
-        # extracting these component concepts, since the frontend does not make use of them and the resulting
-        # theme pages would be empty.
-        # However, an exception exists for simple, non-composite subjects where the nested concept
-        # is the subject itself (identified by matching IDs). In this specific case, the nested
-        # concept's "Type" is more specific, so we promote it to the top-level subject.
-        for subject in self.subjects:
-            new_type = "Subject"
-            if len(subject.concepts) == 1 and subject.concepts[0].id == subject.id:
-                # If the case matches, use the concept's type
-                new_type = subject.concepts[0].type
+        yield subject.model_copy(update={"type": new_type}), "subjects"
 
-            yield subject.model_copy(update={"type": new_type}), "subjects"
+    # Extract all contributors
+    for contributor in data.contributors:
+        yield contributor.agent, "contributors"
 
-        # Extract all contributors
-        for contributor in self.contributors:
-            yield contributor.agent, "contributors"
+    for genre in data.genres:
+        if genre.concepts:
+            # Only extract the first item from each genre. Subsequent items are not associated with the work in
+            # catalogue API filters and the resulting theme pages would be empty.
+            yield genre.concepts[0], "genres"
 
-        for genre in self.genres:
-            if genre.concepts:
-                # Only extract the first item from each genre. Subsequent items are not associated with the work in
-                # catalogue API filters and the resulting theme pages would be empty.
-                yield genre.concepts[0], "genres"
 
-    def extract_identified_concepts(
-        self,
-    ) -> Generator[tuple[IdentifiedConcept, WorkConceptKey]]:
-        for concept, referenced_in in self.extract_concepts():
-            if concept.id.canonical_id is not None:
-                yield IdentifiedConcept.from_concept(concept), referenced_in
+def extract_identified_concepts(
+    data: WorkData,
+) -> Generator[tuple[IdentifiedConcept, WorkConceptKey]]:
+    for concept, referenced_in in extract_concepts(data):
+        if concept.id.canonical_id is not None:
+            yield IdentifiedConcept.from_concept(concept), referenced_in
 
 
 class ExtractedWorkConcept(BaseModel):
@@ -80,9 +76,9 @@ class CatalogueConceptsSource(BaseSource):
     def stream_raw(self) -> Generator[ExtractedWorkConcept]:
         """Streams raw concept nodes from a work's subjects, genres, and contributors."""
         for work in self.es_source.stream_raw():
-            work_data = MergedWorkConceptsData.model_validate(work["data"])
+            work_data = WorkData.model_validate(work["data"])
 
-            for concept, referenced_in in work_data.extract_identified_concepts():
+            for concept, referenced_in in extract_identified_concepts(work_data):
                 yield ExtractedWorkConcept(
                     work_id=work["state"]["canonicalId"],
                     concept=concept,
