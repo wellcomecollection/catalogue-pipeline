@@ -52,6 +52,7 @@ class BaseEdge(BaseModel):
 
     @property
     def edge_id(self) -> str:
+        # We need to give the edge a unique ID so that the Neptune bulk loader recognises duplicates
         return f"{self.relationship}:{self.from_id}-->{self.to_id}"
 
 

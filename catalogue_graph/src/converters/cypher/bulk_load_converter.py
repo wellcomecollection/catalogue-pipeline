@@ -44,7 +44,6 @@ class CypherBulkLoadConverter(CypherBaseConverter):
 
     def _edge_to_bulk_cypher(self, model: BaseEdge) -> dict:
         bulk_edge = {
-            # We need to give the edge a unique ID so that the Neptune bulk loader recognises duplicates
             ":ID": model.edge_id,
             ":START_ID": model.from_id,
             ":END_ID": model.to_id,
