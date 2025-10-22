@@ -1,16 +1,11 @@
 import polars as pl
+import pydantic
 import pytest
 
-from graph_remover import IDS_LOG_SCHEMA
 from ingestor.steps.ingestor_deletions import lambda_handler
 from tests.mocks import MockElasticsearchClient, MockSmartOpen, mock_es_secrets
 
 REMOVER_S3_PREFIX = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
-
-
-def get_mock_remover_uri(pipeline_date: str) -> str:
-    return f"{REMOVER_S3_PREFIX}/{pipeline_date}/deleted_ids/catalogue_concepts__nodes.parquet"
-
 
 MOCK_EVENT = {
     "ingestor_type": "concepts",
@@ -19,49 +14,96 @@ MOCK_EVENT = {
     "job_id": "dev",
 }
 
+MOCK_TIME_WINDOW_EVENT = {
+    **MOCK_EVENT,
+    "window": {"start_time": "2025-10-22T08:00", "end_time": "2025-10-22T08:15"},
+}
+
 
 def index_concepts(ids: list[str], index_name: str = "concepts-indexed-dev") -> None:
     for _id in ids:
         MockElasticsearchClient.index(index_name, _id, {})
 
 
-def get_indexed_concepts(index_name: str = "concepts-indexed-dev") -> dict:
-    return MockElasticsearchClient.indexed_documents[index_name] or {}
+def get_indexed_concept_ids(index_name: str = "concepts-indexed-dev") -> list[str]:
+    docs = MockElasticsearchClient.indexed_documents[index_name] or {}
+    return list(docs.keys())
 
 
-def mock_deleted_ids_log_file(pipeline_date: str) -> None:
-    mock_data = {
-        "timestamp": ["2025-04-03", "2025-04-03", "2025-04-07", "2025-04-07"],
-        "id": ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"],
-    }
-    df = pl.DataFrame(mock_data, schema=IDS_LOG_SCHEMA)
-    MockSmartOpen.mock_s3_parquet_file(get_mock_remover_uri(pipeline_date), df)
+def mock_deleted_ids_log_file(mock_ids: list[str], pipeline_date: str) -> None:
+    df = pl.DataFrame(mock_ids)
+
+    uri = f"{REMOVER_S3_PREFIX}/{pipeline_date}/deleted_ids/catalogue_concepts__nodes.parquet"
+    MockSmartOpen.mock_s3_parquet_file(uri, df)
 
 
-def test_ingestor_deletions_safety_check_first_run() -> None:
+def mock_time_window_deleted_ids_log_file(
+    mock_ids: list[str],
+    pipeline_date: str,
+) -> None:
+    df = pl.DataFrame(mock_ids)
+
+    file_name = "catalogue_concepts__nodes.parquet"
+    uri = f"{REMOVER_S3_PREFIX}/{pipeline_date}/windows/20251022T0800-20251022T0815/deleted_ids/{file_name}"
+    MockSmartOpen.mock_s3_parquet_file(uri, df)
+
+
+def test_ingestor_deletions_no_safety_check_first_run() -> None:
     mock_es_secrets("concepts_ingestor", "dev")
-    mock_deleted_ids_log_file("dev")
+    mock_deleted_ids_log_file(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], "dev")
 
     # Index some empty documents with the same IDs as those stored in the parquet mock
     # (plus an extra document which shouldn't be removed).
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
-    assert len(get_indexed_concepts()) == 5
+    assert len(get_indexed_concept_ids()) == 5
 
     # No index date specified, so the local 'concepts-indexed-dev' index name should be used
     event = {**MOCK_EVENT, "force_pass": True}
     lambda_handler(event, None)
 
-    indexed_concepts = get_indexed_concepts()
-    assert len(indexed_concepts) == 1
-    assert list(indexed_concepts.keys())[0] == "someid12"
+    indexed_concepts = get_indexed_concept_ids()
+    assert indexed_concepts == ["someid12"]
+
+
+def test_ingestor_deletions_incremental_mode() -> None:
+    mock_es_secrets("concepts_ingestor", "dev")
+
+    # Mock two sets of deleted IDs, one with a time window and one without
+    mock_deleted_ids_log_file(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], "dev")
+    mock_time_window_deleted_ids_log_file(["u6jve2vb", "amzfbrbz"], "dev")
+
+    index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
+    assert len(get_indexed_concept_ids()) == 5
+
+    event = {**MOCK_TIME_WINDOW_EVENT, "force_pass": True}
+    lambda_handler(event, None)
+
+    # Only the documents listed in the time window event should be removed
+    indexed_concepts = get_indexed_concept_ids()
+    assert set(indexed_concepts) == {"q5a7uqkz", "s8f6cxcf", "someid12"}
+
+
+def test_ingestor_deletions_empty_ids_file() -> None:
+    mock_es_secrets("concepts_ingestor", "dev")
+
+    # Mock an empty dataframe
+    mock_deleted_ids_log_file([], "dev")
+
+    index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
+    assert len(get_indexed_concept_ids()) == 5
+
+    lambda_handler(MOCK_EVENT, None)
+
+    # No concept IDs should be removed
+    assert len(get_indexed_concept_ids()) == 5
 
 
 def test_ingestor_deletions_line_safety_check() -> None:
     # Mock a scenario which would result in a significant percentage of IDs being deleted
-    mock_deleted_ids_log_file("dev")
+    mock_deleted_ids_log_file(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], "dev")
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Fractional change"):
         lambda_handler(MOCK_EVENT, None)
 
 
@@ -73,32 +115,9 @@ def test_ingestor_deletions_line_no_deleted_ids_file() -> None:
         lambda_handler(MOCK_EVENT, None)
 
 
-def test_ingestor_deletions_line_new_index_run() -> None:
-    # Mock an index which was created *after* some IDs were deleted from the graph
-    pipeline_date = "2025-01-01"
-    index_date = "2025-04-07"
-    job_id = "test-job-id"
-    index_name = f"concepts-indexed-{index_date}"
+def test_ingestor_deletions_works() -> None:
+    # Removing works should be impossible
+    event = {**MOCK_EVENT, "ingestor_type": "works"}
 
-    mock_deleted_ids_log_file(pipeline_date)
-    mock_es_secrets("concepts_ingestor", pipeline_date)
-
-    index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], index_name)
-
-    assert len(get_indexed_concepts(index_name)) == 4
-
-    event = {
-        "ingestor_type": "concepts",
-        "pipeline_date": pipeline_date,
-        "index_date": index_date,
-        "job_id": job_id,
-        "force_pass": True,
-    }
-    lambda_handler(event, None)
-
-    indexed_concepts = get_indexed_concepts(index_name)
-
-    # Check that only IDs which were removed after the index was created get removed.
-    # (In a real-life scenario, the other two IDs would not exist in the index at all.)
-    assert len(indexed_concepts) == 2
-    assert set(indexed_concepts.keys()) == {"u6jve2vb", "amzfbrbz"}
+    with pytest.raises(pydantic.ValidationError):
+        lambda_handler(event, None)

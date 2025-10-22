@@ -158,7 +158,7 @@ data "aws_iam_policy_document" "ingestor_deletions_s3_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
+      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover_incremental/*"
     ]
   }
 }

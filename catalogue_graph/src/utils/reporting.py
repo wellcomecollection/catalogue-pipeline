@@ -30,7 +30,6 @@ class LoaderReport(PipelineReport):
 class DeletionReport(PipelineReport):
     label: ClassVar[str] = "deletions"
     deleted_count: int | None
-    date: str
 
 
 class IndexerReport(PipelineReport):

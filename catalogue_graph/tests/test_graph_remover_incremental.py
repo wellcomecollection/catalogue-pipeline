@@ -228,7 +228,7 @@ def test_graph_remover_safety_mechanism() -> None:
         lambda_handler(event, None)
 
     # Safety check disabled
-    event["override_safety_check"] = True
+    event["force_pass"] = True
     lambda_handler(event, None)
     s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
     check_deleted_ids_log(s3_uri, set(disconnected_ids))

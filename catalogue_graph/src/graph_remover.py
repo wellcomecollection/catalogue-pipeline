@@ -104,7 +104,7 @@ def handler(event: FullGraphRemoverEvent, is_local: bool = False) -> None:
     validate_fractional_change(
         modified_size=len(deleted_ids),
         total_size=len(previous_ids),
-        force_pass=event.override_safety_check,
+        force_pass=event.force_pass,
     )
 
     if len(deleted_ids) > 0:
@@ -150,7 +150,7 @@ def local_handler() -> None:
         required=False,
     )
     parser.add_argument(
-        "--override-safety-check",
+        "--force-pass",
         type=bool,
         help="Whether to override a safety check which prevents node/edge removal if the percentage of removed entities is above a certain threshold.",
         default=False,

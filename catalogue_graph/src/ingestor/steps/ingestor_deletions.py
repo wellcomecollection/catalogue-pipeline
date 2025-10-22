@@ -1,88 +1,45 @@
 import argparse
 import typing
-from datetime import datetime
 
 import polars as pl
 
-import utils.elasticsearch
-from ingestor.models.step_events import IngestorMonitorStepEvent, IngestorStepEvent
+from ingestor.models.step_events import IngestorDeletionsLambdaEvent
 from models.events import (
     IncrementalGraphRemoverEvent,
 )
+from removers.elasticsearch_remover import ElasticsearchRemover
 from utils.aws import df_from_s3_parquet
-from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
+from utils.elasticsearch import ElasticsearchMode
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
 
 
-def get_current_id_count(
-    event: IngestorMonitorStepEvent, es_mode: ElasticsearchMode
-) -> int:
-    """Return the number of documents currently stored in ES in the concepts index."""
-    es = utils.elasticsearch.get_client(
-        "concepts_ingestor", event.pipeline_date, es_mode
-    )
-
-    response = es.count(
-        index=get_standard_index_name("concepts-indexed", event.index_date)
-    )
-    count: int = response.get("count", 0)
-    return count
-
-
-def delete_concepts_from_elasticsearch(
-    deleted_ids: set[str],
-    event: IngestorMonitorStepEvent,
-    es_mode: ElasticsearchMode,
-) -> int:
-    """Remove documents matching `deleted_ids` from the concepts ES index."""
-    es = utils.elasticsearch.get_client(
-        "concepts_ingestor", event.pipeline_date, es_mode
-    )
-    index_name = get_standard_index_name("concepts-indexed", event.index_date)
-
-    response = es.delete_by_query(
-        index=index_name, body={"query": {"ids": {"values": list(deleted_ids)}}}
-    )
-
-    deleted_count: int = response["deleted"]
-    print(f"Deleted {deleted_count} documents from the {index_name} index.")
-    return deleted_count
-
-
-def _is_valid_date(index_date: str) -> bool:
-    try:
-        datetime.strptime(index_date, "%Y-%m-%d")
-        return True
-    except ValueError:
-        return False
-
-
-def get_ids_to_delete(event: IngestorMonitorStepEvent) -> set[str]:
+def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
     """Return a list of concept IDs marked for deletion from the ES index."""
+
+    # Reconstruct the original incremental graph remover event which wrote the removed IDs to a parquet file
     remover_event = IncrementalGraphRemoverEvent(
         transformer_type="catalogue_concepts",
         entity_type="nodes",
         pipeline_date=event.pipeline_date,
+        window=event.window,
     )
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
     df = df_from_s3_parquet(remover_event.get_remover_s3_uri("deleted_ids"))
 
-    # TODO: Fix this based on https://github.com/wellcomecollection/platform/issues/6121
-    if event.index_date and _is_valid_date(event.index_date):
-        index_date = datetime.strptime(event.index_date, "%Y-%m-%d").date()
-        df = df.filter(pl.col("timestamp") >= index_date)
-
-    ids = pl.Series(df.select(pl.col("id"))).to_list()
+    ids = []
+    if len(df) > 0:
+        ids = pl.Series(df.select(pl.first())).to_list()
     return set(ids)
 
 
 def handler(
-    event: IngestorMonitorStepEvent, es_mode: ElasticsearchMode = "private"
+    event: IngestorDeletionsLambdaEvent, es_mode: ElasticsearchMode = "private"
 ) -> None:
+    es_remover = ElasticsearchRemover(event, es_mode)
     ids_to_delete = get_ids_to_delete(event)
-    current_id_count = get_current_id_count(event, es_mode)
+    current_id_count = es_remover.get_document_count()
 
     # This is part of a safety mechanism. If two sets of IDs differ by more than the DEFAULT_THRESHOLD
     # (set to 5%), an exception will be raised.
@@ -91,34 +48,18 @@ def handler(
         total_size=current_id_count,
         force_pass=event.force_pass,
     )
-    deleted_count = 0
-    if len(ids_to_delete) > 0:
-        # Delete the corresponding items from the graph
-        deleted_count = delete_concepts_from_elasticsearch(
-            ids_to_delete, event, es_mode
-        )
+    deleted_count = es_remover.delete_documents(ids_to_delete)
 
-    report = DeletionReport(
-        **event.model_dump(),
-        deleted_count=deleted_count,
-        date=datetime.today().strftime("%Y-%m-%d"),
-    )
+    report = DeletionReport(**event.model_dump(), deleted_count=deleted_count)
     report.write()
 
 
-def lambda_handler(event: dict, context: typing.Any) -> dict:
-    handler(IngestorMonitorStepEvent(**event))
-    return IngestorStepEvent(**event).model_dump()
+def lambda_handler(event: dict, context: typing.Any) -> None:
+    handler(IngestorDeletionsLambdaEvent.model_validate(event))
 
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="")
-    parser.add_argument(
-        "--force-pass",
-        type=bool,
-        help="Whether to override a safety check which prevents document removal if the percentage of removed items is above a certain threshold.",
-        default=False,
-    )
     parser.add_argument(
         "--pipeline-date",
         type=str,
@@ -136,14 +77,40 @@ def local_handler() -> None:
     parser.add_argument(
         "--job-id",
         type=str,
-        help="The job ID for the current ingestor run.",
+        help="The job ID for the current run.",
         required=False,
         default="dev",
     )
+    parser.add_argument(
+        "--window-start",
+        type=str,
+        help="Start of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
+        "--window-end",
+        type=str,
+        help="End of the processed window (e.g. 2025-01-01T00:00). Incremental mode only.",
+        required=False,
+    )
+    parser.add_argument(
+        "--es-mode",
+        type=str,
+        help="Which ES instance to connect to. Use 'public' to connect to the production cluster.",
+        required=False,
+        choices=["local", "public"],
+        default="local",
+    )
+    parser.add_argument(
+        "--force-pass",
+        type=bool,
+        help="Whether to override a safety check which prevents document removal if the percentage of removed items is above a certain threshold.",
+        default=False,
+    )
 
     args = parser.parse_args()
-    event = IngestorMonitorStepEvent(**args.__dict__, ingestor_type="concepts")
-    handler(event, es_mode="public")
+    event = IngestorDeletionsLambdaEvent.from_argparser(args)
+    handler(event, es_mode=args.es_mode)
 
 
 if __name__ == "__main__":

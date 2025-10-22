@@ -34,7 +34,7 @@ def get_remover(
 
 def handler(event: IncrementalGraphRemoverEvent, is_local: bool = False) -> None:
     remover = get_remover(event, is_local)
-    deleted_ids = remover.remove(event.override_safety_check)
+    deleted_ids = remover.remove(event.force_pass)
 
     # Write removed IDs to a parquet file
     s3_file_uri = event.get_remover_s3_uri("deleted_ids")
