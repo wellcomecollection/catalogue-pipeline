@@ -1,8 +1,8 @@
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from adapters.ebsco.transformers.common import normalise_identifier_value
+from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.concept import Concept
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
