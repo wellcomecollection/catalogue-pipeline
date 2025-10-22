@@ -6,7 +6,8 @@ from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 class ElasticsearchRemover:
     def __init__(self, event: IngestorStepEvent, es_mode: ElasticsearchMode):
         api_key_name = f"{event.ingestor_type}_ingestor"
-        self.index_name = get_standard_index_name(event.ingestor_type, event.index_date)
+        index_name_prefix = f"{event.ingestor_type}-indexed"
+        self.index_name = get_standard_index_name(index_name_prefix, event.index_date)
 
         self.client = utils.elasticsearch.get_client(
             api_key_name, event.pipeline_date, es_mode
