@@ -1,13 +1,11 @@
 import argparse
 import typing
 from datetime import datetime, timedelta
-from typing import Literal
 
 import polars as pl
 
-import config
 from models.events import (
-    GraphRemoverEvent,
+    FullGraphRemoverEvent,
 )
 from utils.aws import (
     df_from_s3_parquet,
@@ -16,25 +14,14 @@ from utils.aws import (
     get_neptune_client,
 )
 from utils.safety import validate_fractional_change
-from utils.types import EntityType, TransformerType
+from utils.types import EntityType, FullGraphRemoverType, GraphRemoverFolder
 
 IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
-GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
 
 
-def get_s3_uri(
-    transformer: TransformerType, entity: EntityType, folder: GraphRemoverFolder
-) -> str:
-    file_name = f"{transformer}__{entity}.parquet"
-    prefix = f"{config.GRAPH_REMOVER_S3_PREFIX}/{folder}"
-    return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
-
-
-def get_previous_ids(event: GraphRemoverEvent) -> set[str]:
+def get_previous_ids(event: FullGraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest snapshot for the specified transformer and entity type."""
-    s3_file_uri = get_s3_uri(
-        event.transformer_type, event.entity_type, "previous_ids_snapshot"
-    )
+    s3_file_uri = event.get_remover_s3_uri("previous_ids_snapshot")
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
@@ -42,7 +29,7 @@ def get_previous_ids(event: GraphRemoverEvent) -> set[str]:
     return set(ids)
 
 
-def get_current_ids(event: GraphRemoverEvent) -> set[str]:
+def get_current_ids(event: FullGraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest bulk load file for the specified transformer and entity type."""
     s3_file_uri = event.get_bulk_load_s3_uri()
 
@@ -51,20 +38,18 @@ def get_current_ids(event: GraphRemoverEvent) -> set[str]:
     return ids
 
 
-def update_node_ids_snapshot(event: GraphRemoverEvent, ids: set[str]) -> None:
+def update_node_ids_snapshot(event: FullGraphRemoverEvent, ids: set[str]) -> None:
     """Update the IDs snapshot with the latest IDs."""
-    s3_file_uri = get_s3_uri(
-        event.transformer_type, event.entity_type, "previous_ids_snapshot"
-    )
+    s3_file_uri = event.get_remover_s3_uri("previous_ids_snapshot")
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
 
 
 def log_ids(
-    event: GraphRemoverEvent, ids: set[str], folder: GraphRemoverFolder
+    event: FullGraphRemoverEvent, ids: set[str], folder: GraphRemoverFolder
 ) -> None:
     """Append IDs which were added/removed as part of this run to the corresponding log file."""
-    s3_file_uri = get_s3_uri(event.transformer_type, event.entity_type, folder)
+    s3_file_uri = event.get_remover_s3_uri(folder)
 
     try:
         df = df_from_s3_parquet(s3_file_uri)
@@ -86,18 +71,7 @@ def log_ids(
     df_to_s3_parquet(df, s3_file_uri)
 
 
-def delete_ids_from_neptune(
-    deleted_ids: set[str], entity_type: EntityType, is_local: bool
-) -> None:
-    """Delete all nodes/edges with matching IDs from the Neptune cluster"""
-    client = get_neptune_client(is_local)
-    if entity_type == "nodes":
-        client.delete_nodes_by_id(list(deleted_ids))
-    else:
-        client.delete_edges_by_id(list(deleted_ids))
-
-
-def handler(event: GraphRemoverEvent, is_local: bool = False) -> None:
+def handler(event: FullGraphRemoverEvent, is_local: bool = False) -> None:
     try:
         # Retrieve a list of all ids which were loaded into the graph as part of the previous run
         previous_ids = get_previous_ids(event)
@@ -135,7 +109,8 @@ def handler(event: GraphRemoverEvent, is_local: bool = False) -> None:
 
     if len(deleted_ids) > 0:
         # Delete the corresponding items from the graph
-        delete_ids_from_neptune(deleted_ids, event.entity_type, is_local)
+        client = get_neptune_client(is_local)
+        client.delete_entities_by_id(list(deleted_ids), event.entity_type)
 
     # Add ids which were deleted as part of this run to a log file storing all previously deleted ids
     log_ids(event, deleted_ids, "deleted_ids")
@@ -148,7 +123,7 @@ def handler(event: GraphRemoverEvent, is_local: bool = False) -> None:
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    handler(GraphRemoverEvent(**event))
+    handler(FullGraphRemoverEvent.model_validate(event))
 
 
 def local_handler() -> None:
@@ -156,7 +131,7 @@ def local_handler() -> None:
     parser.add_argument(
         "--transformer-type",
         type=str,
-        choices=typing.get_args(TransformerType),
+        choices=typing.get_args(FullGraphRemoverType),
         help="Which transformer's output to bulk load.",
         required=True,
     )
@@ -182,7 +157,7 @@ def local_handler() -> None:
     )
 
     args = parser.parse_args()
-    event = GraphRemoverEvent(**args.__dict__)
+    event = FullGraphRemoverEvent(**args.__dict__)
 
     handler(event, is_local=True)
 

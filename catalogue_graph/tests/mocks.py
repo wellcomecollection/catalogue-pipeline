@@ -262,6 +262,7 @@ class MockRequest:
         MockRequest.calls.append(
             {"method": method, "url": url, "data": data, "headers": headers}
         )
+
         for response in MockRequest.responses:
             if (
                 response["method"] == method
@@ -405,14 +406,19 @@ def mock_es_secrets(
 
 
 def add_neptune_mock_response(
-    mock_query: str, expected_params: dict, mock_results: list[dict]
+    expected_query: str, expected_params: dict | None, mock_results: list[dict]
 ) -> None:
-    query = " ".join(mock_query.split())
+    query = " ".join(expected_query.split())
+
+    body: dict[str, Any] = {"query": query}
+    if expected_params is not None:
+        body["parameters"] = expected_params
+
     MockRequest.mock_response(
         method="POST",
         url="https://test-host.com:8182/openCypher",
         json_data={"results": mock_results},
-        body=json.dumps({"query": query, "parameters": expected_params}),
+        body=json.dumps(body),
     )
 
 

@@ -43,7 +43,8 @@ resource "aws_iam_policy" "state_machine_policy" {
           aws_sfn_state_machine.catalogue_graph_pipeline_monthly.arn,
           aws_sfn_state_machine.catalogue_graph_pipeline_incremental.arn,
           aws_sfn_state_machine.catalogue_graph_scaler.arn,
-          aws_sfn_state_machine.catalogue_graph_removers.arn
+          aws_sfn_state_machine.catalogue_graph_removers.arn,
+          aws_sfn_state_machine.catalogue_graph_graph_removers_incremental.arn
         ]
       },
       {
@@ -53,6 +54,7 @@ resource "aws_iam_policy" "state_machine_policy" {
           module.bulk_loader_lambda.lambda.arn,
           module.bulk_load_poller_lambda.lambda.arn,
           module.graph_remover_lambda.lambda.arn,
+          module.graph_remover_incremental_lambda.lambda.arn,
           module.graph_scaler_lambda.lambda.arn,
           module.graph_status_poller_lambda.lambda.arn,
           module.ingestor_loader_lambda.lambda.arn,

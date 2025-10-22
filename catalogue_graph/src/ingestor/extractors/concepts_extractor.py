@@ -9,8 +9,9 @@ from ingestor.models.neptune.query_result import (
     ExtractedRelatedConcept,
 )
 from models.events import BasePipelineEvent
-from sources.catalogue.concepts_source import extract_concepts_from_work
-from sources.merged_works_source import MergedWorksSource
+from sources.catalogue.concepts_source import (
+    CatalogueConceptsSource,
+)
 from utils.elasticsearch import ElasticsearchMode
 from utils.types import ConceptType
 
@@ -31,18 +32,6 @@ CONCEPT_QUERY_PARAMS = {
     "shared_works_count_threshold": 3,
 }
 
-ES_QUERY = {"match": {"type": "Visible"}}
-# Only retrieve the fields we need (concept IDs and types)
-ES_FIELDS = [
-    "data.subjects.id.canonicalId",
-    "data.subjects.concepts.id.canonicalId",
-    "data.subjects.concepts.type",
-    "data.subjects.type",
-    "data.contributors.agent.id.canonicalId",
-    "data.genres.concepts.id.canonicalId",
-    "data.genres.concepts.type",
-]
-
 RelatedConcepts = dict[str, list[ExtractedRelatedConcept]]
 
 CONCEPTS_BATCH_SIZE = 40_000
@@ -55,10 +44,8 @@ class GraphConceptsExtractor(GraphBaseExtractor):
         es_mode: ElasticsearchMode,
     ):
         super().__init__(es_mode != "private")
-        self.es_source = MergedWorksSource(
+        self.es_source = CatalogueConceptsSource(
             event,
-            query=ES_QUERY,
-            fields=ES_FIELDS,
             es_mode=es_mode,
         )
 
@@ -196,21 +183,14 @@ class GraphConceptsExtractor(GraphBaseExtractor):
 
         return full_result
 
-    def get_concepts_from_works(self) -> Generator[str]:
-        for work in self.es_source.stream_raw():
-            # Since we only ask for concept fields, works with no concepts are returned as empty dictionaries
-            if "data" in work:
-                for concept, _ in extract_concepts_from_work(work["data"]):
-                    if "id" not in concept:
-                        print(f"Concept {concept} does not have an ID.")
-                        continue
-
-                    yield concept["id"]["canonicalId"]
+    def extract_concept_ids(self) -> Generator[str]:
+        for extracted in self.es_source.stream_raw():
+            yield extracted.concept.id.canonical_id
 
     def get_concept_stream(self) -> Generator[set[str]]:
         processed_ids: set[str] = set()
 
-        extracted_ids = self.get_concepts_from_works()
+        extracted_ids = self.extract_concept_ids()
         for extracted_batch in batched(extracted_ids, CONCEPTS_BATCH_SIZE):
             # Some concepts might be duplicated (since a concept can appear in multiple works)
             batch = set(extracted_batch).difference(processed_ids)
