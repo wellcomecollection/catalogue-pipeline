@@ -1,6 +1,5 @@
 import argparse
 import typing
-from datetime import datetime
 
 import polars as pl
 
@@ -51,11 +50,7 @@ def handler(
     )
     deleted_count = es_remover.delete_documents(ids_to_delete)
 
-    report = DeletionReport(
-        **event.model_dump(),
-        deleted_count=deleted_count,
-        date=datetime.today().strftime("%Y-%m-%d"),
-    )
+    report = DeletionReport(**event.model_dump(), deleted_count=deleted_count)
     report.write()
 
 
