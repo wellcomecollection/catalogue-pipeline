@@ -103,7 +103,7 @@ def transform(
 
     # Transform each valid MARC record individually so one bad record doesn't
     # fail the whole payload. Capture and surface transformation errors.
-    works: list[SourceWork] = []
+    works: list[VisibleSourceWork] = []
     for record in marc_records:
         try:
             works.append(transform_record(record))
