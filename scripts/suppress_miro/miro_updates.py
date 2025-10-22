@@ -211,7 +211,7 @@ def _remove_image_from_elasticsearch(*, miro_id):
     images_resp = api_es_client(pipeline_date).search(
         index=images_index,
         body={
-            "query": {"term": {"query.sourceIdentifier.value": miro_id}},
+            "query": {"term": {"query.source.sourceIdentifier.value": miro_id}},
             "_source": "",
         },
     )
