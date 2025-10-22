@@ -1,4 +1,5 @@
 from pathlib import PurePosixPath
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -54,9 +55,10 @@ class IngestorIndexerLambdaEvent(IngestorStepEvent):
     objects_to_index: list[IngestorIndexerObject]
 
 
-class IngestorMonitorStepEvent(IngestorStepEvent):
-    force_pass: bool = False
-
-
 class IngestorIndexerMonitorLambdaEvent(IngestorStepEvent):
     success_count: int
+
+
+class IngestorDeletionsLambdaEvent(IngestorStepEvent):
+    force_pass: bool = False
+    ingestor_type: Literal["concepts"] = "concepts"
