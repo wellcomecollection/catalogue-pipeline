@@ -33,6 +33,7 @@ class Concept(BaseModel):
 
 
 class Contributor(BaseModel):
+    id: Identifiable | Identified | Unidentifiable = Unidentifiable()
     agent: Concept
     roles: list[Label] = []
     primary: bool = True
