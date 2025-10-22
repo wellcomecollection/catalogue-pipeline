@@ -1,0 +1,12 @@
+[project]
+name = "suppress-miro"
+version = "0.1.0"
+description = "A tool to supress miro images"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.40.55",
+    "click>=8.3.0",
+    "elasticsearch>=8.11,<8.13",
+    "httpx>=0.28.1",
+]

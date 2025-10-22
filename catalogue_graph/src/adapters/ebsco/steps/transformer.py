@@ -77,7 +77,7 @@ def transform(
     """Parse a MARC XML string into SourceWork records.
 
     Returns (works, errors). Each error is a dict with at minimum stage, id, reason.
-    Reasons: empty_content | parse_error | no_valid_title
+    Reasons: empty_content | parse_error | transform_error
     """
 
     errors: list[dict[str, Any]] = []
@@ -85,9 +85,6 @@ def transform(
     if not content:
         errors.append({"stage": "transform", "id": work_id, "reason": "empty_content"})
         return [], errors
-
-    def valid_record(record: Any) -> bool:  # local for clarity
-        return bool(record and getattr(record, "title", None))
 
     try:
         marc_records: list[MarcRecord] = parse_xml_to_array(io.StringIO(content))
@@ -104,12 +101,23 @@ def transform(
         )
         return [], errors
 
-    works = [
-        transform_record(record) for record in marc_records if valid_record(record)
-    ]
-
-    if not works:
-        errors.append({"stage": "transform", "id": work_id, "reason": "no_valid_title"})
+    # Transform each valid MARC record individually so one bad record doesn't
+    # fail the whole payload. Capture and surface transformation errors.
+    works: list[SourceWork] = []
+    for record in marc_records:
+        try:
+            works.append(transform_record(record))
+        except Exception as exc:  # broad: we want to continue other records
+            detail = str(exc)[:200]
+            print(f"Failed to transform MARC record for id={work_id}: {exc}")
+            errors.append(
+                {
+                    "stage": "transform",
+                    "id": work_id,
+                    "reason": "transform_error",
+                    "detail": detail,
+                }
+            )
     return works, errors
 
 
