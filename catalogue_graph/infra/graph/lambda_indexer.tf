@@ -21,8 +21,6 @@ module "indexer_lambda" {
     subnet_ids         = local.private_subnets
     security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
   }
-
-  #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 }
 
 resource "aws_iam_role_policy" "indexer_lambda_read_secrets_policy" {

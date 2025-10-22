@@ -6,7 +6,7 @@ resource "aws_lb" "neptune_network_load_balancer" {
   internal           = false
   load_balancer_type = "network"
   security_groups    = [aws_security_group.neptune_lb_security_group.id]
-  subnets            = local.public_subnets
+  subnets            = var.public_subnets
 }
 
 # Create a new target group and attach the IP of the Neptune cluster
@@ -20,16 +20,14 @@ resource "aws_lb_target_group" "neptune_instance" {
 
 resource "aws_lb_target_group_attachment" "neptune_instance_attachment" {
   target_group_arn = aws_lb_target_group.neptune_instance.arn
-  # Hardcode the private IP of the Neptune cluster. AWS does not guarantee that the IP will stay static, so we might
-  # have to manually change this from time to time. I think this is okay for an experimental database, and overall
-  # this setup is still more convenient than only being able to connect from within the VPC.
-  # If it starts bothering us, we can create a Lambda function for dynamically updating the target group IP, as outlined
-  # here: https://aws-samples.github.io/aws-dbs-refarch-graph/src/connecting-using-a-load-balancer/
+  # Hardcode the private IP of the Neptune cluster. AWS does not guarantee that the IP will stay static.
+  # If we start seeing frequent IP changes, we can create a Lambda function for dynamically updating the target group
+  # IP, as outlined here: https://aws-samples.github.io/aws-dbs-refarch-graph/src/connecting-using-a-load-balancer/
   target_id = data.aws_secretsmanager_secret_version.neptune_cluster_private_ip.secret_string
 }
 
 resource "aws_secretsmanager_secret" "neptune_cluster_private_ip" {
-  name = "${local.namespace}/neptune-nlb-private-ip"
+  name = "${var.namespace}/neptune-nlb-private-ip"
 }
 
 data "aws_secretsmanager_secret_version" "neptune_cluster_private_ip" {
@@ -40,7 +38,7 @@ data "aws_secretsmanager_secret_version" "neptune_cluster_private_ip" {
 module "catalogue_graph_nlb_certificate" {
   source = "github.com/wellcomecollection/terraform-aws-acm-certificate?ref=v1.0.0"
 
-  domain_name = local.catalogue_graph_nlb_url
+  domain_name = var.public_url
   zone_id     = data.aws_route53_zone.weco_zone.id
 
   providers = {
@@ -82,12 +80,12 @@ resource "aws_vpc_security_group_egress_rule" "neptune_lb_egress" {
 }
 
 resource "aws_secretsmanager_secret" "neptune_nlb_url" {
-  name = "${local.namespace}/neptune-nlb-url"
+  name = "${var.namespace}/neptune-nlb-url"
 }
 
 resource "aws_secretsmanager_secret_version" "neptune_nlb_endpoint_url" {
   secret_id     = aws_secretsmanager_secret.neptune_nlb_url.id
-  secret_string = "https://${local.catalogue_graph_nlb_url}"
+  secret_string = "https://${var.public_url}"
 }
 
 data "aws_route53_zone" "weco_zone" {
@@ -100,7 +98,7 @@ data "aws_route53_zone" "weco_zone" {
 resource "aws_route53_record" "catalogue_graph_nlb_record" {
   provider = aws.dns
   zone_id  = data.aws_route53_zone.weco_zone.id
-  name     = local.catalogue_graph_nlb_url
+  name     = var.public_url
   type     = "A"
 
   alias {

@@ -27,8 +27,6 @@ module "graph_remover_lambda" {
       CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
     }
   }
-
-  #  error_alarm_topic_arn = data.terraform_remote_state.monitoring.outputs["platform_lambda_error_alerts_topic_arn"]
 }
 
 resource "aws_iam_role_policy" "graph_remover_lambda_neptune_read_policy" {
