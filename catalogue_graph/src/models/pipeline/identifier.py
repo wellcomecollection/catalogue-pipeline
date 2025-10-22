@@ -2,10 +2,10 @@ from collections.abc import Generator
 from typing import Literal
 
 from models.pipeline.id_label import Id
-from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.serialisable import SerialisableModel
 
 
-class SourceIdentifier(ElasticsearchModel):
+class SourceIdentifier(SerialisableModel):
     identifier_type: Id
     ontology_type: str
     value: str
@@ -17,7 +17,7 @@ class SourceIdentifier(ElasticsearchModel):
 IdentifyType = Literal["Identified", "Unidentifiable"]
 
 
-class BaseIdentify(ElasticsearchModel):
+class BaseIdentify(SerialisableModel):
     canonical_id: str | None = None
     type: IdentifyType
 

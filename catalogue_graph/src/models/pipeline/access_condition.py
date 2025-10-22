@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from models.pipeline.serialisable import SerialisableModel
 
 
-class Type(BaseModel):
+class Type(SerialisableModel):
     type: str
 
 
@@ -31,7 +31,7 @@ class AccessStatus(Type):
 LicensedResource = AccessStatus(type="LicensedResources", relationship=Resource)
 
 
-class AccessCondition(BaseModel):
+class AccessCondition(SerialisableModel):
     method: Type
     status: Type | None = None
     terms: str | None = None

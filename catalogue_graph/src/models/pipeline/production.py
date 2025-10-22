@@ -1,9 +1,8 @@
-from pydantic import BaseModel
-
 from models.pipeline.concept import Concept, Period
+from models.pipeline.serialisable import SerialisableModel
 
 
-class ProductionEvent(BaseModel):
+class ProductionEvent(SerialisableModel):
     label: str
     places: list[Concept]
     agents: list[Concept]

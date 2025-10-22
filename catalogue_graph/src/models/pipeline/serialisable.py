@@ -12,3 +12,7 @@ class ElasticsearchModel(BaseModel):
         validate_by_alias=True,
         serialize_by_alias=True,
     )
+
+
+class SerialisableModel(ElasticsearchModel):
+    pass
