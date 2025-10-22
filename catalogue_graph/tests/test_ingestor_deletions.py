@@ -84,6 +84,23 @@ def test_ingestor_deletions_incremental_mode() -> None:
     assert set(indexed_concepts) == {"q5a7uqkz", "s8f6cxcf", "someid12"}
 
 
+def test_ingestor_deletions_empty_ids_file() -> None:
+    mock_es_secrets("concepts_ingestor", "dev")
+
+    # Mock an empty dataframe
+    df = pl.DataFrame([])
+    uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
+    MockSmartOpen.mock_s3_parquet_file(uri, df)
+
+    index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
+    assert len(get_indexed_concept_ids()) == 5
+
+    lambda_handler(MOCK_EVENT, None)
+
+    # No concept IDs should be removed
+    assert len(get_indexed_concept_ids()) == 5
+
+
 def test_ingestor_deletions_line_safety_check() -> None:
     # Mock a scenario which would result in a significant percentage of IDs being deleted
     mock_deleted_ids_log_file("dev")

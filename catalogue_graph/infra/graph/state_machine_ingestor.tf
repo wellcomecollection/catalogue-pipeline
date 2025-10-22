@@ -81,7 +81,28 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           FunctionName = module.ingestor_indexer_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
         },
-        Next = "Success"
+        Next = "Should run deletions?"
+      },
+      "Should run deletions?" = {
+        Type = "Choice"
+        Choices = [
+          {
+            "Condition": "{% $states.input.ingestor_type = 'concepts' %}",
+            "Next": "Run deletions"
+          }
+        ]
+        Default = "Success"
+      },
+      "Run deletions" = {
+        Type     = "Task",
+        Resource = "arn:aws:states:::lambda:invoke",
+        Output   = "{% $states.result.Payload %}",
+        Arguments = {
+          FunctionName = module.ingestor_deletions_lambda.lambda.arn,
+          Payload      = "{% $states.input %}"
+        },
+        Retry = local.DefaultRetry,
+        Next  = "Success"
       },
       Success = {
         Type = "Succeed"
