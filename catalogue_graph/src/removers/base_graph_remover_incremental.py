@@ -56,7 +56,7 @@ class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
         self.neptune_client = get_neptune_client(use_public_endpoint)
         self.entity_type = entity_type
 
-    def remove(self, override_safety_check: bool = False) -> list[str]:
+    def remove(self, force_pass: bool = False) -> list[str]:
         if self.entity_type == "nodes":
             total_count = self.get_total_node_count()
             ids_to_remove = self.get_node_ids_to_remove()
@@ -82,7 +82,7 @@ class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
         validate_fractional_change(
             modified_size=len(existing_ids),
             total_size=total_count,
-            force_pass=override_safety_check,
+            force_pass=force_pass,
         )
 
         self.neptune_client.delete_entities_by_id(existing_ids, self.entity_type)

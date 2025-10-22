@@ -23,6 +23,7 @@ def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
         transformer_type="catalogue_concepts",
         entity_type="nodes",
         pipeline_date=event.pipeline_date,
+        window=event.window,
     )
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
@@ -56,7 +57,7 @@ def handler(
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    handler(IngestorDeletionsLambdaEvent(**event))
+    handler(IngestorDeletionsLambdaEvent.model_validate(event))
 
 
 def local_handler() -> None:

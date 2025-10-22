@@ -65,7 +65,7 @@ class BulkLoadPollerEvent(BaseModel):
 
 
 class GraphRemoverEvent(GraphPipelineEvent):
-    override_safety_check: bool = False
+    force_pass: bool = False
 
     @property
     def s3_prefix(self) -> str:
