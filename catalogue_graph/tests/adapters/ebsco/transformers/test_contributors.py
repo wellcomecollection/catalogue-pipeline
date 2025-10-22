@@ -2,6 +2,7 @@ import pytest
 from pymarc.record import Field, Record, Subfield
 
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from adapters.ebsco.transformers.common import normalise_identifier_value
 from models.pipeline.concept import Concept
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
@@ -257,7 +258,7 @@ def test_contributor_all_fields(
             source_identifier=SourceIdentifier(
                 identifier_type=Id(id="label-derived"),
                 ontology_type=ontology_type,
-                value=label,
+                value=normalise_identifier_value(label),
             ),
             other_identifiers=[],
         ),
@@ -324,7 +325,7 @@ def test_meeting_contributor_all_fields(
             source_identifier=SourceIdentifier(
                 identifier_type=Id(id="label-derived"),
                 ontology_type="Meeting",
-                value=label,
+                value=normalise_identifier_value(label),
             ),
             other_identifiers=[],
         ),
