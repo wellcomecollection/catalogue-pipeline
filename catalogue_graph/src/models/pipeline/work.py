@@ -32,3 +32,11 @@ class DeletedWork(Work):
 class RedirectedWork(SerialisableModel):
     type: WorkStatus = "Redirected"
     redirect_target: Identified
+
+
+ALL_WORK_STATUSES = (
+    VisibleWork,
+    InvisibleWork,
+    DeletedWork,
+    RedirectedWork,
+)
