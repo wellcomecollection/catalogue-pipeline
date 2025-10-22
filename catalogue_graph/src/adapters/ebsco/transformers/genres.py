@@ -12,19 +12,11 @@ from adapters.ebsco.transformers.common import (
     subdivision_concepts,
 )
 from models.pipeline.concept import Genre
-from utils.types import ConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]
 LABEL_SUBFIELDS: list[str] = ["a"] + SUBDIVISION_SUBFIELDS
-
-# Mapping of subdivision code -> SourceConcept.type override
-CONCEPT_TYPE_MAP: dict[str, ConceptType] = {
-    "y": "Period",
-    "z": "Place",
-    # 'a', 'v', 'x' default to 'Concept'
-}
 
 
 def extract_genres(record: Record) -> list[Genre]:

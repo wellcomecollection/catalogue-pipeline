@@ -17,6 +17,9 @@ from itertools import chain
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.ebsco.transformers.common import (
+    normalise_identifier_value,
+)
 from models.pipeline.concept import Concept, Contributor
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
@@ -86,7 +89,7 @@ def format_field(field: Field) -> Contributor:
     label = label_from_field(field, label_subfields[tag[1:]])
     id = Identifiable.from_source_identifier(
         SourceIdentifier(
-            value=label,  # todo: normalise
+            value=normalise_identifier_value(label),
             ontology_type=contributor_type,
             identifier_type=Id(id="label-derived"),
         )

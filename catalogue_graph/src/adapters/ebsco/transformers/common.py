@@ -84,6 +84,7 @@ def extract_concept_from_subfield_value(code: str, value: str) -> Concept:
     concept_label = _clean_concept_label(value)
     identifier = SourceIdentifier(
         identifier_type=Id(id="label-derived"),
+        # TODO: This should not be hard-coded, and will only work for Genres
         ontology_type="Genre",
         value=normalise_identifier_value(concept_label),
     )
