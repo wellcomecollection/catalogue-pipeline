@@ -2,7 +2,7 @@
 # See https://aws-samples.github.io/aws-dbs-refarch-graph/src/connecting-using-a-load-balancer/.
 
 resource "aws_lb" "neptune_network_load_balancer" {
-  name               = "catalogue-graph-neptune-nlb"
+  name               = "${var.namespace}-neptune-nlb"
   internal           = false
   load_balancer_type = "network"
   security_groups    = [aws_security_group.neptune_lb_security_group.id]
@@ -11,7 +11,7 @@ resource "aws_lb" "neptune_network_load_balancer" {
 
 # Create a new target group and attach the IP of the Neptune cluster
 resource "aws_lb_target_group" "neptune_instance" {
-  name        = "neptune-catalogue-graph-cluster"
+  name        = "neptune-${var.namespace}-cluster"
   port        = 8182
   protocol    = "TLS"
   vpc_id      = data.aws_vpc.vpc.id

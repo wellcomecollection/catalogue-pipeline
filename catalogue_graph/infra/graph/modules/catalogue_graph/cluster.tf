@@ -1,5 +1,5 @@
 resource "aws_neptune_cluster" "catalogue_graph_cluster" {
-  cluster_identifier                   = "catalogue-graph"
+  cluster_identifier                   = var.namespace
   engine                               = "neptune"
   engine_version                       = "1.4.5.1"
   neptune_cluster_parameter_group_name = "default.neptune1.4"
@@ -19,11 +19,6 @@ resource "aws_neptune_cluster" "catalogue_graph_cluster" {
   }
 }
 
-resource "aws_iam_role_policy" "s3_read_only_policy_attachment" {
-  role   = aws_iam_role.catalogue_graph_cluster.name
-  policy = data.aws_iam_policy_document.neptune_s3_read_only_policy.json
-}
-
 resource "aws_neptune_cluster_instance" "catalogue_graph_instance" {
   cluster_identifier           = aws_neptune_cluster.catalogue_graph_cluster.cluster_identifier
   instance_class               = "db.serverless"
@@ -31,6 +26,11 @@ resource "aws_neptune_cluster_instance" "catalogue_graph_instance" {
 }
 
 resource "aws_db_subnet_group" "neptune_subnet_group" {
-  name       = "catalogue-graph"
+  name       = var.namespace
   subnet_ids = var.private_subnets
+}
+
+resource "aws_iam_role_policy" "s3_read_only_policy_attachment" {
+  role   = aws_iam_role.catalogue_graph_cluster.name
+  policy = data.aws_iam_policy_document.neptune_s3_read_only_policy.json
 }

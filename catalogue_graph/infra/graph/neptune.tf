@@ -9,6 +9,7 @@ module "catalogue_graph_neptune_cluster" {
   public_url                 = "catalogue-graph.wellcomecollection.org"
 
   providers = {
-    aws = aws
+    aws     = aws
+    aws.dns = aws.dns
   }
 }

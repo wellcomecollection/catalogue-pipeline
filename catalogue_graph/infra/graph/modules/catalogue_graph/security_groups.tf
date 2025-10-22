@@ -1,5 +1,5 @@
 resource "aws_security_group" "neptune_security_group" {
-  name   = "catalogue-graph-neptune"
+  name   = "${var.namespace}-neptune"
   vpc_id = data.aws_vpc.vpc.id
 }
 
