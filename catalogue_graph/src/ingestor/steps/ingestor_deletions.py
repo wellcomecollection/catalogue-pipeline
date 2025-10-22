@@ -3,8 +3,6 @@ import typing
 from datetime import datetime
 
 import polars as pl
-
-from ingestor.models.step_events import IngestorDeletionsLambdaEvent
 from models.events import (
     IncrementalGraphRemoverEvent,
 )
@@ -13,6 +11,8 @@ from utils.aws import df_from_s3_parquet
 from utils.elasticsearch import ElasticsearchMode
 from utils.reporting import DeletionReport
 from utils.safety import validate_fractional_change
+
+from ingestor.models.step_events import IngestorDeletionsLambdaEvent
 
 
 def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
@@ -28,7 +28,10 @@ def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
     df = df_from_s3_parquet(remover_event.get_remover_s3_uri("deleted_ids"))
-    ids = pl.Series(df.select(pl.first())).to_list()
+    
+    ids = []
+    if len(df) > 0:
+        ids = pl.Series(df.select(pl.first())).to_list()
     return set(ids)
 
 
