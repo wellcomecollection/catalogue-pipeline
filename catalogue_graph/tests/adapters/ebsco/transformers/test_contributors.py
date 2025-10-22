@@ -15,6 +15,34 @@ def test_no_contributors(marc_record: Record) -> None:
 
 
 @pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="100",
+                    subfields=[Subfield(code="a", value="Jane Example")],
+                )
+            ],
+            id="single-contributor",
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_contributor_id_default_unidentifiable(marc_record: Record) -> None:
+    """Ensure each contributor object itself has an Unidentifiable id by default.
+
+    The agent (Concept) receives an identifier derived from the label, but the
+    top-level Contributor model should retain its default Unidentifiable id
+    unless explicitly set elsewhere.
+    """
+    from models.pipeline.identifier import Unidentifiable
+
+    contributor = transform_record(marc_record).data.contributors[0]
+    assert isinstance(contributor.id, Unidentifiable)
+
+
+@pytest.mark.parametrize(
     "marc_record,field_code",
     [
         pytest.param(
