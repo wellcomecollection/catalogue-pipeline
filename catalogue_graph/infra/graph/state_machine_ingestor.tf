@@ -87,8 +87,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
         Type = "Choice"
         Choices = [
           {
-            "Condition": "{% $states.input.ingestor_type = 'concepts' %}",
-            "Next": "Run deletions"
+            "Condition" : "{% $states.input.ingestor_type = 'concepts' %}",
+            "Next" : "Run deletions"
           }
         ]
         Default = "Success"
