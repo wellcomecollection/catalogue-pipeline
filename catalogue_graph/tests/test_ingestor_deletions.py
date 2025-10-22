@@ -30,19 +30,18 @@ def get_indexed_concept_ids(index_name: str = "concepts-indexed-dev") -> list[st
     return list(docs.keys())
 
 
-def mock_deleted_ids_log_file(pipeline_date: str) -> None:
-    mock_data = ["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"]
-    df = pl.DataFrame(mock_data)
+def mock_deleted_ids_log_file(mock_ids: list[str], pipeline_date: str) -> None:
+    df = pl.DataFrame(mock_ids)
 
     uri = f"{REMOVER_S3_PREFIX}/{pipeline_date}/deleted_ids/catalogue_concepts__nodes.parquet"
     MockSmartOpen.mock_s3_parquet_file(uri, df)
 
 
 def mock_time_window_deleted_ids_log_file(
+    mock_ids: list[str],
     pipeline_date: str,
 ) -> None:
-    mock_data = ["u6jve2vb", "amzfbrbz"]
-    df = pl.DataFrame(mock_data)
+    df = pl.DataFrame(mock_ids)
 
     file_name = "catalogue_concepts__nodes.parquet"
     uri = f"{REMOVER_S3_PREFIX}/{pipeline_date}/windows/20251022T0800-20251022T0815/deleted_ids/{file_name}"
@@ -51,7 +50,7 @@ def mock_time_window_deleted_ids_log_file(
 
 def test_ingestor_deletions_no_safety_check_first_run() -> None:
     mock_es_secrets("concepts_ingestor", "dev")
-    mock_deleted_ids_log_file("dev")
+    mock_deleted_ids_log_file(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], "dev")
 
     # Index some empty documents with the same IDs as those stored in the parquet mock
     # (plus an extra document which shouldn't be removed).
@@ -70,8 +69,8 @@ def test_ingestor_deletions_incremental_mode() -> None:
     mock_es_secrets("concepts_ingestor", "dev")
 
     # Mock two sets of deleted IDs, one with a time window and one without
-    mock_deleted_ids_log_file("dev")  # removes 4 IDs
-    mock_time_window_deleted_ids_log_file("dev")  # removes 2 IDs
+    mock_deleted_ids_log_file(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], "dev")
+    mock_time_window_deleted_ids_log_file(["u6jve2vb", "amzfbrbz"], "dev")
 
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
     assert len(get_indexed_concept_ids()) == 5
@@ -88,9 +87,7 @@ def test_ingestor_deletions_empty_ids_file() -> None:
     mock_es_secrets("concepts_ingestor", "dev")
 
     # Mock an empty dataframe
-    df = pl.DataFrame([])
-    uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
-    MockSmartOpen.mock_s3_parquet_file(uri, df)
+    mock_deleted_ids_log_file([], "dev")
 
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
     assert len(get_indexed_concept_ids()) == 5
@@ -103,7 +100,7 @@ def test_ingestor_deletions_empty_ids_file() -> None:
 
 def test_ingestor_deletions_line_safety_check() -> None:
     # Mock a scenario which would result in a significant percentage of IDs being deleted
-    mock_deleted_ids_log_file("dev")
+    mock_deleted_ids_log_file(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf"], "dev")
     index_concepts(["u6jve2vb", "amzfbrbz", "q5a7uqkz", "s8f6cxcf", "someid12"])
 
     with pytest.raises(ValueError, match="Fractional change"):
