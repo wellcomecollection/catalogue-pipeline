@@ -20,7 +20,7 @@ variable "private_subnets" {
 
 variable "public_url" {
   type        = string
-  description = "URL for accessing the graph outside of the VPC. Must be a part of wellcomecollection.org domain."
+  description = "URL for accessing the graph outside of the VPC. Must be part of wellcomecollection.org domain."
 }
 
 variable "bulk_loader_s3_bucket_name" {
