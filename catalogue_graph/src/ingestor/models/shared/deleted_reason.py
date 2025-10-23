@@ -1,8 +1,8 @@
-from typing import Literal
-
 from pydantic import BaseModel
+
+from utils.types import DeletedReasonType
 
 
 class DeletedReason(BaseModel):
-    type: Literal["DeletedFromSource", "SuppressedFromSource", "TeiDeletedInMerger"]
+    type: DeletedReasonType
     info: str | None = None

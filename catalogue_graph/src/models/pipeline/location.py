@@ -1,6 +1,6 @@
 from models.pipeline.access_condition import AccessCondition
 from models.pipeline.id_label import Id
-from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.serialisable import SerialisableModel
 
 
 class LocationType(Id):
@@ -10,7 +10,7 @@ class LocationType(Id):
 OnlineResource = LocationType(id="online-resource")
 
 
-class Location(ElasticsearchModel):
+class Location(SerialisableModel):
     location_type: LocationType
     license: Id | None = None
     access_conditions: list[AccessCondition]
