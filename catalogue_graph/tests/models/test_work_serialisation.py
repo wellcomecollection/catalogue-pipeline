@@ -9,18 +9,10 @@ from pydantic.alias_generators import to_camel
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import (
-    Concept,
-    Contributor,
-    Genre,
-    Subject,
-)
+from models.pipeline.concept import Concept, Contributor, Genre, Subject
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Format, Id, IdLabel, Language
-from models.pipeline.identifier import (
-    Identified,
-    SourceIdentifier,
-)
+from models.pipeline.identifier import Identified, SourceIdentifier
 from models.pipeline.image import ImageData
 from models.pipeline.item import Item
 from models.pipeline.location import DigitalLocation, OnlineResource
@@ -34,6 +26,7 @@ from models.pipeline.work import (
     VisibleWork,
 )
 from models.pipeline.work_data import WorkData
+from utils.types import DELETED_REASON_TYPES, INVISIBLE_REASON_TYPES
 
 # -----------------------------
 # Helper construction functions
@@ -203,31 +196,16 @@ identified_strategy = st.builds(
     canonical_id=st.text(min_size=1, max_size=16),
 )
 
-invisible_reason_type_values = [
-    "CopyrightNotCleared",
-    "SourceFieldMissing",
-    "InvalidValueInSourceField",
-    "UnlinkedHistoricalLibraryMiro",
-    "UnableToTransform",
-    "MetsWorksAreNotVisible",
-]
-
 invisible_reason_strategy = st.builds(
     InvisibleReason,
-    type=st.sampled_from(invisible_reason_type_values),
+    type=st.sampled_from(INVISIBLE_REASON_TYPES),
     info=st.none() | st.text(min_size=1, max_size=20),
     message=st.none() | st.text(min_size=1, max_size=20),
 )
 
-deleted_reason_type_values = [
-    "DeletedFromSource",
-    "SuppressedFromSource",
-    "TeiDeletedInMerger",
-]
-
 deleted_reason_strategy = st.builds(
     DeletedReason,
-    type=st.sampled_from(deleted_reason_type_values),
+    type=st.sampled_from(DELETED_REASON_TYPES),
     info=st.none() | st.text(min_size=1, max_size=20),
 )
 
