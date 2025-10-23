@@ -13,13 +13,12 @@ locals {
 
   ec_privatelink_security_group_id = local.shared_infra["ec_platform_privatelink_sg_id"]
 
-  catalogue_graph_nlb_url = "catalogue-graph.wellcomecollection.org"
-
   slack_webhook = "catalogue_graph_reporter/slack_webhook"
 
   # This is a hint that the ingestors might need to be in the pipeline stack!
   pipeline_date       = "2025-10-02"
-  concepts_index_date = "2025-10-09"
+  index_date_concepts = "2025-10-09"
+  index_date_works    = "2025-10-09"
 
   ingestor_types = ["concepts", "works"]
 
@@ -166,13 +165,4 @@ locals {
 
 data "aws_vpc" "vpc" {
   id = local.vpc_id
-}
-
-data "archive_file" "empty_zip" {
-  output_path = "data/empty.zip"
-  type        = "zip"
-  source {
-    content  = "// This file is intentionally left empty"
-    filename = "lambda.py"
-  }
 }

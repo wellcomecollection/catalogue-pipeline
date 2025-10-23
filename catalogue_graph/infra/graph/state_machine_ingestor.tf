@@ -130,7 +130,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
         ItemSelector = {
           "ingestor_type" : "{% $states.context.Map.Item.Value %}",
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
-          "index_date" : "{% $states.context.Execution.Input.index_date %}",
+          "index_date" : "{% $lookup($states.context.Execution.Input.index_dates, $states.context.Map.Item.Value) %}",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
           "pit_id" : "{% $states.context.Execution.Input.pit_id ? $states.context.Execution.Input.pit_id : null %}",
         }

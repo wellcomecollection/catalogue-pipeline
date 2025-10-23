@@ -25,11 +25,13 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
     arn      = aws_sfn_state_machine.catalogue_graph_pipeline_incremental.arn
     role_arn = aws_iam_role.state_machine_execution_role.arn
 
-    # TODO: Replace 'dev' with production index date
     input = <<JSON
     {
       "pipeline_date": "${local.pipeline_date}",
-      "index_date": "${local.concepts_index_date}",
+      "index_dates": {
+        "concepts": "${local.index_date_concepts}",
+        "works": "${local.index_date_works}"
+      },
       "window": {
         "end_time": "<aws.scheduler.scheduled-time>"
       }

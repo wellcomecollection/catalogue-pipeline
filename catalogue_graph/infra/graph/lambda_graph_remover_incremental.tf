@@ -21,8 +21,8 @@ module "graph_remover_incremental_lambda" {
     subnet_ids = local.private_subnets
     security_group_ids = [
       aws_security_group.egress.id,
-      aws_security_group.neptune_service_security_group.id,
-    local.ec_privatelink_security_group_id]
+      local.ec_privatelink_security_group_id
+    ]
   }
 
   environment = {

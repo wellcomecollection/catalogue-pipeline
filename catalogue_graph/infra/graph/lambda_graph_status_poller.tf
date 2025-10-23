@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "neptune_status_poller" {
     ]
 
     resources = [
-      aws_neptune_cluster.catalogue_graph_cluster.arn
+      module.catalogue_graph_neptune_cluster.neptune_cluster_arn
     ]
   }
 }
