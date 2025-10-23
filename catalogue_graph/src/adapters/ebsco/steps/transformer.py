@@ -23,17 +23,17 @@ from adapters.ebsco.models.manifests import ErrorLine, TransformerManifest
 from adapters.ebsco.models.step_events import (
     EbscoAdapterTransformerEvent,
 )
-from adapters.ebsco.models.work import (
-    BaseWork,
-    DeletedWork,
-    SourceIdentifier,
-    SourceWork,
-)
 from adapters.ebsco.transformers.ebsco_to_weco import (
-    EBSCO_IDENTIFIER_TYPE,
+    ebsco_source_work_state,
     transform_record,
 )
 from adapters.ebsco.utils.iceberg import IcebergTableClient, get_iceberg_table
+from ingestor.models.shared.deleted_reason import DeletedReason
+from models.pipeline.source.work import (
+    DeletedSourceWork,
+    VisibleSourceWork,
+)
+from models.pipeline.work_data import WorkData
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 # Batch size for converting Arrow tables to Python objects before indexing
@@ -73,7 +73,7 @@ def _to_error_line(err: dict[str, Any]) -> ErrorLine | None:
 
 def transform(
     work_id: str, content: str
-) -> tuple[list[SourceWork], list[dict[str, Any]]]:
+) -> tuple[list[VisibleSourceWork], list[dict[str, Any]]]:
     """Parse a MARC XML string into SourceWork records.
 
     Returns (works, errors). Each error is a dict with at minimum stage, id, reason.
@@ -103,7 +103,7 @@ def transform(
 
     # Transform each valid MARC record individually so one bad record doesn't
     # fail the whole payload. Capture and surface transformation errors.
-    works: list[SourceWork] = []
+    works: list[VisibleSourceWork] = []
     for record in marc_records:
         try:
             works.append(transform_record(record))
@@ -122,21 +122,25 @@ def transform(
 
 
 def _generate_actions(
-    records: Iterable[BaseWork],  # accept any pydantic model with model_dump
+    records: Iterable[
+        VisibleSourceWork | DeletedSourceWork
+    ],  # accept visible or deleted works
     index_name: str,
 ) -> Generator[dict[str, Any]]:
     for record in records:
         yield {
             "_index": index_name,
             "_id": str(
-                record.source_identifier
+                record.state.id()
             ),  # Use formatted string id via SourceIdentifier
             "_source": record.model_dump(),
         }
 
 
 def load_data(
-    elastic_client: Elasticsearch, records: Iterable[BaseWork], index_name: str
+    elastic_client: Elasticsearch,
+    records: Iterable[VisibleSourceWork | DeletedSourceWork],
+    index_name: str,
 ) -> tuple[int, list[dict[str, Any]]]:
     """Index records; return (success_count, error_details list).
 
@@ -195,7 +199,7 @@ def _process_batch(
     """
     print(f"Processing batch with {len(batch)} rows")
 
-    transformed: list[BaseWork] = []
+    transformed: list[VisibleSourceWork | DeletedSourceWork] = []
     errors: list[dict[str, Any]] = []
 
     for row in batch.to_pylist():
@@ -208,14 +212,17 @@ def _process_batch(
                 errors.extend(t_errors)
         else:
             # deletion marker -> DeletedWork counts as success (not an error)
+            # Deleted works require a version and type; use timestamp similar to visible works
+            del_state = ebsco_source_work_state(work_id)
             transformed.append(
-                DeletedWork(
-                    deleted_reason="not found in EBSCO source",
-                    source_identifier=SourceIdentifier(
-                        identifier_type=EBSCO_IDENTIFIER_TYPE,
-                        ontology_type="Work",
-                        value=work_id,
+                DeletedSourceWork(
+                    version=int(del_state.source_modified_time.timestamp()),
+                    type="Deleted",
+                    deleted_reason=DeletedReason(
+                        type="DeletedFromSource", info="not found in EBSCO source"
                     ),
+                    state=del_state,
+                    data=WorkData(),  # deleted works carry empty data payload
                 )
             )
 
@@ -225,7 +232,7 @@ def _process_batch(
 
     success, index_errors = load_data(es_client, transformed, index_name)
     errors.extend(index_errors)
-    ids = [str(t.source_identifier) for t in transformed]
+    ids = [str(t.state.id()) for t in transformed]
     return success, ids, errors
 
 

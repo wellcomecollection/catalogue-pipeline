@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from models.pipeline.serialisable import SerialisableModel
 
 
-class CollectionPath(BaseModel):
+class CollectionPath(SerialisableModel):
     path: str
     label: str | None = None

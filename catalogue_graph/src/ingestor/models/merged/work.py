@@ -1,61 +1,42 @@
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator
+from pydantic import model_validator
 
-from ingestor.models.shared.deleted_reason import DeletedReason
-from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.id_label import Id
-from models.pipeline.identifier import (
-    Identified,
-    SourceIdentifier,
+from models.pipeline.work import (
+    DeletedWork,
+    InvisibleWork,
+    RedirectedWork,
+    VisibleWork,
+    Work,
 )
-from models.pipeline.serialisable import ElasticsearchModel
-from models.pipeline.work_data import WorkData
-from utils.types import DisplayWorkType, WorkStatus
+from models.pipeline.work_state import WorkState
 
 
-class WorkAncestor(ElasticsearchModel):
-    title: str
-    work_type: str
-    depth: int
-    num_children: int
-    num_descendents: int
-
-
-class WorkRelations(BaseModel):
-    ancestors: list[WorkAncestor] = []
-
-    @field_validator("ancestors", mode="before")
-    @classmethod
-    def convert_merged_type(cls, raw_ancestors: list[dict]) -> list[dict]:
-        # TODO: This is a temporary 'Series' filter which won't be needed once we remove the relation embedder service
-        return [a for a in raw_ancestors if a["numChildren"] == 0]
-
-
-class MergedWorkData(WorkData):
-    @property
-    def display_work_type(self) -> DisplayWorkType:
-        if self.work_type == "Standard":
-            return "Work"
-
-        return self.work_type
-
-
-class MergedWorkState(ElasticsearchModel):
-    source_identifier: SourceIdentifier
+class MergedWorkState(WorkState):
     canonical_id: str
     merged_time: datetime
-    source_modified_time: datetime
     availabilities: list[Id]
     merge_candidates: list[MergeCandidate]
-    relations: WorkRelations
+
+    @model_validator(mode="before")
+    @classmethod
+    def _set_modified_time(cls, data: dict) -> dict:
+        if isinstance(data, dict) and ("merged_time" in data or "mergedTime" in data):
+            d = dict(data)
+            # Prefer snake_case if present else camelCase
+            merged_val = d.get("merged_time", d.get("mergedTime"))
+            d["modified_time"] = merged_val
+            return d
+        return data
+
+    def id(self) -> str:
+        return self.canonical_id
 
 
-class MergedWork(ElasticsearchModel):
+class MergedWork(Work):
     state: MergedWorkState
-    version: int
-    type: WorkStatus
 
     @staticmethod
     def from_raw_document(work: dict) -> "MergedWork":
@@ -71,18 +52,17 @@ class MergedWork(ElasticsearchModel):
         raise ValueError(f"Unknown work type '{work['type']}' for work {work}")
 
 
-class VisibleMergedWork(MergedWork):
-    data: MergedWorkData
-    redirect_sources: list[Identified]
+class VisibleMergedWork(VisibleWork, MergedWork):
+    pass
 
 
-class InvisibleMergedWork(MergedWork):
-    invisibility_reasons: list[InvisibleReason]
+class InvisibleMergedWork(InvisibleWork, MergedWork):
+    pass
 
 
-class DeletedMergedWork(MergedWork):
-    deleted_reason: DeletedReason
+class DeletedMergedWork(DeletedWork, MergedWork):
+    pass
 
 
-class RedirectedMergedWork(MergedWork):
-    redirect_target: Identified
+class RedirectedMergedWork(RedirectedWork, MergedWork):
+    pass

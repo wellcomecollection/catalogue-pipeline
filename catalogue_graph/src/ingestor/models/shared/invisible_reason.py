@@ -1,16 +1,9 @@
-from typing import Literal
-
 from pydantic import BaseModel
+
+from utils.types import InvisibleReasonType
 
 
 class InvisibleReason(BaseModel):
-    type: Literal[
-        "CopyrightNotCleared",
-        "SourceFieldMissing",
-        "InvalidValueInSourceField",
-        "UnlinkedHistoricalLibraryMiro",
-        "UnableToTransform",
-        "MetsWorksAreNotVisible",
-    ]
+    type: InvisibleReasonType
     info: str | None = None
     message: str | None = None
