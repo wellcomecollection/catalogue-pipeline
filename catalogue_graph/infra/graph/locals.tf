@@ -18,7 +18,7 @@ locals {
   # This is a hint that the ingestors might need to be in the pipeline stack!
   pipeline_date       = "2025-10-02"
   index_date_concepts = "2025-10-09"
-  index_date_works = "2025-10-09"
+  index_date_works    = "2025-10-09"
 
   ingestor_types = ["concepts", "works"]
 
