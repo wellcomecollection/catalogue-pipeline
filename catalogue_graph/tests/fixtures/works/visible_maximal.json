@@ -123,7 +123,39 @@
     ],
     "physicalDescription": "Physical",
     "production": [
-      {"agents": [], "dates": [], "function": null, "label": "Production", "places": []}
+      {
+        "agents": [],
+        "dates": [
+          {
+            "id": {
+              "canonicalId": "canon14",
+              "otherIdentifiers": [
+                {
+                  "identifierType": {"id": "ID114"},
+                  "ontologyType": "catalogue",
+                  "value": "val114"
+                }
+              ],
+              "sourceIdentifier": {
+                "identifierType": {"id": "ID14"},
+                "ontologyType": "catalogue",
+                "value": "val14"
+              },
+              "type": "Identified"
+            },
+            "label": "Production Period",
+            "type": "Concept",
+            "range": {
+              "from": "2021-06-01T09:00:00Z",
+              "to": "2021-06-01T17:00:00Z",
+              "label": "One Day"
+            }
+          }
+        ],
+        "function": null,
+        "label": "Production",
+        "places": []
+      }
     ],
     "referenceNumber": "REF123",
     "subjects": [

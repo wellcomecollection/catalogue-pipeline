@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
@@ -57,8 +59,8 @@ def test_fall_back_to_008(marc_record: Record) -> None:
     assert lone_element(production.places).label == "Australian Capital Territory"
     period = lone_element(production.dates)
     assert period.range.label == "1979-1995"
-    assert period.range.from_time == "1979-01-01T00:00:00"
-    assert period.range.to_time == "1995-12-31T23:59:59.999999"
+    assert period.range.from_time == datetime(1979, 1, 1, 0, 0, 0)
+    assert period.range.to_time == datetime(1995, 12, 31, 23, 59, 59, 999999)
 
 
 @pytest.mark.parametrize(
@@ -89,8 +91,8 @@ def test_production_from_abc(marc_record: Record) -> None:
     assert lone_element(production.agents).label == "Mankind"
     period = lone_element(production.dates)
     assert period.range.label == "1998"
-    assert period.range.from_time == "1998-01-01T00:00:00"
-    assert period.range.to_time == "1998-12-31T23:59:59.999999"
+    assert period.range.from_time == datetime(1998, 1, 1, 0, 0, 0)
+    assert period.range.to_time == datetime(1998, 12, 31, 23, 59, 59, 999999)
 
 
 @pytest.mark.parametrize(
@@ -128,8 +130,8 @@ def test_ignores_008(marc_record: Record) -> None:
     assert lone_element(production.agents).label == "Mankind"
     period = lone_element(production.dates)
     assert period.range.label == "1998"
-    assert period.range.from_time == "1998-01-01T00:00:00"
-    assert period.range.to_time == "1998-12-31T23:59:59.999999"
+    assert period.range.from_time == datetime(1998, 1, 1, 0, 0, 0)
+    assert period.range.to_time == datetime(1998, 12, 31, 23, 59, 59, 999999)
 
 
 @pytest.mark.parametrize(
@@ -356,4 +358,4 @@ def test_populate_first_production_with_008_dates_if_none_of_its_own(
     assert lone_element(production.places).label == "New York"
     period = lone_element(production.dates)
     assert period.range.label == "1979"
-    assert period.range.from_time == "1979-01-01T00:00:00"
+    assert period.range.from_time == datetime(1979, 1, 1, 0, 0, 0)

@@ -1,4 +1,3 @@
-import re
 from collections.abc import Generator
 
 from pydantic import BaseModel
@@ -71,11 +70,7 @@ class AggregateWorkTransformer:
         for event in self.data.production:
             for date in event.dates:
                 if date.range is not None:
-                    from_year_match = re.match(r"^-?\d+", date.range.from_time)
-                    if not from_year_match:
-                        raise ValueError(f"Invalid date format: {date.range.from_time}")
-
-                    year = from_year_match.group()
+                    year = str(date.range.from_time.year)
                     yield AggregatableField(id=year, label=year)
 
     @property

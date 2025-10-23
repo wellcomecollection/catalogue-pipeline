@@ -189,11 +189,11 @@ def fill_year_prefix(from_year: str, to_year: str) -> str:
     return to_year
 
 
-def start_of_year(year: str) -> str:
-    return (datetime(int(year), 1, 1) if year else datetime.min).isoformat()
+def start_of_year(year: str) -> datetime:
+    return datetime(int(year), 1, 1) if year else datetime.min
 
 
-def end_of_year(year: str) -> str:
+def end_of_year(year: str) -> datetime:
     return (
         datetime(int(year), 12, 31, 23, 59, 59, 1000000 - 1) if year else datetime.max
-    ).isoformat()
+    )

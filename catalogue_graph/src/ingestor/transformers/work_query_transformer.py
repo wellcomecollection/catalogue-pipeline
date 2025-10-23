@@ -130,9 +130,7 @@ class QueryWorkTransformer:
                     else:
                         try:
                             # Number of milliseconds since the Unix epoch
-                            yield int(
-                                parser.parse(date.range.from_time).timestamp() * 1000
-                            )
+                            yield int(date.range.from_time.timestamp() * 1000)
                         except parser.ParserError:
                             print(
                                 f"Could not parse a production date of work {self.state.canonical_id}"

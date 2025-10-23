@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -9,7 +10,14 @@ from pydantic.alias_generators import to_camel
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Concept, Contributor, Genre, Subject
+from models.pipeline.concept import (
+    Concept,
+    Contributor,
+    DateTimeRange,
+    Genre,
+    Period,
+    Subject,
+)
 from models.pipeline.holdings import Holdings
 from models.pipeline.id_label import Format, Id, IdLabel, Language
 from models.pipeline.identifier import Identified, SourceIdentifier
@@ -57,8 +65,25 @@ def maximal_work_data() -> WorkData:
     )
     genre_min = Genre(label="Genre Label", concepts=[])
     contributor_min = Contributor(agent=concept_min, roles=[], primary=True)
+    # Include a production event with a date Period to exercise nested date serialisation
     production_event = ProductionEvent(
-        label="Production", places=[], agents=[], dates=[]
+        label="Production",
+        places=[],
+        agents=[],
+        dates=[
+            Period(
+                id=example_identified(14),
+                label="Production Period",
+                type="Concept",
+                range=DateTimeRange(
+                    **{
+                        "from": datetime(2021, 6, 1, 9, 0, 0),
+                        "to": datetime(2021, 6, 1, 17, 0, 0),
+                    },
+                    label="One Day",
+                ),
+            )
+        ],
     )
     note_min = Note(
         note_type=IdLabel(id="note", label="Note"), contents="Note contents"
@@ -140,12 +165,14 @@ def test_work_variant_roundtrip_exhaustive(
     work_instance: VisibleWork | InvisibleWork | DeletedWork | RedirectedWork,
 ) -> None:
     # Roundtrip via alias (camelCase) JSON
-    dumped = work_instance.model_dump(by_alias=True)
-    json_str = json.dumps(dumped)
+    json_str = work_instance.model_dump_json(by_alias=True)
+    dumped = json.loads(json_str)
     model2 = type(work_instance).model_validate_json(json_str)
     # Compare semantic content rather than object instance equality to avoid
     # potential discrepancies from internal pydantic normalisation.
-    assert model2.model_dump() == work_instance.model_dump()
+    assert model2.model_dump_json(by_alias=True) == work_instance.model_dump_json(
+        by_alias=True
+    )
 
     # Ensure top-level alias keys are camelCase for fields with underscores
     for field_name in work_instance.model_fields:
@@ -175,6 +202,26 @@ def test_work_variant_roundtrip_exhaustive(
             # alias generation leaves names without underscores unchanged
             expected_key = alias if "_" in field_name else field_name
             assert expected_key in data_dump
+
+        # Check production event dates Period ranges
+        production_dump = data_dump.get("production", [])
+        for event_idx, event_dump in enumerate(production_dump):
+            production_model = (
+                work_instance.data.production[event_idx]
+                if event_idx < len(work_instance.data.production)
+                else None
+            )
+            if production_model is not None:
+                for date_idx, date_dump in enumerate(event_dump.get("dates", [])):
+                    date_model = (
+                        production_model.dates[date_idx]
+                        if date_idx < len(production_model.dates)
+                        else None
+                    )
+                    if isinstance(date_model, Period) and date_model.range is not None:
+                        assert "range" in date_dump
+                        range_dump = date_dump["range"]
+                        assert "from" in range_dump and "to" in range_dump
 
 
 # -----------------------------
@@ -255,10 +302,10 @@ redirected_work_strategy = st.builds(
 def assert_roundtrip_alias(
     model: VisibleWork | InvisibleWork | DeletedWork | RedirectedWork,
 ) -> None:
-    dumped = model.model_dump(by_alias=True)
-    json_str = json.dumps(dumped)
+    json_str = model.model_dump_json(by_alias=True)
+    dumped = json.loads(json_str)
     model2 = type(model).model_validate_json(json_str)
-    assert model2.model_dump() == model.model_dump()
+    assert model2.model_dump_json(by_alias=True) == model.model_dump_json(by_alias=True)
     # verify alias presence for top-level fields
     for field_name in model.model_fields:
         alias = to_camel(field_name)
@@ -334,19 +381,40 @@ def test_work_status_literal_values(status_cls: Any) -> None:
 
 def test_visible_work_maximal_matches_fixture() -> None:
     """The maximal VisibleWork serialisation should match the fixed fixture JSON."""
-    inst = VisibleWork(
+    work = VisibleWork(
         version=1,
         data=maximal_work_data(),
         redirect_sources=[example_identified(20)],
     )
-    generated = inst.model_dump(by_alias=True)
-    import json
+    # Use model_dump_json to ensure datetime encoding
+    generated_json = work.model_dump_json(by_alias=True)
+    generated = json.loads(generated_json)
     import pathlib
 
-    fixture_path = pathlib.Path("tests/fixtures/work/visible_maximal.json")
+    fixture_path = pathlib.Path("tests/fixtures/works/visible_maximal.json")
     with fixture_path.open() as f:
         fixture = json.load(f)
 
     assert generated == fixture, (
         "Generated VisibleWork JSON does not match fixture; update fixture if intentional change."
+    )
+
+
+def test_deserialise_visible_maximal_fixture_matches_helper() -> None:
+    """The fixture JSON should roundtrip into a VisibleWork and match maximal_work_data helper output."""
+    import pathlib
+
+    fixture_path = pathlib.Path("tests/fixtures/works/visible_maximal.json")
+    with fixture_path.open() as f:
+        fixture_json = json.load(f)
+
+    parsed = VisibleWork.model_validate(fixture_json)
+
+    expected_work = VisibleWork(
+        version=1,
+        data=maximal_work_data(),
+        redirect_sources=[example_identified(20)],
+    )
+    assert parsed.model_dump_json(by_alias=True) == expected_work.model_dump_json(
+        by_alias=True
     )
