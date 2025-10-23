@@ -155,6 +155,7 @@
       "license": null,
       "linkText": "Link",
       "locationType": {"id": "online-resource"},
+      "type": "DigitalLocation",
       "url": "https://example.org/thumb"
     },
     "title": "Title",
