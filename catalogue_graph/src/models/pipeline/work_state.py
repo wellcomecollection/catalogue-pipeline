@@ -1,14 +1,14 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
 from models.pipeline.identifier import (
     SourceIdentifier,
 )
-from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.serialisable import SerialisableModel
 
 
-class WorkAncestor(ElasticsearchModel):
+class WorkAncestor(SerialisableModel):
     title: str
     work_type: str
     depth: int
@@ -16,7 +16,7 @@ class WorkAncestor(ElasticsearchModel):
     num_descendents: int
 
 
-class WorkRelations(BaseModel):
+class WorkRelations(SerialisableModel):
     ancestors: list[WorkAncestor] = Field(default_factory=list)
 
     @field_validator("ancestors", mode="before")
@@ -26,11 +26,11 @@ class WorkRelations(BaseModel):
         return [a for a in raw_ancestors if a["numChildren"] == 0]
 
 
-class WorkState(ElasticsearchModel):
+class WorkState(SerialisableModel):
     source_identifier: SourceIdentifier
     source_modified_time: datetime
     modified_time: datetime
-    relations: WorkRelations
+    relations: WorkRelations | None = None
 
     def id(self) -> str:
         raise NotImplementedError()

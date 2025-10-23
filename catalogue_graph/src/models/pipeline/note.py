@@ -1,7 +1,7 @@
 from models.pipeline.id_label import IdLabel
-from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.serialisable import SerialisableModel
 
 
-class Note(ElasticsearchModel):
+class Note(SerialisableModel):
     note_type: IdLabel
     contents: str

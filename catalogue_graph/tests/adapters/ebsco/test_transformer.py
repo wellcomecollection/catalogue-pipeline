@@ -1,5 +1,6 @@
 import json
 from contextlib import suppress  # for ruff SIM105 fix
+from datetime import datetime
 from typing import Any, cast  # added for dummy ES client
 
 import pytest
@@ -9,7 +10,6 @@ from pyiceberg.table import Table as IcebergTable
 import adapters.ebsco.config as adapter_config
 from adapters.ebsco.models.manifests import TransformerManifest
 from adapters.ebsco.models.step_events import EbscoAdapterTransformerEvent
-from adapters.ebsco.models.work import SourceWork
 from adapters.ebsco.steps.transformer import (
     EbscoAdapterTransformerConfig,
     handler,
@@ -18,6 +18,8 @@ from adapters.ebsco.steps.transformer import (
 )
 from adapters.ebsco.utils.iceberg import IcebergTableClient
 from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
+from models.pipeline.work_data import WorkData
 from tests.mocks import (
     MockElasticsearchClient,
     MockSecretsManagerClient,
@@ -121,7 +123,11 @@ def test_transformer_end_to_end_with_local_table(
             "jobId": "20250101T1200",
         }
     ]
-    titles = {op["_source"].get("title") for op in MockElasticsearchClient.inputs}
+    # Title now nested under data for VisibleSourceWork
+    titles = {
+        op["_source"].get("data", {}).get("title")
+        for op in MockElasticsearchClient.inputs
+    }
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
 
@@ -137,7 +143,7 @@ def test_transformer_creates_deletedwork_for_empty_content(
 
     result = _run_transform(changeset_id, index_date="2025-03-01")
 
-    # Both IDs should appear (one DeletedWork, one SourceWork)
+    # Both IDs should appear (one DeletedSourceWork, one VisibleSourceWork)
     assert result.successes.count == 2
     assert result.failures is None
     batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
@@ -160,7 +166,9 @@ def test_transformer_creates_deletedwork_for_empty_content(
     ]
     assert len(deleted_docs) == 1
     deleted_source = deleted_docs[0]["_source"]
-    assert deleted_source["deletedReason"] == "not found in EBSCO source"
+    # DeletedReason now an object with type/info
+    assert deleted_source["deletedReason"]["info"] == "not found in EBSCO source"
+    assert deleted_source["deletedReason"]["type"] == "DeletedFromSource"
     # Ensure normal record still indexed
     alive_docs = [
         op
@@ -168,7 +176,8 @@ def test_transformer_creates_deletedwork_for_empty_content(
         if op["_id"] == "Work[ebsco-alt-lookup/ebsDel002]"
     ]
     assert len(alive_docs) == 1
-    assert alive_docs[0]["_source"]["title"] == "Alive Title"
+    # Visible work title nested under data
+    assert alive_docs[0]["_source"]["data"]["title"] == "Alive Title"
 
 
 def test_transformer_full_retransform_when_no_changeset(
@@ -387,8 +396,9 @@ def test_transform_valid_marcxml_returns_work() -> None:
     works, errors = transform("ebs12345", xml)
     assert not errors
     assert len(works) == 1
-    assert str(works[0].source_identifier) == "Work[ebsco-alt-lookup/ebs12345]"
-    assert works[0].title == "A Useful Title"
+    # Access identifier via nested state
+    assert str(works[0].state.source_identifier) == "Work[ebsco-alt-lookup/ebs12345]"
+    assert works[0].data.title == "A Useful Title"
 
 
 def test_transform_handles_transform_record_exception(
@@ -445,22 +455,31 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
+    now = datetime.now()
     records = [
-        SourceWork(
-            title="Title 1",
-            source_identifier=SourceIdentifier(
-                identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+        VisibleSourceWork(
+            version=int(now.timestamp()),
+            type="Visible",
+            state=SourceWorkState(
+                source_identifier=SourceIdentifier(
+                    identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+                ),
+                source_modified_time=now,
+                modified_time=now,
             ),
-            other_identifiers=[],
-            alternative_titles=[],
+            data=WorkData(title="Title 1", alternative_titles=[], other_identifiers=[]),
         ),
-        SourceWork(
-            title="Title 2",
-            source_identifier=SourceIdentifier(
-                identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
+        VisibleSourceWork(
+            version=int(now.timestamp()),
+            type="Visible",
+            state=SourceWorkState(
+                source_identifier=SourceIdentifier(
+                    identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
+                ),
+                source_modified_time=now,
+                modified_time=now,
             ),
-            other_identifiers=[],
-            alternative_titles=[],
+            data=WorkData(title="Title 2", alternative_titles=[], other_identifiers=[]),
         ),
     ]
     dummy_client = cast(Any, object())
@@ -474,7 +493,8 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
         "Work[ebsco-alt-lookup/id1]",
         "Work[ebsco-alt-lookup/id2]",
     }
-    assert {a["_source"]["title"] for a in collected} == {"Title 1", "Title 2"}
+    # Title now nested under data
+    assert {a["_source"]["data"]["title"] for a in collected} == {"Title 1", "Title 2"}
 
 
 def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -492,14 +512,21 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
+    now = datetime.now()
     records = [
-        SourceWork(
-            title="Bad Title",
-            source_identifier=SourceIdentifier(
-                identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+        VisibleSourceWork(
+            version=int(now.timestamp()),
+            type="Visible",
+            state=SourceWorkState(
+                source_identifier=SourceIdentifier(
+                    identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
+                ),
+                source_modified_time=now,
+                modified_time=now,
             ),
-            other_identifiers=[],
-            alternative_titles=[],
+            data=WorkData(
+                title="Bad Title", alternative_titles=[], other_identifiers=[]
+            ),
         )
     ]
     dummy_client = cast(Any, object())

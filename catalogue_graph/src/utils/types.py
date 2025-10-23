@@ -1,4 +1,22 @@
-from typing import Literal
+from typing import Literal, get_args
+
+# Reason type Literal aliases & derived tuples (single source of truth for values).
+InvisibleReasonType = Literal[
+    "CopyrightNotCleared",
+    "SourceFieldMissing",
+    "InvalidValueInSourceField",
+    "UnlinkedHistoricalLibraryMiro",
+    "UnableToTransform",
+    "MetsWorksAreNotVisible",
+]
+INVISIBLE_REASON_TYPES: tuple[str, ...] = get_args(InvisibleReasonType)
+
+DeletedReasonType = Literal[
+    "DeletedFromSource",
+    "SuppressedFromSource",
+    "TeiDeletedInMerger",
+]
+DELETED_REASON_TYPES: tuple[str, ...] = get_args(DeletedReasonType)
 
 NodeType = Literal["concepts", "names", "locations"]
 OntologyType = Literal[
@@ -14,9 +32,10 @@ WorkConceptKey = Literal["subjects", "genres", "contributors"]
 
 WorkIdentifiersKey = Literal["sourceIdentifier", "otherIdentifiers"]
 
-# Catalogue concepts have a specific type and source
-# This list should be kept in sync with the one defined in
-# `pipeline/id_minter/src/main/scala/weco/pipeline/id_minter/steps/IdentifierGenerator.scala`
+# Catalogue concepts have a specific type and source.
+"""Keep in sync with Scala IdentifierGenerator in
+`pipeline/id_minter/src/main/scala/weco/pipeline/id_minter/steps/IdentifierGenerator.scala`.
+"""
 ConceptType = Literal[
     "Person",
     "Concept",

@@ -1,15 +1,15 @@
-from pydantic import BaseModel
+from models.pipeline.serialisable import SerialisableModel
 
 
-class Id(BaseModel):
+class Id(SerialisableModel):
     id: str
 
 
-class Label(BaseModel):
+class Label(SerialisableModel):
     label: str
 
 
-class IdLabel(BaseModel):
+class IdLabel(SerialisableModel):
     id: str
     label: str
 

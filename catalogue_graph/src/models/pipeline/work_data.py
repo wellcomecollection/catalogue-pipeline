@@ -12,12 +12,12 @@ from models.pipeline.item import Item
 from models.pipeline.location import DigitalLocation
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
-from models.pipeline.serialisable import ElasticsearchModel
+from models.pipeline.serialisable import SerialisableModel
 
 WorkType = Literal["Standard", "Series", "Section", "Collection"]
 
 
-class WorkData(ElasticsearchModel):
+class WorkData(SerialisableModel):
     title: str | None = None
     other_identifiers: list[SourceIdentifier] = Field(default_factory=list)
     alternative_titles: list[str] = Field(default_factory=list)

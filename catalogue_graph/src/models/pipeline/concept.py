@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import Field, field_validator
 
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import (
@@ -8,10 +8,11 @@ from models.pipeline.identifier import (
     Identified,
     Unidentifiable,
 )
+from models.pipeline.serialisable import SerialisableModel
 from utils.types import ConceptType
 
 
-class Concept(BaseModel):
+class Concept(SerialisableModel):
     id: Identifiable | Identified | Unidentifiable = Unidentifiable()
     label: str
     type: ConceptType = "Concept"
@@ -47,7 +48,8 @@ class IdentifiedConcept(Concept):
         )
 
 
-class Contributor(BaseModel):
+class Contributor(SerialisableModel):
+    id: Identifiable | Identified | Unidentifiable = Unidentifiable()
     agent: Concept
     roles: list[Label] = []
     primary: bool = True
@@ -58,12 +60,12 @@ class Subject(Concept):
     type: ConceptType = "Subject"
 
 
-class Genre(BaseModel):
+class Genre(SerialisableModel):
     label: str
     concepts: list[Concept]
 
 
-class DateTimeRange(BaseModel):
+class DateTimeRange(SerialisableModel):
     from_time: str = Field(alias="from")
     to_time: str = Field(alias="to")
     label: str | None = None
