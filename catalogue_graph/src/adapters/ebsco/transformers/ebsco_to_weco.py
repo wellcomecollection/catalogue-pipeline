@@ -21,6 +21,7 @@ from adapters.ebsco.transformers.title import extract_title
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
 from models.pipeline.work_data import WorkData
+from utils.timezone import convert_datetime_to_utc_iso
 
 EBSCO_IDENTIFIER_TYPE = Id(id="ebsco-alt-lookup")
 
@@ -32,7 +33,7 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
 
 
 def ebsco_source_work_state(id_value: str) -> SourceWorkState:
-    current_time_iso: str = datetime.now().isoformat() + "Z"
+    current_time_iso: str = convert_datetime_to_utc_iso(datetime.now())
 
     return SourceWorkState(
         source_identifier=ebsco_source_identifier(id_value),

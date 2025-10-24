@@ -62,6 +62,7 @@ from tests.test_utils import (
     add_mock_merged_documents,
     load_json_fixture,
 )
+from utils.timezone import convert_datetime_to_utc_iso
 
 MOCK_CONCEPT_ID = "jbxfbpzq"
 MOCK_JOB_ID = "20250929T12:00"
@@ -427,8 +428,9 @@ def test_ingestor_loader_non_visible_works() -> None:
         deleted_work = [i for i in items if i["type"] == "Deleted"][0]
         invisible_work = [i for i in items if i["type"] == "Invisible"][0]
 
+        # Time is frozen in local timezone, convert_datetime_to_utc_iso will handle conversion
         now = datetime.now()
-        now_iso = now.isoformat() + "Z"
+        now_iso = convert_datetime_to_utc_iso(now)
 
         assert DeletedIndexableWork(**deleted_work) == DeletedIndexableWork(
             debug=DeletedWorkDebug(
