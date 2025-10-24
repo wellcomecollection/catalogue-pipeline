@@ -13,26 +13,11 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 - Multiple independent analyses distinguished by namespace (auto or user-provided).
 
 ## Installation (using uv)
-```bash
-# From repository root
-uv sync
-# or inside this subproject directory
-uv pip install -e .
-```
-
-If you want to execute commands without performing an editable install, run them from inside the project folder after syncing dependencies:
 
 ```bash
 cd es_index_comparison
-uv sync              # installs dependencies + builds wheel
+uv sync  
 uv run es-index-compare --help
-```
-
-For a global editable install (so you can call `es-index-compare` from anywhere):
-
-```bash
-uv pip install -e ./es_index_comparison
-es-index-compare --help
 ```
 
 ## Quick Start
