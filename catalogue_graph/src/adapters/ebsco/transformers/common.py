@@ -67,7 +67,7 @@ SUBFIELD_TO_TYPE: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
 
 
 def subdivision_concepts(
-    field: Field, subdivision_subfields: list[str]
+        field: Field, subdivision_subfields: list[str]
 ) -> list[Concept]:
     return [
         extract_concept_from_subfield(subfield)
@@ -80,12 +80,11 @@ def extract_concept_from_subfield(subfield: Subfield) -> Concept:
     return extract_concept_from_subfield_value(subfield.code, subfield.value)
 
 
-def extract_concept_from_subfield_value(code: str, value: str) -> Concept:
+def extract_concept_from_subfield_value(code: str, value: str, ontology_type: str = "Concept") -> Concept:
     concept_label = _clean_concept_label(value)
     identifier = SourceIdentifier(
         identifier_type=Id(id="label-derived"),
-        # TODO: This should not be hard-coded, and will only work for Genres
-        ontology_type="Genre",
+        ontology_type=ontology_type,
         value=normalise_identifier_value(concept_label),
     )
     return Concept(
