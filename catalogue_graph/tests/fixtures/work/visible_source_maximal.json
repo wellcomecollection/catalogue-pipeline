@@ -1,0 +1,196 @@
+{
+  "version": 1,
+  "type": "Visible",
+  "redirectSources": [
+    {
+      "canonicalId": "canon20",
+      "otherIdentifiers": [
+        {
+          "identifierType": {"id": "ID120"},
+          "ontologyType": "catalogue",
+          "value": "val120"
+        }
+      ],
+      "sourceIdentifier": {
+        "identifierType": {"id": "ID20"},
+        "ontologyType": "catalogue",
+        "value": "val20"
+      },
+      "type": "Identified"
+    }
+  ],
+  "data": {
+    "title": "Title",
+    "otherIdentifiers": [
+      {
+        "identifierType": {"id": "ID2"},
+        "ontologyType": "catalogue",
+        "value": "val2"
+      }
+    ],
+    "alternativeTitles": ["Alt 1", "Alt 2"],
+    "format": {"id": "fmt", "label": "Format"},
+    "description": "Description",
+    "physicalDescription": "Physical",
+    "lettering": "Lettering",
+    "createdDate": {
+      "id": {
+        "canonicalId": "canon10",
+        "otherIdentifiers": [
+          {
+            "identifierType": {"id": "ID110"},
+            "ontologyType": "catalogue",
+            "value": "val110"
+          }
+        ],
+        "sourceIdentifier": {
+          "identifierType": {"id": "ID10"},
+          "ontologyType": "catalogue",
+          "value": "val10"
+        },
+        "type": "Identified"
+      },
+      "label": "Concept Label",
+      "type": "Concept"
+    },
+    "subjects": [
+      {
+        "concepts": [],
+        "id": {
+          "canonicalId": "canon11",
+          "otherIdentifiers": [
+            {
+              "identifierType": {"id": "ID111"},
+              "ontologyType": "catalogue",
+              "value": "val111"
+            }
+          ],
+          "sourceIdentifier": {
+            "identifierType": {"id": "ID11"},
+            "ontologyType": "catalogue",
+            "value": "val11"
+          },
+          "type": "Identified"
+        },
+        "label": "Subject Label",
+        "type": "Subject"
+      }
+    ],
+    "genres": [
+      {"concepts": [], "label": "Genre Label"}
+    ],
+    "contributors": [
+      {
+        "agent": {
+          "id": {
+            "canonicalId": "canon10",
+            "otherIdentifiers": [
+              {
+                "identifierType": {"id": "ID110"},
+                "ontologyType": "catalogue",
+                "value": "val110"
+              }
+            ],
+            "sourceIdentifier": {
+              "identifierType": {"id": "ID10"},
+              "ontologyType": "catalogue",
+              "value": "val10"
+            },
+            "type": "Identified"
+          },
+          "label": "Concept Label",
+          "type": "Concept"
+        },
+        "id": {"canonicalId": null, "type": "Unidentifiable"},
+        "primary": true,
+        "roles": []
+      }
+    ],
+    "thumbnail": {
+      "accessConditions": [],
+      "credit": "Credit",
+      "license": null,
+      "linkText": "Link",
+      "locationType": {"id": "online-resource"},
+      "type": "DigitalLocation",
+      "url": "https://example.org/thumb"
+    },
+    "production": [
+      {"agents": [], "dates": [], "function": null, "label": "Production", "places": []}
+    ],
+    "languages": [
+      {"id": "en", "label": "English"}
+    ],
+    "edition": "1st",
+    "notes": [
+      {"contents": "Note contents", "noteType": {"id": "note", "label": "Note"}}
+    ],
+    "duration": 123,
+    "items": [
+      {
+        "id": {
+          "canonicalId": "canon12",
+          "otherIdentifiers": [
+            {
+              "identifierType": {"id": "ID112"},
+              "ontologyType": "catalogue",
+              "value": "val112"
+            }
+          ],
+          "sourceIdentifier": {
+            "identifierType": {"id": "ID12"},
+            "ontologyType": "catalogue",
+            "value": "val12"
+          },
+          "type": "Identified"
+        },
+        "locations": [],
+        "note": "Item Note",
+        "title": "Item Title"
+      }
+    ],
+    "holdings": [
+      {"enumeration": ["Vol1"], "location": null, "note": "Holdings note"}
+    ],
+    "collectionPath": {"label": "Collection", "path": "A/B/C"},
+    "referenceNumber": "REF123",
+    "imageData": [
+      {
+        "id": {
+          "canonicalId": "canon13",
+          "otherIdentifiers": [
+            {
+              "identifierType": {"id": "ID113"},
+              "ontologyType": "catalogue",
+              "value": "val113"
+            }
+          ],
+          "sourceIdentifier": {
+            "identifierType": {"id": "ID13"},
+            "ontologyType": "catalogue",
+            "value": "val13"
+          },
+          "type": "Identified"
+        },
+        "locations": [],
+        "version": 1
+      }
+    ],
+    "workType": "Standard",
+    "currentFrequency": "Monthly",
+    "formerFrequency": ["Weekly"],
+    "designation": ["Designation1"]
+  },
+  "state": {
+    "sourceIdentifier": {
+      "identifierType": {"id": "ID1"},
+      "ontologyType": "catalogue",
+      "value": "val1"
+    },
+    "sourceModifiedTime": "2025-10-24T00:00:00Z",
+    "modifiedTime": "2025-10-24T01:00:00Z",
+    "relations": null,
+    "internalWorkStubs": [],
+    "mergeCandidates": []
+  }
+}
