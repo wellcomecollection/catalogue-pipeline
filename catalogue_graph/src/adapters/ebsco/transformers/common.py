@@ -82,15 +82,16 @@ def extract_concept_from_subfield(subfield: Subfield) -> Concept:
 
 def extract_concept_from_subfield_value(code: str, value: str, default_ontology_type: str = "Concept") -> Concept:
     concept_label = _clean_concept_label(value)
+    ontology_type = SUBFIELD_TO_TYPE.get(code, default_ontology_type)
     identifier = SourceIdentifier(
         identifier_type=Id(id="label-derived"),
-        ontology_type=default_ontology_type,
+        ontology_type=ontology_type,
         value=normalise_identifier_value(concept_label),
     )
     return Concept(
         id=Identifiable.from_source_identifier(identifier),
         label=concept_label,
-        type=SUBFIELD_TO_TYPE.get(code, default_ontology_type),
+        type=SUBFIELD_TO_TYPE.get(code, ontology_type),
     )
 
 
