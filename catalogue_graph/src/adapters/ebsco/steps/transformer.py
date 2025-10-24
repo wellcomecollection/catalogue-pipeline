@@ -10,6 +10,7 @@ import io
 from collections.abc import Generator, Iterable
 from typing import Any
 
+import dateutil
 import elasticsearch.helpers
 import pyarrow as pa
 from elasticsearch import Elasticsearch
@@ -216,7 +217,11 @@ def _process_batch(
             del_state = ebsco_source_work_state(work_id)
             transformed.append(
                 DeletedSourceWork(
-                    version=int(del_state.source_modified_time.timestamp()),
+                    version=int(
+                        dateutil.parser.parse(
+                            del_state.source_modified_time
+                        ).timestamp()
+                    ),
                     type="Deleted",
                     deleted_reason=DeletedReason(
                         type="DeletedFromSource", info="not found in EBSCO source"

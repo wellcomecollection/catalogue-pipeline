@@ -456,6 +456,8 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
     now = datetime.now()
+    now_iso = now.isoformat() + "Z"
+
     records = [
         VisibleSourceWork(
             version=int(now.timestamp()),
@@ -464,8 +466,8 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
                 source_identifier=SourceIdentifier(
                     identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
                 ),
-                source_modified_time=now,
-                modified_time=now,
+                source_modified_time=now_iso,
+                modified_time=now_iso,
             ),
             data=WorkData(title="Title 1", alternative_titles=[], other_identifiers=[]),
         ),
@@ -476,8 +478,8 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
                 source_identifier=SourceIdentifier(
                     identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
                 ),
-                source_modified_time=now,
-                modified_time=now,
+                source_modified_time=now_iso,
+                modified_time=now_iso,
             ),
             data=WorkData(title="Title 2", alternative_titles=[], other_identifiers=[]),
         ),
@@ -513,6 +515,8 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
     now = datetime.now()
+    now_iso = now.isoformat() + "Z"
+
     records = [
         VisibleSourceWork(
             version=int(now.timestamp()),
@@ -521,8 +525,8 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
                 source_identifier=SourceIdentifier(
                     identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
                 ),
-                source_modified_time=now,
-                modified_time=now,
+                source_modified_time=now_iso,
+                modified_time=now_iso,
             ),
             data=WorkData(
                 title="Bad Title", alternative_titles=[], other_identifiers=[]

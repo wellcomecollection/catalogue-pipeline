@@ -18,13 +18,13 @@ class WorkDebugSource(ElasticsearchModel):
     id: str
     identifier: SourceIdentifier
     version: int
-    modified_time: datetime
+    modified_time: str
 
 
 class WorkDebug(ElasticsearchModel):
     source: WorkDebugSource
-    merged_time: datetime
-    indexed_time: datetime
+    merged_time: str
+    indexed_time: str
     merge_candidates: list[MergeCandidate]
 
     @classmethod
@@ -37,7 +37,7 @@ class WorkDebug(ElasticsearchModel):
                 modified_time=work.state.source_modified_time,
             ),
             merged_time=work.state.merged_time,
-            indexed_time=datetime.now(),
+            indexed_time=datetime.now().isoformat() + "Z",
             merge_candidates=work.state.merge_candidates,
         )
 

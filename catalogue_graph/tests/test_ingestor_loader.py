@@ -427,6 +427,9 @@ def test_ingestor_loader_non_visible_works() -> None:
         deleted_work = [i for i in items if i["type"] == "Deleted"][0]
         invisible_work = [i for i in items if i["type"] == "Invisible"][0]
 
+        now = datetime.now()
+        now_iso = now.isoformat() + "Z"
+
         assert DeletedIndexableWork(**deleted_work) == DeletedIndexableWork(
             debug=DeletedWorkDebug(
                 source=WorkDebugSource(
@@ -437,10 +440,10 @@ def test_ingestor_loader_non_visible_works() -> None:
                         value="b15610512",
                     ),
                     version=20,
-                    modified_time=datetime.fromisoformat("2025-10-09T12:32:42"),
+                    modified_time="2025-10-09T12:32:42Z",
                 ),
-                merged_time=datetime.fromisoformat("2025-10-09T12:35:31.612637"),
-                indexed_time=datetime.now(),
+                merged_time="2025-10-09T12:35:31.612637Z",
+                indexed_time=now_iso,
                 deleted_reason=DeletedReason(
                     info="Sierra", type="SuppressedFromSource"
                 ),
@@ -459,10 +462,10 @@ def test_ingestor_loader_non_visible_works() -> None:
                         value="b32717714",
                     ),
                     version=1,
-                    modified_time=datetime.fromisoformat("2022-05-23T15:50:41.008000"),
+                    modified_time="2022-05-23T15:50:41.008Z",
                 ),
-                merged_time=datetime.fromisoformat("2025-10-08T15:31:52.203950"),
-                indexed_time=datetime.now(),
+                merged_time="2025-10-08T15:31:52.203950Z",
+                indexed_time=now_iso,
                 invisibility_reasons=[InvisibleReason(type="MetsWorksAreNotVisible")],
                 merge_candidates=[
                     MergeCandidate(
@@ -492,10 +495,10 @@ def test_ingestor_loader_non_visible_works() -> None:
                         value="b18029048",
                     ),
                     version=2,
-                    modified_time=datetime.fromisoformat("2025-10-09T11:41:53.596657"),
+                    modified_time="2025-10-09T11:41:53.596657Z",
                 ),
-                merged_time=datetime.fromisoformat("2025-10-09T12:09:04.086557"),
-                indexed_time=datetime.now(),
+                merged_time="2025-10-09T12:09:04.086557Z",
+                indexed_time=now_iso,
                 merge_candidates=[
                     MergeCandidate(
                         id=Identified(

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pydantic import Field, field_validator
 
 from models.pipeline.identifier import (
@@ -28,8 +26,8 @@ class WorkRelations(SerialisableModel):
 
 class WorkState(SerialisableModel):
     source_identifier: SourceIdentifier
-    source_modified_time: datetime
-    modified_time: datetime
+    source_modified_time: str
+    modified_time: str
     relations: WorkRelations | None = None
 
     def id(self) -> str:
