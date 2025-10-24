@@ -13,6 +13,7 @@ OnlineResource = LocationType(id="online-resource")
 
 LocationDiscriminator = Literal["DigitalLocation", "PhysicalLocation"]
 
+
 class Location(SerialisableModel):
     # Required for Scala deserialiser
     type: LocationDiscriminator
