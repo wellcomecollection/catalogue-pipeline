@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pydantic import model_validator
 
 from ingestor.models.shared.merge_candidate import MergeCandidate
@@ -16,7 +14,7 @@ from models.pipeline.work_state import WorkState
 
 class MergedWorkState(WorkState):
     canonical_id: str
-    merged_time: datetime
+    merged_time: str
     availabilities: list[Id]
     merge_candidates: list[MergeCandidate]
 

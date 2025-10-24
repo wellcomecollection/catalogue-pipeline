@@ -12,19 +12,20 @@ from ingestor.models.shared.invisible_reason import InvisibleReason
 from ingestor.models.shared.merge_candidate import MergeCandidate
 from models.pipeline.identifier import Identified, SourceIdentifier
 from models.pipeline.serialisable import ElasticsearchModel
+from utils.timezone import convert_datetime_to_utc_iso
 
 
 class WorkDebugSource(ElasticsearchModel):
     id: str
     identifier: SourceIdentifier
     version: int
-    modified_time: datetime
+    modified_time: str
 
 
 class WorkDebug(ElasticsearchModel):
     source: WorkDebugSource
-    merged_time: datetime
-    indexed_time: datetime
+    merged_time: str
+    indexed_time: str
     merge_candidates: list[MergeCandidate]
 
     @classmethod
@@ -37,7 +38,7 @@ class WorkDebug(ElasticsearchModel):
                 modified_time=work.state.source_modified_time,
             ),
             merged_time=work.state.merged_time,
-            indexed_time=datetime.now(),
+            indexed_time=convert_datetime_to_utc_iso(datetime.now()),
             merge_candidates=work.state.merge_candidates,
         )
 

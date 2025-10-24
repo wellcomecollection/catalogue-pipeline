@@ -1,6 +1,6 @@
 import json
 from contextlib import suppress  # for ruff SIM105 fix
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, cast  # added for dummy ES client
 
 import pytest
@@ -25,6 +25,7 @@ from tests.mocks import (
     MockSecretsManagerClient,
     MockSmartOpen,
 )
+from utils.timezone import convert_datetime_to_utc_iso
 
 from .helpers import data_to_namespaced_table
 
@@ -455,7 +456,9 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    now = datetime.now()
+    now = datetime.now(UTC)
+    now_iso = convert_datetime_to_utc_iso(now)
+
     records = [
         VisibleSourceWork(
             version=int(now.timestamp()),
@@ -464,8 +467,8 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
                 source_identifier=SourceIdentifier(
                     identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
                 ),
-                source_modified_time=now,
-                modified_time=now,
+                source_modified_time=now_iso,
+                modified_time=now_iso,
             ),
             data=WorkData(title="Title 1", alternative_titles=[], other_identifiers=[]),
         ),
@@ -476,8 +479,8 @@ def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
                 source_identifier=SourceIdentifier(
                     identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
                 ),
-                source_modified_time=now,
-                modified_time=now,
+                source_modified_time=now_iso,
+                modified_time=now_iso,
             ),
             data=WorkData(title="Title 2", alternative_titles=[], other_identifiers=[]),
         ),
@@ -512,7 +515,9 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    now = datetime.now()
+    now = datetime.now(UTC)
+    now_iso = convert_datetime_to_utc_iso(now)
+
     records = [
         VisibleSourceWork(
             version=int(now.timestamp()),
@@ -521,8 +526,8 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
                 source_identifier=SourceIdentifier(
                     identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
                 ),
-                source_modified_time=now,
-                modified_time=now,
+                source_modified_time=now_iso,
+                modified_time=now_iso,
             ),
             data=WorkData(
                 title="Bad Title", alternative_titles=[], other_identifiers=[]

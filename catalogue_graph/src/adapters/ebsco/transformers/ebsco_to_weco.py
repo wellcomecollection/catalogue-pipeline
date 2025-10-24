@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import dateutil
 from pymarc.record import Record
 
 from adapters.ebsco.transformers.alternative_titles import extract_alternative_titles
@@ -20,6 +21,7 @@ from adapters.ebsco.transformers.title import extract_title
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
 from models.pipeline.work_data import WorkData
+from utils.timezone import convert_datetime_to_utc_iso
 
 EBSCO_IDENTIFIER_TYPE = Id(id="ebsco-alt-lookup")
 
@@ -31,14 +33,14 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
 
 
 def ebsco_source_work_state(id_value: str) -> SourceWorkState:
-    current_time: datetime = datetime.now()
+    current_time_iso: str = convert_datetime_to_utc_iso(datetime.now())
 
     return SourceWorkState(
         source_identifier=ebsco_source_identifier(id_value),
         # Using current time for both source_modified_time and modified_time
         # as we are not currently extracting a specific modified time from the record.
-        source_modified_time=current_time,
-        modified_time=current_time,
+        source_modified_time=current_time_iso,
+        modified_time=current_time_iso,
     )
 
 
@@ -68,7 +70,7 @@ def transform_record(marc_record: Record) -> VisibleSourceWork:
         # do not create versions in the EBSCO adapter, so we
         # use a timestamp-based version, to ensure downstream
         # events are always seen as newer than prior ones.
-        version=int(work_state.source_modified_time.timestamp()),
+        version=int(dateutil.parser.parse(work_state.source_modified_time).timestamp()),
         state=work_state,
         data=work_data,
     )
