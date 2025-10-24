@@ -1,0 +1,56 @@
+[project]
+name = "es_index_comparison"
+version = "0.1.0"
+authors = [ { name = "Your Name", email = "you@example.com" } ]
+description = "CLI tool to fetch, materialize, and deeply diff Elasticsearch indices into reproducible artifacts."
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "Apache-2.0" }
+keywords = ["elasticsearch", "diff", "data-quality", "index-comparison"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Apache Software License",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "Topic :: Utilities",
+]
+
+dependencies = [
+  "elasticsearch>=8.11,<9",
+  "polars>=0.20.0",
+  "pandas>=2.0.0",
+  "pyarrow",
+  "numpy>=1.24,<3",
+  "tqdm",
+  "PyYAML>=6.0",
+  "typer>=0.12.0",
+  "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy"]
+
+[project.scripts]
+es-index-compare = "es_index_comparison.cli:app"
+
+[build-system]
+requires = ["hatchling>=1.21.0"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+# Allow uv to resolve and build
+[tool.ruff]
+line-length = 100
+
+[tool.mypy]
+python_version = "3.12"
+warn_unused_configs = true
+ignore_missing_imports = true
+strict_optional = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.2",
+    "ruff>=0.14.2",
+    "types-pyyaml>=6.0.12.20250915",
+]
