@@ -43,12 +43,12 @@ Feature: Extracting subjects from 6xx fields
       When I transform the MARC record
       Then the only subject has the label "A Subject Specimens Literature 1897-1900 Dublin."
       And it has 5 concepts:
-        | type    | label      |
-        | <type>  | A Subject  |
-        | Concept | Specimens  |
-        | Concept | Literature |
-        | Period  | 1897-1900  |
-        | Place   | Dublin     |
+        | type    | label      | id.source_identifier.ontology_type |
+        | <type>  | A Subject  | <type>                             |
+        | Concept | Specimens  | Concept                            |
+        | Concept | Literature | Concept                            |
+        | Period  | 1897-1900  | Period                             |
+        | Place   | Dublin     | Place                              |
       Examples:
         | code | type    |
         | 648  | Period  |
