@@ -48,8 +48,8 @@ def extract_genre(field: Field) -> Genre | None:
     genre_label = " ".join(chain(a_subfields, subdivision_subfields))
 
     concepts = [
-        extract_concept_from_subfield_value("a", a_subfields[0])
-    ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
+                   extract_concept_from_subfield_value("a", a_subfields[0], ontology_type="Genre")
+               ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
 
     return Genre(
         label=genre_label,
