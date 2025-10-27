@@ -25,7 +25,7 @@ Resource = AccessStatusRelationship(type="Resource")
 
 
 class AccessStatus(Type):
-    relationship: AccessStatusRelationship
+    relationship: AccessStatusRelationship | None = None
 
 
 LicensedResource = AccessStatus(type="LicensedResources", relationship=Resource)
@@ -33,6 +33,6 @@ LicensedResource = AccessStatus(type="LicensedResources", relationship=Resource)
 
 class AccessCondition(SerialisableModel):
     method: Type
-    status: Type | None = None
+    status: AccessStatus | None = None
     terms: str | None = None
     note: str | None = None

@@ -9,6 +9,11 @@ from pydantic.alias_generators import to_camel
 
 from ingestor.models.shared.deleted_reason import DeletedReason
 from ingestor.models.shared.invisible_reason import InvisibleReason
+from models.pipeline.access_condition import (
+    AccessCondition,
+    LicensedResource,
+    ViewOnline,
+)
 from models.pipeline.collection_path import CollectionPath
 from models.pipeline.concept import Concept, Contributor, Genre, Subject
 from models.pipeline.holdings import Holdings
@@ -76,6 +81,17 @@ def maximal_work_data() -> WorkData:
         id=example_identified(12), title="Item Title", note="Item Note", locations=[]
     )
     holdings_min = Holdings(note="Holdings note", enumeration=["Vol1"], location=None)
+    access_condition = AccessCondition(method=ViewOnline, status=LicensedResource)
+    digital_location_with_license = DigitalLocation(
+        location_type=OnlineResource,
+        access_conditions=[access_condition],
+        url="https://example.org/licensed",
+    )
+    holdings_with_digital_location = Holdings(
+        note="Holdings with digital location",
+        enumeration=["Vol2"],
+        location=digital_location_with_license,
+    )
     image_data_min = ImageData(id=example_identified(13), version=1, locations=[])
 
     return WorkData(
@@ -97,7 +113,7 @@ def maximal_work_data() -> WorkData:
         notes=[note_min],
         duration=123,
         items=[item_min],
-        holdings=[holdings_min],
+        holdings=[holdings_min, holdings_with_digital_location],
         collection_path=CollectionPath(path="A/B/C", label="Collection"),
         reference_number="REF123",
         image_data=[image_data_min],
