@@ -1,4 +1,5 @@
 import json
+import pathlib
 from typing import Any
 
 import pytest
@@ -18,6 +19,7 @@ from models.pipeline.item import Item
 from models.pipeline.location import DigitalLocation, OnlineResource
 from models.pipeline.note import Note
 from models.pipeline.production import ProductionEvent
+from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
 from models.pipeline.work import (
     ALL_WORK_STATUSES,
     DeletedWork,
@@ -332,21 +334,28 @@ def test_work_status_literal_values(status_cls: Any) -> None:
 # -----------------------------
 
 
-def test_visible_work_maximal_matches_fixture() -> None:
-    """The maximal VisibleWork serialisation should match the fixed fixture JSON."""
-    inst = VisibleWork(
+def test_visible_source_work_maximal_fixtures() -> None:
+    """Validate maximal VisibleWork & VisibleSourceWork serialisations against fixtures.
+
+    Combines previous separate tests into one for reduced duplication.
+    """
+
+    # VisibleSourceWork fixture (includes state)
+    vsw_state = SourceWorkState(
+        source_identifier=example_source_identifier(1),
+        source_modified_time="2025-10-24T00:00:00Z",
+        modified_time="2025-10-24T01:00:00Z",
+    )
+    vsw_inst = VisibleSourceWork(
         version=1,
         data=maximal_work_data(),
         redirect_sources=[example_identified(20)],
+        state=vsw_state,
     )
-    generated = inst.model_dump(by_alias=True)
-    import json
-    import pathlib
-
-    fixture_path = pathlib.Path("tests/fixtures/work/visible_maximal.json")
-    with fixture_path.open() as f:
-        fixture = json.load(f)
-
-    assert generated == fixture, (
-        "Generated VisibleWork JSON does not match fixture; update fixture if intentional change."
+    vsw_generated = vsw_inst.model_dump(by_alias=True)
+    vsw_fixture_path = pathlib.Path("tests/fixtures/work/visible_source_maximal.json")
+    with vsw_fixture_path.open() as f:
+        vsw_fixture = json.load(f)
+    assert vsw_generated == vsw_fixture, (
+        "Generated VisibleSourceWork JSON does not match fixture; update fixture if intentional change."
     )
