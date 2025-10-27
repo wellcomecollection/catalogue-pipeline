@@ -73,7 +73,7 @@ def test_ebook(marc_record: Record) -> None:
     format = transform_record(marc_record).data.format
     assert format is not None
     assert format.id == "v"
-    assert format.label == "E-Books"
+    assert format.label == "E-books"
 
 
 @pytest.mark.parametrize(
@@ -89,4 +89,4 @@ def test_ejournal(marc_record: Record) -> None:
     format = transform_record(marc_record).data.format
     assert format is not None
     assert format.id == "j"
-    assert format.label == "E-Journals"
+    assert format.label == "E-journals"
