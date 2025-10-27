@@ -89,18 +89,13 @@ class RawLibraryOfCongressConcept:
         """Returns a list of alternative labels for the concept."""
         assert self._raw_concept_node is not None
 
-        identifier_lookup = {
-            n["@id"]: self._extract_value(n["madsrdf:variantLabel"])
-            for n in self.raw_concept.get("@graph", [])
-            if "madsrdf:Variant" in n["@type"]
-        }
-
         has_variant = _as_list(self._raw_concept_node.get("madsrdf:hasVariant", []))
         raw_alternative_identifiers = [entry["@id"] for entry in has_variant]
 
         alternative_labels = []
-        for identifier in raw_alternative_identifiers:
-            alternative_labels.append(identifier_lookup[identifier])
+        for n in self.raw_concept.get("@graph", []):
+            if n["@id"] in raw_alternative_identifiers:
+                alternative_labels.append(self._extract_value(n["madsrdf:variantLabel"]))
 
         return alternative_labels
 
