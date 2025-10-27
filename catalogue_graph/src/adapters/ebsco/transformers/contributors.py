@@ -19,7 +19,7 @@ from adapters.ebsco.transformers.common import (
 )
 from models.pipeline.concept import Concept, Contributor
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, Identified, SourceIdentifier
+from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import ConceptType
 
 
@@ -71,7 +71,7 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     label = label_from_field(field, label_subfields[tag[1:]])
-    id = Identified.from_source_identifier(
+    concept_id = Identifiable.from_source_identifier(
         SourceIdentifier(
             value=normalise_identifier_value(label),
             ontology_type=contributor_type,
@@ -83,7 +83,7 @@ def format_field(field: Field) -> Contributor:
         agent=Concept(
             label=label,
             type=contributor_type,
-            id=id,
+            id=concept_id,
         ),
         roles=roles(field),
         primary=is_primary(tag),
