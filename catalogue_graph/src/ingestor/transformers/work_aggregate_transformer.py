@@ -6,7 +6,11 @@ from pydantic import BaseModel
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
-from models.pipeline.identifier import BaseIdentify
+from models.pipeline.identifier import (
+    Identifiable,
+    Identified,
+    Unidentifiable,
+)
 
 
 class AggregatableField(BaseModel):
@@ -14,7 +18,9 @@ class AggregatableField(BaseModel):
     label: str
 
 
-def get_aggregatable(ids: BaseIdentify | None, label: str) -> AggregatableField:
+def get_aggregatable(
+    ids: Identified | Unidentifiable | Identifiable | None, label: str
+) -> AggregatableField:
     if ids is None or ids.canonical_id is None:
         return AggregatableField(id=label, label=label)
 

@@ -17,21 +17,9 @@ class SourceIdentifier(SerialisableModel):
 IdentifyType = Literal["Identifiable", "Identified", "Unidentifiable"]
 
 
-class BaseIdentify(SerialisableModel):
-    canonical_id: str | None = None
-    type: IdentifyType
-
-    def get_identifiers(self) -> Generator[SourceIdentifier]:
-        raise NotImplementedError()
-
-    def get_identifier_values(self) -> Generator[str]:
-        raise NotImplementedError()
-
-
-class Identifiable(BaseIdentify):
+class Identifiers(SerialisableModel):
     source_identifier: SourceIdentifier
     other_identifiers: list[SourceIdentifier] = []
-    type: IdentifyType = "Identifiable"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield self.source_identifier
@@ -41,17 +29,23 @@ class Identifiable(BaseIdentify):
         for identifier in self.get_identifiers():
             yield identifier.value
 
+
+class Identifiable(Identifiers):
+    canonical_id: str | None = None
+    type: IdentifyType = "Identifiable"
+    identifiedType: IdentifyType = "Identified"
+
     @staticmethod
     def from_source_identifier(identifier: SourceIdentifier) -> "Identifiable":
         return Identifiable(source_identifier=identifier, other_identifiers=[])
 
 
-class Identified(Identifiable):
+class Identified(Identifiers):
     canonical_id: str
     type: IdentifyType = "Identified"
 
 
-class Unidentifiable(BaseIdentify):
+class Unidentifiable(SerialisableModel):
     canonical_id: None = None
     type: IdentifyType = "Unidentifiable"
 

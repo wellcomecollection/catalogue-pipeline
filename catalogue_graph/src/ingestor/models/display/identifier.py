@@ -3,9 +3,10 @@ from collections.abc import Generator
 from pydantic import BaseModel
 
 from models.pipeline.identifier import (
-    BaseIdentify,
     Identifiable,
+    Identified,
     SourceIdentifier,
+    Unidentifiable,
 )
 
 from .id_label import DisplayIdLabel
@@ -60,13 +61,7 @@ class DisplayIdentifier(BaseModel):
 
     @staticmethod
     def from_all_identifiers(
-        identifier: BaseIdentify,
+        identifier: Identified | Unidentifiable | Identifiable,
     ) -> Generator["DisplayIdentifier"]:
-        if not isinstance(identifier, Identifiable):
-            return
-
-        if identifier.source_identifier is not None:
-            yield DisplayIdentifier.from_source_identifier(identifier.source_identifier)
-
-        for other_identifier in identifier.other_identifiers:
-            yield DisplayIdentifier.from_source_identifier(other_identifier)
+        for i in identifier.get_identifiers():
+            yield DisplayIdentifier.from_source_identifier(i)
