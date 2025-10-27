@@ -125,6 +125,47 @@
     "notes": [
       {"contents": "Note contents", "noteType": {"id": "note", "label": "Note"}}
     ],
+    "formerFrequency": ["Weekly"],
+    "holdings": [
+      {
+        "enumeration": [
+          "Vol1"
+        ],
+        "location": null,
+        "note": "Holdings note"
+      },
+      {
+        "enumeration": [
+          "Vol2"
+        ],
+        "location": {
+          "accessConditions": [
+            {
+              "method": {
+                "type": "ViewOnline"
+              },
+              "note": null,
+              "status": {
+                "relationship": {
+                  "type": "Resource"
+                },
+                "type": "LicensedResources"
+              },
+              "terms": null
+            }
+          ],
+          "credit": null,
+          "license": null,
+          "linkText": null,
+          "locationType": {
+            "id": "online-resource"
+          },
+          "type": "DigitalLocation",
+          "url": "https://example.org/licensed"
+        },
+        "note": "Holdings with digital location"
+      }
+    ],
     "duration": 123,
     "items": [
       {
@@ -148,9 +189,6 @@
         "note": "Item Note",
         "title": "Item Title"
       }
-    ],
-    "holdings": [
-      {"enumeration": ["Vol1"], "location": null, "note": "Holdings note"}
     ],
     "collectionPath": {"label": "Collection", "path": "A/B/C"},
     "referenceNumber": "REF123",
@@ -178,7 +216,6 @@
     ],
     "workType": "Standard",
     "currentFrequency": "Monthly",
-    "formerFrequency": ["Weekly"],
     "designation": ["Designation1"]
   },
   "state": {
