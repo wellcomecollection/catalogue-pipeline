@@ -11,16 +11,16 @@ https://www.loc.gov/marc/bibliographic/bd710.html
 https://www.loc.gov/marc/bibliographic/bd711.html
 """
 
-from models.pipeline.concept import Concept, Contributor
-from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, Identified, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
-from utils.types import ConceptType
 
 from adapters.ebsco.transformers.common import (
     normalise_identifier_value,
 )
+from models.pipeline.concept import Concept, Contributor
+from models.pipeline.id_label import Label
+from models.pipeline.identifier import Id, Identified, SourceIdentifier
+from utils.types import ConceptType
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -37,7 +37,6 @@ def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
     Filter duplicates from `contributors, fronting primary contributors, but otherwise preserving order.
     An entry is a duplicate if it matches apart from the value of primary.
     """
-
     # Primary contributors should go first
     sorted_contributors = sorted(contributors, key=lambda c: not c.primary)
 
@@ -45,7 +44,9 @@ def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
     deduplicated = []
     for contributor in sorted_contributors:
         # Use a normalised representation (with `primary=False`) for comparison
-        contributor_key = contributor.model_copy(update={"primary": False}).model_dump_json()
+        contributor_key = contributor.model_copy(
+            update={"primary": False}
+        ).model_dump_json()
         if contributor_key not in seen_contributors:
             deduplicated.append(contributor)
             seen_contributors.add(contributor_key)
