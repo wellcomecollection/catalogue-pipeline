@@ -182,3 +182,32 @@ def test_title_a_n_p(marc_record: Record) -> None:
         work.data.title
         == "Philosophical transactions of the Royal Society of London. Series B, Biological sciences"
     )
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        (
+            Field(
+                tag="245",
+                subfields=[
+                    Subfield(
+                        code="a",
+                        value=(
+                            "Serious advice to students and young ministers. A sermon preached at Broad-Mead, Bristol, before the Education-Society, August 17, 1774, And published at their Request. By John Tommas"
+                        ),
+                    ),
+                    Subfield(code="h", value="[electronic resource]."),
+                ],
+            ),
+        )
+    ],
+    indirect=True,
+)
+def test_trailing_h_removed(marc_record: Record) -> None:
+    """Trailing $h subfield is dropped entirely (Scala parity)."""
+    work = transform_record(marc_record)
+    assert (
+        work.data.title
+        == "Serious advice to students and young ministers. A sermon preached at Broad-Mead, Bristol, before the Education-Society, August 17, 1774, And published at their Request. By John Tommas"
+    )
