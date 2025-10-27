@@ -184,7 +184,13 @@ def child_list_member_datatable(
     for index, row in enumerate(datatable[1:]):
         member = members[index]
         for key, expected in zip(headings, row, strict=False):
-            assert getattr(member, key) == expected
+            if "." in key:
+                here = member
+                for subkey in key.split("."):
+                    here = getattr(here, subkey)
+                assert here == expected
+            else:
+                assert getattr(member, key) == expected
 
 
 @then(parsers.parse("there are no {attr_phrase}"))
