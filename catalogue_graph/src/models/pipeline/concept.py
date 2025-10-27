@@ -13,7 +13,7 @@ from utils.types import ConceptType
 
 
 class Concept(SerialisableModel):
-    id: Identifiable | Identified | Unidentifiable = Unidentifiable()
+    id: Identified | Unidentifiable | Identifiable = Unidentifiable()
     label: str
     type: ConceptType = "Concept"
 
@@ -49,7 +49,7 @@ class IdentifiedConcept(Concept):
 
 
 class Contributor(SerialisableModel):
-    id: Identifiable | Identified | Unidentifiable = Unidentifiable()
+    id: Identified | Unidentifiable | Identifiable = Unidentifiable()
     agent: Concept
     roles: list[Label] = []
     primary: bool = True
