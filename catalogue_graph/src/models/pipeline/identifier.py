@@ -14,7 +14,7 @@ class SourceIdentifier(SerialisableModel):
         return f"Work[{self.identifier_type.id}/{self.value}]"
 
 
-IdentifyType = Literal["Identified", "Unidentifiable"]
+IdentifyType = Literal["Identifiable", "Identified", "Unidentifiable"]
 
 
 class BaseIdentify(SerialisableModel):
@@ -31,7 +31,7 @@ class BaseIdentify(SerialisableModel):
 class Identifiable(BaseIdentify):
     source_identifier: SourceIdentifier
     other_identifiers: list[SourceIdentifier] = []
-    type: IdentifyType = "Identified"
+    type: IdentifyType = "Identifiable"
 
     def get_identifiers(self) -> Generator[SourceIdentifier]:
         yield self.source_identifier
@@ -48,6 +48,7 @@ class Identifiable(BaseIdentify):
 
 class Identified(Identifiable):
     canonical_id: str
+    type: IdentifyType = "Identified"
 
 
 class Unidentifiable(BaseIdentify):

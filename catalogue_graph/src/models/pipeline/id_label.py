@@ -18,8 +18,8 @@ class Format(IdLabel):
     pass
 
 
-EBooks = Format(id="v", label="E-Books")
-EJournals = Format(id="j", label="E-Journals")
+EBooks = Format(id="v", label="E-books")
+EJournals = Format(id="j", label="E-journals")
 
 
 class Language(IdLabel):

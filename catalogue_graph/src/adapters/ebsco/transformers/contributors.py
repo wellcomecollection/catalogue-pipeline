@@ -11,9 +11,6 @@ https://www.loc.gov/marc/bibliographic/bd710.html
 https://www.loc.gov/marc/bibliographic/bd711.html
 """
 
-from collections import OrderedDict
-from itertools import chain
-
 from pymarc.field import Field
 from pymarc.record import Record
 
@@ -37,37 +34,24 @@ def extract_contributors(record: Record) -> list[Contributor]:
 
 def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
     """
-    Filter duplicates from `contributors, fronting primary contributors,
-    but otherwise preserving order
-    An entry is a duplicate if it matches apart from the value of primary
+    Filter duplicates from `contributors, fronting primary contributors, but otherwise preserving order.
+    An entry is a duplicate if it matches apart from the value of primary.
     """
-    # First, create a list of 2-tuples containing all the values
-    # primary is arbitrarily set to false in the KEY only,
-    # so that both duplicates share the same key.
-    # This is just to make the creation of the two dicts below
-    # less verbose
-    all_contributors = [
-        (
-            str(contributor.model_copy(update={"primary": False}).model_dump()),
-            contributor,
-        )
-        for contributor in contributors
-    ]
-    # The goal is to have all primaries, then all non-primaries
-    # that are not primary, so we split them.
-    # Note: Not itertools.groupby, because we want to preserve input order
-    primary_contributors = {k: v for (k, v) in all_contributors if v.primary}
-    secondary_contributors = [
-        (k, v)
-        for (k, v) in all_contributors
-        if not v.primary and k not in primary_contributors
-    ]
-    # Now we have all the primaries, and all the non-primaries in two separate lists
-    # use an OrderedDict to uniquify them without messing up the order.
-    as_ordered_dict = OrderedDict(
-        chain(primary_contributors.items(), secondary_contributors)
-    )
-    return list(as_ordered_dict.values())
+    # Primary contributors should go first
+    sorted_contributors = sorted(contributors, key=lambda c: not c.primary)
+
+    seen_contributors = set()
+    deduplicated = []
+    for contributor in sorted_contributors:
+        # Use a normalised representation (with `primary=False`) for comparison
+        contributor_key = contributor.model_copy(
+            update={"primary": False}
+        ).model_dump_json()
+        if contributor_key not in seen_contributors:
+            deduplicated.append(contributor)
+            seen_contributors.add(contributor_key)
+
+    return deduplicated
 
 
 type_of_contributor: dict[str, ConceptType] = {
@@ -87,18 +71,19 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     label = label_from_field(field, label_subfields[tag[1:]])
-    id = Identifiable.from_source_identifier(
+    concept_id = Identifiable.from_source_identifier(
         SourceIdentifier(
             value=normalise_identifier_value(label),
             ontology_type=contributor_type,
             identifier_type=Id(id="label-derived"),
         )
     )
+
     return Contributor(
         agent=Concept(
             label=label,
             type=contributor_type,
-            id=id,
+            id=concept_id,
         ),
         roles=roles(field),
         primary=is_primary(tag),
