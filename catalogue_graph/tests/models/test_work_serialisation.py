@@ -1,4 +1,5 @@
 import json
+import pathlib
 from typing import Any
 
 import pytest
@@ -338,8 +339,6 @@ def test_visible_source_work_maximal_fixtures() -> None:
 
     Combines previous separate tests into one for reduced duplication.
     """
-    import json
-    import pathlib
 
     # VisibleSourceWork fixture (includes state)
     vsw_state = SourceWorkState(
