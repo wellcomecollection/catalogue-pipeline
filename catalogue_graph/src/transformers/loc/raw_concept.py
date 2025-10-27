@@ -95,7 +95,9 @@ class RawLibraryOfCongressConcept:
         alternative_labels = []
         for n in self.raw_concept.get("@graph", []):
             if n["@id"] in raw_alternative_identifiers:
-                alternative_labels.append(self._extract_value(n["madsrdf:variantLabel"]))
+                alternative_labels.append(
+                    self._extract_value(n["madsrdf:variantLabel"])
+                )
 
         return alternative_labels
 
