@@ -321,7 +321,7 @@ object SierraRulesForRequesting {
       //    q|i||61||=|18||
       //    q|i||61||=|15||
       //
-      //    v|i||61||=|4||
+      //    #v|i||61||=|4||
       //    v|i||61||=|14||
       //    v|i||79||=|ofvn1||
       //    v|i||79||=|scmwc||
@@ -342,7 +342,7 @@ object SierraRulesForRequesting {
         )
 
       case i
-          if i.fixedField("61").containsAnyOf("4", "14") || i
+          if i.fixedField("61").containsAnyOf("14") || i
             .fixedField("79")
             .containsAnyOf(
               "ofvn1",
