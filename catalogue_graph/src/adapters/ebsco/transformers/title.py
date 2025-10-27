@@ -10,15 +10,12 @@ Rules replicated from Scala implementation (MarcTitle.scala):
   - If resulting components list empty, raise ValueError (no custom exception class).
 """
 
-import logging
 import re
 
 from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.ebsco.transformers.common import mandatory_field
-
-LOGGER = logging.getLogger(__name__)
 
 _SUBFIELD_TAGS = {"a", "b", "c", "h", "n", "p"}
 _BRACKETED_SEGMENT = re.compile(r"\[[^\]]+\]")
@@ -30,7 +27,7 @@ def _get_245_field(marc_record: Record) -> Field:
         # Let mandatory_field decorator handle missing field error messaging.
         raise ValueError("Missing title field (245)")
     if len(fields_245) > 1:
-        LOGGER.warning(
+        print(
             "Multiple instances of non-repeatable varfield with tag 245: %d (using first)",
             len(fields_245),
         )
@@ -39,16 +36,12 @@ def _get_245_field(marc_record: Record) -> Field:
 
 def _selected_subfield_values(field_245: Field) -> list[str]:
     subfields = field_245.subfields
-    print(subfields)
     selected: list[tuple[str, str]] = []
     for sfield in subfields:
         code = sfield.code
         value = sfield.value
         if code in _SUBFIELD_TAGS:
-            print(f"Selecting subfield: code={code}, value={value}")
             selected.append((code, value))
-        else:
-            print(f"Ignoring subfield: code={code}, value={value}")
 
     # Drop trailing h if present (single last occurrence only, as per Scala logic)
     if selected and selected[-1][0] == "h":
