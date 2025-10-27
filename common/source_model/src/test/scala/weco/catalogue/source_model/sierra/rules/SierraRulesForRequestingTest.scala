@@ -328,17 +328,17 @@ class SierraRulesForRequestingTest
       ("18", NotRequestable.NoPublicMessage("fixed field 61 = 18 (<none>)")),
       ("15", NotRequestable.NoPublicMessage("fixed field 61 = 15 (<none>)")),
       (
-        "4",
-        NotRequestable.NeedsManualRequest(
-          "This item cannot be requested online. Please place a manual request."
-        )
-      ),
-      (
         "14",
         NotRequestable.NeedsManualRequest(
           "This item cannot be requested online. Please place a manual request."
         )
-      )
+      ),
+      // Item type 4 is requestable, included here to verify that other
+      // item types are not inadvertently blocked.
+      (
+        "4",
+        Requestable
+      ),
     )
 
     forAll(testCases) {
