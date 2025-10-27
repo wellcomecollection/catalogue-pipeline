@@ -67,7 +67,7 @@ SUBFIELD_TO_TYPE: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
 
 
 def subdivision_concepts(
-        field: Field, subdivision_subfields: list[str]
+    field: Field, subdivision_subfields: list[str]
 ) -> list[Concept]:
     return [
         extract_concept_from_subfield(subfield)
@@ -80,7 +80,9 @@ def extract_concept_from_subfield(subfield: Subfield) -> Concept:
     return extract_concept_from_subfield_value(subfield.code, subfield.value)
 
 
-def extract_concept_from_subfield_value(code: str, value: str, default_ontology_type: str = "Concept") -> Concept:
+def extract_concept_from_subfield_value(
+    code: str, value: str, default_ontology_type: ConceptType = "Concept"
+) -> Concept:
     concept_label = _clean_concept_label(value)
     ontology_type = SUBFIELD_TO_TYPE.get(code, default_ontology_type)
     identifier = SourceIdentifier(
