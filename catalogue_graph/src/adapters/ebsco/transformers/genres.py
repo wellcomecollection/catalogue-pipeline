@@ -12,7 +12,7 @@ from adapters.ebsco.transformers.common import (
     subdivision_concepts,
 )
 from models.pipeline.concept import Genre
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]
 LABEL_SUBFIELDS: list[str] = ["a"] + SUBDIVISION_SUBFIELDS
 
 # Mapping of subdivision code -> SourceConcept.type override
-CONCEPT_TYPE_MAP: dict[str, ConceptType] = {
+CONCEPT_TYPE_MAP: dict[str, RawConceptType] = {
     "y": "Period",
     "z": "Place",
     # 'a', 'v', 'x' default to 'Concept'
@@ -49,7 +49,7 @@ def extract_genre(field: Field) -> Genre | None:
 
     concepts = [
         extract_concept_from_subfield_value(
-            "a", a_subfields[0], default_ontology_type="Genre"
+            "a", a_subfields[0], default_ontology_type="GenreConcept"
         )
     ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
 

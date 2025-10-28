@@ -20,7 +20,7 @@ from adapters.ebsco.transformers.common import (
 from models.pipeline.concept import Concept, Contributor
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -54,7 +54,7 @@ def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
     return deduplicated
 
 
-type_of_contributor: dict[str, ConceptType] = {
+type_of_contributor: dict[str, RawConceptType] = {
     "00": "Person",
     "10": "Organisation",
     "11": "Meeting",

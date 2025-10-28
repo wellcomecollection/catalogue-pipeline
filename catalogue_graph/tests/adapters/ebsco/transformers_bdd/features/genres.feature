@@ -22,7 +22,7 @@ Feature: Extracting genres from MARC 655
     Then the only genre has the label "Disco Polo"
     And that genre has 1 concept
     And the concept has an identifier with value "disco polo"
-    And the identifier's ontology type is "Genre"
+    And the identifier's ontology type is "GenreConcept"
     And its identifier's identifier type is "label-derived"
 
   Scenario: Multiple genres

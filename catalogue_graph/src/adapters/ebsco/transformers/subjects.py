@@ -10,11 +10,11 @@ from adapters.ebsco.transformers.common import (
 )
 from models.pipeline.concept import Concept, Subject
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
 logger: logging.Logger = logging.getLogger(__name__)
-FIELD_TO_TYPE: dict[str, ConceptType] = {
+FIELD_TO_TYPE: dict[str, RawConceptType] = {
     "600": "Person",
     "610": "Organisation",
     "611": "Meeting",

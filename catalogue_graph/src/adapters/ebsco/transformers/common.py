@@ -5,7 +5,7 @@ from pymarc.record import Field, Record, Subfield
 
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
@@ -63,7 +63,7 @@ def is_url(maybe_url: str) -> bool:
     return bool(url.scheme in ["http", "https"] and url.netloc)
 
 
-SUBFIELD_TO_TYPE: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
+SUBFIELD_TO_TYPE: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
 
 
 def subdivision_concepts(
@@ -81,7 +81,7 @@ def extract_concept_from_subfield(subfield: Subfield) -> Concept:
 
 
 def extract_concept_from_subfield_value(
-    code: str, value: str, default_ontology_type: ConceptType = "Concept"
+    code: str, value: str, default_ontology_type: RawConceptType = "Concept"
 ) -> Concept:
     concept_label = _clean_concept_label(value)
     ontology_type = SUBFIELD_TO_TYPE.get(code, default_ontology_type)
