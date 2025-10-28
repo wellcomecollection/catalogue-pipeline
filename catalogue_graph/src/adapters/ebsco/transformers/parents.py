@@ -1,3 +1,11 @@
+"""
+Conceptually, A work may link either to another Work, or to a "Series", which is not
+an entity in its own right, but simply a title under which multiple Works may be listed.
+See https://github.com/wellcomecollection/docs/tree/main/rfcs/045-sierra-work-relationships.
+
+At present, all parent links behave as though they link to a Series.
+"""
+
 import logging
 
 from pymarc.record import Record
@@ -16,12 +24,12 @@ SUBFIELD_TAGS: dict[str, list[str]] = {
 
 def get_parents(record: Record) -> list[WorkAncestor]:
     """
-    Convert the parent link MARC fields into WorkAncestor objects. Links to a parent are found in four different
-    MARC fields These are all to result in a Series Relation with the title taken from the MARC field:
-        - 440 - Series Statement/Added Entry-Title (https://www.loc.gov/marc/bibliographic/bd440.html)
-        - 490 - Series Statement (https://www.loc.gov/marc/bibliographic/bd490.html)
-        - 773 - Host Item Entry (https://www.loc.gov/marc/bibliographic/bd773.html)
-        - 830 - Series Added Entry-Uniform Title (https://www.loc.gov/marc/bibliographic/bd830.html
+    Parent links are found in four different MARC fields, all of which result in a Series relation with the title taken
+    from the MARC field:
+        - 440: Series Statement/Added Entry-Title (https://www.loc.gov/marc/bibliographic/bd440.html)
+        - 490: Series Statement (https://www.loc.gov/marc/bibliographic/bd490.html)
+        - 773: Host Item Entry (https://www.loc.gov/marc/bibliographic/bd773.html)
+        - 830: Series Added Entry-Uniform Title (https://www.loc.gov/marc/bibliographic/bd830.html
 
     MARC fields are designed to be output by concatenating the subfields in document order. As such, they may contain
     punctuation (and spacing) intended to be presented in that context specifically. In this usage, we are separating
