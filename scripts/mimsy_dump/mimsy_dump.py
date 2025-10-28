@@ -140,6 +140,7 @@ def main():
             "VW_CONDITION_DESCRIPTORS",
             "VW_CONSERVATION",
             "VW_CONSERVATION_STATUS",
+            "VW_DATE_COLLECTED",
             "VW_DISPOSAL_SOURCES",
             "VW_EXHIBITION_ITEMS",
             "VW_EXHIBITION_ITEMS_STATUS",
