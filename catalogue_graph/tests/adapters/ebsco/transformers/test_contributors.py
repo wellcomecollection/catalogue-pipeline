@@ -298,6 +298,43 @@ def test_contributor_all_fields(
     )
 
 
+def test_contributor_label_trims_trailing_punctuation(marc_record: Record) -> None:
+    """Only terminal punctuation is trimmed from the overall label; internal punctuation preserved."""
+    marc_record.add_field(
+        Field(
+            tag="100",
+            subfields=[
+                Subfield(
+                    code="a", value="Trailing Period."
+                ),  # internal period retained
+                Subfield(
+                    code="b", value="Comma, and Space ;"
+                ),  # internal semicolon retained
+                Subfield(code="c", value="Colon:"),  # trailing colon trimmed
+            ],
+        )
+    )
+    contributor = lone_element(transform_record(marc_record).data.contributors)
+    assert contributor.agent.label == "Trailing Period. Comma, and Space ; Colon"
+    assert contributor.roles == []
+
+
+def test_contributor_role_labels_are_cleaned(marc_record: Record) -> None:
+    """Role labels have trailing punctuation trimmed individually."""
+    marc_record.add_field(
+        Field(
+            tag="700",
+            subfields=[
+                Subfield(code="a", value="Randolph"),
+                Subfield(code="e", value="Editor."),
+                Subfield(code="e", value="Translator:"),
+            ],
+        )
+    )
+    contributor = lone_element(transform_record(marc_record).data.contributors)
+    assert contributor.roles == [Label(label="Editor"), Label(label="Translator")]
+
+
 @pytest.mark.parametrize(
     "marc_record,field_code,primary",
     [

@@ -26,7 +26,6 @@ FIELD_TO_TYPE: dict[str, ConceptType] = {
     "648": "Period",
     "651": "Place",
 }
-SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]
 
 
 def extract_subjects(record: Record) -> list[Subject]:
@@ -60,7 +59,7 @@ def extract_subject(field: Field) -> Subject | None:
         extra_label_subfield_codes = []
     else:
         main_concept_label_fields = a_subfields
-        secondary_subfield_codes = SUBDIVISION_SUBFIELDS
+        secondary_subfield_codes = SUBDIVISION_CODES
         extra_label_subfield_codes = secondary_subfield_codes
 
     # Label construction rules:

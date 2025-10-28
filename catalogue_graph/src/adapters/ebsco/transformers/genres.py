@@ -20,8 +20,6 @@ from models.pipeline.identifier import Identifiable, SourceIdentifier
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]  # retained for callers/tests
-
 
 def build_primary_concept(field: Field) -> Concept | None:
     primary = field.get_subfields("a")

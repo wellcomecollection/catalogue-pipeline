@@ -11,6 +11,7 @@ from pymarc.record import Record
 
 from adapters.ebsco.transformers.parsers.field008 import Field008
 from adapters.ebsco.transformers.parsers.period import parse_period
+from adapters.ebsco.transformers.text_utils import clean_concept_label
 from models.pipeline.concept import Concept
 from models.pipeline.production import ProductionEvent
 
@@ -45,7 +46,11 @@ def extract_production_from_008(record: Record) -> ProductionEvent | None:
         period = parse_period(date_range_str)
         if period:
             place = field008.place_of_production
-            places = [Concept(label=place, type="Place")] if place else []
+            places = (
+                [Concept(label=clean_concept_label(place), type="Place")]
+                if place
+                else []
+            )
             return ProductionEvent(
                 label=date_range_str,
                 places=places,
@@ -77,32 +82,42 @@ def single_production_event(field: Field) -> ProductionEvent | None:
         raise ValueError(
             f"Unexpected production event field: {field.tag}. Should be one of 260, 264"
         )
-    label = field.format_field()
+    label = clean_concept_label(field.format_field())
     places = [
-        Concept(label=subfield, type="Place") for subfield in field.get_subfields("a")
+        Concept(label=clean_concept_label(subfield), type="Place")
+        for subfield in field.get_subfields("a")
     ]
     agents = [
-        Concept(label=subfield, type="Agent") for subfield in field.get_subfields("b")
+        Concept(label=clean_concept_label(subfield), type="Agent")
+        for subfield in field.get_subfields("b")
     ]
-    dates = [parse_period(subfield) for subfield in field.get_subfields("c")]
+    dates = [
+        parse_period(clean_concept_label(subfield))
+        for subfield in field.get_subfields("c")
+    ]
     function = None
     if field.tag == "260" and field.get_subfields("e", "f", "g"):
         places += [
-            Concept(label=subfield, type="Place")
+            Concept(label=clean_concept_label(subfield), type="Place")
             for subfield in field.get_subfields("e")
         ]
         agents += [
-            Concept(label=subfield, type="Agent")
+            Concept(label=clean_concept_label(subfield), type="Agent")
             for subfield in field.get_subfields("f")
         ]
-        dates += [parse_period(subfield) for subfield in field.get_subfields("g")]
-        function = Concept(label="Manufacture")
+        dates += [
+            parse_period(clean_concept_label(subfield))
+            for subfield in field.get_subfields("g")
+        ]
+        function = Concept(label=clean_concept_label("Manufacture"))
 
     if field.tag == "264":
         if field.indicator2 in ["4", " "]:
             return None
         else:
-            function = Concept(label=IND2_264_MAP[field.indicator2])
+            function = Concept(
+                label=clean_concept_label(IND2_264_MAP[field.indicator2])
+            )
 
     return ProductionEvent(
         label=label, places=places, agents=agents, dates=dates, function=function

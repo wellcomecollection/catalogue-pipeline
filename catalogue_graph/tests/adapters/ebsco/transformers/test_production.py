@@ -357,3 +357,47 @@ def test_populate_first_production_with_008_dates_if_none_of_its_own(
     period = lone_element(production.dates)
     assert period.range.label == "1979"
     assert period.range.from_time == "1979-01-01T00:00:00Z"
+
+
+def test_production_label_trims_trailing_punctuation(marc_record: Record) -> None:
+    """Overall production label only trims final punctuation; internal punctuation retained."""
+    marc_record.add_field(
+        Field(
+            tag="260",
+            subfields=[
+                Subfield(
+                    code="a", value="Paris:"
+                ),  # internal colon retained in full label
+                Subfield(
+                    code="b", value="Publisher, Ltd.;"
+                ),  # internal semicolon retained
+                Subfield(code="c", value="1999."),  # final period trimmed
+            ],
+        )
+    )
+    production = lone_element(transform_record(marc_record).data.production)
+    assert production.label == "Paris: Publisher, Ltd.; 1999"
+    assert lone_element(production.places).label == "Paris"
+    assert lone_element(production.agents).label == "Publisher, Ltd"
+    assert lone_element(production.dates).label == "1999"
+
+
+def test_production_manufacture_function_label_cleaned(marc_record: Record) -> None:
+    """Manufacture subfields cleaned and function label stable."""
+    marc_record.add_field(
+        Field(
+            tag="260",
+            subfields=[
+                Subfield(code="a", value="Berlin"),
+                Subfield(code="e", value="Munich:"),  # will be added as place
+                Subfield(code="f", value="Printer Co.;"),  # agent
+                Subfield(code="g", value="2001."),  # date
+            ],
+        )
+    )
+    production = lone_element(transform_record(marc_record).data.production)
+    assert production.function.label == "Manufacture"
+    assert production.places[0].label == "Berlin"
+    assert production.places[1].label == "Munich"
+    assert lone_element(production.agents).label == "Printer Co.".rstrip(".;: ")
+    assert lone_element(production.dates).label == "2001"
