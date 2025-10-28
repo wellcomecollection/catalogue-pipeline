@@ -12,8 +12,9 @@ from models.pipeline.concept import Concept, Subject
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import RawConceptType
 
-SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
 logger: logging.Logger = logging.getLogger(__name__)
+
+SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
 FIELD_TO_TYPE: dict[str, RawConceptType] = {
     "600": "Person",
     "610": "Organisation",
@@ -22,6 +23,13 @@ FIELD_TO_TYPE: dict[str, RawConceptType] = {
     "651": "Place",
 }
 SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]
+MAIN_LABEL_SUBFIELDS = {
+    "600": ["a", "b", "c", "d", "t", "p", "n", "q", "l"],
+    "610": ["a", "b"],
+    "611": ["a", "c", "d"],
+}
+SECONDARY_LABEL_SUBFIELDS = {"600": ["x"], "610": [], "611": []}
+EXTRA_LABEL_SUBFIELDS = {"600": ["e", "x"], "610": ["c", "d", "e"], "611": []}
 
 
 def extract_subjects(record: Record) -> list[Subject]:
@@ -31,52 +39,35 @@ def extract_subjects(record: Record) -> list[Subject]:
 
 
 def extract_subject(field: Field) -> Subject | None:
+    tag = field.tag
     a_subfields = field.get_subfields("a")
-    if len(a_subfields) == 0 or not "".join(
-        subfield.strip() for subfield in a_subfields
-    ):
+    if len(a_subfields) == 0 or not "".join(s.strip() for s in a_subfields):
         return None
     if len(a_subfields) > 1:
-        logger.error(f"Repeated Non-repeating field $a found in {field.tag} field")
+        logger.error(f"Repeated Non-repeating field $a found in {tag} field")
 
-    if field.tag == "600":
-        main_concept_label_fields = field.get_subfields(
-            "a", "b", "c", "d", "t", "p", "n", "q", "l"
-        )
-        secondary_subfield_codes = ["x"]
-        extra_label_subfield_codes = ["e", "x"]
-    elif field.tag == "610":
-        main_concept_label_fields = field.get_subfields("a", "b")
-        secondary_subfield_codes = []
-        extra_label_subfield_codes = ["c", "d", "e"]
-    elif field.tag == "611":
-        main_concept_label_fields = field.get_subfields("a", "c", "d")
-        secondary_subfield_codes = []
-        extra_label_subfield_codes = []
-    else:
-        main_concept_label_fields = a_subfields
-        secondary_subfield_codes = SUBDIVISION_SUBFIELDS
-        extra_label_subfield_codes = secondary_subfield_codes
+    main_label_codes = MAIN_LABEL_SUBFIELDS.get(tag, ["a"])
+    secondary_label_codes = SECONDARY_LABEL_SUBFIELDS.get(tag, SUBDIVISION_SUBFIELDS)
+    extra_label_codes = EXTRA_LABEL_SUBFIELDS.get(tag, SUBDIVISION_SUBFIELDS)
 
-    label = " ".join(
-        main_concept_label_fields + field.get_subfields(*extra_label_subfield_codes)
+    main_labels = field.get_subfields(*main_label_codes)
+    extra_labels = field.get_subfields(*extra_label_codes)
+    subject_label = " ".join(main_labels + extra_labels)
+    main_concept_label = " ".join(main_labels)
+
+    concept_type = FIELD_TO_TYPE.get(tag, "Concept")
+    concept_id = get_identifier(main_concept_label, concept_type)
+    subject_id = get_identifier(subject_label, "Subject")
+
+    main_concept = Concept(label=main_concept_label, type=concept_type, id=concept_id)
+    concepts = [main_concept] + subdivision_concepts(field, secondary_label_codes)
+    return Subject(label=subject_label, id=subject_id, concepts=concepts)
+
+
+def get_identifier(label: str, concept_type: RawConceptType) -> Identifiable:
+    source_identifier = SourceIdentifier(
+        identifier_type=Id(id="label-derived"),
+        ontology_type=concept_type,
+        value=normalise_identifier_value(label),
     )
-    main_concept_label = " ".join(main_concept_label_fields)
-
-    return Subject(
-        label=label,
-        concepts=[
-            Concept(
-                label=main_concept_label,
-                type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-                id=Identifiable.from_source_identifier(
-                    SourceIdentifier(
-                        identifier_type=Id(id="label-derived"),
-                        ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-                        value=normalise_identifier_value(main_concept_label),
-                    )
-                ),
-            )
-        ]
-        + subdivision_concepts(field, secondary_subfield_codes),
-    )
+    return Identifiable.from_source_identifier(source_identifier)
