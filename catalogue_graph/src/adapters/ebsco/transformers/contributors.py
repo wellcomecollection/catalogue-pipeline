@@ -15,8 +15,8 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.ebsco.transformers.text_utils import (
-    clean_concept_label,
     normalise_identifier_value,
+    normalise_label,
 )
 from models.pipeline.concept import Concept, Contributor
 from models.pipeline.id_label import Label
@@ -71,7 +71,9 @@ label_subfields: dict[str, list[str]] = {
 def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
-    label = label_from_field(field, label_subfields[tag[1:]])
+    raw_label = label_from_field(field, label_subfields[tag[1:]])
+    # Apply type-specific label normalisation (comma trimming for Person/Organisation/Meeting)
+    label = normalise_label(raw_label, contributor_type)
     concept_id = Identifiable.from_source_identifier(
         SourceIdentifier(
             value=normalise_identifier_value(label),
@@ -92,16 +94,10 @@ def format_field(field: Field) -> Contributor:
 
 
 def label_from_field(field: Field, subfields: list[str]) -> str:
-    """Join selected subfields into a contributor label applying trailing punctuation trimming.
-
-    We keep the existing selection of subfields (excluding work-related ones like $t,$n,$p,$l)
-    and apply cleaning only to the final combined label so internal punctuation (e.g. commas/colons
-    that convey structure) is preserved. This matches previous semantics while still trimming any
-    trailing punctuation from the overall label.
-    """
+    """Join selected subfields into a contributor label without type-specific trimming."""
     parts = [v.strip() for v in field.get_subfields(*subfields) if v.strip()]
     combined = " ".join(parts)
-    return clean_concept_label(combined)
+    return combined.strip()
 
 
 def is_primary(tag: str) -> bool:
@@ -124,6 +120,6 @@ def roles(field: Field) -> list[Label]:
     If EBSCO fix this, then we will have to update accordingly.
     """
     return [
-        Label(label=clean_concept_label(value.strip()))
+        Label(label=normalise_label(value.strip(), "Concept"))
         for value in field.get_subfields("e")
     ]

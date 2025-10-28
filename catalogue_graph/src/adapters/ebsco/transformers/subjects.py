@@ -9,8 +9,8 @@ from adapters.ebsco.transformers.label_subdivisions import (
     SUBFIELD_TYPE_MAP,
 )
 from adapters.ebsco.transformers.text_utils import (
-    clean_concept_label,
     normalise_identifier_value,
+    normalise_label,
 )
 from models.pipeline.concept import Concept, Subject
 from models.pipeline.id_label import Id
@@ -93,7 +93,7 @@ def extract_subject(field: Field) -> Subject | None:
         # Only x yields a subdivision concept
         for subfield in field.subfields:
             if subfield.code == "x":
-                label_part = clean_concept_label(subfield.value)
+                label_part = normalise_label(subfield.value, "Concept")
                 concepts.append(
                     Concept(
                         label=label_part,
@@ -111,7 +111,8 @@ def extract_subject(field: Field) -> Subject | None:
         for subfield in field.subfields:
             code = getattr(subfield, "code", "")
             if code in SUBDIVISION_CODES:
-                label_part = clean_concept_label(subfield.value)
+                ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
+                label_part = normalise_label(subfield.value, ontology_type)
                 ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
                 concepts.append(
                     Concept(
@@ -133,6 +134,8 @@ def extract_subject(field: Field) -> Subject | None:
 
 def build_primary_concept(field: Field, label: str) -> Concept:
     ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
+    # Apply type-specific normalisation to the label.
+    label = normalise_label(label, ontology_type)
     return Concept(
         label=label,
         type=ontology_type,

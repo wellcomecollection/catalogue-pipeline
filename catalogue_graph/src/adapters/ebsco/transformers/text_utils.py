@@ -1,22 +1,52 @@
 from __future__ import annotations
 
+import re
+
+from utils.types import ConceptType as ConceptTypeLike
+
 """Shared text normalisation helpers for MARC transformers.
 
-These mirror the Scala TextNormalisation behaviour we need here:
-- Trailing punctuation trimming on concept labels (.,;:) while preserving internal punctuation
-- Whitespace collapsing & lowercasing for stable identifier values
+Updated to replicate Scala ConceptsTransformer type-specific trailing punctuation semantics.
 
-Note: We deliberately keep the broader punctuation trimming (.,;:) as per
-existing Python implementation rather than the Scala period-only trimming,
-per project decision.
+Scala rules (see ConceptsTransformer.scala):
+  - Concept & GenreConcept labels: trim a single trailing period (not ellipses), then whitespace.
+  - Genre work-level label additionally replaces 'Electronic Books' with 'Electronic books'.
+  - Agent/Person/Organisation/Meeting labels: trim a trailing comma.
+  - Place labels: trim a trailing colon.
+  - Period labels: no punctuation trimming here (identifiers use a preprocessed version upstream).
+
+We keep whitespace collapsing for identifier values.
 """
 
-_TRAILING_PUNCTUATION = ".,;: "  # Broader than Scala which only trims period.
 
+def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
+    """Apply type-specific trailing punctuation trimming matching Scala semantics.
 
-def clean_concept_label(value: str) -> str:
-    """Normalise a raw concept label by removing trailing punctuation & trimming."""
-    return value.rstrip(_TRAILING_PUNCTUATION).strip()
+    Ellipses preservation: only remove a single trailing period if *not* part of an ellipsis.
+    Comma / colon trimming removes a single trailing instance plus surrounding whitespace.
+    Genre special-case: after period trimming & whitespace normalisation, replace
+    'Electronic Books' with 'Electronic books'.
+    Period: return unchanged (aside from outer whitespace trimming) – preprocessing for IDs handled elsewhere.
+    """
+    s = label.strip()
+
+    if concept_type in ["Concept", "Genre", "Subject"]:
+        # Remove a single trailing period unless part of ellipsis (i.e. three periods)
+        # Regex replicates Scala trimTrailingPeriod behaviour.
+        s = re.sub(r"([^\.])\.\s*$", r"\1", s).rstrip()
+    elif concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
+        s = re.sub(r"\s*,\s*$", "", s)
+    elif concept_type == "Place":
+        s = re.sub(r"\s*:\s*$", "", s)
+    elif concept_type == "Period":
+        # Leave untouched (besides earlier strip)
+        pass
+
+    # Replace exact label 'Electronic Books' (after period trimming) with sentence case form.
+    if concept_type == "Genre" and s == "Electronic Books":
+        s = "Electronic books"
+
+    return s
 
 
 def normalise_identifier_value(label: str) -> str:

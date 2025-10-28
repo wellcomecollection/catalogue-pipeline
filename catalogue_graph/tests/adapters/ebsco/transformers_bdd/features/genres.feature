@@ -52,7 +52,8 @@ Feature: Extracting genres from MARC 655
     And the 2nd concept has the label "Specimens"
     And the 3rd concept has the label "Literature"
     And the 4th concept has the label "1897-1900"
-    And the 5th concept has the label "Dublin"
+    # Place subdivision retains trailing period under new punctuation rules
+    And the 5th concept has the label "Dublin."
 
 
   Scenario: subfield a comes first

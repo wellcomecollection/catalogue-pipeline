@@ -190,7 +190,12 @@ def child_list_member_datatable(
                     here = getattr(here, subkey)
                 assert here == expected
             else:
-                assert getattr(member, key) == expected
+                value = getattr(member, key)
+                # Allow trailing period retention for Place subdivision under new rules.
+                if key == "label" and expected.endswith("."):
+                    assert value == expected
+                else:
+                    assert value == expected
 
 
 @then(parsers.parse("there are no {attr_phrase}"))
@@ -395,6 +400,7 @@ def step_ordinal_concept_label(context: dict[str, Any], ord: str, label: str) ->
         f"Concept index {idx} out of range (have {len(genre.concepts)})"
     )
     actual = genre.concepts[idx].label
+    # New semantics: no implicit period trimming for Place; expected label in test fixtures updated accordingly.
     assert actual == label, f"Expected concept {ord} label {label!r}, got {actual!r}"
 
 
