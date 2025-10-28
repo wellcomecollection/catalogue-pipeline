@@ -19,9 +19,18 @@ class WorkRelations(SerialisableModel):
 
     @field_validator("ancestors", mode="before")
     @classmethod
-    def convert_merged_type(cls, raw_ancestors: list[dict]) -> list[dict]:
+    def convert_merged_type(
+        cls, raw_ancestors: list[dict] | list[WorkAncestor]
+    ) -> list[dict]:
         # TODO: This is a temporary 'Series' filter which won't be needed once we remove the relation embedder service
-        return [a for a in raw_ancestors if a["numChildren"] == 0]
+        filtered = []
+        for ancestor in raw_ancestors:
+            if isinstance(ancestor, WorkAncestor):
+                filtered.append(ancestor.model_dump())
+            elif ancestor["numChildren"] == 0:
+                filtered.append(ancestor)
+
+        return filtered
 
 
 class WorkState(SerialisableModel):
