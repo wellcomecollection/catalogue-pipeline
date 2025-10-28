@@ -1,7 +1,5 @@
+import logging
 
-from models.pipeline.concept import Concept, Subject
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
 
@@ -14,6 +12,13 @@ from adapters.ebsco.transformers.text_utils import (
     clean_concept_label,
     normalise_identifier_value,
 )
+from models.pipeline.concept import Concept, Subject
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
+from utils.types import RawConceptType
+
+logger: logging.Logger = logging.getLogger(__name__)
+
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
 FIELD_TO_TYPE: dict[str, RawConceptType] = {
@@ -38,7 +43,6 @@ def extract_subject(field: Field) -> Subject | None:
         return None
     if len(a_subfields) > 1:
         logger.error(f"Repeated Non-repeating field $a found in {tag} field")
-
 
     if field.tag == "600":
         main_concept_label_fields = field.get_subfields(

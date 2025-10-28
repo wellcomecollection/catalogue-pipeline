@@ -2,9 +2,6 @@ from __future__ import annotations
 
 import logging
 
-from models.pipeline.concept import Concept, Genre
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
 
@@ -17,9 +14,11 @@ from adapters.ebsco.transformers.text_utils import (
     clean_concept_label,
     normalise_identifier_value,
 )
+from models.pipeline.concept import Concept, Genre
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
 
 logger: logging.Logger = logging.getLogger(__name__)
-
 
 
 def build_primary_concept(field: Field) -> Concept | None:
@@ -35,7 +34,7 @@ def build_primary_concept(field: Field) -> Concept | None:
     )
     return Concept(
         label=label,
-        type="Genre",
+        type="GenreConcept",
         id=Identifiable.from_source_identifier(source_identifier),
     )
 

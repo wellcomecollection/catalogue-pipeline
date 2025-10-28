@@ -12,7 +12,7 @@ from adapters.ebsco.transformers.text_utils import (
 from models.pipeline.concept import Concept
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identifiable, SourceIdentifier
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 """Helpers for MARC label + subdivision handling (e.g. subjects, genres).
 
@@ -35,7 +35,7 @@ Primary concept type is provided by caller (e.g. Genre, Person, etc.).
 
 SUBDIVISION_CODES: list[str] = ["v", "x", "y", "z"]
 LABEL_SUBFIELD_CODES: list[str] = ["a"] + SUBDIVISION_CODES
-SUBFIELD_TYPE_MAP: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
+SUBFIELD_TYPE_MAP: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
 
 
 def _field_subfields(field: Field, codes: Iterable[str]) -> list[str]:
