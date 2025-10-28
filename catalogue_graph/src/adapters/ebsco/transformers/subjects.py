@@ -1,12 +1,8 @@
 import logging
 from collections.abc import Generator
 
-from models.pipeline.concept import Concept, Subject
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
-from utils.types import RawConceptType
 
 from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
@@ -17,6 +13,10 @@ from adapters.ebsco.transformers.text_utils import (
     clean_concept_label,
     normalise_identifier_value,
 )
+from models.pipeline.concept import Concept, Subject
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
+from utils.types import RawConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -66,11 +66,10 @@ def subdivision_concepts_600(field: Field) -> Generator[Concept]:
 
 def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
     for subfield in field.subfields:
-        code = getattr(subfield, "code", "")
-        if code in SUBDIVISION_CODES:
-            label_part = clean_concept_label(subfield.value)
+        if subfield.code in SUBDIVISION_CODES:
+            label = clean_concept_label(subfield.value)
             ontology_type = SUBFIELD_TYPE_MAP.get(subfield.code, "Concept")
-            yield get_concept(label_part, ontology_type)
+            yield get_concept(label, ontology_type)
 
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
