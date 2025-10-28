@@ -14,7 +14,7 @@ https://www.loc.gov/marc/bibliographic/bd711.html
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import (
+from adapters.ebsco.transformers.text_utils import (
     normalise_identifier_value,
 )
 from models.pipeline.concept import Concept, Contributor

@@ -8,13 +8,37 @@ from pymarc.record import Record
 from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
     build_label_with_subdivisions,
-    primary_and_subdivision_concepts,
+    build_subdivision_concepts,
 )
-from models.pipeline.concept import Genre
+from adapters.ebsco.transformers.text_utils import (
+    clean_concept_label,
+    normalise_identifier_value,
+)
+from models.pipeline.concept import Concept, Genre
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
 
 logger: logging.Logger = logging.getLogger(__name__)
 
 SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]  # retained for callers/tests
+
+
+def build_primary_concept(field: Field) -> Concept | None:
+    primary = field.get_subfields("a")
+    if len(primary) == 0:
+        return None
+    raw = primary[0]
+    label = clean_concept_label(raw)
+    source_identifier = SourceIdentifier(
+        identifier_type=Id(id="label-derived"),
+        ontology_type="Genre",
+        value=normalise_identifier_value(label),
+    )
+    return Concept(
+        label=label,
+        type="Genre",
+        id=Identifiable.from_source_identifier(source_identifier),
+    )
 
 
 def extract_genres(record: Record) -> list[Genre]:
@@ -38,7 +62,12 @@ def extract_genre(field: Field) -> Genre | None:
 
     # Build hyphen-separated label consistent with Scala implementation.
     label = build_label_with_subdivisions(field)
-    concepts = primary_and_subdivision_concepts(field, primary_type="Genre")
+    # Build concepts locally (primary + subdivisions); keep primary type logic
+    # in this ontology-specific module rather than shared helpers.
+    primary_concept = build_primary_concept(field)
+    if primary_concept is None:
+        return None
+    concepts = [primary_concept] + build_subdivision_concepts(field)
     if not label:
         return None
     return Genre(label=label, concepts=concepts)

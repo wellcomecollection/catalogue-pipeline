@@ -57,57 +57,31 @@ def build_label_with_subdivisions(field: Field) -> str:
     return label.rstrip(".")
 
 
-def build_primary_concept(
-    field: Field,
-    ontology_type: ConceptType,
-    default_ontology_type: ConceptType = "Concept",
-) -> Concept | None:
-    primary = _field_subfields(field, ["a"])
-    if len(primary) == 0:
-        return None
-    # If repeated $a - log or ignore? Scala rejects multiple; we ignore extras here.
-    value = primary[0]
-    label = clean_concept_label(value)
-    final_type: ConceptType = ontology_type if ontology_type else default_ontology_type
-    source_identifier = SourceIdentifier(
-        identifier_type=Id(id="label-derived"),
-        ontology_type=final_type,
-        value=normalise_identifier_value(label),
-    )
-    return Concept(
-        id=Identifiable.from_source_identifier(source_identifier),
-        label=label,
-        type=final_type,
-    )
-
-
 def build_subdivision_concepts(field: Field) -> list[Concept]:
+    """Return subdivision concepts (v,x → Concept; y → Period; z → Place).
+
+    Identifier is always label-derived. Trailing punctuation trimmed via
+    clean_concept_label. This is the shared subdivision builder used by
+    specific ontology transformers (e.g. Genre, Subject).
+    """
     concepts: list[Concept] = []
     for subfield in field.subfields:
         code = getattr(subfield, "code", "")
-        if code in SUBDIVISION_CODES:
-            raw = subfield.value
-            label = clean_concept_label(raw)
-            ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
-            source_identifier = SourceIdentifier(
-                identifier_type=Id(id="label-derived"),
-                ontology_type=ontology_type,
-                value=normalise_identifier_value(label),
+        if code not in SUBDIVISION_CODES:
+            continue
+        raw = subfield.value
+        label = clean_concept_label(raw)
+        ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
+        source_identifier = SourceIdentifier(
+            identifier_type=Id(id="label-derived"),
+            ontology_type=ontology_type,
+            value=normalise_identifier_value(label),
+        )
+        concepts.append(
+            Concept(
+                id=Identifiable.from_source_identifier(source_identifier),
+                label=label,
+                type=ontology_type,
             )
-            concepts.append(
-                Concept(
-                    id=Identifiable.from_source_identifier(source_identifier),
-                    label=label,
-                    type=ontology_type,
-                )
-            )
+        )
     return concepts
-
-
-def primary_and_subdivision_concepts(
-    field: Field, primary_type: ConceptType
-) -> list[Concept]:
-    primary = build_primary_concept(field, primary_type)
-    if primary is None:
-        return []
-    return [primary] + build_subdivision_concepts(field)

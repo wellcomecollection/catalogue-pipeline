@@ -1,8 +1,9 @@
 from pymarc.record import Field, Subfield
 
+from adapters.ebsco.transformers.genres import build_primary_concept
 from adapters.ebsco.transformers.label_subdivisions import (
     build_label_with_subdivisions,
-    primary_and_subdivision_concepts,
+    build_subdivision_concepts,
 )
 
 
@@ -30,7 +31,10 @@ def test_concept_types_for_subdivisions() -> None:
         "655",
         [("a", "Music"), ("y", "1990-2000"), ("z", "London."), ("v", "Scores")],
     )
-    concepts = primary_and_subdivision_concepts(field, primary_type="Genre")
+    primary_concept = build_primary_concept(field)
+    concepts = (
+        [primary_concept] if primary_concept else []
+    ) + build_subdivision_concepts(field)
     labels = [c.label for c in concepts]
     types = [c.type for c in concepts]
     assert labels == ["Music", "1990-2000", "London", "Scores"]

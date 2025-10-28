@@ -8,7 +8,10 @@ from adapters.ebsco.transformers.label_subdivisions import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
 )
-from adapters.ebsco.transformers.text_utils import normalise_identifier_value
+from adapters.ebsco.transformers.text_utils import (
+    clean_concept_label,
+    normalise_identifier_value,
+)
 from models.pipeline.concept import Concept, Subject
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identifiable, SourceIdentifier
@@ -86,24 +89,12 @@ def extract_subject(field: Field) -> Subject | None:
     main_concept_label = " ".join(main_concept_label_fields)
 
     # Concept construction with original semantics (preserving Python rules while adopting separator changes)
-    concepts: list[Concept] = [
-        Concept(
-            label=main_concept_label,
-            type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-            id=Identifiable.from_source_identifier(
-                SourceIdentifier(
-                    identifier_type=Id(id="label-derived"),
-                    ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-                    value=normalise_identifier_value(main_concept_label),
-                )
-            ),
-        )
-    ]
+    concepts: list[Concept] = [build_primary_concept(field, main_concept_label)]
     if field.tag == "600":
         # Only x yields a subdivision concept
         for subfield in field.subfields:
             if subfield.code == "x":
-                label_part = subfield.value.rstrip(".,;:").strip()
+                label_part = clean_concept_label(subfield.value)
                 concepts.append(
                     Concept(
                         label=label_part,
@@ -121,7 +112,7 @@ def extract_subject(field: Field) -> Subject | None:
         for subfield in field.subfields:
             code = getattr(subfield, "code", "")
             if code in SUBDIVISION_CODES:
-                label_part = subfield.value.rstrip(".,;:").strip()
+                label_part = clean_concept_label(subfield.value)
                 ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
                 concepts.append(
                     Concept(
@@ -139,3 +130,18 @@ def extract_subject(field: Field) -> Subject | None:
     # 610 & 611: no additional subdivision concepts
     # Trim trailing period from final subject label (Scala behaviour)
     return Subject(label=label.rstrip("."), concepts=concepts)
+
+
+def build_primary_concept(field: Field, label: str) -> Concept:
+    ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
+    return Concept(
+        label=label,
+        type=ontology_type,
+        id=Identifiable.from_source_identifier(
+            SourceIdentifier(
+                identifier_type=Id(id="label-derived"),
+                ontology_type=ontology_type,
+                value=normalise_identifier_value(label),
+            )
+        ),
+    )
