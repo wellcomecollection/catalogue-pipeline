@@ -361,7 +361,7 @@ def test_populate_first_production_with_008_dates_if_none_of_its_own(
 
 def test_production_label_trims_trailing_punctuation(marc_record: Record) -> None:
     """Overall production label only trims final punctuation; internal punctuation retained."""
-    marc_record.add_field(
+    marc_record.add_field(  # type: ignore[no-untyped-call]
         Field(
             tag="260",
             subfields=[
@@ -384,7 +384,7 @@ def test_production_label_trims_trailing_punctuation(marc_record: Record) -> Non
 
 def test_production_manufacture_function_label_cleaned(marc_record: Record) -> None:
     """Manufacture subfields cleaned and function label stable."""
-    marc_record.add_field(
+    marc_record.add_field(  # type: ignore[no-untyped-call]
         Field(
             tag="260",
             subfields=[

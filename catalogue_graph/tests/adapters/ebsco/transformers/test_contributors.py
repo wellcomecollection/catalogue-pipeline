@@ -300,7 +300,7 @@ def test_contributor_all_fields(
 
 def test_contributor_label_trims_trailing_punctuation(marc_record: Record) -> None:
     """Only terminal punctuation is trimmed from the overall label; internal punctuation preserved."""
-    marc_record.add_field(
+    marc_record.add_field(  # type: ignore[no-untyped-call]
         Field(
             tag="100",
             subfields=[
@@ -321,7 +321,7 @@ def test_contributor_label_trims_trailing_punctuation(marc_record: Record) -> No
 
 def test_contributor_role_labels_are_cleaned(marc_record: Record) -> None:
     """Role labels have trailing punctuation trimmed individually."""
-    marc_record.add_field(
+    marc_record.add_field(  # type: ignore[no-untyped-call]
         Field(
             tag="700",
             subfields=[
