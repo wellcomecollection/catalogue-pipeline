@@ -7,7 +7,8 @@ Other Identifiers include ISBN (020) and ISSN (022) records.
 from pymarc.field import Field
 from pymarc.record import Record
 
-from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import SourceIdentifier
 
 ID_TYPES = {"020": "isbn", "022": "issn"}
 

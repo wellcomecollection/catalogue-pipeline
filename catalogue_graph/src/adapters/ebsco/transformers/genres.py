@@ -1,30 +1,43 @@
 from __future__ import annotations
 
 import logging
-from itertools import chain
 
+from models.pipeline.concept import Concept, Genre
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import (
-    extract_concept_from_subfield_value,
-    non_empty,
-    subdivision_concepts,
+from adapters.ebsco.transformers.common import non_empty
+from adapters.ebsco.transformers.label_subdivisions import (
+    build_label_with_subdivisions,
+    build_subdivision_concepts,
 )
-from models.pipeline.concept import Genre
-from utils.types import RawConceptType
+from adapters.ebsco.transformers.text_utils import (
+    clean_concept_label,
+    normalise_identifier_value,
+)
 
 logger: logging.Logger = logging.getLogger(__name__)
 
-SUBDIVISION_SUBFIELDS: list[str] = ["v", "x", "y", "z"]
-LABEL_SUBFIELDS: list[str] = ["a"] + SUBDIVISION_SUBFIELDS
 
-# Mapping of subdivision code -> SourceConcept.type override
-CONCEPT_TYPE_MAP: dict[str, RawConceptType] = {
-    "y": "Period",
-    "z": "Place",
-    # 'a', 'v', 'x' default to 'Concept'
-}
+
+def build_primary_concept(field: Field) -> Concept | None:
+    primary = field.get_subfields("a")
+    if len(primary) == 0:
+        return None
+    raw = primary[0]
+    label = clean_concept_label(raw)
+    source_identifier = SourceIdentifier(
+        identifier_type=Id(id="label-derived"),
+        ontology_type="Genre",
+        value=normalise_identifier_value(label),
+    )
+    return Concept(
+        label=label,
+        type="Genre",
+        id=Identifiable.from_source_identifier(source_identifier),
+    )
 
 
 def extract_genres(record: Record) -> list[Genre]:
@@ -42,18 +55,18 @@ def extract_genre(field: Field) -> Genre | None:
     if len(a_subfields) == 0:
         return None
     if len(a_subfields) > 1:
+        # Keep parity with existing behaviour: log and discard whole field
         logger.error("Repeated Non-repeating field $a found in 655 field")
         return None
-    subdivision_subfields = field.get_subfields("v", "x", "y", "z")
-    genre_label = " ".join(chain(a_subfields, subdivision_subfields))
 
-    concepts = [
-        extract_concept_from_subfield_value(
-            "a", a_subfields[0], default_ontology_type="GenreConcept"
-        )
-    ] + subdivision_concepts(field, SUBDIVISION_SUBFIELDS)
-
-    return Genre(
-        label=genre_label,
-        concepts=concepts,
-    )
+    # Build hyphen-separated label consistent with Scala implementation.
+    label = build_label_with_subdivisions(field)
+    # Build concepts locally (primary + subdivisions); keep primary type logic
+    # in this ontology-specific module rather than shared helpers.
+    primary_concept = build_primary_concept(field)
+    if primary_concept is None:
+        return None
+    concepts = [primary_concept] + build_subdivision_concepts(field)
+    if not label:
+        return None
+    return Genre(label=label, concepts=concepts)

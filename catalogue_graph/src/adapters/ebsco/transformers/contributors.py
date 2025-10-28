@@ -14,7 +14,8 @@ https://www.loc.gov/marc/bibliographic/bd711.html
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import (
+from adapters.ebsco.transformers.text_utils import (
+    clean_concept_label,
     normalise_identifier_value,
 )
 from models.pipeline.concept import Concept, Contributor
@@ -91,7 +92,16 @@ def format_field(field: Field) -> Contributor:
 
 
 def label_from_field(field: Field, subfields: list[str]) -> str:
-    return " ".join(field.get_subfields(*subfields))
+    """Join selected subfields into a contributor label applying trailing punctuation trimming.
+
+    We keep the existing selection of subfields (excluding work-related ones like $t,$n,$p,$l)
+    and apply cleaning only to the final combined label so internal punctuation (e.g. commas/colons
+    that convey structure) is preserved. This matches previous semantics while still trimming any
+    trailing punctuation from the overall label.
+    """
+    parts = [v.strip() for v in field.get_subfields(*subfields) if v.strip()]
+    combined = " ".join(parts)
+    return clean_concept_label(combined)
 
 
 def is_primary(tag: str) -> bool:
@@ -113,4 +123,7 @@ def roles(field: Field) -> list[Label]:
 
     If EBSCO fix this, then we will have to update accordingly.
     """
-    return [Label(label=value.strip()) for value in field.get_subfields("e")]
+    return [
+        Label(label=clean_concept_label(value.strip()))
+        for value in field.get_subfields("e")
+    ]

@@ -1,11 +1,7 @@
 from collections.abc import Callable, Iterable
 from urllib.parse import urlparse
 
-from pymarc.record import Field, Record, Subfield
-
-from models.pipeline.concept import Concept
-from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
-from utils.types import RawConceptType
+from pymarc.record import Record
 
 
 def mandatory_field(marc_code: str, field_name: str) -> Callable:
@@ -61,51 +57,3 @@ def is_url(maybe_url: str) -> bool:
     # So we need to do a bit of extra checking to see if it really
     # looks like a URL.
     return bool(url.scheme in ["http", "https"] and url.netloc)
-
-
-SUBFIELD_TO_TYPE: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
-
-
-def subdivision_concepts(
-    field: Field, subdivision_subfields: list[str]
-) -> list[Concept]:
-    return [
-        extract_concept_from_subfield(subfield)
-        for subfield in field.subfields
-        if subfield.code in subdivision_subfields
-    ]
-
-
-def extract_concept_from_subfield(subfield: Subfield) -> Concept:
-    return extract_concept_from_subfield_value(subfield.code, subfield.value)
-
-
-def extract_concept_from_subfield_value(
-    code: str, value: str, default_ontology_type: RawConceptType = "Concept"
-) -> Concept:
-    concept_label = _clean_concept_label(value)
-    ontology_type = SUBFIELD_TO_TYPE.get(code, default_ontology_type)
-    identifier = SourceIdentifier(
-        identifier_type=Id(id="label-derived"),
-        ontology_type=ontology_type,
-        value=normalise_identifier_value(concept_label),
-    )
-    return Concept(
-        id=Identifiable.from_source_identifier(identifier),
-        label=concept_label,
-        type=SUBFIELD_TO_TYPE.get(code, ontology_type),
-    )
-
-
-def _clean_concept_label(value: str) -> str:
-    """
-    Remove trailing punctuation (.,;:) and trim whitespace for concept labels.
-    """
-    return value.rstrip(".,;:").strip()
-
-
-def normalise_identifier_value(label: str) -> str:
-    """
-    Lowercase & collapse internal whitespace for identifier values.
-    """
-    return " ".join(label.split()).lower()
