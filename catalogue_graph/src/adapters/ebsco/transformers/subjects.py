@@ -3,13 +3,15 @@ import logging
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import (
-    non_empty,
-    normalise_identifier_value,
-    subdivision_concepts,
+from adapters.ebsco.transformers.common import non_empty
+from adapters.ebsco.transformers.label_subdivisions import (
+    SUBDIVISION_CODES,
+    SUBFIELD_TYPE_MAP,
 )
+from adapters.ebsco.transformers.text_utils import normalise_identifier_value
 from models.pipeline.concept import Concept, Subject
-from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
 from utils.types import ConceptType
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
@@ -58,25 +60,82 @@ def extract_subject(field: Field) -> Subject | None:
         secondary_subfield_codes = SUBDIVISION_SUBFIELDS
         extra_label_subfield_codes = secondary_subfield_codes
 
-    label = " ".join(
-        main_concept_label_fields + field.get_subfields(*extra_label_subfield_codes)
-    )
+    # Label construction rules:
+    # - 600: base label (a..l minus x) + role subfield e (if present) space-separated; x subdivision appended with hyphen separator
+    # - 610 & 611: original space-joined label including c,d,e (610) / none extra (611); ignore subdivisions for label & concepts
+    # - 648/650/651: a + all subdivision subfields joined with hyphen separator (Scala style)
+    primary_label_part = " ".join(main_concept_label_fields)
+    subdivision_label_parts = field.get_subfields(*secondary_subfield_codes)
+    if field.tag == "600":
+        role_subfields = field.get_subfields("e")
+        base_label_part = " ".join(main_concept_label_fields + role_subfields)
+        if subdivision_label_parts:
+            label = " - ".join([base_label_part] + subdivision_label_parts)
+        else:
+            label = base_label_part
+    elif field.tag in ["610", "611"]:
+        # Space-joined including extra label subfields (c,d,e) for 610 and none extra for 611
+        label = " ".join(
+            main_concept_label_fields + field.get_subfields(*extra_label_subfield_codes)
+        )
+    else:
+        if subdivision_label_parts:
+            label = " - ".join([primary_label_part] + subdivision_label_parts)
+        else:
+            label = primary_label_part
     main_concept_label = " ".join(main_concept_label_fields)
 
-    return Subject(
-        label=label,
-        concepts=[
-            Concept(
-                label=main_concept_label,
-                type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-                id=Identifiable.from_source_identifier(
-                    SourceIdentifier(
-                        identifier_type=Id(id="label-derived"),
-                        ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
-                        value=normalise_identifier_value(main_concept_label),
+    # Concept construction with original semantics (preserving Python rules while adopting separator changes)
+    concepts: list[Concept] = [
+        Concept(
+            label=main_concept_label,
+            type=FIELD_TO_TYPE.get(field.tag, "Concept"),
+            id=Identifiable.from_source_identifier(
+                SourceIdentifier(
+                    identifier_type=Id(id="label-derived"),
+                    ontology_type=FIELD_TO_TYPE.get(field.tag, "Concept"),
+                    value=normalise_identifier_value(main_concept_label),
+                )
+            ),
+        )
+    ]
+    if field.tag == "600":
+        # Only x yields a subdivision concept
+        for subfield in field.subfields:
+            if subfield.code == "x":
+                label_part = subfield.value.rstrip(".,;:").strip()
+                concepts.append(
+                    Concept(
+                        label=label_part,
+                        type="Concept",
+                        id=Identifiable.from_source_identifier(
+                            SourceIdentifier(
+                                identifier_type=Id(id="label-derived"),
+                                ontology_type="Concept",
+                                value=normalise_identifier_value(label_part),
+                            )
+                        ),
                     )
-                ),
-            )
-        ]
-        + subdivision_concepts(field, secondary_subfield_codes),
-    )
+                )
+    elif field.tag in ["648", "650", "651"]:
+        for subfield in field.subfields:
+            code = getattr(subfield, "code", "")
+            if code in SUBDIVISION_CODES:
+                label_part = subfield.value.rstrip(".,;:").strip()
+                ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
+                concepts.append(
+                    Concept(
+                        label=label_part,
+                        type=ontology_type,
+                        id=Identifiable.from_source_identifier(
+                            SourceIdentifier(
+                                identifier_type=Id(id="label-derived"),
+                                ontology_type=ontology_type,
+                                value=normalise_identifier_value(label_part),
+                            )
+                        ),
+                    )
+                )
+    # 610 & 611: no additional subdivision concepts
+    # Trim trailing period from final subject label (Scala behaviour)
+    return Subject(label=label.rstrip("."), concepts=concepts)

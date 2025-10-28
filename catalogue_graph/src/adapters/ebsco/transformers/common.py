@@ -3,6 +3,10 @@ from urllib.parse import urlparse
 
 from pymarc.record import Field, Record, Subfield
 
+from adapters.ebsco.transformers.text_utils import (
+    clean_concept_label,
+    normalise_identifier_value,
+)
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import ConceptType
@@ -97,15 +101,5 @@ def extract_concept_from_subfield_value(
     )
 
 
-def _clean_concept_label(value: str) -> str:
-    """
-    Remove trailing punctuation (.,;:) and trim whitespace for concept labels.
-    """
-    return value.rstrip(".,;:").strip()
-
-
-def normalise_identifier_value(label: str) -> str:
-    """
-    Lowercase & collapse internal whitespace for identifier values.
-    """
-    return " ".join(label.split()).lower()
+def _clean_concept_label(value: str) -> str:  # Backwards compatibility internal use
+    return clean_concept_label(value)

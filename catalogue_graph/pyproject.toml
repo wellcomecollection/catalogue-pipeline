@@ -95,5 +95,5 @@ mypy_path = "src:type_stubs"
 
 # Ignore untyped imports for external libraries without stubs
 [[tool.mypy.overrides]]
-module = ["pyarrow.*", "boto3.*", "smart_open.*"]
+module = ["pyarrow.*", "boto3.*", "smart_open.*", "pymarc.*"]
 ignore_missing_imports = true
