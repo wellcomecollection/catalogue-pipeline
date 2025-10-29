@@ -24,12 +24,12 @@ data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      module.elastic.pipeline_storage_private_host,
-      module.elastic.pipeline_storage_port,
-      module.elastic.pipeline_storage_protocol,
-      module.elastic.pipeline_storage_es_service_secrets["concepts_ingestor"]["es_apikey"],
-      module.elastic.pipeline_storage_es_service_secrets["works_ingestor"]["es_apikey"],
-      module.elastic.pipeline_storage_es_service_secrets["graph_extractor"]["es_apikey"],
+      var.es_cluster_host,
+      var.es_cluster_port,
+      var.es_cluster_protocol,
+      var.es_secrets.concepts_ingestor,
+      var.es_secrets.works_ingestor,
+      var.es_secrets.graph_extractor,
     ]
   }
 }
@@ -38,10 +38,10 @@ data "aws_iam_policy_document" "allow_pipeline_storage_secret_read_denormalised_
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      module.elastic.pipeline_storage_private_host,
-      module.elastic.pipeline_storage_port,
-      module.elastic.pipeline_storage_protocol,
-      module.elastic.pipeline_storage_es_service_secrets["graph_extractor"]["es_apikey"],
+      var.es_cluster_host,
+      var.es_cluster_port,
+      var.es_cluster_protocol,
+      var.es_secrets.graph_extractor,
     ]
   }
 }
