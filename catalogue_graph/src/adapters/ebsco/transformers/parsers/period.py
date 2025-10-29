@@ -168,9 +168,6 @@ def fill_year_prefix(from_year: str, to_year: str) -> str:
     >>> fill_year_prefix("1964", "72")
     '1972'
 
-    >>> fill_year_prefix("1964", "72")
-    '1972'
-
     >>> fill_year_prefix("650", "55")
     '655'
 
