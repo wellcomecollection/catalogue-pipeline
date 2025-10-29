@@ -3,16 +3,16 @@ from __future__ import annotations
 from collections.abc import Iterable
 from itertools import chain
 
+from models.pipeline.concept import Concept
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
 from pymarc.field import Field
+from utils.types import RawConceptType
 
 from adapters.ebsco.transformers.text_utils import (
     normalise_identifier_value,
     normalise_label,
 )
-from models.pipeline.concept import Concept
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
-from utils.types import RawConceptType
 
 """Helpers for MARC label + subdivision handling (e.g. subjects, genres).
 
@@ -69,20 +69,25 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
         code = getattr(subfield, "code", "")
         if code not in SUBDIVISION_CODES:
             continue
-        raw = subfield.value
-        # Map codes y->Period, z->Place, others -> Concept. Apply normalisation per type.
+
         ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
-        label = normalise_label(raw, ontology_type)
-        source_identifier = SourceIdentifier(
-            identifier_type=Id(id="label-derived"),
-            ontology_type=ontology_type,
-            value=normalise_identifier_value(label),
-        )
-        concepts.append(
-            Concept(
-                id=Identifiable.from_source_identifier(source_identifier),
-                label=label,
-                type=ontology_type,
-            )
-        )
+        concepts.append(build_concept(subfield.value, ontology_type))
+
     return concepts
+
+
+def build_concept(raw_label: str, raw_concept_type: RawConceptType) -> Concept:
+    label = normalise_label(raw_label)
+    concept_type = Concept.type_to_display_type(raw_concept_type)
+    
+    source_identifier = SourceIdentifier(
+        identifier_type=Id(id="label-derived"),
+        ontology_type=concept_type,
+        value=normalise_identifier_value(label),
+    )
+
+    return Concept(
+        id=Identifiable.from_source_identifier(source_identifier),
+        label=label,
+        type=raw_concept_type,
+    )

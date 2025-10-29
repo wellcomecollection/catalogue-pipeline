@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import logging
 
+from models.pipeline.concept import Concept, Genre
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
 
@@ -14,9 +17,6 @@ from adapters.ebsco.transformers.text_utils import (
     normalise_identifier_value,
     normalise_label,
 )
-from models.pipeline.concept import Concept, Genre
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -63,12 +63,9 @@ def extract_genre(field: Field) -> Genre | None:
     # Build concepts locally (primary + subdivisions); keep primary type logic
     # in this ontology-specific module rather than shared helpers.
     primary_concept = build_primary_concept(field)
-    if primary_concept is None:
+    if primary_concept is None or not label:
         return None
-    # Subdivision concepts are generic Concept/Period/Place types – they will be normalised inside builder.
-    concepts = [primary_concept] + build_subdivision_concepts(field)
-    if not label:
-        return None
-    # Final label may include subdivisions joined earlier; normalise again for Genre semantics.
+
     genre_label = normalise_label(label, "Genre")
+    concepts = [primary_concept] + build_subdivision_concepts(field)
     return Genre(label=genre_label, concepts=concepts)

@@ -12,6 +12,7 @@ from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
+    build_concept,
 )
 from adapters.ebsco.transformers.text_utils import (
     normalise_identifier_value,
@@ -59,16 +60,14 @@ def label_transform_648_650_651(field: Field) -> str:
 def subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept
     for raw_label in field.get_subfields("x"):
-        label = clean_concept_label(raw_label)
-        yield get_concept(label, "Concept")
+        yield build_concept(raw_label, "Concept")
 
 
 def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
     for subfield in field.subfields:
         if subfield.code in SUBDIVISION_CODES:
-            label = clean_concept_label(subfield.value)
             ontology_type = SUBFIELD_TYPE_MAP.get(subfield.code, "Concept")
-            yield get_concept(label, ontology_type)
+            yield build_concept(subfield.value, ontology_type)
 
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]

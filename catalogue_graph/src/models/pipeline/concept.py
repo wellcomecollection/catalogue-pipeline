@@ -1,4 +1,5 @@
 from pydantic import Field
+from utils.types import ConceptType, RawConceptType
 
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import (
@@ -7,22 +8,25 @@ from models.pipeline.identifier import (
     Unidentifiable,
 )
 from models.pipeline.serialisable import SerialisableModel
-from utils.types import ConceptType, RawConceptType
 
 
 class Concept(SerialisableModel):
     id: Identified | Unidentifiable | Identifiable = Unidentifiable()
     label: str
     type: RawConceptType = "Concept"
-
-    @property
-    def display_type(self) -> ConceptType:
+    
+    @staticmethod
+    def type_to_display_type(raw_type: RawConceptType) -> ConceptType:
         # In the merged index, the 'Genre' type is called 'GenreConcept'
-        if self.type == "GenreConcept":
+        if raw_type == "GenreConcept":
             return "Genre"
 
-        return self.type
-
+        return raw_type
+        
+    @property
+    def display_type(self) -> ConceptType:
+        return self.type_to_display_type(self.type)
+    
     @property
     def normalised_label(self) -> str:
         return self.label.removesuffix(".")
