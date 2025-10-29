@@ -443,3 +443,35 @@ def test_field_008_unknown_date(
         production.label
         == "Paris : E&#769;ditions de l'E&#769;cole des Hautes e&#769;tudes en sciences sociales"
     )
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="260",
+                    indicators=Indicators(" ", " "),
+                    subfields=[
+                        Subfield(code="a", value="New York :"),
+                        Subfield(
+                            code="b",
+                            value="The Museum,",
+                        ),
+                        Subfield(code="c", value="&#169;1928, &#169;1929-1936."),
+                    ],
+                ),
+            ]
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_field_008_multiple_from_dates(
+    marc_record: Record,
+) -> None:
+    production = lone_element(transform_record(marc_record).data.production)
+    period = lone_element(production.dates)
+    assert period.range.label == "&#169;1928, &#169;1929-1936"
+    assert period.range.from_time == "1928-01-01T00:00:00Z"
+    assert period.range.to_time == "1936-12-31T23:59:59.999999Z"

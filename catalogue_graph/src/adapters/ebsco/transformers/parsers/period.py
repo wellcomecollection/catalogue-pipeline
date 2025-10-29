@@ -64,10 +64,6 @@ def preprocess(period: str) -> str:
     >>> preprocess("[2016]-[2020]")
     '2016 - 2020'
 
-     - Square brackets
-    >>> preprocess("[2016]-[2020]")
-    '2016 - 2020'
-
      - Escaped angle brackets
     >>> preprocess("1961-&lt;2024&gt;")
     '1961 - 2024'
@@ -122,10 +118,6 @@ def crack(range_string: str) -> tuple[str, str]:
     >>> crack("1812 1999 1982")
     ('1812', '1999')
 
-    The list of dates may not be in order, there may be more than two
-    >>> crack("1812 1999 1982")
-    ('1812', '1999')
-
     The "to" date may be abbreviated, the century being inherited from the "from" date.
     >>> crack("1961 - 72")
     ('1961', '1972')
@@ -141,11 +133,16 @@ def crack(range_string: str) -> tuple[str, str]:
     (from_part, sep, to_part) = range_string.partition("-")
     from_part = from_part.strip()
     to_part = to_part.strip()
+
+    # If from_part consists of multiple year entries (e.g. "2024 2025"), extract the lowest one
+    if from_part:
+        from_part = min(from_part.split(" "))
+
     if from_part and sep and to_part:
-        to_part = max(
-            [fill_year_prefix(from_part, to_year) for to_year in to_part.split(" ")]
-        )
         # Fill in any implied missing numbers in the to part.
+        to_part = max(
+            fill_year_prefix(from_part, to_year) for to_year in to_part.split(" ")
+        )
 
     if not sep:
         parts = from_part.split(" ")
