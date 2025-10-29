@@ -54,7 +54,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline_incremental" {
           Payload      = "{% $states.context.Execution.Input %}"
         },
         Output = "{% $merge([$states.context.Execution.Input, $states.result.Payload ]) %}",
-        Retry = local.state_function_default_retry,
+        Retry  = local.state_function_default_retry,
         Next   = "Extractors"
       },
       "Extractors" = {

@@ -38,7 +38,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           Payload      = "{% $states.input %}"
         },
         Retry = local.state_function_default_retry,
-        Next = "Monitor indexer"
+        Next  = "Monitor indexer"
       }
       "Monitor indexer" = {
         Type     = "Task"

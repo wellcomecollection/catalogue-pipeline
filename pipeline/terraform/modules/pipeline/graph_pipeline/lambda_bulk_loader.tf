@@ -1,5 +1,5 @@
 module "bulk_loader_lambda" {
-  source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
+  source       = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
   name         = "${local.namespace}-bulk-loader-${var.pipeline_date}"
   description  = "Bulk loads entities from an S3 bucket into the Neptune database."
   package_type = "Image"

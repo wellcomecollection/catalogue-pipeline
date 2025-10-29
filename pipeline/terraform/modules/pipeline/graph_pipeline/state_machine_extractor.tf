@@ -11,7 +11,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.sync"
         Output   = "{% $states.input %}"
-        Retry = local.state_function_default_retry,
+        Retry    = local.state_function_default_retry,
         Next     = "Success"
         Arguments = {
           Cluster        = aws_ecs_cluster.cluster.arn
