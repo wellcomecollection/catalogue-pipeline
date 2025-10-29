@@ -9,14 +9,14 @@ Feature: Extracting subjects from 6xx fields
     Scenario: A poorly formed genre
     "a" is a non-repeating field. However, if a field has more than one, accept it but log the anomaly.
     There are some records out of our control where multiple "a" has occurred
-      Given the MARC record has a 600 field with subfield "a" value "Joseph Pujol" and subfield "a" value "Roland"
+      Given the MARC record has a 600 field with indicators "" "0" with subfield "a" value "Joseph Pujol" and subfield "a" value "Roland"
       When I transform the MARC record
       Then an error "Repeated Non-repeating field $a found in 600 field" is logged
       And the only subject has the label "Joseph Pujol Roland"
 
   Rule: A subject is extracted for each relevant field
     Scenario Outline: A single simple subject
-      Given the MARC record has a <code> field with subfield "a" value "A Subject"
+      Given the MARC record has a <code> field with indicators "" "0" with subfield "a" value "A Subject"
       When I transform the MARC record
       Then the only subject has the label "A Subject"
       And it has 1 concept
@@ -33,7 +33,7 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: Compound subjects have an appropriately typed concept for each subdivision
     Scenario Outline: A subject with all the subdivisions
-      Given the MARC record has a <code> field with subfields:
+      Given the MARC record has a <code> field with indicators "" "0" with subfields:
         | code | value      |
         | a    | A Subject  |
         | v    | Specimens  |
@@ -60,7 +60,7 @@ Feature: Extracting subjects from 6xx fields
     A Person subject ignores v, y, and z.  Most of the other subdivisions form the subject label and the label of the main concept
     Subfield e is the role and does not result in a concept, nor is it part of the main concept
     Subfield x is the general subdivision, and is only included in the label of subject, and creates its own concept
-      Given the MARC record has a 600 field with subfields:
+      Given the MARC record has a 600 field with indicators "" "2" with subfields:
         | code | value              |
         | a    | Joseph Pujol       |
         | b    | III                |
@@ -85,7 +85,7 @@ Feature: Extracting subjects from 6xx fields
 
     Scenario: A 610 field with all the subdivisions yields an Organisation
     Regardless of the subdivisions, an Organisation is only one Concept
-      Given the MARC record has a 610 field with subfields:
+      Given the MARC record has a 610 field with indicators "" "0" with subfields:
         | code | value                       |
         | a    | Catholic Church.            |
         | b    | Diocese of Auxerre (France) |
@@ -102,7 +102,7 @@ Feature: Extracting subjects from 6xx fields
 
     Scenario: A 611 field with all the subdivisions yields a Meeting
     Regardless of the subdivisions, a Meeting is only one Concept
-      Given the MARC record has a 611 field with subfields:
+      Given the MARC record has a 611 field with indicators "" "0" with subfields:
         | code | value                 |
         | a    | Diet of Worms.        |
         | c    | Rhineland-Palatinate, |
@@ -126,3 +126,41 @@ Feature: Extracting subjects from 6xx fields
       Given the MARC record has a 600 field with subfield "a" value ""
       When I transform the MARC record
       Then there are no subjects
+
+  Rule: Not all 6xx fields create a Subject
+    Scenario Outline: Ignored second indicators
+      Given the MARC record has a 650 field with indicators "0" "<ind2>" with subfield "a" value "<source>"
+      When I transform the MARC record
+      Then there are no subjects
+      Examples:
+        | ind2 | source                                                            |
+        | 1    | Library of Congress Children's and Young Adults' Subject Headings |
+        | 3    | National Agricultural Library subject authority file              |
+        | 4    | Source not specified                                              |
+        | 5    | Canadian Subject Headings                                         |
+        | 6    | Répertoire de vedettes- matière                                   |
+
+    Scenario Outline: Unconditional second indicators
+      Given the MARC record has a 650 field with indicators "0" "<ind2>" with subfield "a" value "<source>"
+      When I transform the MARC record
+      Then there is 1 subject
+      Examples:
+        | ind2 | source                               |
+        | 0    | Library of Congress Subject Headings |
+        | 2    | Medical Subject Headings             |
+
+    Scenario Outline: Conditional second indicator
+      Given the MARC record has a 650 field with indicators "0" "7" with subfields:
+        | code | value     |
+        | a    | A Subject |
+        | 2    | <source>  |
+      When I transform the MARC record
+      Then there are <n> subjects
+      Examples:
+        | n | source   |
+        | 1 | local    |
+        | 1 | homoit   |
+        | 1 | indig    |
+        | 1 | enslv    |
+        | 0 | kadoc    |
+        | 0 | galestne |

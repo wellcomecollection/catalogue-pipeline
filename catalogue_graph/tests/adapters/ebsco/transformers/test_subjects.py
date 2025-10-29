@@ -16,6 +16,7 @@ def test_no_subjects(marc_record: Record) -> None:
             [
                 Field(
                     tag="610",
+                    indicators=("", "2"),
                     subfields=[
                         Subfield(code="a", value="A"),
                         Subfield(code="b", value="B"),
