@@ -23,6 +23,7 @@ def build_primary_concept(field: Field) -> Concept | None:
     primary = field.get_subfields("a")
     if len(primary) == 0:
         return None
+
     return build_concept(primary[0], "GenreConcept")
 
 

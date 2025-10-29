@@ -9,14 +9,39 @@ from utils.types import RawConceptType
 Updated to replicate Scala ConceptsTransformer type-specific trailing punctuation semantics.
 
 Scala rules (see ConceptsTransformer.scala):
-  - Concept & GenreConcept labels: trim a single trailing period (not ellipses), then whitespace.
-  - Genre work-level label additionally replaces 'Electronic Books' with 'Electronic books'.
-  - Agent/Person/Organisation/Meeting labels: trim a trailing comma.
-  - Place labels: trim a trailing colon.
-  - Period labels: no punctuation trimming here (identifiers use a preprocessed version upstream).
+    - Concept & GenreConcept labels: trim a single trailing period (not ellipses), then whitespace.
+    - Genre work-level label additionally replaces 'Electronic Books' with 'Electronic books'.
+    - Agent/Person/Organisation/Meeting labels: trim a trailing comma.
+    - Place labels: trim a trailing colon.
+    - Period labels: no punctuation trimming here (identifiers use a preprocessed version upstream).
 
-We keep whitespace collapsing for identifier values.
+Identifier values are now derived exclusively via Identifiable.identifier_from_text; we no longer perform a separate
+whitespace-collapsing pass (previous normalise_identifier_value removed).
 """
+
+
+def trim_trailing_period(label: str) -> str:
+    """Remove a single trailing period but not ellipses, mirroring Scala trimTrailingPeriod.
+
+    Scala regex (conceptually): /([^\\.])\\.\\s*$/ replacement "$1"; then trim trailing whitespace.
+    We replicate by first substituting, then stripping trailing whitespace.
+    Examples:
+      Title.   -> Title
+      Title..  -> Title.   (remove only one)
+      Title... -> Title... (ellipsis preserved)
+    """
+    result = re.sub(r"([^\.])\.\s*$", r"\1", label)
+    return re.sub(r"\s*$", "", result)
+
+
+def trim_trailing(label: str, char: str) -> str:
+    """Remove the given trailing character and any surrounding whitespace (single instance), mirroring Scala trimTrailing.
+
+    Example: trim_trailing("Name,  ", ",") -> "Name"
+    We construct a regex similar to Scala's dynamic one.
+    """
+    pattern = r"\s*" + re.escape(char) + r"\s*$"
+    return re.sub(pattern, "", label)
 
 
 def normalise_label(label: str, concept_type: RawConceptType) -> str:
@@ -30,17 +55,12 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
     """
     s = label.strip()
 
-    if concept_type in ["Concept", "GenreConcept", "Subject"]:
-        # Remove a single trailing period unless part of ellipsis (i.e. three periods)
-        # Regex replicates Scala trimTrailingPeriod behaviour.
-        s = re.sub(r"([^\.])\.\s*$", r"\1", s).rstrip()
+    if concept_type in ["Concept", "GenreConcept", "Subject", "Period"]:
+        s = trim_trailing_period(s)
     elif concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
-        s = re.sub(r"\s*,\s*$", "", s)
+        s = trim_trailing(s, ",")
     elif concept_type == "Place":
-        s = re.sub(r"\s*:\s*$", "", s)
-    elif concept_type == "Period":
-        # Leave untouched (besides earlier strip)
-        pass
+        s = trim_trailing(s, ":")
 
     # Replace exact label 'Electronic Books' (after period trimming) with sentence case form.
     if concept_type == "GenreConcept" and s == "Electronic Books":
@@ -49,6 +69,4 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
     return s
 
 
-def normalise_identifier_value(label: str) -> str:
-    """Collapse internal whitespace & lowercase for identifier and matching purposes."""
-    return " ".join(label.split()).lower()
+## NOTE: normalise_identifier_value removed; use Identifiable.identifier_from_text for label-derived identifiers.

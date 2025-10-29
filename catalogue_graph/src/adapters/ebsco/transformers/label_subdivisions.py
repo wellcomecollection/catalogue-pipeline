@@ -6,12 +6,10 @@ from itertools import chain
 from pymarc.field import Field
 
 from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
     normalise_label,
 )
 from models.pipeline.concept import Concept
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
+from models.pipeline.identifier import Identifiable
 from utils.types import RawConceptType
 
 """Helpers for MARC label + subdivision handling (e.g. subjects, genres).
@@ -87,11 +85,4 @@ def build_concept(raw_label: str, raw_type: RawConceptType) -> Concept:
 
 def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:
     concept_type = Concept.type_to_display_type(raw_type)
-
-    return Identifiable.from_source_identifier(
-        SourceIdentifier(
-            identifier_type=Id(id="label-derived"),
-            ontology_type=concept_type,
-            value=normalise_identifier_value(label),
-        )
-    )
+    return Identifiable.identifier_from_text(label, concept_type)

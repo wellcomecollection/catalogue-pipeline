@@ -359,8 +359,8 @@ def test_populate_first_production_with_008_dates_if_none_of_its_own(
     assert period.range.from_time == "1979-01-01T00:00:00Z"
 
 
-def test_production_label_trims_trailing_punctuation(marc_record: Record) -> None:
-    """Overall production label only trims final punctuation; internal punctuation retained."""
+def test_production_label_retains_punctuation(marc_record: Record) -> None:
+    """Overall production label only does not trim punctuation."""
     marc_record.add_field(  # type: ignore[no-untyped-call]
         Field(
             tag="260",
@@ -371,7 +371,7 @@ def test_production_label_trims_trailing_punctuation(marc_record: Record) -> Non
                 Subfield(
                     code="b", value="Publisher, Ltd.;"
                 ),  # internal semicolon retained
-                Subfield(code="c", value="1999."),  # final period trimmed
+                Subfield(code="c", value="1999"),  # final period trimmed
             ],
         )
     )
@@ -381,7 +381,7 @@ def test_production_label_trims_trailing_punctuation(marc_record: Record) -> Non
     # Agent labels only trim trailing comma; semicolon retained.
     assert lone_element(production.agents).label == "Publisher, Ltd.;"
     # Date concepts now retain a trailing period (Period labels unchanged by normalisation)
-    assert lone_element(production.dates).label == "1999."
+    assert lone_element(production.dates).label == "1999"
 
 
 def test_production_manufacture_function_label_cleaned(marc_record: Record) -> None:
@@ -404,4 +404,4 @@ def test_production_manufacture_function_label_cleaned(marc_record: Record) -> N
     # Agent labels retain trailing semicolon.
     assert lone_element(production.agents).label == "Printer Co.;"
     # Date concepts now retain a trailing period (Period labels unchanged by normalisation)
-    assert lone_element(production.dates).label == "2001."
+    assert lone_element(production.dates).label == "2001"
