@@ -10,7 +10,7 @@ from adapters.ebsco.transformers.text_utils import (
 )
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identifiable
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 """Helpers for MARC label + subdivision handling (e.g. subjects, genres).
 
@@ -33,7 +33,7 @@ Primary concept type is provided by caller (e.g. Genre, Person, etc.).
 
 SUBDIVISION_CODES: list[str] = ["v", "x", "y", "z"]
 LABEL_SUBFIELD_CODES: list[str] = ["a"] + SUBDIVISION_CODES
-SUBFIELD_TYPE_MAP: dict[str, ConceptType] = {"y": "Period", "z": "Place"}
+SUBFIELD_TYPE_MAP: dict[str, RawConceptType] = {"y": "Period", "z": "Place"}
 
 
 def _field_subfields(field: Field, codes: Iterable[str]) -> list[str]:
@@ -67,15 +67,22 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
         code = getattr(subfield, "code", "")
         if code not in SUBDIVISION_CODES:
             continue
-        raw = subfield.value
-        # Map codes y->Period, z->Place, others -> Concept. Apply normalisation per type.
+
         ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
-        label = normalise_label(raw, ontology_type)
-        concepts.append(
-            Concept(
-                id=Identifiable.identifier_from_text(label, ontology_type),
-                label=label,
-                type=ontology_type,
-            )
-        )
+        concepts.append(build_concept(subfield.value, ontology_type))
+
     return concepts
+
+
+def build_concept(raw_label: str, raw_type: RawConceptType) -> Concept:
+    label = normalise_label(raw_label, raw_type)
+    return Concept(
+        id=get_concept_identifier(label, raw_type),
+        label=label,
+        type=raw_type,
+    )
+
+
+def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:
+    concept_type = Concept.type_to_display_type(raw_type)
+    return Identifiable.identifier_from_text(label, concept_type)

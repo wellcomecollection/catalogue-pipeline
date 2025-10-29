@@ -7,6 +7,7 @@ from pymarc.record import Record
 
 from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
+    build_concept,
     build_label_with_subdivisions,
     build_subdivision_concepts,
 )
@@ -14,7 +15,6 @@ from adapters.ebsco.transformers.text_utils import (
     normalise_label,
 )
 from models.pipeline.concept import Concept, Genre
-from models.pipeline.identifier import Identifiable
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -23,13 +23,8 @@ def build_primary_concept(field: Field) -> Concept | None:
     primary = field.get_subfields("a")
     if len(primary) == 0:
         return None
-    raw = primary[0]
-    label = normalise_label(raw, "Genre")
-    return Concept(
-        label=label,
-        type="Genre",
-        id=Identifiable.identifier_from_text(label, "Genre"),
-    )
+
+    return build_concept(primary[0], "GenreConcept")
 
 
 def extract_genres(record: Record) -> list[Genre]:
@@ -56,12 +51,10 @@ def extract_genre(field: Field) -> Genre | None:
     # Build concepts locally (primary + subdivisions); keep primary type logic
     # in this ontology-specific module rather than shared helpers.
     primary_concept = build_primary_concept(field)
-    if primary_concept is None:
+    if primary_concept is None or not label:
         return None
-    # Subdivision concepts are generic Concept/Period/Place types – they will be normalised inside builder.
-    concepts = [primary_concept] + build_subdivision_concepts(field)
-    if not label:
-        return None
-    # Final label may include subdivisions joined earlier; normalise again for Genre semantics.
-    genre_label = normalise_label(label, "Genre")
-    return Genre(label=genre_label, concepts=concepts)
+
+    return Genre(
+        label=normalise_label(label, "GenreConcept"),
+        concepts=[primary_concept] + build_subdivision_concepts(field),
+    )

@@ -14,13 +14,15 @@ https://www.loc.gov/marc/bibliographic/bd711.html
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.ebsco.transformers.label_subdivisions import (
+    build_concept,
+)
 from adapters.ebsco.transformers.text_utils import (
     normalise_label,
 )
-from models.pipeline.concept import Concept, Contributor
+from models.pipeline.concept import Contributor
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Identifiable
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -54,7 +56,7 @@ def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
     return deduplicated
 
 
-type_of_contributor: dict[str, ConceptType] = {
+type_of_contributor: dict[str, RawConceptType] = {
     "00": "Person",
     "10": "Organisation",
     "11": "Meeting",
@@ -71,16 +73,9 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     raw_label = label_from_field(field, label_subfields[tag[1:]])
-    # Apply type-specific label normalisation
-    label = normalise_label(raw_label, contributor_type)
-    concept_id = Identifiable.identifier_from_text(label, contributor_type)
 
     return Contributor(
-        agent=Concept(
-            label=label,
-            type=contributor_type,
-            id=concept_id,
-        ),
+        agent=build_concept(raw_label, contributor_type),
         roles=roles(field),
         primary=is_primary(tag),
     )

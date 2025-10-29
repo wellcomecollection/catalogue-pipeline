@@ -4,7 +4,7 @@ from pymarc.record import Field, Record, Subfield
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.id_label import Label
 from models.pipeline.identifier import Identifiable
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 from ..helpers import lone_element
 
@@ -265,7 +265,7 @@ def test_distinct_by_label_and_role(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_contributor_all_fields(
-    marc_record: Record, field_code: str, ontology_type: ConceptType, primary: bool
+    marc_record: Record, field_code: str, ontology_type: RawConceptType, primary: bool
 ) -> None:
     # A previous incarnation of this transformer included fields t,n,p and l in the label.
     # Collectively, those fields identified some work by the named person, as though citing

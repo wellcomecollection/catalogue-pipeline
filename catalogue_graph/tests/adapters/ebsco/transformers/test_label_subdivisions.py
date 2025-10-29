@@ -37,6 +37,7 @@ def test_concept_types_for_subdivisions() -> None:
     ) + build_subdivision_concepts(field)
     labels = [c.label for c in concepts]
     types = [c.type for c in concepts]
+
     # Place retains trailing period (colon-only trimming for Place)
     assert labels == ["Music", "1990-2000", "London.", "Scores"]
-    assert types == ["Genre", "Period", "Place", "Concept"]
+    assert types == ["GenreConcept", "Period", "Place", "Concept"]
