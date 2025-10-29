@@ -122,6 +122,6 @@ def extract_subject(field: Field) -> Subject | None:
     # Trim trailing period from final subject label (Scala behaviour)
     return Subject(
         label=label.rstrip("."),
-        id=Identifiable.identifier_from_text(label, "Subject"),
+        id=Identifiable.identifier_from_text(label, ontology_type),
         concepts=[primary_concept] + list(get_subdivision_concepts(field)),
     )
