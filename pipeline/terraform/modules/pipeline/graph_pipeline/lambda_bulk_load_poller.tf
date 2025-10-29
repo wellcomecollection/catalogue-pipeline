@@ -1,10 +1,10 @@
 module "bulk_load_poller_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "catalogue-graph-bulk-load-poller"
+  name         = "${local.namespace}-bulk-load-poller-${var.pipeline_date}"
   description  = "Polls the status of a Neptune bulk load job."
   package_type = "Image"
-  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   publish      = true
 
   // New versions are automatically deployed through a GitHub action.
@@ -25,7 +25,7 @@ module "bulk_load_poller_lambda" {
 
   vpc_config = {
     subnet_ids         = local.private_subnets
-    security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+    security_group_ids = [aws_security_group.graph_pipeline_security_group.id]
   }
 }
 

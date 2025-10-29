@@ -27,7 +27,7 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
 
     input = <<JSON
     {
-      "pipeline_date": "${local.pipeline_date}",
+      "pipeline_date": "${var.pipeline_date}",
       "index_dates": {
         "concepts": "${local.index_date_concepts}",
         "works": "${local.index_date_works}"

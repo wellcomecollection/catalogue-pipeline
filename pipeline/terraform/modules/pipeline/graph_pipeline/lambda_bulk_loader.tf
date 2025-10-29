@@ -1,10 +1,9 @@
 module "bulk_loader_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
-
-  name         = "catalogue-graph-bulk-loader"
+  name         = "${local.namespace}-bulk-loader-${var.pipeline_date}"
   description  = "Bulk loads entities from an S3 bucket into the Neptune database."
   package_type = "Image"
-  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   publish      = true
 
   // New versions are automatically deployed through a GitHub action.
@@ -19,12 +18,12 @@ module "bulk_loader_lambda" {
 
   vpc_config = {
     subnet_ids         = local.private_subnets
-    security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+    security_group_ids = [aws_security_group.graph_pipeline_security_group.id]
   }
 
   environment = {
     variables = {
-      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
     }
   }
 }

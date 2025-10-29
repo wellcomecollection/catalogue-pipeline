@@ -1,5 +1,5 @@
 resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_monthly" {
-  name     = "catalogue-graph-bulk-loaders-monthly"
+  name     = "${local.namespace}-bulk-loaders-monthly-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -15,7 +15,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_monthly" {
           Input = {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
-            "pipeline_date" : local.pipeline_date,
+            "pipeline_date" : var.pipeline_date,
             "insert_error_threshold" : try(task_input.insert_error_threshold, local.bulk_loader_default_insert_error_threshold),
           }
         }
@@ -30,7 +30,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_monthly" {
 }
 
 resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_incremental" {
-  name     = "catalogue-graph-bulk-loaders-incremental"
+  name     = "${local.namespace}-bulk-loaders-incremental-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({

@@ -1,29 +1,5 @@
-locals {
-  DefaultErrorEquals = [
-    "Lambda.ServiceException",
-    "Lambda.AWSLambdaException",
-    "Lambda.SdkClientException",
-    "Lambda.TooManyRequestsException",
-    "Ecs.ServerException",
-    "Ecs.ThrottlingException",
-    "Ecs.TaskFailedToStartException",
-    "Ecs.CannotPullContainerErrorException",
-    "Ecs.ContainerRuntimeTimeoutErrorException",
-    "Ecs.EssentialContainerExited"
-  ]
-  DefaultRetry = [
-    {
-      ErrorEquals     = local.DefaultErrorEquals
-      IntervalSeconds = 1
-      MaxAttempts     = 3
-      BackoffRate     = 2
-      JitterStrategy  = "FULL"
-    }
-  ]
-}
-
 resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
-  name     = "catalogue-graph-ingestor"
+  name     = "${local.namespace}-ingestor-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -39,7 +15,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           FunctionName = module.ingestor_loader_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
         },
-        Retry = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         Next  = "Monitor loader"
       }
       "Monitor loader" = {
@@ -50,7 +26,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           FunctionName = module.ingestor_loader_monitor_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
         },
-        Retry = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         Next  = "Run indexer"
       },
       "Run indexer" = {
@@ -61,16 +37,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           FunctionName = module.ingestor_indexer_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
         },
-        Retry = [
-          {
-            ErrorEquals     = local.DefaultErrorEquals,
-            IntervalSeconds = 300,
-            # Don't try again yet!
-            MaxAttempts    = 1,
-            BackoffRate    = 2,
-            JitterStrategy = "FULL"
-          }
-        ],
+        Retry = local.state_function_default_retry,
         Next = "Monitor indexer"
       }
       "Monitor indexer" = {
@@ -101,7 +68,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
           FunctionName = module.ingestor_deletions_lambda.lambda.arn,
           Payload      = "{% $states.input %}"
         },
-        Retry = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         Next  = "Success"
       },
       Success = {
@@ -113,7 +80,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
 
 
 resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
-  name     = "catalogue-graph-ingestors"
+  name     = "${local.namespace}-ingestors-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -149,7 +116,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
                 StateMachineArn = aws_sfn_state_machine.catalogue_graph_ingestor.arn
                 Input           = "{% $states.input %}"
               },
-              Retry = local.DefaultRetry,
+              Retry = local.state_function_default_retry,
               End   = true
             }
           }

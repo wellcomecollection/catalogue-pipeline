@@ -1,5 +1,5 @@
 resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
-  name     = "catalogue-graph-extractor"
+  name     = "${local.namespace}-extractor-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -11,7 +11,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.sync"
         Output   = "{% $states.input %}"
-        Retry    = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         Next     = "Success"
         Arguments = {
           Cluster        = aws_ecs_cluster.cluster.arn
@@ -23,7 +23,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
               Subnets        = local.private_subnets
               SecurityGroups = [
                 local.ec_privatelink_security_group_id,
-                aws_security_group.egress.id
+                aws_security_group.graph_pipeline_security_group.id,
               ]
             }
           },

@@ -1,10 +1,10 @@
 module "graph_remover_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "catalogue-graph-remover"
+  name         = "${local.namespace}-remover-${var.pipeline_date}"
   description  = "Takes snapshots of items bulk loaded into the catalogue graph and handles the removal of nodes/edges."
   package_type = "Image"
-  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   publish      = true
 
   // New versions are automatically deployed through a GitHub action.
@@ -19,12 +19,12 @@ module "graph_remover_lambda" {
 
   vpc_config = {
     subnet_ids         = local.private_subnets
-    security_group_ids = [aws_security_group.graph_indexer_lambda_security_group.id]
+    security_group_ids = [aws_security_group.graph_pipeline_security_group.id]
   }
 
   environment = {
     variables = {
-      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
     }
   }
 }
@@ -66,7 +66,7 @@ data "aws_iam_policy_document" "graph_remover_s3_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover/*"
     ]
   }
 }

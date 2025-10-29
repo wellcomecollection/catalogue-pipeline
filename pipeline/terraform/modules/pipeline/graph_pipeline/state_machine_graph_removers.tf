@@ -1,5 +1,5 @@
 resource "aws_sfn_state_machine" "catalogue_graph_removers" {
-  name     = "catalogue-graph-removers"
+  name     = "${local.namespace}-removers-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -27,10 +27,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
                 Payload = {
                   "transformer_type" : "{% $states.input.transformer_type %}",
                   "entity_type" : "{% $states.input.entity_type %}",
-                  "pipeline_date" : local.pipeline_date,
+                  "pipeline_date" : var.pipeline_date,
                 }
               },
-              Retry = local.DefaultRetry,
+              Retry = local.state_function_default_retry,
               End   = true
             }
           }
@@ -45,7 +45,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
 }
 
 resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
-  name     = "catalogue-graph-graph-removers-incremental"
+  name     = "${local.namespace}-graph-removers-incremental-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -81,7 +81,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
                 FunctionName = module.graph_remover_incremental_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
               },
-              Retry = local.DefaultRetry,
+              Retry = local.state_function_default_retry,
               End   = true
             }
           }

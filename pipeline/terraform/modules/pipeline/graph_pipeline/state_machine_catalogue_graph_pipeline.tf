@@ -1,9 +1,9 @@
 resource "aws_sfn_state_machine" "catalogue_graph_pipeline_monthly" {
-  name     = "catalogue-graph-pipeline-monthly"
+  name     = "${local.namespace}-pipeline-monthly-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
-    Comment = "Extract raw concepts from external sources, transform them into nodes and edges, and load them into the catalogue graph.",
+    Comment = "Transform raw concepts from external sources into nodes and edges and load them into the catalogue graph.",
     StartAt = "Extractors"
     States = {
       "Extractors" = {
@@ -38,7 +38,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline_monthly" {
 }
 
 resource "aws_sfn_state_machine" "catalogue_graph_pipeline_incremental" {
-  name     = "catalogue-graph-pipeline-incremental"
+  name     = "${local.namespace}-pipeline-incremental-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn
 
   definition = jsonencode({
@@ -54,7 +54,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_pipeline_incremental" {
           Payload      = "{% $states.context.Execution.Input %}"
         },
         Output = "{% $merge([$states.context.Execution.Input, $states.result.Payload ]) %}",
-        Retry  = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         Next   = "Extractors"
       },
       "Extractors" = {
