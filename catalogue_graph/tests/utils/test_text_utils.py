@@ -41,7 +41,7 @@ def test_normalise_label_place_colon() -> None:
 
 
 def test_normalise_label_genre_electronic_books() -> None:
-    assert normalise_label("Electronic Books", "Genre") == "Electronic books"
+    assert normalise_label("Electronic Books", "GenreConcept") == "Electronic books"
 
 
 def test_normalise_label_subject_ellipsis_preserved() -> None:

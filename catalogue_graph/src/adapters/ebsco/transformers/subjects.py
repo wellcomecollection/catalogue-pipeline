@@ -1,11 +1,8 @@
 import logging
 from collections.abc import Generator
 
-from models.pipeline.concept import Concept, Subject
-from models.pipeline.identifier import Identifiable
 from pymarc.field import Field
 from pymarc.record import Record
-from utils.types import RawConceptType
 
 from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
@@ -13,6 +10,9 @@ from adapters.ebsco.transformers.label_subdivisions import (
     SUBFIELD_TYPE_MAP,
     build_concept,
 )
+from models.pipeline.concept import Concept, Subject
+from models.pipeline.identifier import Identifiable
+from utils.types import RawConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
