@@ -405,3 +405,41 @@ def test_production_manufacture_function_label_cleaned(marc_record: Record) -> N
     assert lone_element(production.agents).label == "Printer Co.;"
     # Date concepts now retain a trailing period (Period labels unchanged by normalisation)
     assert lone_element(production.dates).label == "2001"
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag="008",
+                    data="180907cuuuu9999fr qr p o 0 b0eng",
+                ),
+                Field(
+                    tag="264",
+                    indicators=Indicators(" ", "1"),
+                    subfields=[
+                        Subfield(code="a", value="Paris :"),
+                        Subfield(
+                            code="b",
+                            value="E&#769;ditions de l'E&#769;cole des Hautes e&#769;tudes en sciences sociales",
+                        ),
+                    ],
+                ),
+            ]
+        )
+    ],
+    indirect=["marc_record"],
+)
+def test_field_008_unknown_date(
+    marc_record: Record,
+) -> None:
+    production = lone_element(transform_record(marc_record).data.production)
+
+    assert len(production.dates) == 0
+    assert lone_element(production.places).label == "Paris"
+    assert (
+        production.label
+        == "Paris : E&#769;ditions de l'E&#769;cole des Hautes e&#769;tudes en sciences sociales"
+    )

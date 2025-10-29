@@ -130,7 +130,12 @@ class Field008:
         if date_type in "n|":
             # Unknown or no attempt to code
             return None
+
+        # If all four digits are unknown, return `None` (instead of interpreting the year as '0000', which is invalid)
         date_1 = self.raw_field.date_1
+        if date_1 == "uuuu":
+            return None
+
         if date_type in "cu":
             # u=status unknown, so date_2 should be uuuu, but we don't care.
             # c=continuing, so date_2 should be 9999, but we don't care.
