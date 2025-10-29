@@ -4,7 +4,7 @@ from adapters.ebsco.transformers.text_utils import (
     normalise_identifier_value,
     normalise_label,
 )
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 
 def test_normalise_identifier_value_collapses_whitespace_and_lowercases() -> None:
@@ -24,11 +24,13 @@ def test_normalise_identifier_value_collapses_whitespace_and_lowercases() -> Non
         ),  # double period not ending with single char before period pattern
         ("Text ...", "Concept", "Text ..."),
         ("End...", "Concept", "End..."),  # ellipsis preserved
-        ("Genre Title.", "Genre", "Genre Title"),
+        ("Genre Title.", "GenreConcept", "Genre Title"),
         ("Subject.", "Subject", "Subject"),
     ],
 )
-def test_period_trimming(label: str, concept_type: ConceptType, expected: str) -> None:
+def test_period_trimming(
+    label: str, concept_type: RawConceptType, expected: str
+) -> None:
     assert normalise_label(label, concept_type) == expected
 
 
@@ -46,7 +48,9 @@ def test_period_trimming(label: str, concept_type: ConceptType, expected: str) -
         ),  # internal comma preserved
     ],
 )
-def test_comma_trimming(label: str, concept_type: ConceptType, expected: str) -> None:
+def test_comma_trimming(
+    label: str, concept_type: RawConceptType, expected: str
+) -> None:
     assert normalise_label(label, concept_type) == expected
 
 
@@ -86,4 +90,4 @@ def test_period_no_trimming(label: str) -> None:
     ],
 )
 def test_genre_electronic_books_replacement(label: str, expected: str) -> None:
-    assert normalise_label(label, "Genre") == expected
+    assert normalise_label(label, "GenreConcept") == expected

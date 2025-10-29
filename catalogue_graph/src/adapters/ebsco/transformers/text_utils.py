@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from utils.types import ConceptType as ConceptTypeLike
+from utils.types import RawConceptType
 
 """Shared text normalisation helpers for MARC transformers.
 
@@ -19,7 +19,7 @@ We keep whitespace collapsing for identifier values.
 """
 
 
-def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
+def normalise_label(label: str, concept_type: RawConceptType) -> str:
     """Apply type-specific trailing punctuation trimming matching Scala semantics.
 
     Ellipses preservation: only remove a single trailing period if *not* part of an ellipsis.
@@ -30,7 +30,7 @@ def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
     """
     s = label.strip()
 
-    if concept_type in ["Concept", "Genre", "Subject"]:
+    if concept_type in ["Concept", "GenreConcept", "Subject"]:
         # Remove a single trailing period unless part of ellipsis (i.e. three periods)
         # Regex replicates Scala trimTrailingPeriod behaviour.
         s = re.sub(r"([^\.])\.\s*$", r"\1", s).rstrip()
@@ -43,7 +43,7 @@ def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
         pass
 
     # Replace exact label 'Electronic Books' (after period trimming) with sentence case form.
-    if concept_type == "Genre" and s == "Electronic Books":
+    if concept_type == "GenreConcept" and s == "Electronic Books":
         s = "Electronic books"
 
     return s

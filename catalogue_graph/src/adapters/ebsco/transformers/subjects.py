@@ -1,12 +1,8 @@
 import logging
 from collections.abc import Generator
 
-from models.pipeline.concept import Concept, Subject
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
 from pymarc.field import Field
 from pymarc.record import Record
-from utils.types import RawConceptType
 
 from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
@@ -17,6 +13,10 @@ from adapters.ebsco.transformers.label_subdivisions import (
 from adapters.ebsco.transformers.text_utils import (
     normalise_identifier_value,
 )
+from models.pipeline.concept import Concept, Subject
+from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable, SourceIdentifier
+from utils.types import RawConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -117,7 +117,7 @@ def extract_subject(field: Field) -> Subject | None:
     # Concept construction with original semantics (preserving Python rules while adopting separator changes)
     main_label = _get_main_label(field)
     ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
-    primary_concept = get_concept(main_label, ontology_type)
+    primary_concept = build_concept(main_label, ontology_type)
 
     get_subdivision_concepts = SUBDIVISION_TRANSFORMS[field.tag]
     get_label = LABEL_TRANSFORMS[field.tag]
@@ -128,14 +128,6 @@ def extract_subject(field: Field) -> Subject | None:
         label=label.rstrip("."),
         id=get_identifier(label, "Subject"),
         concepts=[primary_concept] + list(get_subdivision_concepts(field)),
-    )
-
-
-def get_concept(label: str, ontology_type: RawConceptType) -> Concept:
-    return Concept(
-        label=label,
-        type=ontology_type,
-        id=get_identifier(label, ontology_type),
     )
 
 

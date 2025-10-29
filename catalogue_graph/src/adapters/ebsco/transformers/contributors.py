@@ -14,13 +14,14 @@ https://www.loc.gov/marc/bibliographic/bd711.html
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.ebsco.transformers.label_subdivisions import (
+    build_concept,
+)
 from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
     normalise_label,
 )
-from models.pipeline.concept import Concept, Contributor
+from models.pipeline.concept import Contributor
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
 from utils.types import RawConceptType
 
 
@@ -72,22 +73,8 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     raw_label = label_from_field(field, label_subfields[tag[1:]])
-    # Apply type-specific label normalisation (comma trimming for Person/Organisation/Meeting)
-    label = normalise_label(raw_label, contributor_type)
-    concept_id = Identifiable.from_source_identifier(
-        SourceIdentifier(
-            value=normalise_identifier_value(label),
-            ontology_type=contributor_type,
-            identifier_type=Id(id="label-derived"),
-        )
-    )
-
     return Contributor(
-        agent=Concept(
-            label=label,
-            type=contributor_type,
-            id=concept_id,
-        ),
+        agent=build_concept(raw_label, contributor_type),
         roles=roles(field),
         primary=is_primary(tag),
     )
