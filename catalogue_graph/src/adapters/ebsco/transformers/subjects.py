@@ -9,13 +9,9 @@ from adapters.ebsco.transformers.label_subdivisions import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
     build_concept,
-)
-from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
+    get_concept_identifier,
 )
 from models.pipeline.concept import Concept, Subject
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
 from utils.types import RawConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -126,16 +122,6 @@ def extract_subject(field: Field) -> Subject | None:
     # Trim trailing period from final subject label (Scala behaviour)
     return Subject(
         label=label.rstrip("."),
-        id=get_identifier(label, "Subject"),
+        id=get_concept_identifier(label, "Subject"),
         concepts=[primary_concept] + list(get_subdivision_concepts(field)),
-    )
-
-
-def get_identifier(label: str, ontology_type: RawConceptType) -> Identifiable:
-    return Identifiable.from_source_identifier(
-        SourceIdentifier(
-            identifier_type=Id(id="label-derived"),
-            ontology_type=ontology_type,
-            value=normalise_identifier_value(label),
-        )
     )

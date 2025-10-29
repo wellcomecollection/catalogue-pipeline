@@ -78,16 +78,20 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
 
 def build_concept(raw_label: str, raw_type: RawConceptType) -> Concept:
     label = normalise_label(raw_label, raw_type)
-    concept_type = Concept.type_to_display_type(raw_type)
-
-    source_identifier = SourceIdentifier(
-        identifier_type=Id(id="label-derived"),
-        ontology_type=concept_type,
-        value=normalise_identifier_value(label),
-    )
-
     return Concept(
-        id=Identifiable.from_source_identifier(source_identifier),
+        id=get_concept_identifier(label, raw_type),
         label=label,
         type=raw_type,
+    )
+
+
+def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:
+    concept_type = Concept.type_to_display_type(raw_type)
+
+    return Identifiable.from_source_identifier(
+        SourceIdentifier(
+            identifier_type=Id(id="label-derived"),
+            ontology_type=concept_type,
+            value=normalise_identifier_value(label),
+        )
     )
