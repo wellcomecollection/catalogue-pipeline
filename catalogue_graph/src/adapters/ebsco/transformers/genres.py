@@ -11,12 +11,10 @@ from adapters.ebsco.transformers.label_subdivisions import (
     build_subdivision_concepts,
 )
 from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
     normalise_label,
 )
 from models.pipeline.concept import Concept, Genre
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
+from models.pipeline.identifier import Identifiable
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -27,15 +25,10 @@ def build_primary_concept(field: Field) -> Concept | None:
         return None
     raw = primary[0]
     label = normalise_label(raw, "Genre")
-    source_identifier = SourceIdentifier(
-        identifier_type=Id(id="label-derived"),
-        ontology_type="Genre",
-        value=normalise_identifier_value(label),
-    )
     return Concept(
         label=label,
         type="Genre",
-        id=Identifiable.from_source_identifier(source_identifier),
+        id=Identifiable.identifier_from_text(label, "Genre"),
     )
 
 

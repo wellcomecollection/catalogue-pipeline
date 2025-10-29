@@ -1,15 +1,19 @@
 import pytest
 
 from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
     normalise_label,
 )
 from utils.types import ConceptType
 
 
-def test_normalise_identifier_value_collapses_whitespace_and_lowercases() -> None:
-    assert normalise_identifier_value("  Mixed   Case  Label ") == "mixed case label"
-    assert normalise_identifier_value("SINGLE") == "single"
+def test_identifier_and_label_normalisation_are_separate() -> None:
+    """Regression guard: label trimming does not collapse internal whitespace (identifier path handles that separately).
+
+    With removal of normalise_identifier_value, identifier generation now uses identifier_from_text which preserves
+    internal spacing except for leading/trailing trim and accent/period handling. This test simply asserts that
+    label normalisation alone leaves internal spacing intact.
+    """
+    assert normalise_label("Mixed   Case  Label", "Concept") == "Mixed   Case  Label"
 
 
 # Concept/Genre/Subject: trim single trailing period (not ellipsis)

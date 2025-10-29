@@ -68,7 +68,6 @@ class Identifiable(Identifiers):
         ascii_only = ascii_only.strip()
         # Step 6
         truncated = ascii_only[:255].strip()
-        # No further trailing-period logic; handled by shared trim_trailing_period
 
         source_identifier = SourceIdentifier(
             identifier_type=Id(id="label-derived"),

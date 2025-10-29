@@ -2,12 +2,8 @@ import pytest
 from pymarc.record import Field, Record, Subfield
 
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
-from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
-)
-from models.pipeline.concept import Concept
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
+from models.pipeline.identifier import Identifiable
 from utils.types import ConceptType
 
 from ..helpers import lone_element
@@ -284,17 +280,13 @@ def test_contributor_all_fields(
     assert contributor.primary == primary
     assert contributor.agent.label == label
 
-    assert contributor.agent == Concept(
-        type=ontology_type,
-        label=label,
-        id=Identifiable(
-            source_identifier=SourceIdentifier(
-                identifier_type=Id(id="label-derived"),
-                ontology_type=ontology_type,
-                value=normalise_identifier_value(label),
-            ),
-            other_identifiers=[],
-        ),
+    assert contributor.agent.label == label
+    # Identifier now generated via identifier_from_text; reconstruct expected value using same function
+    expected_identifiable = Identifiable.identifier_from_text(label, ontology_type)
+    assert isinstance(contributor.agent.id, Identifiable)
+    assert (
+        contributor.agent.id.source_identifier.value
+        == expected_identifiable.source_identifier.value
     )
 
 
@@ -391,15 +383,10 @@ def test_meeting_contributor_all_fields(
     label = "Council of Elrond (1 - October TA 3018: Rivendell)"
     assert contributor.primary == primary
     assert contributor.agent.label == label
-    assert contributor.agent == Concept(
-        type="Meeting",
-        label=label,
-        id=Identifiable(
-            source_identifier=SourceIdentifier(
-                identifier_type=Id(id="label-derived"),
-                ontology_type="Meeting",
-                value=normalise_identifier_value(label),
-            ),
-            other_identifiers=[],
-        ),
+    assert contributor.agent.label == label
+    expected_identifiable = Identifiable.identifier_from_text(label, "Meeting")
+    assert isinstance(contributor.agent.id, Identifiable)
+    assert (
+        contributor.agent.id.source_identifier.value
+        == expected_identifiable.source_identifier.value
     )

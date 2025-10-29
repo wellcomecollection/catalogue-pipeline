@@ -6,12 +6,10 @@ from itertools import chain
 from pymarc.field import Field
 
 from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
     normalise_label,
 )
 from models.pipeline.concept import Concept
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
+from models.pipeline.identifier import Identifiable
 from utils.types import ConceptType
 
 """Helpers for MARC label + subdivision handling (e.g. subjects, genres).
@@ -73,14 +71,9 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
         # Map codes y->Period, z->Place, others -> Concept. Apply normalisation per type.
         ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
         label = normalise_label(raw, ontology_type)
-        source_identifier = SourceIdentifier(
-            identifier_type=Id(id="label-derived"),
-            ontology_type=ontology_type,
-            value=normalise_identifier_value(label),
-        )
         concepts.append(
             Concept(
-                id=Identifiable.from_source_identifier(source_identifier),
+                id=Identifiable.identifier_from_text(label, ontology_type),
                 label=label,
                 type=ontology_type,
             )

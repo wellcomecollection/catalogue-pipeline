@@ -15,12 +15,11 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
     normalise_label,
 )
 from models.pipeline.concept import Concept, Contributor
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
+from models.pipeline.identifier import Identifiable
 from utils.types import ConceptType
 
 
@@ -74,13 +73,7 @@ def format_field(field: Field) -> Contributor:
     raw_label = label_from_field(field, label_subfields[tag[1:]])
     # Apply type-specific label normalisation
     label = normalise_label(raw_label, contributor_type)
-    concept_id = Identifiable.from_source_identifier(
-        SourceIdentifier(
-            value=normalise_identifier_value(label),
-            ontology_type=contributor_type,
-            identifier_type=Id(id="label-derived"),
-        )
-    )
+    concept_id = Identifiable.identifier_from_text(label, contributor_type)
 
     return Contributor(
         agent=Concept(

@@ -9,13 +9,14 @@ from utils.types import ConceptType as ConceptTypeLike
 Updated to replicate Scala ConceptsTransformer type-specific trailing punctuation semantics.
 
 Scala rules (see ConceptsTransformer.scala):
-  - Concept & GenreConcept labels: trim a single trailing period (not ellipses), then whitespace.
-  - Genre work-level label additionally replaces 'Electronic Books' with 'Electronic books'.
-  - Agent/Person/Organisation/Meeting labels: trim a trailing comma.
-  - Place labels: trim a trailing colon.
-  - Period labels: no punctuation trimming here (identifiers use a preprocessed version upstream).
+    - Concept & GenreConcept labels: trim a single trailing period (not ellipses), then whitespace.
+    - Genre work-level label additionally replaces 'Electronic Books' with 'Electronic books'.
+    - Agent/Person/Organisation/Meeting labels: trim a trailing comma.
+    - Place labels: trim a trailing colon.
+    - Period labels: no punctuation trimming here (identifiers use a preprocessed version upstream).
 
-We keep whitespace collapsing for identifier values.
+Identifier values are now derived exclusively via Identifiable.identifier_from_text; we no longer perform a separate
+whitespace-collapsing pass (previous normalise_identifier_value removed).
 """
 
 
@@ -68,6 +69,4 @@ def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
     return s
 
 
-def normalise_identifier_value(label: str) -> str:
-    """Collapse internal whitespace & lowercase for identifier and matching purposes."""
-    return " ".join(label.split()).lower()
+## NOTE: normalise_identifier_value removed; use Identifiable.identifier_from_text for label-derived identifiers.

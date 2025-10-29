@@ -9,12 +9,10 @@ from adapters.ebsco.transformers.label_subdivisions import (
     SUBFIELD_TYPE_MAP,
 )
 from adapters.ebsco.transformers.text_utils import (
-    normalise_identifier_value,
     normalise_label,
 )
 from models.pipeline.concept import Concept, Subject
-from models.pipeline.id_label import Id
-from models.pipeline.identifier import Identifiable, SourceIdentifier
+from models.pipeline.identifier import Identifiable
 from utils.types import ConceptType
 
 SUBJECT_FIELDS = ["600", "610", "611", "648", "650", "651"]
@@ -98,13 +96,7 @@ def extract_subject(field: Field) -> Subject | None:
                     Concept(
                         label=label_part,
                         type="Concept",
-                        id=Identifiable.from_source_identifier(
-                            SourceIdentifier(
-                                identifier_type=Id(id="label-derived"),
-                                ontology_type="Concept",
-                                value=normalise_identifier_value(label_part),
-                            )
-                        ),
+                        id=Identifiable.identifier_from_text(label_part, "Concept"),
                     )
                 )
     elif field.tag in ["648", "650", "651"]:
@@ -118,13 +110,7 @@ def extract_subject(field: Field) -> Subject | None:
                     Concept(
                         label=label_part,
                         type=ontology_type,
-                        id=Identifiable.from_source_identifier(
-                            SourceIdentifier(
-                                identifier_type=Id(id="label-derived"),
-                                ontology_type=ontology_type,
-                                value=normalise_identifier_value(label_part),
-                            )
-                        ),
+                        id=Identifiable.identifier_from_text(label_part, ontology_type),
                     )
                 )
     # 610 & 611: no additional subdivision concepts
@@ -139,11 +125,5 @@ def build_primary_concept(field: Field, label: str) -> Concept:
     return Concept(
         label=label,
         type=ontology_type,
-        id=Identifiable.from_source_identifier(
-            SourceIdentifier(
-                identifier_type=Id(id="label-derived"),
-                ontology_type=ontology_type,
-                value=normalise_identifier_value(label),
-            )
-        ),
+        id=Identifiable.identifier_from_text(label, ontology_type),
     )
