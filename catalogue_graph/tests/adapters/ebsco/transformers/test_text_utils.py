@@ -65,15 +65,15 @@ def test_place_colon_trimming(label: str, expected: str) -> None:
 
 # Period: unchanged (aside from strip)
 @pytest.mark.parametrize(
-    "label",
+    "label,expected",
     [
-        "1990-2000.",
-        "1950-1960,",
-        "Ancient Rome:",
+        ("1990-2000.", "1990-2000"),
+        ("1950-1960, ", "1950-1960,"),
+        ("Ancient Rome: ", "Ancient Rome:"),
     ],
 )
-def test_period_no_trimming(label: str) -> None:
-    assert normalise_label("  " + label + "  ", "Period") == label.strip()
+def test_period_no_trimming(label: str, expected: str) -> None:
+    assert normalise_label("  " + label + "  ", "Period") == expected
 
 
 # Genre special case replacement

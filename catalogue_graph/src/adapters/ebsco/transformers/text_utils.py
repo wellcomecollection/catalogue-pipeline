@@ -30,17 +30,16 @@ def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
     """
     s = label.strip()
 
-    if concept_type in ["Concept", "Genre", "Subject"]:
+    if concept_type in ["Concept", "Genre", "Subject", "Period"]:
         # Remove a single trailing period unless part of ellipsis (i.e. three periods)
         # Regex replicates Scala trimTrailingPeriod behaviour.
         s = re.sub(r"([^\.])\.\s*$", r"\1", s).rstrip()
     elif concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
+        # Trim trailing comma
         s = re.sub(r"\s*,\s*$", "", s)
     elif concept_type == "Place":
+        # Trim trailing colon
         s = re.sub(r"\s*:\s*$", "", s)
-    elif concept_type == "Period":
-        # Leave untouched (besides earlier strip)
-        pass
 
     # Replace exact label 'Electronic Books' (after period trimming) with sentence case form.
     if concept_type == "Genre" and s == "Electronic Books":
