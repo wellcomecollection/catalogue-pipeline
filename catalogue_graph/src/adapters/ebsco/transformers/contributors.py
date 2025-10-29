@@ -14,13 +14,15 @@ https://www.loc.gov/marc/bibliographic/bd711.html
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import (
-    normalise_identifier_value,
+from adapters.ebsco.transformers.label_subdivisions import (
+    build_concept,
 )
-from models.pipeline.concept import Concept, Contributor
+from adapters.ebsco.transformers.text_utils import (
+    normalise_label,
+)
+from models.pipeline.concept import Contributor
 from models.pipeline.id_label import Label
-from models.pipeline.identifier import Id, Identifiable, SourceIdentifier
-from utils.types import ConceptType
+from utils.types import RawConceptType
 
 
 def extract_contributors(record: Record) -> list[Contributor]:
@@ -54,7 +56,7 @@ def distinct_contributors(contributors: list[Contributor]) -> list[Contributor]:
     return deduplicated
 
 
-type_of_contributor: dict[str, ConceptType] = {
+type_of_contributor: dict[str, RawConceptType] = {
     "00": "Person",
     "10": "Organisation",
     "11": "Meeting",
@@ -70,28 +72,20 @@ label_subfields: dict[str, list[str]] = {
 def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
-    label = label_from_field(field, label_subfields[tag[1:]])
-    concept_id = Identifiable.from_source_identifier(
-        SourceIdentifier(
-            value=normalise_identifier_value(label),
-            ontology_type=contributor_type,
-            identifier_type=Id(id="label-derived"),
-        )
-    )
+    raw_label = label_from_field(field, label_subfields[tag[1:]])
 
     return Contributor(
-        agent=Concept(
-            label=label,
-            type=contributor_type,
-            id=concept_id,
-        ),
+        agent=build_concept(raw_label, contributor_type),
         roles=roles(field),
         primary=is_primary(tag),
     )
 
 
 def label_from_field(field: Field, subfields: list[str]) -> str:
-    return " ".join(field.get_subfields(*subfields))
+    """Join selected subfields into a contributor label without type-specific trimming."""
+    parts = [v.strip() for v in field.get_subfields(*subfields) if v.strip()]
+    combined = " ".join(parts)
+    return combined.strip()
 
 
 def is_primary(tag: str) -> bool:
@@ -113,4 +107,7 @@ def roles(field: Field) -> list[Label]:
 
     If EBSCO fix this, then we will have to update accordingly.
     """
-    return [Label(label=value.strip()) for value in field.get_subfields("e")]
+    return [
+        Label(label=normalise_label(value.strip(), "Concept"))
+        for value in field.get_subfields("e")
+    ]

@@ -41,14 +41,14 @@ Feature: Extracting subjects from 6xx fields
         | y    | 1897-1900  |
         | z    | Dublin.    |
       When I transform the MARC record
-      Then the only subject has the label "A Subject Specimens Literature 1897-1900 Dublin."
+      Then the only subject has the label "A Subject - Specimens - Literature - 1897-1900 - Dublin"
       And it has 5 concepts:
         | type    | label      | id.source_identifier.ontology_type |
         | <type>  | A Subject  | <type>                             |
         | Concept | Specimens  | Concept                            |
         | Concept | Literature | Concept                            |
         | Period  | 1897-1900  | Period                             |
-        | Place   | Dublin     | Place                              |
+        | Place   | Dublin.    | Place                              |
       Examples:
         | code | type    |
         | 648  | Period  |
@@ -77,7 +77,7 @@ Feature: Extracting subjects from 6xx fields
         | y    | 1897-1900          |
         | z    | Dublin.            |
       When I transform the MARC record
-      Then the only subject has the label "Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. Performer. Von Klinkerhoffen."
+      Then the only subject has the label "Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. Performer. - Von Klinkerhoffen"
       And it has 2 concepts:
         | type    | label                                                                  |
         | Person  | Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. |

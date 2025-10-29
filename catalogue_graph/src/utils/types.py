@@ -36,17 +36,19 @@ WorkIdentifiersKey = Literal["sourceIdentifier", "otherIdentifiers"]
 """Keep in sync with Scala IdentifierGenerator in
 `pipeline/id_minter/src/main/scala/weco/pipeline/id_minter/steps/IdentifierGenerator.scala`.
 """
-ConceptType = Literal[
+_BaseConceptType = Literal[
     "Person",
     "Concept",
     "Organisation",
     "Place",
     "Agent",
     "Meeting",
-    "Genre",
     "Period",
     "Subject",
 ]
+ConceptType = Literal[_BaseConceptType, "Genre"]
+RawConceptType = Literal[_BaseConceptType, "GenreConcept"]
+
 
 ConceptSource = Literal[
     "label-derived",

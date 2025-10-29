@@ -20,7 +20,7 @@ class DisplayConcept(BaseModel):
             id=concept.id.canonical_id,
             label=concept.label,
             identifiers=None if len(identifiers) == 0 else identifiers,
-            type=concept.type,
+            type=concept.display_type,
         )
 
 
