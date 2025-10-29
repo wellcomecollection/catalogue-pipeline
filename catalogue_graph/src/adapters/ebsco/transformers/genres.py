@@ -11,8 +11,8 @@ from adapters.ebsco.transformers.label_subdivisions import (
     build_subdivision_concepts,
 )
 from adapters.ebsco.transformers.text_utils import (
-    clean_concept_label,
     normalise_identifier_value,
+    normalise_label,
 )
 from models.pipeline.concept import Concept, Genre
 from models.pipeline.id_label import Id
@@ -26,7 +26,7 @@ def build_primary_concept(field: Field) -> Concept | None:
     if len(primary) == 0:
         return None
     raw = primary[0]
-    label = clean_concept_label(raw)
+    label = normalise_label(raw, "Genre")
     source_identifier = SourceIdentifier(
         identifier_type=Id(id="label-derived"),
         ontology_type="Genre",
@@ -65,7 +65,10 @@ def extract_genre(field: Field) -> Genre | None:
     primary_concept = build_primary_concept(field)
     if primary_concept is None:
         return None
+    # Subdivision concepts are generic Concept/Period/Place types – they will be normalised inside builder.
     concepts = [primary_concept] + build_subdivision_concepts(field)
     if not label:
         return None
-    return Genre(label=label, concepts=concepts)
+    # Final label may include subdivisions joined earlier; normalise again for Genre semantics.
+    genre_label = normalise_label(label, "Genre")
+    return Genre(label=genre_label, concepts=concepts)

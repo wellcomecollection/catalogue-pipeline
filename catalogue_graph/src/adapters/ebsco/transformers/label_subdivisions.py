@@ -6,8 +6,8 @@ from itertools import chain
 from pymarc.field import Field
 
 from adapters.ebsco.transformers.text_utils import (
-    clean_concept_label,
     normalise_identifier_value,
+    normalise_label,
 )
 from models.pipeline.concept import Concept
 from models.pipeline.id_label import Id
@@ -70,8 +70,9 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
         if code not in SUBDIVISION_CODES:
             continue
         raw = subfield.value
-        label = clean_concept_label(raw)
+        # Map codes y->Period, z->Place, others -> Concept. Apply normalisation per type.
         ontology_type = SUBFIELD_TYPE_MAP.get(code, "Concept")
+        label = normalise_label(raw, ontology_type)
         source_identifier = SourceIdentifier(
             identifier_type=Id(id="label-derived"),
             ontology_type=ontology_type,

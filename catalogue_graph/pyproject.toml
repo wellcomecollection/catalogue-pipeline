@@ -92,6 +92,7 @@ warn_return_any = true
 warn_unreachable = true
 warn_unused_configs = true
 mypy_path = "src"
+exclude = ["build/.*"]
 
 # Ignore untyped imports for external libraries without stubs
 [[tool.mypy.overrides]]

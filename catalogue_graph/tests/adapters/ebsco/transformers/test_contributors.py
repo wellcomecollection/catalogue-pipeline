@@ -315,7 +315,9 @@ def test_contributor_label_trims_trailing_punctuation(marc_record: Record) -> No
         )
     )
     contributor = lone_element(transform_record(marc_record).data.contributors)
-    assert contributor.agent.label == "Trailing Period. Comma, and Space ; Colon"
+    # With type-specific normalisation: Person labels only trim trailing comma, not colon; internal punctuation preserved.
+    # Final colon remains.
+    assert contributor.agent.label == "Trailing Period. Comma, and Space ; Colon:"
     assert contributor.roles == []
 
 
@@ -332,7 +334,8 @@ def test_contributor_role_labels_are_cleaned(marc_record: Record) -> None:
         )
     )
     contributor = lone_element(transform_record(marc_record).data.contributors)
-    assert contributor.roles == [Label(label="Editor"), Label(label="Translator")]
+    # Role labels use generic Concept trimming (period removed, colon preserved)
+    assert contributor.roles == [Label(label="Editor"), Label(label="Translator:")]
 
 
 @pytest.mark.parametrize(

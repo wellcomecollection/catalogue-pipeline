@@ -48,7 +48,7 @@ Feature: Extracting subjects from 6xx fields
         | Concept | Specimens  | Concept                            |
         | Concept | Literature | Concept                            |
         | Period  | 1897-1900  | Period                             |
-        | Place   | Dublin     | Place                              |
+        | Place   | Dublin.    | Place                              |
       Examples:
         | code | type    |
         | 648  | Period  |
