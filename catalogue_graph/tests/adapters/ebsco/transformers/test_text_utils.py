@@ -1,4 +1,3 @@
-
 import pytest
 
 from adapters.ebsco.transformers.text_utils import (
