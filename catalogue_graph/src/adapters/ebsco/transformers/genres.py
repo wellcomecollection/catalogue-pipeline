@@ -53,6 +53,7 @@ def extract_genre(field: Field) -> Genre | None:
     if primary_concept is None or not label:
         return None
 
-    genre_label = normalise_label(label, "GenreConcept")
-    concepts = [primary_concept] + build_subdivision_concepts(field)
-    return Genre(label=genre_label, concepts=concepts)
+    return Genre(
+        label=normalise_label(label, "GenreConcept"),
+        concepts=[primary_concept] + build_subdivision_concepts(field),
+    )
