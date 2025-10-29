@@ -23,7 +23,7 @@ class RawCatalogueConcept:
 
         self.wellcome_id = self.raw_concept.id.canonical_id
         self.label = self.raw_concept.label
-        self.type = self.raw_concept.type
+        self.type = self.raw_concept.display_type
 
     @property
     def source_identifier(self) -> SourceIdentifier:

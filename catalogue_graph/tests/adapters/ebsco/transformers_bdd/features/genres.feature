@@ -36,8 +36,8 @@ Feature: Extracting genres from MARC 655
     Then the 3st genre has the label "Nu-Cumbia"
 
   Scenario: v, x, y, and z subfields
-  The label is made from subfields a,v,x,y,z - and each subdivision field
-  yields its own concept
+  The label is made from subfields a,v,x,y,z joined with " - " and each subdivision
+  field yields its own concept
     Given the MARC record has a 655 field with subfields:
       | code | value      |
       | a    | Disco Polo |
@@ -46,13 +46,14 @@ Feature: Extracting genres from MARC 655
       | y    | 1897-1900  |
       | z    | Dublin.    |
     When I transform the MARC record
-    Then the only genre has the label "Disco Polo Specimens Literature 1897-1900 Dublin."
+    Then the only genre has the label "Disco Polo - Specimens - Literature - 1897-1900 - Dublin"
     And that genre has 5 concepts
     And the 1st concept has the label "Disco Polo"
     And the 2nd concept has the label "Specimens"
     And the 3rd concept has the label "Literature"
     And the 4th concept has the label "1897-1900"
-    And the 5th concept has the label "Dublin"
+    # Place subdivision retains trailing period under new punctuation rules
+    And the 5th concept has the label "Dublin."
 
 
   Scenario: subfield a comes first
@@ -74,7 +75,7 @@ Feature: Extracting genres from MARC 655
     And that field has a subfield "<code3>" with value "<code3>"
     And that field has a subfield "<code4>" with value "<code4>"
     When I transform the MARC record
-    Then the only genre has the label "a <code1> <code2> <code3> <code4>"
+    Then the only genre has the label "a - <code1> - <code2> - <code3> - <code4>"
     Examples:
       | code1 | code2 | code3 | code4 |
       | x     | y     | z     | v     |
@@ -85,7 +86,7 @@ Feature: Extracting genres from MARC 655
     Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
     And that field has a subfield "<code>" with value "<text>"
     When I transform the MARC record
-    Then the only genre has the label "Disco Polo <text>"
+    Then the only genre has the label "Disco Polo - <text>"
     And that genre has 2 concepts
     And that genre's 1st concept has the label "Disco Polo"
     And that genre's 2nd concept has the label "<text>"
