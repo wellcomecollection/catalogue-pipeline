@@ -81,7 +81,7 @@ def test_period_no_trimming(label: str, expected: str) -> None:
     "label,expected",
     [
         ("Electronic Books", "Electronic books"),
-        ("Electronic Books.", "Electronic books"),  # period trimmed then replaced
+        ("Electronic Books.", "Electronic books"),
         ("Not Electronic Books", "Not Electronic Books"),
     ],
 )

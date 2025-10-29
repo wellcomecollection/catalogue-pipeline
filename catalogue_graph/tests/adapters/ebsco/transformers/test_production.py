@@ -359,8 +359,8 @@ def test_populate_first_production_with_008_dates_if_none_of_its_own(
     assert period.range.from_time == "1979-01-01T00:00:00Z"
 
 
-def test_production_label_trims_trailing_punctuation(marc_record: Record) -> None:
-    """Overall production label only trims final punctuation; internal punctuation retained."""
+def test_production_label_retains_punctuation(marc_record: Record) -> None:
+    """Overall production label only does not trim punctuation."""
     marc_record.add_field(  # type: ignore[no-untyped-call]
         Field(
             tag="260",
@@ -371,7 +371,7 @@ def test_production_label_trims_trailing_punctuation(marc_record: Record) -> Non
                 Subfield(
                     code="b", value="Publisher, Ltd.;"
                 ),  # internal semicolon retained
-                Subfield(code="c", value="1999."),  # final period trimmed
+                Subfield(code="c", value="1999"),  # final period trimmed
             ],
         )
     )

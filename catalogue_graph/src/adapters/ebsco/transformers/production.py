@@ -76,14 +76,17 @@ IND2_264_MAP = {
     "3": "Manufacture",
 }
 
+# See MarcProduction.scala for reference implementation
+def labelFromSubFields(field: Field) -> str:
+    return " ".join(subfield.value for subfield in field.subfields)
 
 def single_production_event(field: Field) -> ProductionEvent | None:
     if field.tag not in ["260", "264"]:
         raise ValueError(
             f"Unexpected production event field: {field.tag}. Should be one of 260, 264"
         )
-    # Label for production event is free-form; treat as generic Concept for period trimming only.
-    label = normalise_label(field.format_field(), "Concept")
+    # Label for production event is free-form, no special trimming rules.
+    label = labelFromSubFields(field)
     places = [
         Concept(label=normalise_label(subfield, "Place"), type="Place")
         for subfield in field.get_subfields("a")
@@ -96,6 +99,7 @@ def single_production_event(field: Field) -> ProductionEvent | None:
         parse_period(normalise_label(subfield, "Period"))
         for subfield in field.get_subfields("c")
     ]
+    print(dates)
     function = None
     if field.tag == "260" and field.get_subfields("e", "f", "g"):
         places += [
