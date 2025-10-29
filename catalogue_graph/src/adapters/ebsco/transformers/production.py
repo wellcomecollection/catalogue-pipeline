@@ -76,9 +76,11 @@ IND2_264_MAP = {
     "3": "Manufacture",
 }
 
+
 # See MarcProduction.scala for reference implementation
 def labelFromSubFields(field: Field) -> str:
     return " ".join(subfield.value for subfield in field.subfields)
+
 
 def single_production_event(field: Field) -> ProductionEvent | None:
     if field.tag not in ["260", "264"]:

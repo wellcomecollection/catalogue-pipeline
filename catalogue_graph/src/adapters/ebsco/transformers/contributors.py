@@ -72,7 +72,7 @@ def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
     raw_label = label_from_field(field, label_subfields[tag[1:]])
-    # Apply type-specific label normalisation (comma trimming for Person/Organisation/Meeting)
+    # Apply type-specific label normalisation
     label = normalise_label(raw_label, contributor_type)
     concept_id = Identifiable.from_source_identifier(
         SourceIdentifier(

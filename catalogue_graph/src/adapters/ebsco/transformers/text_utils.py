@@ -19,6 +19,30 @@ We keep whitespace collapsing for identifier values.
 """
 
 
+def trim_trailing_period(label: str) -> str:
+    """Remove a single trailing period but not ellipses, mirroring Scala trimTrailingPeriod.
+
+    Scala regex (conceptually): /([^\\.])\\.\\s*$/ replacement "$1"; then trim trailing whitespace.
+    We replicate by first substituting, then stripping trailing whitespace.
+    Examples:
+      Title.   -> Title
+      Title..  -> Title.   (remove only one)
+      Title... -> Title... (ellipsis preserved)
+    """
+    result = re.sub(r"([^\.])\.\s*$", r"\1", label)
+    return re.sub(r"\s*$", "", result)
+
+
+def trim_trailing(label: str, char: str) -> str:
+    """Remove the given trailing character and any surrounding whitespace (single instance), mirroring Scala trimTrailing.
+
+    Example: trim_trailing("Name,  ", ",") -> "Name"
+    We construct a regex similar to Scala's dynamic one.
+    """
+    pattern = r"\s*" + re.escape(char) + r"\s*$"
+    return re.sub(pattern, "", label)
+
+
 def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
     """Apply type-specific trailing punctuation trimming matching Scala semantics.
 
@@ -31,15 +55,11 @@ def normalise_label(label: str, concept_type: ConceptTypeLike) -> str:
     s = label.strip()
 
     if concept_type in ["Concept", "Genre", "Subject", "Period"]:
-        # Remove a single trailing period unless part of ellipsis (i.e. three periods)
-        # Regex replicates Scala trimTrailingPeriod behaviour.
-        s = re.sub(r"([^\.])\.\s*$", r"\1", s).rstrip()
+        s = trim_trailing_period(s)
     elif concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
-        # Trim trailing comma
-        s = re.sub(r"\s*,\s*$", "", s)
+        s = trim_trailing(s, ",")
     elif concept_type == "Place":
-        # Trim trailing colon
-        s = re.sub(r"\s*:\s*$", "", s)
+        s = trim_trailing(s, ":")
 
     # Replace exact label 'Electronic Books' (after period trimming) with sentence case form.
     if concept_type == "Genre" and s == "Electronic Books":
