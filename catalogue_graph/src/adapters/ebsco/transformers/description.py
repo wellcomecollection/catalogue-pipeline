@@ -32,7 +32,8 @@ def extract_description(record: Record) -> str | None:
 
 
 def format_field(field: Field) -> str:
-    return " ".join(chain(get_plain_field_values(field), get_u_field_values(field)))
+    contents = " ".join(chain(get_plain_field_values(field), get_u_field_values(field)))
+    return f"<p>{contents}</p>"
 
 
 def get_plain_field_values(field: Field) -> Iterable[str]:

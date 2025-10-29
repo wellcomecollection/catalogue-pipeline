@@ -37,7 +37,7 @@ def test_no_description(marc_record: Record) -> None:
 def test_extract_description_from_520(marc_record: Record) -> None:
     assert (
         transform_record(marc_record).data.description
-        == "A statement or account which describes something or someone by listing characteristic features, significant details, etc.; (from OED)"
+        == "<p>A statement or account which describes something or someone by listing characteristic features, significant details, etc.; (from OED)</p>"
     )
 
 
@@ -70,7 +70,7 @@ def test_make_link_from_url(marc_record: Record) -> None:
     """
     assert (
         transform_record(marc_record).data.description
-        == 'summary expansion source <a href="http://example.com">http://example.com</a>'
+        == '<p>summary expansion source <a href="http://example.com">http://example.com</a></p>'
     )
 
 
@@ -101,7 +101,7 @@ def test_only_urls_create_links(
     with caplog.at_level(logging.WARN):
         assert (
             transform_record(marc_record).data.description
-            == "summary source urn:isbn:9781455841653"
+            == "<p>summary source urn:isbn:9781455841653</p>"
         )
     assert "doesn't look like a URL: urn:isbn:9781455841653" in caplog.text
 
@@ -130,7 +130,7 @@ def test_multiple_urls(marc_record: Record) -> None:
     """
     assert (
         transform_record(marc_record).data.description
-        == 'summary urn:isbn:9781455841653 <a href="http://example.com">http://example.com</a>'
+        == '<p>summary urn:isbn:9781455841653 <a href="http://example.com">http://example.com</a></p>'
     )
 
 
@@ -158,4 +158,6 @@ def test_multiple_descriptions(marc_record: Record) -> None:
     """
     multiple descriptions are condensed into one big one, line-separated
     """
-    assert transform_record(marc_record).data.description == "hello\nworld"
+    assert (
+        transform_record(marc_record).data.description == "<p>hello</p>\n<p>world</p>"
+    )
