@@ -30,12 +30,12 @@ data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/concepts_ingestor/api_key*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/works_ingestor/api_key*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
+      "${local.secrets_manager_prefix}:${var.es_cluster_host}*",
+      "${local.secrets_manager_prefix}:${var.es_cluster_port}*",
+      "${local.secrets_manager_prefix}:${var.es_cluster_protocol}*",
+      "${local.secrets_manager_prefix}:${var.es_secrets.concepts_ingestor}*",
+      "${local.secrets_manager_prefix}:${var.es_secrets.works_ingestor}*",
+      "${local.secrets_manager_prefix}:${var.es_secrets.graph_extractor}*"
     ]
   }
 }
@@ -44,10 +44,10 @@ data "aws_iam_policy_document" "allow_pipeline_storage_secret_read_denormalised_
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
-      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
+      "${local.secrets_manager_prefix}:${var.es_cluster_host}*",
+      "${local.secrets_manager_prefix}:${var.es_cluster_port}*",
+      "${local.secrets_manager_prefix}:${var.es_cluster_protocol}*",
+      "${local.secrets_manager_prefix}:${var.es_secrets.graph_extractor}*"
     ]
   }
 }

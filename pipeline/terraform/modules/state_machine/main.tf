@@ -22,10 +22,7 @@ resource "aws_iam_role" "state_machine_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = [
-            "states.amazonaws.com",
-            "scheduler.amazonaws.com"
-          ]
+          Service = "states.amazonaws.com"
         }
       }
     ]

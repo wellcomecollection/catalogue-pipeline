@@ -9,7 +9,6 @@ variable "index_dates" {
   })
 }
 
-
 variable "es_cluster_host" {
   type = string
 }

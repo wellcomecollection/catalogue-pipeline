@@ -1,4 +1,3 @@
-# ingestor_loader_monitor
 module "ingestor_loader_monitor_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
