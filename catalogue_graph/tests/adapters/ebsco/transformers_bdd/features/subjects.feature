@@ -128,10 +128,9 @@ Feature: Extracting subjects from 6xx fields
       Then there are no subjects
 
   Rule: Not all 6xx fields create a Subject
-  We catalogue using LoC (2nd indicator 0) and MeSH (2nd indicator 2) and
-  other (2nd indicator 7), so for the above Subject Added Entry's we do not
-  take any headings with 2nd indicators 1, 3-6, there are particular rules
-  on 2nd indicator 7 headings:
+  We catalogue using LoC (2nd indicator 0) and MeSH (2nd indicator 2) and other (2nd indicator 7).
+  So for any of the Subject Added Entry fields we do not take any headings
+  with 2nd indicators 1, 3-6, and there are particular rules on 2nd indicator 7 headings.
 
   We currently keep/use the following 650_7 ǂ2: local, homoit, indig, enslv
 
