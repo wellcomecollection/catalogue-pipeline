@@ -1,8 +1,8 @@
-data "aws_iam_policy_document" "allow_secret_read" {
+data "aws_iam_policy_document" "allow_catalogue_graph_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:${local.namespace}/*"
+      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:catalogue-graph/*"
     ]
   }
 }

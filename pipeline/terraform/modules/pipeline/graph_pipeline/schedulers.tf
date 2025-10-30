@@ -9,7 +9,7 @@ resource "aws_scheduler_schedule" "concepts_pipeline_monthly" {
 
   target {
     arn      = module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn
-    role_arn = aws_iam_role.state_machine_execution_role.arn
+    role_arn = aws_iam_role.run_graph_pipeline_role.arn
   }
 }
 
@@ -23,7 +23,7 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
 
   target {
     arn      = module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn
-    role_arn = aws_iam_role.state_machine_execution_role.arn
+    role_arn = aws_iam_role.run_graph_pipeline_role.arn
 
     input = <<JSON
     {
@@ -40,21 +40,42 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
   }
 }
 
-resource "aws_iam_role" "state_machine_execution_role" {
-  name = "${local.namespace}-state-machine-execution-role-${var.pipeline_date}"
+resource "aws_iam_role" "run_graph_pipeline_role" {
+  name = "run-graph-pipeline-role-${var.pipeline_date}"
+
   assume_role_policy = jsonencode({
-    Version = "2012-10-17",
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect = "Allow",
+        Effect = "Allow"
         Principal = {
-          Service = [
-            "states.amazonaws.com",
-            "scheduler.amazonaws.com"
-          ]
-        },
+          Service = "scheduler.amazonaws.com"
+        }
         Action = "sts:AssumeRole"
       }
     ]
   })
+}
+
+resource "aws_iam_policy" "start_graph_pipeline" {
+  name        = "start-graph-pipeline-${var.pipeline_date}"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "states:StartExecution"
+        Resource = [
+          module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn,
+          module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_policy" {
+  role       = aws_iam_role.run_graph_pipeline_role.name
+  policy_arn = aws_iam_policy.start_graph_pipeline.arn
 }

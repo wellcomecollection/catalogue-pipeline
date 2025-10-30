@@ -26,7 +26,7 @@ module "catalogue_graph_pipeline_monthly_state_machine" {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
-          StateMachineArn = module.catalogue_graph_removers_full_state_machine.state_machine_arn
+          StateMachineArn = module.catalogue_graph_removers_monthly_state_machine.state_machine_arn
         }
         Next = "Success"
       },
@@ -39,7 +39,7 @@ module "catalogue_graph_pipeline_monthly_state_machine" {
   invokable_state_machine_arns = [
     module.catalogue_graph_extractors_monthly_state_machine.state_machine_arn,
     module.catalogue_graph_bulk_loaders_monthly_state_machine.state_machine_arn,
-    module.catalogue_graph_removers_full_state_machine.state_machine_arn
+    module.catalogue_graph_removers_monthly_state_machine.state_machine_arn
   ]
 }
 

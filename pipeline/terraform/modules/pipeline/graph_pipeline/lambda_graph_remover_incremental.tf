@@ -1,7 +1,7 @@
 module "graph_remover_incremental_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "${local.namespace}-remover-incremental-${var.pipeline_date}"
+  name         = "graph-remover-incremental-${var.pipeline_date}"
   description  = "Handles the incremental removal of catalogue nodes/edges from the catalogue graph."
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
@@ -44,7 +44,7 @@ resource "aws_iam_role_policy" "graph_remover_incremental_lambda_neptune_delete_
 
 resource "aws_iam_role_policy" "graph_remover_incremental_lambda_read_secrets_policy" {
   role   = module.graph_remover_incremental_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_secret_read.json
+  policy = data.aws_iam_policy_document.allow_catalogue_graph_secret_read.json
 }
 
 # Write files storing deleted nodes/edges

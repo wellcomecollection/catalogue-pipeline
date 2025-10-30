@@ -47,4 +47,8 @@ module "catalogue_graph_ingestors_state_machine" {
       }
     }
   })
+
+  invokable_state_machine_arns = [
+    module.catalogue_graph_ingestor_state_machine.state_machine_arn
+  ]
 }

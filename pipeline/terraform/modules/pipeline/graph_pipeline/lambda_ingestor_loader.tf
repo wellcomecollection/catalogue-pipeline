@@ -32,7 +32,7 @@ module "ingestor_loader_lambda" {
 
 resource "aws_iam_role_policy" "ingestor_loader_lambda_read_secrets_policy" {
   role   = module.ingestor_loader_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_secret_read.json
+  policy = data.aws_iam_policy_document.allow_catalogue_graph_secret_read.json
 }
 
 resource "aws_iam_role_policy" "ingestor_loader_lambda_read_pipeline_secrets_policy" {

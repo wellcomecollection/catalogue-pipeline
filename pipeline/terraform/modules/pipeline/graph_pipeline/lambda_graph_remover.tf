@@ -1,7 +1,7 @@
 module "graph_remover_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "${local.namespace}-remover-${var.pipeline_date}"
+  name         = "graph-remover-${var.pipeline_date}"
   description  = "Takes snapshots of items bulk loaded into the catalogue graph and handles the removal of nodes/edges."
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
@@ -41,7 +41,7 @@ resource "aws_iam_role_policy" "graph_remover_lambda_neptune_delete_policy" {
 
 resource "aws_iam_role_policy" "graph_remover_lambda_read_secrets_policy" {
   role   = module.graph_remover_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_secret_read.json
+  policy = data.aws_iam_policy_document.allow_catalogue_graph_secret_read.json
 }
 
 # Read bulk load files outputted by the extractor

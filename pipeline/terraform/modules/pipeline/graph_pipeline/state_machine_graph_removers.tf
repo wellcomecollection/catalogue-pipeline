@@ -1,6 +1,6 @@
-module "catalogue_graph_removers_full_state_machine" {
+module "catalogue_graph_removers_monthly_state_machine" {
   source = "../../state_machine"
-  name   = "graph-removers-full-${var.pipeline_date}"
+  name   = "graph-removers-monthly-${var.pipeline_date}"
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"

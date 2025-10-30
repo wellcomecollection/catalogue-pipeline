@@ -1,7 +1,7 @@
 module "graph_scaler_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "${local.namespace}-scaler-${var.pipeline_date}"
+  name         = "graph-scaler-${var.pipeline_date}"
   description  = "Sets the minimum and maximum capacity of the serverless Neptune cluster."
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"

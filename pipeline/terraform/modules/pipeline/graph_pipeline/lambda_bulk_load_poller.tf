@@ -1,7 +1,7 @@
 module "bulk_load_poller_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "${local.namespace}-bulk-load-poller-${var.pipeline_date}"
+  name         = "graph-bulk-load-poller-${var.pipeline_date}"
   description  = "Polls the status of a Neptune bulk load job."
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
@@ -31,7 +31,7 @@ module "bulk_load_poller_lambda" {
 
 resource "aws_iam_role_policy" "bulk_load_poller_lambda_read_secrets_policy" {
   role   = module.bulk_load_poller_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_secret_read.json
+  policy = data.aws_iam_policy_document.allow_catalogue_graph_secret_read.json
 }
 
 resource "aws_iam_role_policy" "bulk_load_poller_lambda_neptune_policy" {
