@@ -1,11 +1,11 @@
 resource "aws_ecs_cluster" "cluster" {
-  name = "${local.namespace}-${var.pipeline_date}"
+  name = "graph-extractor-${var.pipeline_date}"
 }
 
 module "extractor_ecs_task" {
   source = "./ecs_task"
 
-  task_name = "${local.namespace}-extractor-${var.pipeline_date}"
+  task_name = "graph-extractor-${var.pipeline_date}"
 
   image = "${data.aws_ecr_repository.catalogue_graph_extractor.repository_url}:prod"
 

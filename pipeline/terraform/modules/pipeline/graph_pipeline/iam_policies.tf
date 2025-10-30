@@ -45,6 +45,8 @@ data "aws_iam_policy_document" "allow_pipeline_storage_secret_read_denormalised_
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 locals {
   account_id          = data.aws_caller_identity.current.account_id
   cluster_resource_id = "cluster-JMIJSN5H4GF2HBVDQFLL7I2OCM"

@@ -63,7 +63,8 @@ resource "aws_iam_policy" "state_machine_self_start_execution_policy" {
       {
         Effect = "Allow"
         Action = [
-          "states:StartExecution"
+          "states:StartExecution",
+          "states:RedriveExecution"
         ]
         Resource = aws_sfn_state_machine.state_machine.arn
       }
