@@ -79,9 +79,9 @@ Feature: Extracting subjects from 6xx fields
       When I transform the MARC record
       Then the only subject has the label "Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. Performer. - Von Klinkerhoffen"
       And it has 2 concepts:
-        | type    | label                                                                  |
-        | Person  | Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. |
-        | Concept | Von Klinkerhoffen                                                      |
+        | type    | label                                                                 |
+        | Person  | Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French |
+        | Concept | Von Klinkerhoffen                                                     |
 
     Scenario: A 610 field with all the subdivisions yields an Organisation
     Regardless of the subdivisions, an Organisation is only one Concept

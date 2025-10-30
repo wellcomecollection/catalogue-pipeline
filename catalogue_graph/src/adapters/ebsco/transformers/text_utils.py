@@ -55,9 +55,9 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
     """
     s = label.strip()
 
-    if concept_type in ["Concept", "GenreConcept", "Subject", "Period"]:
+    if concept_type != "Period":
         s = trim_trailing_period(s)
-    elif concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
+    if concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
         s = trim_trailing(s, ",")
     elif concept_type == "Place":
         s = trim_trailing(s, ":")
@@ -67,6 +67,5 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
         s = "Electronic books"
 
     return s
-
 
 ## NOTE: normalise_identifier_value removed; use Identifiable.identifier_from_text for label-derived identifiers.
