@@ -129,7 +129,7 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: Not all 6xx fields create a Subject
     Scenario Outline: Ignored second indicators
-      Given the MARC record has a 650 field with indicators "0" "<ind2>" with subfield "a" value "<source>"
+      Given the MARC record has a 650 field with indicators "" "<ind2>" with subfield "a" value "<source>"
       When I transform the MARC record
       Then there are no subjects
       Examples:
@@ -141,7 +141,7 @@ Feature: Extracting subjects from 6xx fields
         | 6    | Répertoire de vedettes- matière                                   |
 
     Scenario Outline: Unconditional second indicators
-      Given the MARC record has a 650 field with indicators "0" "<ind2>" with subfield "a" value "<source>"
+      Given the MARC record has a 650 field with indicators "" "<ind2>" with subfield "a" value "<source>"
       When I transform the MARC record
       Then there is 1 subject
       Examples:
@@ -150,7 +150,9 @@ Feature: Extracting subjects from 6xx fields
         | 2    | Medical Subject Headings             |
 
     Scenario Outline: Conditional second indicator
-      Given the MARC record has a 650 field with indicators "0" "7" with subfields:
+    Only a select few "source specified in subfield" sources are retained,
+    all others are discarded
+      Given the MARC record has a 650 field with indicators "" "7" with subfields:
         | code | value     |
         | a    | A Subject |
         | 2    | <source>  |
