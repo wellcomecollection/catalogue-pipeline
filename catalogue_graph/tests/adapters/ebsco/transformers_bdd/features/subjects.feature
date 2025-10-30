@@ -179,9 +179,6 @@ Feature: Extracting subjects from 6xx fields
         | 0 | kadoc    |
         | 0 | galestne |
 
-
-
-
   Rule: Trailing full stops are removed in Subjects, apart from Person subjects
   This is a bug in the previous implementation that we need to replicate for comparison purposes.
   Once the comparison is successful we should be able to remove the dot from a Person as well.
