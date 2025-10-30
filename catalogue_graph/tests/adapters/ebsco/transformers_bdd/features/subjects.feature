@@ -48,7 +48,7 @@ Feature: Extracting subjects from 6xx fields
         | Concept | Specimens  | Concept                            |
         | Concept | Literature | Concept                            |
         | Period  | 1897-1900  | Period                             |
-        | Place   | Dublin.    | Place                              |
+        | Place   | Dublin     | Place                              |
       Examples:
         | code | type    |
         | 648  | Period  |
@@ -179,7 +179,7 @@ Feature: Extracting subjects from 6xx fields
         | 0 | kadoc    |
         | 0 | galestne |
 
-  Rule: Trailing full stops are removed in Subjects, apart from Person subjects
+  Rule: Trailing full stops are removed in Subjects, apart from Person subjects, and also in the concepts that make up a subject
   This is a bug in the previous implementation that we need to replicate for comparison purposes.
   Once the comparison is successful we should be able to remove the dot from a Person as well.
 
@@ -199,3 +199,19 @@ Feature: Extracting subjects from 6xx fields
         | 648  |
         | 650  |
         | 651  |
+
+    Scenario: A Subject with trailing dots in all the concepts
+      Given the MARC record has a 650 field with indicators "" "0" with subfields:
+        | code | value       |
+        | a    | A Subject.  |
+        | v    | Specimens.  |
+        | x    | Literature. |
+        | z    | Dublin.     |
+      When I transform the MARC record
+      Then the only subject has the label "A Subject. - Specimens. - Literature. - Dublin"
+      And it has 4 concepts:
+        | label      |
+        | A Subject  |
+        | Specimens  |
+        | Literature |
+        | Dublin     |

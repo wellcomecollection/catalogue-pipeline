@@ -34,6 +34,7 @@ ignore_fields:
   - data.production[].dates[].range.from
   - data.production[].dates[].range.to
   - data.production[].places[].type
+  - data.production[].function.type
   - data.subjects[].type
   # Number of differing documents to sample for console display
 sample_size: 10
