@@ -42,8 +42,6 @@ module "catalogue_graph_extractor_state_machine" {
       }
     },
   })
-
-  state_machine_iam_policy = data.aws_iam_policy_document.run_extractor_ecs_task.json
 }
 
 data "aws_iam_policy_document" "run_extractor_ecs_task" {
@@ -81,3 +79,13 @@ data "aws_iam_policy_document" "run_extractor_ecs_task" {
     ]
   }
 }
+
+resource "aws_iam_policy" "run_extractor_ecs_task" {
+  policy      = data.aws_iam_policy_document.run_extractor_ecs_task.json
+}
+
+resource "aws_iam_role_policy_attachment" "run_extractor_ecs_task" {
+  role       = module.catalogue_graph_extractor_state_machine.state_machine_role_name
+  policy_arn = aws_iam_policy.run_extractor_ecs_task.arn
+}
+

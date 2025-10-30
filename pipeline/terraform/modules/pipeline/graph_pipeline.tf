@@ -17,5 +17,3 @@ module "graph_pipeline" {
     graph_extractor   = module.elastic.pipeline_storage_es_service_secrets["graph_extractor"]["es_apikey"],
   }
 }
-
-

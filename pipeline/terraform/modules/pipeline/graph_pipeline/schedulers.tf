@@ -1,5 +1,5 @@
-resource "aws_scheduler_schedule" "concepts_pipeline_monthly" {
-  name = "concepts_pipeline_monthly_run"
+resource "aws_scheduler_schedule" "graph_pipeline_monthly" {
+  name = "graph-pipeline-monthly-run-${var.pipeline_date}"
 
   flexible_time_window {
     mode = "OFF"
@@ -14,7 +14,7 @@ resource "aws_scheduler_schedule" "concepts_pipeline_monthly" {
 }
 
 resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
-  name                = "catalogue_graph_pipeline_incremental_run"
+  name = "graph-pipeline-incremental-run-${var.pipeline_date}"
   schedule_expression = "cron(0,15,30,45 * * * ? *)" # Every 15 minutes
 
   flexible_time_window {
