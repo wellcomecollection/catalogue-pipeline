@@ -1,6 +1,6 @@
 module "catalogue_graph_ingestor_state_machine" {
   source = "../../state_machine"
-  name = "graph-pipeline-ingestor-${var.pipeline_date}"
+  name   = "graph-pipeline-ingestor-${var.pipeline_date}"
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"

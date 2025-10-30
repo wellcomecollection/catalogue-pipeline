@@ -21,7 +21,7 @@ module "catalogue_graph_bulk_loaders_monthly_state_machine" {
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
-    }), {
+      }), {
       Success = {
         Type = "Succeed"
       }
@@ -58,7 +58,7 @@ module "catalogue_graph_bulk_loaders_incremental_state_machine" {
         }
         Next = index == length(local.concepts_pipeline_inputs_incremental) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_incremental[index + 1].label}"
       }
-    }), {
+      }), {
       Success = {
         Type = "Succeed"
       }

@@ -104,8 +104,8 @@ resource "aws_iam_policy" "state_machine_execution_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow",
-        Action = ["states:StartExecution", "states:RedriveExecution"],
+        Effect   = "Allow",
+        Action   = ["states:StartExecution", "states:RedriveExecution"],
         Resource = var.invokable_state_machine_arns
       }
     ]
@@ -121,7 +121,7 @@ resource "aws_iam_policy" "custom_state_machine_policy" {
 }
 
 resource "aws_iam_policy" "sync_run_policy" {
-  name        = "${var.name}-sync-run-policy"
+  name = "${var.name}-sync-run-policy"
 
   policy = jsonencode({
     Version = "2012-10-17",
@@ -129,8 +129,8 @@ resource "aws_iam_policy" "sync_run_policy" {
       # These EventBridge permissions are needed to use the .sync pattern, allowing the state machine to start
       # other services (e.g. step functions, ECS tasks) and wait for them to complete
       {
-        Effect   = "Allow",
-        Action   = [
+        Effect = "Allow",
+        Action = [
           "events:PutTargets",
           "events:PutRule",
           "events:DescribeRule",

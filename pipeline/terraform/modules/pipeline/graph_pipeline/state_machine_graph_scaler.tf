@@ -1,6 +1,6 @@
 module "catalogue_graph_scaler_state_machine" {
   source = "../../state_machine"
-  name = "graph-scaler-${var.pipeline_date}"
+  name   = "graph-scaler-${var.pipeline_date}"
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONPath"
