@@ -1,19 +1,19 @@
-resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
-  name     = "${local.namespace}-extractors-monthly-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_extractors_monthly_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-extractors-monthly-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     Comment = "Transform raw concepts from external sources into nodes and edges and stream them into an S3 bucket."
     StartAt = "Extract ${local.concepts_pipeline_inputs_monthly[0].label}"
 
     States = merge(tomap({
       for index, task_input in local.concepts_pipeline_inputs_monthly :
       "Extract ${task_input.label}" => {
-        Type     = "Task"
-        Resource = "arn:aws:states:::states:startExecution.sync:2",
+        Type       = "Task"
+        Resource   = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
-          StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
-          Input = {
+          StateMachineArn = module.catalogue_graph_extractor_state_machine.state_machine_arn
+          Input           = {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
             "pipeline_date" : var.pipeline_date,
@@ -22,19 +22,23 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_monthly" {
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Extract ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
-      }), {
+    }), {
       Success = {
         Type = "Succeed"
       }
     })
   })
+
+  invokable_state_machine_arns = [
+    module.catalogue_graph_extractor_state_machine.state_machine_arn
+  ]
 }
 
-resource "aws_sfn_state_machine" "catalogue_graph_extractors_incremental" {
-  name     = "${local.namespace}-extractors-incremental-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_extractors_incremental_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-extractors-incremental-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Extract catalogue works/concepts, transform them into nodes and edges, and stream them into an S3 bucket."
     StartAt       = "Extractors"
@@ -59,12 +63,12 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_incremental" {
             ExecutionType = "STANDARD"
           },
           StartAt = "Run extractor",
-          States = {
+          States  = {
             "Run extractor" = {
-              Type     = "Task",
-              Resource = "arn:aws:states:::states:startExecution.sync:2",
+              Type      = "Task",
+              Resource  = "arn:aws:states:::states:startExecution.sync:2",
               Arguments = {
-                StateMachineArn = aws_sfn_state_machine.catalogue_graph_extractor.arn
+                StateMachineArn = module.catalogue_graph_extractor_state_machine.state_machine_arn
                 Input           = "{% $states.input %}"
               },
               Retry = local.state_function_default_retry,
@@ -79,6 +83,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractors_incremental" {
       }
     }
   })
+
+  invokable_state_machine_arns = [
+    module.catalogue_graph_extractor_state_machine.state_machine_arn
+  ]
 }
-
-

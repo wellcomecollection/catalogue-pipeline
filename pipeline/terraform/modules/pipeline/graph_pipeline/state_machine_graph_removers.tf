@@ -1,8 +1,8 @@
-resource "aws_sfn_state_machine" "catalogue_graph_removers" {
-  name     = "${local.namespace}-removers-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_removers_full_state_machine" {
+  source = "../../state_machine"
+  name = "graph-removers-full-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Remove unused nodes/edges from the catalogue graph"
     StartAt       = "Run graph removers"
@@ -42,13 +42,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
       }
     }
   })
+
+  invokable_lambda_arns = [
+    module.graph_remover_lambda.lambda.arn
+  ]
 }
 
-resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
-  name     = "${local.namespace}-graph-removers-incremental-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_removers_incremental_state_machine" {
+  source = "../../state_machine"
+  name = "graph-removers-incremental-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Remove unused catalogue nodes/edges from the catalogue graph"
     StartAt       = "Graph removers"
@@ -93,4 +97,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
       }
     }
   })
+
+  invokable_lambda_arns = [
+    module.graph_remover_incremental_lambda.lambda.arn
+  ]
 }

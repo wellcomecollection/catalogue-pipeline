@@ -1,8 +1,8 @@
-resource "aws_sfn_state_machine" "catalogue_graph_scaler" {
-  name     = "${local.namespace}-graph-scaler-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_scaler_state_machine" {
+  source = "../../state_machine"
+  name = "graph-scaler-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONPath"
     Comment       = "Change the capacity of the serverless Neptune cluster and periodically check its status until new capacity applied."
     StartAt       = "Scale"
@@ -49,4 +49,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_scaler" {
       }
     }
   })
+
+  invokable_lambda_arns = [
+    module.graph_scaler_lambda.lambda.arn,
+    module.graph_status_poller_lambda.lambda.arn
+  ]
 }

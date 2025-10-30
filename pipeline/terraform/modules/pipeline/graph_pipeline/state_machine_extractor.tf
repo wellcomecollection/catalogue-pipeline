@@ -1,8 +1,8 @@
-resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
-  name     = "${local.namespace}-extractor-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_extractor_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-extractor-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     Comment       = "Run a single catalogue graph pipeline extractor task."
     QueryLanguage = "JSONata"
     StartAt       = "Extract"
@@ -42,4 +42,42 @@ resource "aws_sfn_state_machine" "catalogue_graph_extractor" {
       }
     },
   })
+
+  state_machine_iam_policy = data.aws_iam_policy_document.run_extractor_ecs_task.json
+}
+
+data "aws_iam_policy_document" "run_extractor_ecs_task" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "ecs:RunTask",
+    ]
+    resources = [
+      "${local.extractor_task_definition_arn_latest}:*",
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "iam:PassRole",
+    ]
+    resources = [
+      module.extractor_ecs_task.task_execution_role_arn,
+      module.extractor_ecs_task.task_role_arn,
+    ]
+  }
+
+  statement {
+    effect = "Allow"
+
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
 }

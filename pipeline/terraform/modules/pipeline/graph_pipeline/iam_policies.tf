@@ -19,17 +19,16 @@ data "aws_iam_policy_document" "allow_slack_secret_read" {
   }
 }
 
-
 data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      var.es_cluster_host,
-      var.es_cluster_port,
-      var.es_cluster_protocol,
-      var.es_secrets.concepts_ingestor,
-      var.es_secrets.works_ingestor,
-      var.es_secrets.graph_extractor,
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/concepts_ingestor/api_key*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/works_ingestor/api_key*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
     ]
   }
 }
@@ -38,10 +37,10 @@ data "aws_iam_policy_document" "allow_pipeline_storage_secret_read_denormalised_
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      var.es_cluster_host,
-      var.es_cluster_port,
-      var.es_cluster_protocol,
-      var.es_secrets.graph_extractor,
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
     ]
   }
 }

@@ -1,8 +1,8 @@
-resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_monthly" {
-  name     = "${local.namespace}-bulk-loaders-monthly-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_bulk_loaders_monthly_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-bulk-loaders-monthly-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     Comment = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
     StartAt = "Load ${local.concepts_pipeline_inputs_monthly[0].label}"
     States = merge(tomap({
@@ -11,7 +11,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_monthly" {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Parameters = {
-          StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
+          StateMachineArn = module.catalogue_graph_bulk_loader_state_machine.state_machine_arn
           Input = {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
@@ -21,19 +21,23 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_monthly" {
         }
         Next = index == length(local.concepts_pipeline_inputs_monthly) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_monthly[index + 1].label}"
       }
-      }), {
+    }), {
       Success = {
         Type = "Succeed"
       }
     })
   })
+
+  invokable_state_machine_arns = [
+    module.catalogue_graph_bulk_loader_state_machine.state_machine_arn
+  ]
 }
 
-resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_incremental" {
-  name     = "${local.namespace}-bulk-loaders-incremental-${var.pipeline_date}"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_bulk_loaders_incremental_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-bulk-loaders-incremental-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Trigger the catalogue-graph-bulk-loader state machine in sequence for each combination of inputs."
     StartAt       = "Load ${local.concepts_pipeline_inputs_incremental[0].label}"
@@ -43,7 +47,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_incremental" {
         Type     = "Task"
         Resource = "arn:aws:states:::states:startExecution.sync:2",
         Arguments = {
-          StateMachineArn = aws_sfn_state_machine.catalogue_graph_bulk_loader.arn
+          StateMachineArn = module.catalogue_graph_bulk_loader_state_machine.state_machine_arn
           Input = {
             "transformer_type" : task_input.transformer_type,
             "entity_type" : task_input.entity_type,
@@ -54,10 +58,14 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loaders_incremental" {
         }
         Next = index == length(local.concepts_pipeline_inputs_incremental) - 1 ? "Success" : "Load ${local.concepts_pipeline_inputs_incremental[index + 1].label}"
       }
-      }), {
+    }), {
       Success = {
         Type = "Succeed"
       }
     })
   })
+
+  invokable_state_machine_arns = [
+    module.catalogue_graph_bulk_loader_state_machine.state_machine_arn
+  ]
 }
