@@ -1,5 +1,5 @@
 resource "aws_cloudwatch_metric_alarm" "incremental_pipeline_run_aborted_alarm" {
-  alarm_name          = "concepts_daily_run_aborted_alarm"
+  alarm_name          = "graph-pipeline-incremental-run-aborted-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ExecutionsAborted"
@@ -15,8 +15,8 @@ resource "aws_cloudwatch_metric_alarm" "incremental_pipeline_run_aborted_alarm" 
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
-resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_failed_alarm" {
-  alarm_name          = "concepts_daily_run_failed_alarm"
+resource "aws_cloudwatch_metric_alarm" "incremental_pipeline_run_failed_alarm" {
+  alarm_name          = "graph-pipeline-incremental-run-failed-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ExecutionsFailed"
@@ -32,8 +32,8 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_failed_alarm" {
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
-resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_timedout_alarm" {
-  alarm_name          = "concepts_daily_run_timedout_alarm"
+resource "aws_cloudwatch_metric_alarm" "incremental_pipeline_run_timeout_alarm" {
+  alarm_name          = "graph-pipeline-incremental-run-timeout-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ExecutionsTimedOut"
@@ -49,8 +49,8 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_timedout_alarm" {
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
-resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_aborted_alarm" {
-  alarm_name          = "concepts_monthly_run_aborted_alarm"
+resource "aws_cloudwatch_metric_alarm" "monthly_pipeline_run_aborted_alarm" {
+  alarm_name          = "graph-pipeline-monthly-run-aborted-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ExecutionsAborted"
@@ -66,8 +66,8 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_aborted_alarm" {
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
-resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_failed_alarm" {
-  alarm_name          = "concepts_monthly_run_failed_alarm"
+resource "aws_cloudwatch_metric_alarm" "monthly_pipeline_run_failed_alarm" {
+  alarm_name          = "graph-pipeline-monthly-run-failed-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ExecutionsFailed"
@@ -83,8 +83,8 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_failed_alarm" {
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
 
-resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_timedout_alarm" {
-  alarm_name          = "concepts_monthly_run_timedout_alarm"
+resource "aws_cloudwatch_metric_alarm" "monthly_pipeline_run_timeout_alarm" {
+  alarm_name          = "graph-pipeline-monthly-run-timeout-${var.pipeline_date}"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
   metric_name         = "ExecutionsTimedOut"
