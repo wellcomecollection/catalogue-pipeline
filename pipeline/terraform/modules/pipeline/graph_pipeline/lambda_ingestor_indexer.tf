@@ -1,7 +1,7 @@
 module "ingestor_indexer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "catalogue-graph-ingestor-indexer"
+  name         = "${local.namespace}-ingestor-indexer-${var.pipeline_date}"
   description  = "Indexes catalogue concepts into elasticsearch"
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
