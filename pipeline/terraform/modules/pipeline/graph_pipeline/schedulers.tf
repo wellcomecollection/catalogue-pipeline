@@ -58,7 +58,7 @@ resource "aws_iam_role" "run_graph_pipeline_role" {
 }
 
 resource "aws_iam_policy" "start_graph_pipeline" {
-  name        = "start-graph-pipeline-${var.pipeline_date}"
+  name = "start-graph-pipeline-${var.pipeline_date}"
 
   policy = jsonencode({
     Version = "2012-10-17"
