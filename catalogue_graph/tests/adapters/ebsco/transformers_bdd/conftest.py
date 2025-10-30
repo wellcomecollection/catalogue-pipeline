@@ -257,6 +257,7 @@ def only_root_list_member_has(
         property: str,
         value: str,
 ) -> Any:
+    list_member_count(work, 1, attr_phrase)
     member = _list_member_nth(work.data, 1, attr_phrase)
     assert getattr(member, property) == value
     context[attr_phrase] = member
