@@ -81,7 +81,7 @@ data "aws_iam_policy_document" "run_extractor_ecs_task" {
 }
 
 resource "aws_iam_policy" "run_extractor_ecs_task" {
-  policy      = data.aws_iam_policy_document.run_extractor_ecs_task.json
+  policy = data.aws_iam_policy_document.run_extractor_ecs_task.json
 }
 
 resource "aws_iam_role_policy_attachment" "run_extractor_ecs_task" {
