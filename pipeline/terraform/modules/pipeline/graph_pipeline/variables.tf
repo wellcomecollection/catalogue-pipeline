@@ -4,7 +4,7 @@ variable "pipeline_date" {
 
 variable "index_dates" {
   type = object({
-    works = string
+    works    = string
     concepts = string
   })
 }
