@@ -1,8 +1,15 @@
+data "aws_caller_identity" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+  secrets_manager_prefix = "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret"
+}
+
 data "aws_iam_policy_document" "allow_catalogue_graph_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:catalogue-graph/*"
+      "${local.secrets_manager_prefix}:catalogue-graph/*"
     ]
   }
 }
@@ -14,7 +21,7 @@ data "aws_iam_policy_document" "allow_slack_secret_read" {
     ]
 
     resources = [
-      "arn:aws:secretsmanager:eu-west-1:760097843905:secret:${local.slack_webhook}*",
+      "${local.secrets_manager_prefix}:${local.slack_webhook}*",
     ]
   }
 }
@@ -23,12 +30,12 @@ data "aws_iam_policy_document" "ingestor_allow_pipeline_storage_secret_read" {
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/concepts_ingestor/api_key*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/works_ingestor/api_key*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/concepts_ingestor/api_key*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/works_ingestor/api_key*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
     ]
   }
 }
@@ -37,24 +44,14 @@ data "aws_iam_policy_document" "allow_pipeline_storage_secret_read_denormalised_
   statement {
     actions = ["secretsmanager:GetSecretValue"]
     resources = [
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
-      "arn:aws:secretsmanager:eu-west-1:${local.account_id}:secret:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/private_host*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/port*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/protocol*",
+      "${local.secrets_manager_prefix}:elasticsearch/pipeline_storage_${var.pipeline_date}/graph_extractor/api_key*"
     ]
   }
 }
 
-data "aws_caller_identity" "current" {}
-
-locals {
-  account_id          = data.aws_caller_identity.current.account_id
-  cluster_resource_id = "cluster-JMIJSN5H4GF2HBVDQFLL7I2OCM"
-  # See https://docs.aws.amazon.com/neptune/latest/userguide/iam-data-resources.html
-  cluster_data_access_arn = "arn:aws:neptune-db:eu-west-1:${local.account_id}:${local.cluster_resource_id}/*"
-}
-
-# neptune read policy
 data "aws_iam_policy_document" "neptune_read" {
   statement {
     actions = [
@@ -64,12 +61,11 @@ data "aws_iam_policy_document" "neptune_read" {
     ]
 
     resources = [
-      local.cluster_data_access_arn
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
     ]
   }
 }
 
-# neptune delete policy
 data "aws_iam_policy_document" "neptune_delete" {
   statement {
     actions = [
@@ -77,7 +73,7 @@ data "aws_iam_policy_document" "neptune_delete" {
     ]
 
     resources = [
-      local.cluster_data_access_arn
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_data_access_arn
     ]
   }
 }

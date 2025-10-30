@@ -1,4 +1,4 @@
-resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_aborted_alarm" {
+resource "aws_cloudwatch_metric_alarm" "incremental_pipeline_run_aborted_alarm" {
   alarm_name          = "concepts_daily_run_aborted_alarm"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
@@ -10,7 +10,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_aborted_alarm" {
   actions_enabled     = true
   alarm_description   = "ExecutionsAborted detected"
   dimensions = {
-    StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
+    StateMachineArn = module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn
   }
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
@@ -27,7 +27,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_failed_alarm" {
   actions_enabled     = true
   alarm_description   = "ExecutionsFailed detected"
   dimensions = {
-    StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
+    StateMachineArn = module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn
   }
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
@@ -44,7 +44,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_daily_run_timedout_alarm" {
   actions_enabled     = true
   alarm_description   = "ExecutionsTimedOut detected"
   dimensions = {
-    StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_daily"
+    StateMachineArn = module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn
   }
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
@@ -61,7 +61,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_aborted_alarm" {
   actions_enabled     = true
   alarm_description   = "ExecutionsAborted detected"
   dimensions = {
-    StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_monthly"
+    StateMachineArn = module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn
   }
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
@@ -78,7 +78,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_failed_alarm" {
   actions_enabled     = true
   alarm_description   = "ExecutionsFailed detected"
   dimensions = {
-    StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_monthly"
+    StateMachineArn = module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn
   }
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }
@@ -95,7 +95,7 @@ resource "aws_cloudwatch_metric_alarm" "concepts_monthly_run_timedout_alarm" {
   actions_enabled     = true
   alarm_description   = "ExecutionsTimedOut detected"
   dimensions = {
-    StateMachineArn = "arn:aws:states:eu-west-1:760097843905:stateMachine:concepts-pipeline_monthly"
+    StateMachineArn = module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn
   }
   alarm_actions = [data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn]
 }

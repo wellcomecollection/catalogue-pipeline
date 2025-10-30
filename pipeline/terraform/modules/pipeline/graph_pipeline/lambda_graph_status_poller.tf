@@ -31,7 +31,7 @@ data "aws_iam_policy_document" "neptune_status_poller" {
     ]
 
     resources = [
-      local.neptune_cluster_resource_arn
+      data.terraform_remote_state.catalogue_graph.outputs.neptune_cluster_arn
     ]
   }
 }

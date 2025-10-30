@@ -17,8 +17,6 @@ locals {
 
   bulk_loader_default_insert_error_threshold = 1 / 10000
 
-  neptune_cluster_resource_arn = "arn:aws:rds:eu-west-1:760097843905:cluster:catalogue-graph"
-
   concepts_pipeline_inputs_monthly = [
     {
       "label" : "LoC Concept Nodes",
