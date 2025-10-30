@@ -99,14 +99,19 @@ SUBDIVISION_TRANSFORMS = {
 
 def extract_subjects(record: Record) -> list[Subject]:
     return non_empty(
-        extract_subject(field) for field in record.get_fields(*SUBJECT_FIELDS) if is_subject_to_keep(field)
+        extract_subject(field)
+        for field in record.get_fields(*SUBJECT_FIELDS)
+        if is_subject_to_keep(field)
     )
 
 
 def is_subject_to_keep(field: Field) -> bool:
-    return (
-            field.indicators.second in ["0", "2"]
-            or (field.indicators.second == "7" and field.get("2") in ["local", "homoit", "indig", "enslv"])
+    return field.indicators is not None and (
+        field.indicators.second in ["0", "2"]
+        or (
+            field.indicators.second == "7"
+            and field.get("2") in ["local", "homoit", "indig", "enslv"]
+        )
     )
 
 
