@@ -1,5 +1,5 @@
 import pytest
-from pymarc.record import Field, Record, Subfield
+from pymarc.record import Field, Indicators, Record, Subfield
 
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.identifier import Identifiable
@@ -16,6 +16,7 @@ def test_no_subjects(marc_record: Record) -> None:
             [
                 Field(
                     tag="610",
+                    indicators=Indicators("", "2"),
                     subfields=[
                         Subfield(code="a", value="A"),
                         Subfield(code="b", value="B"),
