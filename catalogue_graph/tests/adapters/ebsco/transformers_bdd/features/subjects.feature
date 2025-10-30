@@ -61,21 +61,21 @@ Feature: Extracting subjects from 6xx fields
     Subfield e is the role and does not result in a concept, nor is it part of the main concept
     Subfield x is the general subdivision, and is only included in the label of subject, and creates its own concept
       Given the MARC record has a 600 field with indicators "" "2" with subfields:
-        | code | value              |
-        | a    | Joseph Pujol       |
-        | b    | III                |
-        | c    | Kt,                |
-        | d    | 1857-1945          |
-        | t    | O Sole Mio         |
-        | p    | intro              |
-        | n    | 1                  |
-        | q    | Le Pétomane.       |
-        | l    | French.            |
-        | e    | Performer.         |
-        | x    | Von Klinkerhoffen. |
-        | v    | Specimens          |
-        | y    | 1897-1900          |
-        | z    | Dublin.            |
+        | code | value             |
+        | a    | Joseph Pujol      |
+        | b    | III               |
+        | c    | Kt,               |
+        | d    | 1857-1945         |
+        | t    | O Sole Mio        |
+        | p    | intro             |
+        | n    | 1                 |
+        | q    | Le Pétomane.      |
+        | l    | French.           |
+        | e    | Performer.        |
+        | x    | Von Klinkerhoffen |
+        | v    | Specimens         |
+        | y    | 1897-1900         |
+        | z    | Dublin.           |
       When I transform the MARC record
       Then the only subject has the label "Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. Performer. - Von Klinkerhoffen"
       And it has 2 concepts:
@@ -178,3 +178,27 @@ Feature: Extracting subjects from 6xx fields
         | 1 | enslv    |
         | 0 | kadoc    |
         | 0 | galestne |
+
+
+
+
+  Rule: Trailing full stops are removed in Subjects, apart from Person subjects
+  This is a bug in the previous implementation that we need to replicate for comparison purposes.
+  Once the comparison is successful we should be able to remove the dot from a Person as well.
+
+    Scenario: A Person Subject with a trailing dot
+      Given the MARC record has a 600 field with indicators "" "0" with subfield "a" value "John II Comnenus, Emperor of the East, 1087 or 1088-1143."
+      When I transform the MARC record
+      Then the only subject has the label "John II Comnenus, Emperor of the East, 1087 or 1088-1143."
+
+    Scenario Outline: A Subject with a trailing dot
+      Given the MARC record has a <code> field with indicators "" "0" with subfield "a" value "Quirkafleeg."
+      When I transform the MARC record
+      Then the only subject has the label "Quirkafleeg"
+      Scenarios:
+        | code |
+        | 610  |
+        | 611  |
+        | 648  |
+        | 650  |
+        | 651  |

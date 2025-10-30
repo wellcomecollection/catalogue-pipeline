@@ -135,9 +135,13 @@ def extract_subject(field: Field) -> Subject | None:
     get_label = LABEL_TRANSFORMS[field.tag]
     label = get_label(field)
 
-    # Trim trailing period from final subject label (Scala behaviour)
+    # Trim trailing period from final subject label
+    # unless it is a Person (Scala behaviour)
+    if field.tag != "600":
+        label = label.rstrip(".")
+
     return Subject(
-        label=label.rstrip("."),
+        label=label,
         id=Identifiable.identifier_from_text(label, ontology_type),
         concepts=[primary_concept] + list(get_subdivision_concepts(field)),
     )
