@@ -7,16 +7,17 @@ locals {
 
   ec_privatelink_security_group_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
 
+  slack_webhook = "catalogue_graph_reporter/slack_webhook"
+
   vpc_id          = data.terraform_remote_state.platform_infra.outputs.catalogue_vpc_delta_id
   private_subnets = data.terraform_remote_state.platform_infra.outputs.catalogue_vpc_delta_private_subnets
   public_subnets  = data.terraform_remote_state.platform_infra.outputs.catalogue_vpc_delta_public_subnets
 
-  index_date_concepts = "2025-10-09"
-  index_date_works    = "2025-10-09"
-
   ingestor_types = ["concepts", "works"]
 
   bulk_loader_default_insert_error_threshold = 1 / 10000
+
+  neptune_cluster_resource_arn = "arn:aws:rds:eu-west-1:760097843905:cluster:catalogue-graph"
 
   concepts_pipeline_inputs_monthly = [
     {
@@ -192,8 +193,4 @@ data "aws_ecr_repository" "unified_pipeline_lambda" {
 
 data "aws_ecr_repository" "catalogue_graph_extractor" {
   name = "uk.ac.wellcome/catalogue_graph_extractor"
-}
-
-data "aws_neptune_cluster" "catalogue_graph_cluster" {
-  name = "catalogue_graph"
 }

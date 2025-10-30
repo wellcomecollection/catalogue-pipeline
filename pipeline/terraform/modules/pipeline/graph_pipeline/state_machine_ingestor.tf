@@ -78,7 +78,6 @@ resource "aws_sfn_state_machine" "catalogue_graph_ingestor" {
   })
 }
 
-
 resource "aws_sfn_state_machine" "catalogue_graph_ingestors" {
   name     = "${local.namespace}-ingestors-${var.pipeline_date}"
   role_arn = aws_iam_role.state_machine_execution_role.arn

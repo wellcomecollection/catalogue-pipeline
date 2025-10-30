@@ -2,6 +2,14 @@ variable "pipeline_date" {
   type = string
 }
 
+variable "index_dates" {
+  type = object({
+    works = string
+    concepts = string
+  })
+}
+
+
 variable "es_cluster_host" {
   type = string
 }

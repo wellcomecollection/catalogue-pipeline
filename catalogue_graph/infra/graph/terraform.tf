@@ -12,7 +12,7 @@ terraform {
   }
 }
 
-data "terraform_remote_state" "catalogue_aws_account_infrastructure" {
+data "terraform_remote_state" "platform_infra" {
   backend = "s3"
 
   config = {
@@ -34,6 +34,18 @@ data "terraform_remote_state" "shared_infra" {
     }
     bucket = "wellcomecollection-platform-infra"
     key    = "terraform/platform-infrastructure/shared.tfstate"
+    region = "eu-west-1"
+  }
+}
+
+data "terraform_remote_state" "platform_monitoring" {
+  backend = "s3"
+  config = {
+    assume_role = {
+      role_arn = "arn:aws:iam::760097843905:role/platform-read_only"
+    }
+    bucket = "wellcomecollection-platform-infra"
+    key    = "terraform/monitoring.tfstate"
     region = "eu-west-1"
   }
 }

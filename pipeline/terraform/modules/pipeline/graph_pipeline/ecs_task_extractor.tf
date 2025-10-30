@@ -3,7 +3,7 @@ resource "aws_ecs_cluster" "cluster" {
 }
 
 module "extractor_ecs_task" {
-  source = "./modules/ecs_task"
+  source = "./ecs_task"
 
   task_name = "${local.namespace}-extractor-${var.pipeline_date}"
 

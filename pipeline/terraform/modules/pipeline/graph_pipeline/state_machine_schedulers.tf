@@ -29,8 +29,8 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
     {
       "pipeline_date": "${var.pipeline_date}",
       "index_dates": {
-        "concepts": "${local.index_date_concepts}",
-        "works": "${local.index_date_works}"
+        "concepts": "${var.index_dates.concepts}",
+        "works": "${var.index_dates.works}"
       },
       "window": {
         "end_time": "<aws.scheduler.scheduled-time>"
