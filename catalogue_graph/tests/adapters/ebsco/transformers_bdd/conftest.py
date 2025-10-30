@@ -72,11 +72,11 @@ field_step_regex = parsers.re(
 
 @given(field_step_regex)
 def add_field(
-    marc_record: Record,
-    tag: str,
-    subs: str,
-    ind1: str = "",
-    ind2: str = "",
+        marc_record: Record,
+        tag: str,
+        subs: str,
+        ind1: str = "",
+        ind2: str = "",
 ) -> None:
     matches: list[tuple[str, str]] = re.findall(
         r' (?:with|and) subfield "([^"]+)" value "([^"]*)"', subs
@@ -88,15 +88,15 @@ def add_field(
 
 @given(
     parsers.re(
-        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)?") with subfields:'
+        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)")? with subfields:'
     )
 )
 def field_from_table(
-    marc_record: Record,
-    datatable: list[list[str]],
-    tag: str,
-    ind1: str = "",
-    ind2: str = "",
+        marc_record: Record,
+        datatable: list[list[str]],
+        tag: str,
+        ind1: str = "",
+        ind2: str = "",
 ) -> None:
     headings = datatable[0]
     code = headings.index("code")
@@ -140,7 +140,7 @@ def list_member_count(work: VisibleSourceWork, count: int, attr_phrase: str) -> 
     )
 )
 def context_concept_identifier_value(
-    context: dict[str, Any], thing_name: str, ord: str, value: str
+        context: dict[str, Any], thing_name: str, ord: str, value: str
 ) -> None:
     """
     Assert the Nth concept (ordinal like 1st/2nd/3rd/4th etc.) of the thing
@@ -168,7 +168,7 @@ def context_concept_identifier_value(
 
 @then(parsers.parse("that {thing} has {count:d} {attr_phrase}"))
 def sublist_member_count(
-    context: dict[str, Any], thing: str, count: int, attr_phrase: str
+        context: dict[str, Any], thing: str, count: int, attr_phrase: str
 ) -> None:
     values: Sequence[Any] = _get_attr_list(context[thing], attr_phrase)
     assert len(values) == count, (
@@ -186,7 +186,7 @@ def child_list_member_count(antecedent: Any, count: int, attr_phrase: str) -> No
 
 @then(parsers.parse("it has {count:d} {attr_phrase}:"))
 def child_list_member_datatable(
-    antecedent: Any, datatable: list[list[str]], count: int, attr_phrase: str
+        antecedent: Any, datatable: list[list[str]], count: int, attr_phrase: str
 ) -> None:
     members: Sequence[Any] = _get_attr_list(antecedent, attr_phrase)
     assert len(members) == count, (
@@ -237,7 +237,7 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     )
 )
 def list_member_nth_is(
-    work: VisibleSourceWork, index: str | int, attr_phrase: str, value: str
+        work: VisibleSourceWork, index: str | int, attr_phrase: str, value: str
 ) -> Any:
     nth_member = _list_member_nth(work.data, index, attr_phrase)
     assert nth_member == value, (
@@ -251,11 +251,11 @@ def list_member_nth_is(
     target_fixture="antecedent",
 )
 def only_root_list_member_has(
-    context: dict[str, Any],
-    work: VisibleSourceWork,
-    attr_phrase: str,
-    property: str,
-    value: str,
+        context: dict[str, Any],
+        work: VisibleSourceWork,
+        attr_phrase: str,
+        property: str,
+        value: str,
 ) -> Any:
     list_member_count(work, 1, attr_phrase)
     member = _list_member_nth(work.data, 1, attr_phrase)
@@ -266,7 +266,7 @@ def only_root_list_member_has(
 
 @then(parsers.re(r'that (?P<thing_name>.+) has the (?P<property>.+) "(?P<value>.*)"'))
 def context_has(
-    context: dict[str, Any], thing_name: str, property: str, value: str
+        context: dict[str, Any], thing_name: str, property: str, value: str
 ) -> None:
     assert getattr(context[thing_name], property) == value
 
@@ -277,7 +277,7 @@ def context_has(
     )
 )
 def context_concept_value(
-    context: dict[str, Any], thing_name: str, ord: str, property: str, value: str
+        context: dict[str, Any], thing_name: str, ord: str, property: str, value: str
 ) -> None:
     thing = context[thing_name]
     concept = thing.concepts[int(ord) - 1]
@@ -290,11 +290,11 @@ def context_concept_value(
     target_fixture="antecedent",
 )
 def only_list_member_has(
-    context: dict[str, Any],
-    antecedent: Any,
-    attr_phrase: str,
-    property: str,
-    value: str,
+        context: dict[str, Any],
+        antecedent: Any,
+        attr_phrase: str,
+        property: str,
+        value: str,
 ) -> None:
     # Callers should pass .data if required; use antecedent directly.
     member = _list_member_nth(antecedent, 1, attr_phrase)
@@ -310,9 +310,9 @@ def step_error_logged(caplog: LogCaptureFixture, message: str) -> None:
         if rec.levelno >= logging.ERROR and rec.getMessage() == message
     ]
     assert matches, (
-        f'Expected an ERROR log with message: "{message}". '
-        f"Captured log messages were:\n"
-        + "\n".join(f"[{r.levelname}] {r.getMessage()}" for r in caplog.records)
+            f'Expected an ERROR log with message: "{message}". '
+            f"Captured log messages were:\n"
+            + "\n".join(f"[{r.levelname}] {r.getMessage()}" for r in caplog.records)
     )
 
 
@@ -376,7 +376,7 @@ def step_concept_identifier_ontology(context: dict[str, Any], ontology: str) -> 
 
 @then(parsers.parse('its identifier\'s identifier type is "{itype}"'))
 def step_concept_identifier_identifier_type(
-    context: dict[str, Any], itype: str
+        context: dict[str, Any], itype: str
 ) -> None:
     genre = _assert_single_genre(context)
     assert len(genre.concepts) == 1, (
