@@ -44,7 +44,7 @@ def trim_trailing(label: str, char: str) -> str:
     return re.sub(pattern, "", label)
 
 
-def normalise_label(label: str, concept_type: RawConceptType) -> str:
+def normalise_label(label: str, concept_type: RawConceptType, preserve_trailing_period: bool = False) -> str:
     """Apply type-specific trailing punctuation trimming matching Scala semantics.
 
     Ellipses preservation: only remove a single trailing period if *not* part of an ellipsis.
@@ -54,10 +54,10 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
     Period: return unchanged (aside from outer whitespace trimming) – preprocessing for IDs handled elsewhere.
     """
     s = label.strip()
-
-    if concept_type in ["Concept", "GenreConcept", "Subject", "Period"]:
+    if not preserve_trailing_period:
         s = trim_trailing_period(s)
-    elif concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
+
+    if concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
         s = trim_trailing(s, ",")
     elif concept_type == "Place":
         s = trim_trailing(s, ":")
@@ -67,6 +67,5 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
         s = "Electronic books"
 
     return s
-
 
 ## NOTE: normalise_identifier_value removed; use Identifiable.identifier_from_text for label-derived identifiers.

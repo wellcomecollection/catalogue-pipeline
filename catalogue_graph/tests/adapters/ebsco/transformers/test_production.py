@@ -403,7 +403,6 @@ def test_production_manufacture_function_label_cleaned(marc_record: Record) -> N
     assert production.places[1].label == "Munich"
     # Agent labels retain trailing semicolon.
     assert lone_element(production.agents).label == "Printer Co.;"
-    # Date concepts now retain a trailing period (Period labels unchanged by normalisation)
     assert lone_element(production.dates).label == "2001"
 
 

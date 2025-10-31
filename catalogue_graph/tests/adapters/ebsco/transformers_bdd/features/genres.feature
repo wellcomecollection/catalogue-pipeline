@@ -53,7 +53,7 @@ Feature: Extracting genres from MARC 655
       | v    | Specimens  |
       | x    | Literature |
       | y    | 1897-1900  |
-      | z    | Dublin.    |
+      | z    | Dublin     |
     When I transform the MARC record
     Then the only genre has the label "Disco Polo - Specimens - Literature - 1897-1900 - Dublin"
     And that genre has 5 concepts
@@ -61,8 +61,7 @@ Feature: Extracting genres from MARC 655
     And the 2nd concept has the label "Specimens"
     And the 3rd concept has the label "Literature"
     And the 4th concept has the label "1897-1900"
-    # Place subdivision retains trailing period under new punctuation rules
-    And the 5th concept has the label "Dublin."
+    And the 5th concept has the label "Dublin"
 
 
   Scenario: subfield a comes first

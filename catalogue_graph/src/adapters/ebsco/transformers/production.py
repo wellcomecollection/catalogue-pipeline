@@ -101,7 +101,6 @@ def single_production_event(field: Field) -> ProductionEvent | None:
         parse_period(normalise_label(subfield, "Period"))
         for subfield in field.get_subfields("c")
     ]
-    print(dates)
     function = None
     if field.tag == "260" and field.get_subfields("e", "f", "g"):
         places += [
