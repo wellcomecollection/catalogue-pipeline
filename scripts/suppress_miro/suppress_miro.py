@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Always run the script with the --dry-run flag first to check that all required resources are available.
+"""
 import click
 import httpx
 import os
@@ -36,6 +39,8 @@ def suppress_miro(id_source, message, dry_run):
 
     ID can be either a catalogue or a Miro identifier.
     """
+    check_gh_cli_installed()
+
     if dry_run:
         check_reindexer_listening(dry_run=True)
         for miro_id in valid_ids(id_source):
@@ -44,7 +49,6 @@ def suppress_miro(id_source, message, dry_run):
             run_pre_suppression_checks(miro_id)
             print("--------------------------------------------------------\n")
         print("When you run the suppression without the --dry-run flag, update_miro_image_suppressions_doc will be executed.")
-        check_gh_cli_installed()
 
     else:
         for miro_id in valid_ids(id_source):
