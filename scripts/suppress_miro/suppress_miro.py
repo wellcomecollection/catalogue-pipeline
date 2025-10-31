@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
+"""
+Always run the script with the --dry-run flag first to check that all required resources are available.
+"""
 import click
 import httpx
 import os
 import sys
 
 from miro_updates import (
+    check_reindexer_listening,
+    run_pre_suppression_checks,
     suppress_image,
     update_miro_image_suppressions_doc,
     is_valid_miro_id,
@@ -24,25 +29,31 @@ from miro_updates import (
     required=True,
 )
 @click.option(
-    "--dry-run", help="Show what will happen, without actually doing it", is_flag=True
+    "--dry-run", help="Check that the suppression script can run successfully", is_flag=True
 )
+
+
 def suppress_miro(id_source, message, dry_run):
     """
     Suppresses a Miro image with a given ID.
 
     ID can be either a catalogue or a Miro identifier.
     """
-    suppress = print_suppression_command if dry_run else suppress_image
-    update = print_update_command if dry_run else update_miro_image_suppressions_doc
-
-    # Run some pre-flight checks
     check_gh_cli_installed()
 
-    for miro_id in valid_ids(id_source):
-        suppress(miro_id=miro_id, message=message)
+    if dry_run:
+        check_reindexer_listening(dry_run=True)
+        for miro_id in valid_ids(id_source):
+            print("--------------------------------------------------------")
+            print(f"Running checks for Miro ID: {miro_id}")
+            run_pre_suppression_checks(miro_id)
+            print("--------------------------------------------------------\n")
+        print("When you run the suppression without the --dry-run flag, update_miro_image_suppressions_doc will be executed.")
 
-    # Run the update command
-    update()
+    else:
+        for miro_id in valid_ids(id_source):
+            suppress_image(miro_id=miro_id, message=message)
+        update_miro_image_suppressions_doc()
 
 
 def check_gh_cli_installed():
@@ -74,14 +85,6 @@ def valid_ids(id_source):
                 raise click.ClickException(
                     f"{single_id} doesn't look like a Miro ID and isn't the identifier of a catalogue record containing a Miro ID"
                 )
-
-
-def print_suppression_command(miro_id, message):
-    print(f"suppress_image(miro_id={miro_id}, message={message})")
-
-
-def print_update_command():
-    print("update_miro_image_suppressions_doc()")
 
 
 if __name__ == "__main__":
