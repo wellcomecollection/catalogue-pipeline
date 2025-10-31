@@ -4,7 +4,7 @@ This package contains scripts to perform updates on Miro images:
 - suppress Miro images in the Wellcome Collection catalogue pipeline. Suppression requests most often originate from take down requests, discussed in the [#takedown-requests Slack channel](https://wellcome.slack.com/archives/C0262TDBC58).  
 For more information on the take down request process, refer to the [takedown-requests documentation](https://github.com/wellcomecollection/private/blob/main/takedown-requests.md).
 - reinstates a previously suppressed Miro image
-- override the copyright license on Miro images, or restaure it to its previous value. 
+- override the copyright license on Miro images, or restore it to its previous value. 
 
 
 
