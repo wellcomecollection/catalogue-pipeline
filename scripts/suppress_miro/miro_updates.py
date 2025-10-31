@@ -62,6 +62,22 @@ def dlcs_api_client():
     return httpx.Client(auth=(api_key, api_secret))
 
 
+RE_MIRO_ID = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
+
+def is_valid_miro_id(maybe_miro_id: str):
+    return RE_MIRO_ID.fullmatch(maybe_miro_id)
+
+
+def _get_user():
+    """
+    Returns the original role ARN.
+    e.g. at Wellcome we have a base role, but then we assume roles into different
+    accounts.  This returns the ARN of the base role.
+    """
+    client = boto3.client("sts")
+    return client.get_caller_identity()["Arn"]
+
+
 def _read_from_s3(bucket, key):
     s3 = SESSION.client("s3")
     obj = s3.get_object(Bucket=bucket, Key=key)
@@ -92,13 +108,23 @@ def _get_reindexer_topic_arn():
     return outputs["topic_arn"]["value"]
 
 
-def has_subscriptions(sns_client, *, topic_arn):
-    """
-    Returns True if a topic ARN has any subscriptions (e.g. an SQS queue), False otherwise.
-    """
-    resp = sns_client.list_subscriptions_by_topic(TopicArn=topic_arn)
-
-    return bool(resp["Subscriptions"])
+def check_reindexer_listening(dry_run=False):
+    sns_client = SESSION.client("sns")
+    topic_arn = _get_reindexer_topic_arn()
+    subscriptions = sns_client.list_subscriptions_by_topic(TopicArn=topic_arn)["Subscriptions"]
+    if not subscriptions:
+        if not dry_run:
+            print(
+                "Nothing is listening to the reindexer, this action will not have the expected effect, aborting"
+            )
+            exit(1)
+        else:
+            print("No subscriptions found for reindexer topic. Please ensure the reindexer subscribed.")
+    else:
+        print("Subscriptions found for reindexer topic:")
+        for sub in subscriptions:
+            print(f"{sub['SubscriptionArn']}")
+    return bool(subscriptions)
 
 
 def _request_reindex_for(miro_id):
@@ -116,54 +142,7 @@ def _get_timestamp():
     return int(datetime.datetime.now().timestamp() * 1000)
 
 
-def _get_user():
-    """
-    Returns the original role ARN.
-    e.g. at Wellcome we have a base role, but then we assume roles into different
-    accounts.  This returns the ARN of the base role.
-    """
-    client = boto3.client("sts")
-    return client.get_caller_identity()["Arn"]
-
-
-def _set_image_availability(*, miro_id, message: str, is_available: bool):
-    item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
-
-    new_event = {
-        "description": "Change isClearedForCatalogueAPI from %r to %r"
-        % (item["isClearedForCatalogueAPI"], is_available),
-        "message": message,
-        "date": _get_timestamp(),
-        "user": _get_user(),
-    }
-
-    try:
-        events = item["events"] + [new_event]
-    except KeyError:
-        events = [new_event]
-
-    DYNAMO_CLIENT.update_item(
-        TableName=TABLE_NAME,
-        Key={"id": miro_id},
-        UpdateExpression="SET #version = :newVersion, #events = :events, #isClearedForCatalogueAPI = :is_available",
-        ConditionExpression="#version = :oldVersion",
-        ExpressionAttributeNames={
-            "#version": "version",
-            "#events": "events",
-            "#isClearedForCatalogueAPI": "isClearedForCatalogueAPI",
-        },
-        ExpressionAttributeValues={
-            ":oldVersion": item["version"],
-            ":newVersion": item["version"] + 1,
-            ":events": events,
-            ":is_available": is_available,
-        },
-    )
-
-    _request_reindex_for(miro_id)
-
-
-def _remove_image_from_elasticsearch(*, miro_id):
+def _get_current_pipeline_and_indices():
     search_templates_url = (
         "https://api.wellcomecollection.org/catalogue/v2/search-templates.json"
     )
@@ -176,7 +155,24 @@ def _remove_image_from_elasticsearch(*, miro_id):
     )
     pipeline_date = get_date_from_index_name(works_index)
 
-    # Remove the work from the works index
+    return pipeline_date, works_index, images_index
+
+
+def _get_vhs_sourcedata_miro_ddb_item(miro_id):
+    try:
+        item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
+    except KeyError:
+        print(f"Miro ID {miro_id} not found in DynamoDB table {TABLE_NAME}", file=sys.stderr)
+        return
+    else:
+        print(f"Miro ID {miro_id} found in DynamoDB table {TABLE_NAME}")
+        return item
+
+
+def _check_works_and_images_indices(miro_id):
+    pipeline_date, works_index, images_index = _get_current_pipeline_and_indices()
+
+    # Check the work exists in the works index
     works_resp = api_es_client(pipeline_date).search(
         index=works_index,
         body={"query": {"term": {"query.identifiers.value": miro_id}}},
@@ -190,24 +186,15 @@ def _remove_image_from_elasticsearch(*, miro_id):
             == "miro-image-number"
         )
     except StopIteration:
-        print(f"Could not find a work for {miro_id} in {works_index}", file=sys.stderr)
         print(
+            f"Could not find a work for {miro_id} in {works_index}\n"
             "It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first",
             file=sys.stderr,
         )
-        return
     else:
-        work["_source"]["debug"]["deletedReason"] = {
-            "info": "Miro: isClearedForCatalogueAPI = false",
-            "type": "SuppressedFromSource",
-        }
-        work["_source"]["type"] = "Deleted"
+        print(f"Work for {miro_id} found in {works_index}: {work['_id']}")
 
-        index_resp = work_ingestor_es_client(date=pipeline_date).index(
-            index=works_index, body=work["_source"], id=work["_id"]
-        )
-        assert index_resp["result"] == "updated", index_resp
-
+    # Check the image exists in the images index
     images_resp = api_es_client(pipeline_date).search(
         index=images_index,
         body={
@@ -216,81 +203,32 @@ def _remove_image_from_elasticsearch(*, miro_id):
         },
     )
 
-    try:
-        image_id = images_resp["hits"]["hits"][0]["_id"]
-    except IndexError:
+    if images_resp["hits"]["total"]["value"] == 0:
         print(
-            f"Could not find an image for {work['_id']} in {images_index}",
+            f"Could not find an image for {miro_id} in {images_index}\n",
+            "It could be that the source identifier for this image is that of a Sierra work - that should be suppressed by collections information first",
             file=sys.stderr,
         )
-        return
     else:
-        delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
-            index=images_index, id=image_id
-        )
-        assert delete_resp["result"] == "deleted", delete_resp
+        print(f"Image for {miro_id} found in {images_index}: {images_resp['hits']['hits'][0]['_id']}")
 
 
-def _remove_image_from_dlcs(*, miro_id):
-    # Wellcome = customer 2, Miro = space 8
-    # See https://wellcome.slack.com/archives/CBT40CMKQ/p1621496639019200?thread_ts=1621495275.018100&cid=CBT40CMKQ
-    resp = dlcs_api_client().delete(
+def _check_dlcs_server(miro_id):
+    resp = dlcs_api_client().get(
         f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
     )
+
     if resp.status_code == 404:
-        print(
-            f"Failed to delete image {miro_id} from DLCS, image not found!",
-            file=sys.stderr,
-        )
-        return
+        print(f"Image {miro_id} not found on DLCS server", file=sys.stderr)
+    elif resp.status_code != 200:
+        print(f"Error checking DLCS server for {miro_id}: {resp.status_code}", file=sys.stderr)
     else:
-        assert resp.status_code == 204, resp
+        print(f"Image {miro_id} found on DLCS server")
 
 
-def _remove_image_from_cloudfront(*, miro_id):
-    cloudfront_client = SESSION.client("cloudfront")
-
-    try:
-        cloudfront_client.create_invalidation(
-            DistributionId="E1KKXGJWOADM2A",  # IIIF APIs prod
-            InvalidationBatch={
-                "Paths": {"Quantity": 1, "Items": [f"/image/{miro_id}*"]},
-                "CallerReference": f"{__file__} invalidating {miro_id}",
-            },
-        )
-    except ClientError:
-        print(f"Failed to invalidate {miro_id} from CloudFront", file=sys.stderr)
 
 
-def suppress_image(*, miro_id, message: str):
-    """
-    Hide a Miro image from wellcomecollection.org.
-    These operations must happen in a specific order: _set_image_availability first, as the DDB table is the source of truth for Miro images when building pipelines
-    """
-    _set_image_availability(miro_id=miro_id, message=message, is_available=False)
 
-    _remove_image_from_elasticsearch(miro_id=miro_id)
-    _remove_image_from_dlcs(miro_id=miro_id)
-    _remove_image_from_cloudfront(miro_id=miro_id)
-
-
-def unsuppress_image(*, miro_id: str, origin: str, message: str):
-    """
-    Reinstate a hidden Miro image
-    """
-    sns_client = SESSION.client("sns")
-    topic_arn = _get_reindexer_topic_arn()
-    if not has_subscriptions(sns_client, topic_arn=topic_arn):
-        print(
-            "Nothing is listening to the reindexer, this action will not have the expected effect, aborting"
-        )
-        exit(1)
-
-    # First, make the DDS record reflect that the image should be visible
-    _set_image_availability(miro_id=miro_id, message=message, is_available=True)
-
-    # Now the actual image must be registered on DLCS so that it can be seen
-    register_on_dlcs(origin_url=origin, miro_id=miro_id)
 
 
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
@@ -393,30 +331,7 @@ def remove_license_override(*, miro_id: str, message: str):
     _remove_override(miro_id=miro_id, message=message, override_key="license")
 
 
-def get_all_miro_suppression_events():
-    for item in get_dynamodb_items(SESSION, TableName=TABLE_NAME):
-        try:
-            # Note: there are cases where the suppressed description was
-            # added to DynamoDB after the image was initially suppressed,
-            # so we need to catch both variants of this message.
-            first_deletion = next(
-                ev
-                for ev in item.get("events", [])
-                if ev["description"]
-                in {
-                    "Change isClearedForCatalogueAPI from True to False",
-                    "Change isClearedForCatalogueAPI from False to False",
-                }
-            )
-        except StopIteration:
-            continue
-
-        yield {
-            "id": item["id"],
-            "message": first_deletion["message"],
-            "date": datetime.datetime.fromtimestamp(int(first_deletion["date"]) / 1000),
-        }
-
+# github 
 
 def update_miro_image_suppressions_doc():
     print(
@@ -432,7 +347,142 @@ def update_miro_image_suppressions_doc():
     )
 
 
-def register_on_dlcs(origin_url, miro_id):
+# DDB sourcedata_miro and reindex
+
+def _set_image_availability(*, miro_id, message: str, is_available: bool):
+    item = _get_vhs_sourcedata_miro_ddb_item(miro_id)
+    
+    if item:
+        new_event = {
+            "description": "Change isClearedForCatalogueAPI from %r to %r"
+            % (item["isClearedForCatalogueAPI"], is_available),
+            "message": message,
+            "date": _get_timestamp(),
+            "user": _get_user(),
+        }
+
+        try:
+            events = item["events"] + [new_event]
+        except KeyError:
+            events = [new_event]
+
+        DYNAMO_CLIENT.update_item(
+            TableName=TABLE_NAME,
+            Key={"id": miro_id},
+            UpdateExpression="SET #version = :newVersion, #events = :events, #isClearedForCatalogueAPI = :is_available",
+            ConditionExpression="#version = :oldVersion",
+            ExpressionAttributeNames={
+                "#version": "version",
+                "#events": "events",
+                "#isClearedForCatalogueAPI": "isClearedForCatalogueAPI",
+            },
+            ExpressionAttributeValues={
+                ":oldVersion": item["version"],
+                ":newVersion": item["version"] + 1,
+                ":events": events,
+                ":is_available": is_available,
+            },
+        )
+
+        _request_reindex_for(miro_id)
+
+
+#elasticsearch
+
+def _remove_image_from_elasticsearch(*, miro_id):
+    pipeline_date, works_index, images_index = _get_current_pipeline_and_indices()
+
+    # Remove the work from the works index
+    works_resp = api_es_client(pipeline_date).search(
+        index=works_index,
+        body={"query": {"term": {"query.identifiers.value": miro_id}}},
+    )
+
+    try:
+        work = next(
+            hit
+            for hit in works_resp["hits"]["hits"]
+            if hit["_source"]["debug"]["source"]["identifier"]["identifierType"]["id"]
+            == "miro-image-number"
+        )
+    except StopIteration:
+        print(f"Could not find a work for {miro_id} in {works_index}", file=sys.stderr)
+        print(
+            "It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first",
+            file=sys.stderr,
+        )
+        return
+    else:
+        work["_source"]["debug"]["deletedReason"] = {
+            "info": "Miro: isClearedForCatalogueAPI = false",
+            "type": "SuppressedFromSource",
+        }
+        work["_source"]["type"] = "Deleted"
+
+        index_resp = work_ingestor_es_client(date=pipeline_date).index(
+            index=works_index, body=work["_source"], id=work["_id"]
+        )
+        assert index_resp["result"] == "updated", index_resp
+
+    images_resp = api_es_client(pipeline_date).search(
+        index=images_index,
+        body={
+            "query": {"term": {"query.source.sourceIdentifier.value": miro_id}},
+            "_source": "",
+        },
+    )
+
+    try:
+        image_id = images_resp["hits"]["hits"][0]["_id"]
+    except IndexError:
+        print(
+            f"Could not find an image for {work['_id']} in {images_index}",
+            file=sys.stderr,
+        )
+        return
+    else:
+        delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
+            index=images_index, id=image_id
+        )
+        assert delete_resp["result"] == "deleted", delete_resp
+
+
+# cloudfront
+
+def _remove_image_from_cloudfront(*, miro_id):
+    cloudfront_client = SESSION.client("cloudfront")
+
+    try:
+        cloudfront_client.create_invalidation(
+            DistributionId="E1KKXGJWOADM2A",  # IIIF APIs prod
+            InvalidationBatch={
+                "Paths": {"Quantity": 1, "Items": [f"/image/{miro_id}*"]},
+                "CallerReference": f"{__file__} invalidating {miro_id}",
+            },
+        )
+    except ClientError:
+        print(f"Failed to invalidate {miro_id} from CloudFront", file=sys.stderr)
+
+
+# DLCS 
+
+def _remove_image_from_dlcs(*, miro_id):
+    # Wellcome = customer 2, Miro = space 8
+    # See https://wellcome.slack.com/archives/CBT40CMKQ/p1621496639019200?thread_ts=1621495275.018100&cid=CBT40CMKQ
+    resp = dlcs_api_client().delete(
+        f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
+    )
+    if resp.status_code == 404:
+        print(
+            f"Failed to delete image {miro_id} from DLCS, image not found!",
+            file=sys.stderr,
+        )
+        return
+    else:
+        assert resp.status_code == 204, resp
+
+
+def _register_image_on_dlcs(origin_url, miro_id):
     dlcs_response = dlcs_api_client().post(
         f"https://api.dlcs.io/customers/2/queue/priority",
         json={
@@ -454,8 +504,38 @@ def register_on_dlcs(origin_url, miro_id):
     print(dlcs_response.text)
 
 
-RE_MIRO_ID = re.compile("^[A-Z][0-9]{7}[A-Z]{0,4}[0-9]{0,2}$")
 
 
-def is_valid_miro_id(maybe_miro_id: str):
-    return RE_MIRO_ID.fullmatch(maybe_miro_id)
+
+# check runs 
+
+def run_image_checks(miro_id):
+    _get_vhs_sourcedata_miro_ddb_item(miro_id)
+    _check_works_and_images_indices(miro_id)
+    _check_dlcs_server(miro_id)
+
+
+# actual suppression/unsuppression functions
+
+def suppress_image(*, miro_id, message: str):
+    """
+    Hide a Miro image from wellcomecollection.org.
+    These operations must happen in a specific order: _set_image_availability first, as the DDB table is the source of truth for Miro images when building pipelines
+    """
+    _set_image_availability(miro_id=miro_id, message=message, is_available=False)
+    _remove_image_from_elasticsearch(miro_id=miro_id)
+    _remove_image_from_dlcs(miro_id=miro_id)
+    _remove_image_from_cloudfront(miro_id=miro_id)
+
+
+def unsuppress_image(*, miro_id: str, origin: str, message: str):
+    """
+    Reinstate a hidden Miro image
+    """
+    check_reindexer_listening()
+
+    # First, make the DDS record reflect that the image should be visible, and request reindex
+    _set_image_availability(miro_id=miro_id, message=message, is_available=True)
+
+    # Now the actual image must be registered on DLCS so that it can be seen
+    _register_image_on_dlcs(origin_url=origin, miro_id=miro_id)
