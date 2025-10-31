@@ -1,10 +1,10 @@
-resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
-  name     = "catalogue-graph-bulk-loader"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_bulk_loader_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-bulk-loader-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONPath"
-    Comment       = "Trigger a Neptune bulk load from a file stored in S3 and periodically check the status of the bulk load until complete."
+    Comment       = "Trigger a Neptune bulk load from an S3 file and periodically check its status until complete."
     StartAt       = "Trigger bulk load"
     States = {
       "Trigger bulk load" : {
@@ -15,7 +15,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           "FunctionName" : module.bulk_loader_lambda.lambda.arn,
           "Payload.$" : "$"
         },
-        Retry = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         "Next" : "Wait 5 seconds"
       },
       "Wait 5 seconds" : {
@@ -31,7 +31,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
           "FunctionName" : module.bulk_load_poller_lambda.lambda.arn,
           "Payload.$" : "$"
         },
-        Retry = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         "Next" : "Load complete?"
       },
       "Load complete?" : {
@@ -50,4 +50,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_bulk_loader" {
       }
     }
   })
+
+  invokable_lambda_arns = [
+    module.bulk_loader_lambda.lambda.arn,
+    module.bulk_load_poller_lambda.lambda.arn
+  ]
 }

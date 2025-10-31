@@ -65,7 +65,7 @@ def marc_record() -> Record:
 # ------------------------------------------------------------------
 field_step_regex = parsers.re(
     r"the MARC record has (?:a|another) (?P<tag>\d{3}) field"
-    r'(?: with indicators "(?P<ind1>[^"])" "(?P<ind2>[^"])"|)'
+    r'(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)"|)'
     r'(?P<subs>(?: (?:with|and) subfield "[^"]+" value "[^"]*")+)'  # one or more subfield/value pairs
 )
 
@@ -75,28 +75,35 @@ def add_field(
     marc_record: Record,
     tag: str,
     subs: str,
-    ind1: str | None = None,
-    ind2: str | None = None,
+    ind1: str = "",
+    ind2: str = "",
 ) -> None:
     matches: list[tuple[str, str]] = re.findall(
         r' (?:with|and) subfield "([^"]+)" value "([^"]*)"', subs
     )
     subfields: list[Subfield] = [Subfield(code=c, value=v) for c, v in matches]
-    indicators: Indicators | None = Indicators(ind1, ind2) if ind1 and ind2 else None
+    indicators: Indicators | None = Indicators(ind1, ind2) if ind1 or ind2 else None
     marc_record.add_field(Field(tag=tag, indicators=indicators, subfields=subfields))
 
 
 @given(
     parsers.re(
-        r"the MARC record has (?:a|another) (?P<tag>\d{3}) field with subfields:"
+        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"])?"|) with subfields:'
     )
 )
-def field_from_table(marc_record: Record, datatable: list[list[str]], tag: str) -> None:
+def field_from_table(
+    marc_record: Record,
+    datatable: list[list[str]],
+    tag: str,
+    ind1: str = "",
+    ind2: str = "",
+) -> None:
     headings = datatable[0]
     code = headings.index("code")
     value = headings.index("value")
     subfields = [Subfield(code=row[code], value=row[value]) for row in datatable[1:]]
-    marc_record.add_field(Field(tag=tag, subfields=subfields))
+    indicators: Indicators | None = Indicators(ind1, ind2) if ind1 or ind2 else None
+    marc_record.add_field(Field(tag=tag, indicators=indicators, subfields=subfields))
 
 
 # ------------------------------------------------------------------
@@ -112,6 +119,11 @@ def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceW
 # ------------------------------------------------------------------
 # Generic list assertion steps
 # ------------------------------------------------------------------
+
+
+@then(parsers.parse("there is 1 {attr_phrase}"))
+def one_list_member(work: VisibleSourceWork, attr_phrase: str) -> None:
+    list_member_count(work, 1, attr_phrase)
 
 
 @then(parsers.parse("there are {count:d} {attr_phrase}"))

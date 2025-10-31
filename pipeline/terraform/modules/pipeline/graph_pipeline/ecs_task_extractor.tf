@@ -1,16 +1,16 @@
 resource "aws_ecs_cluster" "cluster" {
-  name = local.namespace
+  name = "graph-extractor-${var.pipeline_date}"
 }
 
 module "extractor_ecs_task" {
-  source = "./modules/ecs_task"
+  source = "./ecs_task"
 
-  task_name = "${local.namespace}_extractor"
+  task_name = "graph-extractor-${var.pipeline_date}"
 
-  image = "${aws_ecr_repository.catalogue_graph_extractor.repository_url}:prod"
+  image = "${data.aws_ecr_repository.catalogue_graph_extractor.repository_url}:prod"
 
   environment = {
-    CATALOGUE_GRAPH_S3_BUCKET   = aws_s3_bucket.catalogue_graph_bucket.bucket
+    CATALOGUE_GRAPH_S3_BUCKET   = data.aws_s3_bucket.catalogue_graph_bucket.bucket
     GRAPH_QUERIES_SNS_TOPIC_ARN = module.catalogue_graph_queries_topic.arn
   }
 
@@ -36,7 +36,7 @@ resource "aws_iam_role_policy" "ecs_read_s3_policy" {
 # openCypher queries will be streamed to this SNS topic (when SNS is chosen as the streaming destination)
 module "catalogue_graph_queries_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
-  name   = "catalogue_graph_queries"
+  name   = "${local.namespace}-cypher-queries-${var.pipeline_date}"
 }
 
 data "aws_iam_policy_document" "stream_to_sns" {

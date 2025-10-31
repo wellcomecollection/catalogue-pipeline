@@ -35,8 +35,13 @@ module "pipeline" {
       concepts = {}
     }
     "2025-10-09" = {
-      works    = { indexed = "works_indexed.2024-11-14" }
-      images   = {}
+      works    = { 
+        indexed = "works_indexed.2024-11-14" 
+        denormalised = "works_denormalised.2025-08-14"
+      }
+      images   = {
+        initial = "empty"
+      }
       concepts = { indexed = "concepts_indexed.2025-06-17" }
     }
   }

@@ -31,6 +31,8 @@ resource "aws_iam_role" "state_machine_role" {
 
 # IAM Policy for State Machine to invoke Lambda functions
 resource "aws_iam_policy" "state_machine_lambda_policy" {
+  count = length(var.invokable_lambda_arns) > 0 ? 1 : 0
+
   name        = "${var.name}-sfn-lambda-policy"
   description = "Allow state machine to invoke Lambda functions"
 
@@ -58,7 +60,8 @@ resource "aws_iam_policy" "state_machine_self_start_execution_policy" {
       {
         Effect = "Allow"
         Action = [
-          "states:StartExecution"
+          "states:StartExecution",
+          "states:RedriveExecution"
         ]
         Resource = aws_sfn_state_machine.state_machine.arn
       }
@@ -92,6 +95,21 @@ resource "aws_iam_policy" "state_machine_logging_policy" {
   })
 }
 
+resource "aws_iam_policy" "state_machine_execution_policy" {
+  count = length(var.invokable_state_machine_arns) > 0 ? 1 : 0
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = ["states:StartExecution", "states:RedriveExecution"],
+        Resource = var.invokable_state_machine_arns
+      }
+    ]
+  })
+}
+
 # If a custom IAM policy is provided, attach it to the role
 resource "aws_iam_policy" "custom_state_machine_policy" {
   count       = var.state_machine_iam_policy != null ? 1 : 0
@@ -100,15 +118,52 @@ resource "aws_iam_policy" "custom_state_machine_policy" {
   policy      = var.state_machine_iam_policy
 }
 
+resource "aws_iam_policy" "sync_run_policy" {
+  name = "${var.name}-sync-run-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      # These EventBridge permissions are needed to use the .sync pattern, allowing the state machine to start
+      # other services (e.g. step functions, ECS tasks) and wait for them to complete
+      {
+        Effect = "Allow",
+        Action = [
+          "events:PutTargets",
+          "events:PutRule",
+          "events:DescribeRule",
+          "events:RemoveTargets",
+          "events:DeleteRule"
+        ],
+        Resource = "arn:aws:events:eu-west-1:${data.aws_caller_identity.current.account_id}:rule/StepFunctions*"
+      }
+    ]
+  })
+}
+
 # Attach the policies to the role
 resource "aws_iam_role_policy_attachment" "state_machine_lambda_policy_attachment" {
+  count = length(var.invokable_lambda_arns) > 0 ? 1 : 0
+
   role       = aws_iam_role.state_machine_role.name
-  policy_arn = aws_iam_policy.state_machine_lambda_policy.arn
+  policy_arn = aws_iam_policy.state_machine_lambda_policy[0].arn
+}
+
+resource "aws_iam_role_policy_attachment" "state_machine_execution_policy_attachment" {
+  count = length(var.invokable_state_machine_arns) > 0 ? 1 : 0
+
+  role       = aws_iam_role.state_machine_role.name
+  policy_arn = aws_iam_policy.state_machine_execution_policy[0].arn
 }
 
 resource "aws_iam_role_policy_attachment" "state_machine_logging_policy_attachment" {
   role       = aws_iam_role.state_machine_role.name
   policy_arn = aws_iam_policy.state_machine_logging_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "state_machine_sync_run_policy_attachment" {
+  role       = aws_iam_role.state_machine_role.name
+  policy_arn = aws_iam_policy.sync_run_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "custom_state_machine_policy_attachment" {
@@ -131,8 +186,15 @@ resource "aws_cloudwatch_log_group" "state_machine_logs" {
 # Data source for current AWS region
 data "aws_region" "current" {}
 
+data "aws_caller_identity" "current" {}
+
 # Outputs
 output "state_machine_arn" {
   description = "ARN of the created Step Functions state machine"
   value       = aws_sfn_state_machine.state_machine.arn
+}
+
+output "state_machine_role_name" {
+  description = "Name of the role assumed by the Step Functions state machine"
+  value       = aws_iam_role.state_machine_role.name
 }

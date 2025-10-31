@@ -44,7 +44,7 @@ module "image_inferrer" {
   name = "image_inferrer"
 
   topic_arns = [
-    module.merger_images_output_topic.arn,
+    module.merger.images_output_topic_arn,
   ]
 
   queue_visibility_timeout_seconds = local.queue_visibility_timeout
