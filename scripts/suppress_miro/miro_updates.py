@@ -116,7 +116,7 @@ def check_reindexer_listening(dry_run=False):
             print(
                 "Nothing is listening to the reindexer, this action will not have the expected effect, aborting"
             )
-            exit(1)
+            return False
         else:
             print("No subscriptions found for reindexer topic. Please ensure reindexer subscribed before proceeding with the suppression.")
     else:
@@ -221,15 +221,18 @@ def _check_dlcs_server(miro_id):
     )
 
     if resp.status_code == 404:
-        print(f"Image {miro_id} not found on DLCS server", file=sys.stderr)
+        print(f"✗ Image {miro_id} not found on DLCS server", file=sys.stderr)
     elif resp.status_code != 200:
-        print(f"Error checking DLCS server for {miro_id}: {resp.status_code}", file=sys.stderr)
+        print(f"✗ Error checking DLCS server for {miro_id}: {resp.status_code}", file=sys.stderr)
     else:
-        print(f"Image {miro_id} found on DLCS server")
+        print(f"✓ Image {miro_id} found on DLCS server")
 
 
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
-    item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
+    item = _get_vhs_sourcedata_miro_ddb_item(miro_id)
+    
+    if not item:
+        return False
 
     new_event = {
         "description": "Change overrides.%s from %r to %r"
@@ -247,29 +250,37 @@ def _set_overrides(*, miro_id, message: str, override_key: str, override_value: 
     except KeyError:
         events = [new_event]
 
-    DYNAMO_CLIENT.update_item(
-        TableName=TABLE_NAME,
-        Key={"id": miro_id},
-        UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
-        ConditionExpression="#version = :oldVersion",
-        ExpressionAttributeNames={
-            "#version": "version",
-            "#events": "events",
-            "#overrides": "overrides",
-        },
-        ExpressionAttributeValues={
-            ":oldVersion": item["version"],
-            ":newVersion": item["version"] + 1,
-            ":events": events,
-            ":overrides": overrides,
-        },
-    )
-
-    _request_reindex_for(miro_id)
+    try:
+        DYNAMO_CLIENT.update_item(
+            TableName=TABLE_NAME,
+            Key={"id": miro_id},
+            UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
+            ConditionExpression="#version = :oldVersion",
+            ExpressionAttributeNames={
+                "#version": "version",
+                "#events": "events",
+                "#overrides": "overrides",
+            },
+            ExpressionAttributeValues={
+                ":oldVersion": item["version"],
+                ":newVersion": item["version"] + 1,
+                ":events": events,
+                ":overrides": overrides,
+            },
+        )
+        print(f"✓ Successfully set {override_key} override for {miro_id}: {old_value!r} → {override_value!r}")
+        _request_reindex_for(miro_id)
+        return True
+    except Exception as e:
+        print(f"✗ Failed to set {override_key} override for {miro_id}: {e}", file=sys.stderr)
+        return False
 
 
 def _remove_override(*, miro_id, message: str, override_key: str):
-    item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
+    item = _get_vhs_sourcedata_miro_ddb_item(miro_id)
+    
+    if not item:
+        return False
 
     new_event = {
         "description": "Remove overrides.%s (previously %r)"
@@ -291,25 +302,30 @@ def _remove_override(*, miro_id, message: str, override_key: str):
     except KeyError:
         events = [new_event]
 
-    DYNAMO_CLIENT.update_item(
-        TableName=TABLE_NAME,
-        Key={"id": miro_id},
-        UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
-        ConditionExpression="#version = :oldVersion",
-        ExpressionAttributeNames={
-            "#version": "version",
-            "#events": "events",
-            "#overrides": "overrides",
-        },
-        ExpressionAttributeValues={
-            ":oldVersion": item["version"],
-            ":newVersion": item["version"] + 1,
-            ":events": events,
-            ":overrides": overrides,
-        },
-    )
-
-    _request_reindex_for(miro_id)
+    try:
+        DYNAMO_CLIENT.update_item(
+            TableName=TABLE_NAME,
+            Key={"id": miro_id},
+            UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
+            ConditionExpression="#version = :oldVersion",
+            ExpressionAttributeNames={
+                "#version": "version",
+                "#events": "events",
+                "#overrides": "overrides",
+            },
+            ExpressionAttributeValues={
+                ":oldVersion": item["version"],
+                ":newVersion": item["version"] + 1,
+                ":events": events,
+                ":overrides": overrides,
+            },
+        )
+        print(f"✓ Successfully removed {override_key} override for {miro_id} (was: {old_value!r})")
+        _request_reindex_for(miro_id)
+        return True
+    except Exception as e:
+        print(f"✗ Failed to remove {override_key} override for {miro_id}: {e}", file=sys.stderr)
+        return False
 
 
 def set_license_override(*, miro_id: str, license_code: str, message: str):
@@ -349,20 +365,24 @@ def update_miro_image_suppressions_doc():
 def _set_image_availability(*, miro_id, message: str, is_available: bool):
     item = _get_vhs_sourcedata_miro_ddb_item(miro_id)
     
-    if item:
-        new_event = {
-            "description": "Change isClearedForCatalogueAPI from %r to %r"
-            % (item["isClearedForCatalogueAPI"], is_available),
-            "message": message,
-            "date": _get_timestamp(),
-            "user": _get_user(),
-        }
+    if not item:
+        return False
+    
+    
+    new_event = {
+        "description": "Change isClearedForCatalogueAPI from %r to %r"
+        % (item["isClearedForCatalogueAPI"], is_available),
+        "message": message,
+        "date": _get_timestamp(),
+        "user": _get_user(),
+    }
 
-        try:
-            events = item["events"] + [new_event]
-        except KeyError:
-            events = [new_event]
+    try:
+        events = item["events"] + [new_event]
+    except KeyError:
+        events = [new_event]
 
+    try:
         DYNAMO_CLIENT.update_item(
             TableName=TABLE_NAME,
             Key={"id": miro_id},
@@ -381,7 +401,13 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
             },
         )
 
+        availability_status = "available" if is_available else "suppressed"
+        print(f"✓ Successfully set image availability for {miro_id}: {availability_status}")
         _request_reindex_for(miro_id)
+        return True
+    except Exception as e:
+        print(f"✗ Failed to set image availability for {miro_id}: {e}", file=sys.stderr)
+        return False
 
 
 #elasticsearch
@@ -391,7 +417,7 @@ def _remove_image_from_elasticsearch(*, miro_id):
     work, image = _get_work_and_image(miro_id)
 
     if work is None or image is None:
-        return
+        return False
 
     # Mark the work as deleted
     work["_source"]["debug"]["deletedReason"] = {
@@ -400,16 +426,27 @@ def _remove_image_from_elasticsearch(*, miro_id):
     }
     work["_source"]["type"] = "Deleted"
 
-    index_resp = work_ingestor_es_client(date=pipeline_date).index(
-        index=works_index, body=work["_source"], id=work["_id"]
-    )
-    assert index_resp["result"] == "updated", index_resp
+    try:
+        index_resp = work_ingestor_es_client(date=pipeline_date).index(
+            index=works_index, body=work["_source"], id=work["_id"]
+        )
+        assert index_resp["result"] == "updated", index_resp
+        print(f"✓ Marked work {work['_id']} as deleted in Elasticsearch")
+    except Exception as e:
+        print(f"✗ Failed to mark work {work['_id']} as deleted: {e}", file=sys.stderr)
+        return False
 
     # Delete the image
-    delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
-        index=images_index, id=image["_id"]
-    )
-    assert delete_resp["result"] == "deleted", delete_resp
+    try:
+        delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
+            index=images_index, id=image["_id"]
+        )
+        assert delete_resp["result"] == "deleted", delete_resp
+        print(f"✓ Deleted image {image['_id']} from Elasticsearch")
+        return True
+    except Exception as e:
+        print(f"✗ Failed to delete image {image['_id']}: {e}", file=sys.stderr)
+        return False
 
 
 # cloudfront
@@ -425,8 +462,11 @@ def _remove_image_from_cloudfront(*, miro_id):
                 "CallerReference": f"{__file__} invalidating {miro_id}",
             },
         )
+        print(f"✓ Successfully invalidated {miro_id} from CloudFront")
+        return True
     except ClientError:
-        print(f"Failed to invalidate {miro_id} from CloudFront", file=sys.stderr)
+        print(f"✗ Failed to invalidate {miro_id} from CloudFront", file=sys.stderr)
+        return False
 
 
 # DLCS 
@@ -434,39 +474,52 @@ def _remove_image_from_cloudfront(*, miro_id):
 def _remove_image_from_dlcs(*, miro_id):
     # Wellcome = customer 2, Miro = space 8
     # See https://wellcome.slack.com/archives/CBT40CMKQ/p1621496639019200?thread_ts=1621495275.018100&cid=CBT40CMKQ
-    resp = dlcs_api_client().delete(
-        f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
-    )
-    if resp.status_code == 404:
-        print(
-            f"Failed to delete image {miro_id} from DLCS, image not found!",
-            file=sys.stderr,
+    try:
+        resp = dlcs_api_client().delete(
+            f"https://api.dlcs.io/customers/2/spaces/8/images/{miro_id}"
         )
-        return
-    else:
-        assert resp.status_code == 204, resp
+        if resp.status_code == 404:
+            print(f"⚠ Image {miro_id} not found on DLCS server (may already be deleted)", file=sys.stderr)
+            return True  # Not found is OK for deletion
+        elif resp.status_code == 204:
+            print(f"✓ Successfully deleted {miro_id} from DLCS")
+            return True
+        else:
+            print(f"✗ Unexpected response from DLCS when deleting {miro_id}: {resp.status_code}", file=sys.stderr)
+            return False
+    except Exception as e:
+        print(f"✗ Failed to delete {miro_id} from DLCS: {e}", file=sys.stderr)
+        return False
 
 
 def _register_image_on_dlcs(origin_url, miro_id):
-    dlcs_response = dlcs_api_client().post(
-        f"https://api.dlcs.io/customers/2/queue/priority",
-        json={
-            "@type": "Collection",
-            "member": [
-                {
-                    "space": "8",
-                    "origin": origin_url,
-                    "id": miro_id,
-                    "mediaType": "image/jpeg",
-                }
-            ],
-        },
-    )
-    # DLCS will process the above request asynchronously and it may take considerable time.
-    # This is particularly true if it is already busy with something else.
-    # The response contains details that will allow you to interrogate DLCS to
-    # find out whether it has processed (or failed to process - e.g. there's a typo in your origin_url) your request.
-    print(dlcs_response.text)
+    try:
+        dlcs_response = dlcs_api_client().post(
+            f"https://api.dlcs.io/customers/2/queue/priority",
+            json={
+                "@type": "Collection",
+                "member": [
+                    {
+                        "space": "8",
+                        "origin": origin_url,
+                        "id": miro_id,
+                        "mediaType": "image/jpeg",
+                    }
+                ],
+            },
+        )
+        dlcs_response.raise_for_status()
+        print(f"✓ Successfully queued {miro_id} for registration on DLCS")
+        print(f"  Origin URL: {origin_url}")
+        # DLCS will process the above request asynchronously and it may take considerable time.
+        # This is particularly true if it is already busy with something else.
+        # The response contains details that will allow you to interrogate DLCS to
+        # find out whether it has processed (or failed to process - e.g. there's a typo in your origin_url) your request.
+        print(f"  DLCS Response: {dlcs_response.text}")
+        return True
+    except Exception as e:
+        print(f"✗ Failed to register {miro_id} on DLCS: {e}", file=sys.stderr)
+        return False
 
 
 

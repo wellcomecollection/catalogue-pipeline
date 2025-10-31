@@ -39,7 +39,7 @@ def suppress_miro(id_source, message, dry_run):
     if dry_run:
         check_reindexer_listening(dry_run=True)
         for miro_id in valid_ids(id_source):
-            print("--------------------------------------------------------\n")
+            print("--------------------------------------------------------")
             print(f"Running checks for Miro ID: {miro_id}")
             run_pre_suppression_checks(miro_id)
             print("--------------------------------------------------------\n")
