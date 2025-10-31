@@ -9,6 +9,11 @@ variable "invokable_lambda_arns" {
   default = []
 }
 
+variable "invokable_state_machine_arns" {
+  type    = list(string)
+  default = []
+}
+
 variable "state_machine_iam_policy" {
   type    = string
   default = null

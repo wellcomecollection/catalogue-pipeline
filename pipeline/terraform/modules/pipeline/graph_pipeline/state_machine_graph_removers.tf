@@ -1,8 +1,8 @@
-resource "aws_sfn_state_machine" "catalogue_graph_removers" {
-  name     = "catalogue-graph-removers"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_removers_monthly_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-removers-monthly-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Remove unused nodes/edges from the catalogue graph"
     StartAt       = "Run graph removers"
@@ -27,10 +27,10 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
                 Payload = {
                   "transformer_type" : "{% $states.input.transformer_type %}",
                   "entity_type" : "{% $states.input.entity_type %}",
-                  "pipeline_date" : local.pipeline_date,
+                  "pipeline_date" : var.pipeline_date,
                 }
               },
-              Retry = local.DefaultRetry,
+              Retry = local.state_function_default_retry,
               End   = true
             }
           }
@@ -42,13 +42,17 @@ resource "aws_sfn_state_machine" "catalogue_graph_removers" {
       }
     }
   })
+
+  invokable_lambda_arns = [
+    module.graph_remover_lambda.lambda.arn
+  ]
 }
 
-resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
-  name     = "catalogue-graph-graph-removers-incremental"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_removers_incremental_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-removers-incremental-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONata"
     Comment       = "Remove unused catalogue nodes/edges from the catalogue graph"
     StartAt       = "Graph removers"
@@ -81,7 +85,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
                 FunctionName = module.graph_remover_incremental_lambda.lambda.arn,
                 Payload      = "{% $states.input %}"
               },
-              Retry = local.DefaultRetry,
+              Retry = local.state_function_default_retry,
               End   = true
             }
           }
@@ -93,4 +97,8 @@ resource "aws_sfn_state_machine" "catalogue_graph_graph_removers_incremental" {
       }
     }
   })
+
+  invokable_lambda_arns = [
+    module.graph_remover_incremental_lambda.lambda.arn
+  ]
 }

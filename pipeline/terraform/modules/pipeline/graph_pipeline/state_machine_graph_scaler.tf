@@ -1,10 +1,10 @@
-resource "aws_sfn_state_machine" "catalogue_graph_scaler" {
-  name     = "catalogue-graph-scaler"
-  role_arn = aws_iam_role.state_machine_execution_role.arn
+module "catalogue_graph_scaler_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-scaler-${var.pipeline_date}"
 
-  definition = jsonencode({
+  state_machine_definition = jsonencode({
     QueryLanguage = "JSONPath"
-    Comment       = "Change the capacity of the serverless Neptune cluster and periodically check the status of the cluster until new capacity applied."
+    Comment       = "Change the capacity of the serverless Neptune cluster and periodically check its status until new capacity applied."
     StartAt       = "Scale"
     States = {
       "Scale" : {
@@ -15,7 +15,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_scaler" {
           "FunctionName" : module.graph_scaler_lambda.lambda.arn,
           "Payload.$" : "$"
         },
-        Retry = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         "Next" : "Wait 30 seconds"
       },
       "Wait 30 seconds" : {
@@ -30,7 +30,7 @@ resource "aws_sfn_state_machine" "catalogue_graph_scaler" {
         "Parameters" : {
           "FunctionName" : module.graph_status_poller_lambda.lambda.arn
         },
-        Retry = local.DefaultRetry,
+        Retry = local.state_function_default_retry,
         "Next" : "Scale operation complete?"
       },
       "Scale operation complete?" : {
@@ -49,4 +49,9 @@ resource "aws_sfn_state_machine" "catalogue_graph_scaler" {
       }
     }
   })
+
+  invokable_lambda_arns = [
+    module.graph_scaler_lambda.lambda.arn,
+    module.graph_status_poller_lambda.lambda.arn
+  ]
 }

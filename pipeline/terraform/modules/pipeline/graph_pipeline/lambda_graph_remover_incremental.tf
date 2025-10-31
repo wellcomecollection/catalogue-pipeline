@@ -1,10 +1,10 @@
 module "graph_remover_incremental_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "catalogue-graph-remover-incremental"
+  name         = "graph-remover-incremental-${var.pipeline_date}"
   description  = "Handles the incremental removal of catalogue nodes/edges from the catalogue graph."
   package_type = "Image"
-  image_uri    = "${aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
+  image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   publish      = true
 
   // New versions are automatically deployed through a GitHub action.
@@ -20,14 +20,14 @@ module "graph_remover_incremental_lambda" {
   vpc_config = {
     subnet_ids = local.private_subnets
     security_group_ids = [
-      aws_security_group.egress.id,
+      aws_security_group.graph_pipeline_security_group.id,
       local.ec_privatelink_security_group_id
     ]
   }
 
   environment = {
     variables = {
-      CATALOGUE_GRAPH_S3_BUCKET = aws_s3_bucket.catalogue_graph_bucket.bucket
+      CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
     }
   }
 }
@@ -44,7 +44,7 @@ resource "aws_iam_role_policy" "graph_remover_incremental_lambda_neptune_delete_
 
 resource "aws_iam_role_policy" "graph_remover_incremental_lambda_read_secrets_policy" {
   role   = module.graph_remover_incremental_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.allow_secret_read.json
+  policy = data.aws_iam_policy_document.allow_catalogue_graph_secret_read.json
 }
 
 # Write files storing deleted nodes/edges
@@ -62,7 +62,7 @@ data "aws_iam_policy_document" "graph_remover_incremental_s3_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover_incremental/*"
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/graph_remover_incremental/*"
     ]
   }
 }
