@@ -31,8 +31,7 @@ def label_transform_600(field: Field) -> str:
     # base label (a..l minus x) + role subfield e (if present)
     base_label_part = " ".join([main_label] + role_subfields)
 
-    # x subdivision appended with hyphen separator
-    return " - ".join([base_label_part] + subdivision_labels)
+    return " ".join([base_label_part] + subdivision_labels)
 
 
 def label_transform_610(field: Field) -> str:
@@ -56,7 +55,7 @@ def label_transform_648_650_651(field: Field) -> str:
 def subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept
     for raw_label in field.get_subfields("x"):
-        yield build_concept(raw_label, "Concept")
+        yield build_concept(raw_label, "Concept", label_is_verbatim=True)
 
 
 def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
@@ -129,7 +128,9 @@ def extract_subject(field: Field) -> Subject | None:
     # Concept construction with original semantics (preserving Python rules while adopting separator changes)
     main_label = _get_main_label(field)
     ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
-    primary_concept = build_concept(main_label, ontology_type)
+    primary_concept = build_concept(
+        main_label, ontology_type, label_is_verbatim=ontology_type == "Person"
+    )
 
     get_subdivision_concepts = SUBDIVISION_TRANSFORMS[field.tag]
     get_label = LABEL_TRANSFORMS[field.tag]

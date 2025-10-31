@@ -53,10 +53,8 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
     'Electronic Books' with 'Electronic books'.
     Period: return unchanged (aside from outer whitespace trimming) – preprocessing for IDs handled elsewhere.
     """
-    s = label.strip()
+    s = trim_trailing_period(label.strip())
 
-    if concept_type != "Period":
-        s = trim_trailing_period(s)
     if concept_type in ["Agent", "Person", "Organisation", "Meeting"]:
         s = trim_trailing(s, ",")
     elif concept_type == "Place":

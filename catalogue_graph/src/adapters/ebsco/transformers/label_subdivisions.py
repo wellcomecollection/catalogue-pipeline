@@ -74,8 +74,10 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
     return concepts
 
 
-def build_concept(raw_label: str, raw_type: RawConceptType) -> Concept:
-    label = normalise_label(raw_label, raw_type)
+def build_concept(
+    raw_label: str, raw_type: RawConceptType, label_is_verbatim: bool = False
+) -> Concept:
+    label = raw_label if label_is_verbatim else normalise_label(raw_label, raw_type)
     return Concept(
         id=get_concept_identifier(label, raw_type),
         label=label,
