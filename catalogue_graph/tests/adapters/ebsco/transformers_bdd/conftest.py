@@ -88,7 +88,7 @@ def add_field(
 
 @given(
     parsers.re(
-        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"])?"|) with subfields:'
+        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)")? with subfields:'
     )
 )
 def field_from_table(
