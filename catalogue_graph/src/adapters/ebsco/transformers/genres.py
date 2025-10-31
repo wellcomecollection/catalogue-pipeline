@@ -37,7 +37,13 @@ def extract_genres(record: Record) -> list[Genre]:
 
 
 def distinct(genres: list[Genre]) -> list[Genre]:
-    return list({genre.label: genre for genre in genres}.values())
+    seen = set()
+    result = []
+    for genre in genres:
+        if genre.label not in seen:
+            seen.add(genre.label)
+            result.append(genre)
+    return result
 
 
 def extract_genre(field: Field) -> Genre | None:
