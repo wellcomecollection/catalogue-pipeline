@@ -55,7 +55,7 @@ def label_transform_648_650_651(field: Field) -> str:
 def subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept
     for raw_label in field.get_subfields("x"):
-        yield build_concept(raw_label, "Concept", label_is_verbatim=True)
+        yield build_concept(raw_label, "Concept", preserve_trailing_period=True)
 
 
 def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
@@ -110,11 +110,11 @@ def is_subject_to_keep(field: Field) -> bool:
     https://github.com/wellcomecollection/catalogue-pipeline/blob/180bece57fb84a90a8d2d2a7432843b5237d7727/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcSubjects.scala#L82
     """
     return field.indicators is not None and (
-        field.indicators.second in ["0", "2"]
-        or (
-            field.indicators.second == "7"
-            and field.get("2") in ["local", "homoit", "indig", "enslv"]
-        )
+            field.indicators.second in ["0", "2"]
+            or (
+                    field.indicators.second == "7"
+                    and field.get("2") in ["local", "homoit", "indig", "enslv"]
+            )
     )
 
 
@@ -129,7 +129,7 @@ def extract_subject(field: Field) -> Subject | None:
     main_label = _get_main_label(field)
     ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
     primary_concept = build_concept(
-        main_label, ontology_type, label_is_verbatim=ontology_type == "Person"
+        main_label, ontology_type, preserve_trailing_period=ontology_type == "Person"
     )
 
     get_subdivision_concepts = SUBDIVISION_TRANSFORMS[field.tag]
