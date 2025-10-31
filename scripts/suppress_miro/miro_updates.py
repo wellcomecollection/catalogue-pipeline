@@ -22,7 +22,6 @@ from _common import (
     get_secret_string,
     get_session,
     get_date_from_index_name,
-    get_dynamodb_items,
 )
 
 SESSION = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
@@ -119,7 +118,7 @@ def check_reindexer_listening(dry_run=False):
             )
             exit(1)
         else:
-            print("No subscriptions found for reindexer topic. Please ensure the reindexer subscribed.")
+            print("No subscriptions found for reindexer topic. Please ensure reindexer subscribed before proceeding with the suppression.")
     else:
         print("Subscriptions found for reindexer topic:")
         for sub in subscriptions:
@@ -162,14 +161,14 @@ def _get_vhs_sourcedata_miro_ddb_item(miro_id):
     try:
         item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
     except KeyError:
-        print(f"Miro ID {miro_id} not found in DynamoDB table {TABLE_NAME}", file=sys.stderr)
+        print(f"✗ Miro ID {miro_id} not found in DynamoDB table {TABLE_NAME}", file=sys.stderr)
         return
     else:
-        print(f"Miro ID {miro_id} found in DynamoDB table {TABLE_NAME}")
+        print(f"✓ Miro ID {miro_id} found in DynamoDB table {TABLE_NAME}")
         return item
 
 
-def _check_works_and_images_indices(miro_id):
+def _get_work_and_image(miro_id):
     pipeline_date, works_index, images_index = _get_current_pipeline_and_indices()
 
     # Check the work exists in the works index
@@ -178,6 +177,7 @@ def _check_works_and_images_indices(miro_id):
         body={"query": {"term": {"query.identifiers.value": miro_id}}},
     )
 
+    work = None
     try:
         work = next(
             hit
@@ -185,32 +185,34 @@ def _check_works_and_images_indices(miro_id):
             if hit["_source"]["debug"]["source"]["identifier"]["identifierType"]["id"]
             == "miro-image-number"
         )
+        print(f"✓ Work for {miro_id} found in {works_index}: {work['_id']}")
     except StopIteration:
         print(
-            f"Could not find a work for {miro_id} in {works_index}\n"
-            "It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first",
+            f"✗ Could not find a work for {miro_id} in {works_index}\n"
+            "  It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first",
             file=sys.stderr,
         )
-    else:
-        print(f"Work for {miro_id} found in {works_index}: {work['_id']}")
 
     # Check the image exists in the images index
     images_resp = api_es_client(pipeline_date).search(
         index=images_index,
         body={
             "query": {"term": {"query.source.sourceIdentifier.value": miro_id}},
-            "_source": "",
         },
     )
 
+    image = None
     if images_resp["hits"]["total"]["value"] == 0:
         print(
-            f"Could not find an image for {miro_id} in {images_index}\n",
-            "It could be that the source identifier for this image is that of a Sierra work - that should be suppressed by collections information first",
+            f"✗ Could not find an image for {miro_id} in {images_index}\n"
+            "  It could be that the source identifier for this image is that of a Sierra work - that should be suppressed by collections information first",
             file=sys.stderr,
         )
     else:
-        print(f"Image for {miro_id} found in {images_index}: {images_resp['hits']['hits'][0]['_id']}")
+        image = images_resp["hits"]["hits"][0]
+        print(f"✓ Image for {miro_id} found in {images_index}: {image['_id']}")
+
+    return work, image
 
 
 def _check_dlcs_server(miro_id):
@@ -224,11 +226,6 @@ def _check_dlcs_server(miro_id):
         print(f"Error checking DLCS server for {miro_id}: {resp.status_code}", file=sys.stderr)
     else:
         print(f"Image {miro_id} found on DLCS server")
-
-
-
-
-
 
 
 def _set_overrides(*, miro_id, message: str, override_key: str, override_value: str):
@@ -391,60 +388,28 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
 
 def _remove_image_from_elasticsearch(*, miro_id):
     pipeline_date, works_index, images_index = _get_current_pipeline_and_indices()
+    work, image = _get_work_and_image(miro_id)
 
-    # Remove the work from the works index
-    works_resp = api_es_client(pipeline_date).search(
-        index=works_index,
-        body={"query": {"term": {"query.identifiers.value": miro_id}}},
-    )
-
-    try:
-        work = next(
-            hit
-            for hit in works_resp["hits"]["hits"]
-            if hit["_source"]["debug"]["source"]["identifier"]["identifierType"]["id"]
-            == "miro-image-number"
-        )
-    except StopIteration:
-        print(f"Could not find a work for {miro_id} in {works_index}", file=sys.stderr)
-        print(
-            "It could be that the canonical work for this Miro ID is a Sierra work - that should be suppressed by collections information first",
-            file=sys.stderr,
-        )
+    if work is None or image is None:
         return
-    else:
-        work["_source"]["debug"]["deletedReason"] = {
-            "info": "Miro: isClearedForCatalogueAPI = false",
-            "type": "SuppressedFromSource",
-        }
-        work["_source"]["type"] = "Deleted"
 
-        index_resp = work_ingestor_es_client(date=pipeline_date).index(
-            index=works_index, body=work["_source"], id=work["_id"]
-        )
-        assert index_resp["result"] == "updated", index_resp
+    # Mark the work as deleted
+    work["_source"]["debug"]["deletedReason"] = {
+        "info": "Miro: isClearedForCatalogueAPI = false",
+        "type": "SuppressedFromSource",
+    }
+    work["_source"]["type"] = "Deleted"
 
-    images_resp = api_es_client(pipeline_date).search(
-        index=images_index,
-        body={
-            "query": {"term": {"query.source.sourceIdentifier.value": miro_id}},
-            "_source": "",
-        },
+    index_resp = work_ingestor_es_client(date=pipeline_date).index(
+        index=works_index, body=work["_source"], id=work["_id"]
     )
+    assert index_resp["result"] == "updated", index_resp
 
-    try:
-        image_id = images_resp["hits"]["hits"][0]["_id"]
-    except IndexError:
-        print(
-            f"Could not find an image for {work['_id']} in {images_index}",
-            file=sys.stderr,
-        )
-        return
-    else:
-        delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
-            index=images_index, id=image_id
-        )
-        assert delete_resp["result"] == "deleted", delete_resp
+    # Delete the image
+    delete_resp = image_ingestor_es_client(date=pipeline_date).delete(
+        index=images_index, id=image["_id"]
+    )
+    assert delete_resp["result"] == "deleted", delete_resp
 
 
 # cloudfront
@@ -507,11 +472,11 @@ def _register_image_on_dlcs(origin_url, miro_id):
 
 
 
-# check runs 
+# pre-suppression checks
 
-def run_image_checks(miro_id):
+def run_pre_suppression_checks(miro_id):
     _get_vhs_sourcedata_miro_ddb_item(miro_id)
-    _check_works_and_images_indices(miro_id)
+    _get_work_and_image(miro_id)
     _check_dlcs_server(miro_id)
 
 
@@ -532,8 +497,6 @@ def unsuppress_image(*, miro_id: str, origin: str, message: str):
     """
     Reinstate a hidden Miro image
     """
-    check_reindexer_listening()
-
     # First, make the DDS record reflect that the image should be visible, and request reindex
     _set_image_availability(miro_id=miro_id, message=message, is_available=True)
 
