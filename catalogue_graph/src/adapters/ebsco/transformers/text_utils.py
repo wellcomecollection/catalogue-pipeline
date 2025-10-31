@@ -68,4 +68,5 @@ def normalise_label(label: str, concept_type: RawConceptType) -> str:
 
     return s
 
+
 ## NOTE: normalise_identifier_value removed; use Identifiable.identifier_from_text for label-derived identifiers.
