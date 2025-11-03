@@ -328,22 +328,6 @@ def _remove_override(*, miro_id, message: str, override_key: str):
         return False
 
 
-def set_license_override(*, miro_id: str, license_code: str, message: str):
-    """
-    Set the license of a Miro image on wellcomecollection.org.
-    """
-    _set_overrides(
-        miro_id=miro_id,
-        message=message,
-        override_key="license",
-        override_value=license_code,
-    )
-
-
-def remove_license_override(*, miro_id: str, message: str):
-    _remove_override(miro_id=miro_id, message=message, override_key="license")
-
-
 # github 
 
 def update_miro_image_suppressions_doc():
@@ -522,9 +506,6 @@ def _register_image_on_dlcs(origin_url, miro_id):
         return False
 
 
-
-
-
 # pre-suppression checks
 
 def run_pre_suppression_checks(miro_id):
@@ -533,7 +514,7 @@ def run_pre_suppression_checks(miro_id):
     _check_dlcs_server(miro_id)
 
 
-# actual suppression/unsuppression functions
+# actual suppression/unsuppression/license update functions
 
 def suppress_image(*, miro_id, message: str):
     """
@@ -555,3 +536,19 @@ def unsuppress_image(*, miro_id: str, origin: str, message: str):
 
     # Now the actual image must be registered on DLCS so that it can be seen
     _register_image_on_dlcs(origin_url=origin, miro_id=miro_id)
+
+
+def set_license_override(*, miro_id: str, license_code: str, message: str):
+    """
+    Set the license of a Miro image on wellcomecollection.org.
+    """
+    _set_overrides(
+        miro_id=miro_id,
+        message=message,
+        override_key="license",
+        override_value=license_code,
+    )
+
+
+def remove_license_override(*, miro_id: str, message: str):
+    _remove_override(miro_id=miro_id, message=message, override_key="license")
