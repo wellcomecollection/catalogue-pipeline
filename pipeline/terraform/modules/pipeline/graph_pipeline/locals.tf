@@ -5,6 +5,10 @@ locals {
   extractor_task_definition_version    = element(local._extractor_task_definition_split, length(local._extractor_task_definition_split) - 1)
   extractor_task_definition_arn_latest = trimsuffix(module.extractor_ecs_task.task_definition_arn, ":${local.extractor_task_definition_version}")
 
+  _ingestor_loader_task_definition_split     = split(":", module.ingestor_loader_ecs_task.task_definition_arn)
+  ingestor_loader_task_definition_version    = element(local._ingestor_loader_task_definition_split, length(local._ingestor_loader_task_definition_split) - 1)
+  ingestor_loader_task_definition_arn_latest = trimsuffix(module.ingestor_loader_ecs_task.task_definition_arn, ":${local.ingestor_loader_task_definition_version}")
+
   ec_privatelink_security_group_id = data.terraform_remote_state.shared_infra.outputs.ec_platform_privatelink_sg_id
 
   slack_webhook = "catalogue_graph_reporter/slack_webhook"
@@ -187,6 +191,11 @@ data "aws_s3_bucket" "catalogue_graph_bucket" {
 
 data "aws_ecr_repository" "unified_pipeline_lambda" {
   name = "uk.ac.wellcome/unified_pipeline_lambda"
+}
+
+
+data "aws_ecr_repository" "unified_pipeline_task" {
+  name = "uk.ac.wellcome/unified_pipeline_task"
 }
 
 data "aws_ecr_repository" "catalogue_graph_extractor" {

@@ -29,3 +29,7 @@ ENV PYTHONPATH="/app/src"
 FROM base AS catalogue_graph_extractor
 
 ENTRYPOINT [ "python", "/app/src/extractor.py" ]
+
+FROM base AS unified_pipeline_task
+
+ENTRYPOINT [ "python" ]
