@@ -88,7 +88,7 @@ def add_field(
 
 @given(
     parsers.re(
-        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"])?"|) with subfields:'
+        r'the MARC record has (?:a|another) (?P<tag>\d{3}) field(?: with indicators "(?P<ind1>[^"]?)" "(?P<ind2>[^"]?)")? with subfields:'
     )
 )
 def field_from_table(
@@ -257,6 +257,7 @@ def only_root_list_member_has(
     property: str,
     value: str,
 ) -> Any:
+    list_member_count(work, 1, attr_phrase)
     member = _list_member_nth(work.data, 1, attr_phrase)
     assert getattr(member, property) == value
     context[attr_phrase] = member

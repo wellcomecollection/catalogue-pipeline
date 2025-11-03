@@ -27,10 +27,15 @@ ignore_fields:
   - version
   - state.modifiedTime
   - state.sourceModifiedTime
+  - state.relations.children
+  - state.relations.siblingsPreceding
+  - state.relations.siblingsSucceeding
+  - data.production[].dates[].type
   - data.production[].dates[].range.from
   - data.production[].dates[].range.to
-
-# Number of differing documents to sample for console display
+  - data.production[].places[].type
+  - data.subjects[].type
+  # Number of differing documents to sample for console display
 sample_size: 10
 
 # Rows per Parquet shard flush during conversion

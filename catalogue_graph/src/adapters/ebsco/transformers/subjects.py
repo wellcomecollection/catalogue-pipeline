@@ -106,6 +106,10 @@ def extract_subjects(record: Record) -> list[Subject]:
 
 
 def is_subject_to_keep(field: Field) -> bool:
+    """
+    Filter rule originally defined in Scala here:
+    https://github.com/wellcomecollection/catalogue-pipeline/blob/180bece57fb84a90a8d2d2a7432843b5237d7727/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcSubjects.scala#L82
+    """
     return field.indicators is not None and (
         field.indicators.second in ["0", "2"]
         or (
@@ -131,9 +135,13 @@ def extract_subject(field: Field) -> Subject | None:
     get_label = LABEL_TRANSFORMS[field.tag]
     label = get_label(field)
 
-    # Trim trailing period from final subject label (Scala behaviour)
+    # Trim trailing period from final subject label
+    # unless it is a Person (Scala behaviour)
+    if field.tag != "600":
+        label = label.rstrip(".")
+
     return Subject(
-        label=label.rstrip("."),
+        label=label,
         id=Identifiable.identifier_from_text(label, ontology_type),
         concepts=[primary_concept] + list(get_subdivision_concepts(field)),
     )

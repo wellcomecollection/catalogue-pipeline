@@ -35,6 +35,15 @@ Feature: Extracting genres from MARC 655
     Then the 2st genre has the label "Doomcore"
     Then the 3st genre has the label "Nu-Cumbia"
 
+
+  Scenario: Duplicate Genres
+    Given the MARC record has a 655 field with subfield "a" value "Disco Polo"
+    And the MARC record has another 655 field with subfield "a" value "Disco Polo"
+    And the MARC record has another 655 field with subfield "a" value "Disco Polo"
+    When I transform the MARC record
+    Then the only genre has the label "Disco Polo"
+
+
   Scenario: v, x, y, and z subfields
   The label is made from subfields a,v,x,y,z joined with " - " and each subdivision
   field yields its own concept
