@@ -3,7 +3,7 @@ variable "pipeline_date" {
 }
 
 variable "index_date" {
-  type = string
+  type    = string
   default = null
 }
 
@@ -25,9 +25,9 @@ variable "es_config" {
 
 variable "es_index_config" {
   type = object({
-    es_works_identified_index = optional(string, null)
+    es_works_identified_index   = optional(string, null)
     es_works_denormalised_index = optional(string, null)
-    es_images_initial_index = optional(string, null)
+    es_images_initial_index     = optional(string, null)
   })
   default = {}
 }
