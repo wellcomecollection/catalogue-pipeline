@@ -37,7 +37,7 @@ module "merger_delta" {
   source = "./merger"
 
   pipeline_date = var.pipeline_date
-  index_date = "2025-10-09"
+  index_date    = "2025-10-09"
 
   vpc_config   = local.service_vpc_config
   queue_config = local.queue_config

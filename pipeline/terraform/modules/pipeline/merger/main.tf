@@ -45,7 +45,7 @@ module "merger_lambda" {
   }
 
   secret_env_vars = merge(
-    local.es_upstream_config, 
+    local.es_upstream_config,
     local.es_downstream_config
   )
 
