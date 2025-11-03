@@ -1,4 +1,4 @@
-DEFAULT_THRESHOLD = 0.05
+DEFAULT_THRESHOLD = 0.2
 
 
 def validate_fractional_change(
