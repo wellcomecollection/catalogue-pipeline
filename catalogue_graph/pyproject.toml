@@ -50,6 +50,7 @@ dev = [
     "ipykernel>=6.30.0",
     "pytest-bdd>=8.1.0",
     "hypothesis>=6.100.0,<7.0.0",
+    "types-boto3>=1.40.64",
 ]
 
 [tool.pytest.ini_options]
