@@ -168,7 +168,6 @@ locals {
         "Ecs.CannotPullContainerErrorException",
         "Ecs.ContainerRuntimeTimeoutErrorException",
         "Ecs.EssentialContainerExited",
-        "Sandbox.Timedout",
       ]
       IntervalSeconds = 1
       MaxAttempts     = 3
