@@ -117,19 +117,24 @@ locals {
 
   concepts_pipeline_inputs_incremental = [
     {
-      "label" : "Catalogue Concept Nodes",
-      "transformer_type" : "catalogue_concepts",
+      "label" : "Catalogue Work Nodes",
+      "transformer_type" : "catalogue_works",
       "entity_type" : "nodes"
-    },
-    {
-      "label" : "Catalogue Concept Edges",
-      "transformer_type" : "catalogue_concepts",
-      "entity_type" : "edges"
     },
     {
       "label" : "Catalogue Work Identifier Nodes",
       "transformer_type" : "catalogue_work_identifiers",
       "entity_type" : "nodes"
+    },
+    {
+      "label" : "Catalogue Concept Nodes",
+      "transformer_type" : "catalogue_concepts",
+      "entity_type" : "nodes"
+    },
+    {
+      "label" : "Catalogue Work Edges",
+      "transformer_type" : "catalogue_works",
+      "entity_type" : "edges"
     },
     {
       "label" : "Catalogue Work Identifier Edges",
@@ -144,13 +149,8 @@ locals {
       "insert_error_threshold" : 1
     },
     {
-      "label" : "Catalogue Work Nodes",
-      "transformer_type" : "catalogue_works",
-      "entity_type" : "nodes"
-    },
-    {
-      "label" : "Catalogue Work Edges",
-      "transformer_type" : "catalogue_works",
+      "label" : "Catalogue Concept Edges",
+      "transformer_type" : "catalogue_concepts",
       "entity_type" : "edges"
     },
   ]
