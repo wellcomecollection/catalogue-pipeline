@@ -117,9 +117,9 @@ module "catalogue_graph_ingestor_state_machine_EXPERIMENTAL" {
           Overrides = {
             ContainerOverrides = [
               {
-                Name    = "ingestor-loader-${var.pipeline_date}"
+                Name = "ingestor-loader-${var.pipeline_date}"
                 Command = [
-                  "/app/src/ingestor/steps/ingestor_loader.py", 
+                  "/app/src/ingestor/steps/ingestor_loader.py",
                   "--event", "{% $string($states.input) %}"
                 ],
                 Environment = [
