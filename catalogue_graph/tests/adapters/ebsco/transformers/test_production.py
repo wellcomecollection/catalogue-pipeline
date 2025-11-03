@@ -406,6 +406,33 @@ def test_production_manufacture_function_label_cleaned(marc_record: Record) -> N
     assert lone_element(production.dates).label == "2001"
 
 
+def test_preserve_trailing_dots(marc_record: Record) -> None:
+    """
+    Trailing dots are preserved in places and agents in a production event.
+
+    This replicates the current inconsistent Scala behaviour.
+    """
+    marc_record.add_field(  # type: ignore[no-untyped-call]
+        Field(
+            tag="260",
+            subfields=[
+                Subfield(code="a", value="Berlin."),  # place
+                Subfield(code="e", value="Munich."),  # place
+                Subfield(code="b", value="Printer Co."),  # agent
+                Subfield(code="f", value="Druckerfirma."),  # agent
+                Subfield(code="g", value="2001."),  # date
+            ],
+        )
+    )
+    production = lone_element(transform_record(marc_record).data.production)
+    assert production.function.label == "Manufacture"
+    assert production.places[0].label == "Berlin."
+    assert production.places[1].label == "Munich."
+    assert production.agents[0].label == "Printer Co."
+    assert production.agents[1].label == "Druckerfirma."
+    assert lone_element(production.dates).label == "2001"
+
+
 @pytest.mark.parametrize(
     "marc_record",
     [

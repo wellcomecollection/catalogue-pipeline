@@ -75,8 +75,7 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
 
 
 def build_concept(
-        raw_label: str, raw_type: RawConceptType,
-        preserve_trailing_period: bool = False
+    raw_label: str, raw_type: RawConceptType, preserve_trailing_period: bool = False
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
     return Concept(
