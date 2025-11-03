@@ -31,7 +31,19 @@ def extract_genres(record: Record) -> list[Genre]:
     """
     Build a list of Genre objects from MARC 655 fields.
     """
-    return non_empty(extract_genre(field) for field in record.get_fields("655"))
+    return distinct(
+        non_empty(extract_genre(field) for field in record.get_fields("655"))
+    )
+
+
+def distinct(genres: list[Genre]) -> list[Genre]:
+    seen = set()
+    result = []
+    for genre in genres:
+        if genre.label not in seen:
+            seen.add(genre.label)
+            result.append(genre)
+    return result
 
 
 def extract_genre(field: Field) -> Genre | None:
