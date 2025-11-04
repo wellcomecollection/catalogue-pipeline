@@ -8,10 +8,10 @@ from ingestor.models.step_events import (
 from ingestor.steps.ingestor_loader_monitor import (
     handler,
 )
-
+from models.events import IncrementalWindow
 from tests.mocks import MockCloudwatchClient, MockSmartOpen
 
-MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.loader.json"
+MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/20250101T1145-20250101T1200/report.loader.json"
 
 
 MOCK_STEP_EVENT = IngestorStepEvent(
@@ -19,27 +19,16 @@ MOCK_STEP_EVENT = IngestorStepEvent(
     pipeline_date="2025-01-01",
     index_date="2025-03-01",
     job_id="123",
+    window=IncrementalWindow.model_validate({"end_time": "2025-01-01T12:00"}),
 )
 
 
 def get_mock_expected_report(record_count: int, file_size: int) -> dict:
     return {
-        **MOCK_STEP_EVENT.model_dump(),
+        # Serialise timestamps
+        **json.loads(MOCK_STEP_EVENT.model_dump_json()),
         "record_count": record_count,
         "total_file_size": file_size,
-    }
-
-
-def get_mock_expected_metric(file_size: int) -> dict:
-    return {
-        "namespace": "catalogue_graph_pipeline",
-        "value": file_size,
-        "metric_name": "total_file_size",
-        "dimensions": {
-            "ingestor_type": "concepts",
-            "pipeline_date": "2025-01-01",
-            "index_date": "2025-03-01"
-        },
     }
 
 
@@ -72,7 +61,28 @@ def test_ingestor_loader_monitor_success_no_previous() -> None:
     handler(event)
 
     # assert metrics are reported
-    assert MockCloudwatchClient.metrics_reported == [get_mock_expected_metric(3000)]
+    assert MockCloudwatchClient.metrics_reported == [
+        {
+            "namespace": "catalogue_graph_pipeline",
+            "value": 300,
+            "metric_name": "record_count",
+            "dimensions": {
+                "ingestor_type": "concepts",
+                "pipeline_date": "2025-01-01",
+                "index_date": "2025-03-01",
+            },
+        },
+        {
+            "namespace": "catalogue_graph_pipeline",
+            "value": 3000,
+            "metric_name": "total_file_size",
+            "dimensions": {
+                "ingestor_type": "concepts",
+                "pipeline_date": "2025-01-01",
+                "index_date": "2025-03-01",
+            },
+        },
+    ]
 
     # assert reports are written in s3
     verify_s3_reports(300, 3000)

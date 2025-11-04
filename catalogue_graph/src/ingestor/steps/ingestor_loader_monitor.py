@@ -1,13 +1,12 @@
 import typing
 
-from utils.reporting import LoaderReport
-
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
 )
+from utils.reporting import LoaderReport
 
 
-def write_s3_report(event: IngestorIndexerLambdaEvent) -> LoaderReport:
+def write_s3_report(event: IngestorIndexerLambdaEvent) -> None:
     pipeline_date = event.pipeline_date
     job_id = event.job_id
 
