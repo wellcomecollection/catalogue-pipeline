@@ -5,7 +5,6 @@ module "ingestor_loader_ecs_task" {
 
   image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:dev"
 
-  # These are defined in the ECS task definition as environment variables,
   environment = {
       CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
       INGESTOR_S3_PREFIX        = "ingestor"
@@ -23,7 +22,7 @@ data "aws_iam_policy_document" "allow_ingestor_loader_task_token" {
       "states:SendTaskFailure",
     ]
     resources = [
-      module.catalogue_graph_ingestor_state_machine_EXPERIMENTAL.state_machine_arn,
+      module.catalogue_graph_ingestor_state_machine.state_machine_arn,
     ]
   }
 }

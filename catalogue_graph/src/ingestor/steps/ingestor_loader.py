@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-import argparse
-import datetime
 import json
 import typing
+from argparse import ArgumentParser
 
 import boto3
 
@@ -17,12 +16,8 @@ from ingestor.transformers.base_transformer import (
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.elasticsearch import ElasticsearchMode
+from utils.steps import create_job_id
 from utils.types import IngestorType
-
-
-def create_job_id() -> str:
-    """Generate a job_id based on the current time using an iso8601 format like 20210701T1300"""
-    return datetime.datetime.now().strftime("%Y%m%dT%H%M")
 
 
 def create_transformer(
@@ -60,7 +55,7 @@ def raw_event(raw_input: str) -> IngestorLoaderLambdaEvent:
     return IngestorLoaderLambdaEvent.model_validate(event)
 
 
-def ecs_handler() -> None:
+def ecs_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--event",
         type=raw_event,
@@ -84,7 +79,6 @@ def ecs_handler() -> None:
 
     ecs_args = parser.parse_args()
 
-    # In ECS mode we need to pull the task token from the environment variables
     task_token = ecs_args.task_token
     if task_token:
         print(
@@ -92,8 +86,6 @@ def ecs_handler() -> None:
         )
 
     try:
-        # TODO: Should we send a heartbeat somewhere here to keep the Step Functions task alive?
-        # see setting HeartbeatSeconds
         result = handler(event=ecs_args.event, es_mode=ecs_args.es_mode)
         output = result.model_dump_json()
 
@@ -127,7 +119,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
     return handler(IngestorLoaderLambdaEvent(**event)).model_dump(mode="json")
 
 
-def local_handler() -> None:
+def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -199,7 +191,7 @@ def local_handler() -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser: ArgumentParser = ArgumentParser()
     parser.add_argument(
         "--use-cli",
         action="store_true",
@@ -208,6 +200,6 @@ if __name__ == "__main__":
     args, _ = parser.parse_known_args()
 
     if args.use_cli:
-        local_handler()
+        local_handler(parser)
     else:
-        ecs_handler()
+        ecs_handler(parser)

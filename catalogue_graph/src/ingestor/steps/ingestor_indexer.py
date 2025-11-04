@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-import argparse
 import json
 import typing
+from argparse import ArgumentParser
 from collections.abc import Generator
 
 import boto3
@@ -20,6 +20,7 @@ from ingestor.models.step_events import (
 )
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
+from utils.steps import create_job_id
 from utils.types import IngestorType
 
 RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
@@ -100,8 +101,72 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     return handler(IngestorIndexerLambdaEvent(**event)).model_dump(mode="json")
 
 
-def local_handler() -> None:
-    parser = argparse.ArgumentParser(description="")
+def raw_event(raw_input: str) -> IngestorIndexerLambdaEvent:
+    event = json.loads(raw_input)
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
+
+    return IngestorIndexerLambdaEvent.model_validate(event)
+
+
+def ecs_handler(parser: ArgumentParser) -> None:
+    parser.add_argument(
+        "--event",
+        type=raw_event,
+        help="Raw event in JSON format.",
+        required=True,
+    )
+    parser.add_argument(
+        "--task-token",
+        type=str,
+        help="The Step Functions task token for reporting success or failure.",
+        required=False,
+    )
+    parser.add_argument(
+        "--es-mode",
+        type=str,
+        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
+        required=False,
+        choices=["private", "local", "public"],
+        default="private",
+    )
+
+    ecs_args = parser.parse_args()
+
+    task_token = ecs_args.task_token
+    if task_token:
+        print(
+            "Received TASK_TOKEN in ECS arguments, will report back to Step Functions."
+        )
+
+    try:
+        result = handler(event=ecs_args.event, es_mode=ecs_args.es_mode)
+        output = result.model_dump_json()
+
+        if task_token:
+            print("Sending task success to Step Functions.")
+            stepfunctions_client = boto3.client("stepfunctions")
+            stepfunctions_client.send_task_success(taskToken=task_token, output=output)
+        else:
+            print(
+                "No TASK_TOKEN found in environment variables, skipping send_task_success."
+            )
+            print(f"Result: {output}")
+
+    except Exception as e:
+        error_output = json.dumps({"error": str(e)})
+
+        if task_token:
+            print(f"Sending task failure to Step Functions: {error_output}")
+            stepfunctions_client = boto3.client("stepfunctions")
+            stepfunctions_client.send_task_failure(
+                taskToken=task_token, error="IngestorLoaderError", cause=error_output
+            )
+        else:
+            raise
+
+
+def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -196,4 +261,15 @@ def _get_objects_to_index(
 
 
 if __name__ == "__main__":
-    local_handler()
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.use_cli:
+        local_handler(parser)
+    else:
+        ecs_handler(parser)
