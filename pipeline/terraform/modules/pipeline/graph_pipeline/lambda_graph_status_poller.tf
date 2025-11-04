@@ -14,8 +14,8 @@ module "graph_status_poller_lambda" {
     command = ["graph_status_poller.lambda_handler"]
   }
 
-  memory_size = 128
-  timeout     = 30 // 30 seconds
+  memory_size = 256
+  timeout     = 60 // 60 seconds
 
   vpc_config = {
     subnet_ids         = local.private_subnets

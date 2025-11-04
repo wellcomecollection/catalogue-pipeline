@@ -78,7 +78,7 @@ class BaseGraphRemoverIncremental(BaseGraphEdgeRemover, BaseGraphNodeRemover):
         )
 
         # This is part of a safety mechanism. If the fraction of removed nodes/edges of the given type exceeds
-        # `DEFAULT_THRESHOLD` (set to 5%), an exception will be raised.
+        # `DEFAULT_THRESHOLD` (set to 20%), an exception will be raised.
         validate_fractional_change(
             modified_size=len(existing_ids),
             total_size=total_count,

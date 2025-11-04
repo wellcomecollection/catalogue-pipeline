@@ -234,7 +234,7 @@ Feature: Extracting subjects from 6xx fields
 
   Rule: Subdivisions of a Person Subject do not create identifiable concepts
 
-    Scenario: A Subject with trailing dots in all the concepts
+    Scenario: A Subject with a general subdivision
       Given the MARC record has a 600 field with indicators "" "0" with subfields:
         | code | value              |
         | a    | Joseph Pujol       |
