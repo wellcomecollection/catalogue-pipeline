@@ -11,8 +11,8 @@ module "elasticsearch_pit_opener_lambda" {
     command = ["pit_opener.lambda_handler"]
   }
 
-  memory_size = 128
-  timeout     = 15
+  memory_size = 256
+  timeout     = 60 // 60 seconds
 
   vpc_config = {
     subnet_ids = local.private_subnets
