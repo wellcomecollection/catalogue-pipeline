@@ -18,7 +18,6 @@ variable "reindexing_state" {
     listen_to_reindexer      = bool
     scale_up_tasks           = bool
     scale_up_elastic_cluster = bool
-    scale_up_id_minter_db    = bool
     scale_up_matcher_db      = bool
   })
 }

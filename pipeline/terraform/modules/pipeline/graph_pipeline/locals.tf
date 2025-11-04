@@ -167,7 +167,7 @@ locals {
         "Ecs.TaskFailedToStartException",
         "Ecs.CannotPullContainerErrorException",
         "Ecs.ContainerRuntimeTimeoutErrorException",
-        "Ecs.EssentialContainerExited"
+        "Ecs.EssentialContainerExited",
       ]
       IntervalSeconds = 1
       MaxAttempts     = 3
