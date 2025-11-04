@@ -81,8 +81,9 @@ def build_concept(
         is_identifiable: bool = True,
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
+    label_for_id = raw_label if raw_type == "Organisation" else label
     return Concept(
-        id=get_concept_identifier(label, raw_type)
+        id=get_concept_identifier(label_for_id, raw_type)
         if is_identifiable
         else Unidentifiable(),
         label=label,

@@ -344,17 +344,17 @@ def test_contributor_agent_labels_preserve_trailing_dots(marc_record: Record) ->
     )
 
 
-def test_contributor_agent_labels_strip_whitespace(marc_record: Record) -> None:
-    """Contributor agents preserve trailing dots."""
+def test_contributor_organisation_identifiers_do_not_normalise(marc_record: Record) -> None:
+    """Contributor organisation identifiers are left verbatim"""
     marc_record.add_field(  # type: ignore[no-untyped-call]
         Field(
-            tag="700",
-            subfields=[Subfield(code="a", value="   Randolph,   ")],
+            tag="710",
+            subfields=[Subfield(code="a", value="SCC,")],
         )
     )
     assert (
             lone_element(transform_record(marc_record).data.contributors).agent.label
-            == "Randolph,"
+            == "SCC,"
     )
 
 
