@@ -9,7 +9,7 @@ from adapters.ebsco.transformers.text_utils import (
     normalise_label,
 )
 from models.pipeline.concept import Concept
-from models.pipeline.identifier import Identifiable
+from models.pipeline.identifier import Identifiable, Unidentifiable
 from utils.types import RawConceptType
 
 """Helpers for MARC label + subdivision handling (e.g. subjects, genres).
@@ -75,11 +75,11 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
 
 
 def build_concept(
-    raw_label: str, raw_type: RawConceptType, preserve_trailing_period: bool = False
+        raw_label: str, raw_type: RawConceptType, preserve_trailing_period: bool = False, is_identifiable=True
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
     return Concept(
-        id=get_concept_identifier(label, raw_type),
+        id=get_concept_identifier(label, raw_type) if is_identifiable else Unidentifiable(),
         label=label,
         type=raw_type,
     )
