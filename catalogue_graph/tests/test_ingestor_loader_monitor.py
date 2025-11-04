@@ -8,6 +8,7 @@ from ingestor.models.step_events import (
 from ingestor.steps.ingestor_loader_monitor import (
     handler,
 )
+
 from tests.mocks import MockCloudwatchClient, MockSmartOpen
 
 MOCK_CURRENT_JOB_S3_URI = "s3://wellcomecollection-catalogue-graph/ingestor_concepts/2025-01-01/2025-03-01/123/report.loader.json"
@@ -31,15 +32,13 @@ def get_mock_expected_report(record_count: int, file_size: int) -> dict:
 
 def get_mock_expected_metric(file_size: int) -> dict:
     return {
-        "namespace": "catalogue_graph_ingestor",
+        "namespace": "catalogue_graph_pipeline",
         "value": file_size,
         "metric_name": "total_file_size",
         "dimensions": {
             "ingestor_type": "concepts",
             "pipeline_date": "2025-01-01",
-            "index_date": "2025-03-01",
-            "job_id": "123",
-            "step": "ingestor_loader_monitor",
+            "index_date": "2025-03-01"
         },
     }
 

@@ -1,3 +1,4 @@
+
 import boto3
 
 
@@ -8,10 +9,10 @@ class MetricReporter:
         self.namespace = namespace
 
     def put_metric_data(
-        self, metric_name: str, value: float, dimensions: dict[str, str] | None = None
+        self, metric_name: str, value: float, timestamp: str, dimensions: dict[str, str] | None = None
     ) -> None:
         dimensions = dimensions or {}
-
+        
         self.client.put_metric_data(
             Namespace=self.namespace,
             MetricData=[
@@ -22,6 +23,7 @@ class MetricReporter:
                     "Dimensions": [
                         {"Name": k, "Value": v} for k, v in dimensions.items()
                     ],
+                    "Timestamp": timestamp
                 }
             ],
         )
