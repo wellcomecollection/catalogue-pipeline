@@ -15,12 +15,12 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.ebsco.transformers.label_subdivisions import (
-    build_concept,
+    get_concept_identifier,
 )
 from adapters.ebsco.transformers.text_utils import (
     normalise_label,
 )
-from models.pipeline.concept import Contributor
+from models.pipeline.concept import Contributor, Concept
 from models.pipeline.id_label import Label
 from utils.types import RawConceptType
 
@@ -72,10 +72,14 @@ label_subfields: dict[str, list[str]] = {
 def format_field(field: Field) -> Contributor:
     tag = field.tag
     contributor_type = type_of_contributor[tag[1:]]
-    raw_label = label_from_field(field, label_subfields[tag[1:]])
+    label = label_from_field(field, label_subfields[tag[1:]]).strip()
 
     return Contributor(
-        agent=build_concept(raw_label, contributor_type, preserve_trailing_period=True),
+        agent=Concept(
+            id=get_concept_identifier(label, contributor_type),
+            label=label,
+            type=contributor_type,
+        ),
         roles=roles(field),
         primary=is_primary(tag),
     )
