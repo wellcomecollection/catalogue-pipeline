@@ -55,7 +55,9 @@ def label_transform_648_650_651(field: Field) -> str:
 def subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept
     for raw_label in field.get_subfields("x"):
-        yield build_concept(raw_label, "Concept", preserve_trailing_period=True, is_identifiable=False)
+        yield build_concept(
+            raw_label, "Concept", preserve_trailing_period=True, is_identifiable=False
+        )
 
 
 def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:
@@ -110,11 +112,11 @@ def is_subject_to_keep(field: Field) -> bool:
     https://github.com/wellcomecollection/catalogue-pipeline/blob/180bece57fb84a90a8d2d2a7432843b5237d7727/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcSubjects.scala#L82
     """
     return field.indicators is not None and (
-            field.indicators.second in ["0", "2"]
-            or (
-                    field.indicators.second == "7"
-                    and field.get("2") in ["local", "homoit", "indig", "enslv"]
-            )
+        field.indicators.second in ["0", "2"]
+        or (
+            field.indicators.second == "7"
+            and field.get("2") in ["local", "homoit", "indig", "enslv"]
+        )
     )
 
 
