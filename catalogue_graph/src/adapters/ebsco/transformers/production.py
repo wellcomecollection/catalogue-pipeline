@@ -90,26 +90,37 @@ def single_production_event(field: Field) -> ProductionEvent | None:
     # Label for production event is free-form, no special trimming rules.
     label = labelFromSubFields(field)
     places = [
-        Concept(label=normalise_label(subfield, "Place"), type="Place")
+        Concept(
+            label=normalise_label(subfield, "Place", preserve_trailing_period=True),
+            type="Place",
+        )
         for subfield in field.get_subfields("a")
     ]
     agents = [
-        Concept(label=normalise_label(subfield, "Agent"), type="Agent")
+        Concept(
+            label=normalise_label(subfield, "Agent", preserve_trailing_period=True),
+            type="Agent",
+        )
         for subfield in field.get_subfields("b")
     ]
     dates = [
         parse_period(normalise_label(subfield, "Period"))
         for subfield in field.get_subfields("c")
     ]
-    print(dates)
     function = None
     if field.tag == "260" and field.get_subfields("e", "f", "g"):
         places += [
-            Concept(label=normalise_label(subfield, "Place"), type="Place")
+            Concept(
+                label=normalise_label(subfield, "Place", preserve_trailing_period=True),
+                type="Place",
+            )
             for subfield in field.get_subfields("e")
         ]
         agents += [
-            Concept(label=normalise_label(subfield, "Agent"), type="Agent")
+            Concept(
+                label=normalise_label(subfield, "Agent", preserve_trailing_period=True),
+                type="Agent",
+            )
             for subfield in field.get_subfields("f")
         ]
         dates += [

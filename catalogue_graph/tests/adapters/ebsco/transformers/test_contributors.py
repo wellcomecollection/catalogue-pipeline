@@ -330,6 +330,20 @@ def test_contributor_role_labels_are_cleaned(marc_record: Record) -> None:
     assert contributor.roles == [Label(label="Editor"), Label(label="Translator:")]
 
 
+def test_contributor_agent_labels_preserve_trailing_dots(marc_record: Record) -> None:
+    """Contributor agents preserve trailing dots."""
+    marc_record.add_field(  # type: ignore[no-untyped-call]
+        Field(
+            tag="700",
+            subfields=[Subfield(code="a", value="Randolph.")],
+        )
+    )
+    assert (
+        lone_element(transform_record(marc_record).data.contributors).agent.label
+        == "Randolph."
+    )
+
+
 @pytest.mark.parametrize(
     "marc_record,field_code,primary",
     [

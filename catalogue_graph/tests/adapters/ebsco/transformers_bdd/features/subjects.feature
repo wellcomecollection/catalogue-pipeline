@@ -48,7 +48,7 @@ Feature: Extracting subjects from 6xx fields
         | Concept | Specimens  | Concept                            |
         | Concept | Literature | Concept                            |
         | Period  | 1897-1900  | Period                             |
-        | Place   | Dublin.    | Place                              |
+        | Place   | Dublin     | Place                              |
       Examples:
         | code | type    |
         | 648  | Period  |
@@ -60,6 +60,7 @@ Feature: Extracting subjects from 6xx fields
     A Person subject ignores v, y, and z.  Most of the other subdivisions form the subject label and the label of the main concept
     Subfield e is the role and does not result in a concept, nor is it part of the main concept
     Subfield x is the general subdivision, and is only included in the label of subject, and creates its own concept
+    Person subjects join the subdivisions with a space, not with " - "
       Given the MARC record has a 600 field with indicators "" "2" with subfields:
         | code | value             |
         | a    | Joseph Pujol      |
@@ -77,7 +78,7 @@ Feature: Extracting subjects from 6xx fields
         | y    | 1897-1900         |
         | z    | Dublin.           |
       When I transform the MARC record
-      Then the only subject has the label "Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. Performer. - Von Klinkerhoffen"
+      Then the only subject has the label "Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. Performer. Von Klinkerhoffen"
       And it has 2 concepts:
         | type    | label                                                                  |
         | Person  | Joseph Pujol III Kt, 1857-1945 O Sole Mio intro 1 Le Pétomane. French. |
@@ -179,7 +180,7 @@ Feature: Extracting subjects from 6xx fields
         | 0 | kadoc    |
         | 0 | galestne |
 
-  Rule: Trailing full stops are removed in Subjects, apart from Person subjects
+  Rule: Trailing full stops are removed in Subjects, apart from Person subjects, and also in the concepts that make up a subject
   This is a bug in the previous implementation that we need to replicate for comparison purposes.
   Once the comparison is successful we should be able to remove the dot from a Person as well.
 
@@ -199,3 +200,34 @@ Feature: Extracting subjects from 6xx fields
         | 648  |
         | 650  |
         | 651  |
+
+    Scenario: A Subject with trailing dots in all the concepts
+      Given the MARC record has a 650 field with indicators "" "0" with subfields:
+        | code | value       |
+        | a    | A Subject.  |
+        | v    | Specimens.  |
+        | x    | Literature. |
+        | z    | Dublin.     |
+      When I transform the MARC record
+      Then the only subject has the label "A Subject. - Specimens. - Literature. - Dublin"
+      And it has 4 concepts:
+        | label      |
+        | A Subject  |
+        | Specimens  |
+        | Literature |
+        | Dublin     |
+
+    Scenario: A Person Subject with trailing dots in all the concepts
+    As with the main label, person subjects also preserve the dots in their subdivision concepts
+
+      Given the MARC record has a 600 field with indicators "" "0" with subfields:
+        | code | value             |
+        | a    | Slartibartfast.   |
+        | e    | Fjord Specialist. |
+        | x    | Literature.       |
+      When I transform the MARC record
+      Then the only subject has the label "Slartibartfast. Fjord Specialist. Literature."
+      And it has 2 concepts:
+        | label           |
+        | Slartibartfast. |
+        | Literature.     |

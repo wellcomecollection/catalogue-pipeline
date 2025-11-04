@@ -75,7 +75,7 @@ def format_field(field: Field) -> Contributor:
     raw_label = label_from_field(field, label_subfields[tag[1:]])
 
     return Contributor(
-        agent=build_concept(raw_label, contributor_type),
+        agent=build_concept(raw_label, contributor_type, preserve_trailing_period=True),
         roles=roles(field),
         primary=is_primary(tag),
     )
