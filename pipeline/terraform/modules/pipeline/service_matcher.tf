@@ -75,9 +75,13 @@ module "matcher_lambda" {
     visibility_timeout_seconds = local.queue_visibility_timeout_seconds
     max_receive_count          = local.max_receive_count
     batching_window_seconds    = 30
-    batch_size                 = 100
+    batch_size                 = var.reindexing_state.scale_up_matcher_db ? 400 : 100
+    maximum_concurrency        = var.reindexing_state.scale_up_matcher_db ? 40 : 2
     topic_arns = [
       module.id_minter_output_topic.arn,
     ]
   }
+
+  timeout     = var.reindexing_state.scale_up_matcher_db ? 300 : 30
+  memory_size = var.reindexing_state.scale_up_matcher_db ? 4096 : 1024
 }
