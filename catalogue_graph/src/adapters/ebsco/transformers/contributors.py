@@ -20,7 +20,7 @@ from adapters.ebsco.transformers.label_subdivisions import (
 from adapters.ebsco.transformers.text_utils import (
     normalise_label,
 )
-from models.pipeline.concept import Contributor, Concept
+from models.pipeline.concept import Contributor
 from models.pipeline.id_label import Label
 from utils.types import RawConceptType
 
