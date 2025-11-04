@@ -82,6 +82,6 @@ module "matcher_lambda" {
     ]
   }
 
-  timeout     = var.reindexing_state.scale_up_matcher_db ? 300 : 30 # 5 minutes vs 30 seconds
+  timeout     = var.reindexing_state.scale_up_matcher_db ? 300 : 30    # 5 minutes vs 30 seconds
   memory_size = var.reindexing_state.scale_up_matcher_db ? 4096 : 1024 # 4GB vs 1GB
 }
