@@ -210,7 +210,7 @@ def test_graph_remover_catalogue_failure() -> None:
 
 def test_graph_remover_safety_mechanism() -> None:
     disconnected_ids = ["byzuqyr5", "vjfb76xy"]
-    mock_neptune_get_total_node_count("Concept", 20)
+    mock_neptune_get_total_node_count("Concept", 9)
     mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
     mock_neptune_get_existing_nodes_response(disconnected_ids)
     mock_neptune_delete_nodes_response(disconnected_ids)
@@ -223,7 +223,7 @@ def test_graph_remover_safety_mechanism() -> None:
 
     # Safety check enabled
     with pytest.raises(
-        ValueError, match="Fractional change 0.1 exceeds threshold 0.05!"
+        ValueError, match="Fractional change 0.22 exceeds threshold 0.2!"
     ):
         lambda_handler(event, None)
 

@@ -14,8 +14,8 @@ module "bulk_load_poller_lambda" {
     command = ["bulk_load_poller.lambda_handler"]
   }
 
-  memory_size = 128
-  timeout     = 120 // 120 seconds
+  memory_size = 256
+  timeout     = 60 // 60 seconds
 
   environment = {
     variables = {

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import click
 
-from miro_updates import unsuppress_image, is_valid_miro_id
+from miro_updates import check_reindexer_listening, unsuppress_image, is_valid_miro_id
 
 
 @click.command()
@@ -51,7 +51,9 @@ def unsuppress_miro(id, origin, message):
         raise click.ClickException(
             f"{id} doesn't look like a Miro ID and isn't the identifier of a catalogue record containing a Miro ID"
         )
-
+    
+    check_reindexer_listening()
+    
     unsuppress_image(miro_id=miro_id, origin=origin, message=message)
 
 
