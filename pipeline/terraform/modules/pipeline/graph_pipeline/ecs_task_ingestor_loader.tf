@@ -1,7 +1,3 @@
-resource "aws_ecs_cluster" "pipeline_cluster" {
-  name = "unified-pipeline-${var.pipeline_date}"
-}
-
 module "ingestor_loader_ecs_task" {
   source = "./ecs_task"
 
@@ -10,7 +6,10 @@ module "ingestor_loader_ecs_task" {
   image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:dev"
 
   # These are defined in the ECS task definition as environment variables,
-  environment = {}
+  environment = {
+      CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
+      INGESTOR_S3_PREFIX        = "ingestor"
+  }
 
   cpu    = 4096
   memory = 16384

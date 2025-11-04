@@ -101,7 +101,7 @@ module "catalogue_graph_ingestor_state_machine_EXPERIMENTAL" {
         Retry    = local.state_function_default_retry,
         Next     = "Monitor loader"
         Arguments = {
-          Cluster        = aws_ecs_cluster.cluster.arn
+          Cluster        = aws_ecs_cluster.pipeline_cluster.arn
           TaskDefinition = module.ingestor_loader_ecs_task.task_definition_arn
           LaunchType     = "FARGATE"
           NetworkConfiguration = {
@@ -120,22 +120,9 @@ module "catalogue_graph_ingestor_state_machine_EXPERIMENTAL" {
                 Name    = "ingestor-loader-${var.pipeline_date}"
                 Command = [
                   "/app/src/ingestor/steps/ingestor_loader.py", 
-                  "--event", "{% $string($states.input) %}"
+                  "--event", "{% $string($states.input) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
                 ],
-                Environment = [
-                  {
-                    "Name" : "TASK_TOKEN",
-                    "Value" : "{% $states.context.Task.Token %}"
-                  },
-                  {
-                    Name  = "CATALOGUE_GRAPH_S3_BUCKET"
-                    Value = data.aws_s3_bucket.catalogue_graph_bucket.bucket
-                  },
-                  {
-                    Name  = "INGESTOR_S3_PREFIX"
-                    Value = "ingestor"
-                  }
-                ]
               }
             ]
           }
@@ -165,51 +152,8 @@ module "catalogue_graph_ingestor_state_machine_EXPERIMENTAL" {
     module.ingestor_indexer_monitor_lambda.lambda.arn,
     module.ingestor_deletions_lambda.lambda.arn
   ]
-}
 
-# TODO: Can we modularise this somehow, and the nasty local variables (like invokable_lambda_arns)?
-data "aws_iam_policy_document" "run_ingestor_loader_ecs_task" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "ecs:RunTask",
-    ]
-    resources = [
-      "${local.ingestor_loader_task_definition_arn_latest}:*",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "iam:PassRole",
-    ]
-    resources = [
-      module.ingestor_loader_ecs_task.task_execution_role_arn,
-      module.ingestor_loader_ecs_task.task_role_arn,
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-
-    resources = [
-      "*",
-    ]
+  policies_to_attach = {
+    "ingestor_loader_ecs_task_invoke_policy" = module.ingestor_loader_ecs_task.invoke_policy_document
   }
 }
-
-resource "aws_iam_policy" "run_ingestor_loader_ecs_task" {
-  policy = data.aws_iam_policy_document.run_ingestor_loader_ecs_task.json
-}
-
-resource "aws_iam_role_policy_attachment" "run_ingestor_loader_ecs_task" {
-  role       = module.catalogue_graph_ingestor_state_machine_EXPERIMENTAL.state_machine_role_name
-  policy_arn = aws_iam_policy.run_ingestor_loader_ecs_task.arn
-}
-

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import argparse
-import boto3
 import datetime
 import json
-import os
 import typing
+
+import boto3
 
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
@@ -56,8 +56,9 @@ def raw_event(raw_input: str) -> IngestorLoaderLambdaEvent:
     event = json.loads(raw_input)
     if "job_id" not in event:
         event["job_id"] = create_job_id()
-        
+
     return IngestorLoaderLambdaEvent.model_validate(event)
+
 
 def ecs_handler() -> None:
     parser.add_argument(
@@ -67,6 +68,12 @@ def ecs_handler() -> None:
         required=True,
     )
     parser.add_argument(
+        "--task-token",
+        type=str,
+        help="The Step Functions task token for reporting success or failure.",
+        required=False,
+    )
+    parser.add_argument(
         "--es-mode",
         type=str,
         help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
@@ -74,41 +81,40 @@ def ecs_handler() -> None:
         choices=["private", "local", "public"],
         default="private",
     )
-    
+
     ecs_args = parser.parse_args()
-    
+
     # In ECS mode we need to pull the task token from the environment variables
-    task_token = os.environ.get("TASK_TOKEN", None)
+    task_token = ecs_args.task_token
     if task_token:
-        print(f"Detected TASK_TOKEN in environment variables while running in ECS mode: {task_token}")
-    
+        print(
+            "Received TASK_TOKEN in ECS arguments, will report back to Step Functions."
+        )
+
     try:
         # TODO: Should we send a heartbeat somewhere here to keep the Step Functions task alive?
-        # see setting HeartbeatSeconds
+        # see setting HeartbeatSeconds
         result = handler(event=ecs_args.event, es_mode=ecs_args.es_mode)
         output = result.model_dump_json()
-        
+
         if task_token:
             print("Sending task success to Step Functions.")
-            stepfunctions_client = boto3.client('stepfunctions')
-            stepfunctions_client.send_task_success(
-                taskToken=task_token,
-                output=output
-            )
+            stepfunctions_client = boto3.client("stepfunctions")
+            stepfunctions_client.send_task_success(taskToken=task_token, output=output)
         else:
-            print("No TASK_TOKEN found in environment variables, skipping send_task_success.")
+            print(
+                "No TASK_TOKEN found in environment variables, skipping send_task_success."
+            )
             print(f"Result: {output}")
-            
+
     except Exception as e:
         error_output = json.dumps({"error": str(e)})
-        
+
         if task_token:
             print(f"Sending task failure to Step Functions: {error_output}")
-            stepfunctions_client = boto3.client('stepfunctions')
+            stepfunctions_client = boto3.client("stepfunctions")
             stepfunctions_client.send_task_failure(
-                taskToken=task_token,
-                error='IngestorLoaderError',
-                cause=error_output
+                taskToken=task_token, error="IngestorLoaderError", cause=error_output
             )
         else:
             raise
@@ -193,15 +199,15 @@ def local_handler() -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--is-local",
+        "--use-cli",
         action="store_true",
-        help="Whether to run the handler in local mode",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
     )
     args, _ = parser.parse_known_args()
 
-    if args.is_local:
+    if args.use_cli:
         local_handler()
     else:
         ecs_handler()

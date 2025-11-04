@@ -1,7 +1,3 @@
-resource "aws_ecs_cluster" "cluster" {
-  name = "graph-extractor-${var.pipeline_date}"
-}
-
 module "extractor_ecs_task" {
   source = "./ecs_task"
 

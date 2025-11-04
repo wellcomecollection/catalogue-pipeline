@@ -14,7 +14,7 @@ module "catalogue_graph_extractor_state_machine" {
         Retry    = local.state_function_default_retry,
         Next     = "Success"
         Arguments = {
-          Cluster        = aws_ecs_cluster.cluster.arn
+          Cluster        = aws_ecs_cluster.pipeline_cluster.arn
           TaskDefinition = module.extractor_ecs_task.task_definition_arn
           LaunchType     = "FARGATE"
           NetworkConfiguration = {
@@ -42,50 +42,8 @@ module "catalogue_graph_extractor_state_machine" {
       }
     },
   })
-}
 
-data "aws_iam_policy_document" "run_extractor_ecs_task" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "ecs:RunTask",
-    ]
-    resources = [
-      "${local.extractor_task_definition_arn_latest}:*",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    actions = [
-      "iam:PassRole",
-    ]
-    resources = [
-      module.extractor_ecs_task.task_execution_role_arn,
-      module.extractor_ecs_task.task_role_arn,
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-
-    actions = [
-      "logs:CreateLogStream",
-      "logs:PutLogEvents",
-    ]
-
-    resources = [
-      "*",
-    ]
+  policies_to_attach = {
+    "extractor_ecs_task_invoke_policy" = module.extractor_ecs_task.invoke_policy_document
   }
 }
-
-resource "aws_iam_policy" "run_extractor_ecs_task" {
-  policy = data.aws_iam_policy_document.run_extractor_ecs_task.json
-}
-
-resource "aws_iam_role_policy_attachment" "run_extractor_ecs_task" {
-  role       = module.catalogue_graph_extractor_state_machine.state_machine_role_name
-  policy_arn = aws_iam_policy.run_extractor_ecs_task.arn
-}
-
