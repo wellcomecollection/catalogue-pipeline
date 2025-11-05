@@ -5,6 +5,7 @@ from argparse import ArgumentParser
 
 import boto3
 
+from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -16,6 +17,7 @@ from ingestor.transformers.base_transformer import (
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.elasticsearch import ElasticsearchMode
+from utils.reporting import LoaderReport
 from utils.steps import create_job_id
 from utils.types import IngestorType
 
@@ -42,6 +44,31 @@ def handler(
     objects_to_index = transformer.load_documents(event, load_destination)
 
     event_payload = event.model_dump(exclude={"pass_objects_to_index"})
+
+    record_count = sum(o.record_count for o in objects_to_index)
+    total_file_size = sum(o.content_length for o in objects_to_index)
+
+    report = LoaderReport(
+        **event_payload,
+        record_count=record_count,
+        total_file_size=total_file_size,
+    )
+    report.write()
+
+    dimensions = {
+        "ingestor_type": report.ingestor_type,
+        "pipeline_date": report.pipeline_date,
+        "index_date": report.index_date,
+        "step": "ingestor_loader_monitor",
+        "job_id": report.job_id or "unspecified",
+    }
+
+    reporter = MetricReporter("catalogue_graph_ingestor")
+    reporter.put_metric_data(
+        metric_name="total_file_size",
+        value=report.total_file_size,
+        dimensions=dimensions,
+    )
 
     if event.pass_objects_to_index:
         return IngestorIndexerLambdaEvent(

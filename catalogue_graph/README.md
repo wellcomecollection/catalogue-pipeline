@@ -270,7 +270,6 @@ at it via the normal env vars.
 | graph_scaler             | graph_scaler.lambda_handler                            |
 | indexer                  | indexer.lambda_handler                                 |
 | ingestor_loader          | ingestor.steps.ingestor_loader.lambda_handler          |
-| ingestor_loader_monitor  | ingestor.steps.ingestor_loader_monitor.lambda_handler  |
 | ingestor_indexer         | ingestor.steps.ingestor_indexer.lambda_handler         |
 | ingestor_indexer_monitor | ingestor.steps.ingestor_indexer_monitor.lambda_handler |
 | ingestor_deletions       | ingestor.steps.ingestor_deletions.lambda_handler       |

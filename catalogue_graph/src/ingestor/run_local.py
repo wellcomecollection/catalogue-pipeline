@@ -10,19 +10,7 @@ from ingestor.models.step_events import (
 from ingestor.steps.ingestor_indexer import handler as indexer_handler
 from ingestor.steps.ingestor_loader import create_job_id
 from ingestor.steps.ingestor_loader import handler as loader_handler
-from ingestor.steps.ingestor_loader_monitor import handler as loader_monitor_handler
 from utils.types import IngestorType
-
-
-def run_load(
-    loader_event: IngestorLoaderLambdaEvent, args: argparse.Namespace
-) -> IngestorIndexerLambdaEvent:
-    loader_result = loader_handler(loader_event, es_mode="public")
-
-    if args.monitoring:
-        loader_monitor_handler(loader_result)
-
-    return loader_result
 
 
 def run_index(loader_result: IngestorIndexerLambdaEvent) -> None:
@@ -81,18 +69,12 @@ def main() -> None:
         help="The number of shards to process, will process all if not specified.",
         required=False,
     )
-    parser.add_argument(
-        "--monitoring",
-        action=argparse.BooleanOptionalAction,
-        help="Whether to enable monitoring, will default to False.",
-        default=False,
-    )
 
     args = parser.parse_args()
-    event = IngestorLoaderLambdaEvent.from_argparser(args)
+    loader_event = IngestorLoaderLambdaEvent.from_argparser(args)
 
-    loader_results = run_load(event, args)
-    run_index(loader_results)
+    loader_result = loader_handler(loader_event, es_mode="public")
+    run_index(loader_result)
 
 
 if __name__ == "__main__":

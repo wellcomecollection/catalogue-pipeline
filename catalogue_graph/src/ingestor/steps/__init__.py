@@ -9,7 +9,6 @@ Core Processing Steps:
 
 Monitoring Steps:
 - trigger_monitor: Validates trigger step output and safety checks
-- loader_monitor: Validates loader step output and tracks file sizes
 - indexer_monitor: Tracks indexing success counts and builds reports
 - reporter: Generates final pipeline reports and sends to Slack
 """

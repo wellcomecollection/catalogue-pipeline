@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 import polars as pl
@@ -53,6 +54,7 @@ from ingestor.steps.ingestor_loader import handler
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identified, SourceIdentifier
 from tests.mocks import (
+    MockCloudwatchClient,
     MockElasticsearchClient,
     MockRequest,
     MockSmartOpen,
@@ -335,11 +337,22 @@ def _get_result_s3_uri(
     matches = [
         uri
         for uri in MockSmartOpen.file_lookup
-        if isinstance(uri, str) and uri.startswith(uri_prefix)
+        if isinstance(uri, str)
+        and uri.startswith(uri_prefix)
+        and uri.endswith(f".{loader_event.load_format}")
     ]
 
     assert len(matches) == 1
     return matches[0]
+
+
+def _get_report_uri(loader_event: IngestorLoaderLambdaEvent) -> str:
+    return loader_event.get_s3_uri("report.loader", "json")
+
+
+def _read_loader_report(loader_event: IngestorLoaderLambdaEvent) -> dict:
+    with MockSmartOpen.open(_get_report_uri(loader_event), "r") as f:
+        return json.load(f)
 
 
 def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> None:
@@ -373,6 +386,93 @@ def _compare_events(
     assert event_payload == expected_payload
 
 
+def _get_expected_metric(
+    loader_event: IngestorLoaderLambdaEvent, total_file_size: int
+) -> dict:
+    return {
+        "namespace": "catalogue_graph_ingestor",
+        "metric_name": "total_file_size",
+        "value": total_file_size,
+        "dimensions": {
+            "ingestor_type": loader_event.ingestor_type,
+            "pipeline_date": loader_event.pipeline_date,
+            "index_date": loader_event.index_date,
+            "job_id": loader_event.job_id,
+            "step": "ingestor_loader_monitor",
+        },
+    }
+
+
+@pytest.mark.parametrize("pass_objects_to_index", [False, True])
+def test_ingestor_loader_reports_metrics_and_writes_report(
+    monkeypatch: pytest.MonkeyPatch, pass_objects_to_index: bool
+) -> None:
+    class DummyTransformer:
+        def load_documents(
+            self,
+            event: IngestorLoaderLambdaEvent,
+            load_destination: str,
+        ) -> list[IngestorIndexerObject]:
+            return [
+                IngestorIndexerObject(
+                    s3_uri=event.get_s3_uri("00000000-00000001"),
+                    content_length=1000,
+                    record_count=100,
+                ),
+                IngestorIndexerObject(
+                    s3_uri=event.get_s3_uri("00000001-00000002"),
+                    content_length=2000,
+                    record_count=200,
+                ),
+            ]
+
+    monkeypatch.setattr(
+        "ingestor.steps.ingestor_loader.create_transformer",
+        lambda event, es_mode: DummyTransformer(),
+    )
+
+    loader_event = IngestorLoaderLambdaEvent(
+        ingestor_type="concepts",
+        pipeline_date="2025-01-01",
+        index_date="2025-03-01",
+        job_id="123",
+        pass_objects_to_index=pass_objects_to_index,
+    )
+
+    result = handler(loader_event)
+
+    expected_metric = _get_expected_metric(loader_event, total_file_size=3000)
+    assert MockCloudwatchClient.metrics_reported == [expected_metric]
+
+    report = _read_loader_report(loader_event)
+    assert report["record_count"] == 300
+    assert report["total_file_size"] == 3000
+    assert report["ingestor_type"] == loader_event.ingestor_type
+    assert report["pipeline_date"] == loader_event.pipeline_date
+    assert report["index_date"] == loader_event.index_date
+    assert report["job_id"] == loader_event.job_id
+
+    if pass_objects_to_index:
+        assert result.objects_to_index is not None
+        assert [obj.model_dump() for obj in result.objects_to_index] == [
+            obj.model_dump()
+            for obj in [
+                IngestorIndexerObject(
+                    s3_uri=loader_event.get_s3_uri("00000000-00000001"),
+                    content_length=1000,
+                    record_count=100,
+                ),
+                IngestorIndexerObject(
+                    s3_uri=loader_event.get_s3_uri("00000001-00000002"),
+                    content_length=2000,
+                    record_count=200,
+                ),
+            ]
+        ]
+    else:
+        assert result.objects_to_index is None
+
+
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
 def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> None:
     mock_merged_work()
@@ -397,6 +497,23 @@ def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> Non
     expected_concept = get_catalogue_concept_mock([])
     s3_uri = _get_result_s3_uri(result, loader_event)
     check_processed_concept(s3_uri, expected_concept)
+
+    report = _read_loader_report(loader_event)
+    assert report["total_file_size"] >= 0
+    assert MockCloudwatchClient.metrics_reported == [
+        {
+            "namespace": "catalogue_graph_ingestor",
+            "metric_name": "total_file_size",
+            "value": report["total_file_size"],
+            "dimensions": {
+                "ingestor_type": loader_event.ingestor_type,
+                "pipeline_date": loader_event.pipeline_date,
+                "index_date": loader_event.index_date,
+                "job_id": loader_event.job_id,
+                "step": "ingestor_loader_monitor",
+            },
+        }
+    ]
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
@@ -425,6 +542,9 @@ def test_ingestor_loader_with_broader_than_concepts(
     expected_concept = get_catalogue_concept_mock(["broader_than"])
     s3_uri = _get_result_s3_uri(result, loader_event)
     check_processed_concept(s3_uri, expected_concept)
+
+    report = _read_loader_report(loader_event)
+    assert report["record_count"] == 1
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
@@ -465,6 +585,31 @@ def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> 
         assert result.objects_to_index is None
 
     assert len(MockRequest.calls) == 0
+
+    prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{loader_event.get_path_prefix()}"
+    parquet_matches = [
+        uri
+        for uri in MockSmartOpen.file_lookup
+        if isinstance(uri, str)
+        and uri.startswith(prefix)
+        and uri.endswith(f".{loader_event.load_format}")
+    ]
+
+    assert parquet_matches == []
+
+    report_uri = loader_event.get_s3_uri("report.loader", "json")
+    with MockSmartOpen.open(report_uri, "r") as f:
+        report = json.load(f)
+
+    assert report["record_count"] == 0
+    assert report["total_file_size"] == 0
+    assert report["ingestor_type"] == loader_event.ingestor_type
+    assert report["pipeline_date"] == loader_event.pipeline_date
+    assert report["index_date"] == loader_event.index_date
+    assert report["job_id"] == loader_event.job_id
+    assert MockCloudwatchClient.metrics_reported == [
+        _get_expected_metric(loader_event, total_file_size=0)
+    ]
 
 
 def test_ingestor_loader_bad_neptune_response() -> None:
@@ -509,109 +654,107 @@ def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
     s3_uri = _get_result_s3_uri(result, loader_event)
     with MockSmartOpen.open(s3_uri, "rb") as f:
         df = pl.read_parquet(f)
-        assert len(df) == 3
-
         items = df.to_dicts()
-        redirected_work = [i for i in items if i["type"] == "Redirected"][0]
-        deleted_work = [i for i in items if i["type"] == "Deleted"][0]
-        invisible_work = [i for i in items if i["type"] == "Invisible"][0]
 
-        # Time is frozen in local timezone, convert_datetime_to_utc_iso will handle conversion
-        now = datetime.now()
-        now_iso = convert_datetime_to_utc_iso(now)
+    assert len(items) == 3
+    deleted_work = [i for i in items if i["type"] == "Deleted"][0]
+    invisible_work = [i for i in items if i["type"] == "Invisible"][0]
+    redirected_work = [i for i in items if i["type"] == "Redirected"][0]
 
-        assert DeletedIndexableWork(**deleted_work) == DeletedIndexableWork(
-            debug=DeletedWorkDebug(
-                source=WorkDebugSource(
-                    id="fz655hx4",
-                    identifier=SourceIdentifier(
-                        identifier_type=Id(id="sierra-system-number"),
-                        ontology_type="Work",
-                        value="b15610512",
-                    ),
-                    version=20,
-                    modified_time="2025-10-09T12:32:42Z",
-                ),
-                merged_time="2025-10-09T12:35:31.612637Z",
-                indexed_time=now_iso,
-                deleted_reason=DeletedReason(
-                    info="Sierra", type="SuppressedFromSource"
-                ),
-                merge_candidates=[],
-            ),
-            type="Deleted",
-        )
+    # Time is frozen in local timezone, convert_datetime_to_utc_iso will handle conversion
+    now = datetime.now()
+    now_iso = convert_datetime_to_utc_iso(now)
 
-        assert InvisibleIndexableWork(**invisible_work) == InvisibleIndexableWork(
-            debug=InvisibleWorkDebug(
-                source=WorkDebugSource(
-                    id="sghsneca",
-                    identifier=SourceIdentifier(
-                        identifier_type=Id(id="mets"),
-                        ontology_type="Work",
-                        value="b32717714",
-                    ),
-                    version=1,
-                    modified_time="2022-05-23T15:50:41.008Z",
-                ),
-                merged_time="2025-10-08T15:31:52.203950Z",
-                indexed_time=now_iso,
-                invisibility_reasons=[InvisibleReason(type="MetsWorksAreNotVisible")],
-                merge_candidates=[
-                    MergeCandidate(
-                        id=Identified(
-                            canonical_id="avwk5k79",
-                            source_identifier=SourceIdentifier(
-                                identifier_type=Id(id="sierra-system-number"),
-                                ontology_type="Work",
-                                value="b32717714",
-                            ),
-                            other_identifiers=[],
-                        ),
-                        reason="METS work",
-                    )
-                ],
-            ),
-            type="Invisible",
-        )
-
-        assert RedirectedIndexableWork(**redirected_work) == RedirectedIndexableWork(
-            debug=RedirectedWorkDebug(
-                source=WorkDebugSource(
-                    id="cbgkvkx5",
-                    identifier=SourceIdentifier(
-                        identifier_type=Id(id="mets"),
-                        ontology_type="Work",
-                        value="b18029048",
-                    ),
-                    version=2,
-                    modified_time="2025-10-09T11:41:53.596657Z",
-                ),
-                merged_time="2025-10-09T12:09:04.086557Z",
-                indexed_time=now_iso,
-                merge_candidates=[
-                    MergeCandidate(
-                        id=Identified(
-                            canonical_id="qcp6bq89",
-                            source_identifier=SourceIdentifier(
-                                identifier_type=Id(id="sierra-system-number"),
-                                ontology_type="Work",
-                                value="b18029048",
-                            ),
-                            other_identifiers=[],
-                        ),
-                        reason="METS work",
-                    )
-                ],
-            ),
-            redirect_target=Identified(
-                canonical_id="p5w7ujap",
-                source_identifier=SourceIdentifier(
+    assert DeletedIndexableWork(**deleted_work) == DeletedIndexableWork(
+        debug=DeletedWorkDebug(
+            source=WorkDebugSource(
+                id="fz655hx4",
+                identifier=SourceIdentifier(
                     identifier_type=Id(id="sierra-system-number"),
                     ontology_type="Work",
-                    value="b1206094x",
+                    value="b15610512",
                 ),
-                other_identifiers=[],
+                version=20,
+                modified_time="2025-10-09T12:32:42Z",
             ),
-            type="Redirected",
-        )
+            merged_time="2025-10-09T12:35:31.612637Z",
+            indexed_time=now_iso,
+            deleted_reason=DeletedReason(info="Sierra", type="SuppressedFromSource"),
+            merge_candidates=[],
+        ),
+        type="Deleted",
+    )
+
+    assert InvisibleIndexableWork(**invisible_work) == InvisibleIndexableWork(
+        debug=InvisibleWorkDebug(
+            source=WorkDebugSource(
+                id="sghsneca",
+                identifier=SourceIdentifier(
+                    identifier_type=Id(id="mets"),
+                    ontology_type="Work",
+                    value="b32717714",
+                ),
+                version=1,
+                modified_time="2022-05-23T15:50:41.008Z",
+            ),
+            merged_time="2025-10-08T15:31:52.203950Z",
+            indexed_time=now_iso,
+            invisibility_reasons=[InvisibleReason(type="MetsWorksAreNotVisible")],
+            merge_candidates=[
+                MergeCandidate(
+                    id=Identified(
+                        canonical_id="avwk5k79",
+                        source_identifier=SourceIdentifier(
+                            identifier_type=Id(id="sierra-system-number"),
+                            ontology_type="Work",
+                            value="b32717714",
+                        ),
+                        other_identifiers=[],
+                    ),
+                    reason="METS work",
+                )
+            ],
+        ),
+        type="Invisible",
+    )
+
+    assert RedirectedIndexableWork(**redirected_work) == RedirectedIndexableWork(
+        debug=RedirectedWorkDebug(
+            source=WorkDebugSource(
+                id="cbgkvkx5",
+                identifier=SourceIdentifier(
+                    identifier_type=Id(id="mets"),
+                    ontology_type="Work",
+                    value="b18029048",
+                ),
+                version=2,
+                modified_time="2025-10-09T11:41:53.596657Z",
+            ),
+            merged_time="2025-10-09T12:09:04.086557Z",
+            indexed_time=now_iso,
+            merge_candidates=[
+                MergeCandidate(
+                    id=Identified(
+                        canonical_id="qcp6bq89",
+                        source_identifier=SourceIdentifier(
+                            identifier_type=Id(id="sierra-system-number"),
+                            ontology_type="Work",
+                            value="b18029048",
+                        ),
+                        other_identifiers=[],
+                    ),
+                    reason="METS work",
+                )
+            ],
+        ),
+        redirect_target=Identified(
+            canonical_id="p5w7ujap",
+            source_identifier=SourceIdentifier(
+                identifier_type=Id(id="sierra-system-number"),
+                ontology_type="Work",
+                value="b1206094x",
+            ),
+            other_identifiers=[],
+        ),
+        type="Redirected",
+    )
