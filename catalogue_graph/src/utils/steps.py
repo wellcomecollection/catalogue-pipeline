@@ -25,10 +25,7 @@ class StepFunctionOutput:
         self, task_token: str | None, stepfunctions_client: StepFunctionClient | None
     ) -> None:
         self.task_token = task_token
-        self.stepfunctions_client = stepfunctions_client or boto3.client(
-            "stepfunctions"
-        )
-        self.can_report = task_token is not None and stepfunctions_client is not None
+        self.stepfunctions_client = stepfunctions_client
 
     def _dump_result(self, result: ResultModel | None) -> str:
         if result is not None:
@@ -38,11 +35,9 @@ class StepFunctionOutput:
     def send_success(self, result: ResultModel | None) -> None:
         output = self._dump_result(result)
 
-        if self.can_report:
-            assert self.task_token is not None
-            stepfunctions_client = boto3.client("stepfunctions")
+        if self.stepfunctions_client is not None and self.task_token is not None:
             print("Sending task success to Step Functions.")
-            stepfunctions_client.send_task_success(
+            self.stepfunctions_client.send_task_success(
                 taskToken=self.task_token,
                 output=output,
             )
@@ -58,8 +53,7 @@ class StepFunctionOutput:
             }
         )
 
-        if self.can_report:
-            assert self.task_token is not None
+        if self.stepfunctions_client is not None and self.task_token is not None:
             print(f"Sending task failure to Step Functions: {error_output}")
             self.stepfunctions_client.send_task_failure(
                 taskToken=self.task_token,
