@@ -4,6 +4,7 @@ import polars as pl
 import pytest
 from freezegun import freeze_time
 
+import config
 from ingestor.extractors.base_extractor import ConceptRelatedQuery
 from ingestor.models.debug.work import (
     DeletedWorkDebug,
@@ -63,30 +64,52 @@ from tests.test_utils import (
     load_json_fixture,
 )
 from utils.timezone import convert_datetime_to_utc_iso
+from utils.types import IngestorType
 
 MOCK_CONCEPT_ID = "jbxfbpzq"
 MOCK_JOB_ID = "20250929T12:00"
 MOCK_PIPELINE_DATE = "2025-01-01"
 MOCK_INDEX_DATE = "2025-03-01"
 
-MOCK_LOADER_CONCEPTS_EVENT = IngestorLoaderLambdaEvent(
-    ingestor_type="concepts",
-    pipeline_date=MOCK_PIPELINE_DATE,
-    index_date=MOCK_INDEX_DATE,
-    job_id=MOCK_JOB_ID,
-)
+
+def make_loader_event(
+    pass_objects_to_index: bool,
+    ingestor_type: IngestorType = "concepts",
+    job_id: str = MOCK_JOB_ID,
+) -> IngestorLoaderLambdaEvent:
+    return IngestorLoaderLambdaEvent(
+        ingestor_type=ingestor_type,
+        pipeline_date=MOCK_PIPELINE_DATE,
+        index_date=MOCK_INDEX_DATE,
+        job_id=job_id,
+        pass_objects_to_index=pass_objects_to_index,
+    )
 
 
-MOCK_INDEXER_EVENT = IngestorIndexerLambdaEvent(
-    **MOCK_LOADER_CONCEPTS_EVENT.model_dump(),
-    objects_to_index=[
-        IngestorIndexerObject(
-            s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_concepts/{MOCK_PIPELINE_DATE}/{MOCK_INDEX_DATE}/{MOCK_JOB_ID}/00000000-00000001.parquet",
-            content_length=1,
-            record_count=1,
-        )
-    ],
-)
+def make_expected_indexer_event(
+    loader_event: IngestorLoaderLambdaEvent,
+    s3_filename: str,
+    record_count: int,
+    include_objects: bool,
+) -> IngestorIndexerLambdaEvent:
+    base_kwargs = loader_event.model_dump(exclude={"pass_objects_to_index"})
+
+    if not include_objects:
+        return IngestorIndexerLambdaEvent(**base_kwargs)
+
+    return IngestorIndexerLambdaEvent(
+        **base_kwargs,
+        objects_to_index=[
+            IngestorIndexerObject(
+                s3_uri=(
+                    f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/"
+                    f"{loader_event.get_path_prefix()}/{s3_filename}"
+                ),
+                content_length=1,
+                record_count=record_count,
+            )
+        ],
+    )
 
 
 def mock_merged_work() -> None:
@@ -300,6 +323,25 @@ def get_catalogue_concept_mock(
     )
 
 
+def _get_result_s3_uri(
+    result: IngestorIndexerLambdaEvent, loader_event: IngestorLoaderLambdaEvent
+) -> str:
+    if result.objects_to_index:
+        return result.objects_to_index[0].s3_uri
+
+    prefix = loader_event.get_path_prefix()
+    uri_prefix = f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/"
+
+    matches = [
+        uri
+        for uri in MockSmartOpen.file_lookup
+        if isinstance(uri, str) and uri.startswith(uri_prefix)
+    ]
+
+    assert len(matches) == 1
+    return matches[0]
+
+
 def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> None:
     with MockSmartOpen.open(s3_uri, "rb") as f:
         df = pl.read_parquet(f)
@@ -316,69 +358,112 @@ def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> 
 def _compare_events(
     event: IngestorIndexerLambdaEvent, expected_event: IngestorIndexerLambdaEvent
 ) -> None:
-    # Parquet file sizes are an implementation detail and comparing them would lead to flaky unit tests
-    assert event.objects_to_index is not None
-    assert expected_event.objects_to_index is not None
-    event.objects_to_index[0].content_length = 0
-    expected_event.objects_to_index[0].content_length = 0
+    event_payload = event.model_dump()
+    expected_payload = expected_event.model_dump()
 
-    assert event == expected_event
+    event_objects = event_payload.get("objects_to_index")
+    expected_objects = expected_payload.get("objects_to_index")
+
+    if event_objects and expected_objects:
+        assert len(event_objects) == len(expected_objects)
+        for actual, expected in zip(event_objects, expected_objects, strict=False):
+            actual["content_length"] = 0
+            expected["content_length"] = 0
+
+    assert event_payload == expected_payload
 
 
-def test_ingestor_loader_no_related_concepts() -> None:
+@pytest.mark.parametrize("pass_objects_to_index", [False, True])
+def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> None:
     mock_merged_work()
     mock_neptune_responses([])
 
-    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
+    loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
+    result = handler(loader_event)
+
+    expected_event = make_expected_indexer_event(
+        loader_event,
+        "00000000-00000001.parquet",
+        record_count=1,
+        include_objects=pass_objects_to_index,
+    )
 
     # We expect a total of 11 API calls:
     # * 4 to retrieve concept data (concept query, types query, same as query, and source concepts query)
     # * 8 to retrieve related concept data (one for each related concept category, such as 'people' or 'broader than')
-    _compare_events(result, MOCK_INDEXER_EVENT)
+    _compare_events(result, expected_event)
     assert len(MockRequest.calls) == 12
 
     expected_concept = get_catalogue_concept_mock([])
-    assert result.objects_to_index is not None
-    check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
+    s3_uri = _get_result_s3_uri(result, loader_event)
+    check_processed_concept(s3_uri, expected_concept)
 
 
-def test_ingestor_loader_with_broader_than_concepts() -> None:
+@pytest.mark.parametrize("pass_objects_to_index", [False, True])
+def test_ingestor_loader_with_broader_than_concepts(
+    pass_objects_to_index: bool,
+) -> None:
     mock_merged_work()
     mock_neptune_responses(["broader_than"])
 
-    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
+    loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
+    result = handler(loader_event)
+
+    expected_event = make_expected_indexer_event(
+        loader_event,
+        "00000000-00000001.parquet",
+        record_count=1,
+        include_objects=pass_objects_to_index,
+    )
 
     # We expect a total of 15 API calls:
     # * 12 to retrieve the same data as the `test_ingestor_loader_no_related_concepts` test case
     # * 4 to retrieve concept data for broader than concepts
-    _compare_events(result, MOCK_INDEXER_EVENT)
+    _compare_events(result, expected_event)
     assert len(MockRequest.calls) == 16
 
     expected_concept = get_catalogue_concept_mock(["broader_than"])
-    assert result.objects_to_index is not None
-    check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
+    s3_uri = _get_result_s3_uri(result, loader_event)
+    check_processed_concept(s3_uri, expected_concept)
 
 
-def test_ingestor_loader_with_related_to_concepts() -> None:
+@pytest.mark.parametrize("pass_objects_to_index", [False, True])
+def test_ingestor_loader_with_related_to_concepts(
+    pass_objects_to_index: bool,
+) -> None:
     mock_merged_work()
     mock_neptune_responses(["related_to", "people"])
 
-    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
+    loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
+    result = handler(loader_event)
+
+    expected_event = make_expected_indexer_event(
+        loader_event,
+        "00000000-00000001.parquet",
+        record_count=1,
+        include_objects=pass_objects_to_index,
+    )
 
     # Since we're including two separate groups of related concepts, we expect 4 additional API calls
     # on top of those in `test_ingestor_loader_with_broader_than_concepts`
-    _compare_events(result, MOCK_INDEXER_EVENT)
+    _compare_events(result, expected_event)
     assert len(MockRequest.calls) == 20
 
     expected_concept = get_catalogue_concept_mock(["related_to", "people"])
-    assert result.objects_to_index is not None
-    check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
+    s3_uri = _get_result_s3_uri(result, loader_event)
+    check_processed_concept(s3_uri, expected_concept)
 
 
-def test_ingestor_loader_no_concepts_to_process() -> None:
-    result = handler(MOCK_LOADER_CONCEPTS_EVENT)
-    assert result.objects_to_index is not None
-    assert len(result.objects_to_index) == 0
+@pytest.mark.parametrize("pass_objects_to_index", [False, True])
+def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> None:
+    loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
+    result = handler(loader_event)
+
+    if pass_objects_to_index:
+        assert result.objects_to_index == []
+    else:
+        assert result.objects_to_index is None
+
     assert len(MockRequest.calls) == 0
 
 
@@ -389,12 +474,15 @@ def test_ingestor_loader_bad_neptune_response() -> None:
         [MOCK_CONCEPT_ID], SAME_AS_CONCEPT_QUERY, [{"foo": "bar"}]
     )
 
+    loader_event = make_loader_event(pass_objects_to_index=False)
+
     with pytest.raises(KeyError):
-        handler(MOCK_LOADER_CONCEPTS_EVENT)
+        handler(loader_event)
 
 
+@pytest.mark.parametrize("pass_objects_to_index", [False, True])
 @freeze_time("2025-09-09")
-def test_ingestor_loader_non_visible_works() -> None:
+def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
     # Add one of each non-visible work type
     add_mock_merged_documents(pipeline_date=MOCK_PIPELINE_DATE, work_status="Deleted")
     add_mock_merged_documents(pipeline_date=MOCK_PIPELINE_DATE, work_status="Invisible")
@@ -402,21 +490,14 @@ def test_ingestor_loader_non_visible_works() -> None:
         pipeline_date=MOCK_PIPELINE_DATE, work_status="Redirected"
     )
 
-    loader_event = IngestorLoaderLambdaEvent(
-        ingestor_type="works",
-        pipeline_date=MOCK_PIPELINE_DATE,
-        index_date=MOCK_INDEX_DATE,
-        job_id=MOCK_JOB_ID,
+    loader_event = make_loader_event(
+        pass_objects_to_index=pass_objects_to_index, ingestor_type="works"
     )
-    expected_indexer_event = IngestorIndexerLambdaEvent(
-        **loader_event.model_dump(),
-        objects_to_index=[
-            IngestorIndexerObject(
-                s3_uri=f"s3://wellcomecollection-catalogue-graph/ingestor_works/{MOCK_PIPELINE_DATE}/{MOCK_INDEX_DATE}/{MOCK_JOB_ID}/00000000-00000003.parquet",
-                content_length=1,
-                record_count=3,
-            )
-        ],
+    expected_indexer_event = make_expected_indexer_event(
+        loader_event,
+        "00000000-00000003.parquet",
+        record_count=3,
+        include_objects=pass_objects_to_index,
     )
 
     result = handler(loader_event)
@@ -425,8 +506,8 @@ def test_ingestor_loader_non_visible_works() -> None:
     assert len(MockRequest.calls) == 0
 
     # The dataframe should have all three works
-    assert result.objects_to_index is not None
-    with MockSmartOpen.open(result.objects_to_index[0].s3_uri, "rb") as f:
+    s3_uri = _get_result_s3_uri(result, loader_event)
+    with MockSmartOpen.open(s3_uri, "rb") as f:
         df = pl.read_parquet(f)
         assert len(df) == 3
 

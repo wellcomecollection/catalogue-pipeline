@@ -41,10 +41,15 @@ def handler(
     transformer = create_transformer(event, es_mode)
     objects_to_index = transformer.load_documents(event, load_destination)
 
-    return IngestorIndexerLambdaEvent(
-        **event.model_dump(),
-        objects_to_index=objects_to_index,
-    )
+    event_payload = event.model_dump(exclude={"pass_objects_to_index"})
+
+    if event.pass_objects_to_index:
+        return IngestorIndexerLambdaEvent(
+            **event_payload,
+            objects_to_index=objects_to_index,
+        )
+
+    return IngestorIndexerLambdaEvent(**event_payload)
 
 
 def raw_event(raw_input: str) -> IngestorLoaderLambdaEvent:
@@ -183,6 +188,11 @@ def local_handler(parser: ArgumentParser) -> None:
         required=False,
         choices=["local", "public"],
         default="local",
+    )
+    parser.add_argument(
+        "--pass-objects-to-index",
+        action="store_true",
+        help="Return the list of generated objects in the loader response.",
     )
 
     args = parser.parse_args()

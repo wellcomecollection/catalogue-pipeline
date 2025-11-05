@@ -1,4 +1,3 @@
-
 import polars
 import pydantic_core
 import pytest
