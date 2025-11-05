@@ -8,7 +8,7 @@ import pytest
 from pydantic import BaseModel
 
 from tests.mocks import MockStepFunctionsClient
-from utils.steps import run_ecs_handler
+from utils.steps import StepFunctionOutput, run_ecs_handler
 
 
 class ExampleEvent(BaseModel):
@@ -94,16 +94,60 @@ def test_run_ecs_handler_reports_failure(
     )
 
     assert MockStepFunctionsClient.task_successes == []
-    assert MockStepFunctionsClient.task_failures == [
+    assert len(MockStepFunctionsClient.task_failures) == 1
+    failure = MockStepFunctionsClient.task_failures[0]
+    assert failure["taskToken"] == token
+    assert failure["error"] == "IngestorLoaderError"
+    cause = json.loads(failure["cause"])
+    assert cause["message"] == "unexpected kaboom"
+    assert cause["type"] == "RuntimeError"
+
+    captured = capsys.readouterr()
+    assert "Sending task failure to Step Functions" in captured.out
+
+
+# run_ecs_handler tests
+
+
+def test_run_ecs_handler_handles_none_result(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    event_payload = ExampleEvent(message="hello").model_dump_json()
+    token = "token-789"
+    parser = ArgumentParser(prog="test-handler")
+
+    def handler(event: ExampleEvent) -> ExampleResult | None:  # noqa: ARG001
+        return None
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "prog",
+            "--event",
+            event_payload,
+            "--task-token",
+            token,
+        ],
+    )
+
+    run_ecs_handler(
+        arg_parser=parser,
+        handler=handler,
+        event_validator=ExampleEvent.model_validate_json,
+    )
+
+    assert MockStepFunctionsClient.task_failures == []
+    assert MockStepFunctionsClient.task_successes == [
         {
             "taskToken": token,
-            "error": "IngestorLoaderError",
-            "cause": json.dumps({"error": "unexpected kaboom"}),
+            "output": "Result is None",
         }
     ]
 
     captured = capsys.readouterr()
-    assert "Sending task failure to Step Functions" in captured.out
+    assert "Sending task success to Step Functions." in captured.out
 
 
 def test_run_ecs_handler_without_task_token(
@@ -136,6 +180,112 @@ def test_run_ecs_handler_without_task_token(
     assert MockStepFunctionsClient.task_failures == []
 
     captured = capsys.readouterr()
-    assert "No TASK_TOKEN provided, skipping send_task_success." in captured.out
     expected_output = ExampleResult(status="processed-no-token").model_dump_json()
     assert f"Result: {expected_output}" in captured.out
+
+
+def test_run_ecs_handler_without_task_token_none_result(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    event_payload = ExampleEvent(message="no-token").model_dump_json()
+    parser = ArgumentParser(prog="test-handler")
+
+    def handler(event: ExampleEvent) -> ExampleResult | None:  # noqa: ARG001
+        return None
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "prog",
+            "--event",
+            event_payload,
+        ],
+    )
+
+    run_ecs_handler(
+        arg_parser=parser,
+        handler=handler,
+        event_validator=ExampleEvent.model_validate_json,
+    )
+
+    assert MockStepFunctionsClient.task_successes == []
+    assert MockStepFunctionsClient.task_failures == []
+
+    captured = capsys.readouterr()
+    assert "Result: Result is None" in captured.out
+
+
+# StepFunctionOutput tests
+
+
+def test_step_function_output_send_success_reports() -> None:
+    output = StepFunctionOutput("token-123", MockStepFunctionsClient())
+
+    output.send_success(ExampleResult(status="ok"))
+
+    assert MockStepFunctionsClient.task_failures == []
+    assert MockStepFunctionsClient.task_successes == [
+        {
+            "taskToken": "token-123",
+            "output": ExampleResult(status="ok").model_dump_json(),
+        }
+    ]
+
+
+def test_step_function_output_send_success_without_token_prints(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = StepFunctionOutput(None, None)
+
+    output.send_success(ExampleResult(status="ok"))
+
+    assert MockStepFunctionsClient.task_successes == []
+    captured = capsys.readouterr()
+    expected = ExampleResult(status="ok").model_dump_json()
+    assert f"Result: {expected}" in captured.out
+
+
+def test_step_function_output_send_success_none_result_records() -> None:
+    output = StepFunctionOutput("token-456", MockStepFunctionsClient())
+
+    output.send_success(None)
+
+    assert MockStepFunctionsClient.task_successes == [
+        {
+            "taskToken": "token-456",
+            "output": "Result is None",
+        }
+    ]
+
+
+def test_step_function_output_send_failure_reports(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = StepFunctionOutput("token-555", MockStepFunctionsClient())
+
+    output.send_failure(RuntimeError("boom"))
+
+    assert MockStepFunctionsClient.task_successes == []
+    assert len(MockStepFunctionsClient.task_failures) == 1
+    failure = MockStepFunctionsClient.task_failures[0]
+    assert failure["taskToken"] == "token-555"
+    assert failure["error"] == "IngestorLoaderError"
+    cause = json.loads(failure["cause"])
+    assert cause["message"] == "boom"
+    assert cause["type"] == "RuntimeError"
+    captured = capsys.readouterr()
+    assert "Sending task failure to Step Functions" in captured.out
+
+
+def test_step_function_output_send_failure_without_token_prints(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    output = StepFunctionOutput(None, None)
+
+    output.send_failure(RuntimeError("boom"))
+
+    assert MockStepFunctionsClient.task_failures == []
+    captured = capsys.readouterr()
+    assert "Error: {" in captured.out
