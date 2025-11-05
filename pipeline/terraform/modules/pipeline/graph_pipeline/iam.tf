@@ -91,6 +91,16 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
       "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
     ]
   }
+  
+  statement {
+    actions = [
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      "${data.aws_s3_bucket.catalogue_graph_bucket.arn}"
+    ]
+  }
 }
 
 # read from catalogue_graph_bucket s3 bucket with prefix /graph_remover
