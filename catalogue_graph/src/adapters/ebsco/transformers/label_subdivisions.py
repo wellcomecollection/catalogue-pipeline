@@ -75,14 +75,26 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
 
 
 def build_concept(
-        raw_label: str,
-        raw_type: RawConceptType,
-        preserve_trailing_period: bool = False,
-        is_identifiable: bool = True,
+    raw_label: str,
+    raw_type: RawConceptType,
+    preserve_trailing_period: bool = False,
+    is_identifiable: bool = True,
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
+    # Organisations use the raw label to create a Label Derived Identifier.
+    # (erroneously - this is maintained for fidelity with the Scala transformer)
+    # Label Derived Identifiers call getLabel, in order to pull out the text for the id
+    # https://github.com/wellcomecollection/catalogue-pipeline/blob/6c5ee0e90eda680e82a2c2716a4f31e6eb4a96ea/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcHasRecordControlNumber.scala#L178
+    # In the case of an Organisation, this falls back to AbstractAgent.getLabel, which
+    # simply joins the label fields with a space
+    # https://github.com/wellcomecollection/catalogue-pipeline/blob/6c5ee0e90eda680e82a2c2716a4f31e6eb4a96ea/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcAbstractAgent.scala#L24
+    # This is in contrast with other concepts (e.g. Person, below), which also performs the normalisation
+    # in the same fashion as normalise_label does here.
+    # https://github.com/wellcomecollection/catalogue-pipeline/blob/6c5ee0e90eda680e82a2c2716a4f31e6eb4a96ea/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcPerson.scala#L23
+    label_for_id = raw_label if raw_type == "Organisation" else label
+
     return Concept(
-        id=get_concept_identifier(label, raw_type)
+        id=get_concept_identifier(label_for_id, raw_type)
         if is_identifiable
         else Unidentifiable(),
         label=label,
