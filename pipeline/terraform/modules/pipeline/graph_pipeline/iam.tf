@@ -91,7 +91,7 @@ data "aws_iam_policy_document" "ingestor_s3_read" {
       "${data.aws_s3_bucket.catalogue_graph_bucket.arn}/ingestor*"
     ]
   }
-  
+
   statement {
     actions = [
       "s3:ListBucket",
