@@ -55,7 +55,9 @@ def label_transform_648_650_651(field: Field) -> str:
 def subdivision_concepts_600(field: Field) -> Generator[Concept]:
     # Only x yields a subdivision concept
     for raw_label in field.get_subfields("x"):
-        yield build_concept(raw_label, "Concept", preserve_trailing_period=True)
+        yield build_concept(
+            raw_label, "Concept", preserve_trailing_period=True, is_identifiable=False
+        )
 
 
 def subdivision_concepts_648_650_651(field: Field) -> Generator[Concept]:

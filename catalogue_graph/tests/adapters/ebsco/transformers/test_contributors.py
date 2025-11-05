@@ -344,6 +344,30 @@ def test_contributor_agent_labels_preserve_trailing_dots(marc_record: Record) ->
     )
 
 
+def test_contributor_organisation_identifiers_do_not_normalise(
+    marc_record: Record,
+) -> None:
+    """Contributor organisation identifiers are left verbatim
+    This is not correct behaviour, but it is what currently happens.
+    """
+    marc_record.add_field(  # type: ignore[no-untyped-call]
+        Field(
+            tag="710",
+            subfields=[Subfield(code="a", value="SCC,")],
+        )
+    )
+    assert (
+        lone_element(transform_record(marc_record).data.contributors).agent.label
+        == "SCC"
+    )
+    assert (
+        lone_element(
+            transform_record(marc_record).data.contributors
+        ).agent.id.source_identifier.value
+        == "scc,"
+    )
+
+
 @pytest.mark.parametrize(
     "marc_record,field_code,primary",
     [

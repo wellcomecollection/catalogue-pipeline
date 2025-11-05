@@ -231,3 +231,18 @@ Feature: Extracting subjects from 6xx fields
         | label           |
         | Slartibartfast. |
         | Literature.     |
+
+  Rule: Subdivisions of a Person Subject do not create identifiable concepts
+
+    Scenario: A Subject with a general subdivision
+      Given the MARC record has a 600 field with indicators "" "0" with subfields:
+        | code | value              |
+        | a    | Joseph Pujol       |
+        | e    | Performer          |
+        | x    | Artistic Flatulism |
+      When I transform the MARC record
+      Then the only subject has the label "Joseph Pujol Performer Artistic Flatulism"
+      And it has 2 concepts:
+        | label              | id.type        |
+        | Joseph Pujol       | Identifiable   |
+        | Artistic Flatulism | Unidentifiable |
