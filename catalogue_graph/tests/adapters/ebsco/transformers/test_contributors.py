@@ -356,10 +356,16 @@ def test_contributor_organisation_identifiers_do_not_normalise(
             subfields=[Subfield(code="a", value="SCC,")],
         )
     )
-    lone_element(transform_record(marc_record).data.contributors).agent.label == "SCC"
-    lone_element(
-        transform_record(marc_record).data.contributors
-    ).agent.id.source_identifier.value == "SCC,"
+    assert (
+        lone_element(transform_record(marc_record).data.contributors).agent.label
+        == "SCC"
+    )
+    assert (
+        lone_element(
+            transform_record(marc_record).data.contributors
+        ).agent.id.source_identifier.value
+        == "SCC,"
+    )
 
 
 @pytest.mark.parametrize(
