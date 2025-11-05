@@ -21,7 +21,7 @@ from ingestor.models.step_events import (
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
 from utils.reporting import IndexerReport
-from utils.steps import create_job_id
+from utils.steps import create_job_id, run_ecs_handler
 from utils.types import IngestorType
 
 RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
@@ -134,7 +134,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     return handler(IngestorIndexerLambdaEvent(**event)).model_dump(mode="json")
 
 
-def raw_event(raw_input: str) -> IngestorIndexerLambdaEvent:
+def event_validator(raw_input: str) -> IngestorIndexerLambdaEvent:
     event = json.loads(raw_input)
     if "job_id" not in event:
         event["job_id"] = create_job_id()
@@ -142,20 +142,8 @@ def raw_event(raw_input: str) -> IngestorIndexerLambdaEvent:
     return IngestorIndexerLambdaEvent.model_validate(event)
 
 
-def ecs_handler(parser: ArgumentParser) -> None:
-    parser.add_argument(
-        "--event",
-        type=raw_event,
-        help="Raw event in JSON format.",
-        required=True,
-    )
-    parser.add_argument(
-        "--task-token",
-        type=str,
-        help="The Step Functions task token for reporting success or failure.",
-        required=False,
-    )
-    parser.add_argument(
+def ecs_handler(arg_parser: ArgumentParser) -> None:
+    arg_parser.add_argument(
         "--es-mode",
         type=str,
         help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
@@ -164,39 +152,15 @@ def ecs_handler(parser: ArgumentParser) -> None:
         default="private",
     )
 
-    ecs_args = parser.parse_args()
+    args, _ = arg_parser.parse_known_args()
+    es_mode = args.es_mode
 
-    task_token = ecs_args.task_token
-    if task_token:
-        print(
-            "Received TASK_TOKEN in ECS arguments, will report back to Step Functions."
-        )
-
-    try:
-        result = handler(event=ecs_args.event, es_mode=ecs_args.es_mode)
-        output = result.model_dump_json()
-
-        if task_token:
-            print("Sending task success to Step Functions.")
-            stepfunctions_client = boto3.client("stepfunctions")
-            stepfunctions_client.send_task_success(taskToken=task_token, output=output)
-        else:
-            print(
-                "No TASK_TOKEN found in environment variables, skipping send_task_success."
-            )
-            print(f"Result: {output}")
-
-    except Exception as e:
-        error_output = json.dumps({"error": str(e)})
-
-        if task_token:
-            print(f"Sending task failure to Step Functions: {error_output}")
-            stepfunctions_client = boto3.client("stepfunctions")
-            stepfunctions_client.send_task_failure(
-                taskToken=task_token, error="IngestorLoaderError", cause=error_output
-            )
-        else:
-            raise
+    run_ecs_handler(
+        arg_parser=arg_parser,
+        handler=handler,
+        event_validator=event_validator,
+        es_mode=es_mode,
+    )
 
 
 def local_handler(parser: ArgumentParser) -> None:

@@ -183,6 +183,33 @@ class MockSNSClient(MockAwsService):
         )
 
 
+class MockStepFunctionsClient(MockAwsService):
+    task_successes: list[dict[str, str]] = []
+    task_failures: list[dict[str, str]] = []
+
+    @staticmethod
+    def reset_mocks() -> None:
+        MockStepFunctionsClient.task_successes = []
+        MockStepFunctionsClient.task_failures = []
+
+    def send_task_success(self, taskToken: str, output: str) -> None:  # noqa: N803
+        MockStepFunctionsClient.task_successes.append(
+            {
+                "taskToken": taskToken,
+                "output": output,
+            }
+        )
+
+    def send_task_failure(self, taskToken: str, error: str, cause: str) -> None:  # noqa: N803
+        MockStepFunctionsClient.task_failures.append(
+            {
+                "taskToken": taskToken,
+                "error": error,
+                "cause": cause,
+            }
+        )
+
+
 class MockBoto3Resource:  # pragma: no cover - structural
     def __init__(self, resourceName: str) -> None:  # noqa: N803
         return None
@@ -199,6 +226,7 @@ class MockBoto3Session:
             "secretsmanager": MockSecretsManagerClient(),
             "s3": MockS3Client(),
             "sns": MockSNSClient(),
+            "stepfunctions": MockStepFunctionsClient(),
             "cloudwatch": MockCloudwatchClient(),
         }
 

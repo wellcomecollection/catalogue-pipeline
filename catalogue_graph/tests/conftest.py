@@ -13,6 +13,7 @@ from tests.mocks import (
     MockS3Client,
     MockSmartOpen,
     MockSNSClient,
+    MockStepFunctionsClient,
     mock_boto3_client,
 )
 
@@ -43,5 +44,6 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     MockElasticsearchClient.reset_mocks()
     MockCloudwatchClient.reset_mocks()
     MockS3Client.reset_mocks()
+    MockStepFunctionsClient.reset_mocks()
     yield
     # Run any cleanup code here
