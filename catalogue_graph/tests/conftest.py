@@ -10,8 +10,10 @@ from tests.mocks import (
     MockCloudwatchClient,
     MockElasticsearchClient,
     MockRequest,
+    MockS3Client,
     MockSmartOpen,
     MockSNSClient,
+    mock_boto3_client,
 )
 
 
@@ -20,6 +22,7 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     # Replaces boto3 and Elasticsearch with fake clients
     monkeypatch.setattr("boto3.Session", MockBoto3Session)
     monkeypatch.setattr("boto3.resource", MockBoto3Resource)
+    monkeypatch.setattr("boto3.client", mock_boto3_client)
     monkeypatch.setattr("requests.request", MockRequest.request)
     monkeypatch.setattr("requests.get", MockRequest.get)
     monkeypatch.setattr("smart_open.open", MockSmartOpen.open)
@@ -39,5 +42,6 @@ def test(monkeypatch: MonkeyPatch) -> Generator[Any, Any, Any]:
     MockSNSClient.reset_mocks()
     MockElasticsearchClient.reset_mocks()
     MockCloudwatchClient.reset_mocks()
+    MockS3Client.reset_mocks()
     yield
     # Run any cleanup code here

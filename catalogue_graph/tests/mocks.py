@@ -105,8 +105,46 @@ class MockSecretsManagerClient(MockAwsService):
         return {"SecretString": secret_value}
 
 
-class MockS3Client(MockAwsService):  # pragma: no cover - structural
-    pass
+class MockS3Paginator:
+    def __init__(self, client: MockS3Client) -> None:
+        self._client = client
+
+    def paginate(
+        self, Bucket: str, Prefix: str, **kwargs: Any
+    ) -> Generator[dict, None, None]:  # noqa: N803
+        key = (Bucket, Prefix)
+        self._client.list_objects_v2_calls.append(key)
+        pages = self._client.list_objects_v2_pages.get(key, [])
+        yield from pages
+
+
+class MockS3Client(MockAwsService):
+    list_objects_v2_pages: dict[tuple[str, str], list[dict]] = {}
+    list_objects_v2_calls: list[tuple[str, str]] = []
+
+    @classmethod
+    def reset_mocks(cls) -> None:
+        cls.list_objects_v2_pages = {}
+        cls.list_objects_v2_calls = []
+
+    @classmethod
+    def add_list_objects_response(
+        cls,
+        bucket: str,
+        prefix: str,
+        contents: list[dict[str, Any]],
+    ) -> None:
+        pages: list[dict[str, Any]]
+        if contents and isinstance(contents[0].get("Contents"), list):
+            pages = contents
+        else:
+            pages = [{"Contents": contents}]
+        cls.list_objects_v2_pages[(bucket, prefix)] = pages
+
+    def get_paginator(self, method: str) -> MockS3Paginator:
+        if method != "list_objects_v2":
+            raise KeyError(f"Unsupported paginator: {method}")
+        return MockS3Paginator(self)
 
 
 class MockCloudwatchClient(MockAwsService):
@@ -171,6 +209,11 @@ class MockBoto3Session:
 
     def get_credentials(self) -> Credentials:  # noqa: D401
         return MOCK_CREDENTIALS
+
+
+def mock_boto3_client(client_name: str, *args: Any, **kwargs: Any) -> MockAwsService:
+    session = MockBoto3Session()
+    return session.client(client_name)
 
 
 class MockResponse:
@@ -428,3 +471,4 @@ def reset_all_mocks() -> None:
     MockSNSClient.reset_mocks()
     MockElasticsearchClient.reset_mocks()
     MockCloudwatchClient.reset_mocks()
+    MockS3Client.reset_mocks()

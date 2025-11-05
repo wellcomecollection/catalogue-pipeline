@@ -29,6 +29,33 @@ RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
 }
 
 
+def _get_objects_to_index(
+    base_event: IngestorStepEvent,
+) -> Generator[IngestorIndexerObject]:
+    print("Listing S3 objects to index...")
+    bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
+    prefix = base_event.get_path_prefix()
+    load_format = base_event.load_format
+
+    print(
+        f"Will process all {load_format} files prefixed with 's3://{bucket_name}/{prefix}/*'."
+    )
+
+    paginator = boto3.client("s3").get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix):
+        for s3_object in page.get("Contents", []):
+            if s3_object["Key"].endswith(f".{load_format}"):
+                # Given a key like 'some/prefix/00000000-00002070.format', extract '00000000-00002070'
+                range_suffix = s3_object["Key"].split("/")[-1].split(".")[0]
+                range_start, range_end = map(int, range_suffix.split("-"))
+
+                yield IngestorIndexerObject(
+                    s3_uri=f"s3://{bucket_name}/{s3_object['Key']}",
+                    content_length=s3_object["Size"],
+                    record_count=range_end - range_start,
+                )
+
+
 def generate_operations(
     index_name: str, indexable_data: list[IndexableRecord]
 ) -> Generator[dict]:
@@ -69,11 +96,10 @@ def handler(
 
     record_class = RECORD_CLASSES[event.ingestor_type]
 
-    if len(event.objects_to_index) == 0:
-        print("Will not index any documents. There are no files to process.")
+    objects_to_index = event.objects_to_index or _get_objects_to_index(event)
 
     total_success_count = 0
-    for s3_object in event.objects_to_index:
+    for s3_object in objects_to_index:
         if event.load_format == "parquet":
             data = df_from_s3_parquet(s3_object.s3_uri).to_dicts()
         else:
@@ -227,37 +253,8 @@ def local_handler(parser: ArgumentParser) -> None:
     args = parser.parse_args()
     base_event = IngestorStepEvent.from_argparser(args)
 
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-    prefix = base_event.get_path_prefix()
-    objects_to_index = _get_objects_to_index(bucket, prefix, base_event.load_format)
-
-    event = IngestorIndexerLambdaEvent(
-        **base_event.model_dump(), objects_to_index=list(objects_to_index)
-    )
+    event = IngestorIndexerLambdaEvent(**base_event.model_dump())
     handler(event, es_mode=args.es_mode)
-
-
-def _get_objects_to_index(
-    bucket_name: str, prefix: str, load_format: str
-) -> Generator[IngestorIndexerObject]:
-    """Manually construct `IngestorIndexerObject` items based on objects in a given S3 location. Local runs only."""
-    print(
-        f"Will process all {load_format} files prefixed with 's3://{bucket_name}/{prefix}/*'."
-    )
-
-    paginator = boto3.client("s3").get_paginator("list_objects_v2")
-    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix):
-        for s3_object in page.get("Contents", []):
-            if s3_object["Key"].endswith(f".{load_format}"):
-                # Given a key like 'some/prefix/00000000-00002070.format', extract '00000000-00002070'
-                range_suffix = s3_object["Key"].split("/")[-1].split(".")[0]
-                range_start, range_end = map(int, range_suffix.split("-"))
-
-                yield IngestorIndexerObject(
-                    s3_uri=f"s3://{bucket_name}/{s3_object['Key']}",
-                    content_length=s3_object["Size"],
-                    record_count=range_end - range_start,
-                )
 
 
 if __name__ == "__main__":

@@ -317,6 +317,8 @@ def _compare_events(
     event: IngestorIndexerLambdaEvent, expected_event: IngestorIndexerLambdaEvent
 ) -> None:
     # Parquet file sizes are an implementation detail and comparing them would lead to flaky unit tests
+    assert event.objects_to_index is not None
+    assert expected_event.objects_to_index is not None
     event.objects_to_index[0].content_length = 0
     expected_event.objects_to_index[0].content_length = 0
 
@@ -336,6 +338,7 @@ def test_ingestor_loader_no_related_concepts() -> None:
     assert len(MockRequest.calls) == 12
 
     expected_concept = get_catalogue_concept_mock([])
+    assert result.objects_to_index is not None
     check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
 
 
@@ -352,6 +355,7 @@ def test_ingestor_loader_with_broader_than_concepts() -> None:
     assert len(MockRequest.calls) == 16
 
     expected_concept = get_catalogue_concept_mock(["broader_than"])
+    assert result.objects_to_index is not None
     check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
 
 
@@ -367,11 +371,13 @@ def test_ingestor_loader_with_related_to_concepts() -> None:
     assert len(MockRequest.calls) == 20
 
     expected_concept = get_catalogue_concept_mock(["related_to", "people"])
+    assert result.objects_to_index is not None
     check_processed_concept(result.objects_to_index[0].s3_uri, expected_concept)
 
 
 def test_ingestor_loader_no_concepts_to_process() -> None:
     result = handler(MOCK_LOADER_CONCEPTS_EVENT)
+    assert result.objects_to_index is not None
     assert len(result.objects_to_index) == 0
     assert len(MockRequest.calls) == 0
 
@@ -419,6 +425,7 @@ def test_ingestor_loader_non_visible_works() -> None:
     assert len(MockRequest.calls) == 0
 
     # The dataframe should have all three works
+    assert result.objects_to_index is not None
     with MockSmartOpen.open(result.objects_to_index[0].s3_uri, "rb") as f:
         df = pl.read_parquet(f)
         assert len(df) == 3

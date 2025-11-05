@@ -52,7 +52,7 @@ class IngestorIndexerObject(BaseModel):
 
 
 class IngestorIndexerLambdaEvent(IngestorStepEvent):
-    objects_to_index: list[IngestorIndexerObject]
+    objects_to_index: list[IngestorIndexerObject] | None = None
 
 
 class IngestorIndexerMonitorLambdaEvent(IngestorStepEvent):
