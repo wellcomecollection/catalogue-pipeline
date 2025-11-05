@@ -20,6 +20,7 @@ from ingestor.models.step_events import (
 )
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
+from utils.reporting import IndexerReport
 from utils.steps import create_job_id
 from utils.types import IngestorType
 
@@ -117,8 +118,14 @@ def handler(
 
         total_success_count += success_count
 
+    event_payload = event.model_dump(exclude={"objects_to_index"})
+
+    print("Preparing indexer pipeline report ...")
+    report = IndexerReport(**event_payload, success_count=total_success_count)
+    report.write()
+
     return IngestorIndexerMonitorLambdaEvent(
-        **event.model_dump(),
+        **event_payload,
         success_count=total_success_count,
     )
 

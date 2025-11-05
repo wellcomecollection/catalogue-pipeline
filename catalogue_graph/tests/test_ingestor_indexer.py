@@ -1,3 +1,6 @@
+import json
+from typing import Any, cast
+
 import polars
 import pydantic_core
 import pytest
@@ -16,6 +19,15 @@ from tests.mocks import (
 )
 from tests.test_utils import load_fixture, load_json_fixture
 from utils.types import IngestorType
+
+
+def _get_result_s3_uri(event: IngestorIndexerLambdaEvent) -> str:
+    return event.get_s3_uri("report.indexer", "json")
+
+
+def _read_indexer_report(event: IngestorIndexerLambdaEvent) -> dict[str, Any]:
+    with MockSmartOpen.open(_get_result_s3_uri(event), "r") as f:
+        return cast(dict[str, Any], json.load(f))
 
 
 def get_mock_indexer_event(record_type: IngestorType) -> IngestorIndexerLambdaEvent:
@@ -69,6 +81,18 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
     assert result.success_count == len(expected_inputs)
     assert MockElasticsearchClient.inputs == expected_inputs
 
+    report = _read_indexer_report(event)
+    assert report == {
+        "pipeline_date": pipeline_date,
+        "index_date": index_date,
+        "ingestor_type": record_type,
+        "job_id": job_id,
+        "load_format": "parquet",
+        "window": None,
+        "pit_id": None,
+        "success_count": len(expected_inputs),
+    }
+
 
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
 def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) -> None:
@@ -109,6 +133,18 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
     assert MockS3Client.list_objects_v2_calls == []
     assert result.success_count == len(expected_inputs)
     assert MockElasticsearchClient.inputs == expected_inputs
+
+    report = _read_indexer_report(event)
+    assert report == {
+        "pipeline_date": pipeline_date,
+        "index_date": index_date,
+        "ingestor_type": record_type,
+        "job_id": job_id,
+        "load_format": "parquet",
+        "window": None,
+        "pit_id": None,
+        "success_count": len(expected_inputs),
+    }
 
 
 def test_ingestor_indexer_failure_invalid_data_concepts() -> None:

@@ -11,7 +11,7 @@ module "catalogue_graph_ingestor_state_machine" {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         Retry    = local.state_function_default_retry,
-        Next     = "Monitor loader"
+        Next     = "Run indexer"
         Arguments = {
           Cluster        = aws_ecs_cluster.pipeline_cluster.arn
           TaskDefinition = module.ingestor_loader_ecs_task.task_definition_arn
@@ -39,23 +39,12 @@ module "catalogue_graph_ingestor_state_machine" {
             ]
           }
         }
-      }
-      "Monitor loader" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
-        Arguments = {
-          FunctionName = module.ingestor_loader_monitor_lambda.lambda.arn,
-          Payload      = "{% $states.input %}"
-        },
-        Retry = local.state_function_default_retry,
-        Next  = "Run indexer"
       },
       "Run indexer" = {
         Type     = "Task"
         Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
         Retry    = local.state_function_default_retry,
-        Next     = "Monitor indexer"
+        Next     = "Should run deletions?"
         Arguments = {
           Cluster        = aws_ecs_cluster.pipeline_cluster.arn
           TaskDefinition = module.ingestor_indexer_ecs_task.task_definition_arn
@@ -84,16 +73,6 @@ module "catalogue_graph_ingestor_state_machine" {
           }
         }
       }
-      "Monitor indexer" = {
-        Type     = "Task"
-        Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
-        Arguments = {
-          FunctionName = module.ingestor_indexer_monitor_lambda.lambda.arn,
-          Payload      = "{% $states.input %}"
-        },
-        Next = "Should run deletions?"
-      },
       "Should run deletions?" = {
         Type = "Choice"
         Choices = [
@@ -122,8 +101,6 @@ module "catalogue_graph_ingestor_state_machine" {
   })
 
   invokable_lambda_arns = [
-    module.ingestor_loader_monitor_lambda.lambda.arn,
-    module.ingestor_indexer_monitor_lambda.lambda.arn,
     module.ingestor_deletions_lambda.lambda.arn
   ]
 

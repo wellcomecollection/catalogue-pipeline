@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from typing import Any, cast
 
 import polars as pl
 import pytest
@@ -350,9 +351,9 @@ def _get_report_uri(loader_event: IngestorLoaderLambdaEvent) -> str:
     return loader_event.get_s3_uri("report.loader", "json")
 
 
-def _read_loader_report(loader_event: IngestorLoaderLambdaEvent) -> dict:
+def _read_loader_report(loader_event: IngestorLoaderLambdaEvent) -> dict[str, Any]:
     with MockSmartOpen.open(_get_report_uri(loader_event), "r") as f:
-        return json.load(f)
+        return cast(dict[str, Any], json.load(f))
 
 
 def check_processed_concept(s3_uri: str, expected_concept: IndexableConcept) -> None:

@@ -46,3 +46,13 @@ resource "aws_iam_role_policy" "ingestor_indexer_task_s3_read_policy" {
   role   = module.ingestor_indexer_ecs_task.task_role_name
   policy = data.aws_iam_policy_document.ingestor_s3_read.json
 }
+
+resource "aws_iam_role_policy" "ingestor_indexer_task_s3_write_policy" {
+  role   = module.ingestor_indexer_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.ingestor_s3_write.json
+}
+
+resource "aws_iam_role_policy" "ingestor_indexer_task_cloudwatch_write_policy" {
+  role   = module.ingestor_indexer_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}

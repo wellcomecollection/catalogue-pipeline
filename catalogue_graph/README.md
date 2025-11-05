@@ -119,8 +119,10 @@ Graph Lambda functions:
 Elasticsearch ingestor Lambda functions:
 * `ingestor_loader`: Queries the denormalised index for all works which changed within a given time window,
   supplementing returned documents with data from the catalogue graph, creating final work or concept
-  documents, and loading the results into parquet files in S3.
-* `ingestor_indexer`: Consumes parquet files from S3, loading final documents into Elasticsearch.
+  documents, and loading the results into parquet files in S3. The loader also writes pipeline reports and publishes
+  execution metrics directly.
+* `ingestor_indexer`: Consumes parquet files from S3, loading final documents into Elasticsearch. The indexer writes
+  pipeline reports directly as part of the indexing step.
 * `ingestor_deletions`: Removes indexed concepts from Elasticsearch if corresponding 'Concept' nodes were removed from
   the catalogue graph. Uses the append-only log of deleted IDs created by the `graph_remover` to decide which
   documents to remove.
@@ -271,7 +273,6 @@ at it via the normal env vars.
 | indexer                  | indexer.lambda_handler                                 |
 | ingestor_loader          | ingestor.steps.ingestor_loader.lambda_handler          |
 | ingestor_indexer         | ingestor.steps.ingestor_indexer.lambda_handler         |
-| ingestor_indexer_monitor | ingestor.steps.ingestor_indexer_monitor.lambda_handler |
 | ingestor_deletions       | ingestor.steps.ingestor_deletions.lambda_handler       |
 | pit_opener               | pit_opener.lambda_handler                              |
 

@@ -56,3 +56,8 @@ resource "aws_iam_role_policy" "ingestor_loader_neptune_read_policy" {
   role   = module.ingestor_loader_ecs_task.task_role_name
   policy = data.aws_iam_policy_document.neptune_read.json
 }
+
+resource "aws_iam_role_policy" "ingestor_loader_task_cloudwatch_write_policy" {
+  role   = module.ingestor_loader_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}
