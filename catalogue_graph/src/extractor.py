@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Example of how to use structlog-based logging in extractor.py
+"""
+
 import argparse
 import json
 import typing
@@ -14,7 +18,12 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
+from utils.logger import (
+    setup_logging,
+    get_logger
+)
 
+execution_id = "some-value-passed-down-state-machine-steps"
 
 def raw_event(raw_input: str) -> ExtractorEvent:
     event = json.loads(raw_input)
@@ -22,9 +31,15 @@ def raw_event(raw_input: str) -> ExtractorEvent:
 
 
 def handler(event: ExtractorEvent, is_local: bool = False) -> None:
-    print(
-        f"Transforming {event.sample_size or 'all'} {event.entity_type} using the {event.transformer_type} "
-        f"transformer and streaming them into {event.stream_destination}."
+    logger = get_logger("graph-extractor")
+    
+    logger.info(
+        "Starting extraction",
+        sample_size=event.sample_size,
+        transformer_type=event.transformer_type,
+        entity_type=event.entity_type,
+        stream_destination=event.stream_destination,
+        pipeline_date=getattr(event, 'pipeline_date', None)
     )
 
     transformer: BaseTransformer = create_transformer(
@@ -32,36 +47,66 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
         es_mode="public" if is_local else "private",
     )
 
-    if event.stream_destination == "graph":
-        client = get_neptune_client(is_local)
-        transformer.stream_to_graph(client, event.entity_type, event.sample_size)
-    elif event.stream_destination == "s3":
-        s3_uri = event.get_bulk_load_s3_uri()
-        transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
-        print(f"Data streamed to S3 file: '{s3_uri}'.")
-    elif event.stream_destination == "sns":
-        topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
-        if topic_arn is None:
-            raise ValueError(
-                "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined."
+    try:
+        if event.stream_destination == "graph":
+            client = get_neptune_client(is_local)
+            logger.info("Streaming to Neptune graph", destination="graph")
+            transformer.stream_to_graph(client, event.entity_type, event.sample_size)
+            
+        elif event.stream_destination == "s3":
+            s3_uri = event.get_bulk_load_s3_uri()
+            logger.info("Streaming to S3", destination="s3", s3_uri=s3_uri)
+            transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
+
+        elif event.stream_destination == "sns":
+            topic_arn = config.GRAPH_QUERIES_SNS_TOPIC_ARN
+            if topic_arn is None:
+                error_msg = "To stream to SNS, the GRAPH_QUERIES_SNS_TOPIC_ARN environment variable must be defined"
+                logger.error("Missing SNS configuration", error=error_msg)
+                raise ValueError(error_msg)
+            logger.info("Streaming to SNS", destination="sns", topic_arn=topic_arn)
+            transformer.stream_to_sns(topic_arn, event.entity_type, event.sample_size)
+            
+        elif event.stream_destination == "local":
+            file_path = event.get_bulk_load_file_path()
+            logger.info("Streaming to local file", destination="local", file_path=file_path)
+            transformer.stream_to_local_file(
+                file_path, event.entity_type, event.sample_size
             )
 
-        transformer.stream_to_sns(topic_arn, event.entity_type, event.sample_size)
-    elif event.stream_destination == "local":
-        file_path = event.get_bulk_load_file_path()
-        full_file_path = transformer.stream_to_local_file(
-            file_path, event.entity_type, event.sample_size
+        elif event.stream_destination == "void":
+            logger.info("Streaming to void (discarding output)", destination="void")
+            for _ in transformer.stream(event.entity_type, event.sample_size):
+                pass
+                
+        else:
+            logger.error("Unsupported stream destination", stream_destination=event.stream_destination)
+            raise ValueError(f"Unsupported stream destination: {event.stream_destination}")
+
+        logger.info("Extraction completed successfully")
+        
+    except Exception as e:
+        logger.error(
+            "Extraction failed",
+            error_type=type(e).__name__,
+            error_message=str(e),
+            transformer_type=event.transformer_type,
+            entity_type=event.entity_type,
+            stream_destination=event.stream_destination,
+            exc_info=True
         )
-        print(f"Data streamed to local file: '{full_file_path}'.")
-    elif event.stream_destination == "void":
-        for _ in transformer.stream(event.entity_type, event.sample_size):
-            pass
-    else:
-        raise ValueError("Unsupported stream destination.")
+        raise
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
+    # Use hardcoded execution_id for now
+    logger = setup_logging(execution_id)
+    
+    logger.info("Lambda invocation started")
+    
     handler(ExtractorEvent(**event))
+
+    logger.info("Lambda invocation completed successfully")
 
 
 def ecs_handler() -> None:
@@ -72,7 +117,19 @@ def ecs_handler() -> None:
         required=True,
     )
     ecs_args = parser.parse_args()
+    
+    # Use hardcoded execution_id for now
+    logger = setup_logging(execution_id)
+    
+    logger.info(
+        "ECS task started",
+        transformer_type=ecs_args.event.transformer_type,
+        entity_type=ecs_args.event.entity_type
+    )
+
     handler(ecs_args.event)
+
+    logger.info("ECS task completed successfully")
 
 
 def local_handler() -> None:
@@ -131,8 +188,18 @@ def local_handler() -> None:
 
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
+    
+    # Use hardcoded execution_id for now
+    logger = setup_logging(execution_id, is_local=True)
+    
+    logger.info(
+        "Local handler started",
+        transformer_type=event.transformer_type,
+        entity_type=event.entity_type
+    )
 
     handler(event, is_local=args.is_local)
+    logger.info("Local handler completed successfully")
 
 
 if __name__ == "__main__":
