@@ -30,11 +30,11 @@ module "catalogue_graph_extractor_state_machine" {
           Overrides = {
             ContainerOverrides = [
               {
-                Name    = "graph-extractor-${var.pipeline_date}"
+                Name = "graph-extractor-${var.pipeline_date}"
                 Command = [
-                  "/app/src/extractor.py", 
+                  "/app/src/extractor.py",
                   "--event", "{% $string($states.input) %}",
-                ],              
+                ],
               }
             ]
           }

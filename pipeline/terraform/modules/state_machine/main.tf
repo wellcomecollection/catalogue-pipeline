@@ -164,13 +164,13 @@ resource "aws_iam_role_policy_attachment" "state_machine_self_start_execution_po
 }
 
 resource "aws_iam_policy" "policy" {
-  count       = length(keys(var.policies_to_attach))
-  name        = "${keys(var.policies_to_attach)[count.index]}-sfn-policy"
-  policy      = var.policies_to_attach[keys(var.policies_to_attach)[count.index]]
+  count  = length(keys(var.policies_to_attach))
+  name   = "${keys(var.policies_to_attach)[count.index]}-sfn-policy"
+  policy = var.policies_to_attach[keys(var.policies_to_attach)[count.index]]
 }
 
 resource "aws_iam_role_policy_attachment" "state_machine_policy_attachment" {
-  count       = length(keys(var.policies_to_attach))
+  count      = length(keys(var.policies_to_attach))
   role       = aws_iam_role.state_machine_role.name
   policy_arn = aws_iam_policy.policy[count.index].arn
 }

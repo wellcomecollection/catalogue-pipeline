@@ -29,9 +29,9 @@ module "catalogue_graph_ingestor_state_machine" {
           Overrides = {
             ContainerOverrides = [
               {
-                Name    = "ingestor-loader-${var.pipeline_date}"
+                Name = "ingestor-loader-${var.pipeline_date}"
                 Command = [
-                  "/app/src/ingestor/steps/ingestor_loader.py", 
+                  "/app/src/ingestor/steps/ingestor_loader.py",
                   "--event", "{% $string($states.input) %}",
                   "--task-token", "{% $states.context.Task.Token %}"
                 ],
@@ -73,9 +73,9 @@ module "catalogue_graph_ingestor_state_machine" {
           Overrides = {
             ContainerOverrides = [
               {
-                Name    = "ingestor-indexer-${var.pipeline_date}"
+                Name = "ingestor-indexer-${var.pipeline_date}"
                 Command = [
-                  "/app/src/ingestor/steps/ingestor_indexer.py", 
+                  "/app/src/ingestor/steps/ingestor_indexer.py",
                   "--event", "{% $string($states.input) %}",
                   "--task-token", "{% $states.context.Task.Token %}"
                 ],

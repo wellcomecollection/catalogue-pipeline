@@ -6,8 +6,8 @@ module "ingestor_indexer_ecs_task" {
   image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:dev"
 
   environment = {
-      CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
-      INGESTOR_S3_PREFIX        = "ingestor"
+    CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
+    INGESTOR_S3_PREFIX        = "ingestor"
   }
 
   cpu    = 4096
