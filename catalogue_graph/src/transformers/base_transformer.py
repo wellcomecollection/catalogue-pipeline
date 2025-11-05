@@ -56,8 +56,9 @@ class BaseTransformer:
 
                 if counter % 10000 == 0:
                     self.logger.info(f"Streamed {counter} nodes...")
-            if counter == number:
-                return
+                if counter == number:
+                    self.logger.info(f"Streamed all {counter} nodes.")
+                    return
 
         self.logger.info(f"Streamed all {counter} nodes.")
 
@@ -78,6 +79,7 @@ class BaseTransformer:
                 if counter % 10000 == 0:
                     self.logger.info(f"Streamed {counter} edges...")
                 if counter == number:
+                    self.logger.info(f"Streamed all {counter} edges.")
                     return
 
         self.logger.info(f"Streamed all {counter} edges.")
