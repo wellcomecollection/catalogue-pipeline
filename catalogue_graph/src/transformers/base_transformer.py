@@ -26,7 +26,7 @@ CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
 class BaseTransformer:
     def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
-        self.logger = get_logger(__name__) 
+        self.logger = get_logger(f"{self.__class__.__module__}") 
 
     def transform_node(self, raw_node: Any) -> BaseNode | None:
         """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
