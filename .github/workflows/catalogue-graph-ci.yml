@@ -57,7 +57,7 @@ jobs:
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
   deploy:
-    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [build-unified-pipeline-task-image, build-unified-pipeline-lambda-image]
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
