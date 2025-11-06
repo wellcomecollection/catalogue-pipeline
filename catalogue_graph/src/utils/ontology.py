@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import get_args
 
-import utils.bulk_load as bulk_load
+from models.events import BulkLoaderEvent
 from utils.aws import get_csv_from_s3
 from utils.types import (
     CatalogueTransformerType,
@@ -39,8 +39,10 @@ def get_extracted_ids(transformer: TransformerType, pipeline_date: str) -> set[s
     """Return all ids extracted as part of the specified transformer."""
     print(f"Retrieving ids of type '{transformer}' from S3.", end=" ", flush=True)
 
-    s3_uri = bulk_load.get_s3_uri(transformer, "nodes", pipeline_date)
-    ids = {row[":ID"] for row in get_csv_from_s3(s3_uri)}
+    event = BulkLoaderEvent(
+        transformer_type=transformer, entity_type="nodes", pipeline_date=pipeline_date
+    )
+    ids = {row[":ID"] for row in get_csv_from_s3(event.get_s3_uri())}
 
     print(f"({len(ids)} ids retrieved.)")
 

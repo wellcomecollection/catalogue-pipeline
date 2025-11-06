@@ -4,9 +4,7 @@ from datetime import datetime, timedelta
 
 import polars as pl
 
-from models.events import (
-    FullGraphRemoverEvent,
-)
+from models.events import BulkLoaderEvent, FullGraphRemoverEvent
 from utils.aws import (
     df_from_s3_parquet,
     df_to_s3_parquet,
@@ -31,7 +29,8 @@ def get_previous_ids(event: FullGraphRemoverEvent) -> set[str]:
 
 def get_current_ids(event: FullGraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest bulk load file for the specified transformer and entity type."""
-    s3_file_uri = event.get_bulk_load_s3_uri()
+    bulk_loader_event = BulkLoaderEvent(**event.model_dump())
+    s3_file_uri = bulk_loader_event.get_s3_uri()
 
     ids = set(row[":ID"] for row in get_csv_from_s3(s3_file_uri))
     print(f"Retrieved {len(ids)} ids from the current bulk loader file.")

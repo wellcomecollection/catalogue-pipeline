@@ -36,7 +36,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
         client = get_neptune_client(is_local)
         transformer.stream_to_graph(client, event.entity_type, event.sample_size)
     elif event.stream_destination == "s3":
-        s3_uri = event.get_bulk_load_s3_uri()
+        s3_uri = event.get_s3_uri()
         transformer.stream_to_s3(s3_uri, event.entity_type, event.sample_size)
         print(f"Data streamed to S3 file: '{s3_uri}'.")
     elif event.stream_destination == "sns":
@@ -48,7 +48,7 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
 
         transformer.stream_to_sns(topic_arn, event.entity_type, event.sample_size)
     elif event.stream_destination == "local":
-        file_path = event.get_bulk_load_file_path()
+        file_path = event.get_file_path()
         full_file_path = transformer.stream_to_local_file(
             file_path, event.entity_type, event.sample_size
         )
