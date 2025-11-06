@@ -19,7 +19,7 @@ IDS_LOG_SCHEMA: dict = {"timestamp": pl.Date(), "id": pl.Utf8}
 
 def get_previous_ids(event: FullGraphRemoverEvent) -> set[str]:
     """Return all IDs from the latest snapshot for the specified transformer and entity type."""
-    s3_file_uri = event.get_remover_s3_uri("previous_ids_snapshot")
+    s3_file_uri = event.get_s3_uri("parquet", "previous_ids_snapshot")
     df = df_from_s3_parquet(s3_file_uri)
 
     ids = pl.Series(df.select(pl.first())).to_list()
@@ -39,7 +39,7 @@ def get_current_ids(event: FullGraphRemoverEvent) -> set[str]:
 
 def update_node_ids_snapshot(event: FullGraphRemoverEvent, ids: set[str]) -> None:
     """Update the IDs snapshot with the latest IDs."""
-    s3_file_uri = event.get_remover_s3_uri("previous_ids_snapshot")
+    s3_file_uri = event.get_s3_uri("parquet", "previous_ids_snapshot")
     df = pl.DataFrame(list(ids))
     df_to_s3_parquet(df, s3_file_uri)
 
@@ -48,7 +48,7 @@ def log_ids(
     event: FullGraphRemoverEvent, ids: set[str], folder: GraphRemoverFolder
 ) -> None:
     """Append IDs which were added/removed as part of this run to the corresponding log file."""
-    s3_file_uri = event.get_remover_s3_uri(folder)
+    s3_file_uri = event.get_s3_uri("parquet", folder)
 
     try:
         df = df_from_s3_parquet(s3_file_uri)

@@ -10,7 +10,6 @@ from utils.types import (
     CatalogueTransformerType,
     EntityType,
     FullGraphRemoverType,
-    GraphRemoverFolder,
     StreamDestination,
     TransformerType,
 )
@@ -90,9 +89,6 @@ class BulkLoadPollerEvent(BaseModel):
 
 class GraphRemoverEvent(GraphPipelineEvent):
     force_pass: bool = False
-
-    def get_remover_s3_uri(self, folder: GraphRemoverFolder) -> str:
-        return self.get_s3_uri("parquet", folder)
 
 
 class FullGraphRemoverEvent(GraphRemoverEvent):

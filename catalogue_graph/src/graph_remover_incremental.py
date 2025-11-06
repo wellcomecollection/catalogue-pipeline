@@ -37,7 +37,7 @@ def handler(event: IncrementalGraphRemoverEvent, is_local: bool = False) -> None
     deleted_ids = remover.remove(event.force_pass)
 
     # Write removed IDs to a parquet file
-    s3_file_uri = event.get_remover_s3_uri("deleted_ids")
+    s3_file_uri = event.get_s3_uri("parquet", "deleted_ids")
     df_to_s3_parquet(pl.DataFrame(deleted_ids), s3_file_uri)
 
     print(f"List of deleted IDs saved to '{s3_file_uri}'.")
