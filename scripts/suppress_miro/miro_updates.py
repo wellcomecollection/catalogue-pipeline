@@ -27,7 +27,9 @@ from _common import (
 SESSION = get_session(role_arn="arn:aws:iam::760097843905:role/platform-developer")
 DYNAMO_CLIENT = SESSION.resource("dynamodb").meta.client
 
-TABLE_NAME = "vhs-sourcedata-miro"
+MIRO_TABLE_NAME = "vhs-sourcedata-miro"
+
+METS_TABLE_NAME = "mets-adapter-store-delta"
 
 
 @functools.lru_cache()
@@ -159,14 +161,25 @@ def _get_current_pipeline_and_indices():
 
 def _get_vhs_sourcedata_miro_ddb_item(miro_id):
     try:
-        item = DYNAMO_CLIENT.get_item(TableName=TABLE_NAME, Key={"id": miro_id})["Item"]
+        item = DYNAMO_CLIENT.get_item(TableName=MIRO_TABLE_NAME, Key={"id": miro_id})["Item"]
     except KeyError:
-        print(f"✗ Miro ID {miro_id} not found in DynamoDB table {TABLE_NAME}", file=sys.stderr)
+        print(f"✗ Miro ID {miro_id} not found in DynamoDB table {MIRO_TABLE_NAME}", file=sys.stderr)
         return
     else:
-        print(f"✓ Miro ID {miro_id} found in DynamoDB table {TABLE_NAME}")
+        print(f"✓ Miro ID {miro_id} found in DynamoDB table {MIRO_TABLE_NAME}")
         return item
 
+def _check_mets_adapter_store(work):
+    identifiers = work["_source"]["query"]["identifiers.value"]
+    
+    for maybeMetsIdentifier in identifiers:
+        try:
+            item = DYNAMO_CLIENT.get_item(TableName=METS_TABLE_NAME, Key={"id": maybeMetsIdentifier})["Item"]
+        except KeyError:
+            continue
+        else:
+            print(f"✓ Identifier {maybeMetsIdentifier} found in DynamoDB table {METS_TABLE_NAME}\nThe image will need to be soft- or hard-deleted from the storage-service")
+            return item
 
 def _get_work_and_image(miro_id):
     pipeline_date, works_index, images_index = _get_current_pipeline_and_indices()
@@ -252,7 +265,7 @@ def _set_overrides(*, miro_id, message: str, override_key: str, override_value: 
 
     try:
         DYNAMO_CLIENT.update_item(
-            TableName=TABLE_NAME,
+            TableName=MIRO_TABLE_NAME,
             Key={"id": miro_id},
             UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
             ConditionExpression="#version = :oldVersion",
@@ -304,7 +317,7 @@ def _remove_override(*, miro_id, message: str, override_key: str):
 
     try:
         DYNAMO_CLIENT.update_item(
-            TableName=TABLE_NAME,
+            TableName=MIRO_TABLE_NAME,
             Key={"id": miro_id},
             UpdateExpression="SET #version = :newVersion, #events = :events, #overrides = :overrides",
             ConditionExpression="#version = :oldVersion",
@@ -368,7 +381,7 @@ def _set_image_availability(*, miro_id, message: str, is_available: bool):
 
     try:
         DYNAMO_CLIENT.update_item(
-            TableName=TABLE_NAME,
+            TableName=MIRO_TABLE_NAME,
             Key={"id": miro_id},
             UpdateExpression="SET #version = :newVersion, #events = :events, #isClearedForCatalogueAPI = :is_available",
             ConditionExpression="#version = :oldVersion",
@@ -510,7 +523,8 @@ def _register_image_on_dlcs(origin_url, miro_id):
 
 def run_pre_suppression_checks(miro_id):
     _get_vhs_sourcedata_miro_ddb_item(miro_id)
-    _get_work_and_image(miro_id)
+    work, _ = _get_work_and_image(miro_id)
+    _check_mets_adapter_store(work)
     _check_dlcs_server(miro_id)
 
 
