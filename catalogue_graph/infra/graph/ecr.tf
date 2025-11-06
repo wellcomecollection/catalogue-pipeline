@@ -6,6 +6,10 @@ resource "aws_ecr_repository" "catalogue_graph_extractor" {
   name = "uk.ac.wellcome/catalogue_graph_extractor"
 }
 
+resource "aws_ecr_repository" "unified_pipeline_task" {
+  name = "uk.ac.wellcome/unified_pipeline_task"
+}
+
 // Shared lifecycle policy JSON for both repositories
 locals {
   ecr_lifecycle_policy = jsonencode({
@@ -78,5 +82,10 @@ resource "aws_ecr_lifecycle_policy" "expire_old_images" {
 
 resource "aws_ecr_lifecycle_policy" "expire_old_images_unified_pipeline_lambda" {
   repository = aws_ecr_repository.unified_pipeline_lambda.name
+  policy     = local.ecr_lifecycle_policy
+}
+
+resource "aws_ecr_lifecycle_policy" "expire_old_images_unified_pipeline_task" {
+  repository = aws_ecr_repository.unified_pipeline_task.name
   policy     = local.ecr_lifecycle_policy
 }

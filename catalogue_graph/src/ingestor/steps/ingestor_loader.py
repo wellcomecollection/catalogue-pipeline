@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-import argparse
-import datetime
+import json
 import typing
+from argparse import ArgumentParser
 
+from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -14,12 +15,9 @@ from ingestor.transformers.base_transformer import (
 from ingestor.transformers.concepts_transformer import ElasticsearchConceptsTransformer
 from ingestor.transformers.works_transformer import ElasticsearchWorksTransformer
 from utils.elasticsearch import ElasticsearchMode
+from utils.reporting import LoaderReport
+from utils.steps import create_job_id, run_ecs_handler
 from utils.types import IngestorType
-
-
-def create_job_id() -> str:
-    """Generate a job_id based on the current time using an iso8601 format like 20210701T1300"""
-    return datetime.datetime.now().strftime("%Y%m%dT%H%M")
 
 
 def create_transformer(
@@ -43,9 +41,68 @@ def handler(
     transformer = create_transformer(event, es_mode)
     objects_to_index = transformer.load_documents(event, load_destination)
 
-    return IngestorIndexerLambdaEvent(
-        **event.model_dump(),
-        objects_to_index=objects_to_index,
+    event_payload = event.model_dump(exclude={"pass_objects_to_index"})
+
+    record_count = sum(o.record_count for o in objects_to_index)
+    total_file_size = sum(o.content_length for o in objects_to_index)
+
+    report = LoaderReport(
+        **event_payload,
+        record_count=record_count,
+        total_file_size=total_file_size,
+    )
+    report.write()
+
+    dimensions = {
+        "ingestor_type": report.ingestor_type,
+        "pipeline_date": report.pipeline_date,
+        "index_date": report.index_date,
+        "step": "ingestor_loader_monitor",
+        "job_id": report.job_id or "unspecified",
+    }
+
+    reporter = MetricReporter("catalogue_graph_ingestor")
+    reporter.put_metric_data(
+        metric_name="total_file_size",
+        value=report.total_file_size,
+        dimensions=dimensions,
+    )
+
+    if event.pass_objects_to_index:
+        return IngestorIndexerLambdaEvent(
+            **event_payload,
+            objects_to_index=objects_to_index,
+        )
+
+    return IngestorIndexerLambdaEvent(**event_payload)
+
+
+def event_validator(raw_input: str) -> IngestorLoaderLambdaEvent:
+    event = json.loads(raw_input)
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
+
+    return IngestorLoaderLambdaEvent.model_validate(event)
+
+
+def ecs_handler(arg_parser: ArgumentParser) -> None:
+    arg_parser.add_argument(
+        "--es-mode",
+        type=str,
+        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
+        required=False,
+        choices=["private", "local", "public"],
+        default="private",
+    )
+
+    args, _ = arg_parser.parse_known_args()
+    es_mode = args.es_mode
+
+    run_ecs_handler(
+        arg_parser=arg_parser,
+        handler=handler,
+        event_validator=event_validator,
+        es_mode=es_mode,
     )
 
 
@@ -56,8 +113,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict:
     return handler(IngestorLoaderLambdaEvent(**event)).model_dump(mode="json")
 
 
-def local_handler() -> None:
-    parser = argparse.ArgumentParser(description="")
+def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -122,6 +178,11 @@ def local_handler() -> None:
         choices=["local", "public"],
         default="local",
     )
+    parser.add_argument(
+        "--pass-objects-to-index",
+        action="store_true",
+        help="Return the list of generated objects in the loader response.",
+    )
 
     args = parser.parse_args()
     event = IngestorLoaderLambdaEvent.from_argparser(args)
@@ -129,4 +190,15 @@ def local_handler() -> None:
 
 
 if __name__ == "__main__":
-    local_handler()
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.use_cli:
+        local_handler(parser)
+    else:
+        ecs_handler(parser)

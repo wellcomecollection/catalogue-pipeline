@@ -4,9 +4,9 @@
 Example of how to use structlog-based logging in extractor.py
 """
 
-import argparse
 import json
 import typing
+from argparse import ArgumentParser
 
 import config
 from models.events import (
@@ -18,6 +18,7 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
+from utils.steps import run_ecs_handler
 from utils.logger import ExecutionContext, get_logger, setup_logging
 
 trace_id = "some-value-passed-down-state-machine-steps"
@@ -112,32 +113,25 @@ def lambda_handler(event: dict, context: typing.Any) -> None:
     logger.info("Lambda invocation completed successfully")
 
 
-def ecs_handler() -> None:
-    parser.add_argument(
-        "--event",
-        type=raw_event,
-        help="Raw event in JSON format.",
-        required=True,
+def event_validator(raw_input: str) -> ExtractorEvent:
+    event = json.loads(raw_input)
+    return ExtractorEvent(**event)
+
+
+def ecs_handler(arg_parser: ArgumentParser) -> None:
+    run_ecs_handler(
+        arg_parser=arg_parser,
+        handler=handler,
+        event_validator=event_validator,
     )
-    ecs_args = parser.parse_args()
 
     # Use hardcoded trace_id for now
-    logger = setup_logging(
+    setup_logging(
         ExecutionContext(trace_id=trace_id, pipeline_step="graph_extractor")
     )
 
-    logger.info(
-        "ECS task started",
-        transformer_type=ecs_args.event.transformer_type,
-        entity_type=ecs_args.event.entity_type,
-    )
 
-    handler(ecs_args.event)
-
-    logger.info("ECS task completed successfully")
-
-
-def local_handler() -> None:
+def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--transformer-type",
         type=str,
@@ -211,7 +205,7 @@ def local_handler() -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="")
+    parser = ArgumentParser(description="")
     parser.add_argument(
         "--is-local",
         action="store_true",
@@ -220,6 +214,6 @@ if __name__ == "__main__":
     args, _ = parser.parse_known_args()
 
     if args.is_local:
-        local_handler()
+        local_handler(parser)
     else:
-        ecs_handler()
+        ecs_handler(parser)

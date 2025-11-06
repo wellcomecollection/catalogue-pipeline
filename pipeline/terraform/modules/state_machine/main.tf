@@ -110,14 +110,6 @@ resource "aws_iam_policy" "state_machine_execution_policy" {
   })
 }
 
-# If a custom IAM policy is provided, attach it to the role
-resource "aws_iam_policy" "custom_state_machine_policy" {
-  count       = var.state_machine_iam_policy != null ? 1 : 0
-  name        = "${var.name}-custom-sfn-policy"
-  description = "Custom IAM policy for state machine"
-  policy      = var.state_machine_iam_policy
-}
-
 resource "aws_iam_policy" "sync_run_policy" {
   name = "${var.name}-sync-run-policy"
 
@@ -166,15 +158,21 @@ resource "aws_iam_role_policy_attachment" "state_machine_sync_run_policy_attachm
   policy_arn = aws_iam_policy.sync_run_policy.arn
 }
 
-resource "aws_iam_role_policy_attachment" "custom_state_machine_policy_attachment" {
-  count      = var.state_machine_iam_policy != null ? 1 : 0
-  role       = aws_iam_role.state_machine_role.name
-  policy_arn = aws_iam_policy.custom_state_machine_policy[0].arn
-}
-
 resource "aws_iam_role_policy_attachment" "state_machine_self_start_execution_policy_attachment" {
   role       = aws_iam_role.state_machine_role.name
   policy_arn = aws_iam_policy.state_machine_self_start_execution_policy.arn
+}
+
+resource "aws_iam_policy" "policy" {
+  count  = length(keys(var.policies_to_attach))
+  name   = "${keys(var.policies_to_attach)[count.index]}-sfn-policy"
+  policy = var.policies_to_attach[keys(var.policies_to_attach)[count.index]]
+}
+
+resource "aws_iam_role_policy_attachment" "state_machine_policy_attachment" {
+  count      = length(keys(var.policies_to_attach))
+  role       = aws_iam_role.state_machine_role.name
+  policy_arn = aws_iam_policy.policy[count.index].arn
 }
 
 # CloudWatch Log Group for State Machine
@@ -183,18 +181,16 @@ resource "aws_cloudwatch_log_group" "state_machine_logs" {
   retention_in_days = 14
 }
 
-# Data source for current AWS region
-data "aws_region" "current" {}
-
-data "aws_caller_identity" "current" {}
-
-# Outputs
-output "state_machine_arn" {
-  description = "ARN of the created Step Functions state machine"
-  value       = aws_sfn_state_machine.state_machine.arn
+# TODO: Remove this in favour of policies_to_attach
+resource "aws_iam_policy" "custom_state_machine_policy" {
+  count       = var.state_machine_iam_policy != null ? 1 : 0
+  name        = "${var.name}-custom-sfn-policy"
+  description = "Custom IAM policy for state machine"
+  policy      = var.state_machine_iam_policy
 }
 
-output "state_machine_role_name" {
-  description = "Name of the role assumed by the Step Functions state machine"
-  value       = aws_iam_role.state_machine_role.name
+resource "aws_iam_role_policy_attachment" "custom_state_machine_policy_attachment" {
+  count      = var.state_machine_iam_policy != null ? 1 : 0
+  role       = aws_iam_role.state_machine_role.name
+  policy_arn = aws_iam_policy.custom_state_machine_policy[0].arn
 }

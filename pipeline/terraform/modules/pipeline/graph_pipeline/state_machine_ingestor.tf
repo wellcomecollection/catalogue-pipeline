@@ -8,48 +8,71 @@ module "catalogue_graph_ingestor_state_machine" {
     StartAt       = "Run loader"
     States = {
       "Run loader" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
+        Type     = "Task"
+        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        Retry    = local.state_function_default_retry,
+        Next     = "Run indexer"
         Arguments = {
-          FunctionName = module.ingestor_loader_lambda.lambda.arn,
-          Payload      = "{% $states.input %}"
-        },
-        Retry = local.state_function_default_retry,
-        Next  = "Monitor loader"
-      }
-      "Monitor loader" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
-        Arguments = {
-          FunctionName = module.ingestor_loader_monitor_lambda.lambda.arn,
-          Payload      = "{% $states.input %}"
-        },
-        Retry = local.state_function_default_retry,
-        Next  = "Run indexer"
+          Cluster        = aws_ecs_cluster.pipeline_cluster.arn
+          TaskDefinition = module.ingestor_loader_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = local.private_subnets
+              SecurityGroups = [
+                local.ec_privatelink_security_group_id,
+                aws_security_group.graph_pipeline_security_group.id,
+              ]
+            }
+          },
+          Overrides = {
+            ContainerOverrides = [
+              {
+                Name = "ingestor-loader-${var.pipeline_date}"
+                Command = [
+                  "/app/src/ingestor/steps/ingestor_loader.py",
+                  "--event", "{% $string($states.input) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
+                ],
+              }
+            ]
+          }
+        }
       },
       "Run indexer" = {
-        Type     = "Task",
-        Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
-        Arguments = {
-          FunctionName = module.ingestor_indexer_lambda.lambda.arn,
-          Payload      = "{% $states.input %}"
-        },
-        Retry = local.state_function_default_retry,
-        Next  = "Monitor indexer"
-      }
-      "Monitor indexer" = {
         Type     = "Task"
-        Resource = "arn:aws:states:::lambda:invoke",
-        Output   = "{% $states.result.Payload %}",
+        Resource = "arn:aws:states:::ecs:runTask.waitForTaskToken"
+        Retry    = local.state_function_default_retry,
+        Next     = "Should run deletions?"
         Arguments = {
-          FunctionName = module.ingestor_indexer_monitor_lambda.lambda.arn,
-          Payload      = "{% $states.input %}"
-        },
-        Next = "Should run deletions?"
-      },
+          Cluster        = aws_ecs_cluster.pipeline_cluster.arn
+          TaskDefinition = module.ingestor_indexer_ecs_task.task_definition_arn
+          LaunchType     = "FARGATE"
+          NetworkConfiguration = {
+            AwsvpcConfiguration = {
+              AssignPublicIp = "DISABLED"
+              Subnets        = local.private_subnets
+              SecurityGroups = [
+                local.ec_privatelink_security_group_id,
+                aws_security_group.graph_pipeline_security_group.id,
+              ]
+            }
+          },
+          Overrides = {
+            ContainerOverrides = [
+              {
+                Name = "ingestor-indexer-${var.pipeline_date}"
+                Command = [
+                  "/app/src/ingestor/steps/ingestor_indexer.py",
+                  "--event", "{% $string($states.input) %}",
+                  "--task-token", "{% $states.context.Task.Token %}"
+                ],
+              }
+            ]
+          }
+        }
+      }
       "Should run deletions?" = {
         Type = "Choice"
         Choices = [
@@ -78,11 +101,11 @@ module "catalogue_graph_ingestor_state_machine" {
   })
 
   invokable_lambda_arns = [
-    module.ingestor_loader_lambda.lambda.arn,
-    module.ingestor_loader_monitor_lambda.lambda.arn,
-    module.ingestor_indexer_lambda.lambda.arn,
-    module.ingestor_indexer_monitor_lambda.lambda.arn,
     module.ingestor_deletions_lambda.lambda.arn
   ]
-}
 
+  policies_to_attach = {
+    "ingestor_loader_ecs_task_invoke_policy"  = module.ingestor_loader_ecs_task.invoke_policy_document
+    "ingestor_indexer_ecs_task_invoke_policy" = module.ingestor_indexer_ecs_task.invoke_policy_document
+  }
+}
