@@ -101,7 +101,7 @@ jobs:
           # Graph subsystem lambdas
           - graph-remover
           - graph-es-pit-opener
-          - graph-bulk-loader-poller
+          - graph-bulk-load-poller
           - graph-bulk-loader
           - graph-remover-incremental
           - graph-ingestor-deletions
