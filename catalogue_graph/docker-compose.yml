@@ -1,12 +1,12 @@
 services:
-  catalogue_graph_extractor:
-    image: ${REPOSITORY_PREFIX:-}catalogue_graph_extractor:${TAG:-dev}
+  unified_pipeline_task:
+    image: ${REPOSITORY_PREFIX:-}unified_pipeline_task:${TAG:-dev}
     platform: linux/amd64
     build:
       context: .
       args:
         - PYTHON_IMAGE_VERSION=${PYTHON_IMAGE_VERSION:-3.13}
-      dockerfile: Dockerfile
+      dockerfile: task.Dockerfile
   unified_pipeline_lambda:
     image: ${REPOSITORY_PREFIX:-}unified_pipeline_lambda:${TAG:-dev}
     platform: linux/amd64
