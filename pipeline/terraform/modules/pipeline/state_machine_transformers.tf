@@ -152,7 +152,10 @@ module "ebsco_transformer_state_machine" {
     module.ebsco_transformer_lambda.lambda.arn,
     module.id_minter_lambda_step_function.lambda_arn
   ]
-  state_machine_iam_policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
+
+  policies_to_attach = {
+    "read_ebsco_adapter_bucket" = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
+  }
 }
 
 # Trigger State Machine on ebsco.adapter.completed events

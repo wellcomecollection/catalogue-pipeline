@@ -17,3 +17,7 @@ output "task_execution_role_name" {
 output "task_definition_arn" {
   value = module.task_definition.arn
 }
+
+output "invoke_policy_document" {
+  value = data.aws_iam_policy_document.invoke_policy_document.json
+}

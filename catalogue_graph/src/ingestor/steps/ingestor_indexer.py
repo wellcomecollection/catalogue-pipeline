@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-import argparse
 import json
 import typing
+from argparse import ArgumentParser
 from collections.abc import Generator
 
 import boto3
@@ -20,12 +20,41 @@ from ingestor.models.step_events import (
 )
 from utils.aws import df_from_s3_parquet, dicts_from_s3_jsonl
 from utils.elasticsearch import ElasticsearchMode, get_standard_index_name
+from utils.reporting import IndexerReport
+from utils.steps import create_job_id, run_ecs_handler
 from utils.types import IngestorType
 
 RECORD_CLASSES: dict[IngestorType, type[IndexableRecord]] = {
     "concepts": IndexableConcept,
     "works": IndexableWork,
 }
+
+
+def _get_objects_to_index(
+    base_event: IngestorStepEvent,
+) -> Generator[IngestorIndexerObject]:
+    print("Listing S3 objects to index...")
+    bucket_name = config.CATALOGUE_GRAPH_S3_BUCKET
+    prefix = base_event.get_path_prefix()
+    load_format = base_event.load_format
+
+    print(
+        f"Will process all {load_format} files prefixed with 's3://{bucket_name}/{prefix}/*'."
+    )
+
+    paginator = boto3.client("s3").get_paginator("list_objects_v2")
+    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix):
+        for s3_object in page.get("Contents", []):
+            if s3_object["Key"].endswith(f".{load_format}"):
+                # Given a key like 'some/prefix/00000000-00002070.format', extract '00000000-00002070'
+                range_suffix = s3_object["Key"].split("/")[-1].split(".")[0]
+                range_start, range_end = map(int, range_suffix.split("-"))
+
+                yield IngestorIndexerObject(
+                    s3_uri=f"s3://{bucket_name}/{s3_object['Key']}",
+                    content_length=s3_object["Size"],
+                    record_count=range_end - range_start,
+                )
 
 
 def generate_operations(
@@ -68,11 +97,10 @@ def handler(
 
     record_class = RECORD_CLASSES[event.ingestor_type]
 
-    if len(event.objects_to_index) == 0:
-        print("Will not index any documents. There are no files to process.")
+    objects_to_index = event.objects_to_index or _get_objects_to_index(event)
 
     total_success_count = 0
-    for s3_object in event.objects_to_index:
+    for s3_object in objects_to_index:
         if event.load_format == "parquet":
             data = df_from_s3_parquet(s3_object.s3_uri).to_dicts()
         else:
@@ -90,8 +118,14 @@ def handler(
 
         total_success_count += success_count
 
+    event_payload = event.model_dump(exclude={"objects_to_index"})
+
+    print("Preparing indexer pipeline report ...")
+    report = IndexerReport(**event_payload, success_count=total_success_count)
+    report.write()
+
     return IngestorIndexerMonitorLambdaEvent(
-        **event.model_dump(),
+        **event_payload,
         success_count=total_success_count,
     )
 
@@ -100,8 +134,36 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, typing.Any]:
     return handler(IngestorIndexerLambdaEvent(**event)).model_dump(mode="json")
 
 
-def local_handler() -> None:
-    parser = argparse.ArgumentParser(description="")
+def event_validator(raw_input: str) -> IngestorIndexerLambdaEvent:
+    event = json.loads(raw_input)
+    if "job_id" not in event:
+        event["job_id"] = create_job_id()
+
+    return IngestorIndexerLambdaEvent.model_validate(event)
+
+
+def ecs_handler(arg_parser: ArgumentParser) -> None:
+    arg_parser.add_argument(
+        "--es-mode",
+        type=str,
+        help="Where to extract Elasticsearch documents. Use 'public' to connect to the production cluster.",
+        required=False,
+        choices=["private", "local", "public"],
+        default="private",
+    )
+
+    args, _ = arg_parser.parse_known_args()
+    es_mode = args.es_mode
+
+    run_ecs_handler(
+        arg_parser=arg_parser,
+        handler=handler,
+        event_validator=event_validator,
+        es_mode=es_mode,
+    )
+
+
+def local_handler(parser: ArgumentParser) -> None:
     parser.add_argument(
         "--ingestor-type",
         type=str,
@@ -162,38 +224,20 @@ def local_handler() -> None:
     args = parser.parse_args()
     base_event = IngestorStepEvent.from_argparser(args)
 
-    bucket = config.CATALOGUE_GRAPH_S3_BUCKET
-    prefix = base_event.get_path_prefix()
-    objects_to_index = _get_objects_to_index(bucket, prefix, base_event.load_format)
-
-    event = IngestorIndexerLambdaEvent(
-        **base_event.model_dump(), objects_to_index=list(objects_to_index)
-    )
+    event = IngestorIndexerLambdaEvent(**base_event.model_dump())
     handler(event, es_mode=args.es_mode)
 
 
-def _get_objects_to_index(
-    bucket_name: str, prefix: str, load_format: str
-) -> Generator[IngestorIndexerObject]:
-    """Manually construct `IngestorIndexerObject` items based on objects in a given S3 location. Local runs only."""
-    print(
-        f"Will process all {load_format} files prefixed with 's3://{bucket_name}/{prefix}/*'."
-    )
-
-    paginator = boto3.client("s3").get_paginator("list_objects_v2")
-    for page in paginator.paginate(Bucket=bucket_name, Prefix=prefix):
-        for s3_object in page.get("Contents", []):
-            if s3_object["Key"].endswith(f".{load_format}"):
-                # Given a key like 'some/prefix/00000000-00002070.format', extract '00000000-00002070'
-                range_suffix = s3_object["Key"].split("/")[-1].split(".")[0]
-                range_start, range_end = map(int, range_suffix.split("-"))
-
-                yield IngestorIndexerObject(
-                    s3_uri=f"s3://{bucket_name}/{s3_object['Key']}",
-                    content_length=s3_object["Size"],
-                    record_count=range_end - range_start,
-                )
-
-
 if __name__ == "__main__":
-    local_handler()
+    parser: ArgumentParser = ArgumentParser()
+    parser.add_argument(
+        "--use-cli",
+        action="store_true",
+        help="Whether to invoke the local CLI handler instead of the ECS handler.",
+    )
+    args, _ = parser.parse_known_args()
+
+    if args.use_cli:
+        local_handler(parser)
+    else:
+        ecs_handler(parser)
