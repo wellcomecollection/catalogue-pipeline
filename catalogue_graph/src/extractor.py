@@ -119,15 +119,15 @@ def event_validator(raw_input: str) -> ExtractorEvent:
 
 
 def ecs_handler(arg_parser: ArgumentParser) -> None:
+    # Use hardcoded trace_id for now
+    setup_logging(
+        ExecutionContext(trace_id=trace_id, pipeline_step="graph_extractor")
+    )
+
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,
         event_validator=event_validator,
-    )
-
-    # Use hardcoded trace_id for now
-    setup_logging(
-        ExecutionContext(trace_id=trace_id, pipeline_step="graph_extractor")
     )
 
 

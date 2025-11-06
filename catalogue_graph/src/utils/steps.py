@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from collections.abc import Callable
 from datetime import datetime
 from typing import Concatenate, ParamSpec, Protocol, TypeVar
+from utils.logger import get_logger
 
 import boto3
 from pydantic import BaseModel
@@ -88,12 +89,21 @@ def run_ecs_handler(
     task_token = ecs_args.task_token
     event = ecs_args.event
 
+    logger = get_logger()
+    logger.info(
+        "ECS task started",
+        transformer_type=ecs_args.event.transformer_type,
+        entity_type=ecs_args.event.entity_type,
+    )
+
     stepfunctions_client = boto3.client("stepfunctions") if task_token else None
     step_output = StepFunctionOutput(task_token, stepfunctions_client)
 
     try:
         result = handler(event=event, *handler_args, **handler_kwargs)  # noqa: B026
         step_output.send_success(result)
+        logger.info("ECS task completed successfully")
+
     except Exception as exc:
         step_output.send_failure(exc)
 
