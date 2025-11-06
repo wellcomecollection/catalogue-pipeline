@@ -9,11 +9,23 @@ from models.events import (
     TransformerType,
 )
 from utils.aws import get_neptune_client
+from utils.logger import ExecutionContext, setup_logging
 
 
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
     s3_file_uri = event.get_bulk_load_s3_uri()
-    print(f"Initiating bulk load from {s3_file_uri}.")
+    logger = setup_logging(
+        ExecutionContext(
+            trace_id="some-value-passed-down-state-machine-steps",
+            pipeline_step="bulk_loader",
+        )
+    )
+    logger.info(
+        "Starting bulk load",
+        s3_file_uri=s3_file_uri,
+        transformer_type=event.transformer_type,
+        entity_type=event.entity_type,
+    )
 
     neptune_client = get_neptune_client(is_local)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)

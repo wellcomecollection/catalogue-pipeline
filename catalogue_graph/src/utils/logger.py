@@ -25,8 +25,9 @@ def setup_structlog(
         log_level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     """
     log_level = log_level or os.environ.get(
-        "LOG_LEVEL", "WARNING"
+        "LOG_LEVEL", "INFO"
     )  # we can adjust the log level without code change
+    # setting as INFO for now to check logs in production
 
     # Configure processors
     processors = [
@@ -86,8 +87,8 @@ def bind_execution_context(context: ExecutionContext) -> None:
         execution_context: Additional context metadata
     """
     structlog.contextvars.bind_contextvars(
-        trace_id=context["trace_id"],
-        pipeline_step=context["pipeline_step"],
+        trace_id=context.trace_id,
+        pipeline_step=context.pipeline_step,
         started_at=datetime.now(UTC).isoformat(),
     )
 

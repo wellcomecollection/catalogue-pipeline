@@ -18,8 +18,8 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
-from utils.steps import run_ecs_handler
 from utils.logger import ExecutionContext, get_logger, setup_logging
+from utils.steps import run_ecs_handler
 
 trace_id = "some-value-passed-down-state-machine-steps"
 
@@ -119,11 +119,6 @@ def event_validator(raw_input: str) -> ExtractorEvent:
 
 
 def ecs_handler(arg_parser: ArgumentParser) -> None:
-    # Use hardcoded trace_id for now
-    setup_logging(
-        ExecutionContext(trace_id=trace_id, pipeline_step="graph_extractor")
-    )
-
     run_ecs_handler(
         arg_parser=arg_parser,
         handler=handler,

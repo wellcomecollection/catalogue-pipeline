@@ -3,10 +3,11 @@ from argparse import ArgumentParser
 from collections.abc import Callable
 from datetime import datetime
 from typing import Concatenate, ParamSpec, Protocol, TypeVar
-from utils.logger import get_logger
 
 import boto3
 from pydantic import BaseModel
+
+from utils.logger import ExecutionContext, setup_logging
 
 Params = ParamSpec("Params")
 EventModel = TypeVar("EventModel", bound=BaseModel)
@@ -89,11 +90,15 @@ def run_ecs_handler(
     task_token = ecs_args.task_token
     event = ecs_args.event
 
-    logger = get_logger()
+    logger = setup_logging(
+        ExecutionContext(
+            trace_id="some-value-passed-down-state-machine-steps",
+            pipeline_step="graph_extractor",
+        )
+    )
+
     logger.info(
         "ECS task started",
-        transformer_type=ecs_args.event.transformer_type,
-        entity_type=ecs_args.event.entity_type,
     )
 
     stepfunctions_client = boto3.client("stepfunctions") if task_token else None

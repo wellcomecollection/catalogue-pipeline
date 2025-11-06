@@ -11,6 +11,7 @@ import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 
+from utils.logger import get_logger
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
 
@@ -30,7 +31,12 @@ NEPTUNE_QUERY_THREAD_COUNT = 5
 
 def on_request_backoff(backoff_details: typing.Any) -> None:
     exception_name = type(backoff_details["exception"]).__name__
-    print(f"Neptune request failed due to '{exception_name}'. Retrying...")
+    get_logger(__name__).warning(
+        "Neptune request failed, retrying",
+        exception_type=exception_name,
+        attempt=backoff_details.get("tries", "unknown"),
+        wait_time=backoff_details.get("wait", "unknown"),
+    )
 
 
 class BaseNeptuneClient:
@@ -44,6 +50,7 @@ class BaseNeptuneClient:
     def __init__(self, neptune_endpoint: str) -> None:
         self.session: boto3.Session | None = None
         self.neptune_endpoint: str = neptune_endpoint
+        self.logger = get_logger(f"{self.__class__.__module__}")
 
         # Throttle the number of parallel requests to prevent overwhelming the cluster
         self.parallel_query_semaphore = threading.Semaphore(
@@ -107,8 +114,10 @@ class BaseNeptuneClient:
         """Runs an openCypher query, measures its execution time, and prints a summary."""
         t = time.time()
         results = self.run_open_cypher_query(query, parameters)
-        print(
-            f"Ran '{query_label}' query in {round(time.time() - t)} seconds, retrieving {len(results)} records."
+        self.logger.info(
+            f"Ran '{query_label}' query",
+            duration_seconds=round(time.time() - t),
+            record_count=len(results),
         )
         return results
 
@@ -132,7 +141,7 @@ class BaseNeptuneClient:
             data = {"action": "performDatabaseReset", "token": reset_token}
             return self._make_request("POST", "/system", data)
 
-        print("Cannot reset the database due to an active safety switch.")
+        self.logger.warning("Cannot reset the database due to an active safety switch.")
         return None
 
     def initiate_bulk_load(self, s3_file_uri: str) -> str:
@@ -188,13 +197,14 @@ class BaseNeptuneClient:
     def delete_all_nodes_with_label(self, label: str) -> None:
         """Removes all nodes with the specified label from the graph in batches."""
         while (c := self.count_nodes_wih_label(label)) > 0:
-            print(f"Remaining nodes with label '{label}': {c}.")
+            self.logger.info(
+                f"Removing nodes with label '{label}",
+                remaining_node_count=c,
+            )
             delete_query = f"""
                 MATCH (n:{label}) WITH n ORDER BY n.id LIMIT {DELETE_BATCH_SIZE} DETACH DELETE n;
             """
             self.run_open_cypher_query(delete_query)
-
-        print(f"Removed all nodes with label '{label}'.")
 
     def get_existing_ids(self, ids: list[str], entity_type: EntityType) -> list[str]:
         if entity_type == "nodes":
