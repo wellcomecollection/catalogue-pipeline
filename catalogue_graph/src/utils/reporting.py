@@ -1,5 +1,5 @@
 import typing
-from typing import ClassVar, Self
+from typing import ClassVar
 
 from pydantic import BaseModel
 
@@ -14,7 +14,7 @@ from models.events import (
     IncrementalGraphRemoverEvent,
 )
 from models.neptune_bulk_loader import BulkLoadStatusResponse
-from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
+from utils.aws import pydantic_to_s3_json
 
 
 class PipelineMetric(BaseModel):
@@ -24,6 +24,10 @@ class PipelineMetric(BaseModel):
 
 class PipelineReport(BasePipelineEvent):
     label: ClassVar[str]
+
+    @property
+    def s3_uri(self) -> str:
+        raise NotImplementedError()
 
     @property
     def metrics(self) -> list[PipelineMetric]:
@@ -46,6 +50,11 @@ class PipelineReport(BasePipelineEvent):
                 timestamp=self.window.end_time,
             )
 
+    def publish(self) -> None:
+        """Write the report to S3 and publish all metrics."""
+        pydantic_to_s3_json(self, self.s3_uri)
+        self.put_metrics()
+
 
 class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
     @property
@@ -53,10 +62,9 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
         base_key = super().event_key
         return f"report.{base_key}"
 
-    def write(self) -> None:
-        s3_uri = self.get_s3_uri("json")
-        pydantic_to_s3_json(self, s3_uri)
-        self.put_metrics()
+    @property
+    def s3_uri(self) -> str:
+        return self.get_s3_uri("json")
 
     @property
     def metric_dimensions(self) -> dict:
@@ -64,6 +72,20 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
             "pipeline_date": self.pipeline_date,
             "transformer_type": self.transformer_type,
             "entity_type": self.entity_type,
+        }
+
+
+class IngestorReport(PipelineReport, IngestorStepEvent):
+    @property
+    def s3_uri(self) -> str:
+        return self.get_s3_uri(f"report.{self.label}", "json")
+
+    @property
+    def metric_dimensions(self) -> dict:
+        return {
+            "pipeline_date": self.pipeline_date,
+            "ingestor_type": self.ingestor_type,
+            "index_date": self.index_date,
         }
 
 
@@ -94,27 +116,6 @@ class IncrementalGraphRemoverReport(GraphPipelineReport, IncrementalGraphRemover
         return [
             PipelineMetric(name="deleted_count", value=self.deleted_count),
         ]
-
-
-class IngestorReport(PipelineReport, IngestorStepEvent):
-    @classmethod
-    def read(cls, event: IngestorStepEvent) -> Self | None:
-        s3_uri = event.get_s3_uri(f"report.{cls.label}", "json")
-        return pydantic_from_s3_json(cls, s3_uri)
-
-    def write(self) -> None:
-        s3_uri = self.get_s3_uri(f"report.{self.label}", "json")
-        pydantic_to_s3_json(self, s3_uri)
-
-        self.put_metrics()
-
-    @property
-    def metric_dimensions(self) -> dict:
-        return {
-            "pipeline_date": self.pipeline_date,
-            "ingestor_type": self.ingestor_type,
-            "index_date": self.index_date,
-        }
 
 
 class LoaderReport(IngestorReport):

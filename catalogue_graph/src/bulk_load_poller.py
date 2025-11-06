@@ -109,7 +109,7 @@ def handler(
     if not is_local:
         bulk_loader_event = bulk_loader_event_from_s3_uri(overall_status.full_uri)
         report = BulkLoaderReport(**bulk_loader_event.model_dump(), status=payload)
-        report.write()
+        report.publish()
 
     if status == "LOAD_COMPLETED" or failed_below_insert_error_threshold:
         return BulkLoadPollerResponse.from_event(event, "SUCCEEDED")

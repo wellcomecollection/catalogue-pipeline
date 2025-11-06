@@ -44,7 +44,7 @@ def handler(event: IncrementalGraphRemoverEvent, is_local: bool = False) -> None
     report = IncrementalGraphRemoverReport(
         **event.model_dump(), deleted_count=len(deleted_ids)
     )
-    report.write()
+    report.publish()
 
     print(f"List of deleted IDs saved to '{s3_file_uri}'.")
 

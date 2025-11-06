@@ -51,7 +51,7 @@ def handler(
     deleted_count = es_remover.delete_documents(ids_to_delete)
 
     report = DeletionReport(**event.model_dump(), deleted_count=deleted_count)
-    report.write()
+    report.publish()
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:

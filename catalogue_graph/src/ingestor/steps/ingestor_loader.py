@@ -50,7 +50,7 @@ def handler(
         record_count=record_count,
         total_file_size=total_file_size,
     )
-    report.write()
+    report.publish()
 
     if event.pass_objects_to_index:
         return IngestorIndexerLambdaEvent(
