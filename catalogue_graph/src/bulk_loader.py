@@ -9,18 +9,13 @@ from models.events import (
     TransformerType,
 )
 from utils.aws import get_neptune_client
-from utils.logger import ExecutionContext, setup_logging
+from utils.logger import ExecutionContext, get_logger, setup_logging
 
 
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
     s3_file_uri = event.get_bulk_load_s3_uri()
-    logger = setup_logging(
-        ExecutionContext(
-            trace_id="some-value-passed-down-state-machine-steps",
-            pipeline_step="bulk_loader",
-        )
-    )
-    logger.info(
+
+    get_logger().info(
         "Starting bulk load",
         s3_file_uri=s3_file_uri,
         transformer_type=event.transformer_type,
@@ -36,6 +31,13 @@ def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEve
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
+    setup_logging(
+        ExecutionContext(
+            trace_id="some-value-passed-down-state-machine-steps",
+            pipeline_step="bulk_loader",
+        ),
+        is_local=True,
+    )
     return handler(BulkLoaderEvent(**event)).model_dump()
 
 
@@ -84,6 +86,14 @@ def local_handler() -> None:
 
     args = parser.parse_args()
     event = BulkLoaderEvent.from_argparser(args)
+
+    setup_logging(
+        ExecutionContext(
+            trace_id="some-value-passed-down-state-machine-steps",
+            pipeline_step="bulk_loader",
+        ),
+        is_local=True,
+    )
 
     print(handler(event, is_local=True))
 
