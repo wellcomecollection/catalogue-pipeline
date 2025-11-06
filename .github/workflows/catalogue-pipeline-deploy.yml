@@ -1,4 +1,4 @@
-name: "Catalogue graph: Deploy"
+name: "Catalogue pipeline: Deploy"
 
 on:
   workflow_call:
@@ -22,7 +22,23 @@ permissions:
   contents: read
   id-token: write
 
-jobs:
+jobs: 
+  retag-unified-pipeline-task-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-1
+          role-to-assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+      - uses: ./.github/actions/retag-docker-image
+        with:
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          image_name: unified_pipeline_task
+          source_tag: ${{ inputs.deploy_tag }}
+          target_tag: prod
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+
   retag-unified-pipeline-lambda-image:
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +54,20 @@ jobs:
           source_tag: ${{ inputs.deploy_tag }}
           target_tag: prod
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+
+  retag-dated-unified-pipeline-task-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Retag dated unified pipeline task image
+        id: retag
+        uses: ./.github/actions/retag-dated-pipeline-image
+        with:
+          source_tag: ${{ inputs.deploy_tag }}
+          registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
+          image_name: unified_pipeline_task
+          role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
+          terraform_dir: pipeline/terraform
 
   deploy-unified-pipeline-lambdas:
     runs-on: ubuntu-latest

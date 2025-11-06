@@ -2,10 +2,6 @@ resource "aws_ecr_repository" "unified_pipeline_lambda" {
   name = "uk.ac.wellcome/unified_pipeline_lambda"
 }
 
-resource "aws_ecr_repository" "catalogue_graph_extractor" {
-  name = "uk.ac.wellcome/catalogue_graph_extractor"
-}
-
 resource "aws_ecr_repository" "unified_pipeline_task" {
   name = "uk.ac.wellcome/unified_pipeline_task"
 }
@@ -38,6 +34,17 @@ locals {
       },
       {
         rulePriority = 3
+        description  = "Keep latest 4 env tagged images e.g. env.2025-10-01"
+        selection = {
+          tagStatus     = "tagged"
+          tagPrefixList = ["env"]
+          countType     = "imageCountMoreThan"
+          countNumber   = 4
+        }
+        action = { type = "expire" }
+      },
+      {
+        rulePriority = 4
         description  = "Keep dev tagged image"
         selection = {
           tagStatus     = "tagged"
@@ -48,7 +55,7 @@ locals {
         action = { type = "expire" }
       },
       {
-        rulePriority = 4
+        rulePriority = 5
         description  = "Expire other tagged images, keep only the last 50"
         selection = {
           tagStatus      = "tagged"
@@ -59,7 +66,7 @@ locals {
         action = { type = "expire" }
       },
       {
-        rulePriority = 5
+        rulePriority = 6
         description  = "Expire untagged images, keep only the last 5"
         selection = {
           tagStatus   = "untagged"
@@ -70,14 +77,6 @@ locals {
       }
     ]
   })
-}
-
-// This policy will expire old images in the repository, when we decide
-// deployment strategy we can update this policy to match the desired tags in use
-// and the number of images to keep.
-resource "aws_ecr_lifecycle_policy" "expire_old_images" {
-  repository = aws_ecr_repository.catalogue_graph_extractor.name
-  policy     = local.ecr_lifecycle_policy
 }
 
 resource "aws_ecr_lifecycle_policy" "expire_old_images_unified_pipeline_lambda" {

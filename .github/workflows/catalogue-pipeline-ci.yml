@@ -1,4 +1,4 @@
-name: "Catalogue graph: Run CI pipeline"
+name: "Catalogue pipeline: Build and Test"
 
 on:
   push:
