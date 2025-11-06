@@ -2,6 +2,7 @@ import re
 from datetime import datetime
 
 from models.pipeline.concept import DateTimeRange, Period
+from models.pipeline.identifier import Identified, Unidentifiable
 
 # Explicitly discard SGML escape sequences and doubly-escaped sequences.
 # This prevents the RE_KEEP sequence misinterpreting &#40; (lparen)
@@ -10,15 +11,63 @@ RE_DISCARD = re.compile(r"(&(amp;)?.+?;)")
 
 RE_KEEP = re.compile(r"\d{2,4}|-")
 
+# matcher for "nth century" with any single trailing punctuation
+# actually matches any character at all directly after century, but
+# it's most likely to be a comma or dot, and it is more permissive if
+# we allow anything there.
+RE_NTH_CENTURY = re.compile(r"(\d+)\w{2} century.?")
 
-def parse_period(period: str) -> Period:
+# Matcher for date ranges consisting of four-digit years.
+# The scala transformer does not create ranges for subdivisions
+# consisting of years with fewer than 4 digits (e.g. 500-1400 from ebs1211100e)
+RE_4_DIGIT_DATE_RANGE = re.compile(r"\d{4}(-|-(\d{4}))?")
+
+
+def parse_period(period: str, identifier: Identified | None = None) -> Period:
     """
     Converts a string representation of a period into a Period,
     giving a concrete date/time range.
     >>> parse_period("1988-1990")
-    Period(id=None, label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00', to_time='1990-12-31T23:59:59.999999', label='1988-1990'))
+    Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00Z', to_time='1990-12-31T23:59:59.999999Z', label='1988-1990'))
     """
-    return Period(label=period, range=to_range(period), type="Period")
+    range_fn = century_to_range if "century" in period else to_range
+    return Period(
+        label=period,
+        range=range_fn(period),
+        type="Period",
+        id=identifier if identifier else Unidentifiable(),
+    )
+
+
+def century_to_range(period: str) -> DateTimeRange:
+    """
+    Returns a range for a period representing a century, expressed as "nth century"
+    >>> r = century_to_range("19th century")
+    >>> r.from_time
+    '1800-01-01T00:00:00Z'
+    >>> r.to_time
+    '1899-12-31T23:59:59.999999Z'
+
+    It is sensitive to all the English ordinal suffixes
+    >>> r = century_to_range("21st century")
+    >>> r.from_time
+    '2000-01-01T00:00:00Z'
+    >>> r = century_to_range("22nd century")
+    >>> r.from_time
+    '2100-01-01T00:00:00Z'
+    >>> r = century_to_range("23rd century")
+    >>> r.from_time
+    '2200-01-01T00:00:00Z'
+    """
+    century_ordinal = int(RE_NTH_CENTURY.match(period).group(1))
+    century_prefix = century_ordinal - 1
+    return DateTimeRange.model_validate(
+        {
+            "label": period,
+            "from": start_of_year(f"{century_prefix}00"),
+            "to": end_of_year(f"{century_prefix}99"),
+        }
+    )
 
 
 def to_range(period: str) -> DateTimeRange:
@@ -28,9 +77,9 @@ def to_range(period: str) -> DateTimeRange:
     A range is from the start of the first year to the end of the last year
     >>> r = to_range("[2016]-[2020]")
     >>> r.from_time
-    '2016-01-01T00:00:00'
+    '2016-01-01T00:00:00Z'
     >>> r.to_time
-    '2020-12-31T23:59:59.999999'
+    '2020-12-31T23:59:59.999999Z'
 
     Although not necessarily part of a true range definition, copyright dates are interpreted as part of the range
     >>> r = to_range("1986 printing, c1977.")
@@ -134,11 +183,10 @@ def crack(range_string: str) -> tuple[str, str]:
     from_part = from_part.strip()
     to_part = to_part.strip()
 
-    # If from_part consists of multiple year entries (e.g. "2024 2025"), extract the lowest one
-    if from_part:
-        from_part = min(from_part.split(" "))
-
     if from_part and sep and to_part:
+        # If from_part consists of multiple year entries (e.g. "2024 2025"), extract the lowest one
+        if from_part:
+            from_part = min(from_part.split(" "))
         # Fill in any implied missing numbers in the to part.
         to_part = max(
             fill_year_prefix(from_part, to_year) for to_year in to_part.split(" ")
@@ -189,5 +237,10 @@ def start_of_year(year: str) -> str:
 
 def end_of_year(year: str) -> str:
     return (
-        datetime(int(year), 12, 31, 23, 59, 59, 1000000 - 1) if year else datetime.max
-    ).isoformat() + "Z"
+        (
+            datetime(int(year), 12, 31, 23, 59, 59, 1000000 - 1)
+            if year
+            else datetime.max
+        ).isoformat()
+        + "999Z"
+    )  # hack - EoY in the scala transformer has nanosecond precision

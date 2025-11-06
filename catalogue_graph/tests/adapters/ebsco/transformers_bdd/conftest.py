@@ -166,6 +166,26 @@ def context_concept_identifier_value(
     )
 
 
+@then(
+    parsers.re(
+        r"that (?P<thing_name>.+)\'s (?P<ord>\d+\w{2}) concept has a range from (?P<from_val>[\dT:.Z-]+) to (?P<to_val>[\dT:.Z-]+)"
+    )
+)
+def step_ordinal_range(
+    context: dict[str, Any], thing_name: str, ord: str, from_val: str, to_val: str
+) -> None:
+    thing = context[thing_name]
+    idx = _ordinal_index(ord)
+    assert 0 <= idx < len(thing.concepts), (
+        f"Concept index {idx} out of range (have {len(thing.concepts)})"
+    )
+    assert thing.concepts[idx].type == "Period"
+    actual_from = thing.concepts[idx].range.from_time
+    actual_to = thing.concepts[idx].range.to_time
+    assert actual_from == from_val
+    assert actual_to == to_val
+
+
 @then(parsers.parse("that {thing} has {count:d} {attr_phrase}"))
 def sublist_member_count(
     context: dict[str, Any], thing: str, count: int, attr_phrase: str
