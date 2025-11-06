@@ -1,6 +1,6 @@
 module "bulk_loader_lambda" {
   source = "../../pipeline_lambda"
-  
+
   service_name = "graph-bulk-loader"
   description  = "Bulk loads entities from an S3 bucket into the Neptune database."
 

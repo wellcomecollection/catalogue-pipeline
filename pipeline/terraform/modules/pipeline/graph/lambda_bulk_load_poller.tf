@@ -13,7 +13,7 @@ module "bulk_load_poller_lambda" {
   }
 
   memory_size = 256
-  timeout     = 60 
+  timeout     = 60
 
   secret_env_vars = {
     SLACK_SECRET_ID = local.slack_webhook
