@@ -7,7 +7,12 @@ from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
     IngestorStepEvent,
 )
-from models.events import BasePipelineEvent, BulkLoaderEvent, GraphPipelineEvent
+from models.events import (
+    BasePipelineEvent,
+    BulkLoaderEvent,
+    GraphPipelineEvent,
+    IncrementalGraphRemoverEvent,
+)
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.aws import pydantic_from_s3_json, pydantic_to_s3_json
 
@@ -80,7 +85,7 @@ class BulkLoaderReport(GraphPipelineReport, BulkLoaderEvent):
         ]
 
 
-class IncrementalGraphRemoverReport(GraphPipelineReport, BulkLoaderEvent):
+class IncrementalGraphRemoverReport(GraphPipelineReport, IncrementalGraphRemoverEvent):
     label: ClassVar[str] = "incremental_graph_remover"
     deleted_count: int
 

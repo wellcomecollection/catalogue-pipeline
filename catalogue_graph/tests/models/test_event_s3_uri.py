@@ -10,7 +10,7 @@ from models.neptune_bulk_loader import (
     BulkLoadFeed,
     BulkLoadStatusResponse,
 )
-from utils.reporting import BulkLoaderReport
+from utils.reporting import BulkLoaderReport, IncrementalGraphRemoverReport
 
 
 def test_construct_bulk_loader_file_path() -> None:
@@ -118,4 +118,20 @@ def test_construct_bulk_loader_report_s3_uri() -> None:
     assert (
         event.get_s3_uri("json")
         == f"{s3_prefix}/2025-01-01/windows/20220101T1145-20220101T1200/report.catalogue_work_identifiers__edges.json"
+    )
+
+
+def test_construct_graph_remover_report_s3_uri() -> None:
+    s3_prefix = "s3://wellcomecollection-catalogue-graph/graph_remover_incremental"
+    event = IncrementalGraphRemoverReport(
+        pipeline_date="2025-01-01",
+        transformer_type="catalogue_concepts",
+        entity_type="nodes",
+        window=IncrementalWindow.model_validate({"end_time": "2022-01-01T12:00"}),
+        deleted_count=235,
+    )
+
+    assert (
+        event.get_s3_uri("json")
+        == f"{s3_prefix}/2025-01-01/windows/20220101T1145-20220101T1200/report.catalogue_concepts__nodes.json"
     )
