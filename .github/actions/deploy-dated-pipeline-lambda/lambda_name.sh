@@ -8,7 +8,7 @@ PIPELINE_DATE="${1:-}"
 LAMBDA_SUFFIX="${2:-}"
 
 if [[ -z "$PIPELINE_DATE" || -z "$LAMBDA_SUFFIX" ]]; then
-	echo "Usage: discover.sh <pipeline_date> <lambda_suffix>" >&2
+	echo "Usage: lambda_name.sh <pipeline_date> <lambda_suffix>" >&2
 	exit 1
 fi
 
