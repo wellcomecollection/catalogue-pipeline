@@ -36,6 +36,7 @@ jobs:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           folder: catalogue_graph
           target: unified_pipeline_task
+          dockerfile: task.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
@@ -56,7 +57,7 @@ jobs:
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     needs: [build-unified-pipeline-task-image, build-unified-pipeline-lambda-image]
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
