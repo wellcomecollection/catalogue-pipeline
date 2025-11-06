@@ -76,9 +76,9 @@ def handler(
     event: BulkLoadPollerEvent, is_local: bool = False
 ) -> BulkLoadPollerResponse:
     payload = get_neptune_client(is_local).get_bulk_load_status(event.load_id)
+    overall_status = payload.overall_status
 
     # Statuses: https://docs.aws.amazon.com/neptune/latest/userguide/loader-message.html
-    overall_status = payload.overall_status
     status: str = overall_status.status
     processed_count = overall_status.total_records
 
