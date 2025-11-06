@@ -9,6 +9,7 @@ from transformers.loc.raw_concept import RawLibraryOfCongressConcept
 
 class LibraryOfCongressLocationsTransformer(BaseTransformer):
     def __init__(self, subject_headings_url: str, names_url: str):
+        super().__init__()
         self.source = MultiGZipSource([subject_headings_url, names_url])
 
     def transform_node(self, raw_node: dict) -> SourceLocation | None:

@@ -31,6 +31,7 @@ class CatalogueWorksTransformer(BaseTransformer):
         event: BasePipelineEvent,
         es_mode: ElasticsearchMode,
     ):
+        super().__init__()
         self.source = MergedWorksSource(
             event, query=ES_QUERY, fields=ES_FIELDS, es_mode=es_mode
         )

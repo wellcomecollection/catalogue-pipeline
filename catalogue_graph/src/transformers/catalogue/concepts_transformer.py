@@ -21,6 +21,7 @@ class CatalogueConceptsTransformer(BaseTransformer):
         event: BasePipelineEvent,
         es_mode: ElasticsearchMode,
     ):
+        super().__init__()
         self.source = CatalogueConceptsSource(event, es_mode=es_mode)
 
         self.id_label_checker: IdLabelChecker | None = None

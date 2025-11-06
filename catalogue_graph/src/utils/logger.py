@@ -5,10 +5,14 @@ Contextual logging implementation using structlog.
 import os
 import sys
 from datetime import UTC, datetime
-from typing import Any
 
 import structlog
-from structlog.types import FilteringBoundLogger
+from pydantic import BaseModel
+
+
+class ExecutionContext(BaseModel):
+    trace_id: str
+    pipeline_step: str
 
 
 def setup_structlog(
@@ -73,22 +77,22 @@ def _get_renderer():
         return structlog.processors.JSONRenderer()
 
 
-def bind_execution_context(
-    execution_id: str, execution_context: dict[str, Any] | None = None
-) -> None:
+def bind_execution_context(context: ExecutionContext) -> None:
     """
     Bind execution context globally for all subsequent log calls.
 
     Args:
-        execution_id: Unique execution identifier
+        trace_id: Unique execution identifier
         execution_context: Additional context metadata
     """
     structlog.contextvars.bind_contextvars(
-        execution_id=execution_id, execution_context=execution_context
+        trace_id=context["trace_id"],
+        pipeline_step=context["pipeline_step"],
+        started_at=datetime.now(UTC).isoformat(),
     )
 
 
-def get_logger(name: str | None = None) -> FilteringBoundLogger:
+def get_logger(name: str | None = None) -> structlog.BoundLogger:
     """
     Get a structlog logger with automatic context from contextvars.
 
@@ -101,12 +105,14 @@ def get_logger(name: str | None = None) -> FilteringBoundLogger:
     return structlog.get_logger(name)
 
 
-def setup_logging(execution_id: str, is_local: bool = False) -> FilteringBoundLogger:
+def setup_logging(
+    context: ExecutionContext, is_local: bool = False
+) -> structlog.BoundLogger:
     """
     Set up structlog with execution context.
 
     Args:
-        execution_id: Unique execution identifier provided by caller
+        trace_id: Unique execution identifier provided by caller
         is_local: Whether this is running in local development mode
 
     Returns:
@@ -115,12 +121,6 @@ def setup_logging(execution_id: str, is_local: bool = False) -> FilteringBoundLo
     # Set default log level based on environment
     setup_structlog(log_level="INFO" if is_local else "WARNING")
 
-    # Simple execution context with just timestamp
-    execution_context: dict[str, Any] = {
-        "started_at": datetime.now(UTC).isoformat(),
-        ## something else that is interesting
-    }
-
-    bind_execution_context(execution_id, execution_context)
+    bind_execution_context(context)
 
     return get_logger()

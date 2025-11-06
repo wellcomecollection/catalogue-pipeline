@@ -10,6 +10,7 @@ from .raw_concept import RawMeSHConcept
 
 class MeSHConceptsTransformer(BaseTransformer):
     def __init__(self, url: str):
+        super().__init__()
         self.source = MeSHConceptsSource(url)
 
     def transform_node(self, raw_node: RawMeshNode) -> SourceConcept | None:

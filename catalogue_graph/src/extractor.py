@@ -18,9 +18,9 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
-from utils.logger import get_logger, setup_logging
+from utils.logger import ExecutionContext, get_logger, setup_logging
 
-execution_id = "some-value-passed-down-state-machine-steps"
+trace_id = "some-value-passed-down-state-machine-steps"
 
 
 def raw_event(raw_input: str) -> ExtractorEvent:
@@ -80,10 +80,6 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
                 pass
 
         else:
-            logger.error(
-                "Unsupported stream destination",
-                stream_destination=event.stream_destination,
-            )
             raise ValueError(
                 f"Unsupported stream destination: {event.stream_destination}"
             )
@@ -104,8 +100,10 @@ def handler(event: ExtractorEvent, is_local: bool = False) -> None:
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:
-    # Use hardcoded execution_id for now
-    logger = setup_logging(execution_id)
+    # Use hardcoded trace_id for now
+    logger = setup_logging(
+        ExecutionContext(trace_id=trace_id, pipeline_step="graph_extractor")
+    )
 
     logger.info("Lambda invocation started")
 
@@ -123,8 +121,10 @@ def ecs_handler() -> None:
     )
     ecs_args = parser.parse_args()
 
-    # Use hardcoded execution_id for now
-    logger = setup_logging(execution_id)
+    # Use hardcoded trace_id for now
+    logger = setup_logging(
+        ExecutionContext(trace_id=trace_id, pipeline_step="graph_extractor")
+    )
 
     logger.info(
         "ECS task started",
@@ -194,8 +194,11 @@ def local_handler() -> None:
     local_args = parser.parse_args()
     event = ExtractorEvent.from_argparser(local_args)
 
-    # Use hardcoded execution_id for now
-    logger = setup_logging(execution_id, is_local=True)
+    # Use hardcoded trace_id for now
+    logger = setup_logging(
+        ExecutionContext(trace_id=trace_id, pipeline_step="graph_extractor"),
+        is_local=True,
+    )
 
     logger.info(
         "Local handler started",
