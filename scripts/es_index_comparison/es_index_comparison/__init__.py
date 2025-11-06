@@ -10,4 +10,5 @@ __all__ = [
     "parquet_io",
     "diff",
     "analysis",
+    "source_config",
 ]

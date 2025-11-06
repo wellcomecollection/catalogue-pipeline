@@ -7,6 +7,7 @@ import pandas as pd
 import polars as pl
 
 from .diff import compile_ignore_patterns, aggregate_diffs, truncate_val
+from .source_config import ResolvedIndexSource
 from rich.markup import escape as rich_escape
 
 console = Console()
@@ -28,17 +29,17 @@ def build_source_maps(df_pl: pl.DataFrame) -> dict:
 
 
 def compare_indices(
-    index_a: str,
-    index_b: str,
-    dfs: dict,
+    source_a: ResolvedIndexSource,
+    source_b: ResolvedIndexSource,
+    dfs: dict[str, pl.DataFrame],
     ignore_fields: list[str],
     base_diff_folder: Path,
     sample_size: int,
 ):
     console.log("Starting comparison phase")
 
-    df_a = dfs[index_a]
-    df_b = dfs[index_b]
+    df_a = dfs[source_a.id]
+    df_b = dfs[source_b.id]
 
     ids_a = set(df_a.select("_id").to_pandas()["_id"].values)
     ids_b = set(df_b.select("_id").to_pandas()["_id"].values)
@@ -48,16 +49,16 @@ def compare_indices(
     common_ids = ids_a & ids_b
 
     console.log(
-        f"Total {rich_escape(index_a)}: {len(ids_a)}  {rich_escape(index_b)}: {len(ids_b)}  Common: {len(common_ids)}"
+        f"Total {rich_escape(source_a.label)}: {len(ids_a)}  {rich_escape(source_b.label)}: {len(ids_b)}  Common: {len(common_ids)}"
     )
     if only_in_a:
         console.log(
             # Escape expects a string; join sample IDs for display
-            f"Only in {rich_escape(index_a)} count={len(only_in_a)} sample={rich_escape(', '.join(map(str, only_in_a[:10])))}"
+            f"Only in {rich_escape(source_a.label)} count={len(only_in_a)} sample={rich_escape(', '.join(map(str, only_in_a[:10])))}"
         )
     if only_in_b:
         console.log(
-            f"Only in {rich_escape(index_b)} count={len(only_in_b)} sample={rich_escape(', '.join(map(str, only_in_b[:10])))}"
+            f"Only in {rich_escape(source_b.label)} count={len(only_in_b)} sample={rich_escape(', '.join(map(str, only_in_b[:10])))}"
         )
 
     sources_a = build_source_maps(df_a)
@@ -136,7 +137,7 @@ def compare_indices(
         ids = ids[:sample_size]
         with sample_md_path.open("w") as md:
             md.write("# Sample Differing Documents\n\n")
-            md.write(f"Compared indices: `{index_a}` vs `{index_b}`\n\n")
+            md.write(f"Compared indices: `{source_a.label}` vs `{source_b.label}`\n\n")
             md.write(f"Run timestamp: {datetime.utcnow().isoformat()}Z\n\n")
             md.write(f"Total differing documents: {len(diff_results)}\n")
             md.write(f"Total diff entries: {total_diff_entries}\n")
@@ -154,7 +155,7 @@ def compare_indices(
                     left_md = left.replace("`", "\u200b`")
                     right_md = right.replace("`", "\u200b`")
                     md.write(
-                        f"- **{d['type']}** @ `{d['path']}`\n  - {index_a}: `{left_md}`\n  - {index_b}: `{right_md}`\n"
+                        f"- **{d['type']}** @ `{d['path']}`\n  - {source_a.label}: `{left_md}`\n  - {source_b.label}: `{right_md}`\n"
                     )
                 md.write("\n")
         console.log(f"Sample diffs written to {sample_md_path}")
@@ -186,7 +187,7 @@ def load_diff_jsonl(diff_dir: Path) -> dict[str, list[dict]]:
     return out
 
 
-def show_single_diff(doc_id: str, diff_dir: Path, index_a: str, index_b: str, limit: int = 500):
+def show_single_diff(doc_id: str, diff_dir: Path, label_a: str, label_b: str, limit: int = 500):
     diffs_map = load_diff_jsonl(diff_dir)
     if doc_id not in diffs_map:
         console.print(f"Doc {doc_id} not found in diff set or is identical post-filter.")
@@ -197,7 +198,7 @@ def show_single_diff(doc_id: str, diff_dir: Path, index_a: str, index_b: str, li
         left = truncate_val(d.get("left"))
         right = truncate_val(d.get("right"))
         console.print(
-            f" - {rich_escape(d['type']):15} @ {rich_escape(d['path'])}\n    {rich_escape(index_a)}: {rich_escape(left)}\n    {rich_escape(index_b)}: {rich_escape(right)}",
+            f" - {rich_escape(d['type']):15} @ {rich_escape(d['path'])}\n    {rich_escape(label_a)}: {rich_escape(left)}\n    {rich_escape(label_b)}: {rich_escape(right)}",
             markup=True,
         )
     if len(diffs) > limit:

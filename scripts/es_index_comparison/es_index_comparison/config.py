@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import yaml
 import time
 from pathlib import Path
@@ -12,17 +11,13 @@ DEFAULT_OUTPUT_DIR = "data"
 
 @dataclass
 class AppConfig:
-    indexes: List[str]
+    index_sources: List[str]
     filter_query: Dict[str, Any] | None = None
     ignore_fields: List[str] = field(default_factory=list)
     sample_size: int = 10
     loading_chunk_size: int = 100_000
     namespace: str | None = None
     output_dir: str = DEFAULT_OUTPUT_DIR
-
-    # Derived / runtime only
-    cloud_id: str | None = None
-    api_key: str | None = None
 
     def effective_namespace(self, config_path: Path | None) -> str:
         if self.namespace:
@@ -32,8 +27,8 @@ class AppConfig:
         return f"{base}-{stamp}"
 
     def validate(self) -> None:
-        if len(self.indexes) != 2:
-            raise ValueError("Config 'indexes' must contain exactly two index names.")
+        if len(self.index_sources) != 2:
+            raise ValueError("Config 'index_sources' must contain exactly two identifiers.")
         if self.sample_size <= 0:
             raise ValueError("sample_size must be > 0")
         if self.loading_chunk_size <= 0:
@@ -54,7 +49,7 @@ def load_config(path: str | Path, overrides: Dict[str, Any] | None = None) -> Ap
                 raw[k] = v
 
     cfg = AppConfig(
-        indexes=raw.get("indexes", []),
+        index_sources=raw.get("index_sources", []),
         filter_query=raw.get("filter_query"),
         ignore_fields=raw.get("ignore_fields", []) or [],
         sample_size=raw.get("sample_size", 10),
@@ -62,14 +57,6 @@ def load_config(path: str | Path, overrides: Dict[str, Any] | None = None) -> Ap
         namespace=raw.get("namespace"),
         output_dir=raw.get("output_dir", DEFAULT_OUTPUT_DIR),
     )
-
-    # Env secrets (do not persist)
-    cfg.cloud_id = overrides.get("cloud_id") if overrides else None
-    if not cfg.cloud_id:
-        cfg.cloud_id = os.getenv("ES_CLOUD_ID")
-    cfg.api_key = overrides.get("api_key") if overrides else None
-    if not cfg.api_key:
-        cfg.api_key = os.getenv("ES_API_KEY")
 
     cfg.validate()
     return cfg

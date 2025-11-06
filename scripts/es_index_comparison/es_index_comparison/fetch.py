@@ -3,9 +3,12 @@ from __future__ import annotations
 import gzip
 import json
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, List, Tuple
 from elasticsearch import helpers, Elasticsearch
 from rich.console import Console
+
+from .es_client import build_client
+from .source_config import ResolvedIndexSource
 
 console = Console()
 
@@ -34,15 +37,33 @@ def fetch_index(
 
 
 def fetch_both(
-    es: Elasticsearch,
-    indexes: list[str],
+    sources: List[ResolvedIndexSource],
     raw_dir: Path,
     query: Dict[str, Any] | None,
 ) -> Dict[str, Path]:
+    """Fetch documents for each index source, instantiating clients per cluster."""
+
     results: Dict[str, Path] = {}
-    for idx in indexes:
-        out_file = raw_dir / f"{idx}.ndjson.gz"
-        console.log(f"Fetching index {idx} to {out_file}")
-        fetch_index(es, idx, out_file, query)
-        results[idx] = out_file
+    clients: Dict[Tuple[str, str, str], Elasticsearch] = {}
+
+    try:
+        for source in sources:
+            client_key = (source.cluster_id, source.cloud_id, source.api_key)
+            if client_key not in clients:
+                clients[client_key] = build_client(source.cloud_id, source.api_key)
+            es = clients[client_key]
+
+            out_file = raw_dir / f"{source.storage_key}.ndjson.gz"
+            console.log(
+                f"Fetching index {source.index} (source={source.id}, cluster={source.cluster_id}) to {out_file}"
+            )
+            fetch_index(es, source.index, out_file, query)
+            results[source.id] = out_file
+    finally:
+        for es in clients.values():
+            try:
+                es.close()
+            except Exception:
+                pass
+
     return results

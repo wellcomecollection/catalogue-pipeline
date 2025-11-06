@@ -4,17 +4,16 @@
 # Each run produces its own namespace directory under output_dir.
 # ------------------------------------------------------------
 
-# Exactly TWO indices to compare (required)
-indexes:
-  - works-source-2025-10-02
-  - works-source-2025-10-06
+# Exactly TWO index sources to compare (required)
+# These identifiers must exist in source_configuration.yaml
+index_sources:
+  - pipeline-2025-10-02-images-indexed
+  - pipeline-2025-08-14-images-indexed
 
 # Optional Elasticsearch query DSL (omit for match_all). This example filters
 # documents where a nested term matches a specific identifier type.
-filter_query:
-  query:
-    term:
-      state.sourceIdentifier.identifierType.id: ebsco-alt-lookup
+# filter_query:
+#   query:
 
 # Ignore field path patterns (wildcards & list index insensitive tokens allowed)
 # Pattern language:
@@ -24,19 +23,9 @@ filter_query:
 #   data.production[].dates[].range.from -> ignore all list indices for those segments
 # Descendants of a matched path are also ignored implicitly.
 ignore_fields:
-  - version
-  - state.modifiedTime
-  - state.sourceModifiedTime
-  - state.relations.children
-  - state.relations.siblingsPreceding
-  - state.relations.siblingsSucceeding
-  - data.production[].dates[].type
-  - data.production[].dates[].range.from
-  - data.production[].dates[].range.to
-  - data.production[].places[].type
-  - data.subjects[].type
-  - data.production[].function.type
-  # Number of differing documents to sample for console display
+  # - some_field
+
+# Number of differing documents to sample for console display
 sample_size: 10
 
 # Rows per Parquet shard flush during conversion
@@ -47,7 +36,3 @@ loading_chunk_size: 100000
 
 # Base output directory (created if missing)
 output_dir: data
-
-# Secrets are NOT placed here; provide via env or CLI flags:
-#   export ES_CLOUD_ID=...
-#   export ES_API_KEY=...
