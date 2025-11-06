@@ -38,7 +38,7 @@ class PipelineReport(BasePipelineEvent):
                 metric_name=metric.name,
                 value=metric.value,
                 dimensions=self.metric_dimensions,
-                timestamp=self.window.start_time,
+                timestamp=self.window.end_time,
             )
 
 
