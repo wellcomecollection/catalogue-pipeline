@@ -14,6 +14,7 @@ from utils.aws import (
     df_to_s3_parquet,
 )
 from utils.elasticsearch import ElasticsearchMode
+from utils.reporting import IncrementalGraphRemoverReport
 from utils.types import CatalogueTransformerType, EntityType
 
 
@@ -39,6 +40,11 @@ def handler(event: IncrementalGraphRemoverEvent, is_local: bool = False) -> None
     # Write removed IDs to a parquet file
     s3_file_uri = event.get_s3_uri("parquet", "deleted_ids")
     df_to_s3_parquet(pl.DataFrame(deleted_ids), s3_file_uri)
+
+    report = IncrementalGraphRemoverReport(
+        **event.model_dump(), deleted_count=len(deleted_ids)
+    )
+    report.write()
 
     print(f"List of deleted IDs saved to '{s3_file_uri}'.")
 

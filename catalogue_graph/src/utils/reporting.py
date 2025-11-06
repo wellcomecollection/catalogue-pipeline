@@ -80,6 +80,17 @@ class BulkLoaderReport(GraphPipelineReport, BulkLoaderEvent):
         ]
 
 
+class IncrementalGraphRemoverReport(GraphPipelineReport, BulkLoaderEvent):
+    label: ClassVar[str] = "incremental_graph_remover"
+    deleted_count: int
+
+    @property
+    def metrics(self) -> list[PipelineMetric]:
+        return [
+            PipelineMetric(name="deleted_count", value=self.deleted_count),
+        ]
+
+
 class IngestorReport(PipelineReport, IngestorStepEvent):
     @classmethod
     def read(cls, event: IngestorStepEvent) -> Self | None:
@@ -116,7 +127,7 @@ class LoaderReport(IngestorReport):
 
 class IndexerReport(IngestorReport):
     label: ClassVar[str] = "indexer"
-    success_count: int | None = None
+    success_count: int
 
     @property
     def metrics(self) -> list[PipelineMetric]:
@@ -125,7 +136,7 @@ class IndexerReport(IngestorReport):
 
 class DeletionReport(IngestorReport):
     label: ClassVar[str] = "deletions"
-    deleted_count: int | None
+    deleted_count: int
 
     @property
     def metrics(self) -> list[PipelineMetric]:
