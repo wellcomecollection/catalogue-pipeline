@@ -1,13 +1,9 @@
-resource "aws_ecs_cluster" "cluster" {
-  name = "graph-extractor-${var.pipeline_date}"
-}
-
 module "extractor_ecs_task" {
   source = "./ecs_task"
 
   task_name = "graph-extractor-${var.pipeline_date}"
 
-  image = "${data.aws_ecr_repository.catalogue_graph_extractor.repository_url}:prod"
+  image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:dev"
 
   environment = {
     CATALOGUE_GRAPH_S3_BUCKET   = data.aws_s3_bucket.catalogue_graph_bucket.bucket

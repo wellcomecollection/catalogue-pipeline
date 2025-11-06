@@ -14,7 +14,7 @@ from utils.elasticsearch import ElasticsearchMode
 
 from .base_extractor import GraphBaseExtractor
 
-WORKS_BATCH_SIZE = 10_000
+WORKS_BATCH_SIZE = 40_000
 
 
 def get_related_works_query(related_ids: list[str]) -> dict:
