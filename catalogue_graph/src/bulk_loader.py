@@ -35,8 +35,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
         ExecutionContext(
             trace_id="some-value-passed-down-state-machine-steps",
             pipeline_step="bulk_loader",
-        ),
-        is_local=True,
+        )
     )
     return handler(BulkLoaderEvent(**event)).model_dump()
 
