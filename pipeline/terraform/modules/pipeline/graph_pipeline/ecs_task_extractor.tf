@@ -8,6 +8,7 @@ module "extractor_ecs_task" {
   environment = {
     CATALOGUE_GRAPH_S3_BUCKET   = data.aws_s3_bucket.catalogue_graph_bucket.bucket
     GRAPH_QUERIES_SNS_TOPIC_ARN = module.catalogue_graph_queries_topic.arn
+    LOG_LEVEL                  = "INFO" # Set log level to INFO for testing, WARNING later
   }
 
   cpu    = 4096

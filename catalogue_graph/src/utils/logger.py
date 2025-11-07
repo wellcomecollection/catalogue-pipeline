@@ -5,6 +5,7 @@ Contextual logging implementation using structlog.
 import os
 import sys
 from datetime import UTC, datetime
+from typing import cast
 
 import structlog
 from pydantic import BaseModel
@@ -15,22 +16,19 @@ class ExecutionContext(BaseModel):
     pipeline_step: str
 
 
-def setup_structlog(
-    log_level: str | None = None,
-) -> None:
+def setup_structlog() -> None:
     """
     Configure structlog for structured contextual logging.
 
     Args:
         log_level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     """
-    log_level = log_level or os.environ.get(
+    log_level = os.environ.get(
         "LOG_LEVEL", "INFO"
-    )  # we can adjust the log level without code change
-    # setting as INFO for now to check logs in production
+    )  # we can adjust the log level in tf. Defaults to INFO in local
 
     # Configure processors
-    processors = [
+    processors: list[structlog.types.Processor] = [
         # Add log level to event dict
         structlog.stdlib.add_log_level,
         # Add logger name
@@ -67,7 +65,7 @@ def setup_structlog(
     )
 
 
-def _get_renderer():
+def _get_renderer() -> structlog.types.Processor:
     """Get appropriate renderer based on environment."""
 
     if hasattr(sys.stderr, "isatty") and sys.stderr.isatty():
@@ -93,7 +91,7 @@ def bind_execution_context(context: ExecutionContext) -> None:
     )
 
 
-def get_logger(name: str | None = None) -> structlog.BoundLogger:
+def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
     """
     Get a structlog logger with automatic context from contextvars.
 
@@ -103,12 +101,12 @@ def get_logger(name: str | None = None) -> structlog.BoundLogger:
     Returns:
         Logger that automatically includes bound context
     """
-    return structlog.get_logger(name)
+    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
 
 
 def setup_logging(
     context: ExecutionContext, is_local: bool = False
-) -> structlog.BoundLogger:
+) -> structlog.stdlib.BoundLogger:
     """
     Set up structlog with execution context.
 
@@ -120,7 +118,7 @@ def setup_logging(
         Logger with execution context bound
     """
     # Set default log level based on environment
-    setup_structlog(log_level="INFO" if is_local else "WARNING")
+    setup_structlog()
 
     bind_execution_context(context)
 

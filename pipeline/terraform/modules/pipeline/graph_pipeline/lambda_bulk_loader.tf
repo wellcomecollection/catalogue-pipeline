@@ -24,6 +24,7 @@ module "bulk_loader_lambda" {
   environment = {
     variables = {
       CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
+      LOG_LEVEL                 = "INFO" # Set log level to INFO for testing, WARNING later
     }
   }
 }
