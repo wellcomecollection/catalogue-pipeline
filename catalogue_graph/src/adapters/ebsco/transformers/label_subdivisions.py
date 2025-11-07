@@ -104,7 +104,7 @@ def should_create_range(label: str) -> bool:
      >>> should_create_range("Siege of Bielefeld 1820-1856")
      False
     """
-    return bool(RE_NTH_CENTURY.match(label) or RE_4_DIGIT_DATE_RANGE.match(label))
+    return RE_NTH_CENTURY.match(label) is not None or RE_4_DIGIT_DATE_RANGE.match(label) is not None
 
 
 def build_concept(
