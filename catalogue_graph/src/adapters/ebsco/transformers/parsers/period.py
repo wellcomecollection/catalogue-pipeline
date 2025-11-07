@@ -28,7 +28,7 @@ def parse_period(period: str, identifier: Identified | None = None) -> Period:
     Converts a string representation of a period into a Period,
     giving a concrete date/time range.
     >>> parse_period("1988-1990")
-    Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00Z', to_time='1990-12-31T23:59:59.999999Z', label='1988-1990'))
+    Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00Z', to_time='1990-12-31T23:59:59.999999999Z', label='1988-1990'))
     """
     range_fn = century_to_range if "century" in period else to_range
     return Period(
@@ -46,7 +46,7 @@ def century_to_range(period: str) -> DateTimeRange:
     >>> r.from_time
     '1800-01-01T00:00:00Z'
     >>> r.to_time
-    '1899-12-31T23:59:59.999999Z'
+    '1899-12-31T23:59:59.999999999Z'
 
     It is sensitive to all the English ordinal suffixes
     >>> r = century_to_range("21st century")
@@ -79,7 +79,7 @@ def to_range(period: str) -> DateTimeRange:
     >>> r.from_time
     '2016-01-01T00:00:00Z'
     >>> r.to_time
-    '2020-12-31T23:59:59.999999Z'
+    '2020-12-31T23:59:59.999999999Z'
 
     Although not necessarily part of a true range definition, copyright dates are interpreted as part of the range
     >>> r = to_range("1986 printing, c1977.")
