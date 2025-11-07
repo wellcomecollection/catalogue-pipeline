@@ -122,7 +122,7 @@ def handler(
 
     print("Preparing indexer pipeline report ...")
     report = IndexerReport(**event_payload, success_count=total_success_count)
-    report.write()
+    report.publish()
 
     return IngestorIndexerMonitorLambdaEvent(
         **event_payload,
