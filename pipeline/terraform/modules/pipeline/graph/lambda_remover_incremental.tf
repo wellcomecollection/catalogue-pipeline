@@ -61,3 +61,8 @@ resource "aws_iam_role_policy" "graph_remover_incremental_ecs_read_pipeline_secr
   role   = module.graph_remover_incremental_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read_denormalised_read_only.json
 }
+
+resource "aws_iam_role_policy" "graph_remover_incremental_lambda_cloudwatch_write_policy" {
+  role   = module.graph_remover_incremental_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}
