@@ -11,7 +11,8 @@ from adapters.ebsco.transformers.label_subdivisions import (
     build_concept,
 )
 from models.pipeline.concept import Concept, Subject
-from models.pipeline.identifier import Identifiable
+from models.pipeline.identifier import Identifiable, SourceIdentifier
+from models.pipeline.id_label import Id
 from utils.types import RawConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -112,12 +113,18 @@ def is_subject_to_keep(field: Field) -> bool:
     https://github.com/wellcomecollection/catalogue-pipeline/blob/180bece57fb84a90a8d2d2a7432843b5237d7727/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcSubjects.scala#L82
     """
     return field.indicators is not None and (
-        field.indicators.second in ["0", "2"]
-        or (
-            field.indicators.second == "7"
-            and field.get("2") in ["local", "homoit", "indig", "enslv"]
-        )
+            field.indicators.second in ["0", "2"]
+            or (
+                    field.indicators.second == "7"
+                    and field.get("2") in ["local", "homoit", "indig", "enslv"]
+            )
     )
+
+
+def _get_id_type(field: Field) -> str | None:
+    return {
+        "2": "nlm-mesh"
+    }.get(field.indicators.second)
 
 
 def extract_subject(field: Field) -> Subject | None:
@@ -130,8 +137,18 @@ def extract_subject(field: Field) -> Subject | None:
     # Concept construction with original semantics (preserving Python rules while adopting separator changes)
     main_label = _get_main_label(field)
     ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
+    identifier = None
+    # Only if ind2 is correct.
+    identifier_type = _get_id_type(field)
+    if identifier_type and (identifier_subfield_value := field.get("0")):
+        identifier = Identifiable.from_source_identifier(SourceIdentifier(
+            identifier_type=Id(id=identifier_type),
+            ontology_type=ontology_type,
+            value=identifier_subfield_value.removeprefix("https://id.nlm.nih.gov/mesh/").removeprefix("(DLNM)"),
+        ))
+
     primary_concept = build_concept(
-        main_label, ontology_type, preserve_trailing_period=ontology_type == "Person"
+        main_label, ontology_type, preserve_trailing_period=ontology_type == "Person", identifier=identifier
     )
 
     get_subdivision_concepts = SUBDIVISION_TRANSFORMS[field.tag]
@@ -145,6 +162,6 @@ def extract_subject(field: Field) -> Subject | None:
 
     return Subject(
         label=label,
-        id=Identifiable.identifier_from_text(label, ontology_type),
+        id=identifier or Identifiable.identifier_from_text(label, ontology_type),
         concepts=[primary_concept] + list(get_subdivision_concepts(field)),
     )

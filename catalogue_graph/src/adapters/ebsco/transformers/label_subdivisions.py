@@ -105,16 +105,17 @@ def should_create_range(label: str) -> bool:
      False
     """
     return (
-        RE_NTH_CENTURY.match(label) is not None
-        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+            RE_NTH_CENTURY.match(label) is not None
+            or RE_4_DIGIT_DATE_RANGE.match(label) is not None
     )
 
 
 def build_concept(
-    raw_label: str,
-    raw_type: RawConceptType,
-    preserve_trailing_period: bool = False,
-    is_identifiable: bool = True,
+        raw_label: str,
+        raw_type: RawConceptType,
+        preserve_trailing_period: bool = False,
+        is_identifiable: bool = True,
+        identifier: Identifiable | None = None
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
     # Organisations use the raw label to create a Label Derived Identifier.
@@ -128,7 +129,7 @@ def build_concept(
     # in the same fashion as normalise_label does here.
     # https://github.com/wellcomecollection/catalogue-pipeline/blob/6c5ee0e90eda680e82a2c2716a4f31e6eb4a96ea/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcPerson.scala#L23
     label_for_id = raw_label if raw_type == "Organisation" else label
-    id = (
+    id = identifier or (
         get_concept_identifier(label_for_id, raw_type)
         if is_identifiable
         else Unidentifiable()

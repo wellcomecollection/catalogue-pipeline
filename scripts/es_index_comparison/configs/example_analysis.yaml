@@ -37,7 +37,7 @@ ignore_fields:
   - data.subjects[].type
   - data.production[].function.type
   # Number of differing documents to sample for console display
-sample_size: 10
+sample_size: 40
 
 # Rows per Parquet shard flush during conversion
 loading_chunk_size: 100000

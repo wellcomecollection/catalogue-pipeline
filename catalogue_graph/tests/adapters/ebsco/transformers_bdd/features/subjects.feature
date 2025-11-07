@@ -263,3 +263,23 @@ Feature: Extracting subjects from 6xx fields
         | code | type    |
         | 650  | Concept |
         | 651  | Place   |
+
+  Rule: If a standard id in a scheme we recognise is provided, use it.
+    Scenario Outline: A subject has a MeSH identifier
+      Given the MARC record has a <code> field with indicators "" "2" with subfields:
+        | code | value       |
+        | a    | Quirkafleeg |
+        | 0    | D003027     |
+      When I transform the MARC record
+      Then the only subject has the label "Quirkafleeg"
+      And that subject's only concept has the type "<type>"
+      And that subject's only concept has the identifier value "D003027"
+      And that subject's only concept has the identifier type "nlm-mesh"
+      Examples:
+        | code | type         |
+        | 600  | Person       |
+        | 610  | Organisation |
+        | 611  | Meeting      |
+        | 648  | Period       |
+        | 650  | Concept      |
+        | 651  | Place        |
