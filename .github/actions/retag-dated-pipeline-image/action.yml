@@ -1,0 +1,46 @@
+name: "Retag Dated Pipeline Image"
+description: "Discovers the latest pipeline date and retags the pipeline image with that date."
+inputs:
+  source_tag:
+    description: "Existing image tag to retag from (e.g., commit SHA)"
+    required: true
+  registry:
+    description: "ECR registry hostname"
+    required: true
+  image_name:
+    description: "ECR repository/image name"
+    required: false
+    default: "unified_pipeline_lambda"
+  role_to_assume:
+    description: "AWS IAM role ARN for ECR operations"
+    required: true
+  terraform_dir:
+    description: "Directory containing dated pipeline terraform folders"
+    required: false
+    default: "pipeline/terraform"
+outputs:
+  pipeline_date:
+    description: "Discovered latest pipeline date"
+    value: ${{ steps.discover.outputs.pipeline_date }}
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Discover latest pipeline date and lambda name
+      id: discover
+      shell: bash
+      run: |
+        chmod +x "${{ github.action_path }}/discover.sh"
+        "${{ github.action_path }}/discover.sh" \
+          "${{ inputs.terraform_dir }}"
+
+    - name: Retag image to pipeline date
+      uses: ./.github/actions/retag-docker-image
+      with:
+        registry: ${{ inputs.registry }}
+        image_name: ${{ inputs.image_name }}
+        source_tag: ${{ inputs.source_tag }}
+        target_tag: env.${{ steps.discover.outputs.pipeline_date }}
+        role_to_assume: ${{ inputs.role_to_assume }}

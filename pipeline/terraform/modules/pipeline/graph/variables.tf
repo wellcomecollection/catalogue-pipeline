@@ -28,3 +28,7 @@ variable "es_secrets" {
     graph_extractor   = string
   })
 }
+
+variable "ecs_cluster_arn" {
+  type = string
+}

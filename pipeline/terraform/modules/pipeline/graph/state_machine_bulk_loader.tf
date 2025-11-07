@@ -1,48 +1,49 @@
-module "catalogue_graph_scaler_state_machine" {
+module "catalogue_graph_bulk_loader_state_machine" {
   source = "../../state_machine"
-  name   = "graph-scaler-${var.pipeline_date}"
+  name   = "graph-bulk-loader-${var.pipeline_date}"
 
   state_machine_definition = jsonencode({
     QueryLanguage = "JSONPath"
-    Comment       = "Change the capacity of the serverless Neptune cluster and periodically check its status until new capacity applied."
-    StartAt       = "Scale"
+    Comment       = "Trigger a Neptune bulk load from an S3 file and periodically check its status until complete."
+    StartAt       = "Trigger bulk load"
     States = {
-      "Scale" : {
+      "Trigger bulk load" : {
         "Type" : "Task",
         "Resource" : "arn:aws:states:::lambda:invoke",
         "OutputPath" : "$.Payload",
         "Parameters" : {
-          "FunctionName" : module.graph_scaler_lambda.lambda.arn,
+          "FunctionName" : module.bulk_loader_lambda.lambda_arn,
           "Payload.$" : "$"
         },
         Retry = local.state_function_default_retry,
-        "Next" : "Wait 30 seconds"
+        "Next" : "Wait 5 seconds"
       },
-      "Wait 30 seconds" : {
+      "Wait 5 seconds" : {
         "Type" : "Wait",
-        "Next" : "Check cluster status",
-        "Seconds" : 30
+        "Next" : "Check load status",
+        "Seconds" : 5
       },
-      "Check cluster status" : {
+      "Check load status" : {
         "Type" : "Task",
         "Resource" : "arn:aws:states:::lambda:invoke",
         "OutputPath" : "$.Payload",
         "Parameters" : {
-          "FunctionName" : module.graph_status_poller_lambda.lambda.arn
+          "FunctionName" : module.bulk_load_poller_lambda.lambda_arn,
+          "Payload.$" : "$"
         },
         Retry = local.state_function_default_retry,
-        "Next" : "Scale operation complete?"
+        "Next" : "Load complete?"
       },
-      "Scale operation complete?" : {
+      "Load complete?" : {
         "Type" : "Choice",
         "Choices" : [
           {
             "Variable" : "$.status",
-            "StringEquals" : "available",
+            "StringEquals" : "SUCCEEDED",
             "Next" : "Success"
           }
         ],
-        "Default" : "Wait 30 seconds"
+        "Default" : "Wait 5 seconds"
       },
       "Success" : {
         "Type" : "Succeed"
@@ -51,7 +52,7 @@ module "catalogue_graph_scaler_state_machine" {
   })
 
   invokable_lambda_arns = [
-    module.graph_scaler_lambda.lambda.arn,
-    module.graph_status_poller_lambda.lambda.arn
+    module.bulk_loader_lambda.lambda_arn,
+    module.bulk_load_poller_lambda.lambda_arn
   ]
 }

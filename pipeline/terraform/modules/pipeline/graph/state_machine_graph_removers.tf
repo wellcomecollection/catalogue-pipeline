@@ -23,7 +23,7 @@ module "catalogue_graph_removers_monthly_state_machine" {
               Resource = "arn:aws:states:::lambda:invoke",
               Output   = "{% $states.result.Payload %}",
               Arguments = {
-                FunctionName = module.graph_remover_lambda.lambda.arn,
+                FunctionName = module.graph_remover_lambda.lambda_arn,
                 Payload = {
                   "transformer_type" : "{% $states.input.transformer_type %}",
                   "entity_type" : "{% $states.input.entity_type %}",
@@ -44,7 +44,7 @@ module "catalogue_graph_removers_monthly_state_machine" {
   })
 
   invokable_lambda_arns = [
-    module.graph_remover_lambda.lambda.arn
+    module.graph_remover_lambda.lambda_arn
   ]
 }
 
@@ -82,7 +82,7 @@ module "catalogue_graph_removers_incremental_state_machine" {
               Type     = "Task",
               Resource = "arn:aws:states:::lambda:invoke",
               Arguments = {
-                FunctionName = module.graph_remover_incremental_lambda.lambda.arn,
+                FunctionName = module.graph_remover_incremental_lambda.lambda_arn,
                 Payload      = "{% $states.input %}"
               },
               Retry = local.state_function_default_retry,
@@ -99,6 +99,6 @@ module "catalogue_graph_removers_incremental_state_machine" {
   })
 
   invokable_lambda_arns = [
-    module.graph_remover_incremental_lambda.lambda.arn
+    module.graph_remover_incremental_lambda.lambda_arn
   ]
 }

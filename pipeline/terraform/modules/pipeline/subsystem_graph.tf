@@ -1,11 +1,13 @@
 module "graph_pipeline" {
-  source = "./graph_pipeline"
+  source = "./graph"
 
   pipeline_date = var.pipeline_date
   index_dates = {
     works    = "2025-10-09"
     concepts = "2025-10-09"
   }
+
+  ecs_cluster_arn = aws_ecs_cluster.cluster.arn
 
   es_cluster_host     = module.elastic.pipeline_storage_private_host
   es_cluster_port     = module.elastic.pipeline_storage_port
