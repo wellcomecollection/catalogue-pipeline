@@ -44,3 +44,8 @@ resource "aws_iam_role_policy" "ingestor_deletions_lambda_s3_policy" {
   role   = module.ingestor_deletions_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.ingestor_deletions_s3_policy.json
 }
+
+resource "aws_iam_role_policy" "ingestor_deletions_lambda_cloudwatch_write_policy" {
+  role   = module.ingestor_deletions_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}

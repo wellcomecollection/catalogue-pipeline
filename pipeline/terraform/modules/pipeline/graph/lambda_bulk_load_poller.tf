@@ -47,3 +47,8 @@ resource "aws_iam_role_policy" "bulk_load_poller_s3_red" {
   policy = data.aws_iam_policy_document.s3_bulk_load_read.json
 }
 
+resource "aws_iam_role_policy" "bulk_load_poller_lambda_cloudwatch_write_policy" {
+  role   = module.bulk_load_poller_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}
+
