@@ -16,7 +16,6 @@ from models.graph_node import BaseNode
 from query_builders.cypher import construct_upsert_cypher_query
 from sources.base_source import BaseSource
 from utils.aws import publish_batch_to_sns
-from utils.logger import get_logger
 
 CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
 
@@ -24,7 +23,6 @@ CHUNK_SIZE = int(os.environ.get("TRANSFORMER_CHUNK_SIZE", "256"))
 class BaseTransformer:
     def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
-        self.logger = get_logger(f"{self.__class__.__module__}")
 
     def transform_node(self, raw_node: Any) -> BaseNode | None:
         """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
@@ -53,12 +51,11 @@ class BaseTransformer:
                 counter += 1
 
                 if counter % 10000 == 0:
-                    self.logger.info(f"Streamed {counter} nodes...")
-                if counter == number:
-                    self.logger.info(f"Streamed all {counter} nodes.")
-                    return
+                    print(f"Streamed {counter} nodes...")
+            if counter == number:
+                return
 
-        self.logger.info(f"Streamed all {counter} nodes.")
+        print(f"Streamed all {counter} nodes.")
 
     def _stream_edges(self, number: int | None = None) -> Generator[BaseEdge]:
         """
@@ -75,12 +72,11 @@ class BaseTransformer:
 
                 counter += 1
                 if counter % 10000 == 0:
-                    self.logger.info(f"Streamed {counter} edges...")
+                    print(f"Streamed {counter} edges...")
                 if counter == number:
-                    self.logger.info(f"Streamed all {counter} edges.")
                     return
 
-        self.logger.info(f"Streamed all {counter} edges.")
+        print(f"Streamed all {counter} edges.")
 
     def _stream_entities(
         self, entity_type: EntityType, sample_size: int | None = None
@@ -190,7 +186,7 @@ class BaseTransformer:
                 queries = []
 
             if (i + 1) % 100 == 0:
-                self.logger.info(f"Published {i + 1} messages to SNS.")
+                print(f"Published {i + 1} messages to SNS.")
 
         # Publish remaining messages (if any)
         if len(queries) > 0:

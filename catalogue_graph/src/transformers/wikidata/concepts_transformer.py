@@ -23,7 +23,6 @@ class WikidataConceptsTransformer(BaseTransformer):
         entity_type: EntityType,
         pipeline_date: str,
     ):
-        super().__init__()
         self.source = WikidataLinkedOntologySource(
             linked_transformer, entity_type, pipeline_date
         )
