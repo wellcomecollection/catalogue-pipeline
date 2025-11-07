@@ -23,7 +23,9 @@ RE_NTH_CENTURY = re.compile(r"(\d+)\w{2} century.?")
 RE_4_DIGIT_DATE_RANGE = re.compile(r"\d{4}(-(\d{4})?)?")
 
 
-def parse_period(period: str, identifier: Identifiable | None = None) -> Period:
+def parse_period(
+    period: str, identifier: Identifiable | Unidentifiable | None = None
+) -> Period:
     """
     Converts a string representation of a period into a Period,
     giving a concrete date/time range.
