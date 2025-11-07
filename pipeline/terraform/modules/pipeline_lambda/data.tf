@@ -2,7 +2,7 @@ locals {
   namespace = "catalogue-${var.pipeline_date}"
 
   name      = "${local.namespace}-${var.service_name}"
-  image_tag = var.tag_override != "" ? var.tag_override : "env.${var.pipeline_date}"
+  image_tag = var.tag_override != "" ? "latest" : "env.${var.pipeline_date}"
 
   # Only set a queue name if a queue_config object has been supplied.
   # When queue_config is null, downstream queue resources are not created.

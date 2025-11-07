@@ -1,5 +1,5 @@
 module "ingestor_loader_ecs_task" {
-  source = "./ecs_task"
+  source = "../../ecs_task"
 
   task_name = "ingestor-loader-${var.pipeline_date}"
 

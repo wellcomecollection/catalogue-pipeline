@@ -13,8 +13,7 @@ from utils.logger import ExecutionContext, get_logger, setup_logging
 
 
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
-    s3_file_uri = event.get_bulk_load_s3_uri()
-
+    s3_file_uri = event.get_s3_uri()
     get_logger().info(
         "Starting bulk load",
         s3_file_uri=s3_file_uri,
@@ -34,7 +33,7 @@ def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
     setup_logging(
         ExecutionContext(
             trace_id="some-value-passed-down-state-machine-steps",
-            pipeline_step="bulk_loader",
+            pipeline_step="graph_bulk_loader",
         )
     )
     return handler(BulkLoaderEvent(**event)).model_dump()
@@ -89,7 +88,7 @@ def local_handler() -> None:
     setup_logging(
         ExecutionContext(
             trace_id="some-value-passed-down-state-machine-steps",
-            pipeline_step="bulk_loader",
+            pipeline_step="graph_bulk_loader",
         ),
         is_local=True,
     )
