@@ -72,12 +72,7 @@ def test_contributor_from_field(marc_record: Record, field_code: str) -> None:
             [
                 Field(
                     tag=f"7{code_suffix}",
-                    subfields=[
-                        Subfield(code="a", value="James Moriarty"),
-                        Subfield(
-                            code="t", value="A Treatise on the Binomial Theorem"
-                        ),  # name of work, not the person
-                    ],
+                    subfields=[Subfield(code="a", value="James Moriarty")],
                 ),
                 Field(
                     tag=f"1{code_suffix}",
@@ -97,7 +92,6 @@ def test_contributor_from_field(marc_record: Record, field_code: str) -> None:
 def test_distinct_by_label(marc_record: Record) -> None:
     work = transform_record(marc_record)
     contributor = lone_element(work.data.contributors)
-    #    assert len(work.contributors) == 1
     assert contributor.agent.label == "James Moriarty"
     # if one is primary and the other not, then the primary one is retained
     # A real example of this can be seen in y2xdytd7 (ebs1351010e)
@@ -115,10 +109,44 @@ def test_distinct_by_label(marc_record: Record) -> None:
                     tag=f"7{code_suffix}",
                     subfields=[
                         Subfield(code="a", value="James Moriarty"),
-                        Subfield(
-                            code="t", value="A Treatise on the Binomial Theorem"
-                        ),  # name of work, not the person
+                        Subfield(code="p", value="asdfghjkldfghjkldfghjklß"),
                     ],
+                ),
+                Field(
+                    tag=f"1{code_suffix}",
+                    subfields=[Subfield(code="a", value="James Moriarty")],
+                ),
+            ],
+            id=concept_type,
+        )
+        for (code_suffix, concept_type) in [
+            ("00", "Person"),
+            ("10", "Organisation"),
+            ("11", "Meeting"),
+        ]
+    ],
+    indirect=["marc_record"],
+)
+def test_distinct_by_label_ignored_fields(marc_record: Record) -> None:
+    # subfield t is omitted for Person and Meeting labels
+    work = transform_record(marc_record)
+    contributor = lone_element(work.data.contributors)
+    assert contributor.agent.label == "James Moriarty"
+    # if one is primary and the other not, then the primary one is retained
+    # A real example of this can be seen in y2xdytd7 (ebs1351010e)
+    # where the primary contributor in the EBSCO data is the author,
+    # and the secondary, his work.
+    assert contributor.primary
+
+
+@pytest.mark.parametrize(
+    "marc_record",
+    [
+        pytest.param(
+            [
+                Field(
+                    tag=f"7{code_suffix}",
+                    subfields=[Subfield(code="a", value="James Moriarty")],
                 ),
                 Field(
                     tag=f"7{code_suffix}",
@@ -152,12 +180,7 @@ def test_distinct_by_label_no_primary(marc_record: Record) -> None:
             [
                 Field(
                     tag="100",
-                    subfields=[
-                        Subfield(code="a", value="Dora Milaje"),
-                        Subfield(
-                            code="t", value="The Princess Bride"
-                        ),  # name of work, not the person
-                    ],
+                    subfields=[Subfield(code="a", value="Dora Milaje")],
                 ),
                 Field(
                     tag="710",
@@ -235,8 +258,9 @@ def test_distinct_by_label_and_role(marc_record: Record) -> None:
                         Subfield(code="c", value="Lady,"),
                         Subfield(code="d", value="1856-1939"),
                         Subfield(
-                            code="t", value="IGNORE ME!"
+                            code="t", value="a work"
                         ),  # name of work, not the person
+                        # t should be ignored, but needs to be here for Scala Transformer fidelity
                         Subfield(
                             code="n", value="IGNORE ME!"
                         ),  # regards section of work mentioned in t
@@ -276,7 +300,7 @@ def test_contributor_all_fields(
     # which does not exist on x10 fields.
     contributor = transform_record(marc_record).data.contributors[0]
     assert contributor.roles == [Label(label="key grip"), Label(label="best boy")]
-    label = "Churchill, Randolph Spencer IV, Lady, 1856-1939 (nee Jennie Jerome)"
+    label = "Churchill, Randolph Spencer IV, Lady, 1856-1939 a work (nee Jennie Jerome)"
     assert contributor.primary == primary
     assert contributor.agent.label == label
 
@@ -385,9 +409,8 @@ def test_contributor_organisation_identifiers_do_not_normalise(
                         ),  # regards section of work mentioned in t
                         Subfield(code="d", value="October TA 3018:"),
                         Subfield(code="c", value="Rivendell)"),
-                        Subfield(
-                            code="t", value="IGNORE ME!"
-                        ),  # name of work, not the person
+                        Subfield(code="t", value="a work"),
+                        # name of work, not the person, shouldn't be here, but required for compatibility with the Scala transformer
                         Subfield(
                             code="p", value="IGNORE ME!"
                         ),  # regards section of work mentioned in t
@@ -418,7 +441,7 @@ def test_meeting_contributor_all_fields(
     # it refers to a work by the agent in the other fields.
     contributor = transform_record(marc_record).data.contributors[0]
     assert contributor.roles == [Label(label="key grip"), Label(label="best boy")]
-    label = "Council of Elrond (1 - October TA 3018: Rivendell)"
+    label = "Council of Elrond (1 - October TA 3018: Rivendell) a work"
     assert contributor.primary == primary
     assert contributor.agent.label == label
     assert contributor.agent.label == label
