@@ -22,3 +22,8 @@ resource "aws_iam_role_policy" "pit_opener_lambda_read_pipeline_secrets_policy" 
   role   = module.elasticsearch_pit_opener_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read_denormalised_read_only.json
 }
+
+resource "aws_iam_role_policy" "pit_opener_lambda_cloudwatch_write_policy" {
+  role   = module.elasticsearch_pit_opener_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}

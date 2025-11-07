@@ -44,3 +44,8 @@ resource "aws_iam_role_policy" "bulk_loader_lambda_neptune_policy" {
   role   = module.bulk_loader_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.neptune_load_poll.json
 }
+
+resource "aws_iam_role_policy" "bulk_loader_lambda_cloudwatch_write_policy" {
+  role   = module.bulk_loader_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}

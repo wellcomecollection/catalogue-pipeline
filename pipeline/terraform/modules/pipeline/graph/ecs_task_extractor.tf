@@ -29,6 +29,11 @@ resource "aws_iam_role_policy" "ecs_read_s3_policy" {
   policy = data.aws_iam_policy_document.s3_bulk_load_read.json
 }
 
+resource "aws_iam_role_policy" "graph_extractor_task_cloudwatch_write_policy" {
+  role   = module.extractor_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}
+
 # openCypher queries will be streamed to this SNS topic (when SNS is chosen as the streaming destination)
 module "catalogue_graph_queries_topic" {
   source = "github.com/wellcomecollection/terraform-aws-sns-topic.git?ref=v1.0.0"
