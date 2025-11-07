@@ -260,7 +260,7 @@ def test_distinct_by_label_and_role(marc_record: Record) -> None:
                         Subfield(
                             code="t", value="a work"
                         ),  # name of work, not the person
-                        # t should be ignored, but needs to be here for Scala Transformer fidelity
+                        # t is now included in labels for Scala Transformer compatibility
                         Subfield(
                             code="n", value="IGNORE ME!"
                         ),  # regards section of work mentioned in t
