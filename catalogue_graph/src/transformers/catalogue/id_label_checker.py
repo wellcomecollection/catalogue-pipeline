@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 
-import utils.bulk_load as bulk_load
+from models.events import BulkLoaderEvent
 from utils.aws import get_csv_from_s3
 from utils.types import ConceptSource, ConceptType, TransformerType
 
@@ -46,8 +46,12 @@ class IdLabelChecker:
         )
 
         for transformer in transformers:
-            s3_uri = bulk_load.get_s3_uri(transformer, "nodes", pipeline_date)
-            for row in get_csv_from_s3(s3_uri):
+            event = BulkLoaderEvent(
+                transformer_type=transformer,
+                entity_type="nodes",
+                pipeline_date=pipeline_date,
+            )
+            for row in get_csv_from_s3(event.get_s3_uri()):
                 source_id = row[":ID"]
                 label = row["label:String"].lower()
                 alternative_labels = [

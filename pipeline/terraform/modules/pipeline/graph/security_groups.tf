@@ -1,5 +1,5 @@
 resource "aws_security_group" "graph_pipeline_security_group" {
-  name   = "${local.namespace}-security-group-${var.pipeline_date}"
+  name   = "graph-pipeline-security-group-${var.pipeline_date}"
   vpc_id = data.aws_vpc.vpc.id
 }
 

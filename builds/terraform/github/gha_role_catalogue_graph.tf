@@ -32,7 +32,7 @@ data "aws_iam_policy_document" "gha_catalogue_graph_ci" {
       "ecr:CompleteLayerUpload",
     ]
     resources = [
-      "arn:aws:ecr:eu-west-1:760097843905:repository/uk.ac.wellcome/catalogue_graph_extractor",
+      "arn:aws:ecr:eu-west-1:760097843905:repository/uk.ac.wellcome/unified_pipeline_task",
       "arn:aws:ecr:eu-west-1:760097843905:repository/uk.ac.wellcome/unified_pipeline_lambda"
     ]
   }

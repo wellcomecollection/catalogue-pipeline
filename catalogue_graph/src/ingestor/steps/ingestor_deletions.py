@@ -26,7 +26,7 @@ def get_ids_to_delete(event: IngestorDeletionsLambdaEvent) -> set[str]:
     )
 
     # Retrieve a log of concept IDs which were deleted from the graph (see `graph_remover.py`).
-    df = df_from_s3_parquet(remover_event.get_remover_s3_uri("deleted_ids"))
+    df = df_from_s3_parquet(remover_event.get_s3_uri("parquet", "deleted_ids"))
 
     ids = []
     if len(df) > 0:
@@ -51,7 +51,7 @@ def handler(
     deleted_count = es_remover.delete_documents(ids_to_delete)
 
     report = DeletionReport(**event.model_dump(), deleted_count=deleted_count)
-    report.write()
+    report.publish()
 
 
 def lambda_handler(event: dict, context: typing.Any) -> None:

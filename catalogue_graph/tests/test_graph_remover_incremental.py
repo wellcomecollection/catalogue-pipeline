@@ -6,6 +6,7 @@ import pytest
 
 from graph_remover_incremental import lambda_handler
 from tests.mocks import (
+    MockCloudwatchClient,
     MockSmartOpen,
     add_neptune_mock_response,
 )
@@ -232,3 +233,32 @@ def test_graph_remover_safety_mechanism() -> None:
     lambda_handler(event, None)
     s3_uri = f"{REMOVER_S3_PREFIX}/dev/deleted_ids/catalogue_concepts__nodes.parquet"
     check_deleted_ids_log(s3_uri, set(disconnected_ids))
+
+
+def test_metrics() -> None:
+    disconnected_ids = ["byzuqyr5", "vjfb76xy"]
+    mock_neptune_get_total_node_count("Concept", 100)
+    mock_neptune_get_disconnected_concept_nodes(disconnected_ids)
+    mock_neptune_get_existing_nodes_response(disconnected_ids)
+    mock_neptune_delete_nodes_response(disconnected_ids)
+
+    event = {
+        "transformer_type": "catalogue_concepts",
+        "entity_type": "nodes",
+        "pipeline_date": "dev",
+        "window": {"end_time": "2025-02-02T12:00"},
+    }
+    lambda_handler(event, None)
+
+    assert MockCloudwatchClient.metrics_reported == [
+        {
+            "dimensions": {
+                "entity_type": "nodes",
+                "pipeline_date": "dev",
+                "transformer_type": "catalogue_concepts",
+            },
+            "metric_name": "deleted_count",
+            "namespace": "catalogue_graph_pipeline",
+            "value": 2,
+        }
+    ]

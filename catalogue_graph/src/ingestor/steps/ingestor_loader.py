@@ -3,7 +3,6 @@ import json
 import typing
 from argparse import ArgumentParser
 
-from clients.metric_reporter import MetricReporter
 from ingestor.models.step_events import (
     IngestorIndexerLambdaEvent,
     IngestorLoaderLambdaEvent,
@@ -51,22 +50,7 @@ def handler(
         record_count=record_count,
         total_file_size=total_file_size,
     )
-    report.write()
-
-    dimensions = {
-        "ingestor_type": report.ingestor_type,
-        "pipeline_date": report.pipeline_date,
-        "index_date": report.index_date,
-        "step": "ingestor_loader_monitor",
-        "job_id": report.job_id or "unspecified",
-    }
-
-    reporter = MetricReporter("catalogue_graph_ingestor")
-    reporter.put_metric_data(
-        metric_name="total_file_size",
-        value=report.total_file_size,
-        dimensions=dimensions,
-    )
+    report.publish()
 
     if event.pass_objects_to_index:
         return IngestorIndexerLambdaEvent(

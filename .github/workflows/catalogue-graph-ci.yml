@@ -1,4 +1,4 @@
-name: "Catalogue graph: Run CI pipeline"
+name: "Catalogue pipeline: Build and Test"
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
         with:
           folder: catalogue_graph
 
-  build-extractor-image:
+  build-unified-pipeline-task-image:
     runs-on: ubuntu-latest
     needs: [python-checks]
     steps:
@@ -35,12 +35,13 @@ jobs:
         with:
           registry: 760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome
           folder: catalogue_graph
-          target: catalogue_graph_extractor
+          target: unified_pipeline_task
+          dockerfile: task.Dockerfile
           tag: ${{ github.sha }}
           role_to_assume: ${{ secrets.CATALOGUE_GRAPH_CI_ROLE_ARN }}
           publish_latest: ${{ github.ref == 'refs/heads/main' }}
 
-  build-unified-pipeline-image:
+  build-unified-pipeline-lambda-image:
     runs-on: ubuntu-latest
     needs: [python-checks]
     steps:
@@ -57,7 +58,7 @@ jobs:
 
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: [build-extractor-image, build-unified-pipeline-image]
+    needs: [build-unified-pipeline-task-image, build-unified-pipeline-lambda-image]
     uses: ./.github/workflows/catalogue-graph-deploy.yml
     with:
       deploy_tag: ${{ github.sha }}
