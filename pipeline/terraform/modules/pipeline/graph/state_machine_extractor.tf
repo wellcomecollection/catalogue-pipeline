@@ -14,7 +14,7 @@ module "catalogue_graph_extractor_state_machine" {
         Retry    = local.state_function_default_retry,
         Next     = "Success"
         Arguments = {
-          Cluster        = aws_ecs_cluster.pipeline_cluster.arn
+          Cluster        = var.ecs_cluster_arn
           TaskDefinition = module.extractor_ecs_task.task_definition_arn
           LaunchType     = "FARGATE"
           NetworkConfiguration = {

@@ -56,7 +56,7 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
         Type     = "Task",
         Resource = "arn:aws:states:::lambda:invoke",
         Arguments = {
-          FunctionName = module.elasticsearch_pit_opener_lambda.lambda.arn,
+          FunctionName = module.elasticsearch_pit_opener_lambda.lambda_arn,
           Payload      = "{% $states.context.Execution.Input %}"
         },
         Output = "{% $merge([$states.context.Execution.Input, $states.result.Payload ]) %}",
@@ -109,7 +109,7 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
   })
 
   invokable_lambda_arns = [
-    module.elasticsearch_pit_opener_lambda.lambda.arn
+    module.elasticsearch_pit_opener_lambda.lambda_arn
   ]
 
   invokable_state_machine_arns = [

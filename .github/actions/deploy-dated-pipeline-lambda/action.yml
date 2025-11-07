@@ -1,5 +1,5 @@
 name: "Deploy Dated Pipeline Lambda"
-description: "Discovers latest pipeline date, retags image to that date, and deploys the dated pipeline lambda (catalogue-{date}-{lambda_suffix})."
+description: "Uses the dated pipeline image (env.{date}) to deploy the catalogue-{date}-{lambda_suffix} lambda."
 inputs:
   source_tag:
     description: "Existing image tag to retag from (e.g., commit SHA)"
@@ -28,40 +28,38 @@ inputs:
 outputs:
   pipeline_date:
     description: "Discovered latest pipeline date"
-    value: ${{ steps.discover.outputs.pipeline_date }}
+    value: ${{ steps.image.outputs.pipeline_date }}
   lambda_name:
     description: "Resolved dated lambda name"
-    value: ${{ steps.discover.outputs.lambda_name }}
+    value: ${{ steps.lambda.outputs.lambda_name }}
 runs:
   using: "composite"
   steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-
-    - name: Discover latest pipeline date and lambda name
-      id: discover
-      shell: bash
-      run: |
-        chmod +x "${{ github.action_path }}/discover.sh"
-        "${{ github.action_path }}/discover.sh" \
-          "${{ inputs.terraform_dir }}" \
-          "${{ inputs.lambda_suffix }}"
-
-    - name: Retag image to pipeline date
-      uses: ./.github/actions/retag-docker-image
+    - name: Discover pipeline date and retag image
+      id: image
+      uses: ./.github/actions/retag-dated-pipeline-image
       with:
         registry: ${{ inputs.registry }}
         image_name: ${{ inputs.image_name }}
         source_tag: ${{ inputs.source_tag }}
-        target_tag: env.${{ steps.discover.outputs.pipeline_date }}
         role_to_assume: ${{ inputs.role_to_assume }}
+        terraform_dir: ${{ inputs.terraform_dir }}
+
+    - name: Resolve lambda name
+      id: lambda
+      shell: bash
+      run: |
+        chmod +x "${{ github.action_path }}/lambda_name.sh"
+        "${{ github.action_path }}/lambda_name.sh" \
+          "${{ steps.image.outputs.pipeline_date }}" \
+          "${{ inputs.lambda_suffix }}"
 
     - name: Deploy Lambda to pipeline date image
       uses: ./.github/actions/deploy-lambda-image
       with:
-        lambda_name: ${{ steps.discover.outputs.lambda_name }}
+        lambda_name: ${{ steps.lambda.outputs.lambda_name }}
         registry: ${{ inputs.registry }}
         image_name: ${{ inputs.image_name }}
-        deploy_tag: env.${{ steps.discover.outputs.pipeline_date }}
+        deploy_tag: env.${{ steps.image.outputs.pipeline_date }}
         role_to_assume: ${{ inputs.role_to_assume }}
         aws_region: ${{ inputs.aws_region }}

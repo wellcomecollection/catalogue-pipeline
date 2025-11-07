@@ -1,5 +1,5 @@
 module "ingestor_indexer_ecs_task" {
-  source = "./ecs_task"
+  source = "../../ecs_task"
 
   task_name = "ingestor-indexer-${var.pipeline_date}"
 

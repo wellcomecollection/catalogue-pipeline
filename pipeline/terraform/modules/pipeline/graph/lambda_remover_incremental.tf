@@ -1,14 +1,12 @@
 module "graph_remover_incremental_lambda" {
-  source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
+  source = "../../pipeline_lambda"
 
-  name         = "graph-remover-incremental-${var.pipeline_date}"
+  service_name = "graph-remover-incremental"
   description  = "Handles the incremental removal of catalogue nodes/edges from the catalogue graph."
-  package_type = "Image"
-  image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
-  publish      = true
 
-  // New versions are automatically deployed through a GitHub action.
-  // To deploy manually, see `scripts/deploy_lambda_zip.sh`
+  pipeline_date = var.pipeline_date
+
+  ecr_repository_name = data.aws_ecr_repository.unified_pipeline_lambda.name
 
   image_config = {
     command = ["graph_remover_incremental.lambda_handler"]
@@ -17,39 +15,31 @@ module "graph_remover_incremental_lambda" {
   memory_size = 2048
   timeout     = 900 // 15 minutes
 
-  vpc_config = {
-    subnet_ids = local.private_subnets
-    security_group_ids = [
-      aws_security_group.graph_pipeline_security_group.id,
-      local.ec_privatelink_security_group_id
-    ]
+  environment_variables = {
+    CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
   }
 
-  environment = {
-    variables = {
-      CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
-    }
-  }
+  vpc_config = local.lambda_vpc_config
 }
 
 resource "aws_iam_role_policy" "graph_remover_incremental_lambda_neptune_read_policy" {
-  role   = module.graph_remover_incremental_lambda.lambda_role.name
+  role   = module.graph_remover_incremental_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.neptune_read.json
 }
 
 resource "aws_iam_role_policy" "graph_remover_incremental_lambda_neptune_delete_policy" {
-  role   = module.graph_remover_incremental_lambda.lambda_role.name
+  role   = module.graph_remover_incremental_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.neptune_delete.json
 }
 
 resource "aws_iam_role_policy" "graph_remover_incremental_lambda_read_secrets_policy" {
-  role   = module.graph_remover_incremental_lambda.lambda_role.name
+  role   = module.graph_remover_incremental_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.allow_catalogue_graph_secret_read.json
 }
 
 # Write files storing deleted nodes/edges
 resource "aws_iam_role_policy" "graph_remover_incremental_lambda_s3_policy" {
-  role   = module.graph_remover_incremental_lambda.lambda_role.name
+  role   = module.graph_remover_incremental_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.graph_remover_incremental_s3_policy.json
 }
 
@@ -68,6 +58,6 @@ data "aws_iam_policy_document" "graph_remover_incremental_s3_policy" {
 }
 
 resource "aws_iam_role_policy" "graph_remover_incremental_ecs_read_pipeline_secrets_policy" {
-  role   = module.graph_remover_incremental_lambda.lambda_role.name
+  role   = module.graph_remover_incremental_lambda.lambda_role_name
   policy = data.aws_iam_policy_document.allow_pipeline_storage_secret_read_denormalised_read_only.json
 }
