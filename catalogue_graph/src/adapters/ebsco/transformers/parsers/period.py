@@ -59,7 +59,10 @@ def century_to_range(period: str) -> DateTimeRange:
     >>> r.from_time
     '2200-01-01T00:00:00Z'
     """
-    century_ordinal = int(RE_NTH_CENTURY.match(period).group(1))
+    match = RE_NTH_CENTURY.match(period)
+    if not match:
+        raise ValueError(f"Invalid century format: {period}")
+    century_ordinal = int(match.group(1))
     century_prefix = century_ordinal - 1
     return DateTimeRange.model_validate(
         {
