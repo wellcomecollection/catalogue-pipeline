@@ -410,7 +410,7 @@ def test_contributor_organisation_identifiers_do_not_normalise(
                         Subfield(code="d", value="October TA 3018:"),
                         Subfield(code="c", value="Rivendell)"),
                         Subfield(code="t", value="a work"),
-                        # name of work, not the person, shouldn't be here, but required for compatibility with the Scala transformer
+                        # 't' is the name of a work (not a person); included intentionally for compatibility with the Scala transformer
                         Subfield(
                             code="p", value="IGNORE ME!"
                         ),  # regards section of work mentioned in t
