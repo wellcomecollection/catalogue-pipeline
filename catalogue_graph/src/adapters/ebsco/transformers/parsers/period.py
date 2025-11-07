@@ -188,8 +188,7 @@ def crack(range_string: str) -> tuple[str, str]:
 
     if from_part and sep and to_part:
         # If from_part consists of multiple year entries (e.g. "2024 2025"), extract the lowest one
-        if from_part:
-            from_part = min(from_part.split(" "))
+        from_part = min(from_part.split(" "))
         # Fill in any implied missing numbers in the to part.
         to_part = max(
             fill_year_prefix(from_part, to_year) for to_year in to_part.split(" ")
