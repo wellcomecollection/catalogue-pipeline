@@ -2,7 +2,8 @@ import re
 from datetime import datetime
 
 from models.pipeline.concept import DateTimeRange, Period
-from models.pipeline.identifier import Identified, Unidentifiable
+
+from models.pipeline.identifier import Identifiable, Unidentifiable
 
 # Explicitly discard SGML escape sequences and doubly-escaped sequences.
 # This prevents the RE_KEEP sequence misinterpreting &#40; (lparen)
@@ -23,7 +24,7 @@ RE_NTH_CENTURY = re.compile(r"(\d+)\w{2} century.?")
 RE_4_DIGIT_DATE_RANGE = re.compile(r"\d{4}(-(\d{4})?)?")
 
 
-def parse_period(period: str, identifier: Identified | None = None) -> Period:
+def parse_period(period: str, identifier: Identifiable | None = None) -> Period:
     """
     Converts a string representation of a period into a Period,
     giving a concrete date/time range.
@@ -239,10 +240,10 @@ def start_of_year(year: str) -> str:
 
 def end_of_year(year: str) -> str:
     return (
-        (
-            datetime(int(year), 12, 31, 23, 59, 59, 1000000 - 1)
-            if year
-            else datetime.max
-        ).isoformat()
-        + "999Z"
+            (
+                datetime(int(year), 12, 31, 23, 59, 59, 1000000 - 1)
+                if year
+                else datetime.max
+            ).isoformat()
+            + "999Z"
     )  # hack - EoY in the scala transformer has nanosecond precision
