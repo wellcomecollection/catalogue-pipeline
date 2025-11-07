@@ -79,7 +79,7 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
     return concepts
 
 
-def should_create_range(label) -> bool:
+def should_create_range(label: str) -> bool:
     """
     The scala transformer doesn't create a range for all parseable periods in subdivisions
     So far, I have only seen them for:
