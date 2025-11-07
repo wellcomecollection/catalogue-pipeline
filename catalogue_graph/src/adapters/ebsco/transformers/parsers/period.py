@@ -2,7 +2,6 @@ import re
 from datetime import datetime
 
 from models.pipeline.concept import DateTimeRange, Period
-
 from models.pipeline.identifier import Identifiable, Unidentifiable
 
 # Explicitly discard SGML escape sequences and doubly-escaped sequences.
