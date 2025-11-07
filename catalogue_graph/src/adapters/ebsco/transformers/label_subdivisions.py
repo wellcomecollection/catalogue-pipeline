@@ -108,10 +108,10 @@ def should_create_range(label: str) -> bool:
 
 
 def build_concept(
-        raw_label: str,
-        raw_type: RawConceptType,
-        preserve_trailing_period: bool = False,
-        is_identifiable: bool = True,
+    raw_label: str,
+    raw_type: RawConceptType,
+    preserve_trailing_period: bool = False,
+    is_identifiable: bool = True,
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
     # Organisations use the raw label to create a Label Derived Identifier.
