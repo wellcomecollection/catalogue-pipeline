@@ -2,7 +2,7 @@ import re
 from datetime import datetime
 
 from models.pipeline.concept import DateTimeRange, Period
-from models.pipeline.identifier import Identified, Unidentifiable
+from models.pipeline.identifier import Identifiable, Unidentifiable
 
 # Explicitly discard SGML escape sequences and doubly-escaped sequences.
 # This prevents the RE_KEEP sequence misinterpreting &#40; (lparen)
@@ -20,15 +20,17 @@ RE_NTH_CENTURY = re.compile(r"(\d+)\w{2} century.?")
 # Matcher for date ranges consisting of four-digit years.
 # The scala transformer does not create ranges for subdivisions
 # consisting of years with fewer than 4 digits (e.g. 500-1400 from ebs1211100e)
-RE_4_DIGIT_DATE_RANGE = re.compile(r"\d{4}(-|-(\d{4}))?")
+RE_4_DIGIT_DATE_RANGE = re.compile(r"\d{4}(-(\d{4})?)?")
 
 
-def parse_period(period: str, identifier: Identified | None = None) -> Period:
+def parse_period(
+    period: str, identifier: Identifiable | Unidentifiable | None = None
+) -> Period:
     """
     Converts a string representation of a period into a Period,
     giving a concrete date/time range.
     >>> parse_period("1988-1990")
-    Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00Z', to_time='1990-12-31T23:59:59.999999Z', label='1988-1990'))
+    Period(id=Unidentifiable(canonical_id=None, type='Unidentifiable'), label='1988-1990', type='Period', range=DateTimeRange(from_time='1988-01-01T00:00:00Z', to_time='1990-12-31T23:59:59.999999999Z', label='1988-1990'))
     """
     range_fn = century_to_range if "century" in period else to_range
     return Period(
@@ -46,7 +48,7 @@ def century_to_range(period: str) -> DateTimeRange:
     >>> r.from_time
     '1800-01-01T00:00:00Z'
     >>> r.to_time
-    '1899-12-31T23:59:59.999999Z'
+    '1899-12-31T23:59:59.999999999Z'
 
     It is sensitive to all the English ordinal suffixes
     >>> r = century_to_range("21st century")
@@ -59,7 +61,10 @@ def century_to_range(period: str) -> DateTimeRange:
     >>> r.from_time
     '2200-01-01T00:00:00Z'
     """
-    century_ordinal = int(RE_NTH_CENTURY.match(period).group(1))
+    match = RE_NTH_CENTURY.match(period)
+    if not match:
+        raise ValueError(f"Invalid century format: {period}")
+    century_ordinal = int(match.group(1))
     century_prefix = century_ordinal - 1
     return DateTimeRange.model_validate(
         {
@@ -79,7 +84,7 @@ def to_range(period: str) -> DateTimeRange:
     >>> r.from_time
     '2016-01-01T00:00:00Z'
     >>> r.to_time
-    '2020-12-31T23:59:59.999999Z'
+    '2020-12-31T23:59:59.999999999Z'
 
     Although not necessarily part of a true range definition, copyright dates are interpreted as part of the range
     >>> r = to_range("1986 printing, c1977.")
@@ -185,8 +190,7 @@ def crack(range_string: str) -> tuple[str, str]:
 
     if from_part and sep and to_part:
         # If from_part consists of multiple year entries (e.g. "2024 2025"), extract the lowest one
-        if from_part:
-            from_part = min(from_part.split(" "))
+        from_part = min(from_part.split(" "))
         # Fill in any implied missing numbers in the to part.
         to_part = max(
             fill_year_prefix(from_part, to_year) for to_year in to_part.split(" ")

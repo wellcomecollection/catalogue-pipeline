@@ -11,6 +11,7 @@ import requests
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 
+from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.streaming import process_stream_in_parallel
 from utils.types import EntityType
 
@@ -159,7 +160,7 @@ class BaseNeptuneClient:
         load_id: str = response["payload"]["loadId"]
         return load_id
 
-    def get_bulk_load_status(self, load_id: str) -> dict:
+    def get_bulk_load_status(self, load_id: str) -> BulkLoadStatusResponse:
         """
         Returns the status of a bulk load job.
         See https://docs.aws.amazon.com/neptune/latest/userguide/load-api-reference-status-requests.html for more info.
@@ -169,7 +170,7 @@ class BaseNeptuneClient:
         )
 
         payload: dict = response["payload"]
-        return payload
+        return BulkLoadStatusResponse.model_validate(payload)
 
     def get_bulk_load_statuses(self) -> list[str]:
         """Returns the loadIDs of the last 5 Neptune bulk load jobs."""

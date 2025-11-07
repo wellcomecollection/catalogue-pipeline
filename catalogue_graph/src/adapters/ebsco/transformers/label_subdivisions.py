@@ -79,14 +79,35 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
     return concepts
 
 
-def should_create_range(label) -> bool:
+def should_create_range(label: str) -> bool:
     """
     The scala transformer doesn't create a range for all parseable periods in subdivisions
     So far, I have only seen them for:
-     * centuries
-     * ranges consisting of one or two four-digit years
+
+     Centuries
+     >>> should_create_range("19th century")
+     True
+
+     Ranges consisting of one or two four-digit years
+     >>> should_create_range("1901")
+     True
+     >>> should_create_range("1904-")
+     True
+     >>> should_create_range("1601-1666")
+     True
+
+     But not ranges with three-digit years
+     >>> should_create_range("501-1066")
+     False
+
+     Or ranges with other content
+     >>> should_create_range("Siege of Bielefeld 1820-1856")
+     False
     """
-    return RE_NTH_CENTURY.match(label) or RE_4_DIGIT_DATE_RANGE.match(label)
+    return (
+        RE_NTH_CENTURY.match(label) is not None
+        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+    )
 
 
 def build_concept(

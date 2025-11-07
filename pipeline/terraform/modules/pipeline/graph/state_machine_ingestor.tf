@@ -13,7 +13,7 @@ module "catalogue_graph_ingestor_state_machine" {
         Retry    = local.state_function_default_retry,
         Next     = "Run indexer"
         Arguments = {
-          Cluster        = aws_ecs_cluster.pipeline_cluster.arn
+          Cluster        = var.ecs_cluster_arn
           TaskDefinition = module.ingestor_loader_ecs_task.task_definition_arn
           LaunchType     = "FARGATE"
           NetworkConfiguration = {
@@ -46,7 +46,7 @@ module "catalogue_graph_ingestor_state_machine" {
         Retry    = local.state_function_default_retry,
         Next     = "Should run deletions?"
         Arguments = {
-          Cluster        = aws_ecs_cluster.pipeline_cluster.arn
+          Cluster        = var.ecs_cluster_arn
           TaskDefinition = module.ingestor_indexer_ecs_task.task_definition_arn
           LaunchType     = "FARGATE"
           NetworkConfiguration = {
@@ -88,7 +88,7 @@ module "catalogue_graph_ingestor_state_machine" {
         Resource = "arn:aws:states:::lambda:invoke",
         Output   = "{% $states.result.Payload %}",
         Arguments = {
-          FunctionName = module.ingestor_deletions_lambda.lambda.arn,
+          FunctionName = module.ingestor_deletions_lambda.lambda_arn,
           Payload      = "{% $states.input %}"
         },
         Retry = local.state_function_default_retry,
@@ -101,7 +101,7 @@ module "catalogue_graph_ingestor_state_machine" {
   })
 
   invokable_lambda_arns = [
-    module.ingestor_deletions_lambda.lambda.arn
+    module.ingestor_deletions_lambda.lambda_arn
   ]
 
   policies_to_attach = {

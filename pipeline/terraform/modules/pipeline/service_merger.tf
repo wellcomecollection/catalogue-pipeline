@@ -6,11 +6,13 @@ locals {
       local.network_config.ec_privatelink_security_group_id,
     ]
   }
+
   queue_config = {
     visibility_timeout_seconds = local.queue_visibility_timeout_seconds
     max_receive_count          = local.max_receive_count
     batching_window_seconds    = 120
     batch_size                 = 50
+    maximum_concurrency        = 30
     topic_arns = [
       module.matcher_output_topic.arn,
     ]

@@ -52,6 +52,7 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
+from models.events import IncrementalWindow
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identified, SourceIdentifier
 from tests.mocks import (
@@ -86,6 +87,7 @@ def make_loader_event(
         index_date=MOCK_INDEX_DATE,
         job_id=job_id,
         pass_objects_to_index=pass_objects_to_index,
+        window=IncrementalWindow.model_validate({"end_time": "2025-01-01T12:00"}),
     )
 
 
@@ -387,21 +389,29 @@ def _compare_events(
     assert event_payload == expected_payload
 
 
-def _get_expected_metric(
-    loader_event: IngestorLoaderLambdaEvent, total_file_size: int
-) -> dict:
-    return {
-        "namespace": "catalogue_graph_ingestor",
-        "metric_name": "total_file_size",
-        "value": total_file_size,
-        "dimensions": {
-            "ingestor_type": loader_event.ingestor_type,
-            "pipeline_date": loader_event.pipeline_date,
-            "index_date": loader_event.index_date,
-            "job_id": loader_event.job_id,
-            "step": "ingestor_loader_monitor",
-        },
+def _get_expected_metrics(
+    loader_event: IngestorLoaderLambdaEvent, record_count: int, total_file_size: int
+) -> list[dict]:
+    dimensions = {
+        "ingestor_type": loader_event.ingestor_type,
+        "pipeline_date": loader_event.pipeline_date,
+        "index_date": loader_event.index_date,
     }
+
+    return [
+        {
+            "namespace": "catalogue_graph_pipeline",
+            "value": record_count,
+            "metric_name": "record_count",
+            "dimensions": dimensions,
+        },
+        {
+            "namespace": "catalogue_graph_pipeline",
+            "value": total_file_size,
+            "metric_name": "total_file_size",
+            "dimensions": dimensions,
+        },
+    ]
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
@@ -432,18 +442,13 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
         lambda event, es_mode: DummyTransformer(),
     )
 
-    loader_event = IngestorLoaderLambdaEvent(
-        ingestor_type="concepts",
-        pipeline_date="2025-01-01",
-        index_date="2025-03-01",
-        job_id="123",
-        pass_objects_to_index=pass_objects_to_index,
-    )
-
+    loader_event = make_loader_event(pass_objects_to_index, "concepts", "123")
     result = handler(loader_event)
 
-    expected_metric = _get_expected_metric(loader_event, total_file_size=3000)
-    assert MockCloudwatchClient.metrics_reported == [expected_metric]
+    expected_metrics = _get_expected_metrics(
+        loader_event, record_count=300, total_file_size=3000
+    )
+    assert MockCloudwatchClient.metrics_reported == expected_metrics
 
     report = _read_loader_report(loader_event)
     assert report["record_count"] == 300
@@ -501,20 +506,11 @@ def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> Non
 
     report = _read_loader_report(loader_event)
     assert report["total_file_size"] >= 0
-    assert MockCloudwatchClient.metrics_reported == [
-        {
-            "namespace": "catalogue_graph_ingestor",
-            "metric_name": "total_file_size",
-            "value": report["total_file_size"],
-            "dimensions": {
-                "ingestor_type": loader_event.ingestor_type,
-                "pipeline_date": loader_event.pipeline_date,
-                "index_date": loader_event.index_date,
-                "job_id": loader_event.job_id,
-                "step": "ingestor_loader_monitor",
-            },
-        }
-    ]
+    assert MockCloudwatchClient.metrics_reported == _get_expected_metrics(
+        loader_event,
+        record_count=report["record_count"],
+        total_file_size=report["total_file_size"],
+    )
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
@@ -608,9 +604,9 @@ def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> 
     assert report["pipeline_date"] == loader_event.pipeline_date
     assert report["index_date"] == loader_event.index_date
     assert report["job_id"] == loader_event.job_id
-    assert MockCloudwatchClient.metrics_reported == [
-        _get_expected_metric(loader_event, total_file_size=0)
-    ]
+    assert MockCloudwatchClient.metrics_reported == _get_expected_metrics(
+        loader_event, record_count=0, total_file_size=0
+    )
 
 
 def test_ingestor_loader_bad_neptune_response() -> None:

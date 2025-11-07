@@ -5,13 +5,11 @@ from typing import Self
 from pydantic import BaseModel
 
 import config
-import utils.bulk_load as bulk_load
-from utils.bulk_load import IncrementalWindow
+from models.incremental_window import IncrementalWindow
 from utils.types import (
     CatalogueTransformerType,
     EntityType,
     FullGraphRemoverType,
-    GraphRemoverFolder,
     StreamDestination,
     TransformerType,
 )
@@ -39,24 +37,49 @@ class GraphPipelineEvent(BasePipelineEvent):
     transformer_type: TransformerType
     entity_type: EntityType
 
-    def get_bulk_load_s3_uri(self) -> str:
-        return bulk_load.get_s3_uri(
-            self.transformer_type, self.entity_type, self.pipeline_date, self.window
-        )
+    @property
+    def s3_prefix(self) -> str:
+        raise NotImplementedError()
 
-    def get_bulk_load_file_path(self) -> str:
-        return bulk_load.get_file_path(
-            self.transformer_type, self.entity_type, self.pipeline_date, self.window
-        )
+    @property
+    def event_key(self) -> str:
+        return f"{self.transformer_type}__{self.entity_type}"
+
+    @property
+    def file_path_parts(self) -> list[str]:
+        parts: list[str] = [self.s3_prefix, self.pipeline_date]
+        if self.window is not None:
+            parts += ["windows", self.window.to_formatted_string()]
+
+        return parts
+
+    def get_file_path(self, file_format: str = "csv", folder: str | None = None) -> str:
+        parts = self.file_path_parts
+        if folder:
+            parts.append(folder)
+
+        return f"{PurePosixPath(*parts)}/{self.event_key}.{file_format}"
+
+    def get_s3_uri(self, file_format: str = "csv", folder: str | None = None) -> str:
+        file_path = self.get_file_path(file_format, folder)
+        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{file_path}"
 
 
 class ExtractorEvent(GraphPipelineEvent):
     stream_destination: StreamDestination = "s3"
     sample_size: int | None = None
 
+    @property
+    def s3_prefix(self) -> str:
+        return config.BULK_LOADER_S3_PREFIX
+
 
 class BulkLoaderEvent(GraphPipelineEvent):
     insert_error_threshold: float = DEFAULT_INSERT_ERROR_THRESHOLD
+
+    @property
+    def s3_prefix(self) -> str:
+        return config.BULK_LOADER_S3_PREFIX
 
 
 class BulkLoadPollerEvent(BaseModel):
@@ -66,22 +89,6 @@ class BulkLoadPollerEvent(BaseModel):
 
 class GraphRemoverEvent(GraphPipelineEvent):
     force_pass: bool = False
-
-    @property
-    def s3_prefix(self) -> str:
-        raise NotImplementedError()
-
-    def get_remover_s3_uri(self, folder: GraphRemoverFolder) -> str:
-        parts: list[str] = [self.s3_prefix, self.pipeline_date]
-        if self.window is not None:
-            parts += ["windows", self.window.to_formatted_string()]
-
-        parts.append(folder)
-
-        prefix = PurePosixPath(*parts)
-        file_name = f"{self.transformer_type}__{self.entity_type}.parquet"
-
-        return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}"
 
 
 class FullGraphRemoverEvent(GraphRemoverEvent):
