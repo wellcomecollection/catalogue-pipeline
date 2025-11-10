@@ -49,6 +49,11 @@ resource "aws_iam_role_policy" "graph_remover_lambda_s3_policy" {
   policy = data.aws_iam_policy_document.graph_remover_s3_policy.json
 }
 
+resource "aws_iam_role_policy" "graph_remover_lambda_cloudwatch_write_policy" {
+  role   = module.graph_remover_lambda.lambda_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
+}
+
 data "aws_iam_policy_document" "graph_remover_s3_policy" {
   statement {
     actions = [

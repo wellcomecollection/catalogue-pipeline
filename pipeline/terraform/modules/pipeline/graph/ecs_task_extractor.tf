@@ -3,7 +3,7 @@ module "extractor_ecs_task" {
 
   task_name = "graph-extractor-${var.pipeline_date}"
 
-  image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:dev"
+  image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:env.${var.pipeline_date}"
 
   environment = {
     CATALOGUE_GRAPH_S3_BUCKET   = data.aws_s3_bucket.catalogue_graph_bucket.bucket
@@ -27,6 +27,11 @@ resource "aws_iam_role_policy" "ecs_stream_to_s3_policy" {
 resource "aws_iam_role_policy" "ecs_read_s3_policy" {
   role   = module.extractor_ecs_task.task_role_name
   policy = data.aws_iam_policy_document.s3_bulk_load_read.json
+}
+
+resource "aws_iam_role_policy" "graph_extractor_task_cloudwatch_write_policy" {
+  role   = module.extractor_ecs_task.task_role_name
+  policy = data.aws_iam_policy_document.cloudwatch_write.json
 }
 
 # openCypher queries will be streamed to this SNS topic (when SNS is chosen as the streaming destination)
