@@ -4,16 +4,15 @@ from collections.abc import Generator
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.ebsco.transformers.authority_standard_number import extract_identifier
 from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
     build_concept,
 )
-from adapters.ebsco.transformers.authority_standard_number import extract_identifier
 from models.pipeline.concept import Concept, Subject
-from models.pipeline.identifier import Identifiable, SourceIdentifier
-from models.pipeline.id_label import Id
+from models.pipeline.identifier import Identifiable
 from utils.types import RawConceptType
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -114,11 +113,11 @@ def is_subject_to_keep(field: Field) -> bool:
     https://github.com/wellcomecollection/catalogue-pipeline/blob/180bece57fb84a90a8d2d2a7432843b5237d7727/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcSubjects.scala#L82
     """
     return field.indicators is not None and (
-            field.indicators.second in ["0", "2"]
-            or (
-                    field.indicators.second == "7"
-                    and field.get("2") in ["local", "homoit", "indig", "enslv"]
-            )
+        field.indicators.second in ["0", "2"]
+        or (
+            field.indicators.second == "7"
+            and field.get("2") in ["local", "homoit", "indig", "enslv"]
+        )
     )
 
 
@@ -135,7 +134,10 @@ def extract_subject(field: Field) -> Subject | None:
     identifier = extract_identifier(field, ontology_type)
 
     primary_concept = build_concept(
-        main_label, ontology_type, preserve_trailing_period=ontology_type == "Person", identifier=identifier
+        main_label,
+        ontology_type,
+        preserve_trailing_period=ontology_type == "Person",
+        identifier=identifier,
     )
 
     get_subdivision_concepts = SUBDIVISION_TRANSFORMS[field.tag]

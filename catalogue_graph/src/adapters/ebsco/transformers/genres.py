@@ -7,7 +7,6 @@ from pymarc.record import Record
 
 from adapters.ebsco.transformers.authority_standard_number import extract_identifier
 from adapters.ebsco.transformers.common import non_empty
-
 from adapters.ebsco.transformers.label_subdivisions import (
     build_concept,
     build_label_with_subdivisions,
@@ -26,7 +25,9 @@ def build_primary_concept(field: Field) -> Concept | None:
     if len(primary) == 0:
         return None
 
-    return build_concept(primary[0], "GenreConcept", identifier=extract_identifier(field, "Genre"))
+    return build_concept(
+        primary[0], "GenreConcept", identifier=extract_identifier(field, "Genre")
+    )
 
 
 def extract_genres(record: Record) -> list[Genre]:
