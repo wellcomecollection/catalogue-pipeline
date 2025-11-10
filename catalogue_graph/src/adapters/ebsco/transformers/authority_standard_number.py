@@ -16,9 +16,13 @@ def extract_identifier(field: Field, ontology_type: str) -> Identifiable | None:
             SourceIdentifier(
                 identifier_type=Id(id=identifier_type),
                 ontology_type=ontology_type,
-                value=identifier_subfield_value.removeprefix(
-                    "https://id.nlm.nih.gov/mesh/"
-                ).removeprefix("(DNLM)"),
+                # currently only MeSH uses this path, implement a way to select different
+                # normalisations when we add another authority.
+                value=normalise_mesh_id(identifier_subfield_value),
             )
         )
     return None
+
+
+def normalise_mesh_id(value: str) -> str:
+    return value.removeprefix("https://id.nlm.nih.gov/mesh/").removeprefix("(DNLM)")
