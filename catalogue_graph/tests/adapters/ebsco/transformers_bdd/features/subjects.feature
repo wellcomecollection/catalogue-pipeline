@@ -246,3 +246,20 @@ Feature: Extracting subjects from 6xx fields
         | label              | id.type        |
         | Joseph Pujol       | Identifiable   |
         | Artistic Flatulism | Unidentifiable |
+
+  Rule: Chronological Subdivisions yield periods with ranges
+  This is a rule with questionable value inherited from the previous implementation.
+  I don't think there is anything that examines the actual date range of a period like this.
+    Scenario Outline: A Subject with a Chronological Subdivision
+      Given the MARC record has a <code> field with indicators "" "0" with subfields:
+        | code | value         |
+        | a    | Blackwork     |
+        | y    | 17th century. |
+      When I transform the MARC record
+      Then the only subject has the label "Blackwork - 17th century"
+      And that subject's 1st concept has the type "<type>"
+      And that subject's 2nd concept has a range from 1600-01-01T00:00:00Z to 1699-12-31T23:59:59.999999999Z
+      Examples:
+        | code | type    |
+        | 650  | Concept |
+        | 651  | Place   |

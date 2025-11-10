@@ -101,6 +101,7 @@ def test_bulk_load_succeeded() -> None:
     assert MockCloudwatchClient.metrics_reported == [
         _get_mock_metric("record_count", record_count),
         _get_mock_metric("duplicate_count", duplicate_count),
+        _get_mock_metric("new_count", record_count - duplicate_count),
         _get_mock_metric("parsing_error_count", 0),
         _get_mock_metric("data_type_error_count", 0),
         _get_mock_metric("insert_error_count", 0),
@@ -123,6 +124,7 @@ def test_bulk_load_failed() -> None:
     assert MockCloudwatchClient.metrics_reported == [
         _get_mock_metric("record_count", record_count),
         _get_mock_metric("duplicate_count", 0),
+        _get_mock_metric("new_count", record_count),
         _get_mock_metric("parsing_error_count", 0),
         _get_mock_metric("data_type_error_count", 0),
         _get_mock_metric("insert_error_count", insert_error_count),

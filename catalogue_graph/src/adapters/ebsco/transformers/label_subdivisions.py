@@ -5,6 +5,11 @@ from itertools import chain
 
 from pymarc.field import Field
 
+from adapters.ebsco.transformers.parsers.period import (
+    RE_4_DIGIT_DATE_RANGE,
+    RE_NTH_CENTURY,
+    parse_period,
+)
 from adapters.ebsco.transformers.text_utils import (
     normalise_label,
 )
@@ -74,6 +79,37 @@ def build_subdivision_concepts(field: Field) -> list[Concept]:
     return concepts
 
 
+def should_create_range(label: str) -> bool:
+    """
+    The scala transformer doesn't create a range for all parseable periods in subdivisions
+    So far, I have only seen them for:
+
+     Centuries
+     >>> should_create_range("19th century")
+     True
+
+     Ranges consisting of one or two four-digit years
+     >>> should_create_range("1901")
+     True
+     >>> should_create_range("1904-")
+     True
+     >>> should_create_range("1601-1666")
+     True
+
+     But not ranges with three-digit years
+     >>> should_create_range("501-1066")
+     False
+
+     Or ranges with other content
+     >>> should_create_range("Siege of Bielefeld 1820-1856")
+     False
+    """
+    return (
+        RE_NTH_CENTURY.match(label) is not None
+        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+    )
+
+
 def build_concept(
     raw_label: str,
     raw_type: RawConceptType,
@@ -92,14 +128,20 @@ def build_concept(
     # in the same fashion as normalise_label does here.
     # https://github.com/wellcomecollection/catalogue-pipeline/blob/6c5ee0e90eda680e82a2c2716a4f31e6eb4a96ea/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcPerson.scala#L23
     label_for_id = raw_label if raw_type == "Organisation" else label
-
-    return Concept(
-        id=get_concept_identifier(label_for_id, raw_type)
+    id = (
+        get_concept_identifier(label_for_id, raw_type)
         if is_identifiable
-        else Unidentifiable(),
-        label=label,
-        type=raw_type,
+        else Unidentifiable()
     )
+
+    if raw_type == "Period" and should_create_range(label):
+        return parse_period(label, identifier=id)
+    else:
+        return Concept(
+            id=id,
+            label=label,
+            type=raw_type,
+        )
 
 
 def get_concept_identifier(label: str, raw_type: RawConceptType) -> Identifiable:
