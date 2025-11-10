@@ -54,16 +54,6 @@ class Contributor(SerialisableModel):
     primary: bool = True
 
 
-class Subject(Concept):
-    concepts: list[Concept]
-    type: RawConceptType = "Subject"
-
-
-class Genre(SerialisableModel):
-    label: str
-    concepts: list[Concept]
-
-
 class DateTimeRange(SerialisableModel):
     from_time: str = Field(alias="from")
     to_time: str = Field(alias="to")
@@ -72,3 +62,13 @@ class DateTimeRange(SerialisableModel):
 
 class Period(Concept):
     range: DateTimeRange | None = None
+
+
+class Subject(Concept):
+    concepts: list[Concept | Period]
+    type: RawConceptType = "Subject"
+
+
+class Genre(SerialisableModel):
+    label: str
+    concepts: list[Concept | Period]
