@@ -63,7 +63,7 @@ type_of_contributor: dict[str, RawConceptType] = {
 }
 
 label_subfields: dict[str, list[str]] = {
-    "00": ["a", "b", "c", "d", "q", "t"],
+    "00": ["a", "b", "c", "d", "q", "t", "l"],
     "10": ["a", "b", "c", "d", "q", "t"],
     "11": ["a", "c", "d", "n", "t"],
 }
