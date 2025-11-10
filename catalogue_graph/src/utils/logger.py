@@ -2,6 +2,7 @@
 Contextual logging implementation using structlog.
 """
 
+import logging
 import os
 import sys
 from datetime import UTC, datetime
@@ -57,8 +58,6 @@ def setup_structlog() -> None:
     )
 
     # Configure standard library logging level
-    import logging
-
     logging.basicConfig(
         format="%(message)s",
         level=getattr(logging, log_level.upper()),
@@ -91,22 +90,7 @@ def bind_execution_context(context: ExecutionContext) -> None:
     )
 
 
-def get_logger(name: str | None = None) -> structlog.stdlib.BoundLogger:
-    """
-    Get a structlog logger with automatic context from contextvars.
-
-    Args:
-        name: Optional logger name (defaults to calling module)
-
-    Returns:
-        Logger that automatically includes bound context
-    """
-    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
-
-
-def setup_logging(
-    context: ExecutionContext, is_local: bool = False
-) -> structlog.stdlib.BoundLogger:
+def setup_logging(context: ExecutionContext) -> None:
     """
     Set up structlog with execution context.
 
@@ -122,4 +106,3 @@ def setup_logging(
 
     bind_execution_context(context)
 
-    return get_logger()

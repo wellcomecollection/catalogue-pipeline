@@ -1,5 +1,6 @@
 import argparse
 import typing
+import structlog
 
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
@@ -9,12 +10,21 @@ from models.events import (
     TransformerType,
 )
 from utils.aws import get_neptune_client
-from utils.logger import ExecutionContext, get_logger, setup_logging
+from utils.logger import ExecutionContext, setup_logging
+
 
 
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
+    setup_logging(
+        ExecutionContext(
+            trace_id="logging test",
+            pipeline_step="graph_bulk_loader",
+        ),
+    )    
+    
     s3_file_uri = event.get_s3_uri()
-    get_logger().info(
+    
+    structlog.get_logger(__name__).info(
         "Starting bulk load",
         s3_file_uri=s3_file_uri,
         transformer_type=event.transformer_type,
@@ -30,12 +40,6 @@ def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEve
 
 
 def lambda_handler(event: dict, context: typing.Any) -> dict[str, str]:
-    setup_logging(
-        ExecutionContext(
-            trace_id="some-value-passed-down-state-machine-steps",
-            pipeline_step="graph_bulk_loader",
-        )
-    )
     return handler(BulkLoaderEvent(**event)).model_dump()
 
 
@@ -85,13 +89,6 @@ def local_handler() -> None:
     args = parser.parse_args()
     event = BulkLoaderEvent.from_argparser(args)
 
-    setup_logging(
-        ExecutionContext(
-            trace_id="some-value-passed-down-state-machine-steps",
-            pipeline_step="graph_bulk_loader",
-        ),
-        is_local=True,
-    )
 
     print(handler(event, is_local=True))
 

@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Concatenate, ParamSpec, Protocol, TypeVar
 
 import boto3
+import structlog
 from pydantic import BaseModel
 
 from utils.logger import ExecutionContext, setup_logging
@@ -90,12 +91,14 @@ def run_ecs_handler(
     task_token = ecs_args.task_token
     event = ecs_args.event
 
-    logger = setup_logging(
+    setup_logging(
         ExecutionContext(
             trace_id="some-value-passed-down-state-machine-steps",
             pipeline_step="graph_extractor",
         )
     )
+
+    logger = structlog.get_logger(__name__)
 
     logger.info(
         "ECS task started",
