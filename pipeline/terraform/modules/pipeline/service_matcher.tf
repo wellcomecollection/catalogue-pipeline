@@ -79,6 +79,7 @@ module "matcher_lambda" {
     maximum_concurrency        = var.reindexing_state.scale_up_matcher_db ? 40 : 2
     topic_arns = [
       module.id_minter_output_topic.arn,
+      module.id_minter_step_function_output_topic.arn,
     ]
   }
 
