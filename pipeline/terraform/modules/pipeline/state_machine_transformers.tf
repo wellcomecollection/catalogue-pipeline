@@ -29,8 +29,8 @@ module "ebsco_transformer_lambda" {
   environment = {
     variables = {
       PIPELINE_DATE = var.pipeline_date
-      S3_BUCKET  = local.ebsco_adapter_bucket
-      S3_PREFIX  = "prod"
+      S3_BUCKET     = local.ebsco_adapter_bucket
+      S3_PREFIX     = "prod"
     }
   }
 }
