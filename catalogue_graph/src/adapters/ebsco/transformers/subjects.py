@@ -10,6 +10,7 @@ from adapters.ebsco.transformers.label_subdivisions import (
     SUBFIELD_TYPE_MAP,
     build_concept,
 )
+from adapters.ebsco.transformers.authority_standard_number import extract_identifier
 from models.pipeline.concept import Concept, Subject
 from models.pipeline.identifier import Identifiable, SourceIdentifier
 from models.pipeline.id_label import Id
@@ -121,12 +122,6 @@ def is_subject_to_keep(field: Field) -> bool:
     )
 
 
-def _get_id_type(field: Field) -> str | None:
-    return {
-        "2": "nlm-mesh"
-    }.get(field.indicators.second)
-
-
 def extract_subject(field: Field) -> Subject | None:
     a_subfields = field.get_subfields("a")
     if len(a_subfields) == 0 or not "".join(s.strip() for s in a_subfields):
@@ -137,15 +132,7 @@ def extract_subject(field: Field) -> Subject | None:
     # Concept construction with original semantics (preserving Python rules while adopting separator changes)
     main_label = _get_main_label(field)
     ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
-    identifier = None
-    # Only if ind2 is correct.
-    identifier_type = _get_id_type(field)
-    if identifier_type and (identifier_subfield_value := field.get("0")):
-        identifier = Identifiable.from_source_identifier(SourceIdentifier(
-            identifier_type=Id(id=identifier_type),
-            ontology_type=ontology_type,
-            value=identifier_subfield_value.removeprefix("https://id.nlm.nih.gov/mesh/").removeprefix("(DLNM)"),
-        ))
+    identifier = extract_identifier(field, ontology_type)
 
     primary_concept = build_concept(
         main_label, ontology_type, preserve_trailing_period=ontology_type == "Person", identifier=identifier

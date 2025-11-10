@@ -136,7 +136,7 @@ def list_member_count(work: VisibleSourceWork, count: int, attr_phrase: str) -> 
 
 @then(
     parsers.re(
-        r'that (?P<thing_name>.+)\'s (?P<ord>(\d+\w{2})|only) concept has the identifier "(?P<id_member>(type|value))" "(?P<value>.*)"'
+        r'that (?P<thing_name>.+)\'s (?P<ord>(\d+\w{2})|only) concept has the identifier (?P<id_member>(type|value)) "(?P<value>.*)"'
     )
 )
 def context_concept_identifier_value(
@@ -160,7 +160,7 @@ def context_concept_identifier_value(
     source_id = source_identifiers[0]
 
     assert concept.id is not None, f"Concept {ord} is missing an identifier"
-    actual = source_id.value
+    actual = source_id.value if id_member == "value" else source_id.identifier_type.id
     assert actual == value, (
         f'Expected {ord} concept identifier value "{value}", got "{actual}"'
     )
