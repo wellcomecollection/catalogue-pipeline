@@ -99,6 +99,9 @@ class BulkLoaderReport(GraphPipelineReport, BulkLoaderEvent):
         return [
             PipelineMetric(name="record_count", value=overall.total_records),
             PipelineMetric(name="duplicate_count", value=overall.total_duplicates),
+            PipelineMetric(
+                name="new_count", value=overall.total_records - overall.total_duplicates
+            ),
             PipelineMetric(name="parsing_error_count", value=overall.parsing_errors),
             PipelineMetric(
                 name="data_type_error_count", value=overall.datatype_mismatch_errors

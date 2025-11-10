@@ -3,7 +3,7 @@ module "ingestor_loader_ecs_task" {
 
   task_name = "ingestor-loader-${var.pipeline_date}"
 
-  image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:dev"
+  image = "${data.aws_ecr_repository.unified_pipeline_task.repository_url}:env.${var.pipeline_date}"
 
   environment = {
     CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
