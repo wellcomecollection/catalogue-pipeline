@@ -1,5 +1,6 @@
-from pymarc.record import Field, Subfield
 import pytest
+from pymarc.record import Field, Subfield
+
 from adapters.ebsco.transformers.genres import build_primary_concept
 from adapters.ebsco.transformers.label_subdivisions import (
     build_label_with_subdivisions,
@@ -33,8 +34,8 @@ def test_concept_types_for_subdivisions() -> None:
     )
     primary_concept = build_primary_concept(field)
     concepts = (
-                   [primary_concept] if primary_concept else []
-               ) + build_subdivision_concepts(field)
+        [primary_concept] if primary_concept else []
+    ) + build_subdivision_concepts(field)
     labels = [c.label for c in concepts]
     types = [c.type for c in concepts]
 
@@ -49,16 +50,13 @@ def test_concept_types_for_subdivisions() -> None:
         ("50 B.C.", "50 bc"),
         ("ca. 50 B.C.", "ca 50 bc"),
         ("Gaul, ca. 50 B.C.", "Gaul, ca 50 bc"),
-        ("Monica. N.O.R.A.D. A.B.C.", "Monica. N.O.R.A.D. A.B.C.")
-    ]
+        ("Monica. N.O.R.A.D. A.B.C.", "Monica. N.O.R.A.D. A.B.C."),
+    ],
 )
 def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
     field = _field(
         "655",
-        [
-            ("a", "Disco Polo"),
-            ("y", y_value)
-        ],
+        [("a", "Disco Polo"), ("y", y_value)],
     )
     concepts = build_subdivision_concepts(field)
     assert concepts[1].id.source_identifier.value == period_id

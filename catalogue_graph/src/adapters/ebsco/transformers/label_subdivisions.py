@@ -106,8 +106,8 @@ def should_create_range(label: str) -> bool:
      False
     """
     return (
-            RE_NTH_CENTURY.match(label) is not None
-            or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+        RE_NTH_CENTURY.match(label) is not None
+        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
     )
 
 
@@ -153,11 +153,11 @@ def type_specific_id_normalisation(label: str, ontology_type: str) -> str | None
 
 
 def build_concept(
-        raw_label: str,
-        raw_type: RawConceptType,
-        preserve_trailing_period: bool = False,
-        is_identifiable: bool = True,
-        identifier: Identifiable | None = None,
+    raw_label: str,
+    raw_type: RawConceptType,
+    preserve_trailing_period: bool = False,
+    is_identifiable: bool = True,
+    identifier: Identifiable | None = None,
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
     # Organisations use the raw label to create a Label Derived Identifier.
