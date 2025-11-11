@@ -35,8 +35,8 @@ def test_concept_types_for_subdivisions() -> None:
     )
     primary_concept = build_primary_concept(field)
     concepts = (
-        [primary_concept] if primary_concept else []
-    ) + build_subdivision_concepts(field)
+                   [primary_concept] if primary_concept else []
+               ) + build_subdivision_concepts(field)
     labels = [c.label for c in concepts]
     types = [c.type for c in concepts]
 
@@ -50,8 +50,8 @@ def test_concept_types_for_subdivisions() -> None:
         ("2000 A.D.", "2000 ad"),
         ("50 B.C.", "50 bc"),
         ("ca. 50 B.C.", "ca 50 bc"),
-        ("Gaul, ca. 50 B.C.", "Gaul, ca 50 bc"),
-        ("Monica. N.O.R.A.D. A.B.C.", "Monica. N.O.R.A.D. A.B.C."),
+        ("Gaul, ca. 50 B.C.", "gaul, ca 50 bc"),
+        ("Monica. N.O.R.A.D. A.B.C. BBQ", "monica. n.o.r.a.d. a.b.c. bbq"),
     ],
 )
 def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
@@ -60,6 +60,6 @@ def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
         [("a", "Disco Polo"), ("y", y_value)],
     )
     concepts = build_subdivision_concepts(field)
-    identifier = concepts[1].id
+    identifier = concepts[0].id
     assert isinstance(identifier, Identifiable)
     assert identifier.source_identifier.value == period_id
