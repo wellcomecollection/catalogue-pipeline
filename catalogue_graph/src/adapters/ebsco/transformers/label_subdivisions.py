@@ -106,16 +106,41 @@ def should_create_range(label: str) -> bool:
      False
     """
     return (
-        RE_NTH_CENTURY.match(label) is not None
-        or RE_4_DIGIT_DATE_RANGE.match(label) is not None
+            RE_NTH_CENTURY.match(label) is not None
+            or RE_4_DIGIT_DATE_RANGE.match(label) is not None
     )
 
 
 def normalise_period_id_label(label: str) -> str:
+    """
+    Period id values are preprocessed for standard normalisation
+    by removing the dots from certain datetime abbreviations.
+    A.D. and B.C become ad and bc
+    >>> normalise_period_id_label("2000 A.D.")
+    '2000 ad'
+    >>> normalise_period_id_label("One Million Years B.C.")
+    'One Million Years bc'
+
+    ca. becomes ca
+    >>> normalise_period_id_label("ca. 1066")
+    'ca 1066'
+    >>> normalise_period_id_label("teatime, ca. 1066")
+    'teatime, ca 1066'
+
+    Each of these substitutions is subject to constraints,
+    A.D. and B.C. are only replaced when preceded by a space
+    >>> normalise_period_id_label("N.O.R.A.D. Santa Tracker")
+    'N.O.R.A.D. Santa Tracker'
+
+    ca. is only replaced either at the beginning of the label,
+    or when preceded by a space
+    >>> normalise_period_id_label("Monica.")
+    'Monica.'
+    """
     return re.sub(
         r"((?<=^)|(?<=\s))ca\.",
         "ca",
-        label.replace(" A.D.", " AD").replace(" B.C.", " bc"),
+        label.replace(" A.D.", " ad").replace(" B.C.", " bc"),
     )
 
 
@@ -128,11 +153,11 @@ def type_specific_id_normalisation(label: str, ontology_type: str) -> str | None
 
 
 def build_concept(
-    raw_label: str,
-    raw_type: RawConceptType,
-    preserve_trailing_period: bool = False,
-    is_identifiable: bool = True,
-    identifier: Identifiable | None = None,
+        raw_label: str,
+        raw_type: RawConceptType,
+        preserve_trailing_period: bool = False,
+        is_identifiable: bool = True,
+        identifier: Identifiable | None = None,
 ) -> Concept:
     label = normalise_label(raw_label, raw_type, preserve_trailing_period)
     # Organisations use the raw label to create a Label Derived Identifier.
