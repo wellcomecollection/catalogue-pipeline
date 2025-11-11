@@ -6,6 +6,7 @@ from adapters.ebsco.transformers.label_subdivisions import (
     build_label_with_subdivisions,
     build_subdivision_concepts,
 )
+from models.pipeline.identifier import Identifiable
 
 
 def _field(tag: str, subs: list[tuple[str, str]]) -> Field:
@@ -59,4 +60,6 @@ def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
         [("a", "Disco Polo"), ("y", y_value)],
     )
     concepts = build_subdivision_concepts(field)
-    assert concepts[1].id.source_identifier.value == period_id
+    identifier = concepts[1].id
+    assert isinstance(identifier, Identifiable)
+    assert identifier.source_identifier.value == period_id
