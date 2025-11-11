@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable
 from itertools import chain
 
@@ -110,6 +111,22 @@ def should_create_range(label: str) -> bool:
     )
 
 
+def normalise_period_id_label(label: str) -> str:
+    return re.sub(
+        r"((?<=^)|(?<=\s))ca\.",
+        "ca",
+        label.replace(" A.D.", " AD").replace(" B.C.", " bc"),
+    )
+
+
+def type_specific_id_normalisation(label: str, ontology_type: str) -> str | None:
+    if ontology_type == "Organisation":
+        return label
+    if ontology_type == "Period":
+        return normalise_period_id_label(label)
+    return None
+
+
 def build_concept(
     raw_label: str,
     raw_type: RawConceptType,
@@ -128,7 +145,8 @@ def build_concept(
     # This is in contrast with other concepts (e.g. Person, below), which also performs the normalisation
     # in the same fashion as normalise_label does here.
     # https://github.com/wellcomecollection/catalogue-pipeline/blob/6c5ee0e90eda680e82a2c2716a4f31e6eb4a96ea/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcPerson.scala#L23
-    label_for_id = raw_label if raw_type == "Organisation" else label
+    label_for_id = type_specific_id_normalisation(raw_label, raw_type) or label
+
     id = identifier or (
         get_concept_identifier(label_for_id, raw_type)
         if is_identifiable
