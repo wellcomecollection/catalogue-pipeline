@@ -6,7 +6,6 @@ import logging
 import os
 import sys
 from datetime import UTC, datetime
-from typing import cast
 
 import structlog
 from pydantic import BaseModel
@@ -20,13 +19,7 @@ class ExecutionContext(BaseModel):
 def setup_structlog() -> None:
     """
     Configure structlog for structured contextual logging.
-
-    Args:
-        log_level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
     """
-    log_level = os.environ.get(
-        "LOG_LEVEL", "INFO"
-    )  # we can adjust the log level in tf. Defaults to INFO in local
 
     # Configure processors
     processors: list[structlog.types.Processor] = [
@@ -57,12 +50,6 @@ def setup_structlog() -> None:
         cache_logger_on_first_use=True,
     )
 
-    # Configure standard library logging level
-    logging.basicConfig(
-        format="%(message)s",
-        level=getattr(logging, log_level.upper()),
-    )
-
 
 def _get_renderer() -> structlog.types.Processor:
     """Get appropriate renderer based on environment."""
@@ -80,8 +67,7 @@ def bind_execution_context(context: ExecutionContext) -> None:
     Bind execution context globally for all subsequent log calls.
 
     Args:
-        trace_id: Unique execution identifier
-        execution_context: Additional context metadata
+        context: Additional context metadata
     """
     structlog.contextvars.bind_contextvars(
         trace_id=context.trace_id,
@@ -93,16 +79,17 @@ def bind_execution_context(context: ExecutionContext) -> None:
 def setup_logging(context: ExecutionContext) -> None:
     """
     Set up structlog with execution context.
-
     Args:
-        trace_id: Unique execution identifier provided by caller
-        is_local: Whether this is running in local development mode
-
-    Returns:
-        Logger with execution context bound
+        context: Execution context to bind
     """
-    # Set default log level based on environment
     setup_structlog()
+
+    log_level = os.environ.get(
+        "LOG_LEVEL", "INFO"
+    )  # we can adjust the log level in tf. Defaults to INFO in local
+    
+    # Force the root logger to desired level to override any AWS Lambda defaults
+    logging.getLogger().setLevel(log_level)
 
     bind_execution_context(context)
 
