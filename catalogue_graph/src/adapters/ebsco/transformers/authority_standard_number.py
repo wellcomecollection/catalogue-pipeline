@@ -5,12 +5,13 @@ from models.pipeline.identifier import Identifiable, SourceIdentifier
 
 
 def _get_id_type(field: Field) -> str | None:
-    return {"2": "nlm-mesh"}.get(field.indicators.second)
+    indicators = field.indicators
+    return {"2": "nlm-mesh"}.get(indicators.second) if indicators else None
 
 
 def extract_identifier(field: Field, ontology_type: str) -> Identifiable | None:
     if (identifier_type := _get_id_type(field)) and (
-        identifier_subfield_value := field.get("0")
+            identifier_subfield_value := field.get("0")
     ):
         return Identifiable.from_source_identifier(
             SourceIdentifier(
