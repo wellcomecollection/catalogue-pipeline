@@ -1,0 +1,25 @@
+# Example source configuration for es_index_comparison
+# ------------------------------------------------------------
+# Copy this file to `source_configuration.yaml` and update the
+# credentials and index definitions. The real file is ignored by
+# Git so that secrets remain local.
+#
+# clusters: Named Elastic Cloud deployments (or logical groups)
+# index_sources: Elastic index references tied to a cluster
+# ------------------------------------------------------------
+
+clusters:
+  production:
+    cloud_id: "<prod-cloud-id>"
+    api_key: "<prod-api-key>"
+  staging:
+    cloud_id: "<staging-cloud-id>"
+    api_key: "<staging-api-key>"
+
+index_sources:
+  prod-works-source:
+    cluster: production
+    index: works-source-2025-10-02
+  stage-works-source:
+    cluster: staging
+    index: works-source-2025-10-06

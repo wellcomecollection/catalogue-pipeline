@@ -22,36 +22,58 @@ uv run es-index-compare --help
 
 ## Quick Start
 ```bash
-# 1. Set secrets (never stored in config)
-# You can create an API key in Elastic Cloud console
-export ES_CLOUD_ID="<your-cloud-id>"
-export ES_API_KEY="<your-api-key>"
+# 1. Copy the example source configuration and fill in secrets locally
+cp es_index_comparison/configs/source_configration.example.yaml \
+  es_index_comparison/configs/source_configuration.yaml
+#   Edit the new file with cluster cloud IDs and API keys (never committed)
 
-# 2. Run full pipeline with example config
-uv run es-index-compare run-all --config es_index_comparison/configs/example_analysis.yaml
+# 2. Run full pipeline with the default analysis config (configs/analysis.yaml)
+uv run es-index-compare run-all
 
 # 3. Inspect a single document's diffs
-uv run es-index-compare show-diff --config es_index_comparison/configs/example_analysis.yaml \
-  --id "Work[ebsco-alt-lookup/ebs28842402e]"
+uv run es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 
 # 4. Change ignore fields or add patterns in YAML then re-run only compare
-uv run es-index-compare compare --config es_index_comparison/configs/example_analysis.yaml
+uv run es-index-compare compare
+
+# If fetch/convert already generated a namespace and you want to reuse it:
+uv run es-index-compare compare --namespace analysis-20250115-103000
+
+# Or set a custom namespace up front so every stage shares the same directory:
+uv run es-index-compare fetch --namespace pipeline-reindex-audit
+uv run es-index-compare convert --namespace pipeline-reindex-audit
+uv run es-index-compare compare --namespace pipeline-reindex-audit
 ```
 
-## Environment Variables
-Set secrets via env (recommended):
-- `ES_CLOUD_ID` – Elastic Cloud deployment ID (no default)
-- `ES_API_KEY` – Elastic API key (no default)
+## Source Configuration
+All cluster credentials now live in `configs/source_configuration.yaml`, which is deliberately
+ignored by Git. The example file `source_configration.example.yaml` shows the structure:
 
-CLI flags can override these, but values are never stored in config artifacts.
+```yaml
+clusters:
+  production:
+    cloud_id: "<prod-cloud-id>"
+    api_key: "<prod-api-key>"
+
+index_sources:
+  prod-works-source:
+    cluster: production
+    index: works-source-2025-10-02
+```
+
+Analysis configs reference the identifiers (`prod-works-source`) instead of raw index names. The
+CLI will resolve credentials by looking up the cluster definition for each index source. Use
+`--config` to point at a different analysis file (defaults to `configs/analysis.yaml`). Use
+`--source-config` to pass a non-default credentials file; otherwise the tool expects the file next
+to the analysis config.
 
 ## YAML Config Schema
 Example `configs/my_analysis.yaml`:
 ```yaml
-# REQUIRED: exactly two indices
-indexes:
-  - works-source-2025-10-02
-  - works-source-2025-10-06
+# REQUIRED: exactly two index sources (see source_configuration.yaml)
+index_sources:
+  - prod-works-source
+  - stage-works-source
 
 # OPTIONAL: ES query DSL (object). Omit for match_all
 filter_query:
@@ -103,20 +125,23 @@ Any match also ignores deeper descendants beneath that path.
 All commands require a config file. Use `run-all` for the full pipeline.
 
 ```bash
-es-index-compare run-all --config configs/my_analysis.yaml
+es-index-compare run-all  # uses configs/analysis.yaml and sibling source_configuration.yaml by default
 
 # Individual stages
-es-index-compare fetch --config configs/my_analysis.yaml
-es-index-compare convert --config configs/my_analysis.yaml
-es-index-compare compare --config configs/my_analysis.yaml
+es-index-compare fetch
+es-index-compare convert
+es-index-compare compare
+
+# Reuse artifacts from a previous fetch/convert run
+es-index-compare compare --namespace analysis-20250115-103000
 
 # Show diff for a single doc id (after compare)
-es-index-compare show-diff --config configs/my_analysis.yaml --id "Work[ebsco-alt-lookup/ebs28842402e]"
+es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 ```
 
 ### Flags (common)
-- `--config PATH` (required)
-- `--cloud-id` / `--api-key` (override env)
+- `--config PATH` (optional; defaults to `configs/analysis.yaml` located beside the CLI project)
+- `--source-config PATH` (optional override; defaults to `<config-dir>/source_configuration.yaml`)
 - `--namespace` (override YAML / auto)
 - `--output-dir` (override YAML)
 
