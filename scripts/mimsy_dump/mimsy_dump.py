@@ -158,6 +158,7 @@ def main():
             "VW_NOTEPAD",
             "VW_OTHER_MEASUREMENTS",
             "VW_OTHER_NUMBERS",
+            "VW_PEOPLE_DATES",
             "VW_REPORTS",
             "VW_SOURCE_DETAILS",
             "VW_TIMELINE",
