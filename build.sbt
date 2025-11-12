@@ -179,12 +179,6 @@ lazy val transformer_marc_xml = setupProject(
   externalDependencies = CatalogueDependencies.transformerMarcXMLDependencies
 )
 
-lazy val transformer_ebsco = setupProject(
-  project,
-  folder = "pipeline/transformer/transformer_ebsco",
-  localDependencies = Seq(transformer_marc_xml)
-)
-
 lazy val transformer_miro = setupProject(
   project,
   folder = "pipeline/transformer/transformer_miro",
@@ -288,8 +282,8 @@ lazy val inference_manager = setupProject(
   localDependencies = Seq(internal_model, pipeline_storage_typesafe),
   externalDependencies = CatalogueDependencies.inferenceManagerDependencies
 )
-// TEI adapter
 
+// TEI adapter
 lazy val tei_id_extractor = setupProject(
   project,
   folder = "tei_adapter/tei_id_extractor",
