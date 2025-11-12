@@ -291,16 +291,16 @@ def test_distinct_by_label_and_role(marc_record: Record) -> None:
 def test_contributor_all_fields(
     marc_record: Record, field_code: str, ontology_type: RawConceptType, primary: bool
 ) -> None:
-    # A previous incarnation of this transformer included fields t,n,p and l in the label.
+    # A previous incarnation of this transformer included fields t,n, and p in the label.
     # Collectively, those fields identified some work by the named person, as though citing
     # them in a bibliography. This is not what we currently use the contributor field for,
     # All we want is the actual person.
-    # Similarly, the previous incarnation had differing subfiueld lists for Organisation and Person.
+    # Similarly, the previous incarnation had differing subfield lists for Organisation and Person.
     # This is not necessary, as the only field that now differs between the two is $q,
     # which does not exist on x10 fields.
     contributor = transform_record(marc_record).data.contributors[0]
     assert contributor.roles == [Label(label="key grip"), Label(label="best boy")]
-    label = "Churchill, Randolph Spencer IV, Lady, 1856-1939 a work (nee Jennie Jerome)"
+    label = "Churchill, Randolph Spencer IV, Lady, 1856-1939 a work (nee Jennie Jerome) Ayapeneco"
     assert contributor.primary == primary
     assert contributor.agent.label == label
 

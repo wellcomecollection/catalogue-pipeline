@@ -136,11 +136,11 @@ def list_member_count(work: VisibleSourceWork, count: int, attr_phrase: str) -> 
 
 @then(
     parsers.re(
-        r'that (?P<thing_name>.+)\'s (?P<ord>\d+\w{2}) concept has the identifier value "(?P<value>.*)"'
+        r'that (?P<thing_name>.+)\'s (?P<ord>(\d+\w{2})|only) concept has the identifier (?P<id_member>(type|value)) "(?P<value>.*)"'
     )
 )
 def context_concept_identifier_value(
-    context: dict[str, Any], thing_name: str, ord: str, value: str
+    context: dict[str, Any], thing_name: str, ord: str, id_member: str, value: str
 ) -> None:
     """
     Assert the Nth concept (ordinal like 1st/2nd/3rd/4th etc.) of the thing
@@ -160,7 +160,7 @@ def context_concept_identifier_value(
     source_id = source_identifiers[0]
 
     assert concept.id is not None, f"Concept {ord} is missing an identifier"
-    actual = source_id.value
+    actual = source_id.value if id_member == "value" else source_id.identifier_type.id
     assert actual == value, (
         f'Expected {ord} concept identifier value "{value}", got "{actual}"'
     )
@@ -168,7 +168,7 @@ def context_concept_identifier_value(
 
 @then(
     parsers.re(
-        r"that (?P<thing_name>.+)\'s (?P<ord>\d+\w{2}) concept has a range from (?P<from_val>[\dT:.Z-]+) to (?P<to_val>[\dT:.Z-]+)"
+        r"that (?P<thing_name>.+)\'s (?P<ord>(\d+\w{2})|only) concept has a range from (?P<from_val>[\dT:.Z-]+) to (?P<to_val>[\dT:.Z-]+)"
     )
 )
 def step_ordinal_range(
@@ -293,14 +293,14 @@ def context_has(
 
 @then(
     parsers.re(
-        r'that (?P<thing_name>.+)\'s (?P<ord>\d+)\w{2} concept has the (?P<property>.+) "(?P<value>.*)"'
+        r'that (?P<thing_name>.+)\'s (?P<ord>(\d+\w{2})|only) concept has the (?P<property>.+) "(?P<value>.*)"'
     )
 )
 def context_concept_value(
     context: dict[str, Any], thing_name: str, ord: str, property: str, value: str
 ) -> None:
     thing = context[thing_name]
-    concept = thing.concepts[int(ord) - 1]
+    concept = thing.concepts[_ordinal_index(ord)]
     assert getattr(concept, property) == value
     context["concept"] = concept
 
@@ -350,6 +350,8 @@ def _assert_single_genre(context: dict[str, Any]) -> Any:
 
 
 def _ordinal_index(ord_with_suffix: str) -> int:
+    if ord_with_suffix == "only":
+        return 0
     m = re.match(r"(\d+)", ord_with_suffix)
     assert m, f"Unrecognised ordinal: {ord_with_suffix}"
     return int(m.group(1)) - 1

@@ -4,6 +4,7 @@ from collections.abc import Generator
 from pymarc.field import Field
 from pymarc.record import Record
 
+from adapters.ebsco.transformers.authority_standard_number import extract_identifier
 from adapters.ebsco.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
     SUBDIVISION_CODES,
@@ -130,8 +131,13 @@ def extract_subject(field: Field) -> Subject | None:
     # Concept construction with original semantics (preserving Python rules while adopting separator changes)
     main_label = _get_main_label(field)
     ontology_type = FIELD_TO_TYPE.get(field.tag, "Concept")
+    identifier = extract_identifier(field, ontology_type)
+
     primary_concept = build_concept(
-        main_label, ontology_type, preserve_trailing_period=ontology_type == "Person"
+        main_label,
+        ontology_type,
+        preserve_trailing_period=ontology_type == "Person",
+        identifier=identifier,
     )
 
     get_subdivision_concepts = SUBDIVISION_TRANSFORMS[field.tag]
@@ -145,6 +151,6 @@ def extract_subject(field: Field) -> Subject | None:
 
     return Subject(
         label=label,
-        id=Identifiable.identifier_from_text(label, ontology_type),
+        id=identifier or Identifiable.identifier_from_text(label, ontology_type),
         concepts=[primary_concept] + list(get_subdivision_concepts(field)),
     )

@@ -36,8 +36,12 @@ ignore_fields:
   - data.production[].places[].type
   - data.subjects[].type
   - data.production[].function.type
+  - data.contributors[].agent.type
+  - data.contributors[].agent.id.sourceIdentifier.ontologyType
+  # agent.type is to ignore Agent -> Person, which is a bug that I'm keen not to reproduce.
+
   # Number of differing documents to sample for console display
-sample_size: 10
+sample_size: 40
 
 # Rows per Parquet shard flush during conversion
 loading_chunk_size: 100000
