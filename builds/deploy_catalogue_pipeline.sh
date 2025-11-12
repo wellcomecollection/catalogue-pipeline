@@ -62,7 +62,6 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
   uk.ac.wellcome/batcher \
   uk.ac.wellcome/relation_embedder \
   uk.ac.wellcome/transformer_calm \
-  uk.ac.wellcome/transformer_ebsco \
   uk.ac.wellcome/transformer_mets \
   uk.ac.wellcome/transformer_miro \
   uk.ac.wellcome/transformer_sierra \
@@ -77,7 +76,6 @@ then
     ingestor_works \
     r_embed_path_concatenator \
     transformer_calm \
-    transformer_ebsco \
     transformer_mets \
     transformer_miro \
     transformer_sierra \
