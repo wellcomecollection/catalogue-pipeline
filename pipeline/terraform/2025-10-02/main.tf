@@ -21,17 +21,6 @@ module "pipeline" {
         augmented = "empty"
         indexed   = "images_indexed.2024-11-14"
       }
-      concepts = {
-        indexed = "concepts_indexed.2025-06-17"
-      }
-    }
-    "2025-10-06" = {
-      works = {
-        source     = "works_source.2025-10-02"
-        identified = "works_identified.2023-05-26"
-      }
-      images   = {}
-      concepts = {}
     }
     "2025-10-09" = {
       works = {

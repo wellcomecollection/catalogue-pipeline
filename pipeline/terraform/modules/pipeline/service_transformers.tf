@@ -44,10 +44,6 @@ locals {
       # sent to a DLQ.
       queue_visibility_timeout_seconds = 90
     }
-
-    ebsco = {
-      container_image = local.transformer_ebsco_image
-    }
   }
 
   transformer_output_topic_arns = [
