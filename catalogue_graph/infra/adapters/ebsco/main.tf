@@ -150,7 +150,7 @@ resource "aws_scheduler_schedule" "ebsco_adapter_daily_run" {
   }
 
   schedule_expression = "cron(0 2 * * ? *)" # Daily at 2 AM UTC
-  state               = "DISABLED"
+  state               = "ENABLED"
 
   target {
     arn      = aws_sfn_state_machine.state_machine.arn
