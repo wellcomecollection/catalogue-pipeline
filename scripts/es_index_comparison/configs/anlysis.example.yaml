@@ -1,0 +1,54 @@
+# Example configuration for es_index_comparison
+# ------------------------------------------------------------
+# Copy this file and modify values to create independent analyses.
+# Each run produces its own namespace directory under output_dir.
+# ------------------------------------------------------------
+
+# Exactly TWO indices to compare (required)
+indexes:
+  - works-source-2025-10-02
+  - works-source-2025-10-06
+
+# Optional Elasticsearch query DSL (omit for match_all). This example filters
+# documents where a nested term matches a specific identifier type.
+filter_query:
+  query:
+    term:
+      state.sourceIdentifier.identifierType.id: ebsco-alt-lookup
+
+# Ignore field path patterns (wildcards & list index insensitive tokens allowed)
+# Pattern language:
+#   state.modifiedTime              -> exact path
+#   state.*.modifiedTime            -> match one segment
+#   state.**.modifiedTime           -> match any depth
+#   data.production[].dates[].range.from -> ignore all list indices for those segments
+# Descendants of a matched path are also ignored implicitly.
+ignore_fields:
+  - version
+  - state.modifiedTime
+  - state.sourceModifiedTime
+  - state.relations.children
+  - state.relations.siblingsPreceding
+  - state.relations.siblingsSucceeding
+  - data.production[].dates[].type
+  - data.production[].dates[].range.from
+  - data.production[].dates[].range.to
+  - data.production[].places[].type
+  - data.subjects[].type
+  - data.production[].function.type
+  - data.contributors[].agent.type
+  - data.contributors[].agent.id.sourceIdentifier.ontologyType
+  # agent.type is to ignore Agent -> Person, which is a bug that I'm keen not to reproduce.
+
+  # Number of differing documents to sample for console display
+sample_size: 40
+
+# Rows per Parquet shard flush during conversion
+loading_chunk_size: 100000
+
+# Optional namespace override; if omitted a timestamped one is generated from filename
+# namespace: pipeline-comparison-ebsco
+
+# Base output directory (created if missing)
+output_dir: data
+
