@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "ebsco_adapter" {
-  bucket = "wellcomecollection-platform-${local.namespace}"
+  bucket = "wellcomecollection-platform-ebsco-adapter"
 
   lifecycle {
     prevent_destroy = false
@@ -18,4 +18,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "ebsco_adapter" {
     }
   }
 }
-
