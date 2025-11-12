@@ -1,3 +1,4 @@
+import pytest
 from pymarc.record import Field, Subfield
 
 from adapters.ebsco.transformers.genres import build_primary_concept
@@ -5,6 +6,7 @@ from adapters.ebsco.transformers.label_subdivisions import (
     build_label_with_subdivisions,
     build_subdivision_concepts,
 )
+from models.pipeline.identifier import Identifiable
 
 
 def _field(tag: str, subs: list[tuple[str, str]]) -> Field:
@@ -40,3 +42,24 @@ def test_concept_types_for_subdivisions() -> None:
 
     assert labels == ["Music", "1990-2000", "London", "Scores"]
     assert types == ["GenreConcept", "Period", "Place", "Concept"]
+
+
+@pytest.mark.parametrize(
+    "y_value, period_id",
+    [
+        ("2000 A.D.", "2000 ad"),
+        ("50 B.C.", "50 bc"),
+        ("ca. 50 B.C.", "ca 50 bc"),
+        ("Gaul, ca. 50 B.C.", "gaul, ca 50 bc"),
+        ("Monica. N.O.R.A.D. A.B.C. BBQ", "monica. n.o.r.a.d. a.b.c. bbq"),
+    ],
+)
+def test_period_subdivision_identifiers(y_value: str, period_id: str) -> None:
+    field = _field(
+        "655",
+        [("a", "Disco Polo"), ("y", y_value)],
+    )
+    concepts = build_subdivision_concepts(field)
+    identifier = concepts[0].id
+    assert isinstance(identifier, Identifiable)
+    assert identifier.source_identifier.value == period_id
