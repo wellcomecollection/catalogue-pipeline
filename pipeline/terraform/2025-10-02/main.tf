@@ -34,7 +34,7 @@ module "pipeline" {
     }
   }
 
-  allow_delete_indices = true
+  allow_delete_indices = false
 
   pipeline_date = local.pipeline_date
   release_label = local.pipeline_date
