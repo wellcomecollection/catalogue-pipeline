@@ -15,6 +15,9 @@ class ExecutionContext(BaseModel):
     trace_id: str
     pipeline_step: str
 
+log_level = os.environ.get(
+    "LOG_LEVEL", "INFO"
+)  # we can adjust the log level in tf. Defaults to INFO in local
 
 def setup_structlog() -> None:
     """
@@ -50,6 +53,13 @@ def setup_structlog() -> None:
         cache_logger_on_first_use=True,
     )
 
+    # Configure standard library logging to output to stdout
+    logging.basicConfig(
+        format="%(message)s",
+        level=getattr(logging, log_level.upper()),
+        stream=sys.stdout,
+    )
+
 
 def _get_renderer() -> structlog.types.Processor:
     """Get appropriate renderer based on environment."""
@@ -83,11 +93,6 @@ def setup_logging(context: ExecutionContext) -> None:
         context: Execution context to bind
     """
     setup_structlog()
-
-    log_level = os.environ.get(
-        "LOG_LEVEL", "INFO"
-    )  # we can adjust the log level in tf. Defaults to INFO in local
-    
     # Force the root logger to desired level to override any AWS Lambda defaults
     logging.getLogger().setLevel(log_level)
 

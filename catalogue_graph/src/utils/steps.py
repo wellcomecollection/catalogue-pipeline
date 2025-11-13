@@ -5,10 +5,7 @@ from datetime import datetime
 from typing import Concatenate, ParamSpec, Protocol, TypeVar
 
 import boto3
-import structlog
 from pydantic import BaseModel
-
-from utils.logger import ExecutionContext, setup_logging
 
 Params = ParamSpec("Params")
 EventModel = TypeVar("EventModel", bound=BaseModel)
@@ -91,26 +88,12 @@ def run_ecs_handler(
     task_token = ecs_args.task_token
     event = ecs_args.event
 
-    setup_logging(
-        ExecutionContext(
-            trace_id="some-value-passed-down-state-machine-steps",
-            pipeline_step="graph_extractor",
-        )
-    )
-
-    logger = structlog.get_logger(__name__)
-
-    logger.info(
-        "ECS task started",
-    )
-
     stepfunctions_client = boto3.client("stepfunctions") if task_token else None
     step_output = StepFunctionOutput(task_token, stepfunctions_client)
 
     try:
         result = handler(event=event, *handler_args, **handler_kwargs)  # noqa: B026
         step_output.send_success(result)
-        logger.info("ECS task completed successfully")
 
     except Exception as exc:
         step_output.send_failure(exc)

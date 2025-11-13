@@ -1,5 +1,6 @@
 import argparse
 import typing
+
 import structlog
 
 from models.events import (
@@ -13,17 +14,16 @@ from utils.aws import get_neptune_client
 from utils.logger import ExecutionContext, setup_logging
 
 
-
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
     setup_logging(
         ExecutionContext(
             trace_id="logging test",
             pipeline_step="graph_bulk_loader",
         ),
-    )    
-    
+    )
+
     s3_file_uri = event.get_s3_uri()
-    
+
     structlog.get_logger(__name__).info(
         "Starting bulk load",
         s3_file_uri=s3_file_uri,
@@ -88,7 +88,6 @@ def local_handler() -> None:
 
     args = parser.parse_args()
     event = BulkLoaderEvent.from_argparser(args)
-
 
     print(handler(event, is_local=True))
 
