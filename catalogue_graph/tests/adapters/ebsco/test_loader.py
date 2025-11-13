@@ -62,7 +62,7 @@ class TestRecordIdExtraction:
         node = etree.fromstring("<record></record>")
 
         with pytest.raises(
-                Exception, match="Could not find controlfield 001 or usable datafield 035"
+            Exception, match="Could not find controlfield 001 or usable datafield 035"
         ):
             node = etree.fromstring(
                 """

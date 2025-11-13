@@ -6,6 +6,7 @@ identifier used by the transformer; skips work if the file was already loaded.
 """
 
 import argparse
+import re
 from datetime import datetime
 from typing import IO, Any, cast
 
