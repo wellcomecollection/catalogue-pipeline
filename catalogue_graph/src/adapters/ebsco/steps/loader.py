@@ -6,6 +6,7 @@ identifier used by the transformer; skips work if the file was already loaded.
 """
 
 import argparse
+import re
 from datetime import datetime
 from typing import IO, Any, cast
 
@@ -53,15 +54,41 @@ def nodes_to_records(collection: etree._Element) -> list[dict[str, str]]:
 
 
 def node_to_record(node: etree._Element) -> dict[str, str]:
-    controlfield = cast(
-        list[str], node.xpath("./*[local-name()='controlfield' and @tag='001']/text()")
-    )
-    if not controlfield:
-        raise Exception("Could not find controlfield with tag 001")
-    record_id: str = controlfield[0]
+    record_id = extract_record_id(node)
     # serialize XML
     content = etree.tostring(node, encoding="unicode", pretty_print=False)
     return {"id": record_id, "content": content}
+
+
+def extract_record_id(node: etree._Element) -> str:
+    controlfield_values = cast(
+        list[str], node.xpath("./*[local-name()='controlfield' and @tag='001']/text()")
+    )
+    for value in controlfield_values:
+        normalized = value.strip()
+        if normalized:
+            return normalized
+
+    datafield_values = cast(
+        list[str],
+        node.xpath(
+            "./*[local-name()='datafield' and @tag='035']/*[local-name()='subfield' and @code='a']/text()"
+        ),
+    )
+    for raw_value in datafield_values:
+        cleaned = _strip_marc_parenthetical_prefix(raw_value)
+        if cleaned:
+            return cleaned
+
+    raise Exception(
+        "Could not find controlfield 001 or usable datafield 035 "
+        f"in record: {etree.tostring(node, encoding='unicode', pretty_print=True)}"
+    )
+
+
+def _strip_marc_parenthetical_prefix(raw_value: str) -> str:
+    value = raw_value.strip()
+    return re.sub(r"^\(.*\)", "", value)
 
 
 def data_to_pa_table(data: list[dict[str, str]]) -> pa.Table:
