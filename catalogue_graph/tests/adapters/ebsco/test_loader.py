@@ -45,7 +45,38 @@ class TestRecordIdExtraction:
 
         assert extract_record_id(node) == "814782"
 
+    def test_ignores_controlfield_001_when_empty(self) -> None:
+        node = etree.fromstring(
+            """
+            <record>
+                <controlfield tag="001"></controlfield>
+                <datafield tag="035">
+                    <subfield code="a">(OCoLC)9999999</subfield>
+                </datafield>
+            </record>
+            """
+        )
+        assert extract_record_id(node) == "9999999"
+
     def test_raises_when_no_identifier_present(self) -> None:
+        node = etree.fromstring("<record></record>")
+
+        with pytest.raises(
+                Exception, match="Could not find controlfield 001 or usable datafield 035"
+        ):
+            node = etree.fromstring(
+                """
+                <record>
+                    <controlfield tag="001">   </controlfield>
+                    <datafield tag="035">
+                        <subfield code="a"> (OCoLC) </subfield>
+                    </datafield>
+                </record>
+                """
+            )
+        assert extract_record_id(node)
+
+    def test_raises_when_no_identifier_fields_present(self) -> None:
         node = etree.fromstring("<record></record>")
 
         with pytest.raises(
