@@ -1,15 +1,57 @@
 import json
 
 import pytest
+from lxml import etree
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
 )
-from adapters.ebsco.steps.loader import EbscoAdapterLoaderConfig, handler
+from adapters.ebsco.steps.loader import (
+    EbscoAdapterLoaderConfig,
+    extract_record_id,
+    handler,
+)
 from adapters.ebsco.utils.tracking import ProcessedFileRecord
 from tests.mocks import MockSmartOpen
+
+
+class TestRecordIdExtraction:
+    def test_uses_controlfield_001_when_available(self) -> None:
+        node = etree.fromstring(
+            """
+            <record>
+                <controlfield tag="001">r-control</controlfield>
+                <datafield tag="035">
+                    <subfield code="a">(OCoLC)9999999</subfield>
+                </datafield>
+            </record>
+            """
+        )
+
+        assert extract_record_id(node) == "r-control"
+
+    def test_falls_back_to_datafield_035_removing_prefix(self) -> None:
+        node = etree.fromstring(
+            """
+            <record>
+                <datafield tag="035">
+                    <subfield code="a">(OCoLC)814782</subfield>
+                </datafield>
+            </record>
+            """
+        )
+
+        assert extract_record_id(node) == "814782"
+
+    def test_raises_when_no_identifier_present(self) -> None:
+        node = etree.fromstring("<record></record>")
+
+        with pytest.raises(
+            Exception, match="Could not find controlfield 001 or usable datafield 035"
+        ):
+            extract_record_id(node)
 
 
 class TestLoaderHandler:
