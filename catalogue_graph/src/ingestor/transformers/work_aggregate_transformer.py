@@ -81,7 +81,8 @@ class AggregateWorkTransformer:
                     if not from_year_match:
                         raise ValueError(f"Invalid date format: {date.range.from_time}")
 
-                    year = from_year_match.group()
+                    # Remove leading zeros
+                    year = str(int(from_year_match.group()))
                     yield AggregatableField(id=year, label=year)
 
     @property
