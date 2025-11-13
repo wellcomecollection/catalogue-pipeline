@@ -87,11 +87,7 @@ def extract_record_id(node: etree._Element) -> str:
 
 def _strip_marc_parenthetical_prefix(raw_value: str) -> str:
     value = raw_value.strip()
-    if value.startswith("("):
-        closing_index = value.find(")")
-        if closing_index != -1:
-            value = value[closing_index + 1 :].strip()
-    return value
+   return re.sub(r"^\(.*\)", "", value)
 
 
 def data_to_pa_table(data: list[dict[str, str]]) -> pa.Table:
