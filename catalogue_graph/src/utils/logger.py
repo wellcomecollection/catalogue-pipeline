@@ -15,9 +15,11 @@ class ExecutionContext(BaseModel):
     trace_id: str
     pipeline_step: str
 
+
 log_level = os.environ.get(
     "LOG_LEVEL", "INFO"
 )  # we can adjust the log level in tf. Defaults to INFO in local
+
 
 def setup_structlog() -> None:
     """
@@ -97,4 +99,3 @@ def setup_logging(context: ExecutionContext) -> None:
     logging.getLogger().setLevel(log_level)
 
     bind_execution_context(context)
-
