@@ -14,17 +14,13 @@ console = Console()
 
 
 def build_source_maps(df_pl: pl.DataFrame) -> dict:
-    pdf = df_pl.select(["_id", "_source"]).to_pandas()
     out = {}
-    for _id, _source in zip(pdf["_id"], pdf["_source"]):
-        if isinstance(_source, str):
-            try:
-                _source = json.loads(_source)
-            except json.JSONDecodeError:
-                pass
-        if not isinstance(_source, dict):
-            _source = {"value": _source}
-        out[_id] = _source
+    for i, row in enumerate(df_pl.select(["_id", "_source"]).iter_rows(named=True)):
+        out[row["_id"]] = row["_source"]
+        
+        if i % 50000 == 0:
+            print(i)
+
     return out
 
 

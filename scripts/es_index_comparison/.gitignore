@@ -1,3 +1,4 @@
 data/*
 !data/.gitkeep
 configs/source_configuration.yaml
+es_index_comparison/data

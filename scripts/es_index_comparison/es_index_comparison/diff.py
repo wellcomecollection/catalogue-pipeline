@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+from .transforms import TRANSFORMS
 import re
 import json
 from typing import Any, Dict, List
@@ -75,6 +75,9 @@ def deep_diff(a: Any, b: Any, path: str = "") -> List[Dict[str, Any]]:
     diffs: List[Dict[str, Any]] = []
     a = normalize_value(a)
     b = normalize_value(b)
+    
+    if path in TRANSFORMS:
+        a, b = TRANSFORMS[path](a, b)
 
     if type(a) is not type(b):
         diffs.append({"path": path, "type": "type_mismatch", "left": a, "right": b})

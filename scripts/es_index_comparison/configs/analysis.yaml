@@ -1,38 +1,28 @@
-# Example configuration for es_index_comparison
-# ------------------------------------------------------------
-# Copy this file and modify values to create independent analyses.
-# Each run produces its own namespace directory under output_dir.
-# ------------------------------------------------------------
-
-# Exactly TWO index sources to compare (required)
-# These identifiers must exist in source_configuration.yaml
 index_sources:
-  - pipeline-2025-10-02-images-indexed
-  - pipeline-2025-08-14-images-indexed
+  - legacy-works-indexed
+  - new-works-indexed
 
-# Optional Elasticsearch query DSL (omit for match_all). This example filters
-# documents where a nested term matches a specific identifier type.
-# filter_query:
-#   query:
-
-# Ignore field path patterns (wildcards & list index insensitive tokens allowed)
-# Pattern language:
-#   state.modifiedTime              -> exact path
-#   state.*.modifiedTime            -> match one segment
-#   state.**.modifiedTime           -> match any depth
-#   data.production[].dates[].range.from -> ignore all list indices for those segments
-# Descendants of a matched path are also ignored implicitly.
 ignore_fields:
-  # - some_field
+  - debug.mergedTime
+  - debug.indexedTime
+  - display.precededBy
+  - display.succeededBy
+  - display.partOf[].totalDescendentParts
+  - display.partOf[].partOf[].totalDescendentParts
+  - display.partOf[].partOf[].partOf[].totalDescendentParts
+  - display.partOf[].partOf[].partOf[].partOf[].totalDescendentParts
+  - display.partOf[].partOf[].partOf[].partOf[].partOf[].totalDescendentParts
+  - display.partOf[].partOf[].partOf[].partOf[].partOf[].partOf[].totalDescendentParts
+  - display.partOf[].partOf[].partOf[].partOf[].partOf[].partOf[].partOf[].totalDescendentParts
+  - display.partOf[].partOf[].partOf[].partOf[].partOf[].partOf[].partOf[].partOf[].totalDescendentParts
+  - display.parts[].totalDescendentParts
+  - debug.mergeCandidates[].id.type
+  - debug.redirectSources[].type
+  - redirectTarget.type
+  - aggregatableValues.production.dates[].id
+  - aggregatableValues.production.dates[].label
+  - aggregatableValues.languages[].label
 
-# Number of differing documents to sample for console display
-sample_size: 10
-
-# Rows per Parquet shard flush during conversion
+sample_size: 100
 loading_chunk_size: 100000
-
-# Optional namespace override; if omitted a timestamped one is generated from filename
-# namespace: pipeline-comparison-ebsco
-
-# Base output directory (created if missing)
 output_dir: data

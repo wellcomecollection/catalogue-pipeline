@@ -10,6 +10,8 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 from rich.console import Console
+import polars as pl
+import tqdm
 
 console = Console()
 
@@ -60,9 +62,6 @@ def ndjson_gz_to_parquet_shards(
 
 def load_parquet_index(folder: Path):
     """Load all parquet shards for an index into a polars DataFrame (relaxed vertical concat)."""
-    import polars as pl
-    import tqdm
-
     files = [f for f in os.listdir(folder) if f.endswith(".parquet")]
     dfs = []
     for f in tqdm.tqdm(files, desc=f"load {folder.name}"):
