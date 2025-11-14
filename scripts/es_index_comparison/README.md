@@ -5,11 +5,12 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 ## Features
 - Fetch only (read-only) from Elasticsearch using cloud_id + api_key (never writes back).
 - Optional filter query to restrict scanned documents.
-- Chunked Parquet materialization (polars + pyarrow) for efficient re-use.
+- Hash-bucketed Parquet materialization (polars + pyarrow) so comparisons stream one bucket at a time.
 - Deep recursive diff (dicts, lists, scalars, numpy arrays) with null-vs-missing equivalence.
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
 - Export artifacts: JSONL diffs, CSV summary, field frequency JSON, and diff metadata.
 - Sampled human-readable diff display & per-document diff inspection.
+- Streaming compare phase with per-bucket, human-readable progress logs.
 - Multiple independent analyses distinguished by namespace (auto or user-provided).
 
 ## Installation (using uv)
@@ -90,10 +91,11 @@ ignore_fields:
   - data.production[].dates[].range.to
 
 # OPTIONAL settings
-sample_size: 10              # number of docs to sample when printing diffs
-loading_chunk_size: 100000   # rows per Parquet shard flush
+sample_size: 10                # number of docs to sample when printing diffs
+loading_chunk_size: 100000     # rows per Parquet shard flush during convert
+hash_bucket_count: 128         # number of deterministic hash buckets for Parquet layout
 namespace: pipeline-comparison-ebsco # If omitted, auto: <basename>-<YYYYMMDD-HHMMSS>
-output_dir: data             # base output root (default: data)
+output_dir: data               # base output root (default: data)
 ```
 
 ## Ignore Pattern Language
@@ -111,9 +113,11 @@ Any match also ignores deeper descendants beneath that path.
     <index>.ndjson.gz
   parquet/
     <index>/
-      0.parquet
-      100000.parquet
-      final.parquet
+      bucket_0000/
+        part-00000.parquet
+      bucket_0001/
+        part-00000.parquet
+      manifest.json
   diffs/
     diffs.jsonl
     diff_summary.csv
@@ -144,12 +148,14 @@ es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 - `--source-config PATH` (optional override; defaults to `<config-dir>/source_configuration.yaml`)
 - `--namespace` (override YAML / auto)
 - `--output-dir` (override YAML)
+- `--hash-buckets` (override YAML `hash_bucket_count` when running fetch/convert/compare)
 
 ## Safety & Read-Only Assurance
 The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it performs no writes, index creations, or updates.
 
 ## Performance Tips
 - Increase `loading_chunk_size` for very large indices if memory permits.
+- Tune `hash_bucket_count` to balance on-disk fan-out vs. in-memory chunk size during compare (higher bucket counts mean fewer docs per chunk).
 - Polars operations are columnar; ensure adequate disk space for Parquet.
 - Re-run `compare` without `fetch`/`convert` after adjusting ignore patterns.
 

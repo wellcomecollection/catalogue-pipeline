@@ -34,15 +34,28 @@ COMMON_OPTIONS = {
         None, "--namespace", help="Override namespace output directory name."
     ),
     "output_dir": typer.Option(None, "--output-dir", help="Override base output directory."),
+    "hash_buckets": typer.Option(
+        None,
+        "--hash-buckets",
+        help="Override hash bucket count for Parquet partitioning (default from config).",
+    ),
 }
 
 
-def _load_and_prepare(config: Path, source_config: Path | None, namespace, output_dir):
+def _load_and_prepare(
+    config: Path,
+    source_config: Path | None,
+    namespace,
+    output_dir,
+    hash_buckets: int | None = None,
+):
     overrides = {}
     if namespace:
         overrides["namespace"] = namespace
     if output_dir:
         overrides["output_dir"] = str(output_dir)
+    if hash_buckets is not None:
+        overrides["hash_bucket_count"] = hash_buckets
     cfg = load_config(config, overrides=overrides)
     namespace_generated = cfg.namespace is None and namespace is None
     eff_ns = cfg.effective_namespace(config)
@@ -66,9 +79,12 @@ def fetch(
     source_config: Path | None = COMMON_OPTIONS["source_config"],
     namespace: str | None = COMMON_OPTIONS["namespace"],
     output_dir: Path | None = COMMON_OPTIONS["output_dir"],
+    hash_buckets: int | None = COMMON_OPTIONS["hash_buckets"],
 ):
     """Fetch documents from both indices into gzip NDJSON files."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(config, source_config, namespace, output_dir)
+    cfg, eff_ns, dirs, sources = _load_and_prepare(
+        config, source_config, namespace, output_dir, hash_buckets
+    )
     fetch_both(sources, dirs["raw"], cfg.filter_query)
     console.print(f"Fetch complete namespace={eff_ns}")
 
@@ -79,9 +95,12 @@ def convert(
     source_config: Path | None = COMMON_OPTIONS["source_config"],
     namespace: str | None = COMMON_OPTIONS["namespace"],
     output_dir: Path | None = COMMON_OPTIONS["output_dir"],
+    hash_buckets: int | None = COMMON_OPTIONS["hash_buckets"],
 ):
     """Convert fetched NDJSON gzip files into Parquet shards (one folder per index)."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(config, source_config, namespace, output_dir)
+    cfg, eff_ns, dirs, sources = _load_and_prepare(
+        config, source_config, namespace, output_dir, hash_buckets
+    )
     # We don't need ES here, just files
     for source in sources:
         ndjson_file = dirs["raw"] / f"{source.storage_key}.ndjson.gz"
@@ -89,7 +108,11 @@ def convert(
             console.print(f"Missing raw file {ndjson_file}. Run fetch first.", style="red")
             raise typer.Exit(code=1)
         ndjson_gz_to_parquet_shards(
-            source.storage_key, ndjson_file, dirs["parquet"], cfg.loading_chunk_size
+            source.storage_key,
+            ndjson_file,
+            dirs["parquet"],
+            cfg.loading_chunk_size,
+            cfg.hash_bucket_count,
         )
     console.print(f"Convert complete namespace={eff_ns}")
 
@@ -100,23 +123,22 @@ def compare(
     source_config: Path | None = COMMON_OPTIONS["source_config"],
     namespace: str | None = COMMON_OPTIONS["namespace"],
     output_dir: Path | None = COMMON_OPTIONS["output_dir"],
+    hash_buckets: int | None = COMMON_OPTIONS["hash_buckets"],
 ):
     """Run diff comparison on existing Parquet shards and write artifacts."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(config, source_config, namespace, output_dir)
+    cfg, eff_ns, dirs, sources = _load_and_prepare(
+        config, source_config, namespace, output_dir, hash_buckets
+    )
 
-    dfs = {}
     for source in sources:
         folder = dirs["parquet"] / source.storage_key
         if not folder.exists():
             console.print(f"Parquet folder missing {folder}. Run convert stage.", style="red")
             raise typer.Exit(code=1)
-        dfs[source.id] = __import__(
-            "es_index_comparison.parquet_io", fromlist=["load_parquet_index"]
-        ).load_parquet_index(folder)
     compare_indices(
         sources[0],
         sources[1],
-        dfs,
+        dirs["parquet"],
         cfg.ignore_fields,
         dirs["diffs"],
         cfg.sample_size,
@@ -130,26 +152,27 @@ def run_all(
     source_config: Path | None = COMMON_OPTIONS["source_config"],
     namespace: str | None = COMMON_OPTIONS["namespace"],
     output_dir: Path | None = COMMON_OPTIONS["output_dir"],
+    hash_buckets: int | None = COMMON_OPTIONS["hash_buckets"],
 ):
     """Execute fetch -> convert -> compare sequentially."""
-    cfg, eff_ns, dirs, sources = _load_and_prepare(config, source_config, namespace, output_dir)
+    cfg, eff_ns, dirs, sources = _load_and_prepare(
+        config, source_config, namespace, output_dir, hash_buckets
+    )
     fetch_both(sources, dirs["raw"], cfg.filter_query)
     for source in sources:
         ndjson_file = dirs["raw"] / f"{source.storage_key}.ndjson.gz"
         ndjson_gz_to_parquet_shards(
-            source.storage_key, ndjson_file, dirs["parquet"], cfg.loading_chunk_size
+            source.storage_key,
+            ndjson_file,
+            dirs["parquet"],
+            cfg.loading_chunk_size,
+            cfg.hash_bucket_count,
         )
 
-    dfs = {
-        source.id: __import__(
-            "es_index_comparison.parquet_io", fromlist=["load_parquet_index"]
-        ).load_parquet_index(dirs["parquet"] / source.storage_key)
-        for source in sources
-    }
     compare_indices(
         sources[0],
         sources[1],
-        dfs,
+        dirs["parquet"],
         cfg.ignore_fields,
         dirs["diffs"],
         cfg.sample_size,
