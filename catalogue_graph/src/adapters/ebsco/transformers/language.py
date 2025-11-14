@@ -1,7 +1,7 @@
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.lookups.languages import from_code
 from adapters.ebsco.transformers.parsers.field008 import RawField008
+from lookups.languages import from_code
 from models.pipeline.id_label import Language
 
 

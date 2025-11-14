@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.availability import DisplayAvailability
 from ingestor.models.display.license import DisplayLicense
+from lookups.languages import from_code
 from models.pipeline.identifier import (
     Identifiable,
     Identified,
@@ -81,11 +82,15 @@ class AggregateWorkTransformer:
                     if not from_year_match:
                         raise ValueError(f"Invalid date format: {date.range.from_time}")
 
-                    year = from_year_match.group()
+                    # Remove leading zeros
+                    year = str(int(from_year_match.group()))
                     yield AggregatableField(id=year, label=year)
 
     @property
     def languages(self) -> Generator[AggregatableField]:
-        # TODO: Investigate MarcLanguageCodeList
         for language in self.data.languages:
-            yield AggregatableField(**language.model_dump())
+            # There are cases where two languages have the same ID but different labels, e.g. Chinese and Mandarin
+            # are both associated with the MARC language code "chi". The distinct names may be important for display
+            # on individual works pages, but for filtering/aggregating we want to use the canonical labels.
+            marc_language = from_code(language.id) or language
+            yield AggregatableField(**marc_language.model_dump())
