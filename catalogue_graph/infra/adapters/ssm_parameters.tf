@@ -49,37 +49,3 @@ resource "aws_ssm_parameter" "ebsco_adapter_ftp_remote_dir" {
     ]
   }
 }
-
-resource "aws_ssm_parameter" "ebsco_adapter_customer_id" {
-  name        = "/catalogue_pipeline/ebsco_adapter/customer_id"
-  description = "The customer ID to use when connecting to the FTP server"
-  type        = "String"
-  value       = "placeholder"
-
-  lifecycle {
-    ignore_changes = [
-      value
-    ]
-  }
-}
-
-resource "aws_ssm_parameter" "ebsco_adapter_output_topic_arn" {
-  name        = "/catalogue_pipeline/ebsco_adapter/output_topic_arn"
-  description = "The ARN of the SNS topic to publish messages to"
-  type        = "String"
-  value       = module.ebsco_adapter_output_topic.arn
-}
-
-resource "aws_ssm_parameter" "ebsco_adapter_reindex_topic_arn" {
-  name        = "/catalogue_pipeline/ebsco_adapter/reindex_topic_arn"
-  description = "The ARN of the SNS topic to publish reindex messages to"
-  type        = "String"
-  value       = local.reindexer_topic_arn
-}
-
-resource "aws_ssm_parameter" "ebsco_adapter_bucket_name" {
-  name        = "/catalogue_pipeline/ebsco_adapter/bucket_name"
-  description = "The name of the S3 bucket to write files to"
-  type        = "String"
-  value       = aws_s3_bucket.ebsco_adapter.bucket
-}
