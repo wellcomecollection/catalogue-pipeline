@@ -15,6 +15,10 @@ data "aws_ecr_repository" "unified_pipeline_lambda" {
   name = "uk.ac.wellcome/unified_pipeline_lambda"
 }
 
+data "aws_s3_bucket" "ebsco_adapter_bucket" {
+  bucket = "wellcomecollection-platform-ebsco-adapter"
+}
+
 locals {
   namespace = "catalogue-${var.pipeline_date}"
 
@@ -99,6 +103,9 @@ locals {
   sierra_merged_holdings_topic_arn = data.terraform_remote_state.sierra_adapter.outputs.merged_holdings_topic_arn
   sierra_merged_orders_topic_arn   = data.terraform_remote_state.sierra_adapter.outputs.merged_orders_topic_arn
 
+  # EBSCO adapter bucket
+  ebsco_adapter_bucket = data.aws_s3_bucket.ebsco_adapter_bucket.bucket
+
   # Mets adapter VHS
   mets_adapter_read_policy = data.terraform_remote_state.mets_adapter.outputs.mets_dynamo_read_policy
 
@@ -108,10 +115,6 @@ locals {
   # Tei adapter topics
   tei_adapter_topic_arn = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_topic_arn
   tei_adapter_bucket    = data.terraform_remote_state.tei_adapter.outputs.tei_adapter_bucket_name
-
-  # EBSCO adapter topics
-  ebsco_adapter_topic_arn = data.terraform_remote_state.ebsco_adapter.outputs.ebsco_adapter_topic_arn
-  ebsco_adapter_bucket    = data.terraform_remote_state.ebsco_adapter.outputs.ebsco_adapter_bucket_name
 
   # Calm adapter VHS
   vhs_calm_read_policy = data.terraform_remote_state.calm_adapter.outputs.vhs_read_policy
@@ -175,14 +178,6 @@ locals {
       ],
       reindex_topic = local.tei_reindexer_topic_arn,
       read_policy   = data.aws_iam_policy_document.read_tei_adapter_bucket.json
-    }
-
-    ebsco = {
-      topics = [
-        local.ebsco_adapter_topic_arn,
-      ],
-      reindex_topic = local.ebsco_reindexer_topic_arn
-      read_policy   = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
     }
   }
 
