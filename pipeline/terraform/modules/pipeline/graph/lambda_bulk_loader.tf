@@ -17,6 +17,7 @@ module "bulk_loader_lambda" {
 
   environment_variables = {
     CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
+    LOG_LEVEL                 = "INFO" # Set log level to INFO for testing, WARNING later
   }
 
   vpc_config = local.lambda_vpc_config

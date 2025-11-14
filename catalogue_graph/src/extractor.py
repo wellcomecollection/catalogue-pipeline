@@ -4,6 +4,8 @@ import json
 import typing
 from argparse import ArgumentParser
 
+import structlog
+
 import config
 from models.events import (
     EntityType,
@@ -14,13 +16,23 @@ from models.events import (
 from transformers.base_transformer import BaseTransformer
 from transformers.create_transformer import create_transformer
 from utils.aws import get_neptune_client
+from utils.logger import ExecutionContext, setup_logging
 from utils.steps import run_ecs_handler
 
 
 def handler(event: ExtractorEvent, is_local: bool = False) -> None:
-    print(
-        f"Transforming {event.sample_size or 'all'} {event.entity_type} using the {event.transformer_type} "
-        f"transformer and streaming them into {event.stream_destination}."
+    setup_logging(
+        ExecutionContext(
+            trace_id="logging test",
+            pipeline_step="graph_extractor",
+        )
+    )
+
+    structlog.get_logger(__name__).info(
+        f"ECS extractor task starting for {event.sample_size or 'all'} entities.",
+        transformer_type=event.transformer_type,
+        entity_type=event.entity_type,
+        stream_destination=event.stream_destination,
     )
 
     transformer: BaseTransformer = create_transformer(
@@ -71,6 +83,8 @@ def ecs_handler(arg_parser: ArgumentParser) -> None:
         handler=handler,
         event_validator=event_validator,
     )
+
+    structlog.get_logger(__name__).info("ECS extractor task completed successfully.")
 
 
 def local_handler(parser: ArgumentParser) -> None:

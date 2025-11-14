@@ -1,6 +1,8 @@
 import argparse
 import typing
 
+import structlog
+
 from models.events import (
     DEFAULT_INSERT_ERROR_THRESHOLD,
     BulkLoaderEvent,
@@ -9,11 +11,25 @@ from models.events import (
     TransformerType,
 )
 from utils.aws import get_neptune_client
+from utils.logger import ExecutionContext, setup_logging
 
 
 def handler(event: BulkLoaderEvent, is_local: bool = False) -> BulkLoadPollerEvent:
+    setup_logging(
+        ExecutionContext(
+            trace_id="logging test",
+            pipeline_step="graph_bulk_loader",
+        ),
+    )
+
     s3_file_uri = event.get_s3_uri()
-    print(f"Initiating bulk load from {s3_file_uri}.")
+
+    structlog.get_logger(__name__).info(
+        "Starting bulk load",
+        s3_file_uri=s3_file_uri,
+        transformer_type=event.transformer_type,
+        entity_type=event.entity_type,
+    )
 
     neptune_client = get_neptune_client(is_local)
     load_id = neptune_client.initiate_bulk_load(s3_file_uri=s3_file_uri)
