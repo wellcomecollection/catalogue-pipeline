@@ -25,4 +25,7 @@ ignore_fields:
 
 sample_size: 100
 loading_chunk_size: 100000
+
+hash_bucket_count: 6
+
 output_dir: data

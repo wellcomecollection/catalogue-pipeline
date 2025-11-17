@@ -113,6 +113,7 @@ dev = [
 dev = [
     { name = "ipywidgets" },
     { name = "mypy" },
+    { name = "pytest" },
     { name = "ruff" },
     { name = "types-pyyaml" },
 ]
@@ -138,6 +139,7 @@ provides-extras = ["dev"]
 dev = [
     { name = "ipywidgets", specifier = ">=8.1.8" },
     { name = "mypy", specifier = ">=1.18.2" },
+    { name = "pytest", specifier = ">=8.3.3" },
     { name = "ruff", specifier = ">=0.14.2" },
     { name = "types-pyyaml", specifier = ">=6.0.12.20250915" },
 ]
