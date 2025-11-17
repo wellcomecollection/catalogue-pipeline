@@ -31,17 +31,18 @@ def build_source_maps(df_pl: pl.DataFrame | None) -> dict:
     required_cols = {"_id", "_source"}
     if not required_cols.issubset(set(df_pl.columns)):
         return {}
-    pdf = df_pl.select(["_id", "_source"]).to_pandas()
     out = {}
-    for _id, _source in zip(pdf["_id"], pdf["_source"]):
-        if isinstance(_source, str):
+    for row in df_pl.select(["_id", "_source"]).iter_rows(named=True):
+        doc_id = row["_id"]
+        src = row["_source"]
+        if isinstance(src, str):
             try:
-                _source = json.loads(_source)
+                src = json.loads(src)
             except json.JSONDecodeError:
                 pass
-        if not isinstance(_source, dict):
-            _source = {"value": _source}
-        out[_id] = _source
+        if not isinstance(src, dict):
+            src = {"value": src}
+        out[doc_id] = src
     return out
 
 
