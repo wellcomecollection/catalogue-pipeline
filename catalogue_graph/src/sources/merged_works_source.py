@@ -58,10 +58,8 @@ class MergedWorksSource(BaseSource):
         self.window = event.window
         self.fields = fields
         self.query = query
-
-        index_date = event.index_dates.merged or event.pipeline_date
         self.index_name = get_standard_index_name(
-            config.ES_MERGED_INDEX_NAME, index_date
+            config.ES_MERGED_INDEX_NAME, event.pipeline_date
         )
 
         # Use the provided point in time (PIT) ID, or create a new one

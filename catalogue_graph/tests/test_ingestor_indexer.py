@@ -11,7 +11,6 @@ from ingestor.models.step_events import (
     IngestorIndexerObject,
 )
 from ingestor.steps.ingestor_indexer import handler
-from models.events import PipelineIndexDates
 from tests.mocks import (
     MockElasticsearchClient,
     MockS3Client,
@@ -35,7 +34,7 @@ def get_mock_indexer_event(record_type: IngestorType) -> IngestorIndexerLambdaEv
     return IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date="2021-07-01",
-        index_dates=PipelineIndexDates.model_validate({record_type: "2025-01-01"}),
+        index_date="2025-01-01",
         job_id="123",
         objects_to_index=[
             IngestorIndexerObject(
@@ -55,7 +54,7 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date=pipeline_date,
-        index_dates=PipelineIndexDates.model_validate({record_type: index_date}),
+        index_date=index_date,
         job_id=job_id,
         objects_to_index=None,
     )
@@ -83,15 +82,9 @@ def test_ingestor_indexer_discovers_parquet_objects(record_type: IngestorType) -
     assert MockElasticsearchClient.inputs == expected_inputs
 
     report = _read_indexer_report(event)
-    index_dates: dict[str, str] = {record_type: index_date}
     assert report == {
         "pipeline_date": pipeline_date,
-        "index_dates": {
-            "merged": None,
-            "concepts": None,
-            "works": None,
-            **index_dates,
-        },
+        "index_date": index_date,
         "ingestor_type": record_type,
         "job_id": job_id,
         "load_format": "parquet",
@@ -121,7 +114,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date=pipeline_date,
-        index_dates=PipelineIndexDates.model_validate({record_type: index_date}),
+        index_date=index_date,
         job_id=job_id,
         objects_to_index=[
             IngestorIndexerObject(
@@ -142,15 +135,9 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
     assert MockElasticsearchClient.inputs == expected_inputs
 
     report = _read_indexer_report(event)
-    index_dates: dict[str, str] = {record_type: index_date}
     assert report == {
         "pipeline_date": pipeline_date,
-        "index_dates": {
-            "merged": None,
-            "concepts": None,
-            "works": None,
-            **index_dates,
-        },
+        "index_date": index_date,
         "ingestor_type": record_type,
         "job_id": job_id,
         "load_format": "parquet",
@@ -207,7 +194,7 @@ def test_ingestor_indexer_failure_missing_file(record_type: IngestorType) -> Non
     event = IngestorIndexerLambdaEvent(
         ingestor_type=record_type,
         pipeline_date="2021-07-01",
-        index_dates=PipelineIndexDates.model_validate({record_type: "2025-01-01"}),
+        index_date="2025-01-01",
         job_id="123",
         objects_to_index=[
             IngestorIndexerObject(

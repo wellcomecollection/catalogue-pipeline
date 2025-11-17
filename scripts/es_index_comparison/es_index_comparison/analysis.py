@@ -43,6 +43,7 @@ def build_source_maps(df_pl: pl.DataFrame | None) -> dict:
         if not isinstance(src, dict):
             src = {"value": src}
         out[doc_id] = src
+    return out
 
 
 def compare_indices(
