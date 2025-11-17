@@ -52,7 +52,7 @@ from ingestor.queries.concept_queries import (
     SOURCE_CONCEPT_QUERY,
 )
 from ingestor.steps.ingestor_loader import handler
-from models.events import IncrementalWindow
+from models.events import IncrementalWindow, PipelineIndexDates
 from models.pipeline.id_label import Id
 from models.pipeline.identifier import Identified, SourceIdentifier
 from tests.mocks import (
@@ -84,7 +84,7 @@ def make_loader_event(
     return IngestorLoaderLambdaEvent(
         ingestor_type=ingestor_type,
         pipeline_date=MOCK_PIPELINE_DATE,
-        index_date=MOCK_INDEX_DATE,
+        index_dates=PipelineIndexDates.model_validate({ingestor_type: MOCK_INDEX_DATE}),
         job_id=job_id,
         pass_objects_to_index=pass_objects_to_index,
         window=IncrementalWindow.model_validate({"end_time": "2025-01-01T12:00"}),
@@ -455,7 +455,7 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
     assert report["total_file_size"] == 3000
     assert report["ingestor_type"] == loader_event.ingestor_type
     assert report["pipeline_date"] == loader_event.pipeline_date
-    assert report["index_date"] == loader_event.index_date
+    assert report["index_dates"]["concepts"] == loader_event.index_date
     assert report["job_id"] == loader_event.job_id
 
     if pass_objects_to_index:
@@ -602,7 +602,7 @@ def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> 
     assert report["total_file_size"] == 0
     assert report["ingestor_type"] == loader_event.ingestor_type
     assert report["pipeline_date"] == loader_event.pipeline_date
-    assert report["index_date"] == loader_event.index_date
+    assert report["index_dates"]["concepts"] == loader_event.index_date
     assert report["job_id"] == loader_event.job_id
     assert MockCloudwatchClient.metrics_reported == _get_expected_metrics(
         loader_event, record_count=0, total_file_size=0
