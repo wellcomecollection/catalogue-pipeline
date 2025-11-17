@@ -1,4 +1,5 @@
 import pytest
+from freezegun import freeze_time
 
 from bulk_load_poller import lambda_handler
 from models.neptune_bulk_loader import (
@@ -83,6 +84,7 @@ def test_bulk_load_in_progress(status: str) -> None:
     assert MockCloudwatchClient.metrics_reported == []
 
 
+@freeze_time("2025-10-23")
 def test_bulk_load_succeeded() -> None:
     record_count = 25
     duplicate_count = 24
@@ -108,6 +110,7 @@ def test_bulk_load_succeeded() -> None:
     ]
 
 
+@freeze_time("2025-10-23")
 def test_bulk_load_failed() -> None:
     record_count = 25
     insert_error_count = 5

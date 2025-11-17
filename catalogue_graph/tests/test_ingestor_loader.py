@@ -415,6 +415,7 @@ def _get_expected_metrics(
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
+@freeze_time("2025-01-02")
 def test_ingestor_loader_reports_metrics_and_writes_report(
     monkeypatch: pytest.MonkeyPatch, pass_objects_to_index: bool
 ) -> None:
@@ -480,6 +481,7 @@ def test_ingestor_loader_reports_metrics_and_writes_report(
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
+@freeze_time("2025-01-02")
 def test_ingestor_loader_no_related_concepts(pass_objects_to_index: bool) -> None:
     mock_merged_work()
     mock_neptune_responses([])
@@ -572,6 +574,7 @@ def test_ingestor_loader_with_related_to_concepts(
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
+@freeze_time("2025-01-02")
 def test_ingestor_loader_no_concepts_to_process(pass_objects_to_index: bool) -> None:
     loader_event = make_loader_event(pass_objects_to_index=pass_objects_to_index)
     result = handler(loader_event)
@@ -623,7 +626,7 @@ def test_ingestor_loader_bad_neptune_response() -> None:
 
 
 @pytest.mark.parametrize("pass_objects_to_index", [False, True])
-@freeze_time("2025-09-09")
+@freeze_time("2025-01-02")
 def test_ingestor_loader_non_visible_works(pass_objects_to_index: bool) -> None:
     # Add one of each non-visible work type
     add_mock_merged_documents(pipeline_date=MOCK_PIPELINE_DATE, work_status="Deleted")

@@ -3,6 +3,7 @@ from typing import Any
 import polars as pl
 import pydantic
 import pytest
+from freezegun import freeze_time
 
 from graph_remover_incremental import lambda_handler
 from tests.mocks import (
@@ -235,6 +236,7 @@ def test_graph_remover_safety_mechanism() -> None:
     check_deleted_ids_log(s3_uri, set(disconnected_ids))
 
 
+@freeze_time("2025-02-10")
 def test_metrics() -> None:
     disconnected_ids = ["byzuqyr5", "vjfb76xy"]
     mock_neptune_get_total_node_count("Concept", 100)
