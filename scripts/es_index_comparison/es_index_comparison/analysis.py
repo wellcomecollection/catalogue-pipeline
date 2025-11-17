@@ -1,18 +1,28 @@
 from __future__ import annotations
 
+import csv
 import json
-from pathlib import Path
-from rich.console import Console
-import pandas as pd
-import polars as pl
+import random
 from collections import Counter
+from pathlib import Path
+from typing import TypedDict
 
-from .diff import compile_ignore_patterns, aggregate_diffs, truncate_val
-from .source_config import ResolvedIndexSource
-from .parquet_io import PartitionedIndex
+import polars as pl
+import pyarrow as pa
+import pyarrow.parquet as pq
+from rich.console import Console
 from rich.markup import escape as rich_escape
 
+from .diff import compile_ignore_patterns, deep_diff, path_ignored, truncate_val
+from .parquet_io import PartitionedIndex
+from .source_config import ResolvedIndexSource
+
 console = Console()
+
+
+class MetaWriterState(TypedDict):
+    writer: pq.ParquetWriter | None
+    path: Path
 
 
 def build_source_maps(df_pl: pl.DataFrame | None) -> dict:
@@ -42,6 +52,7 @@ def compare_indices(
     ignore_fields: list[str],
     base_diff_folder: Path,
     sample_size: int,
+    bucket_filter: set[int] | None = None,
 ):
     console.log("Starting comparison phase (hash-bucket streaming)")
 
@@ -54,7 +65,7 @@ def compare_indices(
         )
 
     total_buckets = reader_a.hash_bucket_count
-    hash_bucket_range = list(range(total_buckets))
+    bucket_ids = sorted(bucket_filter) if bucket_filter is not None else reader_a.iter_bucket_ids()
     ignore_compiled = compile_ignore_patterns(ignore_fields)
 
     def extract_ids(df: pl.DataFrame) -> set:
@@ -62,49 +73,170 @@ def compare_indices(
             return set()
         return set(df.get_column("_id").to_list())
 
-    diff_results: dict[str, list[dict]] = {}
+    def record_diff(
+        doc_id: str,
+        diffs: list[dict],
+        jsonl_handle,
+        csv_writer,
+        meta_rows_buffer: list[dict],
+        field_counter: Counter,
+        distinct_paths: set[str],
+        top_level_paths: set[str],
+    ) -> list[dict]:
+        jsonl_handle.write(json.dumps({"_id": doc_id, "diffs": diffs}, ensure_ascii=False) + "\n")
+        top_fields = sorted(
+            set(d["path"].split(".")[0].split("[")[0] for d in diffs if d.get("path"))
+        )
+        csv_writer.writerow([doc_id, len(diffs), ";".join(top_fields)])
+        meta_rows_buffer.append(
+            {"_id": doc_id, "diff_count": len(diffs), "changed_top_level_fields": top_fields}
+        )
+        for entry in diffs:
+            path = entry.get("path")
+            if not path:
+                continue
+            distinct_paths.add(path)
+            top_level_paths.add(path.split(".")[0].split("[")[0])
+        for field in top_fields:
+            field_counter[field] += 1
+        return meta_rows_buffer
+
+    def flush_meta_rows(meta_rows: list[dict], writer_state: MetaWriterState) -> list[dict]:
+        if not meta_rows:
+            return []
+        table = pa.Table.from_pylist(meta_rows)
+        if writer_state["writer"] is None:
+            writer_state["writer"] = pq.ParquetWriter(writer_state["path"], table.schema)
+        writer = writer_state["writer"]
+        if writer is None:  # mypy safeguard
+            raise RuntimeError("Parquet writer failed to initialize")
+        writer.write_table(table)
+        return []
+
+    bucket_range_display = (
+        f"subset ({len(bucket_ids)} of {total_buckets})"
+        if bucket_filter is not None
+        else f"all {total_buckets}"
+    )
+    console.log(
+        f"Total docs expected: {rich_escape(source_a.label)}={reader_a.total_docs} | "
+        f"{rich_escape(source_b.label)}={reader_b.total_docs} | Buckets processed: {bucket_range_display}"
+    )
+
+    base_diff_folder.mkdir(parents=True, exist_ok=True)
+    jsonl_path = base_diff_folder / "diffs.jsonl"
+    summary_csv_path = base_diff_folder / "diff_summary.csv"
+    field_freq_json_path = base_diff_folder / "field_frequency.json"
+    meta_path = base_diff_folder / "diff_meta.parquet"
+    meta_writer_state: MetaWriterState = {"writer": None, "path": meta_path}
+
+    distinct_field_paths: set[str] = set()
+    top_level_fields_all: set[str] = set()
     field_change_counter: Counter = Counter()
     identical_raw_total = 0
     identical_after_ignore_total = 0
     only_in_a: list[str] = []
     only_in_b: list[str] = []
     total_common = 0
+    total_differing_docs = 0
+    total_diff_entries = 0
+    meta_rows_buffer: list[dict] = []
+    meta_batch_size = 500
 
-    console.log(
-        f"Total docs expected: {rich_escape(source_a.label)}={reader_a.total_docs} | {rich_escape(source_b.label)}={reader_b.total_docs}"
-    )
+    sample_docs: list[tuple[str, list[dict]]] = []
+    seen_diff_docs = 0
 
-    for idx, bucket_id in enumerate(hash_bucket_range, 1):
-        df_a = reader_a.read_bucket(bucket_id)
-        df_b = reader_b.read_bucket(bucket_id)
-        ids_a = extract_ids(df_a)
-        ids_b = extract_ids(df_b)
-        bucket_only_in_a = sorted(ids_a - ids_b)
-        bucket_only_in_b = sorted(ids_b - ids_a)
-        bucket_common = ids_a & ids_b
+    def update_sample(doc_id: str, diffs: list[dict]):
+        nonlocal seen_diff_docs
+        seen_diff_docs += 1
+        if len(sample_docs) < sample_size:
+            sample_docs.append((doc_id, diffs))
+        else:
+            idx = random.randint(0, seen_diff_docs - 1)
+            if idx < sample_size:
+                sample_docs[idx] = (doc_id, diffs)
 
-        only_in_a.extend(bucket_only_in_a)
-        only_in_b.extend(bucket_only_in_b)
-        total_common += len(bucket_common)
+    def process_doc(doc_id: str, sources_a: dict, sources_b: dict):
+        nonlocal identical_raw_total, identical_after_ignore_total
+        src_a = sources_a.get(doc_id)
+        src_b = sources_b.get(doc_id)
+        if src_a is None or src_b is None:
+            return [{"path": "_source", "type": "missing", "left": src_a, "right": src_b}]
+        raw = deep_diff(src_a, src_b)
+        if not raw:
+            identical_raw_total += 1
+            return None
+        filtered = [d for d in raw if not path_ignored(d.get("path", ""), ignore_compiled)]
+        if not filtered:
+            identical_after_ignore_total += 1
+            return None
+        return filtered
 
-        if bucket_common:
-            sources_a = build_source_maps(df_a)
-            sources_b = build_source_maps(df_b)
-            agg = aggregate_diffs(bucket_common, sources_a, sources_b, ignore_compiled)
-            diff_results.update(agg["diff_results"])
-            field_change_counter.update(agg["field_change_counter"])
-            identical_raw_total += agg["identical_raw"]
-            identical_after_ignore_total += agg["identical_after_ignore"]
+    with (
+        jsonl_path.open("w") as jsonl_handle,
+        summary_csv_path.open("w", newline="") as summary_handle,
+    ):
+        csv_writer = csv.writer(summary_handle)
+        csv_writer.writerow(["_id", "diff_count", "top_level_changed_fields"])
 
-        console.log(
-            f"[{idx}/{total_buckets}] bucket={bucket_id:04d} "
-            f"{rich_escape(source_a.storage_key)} docs={len(ids_a)} | "
-            f"{rich_escape(source_b.storage_key)} docs={len(ids_b)} | "
-            f"common={len(bucket_common)} | diffs_collected={len(diff_results)}"
-        )
+        for idx, bucket_id in enumerate(bucket_ids, 1):
+            df_a = reader_a.read_bucket(bucket_id)
+            df_b = reader_b.read_bucket(bucket_id)
+            ids_a = extract_ids(df_a)
+            ids_b = extract_ids(df_b)
+            bucket_only_in_a = sorted(ids_a - ids_b)
+            bucket_only_in_b = sorted(ids_b - ids_a)
+            bucket_common = sorted(ids_a & ids_b)
+
+            only_in_a.extend(bucket_only_in_a)
+            only_in_b.extend(bucket_only_in_b)
+            total_common += len(bucket_common)
+
+            if bucket_common:
+                sources_a = build_source_maps(df_a)
+                sources_b = build_source_maps(df_b)
+                for doc_id in bucket_common:
+                    diffs = process_doc(doc_id, sources_a, sources_b)
+                    if not diffs:
+                        continue
+                    total_differing_docs += 1
+                    total_diff_entries += len(diffs)
+                    meta_rows_buffer = record_diff(
+                        doc_id,
+                        diffs,
+                        jsonl_handle,
+                        csv_writer,
+                        meta_rows_buffer,
+                        field_change_counter,
+                        distinct_field_paths,
+                        top_level_fields_all,
+                    )
+                    if len(meta_rows_buffer) >= meta_batch_size:
+                        meta_rows_buffer = flush_meta_rows(meta_rows_buffer, meta_writer_state)
+                    update_sample(doc_id, diffs)
+
+            console.log(
+                f"[{idx}/{len(bucket_ids)}] bucket={bucket_id:04d} "
+                f"{rich_escape(source_a.storage_key)} docs={len(ids_a)} | "
+                f"{rich_escape(source_b.storage_key)} docs={len(ids_b)} | "
+                f"common={len(bucket_common)} | diffs_emitted={total_differing_docs}"
+            )
+
+    console.log(f"Wrote diffs -> {jsonl_path}")
+    console.log(f"Wrote summary -> {summary_csv_path}")
 
     only_in_a.sort()
     only_in_b.sort()
+    meta_rows_buffer = flush_meta_rows(meta_rows_buffer, meta_writer_state)
+    if meta_writer_state["writer"] is not None:
+        meta_writer_state["writer"].close()
+        console.log("Wrote diff_meta.parquet")
+    elif meta_path.exists():
+        meta_path.unlink()
+
+    with field_freq_json_path.open("w") as ff:
+        json.dump(dict(field_change_counter), ff, ensure_ascii=False, indent=2)
+    console.log(f"Wrote field freq -> {field_freq_json_path}")
 
     console.log(
         f"Common IDs processed: {total_common} | Only in {rich_escape(source_a.label)}: {len(only_in_a)} | Only in {rich_escape(source_b.label)}: {len(only_in_b)}"
@@ -119,7 +251,7 @@ def compare_indices(
         )
 
     console.log(
-        f"Identical raw: {identical_raw_total} | Identical after ignore: {identical_after_ignore_total} | Differing: {len(diff_results)}"
+        f"Identical raw: {identical_raw_total} | Identical after ignore: {identical_after_ignore_total} | Differing: {total_differing_docs}"
     )
 
     most_changed = field_change_counter.most_common(15)
@@ -128,80 +260,29 @@ def compare_indices(
         for f, c in most_changed:
             console.log(f"  {rich_escape(str(f))}: {c}")
 
-    base_diff_folder.mkdir(parents=True, exist_ok=True)
-    jsonl_path = base_diff_folder / "diffs.jsonl"
-    summary_csv_path = base_diff_folder / "diff_summary.csv"
-    field_freq_json_path = base_diff_folder / "field_frequency.json"
-
-    with jsonl_path.open("w") as jf:
-        for _id, diffs in diff_results.items():
-            jf.write(json.dumps({"_id": _id, "diffs": diffs}, ensure_ascii=False) + "\n")
-    console.log(f"Wrote diffs -> {jsonl_path}")
-
-    import csv
-
-    with summary_csv_path.open("w", newline="") as cf:
-        w = csv.writer(cf)
-        w.writerow(["_id", "diff_count", "top_level_changed_fields"])
-        for _id, diffs in diff_results.items():
-            top_fields = sorted(
-                set(d["path"].split(".")[0].split("[")[0] for d in diffs if d.get("path"))
-            )
-            w.writerow([_id, len(diffs), ";".join(top_fields)])
-    console.log(f"Wrote summary -> {summary_csv_path}")
-
-    with field_freq_json_path.open("w") as ff:
-        json.dump(dict(field_change_counter), ff, ensure_ascii=False, indent=2)
-    console.log(f"Wrote field freq -> {field_freq_json_path}")
-
-    # Meta parquet
-    meta_rows = []
-    for _id, diffs in diff_results.items():
-        top_fields = sorted(
-            set(d["path"].split(".")[0].split("[")[0] for d in diffs if d.get("path"))
-        )
-        meta_rows.append(
-            {"_id": _id, "diff_count": len(diffs), "changed_top_level_fields": top_fields}
-        )
-    if meta_rows:
-        meta_df = pd.DataFrame(meta_rows)
-        pl.from_pandas(meta_df).write_parquet(base_diff_folder / "diff_meta.parquet")
-        console.log("Wrote diff_meta.parquet")
-
-    # Sampling written to markdown instead of console output
     from datetime import datetime, timezone
 
     sample_md_path = base_diff_folder / "sample_diffs.md"
-    total_diff_entries = sum(len(v) for v in diff_results.values())
-    distinct_field_paths = sorted(
-        {d["path"] for diffs in diff_results.values() for d in diffs if d.get("path")}
-    )
-    top_level_fields_all = sorted({p.split(".")[0].split("[")[0] for p in distinct_field_paths})
-
-    if diff_results:
-        import random
-
-        ids = list(diff_results.keys())
-        random.shuffle(ids)
-        ids = ids[:sample_size]
+    if total_differing_docs:
+        timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        random.shuffle(sample_docs)
+        sample_subset = sample_docs[: min(sample_size, len(sample_docs))]
         with sample_md_path.open("w") as md:
             md.write("# Sample Differing Documents\n\n")
             md.write(f"Compared indices: `{source_a.label}` vs `{source_b.label}`\n\n")
-            timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
             md.write(f"Run timestamp: {timestamp}\n\n")
-            md.write(f"Total differing documents: {len(diff_results)}\n")
+            md.write(f"Total differing documents: {total_differing_docs}\n")
             md.write(f"Total diff entries: {total_diff_entries}\n")
             md.write(f"Distinct changed field paths: {len(distinct_field_paths)}\n")
             md.write(
-                f"Distinct top-level changed fields: {len(top_level_fields_all)} -> {', '.join(top_level_fields_all)}\n"
+                f"Distinct top-level changed fields: {len(top_level_fields_all)} -> {', '.join(sorted(top_level_fields_all))}\n"
             )
-            md.write(f"Sample size: {len(ids)} (configured: {sample_size})\n\n")
-            for _id in ids:
-                md.write(f"## Document `{_id}`\n\n")
-                for d in diff_results[_id][:500]:
+            md.write(f"Sample size: {len(sample_subset)} (configured: {sample_size})\n\n")
+            for doc_id, diffs in sample_subset:
+                md.write(f"## Document `{doc_id}`\n\n")
+                for d in diffs[:500]:
                     left = truncate_val(d.get("left"))
                     right = truncate_val(d.get("right"))
-                    # Escape backticks in values for markdown formatting
                     left_md = left.replace("`", "\u200b`")
                     right_md = right.replace("`", "\u200b`")
                     md.write(
@@ -213,13 +294,13 @@ def compare_indices(
         console.log("No differing documents to sample; skipping markdown export.")
 
     console.log(
-        f"Summary: differing_docs={len(diff_results)} diff_entries={total_diff_entries} distinct_fields={len(distinct_field_paths)}"
+        f"Summary: differing_docs={total_differing_docs} diff_entries={total_diff_entries} distinct_fields={len(distinct_field_paths)}"
     )
 
     return {
         "only_in_a": only_in_a,
         "only_in_b": only_in_b,
-        "diff_results_count": len(diff_results),
+        "diff_results_count": total_differing_docs,
         "identical_raw": identical_raw_total,
         "identical_after_ignore": identical_after_ignore_total,
     }

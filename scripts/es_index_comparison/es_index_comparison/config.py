@@ -16,7 +16,7 @@ class AppConfig:
     ignore_fields: List[str] = field(default_factory=list)
     sample_size: int = 10
     loading_chunk_size: int = 100_000
-    hash_bucket_count: int = 128
+    hash_bucket_count: int = 6
     namespace: str | None = None
     output_dir: str = DEFAULT_OUTPUT_DIR
 
@@ -57,7 +57,7 @@ def load_config(path: str | Path, overrides: Dict[str, Any] | None = None) -> Ap
         ignore_fields=raw.get("ignore_fields", []) or [],
         sample_size=raw.get("sample_size", 10),
         loading_chunk_size=raw.get("loading_chunk_size", 100_000),
-        hash_bucket_count=raw.get("hash_bucket_count", 128),
+        hash_bucket_count=raw.get("hash_bucket_count", 6),
         namespace=raw.get("namespace"),
         output_dir=raw.get("output_dir", DEFAULT_OUTPUT_DIR),
     )

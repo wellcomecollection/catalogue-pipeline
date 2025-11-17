@@ -5,12 +5,12 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 ## Features
 - Fetch only (read-only) from Elasticsearch using cloud_id + api_key (never writes back).
 - Optional filter query to restrict scanned documents.
-- Hash-bucketed Parquet materialization (polars + pyarrow) so comparisons stream one bucket at a time, with streaming NDJSON ingestion during convert.
+- Hash-bucketed Parquet materialization (polars + pyarrow) so comparisons stream one bucket at a time, with streaming NDJSON ingestion during convert and optional bucket filters for targeted reruns.
 - Deep recursive diff (dicts, lists, scalars, numpy arrays) with null-vs-missing equivalence.
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
 - Export artifacts: JSONL diffs, CSV summary, field frequency JSON, and diff metadata.
 - Sampled human-readable diff display & per-document diff inspection.
-- Streaming compare phase with per-bucket, human-readable progress logs.
+- Streaming compare phase with per-bucket, human-readable progress logs and incremental artifact writes.
 - Multiple independent analyses distinguished by namespace (auto or user-provided).
 
 ## Installation (using uv)
@@ -93,7 +93,7 @@ ignore_fields:
 # OPTIONAL settings
 sample_size: 10                # number of docs to sample when printing diffs
 loading_chunk_size: 100000     # max docs buffered (across all buckets) before flushing Parquet shards
-hash_bucket_count: 128         # number of deterministic hash buckets for Parquet layout
+hash_bucket_count: 6           # number of deterministic hash buckets for Parquet layout
 namespace: pipeline-comparison-ebsco # If omitted, auto: <basename>-<YYYYMMDD-HHMMSS>
 output_dir: data               # base output root (default: data)
 ```
@@ -141,6 +141,10 @@ es-index-compare compare --namespace analysis-20250115-103000
 
 # Show diff for a single doc id (after compare)
 es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
+
+# Convert/compare only specific hash buckets (speeds up targeted reruns)
+es-index-compare convert --bucket 3
+es-index-compare compare --bucket 3 --bucket 4
 ```
 
 ### Flags (common)
@@ -149,13 +153,15 @@ es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 - `--namespace` (override YAML / auto)
 - `--output-dir` (override YAML)
 - `--hash-buckets` (override YAML `hash_bucket_count` when running fetch/convert/compare)
+- `-b/--bucket` (repeatable; restrict convert/compare/run-all to one or more bucket IDs)
 
 ## Safety & Read-Only Assurance
 The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it performs no writes, index creations, or updates.
 
 ## Performance Tips
 - Adjust `loading_chunk_size` to control peak memory: smaller values flush more often (more files, less RAM), larger values reduce file counts at the cost of more buffering.
-- Tune `hash_bucket_count` to balance on-disk fan-out vs. in-memory chunk size during compare (higher bucket counts mean fewer docs per chunk).
+- Tune `hash_bucket_count` to balance on-disk fan-out vs. in-memory chunk size during compare (higher bucket counts mean fewer docs per chunk). The default is now 6 buckets, which keeps artifact counts reasonable while still enabling efficient streaming.
+- Use `-b/--bucket` to rerun only the partitions that matter (ideal for debugging or partial rechecks).
 - Polars operations are columnar; ensure adequate disk space for Parquet.
 - Re-run `compare` without `fetch`/`convert` after adjusting ignore patterns.
 

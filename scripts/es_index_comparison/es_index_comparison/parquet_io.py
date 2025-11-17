@@ -31,12 +31,20 @@ def ndjson_gz_to_parquet_shards(
     out_parent: Path,
     chunk_size: int,
     hash_bucket_count: int,
+    bucket_filter: set[int] | None = None,
 ) -> list[Path]:
     """Convert a gzipped NDJSON (Elasticsearch hits) to a directory of parquet shards.
 
     We build a mapping keyed by _id with entire hit document retained to mimic original notebook logic
     where nested access into _source is needed later.
     """
+    if bucket_filter:
+        invalid = sorted(b for b in bucket_filter if b < 0 or b >= hash_bucket_count)
+        if invalid:
+            raise ValueError(
+                f"Bucket filter contains invalid IDs {invalid}; valid range is 0-{hash_bucket_count - 1}"
+            )
+
     target_dir = out_parent / index
     target_dir.mkdir(parents=True, exist_ok=True)
 
@@ -89,6 +97,8 @@ def ndjson_gz_to_parquet_shards(
             if _id is None:
                 continue
             bucket_id = _hash_bucket_for_id(_id, hash_bucket_count)
+            if bucket_filter is not None and bucket_id not in bucket_filter:
+                continue
             buffers[bucket_id][_id] = doc
             active_buckets.add(bucket_id)
             bucket_meta[bucket_id]["doc_count"] += 1

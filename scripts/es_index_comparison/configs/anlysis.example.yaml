@@ -47,7 +47,7 @@ sample_size: 40
 loading_chunk_size: 100000
 
 # Number of hash buckets for Parquet partitions
-hash_bucket_count: 128
+hash_bucket_count: 6
 
 # Optional namespace override; if omitted a timestamped one is generated from filename
 # namespace: pipeline-comparison-ebsco
