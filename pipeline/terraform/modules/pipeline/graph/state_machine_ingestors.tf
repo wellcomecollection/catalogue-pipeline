@@ -16,7 +16,7 @@ module "catalogue_graph_ingestors_state_machine" {
         ItemSelector = {
           "ingestor_type" : "{% $states.context.Map.Item.Value %}",
           "pipeline_date" : "{% $states.context.Execution.Input.pipeline_date %}",
-          "index_date" : "{% $lookup($states.context.Execution.Input.index_dates, $states.context.Map.Item.Value) %}",
+          "index_dates" : "{% $states.context.Execution.Input.index_dates ? $states.context.Execution.Input.index_dates : null %}",
           "window" : "{% $states.context.Execution.Input.window ? $states.context.Execution.Input.window : null %}",
           "pit_id" : "{% $states.context.Execution.Input.pit_id ? $states.context.Execution.Input.pit_id : null %}",
         }

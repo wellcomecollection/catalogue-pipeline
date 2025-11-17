@@ -10,9 +10,13 @@ from utils.types import IngestorLoadFormat, IngestorType
 
 class IngestorStepEvent(BasePipelineEvent):
     ingestor_type: IngestorType
-    index_date: str
     job_id: str
     load_format: IngestorLoadFormat = "parquet"
+
+    @property
+    def index_date(self) -> str:
+        """Return final index date based on ingestor type. Use pipeline date if no index date specified."""
+        return getattr(self.index_dates, self.ingestor_type) or self.pipeline_date
 
     def get_path_prefix(self) -> str:
         """

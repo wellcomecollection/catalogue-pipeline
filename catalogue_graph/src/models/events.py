@@ -17,10 +17,17 @@ from utils.types import (
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
+class PipelineIndexDates(BaseModel):
+    merged: str | None = None
+    concepts: str | None = None
+    works: str | None = None
+
+
 class BasePipelineEvent(BaseModel):
     pipeline_date: str
     window: IncrementalWindow | None = None
     pit_id: str | None = None
+    index_dates: PipelineIndexDates = PipelineIndexDates()
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
