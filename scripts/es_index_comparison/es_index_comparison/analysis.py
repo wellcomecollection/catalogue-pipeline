@@ -67,6 +67,11 @@ def compare_indices(
     total_buckets = reader_a.hash_bucket_count
     bucket_ids = sorted(bucket_filter) if bucket_filter is not None else reader_a.iter_bucket_ids()
     ignore_compiled = compile_ignore_patterns(ignore_fields)
+    expected_doc_ceiling = max(1, min(reader_a.total_docs, reader_b.total_docs))
+    progress_interval = max(
+        1_000,
+        min(20_000, expected_doc_ceiling // 50 or 1_000),
+    )
 
     def extract_ids(df: pl.DataFrame) -> set:
         if df.height == 0 or "_id" not in df.columns:
@@ -122,6 +127,12 @@ def compare_indices(
         f"Total docs expected: {rich_escape(source_a.label)}={reader_a.total_docs} | "
         f"{rich_escape(source_b.label)}={reader_b.total_docs} | Buckets processed: {bucket_range_display}"
     )
+    bucket_span = f"{min(bucket_ids):04d}→{max(bucket_ids):04d}" if bucket_ids else "(none)"
+    console.log(
+        "Compare configuration: "
+        f"hash_buckets={total_buckets} | subset_span={bucket_span} | "
+        f"min_docs_for_progress={expected_doc_ceiling:,} | progress_interval≈{progress_interval:,} docs"
+    )
 
     base_diff_folder.mkdir(parents=True, exist_ok=True)
     jsonl_path = base_diff_folder / "diffs.jsonl"
@@ -142,9 +153,27 @@ def compare_indices(
     total_diff_entries = 0
     meta_rows_buffer: list[dict] = []
     meta_batch_size = 500
+    docs_processed = 0
+    last_progress_log = 0
 
     sample_docs: list[tuple[str, list[dict]]] = []
     seen_diff_docs = 0
+
+    def maybe_log_progress(force: bool = False, stage: str | None = None):
+        nonlocal last_progress_log
+        if not force and (docs_processed - last_progress_log) < progress_interval:
+            return
+        pct = (
+            min(100.0, (docs_processed / expected_doc_ceiling) * 100)
+            if expected_doc_ceiling
+            else 0.0
+        )
+        prefix = f"{stage} | " if stage else ""
+        console.log(
+            f"{prefix}Compared {docs_processed:,} docs (~{pct:.1f}% of min total) | "
+            f"diff_docs={total_differing_docs:,} | only_in_a={len(only_in_a):,} | only_in_b={len(only_in_b):,}"
+        )
+        last_progress_log = docs_processed
 
     def update_sample(doc_id: str, diffs: list[dict]):
         nonlocal seen_diff_docs
@@ -196,8 +225,10 @@ def compare_indices(
                 sources_a = build_source_maps(df_a)
                 sources_b = build_source_maps(df_b)
                 for doc_id in bucket_common:
+                    docs_processed += 1
                     diffs = process_doc(doc_id, sources_a, sources_b)
                     if not diffs:
+                        maybe_log_progress()
                         continue
                     total_differing_docs += 1
                     total_diff_entries += len(diffs)
@@ -214,13 +245,22 @@ def compare_indices(
                     if len(meta_rows_buffer) >= meta_batch_size:
                         meta_rows_buffer = flush_meta_rows(meta_rows_buffer, meta_writer_state)
                     update_sample(doc_id, diffs)
+                    maybe_log_progress()
+            else:
+                maybe_log_progress(force=True, stage=f"Bucket {bucket_id:04d} has no common docs")
 
+            if bucket_only_in_a or bucket_only_in_b:
+                console.log(
+                    f"bucket={bucket_id:04d} only_in_a={len(bucket_only_in_a)} "
+                    f"only_in_b={len(bucket_only_in_b)}"
+                )
             console.log(
                 f"[{idx}/{len(bucket_ids)}] bucket={bucket_id:04d} "
                 f"{rich_escape(source_a.storage_key)} docs={len(ids_a)} | "
                 f"{rich_escape(source_b.storage_key)} docs={len(ids_b)} | "
                 f"common={len(bucket_common)} | diffs_emitted={total_differing_docs}"
             )
+            maybe_log_progress(force=True, stage=f"Bucket {bucket_id:04d} complete")
 
     console.log(f"Wrote diffs -> {jsonl_path}")
     console.log(f"Wrote summary -> {summary_csv_path}")
