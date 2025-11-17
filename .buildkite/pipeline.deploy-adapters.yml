@@ -1,29 +1,4 @@
 steps:
-  - label: deploy EBSCO adapter
-    command: |
-      ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \
-        uk.ac.wellcome/ebsco_adapter 
-
-    plugins:
-      - wellcomecollection/aws-assume-role#v0.2.2:
-          role: "arn:aws:iam::760097843905:role/platform-ci"
-
-    agents:
-      queue: nano
-
-  - label: deploy EBSCO indexer
-    command: |
-      ./builds/deploy_lambda_zip.sh \
-        ebsco_adapter/ebsco_indexer\
-        ebsco-adapter-indexer
-
-    plugins:
-      - wellcomecollection/aws-assume-role#v0.2.2:
-          role: "arn:aws:iam::760097843905:role/platform-ci"
-
-    agents:
-      queue: nano
-
   - label: deploy CALM adapter
     command: |
       ENV_TAG=env.prod ./builds/update_ecr_image_tag.sh \

@@ -60,7 +60,6 @@ steps:
       - "transformer_miro"
       - "transformer_sierra"
       - "transformer_tei"
-      - "transformer_ebsco"
 
     agents:
       queue: "scala"
@@ -109,8 +108,6 @@ steps:
     matrix:
       - "calm_adapter/calm_deletion_check_initiator"
       - "calm_adapter/calm_window_generator"
-      - "ebsco_adapter/ebsco_adapter"
-      - "ebsco_adapter/ebsco_indexer"
       - "tei_adapter/tei_updater"
       - "common/window_generator"
 
@@ -122,25 +119,8 @@ steps:
     matrix:
       - "calm_adapter/calm_window_generator"
       - "calm_adapter/calm_deletion_check_initiator"
-      - "ebsco_adapter/ebsco_indexer"
       - "common/window_generator"
       - "tei_adapter/tei_updater"
-
-  - label: "{{ matrix }} (Publish/Image)"
-    branches: "main"
-    plugins:
-      - wellcomecollection/aws-assume-role#v0.2.2:
-          role: "arn:aws:iam::760097843905:role/platform-ci"
-      - ecr#v2.5.0:
-          login: true
-      - docker-compose#v4.16.0:
-          config: "{{ matrix }}/docker-compose.yml"
-          cli-version: 2
-          push:
-            - publish:760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ebsco_adapter:ref.${BUILDKITE_COMMIT}
-            - publish:760097843905.dkr.ecr.eu-west-1.amazonaws.com/uk.ac.wellcome/ebsco_adapter:latest
-    matrix:
-      - "ebsco_adapter/ebsco_adapter"
 
   - wait
 

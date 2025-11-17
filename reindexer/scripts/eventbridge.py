@@ -1,7 +1,9 @@
 import json
 
+EVENTBUS_NAME = "catalogue-pipeline-adapter-event-bus"
 EVENTBRIDGE_SOURCE = "weco.pipeline.reindex"
 EVENTBRIDGE_REINDEX_TARGETS = ["ebsco"]
+EVENT_REQUESTED_DETAIL_TYPE = "weco.pipeline.reindex.requested"
 
 
 def send_eventbridge_reindex_event(session, reindex_target):
@@ -19,8 +21,9 @@ def send_eventbridge_reindex_event(session, reindex_target):
         Entries=[
             {
                 "Source": EVENTBRIDGE_SOURCE,
-                "DetailType": "Reindex triggered by start_reindex.py",
-                "Detail": json.dumps({"ReindexTargets": [reindex_target]}),
+                "DetailType": EVENT_REQUESTED_DETAIL_TYPE,
+                "Detail": json.dumps({"reindex_targets": [reindex_target]}),
+                "EventBusName": EVENTBUS_NAME,
             }
         ]
     )
