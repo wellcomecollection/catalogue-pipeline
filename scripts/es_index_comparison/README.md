@@ -5,7 +5,7 @@ A Python CLI (uv project) to fetch documents from two Elasticsearch indices, mat
 ## Features
 - Fetch only (read-only) from Elasticsearch using cloud_id + api_key (never writes back).
 - Optional filter query to restrict scanned documents.
-- Hash-bucketed Parquet materialization (polars + pyarrow) so comparisons stream one bucket at a time.
+- Hash-bucketed Parquet materialization (polars + pyarrow) so comparisons stream one bucket at a time, with streaming NDJSON ingestion during convert.
 - Deep recursive diff (dicts, lists, scalars, numpy arrays) with null-vs-missing equivalence.
 - Ignore field patterns with wildcards (`*`, `**`), list index wildcards (`[]`), and descendant matching.
 - Export artifacts: JSONL diffs, CSV summary, field frequency JSON, and diff metadata.
@@ -92,7 +92,7 @@ ignore_fields:
 
 # OPTIONAL settings
 sample_size: 10                # number of docs to sample when printing diffs
-loading_chunk_size: 100000     # rows per Parquet shard flush during convert
+loading_chunk_size: 100000     # max docs buffered (across all buckets) before flushing Parquet shards
 hash_bucket_count: 128         # number of deterministic hash buckets for Parquet layout
 namespace: pipeline-comparison-ebsco # If omitted, auto: <basename>-<YYYYMMDD-HHMMSS>
 output_dir: data               # base output root (default: data)
@@ -154,7 +154,7 @@ es-index-compare show-diff --id "Work[ebsco-alt-lookup/ebs28842402e]"
 The tool only calls Elasticsearch `GET`/`_search` via scan/scroll helpers; it performs no writes, index creations, or updates.
 
 ## Performance Tips
-- Increase `loading_chunk_size` for very large indices if memory permits.
+- Adjust `loading_chunk_size` to control peak memory: smaller values flush more often (more files, less RAM), larger values reduce file counts at the cost of more buffering.
 - Tune `hash_bucket_count` to balance on-disk fan-out vs. in-memory chunk size during compare (higher bucket counts mean fewer docs per chunk).
 - Polars operations are columnar; ensure adequate disk space for Parquet.
 - Re-run `compare` without `fetch`/`convert` after adjusting ignore patterns.

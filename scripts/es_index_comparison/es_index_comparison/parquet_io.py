@@ -41,17 +41,19 @@ def ndjson_gz_to_parquet_shards(
     target_dir.mkdir(parents=True, exist_ok=True)
 
     buffers: Dict[int, Dict[str, Dict[str, Any]]] = defaultdict(dict)
+    active_buckets: set[int] = set()
     bucket_file_counters: Dict[int, int] = defaultdict(int)
     bucket_meta: Dict[int, Dict[str, Any]] = {
         bucket_id: {"doc_count": 0, "files": []} for bucket_id in range(hash_bucket_count)
     }
     written_files: List[Path] = []
     processed = 0
+    buffered_docs = 0
 
-    def flush_bucket(bucket_id: int):
-        bucket_docs = buffers[bucket_id]
+    def flush_bucket(bucket_id: int) -> int:
+        bucket_docs = buffers.get(bucket_id)
         if not bucket_docs:
-            return
+            return 0
         df = pd.DataFrame.from_dict(bucket_docs, orient="index")
         table = pa.Table.from_pandas(df)
         rel_dir = Path(f"bucket_{bucket_id:05d}")
@@ -65,9 +67,20 @@ def ndjson_gz_to_parquet_shards(
         bucket_meta[bucket_id]["files"].append(str(rel_dir / filename))
         written_files.append(out_path)
         buffers[bucket_id] = {}
+        active_buckets.discard(bucket_id)
         console.log(
             f"[{index}] bucket={bucket_id:04d} wrote {len(df)} docs -> {out_path.relative_to(target_dir)}"
         )
+        return len(df)
+
+    def flush_all_buckets():
+        nonlocal buffered_docs
+        if buffered_docs == 0 or not active_buckets:
+            return
+        flushed = 0
+        for bucket_id in sorted(list(active_buckets)):
+            flushed += flush_bucket(bucket_id)
+        buffered_docs = max(buffered_docs - flushed, 0)
 
     with gzip.open(ndjson_path, "rt") as fh:
         for line in fh:
@@ -77,19 +90,20 @@ def ndjson_gz_to_parquet_shards(
                 continue
             bucket_id = _hash_bucket_for_id(_id, hash_bucket_count)
             buffers[bucket_id][_id] = doc
+            active_buckets.add(bucket_id)
             bucket_meta[bucket_id]["doc_count"] += 1
             processed += 1
+            buffered_docs += 1
 
-            if len(buffers[bucket_id]) >= chunk_size:
-                flush_bucket(bucket_id)
+            if buffered_docs >= chunk_size:
+                flush_all_buckets()
 
             if processed % 50_000 == 0:
                 console.log(
                     f"[{index}] processed {processed} docs across {hash_bucket_count} hash buckets"
                 )
 
-    for bucket_id in range(hash_bucket_count):
-        flush_bucket(bucket_id)
+    flush_all_buckets()
 
     manifest = {
         "version": 1,

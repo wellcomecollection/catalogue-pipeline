@@ -5,6 +5,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
+import pyarrow.parquet as pq
+
 from es_index_comparison.parquet_io import (
     MANIFEST_FILENAME,
     PartitionedIndex,
@@ -60,6 +62,31 @@ def test_manifest_records_hash_buckets(tmp_path):
     for bucket_id, expected_count in expected.items():
         assert bucket_counts[bucket_id] == expected_count
     assert sum(bucket_counts.values()) == len(docs)
+
+
+def test_convert_flushes_global_chunks(tmp_path, monkeypatch):
+    docs = [_hit(f"doc-{i}", {"value": i}) for i in range(5)]
+    raw_path = tmp_path / "raw.ndjson.gz"
+    parquet_root = tmp_path / "parquet"
+    _write_docs(raw_path, docs)
+
+    monkeypatch.setattr(
+        "es_index_comparison.parquet_io._hash_bucket_for_id", lambda _doc_id, _count: 0
+    )
+
+    ndjson_gz_to_parquet_shards(
+        index="sample-index",
+        ndjson_path=raw_path,
+        out_parent=parquet_root,
+        chunk_size=2,
+        hash_bucket_count=4,
+    )
+
+    bucket_dir = parquet_root / "sample-index" / "bucket_00000"
+    parts = sorted(bucket_dir.glob("part-*.parquet"))
+    assert len(parts) == 3  # 2 + 2 + 1 rows flushed sequentially
+    row_counts = [pq.read_table(part).num_rows for part in parts]
+    assert row_counts == [2, 2, 1]
 
 
 def test_compare_indices_streams_partitions(tmp_path):
