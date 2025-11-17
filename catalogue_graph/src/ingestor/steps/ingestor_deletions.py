@@ -68,6 +68,12 @@ def local_handler() -> None:
         default="dev",
     )
     parser.add_argument(
+        "--index-date-merged",
+        type=str,
+        help="The merged index date to read from, will default to pipeline date.",
+        required=False,
+    )
+    parser.add_argument(
         "--index-date",
         type=str,
         help='The concepts index date that is being removed from, will default to "dev".',

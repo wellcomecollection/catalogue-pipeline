@@ -31,13 +31,9 @@ class BasePipelineEvent(BaseModel):
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
-        window = None
-        if args.window_start is not None or args.window_end is not None:
-            window = IncrementalWindow(
-                start_time=args.window_start, end_time=args.window_end
-            )
-
-        return cls(**args.__dict__, window=window)
+        window = IncrementalWindow.from_argparser(args)
+        index_dates = PipelineIndexDates(merged=args.index_date_merged)
+        return cls(**args.__dict__, window=window, index_dates=index_dates)
 
 
 class GraphPipelineEvent(BasePipelineEvent):
