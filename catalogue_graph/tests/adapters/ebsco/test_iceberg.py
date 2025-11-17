@@ -8,8 +8,8 @@ import pyarrow as pa
 from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.schemata import ARROW_SCHEMA
-from adapters.ebsco.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.schemata import ARROW_SCHEMA
 
 from .helpers import assert_row_identifiers
 from .helpers import data_to_namespaced_table as _data_to_namespaced_table_helper

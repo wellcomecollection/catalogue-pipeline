@@ -16,7 +16,7 @@ from adapters.ebsco.steps.transformer import (
     load_data,
     transform,
 )
-from adapters.ebsco.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import IcebergTableClient
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
 from models.pipeline.work_data import WorkData
@@ -57,7 +57,7 @@ def _prepare_changeset(
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
-        "adapters.ebsco.utils.iceberg.get_local_table", lambda **kwargs: temporary_table
+        "adapters.ebsco.table_config.get_local_table", lambda **kwargs: temporary_table
     )
     return changeset_id
 
