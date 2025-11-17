@@ -150,6 +150,7 @@ def test_ingestor_indexer_handles_explicit_objects(record_type: IngestorType) ->
 def test_ingestor_indexer_failure_invalid_data_concepts() -> None:
     # Run works indexer but mock concepts file
     event = get_mock_indexer_event("concepts")
+    mock_es_secrets("concepts_ingestor", "2021-07-01")
     assert event.objects_to_index is not None
     MockSmartOpen.mock_s3_file(
         event.objects_to_index[0].s3_uri,
@@ -166,6 +167,7 @@ def test_ingestor_indexer_failure_invalid_data_concepts() -> None:
 def test_ingestor_indexer_failure_invalid_data_works() -> None:
     # Run concepts indexer but mock works file
     event = get_mock_indexer_event("works")
+    mock_es_secrets("works_ingestor", "2021-07-01")
     assert event.objects_to_index is not None
     MockSmartOpen.mock_s3_file(
         event.objects_to_index[0].s3_uri,
@@ -178,6 +180,7 @@ def test_ingestor_indexer_failure_invalid_data_works() -> None:
 
 @pytest.mark.parametrize("record_type", ["concepts", "works"])
 def test_ingestor_indexer_failure_invalid_parquet(record_type: IngestorType) -> None:
+    mock_es_secrets(f"{record_type}_ingestor", "2021-07-01")
     event = get_mock_indexer_event(record_type)
     assert event.objects_to_index is not None
     MockSmartOpen.mock_s3_file(

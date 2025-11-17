@@ -69,25 +69,18 @@ def generate_operations(
         }
 
 
-def load_data(
-    ingestor_type: IngestorType,
-    indexable_data: list[IndexableRecord],
-    pipeline_date: str,
-    index_date: str,
-    es_mode: ElasticsearchMode,
-) -> int:
-    index_name = get_standard_index_name(f"{ingestor_type}-indexed", index_date)
-    print(
-        f"Loading {len(indexable_data)} Indexable {ingestor_type} to ES index: {index_name} ..."
-    )
-    es = utils.elasticsearch.get_client(
-        f"{ingestor_type}_ingestor", pipeline_date, es_mode
-    )
-    success_count, _ = elasticsearch.helpers.bulk(
-        es, generate_operations(index_name, indexable_data)
-    )
+def get_indexable_data(
+    event: IngestorIndexerLambdaEvent, s3_uri: str
+) -> list[IndexableRecord]:
+    record_class = RECORD_CLASSES[event.ingestor_type]
 
-    return success_count
+    if event.load_format == "parquet":
+        data = df_from_s3_parquet(s3_uri).to_dicts()
+    else:
+        data = dicts_from_s3_jsonl(s3_uri)
+
+    print(f"Extracted {len(data)} records from {s3_uri}.")
+    return [record_class.from_raw_document(row) for row in data]
 
 
 def handler(
@@ -95,25 +88,26 @@ def handler(
 ) -> IngestorIndexerMonitorLambdaEvent:
     print(f"Received event: {event}.")
 
-    record_class = RECORD_CLASSES[event.ingestor_type]
-
     objects_to_index = event.objects_to_index or _get_objects_to_index(event)
+    es_client = utils.elasticsearch.get_client(
+        f"{event.ingestor_type}_ingestor", event.pipeline_date, es_mode
+    )
+    index_name = get_standard_index_name(
+        f"{event.ingestor_type}-indexed", event.index_date
+    )
 
     total_success_count = 0
     for s3_object in objects_to_index:
-        if event.load_format == "parquet":
-            data = df_from_s3_parquet(s3_object.s3_uri).to_dicts()
-        else:
-            data = dicts_from_s3_jsonl(s3_object.s3_uri)
+        indexable_data = get_indexable_data(event, s3_object.s3_uri)
 
-        print(f"Extracted {len(data)} records.")
-        success_count = load_data(
-            ingestor_type=event.ingestor_type,
-            indexable_data=[record_class.from_raw_document(row) for row in data],
-            pipeline_date=event.pipeline_date,
-            index_date=event.index_date,
-            es_mode=es_mode,
+        print(
+            f"Loading {len(indexable_data)} {event.ingestor_type} to ES index '{index_name}'..."
         )
+
+        success_count, _ = elasticsearch.helpers.bulk(
+            es_client, generate_operations(index_name, indexable_data)
+        )
+
         print(f"Successfully indexed {success_count} documents.")
 
         total_success_count += success_count
