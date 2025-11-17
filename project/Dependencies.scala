@@ -285,9 +285,6 @@ object CatalogueDependencies {
     ExternalDependencies.jsoupDependencies ++
       ExternalDependencies.parseDependencies
 
-  val ebscoTransformerDependencies: Seq[ModuleID] =
-    WellcomeDependencies.storageTypesafeLibrary
-
   // METS adapter
 
   val metsAdapterDependencies: Seq[ModuleID] =
