@@ -235,3 +235,32 @@ def test_harvest_recent_requires_valid_range(tmp_path: Path) -> None:
     end_time = datetime(2025, 1, 1, tzinfo=UTC)
     with pytest.raises(ValueError):
         harvester.harvest_recent(start_time=end_time, end_time=end_time)
+
+
+def test_harvest_recent_skips_successful_windows_by_default(tmp_path: Path) -> None:
+    records = [_make_record("id:1")]
+    harvester = _build_harvester(tmp_path, records)
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = start + timedelta(minutes=harvester.window_minutes)
+
+    first = harvester.harvest_recent(start_time=start, end_time=end)
+    assert len(first) == 1
+
+    second = harvester.harvest_recent(start_time=start, end_time=end)
+    assert second == []
+
+
+def test_harvest_recent_can_reprocess_successful_windows(tmp_path: Path) -> None:
+    records = [_make_record("id:1")]
+    harvester = _build_harvester(tmp_path, records)
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = start + timedelta(minutes=harvester.window_minutes)
+
+    harvester.harvest_recent(start_time=start, end_time=end)
+    reprocessed = harvester.harvest_recent(
+        start_time=start,
+        end_time=end,
+        reprocess_successful_windows=True,
+    )
+
+    assert len(reprocessed) == 1

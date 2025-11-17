@@ -116,16 +116,20 @@ class WindowHarvestManager:
         end_time: datetime,
         max_windows: int | None = None,
         record_callback: RecordStoreCallback | None = None,
+        reprocess_successful_windows: bool = False,
     ) -> list[WindowSummary]:
         start_time = self._ensure_utc(start_time)
         end_time = self._ensure_utc(end_time)
         candidates = self.generate_windows(start_time=start_time, end_time=end_time)
         status_map = self.store.load_status_map()
-        pending = [
-            window
-            for window in candidates
-            if status_map.get(self._window_key(*window), {}).get("state") != "success"
-        ]
+        if reprocess_successful_windows:
+            pending = list(candidates)
+        else:
+            pending = [
+                window
+                for window in candidates
+                if status_map.get(self._window_key(*window), {}).get("state") != "success"
+            ]
         if max_windows is not None:
             pending = pending[:max_windows]
         logger.info(
