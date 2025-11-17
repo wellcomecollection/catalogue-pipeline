@@ -19,11 +19,8 @@ ignore_fields:
   - debug.mergeCandidates[].id.type
   - debug.redirectSources[].type
   - redirectTarget.type
-  - aggregatableValues.production.dates[].id
-  - aggregatableValues.production.dates[].label
-  - aggregatableValues.languages[].label
 
-sample_size: 100
+sample_size: 1000
 loading_chunk_size: 100000
 
 hash_bucket_count: 6

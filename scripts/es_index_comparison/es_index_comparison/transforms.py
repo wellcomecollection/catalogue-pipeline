@@ -12,7 +12,7 @@ def nest_ancestors(a, b):
     adjusted_part_of = []
     recursive_part_of, curr_ancestor = None, None
     for item in b:
-        if 'id' in item and item.get("total_parts", 0) > 0:
+        if 'id' in item and item.get("totalParts", 0) > 0:
             if curr_ancestor is not None:
                 curr_ancestor['partOf'] = [item]
             else:
