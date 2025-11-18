@@ -9,8 +9,8 @@ import pytest
 from oai_pmh_client.client import OAIClient
 
 from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent
-from adapters.axiell.steps.loader import LoaderResponse
 from adapters.axiell.steps import loader
+from adapters.axiell.steps.loader import LoaderResponse
 from adapters.utils.iceberg import IcebergTableClient
 from adapters.utils.window_store import IcebergWindowStore
 

@@ -15,7 +15,10 @@ from typing import Any
 from pydantic import BaseModel
 
 from adapters.axiell import config
-from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, AxiellAdapterTriggerEvent
+from adapters.axiell.models.step_events import (
+    AxiellAdapterLoaderEvent,
+    AxiellAdapterTriggerEvent,
+)
 from adapters.axiell.window_status import build_window_store
 from adapters.utils.window_store import IcebergWindowStore
 from models.events import EventBridgeScheduledEvent
