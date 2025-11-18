@@ -126,14 +126,14 @@ def execute_transform(
 
 
 def handler(
-    event: dict[str, Any], runtime: TransformerRuntime | None = None
+    event: AxiellAdapterTransformerEvent, runtime: TransformerRuntime | None = None
 ) -> TransformResult:
-    request = AxiellAdapterTransformerEvent.model_validate(event)
-    return execute_transform(request, runtime=runtime)
+    return execute_transform(event, runtime=runtime)
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    response = handler(event)
+    request = AxiellAdapterTransformerEvent.model_validate(event)
+    response = handler(request)
     return response.model_dump(mode="json")
 
 
@@ -169,8 +169,8 @@ def main() -> None:
             use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode
         )
     )
-    request = AxiellAdapterTransformerEvent(changeset_id=args.changeset_id, job_id=args.job_id)
-    response = execute_transform(request, runtime=runtime)
+    event = AxiellAdapterTransformerEvent(changeset_id=args.changeset_id, job_id=args.job_id)
+    response = handler(event, runtime=runtime)
     print(json.dumps(response.model_dump(mode="json"), indent=2))
 
 
