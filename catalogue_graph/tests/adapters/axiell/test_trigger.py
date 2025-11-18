@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -18,6 +19,14 @@ class StubWindowStore:
         return self._rows
 
 
+class FakeHandlerResponse:
+    def __init__(self, payload: dict):
+        self._payload = payload
+
+    def model_dump(self, mode: str = "json") -> dict:  # noqa: ARG002
+        return self._payload
+
+
 def _window_row(start: datetime, end: datetime) -> dict:
     return {
         "window_key": f"{start.isoformat()}_{end.isoformat()}",
@@ -28,6 +37,7 @@ def _window_row(start: datetime, end: datetime) -> dict:
         "last_error": None,
         "record_ids": [],
         "updated_at": end,
+        "tags": None,
     }
 
 
@@ -42,6 +52,7 @@ def test_build_window_request_uses_lookback_when_no_history(monkeypatch):
     assert request.window_end == now
     assert request.set_spec == config.OAI_SET_SPEC
     assert request.metadata_prefix == config.OAI_METADATA_PREFIX
+    assert request.job_id
 
 
 def test_build_window_request_respects_last_success(monkeypatch):
@@ -89,8 +100,15 @@ def test_build_window_request_applies_max_window_limit(monkeypatch):
     assert request.max_windows == 10
 
 
-def test_build_window_request_uses_rest_api_table_by_default(monkeypatch):
-    now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
+def test_build_window_request_can_override_job_id(monkeypatch):
+    now = datetime(2025, 11, 17, 12, 45, tzinfo=UTC)
+    store = StubWindowStore([])
+    request = trigger.build_window_request(store=store, now=now, job_id="custom-job")
+
+    assert request.job_id == "custom-job"
+
+
+def test_lambda_handler_uses_rest_api_table_by_default(monkeypatch):
     stub_store = StubWindowStore([])
     captured: dict[str, bool] = {}
 
@@ -98,24 +116,14 @@ def test_build_window_request_uses_rest_api_table_by_default(monkeypatch):
         captured["flag"] = use_rest_api_table
         return stub_store
 
-    monkeypatch.setattr(trigger, "build_window_store", fake_build_window_store)
+    def fake_handler(event, runtime):  # noqa: ANN001
+        assert runtime.store is stub_store
+        return FakeHandlerResponse({"ok": True})
 
-    trigger.build_window_request(now=now)
+    monkeypatch.setattr(trigger, "build_window_store", fake_build_window_store)
+    monkeypatch.setattr(trigger, "handler", fake_handler)
+
+    trigger.lambda_handler({"time": "2025-11-17T12:00:00Z"}, context=None)
 
     assert captured["flag"] is True
 
-
-def test_build_window_request_can_target_local_window_store(monkeypatch):
-    now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
-    stub_store = StubWindowStore([])
-    captured: dict[str, bool] = {}
-
-    def fake_build_window_store(*, use_rest_api_table: bool):
-        captured["flag"] = use_rest_api_table
-        return stub_store
-
-    monkeypatch.setattr(trigger, "build_window_store", fake_build_window_store)
-
-    trigger.build_window_request(now=now, use_rest_api_table=False)
-
-    assert captured["flag"] is False

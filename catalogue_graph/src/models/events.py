@@ -17,6 +17,10 @@ from utils.types import (
 DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
+class EventBridgeScheduledEvent(BaseModel):
+    time: str  # original EventBridge schedule event time
+
+
 class BasePipelineEvent(BaseModel):
     pipeline_date: str
     window: IncrementalWindow | None = None

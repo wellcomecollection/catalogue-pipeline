@@ -7,7 +7,19 @@ from datetime import datetime
 from pydantic import BaseModel, Field
 
 
-class WindowRequest(BaseModel):
+class AxiellAdapterEvent(BaseModel):
+    """Base event for all Axiell adapter steps.
+    job_id is a unique identifier for the overall pipeline run.
+    """
+
+    job_id: str
+
+
+class AxiellAdapterTriggerEvent(AxiellAdapterEvent):
+    now: datetime | None = None
+
+
+class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
     window_key: str = Field(
         ..., description="Unique identifier for the requested window"
     )
@@ -16,6 +28,10 @@ class WindowRequest(BaseModel):
     metadata_prefix: str
     set_spec: str
     max_windows: int | None = None
+
+
+class AxiellAdapterTransformerEvent(AxiellAdapterEvent):
+    changeset_id: str
 
 
 class WindowLoadResult(BaseModel):
@@ -33,22 +49,20 @@ class LoaderResponse(BaseModel):
     summaries: list[WindowLoadResult]
     changeset_id: str | None
     record_count: int
-
-
-class TransformRequest(BaseModel):
-    changeset_id: str
+    job_id: str
 
 
 class TransformResult(BaseModel):
     changeset_id: str
     indexed: int
     errors: list[str]
+    job_id: str | None = None
 
 
 __all__ = [
-    "WindowRequest",
+    "AxiellAdapterLoaderEvent",
     "WindowLoadResult",
     "LoaderResponse",
-    "TransformRequest",
+    "AxiellAdapterTransformerEvent",
     "TransformResult",
 ]

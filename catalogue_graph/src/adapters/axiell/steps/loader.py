@@ -8,8 +8,8 @@ import argparse
 import json
 from typing import Any
 
-from attr import dataclass
 import pyarrow as pa
+from attr import dataclass
 from lxml import etree
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.models import Record
@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 from adapters.axiell import config
 from adapters.axiell.clients import build_oai_client
-from adapters.axiell.models import LoaderResponse, WindowLoadResult, WindowRequest
+from adapters.axiell.models import LoaderResponse, WindowLoadResult, AxiellAdapterLoaderEvent
 from adapters.axiell.table_config import get_iceberg_table
 from adapters.axiell.window_status import build_window_store
 from adapters.utils.iceberg import IcebergTableClient
@@ -26,6 +26,7 @@ from adapters.utils.window_harvester import WindowHarvestManager
 from adapters.utils.window_store import IcebergWindowStore
 
 AXIELL_NAMESPACE = "axiell"
+
 
 class LoaderConfig(BaseModel):
     use_rest_api_table: bool = True
@@ -66,7 +67,8 @@ class RecordAccumulator:
             return None
         return pa.Table.from_pylist(self.rows, schema=ARROW_SCHEMA)
 
-@dataclass 
+
+@dataclass
 class LoaderRuntime:
     store: IcebergWindowStore
     table_client: IcebergTableClient
@@ -84,7 +86,7 @@ def build_runtime(config_obj: LoaderConfig | None = None) -> LoaderRuntime:
 
 
 def _build_harvester(
-    request: WindowRequest, runtime: LoaderRuntime, accumulator: RecordAccumulator
+    request: AxiellAdapterLoaderEvent, runtime: LoaderRuntime, accumulator: RecordAccumulator
 ) -> WindowHarvestManager:
     return WindowHarvestManager(
         client=runtime.oai_client,
@@ -94,11 +96,12 @@ def _build_harvester(
         window_minutes=config.WINDOW_MINUTES,
         max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
         record_callback=accumulator,
+        default_tags={"job_id": request.job_id},
     )
 
 
 def execute_loader(
-    request: WindowRequest,
+    request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime | None = None,
 ) -> LoaderResponse:
     runtime = runtime or build_runtime()
@@ -132,17 +135,18 @@ def execute_loader(
         summaries=typed_summaries,
         changeset_id=changeset_id,
         record_count=record_count,
+        job_id=request.job_id,
     )
 
 
 def handler(
-    event: WindowRequest, *, runtime: LoaderRuntime | None = None
+    event: AxiellAdapterLoaderEvent, *, runtime: LoaderRuntime | None = None
 ) -> LoaderResponse:
     return execute_loader(event, runtime=runtime)
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    request = WindowRequest.model_validate(event)
+    request = AxiellAdapterLoaderEvent.model_validate(event)
     response = handler(request)
     return response.model_dump(mode="json")
 
@@ -163,7 +167,7 @@ def main() -> None:
     args = parser.parse_args()
 
     with open(args.event, encoding="utf-8") as f:
-        event = WindowRequest.model_validate(json.load(f))
+        event = AxiellAdapterLoaderEvent.model_validate(json.load(f))
 
     runtime = build_runtime(LoaderConfig(use_rest_api_table=args.use_rest_api_table))
     response = handler(event, runtime=runtime)

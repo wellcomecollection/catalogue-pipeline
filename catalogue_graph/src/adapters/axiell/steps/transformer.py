@@ -17,7 +17,7 @@ from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
 from adapters.axiell import config
-from adapters.axiell.models import TransformRequest, TransformResult
+from adapters.axiell.models import AxiellAdapterTransformerEvent, TransformResult
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
 from adapters.axiell.table_config import get_iceberg_table
 from adapters.utils.iceberg import IcebergTableClient
@@ -110,7 +110,7 @@ def _index_documents(
 
 
 def execute_transform(
-    request: TransformRequest,
+    request: AxiellAdapterTransformerEvent,
     runtime: TransformerRuntime | None = None,
 ) -> TransformResult:
     runtime = runtime or build_runtime()
@@ -121,13 +121,14 @@ def execute_transform(
         changeset_id=request.changeset_id,
         indexed=indexed,
         errors=errors,
+        job_id=request.job_id,
     )
 
 
 def handler(
     event: dict[str, Any], runtime: TransformerRuntime | None = None
 ) -> TransformResult:
-    request = TransformRequest.model_validate(event)
+    request = AxiellAdapterTransformerEvent.model_validate(event)
     return execute_transform(request, runtime=runtime)
 
 
@@ -147,6 +148,11 @@ def main() -> None:
         help="Changeset identifier to transform",
     )
     parser.add_argument(
+        "--job-id",
+        type=str,
+        help="Optional job identifier propagated from the trigger",
+    )
+    parser.add_argument(
         "--use-rest-api-table",
         action="store_true",
         help="Use S3 Tables (default) instead of the local catalog",
@@ -163,7 +169,7 @@ def main() -> None:
             use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode
         )
     )
-    request = TransformRequest(changeset_id=args.changeset_id)
+    request = AxiellAdapterTransformerEvent(changeset_id=args.changeset_id, job_id=args.job_id)
     response = execute_transform(request, runtime=runtime)
     print(json.dumps(response.model_dump(mode="json"), indent=2))
 

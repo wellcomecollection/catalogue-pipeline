@@ -25,14 +25,11 @@ from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTriggerEvent,
 )
+from models.events import EventBridgeScheduledEvent
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
     is_local: bool = False
-
-
-class EventBridgeScheduledEvent(BaseModel):
-    time: str  # original EventBridge schedule event time
 
 
 def _get_ssm_parameter(parameter_name: str) -> str:

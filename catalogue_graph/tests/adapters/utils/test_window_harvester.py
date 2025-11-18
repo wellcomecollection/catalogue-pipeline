@@ -97,7 +97,12 @@ def _make_record(identifier: str) -> Record:
     return Record(header=header, metadata=None)
 
 
-def _build_harvester(tmp_path: Path, responses: list[Record]) -> WindowHarvestManager:
+def _build_harvester(
+    tmp_path: Path,
+    responses: list[Record],
+    *,
+    default_tags: dict[str, str] | None = None,
+) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
     table = _create_table(
@@ -127,6 +132,7 @@ def _build_harvester(tmp_path: Path, responses: list[Record]) -> WindowHarvestMa
         window_minutes=15,
         max_parallel_requests=2,
         record_callback=recorder,
+        default_tags=default_tags,
     )
 
 
@@ -264,3 +270,20 @@ def test_harvest_recent_can_reprocess_successful_windows(tmp_path: Path) -> None
     )
 
     assert len(reprocessed) == 1
+
+
+def test_harvest_recent_attaches_default_tags(tmp_path: Path) -> None:
+    records = [_make_record("id:1")]
+    harvester = _build_harvester(
+        tmp_path,
+        records,
+        default_tags={"job_id": "job-123"},
+    )
+    start_time, end_time = _window_range()
+
+    harvester.harvest_recent(start_time=start_time, end_time=end_time)
+
+    status_map = harvester.store.load_status_map()
+    assert status_map
+    row = next(iter(status_map.values()))
+    assert row["tags"] == {"job_id": "job-123"}

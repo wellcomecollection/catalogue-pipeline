@@ -14,6 +14,7 @@ from pyiceberg.transforms import HourTransform
 from pyiceberg.types import (
     IntegerType,
     ListType,
+    MapType,
     NestedField,
     StringType,
     TimestamptzType,
@@ -34,6 +35,7 @@ class WindowStatusRecord:
     last_error: str | None
     record_ids: tuple[str, ...]
     updated_at: datetime
+    tags: dict[str, str] | None = None
 
 
 WINDOW_STATUS_SCHEMA = Schema(
@@ -48,6 +50,12 @@ WINDOW_STATUS_SCHEMA = Schema(
         8,
         "record_ids",
         ListType(10, StringType(), element_required=False),
+        required=False,
+    ),
+    NestedField(
+        9,
+        "tags",
+        MapType(11, StringType(), 12, StringType(), value_required=False),
         required=False,
     ),
 )
@@ -65,6 +73,7 @@ WINDOW_STATUS_ARROW_FIELDS: list[pa.Field] = [
     pa.field("last_error", pa.string(), nullable=True),
     pa.field("updated_at", pa.timestamp("us", tz="UTC"), nullable=False),
     pa.field("record_ids", pa.list_(pa.string()), nullable=True),
+    pa.field("tags", pa.map_(pa.string(), pa.string()), nullable=True),
 ]
 
 WINDOW_STATUS_ARROW_SCHEMA = pa.schema(WINDOW_STATUS_ARROW_FIELDS)
@@ -93,7 +102,8 @@ class IcebergWindowStore:
         arrow_table = scan.to_arrow()
         if arrow_table is None or arrow_table.num_rows == 0:
             return {}
-        return {row["window_key"]: row for row in arrow_table.to_pylist()}
+        rows = [self._normalize_row(row) for row in arrow_table.to_pylist()]
+        return {row["window_key"]: row for row in rows}
 
     def upsert(self, record: WindowStatusRecord) -> None:
         """Delete any existing row for the window then append the new status."""
@@ -106,6 +116,7 @@ class IcebergWindowStore:
             "last_error": _column(record.last_error),
             "updated_at": _column(record.updated_at),
             "record_ids": _column(list(record.record_ids)),
+            "tags": _column(record.tags),
         }
         table = self._table
         with self._lock:
@@ -120,4 +131,13 @@ class IcebergWindowStore:
         arrow_table = scan.to_arrow()
         if arrow_table is None or arrow_table.num_rows == 0:
             return []
-        return arrow_table.to_pylist()
+        return [self._normalize_row(row) for row in arrow_table.to_pylist()]
+
+    @staticmethod
+    def _normalize_row(row: dict[str, Any]) -> dict[str, Any]:
+        tags = row.get("tags")
+        if tags is not None and not isinstance(tags, dict):
+            # Arrow map columns materialize as list[tuple]; coerce to dict for callers.
+            row = dict(row)
+            row["tags"] = dict(tags)
+        return row

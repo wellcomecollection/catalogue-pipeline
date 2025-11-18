@@ -28,6 +28,7 @@ class WindowSummary(TypedDict):
     record_ids: list[str]
     last_error: str | None
     updated_at: datetime
+    tags: dict[str, str] | None
 
 
 WindowStatusRow = WindowSummary
@@ -72,6 +73,7 @@ class WindowHarvestManager:
         window_minutes: int | None = None,
         max_parallel_requests: int | None = None,
         record_callback: RecordStoreCallback | None = None,
+        default_tags: dict[str, str] | None = None,
     ) -> None:
         self.client = client
         self.store = store
@@ -82,6 +84,7 @@ class WindowHarvestManager:
             max_parallel_requests or self.DEFAULT_MAX_PARALLEL_REQUESTS
         )
         self.record_callback = record_callback
+        self.default_tags = dict(default_tags) if default_tags else None
 
     # ------------------------------------------------------------------
     # Window generation & scheduling
@@ -223,6 +226,7 @@ class WindowHarvestManager:
                 last_error,
             )
         updated_at = datetime.now(UTC)
+        tags = dict(self.default_tags) if self.default_tags else None
         summary: WindowSummary = {
             "window_key": key,
             "window_start": start,
@@ -232,6 +236,7 @@ class WindowHarvestManager:
             "record_ids": record_ids,
             "last_error": last_error,
             "updated_at": updated_at,
+            "tags": tags,
         }
         self.store.upsert(
             WindowStatusRecord(
@@ -243,6 +248,7 @@ class WindowHarvestManager:
                 last_error=last_error,
                 record_ids=tuple(record_ids),
                 updated_at=updated_at,
+                tags=tags,
             )
         )
         if state == "success":

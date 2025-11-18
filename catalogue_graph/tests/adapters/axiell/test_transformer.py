@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import pyarrow as pa
 
-from adapters.axiell.models import TransformRequest
+from adapters.axiell.models import AxiellAdapterTransformerEvent
 from adapters.axiell.steps import transformer
 
 
@@ -22,8 +22,8 @@ def _table(rows: list[dict]) -> pa.Table:
     return pa.Table.from_pylist(rows)
 
 
-def _request() -> TransformRequest:
-    return TransformRequest(changeset_id="changeset-1")
+def _request() -> AxiellAdapterTransformerEvent:
+    return AxiellAdapterTransformerEvent(changeset_id="changeset-1", job_id="job-abc")
 
 
 def test_execute_transform_indexes_documents(monkeypatch):
@@ -60,6 +60,7 @@ def test_execute_transform_indexes_documents(monkeypatch):
     assert result.changeset_id == "changeset-1"
     assert result.indexed == 2
     assert result.errors == []
+    assert result.job_id == "job-abc"
     assert table_client.requested_changeset == "changeset-1"
     assert fake_bulk.actions == [
         {
@@ -92,6 +93,7 @@ def test_execute_transform_skips_when_no_rows(monkeypatch):
 
     assert result.indexed == 0
     assert result.errors == []
+    assert result.job_id == "job-abc"
 
 
 def test_execute_transform_surfaces_errors(monkeypatch):
@@ -112,3 +114,4 @@ def test_execute_transform_surfaces_errors(monkeypatch):
 
     assert result.errors == ["id=ax-1 status=500"]
     assert result.indexed == 0
+    assert result.job_id == "job-abc"

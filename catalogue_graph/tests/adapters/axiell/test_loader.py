@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 import pyarrow as pa
 import pytest
 
-from adapters.axiell.models import LoaderResponse, WindowRequest
+from adapters.axiell.models import LoaderResponse, AxiellAdapterLoaderEvent
 from adapters.axiell.steps import loader
 
 
@@ -37,9 +37,10 @@ class StubHarvester:
         return self.summaries
 
 
-def _request(now: datetime | None = None) -> WindowRequest:
+def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
     now = now or datetime.now(tz=UTC)
-    return WindowRequest(
+    return AxiellAdapterLoaderEvent(
+        job_id="job-123",
         window_key="test",
         window_start=now - timedelta(minutes=15),
         window_end=now,
@@ -60,6 +61,7 @@ def test_execute_loader_updates_iceberg(monkeypatch):
         "record_ids": ["id-1"],
         "last_error": None,
         "updated_at": req.window_end,
+        "tags": {"job_id": req.job_id},
     }
     stub_client = StubTableClient()
     runtime = loader.LoaderRuntime(
@@ -88,6 +90,7 @@ def test_execute_loader_updates_iceberg(monkeypatch):
     assert isinstance(response, LoaderResponse)
     assert response.changeset_id == "changeset-123"
     assert response.record_count == 1
+    assert response.job_id == req.job_id
     assert len(response.summaries) == 1
     assert stub_client.updated_with is not None
     assert stub_client.updated_with.to_pylist() == [
@@ -119,6 +122,7 @@ def test_execute_loader_handles_no_new_records(monkeypatch):
                     "record_ids": [],
                     "last_error": None,
                     "updated_at": request.window_end,
+                    "tags": {"job_id": request.job_id},
                 }
             ]
         )
@@ -158,6 +162,7 @@ def test_execute_loader_filters_delete_warning(monkeypatch):
         "record_ids": ["id-1"],
         "last_error": None,
         "updated_at": req.window_end,
+        "tags": {"job_id": req.job_id},
     }
     stub_client = StubTableClient()
     runtime = loader.LoaderRuntime(

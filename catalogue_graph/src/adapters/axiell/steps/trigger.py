@@ -15,23 +15,23 @@ from typing import Any
 from pydantic import BaseModel
 
 from adapters.axiell import config
-from adapters.axiell.models import WindowRequest
+from adapters.axiell.models import AxiellAdapterLoaderEvent, AxiellAdapterTriggerEvent
 from adapters.axiell.window_status import build_window_store
 from adapters.utils.window_store import IcebergWindowStore
-
-
-class EventBridgeScheduledEvent(BaseModel):
-    time: str
+from models.events import EventBridgeScheduledEvent
 
 
 @dataclass
-class TriggerContext:
-    now: datetime
+class TriggerRuntime:
     store: IcebergWindowStore
 
 
 def _window_key(start: datetime, end: datetime) -> str:
     return f"{start.isoformat()}_{end.isoformat()}"
+
+
+def _generate_job_id(timestamp: datetime) -> str:
+    return timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M")
 
 
 def _latest_success_end(store: IcebergWindowStore) -> datetime | None:
@@ -64,28 +64,27 @@ def _enforce_lag(now: datetime, last_success_end: datetime | None) -> None:
 
 def build_window_request(
     *,
-    store: IcebergWindowStore | None = None,
-    now: datetime | None = None,
-    use_rest_api_table: bool = True,
+    store: IcebergWindowStore,
+    now: datetime,
     enforce_lag: bool = True,
-) -> WindowRequest:
-    context = TriggerContext(
-        now=(now or datetime.now(tz=UTC)),
-        store=store or build_window_store(use_rest_api_table=use_rest_api_table),
-    )
+    job_id: str | None = None,
+) -> AxiellAdapterLoaderEvent:
+    last_success_end = _latest_success_end(store)
 
-    last_success_end = _latest_success_end(context.store)
     if enforce_lag:
-        _enforce_lag(context.now, last_success_end)
+        _enforce_lag(now, last_success_end)
 
-    start_time = _determine_start(context.now, last_success_end).astimezone(UTC)
-    end_time = context.now.astimezone(UTC)
+    start_time = _determine_start(now, last_success_end).astimezone(UTC)
+    end_time = now.astimezone(UTC)
 
     if start_time >= end_time:
         raise RuntimeError("No new windows are ready: computed start >= end.")
 
     max_windows = config.MAX_PENDING_WINDOWS
-    request = WindowRequest(
+    resolved_job_id = job_id or _generate_job_id(now)
+
+    loader_event = AxiellAdapterLoaderEvent(
+        job_id=resolved_job_id,
         window_key=_window_key(start_time, end_time),
         window_start=start_time,
         window_end=end_time,
@@ -93,18 +92,31 @@ def build_window_request(
         set_spec=config.OAI_SET_SPEC,
         max_windows=max_windows,
     )
-    return request
+
+    return loader_event
 
 
-def handler(event: dict[str, Any] | None = None) -> dict[str, Any]:
-    request = build_window_request()
+def handler(
+    event: AxiellAdapterTriggerEvent, runtime: TriggerRuntime
+) -> dict[str, Any]:
+    request = build_window_request(
+        store=runtime.store,
+        now=event.now,
+        job_id=event.job_id,
+    )
     return request.model_dump(mode="json")
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     scheduled_event = EventBridgeScheduledEvent.model_validate(event)
     event_time = datetime.fromisoformat(scheduled_event.time.replace("Z", "+00:00"))
-    request = build_window_request(now=event_time)
+    request = handler(
+        AxiellAdapterTriggerEvent(
+            now=event_time,
+            job_id=_generate_job_id(event_time),
+        ),
+        runtime=TriggerRuntime(store=build_window_store(use_rest_api_table=True)),
+    )
     return request.model_dump(mode="json")
 
 
@@ -125,15 +137,25 @@ def main() -> None:
         action="store_true",
         help="Fail if the latest successful window is older than the configured lag threshold",
     )
+    parser.add_argument(
+        "--job-id",
+        type=str,
+        help="Optional job identifier to embed in the request",
+    )
     args = parser.parse_args()
     now = (
         datetime.fromisoformat(args.at.replace("Z", "+00:00"))
         if args.at
         else datetime.now(tz=UTC)
     )
-    request = build_window_request(
-        now=now,
-        use_rest_api_table=args.use_rest_api_table,
+    request = handler(
+        AxiellAdapterTriggerEvent(
+            now=now,
+            job_id=args.job_id,
+        ),
+        runtime=TriggerRuntime(
+            store=build_window_store(use_rest_api_table=args.use_rest_api_table)
+        ),
         enforce_lag=args.enforce_lag,
     )
     print(json.dumps(request.model_dump(mode="json"), indent=2))
