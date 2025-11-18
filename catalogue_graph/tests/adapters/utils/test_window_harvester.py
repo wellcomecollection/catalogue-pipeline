@@ -185,11 +185,12 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     ) -> None:
         raise RuntimeError("boom")
 
-    start_time, end_time = _window_range()
+    start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
         record_callback=failing_callback,
+        max_windows=1,
     )
 
     assert summaries[0]["state"] == "failed"
@@ -226,8 +227,12 @@ def test_retry_failed_windows(tmp_path: Path) -> None:
 def test_coverage_report(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
-    start_time, end_time = _window_range()
-    harvester.harvest_recent(start_time=start_time, end_time=end_time)
+    start_time, end_time = _window_range(hours=2)
+    harvester.harvest_recent(
+        start_time=start_time,
+        end_time=end_time,
+        max_windows=2,
+    )
 
     report = harvester.coverage_report()
     assert report.total_windows >= 1
@@ -279,9 +284,13 @@ def test_harvest_recent_attaches_default_tags(tmp_path: Path) -> None:
         records,
         default_tags={"job_id": "job-123"},
     )
-    start_time, end_time = _window_range()
+    start_time, end_time = _window_range(hours=1)
 
-    harvester.harvest_recent(start_time=start_time, end_time=end_time)
+    harvester.harvest_recent(
+        start_time=start_time,
+        end_time=end_time,
+        max_windows=1,
+    )
 
     status_map = harvester.store.load_status_map()
     assert status_map
