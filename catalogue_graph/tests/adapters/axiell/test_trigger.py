@@ -7,7 +7,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 
 from adapters.axiell import config
-from adapters.axiell.models import (
+from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
     AxiellAdapterTriggerEvent,
 )

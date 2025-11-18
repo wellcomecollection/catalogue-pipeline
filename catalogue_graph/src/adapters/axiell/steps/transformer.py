@@ -15,19 +15,26 @@ from typing import Any, cast
 import elasticsearch.helpers
 import pyarrow as pa
 from elasticsearch import Elasticsearch
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from adapters.axiell import config
-from adapters.axiell.models import AxiellAdapterTransformerEvent, TransformResult
+from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
 from adapters.axiell.table_config import get_iceberg_table
 from adapters.utils.iceberg import IcebergTableClient
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
-class TransformerConfig(BaseModel):
+class AxiellAdapterTransformerConfig(BaseModel):
     use_rest_api_table: bool = True
     es_mode: ElasticsearchMode = "private"
+
+
+class TransformResult(BaseModel):
+    changeset_ids: list[str] = Field(default_factory=list)
+    indexed: int
+    errors: list[str]
+    job_id: str | None = None
 
 
 @dataclass
@@ -37,8 +44,10 @@ class TransformerRuntime:
     index_name: str
 
 
-def build_runtime(config_obj: TransformerConfig | None = None) -> TransformerRuntime:
-    cfg = config_obj or TransformerConfig(
+def build_runtime(
+    config_obj: AxiellAdapterTransformerConfig | None = None,
+) -> TransformerRuntime:
+    cfg = config_obj or AxiellAdapterTransformerConfig(
         es_mode=cast(ElasticsearchMode, config.ES_MODE)
     )
     table = get_iceberg_table(use_rest_api_table=cfg.use_rest_api_table)
@@ -180,7 +189,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     runtime = build_runtime(
-        TransformerConfig(
+        AxiellAdapterTransformerConfig(
             use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode
         )
     )

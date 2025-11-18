@@ -15,14 +15,12 @@ from attr import dataclass
 from lxml import etree
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.models import Record
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from adapters.axiell import config
 from adapters.axiell.clients import build_oai_client
-from adapters.axiell.models import (
+from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
-    LoaderResponse,
-    WindowLoadResult,
 )
 from adapters.axiell.table_config import get_iceberg_table
 from adapters.axiell.window_status import build_window_store
@@ -43,8 +41,26 @@ logging.basicConfig(
 )
 
 
-class LoaderConfig(BaseModel):
+class AxiellAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
+
+
+class WindowLoadResult(BaseModel):
+    window_key: str
+    window_start: datetime
+    window_end: datetime
+    state: str
+    attempts: int
+    record_ids: list[str]
+    changeset_id: str | None = None
+    last_error: str | None = None
+
+
+class LoaderResponse(BaseModel):
+    summaries: list[WindowLoadResult]
+    changeset_ids: list[str] = Field(default_factory=list)
+    record_count: int
+    job_id: str
 
 
 def _serialize_metadata(record: Record) -> str | None:
@@ -138,8 +154,8 @@ class LoaderRuntime:
     oai_client: OAIClient
 
 
-def build_runtime(config_obj: LoaderConfig | None = None) -> LoaderRuntime:
-    cfg = config_obj or LoaderConfig()
+def build_runtime(config_obj: AxiellAdapterLoaderConfig | None = None) -> LoaderRuntime:
+    cfg = config_obj or AxiellAdapterLoaderConfig()
     store = build_window_store(use_rest_api_table=cfg.use_rest_api_table)
     table = get_iceberg_table(use_rest_api_table=cfg.use_rest_api_table)
     table_client = IcebergTableClient(table, default_namespace=AXIELL_NAMESPACE)
@@ -215,7 +231,8 @@ def handler(
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     request = AxiellAdapterLoaderEvent.model_validate(event)
-    response = handler(request)
+    runtime = build_runtime()
+    response = handler(request, runtime=runtime)
     return response.model_dump(mode="json")
 
 
@@ -248,7 +265,9 @@ def main() -> None:
     with open(args.event, encoding="utf-8") as f:
         event = AxiellAdapterLoaderEvent.model_validate(json.load(f))
 
-    runtime = build_runtime(LoaderConfig(use_rest_api_table=args.use_rest_api_table))
+    runtime = build_runtime(
+        AxiellAdapterLoaderConfig(use_rest_api_table=args.use_rest_api_table)
+    )
     response = handler(event, runtime=runtime)
 
     print(json.dumps(response.model_dump(mode="json"), indent=2))

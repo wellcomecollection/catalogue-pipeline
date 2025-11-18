@@ -12,16 +12,24 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from pydantic import BaseModel
+
 from adapters.axiell import config
-from adapters.axiell.models import AxiellAdapterLoaderEvent, AxiellAdapterTriggerEvent
+from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, AxiellAdapterTriggerEvent
 from adapters.axiell.window_status import build_window_store
 from adapters.utils.window_store import IcebergWindowStore
 from models.events import EventBridgeScheduledEvent
 
 
+class AxiellAdapterTriggerConfig(BaseModel):
+    use_rest_api_table: bool = True
+    enforce_lag: bool = True
+
+
 @dataclass
 class TriggerRuntime:
     store: IcebergWindowStore
+    enforce_lag: bool = True
 
 
 def _window_key(start: datetime, end: datetime) -> str:
@@ -97,27 +105,34 @@ def build_window_request(
 def handler(
     event: AxiellAdapterTriggerEvent,
     runtime: TriggerRuntime,
-    *,
-    enforce_lag: bool = True,
 ) -> AxiellAdapterLoaderEvent:
     now = event.now or datetime.now(tz=UTC)
     return build_window_request(
         store=runtime.store,
         now=now,
-        enforce_lag=enforce_lag,
+        enforce_lag=runtime.enforce_lag,
         job_id=event.job_id,
     )
+
+
+def build_runtime(
+    config_obj: AxiellAdapterTriggerConfig | None = None,
+) -> TriggerRuntime:
+    cfg = config_obj or AxiellAdapterTriggerConfig()
+    store = build_window_store(use_rest_api_table=cfg.use_rest_api_table)
+    return TriggerRuntime(store=store, enforce_lag=cfg.enforce_lag)
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     scheduled_event = EventBridgeScheduledEvent.model_validate(event)
     event_time = datetime.fromisoformat(scheduled_event.time.replace("Z", "+00:00"))
+    runtime = build_runtime()
     loader_event = handler(
         AxiellAdapterTriggerEvent(
             now=event_time,
             job_id=_generate_job_id(event_time),
         ),
-        runtime=TriggerRuntime(store=build_window_store(use_rest_api_table=True)),
+        runtime=runtime,
     )
     return loader_event.model_dump(mode="json")
 
@@ -156,10 +171,11 @@ def main() -> None:
             now=now,
             job_id=job_id,
         ),
-        runtime=TriggerRuntime(
-            store=build_window_store(use_rest_api_table=args.use_rest_api_table)
+        runtime=build_runtime(
+            AxiellAdapterTriggerConfig(
+                use_rest_api_table=args.use_rest_api_table, enforce_lag=args.enforce_lag
+            )
         ),
-        enforce_lag=args.enforce_lag,
     )
     print(json.dumps(loader_event.model_dump(mode="json"), indent=2))
 

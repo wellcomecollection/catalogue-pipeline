@@ -7,7 +7,7 @@ import pyarrow as pa
 import pytest
 from elasticsearch import Elasticsearch
 
-from adapters.axiell.models import AxiellAdapterTransformerEvent
+from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent
 from adapters.axiell.steps import transformer
 from adapters.utils.iceberg import IcebergTableClient
 
