@@ -169,7 +169,9 @@ def main() -> None:
             use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode
         )
     )
-    event = AxiellAdapterTransformerEvent(changeset_id=args.changeset_id, job_id=args.job_id)
+    event = AxiellAdapterTransformerEvent(
+        changeset_id=args.changeset_id, job_id=args.job_id
+    )
     response = handler(event, runtime=runtime)
     print(json.dumps(response.model_dump(mode="json"), indent=2))
 

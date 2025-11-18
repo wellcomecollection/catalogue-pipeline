@@ -469,6 +469,17 @@ class WindowHarvestManager:
             record_ids = [str(record_ids_raw)]
         last_error_value = row.get("last_error")
         last_error = None if last_error_value is None else str(last_error_value)
+        tags_value = row.get("tags")
+        tags: dict[str, str] | None = None
+        if tags_value is not None:
+            if isinstance(tags_value, dict):
+                tags = {str(key): str(value) for key, value in tags_value.items()}
+            else:
+                try:
+                    tags_items = dict(tags_value)
+                except Exception:  # pragma: no cover - defensive fallback
+                    tags_items = {}
+                tags = {str(key): str(value) for key, value in tags_items.items()}
         return {
             "window_key": str(row["window_key"]),
             "window_start": window_start,
@@ -478,6 +489,7 @@ class WindowHarvestManager:
             "record_ids": record_ids,
             "last_error": last_error,
             "updated_at": updated_at,
+            "tags": tags,
         }
 
     @staticmethod

@@ -1,12 +1,18 @@
 from __future__ import annotations
 
-import sys
 from datetime import UTC, datetime, timedelta
+from typing import cast
 
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 
 from adapters.axiell import config
+from adapters.axiell.models import (
+    AxiellAdapterLoaderEvent,
+    AxiellAdapterTriggerEvent,
+)
 from adapters.axiell.steps import trigger
+from adapters.utils.window_store import IcebergWindowStore
 
 
 class StubWindowStore:
@@ -19,15 +25,7 @@ class StubWindowStore:
         return self._rows
 
 
-class FakeHandlerResponse:
-    def __init__(self, payload: dict):
-        self._payload = payload
-
-    def model_dump(self, mode: str = "json") -> dict:  # noqa: ARG002
-        return self._payload
-
-
-def _window_row(start: datetime, end: datetime) -> dict:
+def _window_row(start: datetime, end: datetime) -> dict[str, object]:
     return {
         "window_key": f"{start.isoformat()}_{end.isoformat()}",
         "window_start": start,
@@ -41,10 +39,16 @@ def _window_row(start: datetime, end: datetime) -> dict:
     }
 
 
-def test_build_window_request_uses_lookback_when_no_history(monkeypatch):
+def _stub_store(rows: list[dict]) -> IcebergWindowStore:
+    return cast(IcebergWindowStore, StubWindowStore(rows))
+
+
+def test_build_window_request_uses_lookback_when_no_history(
+    monkeypatch: MonkeyPatch,
+) -> None:
     now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
     monkeypatch.setattr(config, "WINDOW_LOOKBACK_DAYS", 1)
-    store = StubWindowStore([])
+    store = _stub_store([])
 
     request = trigger.build_window_request(store=store, now=now)
 
@@ -55,10 +59,12 @@ def test_build_window_request_uses_lookback_when_no_history(monkeypatch):
     assert request.job_id
 
 
-def test_build_window_request_respects_last_success(monkeypatch):
+def test_build_window_request_respects_last_success(
+    monkeypatch: MonkeyPatch,
+) -> None:
     now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
     last_success_end = now - timedelta(minutes=15)
-    store = StubWindowStore(
+    store = _stub_store(
         [_window_row(last_success_end - timedelta(minutes=15), last_success_end)]
     )
 
@@ -68,20 +74,24 @@ def test_build_window_request_respects_last_success(monkeypatch):
     assert request.window_end == now
 
 
-def test_build_window_request_errors_when_lag_exceeds_limit(monkeypatch):
+def test_build_window_request_errors_when_lag_exceeds_limit(
+    monkeypatch: MonkeyPatch,
+) -> None:
     now = datetime(2025, 11, 17, 13, 0, tzinfo=UTC)
     old_end = now - timedelta(hours=2)
-    store = StubWindowStore([_window_row(old_end - timedelta(minutes=15), old_end)])
+    store = _stub_store([_window_row(old_end - timedelta(minutes=15), old_end)])
     monkeypatch.setattr(config, "MAX_LAG_MINUTES", 30)
 
     with pytest.raises(RuntimeError):
         trigger.build_window_request(store=store, now=now)
 
 
-def test_build_window_request_can_skip_lag_enforcement(monkeypatch):
+def test_build_window_request_can_skip_lag_enforcement(
+    monkeypatch: MonkeyPatch,
+) -> None:
     now = datetime(2025, 11, 17, 13, 0, tzinfo=UTC)
     old_end = now - timedelta(hours=2)
-    store = StubWindowStore([_window_row(old_end - timedelta(minutes=15), old_end)])
+    store = _stub_store([_window_row(old_end - timedelta(minutes=15), old_end)])
     monkeypatch.setattr(config, "MAX_LAG_MINUTES", 30)
 
     request = trigger.build_window_request(store=store, now=now, enforce_lag=False)
@@ -90,9 +100,11 @@ def test_build_window_request_can_skip_lag_enforcement(monkeypatch):
     assert request.window_end == now
 
 
-def test_build_window_request_applies_max_window_limit(monkeypatch):
+def test_build_window_request_applies_max_window_limit(
+    monkeypatch: MonkeyPatch,
+) -> None:
     now = datetime(2025, 11, 17, 12, 45, tzinfo=UTC)
-    store = StubWindowStore([])
+    store = _stub_store([])
     monkeypatch.setattr(config, "MAX_PENDING_WINDOWS", 10)
 
     request = trigger.build_window_request(store=store, now=now)
@@ -100,25 +112,43 @@ def test_build_window_request_applies_max_window_limit(monkeypatch):
     assert request.max_windows == 10
 
 
-def test_build_window_request_can_override_job_id(monkeypatch):
+def test_build_window_request_can_override_job_id(
+    monkeypatch: MonkeyPatch,
+) -> None:
     now = datetime(2025, 11, 17, 12, 45, tzinfo=UTC)
-    store = StubWindowStore([])
+    store = _stub_store([])
     request = trigger.build_window_request(store=store, now=now, job_id="custom-job")
 
     assert request.job_id == "custom-job"
 
 
-def test_lambda_handler_uses_rest_api_table_by_default(monkeypatch):
-    stub_store = StubWindowStore([])
+def test_lambda_handler_uses_rest_api_table_by_default(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    stub_store = _stub_store([])
     captured: dict[str, bool] = {}
 
-    def fake_build_window_store(*, use_rest_api_table: bool):
+    def fake_build_window_store(*, use_rest_api_table: bool) -> IcebergWindowStore:
         captured["flag"] = use_rest_api_table
         return stub_store
 
-    def fake_handler(event, runtime):  # noqa: ANN001
+    def fake_handler(
+        event: AxiellAdapterTriggerEvent,
+        runtime: trigger.TriggerRuntime,
+        *,
+        enforce_lag: bool = True,
+    ) -> AxiellAdapterLoaderEvent:
         assert runtime.store is stub_store
-        return FakeHandlerResponse({"ok": True})
+        assert enforce_lag is True
+        now = event.now or datetime.now(tz=UTC)
+        return AxiellAdapterLoaderEvent(
+            job_id=event.job_id,
+            window_key="window",
+            window_start=now - timedelta(minutes=15),
+            window_end=now,
+            metadata_prefix="oai",
+            set_spec="collect",
+        )
 
     monkeypatch.setattr(trigger, "build_window_store", fake_build_window_store)
     monkeypatch.setattr(trigger, "handler", fake_handler)
@@ -126,4 +156,3 @@ def test_lambda_handler_uses_rest_api_table_by_default(monkeypatch):
     trigger.lambda_handler({"time": "2025-11-17T12:00:00Z"}, context=None)
 
     assert captured["flag"] is True
-

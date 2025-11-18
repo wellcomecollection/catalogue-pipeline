@@ -5,6 +5,7 @@ from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from functools import wraps
 from pathlib import Path
+from typing import Any
 from uuid import uuid4
 
 import pytest
@@ -33,7 +34,7 @@ def fast_oai_backoff(monkeypatch: MonkeyPatch) -> None:
     real_sleep = oai_client.time.sleep
 
     @wraps(original_init)
-    def patched_init(self, *args, **kwargs):
+    def patched_init(self: oai_client.OAIClient, *args: Any, **kwargs: Any) -> None:
         original_init(self, *args, **kwargs)
         self.request_backoff_factor = min(
             self.request_backoff_factor, FAST_OAI_BACKOFF_SECONDS

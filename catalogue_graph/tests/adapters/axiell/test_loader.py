@@ -1,12 +1,16 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from typing import Any, cast
 
 import pyarrow as pa
 import pytest
+from oai_pmh_client.client import OAIClient
 
-from adapters.axiell.models import LoaderResponse, AxiellAdapterLoaderEvent
+from adapters.axiell.models import AxiellAdapterLoaderEvent, LoaderResponse
 from adapters.axiell.steps import loader
+from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.window_store import IcebergWindowStore
 
 
 class StubTableClient:
@@ -20,20 +24,29 @@ class StubTableClient:
         return "changeset-123"
 
 
+class StubWindowStore:
+    pass
+
+
+class StubOAIClient:
+    pass
+
+
 class StubHarvester:
-    def __init__(self, summaries: list[dict]):
+    def __init__(self, summaries: list[dict[str, Any]]):
         self.summaries = summaries
         self.calls: list[tuple[datetime, datetime, int | None]] = []
 
     def harvest_recent(
         self,
         *,
-        start_time,
-        end_time,
-        max_windows,
-        reprocess_successful_windows=False,
-    ):
+        start_time: datetime,
+        end_time: datetime,
+        max_windows: int | None,
+        reprocess_successful_windows: bool = False,
+    ) -> list[dict[str, Any]]:
         self.calls.append((start_time, end_time, max_windows))
+        assert reprocess_successful_windows is True
         return self.summaries
 
 
@@ -50,7 +63,20 @@ def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
     )
 
 
-def test_execute_loader_updates_iceberg(monkeypatch):
+def _runtime_with(
+    *,
+    store: IcebergWindowStore | None = None,
+    table_client: IcebergTableClient | StubTableClient | None = None,
+    oai_client: OAIClient | None = None,
+) -> loader.LoaderRuntime:
+    return loader.LoaderRuntime(
+        store=cast(IcebergWindowStore, store or StubWindowStore()),
+        table_client=cast(IcebergTableClient, table_client or StubTableClient()),
+        oai_client=cast(OAIClient, oai_client or StubOAIClient()),
+    )
+
+
+def test_execute_loader_updates_iceberg(monkeypatch: pytest.MonkeyPatch) -> None:
     req = _request()
     summary = {
         "window_key": req.window_key,
@@ -64,11 +90,13 @@ def test_execute_loader_updates_iceberg(monkeypatch):
         "tags": {"job_id": req.job_id},
     }
     stub_client = StubTableClient()
-    runtime = loader.LoaderRuntime(
-        store=None, table_client=stub_client, oai_client=None
-    )  # type: ignore[arg-type]
+    runtime = _runtime_with(table_client=stub_client)
 
-    def fake_build_harvester(request, runtime_arg, accumulator):  # noqa: ANN001
+    def fake_build_harvester(
+        request: AxiellAdapterLoaderEvent,
+        runtime_arg: loader.LoaderRuntime,
+        accumulator: loader.RecordAccumulator,
+    ) -> StubHarvester:
         assert request.window_key == req.window_key
         harvester = StubHarvester([summary])
         # pre-populate accumulator rows to simulate harvested records
@@ -79,10 +107,10 @@ def test_execute_loader_updates_iceberg(monkeypatch):
                 "content": "<record />",
             }
         )
-        fake_build_harvester.instance = harvester
+        harvester_holder["instance"] = harvester
         return harvester
 
-    fake_build_harvester.instance = None  # type: ignore[attr-defined]
+    harvester_holder: dict[str, StubHarvester | None] = {"instance": None}
     monkeypatch.setattr(loader, "_build_harvester", fake_build_harvester)
 
     response = loader.execute_loader(req, runtime=runtime)
@@ -98,19 +126,21 @@ def test_execute_loader_updates_iceberg(monkeypatch):
     ]
 
     # confirm harvester invoked with event bounds
-    harvester = fake_build_harvester.instance  # type: ignore[assignment]
+    harvester = harvester_holder["instance"]
     assert harvester is not None
     assert harvester.calls == [(req.window_start, req.window_end, req.max_windows)]
 
 
-def test_execute_loader_handles_no_new_records(monkeypatch):
+def test_execute_loader_handles_no_new_records(monkeypatch: pytest.MonkeyPatch) -> None:
     req = _request()
     stub_client = StubTableClient()
-    runtime = loader.LoaderRuntime(
-        store=None, table_client=stub_client, oai_client=None
-    )  # type: ignore[arg-type]
+    runtime = _runtime_with(table_client=stub_client)
 
-    def fake_build_harvester(request, runtime_arg, accumulator):  # noqa: ANN001
+    def fake_build_harvester(
+        request: AxiellAdapterLoaderEvent,
+        runtime_arg: loader.LoaderRuntime,
+        accumulator: loader.RecordAccumulator,
+    ) -> StubHarvester:
         return StubHarvester(
             [
                 {
@@ -136,68 +166,18 @@ def test_execute_loader_handles_no_new_records(monkeypatch):
     assert stub_client.updated_with is None
 
 
-def test_execute_loader_errors_when_no_windows(monkeypatch):
+def test_execute_loader_errors_when_no_windows(monkeypatch: pytest.MonkeyPatch) -> None:
     req = _request()
-    runtime = loader.LoaderRuntime(
-        store=None, table_client=StubTableClient(), oai_client=None
-    )  # type: ignore[arg-type]
+    runtime = _runtime_with(table_client=StubTableClient())
 
-    def fake_build_harvester(request, runtime_arg, accumulator):  # noqa: ANN001
+    def fake_build_harvester(
+        request: AxiellAdapterLoaderEvent,
+        runtime_arg: loader.LoaderRuntime,
+        accumulator: loader.RecordAccumulator,
+    ) -> StubHarvester:
         return StubHarvester([])
 
     monkeypatch.setattr(loader, "_build_harvester", fake_build_harvester)
 
     with pytest.raises(RuntimeError):
         loader.execute_loader(req, runtime=runtime)
-
-
-def test_execute_loader_filters_delete_warning(monkeypatch):
-    req = _request()
-    summary = {
-        "window_key": req.window_key,
-        "window_start": req.window_start,
-        "window_end": req.window_end,
-        "state": "success",
-        "attempts": 1,
-        "record_ids": ["id-1"],
-        "last_error": None,
-        "updated_at": req.window_end,
-        "tags": {"job_id": req.job_id},
-    }
-    stub_client = StubTableClient()
-    runtime = loader.LoaderRuntime(
-        store=None, table_client=stub_client, oai_client=None
-    )  # type: ignore[arg-type]
-
-    class WarningHarvester(StubHarvester):
-        def harvest_recent(
-            self,
-            *,
-            start_time,
-            end_time,
-            max_windows,
-            reprocess_successful_windows=False,
-        ):  # noqa: ANN001
-            return super().harvest_recent(
-                start_time=start_time,
-                end_time=end_time,
-                max_windows=max_windows,
-                reprocess_successful_windows=reprocess_successful_windows,
-            )
-
-    def fake_build_harvester(request, runtime_arg, accumulator):  # noqa: ANN001
-        harvester = WarningHarvester([summary])
-        accumulator.rows.append(
-            {
-                "namespace": loader.AXIELL_NAMESPACE,
-                "id": "id-1",
-                "content": "<record />",
-            }
-        )
-        return harvester
-
-    monkeypatch.setattr(loader, "_build_harvester", fake_build_harvester)
-
-    loader.execute_loader(req, runtime=runtime)
-
-    assert stub_client.times_called == 1
