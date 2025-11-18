@@ -93,7 +93,14 @@ class QueryWorkTransformer:
         if self.data.collection_path is None:
             return None
 
-        return self.data.collection_path.path
+        path_fragments = self.data.collection_path.path.split("/")
+        for a in self.hierarchy.ancestors:
+            if ancestor_path := a.work.properties.collection_path:
+                ancestor_path_fragments = ancestor_path.split("/")
+                if ancestor_path_fragments[-1] == path_fragments[0]:
+                    path_fragments = ancestor_path_fragments[:-1] + path_fragments
+
+        return "/".join(path_fragments)
 
     @property
     def collection_path_label(self) -> str | None:
