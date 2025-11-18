@@ -6,6 +6,7 @@ Iceberg, and emits a changeset identifier for the transformer step.
 
 import argparse
 import json
+from datetime import datetime
 from typing import Any
 
 import pyarrow as pa
@@ -17,7 +18,11 @@ from pydantic import BaseModel
 
 from adapters.axiell import config
 from adapters.axiell.clients import build_oai_client
-from adapters.axiell.models import LoaderResponse, WindowLoadResult, AxiellAdapterLoaderEvent
+from adapters.axiell.models import (
+    AxiellAdapterLoaderEvent,
+    LoaderResponse,
+    WindowLoadResult,
+)
 from adapters.axiell.table_config import get_iceberg_table
 from adapters.axiell.window_status import build_window_store
 from adapters.utils.iceberg import IcebergTableClient
@@ -48,6 +53,9 @@ class RecordAccumulator:
         self,
         identifier: str,
         record: Record,
+        _window_start: datetime,
+        _window_end: datetime,
+        _index: int,
     ) -> bool:
         self.rows.append(
             {
@@ -86,7 +94,9 @@ def build_runtime(config_obj: LoaderConfig | None = None) -> LoaderRuntime:
 
 
 def _build_harvester(
-    request: AxiellAdapterLoaderEvent, runtime: LoaderRuntime, accumulator: RecordAccumulator
+    request: AxiellAdapterLoaderEvent,
+    runtime: LoaderRuntime,
+    accumulator: RecordAccumulator,
 ) -> WindowHarvestManager:
     return WindowHarvestManager(
         client=runtime.oai_client,
@@ -153,6 +163,17 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Axiell loader step locally")
+    """ Example event: 
+    {
+        "job_id": "some-unique-job-id",
+        "window_key": "2025-11-17T16:46:41.071426+00:00_2025-11-17T16:50:05.531331+00:00",
+        "window_start": "2025-11-17T16:46:41.071426Z",
+        "window_end": "2025-11-17T16:50:05.531331Z",
+        "metadata_prefix": "oai_raw",
+        "set_spec": "collect",
+        "max_windows": null
+    }
+    """
     parser.add_argument(
         "--event",
         type=str,

@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 from functools import cache
+from typing import Any
 
 import httpx
+from httpx import Request
+from httpx._types import URLTypes
 from oai_pmh_client.client import OAIClient
 
 from adapters.axiell import config
@@ -28,11 +31,11 @@ def _oai_endpoint() -> str:
 class AuthenticatedHTTPXClient(httpx.Client):
     """HTTPX client that automatically appends the OAI token to each request."""
 
-    def __init__(self, *, token: str | None = None, **kwargs) -> None:
+    def __init__(self, *, token: str | None = None, **kwargs: Any) -> None:
         self._token = token or _oai_token()
         super().__init__(timeout=_http_timeout(), **kwargs)
 
-    def build_request(self, method, url, **kwargs):  # type: ignore[override]
+    def build_request(self, method: str, url: URLTypes, **kwargs: Any) -> Request:
         params = kwargs.pop("params", {})
         params.setdefault("token", self._token)
         kwargs["params"] = params
