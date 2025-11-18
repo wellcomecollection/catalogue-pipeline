@@ -7,8 +7,8 @@
 # Exactly TWO index sources to compare (required)
 # These identifiers must exist in source_configuration.yaml
 index_sources:
-  - pipeline-2025-10-02-images-indexed
-  - pipeline-2025-08-14-images-indexed
+  - works-indexed-2025-10-02
+  - works-indexed-2025-10-09
 
 # Optional Elasticsearch query DSL (omit for match_all). This example filters
 # documents where a nested term matches a specific identifier type.
@@ -30,6 +30,9 @@ sample_size: 10
 
 # Rows per Parquet shard flush during conversion
 loading_chunk_size: 100000
+
+# Number of hash buckets for Parquet partitioning (controls compare-memory usage)
+hash_bucket_count: 6
 
 # Optional namespace override; if omitted a timestamped one is generated from filename
 # namespace: pipeline-comparison-ebsco
