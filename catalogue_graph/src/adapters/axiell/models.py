@@ -8,7 +8,9 @@ from pydantic import BaseModel, Field
 
 
 class WindowRequest(BaseModel):
-    window_key: str = Field(..., description="Unique identifier for the requested window")
+    window_key: str = Field(
+        ..., description="Unique identifier for the requested window"
+    )
     window_start: datetime
     window_end: datetime
     metadata_prefix: str

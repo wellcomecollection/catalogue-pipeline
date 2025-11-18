@@ -12,9 +12,9 @@ from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.window_store import (
-    IcebergWindowStore,
     WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
+    IcebergWindowStore,
 )
 
 from . import config
@@ -58,14 +58,16 @@ def _local_catalog_params(db_name: str) -> dict[str, str]:
     }
 
 
-def _load_rest_window_status_table(
-    *, create_if_not_exists: bool
-) -> IcebergTable:
+def _load_rest_window_status_table(*, create_if_not_exists: bool) -> IcebergTable:
     session = boto3.Session()
     region = config.AWS_REGION or session.region_name
-    account_id = config.AWS_ACCOUNT_ID or session.client("sts").get_caller_identity()["Account"]
+    account_id = (
+        config.AWS_ACCOUNT_ID or session.client("sts").get_caller_identity()["Account"]
+    )
     if region is None or account_id is None:
-        raise RuntimeError("AWS region/account must be configured to load window status table")
+        raise RuntimeError(
+            "AWS region/account must be configured to load window status table"
+        )
 
     params = _rest_catalog_params(region, account_id)
     catalog = load_catalog(config.WINDOW_STATUS_CATALOG_NAME, **params)
@@ -83,12 +85,12 @@ def _load_rest_window_status_table(
     return catalog.load_table(identifier)
 
 
-def _load_local_window_status_table(
-    *, create_if_not_exists: bool
-) -> IcebergTable:
+def _load_local_window_status_table(*, create_if_not_exists: bool) -> IcebergTable:
     params: dict[str, Any] = _local_catalog_params(config.LOCAL_WINDOW_STATUS_DB_NAME)
     catalog = load_catalog(config.LOCAL_WINDOW_STATUS_CATALOG_NAME, **params)
-    identifier = f"{config.LOCAL_WINDOW_STATUS_NAMESPACE}.{config.LOCAL_WINDOW_STATUS_TABLE}"
+    identifier = (
+        f"{config.LOCAL_WINDOW_STATUS_NAMESPACE}.{config.LOCAL_WINDOW_STATUS_TABLE}"
+    )
 
     if create_if_not_exists:
         with contextlib.suppress(NamespaceAlreadyExistsError):

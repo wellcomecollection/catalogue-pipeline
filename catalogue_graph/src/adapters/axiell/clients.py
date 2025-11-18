@@ -7,9 +7,8 @@ from functools import cache
 import httpx
 from oai_pmh_client.client import OAIClient
 
-from utils.aws import get_ssm_parameter
-
 from adapters.axiell import config
+from utils.aws import get_ssm_parameter
 
 
 def _http_timeout() -> httpx.Timeout:

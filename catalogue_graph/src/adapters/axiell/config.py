@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 
-
 # ---------------------------------------------------------------------------
 # AWS account / region context
 # ---------------------------------------------------------------------------
@@ -20,13 +19,9 @@ S3_TABLES_BUCKET = os.getenv(
     "AXIELL_S3_TABLES_BUCKET", "wellcomecollection-platform-axiell-adapter"
 )
 REST_API_TABLE_NAME = os.getenv("REST_API_TABLE_NAME", "axiell_adapter_table")
-REST_API_NAMESPACE = os.getenv(
-    "REST_API_NAMESPACE", "wellcomecollection_catalogue"
-)
+REST_API_NAMESPACE = os.getenv("REST_API_NAMESPACE", "wellcomecollection_catalogue")
 
-WINDOW_STATUS_NAMESPACE = os.getenv(
-    "WINDOW_STATUS_NAMESPACE", "axiell_window_status"
-)
+WINDOW_STATUS_NAMESPACE = os.getenv("WINDOW_STATUS_NAMESPACE", "axiell_window_status")
 WINDOW_STATUS_TABLE = os.getenv("WINDOW_STATUS_TABLE", "window_status")
 WINDOW_STATUS_CATALOG_NAME = os.getenv(
     "WINDOW_STATUS_CATALOG_NAME", "axiell_window_status_catalog"
@@ -39,9 +34,7 @@ WINDOW_STATUS_CATALOG_NAME = os.getenv(
 LOCAL_TABLE_NAME = os.getenv("LOCAL_TABLE_NAME", "axiell_local_table")
 LOCAL_NAMESPACE = os.getenv("LOCAL_NAMESPACE", "axiell_local")
 LOCAL_DB_NAME = os.getenv("LOCAL_DB_NAME", "axiell_catalog")
-LOCAL_WINDOW_STATUS_TABLE = os.getenv(
-    "LOCAL_WINDOW_STATUS_TABLE", WINDOW_STATUS_TABLE
-)
+LOCAL_WINDOW_STATUS_TABLE = os.getenv("LOCAL_WINDOW_STATUS_TABLE", WINDOW_STATUS_TABLE)
 LOCAL_WINDOW_STATUS_NAMESPACE = os.getenv(
     "LOCAL_WINDOW_STATUS_NAMESPACE", WINDOW_STATUS_NAMESPACE
 )
@@ -51,17 +44,6 @@ LOCAL_WINDOW_STATUS_DB_NAME = os.getenv(
 LOCAL_WINDOW_STATUS_CATALOG_NAME = os.getenv(
     "LOCAL_WINDOW_STATUS_CATALOG_NAME", f"{WINDOW_STATUS_CATALOG_NAME}_local"
 )
-
-
-# ---------------------------------------------------------------------------
-# Storage locations
-# ---------------------------------------------------------------------------
-S3_BUCKET = os.getenv("AXIELL_S3_BUCKET", "wellcomecollection-platform-axiell-adapter")
-S3_PREFIX = os.getenv("S3_PREFIX", "dev")
-WINDOW_STORE_PREFIX = os.path.join(S3_PREFIX, "window_store")
-RECORDS_PREFIX = os.path.join(S3_PREFIX, "records")
-MANIFESTS_PREFIX = os.path.join(S3_PREFIX, "manifests")
-
 
 # ---------------------------------------------------------------------------
 # OAI-PMH connectivity
@@ -92,7 +74,9 @@ if MAX_PENDING_WINDOWS is not None:
     MAX_PENDING_WINDOWS = int(MAX_PENDING_WINDOWS)
 
 MAX_LAG_MINUTES = int(os.getenv("MAX_LAG_MINUTES", "60"))
-AUTO_RETRY_FAILED_WINDOWS = os.getenv("AUTO_RETRY_FAILED_WINDOWS", "true").lower() == "true"
+AUTO_RETRY_FAILED_WINDOWS = (
+    os.getenv("AUTO_RETRY_FAILED_WINDOWS", "true").lower() == "true"
+)
 
 
 # ---------------------------------------------------------------------------

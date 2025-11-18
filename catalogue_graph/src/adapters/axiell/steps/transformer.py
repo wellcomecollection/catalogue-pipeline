@@ -16,12 +16,11 @@ import pyarrow as pa
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel
 
-from adapters.utils.iceberg import IcebergTableClient
-
 from adapters.axiell import config
 from adapters.axiell.models import TransformRequest, TransformResult
-from adapters.axiell.table_config import get_iceberg_table
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
+from adapters.axiell.table_config import get_iceberg_table
+from adapters.utils.iceberg import IcebergTableClient
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
@@ -125,7 +124,9 @@ def execute_transform(
     )
 
 
-def handler(event: dict[str, Any], runtime: TransformerRuntime | None = None) -> TransformResult:
+def handler(
+    event: dict[str, Any], runtime: TransformerRuntime | None = None
+) -> TransformResult:
     request = TransformRequest.model_validate(event)
     return execute_transform(request, runtime=runtime)
 
@@ -136,7 +137,9 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the Axiell transformer step locally")
+    parser = argparse.ArgumentParser(
+        description="Run the Axiell transformer step locally"
+    )
     parser.add_argument(
         "--changeset-id",
         type=str,
@@ -156,7 +159,9 @@ def main() -> None:
     )
     args = parser.parse_args()
     runtime = build_runtime(
-        TransformerConfig(use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode)
+        TransformerConfig(
+            use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode
+        )
     )
     request = TransformRequest(changeset_id=args.changeset_id)
     response = execute_transform(request, runtime=runtime)

@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 import pyarrow as pa
-import pytest
 
 from adapters.axiell.models import TransformRequest
 from adapters.axiell.steps import transformer
@@ -29,8 +28,18 @@ def _request() -> TransformRequest:
 
 def test_execute_transform_indexes_documents(monkeypatch):
     rows = [
-        {"namespace": "axiell", "id": "a1", "content": "<xml />", "last_modified": datetime.now(tz=UTC)},
-        {"namespace": "axiell", "id": "a2", "content": "<xml />", "last_modified": datetime.now(tz=UTC)},
+        {
+            "namespace": "axiell",
+            "id": "a1",
+            "content": "<xml />",
+            "last_modified": datetime.now(tz=UTC),
+        },
+        {
+            "namespace": "axiell",
+            "id": "a2",
+            "content": "<xml />",
+            "last_modified": datetime.now(tz=UTC),
+        },
     ]
     table_client = StubTableClient(_table(rows))
     runtime = transformer.TransformerRuntime(
@@ -53,8 +62,16 @@ def test_execute_transform_indexes_documents(monkeypatch):
     assert result.errors == []
     assert table_client.requested_changeset == "changeset-1"
     assert fake_bulk.actions == [
-        {"_index": "axiell-test", "_id": "a1", "_source": transformer._dummy_document(rows[0])},
-        {"_index": "axiell-test", "_id": "a2", "_source": transformer._dummy_document(rows[1])},
+        {
+            "_index": "axiell-test",
+            "_id": "a1",
+            "_source": transformer._dummy_document(rows[0]),
+        },
+        {
+            "_index": "axiell-test",
+            "_id": "a2",
+            "_source": transformer._dummy_document(rows[1]),
+        },
     ]
 
 

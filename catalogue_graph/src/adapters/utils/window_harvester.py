@@ -128,7 +128,8 @@ class WindowHarvestManager:
             pending = [
                 window
                 for window in candidates
-                if status_map.get(self._window_key(*window), {}).get("state") != "success"
+                if status_map.get(self._window_key(*window), {}).get("state")
+                != "success"
             ]
         if max_windows is not None:
             pending = pending[:max_windows]

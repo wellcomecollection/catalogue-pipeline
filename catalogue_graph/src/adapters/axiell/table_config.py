@@ -11,10 +11,9 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.axiell import config
 from adapters.utils.iceberg import IcebergTableClient
 from adapters.utils.schemata import SCHEMA
-
-from adapters.axiell import config
 
 
 def _get_table(
@@ -72,9 +71,13 @@ def _get_rest_api_table(
 ) -> IcebergTable:
     session = boto3.Session()
     region = config.AWS_REGION or session.region_name
-    account_id = config.AWS_ACCOUNT_ID or session.client("sts").get_caller_identity()["Account"]
+    account_id = (
+        config.AWS_ACCOUNT_ID or session.client("sts").get_caller_identity()["Account"]
+    )
     if region is None or account_id is None:
-        raise RuntimeError("AWS region/account ID must be configured for REST catalog usage")
+        raise RuntimeError(
+            "AWS region/account ID must be configured for REST catalog usage"
+        )
 
     params = _rest_api_params(region, account_id)
     return _get_table(

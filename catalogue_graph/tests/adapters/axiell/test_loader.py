@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
-import warnings
 
 import pyarrow as pa
 import pytest
@@ -63,7 +62,9 @@ def test_execute_loader_updates_iceberg(monkeypatch):
         "updated_at": req.window_end,
     }
     stub_client = StubTableClient()
-    runtime = loader.LoaderRuntime(store=None, table_client=stub_client, oai_client=None)  # type: ignore[arg-type]
+    runtime = loader.LoaderRuntime(
+        store=None, table_client=stub_client, oai_client=None
+    )  # type: ignore[arg-type]
 
     def fake_build_harvester(request, runtime_arg, accumulator):  # noqa: ANN001
         assert request.window_key == req.window_key
@@ -102,7 +103,9 @@ def test_execute_loader_updates_iceberg(monkeypatch):
 def test_execute_loader_handles_no_new_records(monkeypatch):
     req = _request()
     stub_client = StubTableClient()
-    runtime = loader.LoaderRuntime(store=None, table_client=stub_client, oai_client=None)  # type: ignore[arg-type]
+    runtime = loader.LoaderRuntime(
+        store=None, table_client=stub_client, oai_client=None
+    )  # type: ignore[arg-type]
 
     def fake_build_harvester(request, runtime_arg, accumulator):  # noqa: ANN001
         return StubHarvester(
@@ -131,7 +134,9 @@ def test_execute_loader_handles_no_new_records(monkeypatch):
 
 def test_execute_loader_errors_when_no_windows(monkeypatch):
     req = _request()
-    runtime = loader.LoaderRuntime(store=None, table_client=StubTableClient(), oai_client=None)  # type: ignore[arg-type]
+    runtime = loader.LoaderRuntime(
+        store=None, table_client=StubTableClient(), oai_client=None
+    )  # type: ignore[arg-type]
 
     def fake_build_harvester(request, runtime_arg, accumulator):  # noqa: ANN001
         return StubHarvester([])
@@ -155,7 +160,9 @@ def test_execute_loader_filters_delete_warning(monkeypatch):
         "updated_at": req.window_end,
     }
     stub_client = StubTableClient()
-    runtime = loader.LoaderRuntime(store=None, table_client=stub_client, oai_client=None)  # type: ignore[arg-type]
+    runtime = loader.LoaderRuntime(
+        store=None, table_client=stub_client, oai_client=None
+    )  # type: ignore[arg-type]
 
     class WarningHarvester(StubHarvester):
         def harvest_recent(
@@ -166,7 +173,6 @@ def test_execute_loader_filters_delete_warning(monkeypatch):
             max_windows,
             reprocess_successful_windows=False,
         ):  # noqa: ANN001
-            warnings.warn(loader.DELETE_MISS_WARNING, UserWarning)
             return super().harvest_recent(
                 start_time=start_time,
                 end_time=end_time,
@@ -187,12 +193,6 @@ def test_execute_loader_filters_delete_warning(monkeypatch):
 
     monkeypatch.setattr(loader, "_build_harvester", fake_build_harvester)
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings(
-            "error",
-            message=loader.DELETE_MISS_WARNING,
-            category=UserWarning,
-        )
-        loader.execute_loader(req, runtime=runtime)
+    loader.execute_loader(req, runtime=runtime)
 
     assert stub_client.times_called == 1

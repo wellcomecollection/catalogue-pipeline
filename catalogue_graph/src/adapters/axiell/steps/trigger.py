@@ -14,11 +14,10 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from adapters.utils.window_store import IcebergWindowStore
-
 from adapters.axiell import config
 from adapters.axiell.models import WindowRequest
 from adapters.axiell.window_status import build_window_store
+from adapters.utils.window_store import IcebergWindowStore
 
 
 class EventBridgeScheduledEvent(BaseModel):
@@ -83,9 +82,7 @@ def build_window_request(
     end_time = context.now.astimezone(UTC)
 
     if start_time >= end_time:
-        raise RuntimeError(
-            "No new windows are ready: computed start >= end."
-        )
+        raise RuntimeError("No new windows are ready: computed start >= end.")
 
     max_windows = config.MAX_PENDING_WINDOWS
     request = WindowRequest(

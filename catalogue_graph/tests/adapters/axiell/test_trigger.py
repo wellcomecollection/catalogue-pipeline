@@ -47,9 +47,9 @@ def test_build_window_request_uses_lookback_when_no_history(monkeypatch):
 def test_build_window_request_respects_last_success(monkeypatch):
     now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
     last_success_end = now - timedelta(minutes=15)
-    store = StubWindowStore([
-        _window_row(last_success_end - timedelta(minutes=15), last_success_end)
-    ])
+    store = StubWindowStore(
+        [_window_row(last_success_end - timedelta(minutes=15), last_success_end)]
+    )
 
     request = trigger.build_window_request(store=store, now=now)
 
