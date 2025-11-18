@@ -55,7 +55,7 @@ module "pipeline_storage_secrets" {
 }
 
 module "pipeline_storage_secrets_catalogue" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
+  source    = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.3.0"
   providers = {
     aws = aws.catalogue
   }
@@ -65,13 +65,15 @@ module "pipeline_storage_secrets_catalogue" {
 }
 
 locals {
-  es_config_path = "${path.root}/../../../index_config"
-  index_config_dates = [for date, cfg in var.index_config : {
-    date     = date
-    works    = try(cfg.works, {})
-    images   = try(cfg.images, {})
-    concepts = try(cfg.concepts, {})
-  }]
+  es_config_path     = "${path.root}/../../../index_config"
+  index_config_dates = [
+    for date, cfg in var.index_config : {
+      date     = date
+      works    = try(cfg.works, {})
+      images   = try(cfg.images, {})
+      concepts = try(cfg.concepts, {})
+    }
+  ]
   works_source_list = [
     for cfg in local.index_config_dates : {
       name          = "works-source-${cfg.date}"
@@ -121,7 +123,7 @@ locals {
     } if try(cfg.concepts.indexed, null) != null && cfg.concepts.indexed != ""
   ]
   index_list        = concat(local.works_source_list, local.works_denormalised_list, local.works_identified_list, local.works_indexed_list, local.images_initial_list, local.images_augmented_list, local.images_indexed_list, local.concepts_indexed_list)
-  index_definitions = { for i in local.index_list : i.name => i }
+  index_definitions = {for i in local.index_list : i.name => i}
 }
 
 module "indices" {
@@ -152,10 +154,10 @@ locals {
       write = []
     }
     merger = {
-      read = [for idx in local.works_identified_list : idx.name]
+      read  = [for idx in local.works_identified_list : idx.name]
       write = concat([
         for idx in local.works_denormalised_list : idx.name
-        ], [
+      ], [
         for idx in local.images_initial_list : idx.name
       ])
     }
@@ -184,24 +186,18 @@ locals {
       read  = [for idx in local.images_augmented_list : idx.name]
       write = [for idx in local.images_indexed_list : idx.name]
     }
-    # TODO: Remove `concept_ingestor` once we deploy incremental mode
-    concept_ingestor = {
-      read  = [for idx in local.concepts_indexed_list : idx.name]
-      write = [for idx in local.concepts_indexed_list : idx.name]
-    }
     concepts_ingestor = {
       read  = [for idx in local.works_denormalised_list : idx.name]
       write = [for idx in local.concepts_indexed_list : idx.name]
     }
     works_ingestor = {
-      read = [for idx in local.works_denormalised_list : idx.name]
-      # For now only allow writing to a non-production index for safety
-      write = ["works-indexed-2025-10-09"]
+      read  = [for idx in local.works_denormalised_list : idx.name]
+      write = [for idx in local.works_indexed_list : idx.name]
     }
     snapshot_generator = {
       read = concat([
         for idx in local.works_indexed_list : idx.name
-        ], [
+      ], [
         for idx in local.images_indexed_list : idx.name
       ])
       write = []
@@ -209,7 +205,7 @@ locals {
     catalogue_api = {
       read = concat([
         for idx in local.works_indexed_list : idx.name
-        ], [
+      ], [
         for idx in local.images_indexed_list : idx.name
       ])
       write = []
@@ -237,7 +233,7 @@ module "pipeline_services" {
   write_to            = each.value.write
   pipeline_date       = var.pipeline_date
   expose_to_catalogue = contains(var.catalogue_account_services, each.key)
-  providers = {
+  providers           = {
     aws.catalogue = aws.catalogue
   }
 }
