@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -55,8 +56,21 @@ def build_runtime(config_obj: TransformerConfig | None = None) -> TransformerRun
     )
 
 
-def _rows_for_changeset(runtime: TransformerRuntime, changeset_id: str) -> pa.Table:
-    return runtime.table_client.get_records_by_changeset(changeset_id)
+def _rows_for_changesets(
+    runtime: TransformerRuntime, changeset_ids: Sequence[str]
+) -> pa.Table:
+    tables = [
+        runtime.table_client.get_records_by_changeset(changeset_id)
+        for changeset_id in changeset_ids
+    ]
+    materialized = [
+        table for table in tables if table is not None and table.num_rows > 0
+    ]
+    if not materialized:
+        return pa.Table.from_pylist([])
+    if len(materialized) == 1:
+        return materialized[0]
+    return pa.concat_tables(materialized)
 
 
 def _dummy_document(row: dict[str, Any]) -> dict[str, Any] | None:
@@ -114,11 +128,12 @@ def execute_transform(
     runtime: TransformerRuntime | None = None,
 ) -> TransformResult:
     runtime = runtime or build_runtime()
-    table = _rows_for_changeset(runtime, request.changeset_id)
+    table = _rows_for_changesets(runtime, request.changeset_ids)
     documents = _transform_rows(table)
     indexed, errors = _index_documents(runtime, documents)
     return TransformResult(
-        changeset_id=request.changeset_id,
+        changeset_id=request.changeset_ids[0],
+        changeset_ids=request.changeset_ids,
         indexed=indexed,
         errors=errors,
         job_id=request.job_id,
@@ -143,9 +158,10 @@ def main() -> None:
     )
     parser.add_argument(
         "--changeset-id",
-        type=str,
+        dest="changeset_ids",
+        action="append",
         required=True,
-        help="Changeset identifier to transform",
+        help="Changeset identifier to transform (repeatable)",
     )
     parser.add_argument(
         "--job-id",
@@ -170,7 +186,8 @@ def main() -> None:
         )
     )
     event = AxiellAdapterTransformerEvent(
-        changeset_id=args.changeset_id, job_id=args.job_id
+        changeset_ids=args.changeset_ids,
+        job_id=args.job_id or args.changeset_ids[0],
     )
     response = handler(event, runtime=runtime)
     print(json.dumps(response.model_dump(mode="json"), indent=2))

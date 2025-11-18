@@ -15,7 +15,11 @@ from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.utils.window_harvester import WindowHarvestManager
+from adapters.utils.window_harvester import (
+    RecordCallbackFactory,
+    RecordStoreCallback,
+    WindowHarvestManager,
+)
 from adapters.utils.window_store import (
     WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
@@ -103,6 +107,7 @@ def _build_harvester(
     responses: list[Record],
     *,
     default_tags: dict[str, str] | None = None,
+    record_callback_factory: RecordCallbackFactory | None = None,
 ) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
@@ -125,6 +130,15 @@ def _build_harvester(
     ) -> None:
         return None
 
+    def default_factory(
+        window_key: str,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> RecordStoreCallback:
+        return recorder
+
+    factory = record_callback_factory or default_factory
+
     return WindowHarvestManager(
         client=client,
         store=store,
@@ -132,7 +146,7 @@ def _build_harvester(
         set_spec="collect",
         window_minutes=15,
         max_parallel_requests=2,
-        record_callback=recorder,
+        record_callback_factory=factory,
         default_tags=default_tags,
     )
 
@@ -156,12 +170,19 @@ def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
     ) -> None:
         captured.append(identifier)
 
+    def recorder_factory(
+        window_key: str,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> RecordStoreCallback:
+        return recorder
+
     start_time, end_time = _window_range()
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
         max_windows=1,
-        record_callback=recorder,
+        record_callback_factory=recorder_factory,
     )
 
     assert len(summaries) == 1
@@ -186,11 +207,18 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     ) -> None:
         raise RuntimeError("boom")
 
+    def failing_factory(
+        window_key: str,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> RecordStoreCallback:
+        return failing_callback
+
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
-        record_callback=failing_callback,
+        record_callback_factory=failing_factory,
         max_windows=1,
     )
 
@@ -257,9 +285,13 @@ def test_harvest_recent_skips_successful_windows_by_default(tmp_path: Path) -> N
 
     first = harvester.harvest_recent(start_time=start, end_time=end)
     assert len(first) == 1
+    initial_calls = len(harvester.client.calls)
 
     second = harvester.harvest_recent(start_time=start, end_time=end)
-    assert second == []
+    assert len(second) == 1
+    assert second[0]["window_key"] == first[0]["window_key"]
+    assert second[0]["record_ids"] == first[0]["record_ids"]
+    assert len(harvester.client.calls) == initial_calls
 
 
 def test_harvest_recent_can_reprocess_successful_windows(tmp_path: Path) -> None:
@@ -297,3 +329,124 @@ def test_harvest_recent_attaches_default_tags(tmp_path: Path) -> None:
     assert status_map
     row = next(iter(status_map.values()))
     assert row["tags"] == {"job_id": "job-123"}
+
+
+def test_record_callback_factory_persists_changeset(tmp_path: Path) -> None:
+    records = [_make_record("id:1")]
+    harvester = _build_harvester(tmp_path, records)
+
+    class RecordingCallback:
+        def __init__(self) -> None:
+            self.records: list[str] = []
+
+        def start_window(
+            self,
+            *,
+            window_key: str,
+            window_start: datetime,
+            window_end: datetime,
+        ) -> None:
+            self.window_key = window_key
+
+        def __call__(
+            self,
+            identifier: str,
+            record: Record,
+            window_start: datetime,
+            window_end: datetime,
+            index: int,
+        ) -> bool:
+            self.records.append(identifier)
+            return True
+
+        def complete_window(
+            self,
+            *,
+            window_key: str,
+            window_start: datetime,
+            window_end: datetime,
+            record_ids: list[str],
+        ) -> dict[str, Any]:
+            return {
+                "record_ids": list(self.records),
+                "tags": {"changeset_id": "cs-500"},
+            }
+
+    def factory(
+        window_key: str,
+        window_start: datetime,
+        window_end: datetime,
+    ) -> RecordingCallback:
+        return RecordingCallback()
+
+    start_time, end_time = _window_range(hours=1)
+    summaries = harvester.harvest_recent(
+        start_time=start_time,
+        end_time=end_time,
+        record_callback_factory=factory,
+        reprocess_successful_windows=True,
+    )
+
+    assert summaries[0]["record_ids"] == ["id:1"]
+    assert summaries[0]["changeset_id"] == "cs-500"
+    status_map = harvester.store.load_status_map()
+    stored = next(iter(status_map.values()))
+    assert stored["tags"]["changeset_id"] == "cs-500"
+
+
+def test_harvest_recent_returns_existing_successful_summary_with_tags(
+    tmp_path: Path,
+) -> None:
+    harvester = _build_harvester(tmp_path, [])
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = start + timedelta(minutes=harvester.window_minutes)
+    window_key = f"{start.isoformat()}_{end.isoformat()}"
+    harvester.store.upsert(
+        WindowStatusRecord(
+            window_key=window_key,
+            window_start=start,
+            window_end=end,
+            state="success",
+            attempts=1,
+            last_error=None,
+            record_ids=("existing-1",),
+            updated_at=end,
+            tags={"job_id": "job-1", "changeset_id": "cs-123"},
+        )
+    )
+
+    summaries = harvester.harvest_recent(
+        start_time=start,
+        end_time=end,
+        reprocess_successful_windows=False,
+    )
+
+    assert len(summaries) == 1
+    summary = summaries[0]
+    assert summary["window_key"] == window_key
+    assert summary["record_ids"] == ["existing-1"]
+    assert summary["changeset_id"] == "cs-123"
+
+
+def test_harvest_recent_handles_partial_success_across_runs(tmp_path: Path) -> None:
+    records = [_make_record("id:1")]
+    harvester = _build_harvester(tmp_path, records)
+    start = datetime(2025, 1, 1, tzinfo=UTC)
+    end = start + timedelta(minutes=harvester.window_minutes * 2)
+
+    first = harvester.harvest_recent(
+        start_time=start,
+        end_time=end,
+        max_windows=1,
+    )
+    assert len(first) == 1
+
+    second = harvester.harvest_recent(
+        start_time=start,
+        end_time=end,
+    )
+
+    assert len(second) == 2
+    assert second[0]["window_key"] == first[0]["window_key"]
+    assert second[0]["record_ids"] == first[0]["record_ids"]
+    assert second[1]["window_start"] > second[0]["window_start"]

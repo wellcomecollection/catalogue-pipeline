@@ -13,13 +13,19 @@ from adapters.utils.iceberg import IcebergTableClient
 
 
 class StubTableClient:
-    def __init__(self, table: pa.Table) -> None:
+    def __init__(
+        self,
+        table: pa.Table,
+        *,
+        tables_by_id: dict[str, pa.Table] | None = None,
+    ) -> None:
         self.table = table
-        self.requested_changeset: str | None = None
+        self.tables_by_id = tables_by_id or {}
+        self.requested_changesets: list[str] = []
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
-        self.requested_changeset = changeset_id
-        return self.table
+        self.requested_changesets.append(changeset_id)
+        return self.tables_by_id.get(changeset_id, self.table)
 
 
 class StubElasticsearch:
@@ -80,7 +86,7 @@ def test_execute_transform_indexes_documents(
     assert result.indexed == 2
     assert result.errors == []
     assert result.job_id == "job-abc"
-    assert table_client.requested_changeset == "changeset-1"
+    assert table_client.requested_changesets == ["changeset-1"]
     assert captured_actions == [
         {
             "_index": "axiell-test",
@@ -132,3 +138,52 @@ def test_execute_transform_surfaces_errors(
     assert result.errors == ["id=ax-1 status=500"]
     assert result.indexed == 0
     assert result.job_id == "job-abc"
+
+
+def test_execute_transform_reads_multiple_changesets(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    table_one = _table(
+        [
+            {
+                "namespace": "axiell",
+                "id": "cs1-a",
+                "content": "<xml />",
+                "last_modified": datetime.now(tz=UTC),
+            }
+        ]
+    )
+    table_two = _table(
+        [
+            {
+                "namespace": "axiell",
+                "id": "cs2-a",
+                "content": "<xml />",
+                "last_modified": datetime.now(tz=UTC),
+            }
+        ]
+    )
+    table_client = StubTableClient(
+        _table([]),
+        tables_by_id={"cs-1": table_one, "cs-2": table_two},
+    )
+    runtime = _runtime_with(table_client)
+    captured_actions: list[dict[str, Any]] = []
+
+    def fake_bulk(client: Any, actions: Any, **kwargs: Any) -> tuple[int, list[Any]]:
+        captured_actions[:] = list(actions)
+        return len(captured_actions), []
+
+    monkeypatch.setattr(transformer.elasticsearch.helpers, "bulk", fake_bulk)
+
+    request = AxiellAdapterTransformerEvent(
+        changeset_ids=["cs-1", "cs-2"],
+        job_id="job-xyz",
+    )
+    result = transformer.execute_transform(request, runtime=runtime)
+
+    assert result.indexed == 2
+    assert result.changeset_id == "cs-1"
+    assert result.changeset_ids == ["cs-1", "cs-2"]
+    assert table_client.requested_changesets == ["cs-1", "cs-2"]
+    assert {action["_id"] for action in captured_actions} == {"cs1-a", "cs2-a"}

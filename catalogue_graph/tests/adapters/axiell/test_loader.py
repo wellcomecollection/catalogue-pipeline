@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
 from typing import Any, cast
 
 import pyarrow as pa
@@ -46,7 +47,7 @@ class StubHarvester:
         reprocess_successful_windows: bool = False,
     ) -> list[dict[str, Any]]:
         self.calls.append((start_time, end_time, max_windows))
-        assert reprocess_successful_windows is True
+        assert reprocess_successful_windows is False
         return self.summaries
 
 
@@ -87,7 +88,8 @@ def test_execute_loader_updates_iceberg(monkeypatch: pytest.MonkeyPatch) -> None
         "record_ids": ["id-1"],
         "last_error": None,
         "updated_at": req.window_end,
-        "tags": {"job_id": req.job_id},
+        "tags": {"job_id": req.job_id, "changeset_id": "changeset-123"},
+        "changeset_id": "changeset-123",
     }
     stub_client = StubTableClient()
     runtime = _runtime_with(table_client=stub_client)
@@ -95,18 +97,9 @@ def test_execute_loader_updates_iceberg(monkeypatch: pytest.MonkeyPatch) -> None
     def fake_build_harvester(
         request: AxiellAdapterLoaderEvent,
         runtime_arg: loader.LoaderRuntime,
-        accumulator: loader.RecordAccumulator,
     ) -> StubHarvester:
         assert request.window_key == req.window_key
         harvester = StubHarvester([summary])
-        # pre-populate accumulator rows to simulate harvested records
-        accumulator.rows.append(
-            {
-                "namespace": loader.AXIELL_NAMESPACE,
-                "id": "id-1",
-                "content": "<record />",
-            }
-        )
         harvester_holder["instance"] = harvester
         return harvester
 
@@ -117,13 +110,10 @@ def test_execute_loader_updates_iceberg(monkeypatch: pytest.MonkeyPatch) -> None
 
     assert isinstance(response, LoaderResponse)
     assert response.changeset_id == "changeset-123"
+    assert response.changeset_ids == ["changeset-123"]
     assert response.record_count == 1
     assert response.job_id == req.job_id
     assert len(response.summaries) == 1
-    assert stub_client.updated_with is not None
-    assert stub_client.updated_with.to_pylist() == [
-        {"namespace": loader.AXIELL_NAMESPACE, "id": "id-1", "content": "<record />"}
-    ]
 
     # confirm harvester invoked with event bounds
     harvester = harvester_holder["instance"]
@@ -139,7 +129,6 @@ def test_execute_loader_handles_no_new_records(monkeypatch: pytest.MonkeyPatch) 
     def fake_build_harvester(
         request: AxiellAdapterLoaderEvent,
         runtime_arg: loader.LoaderRuntime,
-        accumulator: loader.RecordAccumulator,
     ) -> StubHarvester:
         return StubHarvester(
             [
@@ -153,6 +142,7 @@ def test_execute_loader_handles_no_new_records(monkeypatch: pytest.MonkeyPatch) 
                     "last_error": None,
                     "updated_at": request.window_end,
                     "tags": {"job_id": request.job_id},
+                    "changeset_id": None,
                 }
             ]
         )
@@ -162,6 +152,7 @@ def test_execute_loader_handles_no_new_records(monkeypatch: pytest.MonkeyPatch) 
     response = loader.execute_loader(req, runtime=runtime)
 
     assert response.changeset_id is None
+    assert response.changeset_ids == []
     assert response.record_count == 0
     assert stub_client.updated_with is None
 
@@ -173,7 +164,6 @@ def test_execute_loader_errors_when_no_windows(monkeypatch: pytest.MonkeyPatch) 
     def fake_build_harvester(
         request: AxiellAdapterLoaderEvent,
         runtime_arg: loader.LoaderRuntime,
-        accumulator: loader.RecordAccumulator,
     ) -> StubHarvester:
         return StubHarvester([])
 
@@ -181,3 +171,68 @@ def test_execute_loader_errors_when_no_windows(monkeypatch: pytest.MonkeyPatch) 
 
     with pytest.raises(RuntimeError):
         loader.execute_loader(req, runtime=runtime)
+
+
+def test_window_record_writer_persists_window() -> None:
+    table_client = StubTableClient()
+    writer = loader.WindowRecordWriter(
+        namespace=loader.AXIELL_NAMESPACE,
+        table_client=cast(IcebergTableClient, table_client),
+        job_id="job-123",
+    )
+    window_start = datetime(2025, 1, 1, tzinfo=UTC)
+    window_end = window_start + timedelta(minutes=15)
+    writer.start_window(
+        window_key="key",
+        window_start=window_start,
+        window_end=window_end,
+    )
+    writer(
+        identifier="id-1",
+        record=SimpleNamespace(metadata=None),
+        _window_start=window_start,
+        _window_end=window_end,
+        _index=1,
+    )
+    result = writer.complete_window(
+        window_key="key",
+        window_start=window_start,
+        window_end=window_end,
+        record_ids=["id-1"],
+    )
+
+    assert table_client.times_called == 1
+    assert result["record_ids"] == ["id-1"]
+    tags = result["tags"]
+    assert tags is not None
+    assert tags["job_id"] == "job-123"
+    assert tags["changeset_id"] == "changeset-123"
+
+
+def test_window_record_writer_handles_empty_window() -> None:
+    table_client = StubTableClient()
+    writer = loader.WindowRecordWriter(
+        namespace=loader.AXIELL_NAMESPACE,
+        table_client=cast(IcebergTableClient, table_client),
+        job_id="job-123",
+    )
+    window_start = datetime(2025, 1, 1, tzinfo=UTC)
+    window_end = window_start + timedelta(minutes=15)
+    writer.start_window(
+        window_key="key",
+        window_start=window_start,
+        window_end=window_end,
+    )
+    result = writer.complete_window(
+        window_key="key",
+        window_start=window_start,
+        window_end=window_end,
+        record_ids=[],
+    )
+
+    assert table_client.times_called == 0
+    assert result["record_ids"] == []
+    tags = result["tags"]
+    assert tags is not None
+    assert tags["job_id"] == "job-123"
+    assert "changeset_id" not in tags

@@ -6,6 +6,7 @@ Iceberg, and emits a changeset identifier for the transformer step.
 
 import argparse
 import json
+import logging
 from datetime import datetime
 from typing import Any
 
@@ -27,10 +28,19 @@ from adapters.axiell.table_config import get_iceberg_table
 from adapters.axiell.window_status import build_window_store
 from adapters.utils.iceberg import IcebergTableClient
 from adapters.utils.schemata import ARROW_SCHEMA
-from adapters.utils.window_harvester import WindowHarvestManager
+from adapters.utils.window_harvester import (
+    WindowCallbackResult,
+    WindowHarvestManager,
+)
 from adapters.utils.window_store import IcebergWindowStore
 
 AXIELL_NAMESPACE = "axiell"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+    force=True,
+)
 
 
 class LoaderConfig(BaseModel):
@@ -44,10 +54,27 @@ def _serialize_metadata(record: Record) -> str | None:
     return etree.tostring(metadata, encoding="unicode", pretty_print=False)
 
 
-class RecordAccumulator:
-    def __init__(self, namespace: str) -> None:
+class WindowRecordWriter:
+    def __init__(
+        self,
+        *,
+        namespace: str,
+        table_client: IcebergTableClient,
+        job_id: str,
+    ) -> None:
         self.namespace = namespace
-        self.rows: list[dict[str, str | None]] = []
+        self.table_client = table_client
+        self.job_id = job_id
+        self._rows: list[dict[str, str | None]] = []
+        self._record_ids: list[str] = []
+        self._window_key: str | None = None
+
+    def start_window(
+        self, *, window_key: str, window_start: datetime, window_end: datetime
+    ) -> None:
+        self._window_key = window_key
+        self._rows = []
+        self._record_ids = []
 
     def __call__(
         self,
@@ -57,23 +84,51 @@ class RecordAccumulator:
         _window_end: datetime,
         _index: int,
     ) -> bool:
-        self.rows.append(
+        self._rows.append(
             {
                 "namespace": self.namespace,
                 "id": identifier,
                 "content": _serialize_metadata(record),
             }
         )
+        self._record_ids.append(identifier)
         return True
 
-    @property
-    def count(self) -> int:
-        return len(self.rows)
+    def complete_window(
+        self,
+        *,
+        window_key: str,
+        window_start: datetime,
+        window_end: datetime,
+        record_ids: list[str],
+    ) -> WindowCallbackResult:
+        tags: dict[str, str] = {"job_id": self.job_id}
+        if self._window_key:
+            tags.setdefault("window_key", self._window_key)
+        changeset_id: str | None = None
+        if self._rows:
+            table = pa.Table.from_pylist(self._rows, schema=ARROW_SCHEMA)
+            changeset_id = self.table_client.update(table)
+        if changeset_id:
+            tags["changeset_id"] = changeset_id
+        record_ids = list(self._record_ids or record_ids)
+        return {"record_ids": record_ids, "tags": tags}
 
-    def to_table(self) -> pa.Table | None:
-        if not self.rows:
-            return None
-        return pa.Table.from_pylist(self.rows, schema=ARROW_SCHEMA)
+
+class WindowRecordWriterFactory:
+    def __init__(self, *, table_client: IcebergTableClient, job_id: str) -> None:
+        self.table_client = table_client
+        self.job_id = job_id
+
+    def __call__(
+        self, window_key: str, window_start: datetime, window_end: datetime
+    ) -> WindowRecordWriter:
+        writer = WindowRecordWriter(
+            namespace=AXIELL_NAMESPACE,
+            table_client=self.table_client,
+            job_id=self.job_id,
+        )
+        return writer
 
 
 @dataclass
@@ -96,8 +151,11 @@ def build_runtime(config_obj: LoaderConfig | None = None) -> LoaderRuntime:
 def _build_harvester(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime,
-    accumulator: RecordAccumulator,
 ) -> WindowHarvestManager:
+    callback_factory = WindowRecordWriterFactory(
+        table_client=runtime.table_client,
+        job_id=request.job_id,
+    )
     return WindowHarvestManager(
         client=runtime.oai_client,
         store=runtime.store,
@@ -105,7 +163,7 @@ def _build_harvester(
         set_spec=request.set_spec,
         window_minutes=config.WINDOW_MINUTES,
         max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
-        record_callback=accumulator,
+        record_callback_factory=callback_factory,
         default_tags={"job_id": request.job_id},
     )
 
@@ -115,14 +173,13 @@ def execute_loader(
     runtime: LoaderRuntime | None = None,
 ) -> LoaderResponse:
     runtime = runtime or build_runtime()
-    accumulator = RecordAccumulator(namespace=AXIELL_NAMESPACE)
-    harvester = _build_harvester(request, runtime, accumulator)
+    harvester = _build_harvester(request, runtime)
 
     summaries = harvester.harvest_recent(
         start_time=request.window_start,
         end_time=request.window_end,
         max_windows=request.max_windows,
-        reprocess_successful_windows=True,
+        reprocess_successful_windows=False,
     )
 
     if not summaries:
@@ -131,19 +188,22 @@ def execute_loader(
             f"{request.window_start.isoformat()} -> {request.window_end.isoformat()}"
         )
 
-    arrow_table = accumulator.to_table()
-    changeset_id: str | None = None
-    if arrow_table is not None and arrow_table.num_rows > 0:
-        changeset_id = runtime.table_client.update(arrow_table)
-
     typed_summaries = [
         WindowLoadResult.model_validate(summary) for summary in summaries
     ]
-    record_count = accumulator.count
+    record_count = sum(len(summary.record_ids) for summary in typed_summaries)
+    seen: dict[str, None] = {}
+    for summary in typed_summaries:
+        if summary.changeset_id is None:
+            continue
+        seen.setdefault(summary.changeset_id, None)
+    unique_changesets = list(seen.keys())
+    primary_changeset = unique_changesets[0] if unique_changesets else None
 
     return LoaderResponse(
         summaries=typed_summaries,
-        changeset_id=changeset_id,
+        changeset_id=primary_changeset,
+        changeset_ids=unique_changesets,
         record_count=record_count,
         job_id=request.job_id,
     )
