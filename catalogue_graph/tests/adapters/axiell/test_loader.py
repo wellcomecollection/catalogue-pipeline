@@ -109,7 +109,6 @@ def test_execute_loader_updates_iceberg(monkeypatch: pytest.MonkeyPatch) -> None
     response = loader.execute_loader(req, runtime=runtime)
 
     assert isinstance(response, LoaderResponse)
-    assert response.changeset_id == "changeset-123"
     assert response.changeset_ids == ["changeset-123"]
     assert response.record_count == 1
     assert response.job_id == req.job_id
@@ -151,7 +150,6 @@ def test_execute_loader_handles_no_new_records(monkeypatch: pytest.MonkeyPatch) 
 
     response = loader.execute_loader(req, runtime=runtime)
 
-    assert response.changeset_id is None
     assert response.changeset_ids == []
     assert response.record_count == 0
     assert stub_client.updated_with is None

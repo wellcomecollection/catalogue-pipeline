@@ -192,18 +192,16 @@ def execute_loader(
         WindowLoadResult.model_validate(summary) for summary in summaries
     ]
     record_count = sum(len(summary.record_ids) for summary in typed_summaries)
-    seen: dict[str, None] = {}
+    changeset_ids: set[str] = set()
+
     for summary in typed_summaries:
         if summary.changeset_id is None:
             continue
-        seen.setdefault(summary.changeset_id, None)
-    unique_changesets = list(seen.keys())
-    primary_changeset = unique_changesets[0] if unique_changesets else None
+        changeset_ids.add(summary.changeset_id)
 
     return LoaderResponse(
         summaries=typed_summaries,
-        changeset_id=primary_changeset,
-        changeset_ids=unique_changesets,
+        changeset_ids=list(changeset_ids),
         record_count=record_count,
         job_id=request.job_id,
     )

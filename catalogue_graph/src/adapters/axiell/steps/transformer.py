@@ -132,7 +132,6 @@ def execute_transform(
     documents = _transform_rows(table)
     indexed, errors = _index_documents(runtime, documents)
     return TransformResult(
-        changeset_id=request.changeset_ids[0],
         changeset_ids=request.changeset_ids,
         indexed=indexed,
         errors=errors,

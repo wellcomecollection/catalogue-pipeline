@@ -49,7 +49,9 @@ def _runtime_with(
 
 
 def _request() -> AxiellAdapterTransformerEvent:
-    return AxiellAdapterTransformerEvent(changeset_id="changeset-1", job_id="job-abc")
+    return AxiellAdapterTransformerEvent(
+        changeset_ids=["changeset-1"], job_id="job-abc"
+    )
 
 
 def test_execute_transform_indexes_documents(
@@ -69,6 +71,7 @@ def test_execute_transform_indexes_documents(
             "last_modified": datetime.now(tz=UTC),
         },
     ]
+
     table_client = StubTableClient(_table(rows))
     runtime = _runtime_with(table_client)
 
@@ -81,8 +84,7 @@ def test_execute_transform_indexes_documents(
     monkeypatch.setattr(transformer.elasticsearch.helpers, "bulk", fake_bulk)
 
     result = transformer.execute_transform(_request(), runtime=runtime)
-
-    assert result.changeset_id == "changeset-1"
+    assert result.changeset_ids == ["changeset-1"]
     assert result.indexed == 2
     assert result.errors == []
     assert result.job_id == "job-abc"
@@ -183,7 +185,6 @@ def test_execute_transform_reads_multiple_changesets(
     result = transformer.execute_transform(request, runtime=runtime)
 
     assert result.indexed == 2
-    assert result.changeset_id == "cs-1"
     assert result.changeset_ids == ["cs-1", "cs-2"]
     assert table_client.requested_changesets == ["cs-1", "cs-2"]
     assert {action["_id"] for action in captured_actions} == {"cs1-a", "cs2-a"}

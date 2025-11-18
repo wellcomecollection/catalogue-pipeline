@@ -106,15 +106,19 @@ class WindowHarvestManager:
     ) -> list[tuple[datetime, datetime]]:
         start_time = self._ensure_utc(start_time)
         end_time = self._ensure_utc(end_time)
+
         if start_time >= end_time:
             raise ValueError("start_time must be earlier than end_time")
+
         delta = timedelta(minutes=self.window_minutes)
         windows: list[tuple[datetime, datetime]] = []
         cursor = start_time
+
         while cursor < end_time:
             win_end = min(cursor + delta, end_time)
             windows.append((cursor, win_end))
             cursor = win_end
+
         logger.info(
             "Generated %d windows covering %s -> %s (size=%d minutes)",
             len(windows),
@@ -122,6 +126,7 @@ class WindowHarvestManager:
             end_time.isoformat(),
             self.window_minutes,
         )
+
         return windows
 
     def harvest_recent(
@@ -138,6 +143,7 @@ class WindowHarvestManager:
         candidates = self.generate_windows(start_time=start_time, end_time=end_time)
         callback_factory = record_callback_factory or self.record_callback_factory
         reused: list[WindowSummary] = []
+
         if reprocess_successful_windows:
             pending = list(candidates)
         else:
@@ -150,8 +156,10 @@ class WindowHarvestManager:
                     reused.append(self._coerce_row(existing))
                     continue
                 pending.append(window)
+
         if max_windows is not None:
             pending = pending[:max_windows]
+
         logger.info(
             "Harvesting %d of %d windows between %s and %s",
             len(pending),
@@ -159,14 +167,17 @@ class WindowHarvestManager:
             start_time.isoformat(),
             end_time.isoformat(),
         )
+
         new_summaries = self.harvest_windows(
             pending,
             record_callback_factory=callback_factory,
         )
+
         if reprocess_successful_windows:
             return new_summaries
         combined = reused + new_summaries
         combined.sort(key=lambda summary: summary["window_start"])
+
         return combined
 
     def harvest_windows(
@@ -267,6 +278,7 @@ class WindowHarvestManager:
                 attempts,
                 last_error,
             )
+
         updated_at = datetime.now(UTC)
         summary: WindowSummary = {
             "window_key": key,
