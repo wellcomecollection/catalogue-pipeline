@@ -5,7 +5,7 @@ import weco.storage.providers.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import java.time.Instant
 
 sealed trait MetsSourceData {
-  val createdDate: Instant
+  val modifiedTime: Instant
   val version: Int
 }
 
@@ -13,7 +13,7 @@ case class MetsFileWithImages(
   root: S3ObjectLocationPrefix,
   filename: String,
   manifestations: List[String],
-  createdDate: Instant,
+  modifiedTime: Instant,
   version: Int
 ) extends MetsSourceData {
 
@@ -32,7 +32,7 @@ case class MetsFileWithImages(
           if m.root == root &&
             m.filename == filename &&
             m.manifestations == manifestations &&
-            m.createdDate.getEpochSecond == createdDate.getEpochSecond &&
+            m.modifiedTime.getEpochSecond == modifiedTime.getEpochSecond &&
             m.version == version =>
         true
       case _ => false
@@ -40,7 +40,7 @@ case class MetsFileWithImages(
 }
 
 case class DeletedMetsFile(
-  createdDate: Instant,
+  modifiedTime: Instant,
   version: Int
 ) extends MetsSourceData {
 
@@ -50,7 +50,7 @@ case class DeletedMetsFile(
   override def equals(other: Any): Boolean =
     other match {
       case d: DeletedMetsFile
-          if d.createdDate.getEpochSecond == createdDate.getEpochSecond &&
+          if d.modifiedTime.getEpochSecond == modifiedTime.getEpochSecond &&
             d.version == version =>
         true
       case _ => false

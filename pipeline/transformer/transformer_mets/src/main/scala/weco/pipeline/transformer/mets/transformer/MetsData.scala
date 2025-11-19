@@ -60,6 +60,7 @@ case class InvisibleMetsData(
   recordIdentifier: String,
   title: String,
   accessConditions: MetsAccessConditions,
+  createdDate: Option[String],
   version: Int,
   modifiedTime: Instant,
   locationPrefix: String,
@@ -71,6 +72,7 @@ case class InvisibleMetsData(
     val location = MetsLocation(
       recordIdentifier = recordIdentifier,
       license = accessConditions.licence,
+      createdDate = createdDate,
       accessStatus = accessConditions.accessStatus,
       accessConditionUsage = accessConditions.usage,
       locationPrefix = locationPrefix
@@ -150,6 +152,7 @@ object InvisibleMetsData {
       recordIdentifier = recordIdentifier,
       title = title,
       accessConditions = accessConditions,
+      createdDate = root.createdDate,
       version = version,
       modifiedTime = modifiedTime,
       locationPrefix = locationPrefix,

@@ -18,7 +18,8 @@ case class DigitalLocation(
   license: Option[License] = None,
   credit: Option[String] = None,
   linkText: Option[String] = None,
-  accessConditions: List[AccessCondition] = Nil
+  accessConditions: List[AccessCondition] = Nil,
+  createdDate: Option[String] = None
 ) extends Location
 
 case class PhysicalLocation(
