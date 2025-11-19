@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from typing import Any, cast
 
 import pytest
+from lxml import etree
 from oai_pmh_client.client import OAIClient
 from pyiceberg.table import Table as IcebergTable
 
@@ -92,7 +93,9 @@ def test_execute_loader_updates_iceberg(
         "tags": {"job_id": req.job_id, "changeset_id": "changeset-123"},
         "changeset_id": "changeset-123",
     }
-    table_client = IcebergTableClient(temporary_table)
+    table_client = IcebergTableClient(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
     store = IcebergWindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
@@ -128,7 +131,9 @@ def test_execute_loader_handles_no_new_records(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    table_client = IcebergTableClient(temporary_table)
+    table_client = IcebergTableClient(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
     store = IcebergWindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
@@ -168,7 +173,9 @@ def test_execute_loader_errors_when_no_windows(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    table_client = IcebergTableClient(temporary_table)
+    table_client = IcebergTableClient(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
     store = IcebergWindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
@@ -185,7 +192,9 @@ def test_execute_loader_errors_when_no_windows(
 
 
 def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> None:
-    table_client = IcebergTableClient(temporary_table)
+    table_client = IcebergTableClient(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
     writer = loader.WindowRecordWriter(
         namespace=loader.AXIELL_NAMESPACE,
         table_client=table_client,
@@ -200,7 +209,7 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
     )
     writer(
         identifier="id-1",
-        record=SimpleNamespace(metadata=None),
+        record=SimpleNamespace(metadata=etree.fromstring("<metadata />")),
         _window_start=window_start,
         _window_end=window_end,
         _index=1,
@@ -223,7 +232,9 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
 def test_window_record_writer_handles_empty_window(
     temporary_table: IcebergTable,
 ) -> None:
-    table_client = IcebergTableClient(temporary_table)
+    table_client = IcebergTableClient(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
     writer = loader.WindowRecordWriter(
         namespace=loader.AXIELL_NAMESPACE,
         table_client=table_client,
@@ -249,3 +260,49 @@ def test_window_record_writer_handles_empty_window(
     assert tags is not None
     assert tags["job_id"] == "job-123"
     assert "changeset_id" not in tags
+
+
+def test_window_record_writer_handles_deleted_record(
+    temporary_table: IcebergTable,
+) -> None:
+    table_client = IcebergTableClient(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
+    writer = loader.WindowRecordWriter(
+        namespace=loader.AXIELL_NAMESPACE,
+        table_client=table_client,
+        job_id="job-123",
+    )
+    window_start = datetime(2025, 1, 1, tzinfo=UTC)
+    window_end = window_start + timedelta(minutes=15)
+    writer.start_window(
+        window_key="key",
+        window_start=window_start,
+        window_end=window_end,
+    )
+    writer(
+        identifier="id-deleted",
+        record=SimpleNamespace(metadata=None),
+        _window_start=window_start,
+        _window_end=window_end,
+        _index=1,
+    )
+    result = writer.complete_window(
+        window_key="key",
+        window_start=window_start,
+        window_end=window_end,
+        record_ids=["id-deleted"],
+    )
+
+    assert result["record_ids"] == ["id-deleted"]
+
+    # Verify soft delete (content is None)
+    all_records = table_client.get_all_records(include_deleted=True)
+    assert all_records.num_rows == 1
+    row = all_records.to_pylist()[0]
+    assert row["id"] == "id-deleted"
+    assert row["content"] is None
+
+    # Verify excluded by default
+    active_records = table_client.get_all_records(include_deleted=False)
+    assert active_records.num_rows == 0
