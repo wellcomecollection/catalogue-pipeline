@@ -551,4 +551,107 @@ def test_incremental_update_does_not_delete_missing_records(
 
     assert "eb0002" in rows
     assert rows["eb0002"]["content"] == "world"  # Unchanged
-    assert rows["eb0001"]["content"] == "hello updated"  # Updated
+
+
+def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> None:
+    """
+    Given an existing Iceberg table
+    And an incremental update that contains new records
+    When the update is applied
+    Then the new records are inserted
+    """
+    temporary_table.append(
+        data_to_namespaced_table(
+            [
+                {"id": "eb0001", "content": "hello"},
+            ]
+        )
+    )
+
+    new_data = data_to_namespaced_table(
+        [
+            {"id": "eb0002", "content": "world"},
+        ]
+    )
+
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.incremental_update(new_data, "ebsco_test")
+    assert changeset_id is not None
+
+    all_records = client.get_all_records()
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+
+    assert "eb0001" in rows
+    assert "eb0002" in rows
+    assert rows["eb0002"]["content"] == "world"
+
+
+def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
+    """
+    Given an existing Iceberg table
+    And an incremental update that contains both updates and new records
+    When the update is applied
+    Then the updates are applied and new records are inserted
+    """
+    temporary_table.append(
+        data_to_namespaced_table(
+            [
+                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0002", "content": "world"},
+            ]
+        )
+    )
+
+    new_data = data_to_namespaced_table(
+        [
+            {"id": "eb0001", "content": "hello updated"},
+            {"id": "eb0003", "content": "new record"},
+        ]
+    )
+
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.incremental_update(new_data, "ebsco_test")
+    assert changeset_id is not None
+
+    all_records = client.get_all_records()
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+
+    assert len(rows) == 3
+    assert rows["eb0001"]["content"] == "hello updated"
+    assert rows["eb0002"]["content"] == "world"
+    assert rows["eb0003"]["content"] == "new record"
+
+
+def test_incremental_update_does_not_touch_other_namespaces(
+    temporary_table: IcebergTable,
+) -> None:
+    """
+    Given an Iceberg table with data from multiple namespaces
+    When an incremental update is applied to one namespace
+    Then data in other namespaces is unaffected
+    """
+    # Add data for another namespace
+    other_data = _data_to_namespaced_table_helper(
+        [{"id": "ax0001", "content": "axiell data"}], "axiell_test"
+    )
+    temporary_table.append(other_data)
+
+    # Add data for ebsco namespace
+    ebsco_data = data_to_namespaced_table([{"id": "eb0001", "content": "ebsco data"}])
+    temporary_table.append(ebsco_data)
+
+    # Update ebsco data
+    new_ebsco_data = data_to_namespaced_table(
+        [{"id": "eb0001", "content": "ebsco updated"}]
+    )
+
+    client = IcebergTableClient(temporary_table)
+    client.incremental_update(new_ebsco_data, "ebsco_test")
+
+    # Verify axiell data is untouched
+    all_records = client.get_all_records()
+    rows = {(row["namespace"], row["id"]): row for row in all_records.to_pylist()}
+
+    assert ("axiell_test", "ax0001") in rows
+    assert rows[("axiell_test", "ax0001")]["content"] == "axiell data"
+    assert rows[("ebsco_test", "eb0001")]["content"] == "ebsco updated"

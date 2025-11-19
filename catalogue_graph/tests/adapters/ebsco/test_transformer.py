@@ -52,7 +52,7 @@ def _prepare_changeset(
     pa_table_initial = data_to_namespaced_table(rows)
 
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(pa_table_initial, "ebsco")
+    changeset_id = client.snapshot_sync(pa_table_initial, "ebsco")
     assert changeset_id, "Expected a changeset_id to be returned"
 
     # Ensure transformer uses our temporary table

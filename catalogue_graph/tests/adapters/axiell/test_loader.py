@@ -20,7 +20,7 @@ class StubTableClient:
         self.updated_with: pa.Table | None = None
         self.times_called = 0
 
-    def update(self, table: pa.Table) -> str:
+    def incremental_update(self, table: pa.Table) -> str:
         self.updated_with = table
         self.times_called += 1
         return "changeset-123"
