@@ -102,27 +102,31 @@ def get_rest_api_table(
             "Incomplete AWS credentials: access key or secret key is missing."
         )
 
+    params = {
+        "type": "rest",
+        "warehouse": f"arn:aws:s3tables:{region}:{account_id}:bucket/{s3_tables_bucket}",
+        "uri": f"https://s3tables.{region}.amazonaws.com/iceberg",
+        "rest.sigv4-enabled": "true",
+        "rest.signing-name": "s3tables",
+        "rest.signing-region": region,
+        # As we are using the Iceberg REST API exposed by S3 Tables,
+        # instead of the Glue catalog, we need S3 credentials here.
+        # Using the Glue catalog requires provisioning more complex
+        # Lake Formation permissions, which are not required.
+        "s3.access-key-id": access_key,
+        "s3.secret-access-key": secret_key,
+        "s3.region": region,
+    }
+    if token:
+        params["s3.session-token"] = token
+
     return get_table(
         catalogue_namespace=namespace,
         table_name=table_name,
         catalogue_name="s3tablescatalog",
         create_if_not_exists=create_if_not_exists,
-        **{
-            "type": "rest",
-            "warehouse": f"arn:aws:s3tables:{region}:{account_id}:bucket/{s3_tables_bucket}",
-            "uri": f"https://s3tables.{region}.amazonaws.com/iceberg",
-            "rest.sigv4-enabled": "true",
-            "rest.signing-name": "s3tables",
-            "rest.signing-region": region,
-            # As we are using the Iceberg REST API exposed by S3 Tables,
-            # instead of the Glue catalog, we need S3 credentials here.
-            # Using the Glue catalog requires provisioning more complex
-            # Lake Formation permissions, which are not required.
-            "s3.access-key-id": access_key,
-            "s3.secret-access-key": secret_key,
-            "s3.session-token": token,
-            "s3.region": region,
-        },
+        schema=SCHEMA,
+        **params,
     )
 
 

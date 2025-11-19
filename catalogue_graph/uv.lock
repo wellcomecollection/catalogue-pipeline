@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.12.*"
 
 [[package]]
@@ -173,7 +173,7 @@ requires-dist = [
     { name = "boto3" },
     { name = "elasticsearch", specifier = ">=8.11,<8.13" },
     { name = "lxml", specifier = ">=6.0.0" },
-    { name = "oai-pmh-client", git = "https://github.com/wellcomecollection/oai-pmh" },
+    { name = "oai-pmh-client", git = "https://github.com/wellcomecollection/oai-pmh.git?tag=v1.0.0" },
     { name = "polars" },
     { name = "pyarrow", specifier = "~=20.0" },
     { name = "pydantic", specifier = ">=2.11.7,<2.12.0" },
@@ -777,8 +777,8 @@ wheels = [
 
 [[package]]
 name = "oai-pmh-client"
-version = "0.1.0"
-source = { git = "https://github.com/wellcomecollection/oai-pmh#525c10aa3949c91203d8cc2070c64707b2a72ced" }
+version = "1.0.0"
+source = { git = "https://github.com/wellcomecollection/oai-pmh.git?tag=v1.0.0#bc681df308da70f30a0d3d8e0041dbb4785140f3" }
 dependencies = [
     { name = "httpx" },
     { name = "lxml" },

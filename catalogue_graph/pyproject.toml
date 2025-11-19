@@ -35,7 +35,7 @@ dependencies = [
 package = true
 
 [tool.uv.sources]
-oai-pmh-client = { git = "https://github.com/wellcomecollection/oai-pmh" }
+oai-pmh-client = { git = "https://github.com/wellcomecollection/oai-pmh.git", tag = "v1.0.0" }
 
 
 [dependency-groups]

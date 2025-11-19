@@ -49,7 +49,7 @@ def _rest_api_params(region: str, account_id: str) -> dict[str, str]:
     if not frozen.access_key or not frozen.secret_key:
         raise RuntimeError("AWS credentials missing access key or secret key")
 
-    return {
+    params = {
         "type": "rest",
         "warehouse": f"arn:aws:s3tables:{region}:{account_id}:bucket/{config.S3_TABLES_BUCKET}",
         "uri": f"https://s3tables.{region}.amazonaws.com/iceberg",
@@ -58,9 +58,11 @@ def _rest_api_params(region: str, account_id: str) -> dict[str, str]:
         "rest.signing-region": region,
         "s3.access-key-id": frozen.access_key,
         "s3.secret-access-key": frozen.secret_key,
-        "s3.session-token": frozen.token,
         "s3.region": region,
     }
+    if frozen.token:
+        params["s3.session-token"] = frozen.token
+    return params
 
 
 def _get_rest_api_table(
