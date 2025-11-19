@@ -28,6 +28,7 @@ dependencies = [
     "smart-open>=7.3.0.post1",
     "tqdm>=4.67.1",
     "oai-pmh-client",
+    "structlog>=24.1.0",
 ]
 
 [tool.uv]

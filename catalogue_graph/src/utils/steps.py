@@ -94,6 +94,7 @@ def run_ecs_handler(
     try:
         result = handler(event=event, *handler_args, **handler_kwargs)  # noqa: B026
         step_output.send_success(result)
+
     except Exception as exc:
         step_output.send_failure(exc)
 
