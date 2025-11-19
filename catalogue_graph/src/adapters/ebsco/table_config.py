@@ -11,6 +11,7 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.exceptions import (
     NamespaceAlreadyExistsError,
 )
+from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.ebsco import config
@@ -22,6 +23,7 @@ def get_table(
     table_name: str,
     catalogue_name: str,
     create_if_not_exists: bool,
+    schema: Schema = SCHEMA,
     **params: Any,
 ) -> IcebergTable:
     """
@@ -33,6 +35,7 @@ def get_table(
         catalogue_warehouse: Warehouse directory path
         catalogue_namespace: Namespace for the table
         table_name: Name of the table
+        schema: Schema to use when creating the table
 
     Returns:
         IcebergTable: The configured table
@@ -51,7 +54,7 @@ def get_table(
             catalogue.create_namespace(catalogue_namespace)
 
         return catalogue.create_table_if_not_exists(
-            identifier=table_fullname, schema=SCHEMA
+            identifier=table_fullname, schema=schema
         )
 
     return catalogue.load_table(table_fullname)
@@ -124,7 +127,10 @@ def get_rest_api_table(
 
 
 def get_local_table(
-    table_name: str = "mytable", namespace: str = "default", db_name: str = "catalog"
+    table_name: str = "mytable",
+    namespace: str = "default",
+    db_name: str = "catalog",
+    schema: Schema = SCHEMA,
 ) -> IcebergTable:
     """
     Get a table from the local catalog using the .local directory.
@@ -133,6 +139,7 @@ def get_local_table(
         table_name: Name of the table (defaults to "mytable")
         namespace: Namespace for the table (defaults to "default")
         db_name: Database name (defaults to "catalog", use "test_catalog" for tests)
+        schema: Schema to use when creating the table
 
     Returns:
         IcebergTable: The configured table
@@ -157,6 +164,7 @@ def get_local_table(
         table_name=table_name,
         catalogue_name="local",
         create_if_not_exists=True,
+        schema=schema,
         **{
             "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
             "warehouse": f"file://{warehouse_dir}/",
