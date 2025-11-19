@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import logging
 from collections import Counter
-from collections.abc import Callable, Sequence
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime, timedelta
-from typing import Any, Protocol, TypedDict, cast
+from typing import Any, Protocol, TypedDict
 
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import NoRecordsMatchError
@@ -16,13 +16,34 @@ from .window_store import IcebergWindowStore, WindowStatusRecord
 
 logger = logging.getLogger(__name__)
 
-RecordStoreCallback = Callable[[str, Record, datetime, datetime, int], bool | None]
+
+class WindowProcessor(Protocol):
+    def start_window(
+        self, window_key: str, window_start: datetime, window_end: datetime
+    ) -> None: ...
+
+    def process_record(
+        self,
+        identifier: str,
+        record: Record,
+        window_start: datetime,
+        window_end: datetime,
+        index: int,
+    ) -> None: ...
+
+    def complete_window(
+        self,
+        window_key: str,
+        window_start: datetime,
+        window_end: datetime,
+        record_ids: list[str],
+    ) -> WindowCallbackResult: ...
 
 
 class RecordCallbackFactory(Protocol):
     def __call__(
         self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> RecordStoreCallback: ...
+    ) -> WindowProcessor: ...
 
 
 class WindowCallbackResult(TypedDict, total=False):
@@ -79,8 +100,8 @@ class WindowHarvestManager:
         self,
         client: OAIClient,
         store: IcebergWindowStore,
-        metadata_prefix: str,
-        set_spec: str,
+        metadata_prefix: str | None = None,
+        set_spec: str | None = None,
         *,
         window_minutes: int | None = None,
         max_parallel_requests: int | None = None,
@@ -149,6 +170,7 @@ class WindowHarvestManager:
         else:
             status_map = self.store.load_status_map()
             pending = []
+
             for window in candidates:
                 key = self._window_key(*window)
                 existing = status_map.get(key)
@@ -233,9 +255,9 @@ class WindowHarvestManager:
             dict(self.default_tags) if self.default_tags else None
         )
         callback_factory = record_callback_factory or self.record_callback_factory
-        callback: RecordStoreCallback | None = None
+        processor: WindowProcessor | None = None
         if callback_factory is not None:
-            callback = callback_factory(key, start, end)
+            processor = callback_factory(key, start, end)
         logger.info("Processing window %s -> %s", start.isoformat(), end.isoformat())
         try:
             records_in_window = list(
@@ -246,28 +268,46 @@ class WindowHarvestManager:
                     set_spec=self.set_spec,
                 )
             )
-            if not callback and records_in_window:
+            if not processor and records_in_window:
                 raise RuntimeError(
                     "A record callback must be supplied via record_callback_factory to persist harvested records."
                 )
-            self._start_window(callback, key, start, end)
-            if callback:
+
+            if processor:
+                processor.start_window(
+                    window_key=key, window_start=start, window_end=end
+                )
+
                 for idx, record in enumerate(records_in_window, 1):
                     identifier = self._record_identifier(record, start, idx)
-                    self._invoke_callback(callback, identifier, record, start, end, idx)
+                    processor.process_record(
+                        identifier=identifier,
+                        record=record,
+                        window_start=start,
+                        window_end=end,
+                        index=idx,
+                    )
                     record_ids.append(identifier)
-            callback_result = self._complete_window(
-                callback, key, start, end, record_ids
-            )
-            if callback_result and "record_ids" in callback_result:
-                record_ids = callback_result["record_ids"]
+
+                callback_result = processor.complete_window(
+                    window_key=key,
+                    window_start=start,
+                    window_end=end,
+                    record_ids=record_ids,
+                )
+
+                if callback_result and "record_ids" in callback_result:
+                    record_ids = callback_result["record_ids"]
+                if callback_result and "tags" in callback_result:
+                    tags = self._merge_tags(callback_result["tags"])
+
             state = "success"
-            if callback_result and "tags" in callback_result:
-                tags = self._merge_tags(callback_result["tags"])
+
         except NoRecordsMatchError:
             state = "success"
             record_ids = []
             tags = dict(self.default_tags) if self.default_tags else None
+
         except Exception as exc:  # pragma: no cover - generic safety net
             last_error = repr(exc)
             state = "failed"
@@ -461,59 +501,6 @@ class WindowHarvestManager:
             if isinstance(identifier, str):
                 return identifier
         return f"no-header-{window_start.isoformat()}-{idx}"
-
-    def _invoke_callback(
-        self,
-        callback: RecordStoreCallback,
-        identifier: str,
-        record: Record,
-        window_start: datetime,
-        window_end: datetime,
-        index: int,
-    ) -> None:
-        result = callback(identifier, record, window_start, window_end, index)
-        if result is False:
-            raise RuntimeError("Record callback reported failure")
-
-    def _start_window(
-        self,
-        callback: RecordStoreCallback | None,
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> None:
-        if callback is None:
-            return
-        starter = getattr(callback, "start_window", None)
-        if callable(starter):
-            starter(
-                window_key=window_key,
-                window_start=window_start,
-                window_end=window_end,
-            )
-
-    def _complete_window(
-        self,
-        callback: RecordStoreCallback | None,
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-        record_ids: list[str],
-    ) -> WindowCallbackResult | None:
-        if callback is None:
-            return None
-        finisher = getattr(callback, "complete_window", None)
-        if not callable(finisher):
-            return None
-        result = finisher(
-            window_key=window_key,
-            window_start=window_start,
-            window_end=window_end,
-            record_ids=list(record_ids),
-        )
-        if result is None:
-            return None
-        return cast(WindowCallbackResult, result)
 
     def _merge_tags(self, custom_tags: dict[str, str] | None) -> dict[str, str] | None:
         base = dict(self.default_tags) if self.default_tags else {}

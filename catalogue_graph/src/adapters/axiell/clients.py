@@ -25,7 +25,8 @@ def _oai_token() -> str:
 
 @cache
 def _oai_endpoint() -> str:
-    return get_ssm_parameter(config.SSM_OAI_URL)
+    # return get_ssm_parameter(config.SSM_OAI_URL)
+    return "https://oaipmh.arxiv.org/oai"  # Temporary for testing
 
 
 class AuthenticatedHTTPXClient(httpx.Client):
@@ -37,7 +38,9 @@ class AuthenticatedHTTPXClient(httpx.Client):
 
     def build_request(self, method: str, url: URLTypes, **kwargs: Any) -> Request:
         params = kwargs.pop("params", {})
-        params.setdefault("token", self._token)
+        # Intentionally commented out for testing while Axiell OAI endpoint is offline,
+        # we'll test with Arxiv.org which doesn't need a token.
+        # params.setdefault("token", self._token)
         kwargs["params"] = params
         return super().build_request(method, url, **kwargs)
 
@@ -51,6 +54,7 @@ def build_oai_client(*, http_client: httpx.Client | None = None) -> OAIClient:
     return OAIClient(
         _oai_endpoint(),
         client=client,
+        datestamp_granularity="YYYY-MM-DD",  # temporarily set for Arxiv testing
         max_request_retries=config.OAI_MAX_RETRIES,
         request_backoff_factor=config.OAI_BACKOFF_FACTOR,
         request_max_backoff=config.OAI_BACKOFF_MAX,

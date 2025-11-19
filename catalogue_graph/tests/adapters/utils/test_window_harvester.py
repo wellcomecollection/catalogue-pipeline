@@ -17,8 +17,9 @@ from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.window_harvester import (
     RecordCallbackFactory,
-    RecordStoreCallback,
+    WindowCallbackResult,
     WindowHarvestManager,
+    WindowProcessor,
 )
 from adapters.utils.window_store import (
     WINDOW_STATUS_PARTITION_SPEC,
@@ -64,6 +65,32 @@ class StubOAIClient:
     def list_records(self, **kwargs: object) -> list[Record]:
         self.calls.append(kwargs)
         return list(self.responses)
+
+
+class StubWindowProcessor:
+    def start_window(
+        self, window_key: str, window_start: datetime, window_end: datetime
+    ) -> None:
+        pass
+
+    def process_record(
+        self,
+        identifier: str,
+        record: Record,
+        window_start: datetime,
+        window_end: datetime,
+        index: int,
+    ) -> None:
+        pass
+
+    def complete_window(
+        self,
+        window_key: str,
+        window_start: datetime,
+        window_end: datetime,
+        record_ids: list[str],
+    ) -> WindowCallbackResult:
+        return {"record_ids": record_ids}
 
 
 def _create_table(
@@ -121,21 +148,12 @@ def _build_harvester(
     store = IcebergWindowStore(table)
     client = StubOAIClient(responses)
 
-    def recorder(
-        identifier: str,
-        record: Record,
-        window_start: datetime,
-        window_end: datetime,
-        index: int,
-    ) -> None:
-        return None
-
     def default_factory(
         window_key: str,
         window_start: datetime,
         window_end: datetime,
-    ) -> RecordStoreCallback:
-        return recorder
+    ) -> WindowProcessor:
+        return StubWindowProcessor()
 
     factory = record_callback_factory or default_factory
 
@@ -161,21 +179,23 @@ def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
     harvester = _build_harvester(tmp_path, records)
     captured: list[str] = []
 
-    def recorder(
-        identifier: str,
-        record: Record,
-        window_start: datetime,
-        window_end: datetime,
-        index: int,
-    ) -> None:
-        captured.append(identifier)
+    class CapturingProcessor(StubWindowProcessor):
+        def process_record(
+            self,
+            identifier: str,
+            record: Record,
+            window_start: datetime,
+            window_end: datetime,
+            index: int,
+        ) -> None:
+            captured.append(identifier)
 
     def recorder_factory(
         window_key: str,
         window_start: datetime,
         window_end: datetime,
-    ) -> RecordStoreCallback:
-        return recorder
+    ) -> WindowProcessor:
+        return CapturingProcessor()
 
     start_time, end_time = _window_range()
     summaries = harvester.harvest_recent(
@@ -198,21 +218,23 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
 
-    def failing_callback(
-        identifier: str,
-        record: Record,
-        window_start: datetime,
-        window_end: datetime,
-        index: int,
-    ) -> None:
-        raise RuntimeError("boom")
+    class FailingProcessor(StubWindowProcessor):
+        def process_record(
+            self,
+            identifier: str,
+            record: Record,
+            window_start: datetime,
+            window_end: datetime,
+            index: int,
+        ) -> None:
+            raise RuntimeError("boom")
 
     def failing_factory(
         window_key: str,
         window_start: datetime,
         window_end: datetime,
-    ) -> RecordStoreCallback:
-        return failing_callback
+    ) -> WindowProcessor:
+        return FailingProcessor()
 
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_recent(
@@ -341,32 +363,29 @@ def test_record_callback_factory_persists_changeset(tmp_path: Path) -> None:
 
         def start_window(
             self,
-            *,
             window_key: str,
             window_start: datetime,
             window_end: datetime,
         ) -> None:
             self.window_key = window_key
 
-        def __call__(
+        def process_record(
             self,
             identifier: str,
             record: Record,
             window_start: datetime,
             window_end: datetime,
             index: int,
-        ) -> bool:
+        ) -> None:
             self.records.append(identifier)
-            return True
 
         def complete_window(
             self,
-            *,
             window_key: str,
             window_start: datetime,
             window_end: datetime,
             record_ids: list[str],
-        ) -> dict[str, Any]:
+        ) -> WindowCallbackResult:
             return {
                 "record_ids": list(self.records),
                 "tags": {"changeset_id": "cs-500"},
@@ -376,7 +395,7 @@ def test_record_callback_factory_persists_changeset(tmp_path: Path) -> None:
         window_key: str,
         window_start: datetime,
         window_end: datetime,
-    ) -> RecordingCallback:
+    ) -> WindowProcessor:
         return RecordingCallback()
 
     start_time, end_time = _window_range(hours=1)

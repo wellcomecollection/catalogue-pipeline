@@ -29,6 +29,7 @@ from adapters.utils.schemata import ARROW_SCHEMA
 from adapters.utils.window_harvester import (
     WindowCallbackResult,
     WindowHarvestManager,
+    WindowProcessor,
 )
 from adapters.utils.window_store import IcebergWindowStore
 
@@ -82,24 +83,22 @@ class WindowRecordWriter:
         self.table_client = table_client
         self.job_id = job_id
         self._rows: list[dict[str, str | None]] = []
-        self._record_ids: list[str] = []
         self._window_key: str | None = None
 
     def start_window(
-        self, *, window_key: str, window_start: datetime, window_end: datetime
+        self, window_key: str, window_start: datetime, window_end: datetime
     ) -> None:
         self._window_key = window_key
         self._rows = []
-        self._record_ids = []
 
-    def __call__(
+    def process_record(
         self,
         identifier: str,
         record: Record,
-        _window_start: datetime,
-        _window_end: datetime,
-        _index: int,
-    ) -> bool:
+        window_start: datetime,
+        window_end: datetime,
+        index: int,
+    ) -> None:
         self._rows.append(
             {
                 "namespace": self.namespace,
@@ -107,12 +106,9 @@ class WindowRecordWriter:
                 "content": _serialize_metadata(record),
             }
         )
-        self._record_ids.append(identifier)
-        return True
 
     def complete_window(
         self,
-        *,
         window_key: str,
         window_start: datetime,
         window_end: datetime,
@@ -127,7 +123,6 @@ class WindowRecordWriter:
             changeset_id = self.table_client.incremental_update(table)
         if changeset_id:
             tags["changeset_id"] = changeset_id
-        record_ids = list(self._record_ids or record_ids)
         return {"record_ids": record_ids, "tags": tags}
 
 
@@ -138,7 +133,7 @@ class WindowRecordWriterFactory:
 
     def __call__(
         self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> WindowRecordWriter:
+    ) -> WindowProcessor:
         writer = WindowRecordWriter(
             namespace=AXIELL_NAMESPACE,
             table_client=self.table_client,

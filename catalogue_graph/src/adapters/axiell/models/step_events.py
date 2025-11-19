@@ -21,8 +21,8 @@ class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
     )
     window_start: datetime
     window_end: datetime
-    metadata_prefix: str
-    set_spec: str
+    metadata_prefix: str | None = None
+    set_spec: str | None = None
     max_windows: int | None = None
 
 

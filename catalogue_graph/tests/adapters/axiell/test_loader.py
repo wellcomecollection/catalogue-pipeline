@@ -207,12 +207,12 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
         window_start=window_start,
         window_end=window_end,
     )
-    writer(
+    writer.process_record(
         identifier="id-1",
         record=SimpleNamespace(metadata=etree.fromstring("<metadata />")),
-        _window_start=window_start,
-        _window_end=window_end,
-        _index=1,
+        window_start=window_start,
+        window_end=window_end,
+        index=1,
     )
     result = writer.complete_window(
         window_key="key",
@@ -280,12 +280,12 @@ def test_window_record_writer_handles_deleted_record(
         window_start=window_start,
         window_end=window_end,
     )
-    writer(
+    writer.process_record(
         identifier="id-deleted",
         record=SimpleNamespace(metadata=None),
-        _window_start=window_start,
-        _window_end=window_end,
-        _index=1,
+        window_start=window_start,
+        window_end=window_end,
+        index=1,
     )
     result = writer.complete_window(
         window_key="key",
@@ -306,3 +306,87 @@ def test_window_record_writer_handles_deleted_record(
     # Verify excluded by default
     active_records = table_client.get_all_records(include_deleted=False)
     assert active_records.num_rows == 0
+
+
+def test_window_record_writer_skips_changeset_for_duplicate_data(
+    temporary_table: IcebergTable,
+) -> None:
+    table_client = IcebergTableClient(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
+    writer = loader.WindowRecordWriter(
+        namespace=loader.AXIELL_NAMESPACE,
+        table_client=table_client,
+        job_id="job-123",
+    )
+    window_start = datetime(2025, 1, 1, tzinfo=UTC)
+    window_end = window_start + timedelta(minutes=15)
+
+    # 1. Write initial data
+    writer.start_window(
+        window_key="key-1",
+        window_start=window_start,
+        window_end=window_end,
+    )
+    writer.process_record(
+        identifier="id-1",
+        record=SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
+        window_start=window_start,
+        window_end=window_end,
+        index=1,
+    )
+    result_1 = writer.complete_window(
+        window_key="key-1",
+        window_start=window_start,
+        window_end=window_end,
+        record_ids=["id-1"],
+    )
+    assert "changeset_id" in cast(dict[str, str], result_1["tags"])
+
+    # 2. Write same data again (no-op)
+    writer.start_window(
+        window_key="key-2",
+        window_start=window_start,
+        window_end=window_end,
+    )
+    writer.process_record(
+        identifier="id-1",
+        record=SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
+        window_start=window_start,
+        window_end=window_end,
+        index=1,
+    )
+    result_2 = writer.complete_window(
+        window_key="key-2",
+        window_start=window_start,
+        window_end=window_end,
+        record_ids=["id-1"],
+    )
+
+    # Should have record_ids but NO changeset_id
+    assert result_2["record_ids"] == ["id-1"]
+    tags_2 = cast(dict[str, str], result_2["tags"])
+    assert "changeset_id" not in tags_2
+
+    # 3. Write new data
+    writer.start_window(
+        window_key="key-3",
+        window_start=window_start,
+        window_end=window_end,
+    )
+    writer.process_record(
+        identifier="id-1",
+        record=SimpleNamespace(metadata=etree.fromstring("<metadata>v2</metadata>")),
+        window_start=window_start,
+        window_end=window_end,
+        index=1,
+    )
+    result_3 = writer.complete_window(
+        window_key="key-3",
+        window_start=window_start,
+        window_end=window_end,
+        record_ids=["id-1"],
+    )
+
+    # Should have changeset_id again
+    assert "changeset_id" in cast(dict[str, str], result_3["tags"])
