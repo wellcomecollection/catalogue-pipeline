@@ -23,8 +23,33 @@ class IcebergTableClient:
         self.table = table
         self.default_namespace = default_namespace
 
-    def update(
+    def incremental_update(
         self, new_data: pa.Table, record_namespace: str | None = None
+    ) -> str | None:
+        """
+        Apply an incremental update to the table.
+        Only updates and inserts are processed; missing records are NOT deleted.
+        """
+        return self._perform_update(
+            new_data, record_namespace, incremental=True
+        )
+
+    def snapshot_sync(
+        self, new_data: pa.Table, record_namespace: str | None = None
+    ) -> str | None:
+        """
+        Sync the table to match the new snapshot.
+        Updates, inserts, and DELETES records that are missing from new_data.
+        """
+        return self._perform_update(
+            new_data, record_namespace, incremental=False
+        )
+
+    def _perform_update(
+        self,
+        new_data: pa.Table,
+        record_namespace: str | None = None,
+        incremental: bool = False,
     ) -> str | None:
         namespace = record_namespace or self.default_namespace
         if namespace is None:
@@ -46,10 +71,18 @@ class IcebergTableClient:
             existing_data = existing_data.sort_by("id")
             new_data = new_data.sort_by("id")
 
-            deletes = self._get_deletes(existing_data, new_data, namespace)
+            if incremental:
+                deletes = None
+            else:
+                deletes = self._get_deletes(existing_data, new_data, namespace)
+
             updates = self._find_updates(existing_data, new_data)
             inserts = self._find_inserts(existing_data, new_data, namespace)
-            changes = pa.concat_tables([deletes, updates])
+
+            if deletes:
+                changes = pa.concat_tables([deletes, updates])
+            else:
+                changes = updates
         else:
             # Empty DB short-circuit, just write it all in.
             inserts = new_data

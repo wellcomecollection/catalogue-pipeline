@@ -47,7 +47,7 @@ def load_xml(xmlfile: IO[bytes]) -> etree._Element:
 def update_from_xml(table: IcebergTable, collection: etree._Element) -> str | None:
     records = nodes_to_records(collection)
     updater = IcebergTableClient(table, default_namespace=EBSCO_NAMESPACE)
-    return updater.update(data_to_pa_table(records))
+    return updater.snapshot_sync(data_to_pa_table(records))
 
 
 def nodes_to_records(collection: etree._Element) -> list[dict[str, str]]:
