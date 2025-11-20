@@ -1,8 +1,8 @@
+from models.pipeline.serialisable import ElasticsearchModel
 from pydantic import Field
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.transformers.work_query_transformer import QueryWorkTransformer
-from models.pipeline.serialisable import ElasticsearchModel
 
 
 class WorkFilterableValues(ElasticsearchModel):
@@ -64,7 +64,7 @@ class WorkFilterableValues(ElasticsearchModel):
             genres_label=[g.label for g in work.data.genres],
             genres_concepts_id=list(transformer.genre_ids),
             genres_concepts_source_identifier=list(transformer.genre_identifiers),
-            subjects_label=[s.normalised_label for s in work.data.subjects],
+            subjects_label=list(transformer.subject_labels),
             subjects_concepts_id=list(transformer.subject_ids),
             subjects_concepts_source_identifier=list(transformer.subject_identifiers),
             contributors_agent_label=list(transformer.contributor_agent_labels),

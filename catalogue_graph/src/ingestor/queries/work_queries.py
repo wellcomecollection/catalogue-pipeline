@@ -32,7 +32,6 @@ WORK_CONCEPTS_QUERY = """
         MATCH (work)-[:HAS_CONCEPT]->(concept)
         OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)
         OPTIONAL MATCH (linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
-        WHERE linked_source_concept.id <> source_concept.id
         
         WITH
             work,

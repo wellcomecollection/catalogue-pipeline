@@ -1,10 +1,10 @@
 from collections.abc import Generator
 
 from dateutil import parser
+from models.pipeline.location import PhysicalLocation
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
-from models.pipeline.location import PhysicalLocation
 
 from .work_base_transformer import WorkBaseTransformer
 
@@ -73,13 +73,13 @@ class QueryWorkTransformer(WorkBaseTransformer):
     def genre_concept_labels(self) -> Generator[str]:
         for genre in self.data.genres:
             for concept in genre.concepts:
-                yield concept.normalised_label
+                yield self.get_standard_concept_label(concept)
 
     @property
     def subject_concept_labels(self) -> Generator[str]:
         for subject in self.data.subjects:
             for concept in subject.concepts:
-                yield concept.normalised_label
+                yield self.get_standard_concept_label(concept)
 
     @property
     def image_ids(self) -> list[str]:
@@ -105,8 +105,16 @@ class QueryWorkTransformer(WorkBaseTransformer):
         return self.data.collection_path.label
 
     @property
+    def subject_labels(self) -> list[str]:
+        return [
+            self.get_standard_concept_label(s) for s in self.data.subjects
+        ]
+
+    @property
     def contributor_agent_labels(self) -> list[str]:
-        return [c.agent.normalised_label for c in self.data.contributors]
+        return [
+            self.get_standard_concept_label(c.agent) for c in self.data.contributors
+        ]
 
     @property
     def format_id(self) -> str | None:

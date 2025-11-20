@@ -1,12 +1,13 @@
 from pydantic import BaseModel
 
 from models.pipeline.concept import Concept
+from models.pipeline.serialisable import ElasticsearchModel
 from utils.types import ConceptType
 
 from .identifier import DisplayIdentifier
 
 
-class DisplayConcept(BaseModel):
+class DisplayConcept(ElasticsearchModel):
     id: str | None = None
     label: str
     standard_label: str | None = None
