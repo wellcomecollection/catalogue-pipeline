@@ -119,11 +119,19 @@ class DisplayWorkTransformer(WorkBaseTransformer):
 
     @property
     def subjects(self) -> Generator[DisplaySubject]:
+        labels = set()
         for subject in self.data.subjects:
-            concept = self.get_display_concept(subject)
+            main_concept = self.get_display_concept(subject)
+            concepts = [self.get_display_concept(c) for c in subject.concepts]
+
+            if len(concepts) == 1:
+                if main_concept.standard_label in labels:
+                    continue
+                labels.add(main_concept.standard_label)
+
             yield DisplaySubject(
-                **concept.model_dump(),
-                concepts=[self.get_display_concept(c) for c in subject.concepts],
+                **main_concept.model_dump(),
+                concepts=concepts,
             )
 
     @property
@@ -163,10 +171,18 @@ class DisplayWorkTransformer(WorkBaseTransformer):
 
     @property
     def contributors(self) -> Generator[DisplayContributor]:
+        labels = set()
+
         for contributor in self.data.contributors:
             roles = [DisplayContributionRole(label=r.label) for r in contributor.roles]
+            agent = self.get_display_concept(contributor.agent)
+
+            if agent.standard_label in labels:
+                continue
+            labels.add(agent.standard_label)
+
             yield DisplayContributor(
-                agent=self.get_display_concept(contributor.agent),
+                agent=agent,
                 roles=roles,
                 primary=contributor.primary,
             )

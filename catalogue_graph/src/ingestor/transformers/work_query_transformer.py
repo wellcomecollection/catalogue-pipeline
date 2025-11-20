@@ -1,10 +1,10 @@
 from collections.abc import Generator
 
 from dateutil import parser
-from models.pipeline.location import PhysicalLocation
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
+from models.pipeline.location import PhysicalLocation
 
 from .work_base_transformer import WorkBaseTransformer
 
@@ -106,9 +106,7 @@ class QueryWorkTransformer(WorkBaseTransformer):
 
     @property
     def subject_labels(self) -> list[str]:
-        return [
-            self.get_standard_concept_label(s) for s in self.data.subjects
-        ]
+        return [self.get_standard_concept_label(s) for s in self.data.subjects]
 
     @property
     def contributor_agent_labels(self) -> list[str]:

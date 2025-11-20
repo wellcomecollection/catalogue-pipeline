@@ -1,8 +1,8 @@
-from models.pipeline.serialisable import ElasticsearchModel
 from pydantic import Field
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.transformers.work_query_transformer import QueryWorkTransformer
+from models.pipeline.serialisable import ElasticsearchModel
 
 
 class WorkFilterableValues(ElasticsearchModel):
