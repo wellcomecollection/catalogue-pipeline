@@ -23,6 +23,11 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
+from ingestor.transformers.raw_concept import (
+    DISPLAY_SOURCE_PRIORITY,
+    get_priority_label,
+)
+from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
 from utils.sort import natural_sort_key
 
@@ -32,7 +37,7 @@ class DisplayWorkTransformer:
         self.data = extracted.work.data
         self.state = extracted.work.state
         self.hierarchy = extracted.hierarchy
-        self.concepts = extracted.concepts
+        self.concepts = {c.concept.id: c for c in extracted.concepts}
 
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
@@ -117,7 +122,11 @@ class DisplayWorkTransformer:
     @property
     def subjects(self) -> Generator[DisplaySubject]:
         for subject in self.data.subjects:
-            yield DisplaySubject.from_subject(subject)
+            concept = self.get_display_concept(subject)
+            yield DisplaySubject(
+                **concept.model_dump(),
+                concepts=[self.get_display_concept(c) for c in subject.concepts],
+            )
 
     @property
     def availabilities(self) -> list[DisplayIdLabel]:
@@ -144,12 +153,27 @@ class DisplayWorkTransformer:
         for child in sorted_children:
             yield DisplayRelation.from_neptune_node(child.work, child.parts)
 
+    def get_display_concept(self, concept: Concept) -> DisplayConcept:
+        standard_label = concept.label
+        if concept.id.canonical_id in self.concepts:
+            extracted = self.concepts[concept.id.canonical_id]
+            standard_label, _ = get_priority_label(extracted, DISPLAY_SOURCE_PRIORITY)
+
+        identifiers = list(DisplayIdentifier.from_all_identifiers(concept.id))
+        return DisplayConcept(
+            id=concept.id.canonical_id,
+            label=concept.label,
+            standard_label=standard_label,
+            identifiers=None if len(identifiers) == 0 else identifiers,
+            type=concept.display_type,
+        )
+
     @property
     def contributors(self) -> Generator[DisplayContributor]:
         for contributor in self.data.contributors:
             roles = [DisplayContributionRole(label=r.label) for r in contributor.roles]
             yield DisplayContributor(
-                agent=DisplayConcept.from_concept(contributor.agent),
+                agent=self.get_display_concept(contributor.agent),
                 roles=roles,
                 primary=contributor.primary,
             )
@@ -157,7 +181,7 @@ class DisplayWorkTransformer:
     @property
     def genres(self) -> Generator[DisplayGenre]:
         for genre in self.data.genres:
-            concepts = [DisplayConcept.from_concept(c) for c in genre.concepts]
+            concepts = [self.get_display_concept(c) for c in genre.concepts]
             yield DisplayGenre(concepts=concepts, label=genre.label)
 
     @property

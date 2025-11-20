@@ -7,7 +7,7 @@ from ingestor.models.merged.work import (
     MergedWork,
     VisibleMergedWork,
 )
-from ingestor.models.neptune.query_result import WorkConcept, WorkHierarchy
+from ingestor.models.neptune.query_result import ExtractedConcept, WorkHierarchy
 from models.events import BasePipelineEvent
 from sources.merged_works_source import MergedWorksSource
 from utils.elasticsearch import ElasticsearchMode
@@ -36,7 +36,7 @@ class ExtractedWork(BaseModel):
 class VisibleExtractedWork(ExtractedWork):
     work: VisibleMergedWork
     hierarchy: WorkHierarchy
-    concepts: list[WorkConcept]
+    concepts: list[ExtractedConcept]
 
 
 class GraphWorksExtractor(GraphBaseExtractor):

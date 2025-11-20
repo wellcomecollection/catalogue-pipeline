@@ -16,18 +16,12 @@ class WorkHierarchy(BaseModel):
     children: list[WorkHierarchyItem] = []
 
 
-class WorkConcept(BaseModel):
-    concept: ConceptNode
-    linked_source_concept: SourceConceptNode | None
-    other_source_concepts: list[SourceConceptNode]
-
-
 class ExtractedConcept(BaseModel):
     concept: ConceptNode
     linked_source_concept: SourceConceptNode | None
     source_concepts: list[SourceConceptNode]
-    types: list[ConceptType]
-    same_as: list[str]
+    types: list[ConceptType] = []
+    same_as: list[str] = []
 
 
 class ExtractedRelatedConcept(BaseModel):

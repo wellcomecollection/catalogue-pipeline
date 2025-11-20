@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from models.pipeline.concept import Concept, Subject
+from models.pipeline.concept import Concept
 from utils.types import ConceptType
 
 from .identifier import DisplayIdentifier
@@ -9,6 +9,7 @@ from .identifier import DisplayIdentifier
 class DisplayConcept(BaseModel):
     id: str | None = None
     label: str
+    standard_label: str | None = None
     identifiers: list[DisplayIdentifier] | None = None
     type: ConceptType = "Concept"
 
@@ -39,14 +40,6 @@ class DisplayContributor(BaseModel):
 class DisplaySubject(DisplayConcept):
     concepts: list[DisplayConcept]
     type: ConceptType = "Subject"
-
-    @staticmethod
-    def from_subject(subject: Subject) -> "DisplaySubject":
-        concept = DisplayConcept.from_concept(subject)
-        return DisplaySubject(
-            **concept.model_dump(),
-            concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
-        )
 
 
 class DisplayGenre(BaseModel):

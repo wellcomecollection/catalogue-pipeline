@@ -31,20 +31,20 @@ WORK_CONCEPTS_QUERY = """
         
         MATCH (work)-[:HAS_CONCEPT]->(concept)
         OPTIONAL MATCH (concept)-[:HAS_SOURCE_CONCEPT]->(linked_source_concept)
-        OPTIONAL MATCH (linked_source_concept)-[:SAME_AS*1..2]->(source_concept)
+        OPTIONAL MATCH (linked_source_concept)-[:SAME_AS*0..2]->(source_concept)
         WHERE linked_source_concept.id <> source_concept.id
         
         WITH
             work,
             concept,
             linked_source_concept,
-            COLLECT(source_concept) AS other_source_concepts
+            COLLECT(DISTINCT source_concept) AS source_concepts
 
-        RETURN 
+        RETURN
             work.id AS id,
             COLLECT({
                 concept: concept,
                 linked_source_concept: linked_source_concept,
-                other_source_concepts: other_source_concepts
+                source_concepts: source_concepts
             }) AS concepts
 """
