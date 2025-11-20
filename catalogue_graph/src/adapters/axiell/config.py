@@ -67,7 +67,7 @@ OAI_BACKOFF_MAX = float(os.getenv("OAI_BACKOFF_MAX", "5.0"))
 # Window harvesting behaviour
 # ---------------------------------------------------------------------------
 WINDOW_MINUTES = int(os.getenv("WINDOW_MINUTES", "15"))
-WINDOW_LOOKBACK_DAYS = 1  # int(os.getenv("WINDOW_LOOKBACK_DAYS", "3")) # Temporarily set to 1 day for testing with Arxiv
+WINDOW_LOOKBACK_DAYS = int(os.getenv("WINDOW_LOOKBACK_DAYS", "21"))
 WINDOW_MAX_PARALLEL_REQUESTS = int(os.getenv("WINDOW_MAX_PARALLEL_REQUESTS", "3"))
 _MAX_PENDING_WINDOWS_ENV = os.getenv("MAX_PENDING_WINDOWS")
 MAX_PENDING_WINDOWS: int | None = (

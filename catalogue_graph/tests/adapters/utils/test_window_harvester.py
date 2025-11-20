@@ -68,26 +68,15 @@ class StubOAIClient:
 
 
 class StubWindowProcessor:
-    def start_window(
-        self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> None:
+    def start_window(self, window_key: str) -> None:
         pass
 
-    def process_record(
-        self,
-        identifier: str,
-        record: Record,
-        window_start: datetime,
-        window_end: datetime,
-        index: int,
-    ) -> None:
+    def process_record(self, identifier: str, record: Record) -> None:
         pass
 
     def complete_window(
         self,
         window_key: str,
-        window_start: datetime,
-        window_end: datetime,
         record_ids: list[str],
     ) -> WindowCallbackResult:
         return {"record_ids": record_ids}
@@ -184,9 +173,6 @@ def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
             self,
             identifier: str,
             record: Record,
-            window_start: datetime,
-            window_end: datetime,
-            index: int,
         ) -> None:
             captured.append(identifier)
 
@@ -223,9 +209,6 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
             self,
             identifier: str,
             record: Record,
-            window_start: datetime,
-            window_end: datetime,
-            index: int,
         ) -> None:
             raise RuntimeError("boom")
 
@@ -361,29 +344,15 @@ def test_record_callback_factory_persists_changeset(tmp_path: Path) -> None:
         def __init__(self) -> None:
             self.records: list[str] = []
 
-        def start_window(
-            self,
-            window_key: str,
-            window_start: datetime,
-            window_end: datetime,
-        ) -> None:
+        def start_window(self, window_key: str) -> None:
             self.window_key = window_key
 
-        def process_record(
-            self,
-            identifier: str,
-            record: Record,
-            window_start: datetime,
-            window_end: datetime,
-            index: int,
-        ) -> None:
+        def process_record(self, identifier: str, record: Record) -> None:
             self.records.append(identifier)
 
         def complete_window(
             self,
             window_key: str,
-            window_start: datetime,
-            window_end: datetime,
             record_ids: list[str],
         ) -> WindowCallbackResult:
             return {

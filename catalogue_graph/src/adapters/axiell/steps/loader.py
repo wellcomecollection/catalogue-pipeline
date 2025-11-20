@@ -83,22 +83,11 @@ class WindowRecordWriter:
         self.table_client = table_client
         self.job_id = job_id
         self._rows: list[dict[str, str | None]] = []
-        self._window_key: str | None = None
 
-    def start_window(
-        self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> None:
-        self._window_key = window_key
+    def start_window(self, window_key: str) -> None:
         self._rows = []
 
-    def process_record(
-        self,
-        identifier: str,
-        record: Record,
-        window_start: datetime,
-        window_end: datetime,
-        index: int,
-    ) -> None:
+    def process_record(self, identifier: str, record: Record) -> None:
         self._rows.append(
             {
                 "namespace": self.namespace,
@@ -110,19 +99,18 @@ class WindowRecordWriter:
     def complete_window(
         self,
         window_key: str,
-        window_start: datetime,
-        window_end: datetime,
         record_ids: list[str],
     ) -> WindowCallbackResult:
-        tags: dict[str, str] = {"job_id": self.job_id}
-        if self._window_key:
-            tags.setdefault("window_key", self._window_key)
+        tags: dict[str, str] = {"job_id": self.job_id, "window_key": window_key}
         changeset_id: str | None = None
+
         if self._rows:
             table = pa.Table.from_pylist(self._rows, schema=ARROW_SCHEMA)
             changeset_id = self.table_client.incremental_update(table)
+
         if changeset_id:
             tags["changeset_id"] = changeset_id
+
         return {"record_ids": record_ids, "tags": tags}
 
 

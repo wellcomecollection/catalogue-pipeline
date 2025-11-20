@@ -36,6 +36,7 @@ class IcebergTableClient:
 
         # Optimization: For incremental updates, only fetch rows that match the incoming IDs.
         new_ids = [val for val in new_data.column("id").to_pylist() if val is not None]
+        
         # If there are no IDs, there's nothing to update (and inserts would fail if ID is required, but let's assume valid data)
         if not new_ids:
             return None

@@ -18,25 +18,12 @@ logger = logging.getLogger(__name__)
 
 
 class WindowProcessor(Protocol):
-    def start_window(
-        self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> None: ...
+    def start_window(self, window_key: str) -> None: ...
 
-    def process_record(
-        self,
-        identifier: str,
-        record: Record,
-        window_start: datetime,
-        window_end: datetime,
-        index: int,
-    ) -> None: ...
+    def process_record(self, identifier: str, record: Record) -> None: ...
 
     def complete_window(
-        self,
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-        record_ids: list[str],
+        self, window_key: str, record_ids: list[str]
     ) -> WindowCallbackResult: ...
 
 
@@ -274,25 +261,15 @@ class WindowHarvestManager:
                 )
 
             if processor:
-                processor.start_window(
-                    window_key=key, window_start=start, window_end=end
-                )
+                processor.start_window(window_key=key)
 
                 for idx, record in enumerate(records_in_window, 1):
                     identifier = self._record_identifier(record, start, idx)
-                    processor.process_record(
-                        identifier=identifier,
-                        record=record,
-                        window_start=start,
-                        window_end=end,
-                        index=idx,
-                    )
+                    processor.process_record(identifier=identifier, record=record)
                     record_ids.append(identifier)
 
                 callback_result = processor.complete_window(
                     window_key=key,
-                    window_start=start,
-                    window_end=end,
                     record_ids=record_ids,
                 )
 

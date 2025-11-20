@@ -200,24 +200,13 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
         table_client=table_client,
         job_id="job-123",
     )
-    window_start = datetime(2025, 1, 1, tzinfo=UTC)
-    window_end = window_start + timedelta(minutes=15)
-    writer.start_window(
-        window_key="key",
-        window_start=window_start,
-        window_end=window_end,
-    )
+    writer.start_window(window_key="key")
     writer.process_record(
         identifier="id-1",
         record=SimpleNamespace(metadata=etree.fromstring("<metadata />")),
-        window_start=window_start,
-        window_end=window_end,
-        index=1,
     )
     result = writer.complete_window(
         window_key="key",
-        window_start=window_start,
-        window_end=window_end,
         record_ids=["id-1"],
     )
 
@@ -240,17 +229,9 @@ def test_window_record_writer_handles_empty_window(
         table_client=table_client,
         job_id="job-123",
     )
-    window_start = datetime(2025, 1, 1, tzinfo=UTC)
-    window_end = window_start + timedelta(minutes=15)
-    writer.start_window(
-        window_key="key",
-        window_start=window_start,
-        window_end=window_end,
-    )
+    writer.start_window(window_key="key")
     result = writer.complete_window(
         window_key="key",
-        window_start=window_start,
-        window_end=window_end,
         record_ids=[],
     )
 
@@ -273,24 +254,14 @@ def test_window_record_writer_handles_deleted_record(
         table_client=table_client,
         job_id="job-123",
     )
-    window_start = datetime(2025, 1, 1, tzinfo=UTC)
-    window_end = window_start + timedelta(minutes=15)
-    writer.start_window(
-        window_key="key",
-        window_start=window_start,
-        window_end=window_end,
-    )
+
+    writer.start_window(window_key="key")
     writer.process_record(
         identifier="id-deleted",
         record=SimpleNamespace(metadata=None),
-        window_start=window_start,
-        window_end=window_end,
-        index=1,
     )
     result = writer.complete_window(
         window_key="key",
-        window_start=window_start,
-        window_end=window_end,
         record_ids=["id-deleted"],
     )
 
@@ -319,47 +290,27 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
         table_client=table_client,
         job_id="job-123",
     )
-    window_start = datetime(2025, 1, 1, tzinfo=UTC)
-    window_end = window_start + timedelta(minutes=15)
 
     # 1. Write initial data
-    writer.start_window(
-        window_key="key-1",
-        window_start=window_start,
-        window_end=window_end,
-    )
+    writer.start_window(window_key="key-1")
     writer.process_record(
         identifier="id-1",
         record=SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
-        window_start=window_start,
-        window_end=window_end,
-        index=1,
     )
     result_1 = writer.complete_window(
         window_key="key-1",
-        window_start=window_start,
-        window_end=window_end,
         record_ids=["id-1"],
     )
     assert "changeset_id" in cast(dict[str, str], result_1["tags"])
 
     # 2. Write same data again (no-op)
-    writer.start_window(
-        window_key="key-2",
-        window_start=window_start,
-        window_end=window_end,
-    )
+    writer.start_window(window_key="key-2")
     writer.process_record(
         identifier="id-1",
         record=SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
-        window_start=window_start,
-        window_end=window_end,
-        index=1,
     )
     result_2 = writer.complete_window(
         window_key="key-2",
-        window_start=window_start,
-        window_end=window_end,
         record_ids=["id-1"],
     )
 
@@ -369,22 +320,13 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
     assert "changeset_id" not in tags_2
 
     # 3. Write new data
-    writer.start_window(
-        window_key="key-3",
-        window_start=window_start,
-        window_end=window_end,
-    )
+    writer.start_window(window_key="key-3")
     writer.process_record(
         identifier="id-1",
         record=SimpleNamespace(metadata=etree.fromstring("<metadata>v2</metadata>")),
-        window_start=window_start,
-        window_end=window_end,
-        index=1,
     )
     result_3 = writer.complete_window(
         window_key="key-3",
-        window_start=window_start,
-        window_end=window_end,
         record_ids=["id-1"],
     )
 

@@ -97,8 +97,6 @@ def build_window_request(
         window_key=_window_key(start_time, end_time),
         window_start=start_time,
         window_end=end_time,
-        # metadata_prefix="oai_dc",  # config.OAI_METADATA_PREFIX, # Temporarily disabled for testing with Arxiv
-        # set_spec=None,  # config.OAI_SET_SPEC, # Temporarily disabled for testing with Arxiv
         metadata_prefix=config.OAI_METADATA_PREFIX,
         set_spec=config.OAI_SET_SPEC,
         max_windows=max_windows,
