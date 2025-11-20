@@ -23,21 +23,19 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
-from ingestor.transformers.raw_concept import (
-    DISPLAY_SOURCE_PRIORITY,
-    get_priority_label,
-)
 from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
 from utils.sort import natural_sort_key
 
+from .work_base_transformer import WorkBaseTransformer
 
-class DisplayWorkTransformer:
+
+class DisplayWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(extracted)
         self.data = extracted.work.data
         self.state = extracted.work.state
         self.hierarchy = extracted.hierarchy
-        self.concepts = {c.concept.id: c for c in extracted.concepts}
 
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
@@ -154,16 +152,11 @@ class DisplayWorkTransformer:
             yield DisplayRelation.from_neptune_node(child.work, child.parts)
 
     def get_display_concept(self, concept: Concept) -> DisplayConcept:
-        standard_label = concept.label
-        if concept.id.canonical_id in self.concepts:
-            extracted = self.concepts[concept.id.canonical_id]
-            standard_label, _ = get_priority_label(extracted, DISPLAY_SOURCE_PRIORITY)
-
         identifiers = list(DisplayIdentifier.from_all_identifiers(concept.id))
         return DisplayConcept(
             id=concept.id.canonical_id,
             label=concept.label,
-            standard_label=standard_label,
+            standard_label=self.get_standard_concept_label(concept),
             identifiers=None if len(identifiers) == 0 else identifiers,
             type=concept.display_type,
         )

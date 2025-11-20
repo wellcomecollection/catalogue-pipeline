@@ -6,6 +6,8 @@ from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
 from models.pipeline.location import PhysicalLocation
 
+from .work_base_transformer import WorkBaseTransformer
+
 # The Scala pipeline uses the date `-9999-01-01T00:00:00Z` as 'negative infinity'. The Python standard library doesn't
 # support dates with negative years, and so we hardcode the corresponding Unix timestamp here instead of installing
 # an external library to calculate it.
@@ -13,8 +15,9 @@ NEGATIVE_INFINITY_DATE = "-9999-01-01T00:00:00Z"
 NEGATIVE_INFINITY_UNIX_TIMESTAMP = -377705116800000
 
 
-class QueryWorkTransformer:
+class QueryWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(extracted)
         self.data = extracted.work.data
         self.state = extracted.work.state
         self.hierarchy = extracted.hierarchy
