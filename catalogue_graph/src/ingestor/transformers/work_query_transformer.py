@@ -93,8 +93,10 @@ class QueryWorkTransformer:
         if self.data.collection_path is None:
             return None
 
-        # If the collection path is incomplete, construct the full path using ancestors paths. For example, given
-        # the collection path 'C/D' and ancestors collections paths 'B/C', 'A/B', and 'A', return 'A/B/C/D'.
+        # Some works (e.g. works in the Fallaize Collection) store incomplete collection paths which only consist
+        # of <parent ID>/<work ID>. We want to index the full collection path for querying purposes, so we construct
+        # it here using ancestors paths. For example, given the collection path 'C/D' and ancestors collections paths
+        # 'B/C', 'A/B', and 'A', return 'A/B/C/D'.
         path_fragments = self.data.collection_path.path.split("/")
         for a in self.hierarchy.ancestors:
             if ancestor_path := a.work.properties.collection_path:
