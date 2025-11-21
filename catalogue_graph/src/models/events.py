@@ -18,23 +18,26 @@ DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
 class EventBridgeScheduledEvent(BaseModel):
-    time: str  # original EventBridge schedule event time
+    time: str 
+
+
+class PipelineIndexDates(BaseModel):
+    merged: str | None = None
+    concepts: str | None = None
+    works: str | None = None
 
 
 class BasePipelineEvent(BaseModel):
     pipeline_date: str
     window: IncrementalWindow | None = None
     pit_id: str | None = None
+    index_dates: PipelineIndexDates = PipelineIndexDates()
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
-        window = None
-        if args.window_start is not None or args.window_end is not None:
-            window = IncrementalWindow(
-                start_time=args.window_start, end_time=args.window_end
-            )
-
-        return cls(**args.__dict__, window=window)
+        window = IncrementalWindow.from_argparser(args)
+        index_dates = PipelineIndexDates(merged=args.index_date_merged)
+        return cls(**args.__dict__, window=window, index_dates=index_dates)
 
 
 class GraphPipelineEvent(BasePipelineEvent):

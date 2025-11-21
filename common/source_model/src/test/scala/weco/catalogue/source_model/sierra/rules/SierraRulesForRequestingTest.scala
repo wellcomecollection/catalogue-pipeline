@@ -67,7 +67,9 @@ class SierraRulesForRequestingTest
     )
   }
 
-  it("blocks an item if fixed field 108 (status) is n,a,p or u") {
+  it(
+    "blocks an item if fixed field 108 (status) is n,a,p - manual request required"
+  ) {
     List("n", "a", "p").map {
       status =>
         val item = createSierraItemDataWith(
@@ -79,12 +81,28 @@ class SierraRulesForRequestingTest
           NotRequestable.NeedsManualRequest
         ]
     }
+  }
 
+  it(
+    "blocks an item if fixed field 108 (status) is u - unavailable"
+  ) {
     val item = createSierraItemDataWith(
       fixedFields = Map("108" -> FixedField(label = "STATUS", value = "u"))
     )
+    SierraRulesForRequesting(item) shouldBe a[
+      NotRequestable.ItemUnavailable
+    ]
+  }
 
-    SierraRulesForRequesting(item) shouldBe a[NotRequestable.ItemUnavailable]
+  it(
+    "blocks an item if fixed field 108 (status) is b - at digitisation"
+  ) {
+    val item = createSierraItemDataWith(
+      fixedFields = Map("108" -> FixedField(label = "STATUS", value = "b"))
+    )
+    SierraRulesForRequesting(item) shouldBe a[
+      NotRequestable.AtDigitisation
+    ]
   }
 
   it("does not block an item if fixed field 87 (loan rule) is zero") {
@@ -338,7 +356,7 @@ class SierraRulesForRequestingTest
       (
         "4",
         Requestable
-      ),
+      )
     )
 
     forAll(testCases) {

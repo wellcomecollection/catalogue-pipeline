@@ -129,7 +129,9 @@ class DisplayWorkTransformer:
     def part_of(self) -> Generator[DisplayRelation]:
         if self.state.relations is not None:
             for series in self.state.relations.ancestors[::-1]:
-                yield DisplayRelation.from_work_ancestor(series)
+                # If the series has the same title as one of the work's ancestors, do not include it
+                if not self.hierarchy.ancestors_include_title(series.title):
+                    yield DisplayRelation.from_work_ancestor(series)
 
         for ancestor in self.hierarchy.ancestors:
             yield DisplayRelation.from_neptune_node(ancestor.work, ancestor.parts)
