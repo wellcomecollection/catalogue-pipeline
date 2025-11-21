@@ -19,7 +19,7 @@ class MetricReporter:
         dimensions = dimensions or {}
 
         # CloudWatch does not support sending metrics older than 2 weeks
-        two_weeks_ago = datetime.now() - timedelta(weeks=2)
+        two_weeks_ago = datetime.now(tz=timestamp.tzinfo) - timedelta(weeks=2)
         if two_weeks_ago > timestamp:
             print(
                 "Did not publish CloudWatch metrics. Provided timestamp is too far in the past."
