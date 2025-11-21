@@ -1,4 +1,6 @@
+import argparse
 from datetime import datetime, timedelta
+from typing import Self
 
 from pydantic import BaseModel, model_validator, parse_obj_as
 
@@ -30,3 +32,11 @@ class IncrementalWindow(BaseModel):
         start_time = datetime.strptime(start_str, "%Y%m%dT%H%M")
         end_time = datetime.strptime(end_str, "%Y%m%dT%H%M")
         return cls(start_time=start_time, end_time=end_time)
+
+    @classmethod
+    def from_argparser(cls, args: argparse.Namespace) -> Self | None:
+        window = None
+        if args.window_start is not None or args.window_end is not None:
+            window = cls(start_time=args.window_start, end_time=args.window_end)
+
+        return window
