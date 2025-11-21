@@ -39,14 +39,16 @@ trait LocationGenerators extends RandomGenerators {
     locationType: DigitalLocationType = LocationType.IIIFPresentationAPI,
     url: String = defaultLocationUrl,
     license: Option[License] = Some(License.CCBY),
-    accessConditions: List[AccessCondition] = Nil
+    accessConditions: List[AccessCondition] = Nil,
+    createdDate: Option[String] = None
   ): DigitalLocation = DigitalLocation(
     locationType = locationType,
     url = url,
     license = license,
     credit = chooseFrom(None, Some(s"Credit line: ${randomAlphanumeric()}")),
     linkText = chooseFrom(None, Some(s"Link text: ${randomAlphanumeric()}")),
-    accessConditions = accessConditions
+    accessConditions = accessConditions,
+    createdDate = createdDate
   )
 
   def createDigitalLocation: DigitalLocation = createDigitalLocationWith()

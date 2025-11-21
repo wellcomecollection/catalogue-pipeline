@@ -142,6 +142,31 @@ class MetsXmlTransformerTest
       )
     )
   }
+
+  it("ignores CREATEDATE for Goobi METS when version is not 1") {
+    val xml = readResource("b30246039.xml")
+    val fileReferences = createFileReferences(6, "b30246039")
+    val thumbnailRef = fileReferences(5)
+    val now = Instant.now
+    transform(root = Some(xml), modifiedTime = now, version = 2) shouldBe Right(
+      InvisibleMetsData(
+        recordIdentifier = "b30246039",
+        title = "[Report 1942] /",
+        accessConditions = MetsAccessConditions(
+          licence = Some(License.CCBYNC),
+          accessStatus = Some(AccessStatus.Open),
+          usage = Some("Some terms")
+        ),
+        fileReferences = fileReferences,
+        thumbnailReference = Some(thumbnailRef),
+        version = 2,
+        modifiedTime = now,
+        createdDate = None, // Should be None for version != 1
+        locationPrefix = "v2/"
+      )
+    )
+  }
+
   // TODO, I'm not sure this should error, it should warn and best-guess.
   it("errors if first manifestation doesn't exist in store") {
     val xml = readResource("b22012692.xml")
@@ -161,18 +186,19 @@ class MetsXmlTransformerTest
     root: Option[String],
     modifiedTime: Instant,
     deleted: Boolean = false,
-    manifestations: Map[String, Option[String]] = Map.empty
+    manifestations: Map[String, Option[String]] = Map.empty,
+    version: Int = 1
   ): Result[MetsData] = {
 
     val metsSourceData = if (deleted) {
       DeletedMetsFile(
         modifiedTime = modifiedTime,
-        version = 1
+        version = version
       )
     } else {
       MetsFileWithImages(
         root = S3ObjectLocationPrefix(bucket = "bucket", keyPrefix = "path"),
-        version = 1,
+        version = version,
         filename = if (root.nonEmpty) "root.xml" else "nonexistent.xml",
         modifiedTime = modifiedTime,
         manifestations = manifestations.toList.map { case (file, _) => file }

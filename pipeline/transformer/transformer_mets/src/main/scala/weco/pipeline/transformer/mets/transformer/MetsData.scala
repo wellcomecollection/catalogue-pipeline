@@ -144,6 +144,8 @@ object InvisibleMetsData {
       case _: GoobiMetsXml         => "v2/"
       case _: ArchivematicaMetsXML => ""
     }
+    val createdDate = if (version == 1) root.createdDate else None
+
     for {
       recordIdentifier <- root.recordIdentifier
       title <- MetsTitle(root.root)
@@ -152,7 +154,7 @@ object InvisibleMetsData {
       recordIdentifier = recordIdentifier,
       title = title,
       accessConditions = accessConditions,
-      createdDate = root.createdDate,
+      createdDate = createdDate,
       version = version,
       modifiedTime = modifiedTime,
       locationPrefix = locationPrefix,
