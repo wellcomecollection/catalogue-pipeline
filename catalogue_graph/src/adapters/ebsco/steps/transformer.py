@@ -24,11 +24,12 @@ from adapters.ebsco.models.manifests import ErrorLine, TransformerManifest
 from adapters.ebsco.models.step_events import (
     EbscoAdapterTransformerEvent,
 )
+from adapters.ebsco.table_config import get_iceberg_table
 from adapters.ebsco.transformers.ebsco_to_weco import (
     ebsco_source_work_state,
     transform_record,
 )
-from adapters.ebsco.utils.iceberg import IcebergTableClient, get_iceberg_table
+from adapters.utils.iceberg import IcebergTableClient
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.source.work import (
     DeletedSourceWork,

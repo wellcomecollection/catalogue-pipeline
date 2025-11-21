@@ -25,6 +25,15 @@ def get_secret(secret_name: str) -> str:
     return secret
 
 
+def get_ssm_parameter(parameter_name: str) -> str:
+    """Returns an AWS SSM Parameter Store parameter value associated with a given parameter name."""
+    ssm_client = boto3.Session().client("ssm")
+    response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
+
+    parameter_value: str = response["Parameter"]["Value"]
+    return parameter_value
+
+
 def publish_batch_to_sns(topic_arn: str, messages: list[str]) -> None:
     """Publishes a batch of up to 10 messages to the specified SNS topic."""
 

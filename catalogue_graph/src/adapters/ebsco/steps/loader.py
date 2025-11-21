@@ -20,12 +20,13 @@ from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
 )
-from adapters.ebsco.schemata import ARROW_SCHEMA
-from adapters.ebsco.utils.iceberg import IcebergTableClient, get_iceberg_table
+from adapters.ebsco.table_config import get_iceberg_table
 from adapters.ebsco.utils.tracking import (
     is_file_already_processed,
     record_processed_file,
 )
+from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.schemata import ARROW_SCHEMA
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
@@ -46,7 +47,7 @@ def load_xml(xmlfile: IO[bytes]) -> etree._Element:
 def update_from_xml(table: IcebergTable, collection: etree._Element) -> str | None:
     records = nodes_to_records(collection)
     updater = IcebergTableClient(table, default_namespace=EBSCO_NAMESPACE)
-    return updater.update(data_to_pa_table(records))
+    return updater.snapshot_sync(data_to_pa_table(records))
 
 
 def nodes_to_records(collection: etree._Element) -> list[dict[str, str]]:
