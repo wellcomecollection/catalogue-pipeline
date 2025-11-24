@@ -9,7 +9,7 @@ import argparse
 import re
 import tempfile
 from datetime import datetime
-from typing import Any, cast
+from typing import Any
 
 import boto3
 import smart_open
@@ -26,17 +26,11 @@ from adapters.ebsco.models.step_events import (
     EbscoAdapterTriggerEvent,
 )
 from models.events import EventBridgeScheduledEvent
+from utils.aws import get_ssm_parameter
 
 
 class EbscoAdapterTriggerConfig(BaseModel):
     is_local: bool = False
-
-
-def _get_ssm_parameter(parameter_name: str) -> str:
-    """Returns an AWS SSM parameter string associated with a given name."""
-    ssm_client = boto3.Session().client("ssm")
-    response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
-    return cast(str, response["Parameter"]["Value"])
 
 
 def _list_s3_keys(bucket: str, prefix: str) -> list[str]:
@@ -134,10 +128,10 @@ def handler(
 
     job_id = event.job_id
 
-    ftp_server = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_server")
-    ftp_username = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_username")
-    ftp_password = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_password")
-    ftp_remote_dir = _get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_remote_dir")
+    ftp_server = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_server")
+    ftp_username = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_username")
+    ftp_password = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_password")
+    ftp_remote_dir = get_ssm_parameter(f"{SSM_PARAM_PREFIX}/ftp_remote_dir")
 
     with (
         EbscoFtp(ftp_server, ftp_username, ftp_password, ftp_remote_dir) as ebsco_ftp,
