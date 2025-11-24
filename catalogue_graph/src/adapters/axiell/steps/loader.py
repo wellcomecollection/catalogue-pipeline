@@ -221,17 +221,22 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the Axiell loader step locally")
-    """ Example event: 
-    {
-        "job_id": "some-unique-job-id",
-        "window_key": "2025-11-17T16:46:41.071426+00:00_2025-11-17T16:50:05.531331+00:00",
-        "window_start": "2025-11-17T16:46:41.071426Z",
-        "window_end": "2025-11-17T16:50:05.531331Z",
-        "metadata_prefix": "oai_raw",
-        "set_spec": "collect",
-        "max_windows": null
-    }
-    """
+    """  
+    Runs the Axiell loader step locally.  
+
+    Parses command-line arguments to load an event JSON file and optional configuration,  
+    then executes the loader step and prints the response.  
+    """  
+    # Example event payload:  
+    # {  
+    #     "job_id": "some-unique-job-id",  
+    #     "window_key": "2025-11-17T16:46:41.071426+00:00_2025-11-17T16:50:05.531331+00:00",  
+    #     "window_start": "2025-11-17T16:46:41.071426Z",  
+    #     "window_end": "2025-11-17T16:50:05.531331Z",  
+    #     "metadata_prefix": "oai_raw",  
+    #     "set_spec": "collect",  
+    #     "max_windows": null  
+    # }
     parser.add_argument(
         "--event",
         type=str,
