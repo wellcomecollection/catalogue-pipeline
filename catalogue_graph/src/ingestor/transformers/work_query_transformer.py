@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 
 from dateutil import parser
 
@@ -13,6 +13,11 @@ from .work_base_transformer import WorkBaseTransformer
 # an external library to calculate it.
 NEGATIVE_INFINITY_DATE = "-9999-01-01T00:00:00Z"
 NEGATIVE_INFINITY_UNIX_TIMESTAMP = -377705116800000
+
+
+def get_unique(items: Iterable[str]) -> list[str]:
+    """Deduplicate items in the given iterable white preserving order"""
+    return list(dict.fromkeys(items))
 
 
 class QueryWorkTransformer(WorkBaseTransformer):
@@ -71,16 +76,22 @@ class QueryWorkTransformer(WorkBaseTransformer):
             yield item.work.properties.id
 
     @property
-    def genre_concept_labels(self) -> Generator[str]:
+    def genre_concept_labels(self) -> list[str]:
+        items = []
         for genre in self.data.genres:
             for concept in genre.concepts:
-                yield self.get_standard_concept_label(concept)
+                items.append(self.get_standard_concept_label(concept))
+
+        return get_unique(items)
 
     @property
-    def subject_concept_labels(self) -> Generator[str]:
+    def subject_concept_labels(self) -> list[str]:
+        items = []
         for subject in self.data.subjects:
             for concept in subject.concepts:
-                yield self.get_standard_concept_label(concept)
+                items.append(self.get_standard_concept_label(concept))
+
+        return get_unique(items)
 
     @property
     def image_ids(self) -> list[str]:
@@ -118,13 +129,15 @@ class QueryWorkTransformer(WorkBaseTransformer):
 
     @property
     def subject_labels(self) -> list[str]:
-        return [self.get_standard_concept_label(s) for s in self.data.subjects]
+        return get_unique(
+            self.get_standard_concept_label(s) for s in self.data.subjects
+        )
 
     @property
     def contributor_agent_labels(self) -> list[str]:
-        return [
+        return get_unique(
             self.get_standard_concept_label(c.agent) for c in self.data.contributors
-        ]
+        )
 
     @property
     def format_id(self) -> str | None:
