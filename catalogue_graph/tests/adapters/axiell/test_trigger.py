@@ -53,7 +53,7 @@ def test_build_window_request_uses_lookback_when_no_history(
     assert request.window_end == now
     assert request.set_spec == config.OAI_SET_SPEC
     assert request.metadata_prefix == config.OAI_METADATA_PREFIX
-    assert request.job_id
+    assert request.job_id == "20251117T1200"
 
 
 def test_build_window_request_respects_last_success(
