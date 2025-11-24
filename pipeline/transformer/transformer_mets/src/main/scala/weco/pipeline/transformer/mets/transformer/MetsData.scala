@@ -1,6 +1,7 @@
 package weco.pipeline.transformer.mets.transformer
 
-import java.time.Instant
+import java.time.{Instant, ZonedDateTime}
+import java.time.format.DateTimeFormatter
 import weco.catalogue.internal_model.work.WorkState.Source
 import weco.catalogue.internal_model.identifiers._
 import weco.catalogue.internal_model.image.ImageData
@@ -144,7 +145,21 @@ object InvisibleMetsData {
       case _: GoobiMetsXml         => "v2/"
       case _: ArchivematicaMetsXML => ""
     }
-    val createdDate = if (version == 1) root.createdDate else None
+
+    val createdDate = if (version == 1) {
+      root.createdDate.map { dateStr =>
+        // Parse and reformat to ensure consistent format
+        // Try parsing with timezone first, if that fails assume UTC
+        val zonedDateTime = scala.util.Try {
+          ZonedDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME)
+        }.getOrElse {
+          // No timezone info, parse as LocalDateTime and assume UTC
+          val localDateTime = java.time.LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+          localDateTime.atZone(java.time.ZoneOffset.UTC)
+        }
+        zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
+      }
+    } else None
 
     for {
       recordIdentifier <- root.recordIdentifier
