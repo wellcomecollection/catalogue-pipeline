@@ -10,6 +10,7 @@ import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.MetsAccessConditions
 import weco.pipeline.transformer.result.Result
 import weco.sierra.generators.SierraIdentifierGenerators
+import weco.storage.providers.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryStore
 
 import java.time.Instant
