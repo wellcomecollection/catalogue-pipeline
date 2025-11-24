@@ -72,6 +72,31 @@ def test_build_window_request_respects_last_success(
     assert request.window_end == now
 
 
+def test_build_window_request_finds_latest_among_multiple_windows(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
+
+    # Create windows with different end times
+    end1 = now - timedelta(minutes=45)
+    end2 = now - timedelta(minutes=30)  # This is the latest
+    end3 = now - timedelta(minutes=60)
+
+    store = _populate_store(
+        temporary_window_status_table,
+        [
+            _window_row(end1 - timedelta(minutes=15), end1),
+            _window_row(end2 - timedelta(minutes=15), end2),
+            _window_row(end3 - timedelta(minutes=15), end3),
+        ],
+    )
+
+    request = trigger.build_window_request(store=store, now=now)
+
+    assert request.window_start == end2
+    assert request.window_end == now
+
+
 def test_build_window_request_errors_when_lag_exceeds_limit(
     monkeypatch: MonkeyPatch,
     temporary_window_status_table: IcebergTable,
