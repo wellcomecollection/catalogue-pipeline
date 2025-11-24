@@ -12,6 +12,9 @@ COPY pyproject.toml uv.lock ./
 # Install uv package manager
 RUN pip install uv
 
+# Install git and clean up apt cache
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 # Install dependencies and the package using uv pip install
 # uv pip install works with the system Python environment and installs from uv.lock
 # --system installs to system Python instead of requiring a virtual environment  
