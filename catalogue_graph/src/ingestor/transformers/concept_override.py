@@ -18,7 +18,6 @@ DEFAULT_PATH = os.path.join(HERE, "wellcome_collection_authority.csv")
 
 @lru_cache
 def load_csv_overrides(file_path: str) -> dict[str, dict[str, str]]:
-    print("LOADING OVERRIDES")
     with open(file_path) as f:
         return load_overrides(f)
 
