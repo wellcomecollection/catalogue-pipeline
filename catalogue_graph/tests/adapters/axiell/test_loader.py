@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from typing import Any, cast
+from unittest.mock import patch
 
 import pytest
 from lxml import etree
@@ -18,24 +19,6 @@ from adapters.utils.window_store import IcebergWindowStore
 
 class StubOAIClient:
     pass
-
-
-class StubHarvester:
-    def __init__(self, summaries: list[dict[str, Any]]):
-        self.summaries = summaries
-        self.calls: list[tuple[datetime, datetime, int | None]] = []
-
-    def harvest_recent(
-        self,
-        *,
-        start_time: datetime,
-        end_time: datetime,
-        max_windows: int | None,
-        reprocess_successful_windows: bool = False,
-    ) -> list[dict[str, Any]]:
-        self.calls.append((start_time, end_time, max_windows))
-        assert reprocess_successful_windows is False
-        return self.summaries
 
 
 def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
@@ -99,30 +82,23 @@ def test_execute_loader_updates_iceberg(
     store = IcebergWindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    def fake_build_harvester(
-        request: AxiellAdapterLoaderEvent,
-        runtime_arg: loader.LoaderRuntime,
-    ) -> StubHarvester:
-        assert request.window_key == req.window_key
-        harvester = StubHarvester([summary])
-        harvester_holder["instance"] = harvester
-        return harvester
+    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+        mock_harvest.return_value = [summary]
 
-    harvester_holder: dict[str, StubHarvester | None] = {"instance": None}
-    monkeypatch.setattr(loader, "_build_harvester", fake_build_harvester)
+        response = loader.execute_loader(req, runtime=runtime)
 
-    response = loader.execute_loader(req, runtime=runtime)
+        assert isinstance(response, LoaderResponse)
+        assert response.changeset_ids == ["changeset-123"]
+        assert response.record_count == 1
+        assert response.job_id == req.job_id
+        assert len(response.summaries) == 1
 
-    assert isinstance(response, LoaderResponse)
-    assert response.changeset_ids == ["changeset-123"]
-    assert response.record_count == 1
-    assert response.job_id == req.job_id
-    assert len(response.summaries) == 1
-
-    # confirm harvester invoked with event bounds
-    harvester = harvester_holder["instance"]
-    assert harvester is not None
-    assert harvester.calls == [(req.window_start, req.window_end, req.max_windows)]
+        mock_harvest.assert_called_once_with(
+            start_time=req.window_start,
+            end_time=req.window_end,
+            max_windows=req.max_windows,
+            reprocess_successful_windows=False,
+        )
 
 
 def test_execute_loader_handles_no_new_records(
@@ -137,34 +113,27 @@ def test_execute_loader_handles_no_new_records(
     store = IcebergWindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    def fake_build_harvester(
-        request: AxiellAdapterLoaderEvent,
-        runtime_arg: loader.LoaderRuntime,
-    ) -> StubHarvester:
-        return StubHarvester(
-            [
-                {
-                    "window_key": request.window_key,
-                    "window_start": request.window_start,
-                    "window_end": request.window_end,
-                    "state": "success",
-                    "attempts": 1,
-                    "record_ids": [],
-                    "last_error": None,
-                    "updated_at": request.window_end,
-                    "tags": {"job_id": request.job_id},
-                    "changeset_id": None,
-                }
-            ]
-        )
+    summary = {
+        "window_key": req.window_key,
+        "window_start": req.window_start,
+        "window_end": req.window_end,
+        "state": "success",
+        "attempts": 1,
+        "record_ids": [],
+        "last_error": None,
+        "updated_at": req.window_end,
+        "tags": {"job_id": req.job_id},
+        "changeset_id": None,
+    }
 
-    monkeypatch.setattr(loader, "_build_harvester", fake_build_harvester)
+    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+        mock_harvest.return_value = [summary]
 
-    response = loader.execute_loader(req, runtime=runtime)
+        response = loader.execute_loader(req, runtime=runtime)
 
-    assert response.changeset_ids == []
-    assert response.record_count == 0
-    assert table_client.get_all_records().num_rows == 0
+        assert response.changeset_ids == []
+        assert response.record_count == 0
+        assert table_client.get_all_records().num_rows == 0
 
 
 def test_execute_loader_errors_when_no_windows(
@@ -179,16 +148,11 @@ def test_execute_loader_errors_when_no_windows(
     store = IcebergWindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    def fake_build_harvester(
-        request: AxiellAdapterLoaderEvent,
-        runtime_arg: loader.LoaderRuntime,
-    ) -> StubHarvester:
-        return StubHarvester([])
+    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+        mock_harvest.return_value = []
 
-    monkeypatch.setattr(loader, "_build_harvester", fake_build_harvester)
-
-    with pytest.raises(RuntimeError):
-        loader.execute_loader(req, runtime=runtime)
+        with pytest.raises(RuntimeError):
+            loader.execute_loader(req, runtime=runtime)
 
 
 def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> None:
