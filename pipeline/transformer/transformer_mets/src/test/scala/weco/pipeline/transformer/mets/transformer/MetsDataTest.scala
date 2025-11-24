@@ -50,7 +50,7 @@ class MetsDataTest
     val digitalLocation = DigitalLocation(
       url = url,
       locationType = LocationType.IIIFPresentationAPI,
-      license = Some(License.CCBYNC),
+      license = Some(License.CCBYNC)
     )
 
     val unidentifiableItem =
@@ -289,7 +289,7 @@ class MetsDataTest
         url =
           s"https://iiif.wellcomecollection.org/thumbs/${metsData.recordIdentifier}_location.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
-        license = Some(License.CCBYNC),
+        license = Some(License.CCBYNC)
       )
     )
   }
@@ -310,7 +310,7 @@ class MetsDataTest
         url =
           s"https://iiif.wellcomecollection.org/thumbs/${metsData.recordIdentifier}_title.jp2/full/!200,200/0/default.jpg",
         locationType = LocationType.ThumbnailImage,
-        license = Some(License.CCBYNC),
+        license = Some(License.CCBYNC)
       )
     )
   }
@@ -342,7 +342,7 @@ class MetsDataTest
       DigitalLocation(
         url = s"https://iiif.wellcomecollection.org/thumb/$bibNumber",
         locationType = LocationType.ThumbnailImage,
-        license = Some(License.CCBYNC),
+        license = Some(License.CCBYNC)
       )
     )
   }
@@ -382,13 +382,13 @@ class MetsDataTest
         url =
           s"https://iiif.wellcomecollection.org/image/${metsData.recordIdentifier}_location.jp2/info.json",
         locationType = LocationType.IIIFImageAPI,
-        license = Some(License.CCBYNC),
+        license = Some(License.CCBYNC)
       ),
       DigitalLocation(
         url =
           s"https://iiif.wellcomecollection.org/presentation/v2/${metsData.recordIdentifier}",
         locationType = LocationType.IIIFPresentationAPI,
-        license = Some(License.CCBYNC),
+        license = Some(License.CCBYNC)
       )
     )
   }
