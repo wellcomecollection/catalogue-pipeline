@@ -31,6 +31,11 @@ module "pipeline" {
         initial = "empty"
       }
       concepts = { indexed = "concepts_indexed.2025-06-17" }
+    },
+    "2025-11-20" = {
+      works = {
+        indexed = "works_indexed.2024-11-14"
+      }
     }
     "2025-11-20" = {
       works = {

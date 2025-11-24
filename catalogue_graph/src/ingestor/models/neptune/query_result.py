@@ -1,8 +1,14 @@
+from functools import cached_property
+
 from pydantic import BaseModel
 
 from utils.types import ConceptType
 
 from .node import ConceptNode, SourceConceptNode, WorkNode
+
+
+def _standardise_work_title(title: str) -> str:
+    return title.rstrip(".")
 
 
 class WorkHierarchyItem(BaseModel):
@@ -14,6 +20,19 @@ class WorkHierarchy(BaseModel):
     id: str
     ancestors: list[WorkHierarchyItem] = []
     children: list[WorkHierarchyItem] = []
+
+    @cached_property
+    def _ancestor_titles(self) -> set[str]:
+        titles = set()
+        for ancestor in self.ancestors:
+            if (title := ancestor.work.properties.label) is not None:
+                titles.add(_standardise_work_title(title))
+
+        return titles
+
+    def ancestors_include_title(self, title: str) -> bool:
+        """Returns true if a given title is used by one of the work's ancestors."""
+        return _standardise_work_title(title) in self._ancestor_titles
 
 
 class ExtractedConcept(BaseModel):

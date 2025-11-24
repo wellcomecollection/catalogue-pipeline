@@ -58,7 +58,8 @@ class QueryWorkTransformer(WorkBaseTransformer):
     def part_of_titles(self) -> Generator[str]:
         if self.state.relations is not None:
             for series_item in self.state.relations.ancestors:
-                yield series_item.title
+                if not self.hierarchy.ancestors_include_title(series_item.title):
+                    yield series_item.title
 
         for collection_item in self.hierarchy.ancestors[::-1]:
             if collection_item.work.properties.label is not None:
@@ -95,7 +96,18 @@ class QueryWorkTransformer(WorkBaseTransformer):
         if self.data.collection_path is None:
             return None
 
-        return self.data.collection_path.path
+        # Some works (e.g. works in the Fallaize Collection) store incomplete collection paths which only consist
+        # of <parent ID>/<work ID>. We want to index the full collection path for querying purposes, so we construct
+        # it here using ancestors paths. For example, given the collection path 'C/D' and ancestors collections paths
+        # 'B/C', 'A/B', and 'A', return 'A/B/C/D'.
+        path_fragments = self.data.collection_path.path.split("/")
+        for a in self.hierarchy.ancestors:
+            if ancestor_path := a.work.properties.collection_path:
+                ancestor_path_fragments = ancestor_path.split("/")
+                if ancestor_path_fragments[-1] == path_fragments[0]:
+                    path_fragments = ancestor_path_fragments[:-1] + path_fragments
+
+        return "/".join(path_fragments)
 
     @property
     def collection_path_label(self) -> str | None:
