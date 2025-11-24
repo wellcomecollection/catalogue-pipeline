@@ -1,18 +1,23 @@
+import argparse
 from pathlib import PurePosixPath
-from typing import Literal
+from typing import Literal, Self
 
 from pydantic import BaseModel
 
 import config
-from models.events import BasePipelineEvent
+from models.events import BasePipelineEvent, IncrementalWindow, PipelineIndexDates
 from utils.types import IngestorLoadFormat, IngestorType
 
 
 class IngestorStepEvent(BasePipelineEvent):
     ingestor_type: IngestorType
-    index_date: str
     job_id: str
     load_format: IngestorLoadFormat = "parquet"
+
+    @property
+    def index_date(self) -> str:
+        """Return final index date based on ingestor type. Use pipeline date if no index date specified."""
+        return getattr(self.index_dates, self.ingestor_type) or self.pipeline_date
 
     def get_path_prefix(self) -> str:
         """
@@ -39,6 +44,23 @@ class IngestorStepEvent(BasePipelineEvent):
     def get_s3_uri(self, file_name: str, file_format: str | None = None) -> str:
         prefix = self.get_path_prefix()
         return f"s3://{config.CATALOGUE_GRAPH_S3_BUCKET}/{prefix}/{file_name}.{file_format or self.load_format}"
+
+    @classmethod
+    def from_argparser(cls, args: argparse.Namespace) -> Self:
+        window = IncrementalWindow.from_argparser(args)
+
+        index_date_works, index_date_concepts = None, None
+        if args.ingestor_type == "works":
+            index_date_works = args.index_date
+        elif args.ingestor_type == "concepts":
+            index_date_concepts = args.index_date
+
+        index_dates = PipelineIndexDates(
+            merged=args.index_date_merged,
+            works=index_date_works,
+            concepts=index_date_concepts,
+        )
+        return cls(**args.__dict__, window=window, index_dates=index_dates)
 
 
 class IngestorLoaderLambdaEvent(IngestorStepEvent):

@@ -29,6 +29,7 @@ resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
     {
       "pipeline_date": "${var.pipeline_date}",
       "index_dates": {
+        "merged": "${var.index_dates.merged}",
         "concepts": "${var.index_dates.concepts}",
         "works": "${var.index_dates.works}"
       },

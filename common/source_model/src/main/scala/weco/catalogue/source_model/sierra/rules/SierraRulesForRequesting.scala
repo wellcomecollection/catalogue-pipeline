@@ -152,13 +152,23 @@ object SierraRulesForRequesting {
 
       // These cases cover the lines:
       //
-      //    q|i||108||=|u||
+      //    v|i||108||=|u||
       //    #ls Line above opacmsg = Unavailable for vs 27/08/24
+      //    q|i||108||=|b||
+      //    #ls Line above opacmsg = @digitisation for th 12/11/25
+      //    [note also that the 'q' element on the line above has been changed to 'v' ]
       case i
           if i
             .fixedField("108")
             .contains("u") =>
         NotRequestable.ItemUnavailable()
+      case i
+          if i
+            .fixedField("108")
+            .contains("b") =>
+        NotRequestable.AtDigitisation(
+          "At digitisation"
+        )
 
       // These cases cover the lines:
       //

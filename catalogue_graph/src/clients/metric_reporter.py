@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import boto3
 
@@ -13,10 +13,18 @@ class MetricReporter:
         self,
         metric_name: str,
         value: float,
-        timestamp: str | datetime,
+        timestamp: datetime,
         dimensions: dict[str, str] | None = None,
     ) -> None:
         dimensions = dimensions or {}
+
+        # CloudWatch does not support sending metrics older than 2 weeks
+        two_weeks_ago = datetime.now(tz=timestamp.tzinfo) - timedelta(weeks=2)
+        if two_weeks_ago > timestamp:
+            print(
+                "Did not publish CloudWatch metrics. Provided timestamp is too far in the past."
+            )
+            return
 
         self.client.put_metric_data(
             Namespace=self.namespace,
