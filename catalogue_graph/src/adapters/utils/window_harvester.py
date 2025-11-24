@@ -237,7 +237,6 @@ class WindowHarvestManager:
         attempts = 1
         record_ids: list[str] = []
         last_error: str | None = None
-        state = "failed"
         tags: dict[str, str] | None = (
             dict(self.default_tags) if self.default_tags else None
         )
