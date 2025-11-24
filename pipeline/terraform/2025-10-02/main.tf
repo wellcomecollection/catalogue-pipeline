@@ -37,11 +37,6 @@ module "pipeline" {
         indexed = "works_indexed.2024-11-14"
       }
     }
-    "2025-11-20" = {
-      works = {
-        indexed = "works_indexed.2024-11-14"
-      }
-    }
   }
 
   allow_delete_indices = false
