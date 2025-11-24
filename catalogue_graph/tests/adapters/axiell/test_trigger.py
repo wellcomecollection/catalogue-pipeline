@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -60,10 +61,15 @@ def test_build_window_request_respects_last_success(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     now = datetime(2025, 11, 17, 12, 15, tzinfo=UTC)
-    last_success_end = now - timedelta(minutes=15)
+    minutes_ago = random.randint(2, 40)
+    last_success_end = now - timedelta(minutes=minutes_ago)
     store = _populate_store(
         temporary_window_status_table,
-        [_window_row(last_success_end - timedelta(minutes=15), last_success_end)],
+        [
+            _window_row(
+                last_success_end - timedelta(minutes=minutes_ago), last_success_end
+            )
+        ],
     )
 
     request = trigger.build_window_request(store=store, now=now)
@@ -85,9 +91,9 @@ def test_build_window_request_finds_latest_among_multiple_windows(
     store = _populate_store(
         temporary_window_status_table,
         [
-            _window_row(end1 - timedelta(minutes=15), end1),
-            _window_row(end2 - timedelta(minutes=15), end2),
-            _window_row(end3 - timedelta(minutes=15), end3),
+            _window_row(end1 - timedelta(minutes=random.randint(2, 40)), end1),
+            _window_row(end2 - timedelta(minutes=random.randint(2, 40)), end2),
+            _window_row(end3 - timedelta(minutes=random.randint(2, 40)), end3),
         ],
     )
 
@@ -105,7 +111,7 @@ def test_build_window_request_errors_when_lag_exceeds_limit(
     old_end = now - timedelta(hours=2)
     store = _populate_store(
         temporary_window_status_table,
-        [_window_row(old_end - timedelta(minutes=15), old_end)],
+        [_window_row(old_end - timedelta(minutes=random.randint(2, 40)), old_end)],
     )
     monkeypatch.setattr(config, "MAX_LAG_MINUTES", 30)
 
@@ -121,7 +127,7 @@ def test_build_window_request_can_skip_lag_enforcement(
     old_end = now - timedelta(hours=2)
     store = _populate_store(
         temporary_window_status_table,
-        [_window_row(old_end - timedelta(minutes=15), old_end)],
+        [_window_row(old_end - timedelta(minutes=random.randint(2, 40)), old_end)],
     )
     monkeypatch.setattr(config, "MAX_LAG_MINUTES", 30)
 
@@ -178,7 +184,7 @@ def test_lambda_handler_uses_rest_api_table_by_default(
         return AxiellAdapterLoaderEvent(
             job_id=event.job_id,
             window_key="window",
-            window_start=now - timedelta(minutes=15),
+            window_start=now - timedelta(minutes=random.randint(2, 40)),
             window_end=now,
             metadata_prefix="oai",
             set_spec="collect",
