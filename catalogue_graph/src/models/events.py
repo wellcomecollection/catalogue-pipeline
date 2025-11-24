@@ -18,7 +18,7 @@ DEFAULT_INSERT_ERROR_THRESHOLD = 1 / 10000
 
 
 class EventBridgeScheduledEvent(BaseModel):
-    time: str 
+    time: str
 
 
 class PipelineIndexDates(BaseModel):

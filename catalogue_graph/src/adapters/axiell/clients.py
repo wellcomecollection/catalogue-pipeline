@@ -32,8 +32,8 @@ class AuthenticatedHTTPXClient(httpx.Client):
     """
     HTTPX client that automatically injects the OAI token into all requests.
 
-    This client ensures that the OAI token is appended to the query parameters
-    of every request made by this client.
+    This client ensures that the OAI token is added to the headers of every
+    request made by this client.
     """
 
     def __init__(self, *, token: str | None = None, **kwargs: Any) -> None:
@@ -41,9 +41,9 @@ class AuthenticatedHTTPXClient(httpx.Client):
         super().__init__(timeout=_http_timeout(), **kwargs)
 
     def build_request(self, method: str, url: URLTypes, **kwargs: Any) -> Request:
-        params = kwargs.pop("params", {})
-        params.setdefault("token", self._token)
-        kwargs["params"] = params
+        headers = kwargs.pop("headers", {})
+        headers.setdefault("Token", self._token)
+        kwargs["headers"] = headers
         return super().build_request(method, url, **kwargs)
 
 
@@ -59,5 +59,4 @@ def build_oai_client(*, http_client: httpx.Client | None = None) -> OAIClient:
         max_request_retries=config.OAI_MAX_RETRIES,
         request_backoff_factor=config.OAI_BACKOFF_FACTOR,
         request_max_backoff=config.OAI_BACKOFF_MAX,
-        redacted_query_params=["token"],
     )
