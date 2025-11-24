@@ -28,7 +28,7 @@ case class Bag(
         if (manifest.files.isEmpty) {
           Right(
             DeletedMetsFile(
-              modifiedTime = createdDate,
+              createdDate = createdDate,
               version = version
             )
           )
@@ -41,7 +41,7 @@ case class Bag(
               // See https://github.com/wellcomecollection/platform/issues/4893
               if (containsOnlyMetsFile(filename)) {
                 DeletedMetsFile(
-                  modifiedTime = createdDate,
+                  createdDate = createdDate,
                   version = version
                 )
               } else {
@@ -52,7 +52,7 @@ case class Bag(
                   ),
                   filename = filename,
                   manifestations = manifestations,
-                  modifiedTime = createdDate,
+                  createdDate = createdDate,
                   version = version
                 )
               }

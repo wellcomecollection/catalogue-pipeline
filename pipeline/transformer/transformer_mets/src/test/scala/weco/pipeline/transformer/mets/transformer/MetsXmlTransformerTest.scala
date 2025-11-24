@@ -10,7 +10,6 @@ import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.MetsAccessConditions
 import weco.pipeline.transformer.result.Result
 import weco.sierra.generators.SierraIdentifierGenerators
-import weco.storage.providers.s3.{S3ObjectLocation, S3ObjectLocationPrefix}
 import weco.storage.store.memory.MemoryStore
 
 import java.time.Instant
@@ -27,7 +26,7 @@ class MetsXmlTransformerTest
     val fileReferences = createFileReferences(6, "b30246039")
     val thumbnailRef = fileReferences(5)
     val now = Instant.now
-    transform(root = Some(xml), modifiedTime = now) shouldBe Right(
+    transform(root = Some(xml), createdDate = now) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b30246039",
         title = "[Report 1942] /",
@@ -56,13 +55,13 @@ class MetsXmlTransformerTest
     transform(
       id = "b30246039",
       root = Some(str),
-      modifiedTime = now,
+      createdDate = now,
       deleted = true
     ) shouldBe Right(DeletedMetsData("b30246039", 1, now))
   }
 
   it("errors when the root XML doesn't exist in the store") {
-    transform(root = None, modifiedTime = Instant.now) shouldBe a[Left[_, _]]
+    transform(root = None, createdDate = Instant.now) shouldBe a[Left[_, _]]
   }
 
   it("transforms METS XML with manifestations") {
@@ -76,7 +75,7 @@ class MetsXmlTransformerTest
     val now = Instant.now
     transform(
       root = Some(xml),
-      modifiedTime = now,
+      createdDate = now,
       manifestations = manifestations
     ) shouldBe Right(
       InvisibleMetsData(
@@ -125,7 +124,7 @@ class MetsXmlTransformerTest
     val now = Instant.now
     transform(
       root = Some(xml),
-      modifiedTime = now,
+      createdDate = now,
       manifestations = manifestations
     ) shouldBe Right(
       InvisibleMetsData(
@@ -148,7 +147,7 @@ class MetsXmlTransformerTest
     val fileReferences = createFileReferences(6, "b30246039")
     val thumbnailRef = fileReferences(5)
     val now = Instant.now
-    transform(root = Some(xml), modifiedTime = now, version = 2) shouldBe Right(
+    transform(root = Some(xml), createdDate = now, version = 2) shouldBe Right(
       InvisibleMetsData(
         recordIdentifier = "b30246039",
         title = "[Report 1942] /",
@@ -176,7 +175,7 @@ class MetsXmlTransformerTest
     )
     transform(
       root = Some(xml),
-      modifiedTime = Instant.now,
+      createdDate = Instant.now,
       manifestations = manifestations
     ) shouldBe a[Left[_, _]]
   }
@@ -184,7 +183,7 @@ class MetsXmlTransformerTest
   def transform(
     id: String = createSierraBibNumber.withoutCheckDigit,
     root: Option[String],
-    modifiedTime: Instant,
+    createdDate: Instant,
     deleted: Boolean = false,
     manifestations: Map[String, Option[String]] = Map.empty,
     version: Int = 1
@@ -192,7 +191,7 @@ class MetsXmlTransformerTest
 
     val metsSourceData = if (deleted) {
       DeletedMetsFile(
-        modifiedTime = modifiedTime,
+        createdDate = createdDate,
         version = version
       )
     } else {
@@ -200,7 +199,7 @@ class MetsXmlTransformerTest
         root = S3ObjectLocationPrefix(bucket = "bucket", keyPrefix = "path"),
         version = version,
         filename = if (root.nonEmpty) "root.xml" else "nonexistent.xml",
-        modifiedTime = modifiedTime,
+        createdDate = createdDate,
         manifestations = manifestations.toList.map { case (file, _) => file }
       )
     }

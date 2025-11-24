@@ -123,7 +123,7 @@ class BagTest extends AnyFunSpec with Matchers {
           ),
           filename = "v1/data/b30246039.xml",
           manifestations = List.empty,
-          modifiedTime = bag.createdDate,
+          createdDate = bag.createdDate,
           version = 2
         )
       )
@@ -138,7 +138,7 @@ class BagTest extends AnyFunSpec with Matchers {
       )
       bag.metsSourceData shouldBe Right(
         DeletedMetsFile(
-          modifiedTime = bag.createdDate,
+          createdDate = bag.createdDate,
           version = 2
         )
       )
@@ -151,7 +151,7 @@ class BagTest extends AnyFunSpec with Matchers {
       )
       bag.metsSourceData shouldBe Right(
         DeletedMetsFile(
-          modifiedTime = bag.createdDate,
+          createdDate = bag.createdDate,
           version = 3
         )
       )

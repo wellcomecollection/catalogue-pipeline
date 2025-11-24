@@ -130,7 +130,7 @@ class MetsTransformerEndToEndTest
         filename = "v1/METS.xml",
         manifestations = List.empty,
         version = version,
-        modifiedTime = Instant.now()
+        createdDate = Instant.now()
       ),
       version = 1
     )

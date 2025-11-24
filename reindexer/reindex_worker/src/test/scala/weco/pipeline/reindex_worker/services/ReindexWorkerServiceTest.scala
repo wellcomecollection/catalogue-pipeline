@@ -159,7 +159,7 @@ class ReindexWorkerServiceTest
         table =>
           val bibId = randomAlphanumeric()
           val sourceData = createMetsSourceDataWith(
-            modifiedTime = Instant.parse("2019-09-21T22:10:11.343Z"),
+            createdDate = Instant.parse("2019-09-21T22:10:11.343Z"),
             // DynamoDB doesn't let us pass an empty list of manifestations
             manifestations = List(randomAlphanumeric(), randomAlphanumeric())
           )
@@ -211,7 +211,7 @@ class ReindexWorkerServiceTest
           val version = randomInt(from = 1, to = 10)
 
           val sourceData = DeletedMetsFile(
-            modifiedTime = Instant.parse("2019-09-21T22:10:11.343Z"),
+            createdDate = Instant.parse("2019-09-21T22:10:11.343Z"),
             version = version
           )
 

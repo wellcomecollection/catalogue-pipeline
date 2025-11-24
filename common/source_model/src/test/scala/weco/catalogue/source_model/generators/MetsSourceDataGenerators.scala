@@ -13,7 +13,7 @@ trait MetsSourceDataGenerators extends S3ObjectLocationGenerators {
     bucket: String = createBucketName,
     path: String = randomAlphanumeric(),
     file: String = randomAlphanumeric(),
-    modifiedTime: Instant = Instant.now(),
+    createdDate: Instant = Instant.now(),
     version: Int = 1,
     manifestations: List[String] = Nil
   ): MetsFileWithImages =
@@ -23,7 +23,7 @@ trait MetsSourceDataGenerators extends S3ObjectLocationGenerators {
         keyPrefix = path
       ),
       filename = file,
-      modifiedTime = modifiedTime,
+      createdDate = createdDate,
       version = version,
       manifestations = manifestations
     )
