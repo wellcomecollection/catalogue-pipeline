@@ -29,7 +29,12 @@ def _oai_endpoint() -> str:
 
 
 class AuthenticatedHTTPXClient(httpx.Client):
-    """HTTPX client that automatically appends the OAI token to each request."""
+    """
+    HTTPX client that automatically injects the OAI token into all requests.
+
+    This client ensures that the OAI token is appended to the query parameters
+    of every request made by this client.
+    """
 
     def __init__(self, *, token: str | None = None, **kwargs: Any) -> None:
         self._token = token or _oai_token()
