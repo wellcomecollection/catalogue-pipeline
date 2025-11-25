@@ -12,6 +12,8 @@ COPY pyproject.toml uv.lock ./
 # Install uv package manager
 RUN pip install uv
 
+RUN dnf install -y git && dnf clean all
+
 # Install dependencies and the package using uv pip install
 # uv pip install works with the system Python environment and installs from uv.lock
 # --system installs to system Python instead of requiring a virtual environment  
