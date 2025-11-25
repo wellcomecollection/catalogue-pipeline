@@ -163,13 +163,29 @@
           "type": "dense_vector",
           "dims": 4096,
           "index": true,
-          "similarity": "dot_product"
+          "similarity": "dot_product",
+          "index_options": {
+            "type": "bbq_hnsw",
+            "m": 16,
+            "ef_construction": 100,
+            "rescore_vector": {
+              "oversample": 3
+            }
+          }
         },
         "paletteEmbedding": {
           "type": "dense_vector",
           "dims": 1000,
           "index": true,
-          "similarity": "dot_product"
+          "similarity": "dot_product",
+          "index_options": {
+            "type": "bbq_hnsw",
+            "m": 16,
+            "ef_construction": 100,
+            "rescore_vector": {
+              "oversample": 3
+            }
+          }
         }
       }
     },

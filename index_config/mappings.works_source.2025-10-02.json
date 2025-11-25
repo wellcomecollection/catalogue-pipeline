@@ -1,4 +1,3 @@
-
 {
   "dynamic": "false",
   "properties": {
@@ -19,11 +18,15 @@
         "sourceIdentifier": {
           "dynamic": "false",
           "properties": {
-            "value": {
-              "type": "keyword",
-              "normalizer": "lowercase_normalizer"
+            "identifierType": {
+              "properties": {
+                "id": {
+                  "type": "keyword",
+                  "normalizer": "lowercase_normalizer"
+                }
+              }
             },
-            "identifierType.id": {
+            "value": {
               "type": "keyword",
               "normalizer": "lowercase_normalizer"
             }
