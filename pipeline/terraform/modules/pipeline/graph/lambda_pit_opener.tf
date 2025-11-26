@@ -15,6 +15,10 @@ module "elasticsearch_pit_opener_lambda" {
   memory_size = 256
   timeout     = 60
 
+  environment_variables = {
+    CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
+  }
+
   vpc_config = local.lambda_vpc_config
 }
 
