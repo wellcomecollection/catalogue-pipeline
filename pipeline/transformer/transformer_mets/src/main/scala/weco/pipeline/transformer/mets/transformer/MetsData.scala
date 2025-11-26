@@ -147,17 +147,23 @@ object InvisibleMetsData {
     }
 
     val createdDate = if (version == 1) {
-      root.createdDate.map { dateStr =>
-        // Parse and reformat to ensure consistent format
-        // Try parsing with timezone first, if that fails assume UTC
-        val zonedDateTime = scala.util.Try {
-          ZonedDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME)
-        }.getOrElse {
-          // No timezone info, parse as LocalDateTime and assume UTC
-          val localDateTime = java.time.LocalDateTime.parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-          localDateTime.atZone(java.time.ZoneOffset.UTC)
-        }
-        zonedDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'"))
+      root.createdDate.map {
+        dateStr =>
+          // Parse and reformat to ensure consistent format
+          // Try parsing with timezone first, if that fails assume UTC
+          val zonedDateTime = scala.util
+            .Try {
+              ZonedDateTime.parse(dateStr, DateTimeFormatter.ISO_DATE_TIME)
+            }
+            .getOrElse {
+              // No timezone info, parse as LocalDateTime and assume UTC
+              val localDateTime = java.time.LocalDateTime
+                .parse(dateStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+              localDateTime.atZone(java.time.ZoneOffset.UTC)
+            }
+          zonedDateTime.format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+          )
       }
     } else None
 
