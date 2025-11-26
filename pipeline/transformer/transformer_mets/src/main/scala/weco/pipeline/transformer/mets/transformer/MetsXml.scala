@@ -19,6 +19,10 @@ trait MetsXml extends XMLOps {
   def metsIdentifier: Either[Exception, String]
   def accessConditions: Either[Throwable, MetsAccessConditions]
 
+  def createdDate: Option[String] = {
+    (root \ "metsHdr").headOption.map(_ \@ "CREATEDATE").filter(_.nonEmpty)
+  }
+
   /** Valid METS documents should contain a physicalStructMap section, with the
     * bottom most divs each representing a physical page, and linking to files
     * in the corresponding fileSec structures:

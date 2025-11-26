@@ -18,7 +18,7 @@ import weco.pipeline.transformer.mets.transformer.models.FileReference
 import weco.pipeline.transformer.mets.transformers.ModsAccessConditions
 
 class MetsDataTest
-    extends AnyFunSpec
+  extends AnyFunSpec
     with Matchers
     with EitherValues
     with Inside
@@ -29,7 +29,7 @@ class MetsDataTest
     val bibNumber = createBibNumberString
     val title = randomAlphanumeric()
     val version = 1
-    val createdDate = Instant.now()
+    val modifiedTime = Instant.now()
 
     val metsData =
       createMetsDataWith(
@@ -37,7 +37,7 @@ class MetsDataTest
         title = title,
         accessConditionDz = Some("CC-BY-NC"),
         version = version,
-        modifiedTime = createdDate
+        modifiedTime = modifiedTime,
       )
 
     val expectedSourceIdentifier = SourceIdentifier(
@@ -60,7 +60,7 @@ class MetsDataTest
         version = version,
         state = Source(
           sourceIdentifier = expectedSourceIdentifier,
-          sourceModifiedTime = createdDate,
+          sourceModifiedTime = modifiedTime,
           mergeCandidates = List(
             MergeCandidate(
               identifier = SourceIdentifier(
@@ -83,11 +83,11 @@ class MetsDataTest
   it("creates a deleted work") {
     val bibNumber = createBibNumberString
     val version = 1
-    val createdDate = Instant.now()
+    val modifiedTime = Instant.now()
     val metsData = DeletedMetsData(
       recordIdentifier = bibNumber,
       version = version,
-      modifiedTime = createdDate
+      modifiedTime = modifiedTime
     )
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
@@ -98,7 +98,7 @@ class MetsDataTest
     metsData.toWork shouldBe Work
       .Deleted[Source](
         version = version,
-        state = Source(expectedSourceIdentifier, createdDate),
+        state = Source(expectedSourceIdentifier, modifiedTime),
         deletedReason = DeletedFromSource("Mets")
       )
   }
@@ -106,14 +106,14 @@ class MetsDataTest
   it("creates a invisible work with an item and no license") {
     val bibNumber = createBibNumberString
     val title = randomAlphanumeric()
-    val createdDate = Instant.now()
+    val modifiedTime = Instant.now()
 
     val metsData = createMetsDataWith(
       bibNumber = bibNumber,
       title = title,
       accessConditionDz = None,
       version = 1,
-      modifiedTime = createdDate
+      modifiedTime = modifiedTime,
     )
     val expectedSourceIdentifier = SourceIdentifier(
       identifierType = IdentifierType.METS,
@@ -126,7 +126,7 @@ class MetsDataTest
       DigitalLocation(
         url = url,
         locationType = LocationType.IIIFPresentationAPI,
-        license = None
+        license = None,
       )
 
     val unidentifiableItem =
@@ -136,7 +136,7 @@ class MetsDataTest
         version = 1,
         state = Source(
           sourceIdentifier = expectedSourceIdentifier,
-          sourceModifiedTime = createdDate,
+          sourceModifiedTime = modifiedTime,
           mergeCandidates = List(
             MergeCandidate(
               identifier = SourceIdentifier(
@@ -172,13 +172,13 @@ class MetsDataTest
 
     inside(metsData.toWork.data.items) {
       case List(
-            Item(
-              IdState.Unidentifiable,
-              _,
-              _,
-              List(DigitalLocation(_, _, license, _, _, _))
-            )
-          ) =>
+      Item(
+      IdState.Unidentifiable,
+      _,
+      _,
+      List(DigitalLocation(_, _, license, _, _, _, _))
+      )
+      ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -190,13 +190,13 @@ class MetsDataTest
 
     inside(metsData.toWork.data.items) {
       case List(
-            Item(
-              IdState.Unidentifiable,
-              _,
-              _,
-              List(DigitalLocation(_, _, license, _, _, _))
-            )
-          ) =>
+      Item(
+      IdState.Unidentifiable,
+      _,
+      _,
+      List(DigitalLocation(_, _, license, _, _, _, _))
+      )
+      ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -207,13 +207,13 @@ class MetsDataTest
     )
     inside(metsData.toWork.data.items) {
       case List(
-            Item(
-              IdState.Unidentifiable,
-              _,
-              _,
-              List(DigitalLocation(_, _, license, _, _, _))
-            )
-          ) =>
+      Item(
+      IdState.Unidentifiable,
+      _,
+      _,
+      List(DigitalLocation(_, _, license, _, _, _, _))
+      )
+      ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -226,13 +226,13 @@ class MetsDataTest
 
     inside(result.data.items) {
       case List(
-            Item(
-              IdState.Unidentifiable,
-              _,
-              _,
-              List(DigitalLocation(_, _, license, _, _, _))
-            )
-          ) =>
+      Item(
+      IdState.Unidentifiable,
+      _,
+      _,
+      List(DigitalLocation(_, _, license, _, _, _, _))
+      )
+      ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -247,13 +247,13 @@ class MetsDataTest
 
     inside(result.data.items) {
       case List(
-            Item(
-              IdState.Unidentifiable,
-              _,
-              _,
-              List(DigitalLocation(_, _, license, _, _, _))
-            )
-          ) =>
+      Item(
+      IdState.Unidentifiable,
+      _,
+      _,
+      List(DigitalLocation(_, _, license, _, _, _, _))
+      )
+      ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -266,13 +266,13 @@ class MetsDataTest
 
     inside(result.data.items) {
       case List(
-            Item(
-              IdState.Unidentifiable,
-              _,
-              _,
-              List(DigitalLocation(_, _, license, _, _, _))
-            )
-          ) =>
+      Item(
+      IdState.Unidentifiable,
+      _,
+      _,
+      List(DigitalLocation(_, _, license, _, _, _, _))
+      )
+      ) =>
         license shouldBe Some(License.InCopyright)
     }
   }
@@ -400,7 +400,7 @@ class MetsDataTest
 
     val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, _, accessConditions) =>
+      case DigitalLocation(_, _, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List(
           AccessCondition(
             method = AccessMethod.ViewOnline,
@@ -478,14 +478,14 @@ class MetsDataTest
     )
     val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, _, accessConditions) =>
-        accessConditions shouldBe List(
-          AccessCondition(
-            method = AccessMethod.ViewOnline,
-            status = Some(AccessStatus.Restricted),
-            terms = Some("Please ask nicely")
-          )
+      case DigitalLocation(_, _, _, _, _, accessConditions, _) =>
+      accessConditions shouldBe List(
+        AccessCondition(
+          method = AccessMethod.ViewOnline,
+          status = Some(AccessStatus.Restricted),
+          terms = Some("Please ask nicely")
         )
+      )
     }
   }
 
@@ -496,7 +496,7 @@ class MetsDataTest
     )
     val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, _, accessConditions) =>
+      case DigitalLocation(_, _, _, _, _, accessConditions, _) =>
         accessConditions shouldBe List()
     }
   }
@@ -507,7 +507,7 @@ class MetsDataTest
     )
     val result = metsData.toWork
     inside(result.data.items.head.locations.head) {
-      case DigitalLocation(_, _, _, _, _, accessConditions) =>
+      case DigitalLocation(_, _, _, _, _, accessConditions, _) =>
         accessConditions shouldBe
           List(
             AccessCondition(

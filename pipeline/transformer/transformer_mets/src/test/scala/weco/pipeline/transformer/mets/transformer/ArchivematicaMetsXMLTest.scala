@@ -56,6 +56,22 @@ class ArchivematicaMetsXMLTest
           .url shouldBe "https://iiif.wellcomecollection.org/presentation/BA/AD/FO/OD"
       }
 
+      it("ignores CREATEDATE for Archivematica METS when version is not 1") {
+        val xml = ArchivematicaMetsXML(
+          archivematicaMetsWith(recordIdentifier = "BA/AD/FO/OD")
+        )
+        val metsData = InvisibleMetsData(
+          root = xml,
+          filesRoot = xml,
+          version = 2,
+          modifiedTime = Instant.now()
+        ).right.get
+        
+        // createdDate should be None for version != 1, even if XML contains CREATEDATE
+        metsData.createdDate shouldBe None
+        metsData.version shouldBe 2
+      }
+
     }
 
     describe("failure conditions") {
