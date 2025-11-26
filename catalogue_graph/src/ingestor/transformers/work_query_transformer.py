@@ -181,6 +181,11 @@ class QueryWorkTransformer(WorkBaseTransformer):
                 yield canonical_id
 
     @property
+    def genre_labels(self) -> Generator[str]:
+        for genre in self.data.genres:
+            yield self.get_standard_concept_label(genre.concepts[0])
+
+    @property
     def genre_identifiers(self) -> Generator[str]:
         for genre in self.data.genres:
             # Only the first concept counts, the others include things like places and periods that help

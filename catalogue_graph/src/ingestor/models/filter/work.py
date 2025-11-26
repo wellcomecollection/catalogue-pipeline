@@ -61,7 +61,7 @@ class WorkFilterableValues(ElasticsearchModel):
             work_type=work.data.work_type,
             production_dates_range_from=list(transformer.production_dates_from),
             languages_id=[i.id for i in work.data.languages],
-            genres_label=[g.label for g in work.data.genres],
+            genres_label=list(transformer.genre_labels),
             genres_concepts_id=list(transformer.genre_ids),
             genres_concepts_source_identifier=list(transformer.genre_identifiers),
             subjects_label=list(transformer.subject_labels),
