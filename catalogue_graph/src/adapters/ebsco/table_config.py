@@ -11,9 +11,11 @@ from pyiceberg.catalog import load_catalog
 from pyiceberg.exceptions import (
     NamespaceAlreadyExistsError,
 )
+from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.schemata import SCHEMA
+from adapters.ebsco import config
+from adapters.utils.schemata import SCHEMA
 
 
 def get_table(
@@ -21,6 +23,7 @@ def get_table(
     table_name: str,
     catalogue_name: str,
     create_if_not_exists: bool,
+    schema: Schema = SCHEMA,
     **params: Any,
 ) -> IcebergTable:
     """
@@ -32,6 +35,7 @@ def get_table(
         catalogue_warehouse: Warehouse directory path
         catalogue_namespace: Namespace for the table
         table_name: Name of the table
+        schema: Schema to use when creating the table
 
     Returns:
         IcebergTable: The configured table
@@ -50,7 +54,7 @@ def get_table(
             catalogue.create_namespace(catalogue_namespace)
 
         return catalogue.create_table_if_not_exists(
-            identifier=table_fullname, schema=SCHEMA
+            identifier=table_fullname, schema=schema
         )
 
     return catalogue.load_table(table_fullname)
@@ -98,32 +102,39 @@ def get_rest_api_table(
             "Incomplete AWS credentials: access key or secret key is missing."
         )
 
+    params = {
+        "type": "rest",
+        "warehouse": f"arn:aws:s3tables:{region}:{account_id}:bucket/{s3_tables_bucket}",
+        "uri": f"https://s3tables.{region}.amazonaws.com/iceberg",
+        "rest.sigv4-enabled": "true",
+        "rest.signing-name": "s3tables",
+        "rest.signing-region": region,
+        # As we are using the Iceberg REST API exposed by S3 Tables,
+        # instead of the Glue catalog, we need S3 credentials here.
+        # Using the Glue catalog requires provisioning more complex
+        # Lake Formation permissions, which are not required.
+        "s3.access-key-id": access_key,
+        "s3.secret-access-key": secret_key,
+        "s3.region": region,
+    }
+    if token:
+        params["s3.session-token"] = token
+
     return get_table(
         catalogue_namespace=namespace,
         table_name=table_name,
         catalogue_name="s3tablescatalog",
         create_if_not_exists=create_if_not_exists,
-        **{
-            "type": "rest",
-            "warehouse": f"arn:aws:s3tables:{region}:{account_id}:bucket/{s3_tables_bucket}",
-            "uri": f"https://s3tables.{region}.amazonaws.com/iceberg",
-            "rest.sigv4-enabled": "true",
-            "rest.signing-name": "s3tables",
-            "rest.signing-region": region,
-            # As we are using the Iceberg REST API exposed by S3 Tables,
-            # instead of the Glue catalog, we need S3 credentials here.
-            # Using the Glue catalog requires provisioning more complex
-            # Lake Formation permissions, which are not required.
-            "s3.access-key-id": access_key,
-            "s3.secret-access-key": secret_key,
-            "s3.session-token": token,
-            "s3.region": region,
-        },
+        schema=SCHEMA,
+        **params,
     )
 
 
 def get_local_table(
-    table_name: str = "mytable", namespace: str = "default", db_name: str = "catalog"
+    table_name: str = "mytable",
+    namespace: str = "default",
+    db_name: str = "catalog",
+    schema: Schema = SCHEMA,
 ) -> IcebergTable:
     """
     Get a table from the local catalog using the .local directory.
@@ -132,6 +143,7 @@ def get_local_table(
         table_name: Name of the table (defaults to "mytable")
         namespace: Namespace for the table (defaults to "default")
         db_name: Database name (defaults to "catalog", use "test_catalog" for tests)
+        schema: Schema to use when creating the table
 
     Returns:
         IcebergTable: The configured table
@@ -156,8 +168,30 @@ def get_local_table(
         table_name=table_name,
         catalogue_name="local",
         create_if_not_exists=True,
+        schema=schema,
         **{
             "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
             "warehouse": f"file://{warehouse_dir}/",
         },
+    )
+
+
+def get_iceberg_table(use_rest_api_table: bool = True) -> IcebergTable:
+    """Return either the REST API table or a local catalog table based on configuration."""
+
+    if use_rest_api_table:
+        print("Using S3 Tables Iceberg REST API table...")
+        return get_rest_api_table(
+            s3_tables_bucket=config.S3_TABLES_BUCKET,
+            table_name=config.REST_API_TABLE_NAME,
+            namespace=config.REST_API_NAMESPACE,
+            region=config.AWS_REGION,
+            account_id=config.AWS_ACCOUNT_ID,
+        )
+
+    print("Using local table...")
+    return get_local_table(
+        table_name=config.LOCAL_TABLE_NAME,
+        namespace=config.LOCAL_NAMESPACE,
+        db_name=config.LOCAL_DB_NAME,
     )

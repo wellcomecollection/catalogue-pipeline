@@ -8,8 +8,8 @@ import pyarrow as pa
 from pyiceberg.expressions import EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.schemata import ARROW_SCHEMA
-from adapters.ebsco.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.schemata import ARROW_SCHEMA
 
 from .helpers import assert_row_identifiers
 from .helpers import data_to_namespaced_table as _data_to_namespaced_table_helper
@@ -27,7 +27,7 @@ def test_noop(temporary_table: IcebergTable) -> None:
     data = data_to_namespaced_table([{"id": "eb0001", "content": "hello"}])
     temporary_table.append(data)
     client = IcebergTableClient(temporary_table)
-    changeset = client.update(data, "ebsco_test")
+    changeset = client.snapshot_sync(data, "ebsco_test")
     # No Changeset identifier is returned
     assert changeset is None
     # The data is the same as before the update
@@ -60,7 +60,7 @@ def test_undelete(temporary_table: IcebergTable) -> None:
     )
 
     client = IcebergTableClient(temporary_table)
-    changeset = client.update(new_data, "ebsco_test")
+    changeset = client.snapshot_sync(new_data, "ebsco_test")
     # No Changeset identifier is returned
     assert changeset is not None
     # The data is the same as before the update
@@ -91,7 +91,7 @@ def test_new_table(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None  # Type assertion for mypy
     assert (
         temporary_table.scan().to_arrow()
@@ -138,7 +138,7 @@ def test_update_records(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None  # Type assertion for mypy
     expected_changes = {"eb0001", "eb0003"}
     changed_rows = temporary_table.scan(
@@ -180,7 +180,7 @@ def test_insert_records(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None  # Type assertion for mypy
     expected_insertions = {"eb0002", "eb0099"}
     inserted_rows = temporary_table.scan(
@@ -228,7 +228,7 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None  # Type assertion for mypy
     expected_deletions = {"eb0002", "eb0099"}
     deleted_rows = temporary_table.scan(
@@ -272,7 +272,7 @@ def test_all_actions(temporary_table: IcebergTable) -> None:
     expected_insert = "eb0004"
 
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None  # Type assertion for mypy
     changeset_rows = temporary_table.scan(
         row_filter=EqualTo("changeset", changeset_id),
@@ -329,9 +329,9 @@ def test_idempotent(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id
-    second_changeset_id = client.update(new_data, "ebsco_test")
+    second_changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert second_changeset_id is None
 
 
@@ -359,7 +359,7 @@ def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None  # Type assertion for mypy
     assert {"eb0003", "eb0004"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", changeset_id))
@@ -374,7 +374,7 @@ def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
             {"id": "eb0004", "content": "noswaith dda"},
         ]
     )
-    newer_changeset_id = client.update(newer_data, "ebsco_test")
+    newer_changeset_id = client.snapshot_sync(newer_data, "ebsco_test")
     assert newer_changeset_id is not None  # Type assertion for mypy
     assert {"eb0003"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", newer_changeset_id))
@@ -402,7 +402,7 @@ def test_get_records_by_changeset(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id_1 = client.update(initial_data, "ebsco_test")
+    changeset_id_1 = client.snapshot_sync(initial_data, "ebsco_test")
     assert changeset_id_1 is not None  # Type assertion for mypy
 
     # Test retrieving records by first changeset
@@ -420,7 +420,7 @@ def test_get_records_by_changeset(temporary_table: IcebergTable) -> None:
             {"id": "eb0004", "content": "another new record"},  # New record
         ]
     )
-    changeset_id_2 = client.update(additional_data, "ebsco_test")
+    changeset_id_2 = client.snapshot_sync(additional_data, "ebsco_test")
     assert changeset_id_2 is not None  # Type assertion for mypy
 
     # Test retrieving records by second changeset (should only include new records)
@@ -472,7 +472,7 @@ def test_get_all_records_after_update(temporary_table: IcebergTable) -> None:
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None
 
     # get_all_records should EXCLUDE deleted by default -> eb0002 gone
@@ -506,10 +506,152 @@ def test_get_all_records_include_deleted_after_update(
         ]
     )
     client = IcebergTableClient(temporary_table)
-    changeset_id = client.update(new_data, "ebsco_test")
+    changeset_id = client.snapshot_sync(new_data, "ebsco_test")
     assert changeset_id is not None
     all_with_deleted = client.get_all_records(include_deleted=True)
     assert all_with_deleted.num_rows == 4
     rows = {row["id"]: row for row in all_with_deleted.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0002", "eb0003", "eb0004"}
     assert rows["eb0002"]["content"] is None  # deleted present
+
+
+def test_incremental_update_does_not_delete_missing_records(
+    temporary_table: IcebergTable,
+) -> None:
+    """
+    Given an existing Iceberg table
+    And an incremental update that only contains a subset of records
+    When the update is applied with incremental=True
+    Then the missing records are NOT deleted
+    """
+    # Initial state: 2 records
+    temporary_table.append(
+        data_to_namespaced_table(
+            [
+                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0002", "content": "world"},
+            ]
+        )
+    )
+
+    # Incremental update: only updates eb0001, does not include eb0002
+    new_data = data_to_namespaced_table(
+        [
+            {"id": "eb0001", "content": "hello updated"},
+        ]
+    )
+
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.incremental_update(new_data, "ebsco_test")
+    assert changeset_id is not None
+
+    # Verify eb0002 is still present and not deleted (content is not None)
+    all_records = client.get_all_records()
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+
+    assert "eb0002" in rows
+    assert rows["eb0002"]["content"] == "world"  # Unchanged
+
+
+def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> None:
+    """
+    Given an existing Iceberg table
+    And an incremental update that contains new records
+    When the update is applied
+    Then the new records are inserted
+    """
+    temporary_table.append(
+        data_to_namespaced_table(
+            [
+                {"id": "eb0001", "content": "hello"},
+            ]
+        )
+    )
+
+    new_data = data_to_namespaced_table(
+        [
+            {"id": "eb0002", "content": "world"},
+        ]
+    )
+
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.incremental_update(new_data, "ebsco_test")
+    assert changeset_id is not None
+
+    all_records = client.get_all_records()
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+
+    assert "eb0001" in rows
+    assert "eb0002" in rows
+    assert rows["eb0002"]["content"] == "world"
+
+
+def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
+    """
+    Given an existing Iceberg table
+    And an incremental update that contains both updates and new records
+    When the update is applied
+    Then the updates are applied and new records are inserted
+    """
+    temporary_table.append(
+        data_to_namespaced_table(
+            [
+                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0002", "content": "world"},
+            ]
+        )
+    )
+
+    new_data = data_to_namespaced_table(
+        [
+            {"id": "eb0001", "content": "hello updated"},
+            {"id": "eb0003", "content": "new record"},
+        ]
+    )
+
+    client = IcebergTableClient(temporary_table)
+    changeset_id = client.incremental_update(new_data, "ebsco_test")
+    assert changeset_id is not None
+
+    all_records = client.get_all_records()
+    rows = {row["id"]: row for row in all_records.to_pylist()}
+
+    assert len(rows) == 3
+    assert rows["eb0001"]["content"] == "hello updated"
+    assert rows["eb0002"]["content"] == "world"
+    assert rows["eb0003"]["content"] == "new record"
+
+
+def test_incremental_update_does_not_touch_other_namespaces(
+    temporary_table: IcebergTable,
+) -> None:
+    """
+    Given an Iceberg table with data from multiple namespaces
+    When an incremental update is applied to one namespace
+    Then data in other namespaces is unaffected
+    """
+    # Add data for another namespace
+    other_data = _data_to_namespaced_table_helper(
+        [{"id": "ax0001", "content": "axiell data"}], "axiell_test"
+    )
+    temporary_table.append(other_data)
+
+    # Add data for ebsco namespace
+    ebsco_data = data_to_namespaced_table([{"id": "eb0001", "content": "ebsco data"}])
+    temporary_table.append(ebsco_data)
+
+    # Update ebsco data
+    new_ebsco_data = data_to_namespaced_table(
+        [{"id": "eb0001", "content": "ebsco updated"}]
+    )
+
+    client = IcebergTableClient(temporary_table)
+    client.incremental_update(new_ebsco_data, "ebsco_test")
+
+    # Verify axiell data is untouched
+    all_records = client.get_all_records()
+    rows = {(row["namespace"], row["id"]): row for row in all_records.to_pylist()}
+
+    assert ("axiell_test", "ax0001") in rows
+    assert rows[("axiell_test", "ax0001")]["content"] == "axiell data"
+    assert rows[("ebsco_test", "eb0001")]["content"] == "ebsco updated"
