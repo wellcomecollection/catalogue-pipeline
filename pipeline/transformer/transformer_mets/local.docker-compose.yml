@@ -140,12 +140,33 @@ services:
       - "4566:4566"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "./run_local/init-localstack.sh:/etc/localstack/init/ready.d/init-localstack.sh"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
       interval: 10s
       timeout: 5s
       retries: 5
+
+  localstack-setup:
+    image: "public.ecr.aws/localstack/localstack:3.5.0"
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - |
+        echo '📮 Creating SQS queue...'
+        awslocal sqs create-queue --queue-name mets-transformer-queue --region eu-west-1
+        echo '📢 Creating SNS topic...'
+        awslocal sns create-topic --name mets-transformer-topic --region eu-west-1
+        echo '✅ LocalStack resources created successfully!'
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=eu-west-1
+    restart: "no" 
 
 volumes:
   es_data:
