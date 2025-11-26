@@ -17,8 +17,9 @@ from adapters.utils.iceberg import IcebergTableClient
 from adapters.utils.window_store import IcebergWindowStore
 
 
-class StubOAIClient:
-    pass
+class StubOAIClient(OAIClient):
+    def __init__(self) -> None:
+        pass
 
 
 def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:

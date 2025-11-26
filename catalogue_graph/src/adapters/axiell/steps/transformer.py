@@ -9,13 +9,12 @@ from __future__ import annotations
 import argparse
 import json
 from collections.abc import Sequence
-from dataclasses import dataclass
 from typing import Any, cast
 
 import elasticsearch.helpers
 import pyarrow as pa
 from elasticsearch import Elasticsearch
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from adapters.axiell import config
 from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent
@@ -37,11 +36,12 @@ class TransformResult(BaseModel):
     job_id: str | None = None
 
 
-@dataclass
-class TransformerRuntime:
+class TransformerRuntime(BaseModel):
     table_client: IcebergTableClient
     es_client: Elasticsearch
     index_name: str
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 def build_runtime(
