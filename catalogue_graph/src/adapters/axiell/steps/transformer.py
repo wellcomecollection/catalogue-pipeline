@@ -14,7 +14,7 @@ from typing import Any, cast
 import elasticsearch.helpers
 import pyarrow as pa
 from elasticsearch import Elasticsearch
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from adapters.axiell import config
 from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent

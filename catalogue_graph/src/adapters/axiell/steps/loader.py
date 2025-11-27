@@ -14,7 +14,7 @@ import pyarrow as pa
 from lxml import etree
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.models import Record
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from adapters.axiell import config
 from adapters.axiell.clients import build_oai_client
