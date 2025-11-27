@@ -100,7 +100,7 @@ class WindowRecordWriter:
         window_key: str,
         record_ids: list[str],
     ) -> WindowCallbackResult:
-        tags: dict[str, str] = {"job_id": self.job_id, "window_key": window_key}
+        tags: dict[str, str] = {"job_id": self.job_id}
         changeset_id: str | None = None
 
         if self._rows:
