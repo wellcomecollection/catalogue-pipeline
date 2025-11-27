@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from pyiceberg.catalog import load_catalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Not
+from pyiceberg.partitioning import UNPARTITIONED_PARTITION_SPEC, PartitionSpec
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
@@ -25,6 +26,7 @@ class IcebergTableConfig(BaseModel):
     table_name: str
     namespace: str
     use_rest_api_table: bool = True
+    create_if_not_exists: bool = False
 
     # REST API configuration (S3 Tables)
     s3_tables_bucket: str | None = None
@@ -41,6 +43,7 @@ def get_table(
     catalogue_name: str,
     create_if_not_exists: bool,
     schema: Schema = SCHEMA,
+    partition_spec: PartitionSpec | None = None,
     **params: Any,
 ) -> IcebergTable:
     """
@@ -52,6 +55,7 @@ def get_table(
         table_name: Name of the table
         create_if_not_exists: Whether to create the table if it doesn't exist
         schema: Schema to use when creating the table
+        partition_spec: Partition spec to use when creating the table
         **params: Additional parameters for loading the catalog
 
     Returns:
@@ -68,7 +72,9 @@ def get_table(
             catalogue.create_namespace(catalogue_namespace)
 
         return catalogue.create_table_if_not_exists(
-            identifier=table_fullname, schema=schema
+            identifier=table_fullname,
+            schema=schema,
+            partition_spec=partition_spec or UNPARTITIONED_PARTITION_SPEC,
         )
 
     return catalogue.load_table(table_fullname)
@@ -79,6 +85,8 @@ def get_rest_api_table(
     table_name: str,
     namespace: str,
     create_if_not_exists: bool = False,
+    schema: Schema = SCHEMA,
+    partition_spec: PartitionSpec | None = None,
     *,
     region: str | None = None,
     account_id: str | None = None,
@@ -91,6 +99,8 @@ def get_rest_api_table(
         table_name: Name of the table
         namespace: Namespace for the table
         create_if_not_exists: Whether to create the table if it doesn't exist
+        schema: Schema to use when creating the table
+        partition_spec: Partition spec to use when creating the table
         region: AWS region where the S3 Table is located
         account_id: AWS account ID
 
@@ -140,7 +150,8 @@ def get_rest_api_table(
         table_name=table_name,
         catalogue_name="s3tablescatalog",
         create_if_not_exists=create_if_not_exists,
-        schema=SCHEMA,
+        schema=schema,
+        partition_spec=partition_spec,
         **params,
     )
 
@@ -150,6 +161,8 @@ def get_local_table(
     namespace: str = "default",
     db_name: str = "catalog",
     schema: Schema = SCHEMA,
+    partition_spec: PartitionSpec | None = None,
+    create_if_not_exists: bool = True,
 ) -> IcebergTable:
     """
     Get a table from the local catalog using the .local directory.
@@ -159,6 +172,8 @@ def get_local_table(
         namespace: Namespace for the table (defaults to "default")
         db_name: Database name (defaults to "catalog", use "test_catalog" for tests)
         schema: Schema to use when creating the table
+        partition_spec: Partition spec to use when creating the table
+        create_if_not_exists: Whether to create the table if it doesn't exist
 
     Returns:
         IcebergTable: The configured table
@@ -182,8 +197,9 @@ def get_local_table(
         catalogue_namespace=namespace,
         table_name=table_name,
         catalogue_name="local",
-        create_if_not_exists=True,
+        create_if_not_exists=create_if_not_exists,
         schema=schema,
+        partition_spec=partition_spec,
         **{
             "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
             "warehouse": f"file://{warehouse_dir}/",
@@ -191,12 +207,18 @@ def get_local_table(
     )
 
 
-def get_iceberg_table(config: IcebergTableConfig) -> IcebergTable:
+def get_iceberg_table(
+    config: IcebergTableConfig,
+    schema: Schema = SCHEMA,
+    partition_spec: PartitionSpec | None = None,
+) -> IcebergTable:
     """
     Get an Iceberg table based on the provided configuration.
 
     Args:
         config: Configuration object containing table details.
+        schema: Schema to use when creating the table.
+        partition_spec: Partition spec to use when creating the table.
 
     Returns:
         IcebergTable: The configured table.
@@ -210,7 +232,9 @@ def get_iceberg_table(config: IcebergTableConfig) -> IcebergTable:
             s3_tables_bucket=config.s3_tables_bucket,
             table_name=config.table_name,
             namespace=config.namespace,
-            create_if_not_exists=False,
+            create_if_not_exists=config.create_if_not_exists,
+            schema=schema,
+            partition_spec=partition_spec,
             region=config.region,
             account_id=config.account_id,
         )
@@ -219,6 +243,9 @@ def get_iceberg_table(config: IcebergTableConfig) -> IcebergTable:
         table_name=config.table_name,
         namespace=config.namespace,
         db_name=config.db_name or "catalog",
+        schema=schema,
+        partition_spec=partition_spec,
+        create_if_not_exists=config.create_if_not_exists,
     )
 
 
