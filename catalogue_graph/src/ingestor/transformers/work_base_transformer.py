@@ -13,6 +13,7 @@ class WorkBaseTransformer:
         self.label_override_provider = ConceptTextOverrideProvider()
 
     def get_standard_concept_label(self, concept: Concept) -> str:
+        """Return the highest priority label for the given concept, as determined by the catalogue graph."""
         standard_label = concept.label
         if concept.id.canonical_id in self.neptune_concepts:
             extracted = self.neptune_concepts[concept.id.canonical_id]
