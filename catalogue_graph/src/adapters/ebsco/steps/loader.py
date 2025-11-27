@@ -16,7 +16,7 @@ from lxml import etree
 from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco import config
+from adapters.ebsco import helpers
 from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
@@ -27,8 +27,6 @@ from adapters.ebsco.utils.tracking import (
 )
 from adapters.utils.iceberg import (
     IcebergTableClient,
-    IcebergTableConfig,
-    get_iceberg_table,
 )
 from adapters.utils.schemata import ARROW_SCHEMA
 
@@ -118,20 +116,7 @@ def handler(
             job_id=event.job_id,
         )
 
-    table_config = IcebergTableConfig(
-        table_name=config.REST_API_TABLE_NAME,
-        namespace=config.REST_API_NAMESPACE,
-        use_rest_api_table=config_obj.use_rest_api_table,
-        s3_tables_bucket=config.S3_TABLES_BUCKET,
-        region=config.AWS_REGION,
-        account_id=config.AWS_ACCOUNT_ID,
-        db_name=config.LOCAL_DB_NAME,
-    )
-    if not config_obj.use_rest_api_table:
-        table_config.table_name = config.LOCAL_TABLE_NAME
-        table_config.namespace = config.LOCAL_NAMESPACE
-
-    table = get_iceberg_table(table_config)
+    table = helpers.build_adapter_table(config_obj.use_rest_api_table)
     with smart_open.open(event.file_location, "rb") as f:
         changeset_id = update_from_xml_file(table, f)
 

@@ -18,7 +18,10 @@ from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 from pymarc.record import Record as MarcRecord
 
-from adapters.ebsco import config
+from adapters.ebsco import (
+    config,
+    helpers,
+)
 from adapters.ebsco.manifests import ManifestWriter
 from adapters.ebsco.models.manifests import ErrorLine, TransformerManifest
 from adapters.ebsco.models.step_events import (
@@ -30,8 +33,6 @@ from adapters.ebsco.transformers.ebsco_to_weco import (
 )
 from adapters.utils.iceberg import (
     IcebergTableClient,
-    IcebergTableConfig,
-    get_iceberg_table,
 )
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.source.work import (
@@ -311,20 +312,7 @@ def handler(
     # Determine index date from config override or fallback to pipeline date
     index_date = config_obj.index_date or config_obj.pipeline_date
 
-    table_config = IcebergTableConfig(
-        table_name=config.REST_API_TABLE_NAME,
-        namespace=config.REST_API_NAMESPACE,
-        use_rest_api_table=config_obj.use_rest_api_table,
-        s3_tables_bucket=config.S3_TABLES_BUCKET,
-        region=config.AWS_REGION,
-        account_id=config.AWS_ACCOUNT_ID,
-        db_name=config.LOCAL_DB_NAME,
-    )
-    if not config_obj.use_rest_api_table:
-        table_config.table_name = config.LOCAL_TABLE_NAME
-        table_config.namespace = config.LOCAL_NAMESPACE
-
-    table = get_iceberg_table(table_config)
+    table = helpers.build_adapter_table(config_obj.use_rest_api_table)
     table_client = IcebergTableClient(table)
 
     # Perform a reindex when no changeset is supplied
