@@ -3,7 +3,7 @@ from uuid import uuid4
 
 import pytest
 
-from adapters.ebsco.table_config import get_table
+from adapters.utils.iceberg import get_table
 
 
 @pytest.fixture()
