@@ -374,9 +374,6 @@ def test_visible_source_work_maximal_fixtures() -> None:
     )
     vsw_generated = vsw_inst.model_dump(by_alias=True)
 
-    with open("test_locations.json", "w") as f:
-        json.dump(vsw_generated, f, indent=2)
-
     vsw_fixture_path = pathlib.Path("tests/fixtures/work/visible_source_maximal.json")
     with vsw_fixture_path.open() as f:
         vsw_fixture = json.load(f)
