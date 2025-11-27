@@ -1,9 +1,8 @@
 import os
+from unittest import mock
 from uuid import uuid4
 
 import pytest
-from pyiceberg.partitioning import PartitionSpec
-from pyiceberg.schema import Schema
 
 from adapters.utils.iceberg import IcebergTableConfig, get_iceberg_table, get_table
 
@@ -123,7 +122,6 @@ def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     # Mock get_local_table to verify it's called with correct params
-        from unittest import mock
     mock_get_local_table = mock.Mock(return_value="mock_table")
 
     monkeypatch.setattr("adapters.utils.iceberg.get_local_table", mock_get_local_table)
@@ -136,7 +134,7 @@ def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
         db_name=config.db_name,
         create_if_not_exists=config.create_if_not_exists,
         schema=mock.ANY,
-        partition_spec=mock.ANY
+        partition_spec=mock.ANY,
     )
     assert result == "mock_table"
 
@@ -158,30 +156,25 @@ def test_get_iceberg_table_rest(monkeypatch: pytest.MonkeyPatch) -> None:
         account_id=account_id,
     )
 
-    # Mock get_rest_api_table to verify it's called with correct params
-    def mock_get_rest_api_table(
-        s3_tables_bucket: str,
-        table_name: str,
-        namespace: str,
-        create_if_not_exists: bool,
-        region: str | None,
-        account_id: str | None,
-        schema: Schema | None = None,
-        partition_spec: PartitionSpec | None = None,
-    ) -> str:
-        assert s3_tables_bucket == config.s3_tables_bucket
-        assert table_name == config.table_name
-        assert namespace == config.namespace
-        assert create_if_not_exists == config.create_if_not_exists
-        assert region == config.region
-        assert account_id == config.account_id
-        return "mock_rest_table"
+    mock_get_rest_api_table = mock.Mock(return_value="mock_rest_table")
 
     monkeypatch.setattr(
         "adapters.utils.iceberg.get_rest_api_table", mock_get_rest_api_table
     )
 
     result = get_iceberg_table(config)
+
+    mock_get_rest_api_table.assert_called_once_with(
+        s3_tables_bucket=config.s3_tables_bucket,
+        table_name=config.table_name,
+        namespace=config.namespace,
+        create_if_not_exists=config.create_if_not_exists,
+        region=config.region,
+        account_id=config.account_id,
+        schema=mock.ANY,
+        partition_spec=mock.ANY,
+    )
+
     assert result == "mock_rest_table"
 
 
