@@ -124,6 +124,9 @@ class DisplayWorkTransformer(WorkBaseTransformer):
             main_concept = self.get_display_concept(subject)
             concepts = [self.get_display_concept(c) for c in subject.concepts]
 
+            # If multiple non-composite subjects have the same standard labels, only include one of them.
+            # This does not apply to composite subjects, which can have different nested concepts when their
+            # standard labels match.
             if len(concepts) == 1:
                 if main_concept.standard_label in labels:
                     continue
@@ -179,6 +182,7 @@ class DisplayWorkTransformer(WorkBaseTransformer):
             roles = [DisplayContributionRole(label=r.label) for r in contributor.roles]
             agent = self.get_display_concept(contributor.agent)
 
+            # If multiple contributors have the same standard labels, only include one of them
             if agent.standard_label in labels:
                 continue
             labels.add(agent.standard_label)

@@ -1,17 +1,17 @@
 import re
 from collections.abc import Generator
 
-from pydantic import BaseModel
-
-from ingestor.extractors.works_extractor import VisibleExtractedWork
-from ingestor.models.display.availability import DisplayAvailability
-from ingestor.models.display.license import DisplayLicense
 from lookups.languages import from_code
 from models.pipeline.identifier import (
     Identifiable,
     Identified,
     Unidentifiable,
 )
+from pydantic import BaseModel
+
+from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.models.display.availability import DisplayAvailability
+from ingestor.models.display.license import DisplayLicense
 
 from .work_base_transformer import WorkBaseTransformer
 
@@ -30,6 +30,15 @@ def get_aggregatable(
     return AggregatableField(id=ids.canonical_id, label=label)
 
 
+def get_unique(aggregatable: list[AggregatableField]) -> Generator[AggregatableField]:
+    """Deduplicate aggregatable values which share the same label"""
+    seen_labels = set()
+    for item in aggregatable:
+        if item.label not in seen_labels:
+            seen_labels.add(item.label)
+            yield item
+
+
 class AggregateWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
         super().__init__(extracted)
@@ -38,31 +47,34 @@ class AggregateWorkTransformer(WorkBaseTransformer):
 
     @property
     def genres(self) -> Generator[AggregatableField]:
+        aggregatable = []
         for genre in self.data.genres:
             concept_id = genre.concepts[0].id.canonical_id
             if concept_id is None:
                 raise ValueError(f"Concept {genre.concepts[0]} does not have an ID.")
 
             label = self.get_standard_concept_label(genre.concepts[0])
-            yield AggregatableField(id=concept_id, label=label)
+            aggregatable.append(AggregatableField(id=concept_id, label=label))
+
+        yield from get_unique(aggregatable)
 
     @property
     def subjects(self) -> Generator[AggregatableField]:
-        processed_labels = set()
+        aggregatable = []
         for subject in self.data.subjects:
             standard_label = self.get_standard_concept_label(subject)
-            if standard_label not in processed_labels:
-                processed_labels.add(standard_label)
-                yield get_aggregatable(subject.id, standard_label)
+            aggregatable.append(get_aggregatable(subject.id, standard_label))
+
+        yield from get_unique(aggregatable)
 
     @property
     def contributors(self) -> Generator[AggregatableField]:
-        processed_labels = set()
+        aggregatable = []
         for c in self.data.contributors:
             standard_label = self.get_standard_concept_label(c.agent)
-            if standard_label not in processed_labels:
-                processed_labels.add(standard_label)
-                yield get_aggregatable(c.agent.id, standard_label)
+            aggregatable.append(get_aggregatable(c.agent.id, standard_label))
+
+        yield from get_unique(aggregatable)
 
     @property
     def work_type(self) -> Generator[AggregatableField]:
