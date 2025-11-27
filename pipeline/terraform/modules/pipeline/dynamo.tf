@@ -123,6 +123,11 @@ resource "aws_dynamodb_table" "matcher_lock_table" {
 
     read_capacity  = local.lock_table_billing_mode == "PROVISIONED" ? 1000 : 0
     write_capacity = local.lock_table_billing_mode == "PROVISIONED" ? 2500 : 0
+
+    warm_throughput {
+      read_units_per_second  = 12000
+      write_units_per_second = 6216
+    }
   }
 
   ttl {
