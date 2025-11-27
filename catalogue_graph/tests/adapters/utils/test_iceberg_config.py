@@ -123,23 +123,21 @@ def test_get_iceberg_table_local(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
     # Mock get_local_table to verify it's called with correct params
-    def mock_get_local_table(
-        table_name: str,
-        namespace: str,
-        db_name: str,
-        schema: Schema | None = None,
-        partition_spec: PartitionSpec | None = None,
-        create_if_not_exists: bool = True,
-    ) -> str:
-        assert table_name == config.table_name
-        assert namespace == config.namespace
-        assert db_name == config.db_name
-        assert create_if_not_exists == config.create_if_not_exists
-        return "mock_table"
+        from unittest import mock
+    mock_get_local_table = mock.Mock(return_value="mock_table")
 
     monkeypatch.setattr("adapters.utils.iceberg.get_local_table", mock_get_local_table)
 
     result = get_iceberg_table(config)
+
+    mock_get_local_table.assert_called_once_with(
+        table_name=config.table_name,
+        namespace=config.namespace,
+        db_name=config.db_name,
+        create_if_not_exists=config.create_if_not_exists,
+        schema=mock.ANY,
+        partition_spec=mock.ANY
+    )
     assert result == "mock_table"
 
 
