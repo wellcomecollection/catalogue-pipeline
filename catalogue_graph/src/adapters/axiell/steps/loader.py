@@ -52,7 +52,7 @@ class WindowLoadResult(BaseModel):
     state: str
     attempts: int
     record_ids: list[str]
-    changeset_id: str | None = None
+    tags: dict[str, str] | None = None
     last_error: str | None = None
 
 
@@ -194,9 +194,9 @@ def execute_loader(
     changeset_ids: set[str] = set()
 
     for summary in typed_summaries:
-        if summary.changeset_id is None:
+        if not summary.tags or "changeset_id" not in summary.tags:
             continue
-        changeset_ids.add(summary.changeset_id)
+        changeset_ids.add(summary.tags["changeset_id"])
 
     return LoaderResponse(
         summaries=typed_summaries,

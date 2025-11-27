@@ -376,7 +376,7 @@ def test_record_callback_factory_persists_changeset(tmp_path: Path) -> None:
     )
 
     assert summaries[0]["record_ids"] == ["id:1"]
-    assert summaries[0]["changeset_id"] == "cs-500"
+    assert summaries[0]["tags"]["changeset_id"] == "cs-500"
     status_map = harvester.store.load_status_map()
     stored = next(iter(status_map.values()))
     assert stored["tags"]["changeset_id"] == "cs-500"
@@ -413,7 +413,7 @@ def test_harvest_recent_returns_existing_successful_summary_with_tags(
     summary = summaries[0]
     assert summary["window_key"] == window_key
     assert summary["record_ids"] == ["existing-1"]
-    assert summary["changeset_id"] == "cs-123"
+    assert summary["tags"]["changeset_id"] == "cs-123"
 
 
 def test_harvest_recent_handles_partial_success_across_runs(tmp_path: Path) -> None:

@@ -48,10 +48,6 @@ class WindowSummary(TypedDict):
     last_error: str | None
     updated_at: datetime
     tags: dict[str, str] | None
-    changeset_id: str | None
-
-
-WindowStatusRow = WindowSummary
 
 
 class CoverageGap(BaseModel):
@@ -306,7 +302,6 @@ class WindowHarvestManager:
             "last_error": last_error,
             "updated_at": updated_at,
             "tags": tags,
-            "changeset_id": tags.get("changeset_id") if tags else None,
         }
         self.store.upsert(
             WindowStatusRecord(
@@ -406,13 +401,13 @@ class WindowHarvestManager:
         *,
         range_start: datetime | None = None,
         range_end: datetime | None = None,
-    ) -> list[WindowStatusRow]:
+    ) -> list[WindowSummary]:
         rows = self.store.list_by_state("failed")
         if not rows:
             return []
         start_bound = self._ensure_utc(range_start) if range_start else None
         end_bound = self._ensure_utc(range_end) if range_end else None
-        typed_rows: list[WindowStatusRow] = []
+        typed_rows: list[WindowSummary] = []
         for row in rows:
             typed_row = self._coerce_row(row)
             if self._within_range(
@@ -490,14 +485,14 @@ class WindowHarvestManager:
         self,
         range_start: datetime | None,
         range_end: datetime | None,
-    ) -> list[WindowStatusRow]:
+    ) -> list[WindowSummary]:
         scan = self.store.table.scan()
         arrow_table = scan.to_arrow()
         if arrow_table is None or arrow_table.num_rows == 0:
             return []
         start_bound = self._ensure_utc(range_start) if range_start else None
         end_bound = self._ensure_utc(range_end) if range_end else None
-        rows: list[WindowStatusRow] = []
+        rows: list[WindowSummary] = []
         for raw_row in arrow_table.to_pylist():
             typed_row = self._coerce_row(raw_row)
             if self._within_range(
@@ -509,7 +504,7 @@ class WindowHarvestManager:
                 rows.append(typed_row)
         return rows
 
-    def _coerce_row(self, row: dict[str, Any]) -> WindowStatusRow:
+    def _coerce_row(self, row: dict[str, Any]) -> WindowSummary:
         window_start_value = row["window_start"]
         window_end_value = row["window_end"]
         updated_at_value = row.get("updated_at")
@@ -548,6 +543,7 @@ class WindowHarvestManager:
                 except Exception:  # pragma: no cover - defensive fallback
                     tags_items = {}
                 tags = {str(key): str(value) for key, value in tags_items.items()}
+                
         return {
             "window_key": str(row["window_key"]),
             "window_start": window_start,
@@ -558,7 +554,6 @@ class WindowHarvestManager:
             "last_error": last_error,
             "updated_at": updated_at,
             "tags": tags,
-            "changeset_id": tags.get("changeset_id") if tags else None,
         }
 
     @staticmethod
