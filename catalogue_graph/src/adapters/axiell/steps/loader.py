@@ -83,8 +83,6 @@ class WindowRecordWriter:
 
     def __call__(
         self,
-        window_start: datetime,
-        window_end: datetime,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
         rows: list[dict[str, str | None]] = []

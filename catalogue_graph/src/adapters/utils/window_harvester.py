@@ -20,8 +20,6 @@ logger = logging.getLogger(__name__)
 class WindowCallback(Protocol):
     def __call__(
         self,
-        window_start: datetime,
-        window_end: datetime,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult: ...
 
@@ -253,7 +251,7 @@ class WindowHarvestManager:
                     records_with_ids.append((identifier, record))
                     record_ids.append(identifier)
 
-                callback_result = callback(start, end, records_with_ids)
+                callback_result = callback(records_with_ids)
 
                 if callback_result and "record_ids" in callback_result:
                     record_ids = callback_result["record_ids"]

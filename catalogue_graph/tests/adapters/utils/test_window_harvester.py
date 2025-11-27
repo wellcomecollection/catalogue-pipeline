@@ -69,8 +69,6 @@ class StubOAIClient:
 class StubWindowProcessor:
     def __call__(
         self,
-        window_start: datetime,
-        window_end: datetime,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
         return {"record_ids": [id for id, _ in records]}
@@ -132,11 +130,9 @@ def _build_harvester(
     client = StubOAIClient(responses)
 
     def default_callback(
-        window_start: datetime,
-        window_end: datetime,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
-        return StubWindowProcessor()(window_start, window_end, records)
+        return StubWindowProcessor()(records)
 
     callback = record_callback or default_callback
 
@@ -165,13 +161,11 @@ def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
     class CapturingProcessor(StubWindowProcessor):
         def __call__(
             self,
-            window_start: datetime,
-            window_end: datetime,
             records: list[tuple[str, Record]],
         ) -> WindowCallbackResult:
             for identifier, _ in records:
                 captured.append(identifier)
-            return super().__call__(window_start, window_end, records)
+            return super().__call__(records)
 
     start_time, end_time = _window_range()
     summaries = harvester.harvest_recent(
@@ -197,8 +191,6 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     class FailingProcessor(StubWindowProcessor):
         def __call__(
             self,
-            window_start: datetime,
-            window_end: datetime,
             records: list[tuple[str, Record]],
         ) -> WindowCallbackResult:
             raise RuntimeError("boom")
@@ -327,8 +319,6 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
     class RecordingCallback:
         def __call__(
             self,
-            window_start: datetime,
-            window_end: datetime,
             records: list[tuple[str, Record]],
         ) -> WindowCallbackResult:
             return {

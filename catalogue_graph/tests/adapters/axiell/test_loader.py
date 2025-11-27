@@ -166,8 +166,6 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
         job_id="job-123",
     )
     result = writer(
-        window_start=datetime(2025, 1, 1, tzinfo=UTC),
-        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
         records=[
             (
                 "id-1",
@@ -196,8 +194,6 @@ def test_window_record_writer_handles_empty_window(
         job_id="job-123",
     )
     result = writer(
-        window_start=datetime(2025, 1, 1, tzinfo=UTC),
-        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
         records=[],
     )
 
@@ -222,8 +218,6 @@ def test_window_record_writer_handles_deleted_record(
     )
 
     result = writer(
-        window_start=datetime(2025, 1, 1, tzinfo=UTC),
-        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
         records=[("id-deleted", SimpleNamespace(metadata=None))],
     )
 
@@ -255,8 +249,6 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
 
     # 1. Write initial data
     result_1 = writer(
-        window_start=datetime(2025, 1, 1, tzinfo=UTC),
-        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
         records=[
             (
                 "id-1",
@@ -268,8 +260,6 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
 
     # 2. Write same data again (no-op)
     result_2 = writer(
-        window_start=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
-        window_end=datetime(2025, 1, 1, 0, 30, tzinfo=UTC),
         records=[
             (
                 "id-1",
@@ -285,8 +275,6 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
 
     # 3. Write new data
     result_3 = writer(
-        window_start=datetime(2025, 1, 1, 0, 30, tzinfo=UTC),
-        window_end=datetime(2025, 1, 1, 0, 45, tzinfo=UTC),
         records=[
             (
                 "id-1",
