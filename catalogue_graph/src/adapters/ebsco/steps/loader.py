@@ -16,6 +16,7 @@ from lxml import etree
 from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.ebsco import config
 from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
@@ -30,8 +31,6 @@ from adapters.utils.iceberg import (
     get_iceberg_table,
 )
 from adapters.utils.schemata import ARROW_SCHEMA
-
-from adapters.ebsco import config
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"

@@ -99,6 +99,9 @@ ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "axiell-works-dev")
 ES_MODE = os.getenv("ES_MODE", "private")
 
 
+# ---------------------------------------------------------------------------
+# Iceberg Table Helpers
+
 class IcebergTableRef(BaseModel):
     namespace: str
     table: str
