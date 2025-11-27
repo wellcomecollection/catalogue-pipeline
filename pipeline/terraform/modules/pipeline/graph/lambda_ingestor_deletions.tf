@@ -15,6 +15,10 @@ module "ingestor_deletions_lambda" {
   memory_size = 1024
   timeout     = 60 // 1 minute
 
+  environment_variables = {
+    CATALOGUE_GRAPH_S3_BUCKET = data.aws_s3_bucket.catalogue_graph_bucket.bucket
+  }
+
   vpc_config = local.lambda_vpc_config
 }
 
