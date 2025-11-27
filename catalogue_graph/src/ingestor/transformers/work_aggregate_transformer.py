@@ -1,17 +1,17 @@
 import re
 from collections.abc import Generator
 
+from pydantic import BaseModel
+
+from ingestor.extractors.works_extractor import VisibleExtractedWork
+from ingestor.models.display.availability import DisplayAvailability
+from ingestor.models.display.license import DisplayLicense
 from lookups.languages import from_code
 from models.pipeline.identifier import (
     Identifiable,
     Identified,
     Unidentifiable,
 )
-from pydantic import BaseModel
-
-from ingestor.extractors.works_extractor import VisibleExtractedWork
-from ingestor.models.display.availability import DisplayAvailability
-from ingestor.models.display.license import DisplayLicense
 
 from .work_base_transformer import WorkBaseTransformer
 
