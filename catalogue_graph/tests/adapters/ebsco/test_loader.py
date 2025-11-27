@@ -119,7 +119,7 @@ class TestLoaderHandler:
         MockSmartOpen.mock_s3_file(file_uri, sample_xml.encode("utf-8"))
 
         monkeypatch.setattr(
-            "adapters.ebsco.table_config.get_local_table",
+            "adapters.utils.iceberg.get_local_table",
             lambda **kwargs: temporary_table,
         )
 

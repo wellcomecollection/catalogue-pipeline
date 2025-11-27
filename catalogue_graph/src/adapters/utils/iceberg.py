@@ -7,6 +7,7 @@ from typing import Any, cast
 import boto3
 import pyarrow as pa
 import pyarrow.compute as pc
+from pydantic import BaseModel
 from pyiceberg.catalog import load_catalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Not
@@ -15,6 +16,23 @@ from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
 from adapters.utils.schemata import ARROW_SCHEMA, SCHEMA
+
+
+class IcebergTableConfig(BaseModel):
+    """Configuration for connecting to an Iceberg table."""
+
+    # Common configuration
+    table_name: str
+    namespace: str
+    use_rest_api_table: bool = True
+
+    # REST API configuration (S3 Tables)
+    s3_tables_bucket: str | None = None
+    region: str | None = None
+    account_id: str | None = None
+
+    # Local configuration
+    db_name: str | None = None
 
 
 def get_table(
@@ -170,6 +188,37 @@ def get_local_table(
             "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
             "warehouse": f"file://{warehouse_dir}/",
         },
+    )
+
+
+def get_iceberg_table(config: IcebergTableConfig) -> IcebergTable:
+    """
+    Get an Iceberg table based on the provided configuration.
+
+    Args:
+        config: Configuration object containing table details.
+
+    Returns:
+        IcebergTable: The configured table.
+    """
+    if config.use_rest_api_table:
+        if not config.s3_tables_bucket:
+            raise ValueError(
+                "s3_tables_bucket must be provided when use_rest_api_table is True"
+            )
+        return get_rest_api_table(
+            s3_tables_bucket=config.s3_tables_bucket,
+            table_name=config.table_name,
+            namespace=config.namespace,
+            create_if_not_exists=False,
+            region=config.region,
+            account_id=config.account_id,
+        )
+
+    return get_local_table(
+        table_name=config.table_name,
+        namespace=config.namespace,
+        db_name=config.db_name or "catalog",
     )
 
 

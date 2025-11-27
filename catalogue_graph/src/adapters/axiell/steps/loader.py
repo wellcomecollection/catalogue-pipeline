@@ -21,9 +21,12 @@ from adapters.axiell.clients import build_oai_client
 from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
 )
-from adapters.axiell.table_config import get_iceberg_table
 from adapters.axiell.window_status import build_window_store
-from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import (
+    IcebergTableClient,
+    IcebergTableConfig,
+    get_iceberg_table,
+)
 from adapters.utils.schemata import ARROW_SCHEMA
 from adapters.utils.window_harvester import (
     WindowCallbackResult,
@@ -140,7 +143,20 @@ class LoaderRuntime(BaseModel):
 def build_runtime(config_obj: AxiellAdapterLoaderConfig | None = None) -> LoaderRuntime:
     cfg = config_obj or AxiellAdapterLoaderConfig()
     store = build_window_store(use_rest_api_table=cfg.use_rest_api_table)
-    table = get_iceberg_table(use_rest_api_table=cfg.use_rest_api_table)
+    table_config = IcebergTableConfig(
+        table_name=config.REST_API_TABLE_NAME,
+        namespace=config.REST_API_NAMESPACE,
+        use_rest_api_table=cfg.use_rest_api_table,
+        s3_tables_bucket=config.S3_TABLES_BUCKET,
+        region=config.AWS_REGION,
+        account_id=config.AWS_ACCOUNT_ID,
+        db_name=config.LOCAL_DB_NAME,
+    )
+    if not cfg.use_rest_api_table:
+        table_config.table_name = config.LOCAL_TABLE_NAME
+        table_config.namespace = config.LOCAL_NAMESPACE
+
+    table = get_iceberg_table(table_config)
     table_client = IcebergTableClient(table, default_namespace=AXIELL_NAMESPACE)
     oai_client = build_oai_client()
 

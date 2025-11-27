@@ -57,7 +57,7 @@ def _prepare_changeset(
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
-        "adapters.ebsco.table_config.get_local_table", lambda **kwargs: temporary_table
+        "adapters.utils.iceberg.get_local_table", lambda **kwargs: temporary_table
     )
     return changeset_id
 
