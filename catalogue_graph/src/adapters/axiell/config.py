@@ -4,8 +4,6 @@ from __future__ import annotations
 
 import os
 
-from pydantic import BaseModel, ConfigDict
-
 # ---------------------------------------------------------------------------
 # AWS account / region context
 # ---------------------------------------------------------------------------
@@ -97,25 +95,3 @@ INDEX_DATE = os.getenv("INDEX_DATE")
 ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "axiell-transformer")
 ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "axiell-works-dev")
 ES_MODE = os.getenv("ES_MODE", "private")
-
-
-# ---------------------------------------------------------------------------
-# Iceberg Table Helpers
-
-class IcebergTableRef(BaseModel):
-    namespace: str
-    table: str
-
-    model_config = ConfigDict(frozen=True)
-
-
-def record_table_ref() -> IcebergTableRef:
-    """Return the namespaced identifier of the records table."""
-
-    return IcebergTableRef(namespace=REST_API_NAMESPACE, table=REST_API_TABLE_NAME)
-
-
-def window_status_table_ref() -> IcebergTableRef:
-    """Return the namespaced identifier used by the window store."""
-
-    return IcebergTableRef(namespace=WINDOW_STATUS_NAMESPACE, table=WINDOW_STATUS_TABLE)
