@@ -16,6 +16,8 @@ from adapters.axiell.steps.loader import LoaderResponse
 from adapters.utils.iceberg import IcebergTableClient
 from adapters.utils.window_store import IcebergWindowStore
 
+WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
+
 
 class StubOAIClient(OAIClient):
     def __init__(self) -> None:
@@ -164,6 +166,7 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
         namespace=loader.AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
+        window_range=WINDOW_RANGE,
     )
     result = writer(
         records=[
@@ -179,6 +182,7 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
     tags = result["tags"]
     assert tags is not None
     assert tags["job_id"] == "job-123"
+    assert tags["window_range"] == WINDOW_RANGE
     assert "changeset_id" in tags
 
 
@@ -192,6 +196,7 @@ def test_window_record_writer_handles_empty_window(
         namespace=loader.AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
+        window_range=WINDOW_RANGE,
     )
     result = writer(
         records=[],
@@ -202,6 +207,7 @@ def test_window_record_writer_handles_empty_window(
     tags = result["tags"]
     assert tags is not None
     assert tags["job_id"] == "job-123"
+    assert tags["window_range"] == WINDOW_RANGE
     assert "changeset_id" not in tags
 
 
@@ -215,6 +221,7 @@ def test_window_record_writer_handles_deleted_record(
         namespace=loader.AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
+        window_range=WINDOW_RANGE,
     )
 
     result = writer(
@@ -245,6 +252,7 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
         namespace=loader.AXIELL_NAMESPACE,
         table_client=table_client,
         job_id="job-123",
+        window_range=WINDOW_RANGE,
     )
 
     # 1. Write initial data

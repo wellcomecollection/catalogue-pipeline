@@ -69,6 +69,10 @@ def _serialize_metadata(record: Record) -> str | None:
     return etree.tostring(metadata, encoding="unicode", pretty_print=False)
 
 
+def _format_window_range(start: datetime, end: datetime) -> str:
+    return f"{start.isoformat()}-{end.isoformat()}"
+
+
 class WindowRecordWriter:
     def __init__(
         self,
@@ -76,10 +80,12 @@ class WindowRecordWriter:
         namespace: str,
         table_client: IcebergTableClient,
         job_id: str,
+        window_range: str,
     ) -> None:
         self.namespace = namespace
         self.table_client = table_client
         self.job_id = job_id
+        self.window_range = window_range
 
     def __call__(
         self,
@@ -98,7 +104,10 @@ class WindowRecordWriter:
             )
             record_ids.append(identifier)
 
-        tags: dict[str, str] = {"job_id": self.job_id}
+        tags: dict[str, str] = {
+            "job_id": self.job_id,
+            "window_range": self.window_range,
+        }
         changeset_id: str | None = None
 
         if rows:
@@ -137,6 +146,7 @@ def build_harvester(
         namespace=AXIELL_NAMESPACE,
         table_client=runtime.table_client,
         job_id=request.job_id,
+        window_range=_format_window_range(request.window_start, request.window_end),
     )
     return WindowHarvestManager(
         client=runtime.oai_client,

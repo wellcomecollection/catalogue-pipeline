@@ -528,7 +528,7 @@ class WindowHarvestManager:
                 except Exception:  # pragma: no cover - defensive fallback
                     tags_items = {}
                 tags = {str(key): str(value) for key, value in tags_items.items()}
-                
+
         return {
             "window_key": str(row["window_key"]),
             "window_start": window_start,
