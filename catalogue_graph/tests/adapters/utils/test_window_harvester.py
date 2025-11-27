@@ -16,10 +16,9 @@ from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.window_harvester import (
-    RecordCallbackFactory,
+    WindowCallback,
     WindowCallbackResult,
     WindowHarvestManager,
-    WindowProcessor,
 )
 from adapters.utils.window_store import (
     WINDOW_STATUS_PARTITION_SPEC,
@@ -68,18 +67,13 @@ class StubOAIClient:
 
 
 class StubWindowProcessor:
-    def start_window(self, window_key: str) -> None:
-        pass
-
-    def process_record(self, identifier: str, record: Record) -> None:
-        pass
-
-    def complete_window(
+    def __call__(
         self,
-        window_key: str,
-        record_ids: list[str],
+        window_start: datetime,
+        window_end: datetime,
+        records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
-        return {"record_ids": record_ids}
+        return {"record_ids": [id for id, _ in records]}
 
 
 def _create_table(
@@ -123,7 +117,7 @@ def _build_harvester(
     responses: list[Record],
     *,
     default_tags: dict[str, str] | None = None,
-    record_callback_factory: RecordCallbackFactory | None = None,
+    record_callback: WindowCallback | None = None,
 ) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
@@ -137,14 +131,14 @@ def _build_harvester(
     store = IcebergWindowStore(table)
     client = StubOAIClient(responses)
 
-    def default_factory(
-        window_key: str,
+    def default_callback(
         window_start: datetime,
         window_end: datetime,
-    ) -> WindowProcessor:
-        return StubWindowProcessor()
+        records: list[tuple[str, Record]],
+    ) -> WindowCallbackResult:
+        return StubWindowProcessor()(window_start, window_end, records)
 
-    factory = record_callback_factory or default_factory
+    callback = record_callback or default_callback
 
     return WindowHarvestManager(
         client=client,
@@ -153,7 +147,7 @@ def _build_harvester(
         set_spec="collect",
         window_minutes=15,
         max_parallel_requests=2,
-        record_callback_factory=factory,
+        record_callback=callback,
         default_tags=default_tags,
     )
 
@@ -169,26 +163,22 @@ def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
     captured: list[str] = []
 
     class CapturingProcessor(StubWindowProcessor):
-        def process_record(
+        def __call__(
             self,
-            identifier: str,
-            record: Record,
-        ) -> None:
-            captured.append(identifier)
-
-    def recorder_factory(
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> WindowProcessor:
-        return CapturingProcessor()
+            window_start: datetime,
+            window_end: datetime,
+            records: list[tuple[str, Record]],
+        ) -> WindowCallbackResult:
+            for identifier, _ in records:
+                captured.append(identifier)
+            return super().__call__(window_start, window_end, records)
 
     start_time, end_time = _window_range()
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
         max_windows=1,
-        record_callback_factory=recorder_factory,
+        record_callback=CapturingProcessor(),
     )
 
     assert len(summaries) == 1
@@ -205,25 +195,19 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     harvester = _build_harvester(tmp_path, records)
 
     class FailingProcessor(StubWindowProcessor):
-        def process_record(
+        def __call__(
             self,
-            identifier: str,
-            record: Record,
-        ) -> None:
+            window_start: datetime,
+            window_end: datetime,
+            records: list[tuple[str, Record]],
+        ) -> WindowCallbackResult:
             raise RuntimeError("boom")
-
-    def failing_factory(
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> WindowProcessor:
-        return FailingProcessor()
 
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
-        record_callback_factory=failing_factory,
+        record_callback=FailingProcessor(),
         max_windows=1,
     )
 
@@ -336,42 +320,27 @@ def test_harvest_recent_attaches_default_tags(tmp_path: Path) -> None:
     assert row["tags"] == {"job_id": "job-123"}
 
 
-def test_record_callback_factory_persists_changeset(tmp_path: Path) -> None:
+def test_record_callback_persists_changeset(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
 
     class RecordingCallback:
-        def __init__(self) -> None:
-            self.records: list[str] = []
-
-        def start_window(self, window_key: str) -> None:
-            self.window_key = window_key
-
-        def process_record(self, identifier: str, record: Record) -> None:
-            self.records.append(identifier)
-
-        def complete_window(
+        def __call__(
             self,
-            window_key: str,
-            record_ids: list[str],
+            window_start: datetime,
+            window_end: datetime,
+            records: list[tuple[str, Record]],
         ) -> WindowCallbackResult:
             return {
-                "record_ids": list(self.records),
+                "record_ids": [id for id, _ in records],
                 "tags": {"changeset_id": "cs-500"},
             }
-
-    def factory(
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> WindowProcessor:
-        return RecordingCallback()
 
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
-        record_callback_factory=factory,
+        record_callback=RecordingCallback(),
         reprocess_successful_windows=True,
     )
 

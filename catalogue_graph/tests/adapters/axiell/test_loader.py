@@ -165,14 +165,15 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
         table_client=table_client,
         job_id="job-123",
     )
-    writer.start_window(window_key="key")
-    writer.process_record(
-        identifier="id-1",
-        record=SimpleNamespace(metadata=etree.fromstring("<metadata />")),
-    )
-    result = writer.complete_window(
-        window_key="key",
-        record_ids=["id-1"],
+    result = writer(
+        window_start=datetime(2025, 1, 1, tzinfo=UTC),
+        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
+        records=[
+            (
+                "id-1",
+                SimpleNamespace(metadata=etree.fromstring("<metadata />")),
+            )
+        ],
     )
 
     assert table_client.get_all_records().num_rows == 1
@@ -194,10 +195,10 @@ def test_window_record_writer_handles_empty_window(
         table_client=table_client,
         job_id="job-123",
     )
-    writer.start_window(window_key="key")
-    result = writer.complete_window(
-        window_key="key",
-        record_ids=[],
+    result = writer(
+        window_start=datetime(2025, 1, 1, tzinfo=UTC),
+        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
+        records=[],
     )
 
     assert table_client.get_all_records().num_rows == 0
@@ -220,14 +221,10 @@ def test_window_record_writer_handles_deleted_record(
         job_id="job-123",
     )
 
-    writer.start_window(window_key="key")
-    writer.process_record(
-        identifier="id-deleted",
-        record=SimpleNamespace(metadata=None),
-    )
-    result = writer.complete_window(
-        window_key="key",
-        record_ids=["id-deleted"],
+    result = writer(
+        window_start=datetime(2025, 1, 1, tzinfo=UTC),
+        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
+        records=[("id-deleted", SimpleNamespace(metadata=None))],
     )
 
     assert result["record_ids"] == ["id-deleted"]
@@ -257,26 +254,28 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
     )
 
     # 1. Write initial data
-    writer.start_window(window_key="key-1")
-    writer.process_record(
-        identifier="id-1",
-        record=SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
-    )
-    result_1 = writer.complete_window(
-        window_key="key-1",
-        record_ids=["id-1"],
+    result_1 = writer(
+        window_start=datetime(2025, 1, 1, tzinfo=UTC),
+        window_end=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
+        records=[
+            (
+                "id-1",
+                SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
+            )
+        ],
     )
     assert "changeset_id" in cast(dict[str, str], result_1["tags"])
 
     # 2. Write same data again (no-op)
-    writer.start_window(window_key="key-2")
-    writer.process_record(
-        identifier="id-1",
-        record=SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
-    )
-    result_2 = writer.complete_window(
-        window_key="key-2",
-        record_ids=["id-1"],
+    result_2 = writer(
+        window_start=datetime(2025, 1, 1, 0, 15, tzinfo=UTC),
+        window_end=datetime(2025, 1, 1, 0, 30, tzinfo=UTC),
+        records=[
+            (
+                "id-1",
+                SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
+            )
+        ],
     )
 
     # Should have record_ids but NO changeset_id
@@ -285,14 +284,15 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
     assert "changeset_id" not in tags_2
 
     # 3. Write new data
-    writer.start_window(window_key="key-3")
-    writer.process_record(
-        identifier="id-1",
-        record=SimpleNamespace(metadata=etree.fromstring("<metadata>v2</metadata>")),
-    )
-    result_3 = writer.complete_window(
-        window_key="key-3",
-        record_ids=["id-1"],
+    result_3 = writer(
+        window_start=datetime(2025, 1, 1, 0, 30, tzinfo=UTC),
+        window_end=datetime(2025, 1, 1, 0, 45, tzinfo=UTC),
+        records=[
+            (
+                "id-1",
+                SimpleNamespace(metadata=etree.fromstring("<metadata>v2</metadata>")),
+            )
+        ],
     )
 
     # Should have changeset_id again

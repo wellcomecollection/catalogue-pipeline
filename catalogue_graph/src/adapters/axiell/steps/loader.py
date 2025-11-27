@@ -28,7 +28,6 @@ from adapters.utils.schemata import ARROW_SCHEMA
 from adapters.utils.window_harvester import (
     WindowCallbackResult,
     WindowHarvestManager,
-    WindowProcessor,
 )
 from adapters.utils.window_store import IcebergWindowStore
 
@@ -81,52 +80,37 @@ class WindowRecordWriter:
         self.namespace = namespace
         self.table_client = table_client
         self.job_id = job_id
-        self._rows: list[dict[str, str | None]] = []
 
-    def start_window(self, window_key: str) -> None:
-        self._rows = []
-
-    def process_record(self, identifier: str, record: Record) -> None:
-        self._rows.append(
-            {
-                "namespace": self.namespace,
-                "id": identifier,
-                "content": _serialize_metadata(record),
-            }
-        )
-
-    def complete_window(
+    def __call__(
         self,
-        window_key: str,
-        record_ids: list[str],
+        window_start: datetime,
+        window_end: datetime,
+        records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
+        rows: list[dict[str, str | None]] = []
+        record_ids: list[str] = []
+
+        for identifier, record in records:
+            rows.append(
+                {
+                    "namespace": self.namespace,
+                    "id": identifier,
+                    "content": _serialize_metadata(record),
+                }
+            )
+            record_ids.append(identifier)
+
         tags: dict[str, str] = {"job_id": self.job_id}
         changeset_id: str | None = None
 
-        if self._rows:
-            table = pa.Table.from_pylist(self._rows, schema=ARROW_SCHEMA)
+        if rows:
+            table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA)
             changeset_id = self.table_client.incremental_update(table)
 
         if changeset_id:
             tags["changeset_id"] = changeset_id
 
         return {"record_ids": record_ids, "tags": tags}
-
-
-class WindowRecordWriterFactory:
-    def __init__(self, *, table_client: IcebergTableClient, job_id: str) -> None:
-        self.table_client = table_client
-        self.job_id = job_id
-
-    def __call__(
-        self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> WindowProcessor:
-        writer = WindowRecordWriter(
-            namespace=AXIELL_NAMESPACE,
-            table_client=self.table_client,
-            job_id=self.job_id,
-        )
-        return writer
 
 
 class LoaderRuntime(BaseModel):
@@ -151,7 +135,8 @@ def build_harvester(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime,
 ) -> WindowHarvestManager:
-    callback_factory = WindowRecordWriterFactory(
+    callback = WindowRecordWriter(
+        namespace=AXIELL_NAMESPACE,
         table_client=runtime.table_client,
         job_id=request.job_id,
     )
@@ -162,7 +147,7 @@ def build_harvester(
         set_spec=request.set_spec,
         window_minutes=config.WINDOW_MINUTES,
         max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
-        record_callback_factory=callback_factory,
+        record_callback=callback,
         default_tags={"job_id": request.job_id},
     )
 

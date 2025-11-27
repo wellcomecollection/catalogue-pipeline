@@ -17,20 +17,13 @@ from .window_store import IcebergWindowStore, WindowStatusRecord
 logger = logging.getLogger(__name__)
 
 
-class WindowProcessor(Protocol):
-    def start_window(self, window_key: str) -> None: ...
-
-    def process_record(self, identifier: str, record: Record) -> None: ...
-
-    def complete_window(
-        self, window_key: str, record_ids: list[str]
-    ) -> WindowCallbackResult: ...
-
-
-class RecordCallbackFactory(Protocol):
+class WindowCallback(Protocol):
     def __call__(
-        self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> WindowProcessor: ...
+        self,
+        window_start: datetime,
+        window_end: datetime,
+        records: list[tuple[str, Record]],
+    ) -> WindowCallbackResult: ...
 
 
 class WindowCallbackResult(TypedDict, total=False):
@@ -88,7 +81,7 @@ class WindowHarvestManager:
         *,
         window_minutes: int | None = None,
         max_parallel_requests: int | None = None,
-        record_callback_factory: RecordCallbackFactory | None = None,
+        record_callback: WindowCallback | None = None,
         default_tags: dict[str, str] | None = None,
     ) -> None:
         self.client = client
@@ -99,7 +92,7 @@ class WindowHarvestManager:
         self.max_parallel_requests = (
             max_parallel_requests or self.DEFAULT_MAX_PARALLEL_REQUESTS
         )
-        self.record_callback_factory = record_callback_factory
+        self.record_callback = record_callback
         self.default_tags = dict(default_tags) if default_tags else None
 
     # ------------------------------------------------------------------
@@ -139,13 +132,13 @@ class WindowHarvestManager:
         start_time: datetime,
         end_time: datetime,
         max_windows: int | None = None,
-        record_callback_factory: RecordCallbackFactory | None = None,
+        record_callback: WindowCallback | None = None,
         reprocess_successful_windows: bool = False,
     ) -> list[WindowSummary]:
         start_time = self._ensure_utc(start_time)
         end_time = self._ensure_utc(end_time)
         candidates = self.generate_windows(start_time=start_time, end_time=end_time)
-        callback_factory = record_callback_factory or self.record_callback_factory
+        callback = record_callback or self.record_callback
         reused: list[WindowSummary] = []
 
         if reprocess_successful_windows:
@@ -175,7 +168,7 @@ class WindowHarvestManager:
 
         new_summaries = self.harvest_windows(
             pending,
-            record_callback_factory=callback_factory,
+            record_callback=callback,
         )
 
         if reprocess_successful_windows:
@@ -189,7 +182,7 @@ class WindowHarvestManager:
         self,
         windows: Sequence[tuple[datetime, datetime]],
         *,
-        record_callback_factory: RecordCallbackFactory | None = None,
+        record_callback: WindowCallback | None = None,
         max_parallel_requests: int | None = None,
     ) -> list[WindowSummary]:
         if not windows:
@@ -198,7 +191,7 @@ class WindowHarvestManager:
         workers = (
             min(max_parallel_requests or self.max_parallel_requests, len(windows)) or 1
         )
-        callback_factory = record_callback_factory or self.record_callback_factory
+        callback = record_callback or self.record_callback
         logger.info(
             "Dispatching %d windows with %d parallel workers", len(windows), workers
         )
@@ -208,7 +201,7 @@ class WindowHarvestManager:
                     self.process_window,
                     start,
                     end,
-                    record_callback_factory=callback_factory,
+                    record_callback=callback,
                 ): (start, end)
                 for start, end in windows
             }
@@ -225,7 +218,7 @@ class WindowHarvestManager:
         start: datetime,
         end: datetime,
         *,
-        record_callback_factory: RecordCallbackFactory | None = None,
+        record_callback: WindowCallback | None = None,
     ) -> WindowSummary:
         start = self._ensure_utc(start)
         end = self._ensure_utc(end)
@@ -236,10 +229,8 @@ class WindowHarvestManager:
         tags: dict[str, str] | None = (
             dict(self.default_tags) if self.default_tags else None
         )
-        callback_factory = record_callback_factory or self.record_callback_factory
-        processor: WindowProcessor | None = None
-        if callback_factory is not None:
-            processor = callback_factory(key, start, end)
+        callback = record_callback or self.record_callback
+
         logger.info("Processing window %s -> %s", start.isoformat(), end.isoformat())
         try:
             records_in_window = list(
@@ -250,23 +241,19 @@ class WindowHarvestManager:
                     set_spec=self.set_spec,
                 )
             )
-            if not processor and records_in_window:
+            if not callback and records_in_window:
                 raise RuntimeError(
-                    "A record callback must be supplied via record_callback_factory to persist harvested records."
+                    "A record callback must be supplied via record_callback to persist harvested records."
                 )
 
-            if processor:
-                processor.start_window(window_key=key)
-
+            if callback:
+                records_with_ids: list[tuple[str, Record]] = []
                 for idx, record in enumerate(records_in_window, 1):
                     identifier = self._record_identifier(record, start, idx)
-                    processor.process_record(identifier=identifier, record=record)
+                    records_with_ids.append((identifier, record))
                     record_ids.append(identifier)
 
-                callback_result = processor.complete_window(
-                    window_key=key,
-                    record_ids=record_ids,
-                )
+                callback_result = callback(start, end, records_with_ids)
 
                 if callback_result and "record_ids" in callback_result:
                     record_ids = callback_result["record_ids"]
@@ -425,7 +412,7 @@ class WindowHarvestManager:
         range_start: datetime | None = None,
         range_end: datetime | None = None,
         limit: int | None = None,
-        record_callback_factory: RecordCallbackFactory | None = None,
+        record_callback: WindowCallback | None = None,
     ) -> list[WindowSummary]:
         failed = sorted(
             self.failed_windows(range_start=range_start, range_end=range_end),
@@ -447,7 +434,7 @@ class WindowHarvestManager:
         )
         return self.harvest_windows(
             windows,
-            record_callback_factory=record_callback_factory,
+            record_callback=record_callback,
         )
 
     # ------------------------------------------------------------------
