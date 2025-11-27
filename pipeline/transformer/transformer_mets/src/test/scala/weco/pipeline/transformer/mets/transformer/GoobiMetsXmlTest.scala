@@ -41,6 +41,21 @@ class GoobiMetsXmlTest
     ]
   }
 
+  it("parses createdDate from XML") {
+    MetsXml(xml).value.createdDate shouldBe Some("2018-06-26T23:45:51Z")
+  }
+
+  it("returns None for createdDate when CREATEDATE attribute is missing") {
+    val xmlWithoutCreateDate = <mets:mets xmlns:mets="http://www.loc.gov/METS/">
+      <mets:metsHdr>
+        <mets:agent OTHERTYPE="SOFTWARE" ROLE="CREATOR" TYPE="OTHER">
+          <mets:name>Goobi</mets:name>
+        </mets:agent>
+      </mets:metsHdr>
+    </mets:mets>
+    GoobiMetsXml(xmlWithoutCreateDate).createdDate shouldBe None
+  }
+
   it("parses thumbnail from XML") {
     ThumbnailReference(
       MetsXml(

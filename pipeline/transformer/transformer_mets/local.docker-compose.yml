@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+  lambda:
+    build:
+      context: .
+      dockerfile: Dockerfile.local
+    volumes:
+      - ~/.aws:/root/.aws:ro
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - AWS_DEFAULT_REGION=eu-west-1
+      - AWS_REGION=eu-west-1
+      - AWS_ENDPOINT_URL_SQS=http://localstack:4566
+      - AWS_ENDPOINT_URL_SNS=http://localstack:4566
+      - es_host=elasticsearch
+      - es_port=9200
+      - es_protocol=http
+      - es_index=works-source-dev
+      - es_apikey=dummy-api-key
+      - queue_url=http://localstack:4566/000000000000/mets-transformer-queue
+      - sns_topic_arn=arn:aws:sns:eu-west-1:000000000000:mets-transformer-topic
+      - metrics_namespace=mets-transformer
+      - batch_size=100
+      - flush_interval_seconds=30
+    env_file:
+      - .env
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      es-setup:
+        condition: service_completed_successfully
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.10
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  es-setup:
+    image: curlimages/curl:8.5.0
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo '⏳ Waiting for Elasticsearch to be ready...' &&
+        until curl -s http://elasticsearch:9200/_cluster/health | grep -q '\"status\":\"green\\|yellow\"'; do
+          echo 'Waiting for Elasticsearch...'
+          sleep 2
+        done &&
+        echo '📊 Checking if works-source-dev index exists...' &&
+        if curl -s -o /dev/null -w '%{http_code}' http://elasticsearch:9200/works-source-dev | grep -q 404; then
+          echo '📊 Creating works-source-dev index with custom mapping...' &&
+          curl -X PUT 'http://elasticsearch:9200/works-source-dev' -H 'Content-Type: application/json' -d'{
+          \"settings\": {
+            \"analysis\": {
+              \"normalizer\": {
+                \"lowercase_normalizer\": {
+                  \"type\": \"custom\",
+                  \"filter\": [\"lowercase\"]
+                }
+              }
+            }
+          },
+          \"mappings\": {
+            \"dynamic\": \"false\",
+            \"properties\": {
+              \"data\": {
+                \"properties\": {
+                  \"otherIdentifiers\": {
+                    \"properties\": {
+                      \"value\": {
+                        \"type\": \"keyword\",
+                        \"normalizer\": \"lowercase_normalizer\"
+                      }
+                    }
+                  }
+                }
+              },
+              \"state\": {
+                \"properties\": {
+                  \"sourceIdentifier\": {
+                    \"dynamic\": \"false\",
+                    \"properties\": {
+                      \"value\": {
+                        \"type\": \"keyword\",
+                        \"normalizer\": \"lowercase_normalizer\"
+                      },
+                      \"identifierType.id\": {
+                        \"type\": \"keyword\",
+                        \"normalizer\": \"lowercase_normalizer\"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }' &&
+          echo '✅ Elasticsearch index created successfully!'
+        else
+          echo '✅ Elasticsearch index already exists, skipping creation'
+        fi
+      "
+    restart: "no"
+
+  localstack:
+    image: "public.ecr.aws/localstack/localstack:3.5.0"
+    environment:
+      - SERVICES=sqs,sns
+      - ALLOW_NONSTANDARD_REGIONS=1
+      - DEBUG=1
+    ports:
+      - "4566:4566"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  localstack-setup:
+    image: "public.ecr.aws/localstack/localstack:3.5.0"
+    depends_on:
+      localstack:
+        condition: service_healthy
+    entrypoint: []
+    command:
+      - sh
+      - -c
+      - |
+        echo '📮 Creating SQS queue...'
+        awslocal sqs create-queue --queue-name mets-transformer-queue --region eu-west-1
+        echo '📢 Creating SNS topic...'
+        awslocal sns create-topic --name mets-transformer-topic --region eu-west-1
+        echo '✅ LocalStack resources created successfully!'
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=eu-west-1
+    restart: "no" 
+
+volumes:
+  es_data:
+    driver: local
