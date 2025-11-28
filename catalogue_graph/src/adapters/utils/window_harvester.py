@@ -323,10 +323,14 @@ class WindowHarvestManager:
         rows = self._rows_in_range(range_start, range_end)
         if not rows:
             now = datetime.now(UTC)
+            start = self._ensure_utc(range_start) if range_start else now
+            end = self._ensure_utc(range_end) if range_end else now
+            gaps = [CoverageGap(start=start, end=end)] if start < end else []
             return WindowCoverageReport(
-                range_start=self._ensure_utc(range_start) if range_start else now,
-                range_end=self._ensure_utc(range_end) if range_end else now,
+                range_start=start,
+                range_end=end,
                 total_windows=0,
+                coverage_gaps=gaps,
             )
         sorted_rows = sorted(
             rows, key=lambda row: self._ensure_utc(row["window_start"])
@@ -344,15 +348,24 @@ class WindowHarvestManager:
         state_counts = Counter(row["state"] for row in sorted_rows)
         coverage_hours = (
             sum(
-                (
-                    self._ensure_utc(row["window_end"])
-                    - self._ensure_utc(row["window_start"])
-                ).total_seconds()
+                max(
+                    0.0,
+                    (
+                        min(self._ensure_utc(row["window_end"]), last_end)
+                        - max(self._ensure_utc(row["window_start"]), first_start)
+                    ).total_seconds(),
+                )
                 for row in sorted_rows
             )
             / 3600.0
         )
         coverage_gaps: list[CoverageGap] = []
+
+        # Check for gap at the start
+        first_window_start = self._ensure_utc(sorted_rows[0]["window_start"])
+        if first_start < first_window_start:
+            coverage_gaps.append(CoverageGap(start=first_start, end=first_window_start))
+
         rolling_end = self._ensure_utc(sorted_rows[0]["window_end"])
         for row in sorted_rows[1:]:
             start = self._ensure_utc(row["window_start"])
@@ -362,6 +375,10 @@ class WindowHarvestManager:
                 rolling_end = end
             else:
                 rolling_end = max(rolling_end, end)
+
+        # Check for gap at the end
+        if rolling_end < last_end:
+            coverage_gaps.append(CoverageGap(start=rolling_end, end=last_end))
         failures = [
             WindowFailure(
                 window_key=row["window_key"],
@@ -478,7 +495,10 @@ class WindowHarvestManager:
 
         search_start = None
         if start_bound:
-            search_start = start_bound - timedelta(minutes=self.window_minutes)
+            # Look back 24 hours to catch any long windows or windows that started much earlier
+            # but overlap with the requested range.
+            lookback_minutes = max(self.window_minutes * 2, 1440)
+            search_start = start_bound - timedelta(minutes=lookback_minutes)
 
         raw_rows = self.store.list_in_range(start=search_start, end=end_bound)
 
