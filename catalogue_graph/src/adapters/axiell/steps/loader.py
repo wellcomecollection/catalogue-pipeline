@@ -16,14 +16,14 @@ from oai_pmh_client.client import OAIClient
 from oai_pmh_client.models import Record
 from pydantic import BaseModel, ConfigDict, Field
 
-from adapters.axiell import config
+from adapters.axiell import config, helpers
 from adapters.axiell.clients import build_oai_client
 from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
 )
-from adapters.axiell.table_config import get_iceberg_table
-from adapters.axiell.window_status import build_window_store
-from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import (
+    IcebergTableClient,
+)
 from adapters.utils.schemata import ARROW_SCHEMA
 from adapters.utils.window_harvester import (
     WindowCallbackResult,
@@ -139,15 +139,15 @@ class LoaderRuntime(BaseModel):
 
 def build_runtime(config_obj: AxiellAdapterLoaderConfig | None = None) -> LoaderRuntime:
     cfg = config_obj or AxiellAdapterLoaderConfig()
-    store = build_window_store(use_rest_api_table=cfg.use_rest_api_table)
-    table = get_iceberg_table(use_rest_api_table=cfg.use_rest_api_table)
+    store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
+    table = helpers.build_adapter_table(cfg.use_rest_api_table)
     table_client = IcebergTableClient(table, default_namespace=AXIELL_NAMESPACE)
     oai_client = build_oai_client()
 
     return LoaderRuntime(store=store, table_client=table_client, oai_client=oai_client)
 
 
-def _build_harvester(
+def build_harvester(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime,
 ) -> WindowHarvestManager:
@@ -172,7 +172,7 @@ def execute_loader(
     runtime: LoaderRuntime | None = None,
 ) -> LoaderResponse:
     runtime = runtime or build_runtime()
-    harvester = _build_harvester(request, runtime)
+    harvester = build_harvester(request, runtime)
 
     summaries = harvester.harvest_recent(
         start_time=request.window_start,

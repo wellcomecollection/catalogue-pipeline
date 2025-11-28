@@ -16,11 +16,12 @@ import pyarrow as pa
 from elasticsearch import Elasticsearch
 from pydantic import BaseModel, ConfigDict, Field
 
-from adapters.axiell import config
+from adapters.axiell import config, helpers
 from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
-from adapters.axiell.table_config import get_iceberg_table
-from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import (
+    IcebergTableClient,
+)
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
@@ -50,7 +51,7 @@ def build_runtime(
     cfg = config_obj or AxiellAdapterTransformerConfig(
         es_mode=cast(ElasticsearchMode, config.ES_MODE)
     )
-    table = get_iceberg_table(use_rest_api_table=cfg.use_rest_api_table)
+    table = helpers.build_adapter_table(cfg.use_rest_api_table)
     table_client = IcebergTableClient(table, default_namespace=AXIELL_NAMESPACE)
     es_client = get_client(
         api_key_name=config.ES_API_KEY_NAME,

@@ -16,16 +16,18 @@ from lxml import etree
 from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.ebsco import helpers
 from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
 )
-from adapters.ebsco.table_config import get_iceberg_table
 from adapters.ebsco.utils.tracking import (
     is_file_already_processed,
     record_processed_file,
 )
-from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import (
+    IcebergTableClient,
+)
 from adapters.utils.schemata import ARROW_SCHEMA
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
@@ -114,7 +116,7 @@ def handler(
             job_id=event.job_id,
         )
 
-    table = get_iceberg_table(config_obj.use_rest_api_table)
+    table = helpers.build_adapter_table(config_obj.use_rest_api_table)
     with smart_open.open(event.file_location, "rb") as f:
         changeset_id = update_from_xml_file(table, f)
 

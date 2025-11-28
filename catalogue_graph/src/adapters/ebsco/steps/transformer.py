@@ -18,18 +18,22 @@ from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 from pymarc.record import Record as MarcRecord
 
-from adapters.ebsco import config
+from adapters.ebsco import (
+    config,
+    helpers,
+)
 from adapters.ebsco.manifests import ManifestWriter
 from adapters.ebsco.models.manifests import ErrorLine, TransformerManifest
 from adapters.ebsco.models.step_events import (
     EbscoAdapterTransformerEvent,
 )
-from adapters.ebsco.table_config import get_iceberg_table
 from adapters.ebsco.transformers.ebsco_to_weco import (
     ebsco_source_work_state,
     transform_record,
 )
-from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.iceberg import (
+    IcebergTableClient,
+)
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.source.work import (
     DeletedSourceWork,
@@ -308,7 +312,7 @@ def handler(
     # Determine index date from config override or fallback to pipeline date
     index_date = config_obj.index_date or config_obj.pipeline_date
 
-    table = get_iceberg_table(config_obj.use_rest_api_table)
+    table = helpers.build_adapter_table(config_obj.use_rest_api_table)
     table_client = IcebergTableClient(table)
 
     # Perform a reindex when no changeset is supplied
