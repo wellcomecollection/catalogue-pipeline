@@ -76,9 +76,13 @@ def maximal_work_data() -> WorkData:
         url="https://example.org/thumb",
         credit="Credit",
         link_text="Link",
+        created_date="Date",
     )
     item_min = Item(
-        id=example_identified(12), title="Item Title", note="Item Note", locations=[]
+        id=example_identified(12),
+        title="Item Title",
+        note="Item Note",
+        locations=[digital_location],
     )
     holdings_min = Holdings(note="Holdings note", enumeration=["Vol1"], location=None)
     access_condition = AccessCondition(method=ViewOnline, status=LicensedResource)
@@ -369,6 +373,7 @@ def test_visible_source_work_maximal_fixtures() -> None:
         state=vsw_state,
     )
     vsw_generated = vsw_inst.model_dump(by_alias=True)
+
     vsw_fixture_path = pathlib.Path("tests/fixtures/work/visible_source_maximal.json")
     with vsw_fixture_path.open() as f:
         vsw_fixture = json.load(f)

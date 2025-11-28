@@ -27,6 +27,7 @@ class DigitalLocation(Location):
     url: str
     credit: str | None = None
     link_text: str | None = None
+    created_date: str | None = None
 
 
 class PhysicalLocation(Location):

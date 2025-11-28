@@ -205,6 +205,7 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b18659135",
+                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -645,6 +646,7 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b30598977_0001.jp2/full/!200,200/0/default.jpg",
+          "createdDate": "2014-02-30T16:20:14Z",
           "type": "DigitalLocation"
         },
         "items": [
@@ -777,6 +779,7 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b30598977",
+                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -1151,6 +1154,7 @@
               ],
               "url": "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=4205.13464940.0&epcustomerid=s7451719",
               "linkText": "Available in Eighteenth Century Collections Online.",
+              
               "type": "DigitalLocation"
             },
             "type": "Holdings"
@@ -1440,6 +1444,7 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b19871831",
+                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -1823,6 +1828,7 @@
                 ],
                 "url": "https://www.proquest.com/docview/2090333870/shibboleth?accountid=14952",
                 "linkText": "Library member access",
+                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -2775,6 +2781,7 @@
                 ],
                 "url": "https://search.proquest.com/docview/2090366780/geoauth",
                 "linkText": "Free UK access",
+                
                 "type": "DigitalLocation"
               }
             ],
@@ -3225,6 +3232,7 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b21053613_0011.jp2/full/!200,200/0/default.jpg",
+          
           "type": "DigitalLocation"
         },
         "items": [
@@ -3259,6 +3267,7 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b21053613",
+                
                 "type": "DigitalLocation"
               }
             ],
@@ -3985,6 +3994,7 @@
                 ],
                 "url": "https://www.proquest.com/docview/2090328290/shibboleth?accountid=14952",
                 "linkText": "Library member access",
+                  
                 "type": "DigitalLocation"
               }
             ],
