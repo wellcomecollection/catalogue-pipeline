@@ -26,7 +26,7 @@ class IcebergTableConfig(BaseModel):
     table_name: str
     namespace: str
     use_rest_api_table: bool = True
-    create_if_not_exists: bool = False
+    create_if_not_exists: bool = True
 
     # REST API configuration (S3 Tables)
     s3_tables_bucket: str | None = None
@@ -164,6 +164,7 @@ def get_local_table(
     partition_spec: PartitionSpec | None = None,
     create_if_not_exists: bool = True,
 ) -> IcebergTable:
+    print(f"Getting local table: {namespace}.{table_name} in database {db_name}")
     """
     Get a table from the local catalog using the .local directory.
 
@@ -403,26 +404,49 @@ class IcebergTableClient:
         # Build correctly-typed Arrow arrays for the metadata columns we're appending.
         num_rows = changeset.num_rows
         changeset_array = pa.array([changeset_id] * num_rows, type=pa.string())
-        # Convert the Arrow scalar to a Python datetime so the array constructor can repeat it
-        last_modified_py = timestamp.as_py()
-        last_modified_array = pa.array(
-            [last_modified_py] * num_rows,
-            type=pa.timestamp("us", "UTC"),
-        )
 
         changeset = changeset.append_column(
             pa.field("changeset", type=pa.string(), nullable=True),
             changeset_array,
-        ).append_column(
-            pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
-            last_modified_array,
         )
+
+        if "last_modified" not in changeset.column_names:
+            # Convert the Arrow scalar to a Python datetime so the array constructor can repeat it
+            last_modified_py = timestamp.as_py()
+            last_modified_array = pa.array(
+                [last_modified_py] * num_rows,
+                type=pa.timestamp("us", "UTC"),
+            )
+
+            changeset = changeset.append_column(
+                pa.field(
+                    "last_modified", type=pa.timestamp("us", "UTC"), nullable=True
+                ),
+                last_modified_array,
+            )
 
         return changeset
 
     @staticmethod
     def _find_updates(existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
-        return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
+        if set(existing_data.column_names) == set(new_data.column_names):
+            return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
+
+        # Handle schema mismatch (e.g. extra columns in new_data)
+        common_cols = [
+            c for c in existing_data.column_names if c in new_data.column_names
+        ]
+        new_projected = new_data.select(common_cols)
+
+        updates_projected = get_rows_to_update(
+            new_projected, existing_data, ["namespace", "id"]
+        )
+
+        if len(updates_projected) == 0:
+            return new_data.slice(0, 0)
+
+        update_ids = updates_projected.column("id")
+        return new_data.filter(pc.field("id").isin(update_ids))
 
     @staticmethod
     def _find_inserts(

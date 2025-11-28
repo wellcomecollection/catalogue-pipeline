@@ -168,16 +168,23 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
         job_id="job-123",
         window_range=WINDOW_RANGE,
     )
+    last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
     result = writer(
         records=[
             (
                 "id-1",
-                SimpleNamespace(metadata=etree.fromstring("<metadata />")),
+                SimpleNamespace(
+                    metadata=etree.fromstring("<metadata />"),
+                    header=SimpleNamespace(datestamp=last_modified),
+                ),
             )
         ],
     )
 
-    assert table_client.get_all_records().num_rows == 1
+    all_records = table_client.get_all_records()
+    assert all_records.num_rows == 1
+    assert all_records.column("last_modified")[0].as_py() == last_modified
+
     assert result["record_ids"] == ["id-1"]
     tags = result["tags"]
     assert tags is not None
@@ -224,8 +231,16 @@ def test_window_record_writer_handles_deleted_record(
         window_range=WINDOW_RANGE,
     )
 
+    last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
     result = writer(
-        records=[("id-deleted", SimpleNamespace(metadata=None))],
+        records=[
+            (
+                "id-deleted",
+                SimpleNamespace(
+                    metadata=None, header=SimpleNamespace(datestamp=last_modified)
+                ),
+            )
+        ],
     )
 
     assert result["record_ids"] == ["id-deleted"]
@@ -236,6 +251,7 @@ def test_window_record_writer_handles_deleted_record(
     row = all_records.to_pylist()[0]
     assert row["id"] == "id-deleted"
     assert row["content"] is None
+    assert row["last_modified"] == last_modified
 
     # Verify excluded by default
     active_records = table_client.get_all_records(include_deleted=False)
@@ -255,12 +271,17 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
         window_range=WINDOW_RANGE,
     )
 
+    last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
+
     # 1. Write initial data
     result_1 = writer(
         records=[
             (
                 "id-1",
-                SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
+                SimpleNamespace(
+                    metadata=etree.fromstring("<metadata>v1</metadata>"),
+                    header=SimpleNamespace(datestamp=last_modified),
+                ),
             )
         ],
     )
@@ -271,7 +292,10 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
         records=[
             (
                 "id-1",
-                SimpleNamespace(metadata=etree.fromstring("<metadata>v1</metadata>")),
+                SimpleNamespace(
+                    metadata=etree.fromstring("<metadata>v1</metadata>"),
+                    header=SimpleNamespace(datestamp=last_modified),
+                ),
             )
         ],
     )
@@ -286,7 +310,10 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
         records=[
             (
                 "id-1",
-                SimpleNamespace(metadata=etree.fromstring("<metadata>v2</metadata>")),
+                SimpleNamespace(
+                    metadata=etree.fromstring("<metadata>v2</metadata>"),
+                    header=SimpleNamespace(datestamp=last_modified),
+                ),
             )
         ],
     )

@@ -32,6 +32,9 @@ from adapters.utils.window_harvester import (
 from adapters.utils.window_store import IcebergWindowStore
 
 AXIELL_NAMESPACE = "axiell"
+LOADER_SCHEMA = ARROW_SCHEMA.append(
+    pa.field("last_modified", pa.timestamp("us", "UTC"))
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -91,7 +94,7 @@ class WindowRecordWriter:
         self,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
-        rows: list[dict[str, str | None]] = []
+        rows: list[dict[str, Any]] = []
         record_ids: list[str] = []
 
         for identifier, record in records:
@@ -100,6 +103,7 @@ class WindowRecordWriter:
                     "namespace": self.namespace,
                     "id": identifier,
                     "content": _serialize_metadata(record),
+                    "last_modified": record.header.datestamp,
                 }
             )
             record_ids.append(identifier)
@@ -111,7 +115,7 @@ class WindowRecordWriter:
         changeset_id: str | None = None
 
         if rows:
-            table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA)
+            table = pa.Table.from_pylist(rows, schema=LOADER_SCHEMA)
             changeset_id = self.table_client.incremental_update(table)
 
         if changeset_id:
