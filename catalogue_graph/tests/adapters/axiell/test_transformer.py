@@ -10,7 +10,7 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent
 from adapters.axiell.steps import transformer
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
-from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 
 
@@ -20,7 +20,7 @@ class StubElasticsearch(Elasticsearch):
 
 
 def _runtime_with(
-    table_client: IcebergTableClient,
+    table_client: AdapterStore,
     *,
     index_name: str = "axiell-test",
 ) -> transformer.TransformerRuntime:
@@ -31,9 +31,7 @@ def _runtime_with(
     )
 
 
-def _seed_changeset(
-    table_client: IcebergTableClient, rows: list[dict[str, Any]]
-) -> str:
+def _seed_changeset(table_client: AdapterStore, rows: list[dict[str, Any]]) -> str:
     table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA)
     changeset_id = table_client.incremental_update(
         table, record_namespace=AXIELL_NAMESPACE
@@ -64,9 +62,7 @@ def test_execute_transform_indexes_documents(
         },
     ]
 
-    table_client = IcebergTableClient(
-        temporary_table, default_namespace=AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     changeset_id = _seed_changeset(table_client, rows)
     runtime = _runtime_with(table_client)
     requested_changesets: list[str] = []
@@ -113,9 +109,7 @@ def test_execute_transform_indexes_documents(
 def test_execute_transform_skips_when_no_rows(
     monkeypatch: pytest.MonkeyPatch, temporary_table: IcebergTable
 ) -> None:
-    table_client = IcebergTableClient(
-        temporary_table, default_namespace=AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     runtime = _runtime_with(table_client)
 
     def fake_bulk(*args: Any, **kwargs: Any) -> None:  # noqa: ARG001
@@ -134,9 +128,7 @@ def test_execute_transform_surfaces_errors(
     monkeypatch: pytest.MonkeyPatch, temporary_table: IcebergTable
 ) -> None:
     rows = [{"namespace": "axiell", "id": "ax-1", "content": "<xml />"}]
-    table_client = IcebergTableClient(
-        temporary_table, default_namespace=AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     changeset_id = _seed_changeset(table_client, rows)
     runtime = _runtime_with(table_client)
 
@@ -160,9 +152,7 @@ def test_execute_transform_surfaces_errors(
 def test_execute_transform_reads_multiple_changesets(
     monkeypatch: pytest.MonkeyPatch, temporary_table: IcebergTable
 ) -> None:
-    table_client = IcebergTableClient(
-        temporary_table, default_namespace=AXIELL_NAMESPACE
-    )
+    table_client = AdapterStore(temporary_table, default_namespace=AXIELL_NAMESPACE)
     cs1 = _seed_changeset(
         table_client,
         [

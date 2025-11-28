@@ -18,7 +18,7 @@ from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
     AxiellAdapterTriggerEvent,
 )
-from adapters.utils.window_store import IcebergWindowStore
+from adapters.utils.window_store import WindowStore
 from models.events import EventBridgeScheduledEvent
 
 
@@ -28,7 +28,7 @@ class AxiellAdapterTriggerConfig(BaseModel):
 
 
 class TriggerRuntime(BaseModel):
-    store: IcebergWindowStore
+    store: WindowStore
     enforce_lag: bool = True
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -42,7 +42,7 @@ def _generate_job_id(timestamp: datetime) -> str:
     return timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M")
 
 
-def _latest_success_end(store: IcebergWindowStore) -> datetime | None:
+def _latest_success_end(store: WindowStore) -> datetime | None:
     rows = store.list_by_state("success")
     if not rows:
         return None
@@ -72,7 +72,7 @@ def _enforce_lag(now: datetime, last_success_end: datetime | None) -> None:
 
 def build_window_request(
     *,
-    store: IcebergWindowStore,
+    store: WindowStore,
     now: datetime,
     enforce_lag: bool = True,
     job_id: str | None = None,

@@ -23,8 +23,8 @@ from adapters.utils.window_harvester import (
 from adapters.utils.window_store import (
     WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
-    IcebergWindowStore,
     WindowStatusRecord,
+    WindowStore,
 )
 
 FAST_OAI_BACKOFF_SECONDS = 1e-3
@@ -126,7 +126,7 @@ def _build_harvester(
         table_name=f"window_status_{uuid4().hex}",
         catalog_name=f"catalog_{uuid4().hex}",
     )
-    store = IcebergWindowStore(table)
+    store = WindowStore(table)
     client = StubOAIClient(responses)
 
     def default_callback(
@@ -335,9 +335,11 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
     )
 
     assert summaries[0]["record_ids"] == ["id:1"]
+    assert summaries[0]["tags"] is not None
     assert summaries[0]["tags"]["changeset_id"] == "cs-500"
     status_map = harvester.store.load_status_map()
     stored = next(iter(status_map.values()))
+    assert stored["tags"] is not None
     assert stored["tags"]["changeset_id"] == "cs-500"
 
 
@@ -372,6 +374,7 @@ def test_harvest_recent_returns_existing_successful_summary_with_tags(
     summary = summaries[0]
     assert summary["window_key"] == window_key
     assert summary["record_ids"] == ["existing-1"]
+    assert summary["tags"] is not None
     assert summary["tags"]["changeset_id"] == "cs-123"
 
 

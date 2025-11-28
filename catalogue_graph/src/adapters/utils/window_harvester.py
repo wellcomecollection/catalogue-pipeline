@@ -12,7 +12,7 @@ from oai_pmh_client.exceptions import NoRecordsMatchError
 from oai_pmh_client.models import Record
 from pydantic import BaseModel, Field
 
-from .window_store import IcebergWindowStore, WindowStatusRecord
+from .window_store import WindowStatusRecord, WindowStore
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class WindowHarvestManager:
     def __init__(
         self,
         client: OAIClient,
-        store: IcebergWindowStore,
+        store: WindowStore,
         metadata_prefix: str | None = None,
         set_spec: str | None = None,
         *,

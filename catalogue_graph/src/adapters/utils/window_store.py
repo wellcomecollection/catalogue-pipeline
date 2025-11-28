@@ -20,7 +20,7 @@ from pyiceberg.types import (
     TimestamptzType,
 )
 
-__all__ = ["WindowStatusRecord", "IcebergWindowStore"]
+__all__ = ["WindowStatusRecord", "WindowStore"]
 
 
 @dataclass(slots=True)
@@ -85,7 +85,7 @@ def _column(value: Any) -> list[Any]:
     return [value]
 
 
-class IcebergWindowStore:
+class WindowStore:
     """Persists harvesting window status rows in an Apache Iceberg table."""
 
     def __init__(self, table: IcebergTable) -> None:

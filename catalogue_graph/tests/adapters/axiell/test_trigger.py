@@ -13,7 +13,7 @@ from adapters.axiell.models.step_events import (
     AxiellAdapterTriggerEvent,
 )
 from adapters.axiell.steps import trigger
-from adapters.utils.window_store import IcebergWindowStore, WindowStatusRecord
+from adapters.utils.window_store import WindowStatusRecord, WindowStore
 
 
 def _window_row(start: datetime, end: datetime) -> WindowStatusRecord:
@@ -30,10 +30,8 @@ def _window_row(start: datetime, end: datetime) -> WindowStatusRecord:
     )
 
 
-def _populate_store(
-    table: IcebergTable, rows: list[WindowStatusRecord]
-) -> IcebergWindowStore:
-    store = IcebergWindowStore(table)
+def _populate_store(table: IcebergTable, rows: list[WindowStatusRecord]) -> WindowStore:
+    store = WindowStore(table)
     for row in rows:
         store.upsert(row)
     return store
@@ -168,7 +166,7 @@ def test_lambda_handler_uses_rest_api_table_by_default(
     stub_store = _populate_store(temporary_window_status_table, [])
     captured: dict[str, bool] = {}
 
-    def fake_build_window_store(*, use_rest_api_table: bool) -> IcebergWindowStore:
+    def fake_build_window_store(*, use_rest_api_table: bool) -> WindowStore:
         captured["flag"] = use_rest_api_table
         return stub_store
 

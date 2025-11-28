@@ -13,8 +13,8 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent
 from adapters.axiell.steps import loader
 from adapters.axiell.steps.loader import LoaderResponse
-from adapters.utils.iceberg import IcebergTableClient
-from adapters.utils.window_store import IcebergWindowStore
+from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.window_store import WindowStore
 
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
 
@@ -39,24 +39,16 @@ def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
 
 def _runtime_with(
     *,
-    store: IcebergWindowStore | None = None,
-    table_client: IcebergTableClient | None = None,
+    store: WindowStore | None = None,
+    table_client: AdapterStore | None = None,
     oai_client: OAIClient | None = None,
 ) -> loader.LoaderRuntime:
     if table_client is None:
-        # This is a bit of a hack, but we need a table client for the runtime
-        # If tests don't provide one, they probably don't care about it
-        # But we can't easily create a dummy IcebergTableClient without a table
-        # So we'll rely on tests providing it if they need it.
-        # For now, let's assume tests will provide it or we mock it.
-        # But wait, I can't mock it easily without a table.
-        # Let's just require it or let it be None and fail if used?
-        # The LoaderRuntime expects it to be not None.
         pass
 
     return loader.LoaderRuntime(
-        store=cast(IcebergWindowStore, store),
-        table_client=cast(IcebergTableClient, table_client),
+        store=cast(WindowStore, store),
+        table_client=cast(AdapterStore, table_client),
         oai_client=cast(OAIClient, oai_client or StubOAIClient()),
     )
 
@@ -79,10 +71,10 @@ def test_execute_loader_updates_iceberg(
         "tags": {"job_id": req.job_id, "changeset_id": "changeset-123"},
         "changeset_id": "changeset-123",
     }
-    table_client = IcebergTableClient(
+    table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
-    store = IcebergWindowStore(temporary_window_status_table)
+    store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
     with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
@@ -110,10 +102,10 @@ def test_execute_loader_handles_no_new_records(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    table_client = IcebergTableClient(
+    table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
-    store = IcebergWindowStore(temporary_window_status_table)
+    store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
     summary = {
@@ -145,10 +137,10 @@ def test_execute_loader_errors_when_no_windows(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    table_client = IcebergTableClient(
+    table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
-    store = IcebergWindowStore(temporary_window_status_table)
+    store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
     with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
@@ -159,7 +151,7 @@ def test_execute_loader_errors_when_no_windows(
 
 
 def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> None:
-    table_client = IcebergTableClient(
+    table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
     writer = loader.WindowRecordWriter(
@@ -196,7 +188,7 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
 def test_window_record_writer_handles_empty_window(
     temporary_table: IcebergTable,
 ) -> None:
-    table_client = IcebergTableClient(
+    table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
     writer = loader.WindowRecordWriter(
@@ -221,7 +213,7 @@ def test_window_record_writer_handles_empty_window(
 def test_window_record_writer_handles_deleted_record(
     temporary_table: IcebergTable,
 ) -> None:
-    table_client = IcebergTableClient(
+    table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
     writer = loader.WindowRecordWriter(
@@ -261,7 +253,7 @@ def test_window_record_writer_handles_deleted_record(
 def test_window_record_writer_skips_changeset_for_duplicate_data(
     temporary_table: IcebergTable,
 ) -> None:
-    table_client = IcebergTableClient(
+    table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
     writer = loader.WindowRecordWriter(

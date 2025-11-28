@@ -35,7 +35,7 @@ EventBridge → Trigger → Loader → Transformer → Elasticsearch
 ### Transformer
 
 * Takes an `AxiellAdapterTransformerEvent` containing the `changeset_ids` emitted by the loader.
-* Uses `IcebergTableClient.get_records_by_changeset` to materialise rows for each changeset and converts them into search documents (dummy title, namespace, raw content).
+* Uses `AdapterSourceDataStore.get_records_by_changeset` to materialise rows for each changeset and converts them into search documents (dummy title, namespace, raw content).
 * Bulk indexes the documents into the Elasticsearch index resolved by `config.ES_INDEX_NAME/PIPELINE_DATE` and records any per-document failures.
 * Returns a `TransformResult` summarising the number of indexed documents, any errors, and the originating `job_id`.
 

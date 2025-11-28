@@ -21,15 +21,13 @@ from adapters.axiell.clients import build_oai_client
 from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
 )
-from adapters.utils.iceberg import (
-    IcebergTableClient,
-)
+from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 from adapters.utils.window_harvester import (
     WindowCallbackResult,
     WindowHarvestManager,
 )
-from adapters.utils.window_store import IcebergWindowStore
+from adapters.utils.window_store import WindowStore
 
 AXIELL_NAMESPACE = "axiell"
 LOADER_SCHEMA = ARROW_SCHEMA.append(
@@ -81,7 +79,7 @@ class WindowRecordWriter:
         self,
         *,
         namespace: str,
-        table_client: IcebergTableClient,
+        table_client: AdapterStore,
         job_id: str,
         window_range: str,
     ) -> None:
@@ -125,8 +123,8 @@ class WindowRecordWriter:
 
 
 class LoaderRuntime(BaseModel):
-    store: IcebergWindowStore
-    table_client: IcebergTableClient
+    store: WindowStore
+    table_client: AdapterStore
     oai_client: OAIClient
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -136,7 +134,7 @@ def build_runtime(config_obj: AxiellAdapterLoaderConfig | None = None) -> Loader
     cfg = config_obj or AxiellAdapterLoaderConfig()
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
     table = helpers.build_adapter_table(cfg.use_rest_api_table)
-    table_client = IcebergTableClient(table, default_namespace=AXIELL_NAMESPACE)
+    table_client = AdapterStore(table, default_namespace=AXIELL_NAMESPACE)
     oai_client = build_oai_client()
 
     return LoaderRuntime(store=store, table_client=table_client, oai_client=oai_client)

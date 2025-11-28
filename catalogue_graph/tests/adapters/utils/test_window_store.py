@@ -11,8 +11,8 @@ from pyiceberg.table import Table as IcebergTable
 from adapters.utils.window_store import (
     WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
-    IcebergWindowStore,
     WindowStatusRecord,
+    WindowStore,
 )
 
 
@@ -53,7 +53,7 @@ def test_window_store_round_trip(tmp_path: Path) -> None:
         table_name=f"window_status_{uuid4().hex}",
         catalog_name=f"catalog_{uuid4().hex}",
     )
-    store = IcebergWindowStore(table)
+    store = WindowStore(table)
 
     assert store.load_status_map() == {}
 

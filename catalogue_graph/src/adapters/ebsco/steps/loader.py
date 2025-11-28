@@ -25,9 +25,7 @@ from adapters.ebsco.utils.tracking import (
     is_file_already_processed,
     record_processed_file,
 )
-from adapters.utils.iceberg import (
-    IcebergTableClient,
-)
+from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
@@ -48,7 +46,7 @@ def load_xml(xmlfile: IO[bytes]) -> etree._Element:
 
 def update_from_xml(table: IcebergTable, collection: etree._Element) -> str | None:
     records = nodes_to_records(collection)
-    updater = IcebergTableClient(table, default_namespace=EBSCO_NAMESPACE)
+    updater = AdapterStore(table, default_namespace=EBSCO_NAMESPACE)
     return updater.snapshot_sync(data_to_pa_table(records))
 
 
