@@ -14,7 +14,9 @@ from adapters.utils.adapter_store import AdapterStore
 
 def test_writes_records_to_store() -> None:
     mock_store = Mock(spec=AdapterStore)
-    mock_store.incremental_update.return_value = Mock(changeset_id="123")
+    mock_store.incremental_update.return_value = Mock(
+        changeset_id="123", updated_record_ids=["rec1"]
+    )
 
     writer = WindowRecordWriter(
         namespace="test_namespace",
@@ -43,6 +45,7 @@ def test_writes_records_to_store() -> None:
         "job_id": "test_job",
         "window_range": "2023-01-01-2023-01-02",
         "changeset_id": "123",
+        "record_ids_changed": '["rec1"]',
     }
 
     mock_store.incremental_update.assert_called_once()
@@ -86,7 +89,9 @@ def test_handles_empty_records() -> None:
 def test_handles_deleted_records() -> None:
     # Deleted records might have no metadata
     mock_store = Mock(spec=AdapterStore)
-    mock_store.incremental_update.return_value = Mock(changeset_id="456")
+    mock_store.incremental_update.return_value = Mock(
+        changeset_id="456", updated_record_ids=["rec1"]
+    )
 
     writer = WindowRecordWriter(
         namespace="test_namespace",
