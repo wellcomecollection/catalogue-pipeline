@@ -73,7 +73,7 @@ MAX_PENDING_WINDOWS: int | None = (
     int(_MAX_PENDING_WINDOWS_ENV) if _MAX_PENDING_WINDOWS_ENV is not None else None
 )
 
-MAX_LAG_MINUTES = int(os.getenv("MAX_LAG_MINUTES", "60"))
+MAX_LAG_MINUTES = int(os.getenv("MAX_LAG_MINUTES", "360"))
 AUTO_RETRY_FAILED_WINDOWS = (
     os.getenv("AUTO_RETRY_FAILED_WINDOWS", "true").lower() == "true"
 )
