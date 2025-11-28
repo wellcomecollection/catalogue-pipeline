@@ -68,7 +68,11 @@ def test_execute_loader_updates_iceberg(
         "record_ids": ["id-1"],
         "last_error": None,
         "updated_at": req.window_end,
-        "tags": {"job_id": req.job_id, "changeset_id": "changeset-123"},
+        "tags": {
+            "job_id": req.job_id,
+            "changeset_id": "changeset-123",
+            "record_ids_changed": '["id-1"]',
+        },
         "changeset_id": "changeset-123",
     }
     table_client = AdapterStore(
@@ -84,7 +88,7 @@ def test_execute_loader_updates_iceberg(
 
         assert isinstance(response, LoaderResponse)
         assert response.changeset_ids == ["changeset-123"]
-        assert response.record_count == 1
+        assert response.changed_record_count == 1
         assert response.job_id == req.job_id
         assert len(response.summaries) == 1
 
@@ -94,6 +98,44 @@ def test_execute_loader_updates_iceberg(
             max_windows=req.max_windows,
             reprocess_successful_windows=False,
         )
+
+
+def test_execute_loader_counts_only_changed_records(
+    monkeypatch: pytest.MonkeyPatch,
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    req = _request()
+    table_client = AdapterStore(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
+    store = WindowStore(temporary_window_status_table)
+    runtime = _runtime_with(table_client=table_client, store=store)
+
+    summary = {
+        "window_key": req.window_key,
+        "window_start": req.window_start,
+        "window_end": req.window_end,
+        "state": "success",
+        "attempts": 1,
+        "record_ids": ["id-1", "id-2"],
+        "last_error": None,
+        "updated_at": req.window_end,
+        "tags": {
+            "job_id": req.job_id,
+            "changeset_id": "changeset-123",
+            "record_ids_changed": '["id-2"]',
+        },
+        "changeset_id": "changeset-123",
+    }
+
+    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+        mock_harvest.return_value = [summary]
+
+        response = loader.execute_loader(req, runtime=runtime)
+
+        assert response.changed_record_count == 1
+        assert response.changeset_ids == ["changeset-123"]
 
 
 def test_execute_loader_handles_no_new_records(
@@ -127,7 +169,7 @@ def test_execute_loader_handles_no_new_records(
         response = loader.execute_loader(req, runtime=runtime)
 
         assert response.changeset_ids == []
-        assert response.record_count == 0
+        assert response.changed_record_count == 0
         assert table_client.get_all_records().num_rows == 0
 
 

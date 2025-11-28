@@ -52,7 +52,7 @@ class WindowLoadResult(BaseModel):
 class LoaderResponse(BaseModel):
     summaries: list[WindowLoadResult]
     changeset_ids: list[str] = Field(default_factory=list)
-    record_count: int
+    changed_record_count: int
     job_id: str
 
 
@@ -123,18 +123,24 @@ def execute_loader(
     typed_summaries = [
         WindowLoadResult.model_validate(summary) for summary in summaries
     ]
-    record_count = sum(len(summary.record_ids) for summary in typed_summaries)
+    changed_record_count = 0
     changeset_ids: set[str] = set()
 
     for summary in typed_summaries:
-        if not summary.tags or "changeset_id" not in summary.tags:
+        if not summary.tags:
             continue
-        changeset_ids.add(summary.tags["changeset_id"])
+
+        if "changeset_id" in summary.tags:
+            changeset_ids.add(summary.tags["changeset_id"])
+
+        if "record_ids_changed" in summary.tags:
+            changed_ids = json.loads(summary.tags["record_ids_changed"])
+            changed_record_count += len(changed_ids)
 
     return LoaderResponse(
         summaries=typed_summaries,
         changeset_ids=list(changeset_ids),
-        record_count=record_count,
+        changed_record_count=changed_record_count,
         job_id=request.job_id,
     )
 
