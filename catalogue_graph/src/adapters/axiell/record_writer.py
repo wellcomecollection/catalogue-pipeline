@@ -40,7 +40,6 @@ class WindowRecordWriter:
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
         rows: list[dict[str, Any]] = []
-        record_ids: list[str] = []
 
         for identifier, record in records:
             rows.append(
@@ -51,7 +50,6 @@ class WindowRecordWriter:
                     "last_modified": record.header.datestamp,
                 }
             )
-            record_ids.append(identifier)
 
         tags: dict[str, str] = {
             "job_id": self.job_id,
@@ -73,4 +71,4 @@ class WindowRecordWriter:
         if updated_record_ids:
             tags["record_ids_changed"] = json.dumps(updated_record_ids)
 
-        return {"record_ids": record_ids, "tags": tags}
+        return {"tags": tags}

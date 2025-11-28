@@ -25,7 +25,6 @@ class WindowCallback(Protocol):
 
 
 class WindowCallbackResult(TypedDict, total=False):
-    record_ids: list[str]
     tags: dict[str, str] | None
 
 
@@ -253,8 +252,6 @@ class WindowHarvestManager:
 
                 callback_result = callback(records_with_ids)
 
-                if callback_result and "record_ids" in callback_result:
-                    record_ids = callback_result["record_ids"]
                 if callback_result and "tags" in callback_result:
                     tags = self._merge_tags(callback_result["tags"])
 

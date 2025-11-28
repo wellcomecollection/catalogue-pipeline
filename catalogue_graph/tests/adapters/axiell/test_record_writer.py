@@ -40,7 +40,6 @@ def test_writes_records_to_store() -> None:
 
     result = writer([("rec1", record)])
 
-    assert result["record_ids"] == ["rec1"]
     assert result["tags"] == {
         "job_id": "test_job",
         "window_range": "2023-01-01-2023-01-02",
@@ -77,7 +76,6 @@ def test_handles_empty_records() -> None:
 
     result = writer([])
 
-    assert result["record_ids"] == []
     assert result["tags"] == {
         "job_id": "test_job",
         "window_range": "2023-01-01-2023-01-02",
@@ -109,9 +107,7 @@ def test_handles_deleted_records() -> None:
 
     record = Record(header=record_header, metadata=None, about=None)
 
-    result = writer([("rec1", record)])
-
-    assert result["record_ids"] == ["rec1"]
+    writer([("rec1", record)])
 
     mock_store.incremental_update.assert_called_once()
     table = mock_store.incremental_update.call_args[0][0]

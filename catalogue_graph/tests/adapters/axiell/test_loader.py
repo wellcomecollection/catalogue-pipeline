@@ -177,7 +177,6 @@ def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> 
     assert all_records.num_rows == 1
     assert all_records.column("last_modified")[0].as_py() == last_modified
 
-    assert result["record_ids"] == ["id-1"]
     tags = result["tags"]
     assert tags is not None
     assert tags["job_id"] == "job-123"
@@ -202,7 +201,6 @@ def test_window_record_writer_handles_empty_window(
     )
 
     assert table_client.get_all_records().num_rows == 0
-    assert result["record_ids"] == []
     tags = result["tags"]
     assert tags is not None
     assert tags["job_id"] == "job-123"
@@ -224,7 +222,7 @@ def test_window_record_writer_handles_deleted_record(
     )
 
     last_modified = datetime(2023, 1, 1, 12, 0, 0, tzinfo=UTC)
-    result = writer(
+    writer(
         records=[
             (
                 "id-deleted",
@@ -234,8 +232,6 @@ def test_window_record_writer_handles_deleted_record(
             )
         ],
     )
-
-    assert result["record_ids"] == ["id-deleted"]
 
     # Verify soft delete (content is None)
     all_records = table_client.get_all_records(include_deleted=True)
@@ -293,7 +289,6 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
     )
 
     # Should have record_ids but NO changeset_id
-    assert result_2["record_ids"] == ["id-1"]
     tags_2 = cast(dict[str, str], result_2["tags"])
     assert "changeset_id" not in tags_2
 

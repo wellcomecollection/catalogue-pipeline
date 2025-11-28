@@ -71,7 +71,7 @@ class StubWindowProcessor:
         self,
         records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
-        return {"record_ids": [id for id, _ in records]}
+        return {}
 
 
 def _create_table(
@@ -322,7 +322,6 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
             records: list[tuple[str, Record]],
         ) -> WindowCallbackResult:
             return {
-                "record_ids": [id for id, _ in records],
                 "tags": {"changeset_id": "cs-500"},
             }
 
