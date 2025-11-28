@@ -54,6 +54,37 @@ def test_build_window_request_uses_lookback_when_no_history(
     assert request.job_id == "20251117T1200"
 
 
+def test_build_window_request_respects_custom_lookback(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
+    store = _populate_store(temporary_window_status_table, [])
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        window_lookback_days=3,
+    )
+
+    assert request.window_start == now - timedelta(days=3)
+    assert request.window_end == now
+
+
+def test_build_window_request_embeds_window_minutes(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
+    store = _populate_store(temporary_window_status_table, [])
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        window_minutes=42,
+    )
+
+    assert request.window_minutes == 42
+
+
 def test_build_window_request_respects_last_success(
     monkeypatch: MonkeyPatch,
     temporary_window_status_table: IcebergTable,

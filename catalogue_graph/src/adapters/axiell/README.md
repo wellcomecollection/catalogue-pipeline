@@ -22,6 +22,7 @@ EventBridge → Trigger → Loader → Transformer → Elasticsearch
 * Computes the next `[window_start, window_end)` range using the most recent successful entry, defaulting to a configurable look-back if no history exists.
 * Generates a canonical `job_id` (UTC `YYYYMMDDTHHMM`), embeds OAI metadata parameters, and publishes an `AxiellAdapterLoaderEvent` via EventBridge.
 * Optionally enforces the maximum lag window before allowing the run to proceed.
+* For local runs, the trigger CLI exposes `--window-minutes` (window duration) and `--lookback-days` (fallback range when no successful windows exist). These default to `config.WINDOW_MINUTES` / `config.WINDOW_LOOKBACK_DAYS` but can be increased to sweep large gaps.
 
 ### Loader
 
@@ -63,6 +64,24 @@ uv run python -m adapters.axiell.steps.trigger \
 ```
 
 Inspect `/tmp/axiell_loader_event.json` to confirm the window, metadata prefix, and generated `job_id`.
+
+#### Rerunning large or missed windows
+
+If windows were skipped for several days (for example, during an outage) you can ask the trigger to produce a much larger catch-up request:
+
+```bash
+uv run python -m adapters.axiell.steps.trigger \
+  --at 2025-11-22T09:00:00Z \
+  --window-minutes 120 \
+  --lookback-days 5 \
+  --job-id backfill-axiell-20251122 \
+  > /tmp/axiell_backfill_event.json
+```
+
+* `--window-minutes` controls how wide each harvesting window should be. The value is copied onto the loader event so the loader harvester uses the same duration.
+* `--lookback-days` sets how far back to start if the window store has no successes; bump this to cover long gaps.
+
+These overrides are only required when you want to deviate from the defaults baked into `config.py`. They are also useful when intentionally reloading historical data for diagnostics: point the loader at the emitted event file and it will replay the requested range without touching your production configuration.
 
 ### 2. Loader → harvest records & emit changesets
 

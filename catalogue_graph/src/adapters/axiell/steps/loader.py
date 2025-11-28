@@ -93,7 +93,7 @@ def build_harvester(
         store=runtime.store,
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
-        window_minutes=config.WINDOW_MINUTES,
+        window_minutes=request.window_minutes or config.WINDOW_MINUTES,
         max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
         record_callback=callback,
         default_tags={"job_id": request.job_id},
