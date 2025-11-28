@@ -16,16 +16,15 @@ from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.window_harvester import (
-    RecordCallbackFactory,
+    WindowCallback,
     WindowCallbackResult,
     WindowHarvestManager,
-    WindowProcessor,
 )
 from adapters.utils.window_store import (
     WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
-    IcebergWindowStore,
     WindowStatusRecord,
+    WindowStore,
 )
 
 FAST_OAI_BACKOFF_SECONDS = 1e-3
@@ -68,18 +67,11 @@ class StubOAIClient:
 
 
 class StubWindowProcessor:
-    def start_window(self, window_key: str) -> None:
-        pass
-
-    def process_record(self, identifier: str, record: Record) -> None:
-        pass
-
-    def complete_window(
+    def __call__(
         self,
-        window_key: str,
-        record_ids: list[str],
+        records: list[tuple[str, Record]],
     ) -> WindowCallbackResult:
-        return {"record_ids": record_ids}
+        return {}
 
 
 def _create_table(
@@ -123,7 +115,8 @@ def _build_harvester(
     responses: list[Record],
     *,
     default_tags: dict[str, str] | None = None,
-    record_callback_factory: RecordCallbackFactory | None = None,
+    record_callback: WindowCallback | None = None,
+    window_minutes: int | None = None,
 ) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
@@ -134,26 +127,24 @@ def _build_harvester(
         table_name=f"window_status_{uuid4().hex}",
         catalog_name=f"catalog_{uuid4().hex}",
     )
-    store = IcebergWindowStore(table)
+    store = WindowStore(table)
     client = StubOAIClient(responses)
 
-    def default_factory(
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> WindowProcessor:
-        return StubWindowProcessor()
+    def default_callback(
+        records: list[tuple[str, Record]],
+    ) -> WindowCallbackResult:
+        return StubWindowProcessor()(records)
 
-    factory = record_callback_factory or default_factory
+    callback = record_callback or default_callback
 
     return WindowHarvestManager(
         client=client,
         store=store,
         metadata_prefix="oai_raw",
         set_spec="collect",
-        window_minutes=15,
+        window_minutes=window_minutes or 15,
         max_parallel_requests=2,
-        record_callback_factory=factory,
+        record_callback=callback,
         default_tags=default_tags,
     )
 
@@ -163,32 +154,123 @@ def _window_range(hours: int = 24) -> tuple[datetime, datetime]:
     return start, start + timedelta(hours=hours)
 
 
+@pytest.mark.parametrize(
+    "window_minutes, expected",
+    [
+        (
+            15,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+        (
+            30,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+        (
+            60,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+        (
+            240,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+    ],
+)
+def test_generate_windows_aligns_to_boundaries(
+    tmp_path: Path, window_minutes: int, expected: list[tuple[datetime, datetime]]
+) -> None:
+    harvester = _build_harvester(tmp_path, [], window_minutes=window_minutes)
+    start = datetime(2025, 1, 1, 12, 7, tzinfo=UTC)
+    end = datetime(2025, 1, 1, 13, 55, tzinfo=UTC)
+
+    windows = harvester.generate_windows(start, end)
+
+    assert windows == expected
+
+
 def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
     records = [_make_record("id:1"), _make_record("id:2")]
     harvester = _build_harvester(tmp_path, records)
     captured: list[str] = []
 
     class CapturingProcessor(StubWindowProcessor):
-        def process_record(
+        def __call__(
             self,
-            identifier: str,
-            record: Record,
-        ) -> None:
-            captured.append(identifier)
-
-    def recorder_factory(
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> WindowProcessor:
-        return CapturingProcessor()
+            records: list[tuple[str, Record]],
+        ) -> WindowCallbackResult:
+            for identifier, _ in records:
+                captured.append(identifier)
+            return super().__call__(records)
 
     start_time, end_time = _window_range()
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
         max_windows=1,
-        record_callback_factory=recorder_factory,
+        record_callback=CapturingProcessor(),
     )
 
     assert len(summaries) == 1
@@ -205,25 +287,17 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     harvester = _build_harvester(tmp_path, records)
 
     class FailingProcessor(StubWindowProcessor):
-        def process_record(
+        def __call__(
             self,
-            identifier: str,
-            record: Record,
-        ) -> None:
+            records: list[tuple[str, Record]],
+        ) -> WindowCallbackResult:
             raise RuntimeError("boom")
-
-    def failing_factory(
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> WindowProcessor:
-        return FailingProcessor()
 
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
-        record_callback_factory=failing_factory,
+        record_callback=FailingProcessor(),
         max_windows=1,
     )
 
@@ -336,49 +410,33 @@ def test_harvest_recent_attaches_default_tags(tmp_path: Path) -> None:
     assert row["tags"] == {"job_id": "job-123"}
 
 
-def test_record_callback_factory_persists_changeset(tmp_path: Path) -> None:
+def test_record_callback_persists_changeset(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
 
     class RecordingCallback:
-        def __init__(self) -> None:
-            self.records: list[str] = []
-
-        def start_window(self, window_key: str) -> None:
-            self.window_key = window_key
-
-        def process_record(self, identifier: str, record: Record) -> None:
-            self.records.append(identifier)
-
-        def complete_window(
+        def __call__(
             self,
-            window_key: str,
-            record_ids: list[str],
+            records: list[tuple[str, Record]],
         ) -> WindowCallbackResult:
             return {
-                "record_ids": list(self.records),
                 "tags": {"changeset_id": "cs-500"},
             }
-
-    def factory(
-        window_key: str,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> WindowProcessor:
-        return RecordingCallback()
 
     start_time, end_time = _window_range(hours=1)
     summaries = harvester.harvest_recent(
         start_time=start_time,
         end_time=end_time,
-        record_callback_factory=factory,
+        record_callback=RecordingCallback(),
         reprocess_successful_windows=True,
     )
 
     assert summaries[0]["record_ids"] == ["id:1"]
-    assert summaries[0]["changeset_id"] == "cs-500"
+    assert summaries[0]["tags"] is not None
+    assert summaries[0]["tags"]["changeset_id"] == "cs-500"
     status_map = harvester.store.load_status_map()
     stored = next(iter(status_map.values()))
+    assert stored["tags"] is not None
     assert stored["tags"]["changeset_id"] == "cs-500"
 
 
@@ -413,7 +471,8 @@ def test_harvest_recent_returns_existing_successful_summary_with_tags(
     summary = summaries[0]
     assert summary["window_key"] == window_key
     assert summary["record_ids"] == ["existing-1"]
-    assert summary["changeset_id"] == "cs-123"
+    assert summary["tags"] is not None
+    assert summary["tags"]["changeset_id"] == "cs-123"
 
 
 def test_harvest_recent_handles_partial_success_across_runs(tmp_path: Path) -> None:
@@ -438,3 +497,23 @@ def test_harvest_recent_handles_partial_success_across_runs(tmp_path: Path) -> N
     assert second[0]["window_key"] == first[0]["window_key"]
     assert second[0]["record_ids"] == first[0]["record_ids"]
     assert second[1]["window_start"] > second[0]["window_start"]
+
+
+def test_harvest_recent_reuses_aligned_windows_for_offset_range(tmp_path: Path) -> None:
+    records = [_make_record("id:1")]
+    harvester = _build_harvester(tmp_path, records)
+    aligned_start = datetime(2025, 1, 1, tzinfo=UTC)
+    aligned_end = aligned_start + timedelta(minutes=harvester.window_minutes * 3)
+
+    harvester.harvest_recent(start_time=aligned_start, end_time=aligned_end)
+    initial_calls = len(harvester.client.calls)
+
+    offset_start = aligned_start + timedelta(minutes=5)
+    summaries = harvester.harvest_recent(start_time=offset_start, end_time=aligned_end)
+
+    assert len(summaries) == 3
+    assert summaries[0]["window_start"] == offset_start
+    assert summaries[1]["window_start"] == aligned_start + timedelta(
+        minutes=harvester.window_minutes
+    )
+    assert len(harvester.client.calls) - initial_calls == 1

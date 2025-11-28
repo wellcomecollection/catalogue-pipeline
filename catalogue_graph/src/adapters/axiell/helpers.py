@@ -7,7 +7,7 @@ from adapters.utils.iceberg import (
 from adapters.utils.window_store import (
     WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
-    IcebergWindowStore,
+    WindowStore,
 )
 
 
@@ -66,6 +66,6 @@ def load_window_status_table(
     )
 
 
-def build_window_store(*, use_rest_api_table: bool = True) -> IcebergWindowStore:
+def build_window_store(*, use_rest_api_table: bool = True) -> WindowStore:
     table = load_window_status_table(use_rest_api_table=use_rest_api_table)
-    return IcebergWindowStore(table)
+    return WindowStore(table)

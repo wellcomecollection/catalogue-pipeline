@@ -24,6 +24,7 @@ class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
     metadata_prefix: str | None = None
     set_spec: str | None = None
     max_windows: int | None = None
+    window_minutes: int | None = None
 
 
 class AxiellAdapterTransformerEvent(AxiellAdapterEvent):

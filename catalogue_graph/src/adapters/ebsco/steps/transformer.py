@@ -31,9 +31,7 @@ from adapters.ebsco.transformers.ebsco_to_weco import (
     ebsco_source_work_state,
     transform_record,
 )
-from adapters.utils.iceberg import (
-    IcebergTableClient,
-)
+from adapters.utils.adapter_store import AdapterStore
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.source.work import (
     DeletedSourceWork,
@@ -313,7 +311,7 @@ def handler(
     index_date = config_obj.index_date or config_obj.pipeline_date
 
     table = helpers.build_adapter_table(config_obj.use_rest_api_table)
-    table_client = IcebergTableClient(table)
+    table_client = AdapterStore(table)
 
     # Perform a reindex when no changeset is supplied
     if event.changeset_id is None:
