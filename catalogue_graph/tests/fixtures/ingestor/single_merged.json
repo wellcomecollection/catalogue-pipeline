@@ -92,7 +92,36 @@
         "contents": "Open and available at Glasgow University Archives Service."
       }
     ],
-    "items": [],
+    "items": [
+        {
+          "id": {
+            "type": "Unidentifiable"
+          },
+          "locations": [
+            {
+              "url": "https://iiif.wellcomecollection.org/presentation/v2/b16675630",
+              "locationType": {
+                "id": "iiif-presentation"
+              },
+              "license": {
+                "id": "cc-by-nc"
+              },
+              "accessConditions": [
+                {
+                  "method": {
+                    "type": "ViewOnline"
+                  },
+                  "status": {
+                    "type": "Open"
+                  }
+                }
+              ],
+              "createdDate": "2012-11-01T09:36:48Z",
+              "type": "DigitalLocation"
+            }
+          ]
+        }
+      ],
     "holdings": [],
     "collectionPath": {
       "path": "UGC198/10/3/5",
