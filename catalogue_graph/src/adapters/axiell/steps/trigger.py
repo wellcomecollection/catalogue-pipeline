@@ -8,11 +8,10 @@ from __future__ import annotations
 
 import argparse
 import json
-from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from adapters.axiell import config
 from adapters.axiell.models.step_events import (
@@ -29,10 +28,11 @@ class AxiellAdapterTriggerConfig(BaseModel):
     enforce_lag: bool = True
 
 
-@dataclass
-class TriggerRuntime:
+class TriggerRuntime(BaseModel):
     store: IcebergWindowStore
     enforce_lag: bool = True
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 def _window_key(start: datetime, end: datetime) -> str:

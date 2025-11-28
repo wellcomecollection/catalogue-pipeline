@@ -11,11 +11,10 @@ from datetime import datetime
 from typing import Any
 
 import pyarrow as pa
-from attr import dataclass
 from lxml import etree
 from oai_pmh_client.client import OAIClient
 from oai_pmh_client.models import Record
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from adapters.axiell import config
 from adapters.axiell.clients import build_oai_client
@@ -130,11 +129,12 @@ class WindowRecordWriterFactory:
         return writer
 
 
-@dataclass
-class LoaderRuntime:
+class LoaderRuntime(BaseModel):
     store: IcebergWindowStore
     table_client: IcebergTableClient
     oai_client: OAIClient
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 def build_runtime(config_obj: AxiellAdapterLoaderConfig | None = None) -> LoaderRuntime:

@@ -18,3 +18,24 @@ resource "aws_s3_bucket_lifecycle_configuration" "ebsco_adapter" {
     }
   }
 }
+
+resource "aws_s3_bucket" "axiell_adapter" {
+  bucket = "wellcomecollection-platform-axiell-adapter"
+
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "axiell_adapter" {
+  bucket = aws_s3_bucket.axiell_adapter.id
+
+  rule {
+    id     = "delete_objects_after_6_months"
+    status = "Enabled"
+
+    expiration {
+      days = 180
+    }
+  }
+}

@@ -29,6 +29,7 @@ dependencies = [
     "tqdm>=4.67.1",
     "oai-pmh-client",
     "structlog>=24.1.0",
+    "pip-system-certs>=5.3",
 ]
 
 [tool.uv]

@@ -9,11 +9,16 @@ WORKDIR /app
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install uv package manager
+# Install uv and pip-system-certs
+# pip-system-certs allows using system CA certificates when making HTTPS requests
 RUN pip install uv
 
 # Install git and clean up apt cache
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y ca-certificates git && rm -rf /var/lib/apt/lists/*
+
+# Copy and install custom certificates
+COPY certs/* /usr/local/share/ca-certificates/
+RUN update-ca-certificates
 
 # Install dependencies and the package using uv pip install
 # uv pip install works with the system Python environment and installs from uv.lock

@@ -6,3 +6,8 @@ module "ebsco" {
   source         = "./ebsco"
   repository_url = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
 }
+
+module "axiell" {
+  source         = "./axiell"
+  repository_url = data.aws_ecr_repository.unified_pipeline_lambda.repository_url
+}
