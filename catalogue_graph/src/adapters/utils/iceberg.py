@@ -158,7 +158,6 @@ def get_local_table(
     partition_spec: PartitionSpec | None = None,
     create_if_not_exists: bool = True,
 ) -> IcebergTable:
-    print(f"Getting local table: {namespace}.{table_name} in database {db_name}")
     """
     Get a table from the local catalog using the .local directory.
 

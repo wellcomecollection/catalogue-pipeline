@@ -116,6 +116,7 @@ def _build_harvester(
     *,
     default_tags: dict[str, str] | None = None,
     record_callback: WindowCallback | None = None,
+    window_minutes: int | None = None,
 ) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
@@ -141,7 +142,7 @@ def _build_harvester(
         store=store,
         metadata_prefix="oai_raw",
         set_spec="collect",
-        window_minutes=15,
+        window_minutes=window_minutes or 15,
         max_parallel_requests=2,
         record_callback=callback,
         default_tags=default_tags,
@@ -151,6 +152,103 @@ def _build_harvester(
 def _window_range(hours: int = 24) -> tuple[datetime, datetime]:
     start = datetime(2025, 1, 1, tzinfo=UTC)
     return start, start + timedelta(hours=hours)
+
+
+@pytest.mark.parametrize(
+    "window_minutes, expected",
+    [
+        (
+            15,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+        (
+            30,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+        (
+            60,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                ),
+                (
+                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+        (
+            240,
+            [
+                (
+                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
+                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
+                ),
+            ],
+        ),
+    ],
+)
+def test_generate_windows_aligns_to_boundaries(
+    tmp_path: Path, window_minutes: int, expected: list[tuple[datetime, datetime]]
+) -> None:
+    harvester = _build_harvester(tmp_path, [], window_minutes=window_minutes)
+    start = datetime(2025, 1, 1, 12, 7, tzinfo=UTC)
+    end = datetime(2025, 1, 1, 13, 55, tzinfo=UTC)
+
+    windows = harvester.generate_windows(start, end)
+
+    assert windows == expected
 
 
 def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
@@ -399,3 +497,23 @@ def test_harvest_recent_handles_partial_success_across_runs(tmp_path: Path) -> N
     assert second[0]["window_key"] == first[0]["window_key"]
     assert second[0]["record_ids"] == first[0]["record_ids"]
     assert second[1]["window_start"] > second[0]["window_start"]
+
+
+def test_harvest_recent_reuses_aligned_windows_for_offset_range(tmp_path: Path) -> None:
+    records = [_make_record("id:1")]
+    harvester = _build_harvester(tmp_path, records)
+    aligned_start = datetime(2025, 1, 1, tzinfo=UTC)
+    aligned_end = aligned_start + timedelta(minutes=harvester.window_minutes * 3)
+
+    harvester.harvest_recent(start_time=aligned_start, end_time=aligned_end)
+    initial_calls = len(harvester.client.calls)
+
+    offset_start = aligned_start + timedelta(minutes=5)
+    summaries = harvester.harvest_recent(start_time=offset_start, end_time=aligned_end)
+
+    assert len(summaries) == 3
+    assert summaries[0]["window_start"] == offset_start
+    assert summaries[1]["window_start"] == aligned_start + timedelta(
+        minutes=harvester.window_minutes
+    )
+    assert len(harvester.client.calls) - initial_calls == 1

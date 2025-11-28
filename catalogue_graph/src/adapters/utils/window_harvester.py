@@ -14,6 +14,8 @@ from pydantic import BaseModel, Field
 
 from .window_store import WindowStatusRecord, WindowStore
 
+ALIGNMENT_EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
+
 logger = logging.getLogger(__name__)
 
 
@@ -109,7 +111,10 @@ class WindowHarvestManager:
         cursor = start_time
 
         while cursor < end_time:
-            win_end = min(cursor + delta, end_time)
+            offset = cursor - ALIGNMENT_EPOCH
+            periods = offset // delta
+            aligned_window_end = ALIGNMENT_EPOCH + (periods + 1) * delta
+            win_end = min(aligned_window_end, end_time)
             windows.append((cursor, win_end))
             cursor = win_end
 
