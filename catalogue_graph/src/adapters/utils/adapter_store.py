@@ -4,11 +4,17 @@ from typing import cast
 
 import pyarrow as pa
 import pyarrow.compute as pc
+from pydantic import BaseModel
 from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, Not
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
 from adapters.utils.schemata import ARROW_SCHEMA
+
+
+class AdapterStoreUpdate(BaseModel):
+    changeset_id: str
+    updated_record_ids: list[str]
 
 
 class AdapterStore:
@@ -25,7 +31,7 @@ class AdapterStore:
 
     def incremental_update(
         self, new_data: pa.Table, record_namespace: str | None = None
-    ) -> str | None:
+    ) -> AdapterStoreUpdate | None:
         """
         Apply an incremental update to the table.
         Only updates and inserts are processed; missing records are NOT deleted.
@@ -86,7 +92,7 @@ class AdapterStore:
             changes = None
 
         if changes or inserts:
-            return self._upsert_with_markers(changes, inserts)
+            return self._upsert_with_markers(changes, inserts).changeset_id
         return None
 
     def _get_namespace(self, record_namespace: str | None) -> str:
@@ -126,7 +132,7 @@ class AdapterStore:
 
     def _upsert_with_markers(
         self, changes: pa.Table | None, inserts: pa.Table | None
-    ) -> str:
+    ) -> AdapterStoreUpdate:
         """
         Insert and update records, adding the timestamp and changeset values to
         any changed rows.
@@ -149,7 +155,16 @@ class AdapterStore:
                 tx.overwrite(changes, overwrite_filter=overwrite_mask_predicate)
             if inserts is not None:
                 tx.append(inserts)
-        return changeset_id
+
+        updated_ids = []
+        if changes is not None:
+            updated_ids.extend(changes.column("id").to_pylist())
+        if inserts is not None:
+            updated_ids.extend(inserts.column("id").to_pylist())
+
+        return AdapterStoreUpdate(
+            changeset_id=changeset_id, updated_record_ids=updated_ids
+        )
 
     @staticmethod
     def _create_match_filter(changes: pa.Table) -> BooleanExpression:

@@ -114,7 +114,9 @@ class WindowRecordWriter:
 
         if rows:
             table = pa.Table.from_pylist(rows, schema=LOADER_SCHEMA)
-            changeset_id = self.table_client.incremental_update(table)
+            update = self.table_client.incremental_update(table)
+            if update:
+                changeset_id = update.changeset_id
 
         if changeset_id:
             tags["changeset_id"] = changeset_id

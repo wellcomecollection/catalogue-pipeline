@@ -33,11 +33,9 @@ def _runtime_with(
 
 def _seed_changeset(table_client: AdapterStore, rows: list[dict[str, Any]]) -> str:
     table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA)
-    changeset_id = table_client.incremental_update(
-        table, record_namespace=AXIELL_NAMESPACE
-    )
-    assert changeset_id is not None
-    return changeset_id
+    update = table_client.incremental_update(table, record_namespace=AXIELL_NAMESPACE)
+    assert update is not None
+    return update.changeset_id
 
 
 def _request() -> AxiellAdapterTransformerEvent:

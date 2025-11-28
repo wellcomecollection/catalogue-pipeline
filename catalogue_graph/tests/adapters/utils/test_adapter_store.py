@@ -551,8 +551,8 @@ def test_incremental_update_does_not_delete_missing_records(
     )
 
     client = AdapterStore(temporary_table)
-    changeset_id = client.incremental_update(new_data, "test_namespace")
-    assert changeset_id is not None
+    update = client.incremental_update(new_data, "test_namespace")
+    assert update is not None
 
     # Verify eb0002 is still present and not deleted (content is not None)
     all_records = client.get_all_records()
@@ -584,8 +584,8 @@ def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> N
     )
 
     client = AdapterStore(temporary_table)
-    changeset_id = client.incremental_update(new_data, "test_namespace")
-    assert changeset_id is not None
+    update = client.incremental_update(new_data, "test_namespace")
+    assert update is not None
 
     all_records = client.get_all_records()
     rows = {row["id"]: row for row in all_records.to_pylist()}
@@ -619,8 +619,8 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
     )
 
     client = AdapterStore(temporary_table)
-    changeset_id = client.incremental_update(new_data, "test_namespace")
-    assert changeset_id is not None
+    update = client.incremental_update(new_data, "test_namespace")
+    assert update is not None
 
     all_records = client.get_all_records()
     rows = {row["id"]: row for row in all_records.to_pylist()}
