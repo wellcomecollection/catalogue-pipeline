@@ -35,18 +35,12 @@ class WorkHierarchy(BaseModel):
         return _standardise_work_title(title) in self._ancestor_titles
 
 
-class WorkConcept(BaseModel):
-    concept: ConceptNode
-    linked_source_concept: SourceConceptNode | None
-    other_source_concepts: list[SourceConceptNode]
-
-
 class ExtractedConcept(BaseModel):
     concept: ConceptNode
     linked_source_concept: SourceConceptNode | None
     source_concepts: list[SourceConceptNode]
-    types: list[ConceptType]
-    same_as: list[str]
+    types: list[ConceptType] = []
+    same_as: list[str] = []
 
 
 class ExtractedRelatedConcept(BaseModel):

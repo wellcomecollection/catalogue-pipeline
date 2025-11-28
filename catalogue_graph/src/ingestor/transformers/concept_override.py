@@ -1,5 +1,6 @@
 import csv
 import os
+from functools import lru_cache
 from typing import TextIO
 
 from ingestor.models.display.id_label import DisplayIdLabel
@@ -12,30 +13,43 @@ from .raw_related_concepts import (
 )
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_PATH = os.path.join(HERE, "wellcome_collection_authority.csv")
+
+
+@lru_cache
+def load_csv_overrides(file_path: str) -> dict[str, dict[str, str]]:
+    with open(file_path) as f:
+        return load_overrides(f)
+
+
+def load_overrides(overrides: TextIO) -> dict[str, dict[str, str]]:
+    csv_reader = csv.DictReader(overrides)
+    return {row["id"].strip(): row for row in csv_reader}
 
 
 class ConceptTextOverrideProvider:
     overrides: dict[str, dict[str, str]] = {}
 
-    def __init__(self, overrides_csv: TextIO | None):
+    def __init__(self, overrides_csv: TextIO | None = None):
         if overrides_csv:
-            self._load_overrides(overrides_csv)
+            self.overrides = load_overrides(overrides_csv)
         else:
-            with open(
-                os.path.join(HERE, "wellcome_collection_authority.csv")
-            ) as csv_file:
-                self._load_overrides(csv_file)
+            self.overrides = load_csv_overrides(DEFAULT_PATH)
 
-    def _load_overrides(self, overrides: TextIO) -> None:
-        csv_reader = csv.DictReader(overrides)
-        self.overrides = {row["id"].strip(): row for row in csv_reader}
+    def get_label_override(self, concept_id: str) -> str | None:
+        override = self.overrides.get(concept_id)
+        if override and (override_label := override["label"].strip()):
+            return override_label
+
+        return None
 
     def display_label_of(
         self, raw_concept: RawNeptuneConcept | RawNeptuneRelatedConcept
     ) -> str:
-        override = self.overrides.get(raw_concept.wellcome_id)
-        if override and (override_label := override["label"].strip()):
-            return override_label
+        override = self.get_label_override(raw_concept.wellcome_id)
+        if override:
+            return override
+
         return raw_concept.display_label
 
     def description_of(

@@ -1,0 +1,34 @@
+{
+  "id": {
+    "sourceIdentifier": {
+      "identifierType": {
+        "id": "nlm-mesh"
+      },
+      "ontologyType": "Concept",
+      "value": "D008288Q000517"
+    },
+    "otherIdentifiers": [],
+    "canonicalId": "w5ewpsaw",
+    "type": "Identified"
+  },
+  "label": "Malaria - prevention & control",
+  "type": "Subject",
+  "concepts": [
+    {
+      "id": {
+        "sourceIdentifier": {
+          "identifierType": {
+            "id": "label-derived"
+          },
+          "ontologyType": "Concept",
+          "value": "malaria"
+        },
+        "otherIdentifiers": [],
+        "canonicalId": "buy5ngy9",
+        "type": "Identified"
+      },
+      "label": "Malaria",
+      "type": "Concept"
+    }
+  ]
+}

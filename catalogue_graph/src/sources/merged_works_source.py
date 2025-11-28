@@ -97,8 +97,12 @@ class MergedWorksSource(BaseSource):
             body["search_after"] = search_after
 
         start_time = time.time()
-        hits: list[dict] = self.es_client.search(body=body)["hits"]["hits"]
+        result = self.es_client.search(body=body)
+        hits: list[dict] = result["hits"]["hits"]
         duration = round(time.time() - start_time)
+
+        if result.get("pit_id"):
+            self.pit_id = result["pit_id"]
 
         print(
             f"Ran Elasticsearch query (slice {slice_index}) in {duration} seconds, retrieving {len(hits)} records."
