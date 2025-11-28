@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from contextlib import suppress
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
@@ -99,3 +99,49 @@ def test_window_store_round_trip(tmp_path: Path) -> None:
     assert len(failed_rows) == 1
     assert failed_rows[0]["window_key"] == record.window_key
     assert failed_rows[0]["record_ids"] == []
+
+
+def test_window_store_list_in_range(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog.db"
+    warehouse_path = tmp_path / "warehouse"
+    catalog_uri = f"sqlite:///{catalog_path}"
+    table = _create_table(
+        catalog_uri=catalog_uri,
+        warehouse_path=warehouse_path,
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
+    )
+    store = WindowStore(table)
+
+    # Create 3 records at different times
+    t1 = datetime(2025, 1, 1, 10, 0, tzinfo=UTC)
+    t2 = datetime(2025, 1, 1, 11, 0, tzinfo=UTC)
+    t3 = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    for t in [t1, t2, t3]:
+        store.upsert(
+            WindowStatusRecord(
+                window_key=t.isoformat(),
+                window_start=t,
+                window_end=t,  # dummy
+                state="success",
+                attempts=1,
+                last_error=None,
+                record_ids=(),
+                updated_at=datetime.now(UTC),
+            )
+        )
+
+    # Test range queries
+    # All
+    assert len(store.list_in_range(start=t1, end=t3 + timedelta(hours=1))) == 3
+
+    # Start filter
+    assert len(store.list_in_range(start=t2)) == 2  # t2, t3
+
+    # End filter
+    assert len(store.list_in_range(end=t2)) == 1  # t1 (end is exclusive)
+
+    # Both
+    assert len(store.list_in_range(start=t2, end=t3)) == 1  # t2

@@ -6,11 +6,17 @@ from threading import Lock
 from typing import Any
 
 import pyarrow as pa
-from pyiceberg.expressions import EqualTo
+from pyiceberg.expressions import (
+    And,
+    BooleanExpression,
+    EqualTo,
+    GreaterThanOrEqual,
+    LessThan,
+)
 from pyiceberg.partitioning import PartitionField, PartitionSpec
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
-from pyiceberg.transforms import HourTransform
+from pyiceberg.transforms import HourTransform, IdentityTransform
 from pyiceberg.types import (
     IntegerType,
     ListType,
@@ -61,7 +67,8 @@ WINDOW_STATUS_SCHEMA = Schema(
 )
 
 WINDOW_STATUS_PARTITION_SPEC = PartitionSpec(
-    PartitionField(2, 1000, HourTransform(), "window_start_hour")
+    PartitionField(2, 1000, HourTransform(), "window_start_hour"),
+    PartitionField(4, 1001, IdentityTransform(), "state"),
 )
 
 WINDOW_STATUS_ARROW_FIELDS: list[pa.Field] = [
@@ -124,6 +131,28 @@ class WindowStore:
             table.append(
                 pa.Table.from_pydict(payload, schema=WINDOW_STATUS_ARROW_SCHEMA)
             )
+
+    def list_in_range(
+        self, start: datetime | None = None, end: datetime | None = None
+    ) -> list[dict[str, Any]]:
+        """Return rows within the given time range."""
+        scan = self._table.scan()
+        filters: list[BooleanExpression] = []
+        if start:
+            filters.append(GreaterThanOrEqual("window_start", start))
+        if end:
+            filters.append(LessThan("window_start", end))
+
+        if filters:
+            if len(filters) > 1:
+                scan = scan.filter(And(*filters))
+            else:
+                scan = scan.filter(filters[0])
+
+        arrow_table = scan.to_arrow()
+        if arrow_table is None or arrow_table.num_rows == 0:
+            return []
+        return [self._normalize_row(row) for row in arrow_table.to_pylist()]
 
     def list_by_state(self, state: str) -> list[dict[str, Any]]:
         """Return rows filtered by state (e.g. success, failed)."""

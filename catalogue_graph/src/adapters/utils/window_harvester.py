@@ -468,14 +468,17 @@ class WindowHarvestManager:
         range_start: datetime | None,
         range_end: datetime | None,
     ) -> list[WindowSummary]:
-        scan = self.store.table.scan()
-        arrow_table = scan.to_arrow()
-        if arrow_table is None or arrow_table.num_rows == 0:
-            return []
         start_bound = self._ensure_utc(range_start) if range_start else None
         end_bound = self._ensure_utc(range_end) if range_end else None
+
+        search_start = None
+        if start_bound:
+            search_start = start_bound - timedelta(minutes=self.window_minutes)
+
+        raw_rows = self.store.list_in_range(start=search_start, end=end_bound)
+
         rows: list[WindowSummary] = []
-        for raw_row in arrow_table.to_pylist():
+        for raw_row in raw_rows:
             typed_row = self._coerce_row(raw_row)
             if self._within_range(
                 typed_row["window_start"],
