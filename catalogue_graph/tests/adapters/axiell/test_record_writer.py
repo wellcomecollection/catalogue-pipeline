@@ -12,7 +12,7 @@ from adapters.axiell.record_writer import (
 from adapters.utils.adapter_store import AdapterStore
 
 
-def test_writes_records_to_store():
+def test_writes_records_to_store() -> None:
     mock_store = Mock(spec=AdapterStore)
     mock_store.incremental_update.return_value = Mock(changeset_id="123")
 
@@ -62,7 +62,7 @@ def test_writes_records_to_store():
     assert "<payload>some content</payload>" in row["content"]
 
 
-def test_handles_empty_records():
+def test_handles_empty_records() -> None:
     mock_store = Mock(spec=AdapterStore)
 
     writer = WindowRecordWriter(
@@ -83,7 +83,7 @@ def test_handles_empty_records():
     mock_store.incremental_update.assert_not_called()
 
 
-def test_handles_deleted_records():
+def test_handles_deleted_records() -> None:
     # Deleted records might have no metadata
     mock_store = Mock(spec=AdapterStore)
     mock_store.incremental_update.return_value = Mock(changeset_id="456")
