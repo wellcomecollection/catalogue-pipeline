@@ -74,32 +74,13 @@ def get_table(
     return catalogue.load_table(table_fullname)
 
 
-def get_rest_api_table(
+def get_rest_api_catalog_params(
     s3_tables_bucket: str,
-    table_name: str,
-    namespace: str,
-    create_if_not_exists: bool = False,
-    schema: Schema = SCHEMA,
-    partition_spec: PartitionSpec | None = None,
-    *,
     region: str | None = None,
     account_id: str | None = None,
-) -> IcebergTable:
+) -> dict[str, str]:
     """
-    Get a table from an S3 Tables Iceberg REST API catalog.
-
-    Args:
-        s3_tables_bucket: S3 bucket for the S3 Table
-        table_name: Name of the table
-        namespace: Namespace for the table
-        create_if_not_exists: Whether to create the table if it doesn't exist
-        schema: Schema to use when creating the table
-        partition_spec: Partition spec to use when creating the table
-        region: AWS region where the S3 Table is located
-        account_id: AWS account ID
-
-    Returns:
-        IcebergTable: The configured table
+    Get parameters for connecting to an S3 Tables Iceberg REST API catalog.
     """
     session = boto3.Session()
     region = region or session.region_name
@@ -139,6 +120,42 @@ def get_rest_api_table(
     if token:
         params["s3.session-token"] = token
 
+    return params
+
+
+def get_rest_api_table(
+    s3_tables_bucket: str,
+    table_name: str,
+    namespace: str,
+    create_if_not_exists: bool = False,
+    schema: Schema = SCHEMA,
+    partition_spec: PartitionSpec | None = None,
+    *,
+    region: str | None = None,
+    account_id: str | None = None,
+) -> IcebergTable:
+    """
+    Get a table from an S3 Tables Iceberg REST API catalog.
+
+    Args:
+        s3_tables_bucket: S3 bucket for the S3 Table
+        table_name: Name of the table
+        namespace: Namespace for the table
+        create_if_not_exists: Whether to create the table if it doesn't exist
+        schema: Schema to use when creating the table
+        partition_spec: Partition spec to use when creating the table
+        region: AWS region where the S3 Table is located
+        account_id: AWS account ID
+
+    Returns:
+        IcebergTable: The configured table
+    """
+    params = get_rest_api_catalog_params(
+        s3_tables_bucket=s3_tables_bucket,
+        region=region,
+        account_id=account_id,
+    )
+
     return get_table(
         catalogue_namespace=namespace,
         table_name=table_name,
@@ -148,6 +165,33 @@ def get_rest_api_table(
         partition_spec=partition_spec,
         **params,
     )
+
+
+def get_local_catalog_params(
+    db_name: str = "catalog",
+) -> dict[str, str]:
+    """
+    Get parameters for connecting to a local Iceberg catalog.
+    """
+    # Get the project root directory (parent of app directory)
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(app_dir)
+    local_dir = os.path.join(project_root, ".local")
+
+    # For test databases, use a separate warehouse directory
+    if db_name.startswith("test"):
+        warehouse_dir = os.path.join(local_dir, "test_warehouse")
+    else:
+        warehouse_dir = os.path.join(local_dir, "warehouse")
+
+    # Ensure directories exist
+    os.makedirs(local_dir, exist_ok=True)
+    os.makedirs(warehouse_dir, exist_ok=True)
+
+    return {
+        "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
+        "warehouse": f"file://{warehouse_dir}/",
+    }
 
 
 def get_local_table(
@@ -172,20 +216,7 @@ def get_local_table(
     Returns:
         IcebergTable: The configured table
     """
-    # Get the project root directory (parent of app directory)
-    app_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.dirname(app_dir)
-    local_dir = os.path.join(project_root, ".local")
-
-    # For test databases, use a separate warehouse directory
-    if db_name.startswith("test"):
-        warehouse_dir = os.path.join(local_dir, "test_warehouse")
-    else:
-        warehouse_dir = os.path.join(local_dir, "warehouse")
-
-    # Ensure directories exist
-    os.makedirs(local_dir, exist_ok=True)
-    os.makedirs(warehouse_dir, exist_ok=True)
+    params = get_local_catalog_params(db_name=db_name)
 
     return get_table(
         catalogue_namespace=namespace,
@@ -194,10 +225,7 @@ def get_local_table(
         create_if_not_exists=create_if_not_exists,
         schema=schema,
         partition_spec=partition_spec,
-        **{
-            "uri": f"sqlite:///{os.path.join(local_dir, f'{db_name}.db')}",
-            "warehouse": f"file://{warehouse_dir}/",
-        },
+        **params,
     )
 
 
