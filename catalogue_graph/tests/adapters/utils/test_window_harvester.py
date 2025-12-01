@@ -5,7 +5,7 @@ from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from uuid import uuid4
 
 import pytest
@@ -323,13 +323,14 @@ def test_harvest_range_skips_successful_windows_by_default(tmp_path: Path) -> No
 
     first = harvester.harvest_range(start_time=start, end_time=end)
     assert len(first) == 1
-    initial_calls = len(harvester.client.calls)
+    client = cast(StubOAIClient, harvester.client)
+    initial_calls = len(client.calls)
 
     second = harvester.harvest_range(start_time=start, end_time=end)
     assert len(second) == 1
     assert second[0]["window_key"] == first[0]["window_key"]
     assert second[0]["record_ids"] == first[0]["record_ids"]
-    assert len(harvester.client.calls) == initial_calls
+    assert len(client.calls) == initial_calls
 
 
 def test_harvest_range_can_reprocess_successful_windows(tmp_path: Path) -> None:
@@ -465,7 +466,8 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
     aligned_end = aligned_start + timedelta(minutes=harvester.window_minutes * 3)
 
     harvester.harvest_range(start_time=aligned_start, end_time=aligned_end)
-    initial_calls = len(harvester.client.calls)
+    client = cast(StubOAIClient, harvester.client)
+    initial_calls = len(client.calls)
 
     offset_start = aligned_start + timedelta(minutes=5)
     summaries = harvester.harvest_range(start_time=offset_start, end_time=aligned_end)
@@ -475,7 +477,7 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
     assert summaries[1]["window_start"] == aligned_start + timedelta(
         minutes=harvester.window_minutes
     )
-    assert len(harvester.client.calls) - initial_calls == 1
+    assert len(client.calls) - initial_calls == 1
 
 
 def test_init_with_optional_client(tmp_path: Path) -> None:
