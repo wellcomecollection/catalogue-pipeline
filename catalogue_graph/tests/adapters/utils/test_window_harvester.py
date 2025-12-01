@@ -251,7 +251,7 @@ def test_generate_windows_aligns_to_boundaries(
     assert windows == expected
 
 
-def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
+def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
     records = [_make_record("id:1"), _make_record("id:2")]
     harvester = _build_harvester(tmp_path, records)
     captured: list[str] = []
@@ -266,7 +266,7 @@ def test_harvest_recent_records_are_stored(tmp_path: Path) -> None:
             return super().__call__(records)
 
     start_time, end_time = _window_range()
-    summaries = harvester.harvest_recent(
+    summaries = harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
         max_windows=1,
@@ -294,7 +294,7 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
             raise RuntimeError("boom")
 
     start_time, end_time = _window_range(hours=1)
-    summaries = harvester.harvest_recent(
+    summaries = harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
         record_callback=FailingProcessor(),
@@ -312,7 +312,7 @@ def test_coverage_report(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
     start_time, end_time = _window_range(hours=2)
-    harvester.harvest_recent(
+    harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
         max_windows=2,
@@ -325,38 +325,38 @@ def test_coverage_report(tmp_path: Path) -> None:
     assert isinstance(report.coverage_gaps, list)
 
 
-def test_harvest_recent_requires_valid_range(tmp_path: Path) -> None:
+def test_harvest_range_requires_valid_range(tmp_path: Path) -> None:
     harvester = _build_harvester(tmp_path, [])
     end_time = datetime(2025, 1, 1, tzinfo=UTC)
     with pytest.raises(ValueError):
-        harvester.harvest_recent(start_time=end_time, end_time=end_time)
+        harvester.harvest_range(start_time=end_time, end_time=end_time)
 
 
-def test_harvest_recent_skips_successful_windows_by_default(tmp_path: Path) -> None:
+def test_harvest_range_skips_successful_windows_by_default(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
     start = datetime(2025, 1, 1, tzinfo=UTC)
     end = start + timedelta(minutes=harvester.window_minutes)
 
-    first = harvester.harvest_recent(start_time=start, end_time=end)
+    first = harvester.harvest_range(start_time=start, end_time=end)
     assert len(first) == 1
     initial_calls = len(harvester.client.calls)
 
-    second = harvester.harvest_recent(start_time=start, end_time=end)
+    second = harvester.harvest_range(start_time=start, end_time=end)
     assert len(second) == 1
     assert second[0]["window_key"] == first[0]["window_key"]
     assert second[0]["record_ids"] == first[0]["record_ids"]
     assert len(harvester.client.calls) == initial_calls
 
 
-def test_harvest_recent_can_reprocess_successful_windows(tmp_path: Path) -> None:
+def test_harvest_range_can_reprocess_successful_windows(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
     start = datetime(2025, 1, 1, tzinfo=UTC)
     end = start + timedelta(minutes=harvester.window_minutes)
 
-    harvester.harvest_recent(start_time=start, end_time=end)
-    reprocessed = harvester.harvest_recent(
+    harvester.harvest_range(start_time=start, end_time=end)
+    reprocessed = harvester.harvest_range(
         start_time=start,
         end_time=end,
         reprocess_successful_windows=True,
@@ -365,7 +365,7 @@ def test_harvest_recent_can_reprocess_successful_windows(tmp_path: Path) -> None
     assert len(reprocessed) == 1
 
 
-def test_harvest_recent_attaches_default_tags(tmp_path: Path) -> None:
+def test_harvest_range_attaches_default_tags(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(
         tmp_path,
@@ -374,7 +374,7 @@ def test_harvest_recent_attaches_default_tags(tmp_path: Path) -> None:
     )
     start_time, end_time = _window_range(hours=1)
 
-    harvester.harvest_recent(
+    harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
         max_windows=1,
@@ -400,7 +400,7 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
             }
 
     start_time, end_time = _window_range(hours=1)
-    summaries = harvester.harvest_recent(
+    summaries = harvester.harvest_range(
         start_time=start_time,
         end_time=end_time,
         record_callback=RecordingCallback(),
@@ -416,7 +416,7 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
     assert stored["tags"]["changeset_id"] == "cs-500"
 
 
-def test_harvest_recent_returns_existing_successful_summary_with_tags(
+def test_harvest_range_returns_existing_successful_summary_with_tags(
     tmp_path: Path,
 ) -> None:
     harvester = _build_harvester(tmp_path, [])
@@ -437,7 +437,7 @@ def test_harvest_recent_returns_existing_successful_summary_with_tags(
         )
     )
 
-    summaries = harvester.harvest_recent(
+    summaries = harvester.harvest_range(
         start_time=start,
         end_time=end,
         reprocess_successful_windows=False,
@@ -451,20 +451,20 @@ def test_harvest_recent_returns_existing_successful_summary_with_tags(
     assert summary["tags"]["changeset_id"] == "cs-123"
 
 
-def test_harvest_recent_handles_partial_success_across_runs(tmp_path: Path) -> None:
+def test_harvest_range_handles_partial_success_across_runs(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
     start = datetime(2025, 1, 1, tzinfo=UTC)
     end = start + timedelta(minutes=harvester.window_minutes * 2)
 
-    first = harvester.harvest_recent(
+    first = harvester.harvest_range(
         start_time=start,
         end_time=end,
         max_windows=1,
     )
     assert len(first) == 1
 
-    second = harvester.harvest_recent(
+    second = harvester.harvest_range(
         start_time=start,
         end_time=end,
     )
@@ -475,17 +475,17 @@ def test_harvest_recent_handles_partial_success_across_runs(tmp_path: Path) -> N
     assert second[1]["window_start"] > second[0]["window_start"]
 
 
-def test_harvest_recent_reuses_aligned_windows_for_offset_range(tmp_path: Path) -> None:
+def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
     aligned_start = datetime(2025, 1, 1, tzinfo=UTC)
     aligned_end = aligned_start + timedelta(minutes=harvester.window_minutes * 3)
 
-    harvester.harvest_recent(start_time=aligned_start, end_time=aligned_end)
+    harvester.harvest_range(start_time=aligned_start, end_time=aligned_end)
     initial_calls = len(harvester.client.calls)
 
     offset_start = aligned_start + timedelta(minutes=5)
-    summaries = harvester.harvest_recent(start_time=offset_start, end_time=aligned_end)
+    summaries = harvester.harvest_range(start_time=offset_start, end_time=aligned_end)
 
     assert len(summaries) == 3
     assert summaries[0]["window_start"] == offset_start

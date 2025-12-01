@@ -107,7 +107,7 @@ def execute_loader(
     runtime = runtime or build_runtime()
     harvester = build_harvester(request, runtime)
 
-    summaries = harvester.harvest_recent(
+    summaries = harvester.harvest_range(
         start_time=request.window_start,
         end_time=request.window_end,
         max_windows=request.max_windows,

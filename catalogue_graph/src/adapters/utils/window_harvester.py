@@ -128,7 +128,7 @@ class WindowHarvestManager:
 
         return windows
 
-    def harvest_recent(
+    def harvest_range(
         self,
         *,
         start_time: datetime,

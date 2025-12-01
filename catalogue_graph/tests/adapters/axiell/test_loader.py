@@ -110,7 +110,7 @@ def test_execute_loader_updates_iceberg(
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
 
         response = loader.execute_loader(req, runtime=runtime)
@@ -158,7 +158,7 @@ def test_execute_loader_counts_only_changed_records(
         "changeset_id": "changeset-123",
     }
 
-    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
 
         response = loader.execute_loader(req, runtime=runtime)
@@ -192,7 +192,7 @@ def test_execute_loader_handles_no_new_records(
         "changeset_id": None,
     }
 
-    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
 
         response = loader.execute_loader(req, runtime=runtime)
@@ -214,7 +214,7 @@ def test_execute_loader_errors_when_no_windows(
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    with patch.object(loader.WindowHarvestManager, "harvest_recent") as mock_harvest:
+    with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = []
 
         with pytest.raises(RuntimeError):
