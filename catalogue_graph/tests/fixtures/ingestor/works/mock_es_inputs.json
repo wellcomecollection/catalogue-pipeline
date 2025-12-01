@@ -423,7 +423,7 @@
     "_source": {
       "query": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
+        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
         "physicalDescription": "69 pages ; 23 cm",
         "alternativeTitles": [],
         "languages.label": [
@@ -454,7 +454,7 @@
           "QZ200:276:22"
         ],
         "notes.contents": [
-          "Universit\u00e4t Leipzig."
+          "Universität Leipzig."
         ],
         "partOf.title": [],
         "production.label": [
@@ -467,7 +467,7 @@
         ],
         "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universit\u00e4t Leipzig (1409-1953)"
+          "Universität Leipzig (1409-1953)"
         ],
         "genres.concepts.label": [
           "Academic dissertations"
@@ -475,7 +475,7 @@
       },
       "display": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
+        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
         "alternativeTitles": [],
         "physicalDescription": "69 pages ; 23 cm",
         "workType": {
@@ -508,7 +508,7 @@
           {
             "agent": {
               "id": "un9788h3",
-              "label": "Universit\u00e4t Leipzig (1409-1953)",
+              "label": "Universität Leipzig (1409-1953)",
               "identifiers": [
                 {
                   "value": "n85086716",
@@ -833,7 +833,7 @@
         "notes": [
           {
             "contents": [
-              "Universit\u00e4t Leipzig."
+              "Universität Leipzig."
             ],
             "noteType": {
               "id": "dissertation-note",
@@ -888,7 +888,7 @@
           },
           {
             "id": "un9788h3",
-            "label": "Universit\u00e4t Leipzig (1409-1953)"
+            "label": "Universität Leipzig (1409-1953)"
           }
         ],
         "items.locations.license": [
@@ -937,7 +937,7 @@
         ],
         "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universit\u00e4t Leipzig (1409-1953)"
+          "Universität Leipzig (1409-1953)"
         ],
         "contributors.agent.id": [
           "eq9qvtwy",
@@ -3003,7 +3003,7 @@
     "_source": {
       "query": {
         "id": "a227dajt",
-        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
+        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
         "physicalDescription": "93 pages ; 25 cm",
         "alternativeTitles": [],
         "languages.label": [
@@ -3046,7 +3046,7 @@
       },
       "display": {
         "id": "a227dajt",
-        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
+        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
         "alternativeTitles": [],
         "physicalDescription": "93 pages ; 25 cm",
         "workType": {
