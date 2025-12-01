@@ -18,6 +18,7 @@ from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
     AxiellAdapterTriggerEvent,
 )
+from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.events import EventBridgeScheduledEvent
 
@@ -46,17 +47,6 @@ def _window_key(start: datetime, end: datetime) -> str:
 
 def _generate_job_id(timestamp: datetime) -> str:
     return timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M")
-
-
-def _latest_success_end(store: WindowStore) -> datetime | None:
-    rows = store.list_by_state("success")
-    if not rows:
-        return None
-    latest = max(rows, key=lambda row: row["window_end"])
-    end_time = latest.get("window_end")
-    if not isinstance(end_time, datetime):
-        return None
-    return end_time.astimezone(UTC)
 
 
 def _determine_start(
@@ -89,7 +79,9 @@ def build_window_request(
     window_minutes: int | None = None,
     window_lookback_days: int | None = None,
 ) -> AxiellAdapterLoaderEvent:
-    last_success_end = _latest_success_end(store)
+    reporter = WindowReporter(store=store)
+    report = reporter.coverage_report()
+    last_success_end = report.last_success_end
 
     if enforce_lag:
         _enforce_lag(now, last_success_end)
