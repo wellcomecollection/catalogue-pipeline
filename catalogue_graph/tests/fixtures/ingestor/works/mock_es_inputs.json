@@ -205,7 +205,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b18659135",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -351,6 +350,9 @@
         "availabilities.id": [
           "closed-stores",
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -421,7 +423,7 @@
     "_source": {
       "query": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
+        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
         "physicalDescription": "69 pages ; 23 cm",
         "alternativeTitles": [],
         "languages.label": [
@@ -452,7 +454,7 @@
           "QZ200:276:22"
         ],
         "notes.contents": [
-          "Universität Leipzig."
+          "Universit\u00e4t Leipzig."
         ],
         "partOf.title": [],
         "production.label": [
@@ -465,7 +467,7 @@
         ],
         "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universität Leipzig (1409-1953)"
+          "Universit\u00e4t Leipzig (1409-1953)"
         ],
         "genres.concepts.label": [
           "Academic dissertations"
@@ -473,7 +475,7 @@
       },
       "display": {
         "id": "a2239muq",
-        "title": "Ueber den Krebs der Nasenhöhle ... / vorgelegt von Hermann Wolter.",
+        "title": "Ueber den Krebs der Nasenh\u00f6hle ... / vorgelegt von Hermann Wolter.",
         "alternativeTitles": [],
         "physicalDescription": "69 pages ; 23 cm",
         "workType": {
@@ -506,7 +508,7 @@
           {
             "agent": {
               "id": "un9788h3",
-              "label": "Universität Leipzig (1409-1953)",
+              "label": "Universit\u00e4t Leipzig (1409-1953)",
               "identifiers": [
                 {
                   "value": "n85086716",
@@ -646,7 +648,6 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b30598977_0001.jp2/full/!200,200/0/default.jpg",
-          "createdDate": "2014-02-30T16:20:14Z",
           "type": "DigitalLocation"
         },
         "items": [
@@ -779,7 +780,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b30598977",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -833,7 +833,7 @@
         "notes": [
           {
             "contents": [
-              "Universität Leipzig."
+              "Universit\u00e4t Leipzig."
             ],
             "noteType": {
               "id": "dissertation-note",
@@ -888,7 +888,7 @@
           },
           {
             "id": "un9788h3",
-            "label": "Universität Leipzig (1409-1953)"
+            "label": "Universit\u00e4t Leipzig (1409-1953)"
           }
         ],
         "items.locations.license": [
@@ -937,7 +937,7 @@
         ],
         "contributors.agent.label": [
           "Wolter, Hermann (Wilhelm Victor Hermann), 1868-",
-          "Universität Leipzig (1409-1953)"
+          "Universit\u00e4t Leipzig (1409-1953)"
         ],
         "contributors.agent.id": [
           "eq9qvtwy",
@@ -981,6 +981,9 @@
         "availabilities.id": [
           "closed-stores",
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -1154,7 +1157,6 @@
               ],
               "url": "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=4205.13464940.0&epcustomerid=s7451719",
               "linkText": "Available in Eighteenth Century Collections Online.",
-              
               "type": "DigitalLocation"
             },
             "type": "Holdings"
@@ -1262,7 +1264,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -1444,7 +1447,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b19871831",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -1616,6 +1618,9 @@
         ],
         "availabilities.id": [
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -1828,7 +1833,6 @@
                 ],
                 "url": "https://www.proquest.com/docview/2090333870/shibboleth?accountid=14952",
                 "linkText": "Library member access",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -2006,6 +2010,9 @@
         ],
         "availabilities.id": [
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -2588,7 +2595,8 @@
         "partOf.title": [],
         "availabilities.id": [
           "closed-stores"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -2781,7 +2789,6 @@
                 ],
                 "url": "https://search.proquest.com/docview/2090366780/geoauth",
                 "linkText": "Free UK access",
-                
                 "type": "DigitalLocation"
               }
             ],
@@ -2966,7 +2973,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -2995,7 +3003,7 @@
     "_source": {
       "query": {
         "id": "a227dajt",
-        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
+        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
         "physicalDescription": "93 pages ; 25 cm",
         "alternativeTitles": [],
         "languages.label": [
@@ -3038,7 +3046,7 @@
       },
       "display": {
         "id": "a227dajt",
-        "title": "L'homoeopathie à l'Académie de médecine de Belgique en 1877 : réponse au défi de M. le professeur Crocq / par le docteur Gailliard.",
+        "title": "L'homoeopathie \u00e0 l'Acad\u00e9mie de m\u00e9decine de Belgique en 1877 : r\u00e9ponse au d\u00e9fi de M. le professeur Crocq / par le docteur Gailliard.",
         "alternativeTitles": [],
         "physicalDescription": "93 pages ; 25 cm",
         "workType": {
@@ -3232,7 +3240,6 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b21053613_0011.jp2/full/!200,200/0/default.jpg",
-          
           "type": "DigitalLocation"
         },
         "items": [
@@ -3267,7 +3274,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b21053613",
-                
                 "type": "DigitalLocation"
               }
             ],
@@ -3472,7 +3478,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -3794,7 +3801,8 @@
         ],
         "availabilities.id": [
           "closed-stores"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -3994,7 +4002,6 @@
                 ],
                 "url": "https://www.proquest.com/docview/2090328290/shibboleth?accountid=14952",
                 "linkText": "Library member access",
-                  
                 "type": "DigitalLocation"
               }
             ],
@@ -4172,7 +4179,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
