@@ -408,60 +408,6 @@ class WindowHarvestManager:
             failures=failures,
         )
 
-    def failed_windows(
-        self,
-        *,
-        range_start: datetime | None = None,
-        range_end: datetime | None = None,
-    ) -> list[WindowSummary]:
-        rows = self.store.list_by_state("failed")
-        if not rows:
-            return []
-        start_bound = self._ensure_utc(range_start) if range_start else None
-        end_bound = self._ensure_utc(range_end) if range_end else None
-        typed_rows: list[WindowSummary] = []
-        for row in rows:
-            typed_row = self._coerce_row(row)
-            if self._within_range(
-                typed_row["window_start"],
-                typed_row["window_end"],
-                start_bound,
-                end_bound,
-            ):
-                typed_rows.append(typed_row)
-        return typed_rows
-
-    def retry_failed_windows(
-        self,
-        *,
-        range_start: datetime | None = None,
-        range_end: datetime | None = None,
-        limit: int | None = None,
-        record_callback: WindowCallback | None = None,
-    ) -> list[WindowSummary]:
-        failed = sorted(
-            self.failed_windows(range_start=range_start, range_end=range_end),
-            key=lambda row: self._ensure_utc(row["window_start"]),
-        )
-        if limit is not None:
-            failed = failed[:limit]
-        windows = [
-            (
-                self._ensure_utc(row["window_start"]),
-                self._ensure_utc(row["window_end"]),
-            )
-            for row in failed
-        ]
-        logger.info(
-            "Retrying %d failed windows%s",
-            len(windows),
-            f" (limit={limit})" if limit is not None else "",
-        )
-        return self.harvest_windows(
-            windows,
-            record_callback=record_callback,
-        )
-
     # ------------------------------------------------------------------
     # Helpers
     # ------------------------------------------------------------------

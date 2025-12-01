@@ -308,30 +308,6 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     assert row["record_ids"] == []
 
 
-def test_retry_failed_windows(tmp_path: Path) -> None:
-    records = [_make_record("id:1")]
-    harvester = _build_harvester(tmp_path, records)
-
-    # Seed a failed row manually
-    start = datetime(2025, 1, 1, tzinfo=UTC)
-    end = start + timedelta(minutes=harvester.window_minutes)
-    harvester.store.upsert(
-        WindowStatusRecord(
-            window_key=f"{start.isoformat()}_{end.isoformat()}",
-            window_start=start,
-            window_end=end,
-            state="failed",
-            attempts=1,
-            last_error="Timeout",
-            record_ids=tuple(),
-            updated_at=datetime.now(UTC),
-        )
-    )
-
-    summaries = harvester.retry_failed_windows()
-    assert summaries[0]["state"] == "success"
-
-
 def test_coverage_report(tmp_path: Path) -> None:
     records = [_make_record("id:1")]
     harvester = _build_harvester(tmp_path, records)
