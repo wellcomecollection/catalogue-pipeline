@@ -346,6 +346,7 @@ class WindowHarvestManager:
             else self._ensure_utc(sorted_rows[-1]["window_end"])
         )
         state_counts = Counter(row["state"] for row in sorted_rows)
+        successful_rows = [row for row in sorted_rows if row["state"] == "success"]
         coverage_hours = (
             sum(
                 max(
@@ -355,30 +356,37 @@ class WindowHarvestManager:
                         - max(self._ensure_utc(row["window_start"]), first_start)
                     ).total_seconds(),
                 )
-                for row in sorted_rows
+                for row in successful_rows
             )
             / 3600.0
         )
         coverage_gaps: list[CoverageGap] = []
 
-        # Check for gap at the start
-        first_window_start = self._ensure_utc(sorted_rows[0]["window_start"])
-        if first_start < first_window_start:
-            coverage_gaps.append(CoverageGap(start=first_start, end=first_window_start))
+        if not successful_rows:
+            if first_start < last_end:
+                coverage_gaps.append(CoverageGap(start=first_start, end=last_end))
+        else:
+            # Check for gap at the start
+            first_window_start = self._ensure_utc(successful_rows[0]["window_start"])
+            if first_start < first_window_start:
+                coverage_gaps.append(
+                    CoverageGap(start=first_start, end=first_window_start)
+                )
 
-        rolling_end = self._ensure_utc(sorted_rows[0]["window_end"])
-        for row in sorted_rows[1:]:
-            start = self._ensure_utc(row["window_start"])
-            end = self._ensure_utc(row["window_end"])
-            if start > rolling_end:
-                coverage_gaps.append(CoverageGap(start=rolling_end, end=start))
-                rolling_end = end
-            else:
-                rolling_end = max(rolling_end, end)
+            rolling_end = self._ensure_utc(successful_rows[0]["window_end"])
+            for row in successful_rows[1:]:
+                start = self._ensure_utc(row["window_start"])
+                end = self._ensure_utc(row["window_end"])
+                if start > rolling_end:
+                    coverage_gaps.append(CoverageGap(start=rolling_end, end=start))
+                    rolling_end = end
+                else:
+                    rolling_end = max(rolling_end, end)
 
-        # Check for gap at the end
-        if rolling_end < last_end:
-            coverage_gaps.append(CoverageGap(start=rolling_end, end=last_end))
+            # Check for gap at the end
+            if rolling_end < last_end:
+                coverage_gaps.append(CoverageGap(start=rolling_end, end=last_end))
+
         failures = [
             WindowFailure(
                 window_key=row["window_key"],

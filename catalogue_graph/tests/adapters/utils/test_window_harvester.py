@@ -517,3 +517,126 @@ def test_harvest_recent_reuses_aligned_windows_for_offset_range(tmp_path: Path) 
         minutes=harvester.window_minutes
     )
     assert len(harvester.client.calls) - initial_calls == 1
+
+
+def _insert_window(
+    harvester: WindowHarvestManager,
+    start: datetime,
+    end: datetime,
+    state: str = "success",
+) -> None:
+    key = harvester._window_key(start, end)
+    harvester.store.upsert(
+        WindowStatusRecord(
+            window_key=key,
+            window_start=start,
+            window_end=end,
+            state=state,
+            attempts=1,
+            last_error="Error" if state == "failed" else None,
+            record_ids=(),
+            updated_at=datetime.now(UTC),
+            tags=None,
+        )
+    )
+
+
+def test_coverage_report_with_failed_windows(tmp_path: Path) -> None:
+    harvester = _build_harvester(tmp_path, [])
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    # 12:00 - 12:15 : Success
+    _insert_window(harvester, start, start + timedelta(minutes=15), "success")
+
+    # 12:15 - 12:30 : Failed
+    _insert_window(
+        harvester,
+        start + timedelta(minutes=15),
+        start + timedelta(minutes=30),
+        "failed",
+    )
+
+    # 12:30 - 12:45 : Success
+    _insert_window(
+        harvester,
+        start + timedelta(minutes=30),
+        start + timedelta(minutes=45),
+        "success",
+    )
+
+    report = harvester.coverage_report(
+        range_start=start, range_end=start + timedelta(minutes=45)
+    )
+
+    # Total range is 45 minutes (0.75 hours)
+    # Covered range should be 30 minutes (0.5 hours) because of the failure
+    assert report.total_windows == 3
+    assert report.state_counts["success"] == 2
+    assert report.state_counts["failed"] == 1
+
+    assert report.coverage_hours == 0.5
+
+    assert len(report.coverage_gaps) == 1
+    gap = report.coverage_gaps[0]
+    assert gap.start == start + timedelta(minutes=15)
+    assert gap.end == start + timedelta(minutes=30)
+
+
+def test_coverage_report_with_missing_windows(tmp_path: Path) -> None:
+    harvester = _build_harvester(tmp_path, [])
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    # 12:00 - 12:15 : Success
+    _insert_window(harvester, start, start + timedelta(minutes=15), "success")
+
+    # 12:15 - 12:30 : Missing
+
+    # 12:30 - 12:45 : Success
+    _insert_window(
+        harvester,
+        start + timedelta(minutes=30),
+        start + timedelta(minutes=45),
+        "success",
+    )
+
+    report = harvester.coverage_report(
+        range_start=start, range_end=start + timedelta(minutes=45)
+    )
+
+    assert report.total_windows == 2
+    assert report.coverage_hours == 0.5
+
+    assert len(report.coverage_gaps) == 1
+    gap = report.coverage_gaps[0]
+    assert gap.start == start + timedelta(minutes=15)
+    assert gap.end == start + timedelta(minutes=30)
+
+
+def test_coverage_report_overlapping_success_and_failure(tmp_path: Path) -> None:
+    harvester = _build_harvester(tmp_path, [])
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    # 12:00 - 13:00 : Failed (60 min window)
+    _insert_window(harvester, start, start + timedelta(minutes=60), "failed")
+
+    # 12:00 - 12:15 : Success (15 min window)
+    _insert_window(harvester, start, start + timedelta(minutes=15), "success")
+
+    report = harvester.coverage_report(
+        range_start=start, range_end=start + timedelta(minutes=60)
+    )
+
+    # We have 2 windows.
+    # 12:00-12:15 is covered.
+    # 12:00-13:00 is failed.
+    # The coverage should be 15 minutes (0.25 hours).
+    # The gap should be 12:15 - 13:00.
+
+    assert report.total_windows == 2
+    assert report.coverage_hours == 0.25
+
+    # Gaps:
+    # 12:15 - 13:00
+    assert len(report.coverage_gaps) == 1
+    assert report.coverage_gaps[0].start == start + timedelta(minutes=15)
+    assert report.coverage_gaps[0].end == start + timedelta(minutes=60)
