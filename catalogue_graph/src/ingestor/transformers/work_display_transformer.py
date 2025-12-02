@@ -128,9 +128,9 @@ class DisplayWorkTransformer(WorkBaseTransformer):
             # This does not apply to composite subjects, which can have different nested concepts even when their
             # standard labels match.
             if len(concepts) == 1:
-                if main_concept.standard_label in labels:
+                if main_concept.label in labels:
                     continue
-                labels.add(main_concept.standard_label)
+                labels.add(main_concept.label)
 
             yield DisplaySubject(
                 **main_concept.model_dump(),
@@ -168,8 +168,7 @@ class DisplayWorkTransformer(WorkBaseTransformer):
         identifiers = list(DisplayIdentifier.from_all_identifiers(concept.id))
         return DisplayConcept(
             id=concept.id.canonical_id,
-            label=concept.label,
-            standard_label=self.get_standard_concept_label(concept),
+            label=self.get_standard_concept_label(concept),
             identifiers=None if len(identifiers) == 0 else identifiers,
             type=concept.display_type,
         )
@@ -183,9 +182,9 @@ class DisplayWorkTransformer(WorkBaseTransformer):
             agent = self.get_display_concept(contributor.agent)
 
             # If multiple contributors have the same standard labels, only include one of them
-            if agent.standard_label in labels:
+            if agent.label in labels:
                 continue
-            labels.add(agent.standard_label)
+            labels.add(agent.label)
 
             yield DisplayContributor(
                 agent=agent,

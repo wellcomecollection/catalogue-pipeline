@@ -10,7 +10,6 @@ from .identifier import DisplayIdentifier
 class DisplayConcept(ElasticsearchModel):
     id: str | None = None
     label: str
-    standard_label: str | None = None
     identifiers: list[DisplayIdentifier] | None = None
     type: ConceptType = "Concept"
 

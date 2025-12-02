@@ -37,8 +37,7 @@ def test_concept_standard_labels() -> None:
     assert list(DisplayWorkTransformer(extracted).subjects) == [
         DisplaySubject(
             id="w5ewpsaw",
-            label="Malaria - prevention & control",
-            standard_label="Malaria",
+            label="Malaria",
             identifiers=[
                 DisplayIdentifier(
                     value="D008288Q000517",
@@ -54,7 +53,6 @@ def test_concept_standard_labels() -> None:
                 DisplayConcept(
                     id="buy5ngy9",
                     label="Malaria",
-                    standard_label="Malaria",
                     identifiers=[
                         DisplayIdentifier(
                             value="malaria",
