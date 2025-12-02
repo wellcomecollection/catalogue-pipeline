@@ -14,8 +14,9 @@ from adapters.utils.iceberg import IcebergTableClient
 from adapters.utils.schemata import ARROW_SCHEMA
 
 
-class StubElasticsearch:
-    pass
+class StubElasticsearch(Elasticsearch):
+    def __init__(self) -> None:
+        pass
 
 
 def _runtime_with(

@@ -29,6 +29,7 @@ class DisplayLocation(BaseModel):
                 url=location.url,
                 credit=location.credit,
                 linkText=location.link_text,
+                createdDate=location.created_date,
             )
 
         return DisplayPhysicalLocation(
@@ -42,6 +43,7 @@ class DisplayDigitalLocation(DisplayLocation):
     url: str
     credit: str | None = None
     linkText: str | None = None
+    createdDate: str | None = None
     type: str = "DigitalLocation"
 
 

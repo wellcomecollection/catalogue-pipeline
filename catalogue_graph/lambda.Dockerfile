@@ -9,10 +9,15 @@ WORKDIR /app
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
 
-# Install uv package manager
-RUN pip install uv
+# Install uv
+RUN pip install uv 
 
-RUN dnf install -y git && dnf clean all
+# Install ca-certificates and git
+RUN dnf install -y ca-certificates git && dnf clean all
+
+# Copy and install custom certificates
+COPY certs/* /etc/pki/ca-trust/source/anchors/
+RUN update-ca-trust extract
 
 # Install dependencies and the package using uv pip install
 # uv pip install works with the system Python environment and installs from uv.lock

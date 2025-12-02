@@ -6,7 +6,7 @@ from uuid import uuid1
 import pytest
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.table_config import get_local_table
+from adapters.utils.iceberg import get_local_table
 from adapters.utils.window_store import WINDOW_STATUS_SCHEMA
 
 

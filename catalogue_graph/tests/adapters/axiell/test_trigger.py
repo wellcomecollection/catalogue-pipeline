@@ -7,7 +7,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.axiell import config
+from adapters.axiell import config, helpers
 from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
     AxiellAdapterTriggerEvent,
@@ -190,7 +190,7 @@ def test_lambda_handler_uses_rest_api_table_by_default(
             set_spec="collect",
         )
 
-    monkeypatch.setattr(trigger, "build_window_store", fake_build_window_store)
+    monkeypatch.setattr(helpers, "build_window_store", fake_build_window_store)
     monkeypatch.setattr(trigger, "handler", fake_handler)
 
     trigger.lambda_handler({"time": "2025-11-17T12:00:00Z"}, context=None)

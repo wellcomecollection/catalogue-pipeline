@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
 
 # ---------------------------------------------------------------------------
 # AWS account / region context
@@ -66,9 +65,9 @@ OAI_BACKOFF_MAX = float(os.getenv("OAI_BACKOFF_MAX", "5.0"))
 # ---------------------------------------------------------------------------
 # Window harvesting behaviour
 # ---------------------------------------------------------------------------
-WINDOW_MINUTES = int(os.getenv("WINDOW_MINUTES", "15"))
-WINDOW_LOOKBACK_DAYS = int(os.getenv("WINDOW_LOOKBACK_DAYS", "21"))
-WINDOW_MAX_PARALLEL_REQUESTS = int(os.getenv("WINDOW_MAX_PARALLEL_REQUESTS", "3"))
+WINDOW_MINUTES = int(os.getenv("WINDOW_MINUTES", "240"))
+WINDOW_LOOKBACK_DAYS = int(os.getenv("WINDOW_LOOKBACK_DAYS", "30"))
+WINDOW_MAX_PARALLEL_REQUESTS = int(os.getenv("WINDOW_MAX_PARALLEL_REQUESTS", "1"))
 _MAX_PENDING_WINDOWS_ENV = os.getenv("MAX_PENDING_WINDOWS")
 MAX_PENDING_WINDOWS: int | None = (
     int(_MAX_PENDING_WINDOWS_ENV) if _MAX_PENDING_WINDOWS_ENV is not None else None
@@ -96,21 +95,3 @@ INDEX_DATE = os.getenv("INDEX_DATE")
 ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "axiell-transformer")
 ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "axiell-works-dev")
 ES_MODE = os.getenv("ES_MODE", "private")
-
-
-@dataclass(frozen=True)
-class IcebergTableRef:
-    namespace: str
-    table: str
-
-
-def record_table_ref() -> IcebergTableRef:
-    """Return the namespaced identifier of the records table."""
-
-    return IcebergTableRef(namespace=REST_API_NAMESPACE, table=REST_API_TABLE_NAME)
-
-
-def window_status_table_ref() -> IcebergTableRef:
-    """Return the namespaced identifier used by the window store."""
-
-    return IcebergTableRef(namespace=WINDOW_STATUS_NAMESPACE, table=WINDOW_STATUS_TABLE)
