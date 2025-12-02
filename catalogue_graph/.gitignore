@@ -1,2 +1,3 @@
 transformer_outputs/*
 ingestor_outputs/
+*.json
