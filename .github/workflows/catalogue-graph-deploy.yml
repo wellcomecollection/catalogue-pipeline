@@ -79,6 +79,8 @@ jobs:
             # Adapter lambdas
             ebsco-adapter-trigger,
             ebsco-adapter-loader,
+            axiell-adapter-trigger,
+            axiell-adapter-loader,
           ]
     steps:
       - uses: actions/checkout@v3
