@@ -168,7 +168,7 @@ class ChatbotNotifier:
         if message.additional_context:
             metadata_dict["additionalContext"] = message.additional_context
 
-        # Add enableCustomActions only if False as it defaults to True
+        # Add enableCustomActions only if False (to disable custom action buttons)
         if not message.enable_custom_actions:
             metadata_dict["enableCustomActions"] = False
 

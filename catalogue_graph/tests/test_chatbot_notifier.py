@@ -75,8 +75,10 @@ def test_send_simple_message(notifier: ChatbotNotifier, topic_arn: str) -> None:
     assert "nextSteps" not in chatbot_payload["content"]
     assert "keywords" not in chatbot_payload["content"]
 
-    # No metadata for non-threaded messages without metadata
-    assert "metadata" not in chatbot_payload
+    # Metadata should include enableCustomActions: False
+    assert chatbot_payload["metadata"]["enableCustomActions"] is False
+    assert "threadId" not in chatbot_payload["metadata"]
+    assert "additionalContext" not in chatbot_payload["metadata"]
 
 
 def test_send_message_with_thread_id(notifier: ChatbotNotifier, topic_arn: str) -> None:
@@ -219,11 +221,12 @@ def test_threading_conversation(notifier: ChatbotNotifier) -> None:
     # Verify all three messages were sent
     assert len(MockSNSClient.publish_calls) == 3
 
-    # First message has no thread
+    # First message has enableCustomActions: False but no thread
     first_payload = json.loads(
         json.loads(MockSNSClient.publish_calls[0]["Message"])["default"]
     )
-    assert "metadata" not in first_payload
+    assert first_payload["metadata"]["enableCustomActions"] is False
+    assert "threadId" not in first_payload["metadata"]
 
     # Second and third messages reference the first message's ID in metadata
     second_payload = json.loads(
