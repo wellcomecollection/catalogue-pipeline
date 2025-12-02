@@ -57,6 +57,9 @@ class ImagesRuleTest
     it(
       "creates n images from a METS work containing n images, and a single Sierra ephemera work"
     ) {
+      info(
+        "METS images are emitted as Images for picture/ephemera Sierra works"
+      )
       val n = 5
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
       val sierraEphemeraWork = sierraIdentifiedWork().format(Format.Ephemera)
@@ -71,6 +74,9 @@ class ImagesRuleTest
     it(
       "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra picture work"
     ) {
+      info(
+        "Both METS and Miro images are emitted as Images for picture/ephemera Sierra works"
+      )
       val n = 3
       val m = 4
       val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
@@ -88,6 +94,9 @@ class ImagesRuleTest
     it(
       "creates n + m images from m Miro works, a METS work containing n images, and a single Sierra ephemera work"
     ) {
+      info(
+        "Both METS and Miro images are emitted as Images for picture/ephemera Sierra works"
+      )
       val n = 3
       val m = 4
       val miroWorks = (1 to m).map(_ => miroIdentifiedWork()).toList
@@ -152,6 +161,9 @@ class ImagesRuleTest
       it(
         "does not use Miro images when a METS image is present for a digaids Sierra work"
       ) {
+        info(
+          "digaids refers to records where Miro images have been redigitised via Mets"
+        )
         val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
         val miroWork = miroIdentifiedWork()
         val sierraDigaidsWork = sierraIdentifiedWork()
@@ -172,6 +184,10 @@ class ImagesRuleTest
       it(
         "does not use Miro images when a METS image is present for a digmiro Sierra work"
       ) {
+        info(
+          "digmiro refers to records where Miro images have been redigitised via Mets"
+        )
+
         val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
         val miroWork = miroIdentifiedWork()
         val sierraDigmiroWork = sierraIdentifiedWork()
