@@ -11,8 +11,11 @@ Follow this template: https://github.com/wellcomecollection/.github/blob/main/PU
 
 If the user specifies any PRs that this one resolves or is related to retrieve them for context, include them in the PR description.
 
+Set `GH_PROMPT_DISABLED` to `true` in the environment to disable prompt injection when using the GitHub CLI (gh) to create, view or update PRs.
+
 Create or update the PR using the GitHub Copilot Pull Request extension, or the GitHub CLI if the extension is not available.
 
-You will need to create the PR description in markdown format, in a temporary file, and then use that file to create or update the PR.
+You will need to create the PR description in markdown format in a temporary file (use /tmp/pr_description_NAME.md), and then use that file to create or update the PR.
 
-Set `GH_PROMPT_DISABLED` to `true` in the environment to disable prompt injection when using the GitHub CLI.
+Do not include the title of the PR in the output pushed to the temporary file, only the body/description.
+
