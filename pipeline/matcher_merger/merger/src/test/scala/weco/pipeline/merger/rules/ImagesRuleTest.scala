@@ -23,6 +23,9 @@ class ImagesRuleTest
 
   describe("image creation rules") {
     it("creates n images from n Miro works and a single Sierra work") {
+      info(
+        "normally, miro images are emitted as Images and become the imageData of a Sierra work"
+      )
       val n = 3
       val miroWorks = (1 to n).map(_ => miroIdentifiedWork())
       val sierraWork = sierraDigitalIdentifiedWork()
@@ -36,6 +39,10 @@ class ImagesRuleTest
     it(
       "creates n images from a METS work containing n images, and a single Sierra picture work"
     ) {
+      info(
+        "METS images are emitted as Images for picture/ephemera Sierra works"
+      )
+
       val n = 5
       val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = n)
       val sierraPictureWork = sierraIdentifiedWork().format(Format.Pictures)
