@@ -5,6 +5,8 @@ from typing import Any
 
 from pydantic import BaseModel, field_validator
 
+from utils.timezone import ensure_datetime_utc
+
 ALIGNMENT_EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 
 
@@ -23,9 +25,9 @@ class WindowSummary(BaseModel):
     @classmethod
     def _coerce_datetime(cls, value: Any) -> datetime:
         if isinstance(value, datetime):
-            return _ensure_utc(value)
+            return ensure_datetime_utc(value)
         if isinstance(value, str):
-            return _ensure_utc(datetime.fromisoformat(value))
+            return ensure_datetime_utc(datetime.fromisoformat(value))
         raise TypeError(f"Unsupported datetime value: {value!r}")
 
     @field_validator("record_ids", mode="before")
@@ -54,12 +56,6 @@ class WindowSummary(BaseModel):
         except Exception:  # pragma: no cover - defensive fallback
             tags_items = {}
         return {str(key): str(val) for key, val in tags_items.items()}
-
-
-def _ensure_utc(dt: datetime) -> datetime:
-    if dt.tzinfo is None:
-        return dt.replace(tzinfo=UTC)
-    return dt.astimezone(UTC)
 
 
 def _window_key(start: datetime, end: datetime) -> str:

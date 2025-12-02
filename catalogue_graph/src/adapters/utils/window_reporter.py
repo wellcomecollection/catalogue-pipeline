@@ -5,8 +5,10 @@ from datetime import UTC, datetime, timedelta
 
 from pydantic import BaseModel, Field
 
+from utils.timezone import ensure_datetime_utc
+
 from .window_store import WindowStore
-from .window_summary import WindowSummary, _ensure_utc
+from .window_summary import WindowSummary
 
 
 class CoverageGap(BaseModel):
@@ -47,8 +49,8 @@ class WindowReporter:
         rows = self._rows_in_range(range_start, range_end)
         if not rows:
             now = datetime.now(UTC)
-            start = _ensure_utc(range_start) if range_start else now
-            end = _ensure_utc(range_end) if range_end else now
+            start = ensure_datetime_utc(range_start) if range_start else now
+            end = ensure_datetime_utc(range_end) if range_end else now
             gaps = [CoverageGap(start=start, end=end)] if start < end else []
             return WindowCoverageReport(
                 range_start=start,
@@ -56,16 +58,18 @@ class WindowReporter:
                 total_windows=0,
                 coverage_gaps=gaps,
             )
-        sorted_rows = sorted(rows, key=lambda row: _ensure_utc(row.window_start))
+        sorted_rows = sorted(
+            rows, key=lambda row: ensure_datetime_utc(row.window_start)
+        )
         first_start = (
-            _ensure_utc(range_start)
+            ensure_datetime_utc(range_start)
             if range_start
-            else _ensure_utc(sorted_rows[0].window_start)
+            else ensure_datetime_utc(sorted_rows[0].window_start)
         )
         last_end = (
-            _ensure_utc(range_end)
+            ensure_datetime_utc(range_end)
             if range_end
-            else _ensure_utc(sorted_rows[-1].window_end)
+            else ensure_datetime_utc(sorted_rows[-1].window_end)
         )
         state_counts = Counter(row.state for row in sorted_rows)
         successful_rows = [row for row in sorted_rows if row.state == "success"]
@@ -74,8 +78,8 @@ class WindowReporter:
                 max(
                     0.0,
                     (
-                        min(_ensure_utc(row.window_end), last_end)
-                        - max(_ensure_utc(row.window_start), first_start)
+                        min(ensure_datetime_utc(row.window_end), last_end)
+                        - max(ensure_datetime_utc(row.window_start), first_start)
                     ).total_seconds(),
                 )
                 for row in successful_rows
@@ -89,16 +93,16 @@ class WindowReporter:
                 coverage_gaps.append(CoverageGap(start=first_start, end=last_end))
         else:
             # Check for gap at the start
-            first_window_start = _ensure_utc(successful_rows[0].window_start)
+            first_window_start = ensure_datetime_utc(successful_rows[0].window_start)
             if first_start < first_window_start:
                 coverage_gaps.append(
                     CoverageGap(start=first_start, end=first_window_start)
                 )
 
-            rolling_end = _ensure_utc(successful_rows[0].window_end)
+            rolling_end = ensure_datetime_utc(successful_rows[0].window_end)
             for row in successful_rows[1:]:
-                start = _ensure_utc(row.window_start)
-                end = _ensure_utc(row.window_end)
+                start = ensure_datetime_utc(row.window_start)
+                end = ensure_datetime_utc(row.window_end)
                 if start > rolling_end:
                     coverage_gaps.append(CoverageGap(start=rolling_end, end=start))
                     rolling_end = end
@@ -112,8 +116,8 @@ class WindowReporter:
         failures = [
             WindowFailure(
                 window_key=row.window_key,
-                window_start=_ensure_utc(row.window_start),
-                window_end=_ensure_utc(row.window_end),
+                window_start=ensure_datetime_utc(row.window_start),
+                window_end=ensure_datetime_utc(row.window_end),
                 attempts=row.attempts,
                 last_error=row.last_error,
             )
@@ -121,7 +125,7 @@ class WindowReporter:
             if row.state != "success"
         ]
         last_success_end = (
-            max(_ensure_utc(row.window_end) for row in successful_rows)
+            max(ensure_datetime_utc(row.window_end) for row in successful_rows)
             if successful_rows
             else None
         )
@@ -141,8 +145,8 @@ class WindowReporter:
         range_start: datetime | None,
         range_end: datetime | None,
     ) -> list[WindowSummary]:
-        start_bound = _ensure_utc(range_start) if range_start else None
-        end_bound = _ensure_utc(range_end) if range_end else None
+        start_bound = ensure_datetime_utc(range_start) if range_start else None
+        end_bound = ensure_datetime_utc(range_end) if range_end else None
 
         search_start = None
         if start_bound:
@@ -172,6 +176,6 @@ class WindowReporter:
         range_start: datetime | None,
         range_end: datetime | None,
     ) -> bool:
-        if range_start and window_end <= _ensure_utc(range_start):
+        if range_start and window_end <= ensure_datetime_utc(range_start):
             return False
-        return not (range_end and window_start >= _ensure_utc(range_end))
+        return not (range_end and window_start >= ensure_datetime_utc(range_end))

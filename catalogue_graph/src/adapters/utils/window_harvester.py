@@ -10,11 +10,12 @@ from oai_pmh_client.client import OAIClient
 from oai_pmh_client.exceptions import NoRecordsMatchError
 from oai_pmh_client.models import Record
 
+from utils.timezone import ensure_datetime_utc
+
 from .window_store import WindowStatusRecord, WindowStore
 from .window_summary import (
     ALIGNMENT_EPOCH,
     WindowSummary,
-    _ensure_utc,
     _window_key,
 )
 
@@ -67,8 +68,8 @@ class WindowHarvestManager:
     def generate_windows(
         self, start_time: datetime, end_time: datetime
     ) -> list[tuple[datetime, datetime]]:
-        start_time = _ensure_utc(start_time)
-        end_time = _ensure_utc(end_time)
+        start_time = ensure_datetime_utc(start_time)
+        end_time = ensure_datetime_utc(end_time)
 
         if start_time >= end_time:
             raise ValueError("start_time must be earlier than end_time")
@@ -104,8 +105,8 @@ class WindowHarvestManager:
         record_callback: WindowCallback | None = None,
         reprocess_successful_windows: bool = False,
     ) -> list[WindowSummary]:
-        start_time = _ensure_utc(start_time)
-        end_time = _ensure_utc(end_time)
+        start_time = ensure_datetime_utc(start_time)
+        end_time = ensure_datetime_utc(end_time)
         candidates = self.generate_windows(start_time=start_time, end_time=end_time)
         callback = record_callback or self.record_callback
         reused: list[WindowSummary] = []
@@ -189,8 +190,8 @@ class WindowHarvestManager:
         *,
         record_callback: WindowCallback | None = None,
     ) -> WindowSummary:
-        start = _ensure_utc(start)
-        end = _ensure_utc(end)
+        start = ensure_datetime_utc(start)
+        end = ensure_datetime_utc(end)
         key = _window_key(start, end)
         attempts = 1
         record_ids: list[str] = []
