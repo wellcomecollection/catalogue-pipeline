@@ -205,7 +205,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b18659135",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -351,6 +350,9 @@
         "availabilities.id": [
           "closed-stores",
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -646,7 +648,6 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b30598977_0001.jp2/full/!200,200/0/default.jpg",
-          "createdDate": "2014-02-30T16:20:14Z",
           "type": "DigitalLocation"
         },
         "items": [
@@ -779,7 +780,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b30598977",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -981,6 +981,9 @@
         "availabilities.id": [
           "closed-stores",
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -1154,7 +1157,6 @@
               ],
               "url": "https://resolver.ebscohost.com/Redirect/PRL?EPPackageLocationID=4205.13464940.0&epcustomerid=s7451719",
               "linkText": "Available in Eighteenth Century Collections Online.",
-              
               "type": "DigitalLocation"
             },
             "type": "Holdings"
@@ -1262,7 +1264,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -1444,7 +1447,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b19871831",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -1616,6 +1618,9 @@
         ],
         "availabilities.id": [
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -1828,7 +1833,6 @@
                 ],
                 "url": "https://www.proquest.com/docview/2090333870/shibboleth?accountid=14952",
                 "linkText": "Library member access",
-                "createdDate": "2014-02-30T16:20:14Z",
                 "type": "DigitalLocation"
               }
             ],
@@ -2006,6 +2010,9 @@
         ],
         "availabilities.id": [
           "online"
+        ],
+        "items.locations.createdDate": [
+          "2014-02-30T16:20:14Z"
         ]
       },
       "type": "Visible",
@@ -2588,7 +2595,8 @@
         "partOf.title": [],
         "availabilities.id": [
           "closed-stores"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -2781,7 +2789,6 @@
                 ],
                 "url": "https://search.proquest.com/docview/2090366780/geoauth",
                 "linkText": "Free UK access",
-                
                 "type": "DigitalLocation"
               }
             ],
@@ -2966,7 +2973,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -3232,7 +3240,6 @@
           },
           "accessConditions": [],
           "url": "https://iiif.wellcomecollection.org/thumbs/b21053613_0011.jp2/full/!200,200/0/default.jpg",
-          
           "type": "DigitalLocation"
         },
         "items": [
@@ -3267,7 +3274,6 @@
                   }
                 ],
                 "url": "https://iiif.wellcomecollection.org/presentation/v2/b21053613",
-                
                 "type": "DigitalLocation"
               }
             ],
@@ -3472,7 +3478,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -3794,7 +3801,8 @@
         ],
         "availabilities.id": [
           "closed-stores"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {
@@ -3994,7 +4002,6 @@
                 ],
                 "url": "https://www.proquest.com/docview/2090328290/shibboleth?accountid=14952",
                 "linkText": "Library member access",
-                  
                 "type": "DigitalLocation"
               }
             ],
@@ -4172,7 +4179,8 @@
         ],
         "availabilities.id": [
           "online"
-        ]
+        ],
+        "items.locations.createdDate": []
       },
       "type": "Visible",
       "debug": {

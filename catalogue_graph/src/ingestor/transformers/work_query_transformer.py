@@ -4,7 +4,7 @@ from dateutil import parser
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
-from models.pipeline.location import PhysicalLocation
+from models.pipeline.location import DigitalLocation, PhysicalLocation
 
 # The Scala pipeline uses the date `-9999-01-01T00:00:00Z` as 'negative infinity'. The Python standard library doesn't
 # support dates with negative years, and so we hardcode the corresponding Unix timestamp here instead of installing
@@ -207,3 +207,10 @@ class QueryWorkTransformer:
         for item in self.data.items:
             for loc in item.locations:
                 yield loc.location_type.id
+
+    @property
+    def items_locations_created_date(self) -> Generator[str]:
+        for item in self.data.items:
+            for loc in item.locations:
+                if isinstance(loc, DigitalLocation) and loc.created_date is not None:
+                    yield loc.created_date
