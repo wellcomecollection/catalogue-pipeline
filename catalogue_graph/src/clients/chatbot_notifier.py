@@ -143,36 +143,35 @@ class ChatbotNotifier:
         # Add optional content fields
         if message.title:
             chatbot_payload["content"]["title"] = message.title
-        
+
         if message.next_steps:
             chatbot_payload["content"]["nextSteps"] = message.next_steps
-        
+
         if message.keywords:
             chatbot_payload["content"]["keywords"] = message.keywords
 
         # Build metadata section
         metadata_dict: dict[str, Any] = {}
-        
+
         # Add thread ID to metadata if provided
         if message.thread_id:
             metadata_dict["threadId"] = message.thread_id
-        
+
         # Add optional metadata fields
         if message.summary:
             metadata_dict["summary"] = message.summary
-        
+
         if message.related_resources:
             metadata_dict["relatedResources"] = message.related_resources
-        
+
         # Add additional context to metadata if provided
         if message.additional_context:
             metadata_dict["additionalContext"] = message.additional_context
-        
-        # Add enableCustomActions
-        metadata_dict["enableCustomActions"] = bool(message.enable_custom_actions)
 
+        # Add enableCustomActions only if False (to disable custom action buttons)
+        if not message.enable_custom_actions:
+            metadata_dict["enableCustomActions"] = False
 
-        
         # Add metadata to payload if any metadata exists
         if metadata_dict:
             chatbot_payload["metadata"] = metadata_dict
