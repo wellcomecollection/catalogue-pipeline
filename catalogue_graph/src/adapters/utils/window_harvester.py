@@ -14,7 +14,6 @@ from .window_store import WindowStatusRecord, WindowStore
 from .window_summary import (
     ALIGNMENT_EPOCH,
     WindowSummary,
-    _coerce_window_summary,
     _ensure_utc,
     _window_key,
 )
@@ -121,7 +120,7 @@ class WindowHarvestManager:
                 key = _window_key(*window)
                 existing = status_map.get(key)
                 if existing and existing.get("state") == "success":
-                    reused.append(_coerce_window_summary(existing))
+                    reused.append(WindowSummary.model_validate(existing))
                     continue
                 pending.append(window)
 
@@ -144,7 +143,7 @@ class WindowHarvestManager:
         if reprocess_successful_windows:
             return new_summaries
         combined = reused + new_summaries
-        combined.sort(key=lambda summary: summary["window_start"])
+        combined.sort(key=lambda summary: summary.window_start)
 
         return combined
 
@@ -177,7 +176,7 @@ class WindowHarvestManager:
             }
             for future in as_completed(future_map):
                 summaries.append(future.result())
-        summaries.sort(key=lambda summary: summary["window_start"])
+        summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 
     # ------------------------------------------------------------------
@@ -250,17 +249,17 @@ class WindowHarvestManager:
             )
 
         updated_at = datetime.now(UTC)
-        summary: WindowSummary = {
-            "window_key": key,
-            "window_start": start,
-            "window_end": end,
-            "state": state,
-            "attempts": attempts,
-            "record_ids": record_ids,
-            "last_error": last_error,
-            "updated_at": updated_at,
-            "tags": tags,
-        }
+        summary = WindowSummary(
+            window_key=key,
+            window_start=start,
+            window_end=end,
+            state=state,
+            attempts=attempts,
+            record_ids=record_ids,
+            last_error=last_error,
+            updated_at=updated_at,
+            tags=tags,
+        )
         self.store.upsert(
             WindowStatusRecord(
                 window_key=key,

@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 from pydantic import BaseModel, Field
 
 from .window_store import WindowStore
-from .window_summary import WindowSummary, _coerce_window_summary, _ensure_utc
+from .window_summary import WindowSummary, _ensure_utc
 
 
 class CoverageGap(BaseModel):
@@ -56,26 +56,26 @@ class WindowReporter:
                 total_windows=0,
                 coverage_gaps=gaps,
             )
-        sorted_rows = sorted(rows, key=lambda row: _ensure_utc(row["window_start"]))
+        sorted_rows = sorted(rows, key=lambda row: _ensure_utc(row.window_start))
         first_start = (
             _ensure_utc(range_start)
             if range_start
-            else _ensure_utc(sorted_rows[0]["window_start"])
+            else _ensure_utc(sorted_rows[0].window_start)
         )
         last_end = (
             _ensure_utc(range_end)
             if range_end
-            else _ensure_utc(sorted_rows[-1]["window_end"])
+            else _ensure_utc(sorted_rows[-1].window_end)
         )
-        state_counts = Counter(row["state"] for row in sorted_rows)
-        successful_rows = [row for row in sorted_rows if row["state"] == "success"]
+        state_counts = Counter(row.state for row in sorted_rows)
+        successful_rows = [row for row in sorted_rows if row.state == "success"]
         coverage_hours = (
             sum(
                 max(
                     0.0,
                     (
-                        min(_ensure_utc(row["window_end"]), last_end)
-                        - max(_ensure_utc(row["window_start"]), first_start)
+                        min(_ensure_utc(row.window_end), last_end)
+                        - max(_ensure_utc(row.window_start), first_start)
                     ).total_seconds(),
                 )
                 for row in successful_rows
@@ -89,16 +89,16 @@ class WindowReporter:
                 coverage_gaps.append(CoverageGap(start=first_start, end=last_end))
         else:
             # Check for gap at the start
-            first_window_start = _ensure_utc(successful_rows[0]["window_start"])
+            first_window_start = _ensure_utc(successful_rows[0].window_start)
             if first_start < first_window_start:
                 coverage_gaps.append(
                     CoverageGap(start=first_start, end=first_window_start)
                 )
 
-            rolling_end = _ensure_utc(successful_rows[0]["window_end"])
+            rolling_end = _ensure_utc(successful_rows[0].window_end)
             for row in successful_rows[1:]:
-                start = _ensure_utc(row["window_start"])
-                end = _ensure_utc(row["window_end"])
+                start = _ensure_utc(row.window_start)
+                end = _ensure_utc(row.window_end)
                 if start > rolling_end:
                     coverage_gaps.append(CoverageGap(start=rolling_end, end=start))
                     rolling_end = end
@@ -111,17 +111,17 @@ class WindowReporter:
 
         failures = [
             WindowFailure(
-                window_key=row["window_key"],
-                window_start=_ensure_utc(row["window_start"]),
-                window_end=_ensure_utc(row["window_end"]),
-                attempts=row["attempts"],
-                last_error=row.get("last_error"),
+                window_key=row.window_key,
+                window_start=_ensure_utc(row.window_start),
+                window_end=_ensure_utc(row.window_end),
+                attempts=row.attempts,
+                last_error=row.last_error,
             )
             for row in sorted_rows
-            if row["state"] != "success"
+            if row.state != "success"
         ]
         last_success_end = (
-            max(_ensure_utc(row["window_end"]) for row in successful_rows)
+            max(_ensure_utc(row.window_end) for row in successful_rows)
             if successful_rows
             else None
         )
@@ -155,10 +155,10 @@ class WindowReporter:
 
         rows: list[WindowSummary] = []
         for raw_row in raw_rows:
-            typed_row = _coerce_window_summary(raw_row)
+            typed_row = WindowSummary.model_validate(raw_row)
             if self._within_range(
-                typed_row["window_start"],
-                typed_row["window_end"],
+                typed_row.window_start,
+                typed_row.window_end,
                 start_bound,
                 end_bound,
             ):

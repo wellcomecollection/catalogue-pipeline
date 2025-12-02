@@ -301,7 +301,7 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
         max_windows=1,
     )
 
-    assert summaries[0]["state"] == "failed"
+    assert summaries[0].state == "failed"
     status_map = harvester.store.load_status_map()
     row = next(iter(status_map.values()))
     assert row["state"] == "failed"
@@ -328,8 +328,8 @@ def test_harvest_range_skips_successful_windows_by_default(tmp_path: Path) -> No
 
     second = harvester.harvest_range(start_time=start, end_time=end)
     assert len(second) == 1
-    assert second[0]["window_key"] == first[0]["window_key"]
-    assert second[0]["record_ids"] == first[0]["record_ids"]
+    assert second[0].window_key == first[0].window_key
+    assert second[0].record_ids == first[0].record_ids
     assert len(client.calls) == initial_calls
 
 
@@ -391,9 +391,9 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
         reprocess_successful_windows=True,
     )
 
-    assert summaries[0]["record_ids"] == ["id:1"]
-    assert summaries[0]["tags"] is not None
-    assert summaries[0]["tags"]["changeset_id"] == "cs-500"
+    assert summaries[0].record_ids == ["id:1"]
+    assert summaries[0].tags is not None
+    assert summaries[0].tags["changeset_id"] == "cs-500"
     status_map = harvester.store.load_status_map()
     stored = next(iter(status_map.values()))
     assert stored["tags"] is not None
@@ -429,10 +429,10 @@ def test_harvest_range_returns_existing_successful_summary_with_tags(
 
     assert len(summaries) == 1
     summary = summaries[0]
-    assert summary["window_key"] == window_key
-    assert summary["record_ids"] == ["existing-1"]
-    assert summary["tags"] is not None
-    assert summary["tags"]["changeset_id"] == "cs-123"
+    assert summary.window_key == window_key
+    assert summary.record_ids == ["existing-1"]
+    assert summary.tags is not None
+    assert summary.tags["changeset_id"] == "cs-123"
 
 
 def test_harvest_range_handles_partial_success_across_runs(tmp_path: Path) -> None:
@@ -454,9 +454,9 @@ def test_harvest_range_handles_partial_success_across_runs(tmp_path: Path) -> No
     )
 
     assert len(second) == 2
-    assert second[0]["window_key"] == first[0]["window_key"]
-    assert second[0]["record_ids"] == first[0]["record_ids"]
-    assert second[1]["window_start"] > second[0]["window_start"]
+    assert second[0].window_key == first[0].window_key
+    assert second[0].record_ids == first[0].record_ids
+    assert second[1].window_start > second[0].window_start
 
 
 def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -> None:
@@ -473,8 +473,8 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
     summaries = harvester.harvest_range(start_time=offset_start, end_time=aligned_end)
 
     assert len(summaries) == 3
-    assert summaries[0]["window_start"] == offset_start
-    assert summaries[1]["window_start"] == aligned_start + timedelta(
+    assert summaries[0].window_start == offset_start
+    assert summaries[1].window_start == aligned_start + timedelta(
         minutes=harvester.window_minutes
     )
     assert len(client.calls) - initial_calls == 1
