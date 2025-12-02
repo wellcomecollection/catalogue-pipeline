@@ -50,9 +50,7 @@ def _generate_job_id(timestamp: datetime) -> str:
 
 
 def _determine_start(
-    now: datetime,
-    last_success_end: datetime | None,
-    window_lookback_days: int,
+    now: datetime, last_success_end: datetime | None, window_lookback_days: int
 ) -> datetime:
     if last_success_end is not None:
         return last_success_end
