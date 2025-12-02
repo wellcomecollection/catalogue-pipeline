@@ -212,7 +212,6 @@ def test_lambda_handler_uses_rest_api_table_by_default(
         now = event.now or datetime.now(tz=UTC)
         return AxiellAdapterLoaderEvent(
             job_id=event.job_id,
-            window_key="window",
             window_start=now - timedelta(minutes=random.randint(2, 40)),
             window_end=now,
             metadata_prefix="oai",

@@ -28,7 +28,6 @@ def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
     now = now or datetime.now(tz=UTC)
     return AxiellAdapterLoaderEvent(
         job_id="job-123",
-        window_key="test",
         window_start=now - timedelta(minutes=15),
         window_end=now,
         metadata_prefix="oai",
@@ -89,7 +88,7 @@ def test_execute_loader_updates_iceberg(
 ) -> None:
     req = _request()
     summary = {
-        "window_key": req.window_key,
+        "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
         "window_start": req.window_start,
         "window_end": req.window_end,
         "state": "success",
@@ -142,7 +141,7 @@ def test_execute_loader_counts_only_changed_records(
     runtime = _runtime_with(table_client=table_client, store=store)
 
     summary = {
-        "window_key": req.window_key,
+        "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
         "window_start": req.window_start,
         "window_end": req.window_end,
         "state": "success",
@@ -180,7 +179,7 @@ def test_execute_loader_handles_no_new_records(
     runtime = _runtime_with(table_client=table_client, store=store)
 
     summary = {
-        "window_key": req.window_key,
+        "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
         "window_start": req.window_start,
         "window_end": req.window_end,
         "state": "success",

@@ -169,7 +169,6 @@ def main() -> None:
     # Example event payload:
     # {
     #     "job_id": "some-unique-job-id",
-    #     "window_key": "2025-11-17T16:46:41.071426+00:00_2025-11-17T16:50:05.531331+00:00",
     #     "window_start": "2025-11-17T16:46:41.071426Z",
     #     "window_end": "2025-11-17T16:50:05.531331Z",
     #     "metadata_prefix": "oai_raw",

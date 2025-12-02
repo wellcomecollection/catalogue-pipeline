@@ -16,9 +16,6 @@ class AxiellAdapterTriggerEvent(AxiellAdapterEvent):
 
 
 class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
-    window_key: str = Field(
-        ..., description="Unique identifier for the requested window"
-    )
     window_start: datetime
     window_end: datetime
     metadata_prefix: str | None = None
