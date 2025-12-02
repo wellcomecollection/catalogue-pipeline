@@ -42,7 +42,7 @@ def _mock_loader_runtime() -> LoaderRuntime:
     return LoaderRuntime.model_construct(
         store=cast(WindowStore, SimpleNamespace()),
         table_client=cast(AdapterStore, SimpleNamespace()),
-        oai_client=cast(MagicMock, MagicMock()),
+        oai_client=MagicMock(),
     )
 
 
@@ -273,13 +273,18 @@ def test_build_runtime_uses_config(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     """Test that build_runtime respects configuration options."""
-    captured_config = {}
+    # Use a typed dict to avoid mypy inferring a single value type
+    from typing import Any
 
-    def mock_build_window_store(use_rest_api_table: bool) -> WindowStore:  # type: ignore[type-arg]
+    captured_config: dict[str, Any] = {}
+
+    def mock_build_window_store(use_rest_api_table: bool) -> WindowStore:
         captured_config["use_rest_api_table"] = use_rest_api_table
         return WindowStore(temporary_window_status_table)
 
-    def mock_build_loader_runtime(config_obj):  # type: ignore[no-untyped-def]
+    def mock_build_loader_runtime(
+        config_obj: reloader.AxiellAdapterReloaderConfig,
+    ) -> LoaderRuntime:
         captured_config["loader_config"] = config_obj
         return _mock_loader_runtime()
 
@@ -294,7 +299,12 @@ def test_build_runtime_uses_config(
     runtime = reloader.build_runtime(config_obj)
 
     assert captured_config["use_rest_api_table"] is True
-    assert captured_config["loader_config"].use_rest_api_table is True
+    assert (
+        cast(
+            reloader.AxiellAdapterReloaderConfig, captured_config["loader_config"]
+        ).use_rest_api_table
+        is True
+    )
     assert isinstance(runtime, reloader.ReloaderRuntime)
 
 
