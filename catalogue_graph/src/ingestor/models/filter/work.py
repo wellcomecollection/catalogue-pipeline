@@ -45,6 +45,9 @@ class WorkFilterableValues(ElasticsearchModel):
     items_locations_location_type_id: list[str] = Field(
         serialization_alias="items.locations.locationType.id"
     )
+    items_locations_created_date: list[str] = Field(
+        serialization_alias="items.locations.createdDate"
+    )
     part_of_id: list[str] = Field(serialization_alias="partOf.id")
     part_of_title: list[str] = Field(serialization_alias="partOf.title")
     availabilities_id: list[str] = Field(serialization_alias="availabilities.id")
@@ -80,6 +83,7 @@ class WorkFilterableValues(ElasticsearchModel):
             items_id=list(transformer.item_ids),
             items_identifiers_value=list(transformer.item_identifiers),
             items_locations_location_type_id=list(transformer.location_type_ids),
+            items_locations_created_date=list(transformer.items_locations_created_date),
             part_of_id=list(transformer.part_of_ids),
             part_of_title=list(transformer.part_of_titles),
             availabilities_id=[a.id for a in work.state.availabilities],
