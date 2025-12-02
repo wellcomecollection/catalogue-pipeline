@@ -150,7 +150,7 @@ resource "aws_scheduler_schedule" "axiell_adapter_15_minute_run" {
   }
 
   schedule_expression = "rate(15 minutes)"
-  state               = "DISABLED"
+  state               = "ENABLED"
 
   target {
     arn      = aws_sfn_state_machine.state_machine.arn
