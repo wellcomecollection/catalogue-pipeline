@@ -103,6 +103,84 @@ uv run python -m adapters.axiell.steps.transformer \
 
 Repeat `--changeset-id` for multiple IDs. Provide `--job-id` to override the inherited value or `--use-rest-api-table` to switch Iceberg catalogs.
 
+### 4. Reloader → fill coverage gaps
+
+The reloader step analyzes window coverage within a specified time range and re-harvests any missing windows. This is primarily intended for local troubleshooting when windows have failed or been skipped.
+
+```bash
+uv run python -m adapters.axiell.steps.reloader \
+  --job-id gap-reload-20251202 \
+  --window-start 2025-12-01T00:00:00Z \
+  --window-end 2025-12-02T00:00:00Z \
+  --use-rest-api-table
+```
+
+The reloader will:
+1. Query the window status table for the specified range
+2. Identify any coverage gaps (missing or failed windows)
+3. Invoke the loader handler sequentially for each gap
+4. Return a summary of processed gaps with their loader responses
+
+#### Dry-run mode
+
+To preview which gaps would be reloaded without actually processing them:
+
+```bash
+uv run python -m adapters.axiell.steps.reloader \
+  --job-id gap-preview-20251202 \
+  --window-start 2025-12-01T00:00:00Z \
+  --window-end 2025-12-02T00:00:00Z \
+  --use-rest-api-table \
+  --dry-run
+```
+
+#### Integration with WindowNotifier
+
+When the trigger step detects coverage gaps, it sends a notification via AWS Chatbot (if configured). These notifications include a "Next Steps" section with a ready-to-run reloader command that spans from the first gap's start to the last gap's end. For example:
+
+```bash
+uv run python -m adapters.axiell.steps.reloader \
+  --job-id 20251202T1200 \
+  --window-start 2025-12-01T14:30:00Z \
+  --window-end 2025-12-01T18:45:00Z \
+  --use-rest-api-table
+```
+
+You can copy this command directly from the Slack notification to remediate the detected gaps.
+
+#### Common scenarios
+
+**Single gap from a failed window:**
+```bash
+uv run python -m adapters.axiell.steps.reloader \
+  --job-id repair-failed-window \
+  --window-start 2025-12-01T10:00:00Z \
+  --window-end 2025-12-01T10:15:00Z \
+  --use-rest-api-table
+```
+
+**Multiple gaps after a service outage:**
+```bash
+uv run python -m adapters.axiell.steps.reloader \
+  --job-id backfill-outage-20251202 \
+  --window-start 2025-12-01T08:00:00Z \
+  --window-end 2025-12-01T20:00:00Z \
+  --use-rest-api-table
+```
+
+**Preview gaps before reloading:**
+```bash
+# First, check what would be reloaded
+uv run python -m adapters.axiell.steps.reloader \
+  --job-id check-gaps \
+  --window-start 2025-12-01T00:00:00Z \
+  --window-end 2025-12-02T00:00:00Z \
+  --use-rest-api-table \
+  --dry-run
+
+# Then run without --dry-run to actually reload
+```
+
 ### Environment prerequisites
 
 * UV-managed virtual environment with the catalogue graph project synced.

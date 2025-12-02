@@ -73,13 +73,14 @@ class WindowNotifier:
 
         message = self._format_message(report, job_id, trigger_time)
         thread_id = self._generate_thread_id(trigger_time) if trigger_time else None
+        next_steps = self._build_next_steps(report, job_id)
 
         self.chatbot_notifier.send_notification(
             ChatbotMessage(
                 text=message,
                 thread_id=thread_id,
                 title="⚠️ Window Coverage Gaps Detected",
-                next_steps=None,
+                next_steps=next_steps,
                 keywords=["axiell-adapter", "window-gaps", "harvesting"],
                 summary=None,
                 related_resources=None,
@@ -141,6 +142,46 @@ class WindowNotifier:
             lines.append(f"\n*...and {remaining} more gap(s)*")
 
         return "\n".join(lines)
+
+    def _build_next_steps(
+        self,
+        report: WindowCoverageReport,
+        job_id: str | None,
+    ) -> list[str] | None:
+        """Build next steps instructions for gap remediation.
+
+        Args:
+            report: Window coverage report containing gap information.
+            job_id: Optional job identifier.
+
+        Returns:
+            List of next step instructions, or None if no gaps.
+        """
+        if not report.coverage_gaps:
+            return None
+
+        first_gap = report.coverage_gaps[0]
+        last_gap = report.coverage_gaps[-1]
+
+        # Format ISO timestamps for command-line usage
+        window_start = first_gap.start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        window_end = last_gap.end.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        # Use provided job_id or generate a descriptive one
+        reload_job_id = job_id or f"gap-reload-{first_gap.start.strftime('%Y%m%d')}"
+
+        command = (
+            f"uv run python -m adapters.axiell.steps.reloader \\\n"
+            f"  --job-id {reload_job_id} \\\n"
+            f"  --window-start {window_start} \\\n"
+            f"  --window-end {window_end} \\\n"
+            f"  --use-rest-api-table"
+        )
+
+        return [
+            f"Run locally to reload gaps:\n```bash\n{command}\n```",
+            "Add `--dry-run` flag to preview without processing",
+        ]
 
     def _build_context(
         self,
