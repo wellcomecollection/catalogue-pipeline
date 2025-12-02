@@ -13,6 +13,6 @@ If the user specifies any PRs that this one resolves or is related to retrieve t
 
 Create or update the PR using the GitHub Copilot Pull Request extension, or the GitHub CLI if the extension is not available.
 
-You will need to create the PR description in markdown format, in a temporary file, and then use that file to create or update the PR. 
+You will need to create the PR description in markdown format, in a temporary file, and then use that file to create or update the PR.
 
-If using the GitHub CLI, be wary of interactive prompts, and use flags to avoid them where possible.
+Set `GH_PROMPT_DISABLED` to `true` in the environment to disable prompt injection when using the GitHub CLI.
