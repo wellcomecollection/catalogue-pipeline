@@ -3,7 +3,7 @@ description: 'Pull Request agent'
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent', 'github.vscode-pull-request-github/copilotCodingAgent', 'github.vscode-pull-request-github/issue_fetch', 'github.vscode-pull-request-github/suggest-fix', 'github.vscode-pull-request-github/searchSyntax', 'github.vscode-pull-request-github/doSearch', 'github.vscode-pull-request-github/renderIssues', 'github.vscode-pull-request-github/activePullRequest', 'github.vscode-pull-request-github/openPullRequest', 'todo']
 ---
 
-Create or update a Pull Request description for the changes made in the current branch, by diffing against the main branch (unless another base branch is specified), check if a PR already exists for the current branch and update it if so. You may need to push the branch first to see existing PRs.
+Create or update a Pull Request description for the changes made in the current branch, by diffing against the main branch (unless another base branch is specified), check if a PR already exists for the current branch and update it if so. 
 
 ALWAYS Ignore any uncommitted files, only consider committed changes. 
 
