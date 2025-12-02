@@ -169,10 +169,12 @@ class MockCloudwatchClient(MockAwsService):
 
 class MockSNSClient(MockAwsService):
     publish_batch_request_entries: list[dict] = []
+    publish_calls: list[dict] = []
 
     @staticmethod
     def reset_mocks() -> None:
         MockSNSClient.publish_batch_request_entries = []
+        MockSNSClient.publish_calls = []
 
     def publish_batch(self, TopicArn: str, PublishBatchRequestEntries: list) -> Any:  # noqa: N803
         MockSNSClient.publish_batch_request_entries.append(
@@ -181,6 +183,14 @@ class MockSNSClient(MockAwsService):
                 "PublishBatchRequestEntries": PublishBatchRequestEntries,
             }
         )
+
+    def publish(self, **kwargs: Any) -> dict[str, Any]:
+        """Mock SNS publish method for single message publishing."""
+        MockSNSClient.publish_calls.append(kwargs)
+        return {
+            "MessageId": f"mock-message-id-{len(MockSNSClient.publish_calls)}",
+            "ResponseMetadata": {"HTTPStatusCode": 200},
+        }
 
 
 class MockStepFunctionsClient(MockAwsService):
