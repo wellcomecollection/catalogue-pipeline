@@ -169,7 +169,7 @@ class ChatbotNotifier:
             metadata_dict["additionalContext"] = message.additional_context
         
         # Add enableCustomActions
-        metadata_dict["enableCustomActions"] = message.enable_custom_actions
+        metadata_dict["enableCustomActions"] = bool(message.enable_custom_actions)
 
 
         
