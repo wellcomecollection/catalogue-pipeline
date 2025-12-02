@@ -125,7 +125,7 @@ class WindowNotifier:
                 f"*Triggered:* {trigger_time.strftime('%Y-%m-%d %H:%M:%S UTC')}"
             )
 
-        lines.extend(["", "## Coverage Gaps"])
+        lines.extend(["", "*Coverage Gaps:*"])
 
         gaps_to_show = report.coverage_gaps[: self.MAX_GAPS_TO_DISPLAY]
         for i, gap in enumerate(gaps_to_show, 1):
