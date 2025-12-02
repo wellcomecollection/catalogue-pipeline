@@ -10,10 +10,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-import pyarrow as pa
-from lxml import etree
 from oai_pmh_client.client import OAIClient
-from oai_pmh_client.models import Record
 from pydantic import BaseModel, ConfigDict, Field
 
 from adapters.axiell import config, helpers
@@ -21,16 +18,12 @@ from adapters.axiell.clients import build_oai_client
 from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
 )
-from adapters.utils.iceberg import (
-    IcebergTableClient,
-)
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.axiell.record_writer import WindowRecordWriter
+from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_harvester import (
-    WindowCallbackResult,
     WindowHarvestManager,
-    WindowProcessor,
 )
-from adapters.utils.window_store import IcebergWindowStore
+from adapters.utils.window_store import WindowStore
 
 AXIELL_NAMESPACE = "axiell"
 
@@ -52,86 +45,24 @@ class WindowLoadResult(BaseModel):
     state: str
     attempts: int
     record_ids: list[str]
-    changeset_id: str | None = None
+    tags: dict[str, str] | None = None
     last_error: str | None = None
 
 
 class LoaderResponse(BaseModel):
     summaries: list[WindowLoadResult]
     changeset_ids: list[str] = Field(default_factory=list)
-    record_count: int
+    changed_record_count: int
     job_id: str
 
 
-def _serialize_metadata(record: Record) -> str | None:
-    metadata = getattr(record, "metadata", None)
-    if metadata is None:
-        return None
-    return etree.tostring(metadata, encoding="unicode", pretty_print=False)
-
-
-class WindowRecordWriter:
-    def __init__(
-        self,
-        *,
-        namespace: str,
-        table_client: IcebergTableClient,
-        job_id: str,
-    ) -> None:
-        self.namespace = namespace
-        self.table_client = table_client
-        self.job_id = job_id
-        self._rows: list[dict[str, str | None]] = []
-
-    def start_window(self, window_key: str) -> None:
-        self._rows = []
-
-    def process_record(self, identifier: str, record: Record) -> None:
-        self._rows.append(
-            {
-                "namespace": self.namespace,
-                "id": identifier,
-                "content": _serialize_metadata(record),
-            }
-        )
-
-    def complete_window(
-        self,
-        window_key: str,
-        record_ids: list[str],
-    ) -> WindowCallbackResult:
-        tags: dict[str, str] = {"job_id": self.job_id, "window_key": window_key}
-        changeset_id: str | None = None
-
-        if self._rows:
-            table = pa.Table.from_pylist(self._rows, schema=ARROW_SCHEMA)
-            changeset_id = self.table_client.incremental_update(table)
-
-        if changeset_id:
-            tags["changeset_id"] = changeset_id
-
-        return {"record_ids": record_ids, "tags": tags}
-
-
-class WindowRecordWriterFactory:
-    def __init__(self, *, table_client: IcebergTableClient, job_id: str) -> None:
-        self.table_client = table_client
-        self.job_id = job_id
-
-    def __call__(
-        self, window_key: str, window_start: datetime, window_end: datetime
-    ) -> WindowProcessor:
-        writer = WindowRecordWriter(
-            namespace=AXIELL_NAMESPACE,
-            table_client=self.table_client,
-            job_id=self.job_id,
-        )
-        return writer
+def _format_window_range(start: datetime, end: datetime) -> str:
+    return f"{start.isoformat()}-{end.isoformat()}"
 
 
 class LoaderRuntime(BaseModel):
-    store: IcebergWindowStore
-    table_client: IcebergTableClient
+    store: WindowStore
+    table_client: AdapterStore
     oai_client: OAIClient
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
@@ -141,7 +72,7 @@ def build_runtime(config_obj: AxiellAdapterLoaderConfig | None = None) -> Loader
     cfg = config_obj or AxiellAdapterLoaderConfig()
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
     table = helpers.build_adapter_table(cfg.use_rest_api_table)
-    table_client = IcebergTableClient(table, default_namespace=AXIELL_NAMESPACE)
+    table_client = AdapterStore(table, default_namespace=AXIELL_NAMESPACE)
     oai_client = build_oai_client()
 
     return LoaderRuntime(store=store, table_client=table_client, oai_client=oai_client)
@@ -151,18 +82,20 @@ def build_harvester(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime,
 ) -> WindowHarvestManager:
-    callback_factory = WindowRecordWriterFactory(
+    callback = WindowRecordWriter(
+        namespace=AXIELL_NAMESPACE,
         table_client=runtime.table_client,
         job_id=request.job_id,
+        window_range=_format_window_range(request.window_start, request.window_end),
     )
     return WindowHarvestManager(
         client=runtime.oai_client,
         store=runtime.store,
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
-        window_minutes=config.WINDOW_MINUTES,
+        window_minutes=request.window_minutes or config.WINDOW_MINUTES,
         max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
-        record_callback_factory=callback_factory,
+        record_callback=callback,
         default_tags={"job_id": request.job_id},
     )
 
@@ -174,7 +107,7 @@ def execute_loader(
     runtime = runtime or build_runtime()
     harvester = build_harvester(request, runtime)
 
-    summaries = harvester.harvest_recent(
+    summaries = harvester.harvest_range(
         start_time=request.window_start,
         end_time=request.window_end,
         max_windows=request.max_windows,
@@ -190,18 +123,24 @@ def execute_loader(
     typed_summaries = [
         WindowLoadResult.model_validate(summary) for summary in summaries
     ]
-    record_count = sum(len(summary.record_ids) for summary in typed_summaries)
+    changed_record_count = 0
     changeset_ids: set[str] = set()
 
     for summary in typed_summaries:
-        if summary.changeset_id is None:
+        if not summary.tags:
             continue
-        changeset_ids.add(summary.changeset_id)
+
+        if "changeset_id" in summary.tags:
+            changeset_ids.add(summary.tags["changeset_id"])
+
+        if "record_ids_changed" in summary.tags:
+            changed_ids = json.loads(summary.tags["record_ids_changed"])
+            changed_record_count += len(changed_ids)
 
     return LoaderResponse(
         summaries=typed_summaries,
         changeset_ids=list(changeset_ids),
-        record_count=record_count,
+        changed_record_count=changed_record_count,
         job_id=request.job_id,
     )
 

@@ -16,7 +16,7 @@ from adapters.ebsco.steps.transformer import (
     load_data,
     transform,
 )
-from adapters.utils.iceberg import IcebergTableClient
+from adapters.utils.adapter_store import AdapterStore
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
 from models.pipeline.work_data import WorkData
@@ -51,7 +51,7 @@ def _prepare_changeset(
     ]
     pa_table_initial = data_to_namespaced_table(rows)
 
-    client = IcebergTableClient(temporary_table)
+    client = AdapterStore(temporary_table)
     changeset_id = client.snapshot_sync(pa_table_initial, "ebsco")
     assert changeset_id, "Expected a changeset_id to be returned"
 

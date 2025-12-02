@@ -245,6 +245,9 @@
                       "type": "keyword"
                     }
                   }
+                },
+                "createdDate": {
+                  "type": "date"
                 }
               }
             }
