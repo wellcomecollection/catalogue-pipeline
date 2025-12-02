@@ -18,6 +18,7 @@ module "trigger_lambda" {
     variables = {
       S3_BUCKET = data.aws_s3_bucket.axiell_adapter.id
       S3_PREFIX = "prod"
+      CHATBOT_TOPIC_ARN = local.chatbot_topic_arn
     }
   }
 }

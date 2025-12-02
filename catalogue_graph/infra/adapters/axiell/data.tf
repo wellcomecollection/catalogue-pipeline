@@ -28,3 +28,7 @@ data "terraform_remote_state" "platform_monitoring" {
     region = "eu-west-1"
   }
 }
+
+locals {
+  chatbot_topic_arn = data.terraform_remote_state.platform_monitoring.outputs.chatbot_topic_arn
+}
