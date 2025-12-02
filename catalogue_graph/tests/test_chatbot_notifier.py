@@ -59,7 +59,7 @@ def test_send_simple_message(notifier: ChatbotNotifier, topic_arn: str) -> None:
     assert chatbot_payload["source"] == "custom"
     assert chatbot_payload["content"]["textType"] == "client-markdown"
     assert chatbot_payload["content"]["description"] == "Hello from the pipeline!"
-    
+
     # Optional fields should not be present when not provided
     assert "title" not in chatbot_payload["content"]
     assert "nextSteps" not in chatbot_payload["content"]
@@ -84,10 +84,10 @@ def test_send_message_with_thread_id(notifier: ChatbotNotifier, topic_arn: str) 
     # Verify thread ID is in the metadata
     assert len(MockSNSClient.publish_calls) == 1
     publish_call = MockSNSClient.publish_calls[0]
-    
+
     outer_message = json.loads(publish_call["Message"])
     chatbot_payload = json.loads(outer_message["default"])
-    
+
     assert "metadata" in chatbot_payload
     assert chatbot_payload["metadata"]["threadId"] == "previous-message-id-123"
 
@@ -151,7 +151,7 @@ def test_threading_conversation(notifier: ChatbotNotifier) -> None:
         text="Job is progressing...",
         thread_id=first_response.message_id,
     )
-    second_response = notifier.send_notification(second_message)
+    notifier.send_notification(second_message)
 
     # Send final message in the thread
     third_message = ChatbotMessage(
@@ -164,14 +164,20 @@ def test_threading_conversation(notifier: ChatbotNotifier) -> None:
     assert len(MockSNSClient.publish_calls) == 3
 
     # First message has no thread
-    first_payload = json.loads(json.loads(MockSNSClient.publish_calls[0]["Message"])["default"])
+    first_payload = json.loads(
+        json.loads(MockSNSClient.publish_calls[0]["Message"])["default"]
+    )
     assert "metadata" not in first_payload
 
     # Second and third messages reference the first message's ID in metadata
-    second_payload = json.loads(json.loads(MockSNSClient.publish_calls[1]["Message"])["default"])
+    second_payload = json.loads(
+        json.loads(MockSNSClient.publish_calls[1]["Message"])["default"]
+    )
     assert second_payload["metadata"]["threadId"] == "mock-message-id-1"
-    
-    third_payload = json.loads(json.loads(MockSNSClient.publish_calls[2]["Message"])["default"])
+
+    third_payload = json.loads(
+        json.loads(MockSNSClient.publish_calls[2]["Message"])["default"]
+    )
     assert third_payload["metadata"]["threadId"] == "mock-message-id-1"
 
 
@@ -243,7 +249,10 @@ def test_send_message_with_all_fields(notifier: ChatbotNotifier) -> None:
     chatbot_payload = json.loads(outer_message["default"])
 
     # Verify content fields
-    assert chatbot_payload["content"]["description"] == "Comprehensive notification with all fields"
+    assert (
+        chatbot_payload["content"]["description"]
+        == "Comprehensive notification with all fields"
+    )
     assert chatbot_payload["content"]["title"] == "Pipeline Alert"
     assert chatbot_payload["content"]["nextSteps"] == [
         "Review the logs in CloudWatch",
@@ -254,6 +263,11 @@ def test_send_message_with_all_fields(notifier: ChatbotNotifier) -> None:
 
     # Verify metadata fields
     assert chatbot_payload["metadata"]["threadId"] == "test-thread-123"
-    assert chatbot_payload["metadata"]["additionalContext"]["environment"] == "production"
-    assert chatbot_payload["metadata"]["additionalContext"]["service"] == "catalogue-pipeline"
+    assert (
+        chatbot_payload["metadata"]["additionalContext"]["environment"] == "production"
+    )
+    assert (
+        chatbot_payload["metadata"]["additionalContext"]["service"]
+        == "catalogue-pipeline"
+    )
     assert chatbot_payload["metadata"]["additionalContext"]["severity"] == "high"

@@ -88,6 +88,12 @@ LOADER_DETAIL_TYPE = os.getenv("LOADER_DETAIL_TYPE", "AxiellWindowLoaded")
 
 
 # ---------------------------------------------------------------------------
+# Chatbot notifications
+# ---------------------------------------------------------------------------
+CHATBOT_TOPIC_ARN = os.getenv("CHATBOT_TOPIC_ARN")
+
+
+# ---------------------------------------------------------------------------
 # Elasticsearch / downstream transform config
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
