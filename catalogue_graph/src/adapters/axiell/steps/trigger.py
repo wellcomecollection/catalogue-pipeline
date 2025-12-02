@@ -41,10 +41,6 @@ class TriggerRuntime(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def _window_key(start: datetime, end: datetime) -> str:
-    return f"{start.isoformat()}_{end.isoformat()}"
-
-
 def _generate_job_id(timestamp: datetime) -> str:
     return timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M")
 
@@ -100,9 +96,11 @@ def build_window_request(
     max_windows = config.MAX_PENDING_WINDOWS
     resolved_job_id = job_id or _generate_job_id(now)
 
+    from adapters.utils.window_summary import WindowKey
+
     loader_event = AxiellAdapterLoaderEvent(
         job_id=resolved_job_id,
-        window_key=_window_key(start_time, end_time),
+        window_key=WindowKey.from_dates(start_time, end_time),
         window_start=start_time,
         window_end=end_time,
         metadata_prefix=config.OAI_METADATA_PREFIX,

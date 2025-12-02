@@ -15,8 +15,8 @@ from utils.timezone import ensure_datetime_utc
 from .window_store import WindowStatusRecord, WindowStore
 from .window_summary import (
     ALIGNMENT_EPOCH,
+    WindowKey,
     WindowSummary,
-    _window_key,
 )
 
 logger = logging.getLogger(__name__)
@@ -118,7 +118,8 @@ class WindowHarvestManager:
             pending = []
 
             for window in candidates:
-                key = _window_key(*window)
+                start, end = window
+                key = WindowKey.from_dates(start, end)
                 existing = status_map.get(key)
                 if existing and existing.get("state") == "success":
                     reused.append(WindowSummary.model_validate(existing))
@@ -192,7 +193,7 @@ class WindowHarvestManager:
     ) -> WindowSummary:
         start = ensure_datetime_utc(start)
         end = ensure_datetime_utc(end)
-        key = _window_key(start, end)
+        key = WindowKey.from_dates(start, end)
         attempts = 1
         record_ids: list[str] = []
         last_error: str | None = None
@@ -251,7 +252,6 @@ class WindowHarvestManager:
 
         updated_at = datetime.now(UTC)
         summary = WindowSummary(
-            window_key=key,
             window_start=start,
             window_end=end,
             state=state,
