@@ -5,7 +5,7 @@ tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'agent', 'github.v
 
 Create or update a Pull Request description for the changes made in the current branch, by diffing against the main branch (unless another base branch is specified), check if a PR already exists for the current branch and update it if so. You may need to push the branch first to see existing PRs.
 
-Ignore any uncommitted files.
+ALWAYS Ignore any uncommitted files, only consider committed changes. 
 
 Follow this template: https://github.com/wellcomecollection/.github/blob/main/PULL_REQUEST_TEMPLATE.md
 
