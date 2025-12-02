@@ -36,11 +36,11 @@ locals {
   role_descriptors = length(var.write_to) > 0 && length(var.read_from) > 0 ? {
     read  = local.read_descriptor
     write = local.write_descriptor
-    } : (length(var.read_from) > 0 ?
-    {
-      read = local.read_descriptor
-      } : {
-      write = local.write_descriptor
+  } : (length(var.read_from) > 0 ?
+  {
+    read = local.read_descriptor
+  } : {
+    write = local.write_descriptor
   })
 }
 
@@ -50,7 +50,7 @@ resource "elasticstack_elasticsearch_security_api_key" "pipeline_service" {
 }
 
 module "pipeline_service_api_key_secrets" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=add-versions-to-outputs"
 
   deletion_mode = "IMMEDIATE"
 
@@ -60,7 +60,7 @@ module "pipeline_service_api_key_secrets" {
 }
 
 module "pipeline_catalogue_service_api_key_secrets" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=add-versions-to-outputs"
 
   count = var.expose_to_catalogue ? 1 : 0
 
