@@ -36,7 +36,17 @@ def notifier(mock_sns_client: MockSNSClient, topic_arn: str) -> ChatbotNotifier:
 
 def test_send_simple_message(notifier: ChatbotNotifier, topic_arn: str) -> None:
     """Test sending a simple message without threading."""
-    message = ChatbotMessage(text="Hello from the pipeline!")
+    message = ChatbotMessage(
+        text="Hello from the pipeline!",
+        thread_id=None,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
+    )
 
     response = notifier.send_notification(message)
 
@@ -74,6 +84,13 @@ def test_send_message_with_thread_id(notifier: ChatbotNotifier, topic_arn: str) 
     message = ChatbotMessage(
         text="Follow-up message",
         thread_id="previous-message-id-123",
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
     )
 
     response = notifier.send_notification(message)
@@ -96,11 +113,18 @@ def test_send_message_with_metadata(notifier: ChatbotNotifier, topic_arn: str) -
     """Test sending a message with additional context metadata."""
     message = ChatbotMessage(
         text="Message with context",
+        thread_id=None,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
         additional_context={
             "job_id": "202512021430",
             "adapter": "axiell",
             "status": "success",
         },
+        enable_custom_actions=False,
     )
 
     response = notifier.send_notification(message)
@@ -123,6 +147,14 @@ def test_send_markdown_message(notifier: ChatbotNotifier) -> None:
     """Test sending a message with markdown formatting."""
     message = ChatbotMessage(
         text="# Alert\n\n**Status:** Failed\n\n- Item 1\n- Item 2",
+        thread_id=None,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
         textType="client-markdown",
     )
 
@@ -143,13 +175,30 @@ def test_send_markdown_message(notifier: ChatbotNotifier) -> None:
 def test_threading_conversation(notifier: ChatbotNotifier) -> None:
     """Test a threaded conversation with multiple messages."""
     # Send initial message
-    first_message = ChatbotMessage(text="Starting a new job")
+    first_message = ChatbotMessage(
+        text="Starting a new job",
+        thread_id=None,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
+    )
     first_response = notifier.send_notification(first_message)
 
     # Send follow-up in the same thread
     second_message = ChatbotMessage(
         text="Job is progressing...",
         thread_id=first_response.message_id,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
     )
     notifier.send_notification(second_message)
 
@@ -157,6 +206,13 @@ def test_threading_conversation(notifier: ChatbotNotifier) -> None:
     third_message = ChatbotMessage(
         text="Job completed successfully!",
         thread_id=first_response.message_id,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
     )
     notifier.send_notification(third_message)
 
@@ -187,7 +243,7 @@ def test_publish_failure_raises_error(
     """Test that a failed SNS publish raises a RuntimeError."""
 
     # Override the mock to return a failure response
-    def failing_publish(**kwargs: dict) -> dict:  # type: ignore[type-arg]
+    def failing_publish(**kwargs: dict) -> dict:
         MockSNSClient.publish_calls.append(kwargs)
         return {
             "MessageId": "mock-message-id",
@@ -197,7 +253,17 @@ def test_publish_failure_raises_error(
     mock_sns_client.publish = failing_publish  # type: ignore[method-assign]
 
     notifier = ChatbotNotifier(sns_client=mock_sns_client, topic_arn=topic_arn)
-    message = ChatbotMessage(text="This should fail")
+    message = ChatbotMessage(
+        text="This should fail",
+        thread_id=None,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
+    )
 
     with pytest.raises(RuntimeError, match="Failed to publish to SNS"):
         notifier.send_notification(message)
@@ -209,13 +275,23 @@ def test_publish_exception_propagates(
     """Test that exceptions from the SNS client are propagated."""
 
     # Override the mock to raise an exception
-    def exception_publish(**kwargs: dict) -> dict:  # type: ignore[type-arg]
+    def exception_publish(**kwargs: dict) -> dict:
         raise ValueError("Network error")
 
     mock_sns_client.publish = exception_publish  # type: ignore[method-assign]
 
     notifier = ChatbotNotifier(sns_client=mock_sns_client, topic_arn=topic_arn)
-    message = ChatbotMessage(text="This should raise an exception")
+    message = ChatbotMessage(
+        text="This should raise an exception",
+        thread_id=None,
+        title=None,
+        next_steps=None,
+        keywords=None,
+        summary=None,
+        related_resources=None,
+        additional_context=None,
+        enable_custom_actions=False,
+    )
 
     with pytest.raises(ValueError, match="Network error"):
         notifier.send_notification(message)
@@ -233,11 +309,14 @@ def test_send_message_with_all_fields(notifier: ChatbotNotifier) -> None:
             "Contact the on-call engineer if needed",
         ],
         keywords=["pipeline", "error", "urgent"],
+        summary=None,
+        related_resources=None,
         additional_context={
             "environment": "production",
             "service": "catalogue-pipeline",
             "severity": "high",
         },
+        enable_custom_actions=False,
     )
 
     response = notifier.send_notification(message)

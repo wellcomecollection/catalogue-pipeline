@@ -111,18 +111,18 @@ class WindowNotifier:
         )
 
         lines = [
-            f"Found **{total_gaps} coverage gap(s)** totaling "
-            f"**{total_missing_hours:.1f} hours** of missing windows.",
+            f"Found *{total_gaps} coverage gap(s)* totaling "
+            f"*{total_missing_hours:.1f} hours* of missing windows.",
             "",
-            f"**Table:** `{self.table_name}`",
+            f"*Table:* `{self.table_name}`",
         ]
 
         if job_id:
-            lines.append(f"**Job ID:** `{job_id}`")
+            lines.append(f"*Job ID:* `{job_id}`")
 
         if trigger_time:
             lines.append(
-                f"**Triggered:** {trigger_time.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+                f"*Triggered:* {trigger_time.strftime('%Y-%m-%d %H:%M:%S UTC')}"
             )
 
         lines.extend(["", "## Coverage Gaps"])
@@ -131,8 +131,8 @@ class WindowNotifier:
         for i, gap in enumerate(gaps_to_show, 1):
             duration_hours = (gap.end - gap.start).total_seconds() / 3600.0
             lines.append(
-                f"{i}. **{gap.start.strftime('%Y-%m-%d %H:%M')}** → "
-                f"**{gap.end.strftime('%Y-%m-%d %H:%M')}** "
+                f"{i}. *{gap.start.strftime('%Y-%m-%d %H:%M')}* → "
+                f"*{gap.end.strftime('%Y-%m-%d %H:%M')}* "
                 f"({duration_hours:.1f}h)"
             )
 
