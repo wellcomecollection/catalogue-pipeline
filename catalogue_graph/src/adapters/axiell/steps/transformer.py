@@ -19,9 +19,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from adapters.axiell import config, helpers
 from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
-from adapters.utils.iceberg import (
-    IcebergTableClient,
-)
+from adapters.utils.adapter_store import AdapterStore
 from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
@@ -38,7 +36,7 @@ class TransformResult(BaseModel):
 
 
 class TransformerRuntime(BaseModel):
-    table_client: IcebergTableClient
+    table_client: AdapterStore
     es_client: Elasticsearch
     index_name: str
 
@@ -52,7 +50,7 @@ def build_runtime(
         es_mode=cast(ElasticsearchMode, config.ES_MODE)
     )
     table = helpers.build_adapter_table(cfg.use_rest_api_table)
-    table_client = IcebergTableClient(table, default_namespace=AXIELL_NAMESPACE)
+    table_client = AdapterStore(table, default_namespace=AXIELL_NAMESPACE)
     es_client = get_client(
         api_key_name=config.ES_API_KEY_NAME,
         pipeline_date=config.PIPELINE_DATE,

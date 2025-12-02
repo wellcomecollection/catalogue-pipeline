@@ -13,7 +13,7 @@ from adapters.axiell.models.step_events import (
     AxiellAdapterTriggerEvent,
 )
 from adapters.axiell.steps import trigger
-from adapters.utils.window_store import IcebergWindowStore, WindowStatusRecord
+from adapters.utils.window_store import WindowStatusRecord, WindowStore
 
 
 def _window_row(start: datetime, end: datetime) -> WindowStatusRecord:
@@ -30,10 +30,8 @@ def _window_row(start: datetime, end: datetime) -> WindowStatusRecord:
     )
 
 
-def _populate_store(
-    table: IcebergTable, rows: list[WindowStatusRecord]
-) -> IcebergWindowStore:
-    store = IcebergWindowStore(table)
+def _populate_store(table: IcebergTable, rows: list[WindowStatusRecord]) -> WindowStore:
+    store = WindowStore(table)
     for row in rows:
         store.upsert(row)
     return store
@@ -54,6 +52,37 @@ def test_build_window_request_uses_lookback_when_no_history(
     assert request.set_spec == config.OAI_SET_SPEC
     assert request.metadata_prefix == config.OAI_METADATA_PREFIX
     assert request.job_id == "20251117T1200"
+
+
+def test_build_window_request_respects_custom_lookback(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
+    store = _populate_store(temporary_window_status_table, [])
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        window_lookback_days=3,
+    )
+
+    assert request.window_start == now - timedelta(days=3)
+    assert request.window_end == now
+
+
+def test_build_window_request_embeds_window_minutes(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    now = datetime(2025, 11, 17, 12, 0, tzinfo=UTC)
+    store = _populate_store(temporary_window_status_table, [])
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        window_minutes=42,
+    )
+
+    assert request.window_minutes == 42
 
 
 def test_build_window_request_respects_last_success(
@@ -168,7 +197,7 @@ def test_lambda_handler_uses_rest_api_table_by_default(
     stub_store = _populate_store(temporary_window_status_table, [])
     captured: dict[str, bool] = {}
 
-    def fake_build_window_store(*, use_rest_api_table: bool) -> IcebergWindowStore:
+    def fake_build_window_store(*, use_rest_api_table: bool) -> WindowStore:
         captured["flag"] = use_rest_api_table
         return stub_store
 
