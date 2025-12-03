@@ -47,34 +47,22 @@ class AggregateWorkTransformer(WorkBaseTransformer):
 
     @property
     def genres(self) -> Generator[AggregatableField]:
-        aggregatable = []
         for genre in self.data.genres:
             concept_id = genre.concepts[0].id.canonical_id
             if concept_id is None:
                 raise ValueError(f"Concept {genre.concepts[0]} does not have an ID.")
 
-            label = self.get_standard_concept_label(genre.concepts[0])
-            aggregatable.append(AggregatableField(id=concept_id, label=label))
-
-        yield from get_unique(aggregatable)
+            yield AggregatableField(id=concept_id, label=genre.label)
 
     @property
     def subjects(self) -> Generator[AggregatableField]:
-        aggregatable = []
         for subject in self.data.subjects:
-            standard_label = self.get_standard_concept_label(subject)
-            aggregatable.append(get_aggregatable(subject.id, standard_label))
-
-        yield from get_unique(aggregatable)
+            yield get_aggregatable(subject.id, subject.normalised_label)
 
     @property
     def contributors(self) -> Generator[AggregatableField]:
-        aggregatable = []
         for c in self.data.contributors:
-            standard_label = self.get_standard_concept_label(c.agent)
-            aggregatable.append(get_aggregatable(c.agent.id, standard_label))
-
-        yield from get_unique(aggregatable)
+            yield get_aggregatable(c.agent.id, c.agent.normalised_label)
 
     @property
     def work_type(self) -> Generator[AggregatableField]:

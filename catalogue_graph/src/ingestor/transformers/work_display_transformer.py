@@ -119,18 +119,9 @@ class DisplayWorkTransformer(WorkBaseTransformer):
 
     @property
     def subjects(self) -> Generator[DisplaySubject]:
-        labels = set()
         for subject in self.data.subjects:
             main_concept = self.get_display_concept(subject)
             concepts = [self.get_display_concept(c) for c in subject.concepts]
-
-            # If multiple non-composite subjects have the same standard labels, only include one of them.
-            # This does not apply to composite subjects, which can have different nested concepts even when their
-            # standard labels match.
-            if len(concepts) == 1:
-                if main_concept.label in labels:
-                    continue
-                labels.add(main_concept.label)
 
             yield DisplaySubject(
                 **main_concept.model_dump(),
@@ -175,16 +166,9 @@ class DisplayWorkTransformer(WorkBaseTransformer):
 
     @property
     def contributors(self) -> Generator[DisplayContributor]:
-        labels = set()
-
         for contributor in self.data.contributors:
             roles = [DisplayContributionRole(label=r.label) for r in contributor.roles]
             agent = self.get_display_concept(contributor.agent)
-
-            # If multiple contributors have the same standard labels, only include one of them
-            if agent.label in labels:
-                continue
-            labels.add(agent.label)
 
             yield DisplayContributor(
                 agent=agent,

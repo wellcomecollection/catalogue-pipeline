@@ -76,22 +76,16 @@ class QueryWorkTransformer(WorkBaseTransformer):
             yield item.work.properties.id
 
     @property
-    def genre_concept_labels(self) -> list[str]:
-        items = []
+    def genre_concept_labels(self) -> Generator[str]:
         for genre in self.data.genres:
             for concept in genre.concepts:
-                items.append(self.get_standard_concept_label(concept))
-
-        return get_unique(items)
+                yield concept.normalised_label
 
     @property
-    def subject_concept_labels(self) -> list[str]:
-        items = []
+    def subject_concept_labels(self) -> Generator[str]:
         for subject in self.data.subjects:
             for concept in subject.concepts:
-                items.append(self.get_standard_concept_label(concept))
-
-        return get_unique(items)
+                yield concept.normalised_label
 
     @property
     def image_ids(self) -> list[str]:
@@ -129,15 +123,11 @@ class QueryWorkTransformer(WorkBaseTransformer):
 
     @property
     def subject_labels(self) -> list[str]:
-        return get_unique(
-            self.get_standard_concept_label(s) for s in self.data.subjects
-        )
+        return [s.normalised_label for s in self.data.subjects]
 
     @property
     def contributor_agent_labels(self) -> list[str]:
-        return get_unique(
-            self.get_standard_concept_label(c.agent) for c in self.data.contributors
-        )
+        return [c.agent.normalised_label for c in self.data.contributors]
 
     @property
     def format_id(self) -> str | None:
