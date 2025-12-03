@@ -120,3 +120,8 @@ variable "service_discovery_namespace_id" {
   type    = string
   default = null
 }
+
+variable "trigger_values" {
+  type = list(string)
+  default = [ "default" ]
+}

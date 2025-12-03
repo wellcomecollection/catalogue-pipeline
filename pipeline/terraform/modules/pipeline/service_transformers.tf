@@ -73,11 +73,11 @@ module "transformers" {
 
     batch_size             = lookup(each.value, "batch_size", 100)
     flush_interval_seconds = lookup(each.value, "flush_interval_seconds", 30)
-    # Add a 'fake' environment variable storing the version ID of the ES API key secret.
-    # This variable is not accessed by the ECS task. We include it so that whenever a new version of the API key
-    # gets created, the task is automatically redeployed.
-    api_key_version = module.elastic.api_key_versions["transformer"]
   }
+
+  trigger_values = [
+    module.elastic.api_key_versions["transformer"],
+  ]
 
   secret_env_vars = module.elastic.pipeline_storage_es_service_secrets["transformer"]
 

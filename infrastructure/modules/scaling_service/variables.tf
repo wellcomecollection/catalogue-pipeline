@@ -120,3 +120,8 @@ variable "queue_config" {
     main_q_age_alarm_action_arns = optional(list(string), [])
   })
 }
+
+variable "trigger_values" {
+  type = list(string)
+  default = [ "default" ]
+}
