@@ -122,6 +122,6 @@ variable "service_discovery_namespace_id" {
 }
 
 variable "trigger_values" {
-  type = list(string)
-  default = [ "default" ]
+  type    = list(string)
+  default = ["default"]
 }

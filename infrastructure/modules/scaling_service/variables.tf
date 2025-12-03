@@ -122,6 +122,6 @@ variable "queue_config" {
 }
 
 variable "trigger_values" {
-  type = list(string)
-  default = [ "default" ]
+  type    = list(string)
+  default = ["default"]
 }

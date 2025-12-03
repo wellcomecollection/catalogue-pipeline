@@ -69,6 +69,6 @@ variable "fargate_service_boilerplate" {
 }
 
 variable "trigger_values" {
-  type = list(string)
-  default = [ "default" ]
+  type    = list(string)
+  default = ["default"]
 }
