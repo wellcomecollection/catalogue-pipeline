@@ -22,6 +22,8 @@ class QueryWorkTransformer:
 
     @property
     def identifiers(self) -> Generator[str]:
+        if getattr(self.state, "canonical_id", None) is not None:
+            yield self.state.canonical_id
         yield self.state.source_identifier.value
         for identifier in self.data.other_identifiers:
             yield identifier.value
@@ -212,5 +214,6 @@ class QueryWorkTransformer:
     def items_locations_created_date(self) -> Generator[str]:
         for item in self.data.items:
             for loc in item.locations:
+                # items's createdDate are only available on digital locations
                 if isinstance(loc, DigitalLocation) and loc.created_date is not None:
                     yield loc.created_date

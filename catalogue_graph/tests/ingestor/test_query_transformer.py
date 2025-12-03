@@ -95,3 +95,13 @@ def test_series_ancestor_no_deduplication() -> None:
         "Some series title",
         "Some ancestor title.",
     ]
+
+
+def test_identifiers_includes_work_canonical_id() -> None:
+    extracted = get_work_with_ancestor()
+    # Set up canonical_id and other identifiers
+    extracted.work.state.canonical_id = "canonical_id_1"
+    extracted.work.state.source_identifier.value = "b_number"
+    identifiers = list(QueryWorkTransformer(extracted).identifiers)
+    assert "canonical_id_1" in identifiers
+    assert "b_number" in identifiers
