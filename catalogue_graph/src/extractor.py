@@ -118,6 +118,12 @@ def local_handler(parser: ArgumentParser) -> None:
         required=False,
     )
     parser.add_argument(
+        "--index-date-merged",
+        type=str,
+        help="The merged index date to read from, will default to pipeline date.",
+        required=False,
+    )
+    parser.add_argument(
         "--pit-id",
         type=str,
         help="An Elasticsearch point in time ID to use when extracting data from the merged index.",

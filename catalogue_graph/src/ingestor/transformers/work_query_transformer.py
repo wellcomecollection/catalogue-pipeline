@@ -1,10 +1,12 @@
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 
 from dateutil import parser
 
 from ingestor.extractors.works_extractor import VisibleExtractedWork
 from ingestor.models.display.access_status import DisplayAccessStatus
 from models.pipeline.location import DigitalLocation, PhysicalLocation
+
+from .work_base_transformer import WorkBaseTransformer
 
 # The Scala pipeline uses the date `-9999-01-01T00:00:00Z` as 'negative infinity'. The Python standard library doesn't
 # support dates with negative years, and so we hardcode the corresponding Unix timestamp here instead of installing
@@ -13,8 +15,14 @@ NEGATIVE_INFINITY_DATE = "-9999-01-01T00:00:00Z"
 NEGATIVE_INFINITY_UNIX_TIMESTAMP = -377705116800000
 
 
-class QueryWorkTransformer:
+def get_unique(items: Iterable[str]) -> list[str]:
+    """Deduplicate items in the given iterable white preserving order"""
+    return list(dict.fromkeys(items))
+
+
+class QueryWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(extracted)
         self.data = extracted.work.data
         self.state = extracted.work.state
         self.hierarchy = extracted.hierarchy
@@ -68,16 +76,22 @@ class QueryWorkTransformer:
             yield item.work.properties.id
 
     @property
-    def genre_concept_labels(self) -> Generator[str]:
+    def genre_concept_labels(self) -> list[str]:
+        items = []
         for genre in self.data.genres:
             for concept in genre.concepts:
-                yield concept.normalised_label
+                items.append(self.get_standard_concept_label(concept))
+
+        return get_unique(items)
 
     @property
-    def subject_concept_labels(self) -> Generator[str]:
+    def subject_concept_labels(self) -> list[str]:
+        items = []
         for subject in self.data.subjects:
             for concept in subject.concepts:
-                yield concept.normalised_label
+                items.append(self.get_standard_concept_label(concept))
+
+        return get_unique(items)
 
     @property
     def image_ids(self) -> list[str]:
@@ -114,8 +128,16 @@ class QueryWorkTransformer:
         return self.data.collection_path.label
 
     @property
+    def subject_labels(self) -> list[str]:
+        return get_unique(
+            self.get_standard_concept_label(s) for s in self.data.subjects
+        )
+
+    @property
     def contributor_agent_labels(self) -> list[str]:
-        return [c.agent.normalised_label for c in self.data.contributors]
+        return get_unique(
+            self.get_standard_concept_label(c.agent) for c in self.data.contributors
+        )
 
     @property
     def format_id(self) -> str | None:
@@ -157,6 +179,11 @@ class QueryWorkTransformer:
             canonical_id = first_concept.id.canonical_id
             if canonical_id is not None:
                 yield canonical_id
+
+    @property
+    def genre_labels(self) -> Generator[str]:
+        for genre in self.data.genres:
+            yield self.get_standard_concept_label(genre.concepts[0])
 
     @property
     def genre_identifiers(self) -> Generator[str]:
