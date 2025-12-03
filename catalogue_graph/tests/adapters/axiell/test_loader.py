@@ -15,6 +15,7 @@ from adapters.axiell.steps import loader
 from adapters.axiell.steps.loader import LoaderResponse
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStore
+from adapters.utils.window_summary import WindowSummary
 
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
 
@@ -87,22 +88,24 @@ def test_execute_loader_updates_iceberg(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    summary = {
-        "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
-        "window_start": req.window_start,
-        "window_end": req.window_end,
-        "state": "success",
-        "attempts": 1,
-        "record_ids": ["id-1"],
-        "last_error": None,
-        "updated_at": req.window_end,
-        "tags": {
-            "job_id": req.job_id,
+    summary = WindowSummary.model_validate(
+        {
+            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
+            "window_start": req.window_start,
+            "window_end": req.window_end,
+            "state": "success",
+            "attempts": 1,
+            "record_ids": ["id-1"],
+            "last_error": None,
+            "updated_at": req.window_end,
+            "tags": {
+                "job_id": req.job_id,
+                "changeset_id": "changeset-123",
+                "record_ids_changed": '["id-1"]',
+            },
             "changeset_id": "changeset-123",
-            "record_ids_changed": '["id-1"]',
-        },
-        "changeset_id": "changeset-123",
-    }
+        }
+    )
     table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
@@ -140,22 +143,24 @@ def test_execute_loader_counts_only_changed_records(
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    summary = {
-        "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
-        "window_start": req.window_start,
-        "window_end": req.window_end,
-        "state": "success",
-        "attempts": 1,
-        "record_ids": ["id-1", "id-2"],
-        "last_error": None,
-        "updated_at": req.window_end,
-        "tags": {
-            "job_id": req.job_id,
+    summary = WindowSummary.model_validate(
+        {
+            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
+            "window_start": req.window_start,
+            "window_end": req.window_end,
+            "state": "success",
+            "attempts": 1,
+            "record_ids": ["id-1", "id-2"],
+            "last_error": None,
+            "updated_at": req.window_end,
+            "tags": {
+                "job_id": req.job_id,
+                "changeset_id": "changeset-123",
+                "record_ids_changed": '["id-2"]',
+            },
             "changeset_id": "changeset-123",
-            "record_ids_changed": '["id-2"]',
-        },
-        "changeset_id": "changeset-123",
-    }
+        }
+    )
 
     with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
@@ -178,18 +183,20 @@ def test_execute_loader_handles_no_new_records(
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    summary = {
-        "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
-        "window_start": req.window_start,
-        "window_end": req.window_end,
-        "state": "success",
-        "attempts": 1,
-        "record_ids": [],
-        "last_error": None,
-        "updated_at": req.window_end,
-        "tags": {"job_id": req.job_id},
-        "changeset_id": None,
-    }
+    summary = WindowSummary.model_validate(
+        {
+            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
+            "window_start": req.window_start,
+            "window_end": req.window_end,
+            "state": "success",
+            "attempts": 1,
+            "record_ids": [],
+            "last_error": None,
+            "updated_at": req.window_end,
+            "tags": {"job_id": req.job_id},
+            "changeset_id": None,
+        }
+    )
 
     with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]

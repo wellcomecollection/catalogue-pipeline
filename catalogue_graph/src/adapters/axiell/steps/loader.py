@@ -24,6 +24,7 @@ from adapters.utils.window_harvester import (
     WindowHarvestManager,
 )
 from adapters.utils.window_store import WindowStore
+from adapters.utils.window_summary import WindowSummary
 
 AXIELL_NAMESPACE = "axiell"
 
@@ -38,19 +39,8 @@ class AxiellAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
 
 
-class WindowLoadResult(BaseModel):
-    window_key: str
-    window_start: datetime
-    window_end: datetime
-    state: str
-    attempts: int
-    record_ids: list[str]
-    tags: dict[str, str] | None = None
-    last_error: str | None = None
-
-
 class LoaderResponse(BaseModel):
-    summaries: list[WindowLoadResult]
+    summaries: list[WindowSummary]
     changeset_ids: list[str] = Field(default_factory=list)
     changed_record_count: int
     job_id: str
@@ -120,13 +110,10 @@ def execute_loader(
             f"{request.window_start.isoformat()} -> {request.window_end.isoformat()}"
         )
 
-    typed_summaries = [
-        WindowLoadResult.model_validate(summary) for summary in summaries
-    ]
     changed_record_count = 0
     changeset_ids: set[str] = set()
 
-    for summary in typed_summaries:
+    for summary in summaries:
         if not summary.tags:
             continue
 
@@ -138,7 +125,7 @@ def execute_loader(
             changed_record_count += len(changed_ids)
 
     return LoaderResponse(
-        summaries=typed_summaries,
+        summaries=summaries,
         changeset_ids=list(changeset_ids),
         changed_record_count=changed_record_count,
         job_id=request.job_id,

@@ -131,16 +131,10 @@ def _process_gap(
             reprocess_successful_windows=False,
         )
 
-        # Build response matching loader's format
-        from adapters.axiell.steps.loader import WindowLoadResult
-
-        typed_summaries = [
-            WindowLoadResult.model_validate(summary) for summary in summaries
-        ]
         changed_record_count = 0
         changeset_ids: set[str] = set()
 
-        for summary in typed_summaries:
+        for summary in summaries:
             if not summary.tags:
                 continue
 
@@ -152,7 +146,7 @@ def _process_gap(
                 changed_record_count += len(changed_ids)
 
         loader_response = LoaderResponse(
-            summaries=typed_summaries,
+            summaries=summaries,
             changeset_ids=list(changeset_ids),
             changed_record_count=changed_record_count,
             job_id=job_id,

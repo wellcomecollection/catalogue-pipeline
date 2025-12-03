@@ -13,6 +13,7 @@ from adapters.axiell.steps import reloader
 from adapters.axiell.steps.loader import LoaderRuntime
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
+from adapters.utils.window_summary import WindowSummary
 
 
 def _window_row(
@@ -94,20 +95,22 @@ def test_handler_with_single_gap(
     # Mock the loader's harvester to avoid actual OAI-PMH calls
     def mock_harvest_range(*args, **kwargs):  # type: ignore[no-untyped-def]
         return [
-            {
-                "window_key": f"{gap_start.isoformat()}_{gap_end.isoformat()}",
-                "window_start": gap_start,
-                "window_end": gap_end,
-                "state": "success",
-                "attempts": 1,
-                "record_ids": ["id-1", "id-2"],
-                "tags": {
-                    "job_id": "test-job",
-                    "changeset_id": "changeset-abc",
-                    "record_ids_changed": '["id-1"]',
-                },
-                "last_error": None,
-            }
+            WindowSummary.model_validate(
+                {
+                    "window_start": gap_start,
+                    "window_end": gap_end,
+                    "state": "success",
+                    "attempts": 1,
+                    "record_ids": ["id-1", "id-2"],
+                    "last_error": None,
+                    "updated_at": gap_end,
+                    "tags": {
+                        "job_id": "test-job",
+                        "changeset_id": "changeset-abc",
+                        "record_ids_changed": '["id-1"]',
+                    },
+                }
+            )
         ]
 
     monkeypatch.setattr(

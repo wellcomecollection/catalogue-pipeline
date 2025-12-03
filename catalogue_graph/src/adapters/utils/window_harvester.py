@@ -177,7 +177,8 @@ class WindowHarvestManager:
                 for start, end in windows
             }
             for future in as_completed(future_map):
-                summaries.append(future.result())
+                summaries.append(WindowSummary.model_validate(future.result()))
+
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 
