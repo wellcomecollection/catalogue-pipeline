@@ -23,6 +23,9 @@ from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.events import EventBridgeScheduledEvent
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 class AxiellAdapterTriggerConfig(BaseModel):
     use_rest_api_table: bool = True
@@ -84,6 +87,9 @@ def build_window_request(
     if enforce_lag:
         _enforce_lag(now, last_success_end)
 
+    # Log window coverage report
+    logging.info(report.summary())
+
     # Send notification if coverage gaps are detected
     if notifier:
         notifier.notify_if_gaps(
@@ -103,7 +109,10 @@ def build_window_request(
     end_time = now.astimezone(UTC)
 
     if start_time >= end_time:
-        raise RuntimeError("No new windows are ready: computed start >= end.")
+        raise RuntimeError(
+            f"No new windows are ready to process: start_time={start_time.isoformat()} "
+            f"last_success_end={last_success_end.isoformat() if last_success_end else 'None'}"
+        )
 
     max_windows = config.MAX_PENDING_WINDOWS
     resolved_job_id = job_id or _generate_job_id(now)

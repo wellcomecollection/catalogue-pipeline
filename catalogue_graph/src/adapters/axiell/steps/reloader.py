@@ -23,12 +23,7 @@ from adapters.axiell.steps.loader import LoaderResponse, LoaderRuntime, build_ha
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
-    force=True,
-)
-
+logging.basicConfig(level=logging.INFO)
 
 class AxiellAdapterReloaderConfig(BaseModel):
     use_rest_api_table: bool = True
@@ -193,6 +188,9 @@ def handler(
     # Generate coverage report for the specified range
     reporter = WindowReporter(store=runtime.store, window_minutes=config.WINDOW_MINUTES)
     report = reporter.coverage_report(range_start=window_start, range_end=window_end)
+
+    # Log window coverage report
+    logging.info(report.summary())
 
     logging.info(
         f"Found {len(report.coverage_gaps)} gap(s) in range "

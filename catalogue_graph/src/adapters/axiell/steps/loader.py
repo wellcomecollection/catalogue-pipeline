@@ -28,12 +28,7 @@ from adapters.utils.window_summary import WindowSummary
 
 AXIELL_NAMESPACE = "axiell"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(name)s - %(message)s",
-    force=True,
-)
-
+logging.basicConfig(level=logging.INFO)
 
 class AxiellAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
