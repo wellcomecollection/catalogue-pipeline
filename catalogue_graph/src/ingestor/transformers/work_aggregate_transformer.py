@@ -13,6 +13,8 @@ from models.pipeline.identifier import (
     Unidentifiable,
 )
 
+from .work_base_transformer import WorkBaseTransformer
+
 
 class AggregatableField(BaseModel):
     id: str
@@ -28,29 +30,51 @@ def get_aggregatable(
     return AggregatableField(id=ids.canonical_id, label=label)
 
 
-class AggregateWorkTransformer:
+def get_unique(aggregatable: list[AggregatableField]) -> Generator[AggregatableField]:
+    """Deduplicate aggregatable values which share the same label"""
+    seen_labels = set()
+    for item in aggregatable:
+        if item.label not in seen_labels:
+            seen_labels.add(item.label)
+            yield item
+
+
+class AggregateWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(extracted)
         self.data = extracted.work.data
         self.state = extracted.work.state
 
     @property
     def genres(self) -> Generator[AggregatableField]:
+        aggregatable = []
         for genre in self.data.genres:
             concept_id = genre.concepts[0].id.canonical_id
             if concept_id is None:
                 raise ValueError(f"Concept {genre.concepts[0]} does not have an ID.")
 
-            yield AggregatableField(id=concept_id, label=genre.label)
+            label = self.get_standard_concept_label(genre.concepts[0])
+            aggregatable.append(AggregatableField(id=concept_id, label=label))
+
+        yield from get_unique(aggregatable)
 
     @property
     def subjects(self) -> Generator[AggregatableField]:
+        aggregatable = []
         for subject in self.data.subjects:
-            yield get_aggregatable(subject.id, subject.normalised_label)
+            standard_label = self.get_standard_concept_label(subject)
+            aggregatable.append(get_aggregatable(subject.id, standard_label))
+
+        yield from get_unique(aggregatable)
 
     @property
     def contributors(self) -> Generator[AggregatableField]:
+        aggregatable = []
         for c in self.data.contributors:
-            yield get_aggregatable(c.agent.id, c.agent.normalised_label)
+            standard_label = self.get_standard_concept_label(c.agent)
+            aggregatable.append(get_aggregatable(c.agent.id, standard_label))
+
+        yield from get_unique(aggregatable)
 
     @property
     def work_type(self) -> Generator[AggregatableField]:
