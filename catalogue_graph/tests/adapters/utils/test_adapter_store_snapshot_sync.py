@@ -88,7 +88,7 @@ def test_snapshot_sync_undelete(temporary_table: IcebergTable) -> None:
     client = AdapterStore(temporary_table)
     changeset = client.snapshot_sync(new_data, "test_namespace")
     assert changeset is not None
-    
+
     as_pa = (
         temporary_table.scan(selected_fields=("id", "content", "changeset"))
         .to_arrow()
