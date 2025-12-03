@@ -40,40 +40,49 @@ class WindowCoverageReport(BaseModel):
             f"Window Coverage Report ({self.range_start.isoformat()} to {self.range_end.isoformat()})",
             f"Total windows: {self.total_windows}",
         ]
-        
+
         if self.state_counts:
             state_summary = ", ".join(
-                f"{state}: {count}" for state, count in sorted(self.state_counts.items())
+                f"{state}: {count}"
+                for state, count in sorted(self.state_counts.items())
             )
             lines.append(f"States: {state_summary}")
-        
+
         lines.append(f"Coverage: {self.coverage_hours:.2f} hours")
-        
+
         if self.coverage_gaps:
             lines.append(f"Gaps: {len(self.coverage_gaps)}")
             for gap in self.coverage_gaps[:3]:  # Show first 3 gaps
                 duration = (gap.end - gap.start).total_seconds() / 3600
-                lines.append(f"  - {gap.start.isoformat()} to {gap.end.isoformat()} ({duration:.2f}h)")
+                lines.append(
+                    f"  - {gap.start.isoformat()} to {gap.end.isoformat()} ({duration:.2f}h)"
+                )
             if len(self.coverage_gaps) > 3:
                 lines.append(f"  ... and {len(self.coverage_gaps) - 3} more")
         else:
             lines.append("Gaps: none")
-        
+
         if self.failures:
             lines.append(f"Failures: {len(self.failures)}")
             for failure in self.failures[:3]:  # Show first 3 failures
                 lines.append(f"  - {failure.window_key} (attempts: {failure.attempts})")
                 if failure.last_error:
-                    error_preview = failure.last_error[:80] + "..." if len(failure.last_error) > 80 else failure.last_error
+                    error_preview = (
+                        failure.last_error[:80] + "..."
+                        if len(failure.last_error) > 80
+                        else failure.last_error
+                    )
                     lines.append(f"    Error: {error_preview}")
             if len(self.failures) > 3:
                 lines.append(f"  ... and {len(self.failures) - 3} more")
         else:
             lines.append("Failures: none")
-        
+
         if self.last_success_end:
-            lines.append(f"Last successful window ended: {self.last_success_end.isoformat()}")
-        
+            lines.append(
+                f"Last successful window ended: {self.last_success_end.isoformat()}"
+            )
+
         return "\n".join(lines)
 
 

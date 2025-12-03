@@ -30,6 +30,7 @@ AXIELL_NAMESPACE = "axiell"
 
 logging.basicConfig(level=logging.INFO)
 
+
 class AxiellAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
 

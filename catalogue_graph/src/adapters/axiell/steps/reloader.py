@@ -25,6 +25,7 @@ from adapters.utils.window_store import WindowStore
 
 logging.basicConfig(level=logging.INFO)
 
+
 class AxiellAdapterReloaderConfig(BaseModel):
     use_rest_api_table: bool = True
 

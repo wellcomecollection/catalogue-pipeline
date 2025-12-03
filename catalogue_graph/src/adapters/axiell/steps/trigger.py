@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -23,9 +24,8 @@ from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.events import EventBridgeScheduledEvent
 
-import logging
-
 logging.basicConfig(level=logging.INFO)
+
 
 class AxiellAdapterTriggerConfig(BaseModel):
     use_rest_api_table: bool = True
