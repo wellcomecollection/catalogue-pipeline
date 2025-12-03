@@ -3,6 +3,7 @@ Common helper functions for tests.
 """
 
 from collections.abc import Collection
+from datetime import UTC, datetime
 from typing import Any
 
 import pyarrow as pa
@@ -35,7 +36,10 @@ def add_namespace(
 
 
 def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]], namespace: str | None = None
+    unqualified_data: list[dict[str, Any]],
+    namespace: str | None = None,
+    *,
+    add_timestamp: bool = False,
 ) -> pa.Table:
     """
     Convert a list of data dictionaries to a PyArrow table with namespace added.
@@ -49,9 +53,12 @@ def data_to_namespaced_table(
     """
     if namespace is None:
         namespace = EBSCO_NAMESPACE
-    return data_to_pa_table(
-        [add_namespace(entry.copy(), namespace) for entry in unqualified_data]
-    )
+    rows = [add_namespace(entry.copy(), namespace) for entry in unqualified_data]
+    if add_timestamp:
+        now = datetime.now(UTC)
+        for row in rows:
+            row["last_modified"] = now
+    return data_to_pa_table(rows)
 
 
 def assert_row_identifiers(rows: pa.Table, expected_ids: Collection[str]) -> None:

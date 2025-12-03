@@ -346,13 +346,14 @@ def test_window_record_writer_skips_changeset_for_duplicate_data(
     assert "changeset_id" not in tags_2
 
     # 3. Write new data
+    newer_last_modified = last_modified + timedelta(minutes=1)
     result_3 = writer(
         records=[
             (
                 "id-1",
                 SimpleNamespace(
                     metadata=etree.fromstring("<metadata>v2</metadata>"),
-                    header=SimpleNamespace(datestamp=last_modified),
+                    header=SimpleNamespace(datestamp=newer_last_modified),
                 ),
             )
         ],

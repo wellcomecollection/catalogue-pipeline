@@ -9,7 +9,7 @@ from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, N
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
 
 
 class AdapterStoreUpdate(BaseModel):
@@ -36,6 +36,13 @@ class AdapterStore:
         Apply an incremental update to the table.
         Only updates and inserts are processed; missing records are NOT deleted.
         """
+        # Enforce presence of timestamps in incremental updates to avoid overwriting
+        # newer records with untimed data.
+        if "last_modified" not in new_data.column_names:
+            raise ValueError(
+                "incremental_update requires a 'last_modified' column in new_data"
+            )
+
         namespace = self._get_namespace(record_namespace)
         if new_data.num_rows == 0:
             return None
@@ -48,13 +55,16 @@ class AdapterStore:
             return None
 
         row_filter = And(EqualTo("namespace", namespace), In("id", new_ids))
-        existing_data = self._get_existing_data(row_filter)
+        # Fetch existing data with timestamps for comparison (timestamps required)
+        existing_data = self._get_existing_data(row_filter, include_timestamp=True)
 
         if existing_data.num_rows > 0:
             existing_data = existing_data.sort_by("id")
             new_data = new_data.sort_by("id")
 
             updates = self._find_updates(existing_data, new_data)
+            # Filter updates to only include records with newer timestamps
+            updates = self._filter_by_timestamp(updates, existing_data)
             inserts = self._find_inserts(existing_data, new_data, namespace)
             changes = updates
         else:
@@ -103,14 +113,23 @@ class AdapterStore:
             )
         return namespace
 
-    def _get_existing_data(self, row_filter: BooleanExpression) -> pa.Table:
+    def _get_existing_data(
+        self, row_filter: BooleanExpression, include_timestamp: bool = False
+    ) -> pa.Table:
+        selected_fields: tuple[str, ...] = ("namespace", "id", "content")
+        schema = ARROW_SCHEMA
+
+        if include_timestamp:
+            selected_fields = ("namespace", "id", "content", "last_modified")
+            schema = ARROW_SCHEMA_WITH_TIMESTAMP
+
         return (
             self.table.scan(
-                selected_fields=("namespace", "id", "content"),
+                selected_fields=selected_fields,
                 row_filter=row_filter,
             )
             .to_arrow()
-            .cast(ARROW_SCHEMA)
+            .cast(schema)
         )
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
@@ -205,17 +224,36 @@ class AdapterStore:
 
     @staticmethod
     def _find_updates(existing_data: pa.Table, new_data: pa.Table) -> pa.Table:
+        # We only consider content changes as a reason to update.
+        # Timestamps are used as a gate (must be newer) but should not themselves
+        # trigger an update if the content is identical.
+        compare_cols = ["namespace", "id", "content"]
+
         if set(existing_data.column_names) == set(new_data.column_names):
+            if all(col in new_data.column_names for col in compare_cols):
+                updates_projected = get_rows_to_update(
+                    new_data.select(compare_cols),
+                    existing_data.select(compare_cols),
+                    ["namespace", "id"],
+                )
+                if len(updates_projected) == 0:
+                    return new_data.slice(0, 0)
+                update_ids = updates_projected.column("id")
+                return new_data.filter(pc.field("id").isin(update_ids))
+            # Fallback to original behaviour if content column missing
             return get_rows_to_update(new_data, existing_data, ["namespace", "id"])
 
         # Handle schema mismatch (e.g. extra columns in new_data)
-        common_cols = [
-            c for c in existing_data.column_names if c in new_data.column_names
-        ]
+        common_cols = [c for c in compare_cols if c in new_data.column_names]
+        if not common_cols:
+            # No comparable columns; nothing to update
+            return new_data.slice(0, 0)
+
         new_projected = new_data.select(common_cols)
+        existing_projected = existing_data.select(common_cols)
 
         updates_projected = get_rows_to_update(
-            new_projected, existing_data, ["namespace", "id"]
+            new_projected, existing_projected, ["namespace", "id"]
         )
 
         if len(updates_projected) == 0:
@@ -233,6 +271,70 @@ class AdapterStore:
             (pc.field("namespace") == record_namespace) & ~pc.field("id").isin(old_ids)
         )
         return missing_records
+
+    @staticmethod
+    def _filter_by_timestamp(updates: pa.Table, existing_data: pa.Table) -> pa.Table:
+        """
+        Filter updates to only include records where the new last_modified is newer than
+        the existing last_modified.
+
+        Records are included if:
+        - The existing record has null last_modified (legacy data, always update)
+        - The new record has a last_modified that is strictly greater than the existing one
+
+        Records are excluded if:
+        - New last_modified is null but existing has a timestamp (reject untimed updates)
+        - New last_modified <= existing last_modified (don't overwrite newer with older)
+
+        Args:
+            updates: Table of candidate updates from _find_updates (with last_modified)
+            existing_data: Table of existing records (with last_modified)
+
+        Returns:
+            Filtered table containing only updates that should be applied
+        """
+        if updates.num_rows == 0:
+            return updates
+
+        # If updates don't have last_modified column, return as-is (backward compatibility)
+        if "last_modified" not in updates.column_names:
+            return updates
+
+        # Create a lookup dictionary for existing timestamps
+        existing_timestamps = {
+            row["id"]: row["last_modified"] for row in existing_data.to_pylist()
+        }
+
+        # Filter updates to only include those with newer timestamps
+        rows_to_keep = []
+        for i in range(updates.num_rows):
+            update_row = updates.slice(i, 1).to_pylist()[0]
+            record_id = update_row["id"]
+            new_timestamp = update_row.get("last_modified")
+            existing_timestamp = existing_timestamps.get(record_id)
+
+            # Keep the update if:
+            # 1. Existing timestamp is None (legacy data or newly inserted)
+            # 2. New timestamp is not None and is greater than existing timestamp
+            #
+            # Reject the update if:
+            # 3. New timestamp is None but existing has a timestamp (reject updates without timestamps)
+            # 4. New timestamp <= existing timestamp (don't overwrite newer with older)
+            if existing_timestamp is None:
+                rows_to_keep.append(i)
+            elif new_timestamp is None:
+                # Reject: new record has no timestamp but existing does
+                # Don't accept data without timestamps that could overwrite timestamped data
+                pass
+            elif new_timestamp > existing_timestamp:
+                rows_to_keep.append(i)
+
+        if not rows_to_keep:
+            # Return empty table with same schema
+            return updates.slice(0, 0)
+
+        # Use PyArrow's take to efficiently select rows by index
+        return updates.take(rows_to_keep)
 
     @staticmethod
     def _get_deletes(

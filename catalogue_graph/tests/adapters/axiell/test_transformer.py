@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from typing import Any, cast
 
 import pyarrow as pa
@@ -11,7 +12,6 @@ from adapters.axiell.models.step_events import AxiellAdapterTransformerEvent
 from adapters.axiell.steps import transformer
 from adapters.axiell.steps.loader import AXIELL_NAMESPACE
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
 
 
 class StubElasticsearch(Elasticsearch):
@@ -32,7 +32,19 @@ def _runtime_with(
 
 
 def _seed_changeset(table_client: AdapterStore, rows: list[dict[str, Any]]) -> str:
-    table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA)
+    # Ensure incremental_update receives a last_modified column
+    now = datetime.now(UTC)
+    enriched = [dict(r, last_modified=now) for r in rows]
+    fields: list[pa.Field] = [
+        pa.field("namespace", pa.string(), nullable=False),
+        pa.field("id", pa.string(), nullable=False),
+        pa.field("content", pa.string(), nullable=True),
+        pa.field("last_modified", pa.timestamp("us", "UTC"), nullable=True),
+    ]
+    table = pa.Table.from_pylist(
+        enriched,
+        schema=pa.schema(fields),
+    )
     update = table_client.incremental_update(table, record_namespace=AXIELL_NAMESPACE)
     assert update is not None
     return update.changeset_id
