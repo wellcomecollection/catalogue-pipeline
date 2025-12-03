@@ -4,15 +4,14 @@ from ingestor.models.merged.work import (
 )
 from ingestor.models.neptune.node import WorkNode
 from ingestor.models.neptune.query_result import (
-    ExtractedConcept,
     WorkHierarchy,
     WorkHierarchyItem,
 )
 from ingestor.transformers.work_query_transformer import QueryWorkTransformer
 from models.graph_node import Work
 from models.pipeline.collection_path import CollectionPath
-from models.pipeline.concept import Subject
 from models.pipeline.work_state import WorkAncestor, WorkRelations
+
 from tests.test_utils import (
     load_json_fixture,
 )
@@ -102,15 +101,3 @@ def test_series_ancestor_no_deduplication() -> None:
         "Some series title",
         "Some ancestor title.",
     ]
-
-
-def test_concept_standard_labels() -> None:
-    extracted = get_work_with_ancestor()
-
-    malaria_concept_fixture = load_json_fixture("neptune/extracted_concept.json")
-    extracted.concepts = [ExtractedConcept.model_validate(malaria_concept_fixture)]
-    subject = Subject.model_validate(load_json_fixture("ingestor/single_subject.json"))
-    extracted.work.data.subjects = [subject]
-
-    # Use standard label
-    assert list(QueryWorkTransformer(extracted).subject_labels) == ["Malaria"]

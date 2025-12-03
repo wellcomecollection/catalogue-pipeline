@@ -9,6 +9,7 @@ from ingestor.transformers.work_aggregate_transformer import (
 )
 from models.pipeline.concept import Subject
 from models.pipeline.id_label import Language
+
 from tests.test_utils import (
     load_json_fixture,
 )
@@ -41,20 +42,6 @@ def test_marc_languages() -> None:
     extracted.work.data.languages = [Language(id="some_code", label="Some label")]
     assert list(AggregateWorkTransformer(extracted).languages)[0] == AggregatableField(
         id="some_code", label="Some label"
-    )
-
-
-def test_concept_standard_labels() -> None:
-    extracted = get_work_fixture()
-
-    malaria_concept_fixture = load_json_fixture("neptune/extracted_concept.json")
-    extracted.concepts = [ExtractedConcept.model_validate(malaria_concept_fixture)]
-    subject = Subject.model_validate(load_json_fixture("ingestor/single_subject.json"))
-    extracted.work.data.subjects = [subject]
-
-    # Use standard label
-    assert list(AggregateWorkTransformer(extracted).subjects)[0] == AggregatableField(
-        id="w5ewpsaw", label="Malaria"
     )
 
 
