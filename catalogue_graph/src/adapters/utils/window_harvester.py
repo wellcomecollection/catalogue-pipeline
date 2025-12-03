@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import Protocol, TypedDict
 
 from oai_pmh_client.client import OAIClient
@@ -12,9 +12,9 @@ from oai_pmh_client.models import Record
 
 from utils.timezone import ensure_datetime_utc
 
+from .window_generator import WindowGenerator
 from .window_store import WindowStatusRecord, WindowStore
 from .window_summary import (
-    ALIGNMENT_EPOCH,
     WindowKey,
     WindowSummary,
 )
@@ -61,6 +61,10 @@ class WindowHarvestManager:
         )
         self.record_callback = record_callback
         self.default_tags = dict(default_tags) if default_tags else None
+        self.window_generator = WindowGenerator(
+            window_minutes=self.window_minutes,
+            allow_partial_final_window=True,
+        )
 
     # ------------------------------------------------------------------
     # Window generation & scheduling
@@ -68,33 +72,21 @@ class WindowHarvestManager:
     def generate_windows(
         self, start_time: datetime, end_time: datetime
     ) -> list[tuple[datetime, datetime]]:
-        start_time = ensure_datetime_utc(start_time)
-        end_time = ensure_datetime_utc(end_time)
+        """Generate aligned time windows between start_time and end_time.
 
-        if start_time >= end_time:
-            raise ValueError("start_time must be earlier than end_time")
+        Delegates to the WindowGenerator instance.
 
-        delta = timedelta(minutes=self.window_minutes)
-        windows: list[tuple[datetime, datetime]] = []
-        cursor = start_time
+        Args:
+            start_time: Start of the time range (inclusive).
+            end_time: End of the time range (exclusive).
 
-        while cursor < end_time:
-            offset = cursor - ALIGNMENT_EPOCH
-            periods = offset // delta
-            aligned_window_end = ALIGNMENT_EPOCH + (periods + 1) * delta
-            win_end = min(aligned_window_end, end_time)
-            windows.append((cursor, win_end))
-            cursor = win_end
+        Returns:
+            List of (window_start, window_end) tuples.
 
-        logger.info(
-            "Generated %d windows covering %s -> %s (size=%d minutes)",
-            len(windows),
-            start_time.isoformat(),
-            end_time.isoformat(),
-            self.window_minutes,
-        )
-
-        return windows
+        Raises:
+            ValueError: If start_time >= end_time.
+        """
+        return self.window_generator.generate_windows(start_time, end_time)
 
     def harvest_range(
         self,
