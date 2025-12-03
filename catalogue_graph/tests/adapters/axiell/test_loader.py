@@ -43,43 +43,19 @@ def _runtime_with(
     table_client: AdapterStore | None = None,
     oai_client: OAIClient | None = None,
 ) -> loader.LoaderRuntime:
+    from adapters.utils.window_generator import WindowGenerator
+
     if table_client is None:
         pass
+
+    window_generator = WindowGenerator()
 
     return loader.LoaderRuntime(
         store=cast(WindowStore, store),
         table_client=cast(AdapterStore, table_client),
         oai_client=cast(OAIClient, oai_client or StubOAIClient()),
+        window_generator=window_generator,
     )
-
-
-def test_build_harvester_uses_request_window_minutes(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    req = _request()
-    req.window_minutes = 37
-
-    def fake_record_writer(**_: object):  # type: ignore[no-untyped-def]
-        return lambda *args, **kwargs: None
-
-    captured: dict[str, int] = {}
-
-    class FakeHarvestManager:
-        def __init__(self, *, window_minutes: int, **_: object) -> None:
-            captured["window_minutes"] = window_minutes
-
-    monkeypatch.setattr(loader, "WindowRecordWriter", fake_record_writer)
-    monkeypatch.setattr(loader, "WindowHarvestManager", FakeHarvestManager)
-
-    runtime = loader.LoaderRuntime.model_construct(
-        store=cast(WindowStore, SimpleNamespace()),
-        table_client=cast(AdapterStore, SimpleNamespace()),
-        oai_client=StubOAIClient(),
-    )
-
-    loader.build_harvester(req, runtime)
-
-    assert captured["window_minutes"] == 37
 
 
 def test_execute_loader_updates_iceberg(

@@ -117,6 +117,7 @@ def _build_harvester(
     default_tags: dict[str, str] | None = None,
     record_callback: WindowCallback | None = None,
     window_minutes: int | None = None,
+    allow_partial_final_window: bool = True,
 ) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
@@ -137,12 +138,19 @@ def _build_harvester(
 
     callback = record_callback or default_callback
 
+    from adapters.utils.window_generator import WindowGenerator
+
+    window_generator = WindowGenerator(
+        window_minutes=window_minutes or 15,
+        allow_partial_final_window=allow_partial_final_window,
+    )
+
     return WindowHarvestManager(
-        client=client,
         store=store,
+        window_generator=window_generator,
+        client=client,
         metadata_prefix="oai_raw",
         set_spec="collect",
-        window_minutes=window_minutes or 15,
         max_parallel_requests=2,
         record_callback=callback,
         default_tags=default_tags,
@@ -384,6 +392,8 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
 
 
 def test_init_with_optional_client(tmp_path: Path) -> None:
+    from adapters.utils.window_generator import WindowGenerator
+
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
     table = _create_table(
@@ -394,5 +404,8 @@ def test_init_with_optional_client(tmp_path: Path) -> None:
         catalog_name=f"catalog_{uuid4().hex}",
     )
     store = WindowStore(table)
-    manager = WindowHarvestManager(store=store, client=None)
+    window_generator = WindowGenerator()
+    manager = WindowHarvestManager(
+        store=store, window_generator=window_generator, client=None
+    )
     assert manager.client is None

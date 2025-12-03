@@ -42,29 +42,26 @@ class WindowHarvestManager:
     def __init__(
         self,
         store: WindowStore,
+        window_generator: WindowGenerator,
         client: OAIClient | None = None,
         metadata_prefix: str | None = None,
         set_spec: str | None = None,
         *,
-        window_minutes: int | None = None,
         max_parallel_requests: int | None = None,
         record_callback: WindowCallback | None = None,
         default_tags: dict[str, str] | None = None,
     ) -> None:
         self.client = client
         self.store = store
+        self.window_generator = window_generator
         self.metadata_prefix = metadata_prefix
         self.set_spec = set_spec
-        self.window_minutes = window_minutes or self.DEFAULT_WINDOW_MINUTES
+        self.window_minutes = window_generator.window_minutes
         self.max_parallel_requests = (
             max_parallel_requests or self.DEFAULT_MAX_PARALLEL_REQUESTS
         )
         self.record_callback = record_callback
         self.default_tags = dict(default_tags) if default_tags else None
-        self.window_generator = WindowGenerator(
-            window_minutes=self.window_minutes,
-            allow_partial_final_window=True,
-        )
 
     # ------------------------------------------------------------------
     # Window generation & scheduling

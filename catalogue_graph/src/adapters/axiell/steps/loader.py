@@ -20,6 +20,7 @@ from adapters.axiell.models.step_events import (
 )
 from adapters.axiell.record_writer import WindowRecordWriter
 from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowHarvestManager,
 )
@@ -33,6 +34,8 @@ logging.basicConfig(level=logging.INFO)
 
 class AxiellAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
+    window_minutes: int | None = None
+    allow_partial_final_window: bool = False
 
 
 class LoaderResponse(BaseModel):
@@ -50,18 +53,31 @@ class LoaderRuntime(BaseModel):
     store: WindowStore
     table_client: AdapterStore
     oai_client: OAIClient
+    window_generator: WindowGenerator
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def build_runtime(config_obj: AxiellAdapterLoaderConfig | None = None) -> LoaderRuntime:
+def build_runtime(
+    config_obj: AxiellAdapterLoaderConfig | None = None,
+) -> LoaderRuntime:
     cfg = config_obj or AxiellAdapterLoaderConfig()
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
     table = helpers.build_adapter_table(cfg.use_rest_api_table)
     table_client = AdapterStore(table, default_namespace=AXIELL_NAMESPACE)
     oai_client = build_oai_client()
 
-    return LoaderRuntime(store=store, table_client=table_client, oai_client=oai_client)
+    window_generator = WindowGenerator(
+        window_minutes=cfg.window_minutes or config.WINDOW_MINUTES,
+        allow_partial_final_window=cfg.allow_partial_final_window,
+    )
+
+    return LoaderRuntime(
+        store=store,
+        table_client=table_client,
+        oai_client=oai_client,
+        window_generator=window_generator,
+    )
 
 
 def build_harvester(
@@ -75,11 +91,11 @@ def build_harvester(
         window_range=_format_window_range(request.window_start, request.window_end),
     )
     return WindowHarvestManager(
-        client=runtime.oai_client,
         store=runtime.store,
+        window_generator=runtime.window_generator,
+        client=runtime.oai_client,
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
-        window_minutes=request.window_minutes or config.WINDOW_MINUTES,
         max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
         record_callback=callback,
         default_tags={"job_id": request.job_id},
@@ -169,13 +185,31 @@ def main() -> None:
         action="store_true",
         help="Use the S3 Tables catalog instead of local storage",
     )
+    parser.add_argument(
+        "--allow-partial-final-window",
+        action="store_true",
+        default=True,
+        help="Allow partial final window (default: True for CLI)",
+    )
     args = parser.parse_args()
 
     with open(args.event, encoding="utf-8") as f:
-        event = AxiellAdapterLoaderEvent.model_validate(json.load(f))
+        event_data = json.load(f)
+        # Set allow_partial_final_window from CLI arg if not in event
+        if "allow_partial_final_window" not in event_data:
+            event_data["allow_partial_final_window"] = args.allow_partial_final_window
+        event = AxiellAdapterLoaderEvent.model_validate(event_data)
 
     runtime = build_runtime(
-        AxiellAdapterLoaderConfig(use_rest_api_table=args.use_rest_api_table)
+        AxiellAdapterLoaderConfig(
+            use_rest_api_table=args.use_rest_api_table,
+            window_minutes=event.window_minutes,
+            allow_partial_final_window=(
+                event.allow_partial_final_window
+                if event.allow_partial_final_window is not None
+                else args.allow_partial_final_window
+            ),
+        )
     )
     response = handler(event, runtime=runtime)
 

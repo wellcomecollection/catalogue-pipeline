@@ -287,8 +287,12 @@ def test_build_runtime_uses_config(
 
     def mock_build_loader_runtime(
         config_obj: reloader.AxiellAdapterReloaderConfig,
+        window_minutes: int | None = None,
+        allow_partial_final_window: bool = False,
     ) -> LoaderRuntime:
         captured_config["loader_config"] = config_obj
+        captured_config["window_minutes"] = window_minutes
+        captured_config["allow_partial_final_window"] = allow_partial_final_window
         return _mock_loader_runtime()
 
     monkeypatch.setattr(

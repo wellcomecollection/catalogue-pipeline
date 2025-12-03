@@ -22,6 +22,7 @@ class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
     set_spec: str | None = None
     max_windows: int | None = None
     window_minutes: int | None = None
+    allow_partial_final_window: bool | None = None
 
 
 class AxiellAdapterTransformerEvent(AxiellAdapterEvent):
