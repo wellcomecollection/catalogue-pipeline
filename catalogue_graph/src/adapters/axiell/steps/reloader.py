@@ -69,7 +69,11 @@ def build_runtime(
     )
 
     loader_runtime = build_loader_runtime(
-        AxiellAdapterLoaderConfig(use_rest_api_table=cfg.use_rest_api_table)
+        AxiellAdapterLoaderConfig(
+            use_rest_api_table=cfg.use_rest_api_table,
+            window_minutes=config.WINDOW_MINUTES,
+            allow_partial_final_window=True,
+        )
     )
 
     return ReloaderRuntime(store=store, loader_runtime=loader_runtime)

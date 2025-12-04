@@ -15,6 +15,7 @@ from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowCallback,
     WindowCallbackResult,
@@ -117,6 +118,7 @@ def _build_harvester(
     default_tags: dict[str, str] | None = None,
     record_callback: WindowCallback | None = None,
     window_minutes: int | None = None,
+    allow_partial_final_window: bool = True,
 ) -> WindowHarvestManager:
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
@@ -137,12 +139,19 @@ def _build_harvester(
 
     callback = record_callback or default_callback
 
+    from adapters.utils.window_generator import WindowGenerator
+
+    window_generator = WindowGenerator(
+        window_minutes=window_minutes or 15,
+        allow_partial_final_window=allow_partial_final_window,
+    )
+
     return WindowHarvestManager(
-        client=client,
         store=store,
+        window_generator=window_generator,
+        client=client,
         metadata_prefix="oai_raw",
         set_spec="collect",
-        window_minutes=window_minutes or 15,
         max_parallel_requests=2,
         record_callback=callback,
         default_tags=default_tags,
@@ -152,103 +161,6 @@ def _build_harvester(
 def _window_range(hours: int = 24) -> tuple[datetime, datetime]:
     start = datetime(2025, 1, 1, tzinfo=UTC)
     return start, start + timedelta(hours=hours)
-
-
-@pytest.mark.parametrize(
-    "window_minutes, expected",
-    [
-        (
-            15,
-            [
-                (
-                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
-                    datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 12, 15, tzinfo=UTC),
-                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
-                    datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 12, 45, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 13, 15, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 13, 45, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
-                ),
-            ],
-        ),
-        (
-            30,
-            [
-                (
-                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
-                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 12, 30, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 13, 30, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
-                ),
-            ],
-        ),
-        (
-            60,
-            [
-                (
-                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
-                ),
-                (
-                    datetime(2025, 1, 1, 13, 0, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
-                ),
-            ],
-        ),
-        (
-            240,
-            [
-                (
-                    datetime(2025, 1, 1, 12, 7, tzinfo=UTC),
-                    datetime(2025, 1, 1, 13, 55, tzinfo=UTC),
-                ),
-            ],
-        ),
-    ],
-)
-def test_generate_windows_aligns_to_boundaries(
-    tmp_path: Path, window_minutes: int, expected: list[tuple[datetime, datetime]]
-) -> None:
-    harvester = _build_harvester(tmp_path, [], window_minutes=window_minutes)
-    start = datetime(2025, 1, 1, 12, 7, tzinfo=UTC)
-    end = datetime(2025, 1, 1, 13, 55, tzinfo=UTC)
-
-    windows = harvester.generate_windows(start, end)
-
-    assert windows == expected
 
 
 def test_harvest_range_records_are_stored(tmp_path: Path) -> None:
@@ -491,5 +403,8 @@ def test_init_with_optional_client(tmp_path: Path) -> None:
         catalog_name=f"catalog_{uuid4().hex}",
     )
     store = WindowStore(table)
-    manager = WindowHarvestManager(store=store, client=None)
+    window_generator = WindowGenerator()
+    manager = WindowHarvestManager(
+        store=store, window_generator=window_generator, client=None
+    )
     assert manager.client is None
