@@ -36,5 +36,7 @@ module "transformer" {
   max_capacity = var.max_capacity
 
   fargate_service_boilerplate = var.fargate_service_boilerplate
+
+  trigger_values = var.trigger_values
 }
 

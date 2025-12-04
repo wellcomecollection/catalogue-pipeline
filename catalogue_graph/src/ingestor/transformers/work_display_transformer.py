@@ -23,16 +23,19 @@ from ingestor.models.display.production_event import DisplayProductionEvent
 from ingestor.models.display.relation import (
     DisplayRelation,
 )
+from models.pipeline.concept import Concept
 from models.pipeline.identifier import Identified
 from utils.sort import natural_sort_key
 
+from .work_base_transformer import WorkBaseTransformer
 
-class DisplayWorkTransformer:
+
+class DisplayWorkTransformer(WorkBaseTransformer):
     def __init__(self, extracted: VisibleExtractedWork):
+        super().__init__(extracted)
         self.data = extracted.work.data
         self.state = extracted.work.state
         self.hierarchy = extracted.hierarchy
-        self.concepts = extracted.concepts
 
     @property
     def identifiers(self) -> Generator[DisplayIdentifier]:
@@ -116,8 +119,23 @@ class DisplayWorkTransformer:
 
     @property
     def subjects(self) -> Generator[DisplaySubject]:
+        labels = set()
         for subject in self.data.subjects:
-            yield DisplaySubject.from_subject(subject)
+            main_concept = self.get_display_concept(subject)
+            concepts = [self.get_display_concept(c) for c in subject.concepts]
+
+            # If multiple non-composite subjects have the same standard labels, only include one of them.
+            # This does not apply to composite subjects, which can have different nested concepts even when their
+            # standard labels match.
+            if len(concepts) == 1:
+                if main_concept.label in labels:
+                    continue
+                labels.add(main_concept.label)
+
+            yield DisplaySubject(
+                **main_concept.model_dump(),
+                concepts=concepts,
+            )
 
     @property
     def availabilities(self) -> list[DisplayIdLabel]:
@@ -146,12 +164,30 @@ class DisplayWorkTransformer:
         for child in sorted_children:
             yield DisplayRelation.from_neptune_node(child.work, child.parts)
 
+    def get_display_concept(self, concept: Concept) -> DisplayConcept:
+        identifiers = list(DisplayIdentifier.from_all_identifiers(concept.id))
+        return DisplayConcept(
+            id=concept.id.canonical_id,
+            label=self.get_standard_concept_label(concept),
+            identifiers=None if len(identifiers) == 0 else identifiers,
+            type=concept.display_type,
+        )
+
     @property
     def contributors(self) -> Generator[DisplayContributor]:
+        labels = set()
+
         for contributor in self.data.contributors:
             roles = [DisplayContributionRole(label=r.label) for r in contributor.roles]
+            agent = self.get_display_concept(contributor.agent)
+
+            # If multiple contributors have the same standard labels, only include one of them
+            if agent.label in labels:
+                continue
+            labels.add(agent.label)
+
             yield DisplayContributor(
-                agent=DisplayConcept.from_concept(contributor.agent),
+                agent=agent,
                 roles=roles,
                 primary=contributor.primary,
             )
@@ -159,7 +195,7 @@ class DisplayWorkTransformer:
     @property
     def genres(self) -> Generator[DisplayGenre]:
         for genre in self.data.genres:
-            concepts = [DisplayConcept.from_concept(c) for c in genre.concepts]
+            concepts = [self.get_display_concept(c) for c in genre.concepts]
             yield DisplayGenre(concepts=concepts, label=genre.label)
 
     @property

@@ -4,7 +4,7 @@ module "graph_pipeline" {
   pipeline_date = var.pipeline_date
   index_dates = {
     merged   = "2025-10-09"
-    works    = "2025-10-09"
+    works    = "2025-11-20"
     concepts = "2025-10-09"
   }
 
