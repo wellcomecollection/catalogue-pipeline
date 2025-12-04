@@ -65,6 +65,8 @@ module "scaling_service" {
   container_definitions = [
     module.app_container.container_definition,
   ]
+
+  trigger_values = var.trigger_values
 }
 
 module "app_container" {
