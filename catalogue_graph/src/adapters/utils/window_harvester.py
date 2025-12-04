@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import Protocol, TypedDict
 
 from oai_pmh_client.client import OAIClient
@@ -12,9 +12,9 @@ from oai_pmh_client.models import Record
 
 from utils.timezone import ensure_datetime_utc
 
+from .window_generator import WindowGenerator
 from .window_store import WindowStatusRecord, WindowStore
 from .window_summary import (
-    ALIGNMENT_EPOCH,
     WindowKey,
     WindowSummary,
 )
@@ -42,20 +42,21 @@ class WindowHarvestManager:
     def __init__(
         self,
         store: WindowStore,
+        window_generator: WindowGenerator,
         client: OAIClient | None = None,
         metadata_prefix: str | None = None,
         set_spec: str | None = None,
         *,
-        window_minutes: int | None = None,
         max_parallel_requests: int | None = None,
         record_callback: WindowCallback | None = None,
         default_tags: dict[str, str] | None = None,
     ) -> None:
         self.client = client
         self.store = store
+        self.window_generator = window_generator
         self.metadata_prefix = metadata_prefix
         self.set_spec = set_spec
-        self.window_minutes = window_minutes or self.DEFAULT_WINDOW_MINUTES
+        self.window_minutes = window_generator.window_minutes
         self.max_parallel_requests = (
             max_parallel_requests or self.DEFAULT_MAX_PARALLEL_REQUESTS
         )
@@ -68,33 +69,21 @@ class WindowHarvestManager:
     def generate_windows(
         self, start_time: datetime, end_time: datetime
     ) -> list[tuple[datetime, datetime]]:
-        start_time = ensure_datetime_utc(start_time)
-        end_time = ensure_datetime_utc(end_time)
+        """Generate aligned time windows between start_time and end_time.
 
-        if start_time >= end_time:
-            raise ValueError("start_time must be earlier than end_time")
+        Delegates to the WindowGenerator instance.
 
-        delta = timedelta(minutes=self.window_minutes)
-        windows: list[tuple[datetime, datetime]] = []
-        cursor = start_time
+        Args:
+            start_time: Start of the time range (inclusive).
+            end_time: End of the time range (exclusive).
 
-        while cursor < end_time:
-            offset = cursor - ALIGNMENT_EPOCH
-            periods = offset // delta
-            aligned_window_end = ALIGNMENT_EPOCH + (periods + 1) * delta
-            win_end = min(aligned_window_end, end_time)
-            windows.append((cursor, win_end))
-            cursor = win_end
+        Returns:
+            List of (window_start, window_end) tuples.
 
-        logger.info(
-            "Generated %d windows covering %s -> %s (size=%d minutes)",
-            len(windows),
-            start_time.isoformat(),
-            end_time.isoformat(),
-            self.window_minutes,
-        )
-
-        return windows
+        Raises:
+            ValueError: If start_time >= end_time.
+        """
+        return self.window_generator.generate_windows(start_time, end_time)
 
     def harvest_range(
         self,
@@ -177,7 +166,8 @@ class WindowHarvestManager:
                 for start, end in windows
             }
             for future in as_completed(future_map):
-                summaries.append(future.result())
+                summaries.append(WindowSummary.model_validate(future.result()))
+
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
 

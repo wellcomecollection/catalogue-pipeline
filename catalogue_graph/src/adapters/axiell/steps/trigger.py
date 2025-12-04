@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -22,6 +23,8 @@ from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.events import EventBridgeScheduledEvent
+
+logging.basicConfig(level=logging.INFO)
 
 
 class AxiellAdapterTriggerConfig(BaseModel):
@@ -103,16 +106,16 @@ def build_window_request(
     end_time = now.astimezone(UTC)
 
     if start_time >= end_time:
-        raise RuntimeError("No new windows are ready: computed start >= end.")
+        raise RuntimeError(
+            f"No new windows are ready to process: start_time={start_time.isoformat()} "
+            f"last_success_end={last_success_end.isoformat() if last_success_end else 'None'}"
+        )
 
     max_windows = config.MAX_PENDING_WINDOWS
     resolved_job_id = job_id or _generate_job_id(now)
 
-    from adapters.utils.window_summary import WindowKey
-
     loader_event = AxiellAdapterLoaderEvent(
         job_id=resolved_job_id,
-        window_key=WindowKey.from_dates(start_time, end_time),
         window_start=start_time,
         window_end=end_time,
         metadata_prefix=config.OAI_METADATA_PREFIX,

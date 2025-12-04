@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel, computed_field, field_validator
 from pydantic_core import core_schema
 
 from utils.timezone import ensure_datetime_utc
-
-ALIGNMENT_EPOCH = datetime(1970, 1, 1, tzinfo=UTC)
 
 
 class WindowKey(str):

@@ -16,15 +16,13 @@ class AxiellAdapterTriggerEvent(AxiellAdapterEvent):
 
 
 class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
-    window_key: str = Field(
-        ..., description="Unique identifier for the requested window"
-    )
     window_start: datetime
     window_end: datetime
     metadata_prefix: str | None = None
     set_spec: str | None = None
     max_windows: int | None = None
     window_minutes: int | None = None
+    allow_partial_final_window: bool | None = None
 
 
 class AxiellAdapterTransformerEvent(AxiellAdapterEvent):

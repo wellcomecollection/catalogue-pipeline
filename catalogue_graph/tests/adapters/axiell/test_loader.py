@@ -15,6 +15,7 @@ from adapters.axiell.steps import loader
 from adapters.axiell.steps.loader import LoaderResponse
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStore
+from adapters.utils.window_summary import WindowSummary
 
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
 
@@ -28,7 +29,6 @@ def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
     now = now or datetime.now(tz=UTC)
     return AxiellAdapterLoaderEvent(
         job_id="job-123",
-        window_key="test",
         window_start=now - timedelta(minutes=15),
         window_end=now,
         metadata_prefix="oai",
@@ -43,43 +43,19 @@ def _runtime_with(
     table_client: AdapterStore | None = None,
     oai_client: OAIClient | None = None,
 ) -> loader.LoaderRuntime:
+    from adapters.utils.window_generator import WindowGenerator
+
     if table_client is None:
         pass
+
+    window_generator = WindowGenerator()
 
     return loader.LoaderRuntime(
         store=cast(WindowStore, store),
         table_client=cast(AdapterStore, table_client),
         oai_client=cast(OAIClient, oai_client or StubOAIClient()),
+        window_generator=window_generator,
     )
-
-
-def test_build_harvester_uses_request_window_minutes(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    req = _request()
-    req.window_minutes = 37
-
-    def fake_record_writer(**_: object):  # type: ignore[no-untyped-def]
-        return lambda *args, **kwargs: None
-
-    captured: dict[str, int] = {}
-
-    class FakeHarvestManager:
-        def __init__(self, *, window_minutes: int, **_: object) -> None:
-            captured["window_minutes"] = window_minutes
-
-    monkeypatch.setattr(loader, "WindowRecordWriter", fake_record_writer)
-    monkeypatch.setattr(loader, "WindowHarvestManager", FakeHarvestManager)
-
-    runtime = loader.LoaderRuntime.model_construct(
-        store=cast(WindowStore, SimpleNamespace()),
-        table_client=cast(AdapterStore, SimpleNamespace()),
-        oai_client=StubOAIClient(),
-    )
-
-    loader.build_harvester(req, runtime)
-
-    assert captured["window_minutes"] == 37
 
 
 def test_execute_loader_updates_iceberg(
@@ -88,22 +64,24 @@ def test_execute_loader_updates_iceberg(
     temporary_window_status_table: IcebergTable,
 ) -> None:
     req = _request()
-    summary = {
-        "window_key": req.window_key,
-        "window_start": req.window_start,
-        "window_end": req.window_end,
-        "state": "success",
-        "attempts": 1,
-        "record_ids": ["id-1"],
-        "last_error": None,
-        "updated_at": req.window_end,
-        "tags": {
-            "job_id": req.job_id,
+    summary = WindowSummary.model_validate(
+        {
+            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
+            "window_start": req.window_start,
+            "window_end": req.window_end,
+            "state": "success",
+            "attempts": 1,
+            "record_ids": ["id-1"],
+            "last_error": None,
+            "updated_at": req.window_end,
+            "tags": {
+                "job_id": req.job_id,
+                "changeset_id": "changeset-123",
+                "record_ids_changed": '["id-1"]',
+            },
             "changeset_id": "changeset-123",
-            "record_ids_changed": '["id-1"]',
-        },
-        "changeset_id": "changeset-123",
-    }
+        }
+    )
     table_client = AdapterStore(
         temporary_table, default_namespace=loader.AXIELL_NAMESPACE
     )
@@ -141,22 +119,24 @@ def test_execute_loader_counts_only_changed_records(
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    summary = {
-        "window_key": req.window_key,
-        "window_start": req.window_start,
-        "window_end": req.window_end,
-        "state": "success",
-        "attempts": 1,
-        "record_ids": ["id-1", "id-2"],
-        "last_error": None,
-        "updated_at": req.window_end,
-        "tags": {
-            "job_id": req.job_id,
+    summary = WindowSummary.model_validate(
+        {
+            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
+            "window_start": req.window_start,
+            "window_end": req.window_end,
+            "state": "success",
+            "attempts": 1,
+            "record_ids": ["id-1", "id-2"],
+            "last_error": None,
+            "updated_at": req.window_end,
+            "tags": {
+                "job_id": req.job_id,
+                "changeset_id": "changeset-123",
+                "record_ids_changed": '["id-2"]',
+            },
             "changeset_id": "changeset-123",
-            "record_ids_changed": '["id-2"]',
-        },
-        "changeset_id": "changeset-123",
-    }
+        }
+    )
 
     with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
@@ -179,18 +159,20 @@ def test_execute_loader_handles_no_new_records(
     store = WindowStore(temporary_window_status_table)
     runtime = _runtime_with(table_client=table_client, store=store)
 
-    summary = {
-        "window_key": req.window_key,
-        "window_start": req.window_start,
-        "window_end": req.window_end,
-        "state": "success",
-        "attempts": 1,
-        "record_ids": [],
-        "last_error": None,
-        "updated_at": req.window_end,
-        "tags": {"job_id": req.job_id},
-        "changeset_id": None,
-    }
+    summary = WindowSummary.model_validate(
+        {
+            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
+            "window_start": req.window_start,
+            "window_end": req.window_end,
+            "state": "success",
+            "attempts": 1,
+            "record_ids": [],
+            "last_error": None,
+            "updated_at": req.window_end,
+            "tags": {"job_id": req.job_id},
+            "changeset_id": None,
+        }
+    )
 
     with patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest:
         mock_harvest.return_value = [summary]
