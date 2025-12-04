@@ -223,6 +223,10 @@ locals {
       es_apikey   = "elasticsearch/pipeline_storage_${var.pipeline_date}/${service}/api_key"
     }
   }
+
+  api_key_versions = {
+    for k, v in local.service_index_permissions : k => module.pipeline_services[k].version
+  }
 }
 
 module "pipeline_services" {

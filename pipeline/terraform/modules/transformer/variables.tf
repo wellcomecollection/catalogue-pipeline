@@ -67,3 +67,8 @@ variable "fargate_service_boilerplate" {
     shared_logging_secrets = optional(map(any), null)
   })
 }
+
+variable "trigger_values" {
+  type    = list(string)
+  default = ["default"]
+}

@@ -1,12 +1,13 @@
 from pydantic import BaseModel
 
-from models.pipeline.concept import Concept, Subject
+from models.pipeline.concept import Concept
+from models.pipeline.serialisable import ElasticsearchModel
 from utils.types import ConceptType
 
 from .identifier import DisplayIdentifier
 
 
-class DisplayConcept(BaseModel):
+class DisplayConcept(ElasticsearchModel):
     id: str | None = None
     label: str
     identifiers: list[DisplayIdentifier] | None = None
@@ -39,14 +40,6 @@ class DisplayContributor(BaseModel):
 class DisplaySubject(DisplayConcept):
     concepts: list[DisplayConcept]
     type: ConceptType = "Subject"
-
-    @staticmethod
-    def from_subject(subject: Subject) -> "DisplaySubject":
-        concept = DisplayConcept.from_concept(subject)
-        return DisplaySubject(
-            **concept.model_dump(),
-            concepts=[DisplayConcept.from_concept(c) for c in subject.concepts],
-        )
 
 
 class DisplayGenre(BaseModel):
