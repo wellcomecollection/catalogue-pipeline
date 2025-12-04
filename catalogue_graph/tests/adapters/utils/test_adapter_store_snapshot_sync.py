@@ -1,5 +1,9 @@
 """
-Tests covering the update behaviour of the AdapterStore
+Tests covering the snapshot_sync behaviour of the AdapterStore.
+
+snapshot_sync performs a full replacement sync where the provided data
+represents the complete desired state. Records not present in the new
+data are marked as deleted.
 """
 
 from collections.abc import Collection
@@ -14,13 +18,18 @@ from adapters.utils.schemata import ARROW_SCHEMA
 
 
 def data_to_namespaced_table(
-    unqualified_data: list[dict[str, Any]], namespace: str = "test_namespace"
+    unqualified_data: list[dict[str, Any]],
+    namespace: str = "test_namespace",
 ) -> pa.Table:
-    data = []
+    """
+    Create an Arrow table with the repo-standard schema.
+    """
+    data: list[dict[str, Any]] = []
     for item in unqualified_data:
         new_item = item.copy()
         new_item["namespace"] = namespace
         data.append(new_item)
+
     return pa.Table.from_pylist(data, schema=ARROW_SCHEMA)
 
 
@@ -36,9 +45,11 @@ def assert_row_identifiers(rows: pa.Table, expected_ids: Collection[str]) -> Non
     assert actual_ids == set(expected_ids)
 
 
-def test_noop(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_noop(temporary_table: IcebergTable) -> None:
     """
-    When there are no updates to perform, nothing happens
+    Given a table with existing data
+    When snapshot_sync is called with identical data
+    Then no changeset is created and data remains unchanged
     """
     data = data_to_namespaced_table([{"id": "eb0001", "content": "hello"}])
     temporary_table.append(data)
@@ -57,15 +68,14 @@ def test_noop(temporary_table: IcebergTable) -> None:
     assert not temporary_table.scan(row_filter=Not(IsNull("changeset"))).to_arrow()
 
 
-def test_undelete(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_undelete(temporary_table: IcebergTable) -> None:
     """
-    Given a table with a record that has been deleted
-    When a record with the same identifier is present in new data
-    The record is successfully undeleted.
+    Given a table with a deleted record (content=None)
+    When snapshot_sync includes that record with content
+    Then the record is successfully undeleted
 
-        This test ensures that we do not run the risk of creating an
-        infinite number of records with the same identifier if the
-        provider deletes and restores access to that resource.
+    This ensures we don't create duplicate records if a provider
+    deletes and restores access to a resource.
     """
     data = data_to_namespaced_table(
         [{"id": "eb0001", "content": "hello"}, {"id": "eb0002", "content": None}]
@@ -77,28 +87,25 @@ def test_undelete(temporary_table: IcebergTable) -> None:
 
     client = AdapterStore(temporary_table)
     changeset = client.snapshot_sync(new_data, "test_namespace")
-    # No Changeset identifier is returned
     assert changeset is not None
-    # The data is the same as before the update
+
     as_pa = (
         temporary_table.scan(selected_fields=("id", "content", "changeset"))
         .to_arrow()
         .sort_by("id")
         .to_pylist()
     )
-    # i.e. the same number of records are present before and after the change
+    # The same number of records are present before and after the change
     assert len(as_pa) == 2
     assert as_pa[1] == {"id": "eb0002", "content": "world!", "changeset": changeset}
 
 
-def test_new_table(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_new_table(temporary_table: IcebergTable) -> None:
     """
-    Given an environment with no data
-    When an update is applied
-    All the new data is stored
-    :return:
+    Given an empty table
+    When snapshot_sync is applied
+    Then all new data is stored and tagged with a changeset
     """
-
     new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hej"},
@@ -108,7 +115,7 @@ def test_new_table(temporary_table: IcebergTable) -> None:
     )
     client = AdapterStore(temporary_table)
     changeset_id = client.snapshot_sync(new_data, "test_namespace")
-    assert changeset_id is not None  # Type assertion for mypy
+    assert changeset_id is not None
     assert (
         temporary_table.scan().to_arrow()
         == temporary_table.scan(
@@ -118,30 +125,18 @@ def test_new_table(temporary_table: IcebergTable) -> None:
     assert len(temporary_table.scan().to_arrow()) == 3
 
 
-def test_update_records(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_update_records(temporary_table: IcebergTable) -> None:
     """
-    Given an existing iceberg table
-    And an update file with the same records
-    And some of those records are different
-    When the update is applied
-    Then the records will have been changed
-    And the changed rows will be identifiably grouped by a changeset property
+    Given an existing table
+    When snapshot_sync includes records with changed content
+    Then the changed records are updated and tagged with a changeset
     """
     temporary_table.append(
         data_to_namespaced_table(
             [
-                {
-                    "id": "eb0001",
-                    "content": "hello",
-                },
-                {
-                    "id": "eb0002",
-                    "content": "boo!",
-                },
-                {
-                    "id": "eb0003",
-                    "content": "world",
-                },
+                {"id": "eb0001", "content": "hello"},
+                {"id": "eb0002", "content": "boo!"},
+                {"id": "eb0003", "content": "world"},
             ]
         )
     )
@@ -155,7 +150,7 @@ def test_update_records(temporary_table: IcebergTable) -> None:
     )
     client = AdapterStore(temporary_table)
     changeset_id = client.snapshot_sync(new_data, "test_namespace")
-    assert changeset_id is not None  # Type assertion for mypy
+    assert changeset_id is not None
     expected_changes = {"eb0001", "eb0003"}
     changed_rows = temporary_table.scan(
         row_filter=In("id", expected_changes), selected_fields=("id",)
@@ -168,16 +163,12 @@ def test_update_records(temporary_table: IcebergTable) -> None:
     assert changed_rows == changeset_rows
 
 
-def test_insert_records(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_insert_records(temporary_table: IcebergTable) -> None:
     """
-    Given an existing iceberg table
-    And an update file with the same records
-    And some new records
-    When the update is applied
-    Then the new records will be added
-    And the new rows will be identifiably grouped by a changeset property
+    Given an existing table
+    When snapshot_sync includes new records
+    Then the new records are inserted and tagged with a changeset
     """
-
     temporary_table.append(
         data_to_namespaced_table(
             [
@@ -197,7 +188,7 @@ def test_insert_records(temporary_table: IcebergTable) -> None:
     )
     client = AdapterStore(temporary_table)
     changeset_id = client.snapshot_sync(new_data, "test_namespace")
-    assert changeset_id is not None  # Type assertion for mypy
+    assert changeset_id is not None
     expected_insertions = {"eb0002", "eb0099"}
     inserted_rows = temporary_table.scan(
         row_filter=In("id", expected_insertions), selected_fields=("id",)
@@ -210,15 +201,12 @@ def test_insert_records(temporary_table: IcebergTable) -> None:
     assert inserted_rows == changeset_rows
 
 
-def test_delete_records(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_delete_records(temporary_table: IcebergTable) -> None:
     """
-    Given an existing iceberg table
-    And an update file with some records removed
-    When the update is applied
-    Then the removed records will be marked as deleted
-    And the new rows will be identifiably grouped by a changeset property
+    Given an existing table
+    When snapshot_sync excludes records that were previously present
+    Then those records are marked as deleted (content=None) and tagged with a changeset
     """
-
     temporary_table.append(
         data_to_namespaced_table(
             [
@@ -238,7 +226,7 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
     )
     client = AdapterStore(temporary_table)
     changeset_id = client.snapshot_sync(new_data, "test_namespace")
-    assert changeset_id is not None  # Type assertion for mypy
+    assert changeset_id is not None
     expected_deletions = {"eb0002", "eb0099"}
     deleted_rows = temporary_table.scan(
         row_filter=IsNull("content"), selected_fields=("id",)
@@ -251,13 +239,12 @@ def test_delete_records(temporary_table: IcebergTable) -> None:
     assert_row_identifiers(changeset_rows, expected_deletions)
 
 
-def test_all_actions(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_all_actions(temporary_table: IcebergTable) -> None:
     """
-    Given an existing Iceberg table
-    And an update file with new, changed, absent and unchanged  records
-    When the update is applied
-    Then all the appropriate actions are taken
-    And all the new, changed and deleted rows are identifiably grouped by a changeset property
+    Given an existing table
+    When snapshot_sync includes new, changed, absent and unchanged records
+    Then inserts, updates, and deletes are all applied correctly
+    And all modified rows are tagged with the same changeset
     """
     temporary_table.append(
         data_to_namespaced_table(
@@ -282,7 +269,7 @@ def test_all_actions(temporary_table: IcebergTable) -> None:
 
     client = AdapterStore(temporary_table)
     changeset_id = client.snapshot_sync(new_data, "test_namespace")
-    assert changeset_id is not None  # Type assertion for mypy
+    assert changeset_id is not None
     changeset_rows = temporary_table.scan(
         row_filter=EqualTo("changeset", changeset_id),
     ).to_arrow()
@@ -313,14 +300,12 @@ def test_all_actions(temporary_table: IcebergTable) -> None:
     ]
 
 
-def test_idempotent(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_idempotent(temporary_table: IcebergTable) -> None:
     """
-    Given an existing Iceberg table
-    And an update with new, changed, absent and unchanged  records
-    When the update is applied twice
-    Then nothing happens the second time
+    Given an existing table
+    When the same snapshot_sync is applied twice
+    Then the second call is a no-op and returns None
     """
-
     temporary_table.append(
         data_to_namespaced_table(
             [
@@ -344,12 +329,13 @@ def test_idempotent(temporary_table: IcebergTable) -> None:
     assert second_changeset_id is None
 
 
-def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_most_recent_changeset_preserved(
+    temporary_table: IcebergTable,
+) -> None:
     """
-    Given an existing Iceberg table
-    And two subsequent updates that change different records
-    When the updates are applied
-    Then each row's changeset id is the latest one that applied to it
+    Given an existing table
+    When multiple snapshot_syncs are applied that change different records
+    Then each row's changeset id reflects the most recent sync that modified it
     """
     temporary_table.append(
         data_to_namespaced_table(
@@ -369,7 +355,7 @@ def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
     )
     client = AdapterStore(temporary_table)
     changeset_id = client.snapshot_sync(new_data, "test_namespace")
-    assert changeset_id is not None  # Type assertion for mypy
+    assert changeset_id is not None
     assert {"eb0003", "eb0004"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", changeset_id))
         .to_arrow()
@@ -384,7 +370,7 @@ def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
         ]
     )
     newer_changeset_id = client.snapshot_sync(newer_data, "test_namespace")
-    assert newer_changeset_id is not None  # Type assertion for mypy
+    assert newer_changeset_id is not None
     assert {"eb0003"} == set(
         temporary_table.scan(row_filter=EqualTo("changeset", newer_changeset_id))
         .to_arrow()
@@ -399,9 +385,10 @@ def test_most_recent_changeset_preserved(temporary_table: IcebergTable) -> None:
     )
 
 
-def test_get_records_by_changeset(temporary_table: IcebergTable) -> None:
+def test_snapshot_sync_get_records_by_changeset(temporary_table: IcebergTable) -> None:
     """
-    Test that get_records_by_changeset correctly retrieves records for a specific changeset.
+    When get_records_by_changeset is called after snapshot_sync
+    Then it correctly retrieves records for each specific changeset
     """
     # Set up initial data
     initial_data = data_to_namespaced_table(
@@ -412,7 +399,7 @@ def test_get_records_by_changeset(temporary_table: IcebergTable) -> None:
     )
     client = AdapterStore(temporary_table)
     changeset_id_1 = client.snapshot_sync(initial_data, "test_namespace")
-    assert changeset_id_1 is not None  # Type assertion for mypy
+    assert changeset_id_1 is not None
 
     # Test retrieving records by first changeset
     records_changeset_1 = client.get_records_by_changeset(changeset_id_1)
@@ -430,7 +417,7 @@ def test_get_records_by_changeset(temporary_table: IcebergTable) -> None:
         ]
     )
     changeset_id_2 = client.snapshot_sync(additional_data, "test_namespace")
-    assert changeset_id_2 is not None  # Type assertion for mypy
+    assert changeset_id_2 is not None
 
     # Test retrieving records by second changeset (should only include new records)
     records_changeset_2 = client.get_records_by_changeset(changeset_id_2)
@@ -459,8 +446,12 @@ def test_get_all_records_empty(temporary_table: IcebergTable) -> None:
     assert all_records.num_rows == 0
 
 
-def test_get_all_records_after_update(temporary_table: IcebergTable) -> None:
-    """After update, default get_all_records excludes deleted rows."""
+def test_snapshot_sync_get_all_records_after_update(
+    temporary_table: IcebergTable,
+) -> None:
+    """
+    After snapshot_sync, get_all_records excludes deleted rows by default
+    """
     # Initial data
     temporary_table.append(
         data_to_namespaced_table(
@@ -494,10 +485,12 @@ def test_get_all_records_after_update(temporary_table: IcebergTable) -> None:
     assert rows["eb0001"]["content"] == "hello"  # unchanged
 
 
-def test_get_all_records_include_deleted_after_update(
+def test_snapshot_sync_get_all_records_include_deleted(
     temporary_table: IcebergTable,
 ) -> None:
-    """With include_deleted=True the deleted rows are present."""
+    """
+    After snapshot_sync, get_all_records with include_deleted=True includes deleted rows
+    """
     temporary_table.append(
         data_to_namespaced_table(
             [
@@ -522,145 +515,3 @@ def test_get_all_records_include_deleted_after_update(
     rows = {row["id"]: row for row in all_with_deleted.to_pylist()}
     assert set(rows.keys()) == {"eb0001", "eb0002", "eb0003", "eb0004"}
     assert rows["eb0002"]["content"] is None  # deleted present
-
-
-def test_incremental_update_does_not_delete_missing_records(
-    temporary_table: IcebergTable,
-) -> None:
-    """
-    Given an existing Iceberg table
-    And an incremental update that only contains a subset of records
-    When the update is applied with incremental=True
-    Then the missing records are NOT deleted
-    """
-    # Initial state: 2 records
-    temporary_table.append(
-        data_to_namespaced_table(
-            [
-                {"id": "eb0001", "content": "hello"},
-                {"id": "eb0002", "content": "world"},
-            ]
-        )
-    )
-
-    # Incremental update: only updates eb0001, does not include eb0002
-    new_data = data_to_namespaced_table(
-        [
-            {"id": "eb0001", "content": "hello updated"},
-        ]
-    )
-
-    client = AdapterStore(temporary_table)
-    update = client.incremental_update(new_data, "test_namespace")
-    assert update is not None
-
-    # Verify eb0002 is still present and not deleted (content is not None)
-    all_records = client.get_all_records()
-    rows = {row["id"]: row for row in all_records.to_pylist()}
-
-    assert "eb0002" in rows
-    assert rows["eb0002"]["content"] == "world"  # Unchanged
-
-
-def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> None:
-    """
-    Given an existing Iceberg table
-    And an incremental update that contains new records
-    When the update is applied
-    Then the new records are inserted
-    """
-    temporary_table.append(
-        data_to_namespaced_table(
-            [
-                {"id": "eb0001", "content": "hello"},
-            ]
-        )
-    )
-
-    new_data = data_to_namespaced_table(
-        [
-            {"id": "eb0002", "content": "world"},
-        ]
-    )
-
-    client = AdapterStore(temporary_table)
-    update = client.incremental_update(new_data, "test_namespace")
-    assert update is not None
-
-    all_records = client.get_all_records()
-    rows = {row["id"]: row for row in all_records.to_pylist()}
-
-    assert "eb0001" in rows
-    assert "eb0002" in rows
-    assert rows["eb0002"]["content"] == "world"
-
-
-def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
-    """
-    Given an existing Iceberg table
-    And an incremental update that contains both updates and new records
-    When the update is applied
-    Then the updates are applied and new records are inserted
-    """
-    temporary_table.append(
-        data_to_namespaced_table(
-            [
-                {"id": "eb0001", "content": "hello"},
-                {"id": "eb0002", "content": "world"},
-            ]
-        )
-    )
-
-    new_data = data_to_namespaced_table(
-        [
-            {"id": "eb0001", "content": "hello updated"},
-            {"id": "eb0003", "content": "new record"},
-        ]
-    )
-
-    client = AdapterStore(temporary_table)
-    update = client.incremental_update(new_data, "test_namespace")
-    assert update is not None
-
-    all_records = client.get_all_records()
-    rows = {row["id"]: row for row in all_records.to_pylist()}
-
-    assert len(rows) == 3
-    assert rows["eb0001"]["content"] == "hello updated"
-    assert rows["eb0002"]["content"] == "world"
-    assert rows["eb0003"]["content"] == "new record"
-
-
-def test_incremental_update_does_not_touch_other_namespaces(
-    temporary_table: IcebergTable,
-) -> None:
-    """
-    Given an Iceberg table with data from multiple namespaces
-    When an incremental update is applied to one namespace
-    Then data in other namespaces is unaffected
-    """
-    # Add data for another namespace
-    other_data = data_to_namespaced_table(
-        [{"id": "ax0001", "content": "axiell data"}], "axiell_test"
-    )
-    temporary_table.append(other_data)
-
-    # Add data for ebsco namespace
-    ebsco_data = data_to_namespaced_table([{"id": "eb0001", "content": "ebsco data"}])
-    temporary_table.append(ebsco_data)
-
-    # Update ebsco data
-    new_ebsco_data = data_to_namespaced_table(
-        [{"id": "eb0001", "content": "ebsco updated"}]
-    )
-
-    client = AdapterStore(temporary_table)
-    client.incremental_update(new_ebsco_data, "test_namespace")
-
-    # Verify axiell data is untouched
-    all_records = client.get_all_records()
-    rows = {(row["namespace"], row["id"]): row for row in all_records.to_pylist()}
-
-    assert ("axiell_test", "ax0001") in rows
-    assert rows[("axiell_test", "ax0001")]["content"] == "axiell data"
-    assert rows[("test_namespace", "eb0001")]["content"] == "ebsco updated"

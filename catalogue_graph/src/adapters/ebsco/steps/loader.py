@@ -26,7 +26,7 @@ from adapters.ebsco.utils.tracking import (
     record_processed_file,
 )
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
@@ -94,7 +94,10 @@ def _strip_marc_parenthetical_prefix(raw_value: str) -> str:
 
 def data_to_pa_table(data: list[dict[str, str]]) -> pa.Table:
     namespaced = [{"namespace": EBSCO_NAMESPACE, **row} for row in data]
-    return pa.Table.from_pylist(namespaced, schema=ARROW_SCHEMA)
+    # If the incoming data includes a last_modified field, use the extended schema
+    has_timestamp = any("last_modified" in row for row in namespaced)
+    schema = ARROW_SCHEMA_WITH_TIMESTAMP if has_timestamp else ARROW_SCHEMA
+    return pa.Table.from_pylist(namespaced, schema=schema)
 
 
 def handler(

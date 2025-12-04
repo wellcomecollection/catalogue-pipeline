@@ -16,8 +16,12 @@ from .helpers import data_to_namespaced_table as _data_to_namespaced_table_helpe
 
 
 # Override the default namespace for these tests
-def data_to_namespaced_table(unqualified_data: list[dict[str, Any]]) -> pa.Table:
-    return _data_to_namespaced_table_helper(unqualified_data, "ebsco_test")
+def data_to_namespaced_table(
+    unqualified_data: list[dict[str, Any]], *, add_timestamp: bool = False
+) -> pa.Table:
+    return _data_to_namespaced_table_helper(
+        unqualified_data, "ebsco_test", add_timestamp=add_timestamp
+    )
 
 
 def test_noop(temporary_table: IcebergTable) -> None:
@@ -538,7 +542,8 @@ def test_incremental_update_does_not_delete_missing_records(
     new_data = data_to_namespaced_table(
         [
             {"id": "eb0001", "content": "hello updated"},
-        ]
+        ],
+        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table)
@@ -571,7 +576,8 @@ def test_incremental_update_with_new_records(temporary_table: IcebergTable) -> N
     new_data = data_to_namespaced_table(
         [
             {"id": "eb0002", "content": "world"},
-        ]
+        ],
+        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table)
@@ -606,7 +612,8 @@ def test_incremental_update_mixed(temporary_table: IcebergTable) -> None:
         [
             {"id": "eb0001", "content": "hello updated"},
             {"id": "eb0003", "content": "new record"},
-        ]
+        ],
+        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table)
@@ -644,7 +651,8 @@ def test_incremental_update_does_not_touch_other_namespaces(
 
     # Update ebsco data
     new_ebsco_data = data_to_namespaced_table(
-        [{"id": "eb0001", "content": "ebsco updated"}]
+        [{"id": "eb0001", "content": "ebsco updated"}],
+        add_timestamp=True,
     )
 
     client = AdapterStore(temporary_table)
