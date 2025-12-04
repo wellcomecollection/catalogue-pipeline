@@ -18,6 +18,7 @@ from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
     AxiellAdapterTriggerEvent,
 )
+from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.events import EventBridgeScheduledEvent
@@ -34,6 +35,7 @@ class AxiellAdapterTriggerConfig(BaseModel):
 
 class TriggerRuntime(BaseModel):
     store: WindowStore
+    notifier: WindowNotifier | None = None
     enforce_lag: bool = True
     window_minutes: int = config.WINDOW_MINUTES
     window_lookback_days: int = config.WINDOW_LOOKBACK_DAYS
@@ -72,13 +74,23 @@ def build_window_request(
     job_id: str | None = None,
     window_minutes: int | None = None,
     window_lookback_days: int | None = None,
+    notifier: WindowNotifier | None = None,
 ) -> AxiellAdapterLoaderEvent:
     reporter = WindowReporter(store=store)
     report = reporter.coverage_report()
     last_success_end = report.last_success_end
 
+    # Enforce lag before notifying to avoid repeated alerts when circuit breaker trips
     if enforce_lag:
         _enforce_lag(now, last_success_end)
+
+    # Send notification if coverage gaps are detected
+    if notifier:
+        notifier.notify_if_gaps(
+            report=report,
+            job_id=job_id,
+            trigger_time=now,
+        )
 
     resolved_window_lookback = window_lookback_days or config.WINDOW_LOOKBACK_DAYS
     resolved_window_minutes = window_minutes or config.WINDOW_MINUTES
@@ -124,6 +136,7 @@ def handler(
         job_id=event.job_id,
         window_minutes=runtime.window_minutes,
         window_lookback_days=runtime.window_lookback_days,
+        notifier=runtime.notifier,
     )
 
 
@@ -132,8 +145,38 @@ def build_runtime(
 ) -> TriggerRuntime:
     cfg = config_obj or AxiellAdapterTriggerConfig()
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
+
+    # Initialize notifier if CHATBOT_TOPIC_ARN is configured
+    notifier = None
+    if config.CHATBOT_TOPIC_ARN:
+        import boto3
+
+        from clients.chatbot_notifier import ChatbotNotifier
+
+        sns_client = boto3.client("sns")
+        chatbot_notifier = ChatbotNotifier(
+            sns_client=sns_client,
+            topic_arn=config.CHATBOT_TOPIC_ARN,
+        )
+
+        # Extract table name for display
+        table = store.table
+        if callable(getattr(table, "name", None)):
+            table_name = ".".join(table.name())
+        else:
+            # Use _identifier for older pyiceberg versions
+            table_name = str(
+                getattr(table, "identifier", getattr(table, "_identifier", "unknown"))
+            )
+
+        notifier = WindowNotifier(
+            chatbot_notifier=chatbot_notifier,
+            table_name=table_name,
+        )
+
     return TriggerRuntime(
         store=store,
+        notifier=notifier,
         enforce_lag=cfg.enforce_lag,
         window_minutes=cfg.window_minutes,
         window_lookback_days=cfg.window_lookback_days,

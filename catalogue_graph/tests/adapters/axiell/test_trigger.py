@@ -225,3 +225,161 @@ def test_lambda_handler_uses_rest_api_table_by_default(
     trigger.lambda_handler({"time": "2025-11-17T12:00:00Z"}, context=None)
 
     assert captured["flag"] is True
+
+
+def test_build_window_request_notifies_when_gaps_detected(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    """Test that notifier is called when coverage gaps are detected."""
+    from adapters.utils.window_notifier import WindowNotifier
+    from clients.chatbot_notifier import ChatbotNotifier
+    from tests.mocks import MockSNSClient
+
+    MockSNSClient.reset_mocks()
+
+    now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
+
+    # Create a gap: two successful windows with a 2-hour gap between them
+    first_end = now - timedelta(hours=4)
+    second_start = now - timedelta(hours=2)
+    second_end = now - timedelta(minutes=5)
+
+    store = _populate_store(
+        temporary_window_status_table,
+        [
+            _window_row(first_end - timedelta(minutes=15), first_end),
+            _window_row(second_start, second_end),
+        ],
+    )
+
+    chatbot_notifier = ChatbotNotifier(
+        sns_client=MockSNSClient(),
+        topic_arn="arn:aws:sns:eu-west-1:123456789012:test-topic",
+    )
+    notifier = WindowNotifier(
+        chatbot_notifier=chatbot_notifier,
+        table_name="test_table.window_status",
+    )
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        enforce_lag=False,
+        job_id="20251202T1200",
+        notifier=notifier,
+    )
+
+    # Should have sent a notification (there's a 2-hour gap between windows)
+    assert len(MockSNSClient.publish_calls) == 1
+
+    # Should still create the window request
+    assert request.job_id == "20251202T1200"
+    assert request.window_start == second_end
+    assert request.window_end == now
+
+
+def test_build_window_request_does_not_notify_without_gaps(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    """Test that notifier is not called when no coverage gaps exist."""
+    from adapters.utils.window_notifier import WindowNotifier
+    from clients.chatbot_notifier import ChatbotNotifier
+    from tests.mocks import MockSNSClient
+
+    MockSNSClient.reset_mocks()
+
+    now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
+
+    # Create recent successful window (5 minutes ago)
+    recent_end = now - timedelta(minutes=5)
+    store = _populate_store(
+        temporary_window_status_table,
+        [_window_row(recent_end - timedelta(minutes=15), recent_end)],
+    )
+
+    chatbot_notifier = ChatbotNotifier(
+        sns_client=MockSNSClient(),
+        topic_arn="arn:aws:sns:eu-west-1:123456789012:test-topic",
+    )
+    notifier = WindowNotifier(
+        chatbot_notifier=chatbot_notifier,
+        table_name="test_table.window_status",
+    )
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        job_id="20251202T1200",
+        notifier=notifier,
+    )
+
+    # Should NOT have sent a notification (no gaps)
+    assert len(MockSNSClient.publish_calls) == 0
+
+    # Should still create the window request
+    assert request.job_id == "20251202T1200"
+    assert request.window_start == recent_end
+    assert request.window_end == now
+
+
+def test_build_window_request_works_without_notifier(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    """Test that build_window_request works when notifier is None."""
+    now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
+    store = _populate_store(temporary_window_status_table, [])
+
+    # Should not raise an error
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        job_id="20251202T1200",
+        notifier=None,
+    )
+
+    assert request.job_id == "20251202T1200"
+
+
+def test_build_window_request_does_not_notify_when_lag_breaker_trips(
+    monkeypatch: MonkeyPatch,
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    """Test that notifier is not called when lag enforcement raises an error."""
+    from adapters.utils.window_notifier import WindowNotifier
+    from clients.chatbot_notifier import ChatbotNotifier
+    from tests.mocks import MockSNSClient
+
+    MockSNSClient.reset_mocks()
+
+    now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
+
+    # Create old successful window that will trigger lag error
+    old_end = now - timedelta(hours=8)
+    store = _populate_store(
+        temporary_window_status_table,
+        [_window_row(old_end - timedelta(minutes=15), old_end)],
+    )
+
+    chatbot_notifier = ChatbotNotifier(
+        sns_client=MockSNSClient(),
+        topic_arn="arn:aws:sns:eu-west-1:123456789012:test-topic",
+    )
+    notifier = WindowNotifier(
+        chatbot_notifier=chatbot_notifier,
+        table_name="test_table.window_status",
+    )
+
+    monkeypatch.setattr(config, "MAX_LAG_MINUTES", 60)
+
+    # Should raise RuntimeError due to lag
+    with pytest.raises(RuntimeError, match="too far behind"):
+        trigger.build_window_request(
+            store=store,
+            now=now,
+            enforce_lag=True,
+            job_id="20251202T1200",
+            notifier=notifier,
+        )
+
+    # Should NOT have sent a notification (error raised before notification)
+    assert len(MockSNSClient.publish_calls) == 0
