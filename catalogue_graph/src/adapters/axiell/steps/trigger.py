@@ -12,6 +12,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import boto3
 from pydantic import BaseModel, ConfigDict, Field
 
 from adapters.axiell import config, helpers
@@ -22,6 +23,7 @@ from adapters.axiell.models.step_events import (
 from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
+from clients.chatbot_notifier import ChatbotNotifier
 from models.events import EventBridgeScheduledEvent
 
 logging.basicConfig(level=logging.INFO)
@@ -155,10 +157,6 @@ def build_runtime(
     # Initialize notifier if CHATBOT_TOPIC_ARN is configured
     notifier = None
     if config.CHATBOT_TOPIC_ARN:
-        import boto3
-
-        from clients.chatbot_notifier import ChatbotNotifier
-
         sns_client = boto3.client("sns")
         chatbot_notifier = ChatbotNotifier(
             sns_client=sns_client,

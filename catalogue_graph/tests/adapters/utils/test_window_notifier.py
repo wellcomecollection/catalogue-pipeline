@@ -374,35 +374,6 @@ def test_notification_includes_keywords(notifier: WindowNotifier) -> None:
     assert "harvesting" in keywords
 
 
-def test_does_not_notify_when_notifier_is_none() -> None:
-    """Test that no notification is sent when chatbot_notifier is None."""
-    notifier = WindowNotifier(
-        chatbot_notifier=None,
-        table_name="axiell_window_status.window_status",
-    )
-
-    report = WindowCoverageReport(
-        range_start=datetime(2025, 12, 1, 0, 0, tzinfo=UTC),
-        range_end=datetime(2025, 12, 2, 0, 0, tzinfo=UTC),
-        total_windows=5,
-        coverage_gaps=[
-            CoverageGap(
-                start=datetime(2025, 12, 1, 10, 0, tzinfo=UTC),
-                end=datetime(2025, 12, 1, 12, 0, tzinfo=UTC),
-            )
-        ],
-    )
-
-    # Should not raise an error, just silently skip
-    notifier.notify_if_gaps(
-        report=report,
-        job_id="20251202T1200",
-        trigger_time=datetime(2025, 12, 2, 12, 0, tzinfo=UTC),
-    )
-
-    assert len(MockSNSClient.publish_calls) == 0
-
-
 def test_notification_works_without_optional_context(notifier: WindowNotifier) -> None:
     """Test that notification works when job_id and trigger_time are not provided."""
     report = WindowCoverageReport(

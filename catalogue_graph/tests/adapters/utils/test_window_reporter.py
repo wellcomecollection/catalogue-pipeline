@@ -227,3 +227,104 @@ def test_coverage_report_last_success_end(tmp_path: Path) -> None:
     _insert_window(store, end2, end3, "success")
     report = reporter.coverage_report()
     assert report.last_success_end == end3
+
+
+def test_coverage_report_overlapping_success_windows(tmp_path: Path) -> None:
+    """Test that overlapping successful windows are merged correctly.
+
+    This test protects against regressions where overlapping windows would be
+    double-counted. For example, windows [12:00-12:15] and [12:00-13:00] should
+    result in 1.0 hour of coverage, not 1.25 hours.
+    """
+    store = _build_store(tmp_path)
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    # 12:00 - 12:15 : Success (15 min window)
+    _insert_window(store, start, start + timedelta(minutes=15), "success")
+
+    # 12:00 - 13:00 : Success (60 min window, overlaps with first)
+    _insert_window(store, start, start + timedelta(hours=1), "success")
+
+    reporter = WindowReporter(store)
+    report = reporter.coverage_report(
+        range_start=start, range_end=start + timedelta(hours=1)
+    )
+
+    # The two windows together cover 1 hour (12:00-13:00), not 1.25 hours
+    assert report.total_windows == 2
+    assert report.state_counts["success"] == 2
+    assert report.coverage_hours == 1.0  # Not 1.25
+    assert len(report.coverage_gaps) == 0
+    assert report.last_success_end == start + timedelta(hours=1)
+
+
+def test_coverage_report_multiple_overlapping_windows(tmp_path: Path) -> None:
+    """Test coverage calculation with three partially overlapping windows."""
+    store = _build_store(tmp_path)
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    # 12:00 - 12:15 : Success
+    _insert_window(store, start, start + timedelta(minutes=15), "success")
+
+    # 12:00 - 13:00 : Success (overlaps with first)
+    _insert_window(store, start, start + timedelta(hours=1), "success")
+
+    # 12:30 - 13:15 : Success (overlaps with second)
+    _insert_window(
+        store,
+        start + timedelta(minutes=30),
+        start + timedelta(hours=1, minutes=15),
+        "success",
+    )
+
+    reporter = WindowReporter(store)
+    report = reporter.coverage_report(
+        range_start=start, range_end=start + timedelta(hours=1, minutes=15)
+    )
+
+    # Coverage: 12:00-13:15 = 1.25 hours
+    assert report.total_windows == 3
+    assert report.state_counts["success"] == 3
+    assert report.coverage_hours == 1.25
+    assert len(report.coverage_gaps) == 0
+    assert report.last_success_end == start + timedelta(hours=1, minutes=15)
+
+
+def test_coverage_report_with_gap_between_overlapping_groups(tmp_path: Path) -> None:
+    """Test gap detection when there are gaps between groups of overlapping windows."""
+    store = _build_store(tmp_path)
+    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+
+    # Group 1: 12:00 - 12:30 (two overlapping windows)
+    _insert_window(store, start, start + timedelta(minutes=15), "success")
+    _insert_window(store, start, start + timedelta(minutes=30), "success")
+
+    # Gap: 12:30 - 13:00
+
+    # Group 2: 13:00 - 13:30 (two overlapping windows)
+    _insert_window(
+        store,
+        start + timedelta(hours=1),
+        start + timedelta(hours=1, minutes=15),
+        "success",
+    )
+    _insert_window(
+        store,
+        start + timedelta(hours=1),
+        start + timedelta(hours=1, minutes=30),
+        "success",
+    )
+
+    reporter = WindowReporter(store)
+    report = reporter.coverage_report(
+        range_start=start, range_end=start + timedelta(hours=1, minutes=30)
+    )
+
+    # Coverage: 30 minutes (12:00-12:30) + 30 minutes (13:00-13:30) = 1.0 hour
+    assert report.total_windows == 4
+    assert report.coverage_hours == 1.0
+
+    # Gap: 30 minutes (12:30-13:00)
+    assert len(report.coverage_gaps) == 1
+    assert report.coverage_gaps[0].start == start + timedelta(minutes=30)
+    assert report.coverage_gaps[0].end == start + timedelta(hours=1)

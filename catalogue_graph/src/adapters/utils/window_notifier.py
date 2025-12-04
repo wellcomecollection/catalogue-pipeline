@@ -39,14 +39,13 @@ class WindowNotifier:
 
     def __init__(
         self,
-        chatbot_notifier: ChatbotNotifier | None,
+        chatbot_notifier: ChatbotNotifier,
         table_name: str,
     ) -> None:
         """Initialize the WindowNotifier.
 
         Args:
             chatbot_notifier: ChatbotNotifier instance for sending messages.
-                If None, notifications are disabled.
             table_name: Fully qualified table name (e.g., "namespace.table").
         """
         self.chatbot_notifier = chatbot_notifier
@@ -65,9 +64,6 @@ class WindowNotifier:
             job_id: Optional job identifier for context.
             trigger_time: Optional trigger timestamp for context and threading.
         """
-        if not self.chatbot_notifier:
-            return
-
         if not report.coverage_gaps:
             return
 

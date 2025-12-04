@@ -79,8 +79,11 @@ class WindowSummary(BaseModel):
             return None
         if isinstance(value, dict):
             return {str(key): str(val) for key, val in value.items()}
+        # Support dict-like objects (e.g., Mapping types)
         try:
             tags_items = dict(value)
-        except Exception:  # pragma: no cover - defensive fallback
-            tags_items = {}
+        except (TypeError, ValueError) as e:
+            raise ValueError(
+                f"tags must be a dict or dict-like object, got {type(value).__name__}: {value!r}"
+            ) from e
         return {str(key): str(val) for key, val in tags_items.items()}

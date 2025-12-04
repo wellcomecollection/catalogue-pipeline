@@ -36,14 +36,9 @@ ARROW_SCHEMA = pa.schema(
 
 # Extended Arrow schema that includes last_modified for comparison operations during incremental updates.
 # This allows us to compare timestamps to prevent overwriting newer records with older ones.
-# Note: Existing records may have null last_modified values, which is expected behavior.
-# Null values are treated as "always update" - i.e., if the existing record has no timestamp,
-# any incoming record will update it.
-ARROW_SCHEMA_WITH_TIMESTAMP_FIELDS = [
-    pa.field("namespace", type=pa.string(), nullable=False),
-    pa.field("id", type=pa.string(), nullable=False),
-    pa.field("content", type=pa.string(), nullable=True),
-    pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
-]
-
-ARROW_SCHEMA_WITH_TIMESTAMP = pa.schema(ARROW_SCHEMA_WITH_TIMESTAMP_FIELDS)  # type: ignore[arg-type]
+ARROW_SCHEMA_WITH_TIMESTAMP = pa.schema(
+    list(ARROW_SCHEMA)
+    + [
+        pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
+    ]
+)
