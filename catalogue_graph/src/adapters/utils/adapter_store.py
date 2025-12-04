@@ -176,10 +176,9 @@ class AdapterStore:
                 tx.append(inserts)
 
         updated_ids: list[str] = []
-        if changes is not None:
-            updated_ids.extend(cast(list[str], changes.column("id").to_pylist()))
-        if inserts is not None:
-            updated_ids.extend(cast(list[str], inserts.column("id").to_pylist()))
+        for t in (changes, inserts):
+            if t is not None:
+                updated_ids.extend(cast(list[str], t.column("id").to_pylist()))
 
         return AdapterStoreUpdate(
             changeset_id=changeset_id, updated_record_ids=updated_ids

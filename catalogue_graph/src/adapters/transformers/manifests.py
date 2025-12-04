@@ -6,15 +6,40 @@ from collections.abc import Iterable
 from pathlib import PurePosixPath
 
 import smart_open
+from pydantic import BaseModel
 
-from adapters.ebsco.models.manifests import (
-    ErrorLine,
-    FailureManifest,
-    S3Location,
-    SuccessBatchLine,
-    SuccessManifest,
-    TransformerManifest,
-)
+
+class S3Location(BaseModel):
+    bucket: str
+    key: str
+
+
+class SuccessManifest(BaseModel):
+    count: int
+    batch_file_location: S3Location
+
+
+class FailureManifest(BaseModel):
+    count: int
+    error_file_location: S3Location
+
+
+class TransformerManifest(BaseModel):
+    job_id: str
+    successes: SuccessManifest
+    failures: FailureManifest | None = None
+
+
+# These are consumed by a Scala service, so for convenience
+# we keep the field names in camelCase
+class SuccessBatchLine(BaseModel):
+    sourceIdentifiers: list[str]
+    jobId: str
+
+
+class ErrorLine(BaseModel):
+    id: str
+    message: str
 
 
 def _success_lines(batches_ids: list[list[str]], job_id: str) -> Iterable[str]:

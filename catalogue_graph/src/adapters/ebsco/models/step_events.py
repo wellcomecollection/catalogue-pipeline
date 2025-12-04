@@ -23,7 +23,3 @@ class EbscoAdapterTriggerEvent(EbscoAdapterEvent):
 
 class EbscoAdapterLoaderEvent(EbscoAdapterEvent):
     file_location: str
-
-
-class EbscoAdapterTransformerEvent(EbscoAdapterEvent):
-    changeset_id: str | None = None

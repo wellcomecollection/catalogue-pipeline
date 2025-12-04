@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class AxiellAdapterEvent(BaseModel):
@@ -23,7 +23,3 @@ class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
     max_windows: int | None = None
     window_minutes: int | None = None
     allow_partial_final_window: bool | None = None
-
-
-class AxiellAdapterTransformerEvent(AxiellAdapterEvent):
-    changeset_ids: list[str] = Field(default_factory=list)
