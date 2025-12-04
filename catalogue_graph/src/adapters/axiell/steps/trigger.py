@@ -18,6 +18,7 @@ from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
     AxiellAdapterTriggerEvent,
 )
+from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from models.events import EventBridgeScheduledEvent
 
@@ -40,29 +41,12 @@ class TriggerRuntime(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def _window_key(start: datetime, end: datetime) -> str:
-    return f"{start.isoformat()}_{end.isoformat()}"
-
-
 def _generate_job_id(timestamp: datetime) -> str:
     return timestamp.astimezone(UTC).strftime("%Y%m%dT%H%M")
 
 
-def _latest_success_end(store: WindowStore) -> datetime | None:
-    rows = store.list_by_state("success")
-    if not rows:
-        return None
-    latest = max(rows, key=lambda row: row["window_end"])
-    end_time = latest.get("window_end")
-    if not isinstance(end_time, datetime):
-        return None
-    return end_time.astimezone(UTC)
-
-
 def _determine_start(
-    now: datetime,
-    last_success_end: datetime | None,
-    window_lookback_days: int,
+    now: datetime, last_success_end: datetime | None, window_lookback_days: int
 ) -> datetime:
     if last_success_end is not None:
         return last_success_end
@@ -89,7 +73,9 @@ def build_window_request(
     window_minutes: int | None = None,
     window_lookback_days: int | None = None,
 ) -> AxiellAdapterLoaderEvent:
-    last_success_end = _latest_success_end(store)
+    reporter = WindowReporter(store=store)
+    report = reporter.coverage_report()
+    last_success_end = report.last_success_end
 
     if enforce_lag:
         _enforce_lag(now, last_success_end)
@@ -110,9 +96,11 @@ def build_window_request(
     max_windows = config.MAX_PENDING_WINDOWS
     resolved_job_id = job_id or _generate_job_id(now)
 
+    from adapters.utils.window_summary import WindowKey
+
     loader_event = AxiellAdapterLoaderEvent(
         job_id=resolved_job_id,
-        window_key=_window_key(start_time, end_time),
+        window_key=WindowKey.from_dates(start_time, end_time),
         window_start=start_time,
         window_end=end_time,
         metadata_prefix=config.OAI_METADATA_PREFIX,

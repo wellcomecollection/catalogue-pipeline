@@ -5,7 +5,7 @@ from contextlib import suppress
 from datetime import UTC, datetime, timedelta
 from functools import wraps
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 from uuid import uuid4
 
 import pytest
@@ -301,28 +301,11 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
         max_windows=1,
     )
 
-    assert summaries[0]["state"] == "failed"
+    assert summaries[0].state == "failed"
     status_map = harvester.store.load_status_map()
     row = next(iter(status_map.values()))
     assert row["state"] == "failed"
     assert row["record_ids"] == []
-
-
-def test_coverage_report(tmp_path: Path) -> None:
-    records = [_make_record("id:1")]
-    harvester = _build_harvester(tmp_path, records)
-    start_time, end_time = _window_range(hours=2)
-    harvester.harvest_range(
-        start_time=start_time,
-        end_time=end_time,
-        max_windows=2,
-    )
-
-    report = harvester.coverage_report()
-    assert report.total_windows >= 1
-    assert report.state_counts.get("success") == report.total_windows
-    assert report.coverage_hours > 0
-    assert isinstance(report.coverage_gaps, list)
 
 
 def test_harvest_range_requires_valid_range(tmp_path: Path) -> None:
@@ -340,13 +323,14 @@ def test_harvest_range_skips_successful_windows_by_default(tmp_path: Path) -> No
 
     first = harvester.harvest_range(start_time=start, end_time=end)
     assert len(first) == 1
-    initial_calls = len(harvester.client.calls)
+    client = cast(StubOAIClient, harvester.client)
+    initial_calls = len(client.calls)
 
     second = harvester.harvest_range(start_time=start, end_time=end)
     assert len(second) == 1
-    assert second[0]["window_key"] == first[0]["window_key"]
-    assert second[0]["record_ids"] == first[0]["record_ids"]
-    assert len(harvester.client.calls) == initial_calls
+    assert second[0].window_key == first[0].window_key
+    assert second[0].record_ids == first[0].record_ids
+    assert len(client.calls) == initial_calls
 
 
 def test_harvest_range_can_reprocess_successful_windows(tmp_path: Path) -> None:
@@ -407,9 +391,9 @@ def test_record_callback_persists_changeset(tmp_path: Path) -> None:
         reprocess_successful_windows=True,
     )
 
-    assert summaries[0]["record_ids"] == ["id:1"]
-    assert summaries[0]["tags"] is not None
-    assert summaries[0]["tags"]["changeset_id"] == "cs-500"
+    assert summaries[0].record_ids == ["id:1"]
+    assert summaries[0].tags is not None
+    assert summaries[0].tags["changeset_id"] == "cs-500"
     status_map = harvester.store.load_status_map()
     stored = next(iter(status_map.values()))
     assert stored["tags"] is not None
@@ -445,10 +429,10 @@ def test_harvest_range_returns_existing_successful_summary_with_tags(
 
     assert len(summaries) == 1
     summary = summaries[0]
-    assert summary["window_key"] == window_key
-    assert summary["record_ids"] == ["existing-1"]
-    assert summary["tags"] is not None
-    assert summary["tags"]["changeset_id"] == "cs-123"
+    assert summary.window_key == window_key
+    assert summary.record_ids == ["existing-1"]
+    assert summary.tags is not None
+    assert summary.tags["changeset_id"] == "cs-123"
 
 
 def test_harvest_range_handles_partial_success_across_runs(tmp_path: Path) -> None:
@@ -470,9 +454,9 @@ def test_harvest_range_handles_partial_success_across_runs(tmp_path: Path) -> No
     )
 
     assert len(second) == 2
-    assert second[0]["window_key"] == first[0]["window_key"]
-    assert second[0]["record_ids"] == first[0]["record_ids"]
-    assert second[1]["window_start"] > second[0]["window_start"]
+    assert second[0].window_key == first[0].window_key
+    assert second[0].record_ids == first[0].record_ids
+    assert second[1].window_start > second[0].window_start
 
 
 def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -> None:
@@ -482,137 +466,30 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
     aligned_end = aligned_start + timedelta(minutes=harvester.window_minutes * 3)
 
     harvester.harvest_range(start_time=aligned_start, end_time=aligned_end)
-    initial_calls = len(harvester.client.calls)
+    client = cast(StubOAIClient, harvester.client)
+    initial_calls = len(client.calls)
 
     offset_start = aligned_start + timedelta(minutes=5)
     summaries = harvester.harvest_range(start_time=offset_start, end_time=aligned_end)
 
     assert len(summaries) == 3
-    assert summaries[0]["window_start"] == offset_start
-    assert summaries[1]["window_start"] == aligned_start + timedelta(
+    assert summaries[0].window_start == offset_start
+    assert summaries[1].window_start == aligned_start + timedelta(
         minutes=harvester.window_minutes
     )
-    assert len(harvester.client.calls) - initial_calls == 1
+    assert len(client.calls) - initial_calls == 1
 
 
-def _insert_window(
-    harvester: WindowHarvestManager,
-    start: datetime,
-    end: datetime,
-    state: str = "success",
-) -> None:
-    key = harvester._window_key(start, end)
-    harvester.store.upsert(
-        WindowStatusRecord(
-            window_key=key,
-            window_start=start,
-            window_end=end,
-            state=state,
-            attempts=1,
-            last_error="Error" if state == "failed" else None,
-            record_ids=(),
-            updated_at=datetime.now(UTC),
-            tags=None,
-        )
+def test_init_with_optional_client(tmp_path: Path) -> None:
+    catalog_path = tmp_path / "catalog.db"
+    warehouse_path = tmp_path / "warehouse"
+    table = _create_table(
+        catalog_uri=f"sqlite:///{catalog_path}",
+        warehouse_path=warehouse_path,
+        namespace="harvest",
+        table_name=f"window_status_{uuid4().hex}",
+        catalog_name=f"catalog_{uuid4().hex}",
     )
-
-
-def test_coverage_report_with_failed_windows(tmp_path: Path) -> None:
-    harvester = _build_harvester(tmp_path, [])
-    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
-
-    # 12:00 - 12:15 : Success
-    _insert_window(harvester, start, start + timedelta(minutes=15), "success")
-
-    # 12:15 - 12:30 : Failed
-    _insert_window(
-        harvester,
-        start + timedelta(minutes=15),
-        start + timedelta(minutes=30),
-        "failed",
-    )
-
-    # 12:30 - 12:45 : Success
-    _insert_window(
-        harvester,
-        start + timedelta(minutes=30),
-        start + timedelta(minutes=45),
-        "success",
-    )
-
-    report = harvester.coverage_report(
-        range_start=start, range_end=start + timedelta(minutes=45)
-    )
-
-    # Total range is 45 minutes (0.75 hours)
-    # Covered range should be 30 minutes (0.5 hours) because of the failure
-    assert report.total_windows == 3
-    assert report.state_counts["success"] == 2
-    assert report.state_counts["failed"] == 1
-
-    assert report.coverage_hours == 0.5
-
-    assert len(report.coverage_gaps) == 1
-    gap = report.coverage_gaps[0]
-    assert gap.start == start + timedelta(minutes=15)
-    assert gap.end == start + timedelta(minutes=30)
-
-
-def test_coverage_report_with_missing_windows(tmp_path: Path) -> None:
-    harvester = _build_harvester(tmp_path, [])
-    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
-
-    # 12:00 - 12:15 : Success
-    _insert_window(harvester, start, start + timedelta(minutes=15), "success")
-
-    # 12:15 - 12:30 : Missing
-
-    # 12:30 - 12:45 : Success
-    _insert_window(
-        harvester,
-        start + timedelta(minutes=30),
-        start + timedelta(minutes=45),
-        "success",
-    )
-
-    report = harvester.coverage_report(
-        range_start=start, range_end=start + timedelta(minutes=45)
-    )
-
-    assert report.total_windows == 2
-    assert report.coverage_hours == 0.5
-
-    assert len(report.coverage_gaps) == 1
-    gap = report.coverage_gaps[0]
-    assert gap.start == start + timedelta(minutes=15)
-    assert gap.end == start + timedelta(minutes=30)
-
-
-def test_coverage_report_overlapping_success_and_failure(tmp_path: Path) -> None:
-    harvester = _build_harvester(tmp_path, [])
-    start = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
-
-    # 12:00 - 13:00 : Failed (60 min window)
-    _insert_window(harvester, start, start + timedelta(minutes=60), "failed")
-
-    # 12:00 - 12:15 : Success (15 min window)
-    _insert_window(harvester, start, start + timedelta(minutes=15), "success")
-
-    report = harvester.coverage_report(
-        range_start=start, range_end=start + timedelta(minutes=60)
-    )
-
-    # We have 2 windows.
-    # 12:00-12:15 is covered.
-    # 12:00-13:00 is failed.
-    # The coverage should be 15 minutes (0.25 hours).
-    # The gap should be 12:15 - 13:00.
-
-    assert report.total_windows == 2
-    assert report.coverage_hours == 0.25
-
-    # Gaps:
-    # 12:15 - 13:00
-    assert len(report.coverage_gaps) == 1
-    assert report.coverage_gaps[0].start == start + timedelta(minutes=15)
-    assert report.coverage_gaps[0].end == start + timedelta(minutes=60)
+    store = WindowStore(table)
+    manager = WindowHarvestManager(store=store, client=None)
+    assert manager.client is None
