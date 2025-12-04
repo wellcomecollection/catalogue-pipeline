@@ -1,12 +1,16 @@
 from collections.abc import Generator, Iterable
-from itertools import batched
 from typing import Any
 
 import elasticsearch.helpers
 from elasticsearch import Elasticsearch
 from models.pipeline.source.work import SourceWork
+from pydantic import BaseModel
 
-CHUNK_SIZE = 1000
+
+class TransformationError(BaseModel):
+    work_id: str | None
+    stage: str
+    detail: str
 
 
 class BaseSource:
@@ -25,31 +29,24 @@ class BaseTransformer:
             "Each transformer must implement a `transform` method."
         )
 
-    def _stream_nodes(self, number: int | None = None) -> Generator[SourceWork]:
+    def _stream_works(self, sample_size: int | None = None) -> Generator[SourceWork | TransformationError]:
         """
         Extracts work documents from the specified source and transforms them. The `source` must define
         a `stream_raw` method. Takes an optional parameter to only extract the first `number` documents.
         """
         counter = 0
 
-        for raw_node in self.source.stream_raw():
-            for transformed in self.transform(raw_node):
+        for raw_work in self.source.stream_raw():
+            for transformed in self.transform(raw_work):
                 yield transformed
                 counter += 1
     
                 if counter % 10000 == 0:
-                    print(f"Streamed {counter} nodes...")
-                if counter == number:
+                    print(f"Transformed {counter} documents...")
+                if counter == sample_size:
                     return
 
-        print(f"Streamed all {counter} nodes.")
-
-    def stream(self, sample_size: int | None = None) -> Generator:
-        """
-        Streams transformed entities (nodes or edges) as a generator. Useful for development and testing purposes.
-        """
-        entities = self._stream_nodes(sample_size)
-        yield from batched(entities, CHUNK_SIZE)
+        print(f"Transformed all {counter} documents.")
 
     def _generate_bulk_load_actions(
         self, records: Iterable[SourceWork], index_name: str
@@ -64,9 +61,16 @@ class BaseTransformer:
     def stream_to_source_index(
         self, es_client: Elasticsearch, index_name: str, sample_size: int | None = None
     ) -> tuple[int, list]:
+        # TODO: Handle errors and batching
+        for item in self._stream_works(sample_size):
+            if isinstance(item, TransformationError):
+                print(item)
+            
         actions = self._generate_bulk_load_actions(
-            self._stream_nodes(sample_size), index_name
+            self._stream_works(sample_size), index_name
         )
+        
+        print(list(actions)[0])
         
         return
         success_count, raw_errors = elasticsearch.helpers.bulk(

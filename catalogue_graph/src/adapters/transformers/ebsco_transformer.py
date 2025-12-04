@@ -5,7 +5,6 @@ from typing import Any
 import dateutil.parser
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.source.work import DeletedSourceWork, SourceWork, VisibleSourceWork
-from pydantic import BaseModel
 from pymarc import parse_xml_to_array
 
 from adapters.ebsco.models.marc import MarcRecord
@@ -13,16 +12,11 @@ from adapters.ebsco.transformers.ebsco_to_weco import (
     ebsco_source_work_state,
     transform_record,
 )
+from adapters.transformers.base_transformer import TransformationError
 from adapters.utils.adapter_store import AdapterStore
 
 from .base_transformer import BaseTransformer
 from .pa_source import PyArrowSource
-
-
-class TransformationError(BaseModel):
-    work_id: str | None
-    stage: str
-    detail: str
 
 
 class EbscoTransformer(BaseTransformer):
