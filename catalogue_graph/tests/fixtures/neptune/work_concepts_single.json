@@ -28,7 +28,7 @@
         "description": "Drugs that are manufactured, obtained, or sold illegally. They include prescription drugs obtained or sold without prescription and non-prescription drugs. Illicit drugs are widely distributed, tend to be grossly impure and may cause unexpected toxicity.\n    "
       }
     },
-    "other_source_concepts": [
+    "source_concepts": [
       {
         "~id": "Q10268802",
         "~entityType": "node",
@@ -74,7 +74,7 @@
         "description": "A central nervous system stimulant and sympathomimetic with actions and uses similar to DEXTROAMPHETAMINE. The smokable form is a drug of abuse and is referred to as crank, crystal, crystal meth, ice, and speed.\n    "
       }
     },
-    "other_source_concepts": [
+    "source_concepts": [
       {
         "~id": "sh85084377",
         "~entityType": "node",
@@ -131,7 +131,7 @@
         "alternative_labels": "Drugs--Prices and sale||Trafficking in narcotics||Trafficking in drugs||Traffic, Drug||Drug smuggling||Drug production, Illicit||Drug trafficking||Illicit drug production||Narcotic trafficking||Drug trade, Illicit||Smuggling of drugs||Narcotic traffic||Smuggling of narcotics||Illicit drug trade||Drug dealing||Narcotic trade"
       }
     },
-    "other_source_concepts": [
+    "source_concepts": [
       {
         "~id": "D064423",
         "~entityType": "node",
@@ -189,7 +189,7 @@
         "source": "lc-names"
       }
     },
-    "other_source_concepts": []
+    "source_concepts": []
   },
   {
     "concept": {
@@ -218,7 +218,7 @@
         "alternative_labels": "Methylamphetamine||Deoxyephedrine||Speed (Drug)||Phenylmethylaminopropane||Dimethylphenethylamine||Meth (Drug)"
       }
     },
-    "other_source_concepts": [
+    "source_concepts": [
       {
         "~id": "D008694",
         "~entityType": "node",
@@ -277,7 +277,7 @@
         "alternative_labels": "Uncle Fester"
       }
     },
-    "other_source_concepts": [
+    "source_concepts": [
       {
         "~id": "Q664975",
         "~entityType": "node",

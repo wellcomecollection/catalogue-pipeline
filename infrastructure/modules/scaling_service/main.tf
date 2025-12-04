@@ -9,6 +9,19 @@ locals {
   service_name = var.service_name == "" ? var.name : var.service_name
 }
 
+resource "null_resource" "task_replacement_trigger" {
+  # This resource doesn't do anything itself, but changing its
+  # "trigger" value will force a replacement of the ECS service,
+  # causing tasks to be restarted.
+  #
+  # We use this to force a redeployment of tasks when certain
+  # configuration changes that don't affect the task definition
+  # occur -- for example, changes to security groups.
+  triggers = {
+    trigger = sha256(join(",", var.trigger_values))
+  }
+}
+
 module "service" {
   source = "git::github.com/wellcomecollection/terraform-aws-ecs-service.git//modules/service?ref=v4.1.0"
 
@@ -63,6 +76,8 @@ module "task_definition" {
     [module.log_router_container.container_definition],
     var.container_definitions
   )
+
+  depends_on = [null_resource.task_replacement_trigger]
 }
 
 module "log_router_container" {
