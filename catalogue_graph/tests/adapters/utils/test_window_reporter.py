@@ -17,6 +17,7 @@ from adapters.utils.window_store import (
     WindowStatusRecord,
     WindowStore,
 )
+from adapters.utils.window_summary import WindowKey
 
 
 def _create_table(
@@ -64,8 +65,6 @@ def _insert_window(
     end: datetime,
     state: str = "success",
 ) -> None:
-    from adapters.utils.window_summary import WindowKey
-
     key = WindowKey.from_dates(start, end)
     store.upsert(
         WindowStatusRecord(

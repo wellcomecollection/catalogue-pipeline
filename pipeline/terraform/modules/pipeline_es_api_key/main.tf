@@ -50,7 +50,7 @@ resource "elasticstack_elasticsearch_security_api_key" "pipeline_service" {
 }
 
 module "pipeline_service_api_key_secrets" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
 
   deletion_mode = "IMMEDIATE"
 
@@ -60,7 +60,7 @@ module "pipeline_service_api_key_secrets" {
 }
 
 module "pipeline_catalogue_service_api_key_secrets" {
-  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.4.0"
+  source = "github.com/wellcomecollection/terraform-aws-secrets?ref=v1.5.0"
 
   count = var.expose_to_catalogue ? 1 : 0
 

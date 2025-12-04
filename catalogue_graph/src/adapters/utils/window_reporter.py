@@ -167,7 +167,6 @@ class WindowReporter:
             if successful_rows
             else None
         )
-
         return WindowCoverageReport(
             range_start=first_start,
             range_end=last_end,

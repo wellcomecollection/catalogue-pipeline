@@ -21,3 +21,4 @@ output "concepts_indexed_indices" { value = [for i in local.concepts_indexed_lis
 
 output "service_index_permissions" { value = local.service_index_permissions }
 output "pipeline_storage_es_service_secrets" { value = local.pipeline_storage_es_service_secrets }
+output "api_key_versions" { value = local.api_key_versions }
