@@ -87,6 +87,9 @@ def build_window_request(
     if enforce_lag:
         _enforce_lag(now, last_success_end)
 
+    # Log window coverage report
+    logging.info(report.summary())
+
     # Send notification if coverage gaps are detected
     if notifier:
         notifier.notify_if_gaps(

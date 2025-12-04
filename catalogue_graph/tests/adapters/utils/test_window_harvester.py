@@ -15,6 +15,7 @@ from pyiceberg.catalog.sql import SqlCatalog
 from pyiceberg.exceptions import NamespaceAlreadyExistsError
 from pyiceberg.table import Table as IcebergTable
 
+from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowCallback,
     WindowCallbackResult,
@@ -392,8 +393,6 @@ def test_harvest_range_reuses_aligned_windows_for_offset_range(tmp_path: Path) -
 
 
 def test_init_with_optional_client(tmp_path: Path) -> None:
-    from adapters.utils.window_generator import WindowGenerator
-
     catalog_path = tmp_path / "catalog.db"
     warehouse_path = tmp_path / "warehouse"
     table = _create_table(
