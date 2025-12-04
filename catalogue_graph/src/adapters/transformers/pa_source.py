@@ -20,6 +20,6 @@ class PyArrowSource:
             table = self.adapter_store.get_all_records()
             yield from table.to_pylist()
 
-    def stream_raw(self) -> Generator[Any]:
+    def stream_raw(self) -> Generator[dict]:
         """Returns a generator of raw data corresponding to an entity extracted from the source."""
         yield from self._get_rows()

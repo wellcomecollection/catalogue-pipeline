@@ -27,22 +27,20 @@ class BaseTransformer:
 
     def _stream_nodes(self, number: int | None = None) -> Generator[SourceWork]:
         """
-        Extracts nodes from the specified source and transforms them. The `source` must define a `stream_raw` method.
-        Takes an optional parameter to only extract the first `number` nodes.
+        Extracts work documents from the specified source and transforms them. The `source` must define
+        a `stream_raw` method. Takes an optional parameter to only extract the first `number` documents.
         """
         counter = 0
 
         for raw_node in self.source.stream_raw():
-            node = self.transform(raw_node)
-
-            if node:
-                yield node
+            for transformed in self.transform(raw_node):
+                yield transformed
                 counter += 1
-
+    
                 if counter % 10000 == 0:
                     print(f"Streamed {counter} nodes...")
-            if counter == number:
-                return
+                if counter == number:
+                    return
 
         print(f"Streamed all {counter} nodes.")
 
@@ -69,7 +67,7 @@ class BaseTransformer:
         actions = self._generate_bulk_load_actions(
             self._stream_nodes(sample_size), index_name
         )
-        print(list(actions))
+        
         return
         success_count, raw_errors = elasticsearch.helpers.bulk(
             es_client,

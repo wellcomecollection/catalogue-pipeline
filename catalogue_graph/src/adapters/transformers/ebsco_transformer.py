@@ -55,6 +55,8 @@ class EbscoTransformer(BaseTransformer):
             )
             return
 
+        assert len(marc_records) == 1
+
         for record in marc_records:
             try:
                 yield transform_record(record)
@@ -71,7 +73,7 @@ class EbscoTransformer(BaseTransformer):
     ) -> Generator[SourceWork | TransformationError]:
         work_id = row["id"]
         content = row.get("content")
-
+        
         if not content:
             yield self._transform_deleted(work_id)
         else:
