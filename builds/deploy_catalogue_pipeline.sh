@@ -57,10 +57,6 @@ ENV_TAG="env.$PIPELINE_DATE" "$ROOT/builds/update_ecr_image_tag.sh" \
   uk.ac.wellcome/matcher \
   uk.ac.wellcome/merger \
   uk.ac.wellcome/ingestor_images \
-  uk.ac.wellcome/ingestor_works \
-  uk.ac.wellcome/path_concatenator \
-  uk.ac.wellcome/batcher \
-  uk.ac.wellcome/relation_embedder \
   uk.ac.wellcome/transformer_calm \
   uk.ac.wellcome/transformer_mets \
   uk.ac.wellcome/transformer_miro \
@@ -73,8 +69,6 @@ then
   CLUSTER="catalogue-$PIPELINE_DATE" "$ROOT/builds/deploy_ecs_services.sh" \
     image_inferrer \
     ingestor_images \
-    ingestor_works \
-    r_embed_path_concatenator \
     transformer_calm \
     transformer_mets \
     transformer_miro \
@@ -87,7 +81,5 @@ then
     id_minter:id_minter_step_function \
     matcher:matcher \
     merger:merger \
-    batcher:r_embed_batcher \
-    relation_embedder:r_embed_embedder
 fi
 
