@@ -95,6 +95,19 @@ data "aws_iam_policy_document" "ssm_read" {
   }
 }
 
+# Allow publish to chatbot topic
+data "aws_iam_policy_document" "chatbot_topic_publish" {
+  statement {
+    actions = [
+      "sns:Publish"
+    ]
+
+    resources = [
+      local.chatbot_topic_arn
+    ]
+  }
+}
+
 # IAM Policy for State Machine to invoke Lambda functions
 resource "aws_iam_policy" "state_machine_lambda_policy" {
   name        = "axiell-adapter-state-machine-lambda-policy"
