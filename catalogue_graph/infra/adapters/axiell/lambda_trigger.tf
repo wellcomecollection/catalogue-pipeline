@@ -43,3 +43,8 @@ resource "aws_iam_role_policy" "trigger_lambda_s3_write" {
   role   = module.trigger_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.s3_write.json
 }
+
+resource "aws_iam_role_policy" "trigger_lambda_chatbot_topic_publish" {
+  role   = module.trigger_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.chatbot_topic_publish.json
+}
