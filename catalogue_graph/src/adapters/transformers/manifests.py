@@ -80,21 +80,20 @@ class ManifestWriter:
         self.bucket = bucket
         self.job_id = job_id
 
-    def write_success(self, batches_ids: list[list[str]]) -> S3Location:
-        key = PurePosixPath(self.prefix) / self.success_filename
+    def _write_lines(self, lines: Iterable[str], file_name: str) -> S3Location:
+        key = PurePosixPath(self.prefix) / file_name
         uri = f"s3://{self.bucket}/{key.as_posix()}"
         with smart_open.open(uri, "w", encoding="utf-8") as f:
-            for line in _success_lines(batches_ids, self.job_id):
+            for line in lines:
                 f.write(line + "\n")
-        return S3Location(bucket=self.bucket, key=key.as_posix())
+        
+        return S3Location(bucket=self.bucket, key=key.as_posix())        
+
+    def write_success(self, batches_ids: list[list[str]]) -> S3Location:
+        return self._write_lines(_success_lines(batches_ids, self.job_id), self.success_filename)
 
     def write_failures(self, errors: list[ErrorLine]) -> S3Location:
-        key = PurePosixPath(self.prefix) / self.failure_filename
-        uri = f"s3://{self.bucket}/{key.as_posix()}"
-        with smart_open.open(uri, "w", encoding="utf-8") as f:
-            for line in _failure_lines(errors):
-                f.write(line + "\n")
-        return S3Location(bucket=self.bucket, key=key.as_posix())
+        return self._write_lines(_failure_lines(errors), self.failure_filename)
 
     def build_manifest(
         self,

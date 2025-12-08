@@ -14,8 +14,7 @@ class PyArrowSource:
             for changeset_id in self.changeset_ids:
                 table = self.adapter_store.get_records_by_changeset(changeset_id)
                 yield from table.to_pylist()
-
-        if len(self.changeset_ids) == 0:
+        else:
             print("No changeset_id provided; performing full reindex of records.")
             table = self.adapter_store.get_all_records()
             yield from table.to_pylist()
