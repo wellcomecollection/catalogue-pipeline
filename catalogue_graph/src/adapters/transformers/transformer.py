@@ -16,7 +16,7 @@ from adapters.axiell import helpers as axiell_helpers
 from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
 from adapters.transformers.ebsco_transformer import EbscoTransformer
-from adapters.transformers.manifests import TransformerManifest
+from adapters.transformers.manifests import ManifestWriter, TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 
 
@@ -62,7 +62,7 @@ def handler(
     print(
         f"Writing to Elasticsearch index: {index_name} in pipeline {config.PIPELINE_DATE} ..."
     )
-    
+
     es_client = get_client(
         pipeline_date=config.PIPELINE_DATE,
         es_mode=es_mode,
@@ -70,22 +70,18 @@ def handler(
     )
     transformer.stream_to_index(es_client, index_name)
 
-    # writer = ManifestWriter(
-    #     job_id=event.job_id,
-    #     changeset_id=changeset_id,
-    #     bucket=config.S3_BUCKET,
-    #     prefix=config.BATCH_S3_PREFIX,
-    # )
-    # result = writer.build_manifest(
-    #     job_id=event.job_id,
-    #     batches_ids=batches_ids,
-    #     errors=error_lines,
-    #     success_count=total_success,
-    # )
-    # total_batches = len(batches_ids)
-    # total_ids = sum(len(b) for b in batches_ids)
-    # 
-    # return result
+    writer = ManifestWriter(
+        job_id=event.job_id,
+        changeset_ids=event.changeset_ids,
+        bucket=config.S3_BUCKET,
+        prefix=config.BATCH_S3_PREFIX,
+    )
+    result = writer.build_manifest(
+        job_id=event.job_id,
+        successful_ids=transformer.processed_ids - transformer.error_ids,
+        errors=transformer.errors,
+    )
+    return result
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
@@ -131,7 +127,7 @@ def main() -> None:
     event = TransformerEvent(
         transformer_type=args.transformer_type,
         changeset_ids=args.changeset_ids,
-        job_id=args.job_id or args.changeset_ids[0],
+        job_id=args.job_id or "||".join(args.changeset_ids),
     )
     response = handler(
         event, use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode

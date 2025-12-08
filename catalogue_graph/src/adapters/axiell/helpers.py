@@ -29,7 +29,7 @@ def build_adapter_table(use_rest_api_table: bool) -> IcebergTable:
             use_rest_api_table=False,
             db_name=config.LOCAL_DB_NAME,
         )
-    
+
     return get_iceberg_table(table_config)
 
 

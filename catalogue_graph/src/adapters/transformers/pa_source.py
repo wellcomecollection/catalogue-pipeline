@@ -9,7 +9,7 @@ class PyArrowSource:
         self.adapter_store = adapter_store
         self.changeset_ids = changeset_ids
 
-    def _get_rows(self) -> Generator[dict[str, Any]]:
+    def stream_raw(self) -> Generator[dict[str, Any]]:
         if self.changeset_ids:
             for changeset_id in self.changeset_ids:
                 table = self.adapter_store.get_records_by_changeset(changeset_id)
@@ -18,7 +18,3 @@ class PyArrowSource:
             print("No changeset_id provided; performing full reindex of records.")
             table = self.adapter_store.get_all_records()
             yield from table.to_pylist()
-
-    def stream_raw(self) -> Generator[dict]:
-        """Returns a generator of raw data corresponding to an entity extracted from the source."""
-        yield from self._get_rows()
