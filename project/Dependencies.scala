@@ -255,9 +255,6 @@ object CatalogueDependencies {
 
   val mergerDependencies: Seq[ModuleID] = Nil
 
-  val pathConcatenatorDependencies: Seq[ModuleID] =
-    WellcomeDependencies.messagingTypesafeLibrary
-
   val routerDependencies: Seq[ModuleID] =
     WellcomeDependencies.messagingTypesafeLibrary
 

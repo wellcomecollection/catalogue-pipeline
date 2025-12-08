@@ -39,7 +39,6 @@ steps:
       fi
 
     matrix:
-      - "batcher"
       - "calm_adapter"
       - "calm_deletion_checker"
       - "calm_indexer"
@@ -47,9 +46,7 @@ steps:
       - "matcher"
       - "merger"
       - "mets_adapter"
-      - "path_concatenator"
       - "reindex_worker"
-      - "relation_embedder"
       - "sierra_indexer"
       - "sierra_linker"
       - "sierra_merger"
@@ -80,7 +77,6 @@ steps:
       fi
 
     matrix:
-      - "ingestor_works"
       - "ingestor_images"
 
     agents:
