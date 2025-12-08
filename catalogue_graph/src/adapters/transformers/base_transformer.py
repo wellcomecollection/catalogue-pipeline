@@ -26,7 +26,6 @@ class BaseSource:
 class BaseTransformer:
     def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
-
         self.processed_ids = set()
         self.error_ids = set()
         self.errors: list[TransformationError] = []

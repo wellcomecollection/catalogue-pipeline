@@ -9,7 +9,6 @@ import json
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
-from utils.elasticsearch import get_client, get_standard_index_name
 
 from adapters.axiell import config as axiell_config
 from adapters.axiell import helpers as axiell_helpers
@@ -18,6 +17,7 @@ from adapters.ebsco import helpers as ebsco_helpers
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import ManifestWriter, TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
+from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
 class TransformerEvent(BaseModel):
@@ -26,16 +26,9 @@ class TransformerEvent(BaseModel):
     changeset_ids: list[str] = Field(default_factory=list)
 
 
-class TransformResult(BaseModel):
-    changeset_ids: list[str] = Field(default_factory=list)
-    indexed_count: int
-    errors: list[str]
-    job_id: str | None = None
-
-
 def handler(
     event: TransformerEvent,
-    es_mode: str = "private",
+    es_mode: ElasticsearchMode = "private",
     use_rest_api_table: bool = False,
 ) -> TransformerManifest:
     print(f"Processing event: {event}")
@@ -77,7 +70,6 @@ def handler(
         prefix=config.BATCH_S3_PREFIX,
     )
     result = writer.build_manifest(
-        job_id=event.job_id,
         successful_ids=transformer.processed_ids - transformer.error_ids,
         errors=transformer.errors,
     )

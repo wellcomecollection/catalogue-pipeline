@@ -34,6 +34,7 @@ class FailureManifest(BaseModel):
 
 class TransformerManifest(BaseModel):
     job_id: str
+    changeset_ids: list[str]
     successes: SuccessManifest
     failures: FailureManifest | None = None
 
@@ -72,6 +73,7 @@ class ManifestWriter:
         self.prefix = prefix
         self.bucket = bucket
         self.job_id = job_id
+        self.changeset_ids = changeset_ids
 
     def _write_lines(self, lines: Iterable[str], file_name: str) -> S3Location:
         key = PurePosixPath(self.prefix) / file_name
@@ -94,7 +96,6 @@ class ManifestWriter:
     def build_manifest(
         self,
         *,
-        job_id: str,
         successful_ids: set[str],
         errors: list[TransformationError],
     ) -> TransformerManifest:
@@ -106,7 +107,8 @@ class ManifestWriter:
                 count=len(errors), error_file_location=failure_loc
             )
         return TransformerManifest(
-            job_id=job_id,
+            changeset_ids=self.changeset_ids,
+            job_id=self.job_id,
             successes=SuccessManifest(
                 count=len(successful_ids), batch_file_location=success_loc
             ),
