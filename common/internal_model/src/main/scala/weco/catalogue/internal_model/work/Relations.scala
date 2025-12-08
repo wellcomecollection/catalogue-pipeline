@@ -40,3 +40,16 @@ case class Relation(
   numChildren: Int,
   numDescendents: Int
 )
+
+object SeriesRelation {
+  def apply(series: String): Relation =
+    Relation(
+      id = None,
+      title = Some(series),
+      collectionPath = None,
+      workType = WorkType.Series,
+      depth = 0,
+      numChildren = 0,
+      numDescendents = 0
+    )
+}
