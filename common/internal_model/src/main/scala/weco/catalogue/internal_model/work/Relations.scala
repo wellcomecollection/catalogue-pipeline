@@ -18,7 +18,7 @@ case class Relations(
   children: List[Relation] = Nil,
   siblingsPreceding: List[Relation] = Nil,
   siblingsSucceeding: List[Relation] = Nil
-) 
+)
 
 object Relations {
 
