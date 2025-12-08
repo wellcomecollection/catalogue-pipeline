@@ -3,8 +3,10 @@ from typing import Any
 
 from adapters.utils.adapter_store import AdapterStore
 
+from .base_transformer import BaseSource
 
-class PyArrowSource:
+
+class PyArrowSource(BaseSource):
     def __init__(self, adapter_store: AdapterStore, changeset_ids: list[str]):
         self.adapter_store = adapter_store
         self.changeset_ids = changeset_ids
