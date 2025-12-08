@@ -26,19 +26,19 @@ class BaseSource:
 class BaseTransformer:
     def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
-        self.processed_ids = set()
-        self.error_ids = set()
+        self.processed_ids: set[str] = set()
+        self.error_ids: set[str] = set()
         self.errors: list[TransformationError] = []
 
-    def add_error(self, exception: Exception | dict, stage: str, work_id: str) -> None:
+    def _add_error(self, exception: Exception | dict, stage: str, work_id: str) -> None:
         error = TransformationError(
             stage=stage, work_id=work_id, detail=str(exception)[:500]
         )
         self.errors.append(error)
         self.error_ids.add(work_id)
 
-    def transform(self, raw_node: Any) -> SourceWork | None:
-        """Accepts a raw work outputted by an adapter and returns a source work as a Pydantic model."""
+    def transform(self, raw_nodes: Iterable[Any]) -> Generator[SourceWork]:
+        """Transform a batch of raw works into SourceWork instances."""
         raise NotImplementedError(
             "Each transformer must implement a `transform` method."
         )
@@ -50,6 +50,7 @@ class BaseTransformer:
         """
         raw_works = self.source.stream_raw()
         for batch in batched(raw_works, 10_000):
+            self.processed_ids |= set(w["id"] for w in batch)
             transformed = list(self.transform(batch))
             print(
                 f"Successfully transformed {len(transformed)} works from a batch of {(len(batch))}..."
@@ -67,7 +68,12 @@ class BaseTransformer:
                 "_source": record.model_dump(),
             }
 
-    def stream_to_index(self, es_client: Elasticsearch, index_name: str):
+    def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
+        # Reset run-specific state so manifests reflect the current execution only
+        self.processed_ids.clear()
+        self.error_ids.clear()
+        self.errors.clear()
+
         transformed = self._stream_works()
         actions = self._generate_bulk_load_actions(transformed, index_name)
 
@@ -86,4 +92,4 @@ class BaseTransformer:
                 f"Successfully indexed {success_count} documents from a batch of {len(batch)}..."
             )
             for e in es_errors:
-                self.add_error(e, "index", e["index"]["_id"])
+                self._add_error(e, "index", e["index"]["_id"])

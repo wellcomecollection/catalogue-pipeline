@@ -3,8 +3,8 @@ import json
 import pytest
 
 import adapters.ebsco.config as adapter_config
-from adapters.ebsco.manifests import ManifestWriter
-from adapters.ebsco.models.manifests import ErrorLine
+from adapters.transformers.base_transformer import TransformationError
+from adapters.transformers.manifests import ManifestWriter
 from tests.mocks import MockSmartOpen
 
 
@@ -17,20 +17,19 @@ def _read_ndjson(uri: str) -> list[dict]:
 def test_manifest_writer_writes_success_only() -> None:
     writer = ManifestWriter(
         job_id="job123",
-        changeset_id="chgABC",
+        changeset_ids=["chgABC"],
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
     )
-    batches_ids = [
-        ["Work[ebsco-alt-lookup/id1]", "Work[ebsco-alt-lookup/id2]"],
-        ["Work[ebsco-alt-lookup/id3]"],
-    ]
-    manifest = writer.build_manifest(
-        job_id="job123", batches_ids=batches_ids, errors=[], success_count=3
-    )
+    success_ids = {
+        "Work[ebsco-alt-lookup/id1]",
+        "Work[ebsco-alt-lookup/id2]",
+        "Work[ebsco-alt-lookup/id3]",
+    }
+    manifest = writer.build_manifest(successful_ids=success_ids, errors=[])
 
     assert manifest.failures is None
-    assert manifest.successes.count == 3
+    assert manifest.successes.count == len(success_ids)
     expected_key = f"{adapter_config.BATCH_S3_PREFIX}/chgABC.job123.ids.ndjson"
     assert manifest.successes.batch_file_location.key == expected_key
     uri = (
@@ -38,39 +37,42 @@ def test_manifest_writer_writes_success_only() -> None:
         f"{manifest.successes.batch_file_location.key}"
     )
     lines = _read_ndjson(uri)
-    assert len(lines) == 2  # two batch lines
-    assert lines[0]["jobId"] == "job123"
-    assert lines[0]["sourceIdentifiers"] == [
-        "Work[ebsco-alt-lookup/id1]",
-        "Work[ebsco-alt-lookup/id2]",
-    ]
-    assert lines[1]["sourceIdentifiers"] == ["Work[ebsco-alt-lookup/id3]"]
+    assert lines  # at least one batch written
+    job_ids = {line["jobId"] for line in lines}
+    assert job_ids == {"job123"}
+    written_ids: set[str] = set()
+    for line in lines:
+        written_ids.update(line["sourceIdentifiers"])
+    assert written_ids == success_ids
 
 
 def test_manifest_writer_writes_failures() -> None:
     writer = ManifestWriter(
         job_id="job999",
-        changeset_id=None,  # triggers 'reindex' naming
+        changeset_ids=[],  # triggers 'reindex' naming
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
     )
 
-    error_lines = [
-        ErrorLine(id="e1", message="stage=transform; reason=parse_error"),
-        ErrorLine(
-            id="e2",
-            message="stage=index; status=400; error_type=mapper_parsing_exception",
+    errors = [
+        TransformationError(
+            work_id="Work[ebsco-alt-lookup/e1]",
+            stage="transform",
+            detail="reason=parse_error",
+        ),
+        TransformationError(
+            work_id="Work[ebsco-alt-lookup/e2]",
+            stage="index",
+            detail="status=400; error_type=mapper_parsing_exception",
         ),
     ]
 
     manifest = writer.build_manifest(
-        job_id="job999",
-        batches_ids=[["Work[ebsco-alt-lookup/idA]"]],
-        errors=error_lines,
-        success_count=1,
+        successful_ids={"Work[ebsco-alt-lookup/idA]"},
+        errors=errors,
     )
     assert manifest.failures is not None
-    assert manifest.failures.count == 2
+    assert manifest.failures.count == len(errors)
     # Check success file still written
     success_uri = (
         f"s3://{manifest.successes.batch_file_location.bucket}/"
@@ -85,10 +87,13 @@ def test_manifest_writer_writes_failures() -> None:
         f"{manifest.failures.error_file_location.key}"
     )
     failure_lines = _read_ndjson(failure_uri)
-    assert {line["id"] for line in failure_lines} == {"e1", "e2"}
-    messages = {line["id"]: line["message"] for line in failure_lines}
-    assert "reason=parse_error" in messages["e1"]
-    assert "error_type=mapper_parsing_exception" in messages["e2"]
+    assert {line["work_id"] for line in failure_lines} == {
+        "Work[ebsco-alt-lookup/e1]",
+        "Work[ebsco-alt-lookup/e2]",
+    }
+    details = {line["work_id"]: line["detail"] for line in failure_lines}
+    assert "reason=parse_error" in details["Work[ebsco-alt-lookup/e1]"]
+    assert "error_type=mapper_parsing_exception" in details["Work[ebsco-alt-lookup/e2]"]
     # Naming pattern for reindex without changeset
     assert manifest.successes.batch_file_location.key.startswith(
         f"{adapter_config.BATCH_S3_PREFIX}/reindex.job999.ids"
@@ -98,14 +103,11 @@ def test_manifest_writer_writes_failures() -> None:
 def test_manifest_writer_handles_empty_batches() -> None:
     writer = ManifestWriter(
         job_id="jobEmpty",
-        changeset_id="chgEmpty",
+        changeset_ids=["chgEmpty"],
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
     )
-    # Even with zero success_count we still write an (empty) success manifest file with 0 count
-    manifest = writer.build_manifest(
-        job_id="jobEmpty", batches_ids=[], errors=[], success_count=0
-    )
+    manifest = writer.build_manifest(successful_ids=set(), errors=[])
     assert manifest.successes.count == 0
     assert manifest.failures is None
     uri = (
@@ -113,7 +115,7 @@ def test_manifest_writer_handles_empty_batches() -> None:
         f"{manifest.successes.batch_file_location.key}"
     )
     lines = _read_ndjson(uri)
-    assert lines == []  # no batch lines written
+    assert lines == []  # no batch lines written for empty set
 
 
 @pytest.mark.parametrize(
@@ -142,16 +144,19 @@ def test_manifest_file_naming_patterns(
     """Ensure naming patterns match spec for both changeset & reindex cases."""
     writer = ManifestWriter(
         job_id=job_id,
-        changeset_id=changeset_id,
+        changeset_ids=[changeset_id] if changeset_id else [],
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
     )
-    # include an error to force failure file creation
     manifest = writer.build_manifest(
-        job_id=job_id,
-        batches_ids=[["Work[ebsco-alt-lookup/only1]"]],
-        errors=[ErrorLine(id="x", message="stage=transform; reason=parse_error")],
-        success_count=1,
+        successful_ids={"Work[ebsco-alt-lookup/only1]"},
+        errors=[
+            TransformationError(
+                work_id="Work[ebsco-alt-lookup/only1]",
+                stage="transform",
+                detail="reason=parse_error",
+            )
+        ],
     )
     assert manifest.successes.batch_file_location.key.endswith(expected_success)
     assert manifest.failures is not None

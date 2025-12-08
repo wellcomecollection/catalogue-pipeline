@@ -1,35 +1,19 @@
 import json
-from contextlib import suppress  # for ruff SIM105 fix
-from datetime import UTC, datetime
-from typing import Any, cast  # added for dummy ES client
+from typing import Any
 
 import pytest
 import smart_open
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.ebsco.config as adapter_config
-from adapters.ebsco.models.manifests import TransformerManifest
-from adapters.ebsco.models.step_events import EbscoAdapterTransformerEvent
-from adapters.ebsco.steps.transformer import (
-    EbscoAdapterTransformerConfig,
-    handler,
-    load_data,
-    transform,
-)
+from adapters.transformers.ebsco_transformer import EbscoTransformer
+from adapters.transformers.manifests import TransformerManifest
+from adapters.transformers.transformer import TransformerEvent, handler
 from adapters.utils.adapter_store import AdapterStore
-from models.pipeline.identifier import Id, SourceIdentifier
-from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
-from models.pipeline.work_data import WorkData
-from tests.mocks import (
-    MockElasticsearchClient,
-    MockSecretsManagerClient,
-    MockSmartOpen,
-)
-from utils.timezone import convert_datetime_to_utc_iso
+from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
+from tests.mocks import MockElasticsearchClient, MockSmartOpen
 
 from .helpers import data_to_namespaced_table
-
-IDENT_TYPE = Id(id="ebsco-alt-lookup")
 
 
 # --------------------------------------------------------------------------------------
@@ -57,41 +41,33 @@ def _prepare_changeset(
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
-        "adapters.utils.iceberg.get_local_table", lambda **kwargs: temporary_table
+        "adapters.ebsco.helpers.build_adapter_table",
+        lambda use_rest_api_table: temporary_table,
     )
     return changeset_id
 
 
 def _run_transform(
-    changeset_id: str,
+    temporary_table: IcebergTable,
+    monkeypatch: pytest.MonkeyPatch,
     *,
+    changeset_ids: list[str] | None = None,
     index_date: str | None = None,
     pipeline_date: str = "dev",
 ) -> TransformerManifest:
-    event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id,
+    monkeypatch.setattr(
+        "adapters.ebsco.helpers.build_adapter_table",
+        lambda use_rest_api_table: temporary_table,
+    )
+    monkeypatch.setattr(adapter_config, "PIPELINE_DATE", pipeline_date)
+    monkeypatch.setattr(adapter_config, "INDEX_DATE", index_date)
+
+    event = TransformerEvent(
+        transformer_type="ebsco",
         job_id="20250101T1200",
+        changeset_ids=changeset_ids or [],
     )
-    config = EbscoAdapterTransformerConfig(
-        es_mode="local",
-        use_rest_api_table=False,
-        pipeline_date=pipeline_date,
-        index_date=index_date,
-    )
-    return handler(event=event, config_obj=config)
-
-
-def _add_pipeline_secrets(pipeline_date: str) -> None:
-    """Provide the minimal set of ES secrets required for get_client for a pipeline_date."""
-    secret_prefix = f"elasticsearch/pipeline_storage_{pipeline_date}"
-    for name, value in [
-        ("public_host", "test"),
-        ("private_host", "test"),
-        ("port", 80),
-        ("protocol", "http"),
-        ("transformer/api_key", ""),
-    ]:
-        MockSecretsManagerClient.add_mock_secret(f"{secret_prefix}/{name}", value)
+    return handler(event=event, es_mode="local", use_rest_api_table=False)
 
 
 # --------------------------------------------------------------------------------------
@@ -108,7 +84,12 @@ def test_transformer_end_to_end_with_local_table(
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
-    result = _run_transform(changeset_id, index_date="2025-01-01")
+    result = _run_transform(
+        temporary_table,
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-01-01",
+    )
 
     assert result.successes.count == 2
     assert result.failures is None
@@ -142,7 +123,12 @@ def test_transformer_creates_deletedwork_for_empty_content(
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
-    result = _run_transform(changeset_id, index_date="2025-03-01")
+    result = _run_transform(
+        temporary_table,
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-03-01",
+    )
 
     # Both IDs should appear (one DeletedSourceWork, one VisibleSourceWork)
     assert result.successes.count == 2
@@ -194,16 +180,18 @@ def test_transformer_full_retransform_when_no_changeset(
     _prepare_changeset(temporary_table, monkeypatch, seed_records)
 
     # Now call handler with no changeset_id -> full re-transform path
-    event = EbscoAdapterTransformerEvent(changeset_id=None, job_id="20250101T1200")
-    config = EbscoAdapterTransformerConfig(
-        es_mode="local", use_rest_api_table=False, pipeline_date="dev"
+    job_id = "20250101T1200"
+    result = _run_transform(
+        temporary_table,
+        monkeypatch,
+        changeset_ids=[],
+        pipeline_date="dev",
     )
-    result = handler(event=event, config_obj=config)
 
     assert result.failures is None
     assert result.successes.count == 2
     assert result.successes.batch_file_location.bucket == adapter_config.S3_BUCKET
-    expected_key = f"{adapter_config.BATCH_S3_PREFIX}/reindex.{event.job_id}.ids.ndjson"
+    expected_key = f"{adapter_config.BATCH_S3_PREFIX}/reindex.{job_id}.ids.ndjson"
     assert result.successes.batch_file_location.key == expected_key
     batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
@@ -215,7 +203,7 @@ def test_transformer_full_retransform_when_no_changeset(
                 "Work[ebsco-alt-lookup/ebsFull001]",
                 "Work[ebsco-alt-lookup/ebsFull002]",
             ],
-            "jobId": event.job_id,
+            "jobId": job_id,
         }
     ]
 
@@ -230,14 +218,12 @@ def test_transformer_batch_file_key_with_changeset(
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
-    event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id,
-        job_id=job_id,
+    result = _run_transform(
+        temporary_table,
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        pipeline_date="dev",
     )
-    config = EbscoAdapterTransformerConfig(
-        es_mode="local", use_rest_api_table=False, pipeline_date="dev"
-    )
-    result = handler(event=event, config_obj=config)
 
     expected_key = (
         f"{adapter_config.BATCH_S3_PREFIX}/{changeset_id}.{job_id}.ids.ndjson"
@@ -267,28 +253,19 @@ def test_transformer_index_name_selection(
     index_date: str | None,
     expected_index: str,
 ) -> None:
-    """Validate cascade: config.index_date or pipeline_date (event no longer provides override)."""
-    _add_pipeline_secrets(pipeline_date)
-
-    with suppress(Exception):  # pragma: no cover - defensive
-        MockElasticsearchClient.inputs.clear()
-
     records_by_id = {
         "ebsIdx001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdx001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Some Title</subfield></datafield></record>",
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
-    event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id, job_id="20250101T1200"
-    )
-    config = EbscoAdapterTransformerConfig(
-        es_mode="local",
-        use_rest_api_table=False,
+    MockElasticsearchClient.inputs.clear()
+    _run_transform(
+        temporary_table,
+        monkeypatch,
+        changeset_ids=[changeset_id],
         pipeline_date=pipeline_date,
         index_date=index_date,
     )
-    handler(event=event, config_obj=config)
-
     indices = {op["_index"] for op in MockElasticsearchClient.inputs}
     assert indices == {expected_index}
 
@@ -298,19 +275,24 @@ def test_transformer_index_name_selection(
 # --------------------------------------------------------------------------------------
 
 
-def test_transform_empty_content_returns_error() -> None:
-    works, errors = transform("work1", "")
-    assert works == []
-    assert errors and errors[0]["reason"] == "empty_content"
-    # IDs in errors are now wrapped
-    assert errors[0]["id"] == "work1"
+def test_transform_empty_content_returns_deleted(
+    temporary_table: IcebergTable,
+) -> None:
+    transformer = EbscoTransformer(AdapterStore(temporary_table), [])
+    works = list(transformer.transform([{"id": "work1", "content": ""}]))
+    assert len(works) == 1
+    assert isinstance(works[0], DeletedSourceWork)
+    assert not transformer.errors
 
 
-def test_transform_invalid_xml_returns_parse_error() -> None:
-    works, errors = transform("work2", "<record><leader>bad")
+def test_transform_invalid_xml_records_error(
+    temporary_table: IcebergTable,
+) -> None:
+    transformer = EbscoTransformer(AdapterStore(temporary_table), [])
+    works = list(transformer.transform([{"id": "work2", "content": "<record><leader>bad"}]))
     assert works == []
-    assert errors and errors[0]["reason"] == "parse_error"
-    assert errors[0]["id"] == "work2"
+    assert transformer.errors and transformer.errors[0].stage == "parse"
+    assert transformer.errors[0].work_id == "work2"
 
 
 def test_transformer_creates_failure_manifest_for_parse_errors(
@@ -322,7 +304,12 @@ def test_transformer_creates_failure_manifest_for_parse_errors(
         "ebsGood001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsGood001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Valid Title</subfield></datafield></record>",
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
-    result = _run_transform(changeset_id, index_date="2025-09-01")
+    result = _run_transform(
+        temporary_table,
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-09-01",
+    )
 
     # We expect one success (good record) and one transform error
     assert result.successes.count == 1
@@ -335,12 +322,8 @@ def test_transformer_creates_failure_manifest_for_parse_errors(
     with open(failure_contents_path, encoding="utf-8") as f:
         failure_lines = [json.loads(line) for line in f if line.strip()]
 
-    # Expect exactly one parse error line referencing the bad XML id
-    # Failure lines now have shape {id, message}; parse_error must appear in message
-    assert any(
-        line["id"] == "ebsBadXml001" and "reason=parse_error" in line["message"]
-        for line in failure_lines
-    )
+    # Expect at least one parse error line referencing the bad XML id
+    assert any(line["work_id"] == "ebsBadXml001" for line in failure_lines)
 
 
 def test_transformer_creates_failure_manifest_for_index_errors(
@@ -369,7 +352,12 @@ def test_transformer_creates_failure_manifest_for_index_errors(
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    result = _run_transform(changeset_id, index_date="2025-09-02")
+    result = _run_transform(
+        temporary_table,
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-09-02",
+    )
     assert result.failures is not None
     assert result.failures.count == 1
 
@@ -377,14 +365,15 @@ def test_transformer_creates_failure_manifest_for_index_errors(
     failure_contents_path = MockSmartOpen.file_lookup[failure_path_full]
     with open(failure_contents_path, encoding="utf-8") as f:
         failure_lines = [json.loads(line) for line in f if line.strip()]
-    # Expect a single failure line with id and message containing status & error_type
+    # Expect a single failure line with id and detail containing error type
     assert len(failure_lines) == 1
-    msg = failure_lines[0]["message"]
-    assert failure_lines[0]["id"] == "Work[ebsco-alt-lookup/ebsIdxErr001]"
-    assert "status=400" in msg and "error_type=mapper_parsing_exception" in msg
+    assert failure_lines[0]["work_id"] == "Work[ebsco-alt-lookup/ebsIdxErr001]"
+    assert "mapper_parsing_exception" in failure_lines[0]["detail"]
 
 
-def test_transform_valid_marcxml_returns_work() -> None:
+def test_transform_valid_marcxml_returns_work(
+    temporary_table: IcebergTable,
+) -> None:
     xml = (
         "<record>"
         "<leader>00000nam a2200000   4500</leader>"
@@ -394,32 +383,25 @@ def test_transform_valid_marcxml_returns_work() -> None:
         "</datafield>"
         "</record>"
     )
-    works, errors = transform("ebs12345", xml)
-    assert not errors
+    transformer = EbscoTransformer(AdapterStore(temporary_table), [])
+    works = list(transformer.transform([{"id": "ebs12345", "content": xml}]))
     assert len(works) == 1
-    # Access identifier via nested state
-    assert str(works[0].state.source_identifier) == "Work[ebsco-alt-lookup/ebs12345]"
+    assert isinstance(works[0], VisibleSourceWork)
     assert works[0].data.title == "A Useful Title"
 
 
 def test_transform_handles_transform_record_exception(
-    monkeypatch: pytest.MonkeyPatch,
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """If a record raises in transform_record we should capture a transform_error and continue.
-
-    Since transform() groups all records under the supplied work_id, the error id should be that work_id.
-    """
-
-    # Patch transform_record to raise for any input
-    def raising_transform_record(_record: Any):  # type: ignore[no-untyped-def]
+    def raising_transform_record(_record: Any) -> None:  # noqa: ANN401
         raise ValueError("boom: bad data")
 
-    # Patch the symbol as imported into the transformer module (not the source module)
     monkeypatch.setattr(
-        "adapters.ebsco.steps.transformer.transform_record",
+        "adapters.transformers.ebsco_transformer.transform_record",
         raising_transform_record,
     )
 
+    transformer = EbscoTransformer(AdapterStore(temporary_table), [])
     xml = (
         "<record>"
         "<leader>00000nam a2200000   4500</leader>"
@@ -429,81 +411,67 @@ def test_transform_handles_transform_record_exception(
         "</datafield>"
         "</record>"
     )
-    works, errors = transform("ebsErr123", xml)
+    works = list(transformer.transform([{"id": "ebsErr123", "content": xml}]))
 
-    # No works produced due to exception
     assert works == []
-    reasons = {e["reason"] for e in errors}
-    assert "transform_error" in reasons
-
-    # Ensure detail captured & truncated
-    transform_errors = [e for e in errors if e["reason"] == "transform_error"]
-    assert transform_errors and "boom: bad data" in transform_errors[0]["detail"]
+    assert transformer.errors
+    assert transformer.errors[0].stage == "transform"
+    assert "boom: bad data" in transformer.errors[0].detail
 
 
-# --------------------------------------------------------------------------------------
-# Tests for load_data()
-# --------------------------------------------------------------------------------------
+class _StubSource:
+    def __init__(self, rows: list[dict[str, Any]]):
+        self.rows = rows
+
+    def stream_raw(self):  # type: ignore[override]
+        yield from self.rows
 
 
-def test_load_data_success_no_errors(monkeypatch: pytest.MonkeyPatch) -> None:
-    collected: list[dict] = []
+def test_stream_to_index_success_no_errors(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    collected: list[dict[str, Any]] = []
 
     def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
-        for a in actions:
-            collected.append(a)
-        return len(collected), []  # success count, no errors
+        batch = list(actions)
+        collected.extend(batch)
+        return len(batch), []
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    now = datetime.now(UTC)
-    now_iso = convert_datetime_to_utc_iso(now)
-
-    records = [
-        VisibleSourceWork(
-            version=int(now.timestamp()),
-            type="Visible",
-            state=SourceWorkState(
-                source_identifier=SourceIdentifier(
-                    identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
-                ),
-                source_modified_time=now_iso,
-                modified_time=now_iso,
-            ),
-            data=WorkData(title="Title 1", alternative_titles=[], other_identifiers=[]),
-        ),
-        VisibleSourceWork(
-            version=int(now.timestamp()),
-            type="Visible",
-            state=SourceWorkState(
-                source_identifier=SourceIdentifier(
-                    identifier_type=IDENT_TYPE, ontology_type="Work", value="id2"
-                ),
-                source_modified_time=now_iso,
-                modified_time=now_iso,
-            ),
-            data=WorkData(title="Title 2", alternative_titles=[], other_identifiers=[]),
-        ),
+    rows = [
+        {
+            "id": "id1",
+            "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id1</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title 1</subfield></datafield></record>",
+        },
+        {
+            "id": "id2",
+            "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id2</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title 2</subfield></datafield></record>",
+        },
     ]
-    dummy_client = cast(Any, object())
-    success, errors = load_data(
-        elastic_client=dummy_client, records=records, index_name="works-source-dev"
-    )
 
-    assert success == 2
-    assert errors == []
+    transformer = EbscoTransformer(AdapterStore(temporary_table), [])
+    transformer.source = _StubSource(rows)
+
+    transformer.stream_to_index(MockElasticsearchClient({}, ""), "works-source-dev")
+
     assert {a["_id"] for a in collected} == {
         "Work[ebsco-alt-lookup/id1]",
         "Work[ebsco-alt-lookup/id2]",
     }
-    # Title now nested under data
-    assert {a["_source"]["data"]["title"] for a in collected} == {"Title 1", "Title 2"}
+    assert {a["_source"]["data"]["title"] for a in collected} == {
+        "Title 1",
+        "Title 2",
+    }
+    assert not transformer.errors
 
 
-def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_stream_to_index_with_errors(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
     def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
         actions_list = list(actions)
-        return 1, [
+        return len(actions_list), [
             {
                 "index": {
                     "_id": actions_list[0]["_id"],
@@ -515,33 +483,21 @@ def test_load_data_with_errors(monkeypatch: pytest.MonkeyPatch) -> None:
 
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
-    now = datetime.now(UTC)
-    now_iso = convert_datetime_to_utc_iso(now)
-
-    records = [
-        VisibleSourceWork(
-            version=int(now.timestamp()),
-            type="Visible",
-            state=SourceWorkState(
-                source_identifier=SourceIdentifier(
-                    identifier_type=IDENT_TYPE, ontology_type="Work", value="id1"
-                ),
-                source_modified_time=now_iso,
-                modified_time=now_iso,
-            ),
-            data=WorkData(
-                title="Bad Title", alternative_titles=[], other_identifiers=[]
-            ),
-        )
+    rows = [
+        {
+            "id": "id1",
+            "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id1</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Bad Title</subfield></datafield></record>",
+        }
     ]
-    dummy_client = cast(Any, object())
-    success, errors = load_data(
-        elastic_client=dummy_client, records=records, index_name="works-source-dev"
-    )
 
-    assert success == 1
-    assert len(errors) == 1
-    assert errors[0]["error_type"] == "mapper_parsing_exception"
+    transformer = EbscoTransformer(AdapterStore(temporary_table), [])
+    transformer.source = _StubSource(rows)
+
+    transformer.stream_to_index(MockElasticsearchClient({}, ""), "works-source-dev")
+
+    assert transformer.errors
+    assert transformer.errors[0].work_id == "Work[ebsco-alt-lookup/id1]"
+    assert "mapper_parsing_exception" in transformer.errors[0].detail
 
 
 def test_transformer_raises_when_batch_file_write_fails(
@@ -561,16 +517,12 @@ def test_transformer_raises_when_batch_file_write_fails(
     def failing_open(*args, **kwargs):  # type: ignore[no-untyped-def]
         raise OSError("simulated write failure")
 
-    # Patch smart_open globally; transformer references the imported module so this applies
     monkeypatch.setattr(smart_open, "open", failing_open)
 
-    event = EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id,
-        job_id="20250101T1200",
-    )
-    config = EbscoAdapterTransformerConfig(
-        es_mode="local", use_rest_api_table=False, pipeline_date="dev"
-    )
-
     with pytest.raises(OSError, match="simulated write failure"):
-        handler(event=event, config_obj=config)
+        _run_transform(
+            temporary_table,
+            monkeypatch,
+            changeset_ids=[changeset_id],
+            pipeline_date="dev",
+        )

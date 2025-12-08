@@ -3,8 +3,6 @@ from collections.abc import Generator, Iterable
 from typing import Any
 
 import dateutil.parser
-from ingestor.models.shared.deleted_reason import DeletedReason
-from models.pipeline.source.work import DeletedSourceWork, SourceWork, VisibleSourceWork
 from pymarc import parse_xml_to_array
 from pymarc.record import Record
 
@@ -13,6 +11,8 @@ from adapters.ebsco.transformers.ebsco_to_weco import (
     transform_record,
 )
 from adapters.utils.adapter_store import AdapterStore
+from ingestor.models.shared.deleted_reason import DeletedReason
+from models.pipeline.source.work import DeletedSourceWork, SourceWork, VisibleSourceWork
 
 from .base_transformer import BaseTransformer
 from .pa_source import PyArrowSource
@@ -52,9 +52,7 @@ class EbscoTransformer(BaseTransformer):
         except Exception as e:
             self._add_error(e, "transform", work_id)
 
-    def transform(
-        self, rows: Iterable[dict[str, Any]]
-    ) -> Generator[SourceWork]:
+    def transform(self, rows: Iterable[dict[str, Any]]) -> Generator[SourceWork]:
         for row in rows:
             work_id, content = row["id"], row.get("content")
 

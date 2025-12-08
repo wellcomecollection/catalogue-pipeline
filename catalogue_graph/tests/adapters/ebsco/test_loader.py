@@ -4,16 +4,14 @@ import pytest
 from lxml import etree
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.models.step_events import (
-    EbscoAdapterLoaderEvent,
-    EbscoAdapterTransformerEvent,
-)
+from adapters.ebsco.models.step_events import EbscoAdapterLoaderEvent
 from adapters.ebsco.steps.loader import (
     EbscoAdapterLoaderConfig,
     extract_record_id,
     handler,
 )
 from adapters.ebsco.utils.tracking import ProcessedFileRecord
+from adapters.transformers.transformer import TransformerEvent
 from tests.mocks import MockSmartOpen
 
 
@@ -88,9 +86,10 @@ class TestLoaderHandler:
         """Loader should short-circuit using existing tracking file."""
         file_uri = "s3://bucket/path/file.xml"
         tracking_uri = f"{file_uri}.loaded.json"
-        prior_event = EbscoAdapterTransformerEvent(
+        prior_event = TransformerEvent(
+            transformer_type="ebsco",
             job_id="20250101T1200",
-            changeset_id="prev-change-123",
+            changeset_ids=["prev-change-123"],
         )
         tracking_record = ProcessedFileRecord(
             job_id="20250101T1200", step="loaded", payload=prior_event.model_dump()
@@ -103,8 +102,8 @@ class TestLoaderHandler:
         config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
         result = handler(event=event, config_obj=config)
 
-        assert isinstance(result, EbscoAdapterTransformerEvent)
-        assert result.changeset_id == "prev-change-123"
+        assert isinstance(result, TransformerEvent)
+        assert result.changeset_ids == ["prev-change-123"]
 
     def test_normal_processing_path_records_file(
         self, monkeypatch: pytest.MonkeyPatch, temporary_table: IcebergTable
@@ -127,8 +126,9 @@ class TestLoaderHandler:
         config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
         result = handler(event=event, config_obj=config)
 
-        assert isinstance(result, EbscoAdapterTransformerEvent)
-        assert result.changeset_id is not None
+        assert isinstance(result, TransformerEvent)
+        assert len(result.changeset_ids) == 1
+        assert result.changeset_ids[0] is not None
 
         tracking_uri = f"{file_uri}.loaded.json"
         assert tracking_uri in MockSmartOpen.file_lookup
@@ -137,4 +137,4 @@ class TestLoaderHandler:
             tracking_json = json.load(f)
         assert tracking_json["job_id"] == "20250101T1200"
         assert tracking_json["step"] == "loaded"
-        assert tracking_json["payload"]["changeset_id"] == result.changeset_id
+        assert tracking_json["payload"]["changeset_ids"] == result.changeset_ids
