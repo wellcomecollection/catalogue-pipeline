@@ -7,43 +7,20 @@ from itertools import batched
 from pathlib import PurePosixPath
 
 import smart_open
-from pydantic import BaseModel
 
 from adapters.transformers.base_transformer import TransformationError
+from adapters.transformers.models.manifests import (
+    FailureManifest,
+    S3Location,
+    SuccessBatchLine,
+    SuccessManifest,
+    TransformerManifest,
+)
 
 # Batch size for converting Arrow tables to Python objects before indexing
 # This must result in batches of output ids that fit in the 256kb item
 # limit for step function invocations (with some margin).
 BATCH_SIZE = 5_000
-
-
-class S3Location(BaseModel):
-    bucket: str
-    key: str
-
-
-class SuccessManifest(BaseModel):
-    count: int
-    batch_file_location: S3Location
-
-
-class FailureManifest(BaseModel):
-    count: int
-    error_file_location: S3Location
-
-
-class TransformerManifest(BaseModel):
-    job_id: str
-    changeset_ids: list[str]
-    successes: SuccessManifest
-    failures: FailureManifest | None = None
-
-
-# These are consumed by a Scala service, so for convenience
-# we keep the field names in camelCase
-class SuccessBatchLine(BaseModel):
-    sourceIdentifiers: list[str]
-    jobId: str
 
 
 def _success_lines(successful_ids: set[str], job_id: str) -> Iterable[str]:
