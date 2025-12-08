@@ -1,0 +1,693 @@
+{
+    "version": 36,
+    "data": {
+      "title": "The dream of a patient in Jungian analysis: a rocky arch, from which steps lead to a river flowing through a lofty tunnel; left, houses on an embankment; beyond, a fjord. Drawing by M.A.C.T., 197-.",
+      "otherIdentifiers": [
+        {
+          "identifierType": {
+            "id": "sierra-identifier"
+          },
+          "ontologyType": "Work",
+          "value": "1658296"
+        },
+        {
+          "identifierType": {
+            "id": "iconographic-number"
+          },
+          "ontologyType": "Work",
+          "value": "658296i"
+        },
+        {
+          "identifierType": {
+            "id": "miro-image-number"
+          },
+          "ontologyType": "Work",
+          "value": "L0045108"
+        }
+      ],
+      "alternativeTitles": [],
+      "format": {
+        "id": "k",
+        "label": "Pictures"
+      },
+      "description": "<p>Centre, human beings lit up as by a fire in a cave</p>",
+      "physicalDescription": "1 drawing : black ink ; sheet 33.8 x 24.7 cm",
+      "lettering": "For Alan ...",
+      "subjects": [
+        {
+          "id": {
+            "canonicalId": "bse2dtxc",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "lc-subjects"
+              },
+              "ontologyType": "Concept",
+              "value": "sh95006221"
+            },
+            "otherIdentifiers": [],
+            "type": "Identified"
+          },
+          "label": "Jungian psychology",
+          "concepts": [
+            {
+              "id": {
+                "canonicalId": "bse2dtxc",
+                "sourceIdentifier": {
+                  "identifierType": {
+                    "id": "lc-subjects"
+                  },
+                  "ontologyType": "Concept",
+                  "value": "sh95006221"
+                },
+                "otherIdentifiers": [],
+                "type": "Identified"
+              },
+              "label": "Jungian psychology",
+              "type": "Concept"
+            }
+          ]
+        },
+        {
+          "id": {
+            "canonicalId": "hjw49bkh",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "lc-subjects"
+              },
+              "ontologyType": "Concept",
+              "value": "sh85039483"
+            },
+            "otherIdentifiers": [],
+            "type": "Identified"
+          },
+          "label": "Dreams",
+          "concepts": [
+            {
+              "id": {
+                "canonicalId": "hjw49bkh",
+                "sourceIdentifier": {
+                  "identifierType": {
+                    "id": "lc-subjects"
+                  },
+                  "ontologyType": "Concept",
+                  "value": "sh85039483"
+                },
+                "otherIdentifiers": [],
+                "type": "Identified"
+              },
+              "label": "Dreams",
+              "type": "Concept"
+            }
+          ]
+        },
+        {
+          "id": {
+            "canonicalId": "wfkwqmmx",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "label-derived"
+              },
+              "ontologyType": "Person",
+              "value": "mcglashan, alan fleming, 1898-1997"
+            },
+            "otherIdentifiers": [],
+            "type": "Identified"
+          },
+          "label": "McGlashan, Alan Fleming, 1898-1997.",
+          "concepts": [
+            {
+              "id": {
+                "canonicalId": "wfkwqmmx",
+                "sourceIdentifier": {
+                  "identifierType": {
+                    "id": "label-derived"
+                  },
+                  "ontologyType": "Person",
+                  "value": "mcglashan, alan fleming, 1898-1997"
+                },
+                "otherIdentifiers": [],
+                "type": "Identified"
+              },
+              "label": "McGlashan, Alan Fleming, 1898-1997.",
+              "type": "Person"
+            }
+          ]
+        }
+      ],
+      "genres": [
+        {
+          "label": "Ink drawings",
+          "concepts": [
+            {
+              "id": {
+                "canonicalId": "jwdpwa6n",
+                "sourceIdentifier": {
+                  "identifierType": {
+                    "id": "label-derived"
+                  },
+                  "ontologyType": "Genre",
+                  "value": "ink drawings"
+                },
+                "otherIdentifiers": [],
+                "type": "Identified"
+              },
+              "label": "Ink drawings",
+              "type": "GenreConcept"
+            }
+          ]
+        },
+        {
+          "label": "Drawings",
+          "concepts": [
+            {
+              "id": {
+                "canonicalId": "yf2kfvzy",
+                "sourceIdentifier": {
+                  "identifierType": {
+                    "id": "label-derived"
+                  },
+                  "ontologyType": "Genre",
+                  "value": "drawings"
+                },
+                "otherIdentifiers": [],
+                "type": "Identified"
+              },
+              "label": "Drawings",
+              "type": "GenreConcept"
+            }
+          ]
+        }
+      ],
+      "contributors": [
+        {
+          "id": {
+            "type": "Unidentifiable"
+          },
+          "agent": {
+            "id": {
+              "canonicalId": "jq6qthre",
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "label-derived"
+                },
+                "ontologyType": "Person",
+                "value": "m.a.c.t"
+              },
+              "otherIdentifiers": [],
+              "type": "Identified"
+            },
+            "label": "M.A.C.T.",
+            "type": "Person"
+          },
+          "roles": [],
+          "primary": true
+        },
+        {
+          "id": {
+            "type": "Unidentifiable"
+          },
+          "agent": {
+            "id": {
+              "canonicalId": "wfkwqmmx",
+              "sourceIdentifier": {
+                "identifierType": {
+                  "id": "label-derived"
+                },
+                "ontologyType": "Person",
+                "value": "mcglashan, alan fleming, 1898-1997"
+              },
+              "otherIdentifiers": [],
+              "type": "Identified"
+            },
+            "label": "McGlashan, Alan Fleming, 1898-1997.",
+            "type": "Person"
+          },
+          "roles": [],
+          "primary": false
+        }
+      ],
+      "thumbnail": {
+        "url": "https://iiif.wellcomecollection.org/image/L0045108/full/300,/0/default.jpg",
+        "locationType": {
+          "id": "thumbnail-image"
+        },
+        "license": {
+          "id": "cc-by"
+        },
+        "accessConditions": []
+      },
+      "production": [
+        {
+          "label": "[between 1970 and 1979?]",
+          "places": [],
+          "agents": [],
+          "dates": [
+            {
+              "id": {
+                "type": "Unidentifiable"
+              },
+              "label": "[between 1970 and 1979?]",
+              "range": {
+                "from": "1970-01-01T00:00:00Z",
+                "to": "1979-12-31T23:59:59.999999999Z",
+                "label": "[between 1970 and 1979?]"
+              }
+            }
+          ]
+        }
+      ],
+      "languages": [
+        {
+          "id": "eng",
+          "label": "English"
+        }
+      ],
+      "notes": [
+        {
+          "noteType": {
+            "id": "credits",
+            "label": "Creator/production credits"
+          },
+          "contents": "Drawing by a patient of Dr Alan McGlashan"
+        },
+        {
+          "noteType": {
+            "id": "reference",
+            "label": "Reference"
+          },
+          "contents": "Wellcome Collection 658296i"
+        },
+        {
+          "noteType": {
+            "id": "general-note",
+            "label": "Notes"
+          },
+          "contents": "Possibly related to no. 658132i (summer 1977), which has a similar composition but showing a soft and idyllic scene instead of a harsh and cold one"
+        },
+        {
+          "noteType": {
+            "id": "related-material",
+            "label": "Related material"
+          },
+          "contents": "Related work : M.A.C.T. The dream of a patient in Jungian analysis: a valley, with a meandering path through trees beyond. Drawing by M.A.C.T., 1977. (Wcat)658132i"
+        }
+      ],
+      "items": [
+        {
+          "id": {
+            "canonicalId": "r8mz6j8c",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "sierra-system-number"
+              },
+              "ontologyType": "Item",
+              "value": "i15863207"
+            },
+            "otherIdentifiers": [
+              {
+                "identifierType": {
+                  "id": "sierra-identifier"
+                },
+                "ontologyType": "Item",
+                "value": "1586320"
+              }
+            ],
+            "type": "Identified"
+          },
+          "title": "A rocky arch, from which steps lead to a river flowing through a lofty tunnel; left, houses on an embankment; beyond, a fjord",
+          "locations": [
+            {
+              "locationType": {
+                "id": "closed-stores"
+              },
+              "label": "Closed stores",
+              "shelfmark": "EPB/ENCY/1.v1",
+              "accessConditions": [
+                {
+                  "method": {
+                    "type": "OnlineRequest"
+                  },
+                  "status": {
+                    "type": "Open"
+                  }
+                }
+              ],
+              "type": "PhysicalLocation"
+            },
+            {
+              "url": "https://iiif.wellcomecollection.org/image/L0045108/info.json",
+              "locationType": {
+                "id": "iiif-image"
+              },
+              "license": {
+                "id": "cc-by"
+              },
+              "credit": "Wellcome Collection",
+              "accessConditions": [
+                {
+                  "method": {
+                    "type": "ViewOnline"
+                  },
+                  "status": {
+                    "type": "Open"
+                  }
+                }
+              ],
+              "type": "DigitalLocation"
+            }
+          ]
+        }
+      ],
+      "holdings": [],
+      "collectionPath": {
+        "path": "657607i/658296i"
+      },
+      "referenceNumber": "658296i",
+      "imageData": [
+        {
+          "id": {
+            "canonicalId": "zswkgyan",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "miro-image-number"
+              },
+              "ontologyType": "Image",
+              "value": "L0045108"
+            },
+            "otherIdentifiers": []
+          },
+          "version": 1,
+          "locations": [
+            {
+              "url": "https://iiif.wellcomecollection.org/image/L0045108/info.json",
+              "locationType": {
+                "id": "iiif-image"
+              },
+              "license": {
+                "id": "cc-by"
+              },
+              "credit": "Wellcome Collection",
+              "accessConditions": [
+                {
+                  "method": {
+                    "type": "ViewOnline"
+                  },
+                  "status": {
+                    "type": "Open"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "workType": "Standard",
+      "formerFrequency": [],
+      "designation": []
+    },
+    "state": {
+      "sourceIdentifier": {
+        "identifierType": {
+          "id": "sierra-system-number"
+        },
+        "ontologyType": "Work",
+        "value": "b16582962"
+      },
+      "canonicalId": "c4zj63fx",
+      "mergedTime": "2025-10-31T13:25:53.036351Z",
+      "sourceModifiedTime": "2025-07-21T16:54:40Z",
+      "availabilities": [
+        {
+          "id": "closed-stores"
+        },
+        {
+          "id": "online"
+        }
+      ],
+      "relations": {
+        "ancestors": [
+          {
+            "title": "M.A.C.T.",
+            "workType": "Series",
+            "depth": 0,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "hvkwjymu",
+            "title": "Dreams of a patient in Jungian analysis. Drawings, 1967-1978.",
+            "collectionPath": {
+              "path": "657607i"
+            },
+            "workType": "Standard",
+            "depth": 0,
+            "numChildren": 20,
+            "numDescendents": 20
+          }
+        ],
+        "children": [],
+        "siblingsPreceding": [
+          {
+            "id": "kze3zrx5",
+            "title": "The dream of a patient in Jungian analysis: a volcanic landscape by moonlight. Drawing by M.A.C.T., 1967.",
+            "collectionPath": {
+              "path": "657607i/658095i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "s7vhq2ab",
+            "title": "The dream of a patient in Jungian analysis: left, a rocky wall; right a swirling wave; at the end, six people. Drawing by M.A.C.T., 1971.",
+            "collectionPath": {
+              "path": "657607i/658096i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "nfd9yyaz",
+            "title": "The dream of a patient in Jungian analysis: a railway tunnel, a train in the distance, and three people walking along next to the right-hand track. Drawing by M.A.C.T., 1971.",
+            "collectionPath": {
+              "path": "657607i/658097i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "qe2zgg5b",
+            "title": "The dream of a patient in Jungian analysis: a person on a bridge, surrounded by swirling waters in which is a big golden fish. Drawing by M.A.C.T., 1973.",
+            "collectionPath": {
+              "path": "657607i/658098i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "ywrcv7dr",
+            "title": "The dream of a patient in Jungian analysis: centre, a tree; right, steps down leading to a railway (left) and a stream (right). Drawing by M.A.C.T., 1975.",
+            "collectionPath": {
+              "path": "657607i/658099i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "zb4ptczj",
+            "title": "The dream of a patient in Jungian analysis: centre, a tree; left, a path; right, a bay. Drawing by M.A.C.T., 1976.",
+            "collectionPath": {
+              "path": "657607i/658121i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "kbgncnpn",
+            "title": "The dream of a patient in Jungian analysis: a tree, of which the roots form a cleft through which a path leads to a valley. Drawing by M.A.C.T., 1976.",
+            "collectionPath": {
+              "path": "657607i/658122i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "hd2xjrv5",
+            "title": "The dream of a patient in Jungian analysis: a valley, with a meandering path through trees beyond. Drawing by M.A.C.T., 1977.",
+            "collectionPath": {
+              "path": "657607i/658132i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "bst84389",
+            "title": "The dream of a patient in Jungian analysis: a view through a window towards fields, hills and woods, with the hands of a writer in the foreground. Drawing by M.A.C.T., 1977.",
+            "collectionPath": {
+              "path": "657607i/658146i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "t5uwh5ca",
+            "title": "The dream of a patient in Jungian analysis: a path on a high bridge, with higher arches and cliffs above. Drawing by M.A.C.T., 1977.",
+            "collectionPath": {
+              "path": "657607i/658151i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "cfe3crxw",
+            "title": "The dream of a patient in Jungian analysis: a steeply descending road, with telegraph poles on the left, a wall and fields on the right, huge mountainous waves in the distance. Drawing by M.A.C.T., 1978.",
+            "collectionPath": {
+              "path": "657607i/658287i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "uk2ewp7c",
+            "title": "The dream of a patient in Jungian analysis: a whorl with a black circle at the centre. Drawing by M.A.C.T., 1978-.",
+            "collectionPath": {
+              "path": "657607i/658288i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "kx4gevnj",
+            "title": "The dream of a patient in Jungian analysis: a railway tunnel, in which the rails at the far end form the trunk of a tree. Drawing by M.A.C.T., 197-.",
+            "collectionPath": {
+              "path": "657607i/658289i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "nb7t7v8a",
+            "title": "The dream of a patient in Jungian analysis: a tunnel, into which water cascades from the top into a swirling pool; small people look down from the top. Drawing by M.A.C.T., 197-.",
+            "collectionPath": {
+              "path": "657607i/658290i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "hp7g6qa7",
+            "title": "The dream of a patient in Jungian analysis: a path through trees, on which three cyclists ride. Drawing by M.A.C.T., 197-.",
+            "collectionPath": {
+              "path": "657607i/658291i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "utsu7nth",
+            "title": "The dream of a patient in Jungian analysis: an avalanche of rocks falls on to a road through mountains, breaking the roadside wall and blocking the progress of a car. Drawing by M.A.C.T., 197-.",
+            "collectionPath": {
+              "path": "657607i/658292i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "w7ufks6s",
+            "title": "The dream of a patient in Jungian analysis: a lofty series of viaducts rising above a valley, a man on horseback in the right foreground. Drawing by M.A.C.T., 197-.",
+            "collectionPath": {
+              "path": "657607i/658293i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "dyt29cbk",
+            "title": "The dream of a patient in Jungian analysis: a stony road through a ravine, with dead arched trees above and fields in the distance. Drawing by M.A.C.T., 197-.",
+            "collectionPath": {
+              "path": "657607i/658294i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          },
+          {
+            "id": "pvv4ep8n",
+            "title": "The dream of a patient in Jungian analysis: logs rolling along a stream through a tunnel, a person stepping from one log to another. Drawing by M.A.C.T., 197-.",
+            "collectionPath": {
+              "path": "657607i/658295i"
+            },
+            "workType": "Standard",
+            "depth": 1,
+            "numChildren": 0,
+            "numDescendents": 0
+          }
+        ],
+        "siblingsSucceeding": []
+      },
+      "mergeCandidates": [
+        {
+          "id": {
+            "canonicalId": "fksyqr6b",
+            "sourceIdentifier": {
+              "identifierType": {
+                "id": "miro-image-number"
+              },
+              "ontologyType": "Work",
+              "value": "L0045108"
+            },
+            "otherIdentifiers": []
+          },
+          "reason": "Miro/Sierra work"
+        }
+      ]
+    },
+    "redirectSources": [
+      {
+        "canonicalId": "fksyqr6b",
+        "sourceIdentifier": {
+          "identifierType": {
+            "id": "miro-image-number"
+          },
+          "ontologyType": "Work",
+          "value": "L0045108"
+        },
+        "otherIdentifiers": []
+      }
+    ],
+    "type": "Visible"
+  }

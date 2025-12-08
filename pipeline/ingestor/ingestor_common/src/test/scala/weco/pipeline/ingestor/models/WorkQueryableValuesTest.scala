@@ -15,7 +15,10 @@ class WorkQueryableValuesTest
     with WorkGenerators {
 
   lazy val testWorkQueryableValues: WorkQueryableValues = WorkQueryableValues(
-    testWork
+    canonicalId = testWork.state.canonicalId,
+    sourceIdentifier = testWork.sourceIdentifier,
+    data = testWork.data,
+    relations = testWork.state.relations
   )
 
   it("transforms works into queryable values") {
