@@ -105,12 +105,6 @@ lazy val ingestor_common = setupProject(
   externalDependencies = WellcomeDependencies.elasticsearchTypesafeLibrary
 )
 
-lazy val ingestor_works = setupProject(
-  project,
-  "pipeline/ingestor/ingestor_works",
-  localDependencies = Seq(ingestor_common)
-)
-
 lazy val ingestor_images = setupProject(
   project,
   "pipeline/ingestor/ingestor_images",
@@ -129,25 +123,6 @@ lazy val merger = setupProject(
   "pipeline/matcher_merger/merger",
   localDependencies = Seq(internal_model, matcher, pipeline_storage_typesafe, lambda),
   externalDependencies = CatalogueDependencies.mergerDependencies
-)
-
-lazy val path_concatenator = setupProject(
-  project,
-  "pipeline/relation_embedder/path_concatenator",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe),
-  externalDependencies = CatalogueDependencies.pathConcatenatorDependencies
-)
-
-lazy val relation_embedder = setupProject(
-  project,
-  "pipeline/relation_embedder/relation_embedder",
-  localDependencies = Seq(internal_model, pipeline_storage_typesafe, lambda)
-)
-
-lazy val batcher = setupProject(
-  project,
-  "pipeline/relation_embedder/batcher",
-  localDependencies = Seq(lambda)
 )
 
 lazy val reindex_worker = setupProject(
