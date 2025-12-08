@@ -8,6 +8,11 @@ from pathlib import PurePosixPath
 import smart_open
 from pydantic import BaseModel
 
+# Batch size for converting Arrow tables to Python objects before indexing
+# This must result in batches of output ids that fit in the 256kb item
+# limit for step function invocations (with some margin).
+BATCH_SIZE = 5_000
+
 
 class S3Location(BaseModel):
     bucket: str

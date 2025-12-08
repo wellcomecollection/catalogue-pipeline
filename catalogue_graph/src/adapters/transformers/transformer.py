@@ -19,11 +19,6 @@ from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
 
-# Batch size for converting Arrow tables to Python objects before indexing
-# This must result in batches of output ids that fit in the 256kb item
-# limit for step function invocations (with some margin).
-BATCH_SIZE = 5_000
-
 
 class TransformerEvent(BaseModel):
     transformer_type: Literal["axiell", "ebsco"]
@@ -64,16 +59,16 @@ def handler(
     # Determine index date from config override or fallback to pipeline date
     index_date = config.INDEX_DATE or config.PIPELINE_DATE
     index_name = get_standard_index_name(config.ES_INDEX_NAME, index_date)
+    print(
+        f"Writing to Elasticsearch index: {index_name} in pipeline {config.PIPELINE_DATE} ..."
+    )
+    
     es_client = get_client(
         pipeline_date=config.PIPELINE_DATE,
         es_mode=es_mode,
         api_key_name=config.ES_API_KEY_NAME,
     )
-    transformer.stream_to_source_index(es_client, index_name)
-
-    print(
-        f"Writing to Elasticsearch index: {index_name} in pipeline {config.PIPELINE_DATE} ..."
-    )
+    transformer.stream_to_index(es_client, index_name)
 
     # writer = ManifestWriter(
     #     job_id=event.job_id,

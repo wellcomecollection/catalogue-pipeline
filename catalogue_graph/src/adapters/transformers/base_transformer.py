@@ -1,14 +1,16 @@
 from collections.abc import Generator, Iterable
-from typing import Any
+from itertools import batched
+from typing import Any, cast
 
 import elasticsearch.helpers
 from elasticsearch import Elasticsearch
 from models.pipeline.source.work import SourceWork
 from pydantic import BaseModel
 
+ES_BULK_INDEX_BATCH_SIZE = 10_000
 
 class TransformationError(BaseModel):
-    work_id: str | None
+    work_id: str
     stage: str
     detail: str
 
@@ -22,31 +24,31 @@ class BaseSource:
 class BaseTransformer:
     def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
+        
+        self.processed_ids = set()
+        self.errors: list[TransformationError] = []
 
-    def transform(self, raw_node: Any) -> Any | None:
-        """Accepts a raw node from the source dataset and returns a transformed node as a Pydantic model."""
+    def add_error(self, exception: Exception | dict, stage: str, work_id: str) -> None:
+        error = TransformationError(stage=stage, work_id=work_id, detail=str(exception)[:500])
+        self.errors.append(error)
+
+    def transform(self, raw_node: Any) -> SourceWork | None:
+        """Accepts a raw work outputted by an adapter and returns a source work as a Pydantic model."""
         raise NotImplementedError(
             "Each transformer must implement a `transform` method."
         )
 
-    def _stream_works(self, sample_size: int | None = None) -> Generator[SourceWork | TransformationError]:
+    def _stream_works(self) -> Generator[SourceWork]:
         """
         Extracts work documents from the specified source and transforms them. The `source` must define
-        a `stream_raw` method. Takes an optional parameter to only extract the first `number` documents.
-        """
-        counter = 0
-
-        for raw_work in self.source.stream_raw():
-            for transformed in self.transform(raw_work):
-                yield transformed
-                counter += 1
-    
-                if counter % 10000 == 0:
-                    print(f"Transformed {counter} documents...")
-                if counter == sample_size:
-                    return
-
-        print(f"Transformed all {counter} documents.")
+        a `stream_raw` method.
+        """        
+        raw_works = self.source.stream_raw()
+        for batch in batched(raw_works, 10_000):
+            transformed = list(self.transform(batch))
+            print(f"Successfully transformed {len(transformed)} works from a batch of {(len(batch))}...")
+            
+            yield from transformed
 
     def _generate_bulk_load_actions(
         self, records: Iterable[SourceWork], index_name: str
@@ -58,41 +60,22 @@ class BaseTransformer:
                 "_source": record.model_dump(),
             }
 
-    def stream_to_source_index(
-        self, es_client: Elasticsearch, index_name: str, sample_size: int | None = None
-    ) -> tuple[int, list]:
-        # TODO: Handle errors and batching
-        for item in self._stream_works(sample_size):
-            if isinstance(item, TransformationError):
-                print(item)
+    def stream_to_index(self, es_client: Elasticsearch, index_name: str):
+        transformed = self._stream_works()
+        actions = self._generate_bulk_load_actions(transformed, index_name)
+        
+        for batch in batched(actions, ES_BULK_INDEX_BATCH_SIZE):
+            success_count, es_errors = elasticsearch.helpers.bulk(
+                es_client,
+                batch,
+                raise_on_error=False,
+                stats_only=False,
+            )
             
-        actions = self._generate_bulk_load_actions(
-            self._stream_works(sample_size), index_name
-        )
-        
-        print(list(actions)[0])
-        
-        return
-        success_count, raw_errors = elasticsearch.helpers.bulk(
-            es_client,
-            actions,
-            raise_on_error=False,
-            stats_only=False,
-        )
+            # Since we called `bulk` with `stats_only=False`, we know that es_errors is a list of dicts 
+            es_errors = cast(list[dict[str, Any]], es_errors)
 
-        errors = []
-        if raw_errors:
-            assert isinstance(raw_errors, list)
-            for err in raw_errors:
-                index_error = err.get("index", {})
-                errors.append(
-                    {
-                        "stage": "index",
-                        "id": index_error.get("_id"),
-                        "status": index_error.get("status"),
-                        "error_type": (index_error.get("error") or {}).get("type"),
-                        "raw": str(err)[:500],
-                    }
-                )
+            print(f"Successfully indexed {success_count} documents from a batch of {len(batch)}...")
+            for e in es_errors:
+                self.add_error(e, "index", e["index"]["_id"])
 
-        return success_count, errors
