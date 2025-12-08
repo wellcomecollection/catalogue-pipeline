@@ -80,6 +80,6 @@ then
     id_minter:id_minter \
     id_minter:id_minter_step_function \
     matcher:matcher \
-    merger:merger \
+    merger:merger
 fi
 
