@@ -17,16 +17,15 @@ from pydantic import BaseModel
 from pyiceberg.table import Table as IcebergTable
 
 from adapters.ebsco import helpers
-from adapters.ebsco.models.step_events import (
-    EbscoAdapterLoaderEvent,
-    EbscoAdapterTransformerEvent,
-)
+from adapters.ebsco.models.step_events import EbscoAdapterLoaderEvent
 from adapters.ebsco.utils.tracking import (
-    is_file_already_processed,
+    ProcessedFileRecord,
     record_processed_file,
 )
+from adapters.transformers.transformer import TransformerEvent
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
+from utils.aws import pydantic_from_s3_json
 
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
@@ -102,20 +101,18 @@ def data_to_pa_table(data: list[dict[str, str]]) -> pa.Table:
 
 def handler(
     event: EbscoAdapterLoaderEvent, config_obj: EbscoAdapterLoaderConfig
-) -> EbscoAdapterTransformerEvent:
+) -> TransformerEvent:
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
-    prior_record = is_file_already_processed(event.file_location, step="loaded")
+    uri = f"{event.file_location}.loaded.json"
+    prior_record = pydantic_from_s3_json(ProcessedFileRecord, uri, ignore_missing=True)
+
     if prior_record:
         print(
             "Source file previously processed; skipping loader work and forwarding prior changeset_id"
         )
-        prior_changeset = prior_record.get("changeset_id")
-        return EbscoAdapterTransformerEvent(
-            changeset_id=prior_changeset,
-            job_id=event.job_id,
-        )
+        return TransformerEvent.model_validate(prior_record.payload)
 
     table = helpers.build_adapter_table(config_obj.use_rest_api_table)
     with smart_open.open(event.file_location, "rb") as f:
@@ -126,15 +123,17 @@ def handler(
         job_id=event.job_id,
         file_location=event.file_location,
         step="loaded",
-        payload_obj=EbscoAdapterTransformerEvent(
-            changeset_id=changeset_id,
+        payload_obj=TransformerEvent(
+            transformer_type="ebsco",
             job_id=event.job_id,
+            changeset_ids=[changeset_id] if changeset_id else [],
         ),
     )
 
-    return EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id,
+    return TransformerEvent(
+        transformer_type="ebsco",
         job_id=event.job_id,
+        changeset_ids=[changeset_id] if changeset_id else [],
     )
 
 
@@ -144,7 +143,7 @@ def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, An
     ).model_dump()
 
 
-def local_handler() -> EbscoAdapterTransformerEvent:
+def local_handler() -> TransformerEvent:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
     parser.add_argument(
         "xmlfile",
@@ -176,12 +175,7 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 
 def main() -> None:
     print("Running loader handler...")
-    try:
-        local_handler()
-
-    except Exception as exc:  # surface failures clearly in local runs
-        print(f"Loader failed: {exc}")
-        raise
+    local_handler()
 
 
 if __name__ == "__main__":
