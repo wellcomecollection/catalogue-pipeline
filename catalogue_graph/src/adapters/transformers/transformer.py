@@ -69,7 +69,6 @@ def handler(
     table_client = AdapterStore(table)
     transformer = transformer_class(table_client, event.changeset_ids)
 
-    # Determine index date from config override or fallback to pipeline date
     index_date = config.INDEX_DATE or config.PIPELINE_DATE
     index_name = get_standard_index_name(config.ES_INDEX_NAME, index_date)
     print(
@@ -96,9 +95,7 @@ def handler(
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    request = TransformerEvent.model_validate(event)
-    response = handler(request)
-    return response.model_dump(mode="json")
+    return handler(TransformerEvent.model_validate(event)).model_dump(mode="json")
 
 
 def main() -> None:
