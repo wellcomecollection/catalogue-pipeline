@@ -1,4 +1,5 @@
 import json
+from collections.abc import Generator
 from typing import Any
 
 import pytest
@@ -14,7 +15,6 @@ from models.pipeline.source.work import DeletedSourceWork, VisibleSourceWork
 from tests.mocks import MockElasticsearchClient, MockSmartOpen
 
 from .helpers import data_to_namespaced_table
-
 
 # --------------------------------------------------------------------------------------
 # Helpers
@@ -116,7 +116,6 @@ def test_transformer_end_to_end_with_local_table(
 def test_transformer_creates_deletedwork_for_empty_content(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Note: empty string content indicates deletion
     records_by_id = {
         "ebsDel001": "",  # deletion marker
         "ebsDel002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsDel002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Alive Title</subfield></datafield></record>",
@@ -289,7 +288,9 @@ def test_transform_invalid_xml_records_error(
     temporary_table: IcebergTable,
 ) -> None:
     transformer = EbscoTransformer(AdapterStore(temporary_table), [])
-    works = list(transformer.transform([{"id": "work2", "content": "<record><leader>bad"}]))
+    works = list(
+        transformer.transform([{"id": "work2", "content": "<record><leader>bad"}])
+    )
     assert works == []
     assert transformer.errors and transformer.errors[0].stage == "parse"
     assert transformer.errors[0].work_id == "work2"
@@ -330,7 +331,6 @@ def test_transformer_creates_failure_manifest_for_index_errors(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """Simulate ES indexing errors and ensure they are captured in failure manifest."""
-    # Create a single valid record
     records_by_id = {
         "ebsIdxErr001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebsIdxErr001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Index Error Title</subfield></datafield></record>",
     }
@@ -393,7 +393,7 @@ def test_transform_valid_marcxml_returns_work(
 def test_transform_handles_transform_record_exception(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def raising_transform_record(_record: Any) -> None:  # noqa: ANN401
+    def raising_transform_record(_record: Any) -> None:
         raise ValueError("boom: bad data")
 
     monkeypatch.setattr(
@@ -423,22 +423,13 @@ class _StubSource:
     def __init__(self, rows: list[dict[str, Any]]):
         self.rows = rows
 
-    def stream_raw(self):  # type: ignore[override]
+    def stream_raw(self) -> Generator[dict, str, Any]:
         yield from self.rows
 
 
 def test_stream_to_index_success_no_errors(
     temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    collected: list[dict[str, Any]] = []
-
-    def fake_bulk(client, actions, raise_on_error, stats_only):  # type: ignore[no-untyped-def]
-        batch = list(actions)
-        collected.extend(batch)
-        return len(batch), []
-
-    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
-
     rows = [
         {
             "id": "id1",
@@ -455,11 +446,11 @@ def test_stream_to_index_success_no_errors(
 
     transformer.stream_to_index(MockElasticsearchClient({}, ""), "works-source-dev")
 
-    assert {a["_id"] for a in collected} == {
+    assert {a["_id"] for a in MockElasticsearchClient.inputs} == {
         "Work[ebsco-alt-lookup/id1]",
         "Work[ebsco-alt-lookup/id2]",
     }
-    assert {a["_source"]["data"]["title"] for a in collected} == {
+    assert {a["_source"]["data"]["title"] for a in MockElasticsearchClient.inputs} == {
         "Title 1",
         "Title 2",
     }

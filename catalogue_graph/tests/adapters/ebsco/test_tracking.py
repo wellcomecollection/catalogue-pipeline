@@ -8,18 +8,10 @@ from adapters.ebsco.utils.tracking import (
 from adapters.transformers.transformer import TransformerEvent
 from utils.aws import pydantic_from_s3_json
 
+from tests.mocks import MockSmartOpen
+
 
 class TestRecordProcessedFile:
-    def setup_method(self) -> None:
-        """Setup method run before each test."""
-        self.mock_smart_open = patch("utils.aws.smart_open.open").start()
-        self.mock_file = Mock()
-        self.mock_smart_open.return_value.__enter__.return_value = self.mock_file
-
-    def teardown_method(self) -> None:
-        """Teardown method run after each test."""
-        patch("utils.aws.smart_open.open").stop()
-
     def test_record_processed_file(self) -> None:
         job_id = "test-job-id"
         file_location = "s3://s3-bucket/is-a/file.xml"
@@ -34,20 +26,18 @@ class TestRecordProcessedFile:
 
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == job_id
-        assert record.payload["changeset_ids"] == ["I have changed"]  # type: ignore[index]
+        assert record.payload["changeset_ids"] == ["I have changed"]
         assert record.step == "loaded"
+
         # Verify smart_open was called with the correct S3 URI
-        self.mock_smart_open.assert_called_once_with(
-            "s3://s3-bucket/is-a/file.xml.loaded.json", "w", encoding="utf-8"
-        )
+        expected_uri = "s3://s3-bucket/is-a/file.xml.loaded.json"
+        with open(MockSmartOpen.file_lookup[expected_uri]) as f:
+            written = json.loads(f.read())
 
         # Verify the JSON was written correctly
-        # Order of keys in JSON dump isn't guaranteed; compare via parsed dict
-        written_args = self.mock_file.write.call_args[0][0]
-        data = json.loads(written_args)
-        assert data["job_id"] == job_id
-        assert data["step"] == "loaded"
-        assert data["payload"]["changeset_ids"] == ["I have changed"]
+        assert written["job_id"] == job_id
+        assert written["step"] == "loaded"
+        assert written["payload"]["changeset_ids"] == ["I have changed"]
 
 
 class TestIsFileAlreadyProcessed:

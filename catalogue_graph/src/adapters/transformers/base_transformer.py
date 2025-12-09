@@ -26,8 +26,7 @@ class BaseSource:
 class BaseTransformer:
     def __init__(self) -> None:
         self.source: BaseSource = BaseSource()
-        self.processed_ids: set[str] = set()
-        self.error_ids: set[str] = set()
+        self.successful_ids: list[str] = []
         self.errors: list[TransformationError] = []
 
     def _add_error(self, exception: Exception | dict, stage: str, work_id: str) -> None:
@@ -35,7 +34,6 @@ class BaseTransformer:
             stage=stage, work_id=work_id, detail=str(exception)[:500]
         )
         self.errors.append(error)
-        self.error_ids.add(work_id)
 
     def transform(self, raw_nodes: Iterable[Any]) -> Generator[SourceWork]:
         """Transform a batch of raw works into SourceWork instances."""
@@ -50,7 +48,6 @@ class BaseTransformer:
         """
         raw_works = self.source.stream_raw()
         for batch in batched(raw_works, 10_000):
-            self.processed_ids |= set(w["id"] for w in batch)
             transformed = list(self.transform(batch))
             print(
                 f"Successfully transformed {len(transformed)} works from a batch of {(len(batch))}..."
@@ -70,8 +67,7 @@ class BaseTransformer:
 
     def stream_to_index(self, es_client: Elasticsearch, index_name: str) -> None:
         # Reset run-specific state so manifests reflect the current execution only
-        self.processed_ids.clear()
-        self.error_ids.clear()
+        self.successful_ids.clear()
         self.errors.clear()
 
         transformed = self._stream_works()
@@ -91,5 +87,13 @@ class BaseTransformer:
             print(
                 f"Successfully indexed {success_count} documents from a batch of {len(batch)}..."
             )
+
+            error_ids = set()
             for e in es_errors:
-                self._add_error(e, "index", e["index"]["_id"])
+                error_id = e["index"]["_id"]
+                error_ids.add(error_id)
+                self._add_error(e, "index", error_id)
+
+            for action in batch:
+                if action["_id"] not in error_ids:
+                    self.successful_ids.append(action["_id"])

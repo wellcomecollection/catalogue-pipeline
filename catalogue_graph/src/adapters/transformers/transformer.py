@@ -88,7 +88,7 @@ def handler(
         prefix=config.BATCH_S3_PREFIX,
     )
     result = writer.build_manifest(
-        successful_ids=transformer.processed_ids - transformer.error_ids,
+        successful_ids=transformer.successful_ids,
         errors=transformer.errors,
     )
     return result
