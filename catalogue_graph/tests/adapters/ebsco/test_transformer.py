@@ -1,13 +1,15 @@
 import json
 from collections.abc import Generator
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import pytest
 import smart_open
+from elasticsearch import Elasticsearch
 from pyiceberg.table import Table as IcebergTable
 
 import adapters.ebsco.config as adapter_config
+from adapters.transformers.base_transformer import BaseSource
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import TransformerManifest
 from adapters.transformers.transformer import TransformerEvent, handler
@@ -462,11 +464,11 @@ def test_transform_handles_transform_record_exception(
     assert "boom: bad data" in transformer.errors[0].detail
 
 
-class _StubSource:
+class _StubSource(BaseSource):
     def __init__(self, rows: list[dict[str, Any]]):
         self.rows = rows
 
-    def stream_raw(self) -> Generator[dict, str, Any]:
+    def stream_raw(self) -> Generator[dict]:
         yield from self.rows
 
 
@@ -487,7 +489,8 @@ def test_stream_to_index_success_no_errors(
     transformer = EbscoTransformer(AdapterStore(temporary_table), [])
     transformer.source = _StubSource(rows)
 
-    transformer.stream_to_index(MockElasticsearchClient({}, ""), "works-source-dev")
+    es_client = MockElasticsearchClient({}, "")
+    transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
 
     assert {a["_id"] for a in MockElasticsearchClient.inputs} == {
         "Work[ebsco-alt-lookup/id1]",
@@ -527,7 +530,8 @@ def test_stream_to_index_with_errors(
     transformer = EbscoTransformer(AdapterStore(temporary_table), [])
     transformer.source = _StubSource(rows)
 
-    transformer.stream_to_index(MockElasticsearchClient({}, ""), "works-source-dev")
+    es_client = MockElasticsearchClient({}, "")
+    transformer.stream_to_index(cast(Elasticsearch, es_client), "works-source-dev")
 
     assert transformer.errors
     assert transformer.errors[0].work_id == "Work[ebsco-alt-lookup/id1]"
