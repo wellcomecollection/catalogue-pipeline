@@ -95,6 +95,23 @@ data "aws_iam_policy_document" "ssm_read" {
   }
 }
 
+# Allow emitting custom CloudWatch metrics
+data "aws_iam_policy_document" "cloudwatch_put_metric_data" {
+  statement {
+    actions = [
+      "cloudwatch:PutMetricData"
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "cloudwatch:namespace"
+      values   = ["catalogue_graph_pipeline"]
+    }
+  }
+}
+
 # Allow publish to chatbot topic
 data "aws_iam_policy_document" "chatbot_topic_publish" {
   statement {

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 from typing import cast
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from lxml import etree
@@ -204,6 +204,58 @@ def test_execute_loader_errors_when_no_windows(
 
         with pytest.raises(RuntimeError):
             loader.execute_loader(req, runtime=runtime)
+
+
+def test_handler_publishes_loader_report(
+    temporary_table: IcebergTable,
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    req = _request()
+    summary = WindowSummary.model_validate(
+        {
+            "window_key": f"{req.window.start_time.isoformat()}_{req.window.end_time.isoformat()}",
+            "window_start": req.window.start_time,
+            "window_end": req.window.end_time,
+            "state": "success",
+            "attempts": 1,
+            "record_ids": ["id-1"],
+            "last_error": None,
+            "updated_at": req.window.end_time,
+            "tags": {
+                "job_id": req.job_id,
+                "changeset_id": "changeset-123",
+                "record_ids_changed": '["id-1"]',
+            },
+            "changeset_id": "changeset-123",
+        }
+    )
+    table_client = AdapterStore(
+        temporary_table, default_namespace=loader.AXIELL_NAMESPACE
+    )
+    store = WindowStore(temporary_window_status_table)
+    runtime = _runtime_with(table_client=table_client, store=store)
+
+    mock_report = MagicMock()
+
+    with (
+        patch.object(loader.WindowHarvestManager, "harvest_range") as mock_harvest,
+        patch.object(loader.AxiellLoaderReport, "from_loader") as mock_from_loader,
+    ):
+        mock_harvest.return_value = [summary]
+        mock_from_loader.return_value = mock_report
+
+        response = loader.handler(req, runtime=runtime)
+
+    mock_harvest.assert_called_once_with(
+        start_time=req.window.start_time,
+        end_time=req.window.end_time,
+        max_windows=req.max_windows,
+        reprocess_successful_windows=False,
+    )
+    mock_from_loader.assert_called_once_with(req, response)
+    mock_report.publish.assert_called_once()
+    assert response.changed_record_count == 1
+    assert response.changeset_ids == ["changeset-123"]
 
 
 def test_window_record_writer_persists_window(temporary_table: IcebergTable) -> None:
