@@ -33,7 +33,9 @@ class BaseTransformer:
         error = TransformationError(
             stage=stage, work_id=work_id, detail=str(exception)[:500]
         )
-        self.errors.append(error)
+        # Only keep track of the first 1000 errors to cap manifest file sizes
+        if len(self.errors) < 1_000:
+            self.errors.append(error)
 
     def transform(self, raw_nodes: Iterable[Any]) -> Generator[SourceWork]:
         """Transform a batch of raw works into SourceWork instances."""
