@@ -6,7 +6,7 @@ import weco.catalogue.internal_model.identifiers.{
   DataState,
   SourceIdentifier
 }
-import weco.catalogue.internal_model.work.{Relations, Work, WorkData, WorkState}
+import weco.catalogue.internal_model.work.{Relations, WorkData}
 
 case class WorkQueryableValues(
   @JsonKey("collectionPath.label") collectionPathLabel: Option[String],
@@ -80,13 +80,4 @@ case object WorkQueryableValues {
         data.subjects.flatMap(_.concepts).map(_.label).map(queryableLabel),
       title = data.title
     )
-
-  def apply(
-    work: Work.Visible[WorkState.Denormalised]
-  ): WorkQueryableValues = WorkQueryableValues(
-    canonicalId = work.state.canonicalId,
-    sourceIdentifier = work.sourceIdentifier,
-    data = work.data,
-    relations = work.state.relations
-  )
 }
