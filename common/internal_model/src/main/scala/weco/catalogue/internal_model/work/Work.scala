@@ -229,26 +229,6 @@ object WorkState {
     // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
     val modifiedTime: Instant = mergedTime
   }
-
-  case class Denormalised(
-    sourceIdentifier: SourceIdentifier,
-    canonicalId: CanonicalId,
-    mergedTime: Instant,
-    sourceModifiedTime: Instant,
-    availabilities: Set[Availability],
-    relations: Relations = Relations.none,
-    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil
-  ) extends WorkState {
-
-    type WorkDataState = DataState.Identified
-    type TransitionArgs = Relations
-
-    def id = canonicalId.toString
-
-    // This is used to order updates in pipeline-storage.
-    // See https://github.com/wellcomecollection/docs/tree/main/rfcs/038-matcher-versioning
-    val modifiedTime: Instant = mergedTime
-  }
 }
 
 /** The WorkFsm contains all possible transitions between work states.
@@ -295,26 +275,4 @@ object WorkFsm {
 
     def redirect(redirect: IdState.Identified): IdState.Identified = redirect
   }
-
-  implicit val mergedToDenormalised =
-    new Transition[Merged, Denormalised] {
-      def state(
-        state: Merged,
-        data: WorkData[DataState.Identified],
-        relations: Relations
-      ): Denormalised =
-        Denormalised(
-          sourceIdentifier = state.sourceIdentifier,
-          canonicalId = state.canonicalId,
-          mergedTime = state.mergedTime,
-          sourceModifiedTime = state.sourceModifiedTime,
-          availabilities = state.availabilities,
-          relations = state.relations + relations,
-          mergeCandidates = state.mergeCandidates
-        )
-
-      def data(data: WorkData[DataState.Identified]) = data
-
-      def redirect(redirect: IdState.Identified) = redirect
-    }
 }

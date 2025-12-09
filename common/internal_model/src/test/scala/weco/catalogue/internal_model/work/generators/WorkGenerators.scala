@@ -68,29 +68,6 @@ trait WorkGenerators
     )
   }
 
-  def denormalisedWork(
-    sourceIdentifier: SourceIdentifier = createSourceIdentifier,
-    canonicalId: CanonicalId = createCanonicalId,
-    modifiedTime: Instant = randomInstant,
-    relations: Relations = Relations.none,
-    mergeCandidates: List[MergeCandidate[IdState.Identified]] = Nil
-  ): Work.Visible[Denormalised] = {
-    val data = initData[DataState.Identified]
-    Work.Visible[Denormalised](
-      state = Denormalised(
-        sourceIdentifier = sourceIdentifier,
-        canonicalId = canonicalId,
-        mergedTime = modifiedTime,
-        sourceModifiedTime = modifiedTime,
-        availabilities = Availabilities.forWorkData(data),
-        relations = relations,
-        mergeCandidates = mergeCandidates
-      ),
-      data = data,
-      version = createVersion
-    )
-  }
-
   def identifiedWork(
     sourceIdentifier: SourceIdentifier = createSourceIdentifier,
     canonicalId: CanonicalId = createCanonicalId,
@@ -113,9 +90,6 @@ trait WorkGenerators
 
   def mergedWorks(count: Int): List[Work.Visible[Merged]] =
     (1 to count).map(_ => mergedWork()).toList
-
-  def denormalisedWorks(count: Int): List[Work.Visible[Denormalised]] =
-    (1 to count).map(_ => denormalisedWork()).toList
 
   def identifiedWorks(count: Int): List[Work.Visible[Identified]] =
     (1 to count).map(_ => identifiedWork()).toList
@@ -318,9 +292,6 @@ trait WorkGenerators
       (state: State, _: WorkData[State#WorkDataState]) => state
 
     implicit val updateIdentifiedState: UpdateState[Identified] = identity
-    implicit val updateDenormalisedState: UpdateState[Denormalised] =
-      (state: Denormalised, data: WorkData[DataState.Identified]) =>
-        state.copy(availabilities = Availabilities.forWorkData(data))
     implicit val updateMergedState: UpdateState[Merged] =
       (state: Merged, data: WorkData[DataState.Identified]) =>
         state.copy(availabilities = Availabilities.forWorkData(data))

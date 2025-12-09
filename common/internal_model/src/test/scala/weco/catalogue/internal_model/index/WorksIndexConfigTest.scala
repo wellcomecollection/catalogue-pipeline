@@ -36,8 +36,6 @@ class WorksIndexConfigTest
   // With IdentifiedWork, that means that it never actually completes.
   implicit val noShrinkSource = Shrink.shrinkAny[Work[WorkState.Source]]
   implicit val noShrinkMerged = Shrink.shrinkAny[Work[WorkState.Merged]]
-  implicit val noShrinkDenormalised =
-    Shrink.shrinkAny[Work[WorkState.Denormalised]]
   implicit val noShrinkIdentified = Shrink.shrinkAny[Work[WorkState.Identified]]
 
   implicit val badObjectEncoder: Encoder[BadTestObject] = deriveEncoder
@@ -69,16 +67,6 @@ class WorksIndexConfigTest
           forAll {
             mergedWork: Work[WorkState.Merged] =>
               assertWorkCanBeIndexed(mergedWork)
-          }
-      }
-    }
-
-    it("WorkState.Denormalised") {
-      withLocalDenormalisedWorksIndex {
-        implicit index =>
-          forAll {
-            denormalisedWork: Work[WorkState.Denormalised] =>
-              assertWorkCanBeIndexed(denormalisedWork)
           }
       }
     }
