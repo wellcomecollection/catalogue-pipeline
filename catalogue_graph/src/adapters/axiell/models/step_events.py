@@ -1,8 +1,9 @@
 from datetime import datetime
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from adapters.utils.adapter_events import BaseAdapterEvent
+from adapters.utils.window_summary import WindowSummary
 from models.events import IncrementalWindow
 
 
@@ -17,6 +18,13 @@ class AxiellAdapterLoaderEvent(BaseAdapterEvent):
     max_windows: int | None = None
     window_minutes: int | None = None
     allow_partial_final_window: bool | None = None
+
+
+class LoaderResponse(BaseModel):
+    summaries: list[WindowSummary]
+    changeset_ids: list[str] = Field(default_factory=list)
+    changed_record_count: int
+    job_id: str
 
 
 class AxiellAdapterTransformerEvent(BaseAdapterEvent):

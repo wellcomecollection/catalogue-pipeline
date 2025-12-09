@@ -11,21 +11,22 @@ from datetime import datetime
 from typing import Any
 
 from oai_pmh_client.client import OAIClient
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from adapters.axiell import config, helpers
 from adapters.axiell.clients import build_oai_client
 from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
+    LoaderResponse,
 )
 from adapters.axiell.record_writer import WindowRecordWriter
+from adapters.axiell.reporting import AxiellLoaderReport
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowHarvestManager,
 )
 from adapters.utils.window_store import WindowStore
-from adapters.utils.window_summary import WindowSummary
 
 AXIELL_NAMESPACE = "axiell"
 
@@ -36,13 +37,6 @@ class AxiellAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
     window_minutes: int | None = None
     allow_partial_final_window: bool = False
-
-
-class LoaderResponse(BaseModel):
-    summaries: list[WindowSummary]
-    changeset_ids: list[str] = Field(default_factory=list)
-    changed_record_count: int
-    job_id: str
 
 
 def _format_window_range(start: datetime, end: datetime) -> str:
@@ -151,7 +145,12 @@ def execute_loader(
 def handler(
     event: AxiellAdapterLoaderEvent, *, runtime: LoaderRuntime | None = None
 ) -> LoaderResponse:
-    return execute_loader(event, runtime=runtime)
+    response = execute_loader(event, runtime=runtime)
+
+    report = AxiellLoaderReport.from_loader(event, response)
+    report.publish()
+
+    return response
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:

@@ -8,11 +8,11 @@ from ingestor.models.step_events import (
     IngestorStepEvent,
 )
 from models.events import (
-    BasePipelineEvent,
     BulkLoaderEvent,
     GraphPipelineEvent,
     IncrementalGraphRemoverEvent,
 )
+from models.incremental_window import IncrementalWindow
 from models.neptune_bulk_loader import BulkLoadStatusResponse
 from utils.aws import pydantic_to_s3_json
 
@@ -22,7 +22,9 @@ class PipelineMetric(BaseModel):
     value: typing.Any
 
 
-class PipelineReport(BasePipelineEvent):
+class PipelineReport(BaseModel):
+    window: IncrementalWindow | None = None
+    publish_to_s3: bool = True
     label: ClassVar[str]
 
     @property
@@ -52,7 +54,9 @@ class PipelineReport(BasePipelineEvent):
 
     def publish(self) -> None:
         """Write the report to S3 and publish all metrics."""
-        pydantic_to_s3_json(self, self.s3_uri)
+        if self.publish_to_s3:
+            pydantic_to_s3_json(self, self.s3_uri)
+
         self.put_metrics()
 
 
