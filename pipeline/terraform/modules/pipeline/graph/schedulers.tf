@@ -37,10 +37,10 @@ resource "aws_iam_role" "run_graph_pipeline_role" {
   name = "run-graph-pipeline-role-${var.pipeline_date}"
 
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect    = "Allow"
+        Effect = "Allow"
         Principal = {
           Service = "scheduler.amazonaws.com"
         }
@@ -54,11 +54,11 @@ resource "aws_iam_policy" "start_graph_pipeline" {
   name = "start-graph-pipeline-${var.pipeline_date}"
 
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Effect   = "Allow"
-        Action   = "states:StartExecution"
+        Effect = "Allow"
+        Action = "states:StartExecution"
         Resource = [
           module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn,
           module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn,
