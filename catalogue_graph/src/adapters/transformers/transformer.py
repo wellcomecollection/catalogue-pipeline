@@ -9,7 +9,6 @@ import json
 from typing import Any, Literal, Protocol, cast
 
 from pydantic import BaseModel, Field
-from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 from adapters.axiell import config as axiell_config
 from adapters.axiell import helpers as axiell_helpers
@@ -20,6 +19,7 @@ from adapters.transformers.base_transformer import BaseTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import ManifestWriter, TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
+from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
 class TransformerEvent(BaseModel):
