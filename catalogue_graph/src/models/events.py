@@ -27,15 +27,24 @@ class PipelineIndexDates(BaseModel):
     works: str | None = None
 
 
-class BasePipelineEvent(BaseModel):
-    pipeline_date: str
+class WindowEvent(BaseModel):
     window: IncrementalWindow | None = None
+
+    @classmethod
+    def window_from_argparser(
+        cls, args: argparse.Namespace
+    ) -> IncrementalWindow | None:
+        return IncrementalWindow.from_argparser(args)
+
+
+class BasePipelineEvent(WindowEvent):
+    pipeline_date: str
     pit_id: str | None = None
     index_dates: PipelineIndexDates = PipelineIndexDates()
 
     @classmethod
     def from_argparser(cls, args: argparse.Namespace) -> Self:
-        window = IncrementalWindow.from_argparser(args)
+        window = cls.window_from_argparser(args)
         index_dates = PipelineIndexDates(merged=args.index_date_merged)
         return cls(**args.__dict__, window=window, index_dates=index_dates)
 

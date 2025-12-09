@@ -16,6 +16,7 @@ from adapters.axiell.steps.loader import LoaderResponse
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_store import WindowStore
 from adapters.utils.window_summary import WindowSummary
+from models.incremental_window import IncrementalWindow
 
 WINDOW_RANGE = "2025-01-01T10:00:00+00:00-2025-01-01T10:15:00+00:00"
 
@@ -29,8 +30,10 @@ def _request(now: datetime | None = None) -> AxiellAdapterLoaderEvent:
     now = now or datetime.now(tz=UTC)
     return AxiellAdapterLoaderEvent(
         job_id="job-123",
-        window_start=now - timedelta(minutes=15),
-        window_end=now,
+        window=IncrementalWindow(
+            start_time=now - timedelta(minutes=15),
+            end_time=now,
+        ),
         metadata_prefix="oai",
         set_spec="collect",
         max_windows=5,

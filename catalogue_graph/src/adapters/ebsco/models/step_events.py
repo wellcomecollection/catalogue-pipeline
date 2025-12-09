@@ -6,15 +6,11 @@ consistently.
 
 from __future__ import annotations
 
-from pydantic import BaseModel
+from adapters.utils.adapter_events import BaseAdapterEvent
 
 
-class EbscoAdapterEvent(BaseModel):
-    """Base event for all EBSCO adapter steps.
-    job_id is a unique identifier for the overall pipeline run.
-    """
-
-    job_id: str
+class EbscoAdapterEvent(BaseAdapterEvent):
+    """Base event for all EBSCO adapter steps (job-scoped)."""
 
 
 class EbscoAdapterTriggerEvent(EbscoAdapterEvent):
