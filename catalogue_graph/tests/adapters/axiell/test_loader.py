@@ -69,14 +69,14 @@ def test_execute_loader_updates_iceberg(
     req = _request()
     summary = WindowSummary.model_validate(
         {
-            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
-            "window_start": req.window_start,
-            "window_end": req.window_end,
+            "window_key": f"{req.window.start_time.isoformat()}_{req.window.end_time.isoformat()}",
+            "window_start": req.window.start_time,
+            "window_end": req.window.end_time,
             "state": "success",
             "attempts": 1,
             "record_ids": ["id-1"],
             "last_error": None,
-            "updated_at": req.window_end,
+            "updated_at": req.window.end_time,
             "tags": {
                 "job_id": req.job_id,
                 "changeset_id": "changeset-123",
@@ -103,8 +103,8 @@ def test_execute_loader_updates_iceberg(
         assert len(response.summaries) == 1
 
         mock_harvest.assert_called_once_with(
-            start_time=req.window_start,
-            end_time=req.window_end,
+            start_time=req.window.start_time,
+            end_time=req.window.end_time,
             max_windows=req.max_windows,
             reprocess_successful_windows=False,
         )
@@ -124,14 +124,14 @@ def test_execute_loader_counts_only_changed_records(
 
     summary = WindowSummary.model_validate(
         {
-            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
-            "window_start": req.window_start,
-            "window_end": req.window_end,
+            "window_key": f"{req.window.start_time.isoformat()}_{req.window.end_time.isoformat()}",
+            "window_start": req.window.start_time,
+            "window_end": req.window.end_time,
             "state": "success",
             "attempts": 1,
             "record_ids": ["id-1", "id-2"],
             "last_error": None,
-            "updated_at": req.window_end,
+            "updated_at": req.window.end_time,
             "tags": {
                 "job_id": req.job_id,
                 "changeset_id": "changeset-123",
@@ -164,14 +164,14 @@ def test_execute_loader_handles_no_new_records(
 
     summary = WindowSummary.model_validate(
         {
-            "window_key": f"{req.window_start.isoformat()}_{req.window_end.isoformat()}",
-            "window_start": req.window_start,
-            "window_end": req.window_end,
+            "window_key": f"{req.window.start_time.isoformat()}_{req.window.end_time.isoformat()}",
+            "window_start": req.window.start_time,
+            "window_end": req.window.end_time,
             "state": "success",
             "attempts": 1,
             "record_ids": [],
             "last_error": None,
-            "updated_at": req.window_end,
+            "updated_at": req.window.end_time,
             "tags": {"job_id": req.job_id},
             "changeset_id": None,
         }

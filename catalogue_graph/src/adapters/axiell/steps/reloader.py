@@ -125,8 +125,8 @@ def _process_gap(
         # Use the harvester directly to avoid recreating runtime
         harvester = build_harvester(loader_event, runtime.loader_runtime)
         summaries = harvester.harvest_range(
-            start_time=loader_event.window_start,
-            end_time=loader_event.window_end,
+            start_time=loader_event.window.start_time,
+            end_time=loader_event.window.end_time,
             max_windows=loader_event.max_windows,
             reprocess_successful_windows=False,
         )

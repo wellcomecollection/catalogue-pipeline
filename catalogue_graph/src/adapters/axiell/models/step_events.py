@@ -3,18 +3,14 @@ from datetime import datetime
 from pydantic import Field
 
 from adapters.utils.adapter_events import BaseAdapterEvent
-from models.events import IncrementalWindow, WindowEvent
+from models.events import IncrementalWindow
 
 
-class AxiellAdapterEvent(BaseAdapterEvent, WindowEvent):
-    """Base event for all Axiell adapter steps (windowed + job_id)."""
-
-
-class AxiellAdapterTriggerEvent(AxiellAdapterEvent):
+class AxiellAdapterTriggerEvent(BaseAdapterEvent):
     now: datetime | None = None
 
 
-class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
+class AxiellAdapterLoaderEvent(BaseAdapterEvent):
     window: IncrementalWindow
     metadata_prefix: str | None = None
     set_spec: str | None = None
@@ -22,14 +18,6 @@ class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
     window_minutes: int | None = None
     allow_partial_final_window: bool | None = None
 
-    @property
-    def window_start(self) -> datetime:
-        return self.window.start_time
 
-    @property
-    def window_end(self) -> datetime:
-        return self.window.end_time
-
-
-class AxiellAdapterTransformerEvent(AxiellAdapterEvent):
+class AxiellAdapterTransformerEvent(BaseAdapterEvent):
     changeset_ids: list[str] = Field(default_factory=list)

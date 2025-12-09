@@ -84,11 +84,13 @@ def build_harvester(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime,
 ) -> WindowHarvestManager:
+    window_start = request.window.start_time
+    window_end = request.window.end_time
     callback = WindowRecordWriter(
         namespace=AXIELL_NAMESPACE,
         table_client=runtime.table_client,
         job_id=request.job_id,
-        window_range=_format_window_range(request.window_start, request.window_end),
+        window_range=_format_window_range(window_start, window_end),
     )
     return WindowHarvestManager(
         store=runtime.store,
@@ -106,12 +108,14 @@ def execute_loader(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime | None = None,
 ) -> LoaderResponse:
+    window_start = request.window.start_time
+    window_end = request.window.end_time
     runtime = runtime or build_runtime()
     harvester = build_harvester(request, runtime)
 
     summaries = harvester.harvest_range(
-        start_time=request.window_start,
-        end_time=request.window_end,
+        start_time=window_start,
+        end_time=window_end,
         max_windows=request.max_windows,
         reprocess_successful_windows=False,
     )
@@ -119,7 +123,7 @@ def execute_loader(
     if not summaries:
         raise RuntimeError(
             "No pending windows to harvest for "
-            f"{request.window_start.isoformat()} -> {request.window_end.isoformat()}"
+            f"{window_start.isoformat()} -> {window_end.isoformat()}"
         )
 
     changed_record_count = 0

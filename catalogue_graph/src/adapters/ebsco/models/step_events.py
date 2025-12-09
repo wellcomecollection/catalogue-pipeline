@@ -9,17 +9,13 @@ from __future__ import annotations
 from adapters.utils.adapter_events import BaseAdapterEvent
 
 
-class EbscoAdapterEvent(BaseAdapterEvent):
-    """Base event for all EBSCO adapter steps (job-scoped)."""
-
-
-class EbscoAdapterTriggerEvent(EbscoAdapterEvent):
+class EbscoAdapterTriggerEvent(BaseAdapterEvent):
     pass
 
 
-class EbscoAdapterLoaderEvent(EbscoAdapterEvent):
+class EbscoAdapterLoaderEvent(BaseAdapterEvent):
     file_location: str
 
 
-class EbscoAdapterTransformerEvent(EbscoAdapterEvent):
+class EbscoAdapterTransformerEvent(BaseAdapterEvent):
     changeset_id: str | None = None
