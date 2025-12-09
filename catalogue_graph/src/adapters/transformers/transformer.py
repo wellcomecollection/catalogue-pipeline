@@ -9,16 +9,17 @@ import json
 from typing import Any, Literal, Protocol, cast
 
 from pydantic import BaseModel, Field
+from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 from adapters.axiell import config as axiell_config
 from adapters.axiell import helpers as axiell_helpers
 from adapters.ebsco import config as ebsco_config
 from adapters.ebsco import helpers as ebsco_helpers
+from adapters.transformers.axiell_transformer import AxiellTransformer
 from adapters.transformers.base_transformer import BaseTransformer
 from adapters.transformers.ebsco_transformer import EbscoTransformer
 from adapters.transformers.manifests import ManifestWriter, TransformerManifest
 from adapters.utils.adapter_store import AdapterStore
-from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
 
 
 class TransformerEvent(BaseModel):
@@ -56,7 +57,7 @@ def handler(
     if event.transformer_type == "axiell":
         config = cast(AdapterConfig, axiell_config)
         helpers = cast(AdapterHelpers, axiell_helpers)
-        transformer_class = EbscoTransformer
+        transformer_class = AxiellTransformer
     elif event.transformer_type == "ebsco":
         config = cast(AdapterConfig, ebsco_config)
         helpers = cast(AdapterHelpers, ebsco_helpers)
