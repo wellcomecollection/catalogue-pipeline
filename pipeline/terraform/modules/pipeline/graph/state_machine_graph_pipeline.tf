@@ -122,7 +122,7 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
 
 module "catalogue_graph_pipeline_incremental_trigger_state_machine" {
   source = "../../state_machine"
-  name   = "graph-pipeline-incremental-trigger"
+  name   = "graph-pipeline-incremental-trigger-${var.pipeline_date}"
 
   state_machine_definition = jsonencode({
     "QueryLanguage" : "JSONata",
