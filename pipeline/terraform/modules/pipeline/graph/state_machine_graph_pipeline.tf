@@ -119,3 +119,48 @@ module "catalogue_graph_pipeline_incremental_state_machine" {
     module.catalogue_graph_ingestors_state_machine.state_machine_arn,
   ]
 }
+
+module "catalogue_graph_pipeline_incremental_trigger_state_machine" {
+  source = "../../state_machine"
+  name   = "graph-pipeline-incremental-trigger-${var.pipeline_date}"
+
+  state_machine_definition = jsonencode({
+    "QueryLanguage" : "JSONata",
+    StartAt = "Construct event"
+    States = {
+      "Construct event" : {
+        "Type" : "Pass",
+
+        "Output" : {
+          "pipeline_date" : var.pipeline_date,
+          "index_dates" : {
+            "merged" : var.index_dates["merged"],
+            "concepts" : var.index_dates["concepts"],
+            "works" : var.index_dates["works"]
+          },
+          # window end time is 5 minutes before the scheduled time
+          "window" : {
+            "end_time" : "{% $fromMillis($toMillis($states.input.scheduled_time) - 300000) %}"
+          }
+        },
+        Next = "Trigger pipeline"
+      }
+      "Trigger pipeline" = {
+        Type     = "Task"
+        Resource = "arn:aws:states:::states:startExecution",
+        Arguments = {
+          StateMachineArn = module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn,
+          Input           = "{% $states.input %}"
+        }
+        Next = "Success"
+      },
+      Success = {
+        Type = "Succeed"
+      }
+    }
+  })
+
+  invokable_state_machine_arns = [
+    module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn,
+  ]
+}
