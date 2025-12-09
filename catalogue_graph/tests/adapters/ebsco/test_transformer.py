@@ -31,7 +31,7 @@ def _prepare_changeset(
     Returns the new changeset_id.
     """
     rows = [
-        {"id": rid, "content": record_xml} for rid, record_xml in records_by_id.items()
+        {"id": rid, "content": data} for rid, data in records_by_id.items()
     ]
     pa_table_initial = data_to_namespaced_table(rows)
 
@@ -48,17 +48,12 @@ def _prepare_changeset(
 
 
 def _run_transform(
-    temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
     *,
     changeset_ids: list[str] | None = None,
     index_date: str | None = None,
     pipeline_date: str = "dev",
 ) -> TransformerManifest:
-    monkeypatch.setattr(
-        "adapters.ebsco.helpers.build_adapter_table",
-        lambda use_rest_api_table: temporary_table,
-    )
     monkeypatch.setattr(adapter_config, "PIPELINE_DATE", pipeline_date)
     monkeypatch.setattr(adapter_config, "INDEX_DATE", index_date)
 
@@ -85,7 +80,6 @@ def test_transformer_end_to_end_with_local_table(
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
     result = _run_transform(
-        temporary_table,
         monkeypatch,
         changeset_ids=[changeset_id],
         index_date="2025-01-01",
@@ -93,11 +87,15 @@ def test_transformer_end_to_end_with_local_table(
 
     assert result.successes.count == 2
     assert result.failures is None
+    assert result.job_id == "20250101T1200"
+    assert result.changeset_ids == [changeset_id]
+
     # Validate file contents written to mock S3 (NDJSON)
     batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
     batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
+
     # Success lines include sourceIdentifiers and jobId
     assert lines == [
         {
@@ -105,7 +103,51 @@ def test_transformer_end_to_end_with_local_table(
             "jobId": "20250101T1200",
         }
     ]
-    # Title now nested under data for VisibleSourceWork
+
+    titles = {
+        op["_source"].get("data", {}).get("title")
+        for op in MockElasticsearchClient.inputs
+    }
+    assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
+
+
+def test_transformer_end_to_end_multiple_changesets(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_1 = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
+    }
+    records_2 = {
+        "ebs00002": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00002</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Parasites, hosts and diseases</subfield></datafield></record>",
+    }
+    changeset_id_1 = _prepare_changeset(temporary_table, monkeypatch, records_1)
+    changeset_id_2 = _prepare_changeset(temporary_table, monkeypatch, records_2)
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id_1, changeset_id_2],
+        index_date="2025-01-01",
+    )
+
+    assert result.successes.count == 2
+    assert result.failures is None
+    assert result.job_id == "20250101T1200"
+    assert result.changeset_ids == [changeset_id_1, changeset_id_2]
+
+    # Validate file contents written to mock S3 (NDJSON)
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
+    with open(batch_contents_path, encoding="utf-8") as f:
+        lines = [json.loads(line) for line in f if line.strip()]
+
+    # Success lines include sourceIdentifiers and jobId
+    assert lines == [
+        {
+            "sourceIdentifiers": [f"Work[ebsco-alt-lookup/{i}]" for i in ["ebs00001", "ebs00002"]],
+            "jobId": "20250101T1200",
+        }
+    ]
+
     titles = {
         op["_source"].get("data", {}).get("title")
         for op in MockElasticsearchClient.inputs
@@ -123,7 +165,6 @@ def test_transformer_creates_deletedwork_for_empty_content(
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
     result = _run_transform(
-        temporary_table,
         monkeypatch,
         changeset_ids=[changeset_id],
         index_date="2025-03-01",
@@ -181,7 +222,6 @@ def test_transformer_full_retransform_when_no_changeset(
     # Now call handler with no changeset_id -> full re-transform path
     job_id = "20250101T1200"
     result = _run_transform(
-        temporary_table,
         monkeypatch,
         changeset_ids=[],
         pipeline_date="dev",
@@ -218,7 +258,6 @@ def test_transformer_batch_file_key_with_changeset(
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
     result = _run_transform(
-        temporary_table,
         monkeypatch,
         changeset_ids=[changeset_id],
         pipeline_date="dev",
@@ -259,7 +298,6 @@ def test_transformer_index_name_selection(
 
     MockElasticsearchClient.inputs.clear()
     _run_transform(
-        temporary_table,
         monkeypatch,
         changeset_ids=[changeset_id],
         pipeline_date=pipeline_date,
@@ -306,7 +344,6 @@ def test_transformer_creates_failure_manifest_for_parse_errors(
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
     result = _run_transform(
-        temporary_table,
         monkeypatch,
         changeset_ids=[changeset_id],
         index_date="2025-09-01",
@@ -353,7 +390,6 @@ def test_transformer_creates_failure_manifest_for_index_errors(
     monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
 
     result = _run_transform(
-        temporary_table,
         monkeypatch,
         changeset_ids=[changeset_id],
         index_date="2025-09-02",
@@ -369,6 +405,26 @@ def test_transformer_creates_failure_manifest_for_index_errors(
     assert len(failure_lines) == 1
     assert failure_lines[0]["work_id"] == "Work[ebsco-alt-lookup/ebsIdxErr001]"
     assert "mapper_parsing_exception" in failure_lines[0]["detail"]
+
+
+def test_transformer_skips_when_no_rows(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Simulate ES indexing errors and ensure they are captured in failure manifest."""
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, {})
+
+    def fake_bulk(client, actions, raise_on_error, stats_only):
+        raise AssertionError("bulk should not be called when there are no documents")
+
+    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-09-02",
+    )
+    assert result.failures is not None
+    assert result.failures.count == 0
 
 
 def test_transform_valid_marcxml_returns_work(
@@ -512,7 +568,6 @@ def test_transformer_raises_when_batch_file_write_fails(
 
     with pytest.raises(OSError, match="simulated write failure"):
         _run_transform(
-            temporary_table,
             monkeypatch,
             changeset_ids=[changeset_id],
             pipeline_date="dev",

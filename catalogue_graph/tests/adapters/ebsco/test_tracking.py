@@ -1,5 +1,4 @@
 import json
-from unittest.mock import Mock, patch
 
 from adapters.ebsco.utils.tracking import (
     ProcessedFileRecord,
@@ -52,13 +51,11 @@ class TestIsFileAlreadyProcessed:
         stored = ProcessedFileRecord(
             job_id="jid", step="loaded", payload=prior_event.model_dump()
         )
-        with patch("utils.aws.smart_open.open") as mock_open:
-            mock_file = Mock()
-            mock_open.return_value.__enter__.return_value = mock_file
-            mock_file.read.return_value = json.dumps(stored.model_dump())
-            record = pydantic_from_s3_json(
-                ProcessedFileRecord, f"{file_location}.loaded.json"
-            )
+        MockSmartOpen.mock_s3_file(f"{file_location}.loaded.json", stored.model_dump_json())
+
+        record = pydantic_from_s3_json(
+            ProcessedFileRecord, f"{file_location}.loaded.json"
+        )
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == "jid"
         assert record.get("changeset_ids") == ["cid"]
