@@ -15,27 +15,19 @@ resource "aws_scheduler_schedule" "graph_pipeline_monthly" {
 
 resource "aws_scheduler_schedule" "catalogue_graph_pipeline_incremental" {
   name                = "graph-pipeline-incremental-run-${var.pipeline_date}"
-  schedule_expression = "cron(0,15,30,45 * * * ? *)" # Every 15 minutes
+  schedule_expression = "cron(5,20,35,50 * * * ? *)" # Every 15 minutes
 
   flexible_time_window {
     mode = "OFF"
   }
 
   target {
-    arn      = module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn
+    arn      = module.catalogue_graph_pipeline_incremental_trigger_state_machine.state_machine_arn
     role_arn = aws_iam_role.run_graph_pipeline_role.arn
 
     input = <<JSON
     {
-      "pipeline_date": "${var.pipeline_date}",
-      "index_dates": {
-        "merged": "${var.index_dates.merged}",
-        "concepts": "${var.index_dates.concepts}",
-        "works": "${var.index_dates.works}"
-      },
-      "window": {
-        "end_time": "<aws.scheduler.scheduled-time>"
-      }
+      "scheduled_time": "<aws.scheduler.scheduled-time>"
     }
     JSON
   }
@@ -69,7 +61,8 @@ resource "aws_iam_policy" "start_graph_pipeline" {
         Action = "states:StartExecution"
         Resource = [
           module.catalogue_graph_pipeline_monthly_state_machine.state_machine_arn,
-          module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn
+          module.catalogue_graph_pipeline_incremental_state_machine.state_machine_arn,
+          module.catalogue_graph_pipeline_incremental_trigger_state_machine.state_machine_arn
         ]
       }
     ]
