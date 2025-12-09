@@ -5,9 +5,8 @@ from adapters.ebsco.utils.tracking import (
     record_processed_file,
 )
 from adapters.transformers.transformer import TransformerEvent
-from utils.aws import pydantic_from_s3_json
-
 from tests.mocks import MockSmartOpen
+from utils.aws import pydantic_from_s3_json
 
 
 class TestRecordProcessedFile:
@@ -25,6 +24,7 @@ class TestRecordProcessedFile:
 
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == job_id
+        assert record.payload is not None
         assert record.payload["changeset_ids"] == ["I have changed"]
         assert record.step == "loaded"
 
@@ -51,7 +51,9 @@ class TestIsFileAlreadyProcessed:
         stored = ProcessedFileRecord(
             job_id="jid", step="loaded", payload=prior_event.model_dump()
         )
-        MockSmartOpen.mock_s3_file(f"{file_location}.loaded.json", stored.model_dump_json())
+        MockSmartOpen.mock_s3_file(
+            f"{file_location}.loaded.json", stored.model_dump_json()
+        )
 
         record = pydantic_from_s3_json(
             ProcessedFileRecord, f"{file_location}.loaded.json"

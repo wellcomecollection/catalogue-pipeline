@@ -21,11 +21,11 @@ def test_manifest_writer_writes_success_only() -> None:
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
     )
-    success_ids = {
+    success_ids = [
         "Work[ebsco-alt-lookup/id1]",
         "Work[ebsco-alt-lookup/id2]",
         "Work[ebsco-alt-lookup/id3]",
-    }
+    ]
     manifest = writer.build_manifest(successful_ids=success_ids, errors=[])
 
     assert manifest.failures is None
@@ -38,11 +38,10 @@ def test_manifest_writer_writes_success_only() -> None:
     )
     lines = _read_ndjson(uri)
     assert lines  # at least one batch written
-    job_ids = {line["jobId"] for line in lines}
-    assert job_ids == {"job123"}
-    written_ids: set[str] = set()
+    assert {line["jobId"] for line in lines} == {"job123"}
+    written_ids: list[str] = []
     for line in lines:
-        written_ids.update(line["sourceIdentifiers"])
+        written_ids += line["sourceIdentifiers"]
     assert written_ids == success_ids
 
 
@@ -68,7 +67,7 @@ def test_manifest_writer_writes_failures() -> None:
     ]
 
     manifest = writer.build_manifest(
-        successful_ids={"Work[ebsco-alt-lookup/idA]"},
+        successful_ids=["Work[ebsco-alt-lookup/idA]"],
         errors=errors,
     )
     assert manifest.failures is not None
@@ -107,7 +106,7 @@ def test_manifest_writer_handles_empty_batches() -> None:
         bucket=adapter_config.S3_BUCKET,
         prefix=adapter_config.BATCH_S3_PREFIX,
     )
-    manifest = writer.build_manifest(successful_ids=set(), errors=[])
+    manifest = writer.build_manifest(successful_ids=[], errors=[])
     assert manifest.successes.count == 0
     assert manifest.failures is None
     uri = (
@@ -149,7 +148,7 @@ def test_manifest_file_naming_patterns(
         prefix=adapter_config.BATCH_S3_PREFIX,
     )
     manifest = writer.build_manifest(
-        successful_ids={"Work[ebsco-alt-lookup/only1]"},
+        successful_ids=["Work[ebsco-alt-lookup/only1]"],
         errors=[
             TransformationError(
                 work_id="Work[ebsco-alt-lookup/only1]",

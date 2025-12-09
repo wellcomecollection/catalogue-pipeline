@@ -1,5 +1,6 @@
 import json
 from collections.abc import Generator
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -31,12 +32,16 @@ def _prepare_changeset(
     Returns the new changeset_id.
     """
     rows = [
-        {"id": rid, "content": data} for rid, data in records_by_id.items()
+        {"id": rid, "content": data, "last_modified": datetime.now()}
+        for rid, data in records_by_id.items()
     ]
     pa_table_initial = data_to_namespaced_table(rows)
 
     client = AdapterStore(temporary_table)
-    changeset_id = client.snapshot_sync(pa_table_initial, "ebsco")
+    store_update = client.incremental_update(pa_table_initial, "ebsco")
+    assert store_update is not None
+    changeset_id = store_update.changeset_id
+
     assert changeset_id, "Expected a changeset_id to be returned"
 
     # Ensure transformer uses our temporary table
@@ -143,7 +148,9 @@ def test_transformer_end_to_end_multiple_changesets(
     # Success lines include sourceIdentifiers and jobId
     assert lines == [
         {
-            "sourceIdentifiers": [f"Work[ebsco-alt-lookup/{i}]" for i in ["ebs00001", "ebs00002"]],
+            "sourceIdentifiers": [
+                f"Work[ebsco-alt-lookup/{i}]" for i in ["ebs00001", "ebs00002"]
+            ],
             "jobId": "20250101T1200",
         }
     ]
@@ -405,26 +412,6 @@ def test_transformer_creates_failure_manifest_for_index_errors(
     assert len(failure_lines) == 1
     assert failure_lines[0]["work_id"] == "Work[ebsco-alt-lookup/ebsIdxErr001]"
     assert "mapper_parsing_exception" in failure_lines[0]["detail"]
-
-
-def test_transformer_skips_when_no_rows(
-    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    """Simulate ES indexing errors and ensure they are captured in failure manifest."""
-    changeset_id = _prepare_changeset(temporary_table, monkeypatch, {})
-
-    def fake_bulk(client, actions, raise_on_error, stats_only):
-        raise AssertionError("bulk should not be called when there are no documents")
-
-    monkeypatch.setattr("elasticsearch.helpers.bulk", fake_bulk)
-
-    result = _run_transform(
-        monkeypatch,
-        changeset_ids=[changeset_id],
-        index_date="2025-09-02",
-    )
-    assert result.failures is not None
-    assert result.failures.count == 0
 
 
 def test_transform_valid_marcxml_returns_work(

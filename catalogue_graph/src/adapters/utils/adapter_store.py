@@ -36,16 +36,17 @@ class AdapterStore:
         Apply an incremental update to the table.
         Only updates and inserts are processed; missing records are NOT deleted.
         """
+
+        namespace = self._get_namespace(record_namespace)
+        if new_data.num_rows == 0:
+            return None
+
         # Enforce presence of timestamps in incremental updates to avoid overwriting
         # newer records with untimed data.
         if "last_modified" not in new_data.column_names:
             raise ValueError(
                 "incremental_update requires a 'last_modified' column in new_data"
             )
-
-        namespace = self._get_namespace(record_namespace)
-        if new_data.num_rows == 0:
-            return None
 
         # Optimization: For incremental updates, only fetch rows that match the incoming IDs.
         new_ids = [val for val in new_data.column("id").to_pylist() if val is not None]

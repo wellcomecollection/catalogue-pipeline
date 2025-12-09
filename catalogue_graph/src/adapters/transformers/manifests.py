@@ -23,7 +23,7 @@ from adapters.transformers.models.manifests import (
 BATCH_SIZE = 5_000
 
 
-def _success_lines(successful_ids: set[str], job_id: str) -> Iterable[str]:
+def _success_lines(successful_ids: list[str], job_id: str) -> Iterable[str]:
     for batch in batched(successful_ids, BATCH_SIZE):
         line = SuccessBatchLine(sourceIdentifiers=list(batch), jobId=job_id)
         yield line.model_dump_json()
@@ -61,7 +61,7 @@ class ManifestWriter:
 
         return S3Location(bucket=self.bucket, key=key.as_posix())
 
-    def write_success(self, successful_ids: set[str]) -> S3Location:
+    def write_success(self, successful_ids: list[str]) -> S3Location:
         return self._write_lines(
             _success_lines(successful_ids, self.job_id), self.success_filename
         )
@@ -73,7 +73,7 @@ class ManifestWriter:
     def build_manifest(
         self,
         *,
-        successful_ids: set[str],
+        successful_ids: list[str],
         errors: list[TransformationError],
     ) -> TransformerManifest:
         success_loc = self.write_success(successful_ids)
