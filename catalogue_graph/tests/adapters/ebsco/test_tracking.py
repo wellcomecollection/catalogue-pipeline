@@ -2,7 +2,6 @@ import json
 
 from adapters.ebsco.utils.tracking import (
     ProcessedFileRecord,
-    record_processed_file,
 )
 from adapters.transformers.transformer import TransformerEvent
 from tests.mocks import MockSmartOpen
@@ -18,9 +17,10 @@ class TestRecordProcessedFile:
             job_id=job_id,
             changeset_ids=["I have changed"],
         )
-        record = record_processed_file(
-            job_id=job_id, file_location=file_location, step="loaded", payload_obj=event
+        record = ProcessedFileRecord(
+            job_id=job_id, step="loaded", payload=event.model_dump()
         )
+        record.write(file_location)
 
         assert isinstance(record, ProcessedFileRecord)
         assert record.job_id == job_id

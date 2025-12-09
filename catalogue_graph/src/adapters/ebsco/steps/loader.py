@@ -20,7 +20,6 @@ from adapters.ebsco import helpers
 from adapters.ebsco.models.step_events import EbscoAdapterLoaderEvent
 from adapters.ebsco.utils.tracking import (
     ProcessedFileRecord,
-    record_processed_file,
 )
 from adapters.transformers.transformer import TransformerEvent
 from adapters.utils.adapter_store import AdapterStore
@@ -119,16 +118,15 @@ def handler(
         changeset_id = update_from_xml_file(table, f)
 
     # Record the processed file to S3
-    record_processed_file(
+    payload = TransformerEvent(
+        transformer_type="ebsco",
         job_id=event.job_id,
-        file_location=event.file_location,
-        step="loaded",
-        payload_obj=TransformerEvent(
-            transformer_type="ebsco",
-            job_id=event.job_id,
-            changeset_ids=[changeset_id] if changeset_id else [],
-        ),
+        changeset_ids=[changeset_id] if changeset_id else [],
     )
+    record = ProcessedFileRecord(
+        job_id=event.job_id, step="loaded", payload=payload.model_dump()
+    )
+    record.write(event.file_location)
 
     return TransformerEvent(
         transformer_type="ebsco",

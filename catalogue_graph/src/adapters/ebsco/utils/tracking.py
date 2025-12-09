@@ -21,15 +21,5 @@ class ProcessedFileRecord(BaseModel):
             return self.payload[key]
         return default
 
-
-def record_processed_file(
-    job_id: str,
-    file_location: str,
-    step: str,
-    payload_obj: BaseModel | None,
-) -> ProcessedFileRecord:
-    payload = payload_obj.model_dump() if payload_obj else None
-    record = ProcessedFileRecord(job_id=job_id, step=step, payload=payload)
-
-    pydantic_to_s3_json(record, f"{file_location}.{step}.json")
-    return record
+    def write(self, file_location: str) -> None:
+        pydantic_to_s3_json(self, f"{file_location}.{self.step}.json")
