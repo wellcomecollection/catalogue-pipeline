@@ -1,7 +1,7 @@
-"""Transformer step for the Axiell adapter.
+"""Transformer step for Axiell and EBSCO.
 
-Loads records for a changeset from Iceberg, applies a dummy transform, and
-indexes the documents into Elasticsearch.
+Loads records for a changeset from Iceberg, applies a transform, and
+indexes transformed documents into Elasticsearch.
 """
 
 import argparse
@@ -121,8 +121,7 @@ def main() -> None:
     parser.add_argument(
         "--use-rest-api-table",
         action="store_true",
-        help="Job identifier (defaults to 'dev' when not supplied).",
-        default="dev",
+        help="Use the S3 Tables catalog instead of local storage",
     )
     parser.add_argument(
         "--es-mode",
