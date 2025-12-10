@@ -100,3 +100,11 @@ INDEX_DATE = os.getenv("INDEX_DATE")
 ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "axiell-transformer")
 ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "axiell-works-dev")
 ES_MODE = os.getenv("ES_MODE", "private")
+
+# Manifest storage configuration
+S3_BUCKET = os.getenv(
+    "AXIELL_TRANSFORMER_S3_BUCKET",
+    "wellcomecollection-platform-axiell-adapter",
+)
+S3_PREFIX = os.getenv("AXIELL_TRANSFORMER_S3_PREFIX", "dev")
+BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")

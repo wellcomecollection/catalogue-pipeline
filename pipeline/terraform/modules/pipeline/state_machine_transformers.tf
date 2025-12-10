@@ -2,17 +2,17 @@ data "aws_cloudwatch_event_bus" "adapter_event_bus" {
   name = "catalogue-pipeline-adapter-event-bus"
 }
 
-module "ebsco_transformer_lambda" {
+module "transformer_lambda" {
   source = "git@github.com:wellcomecollection/terraform-aws-lambda?ref=v1.2.0"
 
-  name         = "${local.namespace}-transformer_ebsco"
-  description  = "Lambda function to transform EBSCO data"
+  name         = "${local.namespace}-transformer"
+  description  = "Lambda function to transform EBSCO/Axiell data"
   package_type = "Image"
   image_uri    = "${data.aws_ecr_repository.unified_pipeline_lambda.repository_url}:prod"
   publish      = true
 
   image_config = {
-    command = ["adapters.ebsco.steps.transformer.lambda_handler"]
+    command = ["adapters.transformers.transformer.lambda_handler"]
   }
 
   memory_size = 4096
@@ -29,7 +29,6 @@ module "ebsco_transformer_lambda" {
   environment = {
     variables = {
       PIPELINE_DATE = var.pipeline_date
-      S3_BUCKET     = local.ebsco_adapter_bucket
       S3_PREFIX     = "prod"
     }
   }
@@ -37,39 +36,39 @@ module "ebsco_transformer_lambda" {
 
 # Attach read-only Iceberg access policy to transformer lambda (now using s3tables read-only doc)
 resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
-  role   = module.ebsco_transformer_lambda.lambda_role.name
+  role   = module.transformer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.read_ebsco_adapter_s3tables_bucket.json
 }
 
 # Attach S3 read policy to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_s3_read" {
-  role   = module.ebsco_transformer_lambda.lambda_role.name
+  role   = module.transformer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
 }
 
 # Attach S3 write policy to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_s3_write" {
-  role   = module.ebsco_transformer_lambda.lambda_role.name
+  role   = module.transformer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.write_ebsco_adapter_bucket.json
 }
 
 # Allow transformer to read pipeline storage secrets
 resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read" {
-  role   = module.ebsco_transformer_lambda.lambda_role.name
+  role   = module.transformer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.read_ebsco_transformer_pipeline_storage_secrets.json
 }
 
 
 # State Machine Definition
 locals {
-  ebsco_transformer_state_machine_definition = jsonencode({
+  transformer_state_machine_definition = jsonencode({
     StartAt = "TransformerStep"
     States = {
       TransformerStep = {
         Type      = "Task"
-        Resource  = module.ebsco_transformer_lambda.lambda.arn
+        Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
-        Next      = "EbscoIdMinterMap"
+        Next      = "IdMinterMap"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -79,7 +78,7 @@ locals {
           }
         ]
       }
-      EbscoIdMinterMap = {
+      IdMinterMap = {
         Type                  = "Map"
         MaxConcurrency        = 2
         ToleratedFailureCount = 0
@@ -115,7 +114,9 @@ locals {
               }
               Retry = [
                 {
-                  ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
+                  ErrorEquals = [
+                    "Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"
+                  ]
                   IntervalSeconds = 2
                   MaxAttempts     = 3
                   BackoffRate     = 2.0
@@ -135,13 +136,13 @@ locals {
 }
 
 
-module "ebsco_transformer_state_machine" {
+module "transformer_state_machine" {
   source = "../state_machine"
 
-  name                     = "ebsco-transformer-${var.pipeline_date}"
-  state_machine_definition = local.ebsco_transformer_state_machine_definition
+  name                     = "transformer-${var.pipeline_date}"
+  state_machine_definition = local.transformer_state_machine_definition
   invokable_lambda_arns = [
-    module.ebsco_transformer_lambda.lambda.arn,
+    module.transformer_lambda.lambda.arn,
     module.id_minter_lambda_step_function.lambda_arn
   ]
 
@@ -156,7 +157,7 @@ module "ebsco_adapter_transformer_trigger" {
 
   name              = "ebsco-transformer-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
-  state_machine_arn = module.ebsco_transformer_state_machine.state_machine_arn
+  state_machine_arn = module.transformer_state_machine.state_machine_arn
 
   enabled = true
 
@@ -164,8 +165,8 @@ module "ebsco_adapter_transformer_trigger" {
     source        = ["ebsco.adapter"],
     "detail-type" = ["ebsco.adapter.completed"]
   }
-  // Unfortunately the input template needs to be a full JSON object, 
-  // so we must wrap the detail in another object and then unwrap in 
+  // Unfortunately the input template needs to be a full JSON object,
+  // so we must wrap the detail in another object and then unwrap in
   // the state machine (it's not possible to just pass the detail directly).
   input_paths = {
     detail = "$.detail"
@@ -179,7 +180,7 @@ module "ebsco_reindex_transformer_trigger" {
 
   name              = "ebsco-reindex-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
-  state_machine_arn = module.ebsco_transformer_state_machine.state_machine_arn
+  state_machine_arn = module.transformer_state_machine.state_machine_arn
 
   enabled = var.reindexing_state.listen_to_reindexer
 
@@ -203,5 +204,7 @@ module "ebsco_reindex_transformer_trigger" {
   input_paths = {
     job_id = "$.detail.job_id"
   }
-  input_template = "{\"detail\": {\"job_id\": <job_id>}}"
+  input_template = "{\"detail\": {\"job_id\": <job_id>, \"transformer_type\": \"ebsco\"}}"
 }
+
+# TODO: Add Axiell triggers

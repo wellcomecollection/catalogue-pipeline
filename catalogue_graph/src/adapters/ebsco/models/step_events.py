@@ -15,7 +15,3 @@ class EbscoAdapterTriggerEvent(BaseAdapterEvent):
 
 class EbscoAdapterLoaderEvent(BaseAdapterEvent):
     file_location: str
-
-
-class EbscoAdapterTransformerEvent(BaseAdapterEvent):
-    changeset_id: str | None = None
