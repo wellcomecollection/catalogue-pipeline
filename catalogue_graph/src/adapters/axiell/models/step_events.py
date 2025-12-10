@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from models.events import IncrementalWindow
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from adapters.utils.adapter_events import BaseAdapterEvent
 from adapters.utils.window_summary import WindowSummary
+from models.events import IncrementalWindow
 
 
 class AxiellAdapterTriggerEvent(BaseAdapterEvent):
