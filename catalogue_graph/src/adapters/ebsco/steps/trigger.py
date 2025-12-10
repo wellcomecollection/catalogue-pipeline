@@ -29,10 +29,6 @@ from models.events import EventBridgeScheduledEvent
 from utils.aws import get_ssm_parameter
 
 
-class EbscoAdapterTriggerConfig(BaseModel):
-    is_local: bool = False
-
-
 def _list_s3_keys(bucket: str, prefix: str) -> list[str]:
     """Lists all S3 keys in a given bucket and prefix."""
     s3_client = boto3.Session().client("s3")
@@ -121,9 +117,8 @@ def sync_files(
 
 
 def handler(
-    event: EbscoAdapterTriggerEvent, config: EbscoAdapterTriggerConfig
+    event: EbscoAdapterTriggerEvent
 ) -> EbscoAdapterLoaderEvent:
-    print(f"Running handler with config: {config}")
     print(f"Processing event: {event}")
 
     job_id = event.job_id
@@ -157,16 +152,11 @@ def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, 
         eventbridge_event.time.replace("Z", "+00:00")
     ).strftime("%Y%m%dT%H%M")
     internal_event = EbscoAdapterTriggerEvent(job_id=job_id)
-    return handler(internal_event, EbscoAdapterTriggerConfig()).model_dump()
+    return handler(internal_event).model_dump()
 
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
-    parser.add_argument(
-        "--local",
-        action="store_true",
-        help="Run locally -writes to /dev S3 prefix",
-    )
     parser.add_argument(
         "--job-id",
         type=str,
@@ -179,9 +169,8 @@ def local_handler() -> None:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
     event = EbscoAdapterTriggerEvent(job_id=job_id)
-    config = EbscoAdapterTriggerConfig(is_local=args.local)
 
-    handler(event=event, config=config)
+    handler(event=event)
 
 
 if __name__ == "__main__":

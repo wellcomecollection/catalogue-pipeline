@@ -7,6 +7,7 @@ identifier used by the transformer; skips work if the file was already loaded.
 
 import argparse
 from datetime import datetime
+import json
 from typing import Any
 
 import pyarrow as pa
@@ -121,7 +122,8 @@ def local_handler() -> EbscoAdapterTransformerEvent:
 def main() -> None:
     print("Running loader handler...")
     try:
-        local_handler()
+        response = local_handler()
+        print(json.dumps(response.model_dump(mode="json"), indent=2))
 
     except Exception as exc:  # surface failures clearly in local runs
         print(f"Loader failed: {exc}")
