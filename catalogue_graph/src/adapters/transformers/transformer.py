@@ -38,7 +38,9 @@ class AdapterConfig(Protocol):
 
 
 class AdapterHelpers(Protocol):
-    def build_adapter_table(self, use_rest_api_table: bool) -> Any:
+    def build_adapter_table(
+        self, use_rest_api_table: bool, create_if_not_exists: bool = True
+    ) -> Any:
         """Construct the Iceberg table containing adapter output."""
 
 
@@ -46,6 +48,7 @@ def handler(
     event: TransformerEvent,
     es_mode: ElasticsearchMode = "private",
     use_rest_api_table: bool = False,
+    create_if_not_exists: bool = False,
 ) -> TransformerManifest:
     print(f"Processing event: {event}")
     print(f"Received job_id: {event.job_id}")
@@ -65,7 +68,7 @@ def handler(
     else:
         raise ValueError(f"Unknown transformer type: {event.transformer_type}")
 
-    table = helpers.build_adapter_table(use_rest_api_table)
+    table = helpers.build_adapter_table(use_rest_api_table, create_if_not_exists)
     table_client = AdapterStore(table)
     transformer = transformer_class(table_client, event.changeset_ids)
 
@@ -95,7 +98,8 @@ def handler(
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    return handler(TransformerEvent.model_validate(event)).model_dump(mode="json")
+    transformer_event = TransformerEvent.model_validate(event)
+    return handler(transformer_event, use_rest_api_table=True).model_dump(mode="json")
 
 
 def main() -> None:
@@ -131,6 +135,11 @@ def main() -> None:
         choices=["local", "public"],
         default="local",
     )
+    parser.add_argument(
+        "--create-if-not-exists",
+        action="store_true",
+        help="Create the Iceberg table if it does not already exist",
+    )
 
     args = parser.parse_args()
     event = TransformerEvent(
@@ -139,7 +148,10 @@ def main() -> None:
         job_id=args.job_id,
     )
     response = handler(
-        event, use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode
+        event,
+        use_rest_api_table=args.use_rest_api_table,
+        create_if_not_exists=args.create_if_not_exists,
+        es_mode=args.es_mode,
     )
     print(json.dumps(response.model_dump(mode="json"), indent=2))
 

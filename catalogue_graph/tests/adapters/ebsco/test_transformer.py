@@ -49,7 +49,7 @@ def _prepare_changeset(
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
         "adapters.ebsco.helpers.build_adapter_table",
-        lambda use_rest_api_table: temporary_table,
+        lambda use_rest_api_table, create_if_not_exists: temporary_table,
     )
     return changeset_id
 
