@@ -6,9 +6,7 @@ consistently.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
-
-from adapters.utils.adapter_events import BaseAdapterEvent
+from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
 
 
 class EbscoAdapterTriggerEvent(BaseAdapterEvent):
@@ -19,10 +17,8 @@ class EbscoAdapterLoaderEvent(BaseAdapterEvent):
     file_location: str
 
 
-class LoaderResponse(BaseModel):
-    changeset_ids: list[str] = Field(default_factory=list)
-    changed_record_count: int
-    job_id: str
+class LoaderResponse(BaseLoaderResponse):
+    pass
 
 
 class EbscoAdapterTransformerEvent(BaseAdapterEvent):
