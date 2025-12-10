@@ -3,10 +3,16 @@ from __future__ import annotations
 from typing import ClassVar
 
 from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, LoaderResponse
+from models.events import IncrementalWindow
 from utils.reporting import PipelineMetric, PipelineReport
 
 
 class AxiellReport(PipelineReport):
+    # These overrides ensure that Axiell reports do not attempt to publish to S3 by default
+    # And that window is required
+    window: IncrementalWindow
+    publish_to_s3: bool = False
+
     @property
     def metric_dimensions(self) -> dict:
         return {
