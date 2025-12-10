@@ -8,7 +8,11 @@ from typing import Any
 
 import pyarrow as pa
 
-from adapters.ebsco.steps.loader import EBSCO_NAMESPACE, data_to_pa_table
+from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
+from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
+from adapters.utils.schemata import ARROW_SCHEMA
+
+file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=EBSCO_NAMESPACE)
 
 
 def lone_element(list_of_one: list) -> Any:
@@ -58,7 +62,8 @@ def data_to_namespaced_table(
         now = datetime.now(UTC)
         for row in rows:
             row["last_modified"] = now
-    return data_to_pa_table(rows)
+
+    return file_loader.data_to_pa_table(rows)
 
 
 def assert_row_identifiers(rows: pa.Table, expected_ids: Collection[str]) -> None:
