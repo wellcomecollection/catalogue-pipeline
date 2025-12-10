@@ -28,6 +28,10 @@ class PipelineReport(BaseModel):
     label: ClassVar[str]
 
     @property
+    def metric_namespace(self) -> str:
+        raise NotImplementedError()
+
+    @property
     def s3_uri(self) -> str:
         raise NotImplementedError()
 
@@ -43,7 +47,7 @@ class PipelineReport(BaseModel):
         if self.window is None:
             return
 
-        reporter = MetricReporter("catalogue_graph_pipeline")
+        reporter = MetricReporter(self.metric_namespace)
         for metric in self.metrics:
             reporter.put_metric_data(
                 metric_name=metric.name,
@@ -61,6 +65,10 @@ class PipelineReport(BaseModel):
 
 
 class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
+    @property
+    def metric_namespace(self) -> str:
+        return "catalogue_graph_pipeline"
+
     @property
     def event_key(self) -> str:
         base_key = super().event_key
@@ -80,6 +88,10 @@ class GraphPipelineReport(PipelineReport, GraphPipelineEvent):
 
 
 class IngestorReport(PipelineReport, IngestorStepEvent):
+    @property
+    def metric_namespace(self) -> str:
+        return "catalogue_graph_pipeline"
+
     @property
     def s3_uri(self) -> str:
         return self.get_s3_uri(f"report.{self.label}", "json")

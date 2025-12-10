@@ -17,6 +17,10 @@ class EbscoReport(PipelineReport):
     publish_to_s3: bool = False
 
     @property
+    def metric_namespace(self) -> str:
+        return "catalogue_adapters"
+
+    @property
     def metric_dimensions(self) -> dict:
         return {
             "adapter_type": "ebsco",
