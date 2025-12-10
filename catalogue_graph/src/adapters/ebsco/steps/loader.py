@@ -21,10 +21,6 @@ from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
     EbscoAdapterTransformerEvent,
 )
-from adapters.ebsco.utils.tracking import (
-    is_file_already_processed,
-    record_processed_file,
-)
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
 
@@ -106,31 +102,9 @@ def handler(
     print(f"Running handler with config: {config_obj}")
     print(f"Processing event: {event}")
 
-    prior_record = is_file_already_processed(event.file_location, step="loaded")
-    if prior_record:
-        print(
-            "Source file previously processed; skipping loader work and forwarding prior changeset_id"
-        )
-        prior_changeset = prior_record.get("changeset_id")
-        return EbscoAdapterTransformerEvent(
-            changeset_id=prior_changeset,
-            job_id=event.job_id,
-        )
-
     table = helpers.build_adapter_table(config_obj.use_rest_api_table)
     with smart_open.open(event.file_location, "rb") as f:
         changeset_id = update_from_xml_file(table, f)
-
-    # Record the processed file to S3
-    record_processed_file(
-        job_id=event.job_id,
-        file_location=event.file_location,
-        step="loaded",
-        payload_obj=EbscoAdapterTransformerEvent(
-            changeset_id=changeset_id,
-            job_id=event.job_id,
-        ),
-    )
 
     return EbscoAdapterTransformerEvent(
         changeset_id=changeset_id,
