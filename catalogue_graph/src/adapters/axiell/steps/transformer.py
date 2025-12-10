@@ -25,6 +25,7 @@ from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_inde
 
 class AxiellAdapterTransformerConfig(BaseModel):
     use_rest_api_table: bool = True
+    create_if_not_exists: bool = False
     es_mode: ElasticsearchMode = "private"
 
 
@@ -49,7 +50,10 @@ def build_runtime(
     cfg = config_obj or AxiellAdapterTransformerConfig(
         es_mode=cast(ElasticsearchMode, config.ES_MODE)
     )
-    table = helpers.build_adapter_table(cfg.use_rest_api_table)
+    table = helpers.build_adapter_table(
+        use_rest_api_table=cfg.use_rest_api_table,
+        create_if_not_exists=cfg.create_if_not_exists,
+    )
     table_client = AdapterStore(table, default_namespace=AXIELL_NAMESPACE)
     es_client = get_client(
         api_key_name=config.ES_API_KEY_NAME,
@@ -186,10 +190,18 @@ def main() -> None:
         choices=["private", "public", "local"],
         help="Elasticsearch connectivity mode",
     )
+    parser.add_argument(
+        "--create-if-not-exists",
+        action="store_true",
+        help="Create the Iceberg table if it does not already exist",
+    )
+
     args = parser.parse_args()
     runtime = build_runtime(
         AxiellAdapterTransformerConfig(
-            use_rest_api_table=args.use_rest_api_table, es_mode=args.es_mode
+            use_rest_api_table=args.use_rest_api_table,
+            create_if_not_exists=args.create_if_not_exists,
+            es_mode=args.es_mode,
         )
     )
     event = AxiellAdapterTransformerEvent(

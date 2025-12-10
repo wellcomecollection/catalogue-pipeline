@@ -63,7 +63,7 @@ def build_runtime(
 ) -> LoaderRuntime:
     cfg = config_obj or AxiellAdapterLoaderConfig()
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
-    table = helpers.build_adapter_table(cfg.use_rest_api_table)
+    table = helpers.build_adapter_table(use_rest_api_table=cfg.use_rest_api_table)
     table_client = AdapterStore(table, default_namespace=AXIELL_NAMESPACE)
     oai_client = build_oai_client()
 
