@@ -67,11 +67,10 @@ if __name__ == "__main__":
 
     for resource_type in ("bibs", "items", "holdings", "orders"):
         report = build_report(session, bucket=BUCKET, resource_type=resource_type)
-        print(report)
         for missing_window in get_missing_windows(report):
             print(missing_window)
-            # client.publish(
-            #     TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource_type}_windows",
-            #     Message=json.dumps(missing_window),
-            #     Subject="Window sender: missing windows script",
-            # )
+            client.publish(
+                TopicArn=f"arn:aws:sns:eu-west-1:760097843905:sierra_{resource_type}_windows",
+                Message=json.dumps(missing_window),
+                Subject="Window sender: missing windows script",
+            )
