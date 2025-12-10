@@ -3,14 +3,10 @@ from __future__ import annotations
 from typing import ClassVar
 
 from adapters.axiell.models.step_events import AxiellAdapterLoaderEvent, LoaderResponse
-from models.events import IncrementalWindow
 from utils.reporting import PipelineMetric, PipelineReport
 
 
 class AxiellReport(PipelineReport):
-    window: IncrementalWindow
-    publish_to_s3: bool = False
-
     @property
     def metric_dimensions(self) -> dict:
         return {
