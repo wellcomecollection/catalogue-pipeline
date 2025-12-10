@@ -18,8 +18,9 @@ from adapters.ebsco import helpers
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
-    EbscoAdapterTransformerEvent,
+    LoaderResponse,
 )
+from adapters.ebsco.reporting import EbscoLoaderReport
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 
@@ -62,24 +63,29 @@ def build_runtime(
 def execute_loader(
     request: EbscoAdapterLoaderEvent,
     runtime: LoaderRuntime | None = None,
-) -> EbscoAdapterTransformerEvent:
+) -> LoaderResponse:
     runtime = runtime or build_runtime()
 
     pa_table = runtime.marcxml_loader.load_file(request.file_location)
     changeset = runtime.adapter_store.snapshot_sync(pa_table)
+    changed_record_count = len(changeset.updated_record_ids) if changeset else 0
 
-    return EbscoAdapterTransformerEvent(
-        changeset_id=changeset.changeset_id if changeset else None,
+    return LoaderResponse(
+        changeset_ids=[changeset.changeset_id] if changeset else [],
+        changed_record_count=changed_record_count,
         job_id=request.job_id,
     )
 
 
 def handler(
     event: EbscoAdapterLoaderEvent, runtime: LoaderRuntime | None = None
-) -> EbscoAdapterTransformerEvent:
-    response = execute_loader(event, runtime=runtime)
+) -> LoaderResponse:
+    loader_response = execute_loader(event, runtime=runtime)
 
-    return response
+    report = EbscoLoaderReport.from_loader(event, loader_response)
+    report.publish()
+
+    return loader_response
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
@@ -89,7 +95,7 @@ def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, An
     return response.model_dump()
 
 
-def local_handler() -> EbscoAdapterTransformerEvent:
+def local_handler() -> LoaderResponse:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
     parser.add_argument(
         "xmlfile",
