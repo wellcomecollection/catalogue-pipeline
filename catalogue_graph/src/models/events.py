@@ -28,8 +28,8 @@ class PipelineIndexDates(BaseModel):
 
 
 class BasePipelineEvent(BaseModel):
-    pipeline_date: str
     window: IncrementalWindow | None = None
+    pipeline_date: str
     pit_id: str | None = None
     index_dates: PipelineIndexDates = PipelineIndexDates()
 

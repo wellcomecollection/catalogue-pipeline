@@ -26,7 +26,6 @@ WINDOW_STATUS_CATALOG_NAME = os.getenv(
     "WINDOW_STATUS_CATALOG_NAME", "axiell_window_status_catalog"
 )
 
-
 # ---------------------------------------------------------------------------
 # Local Table Configuration (development/testing)
 # ---------------------------------------------------------------------------
