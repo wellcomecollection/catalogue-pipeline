@@ -14,14 +14,14 @@ from adapters.utils.adapter_store import AdapterStore
 from ingestor.models.shared.deleted_reason import DeletedReason
 from models.pipeline.source.work import DeletedSourceWork, SourceWork, VisibleSourceWork
 
+from .adapter_store_source import AdapterStoreSource
 from .base_transformer import BaseTransformer
-from .pa_source import PyArrowSource
 
 
 class EbscoTransformer(BaseTransformer):
     def __init__(self, adapter_store: AdapterStore, changeset_ids: list[str]) -> None:
         super().__init__()
-        self.source = PyArrowSource(adapter_store, changeset_ids)
+        self.source = AdapterStoreSource(adapter_store, changeset_ids)
 
     @staticmethod
     def _transform_deleted(work_id: str) -> DeletedSourceWork:
