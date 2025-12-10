@@ -116,7 +116,8 @@ def main() -> None:
     parser.add_argument(
         "--job-id",
         type=str,
-        help="Optional job identifier propagated from the trigger",
+        help="Job identifier propagated from the trigger. Will default to 'dev'.",
+        default="dev",
     )
     parser.add_argument(
         "--use-rest-api-table",
