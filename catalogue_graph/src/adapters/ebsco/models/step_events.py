@@ -6,6 +6,8 @@ consistently.
 
 from __future__ import annotations
 
+from pydantic import Field
+
 from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
 
 
@@ -18,8 +20,6 @@ class EbscoAdapterLoaderEvent(BaseAdapterEvent):
 
 
 class LoaderResponse(BaseLoaderResponse):
-    pass
-
-
-class EbscoAdapterTransformerEvent(BaseAdapterEvent):
-    changeset_id: str | None = None
+    changeset_ids: list[str] = Field(default_factory=list)
+    changed_record_count: int
+    job_id: str

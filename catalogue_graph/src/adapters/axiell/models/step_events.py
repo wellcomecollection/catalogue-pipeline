@@ -22,7 +22,6 @@ class AxiellAdapterLoaderEvent(BaseAdapterEvent):
 
 class LoaderResponse(BaseLoaderResponse):
     summaries: list[WindowSummary]
-
-
-class AxiellAdapterTransformerEvent(BaseAdapterEvent):
     changeset_ids: list[str] = Field(default_factory=list)
+    changed_record_count: int
+    job_id: str

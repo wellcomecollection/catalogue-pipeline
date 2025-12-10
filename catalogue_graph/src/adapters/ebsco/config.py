@@ -26,4 +26,5 @@ BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")
 # Transform Configuration
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
 INDEX_DATE = os.getenv("INDEX_DATE")
+ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "works-source")
 ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "transformer")
