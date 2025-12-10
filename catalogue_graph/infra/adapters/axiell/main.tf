@@ -48,8 +48,8 @@ locals {
           Entries = [
             {
               Detail = {
-                transformer_type = "axiell"
-                "job_id.$"       = "$.job_id"
+                transformer_type  = "axiell"
+                "job_id.$"        = "$.job_id"
                 "changeset_ids.$" = "$.changeset_ids"
               }
               DetailType   = "axiell.adapter.completed"

@@ -48,8 +48,8 @@ locals {
           Entries = [
             {
               Detail = {
-                transformer_type = "ebsco"
-                "job_id.$"       = "$.job_id"
+                transformer_type  = "ebsco"
+                "job_id.$"        = "$.job_id"
                 "changeset_ids.$" = "$.changeset_ids"
               }
               DetailType   = "ebsco.adapter.completed"
