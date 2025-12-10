@@ -14,6 +14,7 @@ from adapters.axiell.models.step_events import (
 )
 from adapters.axiell.steps import trigger
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
+from models.incremental_window import IncrementalWindow
 
 
 def _window_row(start: datetime, end: datetime) -> WindowStatusRecord:
@@ -47,8 +48,8 @@ def test_build_window_request_uses_lookback_when_no_history(
 
     request = trigger.build_window_request(store=store, now=now)
 
-    assert request.window_start == now - timedelta(days=1)
-    assert request.window_end == now
+    assert request.window.start_time == now - timedelta(days=1)
+    assert request.window.end_time == now
     assert request.set_spec == config.OAI_SET_SPEC
     assert request.metadata_prefix == config.OAI_METADATA_PREFIX
     assert request.job_id == "20251117T1200"
@@ -66,8 +67,8 @@ def test_build_window_request_respects_custom_lookback(
         window_lookback_days=3,
     )
 
-    assert request.window_start == now - timedelta(days=3)
-    assert request.window_end == now
+    assert request.window.start_time == now - timedelta(days=3)
+    assert request.window.end_time == now
 
 
 def test_build_window_request_embeds_window_minutes(
@@ -103,8 +104,8 @@ def test_build_window_request_respects_last_success(
 
     request = trigger.build_window_request(store=store, now=now)
 
-    assert request.window_start == last_success_end
-    assert request.window_end == now
+    assert request.window.start_time == last_success_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_finds_latest_among_multiple_windows(
@@ -128,8 +129,8 @@ def test_build_window_request_finds_latest_among_multiple_windows(
 
     request = trigger.build_window_request(store=store, now=now)
 
-    assert request.window_start == end2
-    assert request.window_end == now
+    assert request.window.start_time == end2
+    assert request.window.end_time == now
 
 
 def test_build_window_request_errors_when_lag_exceeds_limit(
@@ -162,8 +163,8 @@ def test_build_window_request_can_skip_lag_enforcement(
 
     request = trigger.build_window_request(store=store, now=now, enforce_lag=False)
 
-    assert request.window_start == old_end
-    assert request.window_end == now
+    assert request.window.start_time == old_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_applies_max_window_limit(
@@ -212,8 +213,10 @@ def test_lambda_handler_uses_rest_api_table_by_default(
         now = event.now or datetime.now(tz=UTC)
         return AxiellAdapterLoaderEvent(
             job_id=event.job_id,
-            window_start=now - timedelta(minutes=random.randint(2, 40)),
-            window_end=now,
+            window=IncrementalWindow(
+                start_time=now - timedelta(minutes=random.randint(2, 40)),
+                end_time=now,
+            ),
             metadata_prefix="oai",
             set_spec="collect",
         )
@@ -273,8 +276,8 @@ def test_build_window_request_notifies_when_gaps_detected(
 
     # Should still create the window request
     assert request.job_id == "20251202T1200"
-    assert request.window_start == second_end
-    assert request.window_end == now
+    assert request.window.start_time == second_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_does_not_notify_without_gaps(
@@ -317,8 +320,8 @@ def test_build_window_request_does_not_notify_without_gaps(
 
     # Should still create the window request
     assert request.job_id == "20251202T1200"
-    assert request.window_start == recent_end
-    assert request.window_end == now
+    assert request.window.start_time == recent_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_works_without_notifier(

@@ -22,6 +22,7 @@ from adapters.axiell.models.step_events import (
 from adapters.axiell.steps.loader import LoaderResponse, LoaderRuntime, build_harvester
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
+from models.incremental_window import IncrementalWindow
 
 logging.basicConfig(level=logging.INFO)
 
@@ -112,8 +113,7 @@ def _process_gap(
         # Construct loader event with sensible defaults from config
         loader_event = AxiellAdapterLoaderEvent(
             job_id=job_id,
-            window_start=gap_start,
-            window_end=gap_end,
+            window=IncrementalWindow(start_time=gap_start, end_time=gap_end),
             metadata_prefix=config.OAI_METADATA_PREFIX,
             set_spec=config.OAI_SET_SPEC,
             max_windows=None,  # Process all windows in the gap
@@ -125,8 +125,8 @@ def _process_gap(
         # Use the harvester directly to avoid recreating runtime
         harvester = build_harvester(loader_event, runtime.loader_runtime)
         summaries = harvester.harvest_range(
-            start_time=loader_event.window_start,
-            end_time=loader_event.window_end,
+            start_time=loader_event.window.start_time,
+            end_time=loader_event.window.end_time,
             max_windows=loader_event.max_windows,
             reprocess_successful_windows=False,
         )

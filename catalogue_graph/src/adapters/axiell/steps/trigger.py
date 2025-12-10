@@ -24,7 +24,7 @@ from adapters.utils.window_notifier import WindowNotifier
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import WindowStore
 from clients.chatbot_notifier import ChatbotNotifier
-from models.events import EventBridgeScheduledEvent
+from models.events import EventBridgeScheduledEvent, IncrementalWindow
 
 logging.basicConfig(level=logging.INFO)
 
@@ -121,8 +121,7 @@ def build_window_request(
 
     loader_event = AxiellAdapterLoaderEvent(
         job_id=resolved_job_id,
-        window_start=start_time,
-        window_end=end_time,
+        window=IncrementalWindow(start_time=start_time, end_time=end_time),
         metadata_prefix=config.OAI_METADATA_PREFIX,
         set_spec=config.OAI_SET_SPEC,
         max_windows=max_windows,
