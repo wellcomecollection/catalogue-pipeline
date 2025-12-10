@@ -52,8 +52,9 @@ def _prepare_changeset(
     pa_table_initial = data_to_namespaced_table(rows)
 
     client = AdapterStore(temporary_table)
-    changeset_id = client.snapshot_sync(pa_table_initial, "ebsco")
-    assert changeset_id, "Expected a changeset_id to be returned"
+    changeset = client.snapshot_sync(pa_table_initial, "ebsco")
+    assert changeset is not None, "Expected a changeset to be returned"
+    changeset_id = changeset.changeset_id
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(

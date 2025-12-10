@@ -6,8 +6,8 @@ identifier used by the transformer; skips work if the file was already loaded.
 """
 
 import argparse
-from datetime import datetime
 import json
+from datetime import datetime
 from typing import Any
 
 import pyarrow as pa
@@ -66,10 +66,10 @@ def execute_loader(
     runtime = runtime or build_runtime()
 
     pa_table = runtime.marcxml_loader.load_file(request.file_location)
-    changeset_id = runtime.adapter_store.snapshot_sync(pa_table)
+    changeset = runtime.adapter_store.snapshot_sync(pa_table)
 
     return EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id,
+        changeset_id=changeset.changeset_id if changeset else None,
         job_id=request.job_id,
     )
 

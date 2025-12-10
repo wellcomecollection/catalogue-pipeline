@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import TextIO
 
 import pytest
 from lxml import etree
@@ -103,7 +104,7 @@ def register_mock_open() -> Callable[[str], None]:
 
 
 def test_loads_one_record_into_pa_table(
-    xml_with_one_record: object, register_mock_open: Callable[[str], None]
+    xml_with_one_record: TextIO, register_mock_open: Callable[[str], None]
 ) -> None:
     register_mock_open(xml_with_one_record.name)
     table = file_loader.load_file(xml_with_one_record.name)
@@ -132,7 +133,7 @@ def test_loads_one_record_into_pa_table(
 
 
 def test_loads_multiple_records_preserving_content_and_order(
-    xml_with_three_records: object,
+    xml_with_three_records: TextIO,
     register_mock_open: Callable[[str], None],
 ) -> None:
     register_mock_open(xml_with_three_records.name)
@@ -198,7 +199,7 @@ def test_loads_multiple_records_preserving_content_and_order(
 
 
 def test_raises_on_invalid_xml_file(
-    not_xml: object, register_mock_open: Callable[[str], None]
+    not_xml: TextIO, register_mock_open: Callable[[str], None]
 ) -> None:
     register_mock_open(not_xml.name)
     with pytest.raises(etree.XMLSyntaxError):

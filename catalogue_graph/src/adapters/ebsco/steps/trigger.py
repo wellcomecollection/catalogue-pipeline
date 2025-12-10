@@ -13,7 +13,6 @@ from typing import Any
 
 import boto3
 import smart_open
-from pydantic import BaseModel
 
 from adapters.ebsco.config import (
     FTP_S3_PREFIX,
@@ -116,9 +115,7 @@ def sync_files(
     return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
 
 
-def handler(
-    event: EbscoAdapterTriggerEvent
-) -> EbscoAdapterLoaderEvent:
+def handler(event: EbscoAdapterTriggerEvent) -> EbscoAdapterLoaderEvent:
     print(f"Processing event: {event}")
 
     job_id = event.job_id

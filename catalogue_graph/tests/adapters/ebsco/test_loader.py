@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Iterable, Iterator
-from datetime import UTC, datetime
+from datetime import UTC, datetime, tzinfo
+from typing import TextIO
+
+import pytest
 
 from pyiceberg.table import Table as IcebergTable
 
@@ -32,12 +35,15 @@ def _ids(table_rows: Iterable[dict]) -> set[str]:
     return {row["id"] for row in table_rows}
 
 
-def _patch_datetime(monkeypatch: object, timestamps: Iterator[datetime]) -> None:
+def _patch_datetime(
+    monkeypatch: pytest.MonkeyPatch, timestamps: Iterator[datetime]
+) -> None:
     class _StubDateTime(datetime):
         @classmethod
-        def now(cls, tz: object | None = None):  # type: ignore[override]
+        def now(cls, tz: tzinfo | None = None) -> "_StubDateTime":
             try:
-                return next(timestamps)
+                value = next(timestamps)
+                return cls.fromtimestamp(value.timestamp(), tz=value.tzinfo)
             except StopIteration:
                 # Reuse last value if more calls occur
                 return cls(1970, 1, 1, tzinfo=tz) if tz else cls(1970, 1, 1)
@@ -46,7 +52,7 @@ def _patch_datetime(monkeypatch: object, timestamps: Iterator[datetime]) -> None
 
 
 def test_execute_loader_inserts_records(
-    temporary_table: IcebergTable, xml_with_two_records: object
+    temporary_table: IcebergTable, xml_with_two_records: TextIO
 ) -> None:
     runtime = _runtime_with(temporary_table)
     _register_mock_open(xml_with_two_records.name)
@@ -66,10 +72,10 @@ def test_execute_loader_inserts_records(
 
 
 def test_execute_loader_updates_existing_records(
-    monkeypatch: object,
+    monkeypatch: pytest.MonkeyPatch,
     temporary_table: IcebergTable,
-    xml_with_one_record: object,
-    xml_with_three_records: object,
+    xml_with_one_record: TextIO,
+    xml_with_three_records: TextIO,
 ) -> None:
     ts1 = datetime(2025, 1, 2, 10, 0, tzinfo=UTC)
     ts2 = datetime(2025, 1, 2, 10, 5, tzinfo=UTC)
@@ -103,8 +109,8 @@ def test_execute_loader_updates_existing_records(
 
 def test_execute_loader_soft_deletes_missing_records(
     temporary_table: IcebergTable,
-    xml_with_two_records: object,
-    xml_with_one_record: object,
+    xml_with_two_records: TextIO,
+    xml_with_one_record: TextIO,
 ) -> None:
     runtime = _runtime_with(temporary_table)
 
@@ -133,10 +139,10 @@ def test_execute_loader_soft_deletes_missing_records(
 
 
 def test_last_modified_updates_on_content_change(
-    monkeypatch: object,
+    monkeypatch: pytest.MonkeyPatch,
     temporary_table: IcebergTable,
-    xml_with_one_record: object,
-    xml_with_three_records: object,
+    xml_with_one_record: TextIO,
+    xml_with_three_records: TextIO,
 ) -> None:
     ts1 = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
     ts2 = datetime(2025, 1, 1, 12, 1, tzinfo=UTC)
@@ -170,10 +176,10 @@ def test_last_modified_updates_on_content_change(
 
 
 def test_last_modified_on_delete_marks_removed_records_newer(
-    monkeypatch: object,
+    monkeypatch: pytest.MonkeyPatch,
     temporary_table: IcebergTable,
-    xml_with_two_records: object,
-    xml_with_one_record: object,
+    xml_with_two_records: TextIO,
+    xml_with_one_record: TextIO,
 ) -> None:
     ts1 = datetime(2025, 1, 1, 13, 0, tzinfo=UTC)
     ts2 = datetime(2025, 1, 1, 13, 5, tzinfo=UTC)

@@ -77,7 +77,7 @@ class AdapterStore:
 
     def snapshot_sync(
         self, new_data: pa.Table, record_namespace: str | None = None
-    ) -> str | None:
+    ) -> AdapterStoreUpdate | None:
         """
         Sync the table to match the new snapshot.
         Updates, inserts, and DELETES records that are missing from new_data.
@@ -102,7 +102,7 @@ class AdapterStore:
             changes = None
 
         if changes or inserts:
-            return self._upsert_with_markers(changes, inserts).changeset_id
+            return self._upsert_with_markers(changes, inserts)
         return None
 
     def _get_namespace(self, record_namespace: str | None) -> str:
