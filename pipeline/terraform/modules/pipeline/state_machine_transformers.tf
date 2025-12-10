@@ -157,6 +157,9 @@ module "ebsco_adapter_transformer_trigger" {
   name              = "ebsco-transformer-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.ebsco_transformer_state_machine.state_machine_arn
+
+  enabled = true
+
   event_pattern = {
     source        = ["ebsco.adapter"],
     "detail-type" = ["ebsco.adapter.completed"]

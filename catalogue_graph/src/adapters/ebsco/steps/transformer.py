@@ -49,6 +49,7 @@ BATCH_SIZE = 5_000
 class EbscoAdapterTransformerConfig(BaseModel):
     es_mode: ElasticsearchMode = "private"
     use_rest_api_table: bool = True
+    create_if_not_exists: bool = False
     pipeline_date: str
     # Optional override for index naming. When None we use pipeline_date.
     index_date: str | None = None
@@ -310,7 +311,10 @@ def handler(
     # Determine index date from config override or fallback to pipeline date
     index_date = config_obj.index_date or config_obj.pipeline_date
 
-    table = helpers.build_adapter_table(config_obj.use_rest_api_table)
+    table = helpers.build_adapter_table(
+        use_rest_api_table=config_obj.use_rest_api_table,
+        create_if_not_exists=False,
+    )
     table_client = AdapterStore(table)
 
     # Perform a reindex when no changeset is supplied
@@ -392,6 +396,11 @@ def local_handler() -> TransformerManifest:
         choices=["local", "public"],
         default="local",
     )
+    parser.add_argument(
+        "--create-if-not-exists",
+        action="store_true",
+        help="Create the Iceberg table if it does not already exist",
+    )
 
     args = parser.parse_args()
 
@@ -402,6 +411,7 @@ def local_handler() -> TransformerManifest:
     config_obj = EbscoAdapterTransformerConfig(
         es_mode=args.es_mode,
         use_rest_api_table=use_rest_api,
+        create_if_not_exists=args.create_if_not_exists,
         pipeline_date=args.pipeline_date,
         index_date=args.index_date,
     )
