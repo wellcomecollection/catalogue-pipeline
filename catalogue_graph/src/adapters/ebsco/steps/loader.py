@@ -11,7 +11,6 @@ from datetime import datetime
 from typing import Any
 
 import pyarrow as pa
-from lxml import etree
 from pydantic import BaseModel, ConfigDict
 
 from adapters.ebsco import helpers
@@ -24,7 +23,6 @@ from adapters.ebsco.reporting import EbscoLoaderReport
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.schemata import ARROW_SCHEMA
 
-XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
 
 

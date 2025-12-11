@@ -9,9 +9,8 @@ from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.utils.schemata import ARROW_SCHEMA
 from tests.mocks import MockSmartOpen
 
-from .helpers import file_loader
-
 # -- Tests for MarcXmlFileLoader.extract_record_id ---
+file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=EBSCO_NAMESPACE)
 
 
 def test_uses_controlfield_001_when_available() -> None:
@@ -107,6 +106,7 @@ def test_loads_one_record_into_pa_table(
     xml_with_one_record: TextIO, register_mock_open: Callable[[str], None]
 ) -> None:
     register_mock_open(xml_with_one_record.name)
+
     table = file_loader.load_file(xml_with_one_record.name)
 
     assert table.schema == ARROW_SCHEMA

@@ -37,7 +37,7 @@ def _prepare_changeset(
         {"id": rid, "content": data, "last_modified": datetime.now()}
         for rid, data in records_by_id.items()
     ]
-    pa_table_initial = data_to_namespaced_table(rows)
+    pa_table_initial = data_to_namespaced_table(rows, add_timestamp=True)
 
     client = AdapterStore(temporary_table)
 
