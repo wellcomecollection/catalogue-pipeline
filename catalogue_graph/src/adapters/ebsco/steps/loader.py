@@ -93,7 +93,7 @@ def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, An
     return response.model_dump()
 
 
-def local_handler() -> LoaderResponse:
+def main() -> None:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
     parser.add_argument(
         "xmlfile",
@@ -120,18 +120,8 @@ def local_handler() -> LoaderResponse:
     config_obj = EbscoAdapterLoaderConfig(use_rest_api_table=args.use_rest_api_table)
     runtime = build_runtime(config_obj)
 
-    return handler(event=event, runtime=runtime)
-
-
-def main() -> None:
-    print("Running loader handler...")
-    try:
-        response = local_handler()
-        print(json.dumps(response.model_dump(mode="json"), indent=2))
-
-    except Exception as exc:  # surface failures clearly in local runs
-        print(f"Loader failed: {exc}")
-        raise
+    response = handler(event=event, runtime=runtime)
+    print(json.dumps(response.model_dump(mode="json"), indent=2))
 
 
 if __name__ == "__main__":
