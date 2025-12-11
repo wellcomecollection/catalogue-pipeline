@@ -107,7 +107,7 @@ data "aws_iam_policy_document" "cloudwatch_put_metric_data" {
     condition {
       test     = "StringEquals"
       variable = "cloudwatch:namespace"
-      values   = ["catalogue_graph_pipeline"]
+      values   = ["catalogue_graph_pipeline", "catalogue_adapters"]
     }
   }
 }

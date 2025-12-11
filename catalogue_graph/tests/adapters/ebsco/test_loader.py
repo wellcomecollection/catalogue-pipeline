@@ -1,140 +1,251 @@
-import json
+from __future__ import annotations
+
+from collections.abc import Iterable, Iterator
+from datetime import UTC, datetime, tzinfo
+from typing import TextIO
+from unittest.mock import MagicMock, patch
 
 import pytest
-from lxml import etree
 from pyiceberg.table import Table as IcebergTable
 
-from adapters.ebsco.models.step_events import EbscoAdapterLoaderEvent
-from adapters.ebsco.steps.loader import (
-    EbscoAdapterLoaderConfig,
-    extract_record_id,
-    handler,
-)
-from adapters.ebsco.utils.tracking import ProcessedFileRecord
-from adapters.transformers.transformer import TransformerEvent
+from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
+from adapters.ebsco.models.step_events import EbscoAdapterLoaderEvent, LoaderResponse
+from adapters.ebsco.steps import loader
+from adapters.ebsco.steps.loader import EBSCO_NAMESPACE, LoaderRuntime
+from adapters.utils.adapter_store import AdapterStore
+from adapters.utils.schemata import ARROW_SCHEMA
 from tests.mocks import MockSmartOpen
 
 
-class TestRecordIdExtraction:
-    def test_uses_controlfield_001_when_available(self) -> None:
-        node = etree.fromstring(
-            """
-            <record>
-                <controlfield tag="001">r-control</controlfield>
-                <datafield tag="035">
-                    <subfield code="a">(OCoLC)9999999</subfield>
-                </datafield>
-            </record>
-            """
-        )
-
-        assert extract_record_id(node) == "r-control"
-
-    def test_falls_back_to_datafield_035_removing_prefix(self) -> None:
-        node = etree.fromstring(
-            """
-            <record>
-                <datafield tag="035">
-                    <subfield code="a">(OCoLC)814782</subfield>
-                </datafield>
-            </record>
-            """
-        )
-
-        assert extract_record_id(node) == "814782"
-
-    def test_ignores_controlfield_001_when_empty(self) -> None:
-        node = etree.fromstring(
-            """
-            <record>
-                <controlfield tag="001"></controlfield>
-                <datafield tag="035">
-                    <subfield code="a">(OCoLC)9999999</subfield>
-                </datafield>
-            </record>
-            """
-        )
-        assert extract_record_id(node) == "9999999"
-
-    def test_raises_when_no_identifier_present(self) -> None:
-        with pytest.raises(
-            Exception, match="Could not find controlfield 001 or usable datafield 035"
-        ):
-            node = etree.fromstring(
-                """
-                <record>
-                    <controlfield tag="001">   </controlfield>
-                    <datafield tag="035">
-                        <subfield code="a"> (OCoLC) </subfield>
-                    </datafield>
-                </record>
-                """
-            )
-            extract_record_id(node)
-
-    def test_raises_when_no_identifier_fields_present(self) -> None:
-        node = etree.fromstring("<record></record>")
-
-        with pytest.raises(
-            Exception, match="Could not find controlfield 001 or usable datafield 035"
-        ):
-            extract_record_id(node)
+def _register_mock_open(path: str) -> None:
+    with open(path, "rb") as fh:
+        MockSmartOpen.mock_s3_file(path, fh.read())
 
 
-class TestLoaderHandler:
-    def test_short_circuit_when_prior_processed_detected(self) -> None:
-        """Loader should short-circuit using existing tracking file."""
-        file_uri = "s3://bucket/path/file.xml"
-        tracking_uri = f"{file_uri}.loaded.json"
-        prior_event = TransformerEvent(
-            transformer_type="ebsco",
-            job_id="20250101T1200",
-            changeset_ids=["prev-change-123"],
-        )
-        tracking_record = ProcessedFileRecord(
-            job_id="20250101T1200", step="loaded", payload=prior_event.model_dump()
-        )
-        MockSmartOpen.mock_s3_file(
-            tracking_uri, json.dumps(tracking_record.model_dump())
-        )
+def _runtime_with(table: IcebergTable) -> LoaderRuntime:
+    return LoaderRuntime(
+        adapter_store=AdapterStore(table, default_namespace=EBSCO_NAMESPACE),
+        marcxml_loader=MarcXmlFileLoader(
+            schema=ARROW_SCHEMA, namespace=EBSCO_NAMESPACE
+        ),
+    )
 
-        event = EbscoAdapterLoaderEvent(job_id="20250101T1200", file_location=file_uri)
-        config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
-        result = handler(event=event, config_obj=config)
 
-        assert isinstance(result, TransformerEvent)
-        assert result.changeset_ids == ["prev-change-123"]
+def _ids(table_rows: Iterable[dict]) -> set[str]:
+    return {row["id"] for row in table_rows}
 
-    def test_normal_processing_path_records_file(
-        self, monkeypatch: pytest.MonkeyPatch, temporary_table: IcebergTable
-    ) -> None:
-        sample_xml = (
-            "<collection>"
-            "<record><controlfield tag='001'>r1</controlfield></record>"
-            "<record><controlfield tag='001'>r2</controlfield></record>"
-            "</collection>"
-        )
-        file_uri = "s3://bucket/path/file.xml"
-        MockSmartOpen.mock_s3_file(file_uri, sample_xml.encode("utf-8"))
 
-        monkeypatch.setattr(
-            "adapters.utils.iceberg.get_local_table",
-            lambda **kwargs: temporary_table,
-        )
+def _patch_datetime(
+    monkeypatch: pytest.MonkeyPatch, timestamps: Iterator[datetime]
+) -> None:
+    class _StubDateTime(datetime):
+        @classmethod
+        def now(cls, tz: tzinfo | None = None) -> _StubDateTime:
+            try:
+                value = next(timestamps)
+                return cls.fromtimestamp(value.timestamp(), tz=value.tzinfo)
+            except StopIteration:
+                # Reuse last value if more calls occur
+                return cls(1970, 1, 1, tzinfo=tz) if tz else cls(1970, 1, 1)
 
-        event = EbscoAdapterLoaderEvent(job_id="20250101T1200", file_location=file_uri)
-        config = EbscoAdapterLoaderConfig(use_rest_api_table=False)
-        result = handler(event=event, config_obj=config)
+    monkeypatch.setattr("adapters.utils.adapter_store.datetime", _StubDateTime)
 
-        assert isinstance(result, TransformerEvent)
-        assert len(result.changeset_ids) == 1
-        assert result.changeset_ids[0] is not None
 
-        tracking_uri = f"{file_uri}.loaded.json"
-        assert tracking_uri in MockSmartOpen.file_lookup
-        tracking_path = MockSmartOpen.file_lookup[tracking_uri]
-        with open(tracking_path, encoding="utf-8") as f:
-            tracking_json = json.load(f)
-        assert tracking_json["job_id"] == "20250101T1200"
-        assert tracking_json["step"] == "loaded"
-        assert tracking_json["payload"]["changeset_ids"] == result.changeset_ids
+def test_execute_loader_inserts_records(
+    temporary_table: IcebergTable, xml_with_two_records: TextIO
+) -> None:
+    runtime = _runtime_with(temporary_table)
+    _register_mock_open(xml_with_two_records.name)
+
+    request = EbscoAdapterLoaderEvent(
+        file_location=xml_with_two_records.name, job_id="job-123"
+    )
+    response = loader.execute_loader(request, runtime=runtime)
+
+    assert response.job_id == "job-123"
+    assert len(response.changeset_ids) == 1
+
+    records = runtime.adapter_store.get_all_records()
+    rows = records.to_pylist()
+    assert _ids(rows) == {"ebs00001", "ebs00002"}
+    assert set(records.column("changeset").to_pylist()) == set(response.changeset_ids)
+    assert response.changed_record_count == 2
+
+
+def test_execute_loader_updates_existing_records(
+    monkeypatch: pytest.MonkeyPatch,
+    temporary_table: IcebergTable,
+    xml_with_one_record: TextIO,
+    xml_with_three_records: TextIO,
+) -> None:
+    ts1 = datetime(2025, 1, 2, 10, 0, tzinfo=UTC)
+    ts2 = datetime(2025, 1, 2, 10, 5, tzinfo=UTC)
+    _patch_datetime(monkeypatch, iter([ts1, ts2]))
+
+    runtime = _runtime_with(temporary_table)
+
+    _register_mock_open(xml_with_one_record.name)
+    initial_request = EbscoAdapterLoaderEvent(
+        file_location=xml_with_one_record.name, job_id="job-123"
+    )
+    initial_response = loader.execute_loader(initial_request, runtime=runtime)
+
+    _register_mock_open(xml_with_three_records.name)
+    update_request = EbscoAdapterLoaderEvent(
+        file_location=xml_with_three_records.name, job_id="job-123"
+    )
+    update_response = loader.execute_loader(update_request, runtime=runtime)
+
+    assert update_response.changeset_ids != []
+    assert update_response.changeset_ids != initial_response.changeset_ids
+
+    rows = runtime.adapter_store.get_all_records().to_pylist()
+    assert _ids(rows) == {"ebs00001", "ebs00003", "ebs00004"}
+
+    record_one = next(row for row in rows if row["id"] == "ebs00001")
+    assert "John W. Trimmer" in record_one["content"]
+    assert record_one["last_modified"] == ts2
+    assert all(row["last_modified"] == ts2 for row in rows)
+    assert update_response.changed_record_count == 3
+
+
+def test_execute_loader_soft_deletes_missing_records(
+    temporary_table: IcebergTable,
+    xml_with_two_records: TextIO,
+    xml_with_one_record: TextIO,
+) -> None:
+    runtime = _runtime_with(temporary_table)
+
+    _register_mock_open(xml_with_two_records.name)
+    initial_request = EbscoAdapterLoaderEvent(
+        file_location=xml_with_two_records.name, job_id="job-123"
+    )
+    loader.execute_loader(initial_request, runtime=runtime)
+
+    _register_mock_open(xml_with_one_record.name)
+    delete_request = EbscoAdapterLoaderEvent(
+        file_location=xml_with_one_record.name, job_id="job-123"
+    )
+    delete_response = loader.execute_loader(delete_request, runtime=runtime)
+
+    assert delete_response.changeset_ids != []
+
+    visible_rows = runtime.adapter_store.get_all_records().to_pylist()
+    assert _ids(visible_rows) == {"ebs00001"}
+
+    all_rows = runtime.adapter_store.get_all_records(include_deleted=True).to_pylist()
+    deleted_record = next(row for row in all_rows if row["id"] == "ebs00002")
+
+    assert deleted_record["content"] is None
+    assert deleted_record["changeset"] in delete_response.changeset_ids
+    assert delete_response.changed_record_count == 1
+
+
+def test_last_modified_updates_on_content_change(
+    monkeypatch: pytest.MonkeyPatch,
+    temporary_table: IcebergTable,
+    xml_with_one_record: TextIO,
+    xml_with_three_records: TextIO,
+) -> None:
+    ts1 = datetime(2025, 1, 1, 12, 0, tzinfo=UTC)
+    ts2 = datetime(2025, 1, 1, 12, 1, tzinfo=UTC)
+    _patch_datetime(monkeypatch, iter([ts1, ts2]))
+
+    runtime = _runtime_with(temporary_table)
+
+    _register_mock_open(xml_with_one_record.name)
+    loader.execute_loader(
+        EbscoAdapterLoaderEvent(
+            file_location=xml_with_one_record.name, job_id="job-123"
+        ),
+        runtime=runtime,
+    )
+
+    record = runtime.adapter_store.get_all_records().to_pylist()[0]
+    assert record["last_modified"] == ts1
+
+    _register_mock_open(xml_with_three_records.name)
+    update_response = loader.execute_loader(
+        EbscoAdapterLoaderEvent(
+            file_location=xml_with_three_records.name, job_id="job-123"
+        ),
+        runtime=runtime,
+    )
+
+    rows = runtime.adapter_store.get_all_records().to_pylist()
+    record_one = next(row for row in rows if row["id"] == "ebs00001")
+    assert record_one["last_modified"] == ts2
+    assert all(row["last_modified"] == ts2 for row in rows)
+    assert rows[0]["changeset"] == rows[1]["changeset"] == rows[2]["changeset"]
+    assert rows[0]["changeset"] in update_response.changeset_ids
+    assert update_response.changed_record_count == 3
+
+
+def test_last_modified_on_delete_marks_removed_records_newer(
+    monkeypatch: pytest.MonkeyPatch,
+    temporary_table: IcebergTable,
+    xml_with_two_records: TextIO,
+    xml_with_one_record: TextIO,
+) -> None:
+    ts1 = datetime(2025, 1, 1, 13, 0, tzinfo=UTC)
+    ts2 = datetime(2025, 1, 1, 13, 5, tzinfo=UTC)
+    _patch_datetime(monkeypatch, iter([ts1, ts2]))
+
+    runtime = _runtime_with(temporary_table)
+
+    _register_mock_open(xml_with_two_records.name)
+    loader.execute_loader(
+        EbscoAdapterLoaderEvent(
+            file_location=xml_with_two_records.name, job_id="job-123"
+        ),
+        runtime=runtime,
+    )
+
+    rows_initial = runtime.adapter_store.get_all_records(
+        include_deleted=True
+    ).to_pylist()
+    assert all(row["last_modified"] == ts1 for row in rows_initial)
+
+    _register_mock_open(xml_with_one_record.name)
+    delete_response = loader.execute_loader(
+        EbscoAdapterLoaderEvent(
+            file_location=xml_with_one_record.name, job_id="job-123"
+        ),
+        runtime=runtime,
+    )
+
+    rows_after = runtime.adapter_store.get_all_records(include_deleted=True).to_pylist()
+    kept = next(row for row in rows_after if row["id"] == "ebs00001")
+    deleted = next(row for row in rows_after if row["id"] == "ebs00002")
+
+    assert kept["last_modified"] == ts1  # unchanged record retains original timestamp
+    assert deleted["last_modified"] == ts2  # delete marker stamped later
+    assert deleted["content"] is None
+    assert delete_response.changed_record_count == 1
+
+
+def test_handler_publishes_loader_report(
+    temporary_table: IcebergTable, xml_with_two_records: TextIO
+) -> None:
+    runtime = _runtime_with(temporary_table)
+    _register_mock_open(xml_with_two_records.name)
+
+    req = EbscoAdapterLoaderEvent(
+        file_location=xml_with_two_records.name, job_id="job-456"
+    )
+
+    mock_report = MagicMock()
+
+    with patch.object(loader.EbscoLoaderReport, "from_loader") as mock_from_loader:
+        mock_from_loader.return_value = mock_report
+
+        loader_response = loader.handler(req, runtime=runtime)
+
+    assert mock_from_loader.call_count == 1
+    called_event, response_for_report = mock_from_loader.call_args.args
+    assert called_event == req
+    assert isinstance(response_for_report, LoaderResponse)
+    mock_report.publish.assert_called_once()
+    assert response_for_report.changed_record_count == 2
+    assert response_for_report.changeset_ids
+    assert loader_response == response_for_report

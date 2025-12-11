@@ -143,7 +143,7 @@ def execute_loader(
 
 
 def handler(
-    event: AxiellAdapterLoaderEvent, *, runtime: LoaderRuntime | None = None
+    event: AxiellAdapterLoaderEvent, runtime: LoaderRuntime | None = None
 ) -> LoaderResponse:
     response = execute_loader(event, runtime=runtime)
 

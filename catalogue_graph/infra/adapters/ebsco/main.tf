@@ -20,7 +20,7 @@ locals {
       LoaderStep = {
         Type     = "Task"
         Resource = module.loader_lambda.lambda.arn
-        Next     = "PublishEvent"
+        Next     = "PublishDecision"
         Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -30,13 +30,28 @@ locals {
           }
         ]
       }
+      PublishDecision = {
+        Type = "Choice"
+        Choices = [
+          {
+            Variable  = "$.changeset_ids[0]"
+            IsPresent = true
+            Next      = "PublishEvent"
+          }
+        ]
+        Default = "Success"
+      }
       PublishEvent = {
         Type     = "Task"
         Resource = "arn:aws:states:::events:putEvents"
         Parameters = {
           Entries = [
             {
-              "Detail.$"   = "$"
+              Detail = {
+                transformer_type  = "ebsco"
+                "job_id.$"        = "$.job_id"
+                "changeset_ids.$" = "$.changeset_ids"
+              }
               DetailType   = "ebsco.adapter.completed"
               EventBusName = aws_cloudwatch_event_bus.event_bus.name
               Source       = "ebsco.adapter"

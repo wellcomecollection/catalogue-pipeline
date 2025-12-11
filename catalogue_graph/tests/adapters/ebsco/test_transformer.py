@@ -37,9 +37,10 @@ def _prepare_changeset(
         {"id": rid, "content": data, "last_modified": datetime.now()}
         for rid, data in records_by_id.items()
     ]
-    pa_table_initial = data_to_namespaced_table(rows)
+    pa_table_initial = data_to_namespaced_table(rows, add_timestamp=True)
 
     client = AdapterStore(temporary_table)
+
     store_update = client.incremental_update(pa_table_initial, "ebsco")
     assert store_update is not None
     changeset_id = store_update.changeset_id
@@ -147,7 +148,7 @@ def test_transformer_end_to_end_multiple_changesets(
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
 
-    # Success lines include sourceIdentifiers and jobId
+        # Success lines include sourceIdentifiers and jobId
     assert lines == [
         {
             "sourceIdentifiers": [

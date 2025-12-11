@@ -6,7 +6,7 @@ consistently.
 
 from __future__ import annotations
 
-from adapters.utils.adapter_events import BaseAdapterEvent
+from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
 
 
 class EbscoAdapterTriggerEvent(BaseAdapterEvent):
@@ -15,3 +15,7 @@ class EbscoAdapterTriggerEvent(BaseAdapterEvent):
 
 class EbscoAdapterLoaderEvent(BaseAdapterEvent):
     file_location: str
+
+
+class LoaderResponse(BaseLoaderResponse):
+    pass
