@@ -4,7 +4,10 @@ from typing import TextIO
 import pytest
 from lxml import etree
 
-from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
+from adapters.ebsco.marcxml_loader import (
+    MarcXmlFileLoader,
+    MissingRecordIdentifierError,
+)
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
 from adapters.utils.schemata import ARROW_SCHEMA
 from tests.mocks import MockSmartOpen
@@ -58,7 +61,8 @@ def test_ignores_controlfield_001_when_empty() -> None:
 
 def test_raises_when_no_identifier_present() -> None:
     with pytest.raises(
-        Exception, match="Could not find controlfield 001 or usable datafield 035"
+        MissingRecordIdentifierError,
+        match="Could not find controlfield 001 or usable datafield 035",
     ):
         node = etree.fromstring(
             """
@@ -77,7 +81,8 @@ def test_raises_when_no_identifier_fields_present() -> None:
     node = etree.fromstring("<record></record>")
 
     with pytest.raises(
-        Exception, match="Could not find controlfield 001 or usable datafield 035"
+        MissingRecordIdentifierError,
+        match="Could not find controlfield 001 or usable datafield 035",
     ):
         MarcXmlFileLoader.extract_record_id(node)
 

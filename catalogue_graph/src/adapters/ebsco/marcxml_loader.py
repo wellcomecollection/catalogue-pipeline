@@ -8,6 +8,10 @@ from lxml import etree
 XMLPARSER = etree.XMLParser(remove_blank_text=True)
 
 
+class MissingRecordIdentifierError(ValueError):
+    """Raised when a MARC record has no usable identifier."""
+
+
 class MarcXmlFileLoader:
     def __init__(self, schema: pa.Schema, namespace: str) -> None:
         self.schema = schema
@@ -56,7 +60,7 @@ class MarcXmlFileLoader:
             if cleaned:
                 return cleaned
 
-        raise Exception(
+        raise MissingRecordIdentifierError(
             "Could not find controlfield 001 or usable datafield 035 "
             f"in record: {etree.tostring(node, encoding='unicode', pretty_print=True)}"
         )
