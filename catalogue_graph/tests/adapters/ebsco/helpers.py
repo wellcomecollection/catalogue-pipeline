@@ -10,9 +10,11 @@ import pyarrow as pa
 
 from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.steps.loader import EBSCO_NAMESPACE
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ARROW_SCHEMA_WITH_TIMESTAMP
 
-file_loader = MarcXmlFileLoader(schema=ARROW_SCHEMA, namespace=EBSCO_NAMESPACE)
+file_loader = MarcXmlFileLoader(
+    schema=ARROW_SCHEMA_WITH_TIMESTAMP, namespace=EBSCO_NAMESPACE
+)
 
 
 def lone_element(list_of_one: list) -> Any:

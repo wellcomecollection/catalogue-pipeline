@@ -40,9 +40,12 @@ def _prepare_changeset(
     pa_table_initial = data_to_namespaced_table(rows)
 
     client = AdapterStore(temporary_table)
-    changeset = client.snapshot_sync(pa_table_initial, "ebsco")
-    assert changeset is not None, "Expected a changeset to be returned"
-    changeset_id = changeset.changeset_id
+
+    store_update = client.incremental_update(pa_table_initial, "ebsco")
+    assert store_update is not None
+    changeset_id = store_update.changeset_id
+
+    assert changeset_id, "Expected a changeset_id to be returned"
 
     # Ensure transformer uses our temporary table
     monkeypatch.setattr(
@@ -130,14 +133,14 @@ def test_transformer_end_to_end_multiple_changesets(
 
     result = _run_transform(
         monkeypatch,
-        changeset_ids=[changeset_id_2, changeset_id_1],
+        changeset_ids=[changeset_id_1, changeset_id_2],
         index_date="2025-01-01",
     )
 
     assert result.successes.count == 2
     assert result.failures is None
     assert result.job_id == "20250101T1200"
-    assert result.changeset_ids == [changeset_id_2, changeset_id_1]
+    assert result.changeset_ids == [changeset_id_1, changeset_id_2]
 
     # Validate file contents written to mock S3 (NDJSON)
     batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
@@ -145,34 +148,21 @@ def test_transformer_end_to_end_multiple_changesets(
     with open(batch_contents_path, encoding="utf-8") as f:
         lines = [json.loads(line) for line in f if line.strip()]
 
-    # Success lines include sourceIdentifiers and jobId (order of identifiers is not guaranteed)
-    assert len(lines) == 1
-    assert lines[0]["jobId"] == "20250101T1200"
-    assert set(lines[0]["sourceIdentifiers"]) == {
-        f"Work[ebsco-alt-lookup/{i}]" for i in ["ebs00001", "ebs00002"]
+        # Success lines include sourceIdentifiers and jobId
+    assert lines == [
+        {
+            "sourceIdentifiers": [
+                f"Work[ebsco-alt-lookup/{i}]" for i in ["ebs00001", "ebs00002"]
+            ],
+            "jobId": "20250101T1200",
+        }
+    ]
+
+    titles = {
+        op["_source"].get("data", {}).get("title")
+        for op in MockElasticsearchClient.inputs
     }
-
-    deleted_docs = [
-        op
-        for op in MockElasticsearchClient.inputs
-        if op["_source"].get("type") == "Deleted"
-    ]
-    visible_docs = [
-        op
-        for op in MockElasticsearchClient.inputs
-        if op["_source"].get("type") == "Visible"
-    ]
-
-    assert len(deleted_docs) == 1
-    assert deleted_docs[0]["_id"] == "Work[ebsco-alt-lookup/ebs00001]"
-    assert deleted_docs[0]["_source"]["deletedReason"]["type"] == "DeletedFromSource"
-
-    assert len(visible_docs) == 1
-    assert visible_docs[0]["_id"] == "Work[ebsco-alt-lookup/ebs00002]"
-    assert (
-        visible_docs[0]["_source"].get("data", {}).get("title")
-        == "Parasites, hosts and diseases"
-    )
+    assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
 
 
 def test_transformer_creates_deletedwork_for_empty_content(
