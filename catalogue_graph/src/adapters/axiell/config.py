@@ -56,7 +56,7 @@ OAI_SET_SPEC = os.getenv("OAI_SET_SPEC", "collect")
 OAI_METADATA_PREFIX = os.getenv("OAI_METADATA_PREFIX", "oai_raw")
 OAI_HTTP_TIMEOUT = float(os.getenv("OAI_HTTP_TIMEOUT", "10.0"))
 OAI_MAX_READ_TIMEOUT = float(os.getenv("OAI_MAX_READ_TIMEOUT", "60.0"))
-OAI_MAX_RETRIES = int(os.getenv("OAI_MAX_RETRIES", "4"))
+OAI_MAX_RETRIES = int(os.getenv("OAI_MAX_RETRIES", "1"))
 OAI_BACKOFF_FACTOR = float(os.getenv("OAI_BACKOFF_FACTOR", "0.75"))
 OAI_BACKOFF_MAX = float(os.getenv("OAI_BACKOFF_MAX", "5.0"))
 
