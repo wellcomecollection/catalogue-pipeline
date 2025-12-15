@@ -1,5 +1,3 @@
-"""Manifest-related pydantic models shared by transformer & other steps."""
-
 from __future__ import annotations
 
 from pydantic import BaseModel
@@ -22,6 +20,7 @@ class FailureManifest(BaseModel):
 
 class TransformerManifest(BaseModel):
     job_id: str
+    changeset_ids: list[str]
     successes: SuccessManifest
     failures: FailureManifest | None = None
 
@@ -31,8 +30,3 @@ class TransformerManifest(BaseModel):
 class SuccessBatchLine(BaseModel):
     sourceIdentifiers: list[str]
     jobId: str
-
-
-class ErrorLine(BaseModel):
-    id: str
-    message: str

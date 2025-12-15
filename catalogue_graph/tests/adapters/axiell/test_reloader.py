@@ -361,8 +361,8 @@ def test_handler_constructs_correct_loader_event(
 
     event = captured_event["event"]
     assert event.job_id == "test-job"
-    assert event.window_start == gap_start
-    assert event.window_end == now
+    assert event.window.start_time == gap_start
+    assert event.window.end_time == now
     assert event.metadata_prefix == "oai_test"
     assert event.set_spec == "test_set"
     assert event.window_minutes == 15

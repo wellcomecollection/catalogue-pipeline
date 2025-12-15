@@ -94,6 +94,23 @@ data "aws_iam_policy_document" "ssm_read" {
   }
 }
 
+# Allow emitting custom CloudWatch metrics
+data "aws_iam_policy_document" "cloudwatch_put_metric_data" {
+  statement {
+    actions = [
+      "cloudwatch:PutMetricData"
+    ]
+
+    resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "cloudwatch:namespace"
+      values   = ["catalogue_graph_pipeline", "catalogue_adapters"]
+    }
+  }
+}
+
 # IAM Policy for State Machine to invoke Lambda functions
 resource "aws_iam_policy" "state_machine_lambda_policy" {
   name        = "ebsco-adapter-state-machine-lambda-policy"

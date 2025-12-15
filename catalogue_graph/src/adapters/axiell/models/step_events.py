@@ -1,23 +1,18 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from adapters.utils.adapter_events import BaseAdapterEvent, BaseLoaderResponse
+from adapters.utils.window_summary import WindowSummary
+from models.events import IncrementalWindow
 
 
-class AxiellAdapterEvent(BaseModel):
-    """Base event for all Axiell adapter steps.
-    job_id is a unique identifier for the overall pipeline run.
-    """
-
-    job_id: str
-
-
-class AxiellAdapterTriggerEvent(AxiellAdapterEvent):
+class AxiellAdapterTriggerEvent(BaseAdapterEvent):
     now: datetime | None = None
 
 
-class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
-    window_start: datetime
-    window_end: datetime
+class AxiellAdapterLoaderEvent(BaseAdapterEvent):
+    window: IncrementalWindow
     metadata_prefix: str | None = None
     set_spec: str | None = None
     max_windows: int | None = None
@@ -25,5 +20,8 @@ class AxiellAdapterLoaderEvent(AxiellAdapterEvent):
     allow_partial_final_window: bool | None = None
 
 
-class AxiellAdapterTransformerEvent(AxiellAdapterEvent):
+class LoaderResponse(BaseLoaderResponse):
+    summaries: list[WindowSummary]
     changeset_ids: list[str] = Field(default_factory=list)
+    changed_record_count: int
+    job_id: str
