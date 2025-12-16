@@ -2,14 +2,18 @@ package weco.pipeline.merger.rules
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.{Inspectors, OptionValues, PrivateMethodTester}
+import org.scalatest.prop.TableDrivenPropertyChecks
+import org.scalatest.{OptionValues, PrivateMethodTester}
+import weco.catalogue.internal_model.identifiers.IdState
+import weco.catalogue.internal_model.image.ImageData
 import weco.catalogue.internal_model.locations.{DigitalLocation, License}
+import weco.catalogue.internal_model.work.WorkState.Identified
 import weco.catalogue.internal_model.work.generators.{
   MetsWorkGenerators,
   MiroWorkGenerators,
   SierraWorkGenerators
 }
-import weco.catalogue.internal_model.work.Format
+import weco.catalogue.internal_model.work.{Format, Work}
 
 class ImagesRuleTest
     extends AnyFunSpec
@@ -19,8 +23,25 @@ class ImagesRuleTest
     with MetsWorkGenerators
     with PrivateMethodTester
     with OptionValues
-    with Inspectors {
+    with TableDrivenPropertyChecks {
 
+  case class ImagesAndImageData(
+    images: List[ImageData[IdState.Identified]],
+    imageData: List[ImageData[IdState.Identified]]
+  )
+
+  def imagesAndImageDataMerge(
+    target: Work.Visible[Identified],
+    sources: Seq[Work[Identified]]
+  ): ImagesAndImageData = {
+    val imagesResult =
+      ImagesRule.merge(target, sources.toList).data
+    val imageDataResult =
+      ImageDataRule
+        .merge(target, sources.toList)
+        .data
+    ImagesAndImageData(imagesResult, imageDataResult)
+  }
   describe("image creation rules") {
     it("creates n images from n Miro works and a single Sierra work") {
       val n = 3
@@ -175,6 +196,40 @@ class ImagesRuleTest
 
         result should contain theSameElementsAs metsWork.data.imageData
       }
+
+      it(
+        "does not use Miro images when multiple METS images are present for a digmiro Sierra work"
+      ) {
+        val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 4)
+        val miroWork = miroIdentifiedWork()
+        val sierraDigmiroWork = sierraIdentifiedWork()
+          .format(Format.Books)
+          .otherIdentifiers(List(createDigcodeIdentifier("digmiro")))
+        val result =
+          imagesAndImageDataMerge(sierraDigmiroWork, List(miroWork, metsWork))
+        result.imageData shouldBe empty
+      }
+
+      it(
+        "does not use Miro images when multiple METS and Miro images are present for a digmiro Sierra work"
+      ) {
+        val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 4)
+        val miroWork = miroIdentifiedWork()
+        val miroWork2 = miroIdentifiedWork()
+        val miroWork3 = miroIdentifiedWork()
+        val sierraDigmiroWork = sierraIdentifiedWork()
+          .format(Format.Pictures)
+          .otherIdentifiers(List(createDigcodeIdentifier("digmiro")))
+        val result =
+          ImagesRule
+            .merge(
+              sierraDigmiroWork,
+              List(miroWork, miroWork2, miroWork3, metsWork)
+            )
+            .data
+
+        result should contain theSameElementsAs metsWork.data.imageData
+      }
     }
 
     it(
@@ -240,5 +295,73 @@ class ImagesRuleTest
       result should contain theSameElementsAs (metsWork.data.imageData)
     }
   }
+  describe("when a Sierra work is digmiro") {
+    val sierraDigmiroWork = sierraIdentifiedWork().otherIdentifiers(
+      List(createDigcodeIdentifier("digmiro"))
+    )
+    forAll(Table("format", Format.values.toList: _*)) {
+      format =>
+        describe(s"and the Sierra work has the format $format") {
+          val sierraDigmiroWorkWithFormat =
+            sierraDigmiroWork
+              .format(format)
+              .items(
+                List(
+                  createIdentifiedPhysicalItem,
+                  createIdentifiedPhysicalItem,
+                  createUnidentifiableItemWith(locations =
+                    List(createDigitalLocation)
+                  ),
+                  createUnidentifiableItemWith(locations =
+                    List(createDigitalLocation)
+                  )
+                )
+              )
+          describe(s"when it is merged with a miro work only") {
+            val miroWork = miroIdentifiedWork()
+            val result =
+              imagesAndImageDataMerge(
+                sierraDigmiroWorkWithFormat,
+                List(miroWork)
+              )
+            it(
+              "does not use Miro images in ImageData and no images are emitted"
+            ) {
+              result.imageData shouldBe empty
+              result.images shouldBe empty
+            }
+          }
+          describe(s"when it is merged with a mets and a miro work") {
+            val miroWork1 = miroIdentifiedWork()
+            val miroWork2 = miroIdentifiedWork()
+            val metsWork = createInvisibleMetsIdentifiedWorkWith(numImages = 1)
+            val result =
+              imagesAndImageDataMerge(
+                sierraDigmiroWorkWithFormat,
+                List(miroWork1, metsWork, miroWork2)
+              )
+            it(
+              "does not use Miro images in ImageData"
+            ) {
+              result.imageData shouldBe empty
+            }
 
+            val (prefix, expected) = format match {
+              case _: Format.Pictures.type | _: Format.Ephemera.type =>
+                ("emits", metsWork.data.imageData)
+              case _ =>
+                ("does not emit", Nil)
+            }
+            it(
+              s"$prefix the METS images"
+            ) {
+              //  Only Pictures and Ephemera
+              //  emit METS images.  This is because other formats (e.g. Books) have
+              //  squillions of images and it would make the image search horrible.
+              result.images should contain theSameElementsAs expected
+            }
+          }
+        }
+    }
+  }
 }
