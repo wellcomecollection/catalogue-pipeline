@@ -99,7 +99,7 @@ jobs:
       matrix:
         component:
           # Transformer lambdas
-          - transformer_ebsco
+          - transformer
           # Graph subsystem lambdas
           - graph-remover
           - graph-es-pit-opener
