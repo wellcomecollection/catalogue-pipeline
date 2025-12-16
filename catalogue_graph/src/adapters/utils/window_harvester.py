@@ -36,7 +36,6 @@ class WindowHarvestManager:
     """Coordinates windowed harvesting and bookkeeping."""
 
     DEFAULT_WINDOW_MINUTES = 15
-    DEFAULT_MAX_PARALLEL_REQUESTS = 3
 
     def __init__(
         self,
@@ -46,7 +45,6 @@ class WindowHarvestManager:
         metadata_prefix: str | None = None,
         set_spec: str | None = None,
         *,
-        max_parallel_requests: int | None = None,
         record_callback: WindowCallback | None = None,
         default_tags: dict[str, str] | None = None,
     ) -> None:
@@ -56,9 +54,6 @@ class WindowHarvestManager:
         self.metadata_prefix = metadata_prefix
         self.set_spec = set_spec
         self.window_minutes = window_generator.window_minutes
-        self.max_parallel_requests = (
-            max_parallel_requests or self.DEFAULT_MAX_PARALLEL_REQUESTS
-        )
         self.record_callback = record_callback
         self.default_tags = dict(default_tags) if default_tags else None
 
@@ -142,18 +137,11 @@ class WindowHarvestManager:
         windows: Sequence[tuple[datetime, datetime]],
         *,
         record_callback: WindowCallback | None = None,
-        max_parallel_requests: int | None = None,
     ) -> list[WindowSummary]:
         if not windows:
             return []
         summaries: list[WindowSummary] = []
         callback = record_callback or self.record_callback
-        if max_parallel_requests and max_parallel_requests != 1:
-            logger.info(
-                "Ignoring max_parallel_requests=%d; window harvesting now runs sequentially",
-                max_parallel_requests,
-            )
-
         logger.info("Processing %d windows sequentially", len(windows))
         for start, end in windows:
             summaries.append(

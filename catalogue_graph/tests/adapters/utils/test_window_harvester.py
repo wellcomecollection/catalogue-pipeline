@@ -150,7 +150,6 @@ def _build_harvester(
         client=client,
         metadata_prefix="oai_raw",
         set_spec="collect",
-        max_parallel_requests=2,
         record_callback=callback,
         default_tags=default_tags,
     )
