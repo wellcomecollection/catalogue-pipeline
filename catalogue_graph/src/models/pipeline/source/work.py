@@ -1,7 +1,7 @@
 from pydantic import Field
 
 from ingestor.models.shared.merge_candidate import MergeCandidate
-from models.pipeline.work import DeletedWork, VisibleWork, Work
+from models.pipeline.work import DeletedWork, InvisibleWork, VisibleWork, Work
 from models.pipeline.work_state import WorkState
 
 
@@ -24,4 +24,8 @@ class VisibleSourceWork(VisibleWork, SourceWork):
 
 
 class DeletedSourceWork(DeletedWork, SourceWork):
+    pass
+
+
+class InvisibleSourceWork(InvisibleWork, SourceWork):
     pass

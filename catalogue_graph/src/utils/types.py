@@ -8,6 +8,7 @@ InvisibleReasonType = Literal[
     "UnlinkedHistoricalLibraryMiro",
     "UnableToTransform",
     "MetsWorksAreNotVisible",
+    "MimsyWorksAreNotVisible"
 ]
 INVISIBLE_REASON_TYPES: tuple[str, ...] = get_args(InvisibleReasonType)
 
@@ -49,7 +50,6 @@ _BaseConceptType = Literal[
 ConceptType = Literal[_BaseConceptType, "Genre"]
 RawConceptType = Literal[_BaseConceptType, "GenreConcept"]
 
-
 ConceptSource = Literal[
     "label-derived",
     "nlm-mesh",
@@ -67,7 +67,6 @@ WorkStatus = Literal["Visible", "Redirected", "Deleted", "Invisible"]
 IngestorType = Literal["works", "concepts"]
 
 IngestorLoadFormat = Literal["parquet", "jsonl"]
-
 
 LocTransformerType = Literal["loc_concepts", "loc_names", "loc_locations"]
 MeshTransformerType = Literal["mesh_concepts", "mesh_locations"]
@@ -98,7 +97,6 @@ FullGraphRemoverType = Literal[
     LocTransformerType, MeshTransformerType, WikidataTransformerType
 ]
 GraphRemoverFolder = Literal["previous_ids_snapshot", "deleted_ids", "added_ids"]
-
 
 EntityType = Literal["nodes", "edges"]
 StreamDestination = Literal["graph", "s3", "sns", "local", "void"]
