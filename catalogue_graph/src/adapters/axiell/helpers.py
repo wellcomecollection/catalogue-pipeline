@@ -5,7 +5,6 @@ from adapters.utils.iceberg import (
     get_iceberg_table,
 )
 from adapters.utils.window_store import (
-    WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
     WindowStore,
 )
@@ -65,7 +64,7 @@ def build_window_status_table(
     return get_iceberg_table(
         table_config,
         schema=WINDOW_STATUS_SCHEMA,
-        partition_spec=WINDOW_STATUS_PARTITION_SPEC,
+        partition_spec=None,
     )
 
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Sequence
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 from typing import Protocol, TypedDict
 
@@ -148,25 +147,24 @@ class WindowHarvestManager:
         if not windows:
             return []
         summaries: list[WindowSummary] = []
-        workers = (
-            min(max_parallel_requests or self.max_parallel_requests, len(windows)) or 1
-        )
         callback = record_callback or self.record_callback
-        logger.info(
-            "Dispatching %d windows with %d parallel workers", len(windows), workers
-        )
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            future_map = {
-                executor.submit(
-                    self.process_window,
-                    start,
-                    end,
-                    record_callback=callback,
-                ): (start, end)
-                for start, end in windows
-            }
-            for future in as_completed(future_map):
-                summaries.append(WindowSummary.model_validate(future.result()))
+        if max_parallel_requests and max_parallel_requests != 1:
+            logger.info(
+                "Ignoring max_parallel_requests=%d; window harvesting now runs sequentially",
+                max_parallel_requests,
+            )
+
+        logger.info("Processing %d windows sequentially", len(windows))
+        for start, end in windows:
+            summaries.append(
+                WindowSummary.model_validate(
+                    self.process_window(
+                        start,
+                        end,
+                        record_callback=callback,
+                    )
+                )
+            )
 
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries
