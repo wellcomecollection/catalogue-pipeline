@@ -167,6 +167,7 @@ class WindowNotifier:
         reload_job_id = job_id or f"gap-reload-{first_gap.start.strftime('%Y%m%d')}"
 
         command = (
+            f"AWS_PROFILE=platform-developer \\\n"
             f"uv run python -m adapters.axiell.steps.reloader \\\n"
             f"  --job-id {reload_job_id} \\\n"
             f"  --window-start {window_start} \\\n"
@@ -177,6 +178,7 @@ class WindowNotifier:
         return [
             f"Run locally to reload gaps:\n```bash\n{command}\n```",
             "Add `--dry-run` flag to preview without processing",
+            "Add --window-minutes to adjust window size if needed",
         ]
 
     def _build_context(
