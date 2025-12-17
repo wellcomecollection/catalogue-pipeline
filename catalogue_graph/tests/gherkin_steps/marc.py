@@ -3,23 +3,15 @@ from pymarc.record import Field, Indicators, Record, Subfield
 from pytest_bdd import given, parsers
 
 
-@given("a valid MARC record", target_fixture="marc_record")
-def marc_record() -> Record:
-    return marc_record_with_id(identifier="test001")
-
-
 @given(parsers.parse('a MARC record with field 001 "{identifier}"'), target_fixture="marc_record")
 def marc_record_with_id(identifier: str) -> Record:
     record = Record()
     record.add_field(Field(tag="001", data=identifier))
-    record.add_field(
-        Field(tag="245", subfields=[Subfield(code="a", value="Test Title")])
-    )
     return record
 
 
 @given(parsers.parse('the MARC record has a 005 field with the value {transaction_date}'), target_fixture="marc_record")
-def marc_record_with_id(marc_record: Record, transaction_date: str) -> Record:
+def with_transaction_date(marc_record: Record, transaction_date: str) -> Record:
     marc_record.add_field(Field(tag="005", data=transaction_date))
     return marc_record
 

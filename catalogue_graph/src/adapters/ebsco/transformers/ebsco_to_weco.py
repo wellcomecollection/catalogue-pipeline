@@ -3,7 +3,6 @@ from datetime import datetime
 import dateutil
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.alternative_titles import extract_alternative_titles
 from adapters.ebsco.transformers.common import mandatory_field
 from adapters.ebsco.transformers.contributors import extract_contributors
 from adapters.ebsco.transformers.current_frequency import extract_current_frequency
@@ -18,7 +17,8 @@ from adapters.ebsco.transformers.other_identifiers import extract_other_identifi
 from adapters.ebsco.transformers.parents import get_parents
 from adapters.ebsco.transformers.production import extract_production
 from adapters.ebsco.transformers.subjects import extract_subjects
-from adapters.ebsco.transformers.title import extract_title
+from adapters.marc.transformers.alternative_titles import extract_alternative_titles
+from adapters.marc.transformers.title import extract_title
 from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.source.work import SourceWorkState, VisibleSourceWork
 from models.pipeline.work_data import WorkData
@@ -35,7 +35,7 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
 
 
 def ebsco_source_work_state(
-    id_value: str, relations: WorkRelations | None = None
+        id_value: str, relations: WorkRelations | None = None
 ) -> SourceWorkState:
     current_time_iso: str = convert_datetime_to_utc_iso(datetime.now())
 

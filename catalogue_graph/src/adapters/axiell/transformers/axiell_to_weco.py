@@ -9,6 +9,8 @@ from adapters.marc.transformers.last_transaction_time import extract_last_transa
 import dateutil
 from datetime import datetime
 from ingestor.models.shared.invisible_reason import InvisibleReason
+from adapters.marc.transformers.title import extract_title
+from adapters.marc.transformers.alternative_titles import extract_alternative_titles
 
 MIMSY_IDENTIFIER_TYPE = Id(id="mimsy-reference")
 
@@ -16,7 +18,8 @@ MIMSY_IDENTIFIER_TYPE = Id(id="mimsy-reference")
 def transform_record(marc_record: Record) -> InvisibleSourceWork:
     work_id = extract_id(marc_record)
     work_data = WorkData(
-        title="hello"
+        title=extract_title(marc_record),
+        alternative_titles=extract_alternative_titles(marc_record),
     )
 
     work_state = axiell_source_work_state(work_id, extract_last_transaction_time_to_datetime(marc_record))

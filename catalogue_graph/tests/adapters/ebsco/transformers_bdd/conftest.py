@@ -14,7 +14,8 @@ from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork
 
-from tests.adapters.marc.steps.givens import *
+from tests.gherkin_steps.marc import *
+from tests.gherkin_steps.work import *
 
 # mypy: allow-untyped-calls
 
@@ -50,6 +51,15 @@ def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
 @pytest.fixture
 def context() -> dict[str, Any]:
     return {}
+
+
+@given("a valid MARC record", target_fixture="marc_record")
+def marc_record() -> Record:
+    record = marc_record_with_id(identifier="test001")
+    record.add_field(
+        Field(tag="245", subfields=[Subfield(code="a", value="Test Title")])
+    )
+    return record
 
 
 # ------------------------------------------------------------------

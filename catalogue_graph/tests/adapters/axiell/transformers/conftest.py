@@ -6,18 +6,21 @@ from pytest_bdd import parsers, then, when
 
 from typing import Any
 
-from tests.adapters.marc.steps.givens import *
-from tests.adapters.marc.steps.thens import *
+from tests.gherkin_steps.marc import *
+from tests.gherkin_steps.work import *
+
+
+@given("a valid MARC record", target_fixture="marc_record")
+def marc_record() -> Record:
+    record = marc_record_with_id(identifier="test001")
+    record.add_field(
+        Field(tag="245", subfields=[Subfield(code="a", value="Test Title")])
+    )
+    record.add_field(Field(tag="005", data="18530821094530.0"))
+    return record
 
 
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(marc_record: Record) -> InvisibleSourceWork:
     work = transform_record(marc_record)
     return work
-
-
-@then(parsers.parse("the work's source modified time is {date_str}"))
-def work_last_modified_date(
-        work: InvisibleSourceWork, date_str: str
-) -> None:
-    assert work.state.source_modified_time == date_str
