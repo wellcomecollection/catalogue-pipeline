@@ -11,7 +11,7 @@ from pydantic import BaseModel
 import config
 from models.events import BasePipelineEvent, IncrementalWindow
 from sources.base_source import BaseSource
-from utils.elasticsearch import ElasticsearchMode, get_client, get_standard_index_name
+from utils.elasticsearch import ElasticsearchMode, get_client, get_merged_index_name
 
 ES_MGET_BATCH_SIZE = 10_000
 ES_REQUESTS_BACKOFF_RETRIES = int(os.environ.get("REQUESTS_BACKOFF_RETRIES", "3"))
@@ -59,10 +59,7 @@ class MergedWorksSource(BaseSource):
         self.fields = fields
         self.query = query
 
-        index_date = event.index_dates.merged or event.pipeline_date
-        self.index_name = get_standard_index_name(
-            config.ES_MERGED_INDEX_NAME, index_date
-        )
+        self.index_name = get_merged_index_name(event)
 
         # Use the provided point in time (PIT) ID, or create a new one
         if event.pit_id is not None:

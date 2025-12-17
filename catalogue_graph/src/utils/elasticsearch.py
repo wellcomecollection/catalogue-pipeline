@@ -8,7 +8,9 @@ from config import (
     ES_LOCAL_HOST,
     ES_LOCAL_PORT,
     ES_LOCAL_SCHEME,
+    ES_MERGED_INDEX_NAME,
 )
+from models.events import BasePipelineEvent
 from utils.aws import get_secret
 
 # private: Connect to the production cluster via the private endpoint (production runs only)
@@ -22,6 +24,11 @@ def get_standard_index_name(prefix: str, date: str | None) -> str:
         return f"{prefix}-{date}"
 
     return prefix
+
+
+def get_merged_index_name(event: BasePipelineEvent) -> str:
+    index_date = event.index_dates.merged or event.pipeline_date
+    return get_standard_index_name(ES_MERGED_INDEX_NAME, index_date)
 
 
 class ElasticsearchConfig(BaseModel):
