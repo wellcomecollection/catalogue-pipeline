@@ -92,7 +92,6 @@ def build_harvester(
         client=runtime.oai_client,
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
-        max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
         record_callback=callback,
         default_tags={"job_id": request.job_id},
     )
