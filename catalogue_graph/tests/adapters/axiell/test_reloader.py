@@ -39,11 +39,12 @@ def _populate_store(table: IcebergTable, rows: list[WindowStatusRecord]) -> Wind
     return store
 
 
-def _mock_loader_runtime() -> LoaderRuntime:
+def _mock_loader_runtime(window_minutes: int = 15) -> LoaderRuntime:
     return LoaderRuntime.model_construct(
         store=cast(WindowStore, SimpleNamespace()),
         table_client=cast(AdapterStore, SimpleNamespace()),
         oai_client=MagicMock(),
+        window_generator=SimpleNamespace(window_minutes=window_minutes),
     )
 
 
@@ -63,7 +64,6 @@ def test_handler_with_no_gaps(
     runtime = reloader.ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
-        window_minutes=15,
     )
 
     response = reloader.handler(
@@ -122,7 +122,6 @@ def test_handler_with_single_gap(
     runtime = reloader.ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
-        window_minutes=15,
     )
 
     response = reloader.handler(
@@ -186,7 +185,6 @@ def test_handler_with_multiple_gaps(
     runtime = reloader.ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
-        window_minutes=15,
     )
 
     response = reloader.handler(
@@ -217,7 +215,6 @@ def test_handler_dry_run_mode(
     runtime = reloader.ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
-        window_minutes=15,
     )
 
     response = reloader.handler(
@@ -259,7 +256,6 @@ def test_handler_with_error_during_reload(
     runtime = reloader.ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
-        window_minutes=15,
     )
 
     response = reloader.handler(
@@ -294,7 +290,7 @@ def test_build_runtime_uses_config(
         config_obj: reloader.AxiellAdapterReloaderConfig,
     ) -> LoaderRuntime:
         captured_config["loader_config"] = config_obj
-        return _mock_loader_runtime()
+        return _mock_loader_runtime(window_minutes=60)
 
     monkeypatch.setattr(
         "adapters.axiell.helpers.build_window_store", mock_build_window_store
@@ -316,7 +312,7 @@ def test_build_runtime_uses_config(
         is True
     )
     assert isinstance(runtime, reloader.ReloaderRuntime)
-    assert runtime.window_minutes == 60
+    assert runtime.loader_runtime.window_generator.window_minutes == 60
     assert captured_config["loader_config"].window_minutes == 60
 
 
@@ -359,7 +355,6 @@ def test_handler_constructs_correct_loader_event(
     runtime = reloader.ReloaderRuntime(
         store=store,
         loader_runtime=_mock_loader_runtime(),
-        window_minutes=15,
     )
 
     reloader.handler(
@@ -392,7 +387,6 @@ def test_lambda_handler_deserializes_event(
         return reloader.ReloaderRuntime(
             store=store,
             loader_runtime=_mock_loader_runtime(),
-            window_minutes=15,
         )
 
     monkeypatch.setattr(

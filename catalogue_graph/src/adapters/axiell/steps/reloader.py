@@ -35,7 +35,6 @@ class AxiellAdapterReloaderConfig(BaseModel):
 class ReloaderRuntime(BaseModel):
     store: WindowStore
     loader_runtime: LoaderRuntime
-    window_minutes: int
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -80,9 +79,7 @@ def build_runtime(
         )
     )
 
-    return ReloaderRuntime(
-        store=store, loader_runtime=loader_runtime, window_minutes=window_minutes
-    )
+    return ReloaderRuntime(store=store, loader_runtime=loader_runtime)
 
 
 def _process_gap(
@@ -122,7 +119,7 @@ def _process_gap(
             metadata_prefix=config.OAI_METADATA_PREFIX,
             set_spec=config.OAI_SET_SPEC,
             max_windows=None,  # Process all windows in the gap
-            window_minutes=runtime.window_minutes,
+            window_minutes=runtime.loader_runtime.window_generator.window_minutes,
         )
 
         logging.info(f"Reloading gap: {gap_start.isoformat()} -> {gap_end.isoformat()}")
@@ -197,7 +194,8 @@ def handler(
 
     # Generate coverage report for the specified range
     reporter = WindowReporter(
-        store=runtime.store, window_minutes=runtime.window_minutes
+        store=runtime.store,
+        window_minutes=runtime.loader_runtime.window_generator.window_minutes,
     )
     report = reporter.coverage_report(range_start=window_start, range_end=window_end)
 
