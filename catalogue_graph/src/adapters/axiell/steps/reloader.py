@@ -29,6 +29,7 @@ logging.basicConfig(level=logging.INFO)
 
 class AxiellAdapterReloaderConfig(BaseModel):
     use_rest_api_table: bool = True
+    window_minutes: int | None = None
 
 
 class ReloaderRuntime(BaseModel):
@@ -60,6 +61,7 @@ def build_runtime(
 ) -> ReloaderRuntime:
     cfg = config_obj or AxiellAdapterReloaderConfig()
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
+    window_minutes = cfg.window_minutes or config.WINDOW_MINUTES
 
     # Import loader runtime dependencies
     from adapters.axiell.steps.loader import (
@@ -72,7 +74,7 @@ def build_runtime(
     loader_runtime = build_loader_runtime(
         AxiellAdapterLoaderConfig(
             use_rest_api_table=cfg.use_rest_api_table,
-            window_minutes=config.WINDOW_MINUTES,
+            window_minutes=window_minutes,
             allow_partial_final_window=True,
         )
     )
@@ -117,7 +119,7 @@ def _process_gap(
             metadata_prefix=config.OAI_METADATA_PREFIX,
             set_spec=config.OAI_SET_SPEC,
             max_windows=None,  # Process all windows in the gap
-            window_minutes=config.WINDOW_MINUTES,
+            window_minutes=runtime.loader_runtime.window_generator.window_minutes,
         )
 
         logging.info(f"Reloading gap: {gap_start.isoformat()} -> {gap_end.isoformat()}")
@@ -191,7 +193,10 @@ def handler(
     runtime = runtime or build_runtime()
 
     # Generate coverage report for the specified range
-    reporter = WindowReporter(store=runtime.store, window_minutes=config.WINDOW_MINUTES)
+    reporter = WindowReporter(
+        store=runtime.store,
+        window_minutes=runtime.loader_runtime.window_generator.window_minutes,
+    )
     report = reporter.coverage_report(range_start=window_start, range_end=window_end)
 
     # Log window coverage report
@@ -242,8 +247,9 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     window_start = datetime.fromisoformat(event["window_start"].replace("Z", "+00:00"))
     window_end = datetime.fromisoformat(event["window_end"].replace("Z", "+00:00"))
     dry_run = event.get("dry_run", False)
+    window_minutes = event.get("window_minutes")
 
-    runtime = build_runtime()
+    runtime = build_runtime(AxiellAdapterReloaderConfig(window_minutes=window_minutes))
     response = handler(
         job_id=job_id,
         window_start=window_start,
@@ -287,6 +293,11 @@ def main() -> None:
         action="store_true",
         help="Report gaps without actually reloading them",
     )
+    parser.add_argument(
+        "--window-minutes",
+        type=int,
+        help="Override default window size in minutes",
+    )
 
     args = parser.parse_args()
 
@@ -298,7 +309,10 @@ def main() -> None:
     ).astimezone(UTC)
 
     runtime = build_runtime(
-        AxiellAdapterReloaderConfig(use_rest_api_table=args.use_rest_api_table)
+        AxiellAdapterReloaderConfig(
+            use_rest_api_table=args.use_rest_api_table,
+            window_minutes=args.window_minutes,
+        )
     )
 
     response = handler(
