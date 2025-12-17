@@ -82,23 +82,14 @@ def build_window_request(
     notifier: WindowNotifier | None = None,
 ) -> AxiellAdapterLoaderEvent:
     reporter = WindowReporter(store=store)
-    report = reporter.coverage_report()
-    last_success_end = report.last_success_end
+
+    # First get a preliminary report to determine last_success_end
+    preliminary_report = reporter.coverage_report()
+    last_success_end = preliminary_report.last_success_end
 
     # Enforce lag before notifying to avoid repeated alerts when circuit breaker trips
     if enforce_lag:
         _enforce_lag(now, last_success_end)
-
-    # Log window coverage report
-    logging.info(report.summary())
-
-    # Send notification if coverage gaps are detected
-    if notifier:
-        notifier.notify_if_gaps(
-            report=report,
-            job_id=job_id,
-            trigger_time=now,
-        )
 
     resolved_window_lookback = window_lookback_days or config.WINDOW_LOOKBACK_DAYS
     resolved_window_minutes = window_minutes or config.WINDOW_MINUTES
@@ -109,6 +100,22 @@ def build_window_request(
         resolved_window_lookback,
     ).astimezone(UTC)
     end_time = now.astimezone(UTC)
+
+    # Generate report for notification using start_time as range_end.
+    # This ensures we only report gaps that WON'T be covered by this batch.
+    # The batch will process from start_time to end_time, so any gaps
+    # before start_time are true historical gaps that need attention.
+    if notifier:
+        notification_report = reporter.coverage_report(range_end=start_time)
+        logging.info(notification_report.summary())
+        notifier.notify_if_gaps(
+            report=notification_report,
+            job_id=job_id,
+            trigger_time=now,
+        )
+    else:
+        # Log the preliminary report summary when no notifier
+        logging.info(preliminary_report.summary())
 
     if start_time >= end_time:
         raise RuntimeError(
