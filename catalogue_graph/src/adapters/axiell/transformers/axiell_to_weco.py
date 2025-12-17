@@ -4,6 +4,8 @@ from models.pipeline.identifier import Id, SourceIdentifier
 from models.pipeline.work_data import WorkData
 from pymarc.record import Record
 from adapters.marc.transformers.identifier import extract_id
+from adapters.marc.transformers.last_transaction_time import extract_last_transaction_time_to_datetime
+
 import dateutil
 from datetime import datetime
 from ingestor.models.shared.invisible_reason import InvisibleReason
@@ -17,7 +19,7 @@ def transform_record(marc_record: Record) -> InvisibleSourceWork:
         title="hello"
     )
 
-    work_state = axiell_source_work_state(work_id)
+    work_state = axiell_source_work_state(work_id, extract_last_transaction_time_to_datetime(marc_record))
 
     return InvisibleSourceWork(
         version=int(dateutil.parser.parse(work_state.source_modified_time).timestamp()),
@@ -30,14 +32,13 @@ def transform_record(marc_record: Record) -> InvisibleSourceWork:
 
 
 def axiell_source_work_state(
-        id_value: str
+        id_value: str, source_modified_time: datetime | None = None
 ) -> SourceWorkState:
     current_time_iso: str = convert_datetime_to_utc_iso(datetime.now())
-
+    source_modified_time_iso: str = convert_datetime_to_utc_iso(source_modified_time)
     return SourceWorkState(
         source_identifier=axiell_mimsy_source_identifier(id_value),
-        # TODO: Extract actual modified time from record if available
-        source_modified_time=current_time_iso,
+        source_modified_time=source_modified_time_iso,
         modified_time=current_time_iso
     )
 

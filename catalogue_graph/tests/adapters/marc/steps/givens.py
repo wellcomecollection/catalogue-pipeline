@@ -18,6 +18,12 @@ def marc_record_with_id(identifier: str) -> Record:
     return record
 
 
+@given(parsers.parse('the MARC record has a 005 field with the value {transaction_date}'), target_fixture="marc_record")
+def marc_record_with_id(marc_record: Record, transaction_date: str) -> Record:
+    marc_record.add_field(Field(tag="005", data=transaction_date))
+    return marc_record
+
+
 # ------------------------------------------------------------------
 # Generic MARC field builder
 # ------------------------------------------------------------------

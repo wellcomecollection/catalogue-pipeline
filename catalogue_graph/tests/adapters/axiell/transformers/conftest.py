@@ -14,3 +14,10 @@ from tests.adapters.marc.steps.thens import *
 def do_transform(marc_record: Record) -> InvisibleSourceWork:
     work = transform_record(marc_record)
     return work
+
+
+@then(parsers.parse("the work's source modified time is {date_str}"))
+def work_last_modified_date(
+        work: InvisibleSourceWork, date_str: str
+) -> None:
+    assert work.state.source_modified_time == date_str
