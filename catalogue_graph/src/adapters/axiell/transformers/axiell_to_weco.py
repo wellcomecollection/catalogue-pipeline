@@ -20,6 +20,8 @@ def transform_record(marc_record: Record) -> InvisibleSourceWork:
     work_data = WorkData(
         title=extract_title(marc_record),
         alternative_titles=extract_alternative_titles(marc_record),
+        description=None,
+        physical_description=None
     )
 
     work_state = axiell_source_work_state(work_id, extract_last_transaction_time_to_datetime(marc_record))
