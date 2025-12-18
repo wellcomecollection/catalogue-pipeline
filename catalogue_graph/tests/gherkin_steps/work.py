@@ -13,12 +13,13 @@ ATTR_ALIASES: dict[str, str] = {
     "genre": "genres",
     "subject": "subjects",
     "concept": "concepts",
+    "other identifier": "other_identifiers",
 }
 
 
 def _normalise_attr_phrase(attr_phrase: str) -> str:
     key = attr_phrase.strip().lower()
-    return ATTR_ALIASES.get(key, key)
+    return ATTR_ALIASES.get(key, key.replace(" ", "_"))
 
 
 def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
@@ -93,6 +94,12 @@ def list_member_only(work: SourceWork, attr_phrase: str, value: str) -> Any:
     return list_member_nth_is(work, 1, attr_phrase, value)
 
 
+@then(parsers.parse('the only {attr_phrase} has the {sub_attr} "{value}"'))
+def list_member_has(work: SourceWork, attr_phrase: str, sub_attr: str, value: str) -> Any:
+    list_member_count(work, 1, attr_phrase)
+    return list_member_nth_has(work, 1, attr_phrase, sub_attr, value)
+
+
 @then(
     parsers.re(
         r'the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) is "(?P<value>.*)"'
@@ -106,6 +113,30 @@ def list_member_nth_is(
         f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
     )
     return nth_member
+
+
+@then(
+    parsers.re(
+        r'the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>.*) has the (?P<sub_attr>.*) "(?P<value>.*)"'
+    )
+)
+def list_member_nth_has(
+        work: SourceWork, index: str | int, attr_phrase: str, sub_attr: str, value: str
+) -> Any:
+    nth_member = _list_member_nth(work.data, index, attr_phrase)
+    actual = drill_through_dots(nth_member, sub_attr)
+    assert actual == value, (
+        f"Expected {attr_phrase}.{sub_attr} at position {index} == {value!r}, got {actual!r}"
+    )
+    return nth_member
+
+
+def drill_through_dots(obj: Any, path: str) -> Any:
+    parts = path.split(".")
+    current = obj
+    for part in parts:
+        current = getattr(current, part)
+    return current
 
 
 @then(parsers.parse("the work has {count:d} {attr_phrase}:"))
