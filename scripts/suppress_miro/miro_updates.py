@@ -148,15 +148,22 @@ def _get_current_pipeline_and_indices():
         "https://api.wellcomecollection.org/catalogue/v2/search-templates.json"
     )
     resp = httpx.get(search_templates_url)
-    current_indexes = set(template["index"] for template in resp.json()["templates"])
+    templates = resp.json()["templates"]
+    current_indexes = set(template["index"] for template in templates)
+    current_pipelines = set(template["pipeline"] for template in templates)
 
-    works_index = next(index for index in current_indexes if index.startswith("works-"))
-    images_index = next(
-        index for index in current_indexes if index.startswith("images-")
-    )
-    pipeline_date = get_date_from_index_name(works_index)
+    if len(current_pipelines) != 1:
+        raise RuntimeError(f"Found multiple pipelines: {current_pipelines}")
 
-    return pipeline_date, works_index, images_index
+    works_indexes = [index for index in current_indexes if index.startswith("works-")]
+    if len(works_indexes) != 1:
+        raise RuntimeError(f"Found multiple works indices: {works_indexes}")
+
+    images_indexes = [index for index in current_indexes if index.startswith("images-")]
+    if len(images_indexes) != 1:
+        raise RuntimeError(f"Found multiple images indices: {images_indexes}")
+
+    return list(current_pipelines)[0], works_indexes[0], images_indexes[0]
 
 
 def _get_vhs_sourcedata_miro_ddb_item(miro_id):
