@@ -9,11 +9,12 @@ from adapters.marc.transformers.last_transaction_time import extract_last_transa
 import dateutil
 from datetime import datetime
 from ingestor.models.shared.invisible_reason import InvisibleReason
-from adapters.marc.transformers.title import extract_title
 from adapters.marc.transformers.alternative_titles import extract_alternative_titles
+from adapters.marc.transformers.notes import extract_notes
+from adapters.marc.transformers.title import extract_title
 from adapters.axiell.transformers.other_identifiers import extract_other_identifiers
 
-MIMSY_IDENTIFIER_TYPE = Id(id="mimsy-reference")
+AXIELL_IDENTIFIER_TYPE = Id(id="axiell-priref")
 
 
 def transform_record(marc_record: Record) -> InvisibleSourceWork:
@@ -22,8 +23,7 @@ def transform_record(marc_record: Record) -> InvisibleSourceWork:
         title=extract_title(marc_record),
         alternative_titles=extract_alternative_titles(marc_record),
         other_identifiers=extract_other_identifiers(marc_record),
-        description=None,
-        physical_description=None
+        notes=extract_notes(marc_record)
     )
 
     work_state = axiell_source_work_state(work_id, extract_last_transaction_time_to_datetime(marc_record))
@@ -52,5 +52,5 @@ def axiell_source_work_state(
 
 def axiell_mimsy_source_identifier(id_value: str) -> SourceIdentifier:
     return SourceIdentifier(
-        identifier_type=MIMSY_IDENTIFIER_TYPE, ontology_type="Work", value=id_value
+        identifier_type=AXIELL_IDENTIFIER_TYPE, ontology_type="Work", value=id_value
     )
