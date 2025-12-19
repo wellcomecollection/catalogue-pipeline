@@ -6,7 +6,7 @@ https://www.loc.gov/marc/bibliographic/bd585.html
 
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import get_a_subfields
+from adapters.marc.transformers.common import get_a_subfields
 from models.pipeline.id_label import IdLabel
 from models.pipeline.note import Note
 

@@ -3,7 +3,7 @@ from datetime import datetime
 import dateutil
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import mandatory_field
+from adapters.marc.transformers.common import mandatory_field
 from adapters.ebsco.transformers.contributors import extract_contributors
 from adapters.ebsco.transformers.current_frequency import extract_current_frequency
 from adapters.ebsco.transformers.description import extract_description
@@ -35,7 +35,7 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
 
 
 def ebsco_source_work_state(
-    id_value: str, relations: WorkRelations | None = None
+        id_value: str, relations: WorkRelations | None = None
 ) -> SourceWorkState:
     current_time_iso: str = convert_datetime_to_utc_iso(datetime.now())
 

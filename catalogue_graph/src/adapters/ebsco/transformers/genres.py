@@ -6,7 +6,7 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.ebsco.transformers.authority_standard_number import extract_identifier
-from adapters.ebsco.transformers.common import non_empty
+from adapters.marc.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
     build_concept,
     build_label_with_subdivisions,

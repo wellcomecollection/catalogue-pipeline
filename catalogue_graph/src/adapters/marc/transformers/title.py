@@ -15,7 +15,7 @@ import re
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import mandatory_field
+from adapters.marc.transformers.common import mandatory_field
 
 _SUBFIELD_TAGS = {"a", "b", "c", "h", "n", "p"}
 _BRACKETED_SEGMENT = re.compile(r"\[[^\]]+\]")
