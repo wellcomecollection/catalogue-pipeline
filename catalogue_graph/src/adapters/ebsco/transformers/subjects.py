@@ -5,12 +5,12 @@ from pymarc.field import Field
 from pymarc.record import Record
 
 from adapters.ebsco.transformers.authority_standard_number import extract_identifier
-from adapters.marc.transformers.common import non_empty
 from adapters.ebsco.transformers.label_subdivisions import (
     SUBDIVISION_CODES,
     SUBFIELD_TYPE_MAP,
     build_concept,
 )
+from adapters.marc.transformers.common import non_empty
 from models.pipeline.concept import Concept, Subject
 from models.pipeline.identifier import Identifiable
 from utils.types import RawConceptType
@@ -113,11 +113,11 @@ def is_subject_to_keep(field: Field) -> bool:
     https://github.com/wellcomecollection/catalogue-pipeline/blob/180bece57fb84a90a8d2d2a7432843b5237d7727/pipeline/transformer/transformer_marc_common/src/main/scala/weco/pipeline/transformer/marc_common/transformers/MarcSubjects.scala#L82
     """
     return field.indicators is not None and (
-            field.indicators.second in ["0", "2"]
-            or (
-                    field.indicators.second == "7"
-                    and field.get("2") in ["local", "homoit", "indig", "enslv"]
-            )
+        field.indicators.second in ["0", "2"]
+        or (
+            field.indicators.second == "7"
+            and field.get("2") in ["local", "homoit", "indig", "enslv"]
+        )
     )
 
 
