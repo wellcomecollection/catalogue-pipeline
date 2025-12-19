@@ -8,7 +8,7 @@ InvisibleReasonType = Literal[
     "UnlinkedHistoricalLibraryMiro",
     "UnableToTransform",
     "MetsWorksAreNotVisible",
-    "MimsyWorksAreNotVisible"
+    "MimsyWorksAreNotVisible",
 ]
 INVISIBLE_REASON_TYPES: tuple[str, ...] = get_args(InvisibleReasonType)
 

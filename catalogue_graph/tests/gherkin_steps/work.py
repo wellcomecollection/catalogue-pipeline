@@ -41,7 +41,7 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     return member
 
 
-@then('the work is invisible')
+@then("the work is invisible")
 def the_work_is_invisible(work: SourceWork) -> None:
     assert work.type == "Invisible"
 
@@ -53,16 +53,12 @@ def the_work_has_the_identifier(work: SourceWork, identifier: str) -> None:
 
 
 @then(parsers.parse("the work's source modified time is {date_str}"))
-def work_last_modified_date(
-        work: SourceWork, date_str: str
-) -> None:
+def work_last_modified_date(work: SourceWork, date_str: str) -> None:
     assert work.state.source_modified_time == date_str
 
 
 @then(parsers.parse("the work's title is {title}"))
-def work_title(
-        work: SourceWork, title: str
-) -> None:
+def work_title(work: SourceWork, title: str) -> None:
     assert work.data.title == title
 
 
@@ -96,7 +92,9 @@ def list_member_only(work: SourceWork, attr_phrase: str, value: str) -> Any:
 
 
 @then(parsers.parse('the only {attr_phrase} has the {sub_attr} "{value}"'))
-def list_member_has(work: SourceWork, attr_phrase: str, sub_attr: str, value: str) -> Any:
+def list_member_has(
+        work: SourceWork, attr_phrase: str, sub_attr: str, value: str
+) -> Any:
     list_member_count(work, 1, attr_phrase)
     return list_member_nth_has(work, 1, attr_phrase, sub_attr, value)
 
@@ -142,7 +140,11 @@ def drill_through_dots(obj: Any, path: str) -> Any:
 
 @then(parsers.parse("the work has {count:d} {attr_phrase} with {sub_attr}:"))
 def child_list_member_has_with_datatable(
-        work: SourceWork, datatable: list[list[str]], count: int, attr_phrase: str, sub_attr: str
+        work: SourceWork,
+        datatable: list[list[str]],
+        count: int,
+        attr_phrase: str,
+        sub_attr: str,
 ) -> None:
     members: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
     assert len(members) == count, (
@@ -153,12 +155,12 @@ def child_list_member_has_with_datatable(
         assert actual == row[0]
 
 
-@then(parsers.re(r"the work has (?P<count>\d+) (?P<atttr_phrase>(?!.*\bwith\b).*):"))
+@then(parsers.re(r"the work has (?P<count>\d+) (?P<attr_phrase>(?!.*\bwith\b).*):"))
 def child_list_member_with_datatable(
-        work: SourceWork, datatable: list[list[str]], count: int, attr_phrase: str
+        work: SourceWork, datatable: list[list[str]], count: str, attr_phrase: str
 ) -> None:
     members: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
-    assert len(members) == count, (
+    assert len(members) == int(count), (
         f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
     )
     for member, row in zip(members, datatable):

@@ -35,7 +35,7 @@ def ebsco_source_identifier(id_value: str) -> SourceIdentifier:
 
 
 def ebsco_source_work_state(
-        id_value: str, relations: WorkRelations | None = None
+    id_value: str, relations: WorkRelations | None = None
 ) -> SourceWorkState:
     current_time_iso: str = convert_datetime_to_utc_iso(datetime.now())
 

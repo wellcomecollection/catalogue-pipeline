@@ -3,14 +3,20 @@ from pymarc.record import Field, Indicators, Record, Subfield
 from pytest_bdd import given, parsers
 
 
-@given(parsers.parse('a MARC record with field 001 "{identifier}"'), target_fixture="marc_record")
+@given(
+    parsers.parse('a MARC record with field 001 "{identifier}"'),
+    target_fixture="marc_record",
+)
 def marc_record_with_id(identifier: str) -> Record:
     record = Record()
     record.add_field(Field(tag="001", data=identifier))
     return record
 
 
-@given(parsers.parse('the MARC record has a 005 field with the value {transaction_date}'), target_fixture="marc_record")
+@given(
+    parsers.parse("the MARC record has a 005 field with the value {transaction_date}"),
+    target_fixture="marc_record",
+)
 def with_transaction_date(marc_record: Record, transaction_date: str) -> Record:
     marc_record.add_field(Field(tag="005", data=transaction_date))
     return marc_record
@@ -28,11 +34,11 @@ field_step_regex = parsers.re(
 
 @given(field_step_regex)
 def add_field(
-        marc_record: Record,
-        tag: str,
-        subs: str,
-        ind1: str = "",
-        ind2: str = "",
+    marc_record: Record,
+    tag: str,
+    subs: str,
+    ind1: str = "",
+    ind2: str = "",
 ) -> None:
     matches: list[tuple[str, str]] = re.findall(
         r' (?:with|and) subfield "([^"]+)" value "([^"]*)"', subs
@@ -48,11 +54,11 @@ def add_field(
     )
 )
 def field_from_table(
-        marc_record: Record,
-        datatable: list[list[str]],
-        tag: str,
-        ind1: str = "",
-        ind2: str = "",
+    marc_record: Record,
+    datatable: list[list[str]],
+    tag: str,
+    ind1: str = "",
+    ind2: str = "",
 ) -> None:
     headings = datatable[0]
     code = headings.index("code")

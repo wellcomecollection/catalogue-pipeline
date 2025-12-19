@@ -21,8 +21,11 @@ logger = logging.getLogger("transformer/other_identifiers")
 
 
 def extract_other_identifiers(record: Record) -> list[SourceIdentifier]:
-    return [source_id for source_id in (format_field(field) for field in record.get_fields("035")) if
-            source_id is not None]
+    return [
+        source_id
+        for source_id in (format_field(field) for field in record.get_fields("035"))
+        if source_id is not None
+    ]
 
 
 ORIGIN_CODE_TO_ID_TYPE = {
@@ -30,8 +33,7 @@ ORIGIN_CODE_TO_ID_TYPE = {
     "Mimsy reference": "mimsy-reference",
     "Sierra Number": "sierra-identifier",
     "WI number": "miro-image-number",
-    "accession number": "wellcome-accession-number"
-
+    "accession number": "wellcome-accession-number",
     # "Library Reference Number" is handled specially in format_field
     # Two other id schemes exist, but I don't know what to do with them.
     # "SCM loan accession number": ,
@@ -52,7 +54,9 @@ def format_field(field: Field) -> str:
             # don't bother warning, we know about these and don't have a use for them yet
             # logging them would just clutter the logs
             return None
-        logger.warning("unknown identifier prefix '%s' in identifier: %s", prefix, a_subfield)
+        logger.warning(
+            "unknown identifier prefix '%s' in identifier: %s", prefix, a_subfield
+        )
         return None
 
     return SourceIdentifier(
