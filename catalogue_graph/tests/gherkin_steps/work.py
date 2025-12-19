@@ -1,5 +1,8 @@
-from typing import Any, Sequence
-from pytest_bdd import then, parsers
+from collections.abc import Sequence
+from typing import Any
+
+from pytest_bdd import parsers, then
+
 from models.pipeline.source.work import SourceWork
 
 # ------------------------------------------------------------------
@@ -93,7 +96,7 @@ def list_member_only(work: SourceWork, attr_phrase: str, value: str) -> Any:
 
 @then(parsers.parse('the only {attr_phrase} has the {sub_attr} "{value}"'))
 def list_member_has(
-        work: SourceWork, attr_phrase: str, sub_attr: str, value: str
+    work: SourceWork, attr_phrase: str, sub_attr: str, value: str
 ) -> Any:
     list_member_count(work, 1, attr_phrase)
     return list_member_nth_has(work, 1, attr_phrase, sub_attr, value)
@@ -105,7 +108,7 @@ def list_member_has(
     )
 )
 def list_member_nth_is(
-        work: SourceWork, index: str | int, attr_phrase: str, value: str
+    work: SourceWork, index: str | int, attr_phrase: str, value: str
 ) -> Any:
     nth_member = _list_member_nth(work.data, index, attr_phrase)
     assert nth_member == value, (
@@ -120,7 +123,7 @@ def list_member_nth_is(
     )
 )
 def list_member_nth_has(
-        work: SourceWork, index: str | int, attr_phrase: str, sub_attr: str, value: str
+    work: SourceWork, index: str | int, attr_phrase: str, sub_attr: str, value: str
 ) -> Any:
     nth_member = _list_member_nth(work.data, index, attr_phrase)
     actual = drill_through_dots(nth_member, sub_attr)
@@ -140,28 +143,28 @@ def drill_through_dots(obj: Any, path: str) -> Any:
 
 @then(parsers.parse("the work has {count:d} {attr_phrase} with {sub_attr}:"))
 def child_list_member_has_with_datatable(
-        work: SourceWork,
-        datatable: list[list[str]],
-        count: int,
-        attr_phrase: str,
-        sub_attr: str,
+    work: SourceWork,
+    datatable: list[list[str]],
+    count: int,
+    attr_phrase: str,
+    sub_attr: str,
 ) -> None:
     members: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
     assert len(members) == count, (
         f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
     )
-    for member, row in zip(members, datatable):
+    for member, row in zip(members, datatable, strict=True):
         actual = drill_through_dots(member, sub_attr)
         assert actual == row[0]
 
 
 @then(parsers.re(r"the work has (?P<count>\d+) (?P<attr_phrase>(?!.*\bwith\b).*):"))
 def child_list_member_with_datatable(
-        work: SourceWork, datatable: list[list[str]], count: str, attr_phrase: str
+    work: SourceWork, datatable: list[list[str]], count: str, attr_phrase: str
 ) -> None:
     members: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
     assert len(members) == int(count), (
         f"Expected {count} {attr_phrase}, got {len(members)}: {members}"
     )
-    for member, row in zip(members, datatable):
+    for member, row in zip(members, datatable, strict=True):
         assert member == row[0]

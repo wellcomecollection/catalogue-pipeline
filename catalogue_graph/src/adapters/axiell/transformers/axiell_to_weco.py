@@ -1,20 +1,21 @@
-from models.pipeline.source.work import InvisibleSourceWork, SourceWorkState
-from utils.timezone import convert_datetime_to_utc_iso
-from models.pipeline.identifier import Id, SourceIdentifier
-from models.pipeline.work_data import WorkData
+from datetime import datetime
+
+import dateutil
 from pymarc.record import Record
+
+from adapters.axiell.transformers.other_identifiers import extract_other_identifiers
+from adapters.marc.transformers.alternative_titles import extract_alternative_titles
 from adapters.marc.transformers.identifier import extract_id
 from adapters.marc.transformers.last_transaction_time import (
     extract_last_transaction_time_to_datetime,
 )
-
-import dateutil
-from datetime import datetime
-from ingestor.models.shared.invisible_reason import InvisibleReason
-from adapters.marc.transformers.alternative_titles import extract_alternative_titles
 from adapters.marc.transformers.notes import extract_notes
 from adapters.marc.transformers.title import extract_title
-from adapters.axiell.transformers.other_identifiers import extract_other_identifiers
+from ingestor.models.shared.invisible_reason import InvisibleReason
+from models.pipeline.identifier import Id, SourceIdentifier
+from models.pipeline.source.work import InvisibleSourceWork, SourceWorkState
+from models.pipeline.work_data import WorkData
+from utils.timezone import convert_datetime_to_utc_iso
 
 AXIELL_IDENTIFIER_TYPE = Id(id="axiell-priref")
 
@@ -41,7 +42,7 @@ def transform_record(marc_record: Record) -> InvisibleSourceWork:
 
 
 def axiell_source_work_state(
-    id_value: str, source_modified_time: datetime | None = None
+    id_value: str, source_modified_time: datetime
 ) -> SourceWorkState:
     current_time_iso: str = convert_datetime_to_utc_iso(datetime.now())
     source_modified_time_iso: str = convert_datetime_to_utc_iso(source_modified_time)

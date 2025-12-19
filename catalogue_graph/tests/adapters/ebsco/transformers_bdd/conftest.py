@@ -7,32 +7,21 @@ from typing import Any, cast
 
 import pytest
 from _pytest.logging import LogCaptureFixture
-from pymarc.record import Field, Indicators, Record, Subfield
-from pytest_bdd import parsers, then, when
+from pymarc.record import Field, Record, Subfield
+from pytest_bdd import given, parsers, then, when
 
 from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork
 
+# Allow * imports, pulling in individual step definitions is unwieldy
+# ruff: noqa: F403, F405
 from tests.gherkin_steps.marc import *
 from tests.gherkin_steps.work import *
 
 # mypy: allow-untyped-calls
 
 logger: logging.Logger = logging.getLogger(__name__)
-
-# ------------------------------------------------------------------
-# Attribute phrase -> model attribute mapping (extendable)
-# ------------------------------------------------------------------
-ATTR_ALIASES: dict[str, str] = {
-    "designation": "designation",
-    "designations": "designation",
-    "alternative title": "alternative_titles",
-    "alternative titles": "alternative_titles",
-    "genre": "genres",
-    "subject": "subjects",
-    "concept": "concepts",
-}
 
 
 def _normalise_attr_phrase(attr_phrase: str) -> str:
@@ -70,24 +59,6 @@ def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceW
     work = transform_record(marc_record)
     context["result"] = work
     return work
-
-
-# ------------------------------------------------------------------
-# Generic list assertion steps
-# ------------------------------------------------------------------
-
-
-@then(parsers.parse("there is 1 {attr_phrase}"))
-def one_list_member(work: VisibleSourceWork, attr_phrase: str) -> None:
-    list_member_count(work, 1, attr_phrase)
-
-
-@then(parsers.parse("there are {count:d} {attr_phrase}"))
-def list_member_count(work: VisibleSourceWork, count: int, attr_phrase: str) -> None:
-    values: Sequence[Any] = _get_attr_list(work.data, attr_phrase)
-    assert len(values) == count, (
-        f"Expected {count} {attr_phrase}, got {len(values)}: {values}"
-    )
 
 
 @then(
@@ -186,17 +157,6 @@ def child_list_member_datatable(
                     assert value == expected
 
 
-@then(parsers.parse("there are no {attr_phrase}"))
-def list_member_empty(work: VisibleSourceWork, attr_phrase: str) -> None:
-    list_member_count(work, 0, attr_phrase)
-
-
-@then(parsers.parse('the only {attr_phrase} is "{value}"'))
-def list_member_only(work: VisibleSourceWork, attr_phrase: str, value: str) -> Any:
-    list_member_count(work, 1, attr_phrase)
-    return list_member_nth_is(work, 1, attr_phrase, value)
-
-
 def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     idx = int(index) - 1
     values: Sequence[Any] = _get_attr_list(parent, attr_phrase)
@@ -205,21 +165,6 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     )
     member = values[idx]
     return member
-
-
-@then(
-    parsers.re(
-        r'the (?P<index>\d+)(?:st|nd|rd|th) (?P<attr_phrase>alternative title|alternative titles|designation|designations) is "(?P<value>.*)"'
-    )
-)
-def list_member_nth_is(
-    work: VisibleSourceWork, index: str | int, attr_phrase: str, value: str
-) -> Any:
-    nth_member = _list_member_nth(work.data, index, attr_phrase)
-    assert nth_member == value, (
-        f"Expected {attr_phrase} at position {index} == {value!r}, got {nth_member!r}"
-    )
-    return nth_member
 
 
 @then(

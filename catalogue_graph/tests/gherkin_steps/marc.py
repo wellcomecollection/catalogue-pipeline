@@ -1,6 +1,9 @@
 import re
+
 from pymarc.record import Field, Indicators, Record, Subfield
 from pytest_bdd import given, parsers
+
+# mypy: allow-untyped-calls
 
 
 @given(

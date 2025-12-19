@@ -5,10 +5,10 @@ https://www.loc.gov/marc/bibliographic/bd585.html
 """
 
 from pymarc.record import Record
-from models.pipeline.id_label import IdLabel
-from models.pipeline.note import Note
 
 from adapters.ebsco.transformers.common import get_a_subfields
+from models.pipeline.id_label import IdLabel
+from models.pipeline.note import Note
 
 exhibitions_note_type = IdLabel(id="exhibitions-note", label="Exhibitions note")
 

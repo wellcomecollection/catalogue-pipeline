@@ -1,13 +1,17 @@
 from __future__ import annotations
-from models.pipeline.source.work import InvisibleSourceWork
+
+from pymarc.record import Field, Record, Subfield
+from pytest_bdd import given, when
+
 from adapters.axiell.transformers.axiell_to_weco import transform_record
-from pymarc.record import Field, Indicators, Record, Subfield
-from pytest_bdd import parsers, then, when
+from models.pipeline.source.work import InvisibleSourceWork
 
-from typing import Any
-
+# Allow * imports, pulling in individual step definitions is unwieldy
+# ruff: noqa: F403, F405
 from tests.gherkin_steps.marc import *
 from tests.gherkin_steps.work import *
+
+# mypy: allow-untyped-calls
 
 
 @given("a valid MARC record", target_fixture="marc_record")

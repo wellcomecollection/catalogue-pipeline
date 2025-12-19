@@ -8,13 +8,10 @@ identifier types that were stored there
 """
 
 import logging
-from collections.abc import Iterable
-from itertools import chain
 
 from pymarc.field import Field
 from pymarc.record import Record
 
-from adapters.ebsco.transformers.common import is_url
 from models.pipeline.identifier import Id, SourceIdentifier
 
 logger = logging.getLogger("transformer/other_identifiers")
@@ -41,7 +38,7 @@ ORIGIN_CODE_TO_ID_TYPE = {
 }
 
 
-def format_field(field: Field) -> str:
+def format_field(field: Field) -> SourceIdentifier | None:
     a_subfield = field.get("a")
     assert a_subfield is not None
     prefix, rpar, id_value = a_subfield[1:].partition(")")

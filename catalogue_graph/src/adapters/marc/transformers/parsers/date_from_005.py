@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-def datetime_from_005(value_005: str) -> datetime | None:
+def datetime_from_005(value_005: str) -> datetime:
     """
     Converts a MARC 005 field string in 'YYYYMMDDHHMMSS.f' format to a datetime.
 
