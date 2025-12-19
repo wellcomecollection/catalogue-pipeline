@@ -5,6 +5,24 @@ from pytest_bdd import parsers, then
 
 from models.pipeline.source.work import SourceWork
 
+__all__ = [
+    "ATTR_ALIASES",
+    "the_work_is_invisible",
+    "the_work_has_the_identifier",
+    "work_last_modified_date",
+    "work_title",
+    "one_list_member",
+    "list_member_count",
+    "list_member_empty",
+    "list_member_only",
+    "list_member_has",
+    "list_member_nth_is",
+    "list_member_nth_has",
+    "drill_through_dots",
+    "child_list_member_has_with_datatable",
+    "child_list_member_with_datatable",
+]
+
 # ------------------------------------------------------------------
 # Attribute phrase -> model attribute mapping (extendable)
 # ------------------------------------------------------------------

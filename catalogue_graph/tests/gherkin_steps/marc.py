@@ -5,6 +5,14 @@ from pytest_bdd import given, parsers
 
 # mypy: allow-untyped-calls
 
+__all__ = [
+    "marc_record_with_id",
+    "with_transaction_date",
+    "add_field",
+    "field_from_table",
+    "add_subfield_to_last_field",
+]
+
 
 @given(
     parsers.parse('a MARC record with field 001 "{identifier}"'),
