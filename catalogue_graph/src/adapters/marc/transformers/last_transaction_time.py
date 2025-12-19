@@ -6,7 +6,7 @@ from .common import mandatory_field
 from .parsers.date_from_005 import datetime_from_005
 
 
-@mandatory_field("001", "id")
+@mandatory_field("005", "last transaction time")
 def extract_last_transaction_time(marc_record: Record) -> str:
     return marc_record["005"].format_field().strip()
 
