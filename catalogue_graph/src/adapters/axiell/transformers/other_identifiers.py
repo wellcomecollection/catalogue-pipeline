@@ -67,6 +67,5 @@ def which_identifier_type(prefix: str, id_value: str) -> str | None:
     if prefix == "Library Reference Number":
         if "/" in id_value:
             return "calm-alt-ref-no"
-        else:
-            return "iconographic-number"
+        return "iconographic-number"
     return ORIGIN_CODE_TO_ID_TYPE.get(prefix)
