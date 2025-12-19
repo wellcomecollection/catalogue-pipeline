@@ -9,7 +9,7 @@ def datetime_from_005(value_005: str) -> datetime:
         value_005 (str): The MARC 005 field string.
 
     Returns:
-        str | None: The extracted date in 'YYYYMMDDHHMMSS.f' format, or None if not found.
+        datetime: The parsed datetime object from the MARC 005 field string.
 
 
     >>> datetime_from_005("20251225123045.0")
