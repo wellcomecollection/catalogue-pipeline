@@ -13,10 +13,8 @@ from pyiceberg.expressions import (
     GreaterThanOrEqual,
     LessThan,
 )
-from pyiceberg.partitioning import PartitionField, PartitionSpec
 from pyiceberg.schema import Schema
 from pyiceberg.table import Table as IcebergTable
-from pyiceberg.transforms import HourTransform, IdentityTransform
 from pyiceberg.types import (
     IntegerType,
     ListType,
@@ -66,11 +64,6 @@ WINDOW_STATUS_SCHEMA = Schema(
     ),
 )
 
-WINDOW_STATUS_PARTITION_SPEC = PartitionSpec(
-    PartitionField(2, 1000, HourTransform(), "window_start_hour"),
-    PartitionField(4, 1001, IdentityTransform(), "state"),
-)
-
 WINDOW_STATUS_ARROW_FIELDS: list[pa.Field] = [
     pa.field("window_key", pa.string(), nullable=False),
     pa.field("window_start", pa.timestamp("us", tz="UTC"), nullable=False),
@@ -113,7 +106,7 @@ class WindowStore:
         return {row["window_key"]: row for row in rows}
 
     def upsert(self, record: WindowStatusRecord) -> None:
-        """Delete any existing row for the window then append the new status."""
+        """Replace any existing row for this window, in a single Iceberg commit."""
         payload: dict[str, list[Any]] = {
             "window_key": _column(record.window_key),
             "window_start": _column(record.window_start),
@@ -126,10 +119,10 @@ class WindowStore:
             "tags": _column(record.tags),
         }
         table = self._table
-        with self._lock:
-            table.delete(EqualTo("window_key", record.window_key))
-            table.append(
-                pa.Table.from_pydict(payload, schema=WINDOW_STATUS_ARROW_SCHEMA)
+        arrow = pa.Table.from_pydict(payload, schema=WINDOW_STATUS_ARROW_SCHEMA)
+        with self._lock, table.transaction() as tx:
+            tx.overwrite(
+                arrow, overwrite_filter=EqualTo("window_key", record.window_key)
             )
 
     def list_in_range(

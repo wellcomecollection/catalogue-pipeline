@@ -36,16 +36,17 @@ class AdapterStore:
         Apply an incremental update to the table.
         Only updates and inserts are processed; missing records are NOT deleted.
         """
+
+        namespace = self._get_namespace(record_namespace)
+        if new_data.num_rows == 0:
+            return None
+
         # Enforce presence of timestamps in incremental updates to avoid overwriting
         # newer records with untimed data.
         if "last_modified" not in new_data.column_names:
             raise ValueError(
                 "incremental_update requires a 'last_modified' column in new_data"
             )
-
-        namespace = self._get_namespace(record_namespace)
-        if new_data.num_rows == 0:
-            return None
 
         # Optimization: For incremental updates, only fetch rows that match the incoming IDs.
         new_ids = [val for val in new_data.column("id").to_pylist() if val is not None]
@@ -77,7 +78,7 @@ class AdapterStore:
 
     def snapshot_sync(
         self, new_data: pa.Table, record_namespace: str | None = None
-    ) -> str | None:
+    ) -> AdapterStoreUpdate | None:
         """
         Sync the table to match the new snapshot.
         Updates, inserts, and DELETES records that are missing from new_data.
@@ -102,7 +103,7 @@ class AdapterStore:
             changes = None
 
         if changes or inserts:
-            return self._upsert_with_markers(changes, inserts).changeset_id
+            return self._upsert_with_markers(changes, inserts)
         return None
 
     def _get_namespace(self, record_namespace: str | None) -> str:
@@ -176,10 +177,9 @@ class AdapterStore:
                 tx.append(inserts)
 
         updated_ids: list[str] = []
-        if changes is not None:
-            updated_ids.extend(cast(list[str], changes.column("id").to_pylist()))
-        if inserts is not None:
-            updated_ids.extend(cast(list[str], inserts.column("id").to_pylist()))
+        for t in (changes, inserts):
+            if t is not None:
+                updated_ids.extend(cast(list[str], t.column("id").to_pylist()))
 
         return AdapterStoreUpdate(
             changeset_id=changeset_id, updated_record_ids=updated_ids

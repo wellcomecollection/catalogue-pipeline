@@ -22,7 +22,6 @@ from adapters.utils.window_harvester import (
     WindowHarvestManager,
 )
 from adapters.utils.window_store import (
-    WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
     WindowStatusRecord,
     WindowStore,
@@ -97,7 +96,6 @@ def _create_table(
     return catalog.create_table(
         identifier=identifier,
         schema=WINDOW_STATUS_SCHEMA,
-        partition_spec=WINDOW_STATUS_PARTITION_SPEC,
     )
 
 
@@ -152,7 +150,6 @@ def _build_harvester(
         client=client,
         metadata_prefix="oai_raw",
         set_spec="collect",
-        max_parallel_requests=2,
         record_callback=callback,
         default_tags=default_tags,
     )

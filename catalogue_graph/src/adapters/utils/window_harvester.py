@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import logging
 from collections.abc import Sequence
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 from typing import Protocol, TypedDict
 
@@ -37,7 +36,6 @@ class WindowHarvestManager:
     """Coordinates windowed harvesting and bookkeeping."""
 
     DEFAULT_WINDOW_MINUTES = 15
-    DEFAULT_MAX_PARALLEL_REQUESTS = 3
 
     def __init__(
         self,
@@ -47,7 +45,6 @@ class WindowHarvestManager:
         metadata_prefix: str | None = None,
         set_spec: str | None = None,
         *,
-        max_parallel_requests: int | None = None,
         record_callback: WindowCallback | None = None,
         default_tags: dict[str, str] | None = None,
     ) -> None:
@@ -57,9 +54,6 @@ class WindowHarvestManager:
         self.metadata_prefix = metadata_prefix
         self.set_spec = set_spec
         self.window_minutes = window_generator.window_minutes
-        self.max_parallel_requests = (
-            max_parallel_requests or self.DEFAULT_MAX_PARALLEL_REQUESTS
-        )
         self.record_callback = record_callback
         self.default_tags = dict(default_tags) if default_tags else None
 
@@ -143,30 +137,22 @@ class WindowHarvestManager:
         windows: Sequence[tuple[datetime, datetime]],
         *,
         record_callback: WindowCallback | None = None,
-        max_parallel_requests: int | None = None,
     ) -> list[WindowSummary]:
         if not windows:
             return []
         summaries: list[WindowSummary] = []
-        workers = (
-            min(max_parallel_requests or self.max_parallel_requests, len(windows)) or 1
-        )
         callback = record_callback or self.record_callback
-        logger.info(
-            "Dispatching %d windows with %d parallel workers", len(windows), workers
-        )
-        with ThreadPoolExecutor(max_workers=workers) as executor:
-            future_map = {
-                executor.submit(
-                    self.process_window,
-                    start,
-                    end,
-                    record_callback=callback,
-                ): (start, end)
-                for start, end in windows
-            }
-            for future in as_completed(future_map):
-                summaries.append(WindowSummary.model_validate(future.result()))
+        logger.info("Processing %d windows sequentially", len(windows))
+        for start, end in windows:
+            summaries.append(
+                WindowSummary.model_validate(
+                    self.process_window(
+                        start,
+                        end,
+                        record_callback=callback,
+                    )
+                )
+            )
 
         summaries.sort(key=lambda summary: summary.window_start)
         return summaries

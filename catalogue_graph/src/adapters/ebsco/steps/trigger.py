@@ -13,7 +13,6 @@ from typing import Any
 
 import boto3
 import smart_open
-from pydantic import BaseModel
 
 from adapters.ebsco.config import (
     FTP_S3_PREFIX,
@@ -27,10 +26,6 @@ from adapters.ebsco.models.step_events import (
 )
 from models.events import EventBridgeScheduledEvent
 from utils.aws import get_ssm_parameter
-
-
-class EbscoAdapterTriggerConfig(BaseModel):
-    is_local: bool = False
 
 
 def _list_s3_keys(bucket: str, prefix: str) -> list[str]:
@@ -120,10 +115,7 @@ def sync_files(
     return f"s3://{s3_bucket}/{s3_prefix}/{most_recent_s3_object}"
 
 
-def handler(
-    event: EbscoAdapterTriggerEvent, config: EbscoAdapterTriggerConfig
-) -> EbscoAdapterLoaderEvent:
-    print(f"Running handler with config: {config}")
+def handler(event: EbscoAdapterTriggerEvent) -> EbscoAdapterLoaderEvent:
     print(f"Processing event: {event}")
 
     job_id = event.job_id
@@ -157,16 +149,11 @@ def lambda_handler(event: EventBridgeScheduledEvent, context: Any) -> dict[str, 
         eventbridge_event.time.replace("Z", "+00:00")
     ).strftime("%Y%m%dT%H%M")
     internal_event = EbscoAdapterTriggerEvent(job_id=job_id)
-    return handler(internal_event, EbscoAdapterTriggerConfig()).model_dump()
+    return handler(internal_event).model_dump()
 
 
 def local_handler() -> None:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
-    parser.add_argument(
-        "--local",
-        action="store_true",
-        help="Run locally -writes to /dev S3 prefix",
-    )
     parser.add_argument(
         "--job-id",
         type=str,
@@ -179,9 +166,8 @@ def local_handler() -> None:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
     event = EbscoAdapterTriggerEvent(job_id=job_id)
-    config = EbscoAdapterTriggerConfig(is_local=args.local)
 
-    handler(event=event, config=config)
+    handler(event=event)
 
 
 if __name__ == "__main__":

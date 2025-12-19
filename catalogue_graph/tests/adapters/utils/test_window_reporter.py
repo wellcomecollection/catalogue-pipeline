@@ -12,7 +12,6 @@ from pyiceberg.table import Table as IcebergTable
 
 from adapters.utils.window_reporter import WindowReporter
 from adapters.utils.window_store import (
-    WINDOW_STATUS_PARTITION_SPEC,
     WINDOW_STATUS_SCHEMA,
     WindowStatusRecord,
     WindowStore,
@@ -42,7 +41,6 @@ def _create_table(
     return catalog.create_table(
         identifier=identifier,
         schema=WINDOW_STATUS_SCHEMA,
-        partition_spec=WINDOW_STATUS_PARTITION_SPEC,
     )
 
 

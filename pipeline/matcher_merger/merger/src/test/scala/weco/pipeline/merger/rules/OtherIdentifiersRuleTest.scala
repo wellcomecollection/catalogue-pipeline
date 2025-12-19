@@ -178,7 +178,10 @@ class OtherIdentifiersRuleTest
           .merge(digmiroSierraWork, List(nothingWork, miroWork, miroWork2))
       ) {
         case FieldMergeResult(otherIdentifiers, mergedSources) =>
-          otherIdentifiers should contain theSameElementsAs miroWork.sourceIdentifier :: miroWork2.sourceIdentifier :: digmiroSierraWork.data.otherIdentifiers
+          otherIdentifiers should contain theSameElementsAs
+            miroWork.sourceIdentifier ::
+              miroWork2.sourceIdentifier ::
+              digmiroSierraWork.data.otherIdentifiers
           mergedSources should contain theSameElementsAs Seq(
             miroWork,
             miroWork2

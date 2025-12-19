@@ -6,145 +6,94 @@ identifier used by the transformer; skips work if the file was already loaded.
 """
 
 import argparse
-import re
+import json
 from datetime import datetime
-from typing import IO, Any, cast
+from typing import Any
 
 import pyarrow as pa
-import smart_open
-from lxml import etree
-from pydantic import BaseModel
-from pyiceberg.table import Table as IcebergTable
+from pydantic import BaseModel, ConfigDict
 
 from adapters.ebsco import helpers
+from adapters.ebsco.marcxml_loader import MarcXmlFileLoader
 from adapters.ebsco.models.step_events import (
     EbscoAdapterLoaderEvent,
-    EbscoAdapterTransformerEvent,
+    LoaderResponse,
 )
-from adapters.ebsco.utils.tracking import (
-    is_file_already_processed,
-    record_processed_file,
-)
+from adapters.ebsco.reporting import EbscoLoaderReport
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
+from adapters.utils.schemata import ARROW_SCHEMA
 
-XMLPARSER = etree.XMLParser(remove_blank_text=True)
 EBSCO_NAMESPACE = "ebsco"
 
 
 class EbscoAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
+    namespace: str = EBSCO_NAMESPACE
+    table_schema: pa.Schema = ARROW_SCHEMA
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def update_from_xml_file(table: IcebergTable, xmlfile: IO[bytes]) -> str | None:
-    return update_from_xml(table, load_xml(xmlfile))
+class LoaderRuntime(BaseModel):
+    adapter_store: AdapterStore
+    marcxml_loader: MarcXmlFileLoader
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def load_xml(xmlfile: IO[bytes]) -> etree._Element:
-    return etree.parse(xmlfile, parser=XMLPARSER).getroot()
-
-
-def update_from_xml(table: IcebergTable, collection: etree._Element) -> str | None:
-    records = nodes_to_records(collection)
-    updater = AdapterStore(table, default_namespace=EBSCO_NAMESPACE)
-    return updater.snapshot_sync(data_to_pa_table(records))
-
-
-def nodes_to_records(collection: etree._Element) -> list[dict[str, str]]:
-    return [node_to_record(record_node) for record_node in collection]
-
-
-def node_to_record(node: etree._Element) -> dict[str, str]:
-    record_id = extract_record_id(node)
-    # serialize XML
-    content = etree.tostring(node, encoding="unicode", pretty_print=False)
-    return {"id": record_id, "content": content}
-
-
-def extract_record_id(node: etree._Element) -> str:
-    controlfield_values = cast(
-        list[str], node.xpath("./*[local-name()='controlfield' and @tag='001']/text()")
+def build_runtime(
+    config_obj: EbscoAdapterLoaderConfig | None = None,
+) -> LoaderRuntime:
+    cfg = config_obj or EbscoAdapterLoaderConfig()
+    table = helpers.build_adapter_table(use_rest_api_table=cfg.use_rest_api_table)
+    adapter_store = AdapterStore(table, default_namespace=cfg.namespace)
+    marcxml_loader = MarcXmlFileLoader(
+        schema=cfg.table_schema,
+        namespace=cfg.namespace,
     )
-    for value in controlfield_values:
-        normalized = value.strip()
-        if normalized:
-            return normalized
 
-    datafield_values = cast(
-        list[str],
-        node.xpath(
-            "./*[local-name()='datafield' and @tag='035']/*[local-name()='subfield' and @code='a']/text()"
-        ),
-    )
-    for raw_value in datafield_values:
-        cleaned = _strip_marc_parenthetical_prefix(raw_value)
-        if cleaned:
-            return cleaned
-
-    raise Exception(
-        "Could not find controlfield 001 or usable datafield 035 "
-        f"in record: {etree.tostring(node, encoding='unicode', pretty_print=True)}"
+    return LoaderRuntime(
+        adapter_store=adapter_store,
+        marcxml_loader=marcxml_loader,
     )
 
 
-def _strip_marc_parenthetical_prefix(raw_value: str) -> str:
-    value = raw_value.strip()
-    return re.sub(r"^\(.*\)", "", value)
+def execute_loader(
+    request: EbscoAdapterLoaderEvent,
+    runtime: LoaderRuntime | None = None,
+) -> LoaderResponse:
+    runtime = runtime or build_runtime()
 
+    pa_table = runtime.marcxml_loader.load_file(request.file_location)
+    changeset = runtime.adapter_store.snapshot_sync(pa_table)
+    changed_record_count = len(changeset.updated_record_ids) if changeset else 0
 
-def data_to_pa_table(data: list[dict[str, str]]) -> pa.Table:
-    namespaced = [{"namespace": EBSCO_NAMESPACE, **row} for row in data]
-    # If the incoming data includes a last_modified field, use the extended schema
-    has_timestamp = any("last_modified" in row for row in namespaced)
-    schema = ARROW_SCHEMA_WITH_TIMESTAMP if has_timestamp else ARROW_SCHEMA
-    return pa.Table.from_pylist(namespaced, schema=schema)
+    return LoaderResponse(
+        changeset_ids=[changeset.changeset_id] if changeset else [],
+        changed_record_count=changed_record_count,
+        job_id=request.job_id,
+    )
 
 
 def handler(
-    event: EbscoAdapterLoaderEvent, config_obj: EbscoAdapterLoaderConfig
-) -> EbscoAdapterTransformerEvent:
-    print(f"Running handler with config: {config_obj}")
-    print(f"Processing event: {event}")
+    event: EbscoAdapterLoaderEvent, runtime: LoaderRuntime | None = None
+) -> LoaderResponse:
+    loader_response = execute_loader(event, runtime=runtime)
 
-    prior_record = is_file_already_processed(event.file_location, step="loaded")
-    if prior_record:
-        print(
-            "Source file previously processed; skipping loader work and forwarding prior changeset_id"
-        )
-        prior_changeset = prior_record.get("changeset_id")
-        return EbscoAdapterTransformerEvent(
-            changeset_id=prior_changeset,
-            job_id=event.job_id,
-        )
+    report = EbscoLoaderReport.from_loader(event, loader_response)
+    report.publish()
 
-    table = helpers.build_adapter_table(config_obj.use_rest_api_table)
-    with smart_open.open(event.file_location, "rb") as f:
-        changeset_id = update_from_xml_file(table, f)
-
-    # Record the processed file to S3
-    record_processed_file(
-        job_id=event.job_id,
-        file_location=event.file_location,
-        step="loaded",
-        payload_obj=EbscoAdapterTransformerEvent(
-            changeset_id=changeset_id,
-            job_id=event.job_id,
-        ),
-    )
-
-    return EbscoAdapterTransformerEvent(
-        changeset_id=changeset_id,
-        job_id=event.job_id,
-    )
+    return loader_response
 
 
 def lambda_handler(event: EbscoAdapterLoaderEvent, context: Any) -> dict[str, Any]:
-    return handler(
-        EbscoAdapterLoaderEvent.model_validate(event), EbscoAdapterLoaderConfig()
-    ).model_dump()
+    request = EbscoAdapterLoaderEvent.model_validate(event)
+    runtime = build_runtime()
+    response = handler(request, runtime=runtime)
+    return response.model_dump()
 
 
-def local_handler() -> EbscoAdapterTransformerEvent:
+def main() -> None:
     parser = argparse.ArgumentParser(description="Process XML file with EBSCO adapter")
     parser.add_argument(
         "xmlfile",
@@ -168,20 +117,11 @@ def local_handler() -> EbscoAdapterTransformerEvent:
     job_id = args.job_id or datetime.now().strftime("%Y%m%dT%H%M")
 
     event = EbscoAdapterLoaderEvent(file_location=args.xmlfile, job_id=job_id)
-    use_rest_api = args.use_rest_api_table
-    config_obj = EbscoAdapterLoaderConfig(use_rest_api_table=use_rest_api)
+    config_obj = EbscoAdapterLoaderConfig(use_rest_api_table=args.use_rest_api_table)
+    runtime = build_runtime(config_obj)
 
-    return handler(event=event, config_obj=config_obj)
-
-
-def main() -> None:
-    print("Running loader handler...")
-    try:
-        local_handler()
-
-    except Exception as exc:  # surface failures clearly in local runs
-        print(f"Loader failed: {exc}")
-        raise
+    response = handler(event=event, runtime=runtime)
+    print(json.dumps(response.model_dump(mode="json"), indent=2))
 
 
 if __name__ == "__main__":

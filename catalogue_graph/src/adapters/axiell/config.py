@@ -26,7 +26,6 @@ WINDOW_STATUS_CATALOG_NAME = os.getenv(
     "WINDOW_STATUS_CATALOG_NAME", "axiell_window_status_catalog"
 )
 
-
 # ---------------------------------------------------------------------------
 # Local Table Configuration (development/testing)
 # ---------------------------------------------------------------------------
@@ -57,7 +56,7 @@ OAI_SET_SPEC = os.getenv("OAI_SET_SPEC", "collect")
 OAI_METADATA_PREFIX = os.getenv("OAI_METADATA_PREFIX", "oai_raw")
 OAI_HTTP_TIMEOUT = float(os.getenv("OAI_HTTP_TIMEOUT", "10.0"))
 OAI_MAX_READ_TIMEOUT = float(os.getenv("OAI_MAX_READ_TIMEOUT", "60.0"))
-OAI_MAX_RETRIES = int(os.getenv("OAI_MAX_RETRIES", "4"))
+OAI_MAX_RETRIES = int(os.getenv("OAI_MAX_RETRIES", "1"))
 OAI_BACKOFF_FACTOR = float(os.getenv("OAI_BACKOFF_FACTOR", "0.75"))
 OAI_BACKOFF_MAX = float(os.getenv("OAI_BACKOFF_MAX", "5.0"))
 
@@ -67,7 +66,6 @@ OAI_BACKOFF_MAX = float(os.getenv("OAI_BACKOFF_MAX", "5.0"))
 # ---------------------------------------------------------------------------
 WINDOW_MINUTES = int(os.getenv("WINDOW_MINUTES", "15"))
 WINDOW_LOOKBACK_DAYS = int(os.getenv("WINDOW_LOOKBACK_DAYS", "7"))
-WINDOW_MAX_PARALLEL_REQUESTS = int(os.getenv("WINDOW_MAX_PARALLEL_REQUESTS", "1"))
 _MAX_PENDING_WINDOWS_ENV = os.getenv("MAX_PENDING_WINDOWS")
 MAX_PENDING_WINDOWS: int | None = (
     int(_MAX_PENDING_WINDOWS_ENV) if _MAX_PENDING_WINDOWS_ENV is not None else None
@@ -101,3 +99,11 @@ INDEX_DATE = os.getenv("INDEX_DATE")
 ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "axiell-transformer")
 ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "axiell-works-dev")
 ES_MODE = os.getenv("ES_MODE", "private")
+
+# Manifest storage configuration
+S3_BUCKET = os.getenv(
+    "AXIELL_TRANSFORMER_S3_BUCKET",
+    "wellcomecollection-platform-axiell-adapter",
+)
+S3_PREFIX = os.getenv("AXIELL_TRANSFORMER_S3_PREFIX", "dev")
+BATCH_S3_PREFIX = os.path.join(S3_PREFIX, "batches")

@@ -14,6 +14,7 @@ from adapters.axiell.models.step_events import (
 )
 from adapters.axiell.steps import trigger
 from adapters.utils.window_store import WindowStatusRecord, WindowStore
+from models.incremental_window import IncrementalWindow
 
 
 def _window_row(start: datetime, end: datetime) -> WindowStatusRecord:
@@ -47,8 +48,8 @@ def test_build_window_request_uses_lookback_when_no_history(
 
     request = trigger.build_window_request(store=store, now=now)
 
-    assert request.window_start == now - timedelta(days=1)
-    assert request.window_end == now
+    assert request.window.start_time == now - timedelta(days=1)
+    assert request.window.end_time == now
     assert request.set_spec == config.OAI_SET_SPEC
     assert request.metadata_prefix == config.OAI_METADATA_PREFIX
     assert request.job_id == "20251117T1200"
@@ -66,8 +67,8 @@ def test_build_window_request_respects_custom_lookback(
         window_lookback_days=3,
     )
 
-    assert request.window_start == now - timedelta(days=3)
-    assert request.window_end == now
+    assert request.window.start_time == now - timedelta(days=3)
+    assert request.window.end_time == now
 
 
 def test_build_window_request_embeds_window_minutes(
@@ -103,8 +104,8 @@ def test_build_window_request_respects_last_success(
 
     request = trigger.build_window_request(store=store, now=now)
 
-    assert request.window_start == last_success_end
-    assert request.window_end == now
+    assert request.window.start_time == last_success_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_finds_latest_among_multiple_windows(
@@ -128,8 +129,8 @@ def test_build_window_request_finds_latest_among_multiple_windows(
 
     request = trigger.build_window_request(store=store, now=now)
 
-    assert request.window_start == end2
-    assert request.window_end == now
+    assert request.window.start_time == end2
+    assert request.window.end_time == now
 
 
 def test_build_window_request_errors_when_lag_exceeds_limit(
@@ -162,8 +163,8 @@ def test_build_window_request_can_skip_lag_enforcement(
 
     request = trigger.build_window_request(store=store, now=now, enforce_lag=False)
 
-    assert request.window_start == old_end
-    assert request.window_end == now
+    assert request.window.start_time == old_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_applies_max_window_limit(
@@ -212,8 +213,10 @@ def test_lambda_handler_uses_rest_api_table_by_default(
         now = event.now or datetime.now(tz=UTC)
         return AxiellAdapterLoaderEvent(
             job_id=event.job_id,
-            window_start=now - timedelta(minutes=random.randint(2, 40)),
-            window_end=now,
+            window=IncrementalWindow(
+                start_time=now - timedelta(minutes=random.randint(2, 40)),
+                end_time=now,
+            ),
             metadata_prefix="oai",
             set_spec="collect",
         )
@@ -273,8 +276,8 @@ def test_build_window_request_notifies_when_gaps_detected(
 
     # Should still create the window request
     assert request.job_id == "20251202T1200"
-    assert request.window_start == second_end
-    assert request.window_end == now
+    assert request.window.start_time == second_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_does_not_notify_without_gaps(
@@ -317,8 +320,8 @@ def test_build_window_request_does_not_notify_without_gaps(
 
     # Should still create the window request
     assert request.job_id == "20251202T1200"
-    assert request.window_start == recent_end
-    assert request.window_end == now
+    assert request.window.start_time == recent_end
+    assert request.window.end_time == now
 
 
 def test_build_window_request_works_without_notifier(
@@ -382,3 +385,114 @@ def test_build_window_request_does_not_notify_when_lag_breaker_trips(
 
     # Should NOT have sent a notification (error raised before notification)
     assert len(MockSNSClient.publish_calls) == 0
+
+
+def test_build_window_request_does_not_notify_for_gaps_about_to_be_processed(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    """Test that gaps between last_success_end and now are NOT reported.
+
+    These gaps are about to be processed by the current batch, so they
+    shouldn't trigger notifications. Only historical gaps (before start_time)
+    should be reported.
+    """
+    from adapters.utils.window_notifier import WindowNotifier
+    from clients.chatbot_notifier import ChatbotNotifier
+    from tests.mocks import MockSNSClient
+
+    MockSNSClient.reset_mocks()
+
+    now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
+
+    # Create a single successful window that ended 3 hours ago.
+    # The gap between last_success_end and now should NOT trigger a notification
+    # because the adapter is about to process that range.
+    last_success_end = now - timedelta(hours=3)
+    store = _populate_store(
+        temporary_window_status_table,
+        [_window_row(last_success_end - timedelta(minutes=15), last_success_end)],
+    )
+
+    chatbot_notifier = ChatbotNotifier(
+        sns_client=MockSNSClient(),
+        topic_arn="arn:aws:sns:eu-west-1:123456789012:test-topic",
+    )
+    notifier = WindowNotifier(
+        chatbot_notifier=chatbot_notifier,
+        table_name="test_table.window_status",
+    )
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        enforce_lag=False,  # Disable lag check for this test
+        job_id="20251202T1200",
+        notifier=notifier,
+    )
+
+    # Should NOT have sent a notification - the gap from last_success_end to now
+    # is about to be processed, so it's not a "missed" gap
+    assert len(MockSNSClient.publish_calls) == 0
+
+    # Should create the window request covering the gap
+    assert request.window.start_time == last_success_end
+    assert request.window.end_time == now
+
+
+def test_build_window_request_notifies_for_historical_gaps_only(
+    temporary_window_status_table: IcebergTable,
+) -> None:
+    """Test that only historical gaps (before start_time) are reported.
+
+    If there's a gap in the historical data that won't be covered by the
+    current batch, it should trigger a notification.
+    """
+    from adapters.utils.window_notifier import WindowNotifier
+    from clients.chatbot_notifier import ChatbotNotifier
+    from tests.mocks import MockSNSClient
+
+    MockSNSClient.reset_mocks()
+
+    now = datetime(2025, 12, 2, 12, 0, tzinfo=UTC)
+
+    # Create windows with a historical gap:
+    # Window 1: 6 hours ago (ends at -6h)
+    # Gap: 2 hours (from -6h to -4h) - this is HISTORICAL and should be reported
+    # Window 2: 4 hours ago to 30 min ago (the latest successful window)
+    # Gap: 30 minutes (from -30min to now) - this is about to be processed, NOT reported
+
+    window1_end = now - timedelta(hours=6)
+    window2_start = now - timedelta(hours=4)
+    window2_end = now - timedelta(minutes=30)
+
+    store = _populate_store(
+        temporary_window_status_table,
+        [
+            _window_row(window1_end - timedelta(minutes=15), window1_end),
+            _window_row(window2_start, window2_end),
+        ],
+    )
+
+    chatbot_notifier = ChatbotNotifier(
+        sns_client=MockSNSClient(),
+        topic_arn="arn:aws:sns:eu-west-1:123456789012:test-topic",
+    )
+    notifier = WindowNotifier(
+        chatbot_notifier=chatbot_notifier,
+        table_name="test_table.window_status",
+    )
+
+    request = trigger.build_window_request(
+        store=store,
+        now=now,
+        enforce_lag=False,
+        job_id="20251202T1200",
+        notifier=notifier,
+    )
+
+    # SHOULD have sent a notification for the historical gap between -6h and -4h
+    assert len(MockSNSClient.publish_calls) == 1
+
+    # The request should cover from last_success_end to now
+    assert request.window.start_time == window2_end
+    assert request.window.end_time == now

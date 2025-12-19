@@ -11,21 +11,22 @@ from datetime import datetime
 from typing import Any
 
 from oai_pmh_client.client import OAIClient
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from adapters.axiell import config, helpers
 from adapters.axiell.clients import build_oai_client
 from adapters.axiell.models.step_events import (
     AxiellAdapterLoaderEvent,
+    LoaderResponse,
 )
 from adapters.axiell.record_writer import WindowRecordWriter
+from adapters.axiell.reporting import AxiellLoaderReport
 from adapters.utils.adapter_store import AdapterStore
 from adapters.utils.window_generator import WindowGenerator
 from adapters.utils.window_harvester import (
     WindowHarvestManager,
 )
 from adapters.utils.window_store import WindowStore
-from adapters.utils.window_summary import WindowSummary
 
 AXIELL_NAMESPACE = "axiell"
 
@@ -36,13 +37,6 @@ class AxiellAdapterLoaderConfig(BaseModel):
     use_rest_api_table: bool = True
     window_minutes: int | None = None
     allow_partial_final_window: bool = False
-
-
-class LoaderResponse(BaseModel):
-    summaries: list[WindowSummary]
-    changeset_ids: list[str] = Field(default_factory=list)
-    changed_record_count: int
-    job_id: str
 
 
 def _format_window_range(start: datetime, end: datetime) -> str:
@@ -63,7 +57,7 @@ def build_runtime(
 ) -> LoaderRuntime:
     cfg = config_obj or AxiellAdapterLoaderConfig()
     store = helpers.build_window_store(use_rest_api_table=cfg.use_rest_api_table)
-    table = helpers.build_adapter_table(cfg.use_rest_api_table)
+    table = helpers.build_adapter_table(use_rest_api_table=cfg.use_rest_api_table)
     table_client = AdapterStore(table, default_namespace=AXIELL_NAMESPACE)
     oai_client = build_oai_client()
 
@@ -84,11 +78,13 @@ def build_harvester(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime,
 ) -> WindowHarvestManager:
+    window_start = request.window.start_time
+    window_end = request.window.end_time
     callback = WindowRecordWriter(
         namespace=AXIELL_NAMESPACE,
         table_client=runtime.table_client,
         job_id=request.job_id,
-        window_range=_format_window_range(request.window_start, request.window_end),
+        window_range=_format_window_range(window_start, window_end),
     )
     return WindowHarvestManager(
         store=runtime.store,
@@ -96,7 +92,6 @@ def build_harvester(
         client=runtime.oai_client,
         metadata_prefix=request.metadata_prefix,
         set_spec=request.set_spec,
-        max_parallel_requests=config.WINDOW_MAX_PARALLEL_REQUESTS,
         record_callback=callback,
         default_tags={"job_id": request.job_id},
     )
@@ -106,12 +101,14 @@ def execute_loader(
     request: AxiellAdapterLoaderEvent,
     runtime: LoaderRuntime | None = None,
 ) -> LoaderResponse:
+    window_start = request.window.start_time
+    window_end = request.window.end_time
     runtime = runtime or build_runtime()
     harvester = build_harvester(request, runtime)
 
     summaries = harvester.harvest_range(
-        start_time=request.window_start,
-        end_time=request.window_end,
+        start_time=window_start,
+        end_time=window_end,
         max_windows=request.max_windows,
         reprocess_successful_windows=False,
     )
@@ -119,7 +116,7 @@ def execute_loader(
     if not summaries:
         raise RuntimeError(
             "No pending windows to harvest for "
-            f"{request.window_start.isoformat()} -> {request.window_end.isoformat()}"
+            f"{window_start.isoformat()} -> {window_end.isoformat()}"
         )
 
     changed_record_count = 0
@@ -145,9 +142,14 @@ def execute_loader(
 
 
 def handler(
-    event: AxiellAdapterLoaderEvent, *, runtime: LoaderRuntime | None = None
+    event: AxiellAdapterLoaderEvent, runtime: LoaderRuntime | None = None
 ) -> LoaderResponse:
-    return execute_loader(event, runtime=runtime)
+    response = execute_loader(event, runtime=runtime)
+
+    report = AxiellLoaderReport.from_loader(event, response)
+    report.publish()
+
+    return response
 
 
 def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:

@@ -39,11 +39,12 @@ def _populate_store(table: IcebergTable, rows: list[WindowStatusRecord]) -> Wind
     return store
 
 
-def _mock_loader_runtime() -> LoaderRuntime:
+def _mock_loader_runtime(window_minutes: int = 15) -> LoaderRuntime:
     return LoaderRuntime.model_construct(
         store=cast(WindowStore, SimpleNamespace()),
         table_client=cast(AdapterStore, SimpleNamespace()),
         oai_client=MagicMock(),
+        window_generator=SimpleNamespace(window_minutes=window_minutes),
     )
 
 
@@ -289,7 +290,7 @@ def test_build_runtime_uses_config(
         config_obj: reloader.AxiellAdapterReloaderConfig,
     ) -> LoaderRuntime:
         captured_config["loader_config"] = config_obj
-        return _mock_loader_runtime()
+        return _mock_loader_runtime(window_minutes=60)
 
     monkeypatch.setattr(
         "adapters.axiell.helpers.build_window_store", mock_build_window_store
@@ -298,7 +299,9 @@ def test_build_runtime_uses_config(
         "adapters.axiell.steps.loader.build_runtime", mock_build_loader_runtime
     )
 
-    config_obj = reloader.AxiellAdapterReloaderConfig(use_rest_api_table=True)
+    config_obj = reloader.AxiellAdapterReloaderConfig(
+        use_rest_api_table=True, window_minutes=60
+    )
     runtime = reloader.build_runtime(config_obj)
 
     assert captured_config["use_rest_api_table"] is True
@@ -309,6 +312,8 @@ def test_build_runtime_uses_config(
         is True
     )
     assert isinstance(runtime, reloader.ReloaderRuntime)
+    assert runtime.loader_runtime.window_generator.window_minutes == 60
+    assert captured_config["loader_config"].window_minutes == 60
 
 
 def test_handler_constructs_correct_loader_event(
@@ -361,8 +366,8 @@ def test_handler_constructs_correct_loader_event(
 
     event = captured_event["event"]
     assert event.job_id == "test-job"
-    assert event.window_start == gap_start
-    assert event.window_end == now
+    assert event.window.start_time == gap_start
+    assert event.window.end_time == now
     assert event.metadata_prefix == "oai_test"
     assert event.set_spec == "test_set"
     assert event.window_minutes == 15

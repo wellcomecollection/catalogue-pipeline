@@ -32,3 +32,8 @@ resource "aws_iam_role_policy" "loader_lambda_s3_write" {
   policy = data.aws_iam_policy_document.s3_write.json
 }
 
+resource "aws_iam_role_policy" "loader_lambda_cloudwatch_metrics" {
+  role   = module.loader_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.cloudwatch_put_metric_data.json
+}
+

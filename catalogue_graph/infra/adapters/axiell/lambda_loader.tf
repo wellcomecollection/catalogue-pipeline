@@ -36,3 +36,8 @@ resource "aws_iam_role_policy" "loader_lambda_ssm_read" {
   role   = module.loader_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.ssm_read.json
 }
+
+resource "aws_iam_role_policy" "loader_lambda_cloudwatch_put_metric" {
+  role   = module.loader_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.cloudwatch_put_metric_data.json
+}
