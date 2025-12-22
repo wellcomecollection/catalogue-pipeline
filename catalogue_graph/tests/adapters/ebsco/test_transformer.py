@@ -1,4 +1,5 @@
 import json
+from collections.abc import Mapping
 from datetime import datetime
 
 import pytest
@@ -20,7 +21,7 @@ from .helpers import data_to_namespaced_table
 def _prepare_changeset(
     temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
-    records_by_id: dict[str, str],
+    records_by_id: Mapping[str, str | None],
 ) -> str:
     """Insert XML records (mapping of id -> MARC XML) into the temporary Iceberg table.
 
@@ -80,6 +81,8 @@ def test_transformer_end_to_end_with_local_table(
     }
     changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
 
+    MockElasticsearchClient.inputs.clear()
+
     result = _run_transform(
         monkeypatch,
         changeset_ids=[changeset_id],
@@ -110,3 +113,42 @@ def test_transformer_end_to_end_with_local_table(
         for op in MockElasticsearchClient.inputs
     }
     assert titles == {"How to Avoid Huge Ships", "Parasites, hosts and diseases"}
+
+
+def test_transformer_end_to_end_includes_deletions(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_by_id: dict[str, str | None] = {
+        "ebs00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>ebs00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>How to Avoid Huge Ships</subfield></datafield></record>",
+        # Deleted records are represented by empty/None content in the adapter store.
+        "ebs00003": None,
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-01-01",
+    )
+
+    assert result.successes.count == 2
+    assert result.failures is None
+
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
+    with open(batch_contents_path, encoding="utf-8") as f:
+        lines = [json.loads(line) for line in f if line.strip()]
+
+    assert len(lines) == 1
+    assert set(lines[0]["sourceIdentifiers"]) == {
+        "Work[ebsco-alt-lookup/ebs00001]",
+        "Work[ebsco-alt-lookup/ebs00003]",
+    }
+
+    by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
+    deleted = by_id["Work[ebsco-alt-lookup/ebs00003]"]["_source"]
+    assert deleted["type"] == "Deleted"
+    assert deleted["deletedReason"]["type"] == "DeletedFromSource"
+    assert deleted["deletedReason"]["info"] == "Marked as deleted from source"

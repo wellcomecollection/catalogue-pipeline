@@ -1,4 +1,5 @@
 import json
+from collections.abc import Mapping
 from datetime import datetime
 
 import pytest
@@ -16,7 +17,7 @@ from tests.mocks import MockElasticsearchClient, MockSmartOpen
 def _prepare_changeset(
     temporary_table: IcebergTable,
     monkeypatch: pytest.MonkeyPatch,
-    records_by_id: dict[str, str],
+    records_by_id: Mapping[str, str | None],
 ) -> str:
     """Insert XML records (mapping of id -> MARC XML) into the temporary Iceberg table.
 
@@ -104,3 +105,42 @@ def test_transformer_end_to_end_with_local_table(
         for op in MockElasticsearchClient.inputs
     }
     assert titles == {"Axiell Title One", "Axiell Title Two"}
+
+
+def test_transformer_end_to_end_includes_deletions(
+    temporary_table: IcebergTable, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    records_by_id: dict[str, str | None] = {
+        "ax00001": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='005'>20251225123045.0</controlfield><controlfield tag='001'>ax00001</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Axiell Title One</subfield></datafield></record>",
+        # Deleted records are represented by empty/None content in the adapter store.
+        "ax00003": None,
+    }
+    changeset_id = _prepare_changeset(temporary_table, monkeypatch, records_by_id)
+
+    MockElasticsearchClient.inputs.clear()
+
+    result = _run_transform(
+        monkeypatch,
+        changeset_ids=[changeset_id],
+        index_date="2025-01-01",
+    )
+
+    assert result.successes.count == 2
+    assert result.failures is None
+
+    batch_path_full = f"s3://{result.successes.batch_file_location.bucket}/{result.successes.batch_file_location.key}"
+    batch_contents_path = MockSmartOpen.file_lookup[batch_path_full]
+    with open(batch_contents_path, encoding="utf-8") as f:
+        lines = [json.loads(line) for line in f if line.strip()]
+
+    assert len(lines) == 1
+    assert set(lines[0]["sourceIdentifiers"]) == {
+        "Work[axiell-priref/ax00001]",
+        "Work[axiell-priref/ax00003]",
+    }
+
+    by_id = {op["_id"]: op for op in MockElasticsearchClient.inputs}
+    deleted = by_id["Work[axiell-priref/ax00003]"]["_source"]
+    assert deleted["type"] == "Deleted"
+    assert deleted["deletedReason"]["type"] == "DeletedFromSource"
+    assert deleted["deletedReason"]["info"] == "Marked as deleted from source"
