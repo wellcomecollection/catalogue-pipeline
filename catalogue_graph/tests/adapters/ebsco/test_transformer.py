@@ -204,7 +204,7 @@ def test_transformer_creates_deletedwork_for_empty_content(
     assert len(deleted_docs) == 1
     deleted_source = deleted_docs[0]["_source"]
     # DeletedReason now an object with type/info
-    assert deleted_source["deletedReason"]["info"] == "not found in EBSCO source"
+    assert deleted_source["deletedReason"]["info"] == "Not found in EBSCO source update"
     assert deleted_source["deletedReason"]["type"] == "DeletedFromSource"
     # Ensure normal record still indexed
     alive_docs = [
@@ -326,7 +326,11 @@ def test_transform_empty_content_returns_deleted(
     temporary_table: IcebergTable,
 ) -> None:
     transformer = EbscoTransformer(AdapterStore(temporary_table), [])
-    works = list(transformer.transform([{"id": "work1", "content": ""}]))
+    works = list(
+        transformer.transform(
+            [{"id": "work1", "content": "", "last_modified": datetime.now()}]
+        )
+    )
     assert len(works) == 1
     assert isinstance(works[0], DeletedSourceWork)
     assert not transformer.errors
@@ -337,7 +341,15 @@ def test_transform_invalid_xml_records_error(
 ) -> None:
     transformer = EbscoTransformer(AdapterStore(temporary_table), [])
     works = list(
-        transformer.transform([{"id": "work2", "content": "<record><leader>bad"}])
+        transformer.transform(
+            [
+                {
+                    "id": "work2",
+                    "content": "<record><leader>bad",
+                    "last_modified": datetime.now(),
+                }
+            ]
+        )
     )
     assert works == []
     assert transformer.errors and transformer.errors[0].stage == "parse"
@@ -430,7 +442,11 @@ def test_transform_valid_marcxml_returns_work(
         "</record>"
     )
     transformer = EbscoTransformer(AdapterStore(temporary_table), [])
-    works = list(transformer.transform([{"id": "ebs12345", "content": xml}]))
+    works = list(
+        transformer.transform(
+            [{"id": "ebs12345", "content": xml, "last_modified": datetime.now()}]
+        )
+    )
     assert len(works) == 1
     assert isinstance(works[0], VisibleSourceWork)
     assert works[0].data.title == "A Useful Title"
@@ -457,7 +473,11 @@ def test_transform_handles_transform_record_exception(
         "</datafield>"
         "</record>"
     )
-    works = list(transformer.transform([{"id": "ebsErr123", "content": xml}]))
+    works = list(
+        transformer.transform(
+            [{"id": "ebsErr123", "content": xml, "last_modified": datetime.now()}]
+        )
+    )
 
     assert works == []
     assert transformer.errors
@@ -480,10 +500,12 @@ def test_stream_to_index_success_no_errors(
         {
             "id": "id1",
             "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id1</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title 1</subfield></datafield></record>",
+            "last_modified": datetime.now(),
         },
         {
             "id": "id2",
             "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id2</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Title 2</subfield></datafield></record>",
+            "last_modified": datetime.now(),
         },
     ]
 
@@ -525,6 +547,7 @@ def test_stream_to_index_with_errors(
         {
             "id": "id1",
             "content": "<record><leader>00000nam a2200000   4500</leader><controlfield tag='001'>id1</controlfield><datafield tag='245' ind1='0' ind2='0'><subfield code='a'>Bad Title</subfield></datafield></record>",
+            "last_modified": datetime.now(),
         }
     ]
 

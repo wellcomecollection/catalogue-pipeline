@@ -1,88 +1,46 @@
-import io
-import logging
-from collections.abc import Generator, Iterable
 from datetime import datetime
-from typing import Any
 
-from pymarc import parse_xml_to_array
 from pymarc.record import Record
 
-from adapters.axiell.transformers.axiell_to_weco import (
-    axiell_source_work_state,
-    transform_record,
+from adapters.axiell.transformers.other_identifiers import extract_other_identifiers
+from adapters.marc.transformers.alternative_titles import extract_alternative_titles
+from adapters.marc.transformers.identifier import extract_id
+from adapters.marc.transformers.last_transaction_time import (
+    extract_last_transaction_time_to_datetime,
 )
+from adapters.marc.transformers.notes import extract_notes
+from adapters.marc.transformers.title import extract_title
+from adapters.transformers.marcxml_transformer import MarcXmlTransformer
 from adapters.utils.adapter_store import AdapterStore
-from ingestor.models.shared.deleted_reason import DeletedReason
-from models.pipeline.source.work import (
-    DeletedSourceWork,
-    InvisibleSourceWork,
-    SourceWork,
-)
-
-from .adapter_store_source import AdapterStoreSource
-from .base_transformer import BaseTransformer
+from ingestor.models.shared.invisible_reason import InvisibleReason
+from models.pipeline.identifier import Id
+from models.pipeline.source.work import InvisibleSourceWork
+from models.pipeline.work_data import WorkData
 
 
-class AxiellTransformer(BaseTransformer):
+class AxiellTransformer(MarcXmlTransformer):
     def __init__(self, adapter_store: AdapterStore, changeset_ids: list[str]) -> None:
-        super().__init__()
-        self.source = AdapterStoreSource(adapter_store, changeset_ids)
+        super().__init__(adapter_store, changeset_ids, Id(id="axiell-priref"))
 
-    # Note: Currently the Axiell source (a) does not emit deletions, and (b) incorrectly
-    # provides a non-persistent identifier that will not match the ID we generate here.
-    # Specifically "collect:12345" where 12345 is the dataset ID, appearing as "priref:12345"
-    # in the MARC record.
-    @staticmethod
-    def _transform_deleted(
-        work_id: str, source_modified_time: datetime
-    ) -> DeletedSourceWork:
-        # Deleted works require a version and type; use timestamp similar to visible works
-        state = axiell_source_work_state(work_id, source_modified_time)
-        version = int(source_modified_time.timestamp())
-
-        deletion = DeletedSourceWork(
-            version=version,
-            deleted_reason=DeletedReason(
-                type="DeletedFromSource", info="Marked as deleted in Axiell source"
-            ),
-            state=state,
+    def transform_record(
+        self, marc_record: Record, source_modified_time: datetime
+    ) -> InvisibleSourceWork:
+        work_id = extract_id(marc_record)
+        work_data = WorkData(
+            title=extract_title(marc_record),
+            alternative_titles=extract_alternative_titles(marc_record),
+            other_identifiers=extract_other_identifiers(marc_record),
+            notes=extract_notes(marc_record),
         )
 
-        logging.warning(
-            f"Work ID {work_id} marked as deleted, but Axiell source does not emit deletions."
+        work_state = self.source_work_state(
+            id_value=work_id,
+            source_modified_time=extract_last_transaction_time_to_datetime(marc_record),
         )
 
-        raise RuntimeError("Axiell source should not emit deletions!")
-        return deletion  # type: ignore[unreachable]  # This line is unreachable but kept for completeness.
-
-    # Currently, Axiell source works are either deleted or invisible, as we do not
-    # wish to expose Mimsy works directly, or have downstream process to merge them.
-    def _transform_visible(
-        self, work_id: str, content: str
-    ) -> Generator[InvisibleSourceWork]:
-        marc_records: list[Record] = []
-        try:
-            marc_records = parse_xml_to_array(io.StringIO(content))
-            assert len(marc_records) == 1
-        except Exception as e:
-            self._add_error(e, "parse", work_id)
-
-        try:
-            for record in marc_records:
-                yield transform_record(record)
-        except Exception as e:
-            logging.error(f"Error transforming work_id {work_id}: {e}")
-            self._add_error(e, "transform", work_id)
-
-    def transform(self, rows: Iterable[dict[str, Any]]) -> Generator[SourceWork]:
-        for row in rows:
-            work_id, content, last_modified = (
-                row["id"],
-                row.get("content"),
-                row["last_modified"],
-            )
-
-            if not content:
-                yield self._transform_deleted(work_id, last_modified)
-            else:
-                yield from self._transform_visible(work_id, content)
+        return InvisibleSourceWork(
+            version=int(source_modified_time.timestamp()),
+            state=work_state,
+            data=work_data,
+            invisibility_reasons=[InvisibleReason(type="MimsyWorksAreNotVisible")],
+        )
