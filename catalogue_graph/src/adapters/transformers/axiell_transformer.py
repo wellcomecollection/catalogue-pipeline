@@ -28,6 +28,10 @@ class AxiellTransformer(BaseTransformer):
         super().__init__()
         self.source = AdapterStoreSource(adapter_store, changeset_ids)
 
+    # Note: Currently the Axiell source (a) does not emit deletions, and (b) incorrectly
+    # provides a non-persistent identifier that will not match the ID we generate here.
+    # Specifically "collect:12345" where 12345 is the dataset ID, appearing as "priref:12345"
+    # in the MARC record.
     @staticmethod
     def _transform_deleted(
         work_id: str, source_modified_time: datetime
@@ -35,15 +39,24 @@ class AxiellTransformer(BaseTransformer):
         # Deleted works require a version and type; use timestamp similar to visible works
         state = axiell_source_work_state(work_id, source_modified_time)
         version = int(source_modified_time.timestamp())
-        return DeletedSourceWork(
+
+        deletion = DeletedSourceWork(
             version=version,
             deleted_reason=DeletedReason(
-                type="DeletedFromSource", info="not found in Axiell source"
+                type="DeletedFromSource", info="Marked as deleted in Axiell source"
             ),
             state=state,
         )
 
-    # Currently, Axiell source works are either deleted or invisible
+        logging.warning(
+            f"Work ID {work_id} marked as deleted, but Axiell source does not emit deletions."
+        )
+
+        raise RuntimeError("Axiell source should not emit deletions!")
+        return deletion  # type: ignore[unreachable]  # This line is unreachable but kept for completeness.
+
+    # Currently, Axiell source works are either deleted or invisible, as we do not
+    # wish to expose Mimsy works directly, or have downstream process to merge them.
     def _transform_visible(
         self, work_id: str, content: str
     ) -> Generator[InvisibleSourceWork]:
