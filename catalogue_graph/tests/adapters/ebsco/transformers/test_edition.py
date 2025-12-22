@@ -1,11 +1,23 @@
+from datetime import datetime
+
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from adapters.ebsco.transformers.edition import extract_edition
+from models.pipeline.work_data import WorkData
+from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
+
+
+def _transform_edition(marc_record: Record) -> str | None:
+    transformer = MarcXmlTransformerForTests(
+        build_work_data=lambda r: WorkData(edition=extract_edition(r))
+    )
+    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
+    return work.data.edition
 
 
 def test_no_edition(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.edition is None
+    assert _transform_edition(marc_record) is None
 
 
 @pytest.mark.parametrize(
@@ -21,7 +33,7 @@ def test_no_edition(marc_record: Record) -> None:
     indirect=True,
 )
 def test_empty_edition_is_no_edition(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.edition is None
+    assert _transform_edition(marc_record) is None
 
 
 @pytest.mark.parametrize(
@@ -37,7 +49,7 @@ def test_empty_edition_is_no_edition(marc_record: Record) -> None:
     indirect=True,
 )
 def test_tidies_value(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.edition == "hello, I'm in space!"
+    assert _transform_edition(marc_record) == "hello, I'm in space!"
 
 
 @pytest.mark.parametrize(
@@ -53,7 +65,7 @@ def test_tidies_value(marc_record: Record) -> None:
     indirect=True,
 )
 def test_extract_edition_from_250(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.edition == "Édition franc̦aise."
+    assert _transform_edition(marc_record) == "Édition franc̦aise."
 
 
 @pytest.mark.parametrize(
@@ -74,8 +86,7 @@ def test_extract_edition_from_250(marc_record: Record) -> None:
 )
 def test_multiple_editions(marc_record: Record) -> None:
     assert (
-        transform_record(marc_record).data.edition
-        == "Édition franc̦aise. Rhifyn Cymraeg"
+        _transform_edition(marc_record) == "Édition franc̦aise. Rhifyn Cymraeg"
     )
 
 
@@ -95,7 +106,7 @@ def test_multiple_editions(marc_record: Record) -> None:
     indirect=True,
 )
 def test_ignore_other_subfields(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.edition == "Større utgave"
+    assert _transform_edition(marc_record) == "Større utgave"
 
 
 @pytest.mark.parametrize(
@@ -126,4 +137,4 @@ def test_ignore_other_subfields(marc_record: Record) -> None:
     indirect=True,
 )
 def test_empty_editions_are_ignored(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.edition == "This one"
+    assert _transform_edition(marc_record) == "This one"
