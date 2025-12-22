@@ -85,7 +85,7 @@ class MarcXmlTransformer(BaseTransformer):
         return DeletedSourceWork(
             version=version,
             deleted_reason=DeletedReason(
-                type="DeletedFromSource", info="Marked as deleted in Axiell source"
+                type="DeletedFromSource", info="Marked as deleted from source"
             ),
             state=state,
         )
