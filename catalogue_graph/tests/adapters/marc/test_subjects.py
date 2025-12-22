@@ -24,7 +24,9 @@ def _transform_subjects(marc_record: Record) -> list[Subject]:
     transformer = MarcXmlTransformerForTests(
         build_work_data=lambda r: WorkData(subjects=extract_subjects(r))
     )
-    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
     return work.data.subjects
 
 

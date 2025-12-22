@@ -1,19 +1,11 @@
-from datetime import datetime
-
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.edition import extract_edition
-from models.pipeline.work_data import WorkData
-from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
+from .ebsco_test_transformer import transform_ebsco_record
 
 
 def _transform_edition(marc_record: Record) -> str | None:
-    transformer = MarcXmlTransformerForTests(
-        build_work_data=lambda r: WorkData(edition=extract_edition(r))
-    )
-    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
-    return work.data.edition
+    return transform_ebsco_record(marc_record).data.edition
 
 
 def test_no_edition(marc_record: Record) -> None:
@@ -85,9 +77,7 @@ def test_extract_edition_from_250(marc_record: Record) -> None:
     indirect=True,
 )
 def test_multiple_editions(marc_record: Record) -> None:
-    assert (
-        _transform_edition(marc_record) == "Édition franc̦aise. Rhifyn Cymraeg"
-    )
+    assert _transform_edition(marc_record) == "Édition franc̦aise. Rhifyn Cymraeg"
 
 
 @pytest.mark.parametrize(

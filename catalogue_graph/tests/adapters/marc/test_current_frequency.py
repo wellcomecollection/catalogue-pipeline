@@ -22,9 +22,13 @@ from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTe
 
 def _transform_current_frequency(marc_record: Record) -> str | None:
     transformer = MarcXmlTransformerForTests(
-        build_work_data=lambda r: WorkData(current_frequency=extract_current_frequency(r))
+        build_work_data=lambda r: WorkData(
+            current_frequency=extract_current_frequency(r)
+        )
     )
-    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
     return work.data.current_frequency
 
 

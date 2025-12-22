@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Sequence
+from datetime import datetime
 from typing import Any, cast
 
 import pytest
@@ -10,9 +11,11 @@ from _pytest.logging import LogCaptureFixture
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, parsers, then, when
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork
+from tests.adapters.ebsco.transformers.ebsco_test_transformer import (
+    EbscoTransformerForTests,
+)
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
@@ -56,7 +59,10 @@ def marc_record() -> Record:
 # ------------------------------------------------------------------
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceWork:
-    work = transform_record(marc_record)
+    transformer = EbscoTransformerForTests()
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime(2020, 1, 1)
+    )
     context["result"] = work
     return work
 

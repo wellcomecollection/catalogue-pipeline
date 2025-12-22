@@ -1,20 +1,13 @@
-from datetime import datetime
-
 import pytest
 from pymarc.record import Field, Record
 
-from adapters.ebsco.transformers.format import extract_format
 from models.pipeline.id_label import Format
-from models.pipeline.work_data import WorkData
-from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
+
+from .ebsco_test_transformer import transform_ebsco_record
 
 
 def _transform_format(marc_record: Record) -> Format | None:
-    transformer = MarcXmlTransformerForTests(
-        build_work_data=lambda r: WorkData(format=extract_format(r))
-    )
-    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
-    return work.data.format
+    return transform_ebsco_record(marc_record).data.format
 
 
 def test_no_format(marc_record: Record) -> None:

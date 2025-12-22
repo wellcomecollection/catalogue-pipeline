@@ -18,7 +18,6 @@ from models.pipeline.work_data import WorkData
 from models.pipeline.work_state import WorkAncestor, WorkRelations
 from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
 
-
 test_cases = [
     (
         [
@@ -181,7 +180,9 @@ def test_relations_are_set_from_parents(marc_record: Record) -> None:
         build_relations=lambda r: WorkRelations(ancestors=get_parents(r)),
     )
 
-    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
 
     assert work.state.relations == WorkRelations(
         ancestors=[

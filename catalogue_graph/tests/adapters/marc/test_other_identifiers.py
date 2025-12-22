@@ -25,14 +25,20 @@ from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTe
 
 def _transform_other_identifiers(marc_record: Record) -> list[SourceIdentifier]:
     transformer = MarcXmlTransformerForTests(
-        build_work_data=lambda r: WorkData(other_identifiers=extract_other_identifiers(r))
+        build_work_data=lambda r: WorkData(
+            other_identifiers=extract_other_identifiers(r)
+        )
     )
-    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
     return work.data.other_identifiers
 
 
 def build_source_identifier(id_type: str, value: str) -> SourceIdentifier:
-    return SourceIdentifier(identifier_type=Id(id=id_type), ontology_type="Work", value=value)
+    return SourceIdentifier(
+        identifier_type=Id(id=id_type), ontology_type="Work", value=value
+    )
 
 
 def test_no_other_identifiers(marc_record: Record) -> None:

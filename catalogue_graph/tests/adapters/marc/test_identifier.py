@@ -12,7 +12,9 @@ from .marcxml_test_transformer import MarcFieldTransformerForTests
 
 def _transform_id(marc_record: Record) -> str:
     transformer = MarcFieldTransformerForTests()
-    work = transformer.transform_record(marc_record, source_modified_time=datetime.now())
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
     return work.state.source_identifier.value
 
 
