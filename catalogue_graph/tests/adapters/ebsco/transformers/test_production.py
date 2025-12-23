@@ -1,13 +1,18 @@
 import pytest
 from pymarc.record import Field, Indicators, Record, Subfield
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from models.pipeline.production import ProductionEvent
 
 from ..helpers import lone_element
+from .ebsco_test_transformer import transform_ebsco_record
+
+
+def _get_production(marc_record: Record) -> list[ProductionEvent]:
+    return transform_ebsco_record(marc_record).data.production
 
 
 def test_no_production(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.production == []
+    assert _get_production(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -27,7 +32,7 @@ def test_no_production(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_empty_production_is_no_production(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.production == []
+    assert _get_production(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -53,7 +58,7 @@ def test_empty_production_is_no_production(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_fall_back_to_008(marc_record: Record) -> None:
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert lone_element(production.places).label == "Australian Capital Territory"
     period = lone_element(production.dates)
     assert period.range.label == "1979-1995"
@@ -83,7 +88,7 @@ def test_fall_back_to_008(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_production_from_abc(marc_record: Record) -> None:
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.label == "1998 Mankind Announcer's Table"
     assert lone_element(production.places).label == "Announcer's Table"
     assert lone_element(production.agents).label == "Mankind"
@@ -122,7 +127,7 @@ def test_ignores_008(marc_record: Record) -> None:
     """
     008 is to be ignored if the information in 260/264 is complete
     """
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.label == "1998 Mankind Announcer's Table"
     assert lone_element(production.places).label == "Announcer's Table"
     assert lone_element(production.agents).label == "Mankind"
@@ -157,7 +162,7 @@ def test_ignores_008(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_production_multiple_subfields(marc_record: Record) -> None:
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert (
         production.label
         == "1998 Mankind Announcer's Table nineteen ninety eight Undertaker Hell in a Cell"
@@ -193,7 +198,7 @@ def test_production_multiple_subfields(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_multiple_productions(marc_record: Record) -> None:
-    productions = transform_record(marc_record).data.production
+    productions = _get_production(marc_record)
     assert productions[0].label == "London"
     assert productions[1].label == "Paris"
 
@@ -224,7 +229,7 @@ def test_manufacture_fields(marc_record: Record) -> None:
     Each of the manufacture subfields will be added to the appropriate
     places/agents/dates field
     """
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.function.label == "Manufacture"
     assert production.label == "New York Munich R. Scott 1979"
     assert production.places[1].label == "Munich"
@@ -261,7 +266,7 @@ def test_indicator2(marc_record: Record, production_function: str) -> None:
     """
     The indicator2 value on a 264 field reveals the function.
     """
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.function.label == production_function
     assert production.label == "New York"
 
@@ -289,7 +294,7 @@ def test_unwanted_indicator2(marc_record: Record) -> None:
     """
     We ignore 264 if its ind2 is blank or 4 (copyright notice)
     """
-    assert transform_record(marc_record).data.production == []
+    assert _get_production(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -322,7 +327,7 @@ def test_prefer_260(marc_record: Record) -> None:
     We currently ignore the 264 field if there is also a 260 field
     This behaviour needs to be revisited.
     """
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.label == "Düsseldorf City"
     assert production.function is None
 
@@ -352,7 +357,7 @@ def test_prefer_260(marc_record: Record) -> None:
 def test_populate_first_production_with_008_dates_if_none_of_its_own(
     marc_record: Record,
 ) -> None:
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert lone_element(production.places).label == "New York"
     period = lone_element(production.dates)
     assert period.range.label == "1979"
@@ -375,7 +380,7 @@ def test_production_label_retains_punctuation(marc_record: Record) -> None:
             ],
         )
     )
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.label == "Paris: Publisher, Ltd.; 1999"
     assert lone_element(production.places).label == "Paris"
     # Agent labels only trim trailing comma; semicolon retained.
@@ -397,7 +402,7 @@ def test_production_manufacture_function_label_cleaned(marc_record: Record) -> N
             ],
         )
     )
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.function.label == "Manufacture"
     assert production.places[0].label == "Berlin"
     assert production.places[1].label == "Munich"
@@ -424,7 +429,7 @@ def test_preserve_trailing_dots(marc_record: Record) -> None:
             ],
         )
     )
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     assert production.function.label == "Manufacture"
     assert production.places[0].label == "Berlin."
     assert production.places[1].label == "Munich."
@@ -461,7 +466,7 @@ def test_preserve_trailing_dots(marc_record: Record) -> None:
 def test_field_008_unknown_date(
     marc_record: Record,
 ) -> None:
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
 
     assert len(production.dates) == 0
     assert lone_element(production.places).label == "Paris"
@@ -496,7 +501,7 @@ def test_field_008_unknown_date(
 def test_field_008_multiple_from_dates(
     marc_record: Record,
 ) -> None:
-    production = lone_element(transform_record(marc_record).data.production)
+    production = lone_element(_get_production(marc_record))
     period = lone_element(production.dates)
     assert period.range.label == "&#169;1928, &#169;1929-1936"
     assert period.range.from_time == "1928-01-01T00:00:00Z"

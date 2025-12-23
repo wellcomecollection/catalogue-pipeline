@@ -34,7 +34,7 @@ module "transformer_lambda" {
   }
 }
 
-# Attach read-only Iceberg access policy to transformer lambda (now using s3tables read-only doc)
+# Attach read-only Iceberg access policy to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
   role   = module.transformer_lambda.lambda_role.name
   policy = data.aws_iam_policy_document.read_ebsco_adapter_s3tables_bucket.json

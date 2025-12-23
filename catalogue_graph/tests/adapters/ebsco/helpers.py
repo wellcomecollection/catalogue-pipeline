@@ -64,7 +64,7 @@ def data_to_namespaced_table(
             row.setdefault("last_modified", now)
 
     schema = ARROW_SCHEMA_WITH_TIMESTAMP if add_timestamp else ARROW_SCHEMA
-    file_loader = MarcXmlFileLoader(schema=schema, namespace=EBSCO_NAMESPACE)
+    file_loader = MarcXmlFileLoader(schema=schema, namespace=namespace)
 
     return file_loader.data_to_pa_table(rows)
 

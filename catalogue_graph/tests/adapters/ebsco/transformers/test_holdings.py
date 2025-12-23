@@ -1,14 +1,19 @@
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from models.pipeline.holdings import Holdings
 from models.pipeline.location import DigitalLocation
 
 from ..helpers import lone_element
+from .ebsco_test_transformer import transform_ebsco_record
+
+
+def _get_holdings(marc_record: Record) -> list[Holdings]:
+    return transform_ebsco_record(marc_record).data.holdings
 
 
 def test_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.holdings == []
+    assert _get_holdings(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -24,7 +29,7 @@ def test_no_holdings(marc_record: Record) -> None:
     indirect=True,
 )
 def test_no_url_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.holdings == []
+    assert _get_holdings(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -52,7 +57,7 @@ def test_no_url_no_holdings(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_incomplete_record_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.holdings == []
+    assert _get_holdings(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -74,7 +79,7 @@ def test_incomplete_record_no_holdings(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_dodgy_url_is_no_holdings(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.holdings == []
+    assert _get_holdings(marc_record) == []
 
 
 @pytest.mark.parametrize(
@@ -96,7 +101,7 @@ def test_dodgy_url_is_no_holdings(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_single_holdings(marc_record: Record) -> None:
-    holdings = lone_element(transform_record(marc_record).data.holdings)
+    holdings = lone_element(_get_holdings(marc_record))
     assert lone_element(holdings.enumeration) == "Full text since time immemorial"
     assert holdings.location.url == "https://example.com"
     assert holdings.location.link_text == "Click Here for access!"
@@ -141,9 +146,9 @@ def test_single_holdings(marc_record: Record) -> None:
     indirect=["marc_record"],
 )
 def test_multiple_holdings(marc_record: Record) -> None:
-    transformed = transform_record(marc_record)
-    assert len(transformed.data.holdings) == 2
-    assert isinstance(transformed.data.holdings[0].location, DigitalLocation)
-    assert isinstance(transformed.data.holdings[1].location, DigitalLocation)
-    assert transformed.data.holdings[0].location.url == "https://example.com"
-    assert transformed.data.holdings[1].location.url == "https://example.com/something"
+    holdings = _get_holdings(marc_record)
+    assert len(holdings) == 2
+    assert isinstance(holdings[0].location, DigitalLocation)
+    assert isinstance(holdings[1].location, DigitalLocation)
+    assert holdings[0].location.url == "https://example.com"
+    assert holdings[1].location.url == "https://example.com/something"

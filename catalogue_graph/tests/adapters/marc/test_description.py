@@ -1,13 +1,36 @@
+"""Tests covering extraction of MARC 520 into HTML description paragraphs.
+
+https://www.loc.gov/marc/bibliographic/bd520.html
+
+Although the extractor is currently located under the EBSCO adapter module,
+these tests are MARC-field level and can be shared across adapters.
+"""
+
+from __future__ import annotations
+
 import logging
+from datetime import datetime
 
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from adapters.ebsco.transformers.description import extract_description
+from models.pipeline.work_data import WorkData
+from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
+
+
+def _transform_description(marc_record: Record) -> str | None:
+    transformer = MarcXmlTransformerForTests(
+        build_work_data=lambda r: WorkData(description=extract_description(r))
+    )
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
+    return work.data.description
 
 
 def test_no_description(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.description is None
+    assert _transform_description(marc_record) is None
 
 
 @pytest.mark.parametrize(
@@ -36,7 +59,7 @@ def test_no_description(marc_record: Record) -> None:
 )
 def test_extract_description_from_520(marc_record: Record) -> None:
     assert (
-        transform_record(marc_record).data.description
+        _transform_description(marc_record)
         == "<p>A statement or account which describes something or someone by listing characteristic features, significant details, etc.; (from OED)</p>"
     )
 
@@ -59,17 +82,9 @@ def test_extract_description_from_520(marc_record: Record) -> None:
     indirect=True,
 )
 def test_make_link_from_url(marc_record: Record) -> None:
-    """
-    An <a /> link is created from urls in the $u subfield.
-
-    Aside:
-    The previous implementation of this always placed
-    the content of subfield $u at the end, regardless of where it
-    is in the list of subfields.
-    This may or may not be a true requirement
-    """
+    """An <a /> link is created from URLs in the $u subfield."""
     assert (
-        transform_record(marc_record).data.description
+        _transform_description(marc_record)
         == '<p>summary expansion source <a href="http://example.com">http://example.com</a></p>'
     )
 
@@ -93,14 +108,10 @@ def test_make_link_from_url(marc_record: Record) -> None:
 def test_only_urls_create_links(
     marc_record: Record, caplog: pytest.LogCaptureFixture
 ) -> None:
-    """
-    Any URI that is not a URL is treated as text.
-    An <a /> link is not created
-    A warning is issued, in case we need to update our url-detection logic.
-    """
+    """Non-URL URIs are treated as text, and a warning is logged."""
     with caplog.at_level(logging.WARN):
         assert (
-            transform_record(marc_record).data.description
+            _transform_description(marc_record)
             == "<p>summary source urn:isbn:9781455841653</p>"
         )
     assert "doesn't look like a URL: urn:isbn:9781455841653" in caplog.text
@@ -123,13 +134,8 @@ def test_only_urls_create_links(
     indirect=True,
 )
 def test_multiple_urls(marc_record: Record) -> None:
-    """
-    Any URI that is not a URL is treated as text.
-    An <a /> link is not created
-    A warning is issued, in case we need to update our url-detection logic.
-    """
     assert (
-        transform_record(marc_record).data.description
+        _transform_description(marc_record)
         == '<p>summary urn:isbn:9781455841653 <a href="http://example.com">http://example.com</a></p>'
     )
 
@@ -138,26 +144,12 @@ def test_multiple_urls(marc_record: Record) -> None:
     "marc_record",
     [
         (
-            Field(
-                tag="520",
-                subfields=[
-                    Subfield(code="a", value="hello"),
-                ],
-            ),
-            Field(
-                tag="520",
-                subfields=[
-                    Subfield(code="a", value="world"),
-                ],
-            ),
+            Field(tag="520", subfields=[Subfield(code="a", value="hello")]),
+            Field(tag="520", subfields=[Subfield(code="a", value="world")]),
         )
     ],
     indirect=True,
 )
 def test_multiple_descriptions(marc_record: Record) -> None:
-    """
-    multiple descriptions are condensed into one big one, line-separated
-    """
-    assert (
-        transform_record(marc_record).data.description == "<p>hello</p>\n<p>world</p>"
-    )
+    """Multiple 520 fields are condensed into one, line-separated."""
+    assert _transform_description(marc_record) == "<p>hello</p>\n<p>world</p>"

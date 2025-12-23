@@ -1,11 +1,39 @@
+"""Tests covering extraction of MARC 310 into a current frequency string.
+
+https://www.loc.gov/marc/bibliographic/bd310.html
+
+Although the extractor currently lives under the EBSCO adapter module, these
+are MARC-field level tests and can be shared across adapters.
+"""
+
+# mypy: allow-untyped-calls
+
+from __future__ import annotations
+
+from datetime import datetime
+
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
+from adapters.ebsco.transformers.current_frequency import extract_current_frequency
+from models.pipeline.work_data import WorkData
+from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
+
+
+def _transform_current_frequency(marc_record: Record) -> str | None:
+    transformer = MarcXmlTransformerForTests(
+        build_work_data=lambda r: WorkData(
+            current_frequency=extract_current_frequency(r)
+        )
+    )
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
+    return work.data.current_frequency
 
 
 def test_no_frequency(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.current_frequency is None
+    assert _transform_current_frequency(marc_record) is None
 
 
 @pytest.mark.parametrize(
@@ -21,7 +49,7 @@ def test_no_frequency(marc_record: Record) -> None:
     indirect=True,
 )
 def test_frequency_a(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.current_frequency == "Samhain"
+    assert _transform_current_frequency(marc_record) == "Samhain"
 
 
 @pytest.mark.parametrize(
@@ -37,7 +65,7 @@ def test_frequency_a(marc_record: Record) -> None:
     indirect=True,
 )
 def test_frequency_b(marc_record: Record) -> None:
-    assert transform_record(marc_record).data.current_frequency == "&lt;Sept. 1991-&gt;"
+    assert _transform_current_frequency(marc_record) == "&lt;Sept. 1991-&gt;"
 
 
 @pytest.mark.parametrize(
@@ -57,7 +85,7 @@ def test_frequency_b(marc_record: Record) -> None:
 )
 def test_frequency_a_b(marc_record: Record) -> None:
     assert (
-        transform_record(marc_record).data.current_frequency
+        _transform_current_frequency(marc_record)
         == "Every lunar month Magáksicaagli Wí 1984"
     )
 
@@ -86,6 +114,6 @@ def test_frequency_a_b(marc_record: Record) -> None:
 )
 def test_frequency_multiple(marc_record: Record) -> None:
     assert (
-        transform_record(marc_record).data.current_frequency
+        _transform_current_frequency(marc_record)
         == "Every lunar month Magáksicaagli Wí 1984 - 2002 Imbolc and Lammas 1666 -"
     )

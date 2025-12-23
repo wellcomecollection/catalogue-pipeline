@@ -53,7 +53,7 @@ SSM_OAI_URL = os.getenv(
     "SSM_OAI_URL", "/catalogue_pipeline/axiell_collections/oai_api_url"
 )
 OAI_SET_SPEC = os.getenv("OAI_SET_SPEC", "collect")
-OAI_METADATA_PREFIX = os.getenv("OAI_METADATA_PREFIX", "oai_raw")
+OAI_METADATA_PREFIX = os.getenv("OAI_METADATA_PREFIX", "oai_marcxml")
 OAI_HTTP_TIMEOUT = float(os.getenv("OAI_HTTP_TIMEOUT", "10.0"))
 OAI_MAX_READ_TIMEOUT = float(os.getenv("OAI_MAX_READ_TIMEOUT", "60.0"))
 OAI_MAX_RETRIES = int(os.getenv("OAI_MAX_RETRIES", "1"))
