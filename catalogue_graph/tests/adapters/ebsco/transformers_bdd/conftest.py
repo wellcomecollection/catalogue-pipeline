@@ -6,7 +6,6 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import Any, cast
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, parsers, then, when
@@ -38,11 +37,6 @@ def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
     if hasattr(parent, attr_name):
         return getattr(parent, attr_name)
     return []
-
-
-@pytest.fixture
-def context() -> dict[str, Any]:
-    return {}
 
 
 @given("a valid MARC record", target_fixture="marc_record")
@@ -171,6 +165,7 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     )
     member = values[idx]
     return member
+
 
 @then(parsers.re(r'that (?P<thing_name>.+) has the (?P<property>.+) "(?P<value>.*)"'))
 def context_has(

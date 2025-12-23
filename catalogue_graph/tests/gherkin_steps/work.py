@@ -17,6 +17,7 @@ def context() -> dict[str, Any]:
 
     return {}
 
+
 # ------------------------------------------------------------------
 # Attribute phrase -> model attribute mapping (extendable)
 # ------------------------------------------------------------------
@@ -101,7 +102,9 @@ def list_member_empty(work: SourceWork, attr_phrase: str) -> None:
 
 
 @then(parsers.parse('the only {attr_phrase} is "{value}"'), target_fixture="antecedent")
-def list_member_only(context: dict[str, Any], work: SourceWork, attr_phrase: str, value: str) -> Any:
+def list_member_only(
+    context: dict[str, Any], work: SourceWork, attr_phrase: str, value: str
+) -> Any:
     list_member_count(work, 1, attr_phrase)
     member = list_member_nth_is(work, 1, attr_phrase, value)
     context[attr_phrase.strip().lower()] = member
