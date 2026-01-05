@@ -12,13 +12,14 @@ class MarcAlternativeTitlesTest
     with Matchers
     with LoneElement {
 
-  describe("extracting alternative titles from 130, 240, and 246 fields") {
+  describe("extracting alternative titles from 130, 240, 242, and 246 fields") {
     info("https://www.loc.gov/marc/bibliographic/bd130.html")
     info("https://www.loc.gov/marc/bibliographic/bd240.html")
     info("https://www.loc.gov/marc/bibliographic/bd246.html")
+    info("https://www.loc.gov/marc/bibliographic/bd242.html")
     describe("returning nothing") {
       it(
-        "does not extract alternative titles if 130, 240, and 246 are absent"
+        "does not extract alternative titles if 130, 240, 242, 246 are all absent"
       ) {
         MarcAlternativeTitles(
           MarcTestRecord(
@@ -83,6 +84,7 @@ class MarcAlternativeTitlesTest
         "tag",
         "130",
         "240",
+        "242",
         "246"
       )
     ) {
@@ -332,6 +334,7 @@ class MarcAlternativeTitlesTest
       "7",
       "8"
     ),
-    "246" -> Seq("a", "b", "f", "g", "h", "i", "n", "p", "5", "6", "7", "8")
+    "246" -> Seq("a", "b", "f", "g", "h", "i", "n", "p", "5", "6", "7", "8"),
+    "242" -> Seq("a", "b", "c", "h", "n", "p", "y")
   )
 }
