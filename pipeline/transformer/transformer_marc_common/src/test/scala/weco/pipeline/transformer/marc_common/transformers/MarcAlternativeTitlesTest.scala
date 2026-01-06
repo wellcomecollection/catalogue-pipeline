@@ -197,6 +197,16 @@ class MarcAlternativeTitlesTest
                     "About binomial theorem I am teeming with a lot o' news"
                 )
               )
+            ),
+            MarcField(
+              marcTag = "242",
+              subfields = Seq(
+                MarcSubfield(
+                  tag = "a",
+                  content =
+                    "Ikh hob a klugn kop un ikh farshtey Einstein's teyoriye"
+                )
+              )
             )
           )
         )
@@ -206,7 +216,8 @@ class MarcAlternativeTitlesTest
         "I understand equations",
         "both simple",
         "and quadratical",
-        "About binomial theorem I am teeming with a lot o' news"
+        "About binomial theorem I am teeming with a lot o' news",
+        "Ikh hob a klugn kop un ikh farshtey Einstein's teyoriye"
       )
     }
     it("does not return duplicate alternative titles") {
@@ -244,6 +255,16 @@ class MarcAlternativeTitlesTest
               )
             ),
             MarcField(
+              marcTag = "242",
+              subfields = Seq(
+                MarcSubfield(
+                  tag = "a",
+                  content =
+                    "With many cheerful facts about the square of the hypoten-potenuse"
+                )
+              )
+            ),
+            MarcField(
               marcTag = "246",
               subfields = Seq(
                 MarcSubfield(
@@ -266,7 +287,8 @@ class MarcAlternativeTitlesTest
       val fields = Seq(
         "130" -> "I am not a caption",
         "246" -> "I am a caption",
-        "240" -> "Nor am I"
+        "240" -> "Nor am I",
+        "242" -> "Heller ikkje meg"
       ) map {
         case (tag, content) =>
           MarcField(
@@ -285,7 +307,8 @@ class MarcAlternativeTitlesTest
         MarcTestRecord(fields = fields)
       ) should contain theSameElementsAs Seq(
         "I am not a caption",
-        "Nor am I"
+        "Nor am I",
+        "Heller ikkje meg"
       )
     }
   }
