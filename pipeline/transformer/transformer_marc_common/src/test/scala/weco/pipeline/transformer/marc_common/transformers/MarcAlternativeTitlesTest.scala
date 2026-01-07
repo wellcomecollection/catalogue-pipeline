@@ -12,13 +12,14 @@ class MarcAlternativeTitlesTest
     with Matchers
     with LoneElement {
 
-  describe("extracting alternative titles from 130, 240, and 246 fields") {
+  describe("extracting alternative titles from 130, 240, 242, and 246 fields") {
     info("https://www.loc.gov/marc/bibliographic/bd130.html")
     info("https://www.loc.gov/marc/bibliographic/bd240.html")
     info("https://www.loc.gov/marc/bibliographic/bd246.html")
+    info("https://www.loc.gov/marc/bibliographic/bd242.html")
     describe("returning nothing") {
       it(
-        "does not extract alternative titles if 130, 240, and 246 are absent"
+        "does not extract alternative titles if 130, 240, 242, 246 are all absent"
       ) {
         MarcAlternativeTitles(
           MarcTestRecord(
@@ -83,6 +84,7 @@ class MarcAlternativeTitlesTest
         "tag",
         "130",
         "240",
+        "242",
         "246"
       )
     ) {
@@ -195,6 +197,16 @@ class MarcAlternativeTitlesTest
                     "About binomial theorem I am teeming with a lot o' news"
                 )
               )
+            ),
+            MarcField(
+              marcTag = "242",
+              subfields = Seq(
+                MarcSubfield(
+                  tag = "a",
+                  content =
+                    "Ikh hob a klugn kop un ikh farshtey Einstein's teyoriye"
+                )
+              )
             )
           )
         )
@@ -204,7 +216,8 @@ class MarcAlternativeTitlesTest
         "I understand equations",
         "both simple",
         "and quadratical",
-        "About binomial theorem I am teeming with a lot o' news"
+        "About binomial theorem I am teeming with a lot o' news",
+        "Ikh hob a klugn kop un ikh farshtey Einstein's teyoriye"
       )
     }
     it("does not return duplicate alternative titles") {
@@ -242,6 +255,16 @@ class MarcAlternativeTitlesTest
               )
             ),
             MarcField(
+              marcTag = "242",
+              subfields = Seq(
+                MarcSubfield(
+                  tag = "a",
+                  content =
+                    "With many cheerful facts about the square of the hypoten-potenuse"
+                )
+              )
+            ),
+            MarcField(
               marcTag = "246",
               subfields = Seq(
                 MarcSubfield(
@@ -264,7 +287,8 @@ class MarcAlternativeTitlesTest
       val fields = Seq(
         "130" -> "I am not a caption",
         "246" -> "I am a caption",
-        "240" -> "Nor am I"
+        "240" -> "Nor am I",
+        "242" -> "Heller ikkje meg"
       ) map {
         case (tag, content) =>
           MarcField(
@@ -283,7 +307,8 @@ class MarcAlternativeTitlesTest
         MarcTestRecord(fields = fields)
       ) should contain theSameElementsAs Seq(
         "I am not a caption",
-        "Nor am I"
+        "Nor am I",
+        "Heller ikkje meg"
       )
     }
   }
@@ -332,6 +357,7 @@ class MarcAlternativeTitlesTest
       "7",
       "8"
     ),
-    "246" -> Seq("a", "b", "f", "g", "h", "i", "n", "p", "5", "6", "7", "8")
+    "246" -> Seq("a", "b", "f", "g", "h", "i", "n", "p", "5", "6", "7", "8"),
+    "242" -> Seq("a", "b", "c", "h", "n", "p", "y")
   )
 }

@@ -8,10 +8,11 @@ import weco.pipeline.transformer.marc_common.models.{
 
 // Populate work:alternativeTitles
 //
-// The following fields are used as possible alternative titles:
-// * 240 $a https://www.loc.gov/marc/bibliographic/bd240.html
-// * 130 $a http://www.loc.gov/marc/bibliographic/bd130.html
-// * 246 $a https://www.loc.gov/marc/bibliographic/bd246.html
+// The following fields are used as possible alternative titles: (245 is the main title)
+// * 240 $a https://www.loc.gov/marc/bibliographic/bd240.html (Uniform Title)
+// * 130 $a http://www.loc.gov/marc/bibliographic/bd130.html (Main Entry - Uniform Title)
+// * 246 $a https://www.loc.gov/marc/bibliographic/bd246.html (Varying Form of Title)
+// * 242 $a https://www.loc.gov/marc/bibliographic/bd242.html (Translation of Title
 
 object MarcAlternativeTitles extends MarcDataTransformer {
 
@@ -19,7 +20,7 @@ object MarcAlternativeTitles extends MarcDataTransformer {
 
   override def apply(record: MarcRecord): Seq[String] = {
     record
-      .fieldsWithTags("240", "130", "246")
+      .fieldsWithTags("240", "130", "246", "242")
       .withoutCaptionTitles
       .map(field => alternativeTitle(field))
       .filterNot(_.isEmpty)
