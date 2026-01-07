@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, when
 
-from adapters.axiell.transformers.axiell_to_weco import transform_record
 from models.pipeline.source.work import InvisibleSourceWork
+from tests.adapters.axiell.transformers.axiell_test_transformer import (
+    AxiellTransformerForTests,
+)
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
@@ -26,5 +30,7 @@ def marc_record() -> Record:
 
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(marc_record: Record) -> InvisibleSourceWork:
-    work = transform_record(marc_record)
-    return work
+    transformer = AxiellTransformerForTests()
+    return transformer.transform_record(
+        marc_record, source_modified_time=datetime(2020, 1, 1)
+    )

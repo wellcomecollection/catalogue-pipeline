@@ -1,9 +1,22 @@
+"""Tests covering extraction of parent/series relations from MARC.
+
+Although the implementation currently lives under `adapters.ebsco.transformers.parents`,
+these tests are MARC-field level and can be shared across adapters.
+"""
+
+# mypy: allow-untyped-calls
+
+from __future__ import annotations
+
+from datetime import datetime
+
 import pytest
 from pymarc.record import Field, Record, Subfield
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from adapters.ebsco.transformers.parents import get_parents
+from models.pipeline.work_data import WorkData
 from models.pipeline.work_state import WorkAncestor, WorkRelations
+from tests.adapters.marc.marcxml_test_transformer import MarcXmlTransformerForTests
 
 test_cases = [
     (
@@ -161,8 +174,16 @@ def test_remove_duplicates() -> None:
     ],
     indirect=["marc_record"],
 )
-def test_multiple_holdings(marc_record: Record) -> None:
-    work = transform_record(marc_record)
+def test_relations_are_set_from_parents(marc_record: Record) -> None:
+    transformer = MarcXmlTransformerForTests(
+        build_work_data=lambda _: WorkData(),
+        build_relations=lambda r: WorkRelations(ancestors=get_parents(r)),
+    )
+
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime.now()
+    )
+
     assert work.state.relations == WorkRelations(
         ancestors=[
             WorkAncestor(

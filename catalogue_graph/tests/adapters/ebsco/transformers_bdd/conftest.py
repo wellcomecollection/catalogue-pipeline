@@ -3,16 +3,18 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Sequence
+from datetime import datetime
 from typing import Any, cast
 
-import pytest
 from _pytest.logging import LogCaptureFixture
 from pymarc.record import Field, Record, Subfield
 from pytest_bdd import given, parsers, then, when
 
-from adapters.ebsco.transformers.ebsco_to_weco import transform_record
 from models.pipeline.identifier import Id
 from models.pipeline.source.work import VisibleSourceWork
+from tests.adapters.ebsco.transformers.ebsco_test_transformer import (
+    EbscoTransformerForTests,
+)
 
 # Allow * imports, pulling in individual step definitions is unwieldy
 # ruff: noqa: F403, F405
@@ -37,11 +39,6 @@ def _get_attr_list(parent: Any, attr_phrase: str) -> Any:
     return []
 
 
-@pytest.fixture
-def context() -> dict[str, Any]:
-    return {}
-
-
 @given("a valid MARC record", target_fixture="marc_record")
 def marc_record() -> Record:
     record = marc_record_with_id(identifier="test001")
@@ -56,7 +53,10 @@ def marc_record() -> Record:
 # ------------------------------------------------------------------
 @when("I transform the MARC record", target_fixture="work")
 def do_transform(context: dict[str, Any], marc_record: Record) -> VisibleSourceWork:
-    work = transform_record(marc_record)
+    transformer = EbscoTransformerForTests()
+    work = transformer.transform_record(
+        marc_record, source_modified_time=datetime(2020, 1, 1)
+    )
     context["result"] = work
     return work
 
@@ -167,24 +167,6 @@ def _list_member_nth(parent: Any, index: str | int, attr_phrase: str) -> Any:
     return member
 
 
-@then(
-    parsers.parse('the only {attr_phrase} has the {property} "{value}"'),
-    target_fixture="antecedent",
-)
-def only_root_list_member_has(
-    context: dict[str, Any],
-    work: VisibleSourceWork,
-    attr_phrase: str,
-    property: str,
-    value: str,
-) -> Any:
-    list_member_count(work, 1, attr_phrase)
-    member = _list_member_nth(work.data, 1, attr_phrase)
-    assert getattr(member, property) == value
-    context[attr_phrase] = member
-    return member
-
-
 @then(parsers.re(r'that (?P<thing_name>.+) has the (?P<property>.+) "(?P<value>.*)"'))
 def context_has(
     context: dict[str, Any], thing_name: str, property: str, value: str
@@ -204,23 +186,6 @@ def context_concept_value(
     concept = thing.concepts[_ordinal_index(ord)]
     assert getattr(concept, property) == value
     context["concept"] = concept
-
-
-@then(
-    parsers.parse('its only {attr_phrase} has the {property} "{value}"'),
-    target_fixture="antecedent",
-)
-def only_list_member_has(
-    context: dict[str, Any],
-    antecedent: Any,
-    attr_phrase: str,
-    property: str,
-    value: str,
-) -> None:
-    # Callers should pass .data if required; use antecedent directly.
-    member = _list_member_nth(antecedent, 1, attr_phrase)
-    assert getattr(member, property) == value
-    context[attr_phrase] = member
 
 
 @then(parsers.parse('an error "{message}" is logged'))

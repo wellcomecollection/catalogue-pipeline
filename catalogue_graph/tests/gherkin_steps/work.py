@@ -1,9 +1,22 @@
 from collections.abc import Sequence
 from typing import Any
 
+import pytest
 from pytest_bdd import parsers, then
 
 from models.pipeline.source.work import SourceWork
+
+
+@pytest.fixture
+def context() -> dict[str, Any]:
+    """Shared pytest-bdd context.
+
+    Individual adapter test suites can override this fixture in their own conftest
+    if they need stricter typing or additional pre-population.
+    """
+
+    return {}
+
 
 # ------------------------------------------------------------------
 # Attribute phrase -> model attribute mapping (extendable)
@@ -88,18 +101,51 @@ def list_member_empty(work: SourceWork, attr_phrase: str) -> None:
     list_member_count(work, 0, attr_phrase)
 
 
-@then(parsers.parse('the only {attr_phrase} is "{value}"'))
-def list_member_only(work: SourceWork, attr_phrase: str, value: str) -> Any:
-    list_member_count(work, 1, attr_phrase)
-    return list_member_nth_is(work, 1, attr_phrase, value)
-
-
-@then(parsers.parse('the only {attr_phrase} has the {sub_attr} "{value}"'))
-def list_member_has(
-    work: SourceWork, attr_phrase: str, sub_attr: str, value: str
+@then(parsers.parse('the only {attr_phrase} is "{value}"'), target_fixture="antecedent")
+def list_member_only(
+    context: dict[str, Any], work: SourceWork, attr_phrase: str, value: str
 ) -> Any:
     list_member_count(work, 1, attr_phrase)
-    return list_member_nth_has(work, 1, attr_phrase, sub_attr, value)
+    member = list_member_nth_is(work, 1, attr_phrase, value)
+    context[attr_phrase.strip().lower()] = member
+    return member
+
+
+@then(
+    parsers.parse('the only {attr_phrase} has the {sub_attr} "{value}"'),
+    target_fixture="antecedent",
+)
+def list_member_has(
+    context: dict[str, Any],
+    work: SourceWork,
+    attr_phrase: str,
+    sub_attr: str,
+    value: str,
+) -> Any:
+    list_member_count(work, 1, attr_phrase)
+    member = list_member_nth_has(work, 1, attr_phrase, sub_attr, value)
+    context[attr_phrase.strip().lower()] = member
+    return member
+
+
+@then(
+    parsers.parse('its only {attr_phrase} has the {sub_attr} "{value}"'),
+    target_fixture="antecedent",
+)
+def its_only_list_member_has(
+    context: dict[str, Any],
+    antecedent: Any,
+    attr_phrase: str,
+    sub_attr: str,
+    value: str,
+) -> Any:
+    member = _list_member_nth(antecedent, 1, attr_phrase)
+    actual = drill_through_dots(member, sub_attr)
+    assert actual == value, (
+        f"Expected only {attr_phrase}.{sub_attr} == {value!r}, got {actual!r}"
+    )
+    context[attr_phrase.strip().lower()] = member
+    return member
 
 
 @then(
