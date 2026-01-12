@@ -19,7 +19,7 @@ module "transformer_lambda" {
   timeout     = 600
 
   vpc_config = {
-    subnet_ids         = local.network_config.subnets
+    subnet_ids = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,
@@ -63,13 +63,13 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
 locals {
   transformer_state_machine_definition = jsonencode({
     StartAt = "TransformerStep"
-    States  = {
+    States = {
       TransformerStep = {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
         Next      = "IdMinterMap"
-        Retry     = [
+        Retry = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -82,8 +82,8 @@ locals {
         Type                  = "Map"
         MaxConcurrency        = 2
         ToleratedFailureCount = 0
-        ItemReader            = {
-          Resource     = "arn:aws:states:::s3:getObject"
+        ItemReader = {
+          Resource = "arn:aws:states:::s3:getObject"
           ReaderConfig = {
             InputType = "JSONL"
           }
@@ -104,10 +104,10 @@ locals {
             ExecutionType = "STANDARD"
           }
           StartAt = "IdMinterStep"
-          States  = {
+          States = {
             IdMinterStep = {
-              Type           = "Task"
-              Resource       = module.id_minter_lambda_step_function.lambda_arn
+              Type     = "Task"
+              Resource = module.id_minter_lambda_step_function.lambda_arn
               ResultSelector = {
                 "failures.$" = "$.failures"
                 "jobId.$"    = "$.jobId"
@@ -154,7 +154,7 @@ module "transformer_state_machine" {
 
   name                     = "transformer-${var.pipeline_date}"
   state_machine_definition = local.transformer_state_machine_definition
-  invokable_lambda_arns    = [
+  invokable_lambda_arns = [
     module.transformer_lambda.lambda.arn,
     module.id_minter_lambda_step_function.lambda_arn
   ]
@@ -211,7 +211,7 @@ module "reindex_transformer_trigger" {
   event_pattern = {
     source        = ["weco.pipeline.reindex"],
     "detail-type" = ["weco.pipeline.reindex.requested"],
-    detail        = {
+    detail = {
       reindex_targets = [each.value.reindex_target_value]
     }
   }
