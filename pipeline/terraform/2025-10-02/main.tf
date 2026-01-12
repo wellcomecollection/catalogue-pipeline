@@ -37,6 +37,11 @@ module "pipeline" {
         indexed = "works_indexed.2024-11-14"
       }
     }
+    "2026-01-12" = {
+      works = {
+        source = "works_source.2025-10-02"
+      }
+    }
   }
 
   allow_delete_indices = false
