@@ -1,4 +1,13 @@
-data "aws_iam_policy_document" "read_ebsco_adapter_bucket" {
+locals {
+  adapter_buckets = {
+    ebsco  = local.ebsco_adapter_bucket
+    axiell = local.axiell_adapter_bucket
+  }
+}
+
+data "aws_iam_policy_document" "adapter_bucket_read" {
+  for_each = local.adapter_buckets
+
   statement {
     actions = [
       "s3:ListBucket",
@@ -6,13 +15,15 @@ data "aws_iam_policy_document" "read_ebsco_adapter_bucket" {
     ]
 
     resources = [
-      "arn:aws:s3:::${local.ebsco_adapter_bucket}",
-      "arn:aws:s3:::${local.ebsco_adapter_bucket}/*",
+      "arn:aws:s3:::${each.value}",
+      "arn:aws:s3:::${each.value}/*",
     ]
   }
 }
 
-data "aws_iam_policy_document" "read_ebsco_adapter_s3tables_bucket" {
+data "aws_iam_policy_document" "adapter_s3tables_read" {
+  for_each = local.adapter_buckets
+
   statement {
     actions = [
       "s3tables:GetNamespace",
@@ -22,8 +33,8 @@ data "aws_iam_policy_document" "read_ebsco_adapter_s3tables_bucket" {
       "s3tables:GetTableMetadataLocation",
     ]
     resources = [
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter",
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/*"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${each.value}",
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${each.value}/*"
     ]
   }
 
@@ -36,7 +47,7 @@ data "aws_iam_policy_document" "read_ebsco_adapter_s3tables_bucket" {
       "s3tables:UpdateTableMetadataLocation"
     ]
     resources = [
-      "arn:aws:s3tables:eu-west-1:760097843905:bucket/wellcomecollection-platform-ebsco-adapter/table/*"
+      "arn:aws:s3tables:eu-west-1:760097843905:bucket/${each.value}/table/*"
     ]
   }
 }
@@ -53,14 +64,16 @@ data "aws_iam_policy_document" "read_ebsco_transformer_pipeline_storage_secrets"
   }
 }
 
-data "aws_iam_policy_document" "write_ebsco_adapter_bucket" {
+data "aws_iam_policy_document" "adapter_bucket_write" {
+  for_each = local.adapter_buckets
+
   statement {
     actions = [
       "s3:PutObject",
     ]
 
     resources = [
-      "arn:aws:s3:::${local.ebsco_adapter_bucket}/prod/batches/*"
+      "arn:aws:s3:::${each.value}/prod/batches/*"
     ]
   }
 }

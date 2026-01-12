@@ -37,19 +37,37 @@ module "transformer_lambda" {
 # Attach read-only Iceberg access policy to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_iceberg_read" {
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.read_ebsco_adapter_s3tables_bucket.json
+  policy = data.aws_iam_policy_document.adapter_s3tables_read["ebsco"].json
+}
+
+# Attach read-only Iceberg access policy to transformer lambda for Axiell
+resource "aws_iam_role_policy" "transformer_lambda_iceberg_read_axiell" {
+  role   = module.transformer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.adapter_s3tables_read["axiell"].json
 }
 
 # Attach S3 read policy to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_s3_read" {
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
+  policy = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
+}
+
+# Attach Axiell S3 read policy to transformer lambda
+resource "aws_iam_role_policy" "transformer_lambda_axiell_s3_read" {
+  role   = module.transformer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
 }
 
 # Attach S3 write policy to transformer lambda
 resource "aws_iam_role_policy" "transformer_lambda_s3_write" {
   role   = module.transformer_lambda.lambda_role.name
-  policy = data.aws_iam_policy_document.write_ebsco_adapter_bucket.json
+  policy = data.aws_iam_policy_document.adapter_bucket_write["ebsco"].json
+}
+
+# Attach Axiell S3 write policy to transformer lambda
+resource "aws_iam_role_policy" "transformer_lambda_axiell_s3_write" {
+  role   = module.transformer_lambda.lambda_role.name
+  policy = data.aws_iam_policy_document.adapter_bucket_write["axiell"].json
 }
 
 # Allow transformer to read pipeline storage secrets
@@ -171,7 +189,8 @@ module "transformer_state_machine" {
   ]
 
   policies_to_attach = {
-    "read_ebsco_adapter_bucket" = data.aws_iam_policy_document.read_ebsco_adapter_bucket.json
+    "read_ebsco_adapter_bucket"  = data.aws_iam_policy_document.adapter_bucket_read["ebsco"].json
+    "read_axiell_adapter_bucket" = data.aws_iam_policy_document.adapter_bucket_read["axiell"].json
   }
 }
 
