@@ -68,7 +68,7 @@ locals {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
-        Next      = "ShoulRunIdMinter"
+        Next      = "ShouldRunIdMinter"
         Retry     = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
