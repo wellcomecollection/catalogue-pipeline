@@ -95,9 +95,9 @@ CHATBOT_TOPIC_ARN = os.getenv("CHATBOT_TOPIC_ARN")
 # Elasticsearch / downstream transform config
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
-INDEX_DATE = os.getenv("INDEX_DATE")
+INDEX_DATE = os.getenv("INDEX_DATE", "2026-01-12") # Use a non-production index for now
 ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "transformer_axiell")
-ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "works-source-axiell")
+ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "works-source")
 ES_MODE = os.getenv("ES_MODE", "private")
 
 # Manifest storage configuration
