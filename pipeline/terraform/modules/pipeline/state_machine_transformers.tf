@@ -68,7 +68,7 @@ locals {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
-        Next      = "IdMinterMap"
+        Next      = "ShoulRunIdMinter"
         Retry     = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
@@ -77,6 +77,17 @@ locals {
             BackoffRate     = 2.0
           }
         ]
+      }
+      "ShouldRunIdMinter" = {
+        Type = "Choice"
+        Choices = [
+          {
+            Variable     = "$$.Execution.Input.detail.transformer_type"
+            StringEquals = "ebsco"
+            Next = "IdMinterMap"
+          }
+        ]
+        Default = "Success"
       }
       IdMinterMap = {
         Type                  = "Map"
