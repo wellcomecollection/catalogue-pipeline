@@ -19,7 +19,7 @@ module "transformer_lambda" {
   timeout     = 600
 
   vpc_config = {
-    subnet_ids = local.network_config.subnets
+    subnet_ids         = local.network_config.subnets
     security_group_ids = [
       aws_security_group.egress.id,
       local.network_config.ec_privatelink_security_group_id,
@@ -63,13 +63,13 @@ resource "aws_iam_role_policy" "transformer_lambda_pipeline_storage_secret_read"
 locals {
   transformer_state_machine_definition = jsonencode({
     StartAt = "TransformerStep"
-    States = {
+    States  = {
       TransformerStep = {
         Type      = "Task"
         Resource  = module.transformer_lambda.lambda.arn
         InputPath = "$.detail"
         Next      = "IdMinterMap"
-        Retry = [
+        Retry     = [
           {
             ErrorEquals     = ["Lambda.ServiceException", "Lambda.AWSLambdaException", "Lambda.SdkClientException"]
             IntervalSeconds = 2
@@ -82,8 +82,8 @@ locals {
         Type                  = "Map"
         MaxConcurrency        = 2
         ToleratedFailureCount = 0
-        ItemReader = {
-          Resource = "arn:aws:states:::s3:getObject"
+        ItemReader            = {
+          Resource     = "arn:aws:states:::s3:getObject"
           ReaderConfig = {
             InputType = "JSONL"
           }
@@ -104,10 +104,10 @@ locals {
             ExecutionType = "STANDARD"
           }
           StartAt = "IdMinterStep"
-          States = {
+          States  = {
             IdMinterStep = {
-              Type     = "Task"
-              Resource = module.id_minter_lambda_step_function.lambda_arn
+              Type           = "Task"
+              Resource       = module.id_minter_lambda_step_function.lambda_arn
               ResultSelector = {
                 "failures.$" = "$.failures"
                 "jobId.$"    = "$.jobId"
@@ -133,6 +133,19 @@ locals {
       }
     }
   })
+
+  transformer_types = {
+    ebsco = {
+      adapter_source       = "ebsco.adapter"
+      adapter_detail_type  = "ebsco.adapter.completed"
+      reindex_target_value = "ebsco"
+    }
+    axiell = {
+      adapter_source       = "axiell.adapter"
+      adapter_detail_type  = "axiell.adapter.completed"
+      reindex_target_value = "axiell"
+    }
+  }
 }
 
 
@@ -141,7 +154,7 @@ module "transformer_state_machine" {
 
   name                     = "transformer-${var.pipeline_date}"
   state_machine_definition = local.transformer_state_machine_definition
-  invokable_lambda_arns = [
+  invokable_lambda_arns    = [
     module.transformer_lambda.lambda.arn,
     module.id_minter_lambda_step_function.lambda_arn
   ]
@@ -151,19 +164,20 @@ module "transformer_state_machine" {
   }
 }
 
-# Trigger State Machine on ebsco.adapter.completed events
-module "ebsco_adapter_transformer_trigger" {
-  source = "../state_machine_trigger"
+# Trigger State Machine on adapter completed events
+module "adapter_transformer_trigger" {
+  for_each = local.transformer_types
+  source   = "../state_machine_trigger"
 
-  name              = "ebsco-transformer-${var.pipeline_date}"
+  name              = "${each.key}-transformer-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
   enabled = true
 
   event_pattern = {
-    source        = ["ebsco.adapter"],
-    "detail-type" = ["ebsco.adapter.completed"]
+    source        = [each.value.adapter_source],
+    "detail-type" = [each.value.adapter_detail_type]
   }
   // Unfortunately the input template needs to be a full JSON object,
   // so we must wrap the detail in another object and then unwrap in
@@ -175,10 +189,11 @@ module "ebsco_adapter_transformer_trigger" {
 }
 
 # Trigger State Machine on weco.pipeline.reindex events
-module "ebsco_reindex_transformer_trigger" {
-  source = "../state_machine_trigger"
+module "reindex_transformer_trigger" {
+  for_each = local.transformer_types
+  source   = "../state_machine_trigger"
 
-  name              = "ebsco-reindex-${var.pipeline_date}"
+  name              = "${each.key}-reindex-${var.pipeline_date}"
   event_bus_name    = data.aws_cloudwatch_event_bus.adapter_event_bus.name
   state_machine_arn = module.transformer_state_machine.state_machine_arn
 
@@ -189,22 +204,20 @@ module "ebsco_reindex_transformer_trigger" {
   //   "source": "weco.pipeline.reindex",
   //   "detail-type": "weco.pipeline.reindex.requested",
   //   "detail": {
-  //     "reindex_targets": ["ebsco"],
+  //     "reindex_targets": ["<adapter>"],
   //     "job_id": "some-unique-id"
   //   }
   // }
   event_pattern = {
     source        = ["weco.pipeline.reindex"],
     "detail-type" = ["weco.pipeline.reindex.requested"],
-    detail = {
-      reindex_targets = ["ebsco"]
+    detail        = {
+      reindex_targets = [each.value.reindex_target_value]
     }
   }
 
   input_paths = {
     job_id = "$.detail.job_id"
   }
-  input_template = "{\"detail\": {\"job_id\": <job_id>, \"transformer_type\": \"ebsco\"}}"
+  input_template = "{\"detail\": {\"job_id\": <job_id>, \"transformer_type\": \"${each.key}\"}}"
 }
-
-# TODO: Add Axiell triggers

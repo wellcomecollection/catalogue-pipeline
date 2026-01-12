@@ -96,8 +96,8 @@ CHATBOT_TOPIC_ARN = os.getenv("CHATBOT_TOPIC_ARN")
 # ---------------------------------------------------------------------------
 PIPELINE_DATE = os.getenv("PIPELINE_DATE", "dev")
 INDEX_DATE = os.getenv("INDEX_DATE")
-ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "axiell-transformer")
-ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "axiell-works-dev")
+ES_API_KEY_NAME = os.getenv("ES_API_KEY_NAME", "transformer_axiell")
+ES_INDEX_NAME = os.getenv("ES_INDEX_NAME", "works-source-axiell")
 ES_MODE = os.getenv("ES_MODE", "private")
 
 # Manifest storage configuration
