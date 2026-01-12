@@ -79,12 +79,12 @@ locals {
         ]
       }
       "ShouldRunIdMinter" = {
-        Type = "Choice"
+        Type    = "Choice"
         Choices = [
           {
             Variable     = "$$.Execution.Input.detail.transformer_type"
             StringEquals = "ebsco"
-            Next = "IdMinterMap"
+            Next         = "IdMinterMap"
           }
         ]
         Default = "Success"
