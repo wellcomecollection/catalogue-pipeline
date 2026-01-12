@@ -6,12 +6,8 @@ from lxml import etree
 from oai_pmh_client.models import Record
 
 from adapters.utils.adapter_store import AdapterStore
-from adapters.utils.schemata import ARROW_SCHEMA
+from adapters.utils.schemata import ARROW_SCHEMA_WITH_TIMESTAMP
 from adapters.utils.window_harvester import WindowCallbackResult
-
-WINDOW_RECORD_WRITER_SCHEMA = ARROW_SCHEMA.append(
-    pa.field("last_modified", pa.timestamp("us", "UTC"))
-)
 
 
 def _serialize_metadata(record: Record) -> str | None:
@@ -59,7 +55,7 @@ class WindowRecordWriter:
         updated_record_ids: list[str] | None = None
 
         if rows:
-            table = pa.Table.from_pylist(rows, schema=WINDOW_RECORD_WRITER_SCHEMA)
+            table = pa.Table.from_pylist(rows, schema=ARROW_SCHEMA_WITH_TIMESTAMP)
             update = self.table_client.incremental_update(table)
             if update:
                 changeset_id = update.changeset_id
