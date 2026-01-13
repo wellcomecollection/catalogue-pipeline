@@ -217,6 +217,57 @@ def test_callback_failure_marks_window_failed(tmp_path: Path) -> None:
     assert row["record_ids"] == []
 
 
+def test_missing_record_identifier_marks_window_failed(tmp_path: Path) -> None:
+    # If we can't extract a stable identifier from the OAI-PMH record header,
+    # we should fail the window rather than inventing a synthetic ID.
+    records = [cast(Record, object())]
+    harvester = _build_harvester(tmp_path, records)
+
+    start_time, end_time = _window_range(hours=1)
+    summaries = harvester.harvest_range(
+        start_time=start_time,
+        end_time=end_time,
+        max_windows=1,
+    )
+
+    assert summaries[0].state == "failed"
+    assert summaries[0].record_ids == []
+    assert summaries[0].last_error is not None
+    assert "header.identifier" in summaries[0].last_error
+
+    status_map = harvester.store.load_status_map()
+    row = next(iter(status_map.values()))
+    assert row["state"] == "failed"
+    assert row["record_ids"] == []
+    assert row["last_error"] is not None
+    assert "header.identifier" in row["last_error"]
+
+
+def test_bad_record_fails_entire_window(tmp_path: Path) -> None:
+    # A single bad record should fail the entire window, even if there are
+    # valid records present. This ensures we don't silently skip problematic
+    # records and lose data.
+    records = [_make_record("id:1"), cast(Record, object()), _make_record("id:2")]
+    harvester = _build_harvester(tmp_path, records)
+
+    start_time, end_time = _window_range(hours=1)
+    summaries = harvester.harvest_range(
+        start_time=start_time,
+        end_time=end_time,
+        max_windows=1,
+    )
+
+    assert summaries[0].state == "failed"
+    assert summaries[0].record_ids == []
+    assert summaries[0].last_error is not None
+    assert "header.identifier" in summaries[0].last_error
+
+    status_map = harvester.store.load_status_map()
+    row = next(iter(status_map.values()))
+    assert row["state"] == "failed"
+    assert row["record_ids"] == []
+
+
 def test_harvest_range_requires_valid_range(tmp_path: Path) -> None:
     harvester = _build_harvester(tmp_path, [])
     end_time = datetime(2025, 1, 1, tzinfo=UTC)
