@@ -1,6 +1,6 @@
 import pyarrow as pa
 from pyiceberg.schema import Schema
-from pyiceberg.types import NestedField, StringType, TimestamptzType, BooleanType
+from pyiceberg.types import BooleanType, NestedField, StringType, TimestamptzType
 
 # namespace - e.g. ebsco - in case we decide to store everything in one table
 # last modified - different from changeset because this allows changeset to be meaningful.
@@ -23,7 +23,11 @@ SCHEMA = Schema(
     ),
     # Whether the record has been deleted.
     NestedField(
-        field_id=6, name="deleted", field_type=BooleanType(), required=False, default_value=False
+        field_id=6,
+        name="deleted",
+        field_type=BooleanType(),
+        required=False,
+        default_value=False,
     ),
 )
 
