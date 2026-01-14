@@ -23,24 +23,26 @@ from .mesh.locations_transformer import MeSHLocationsTransformer
 from .wikidata.concepts_transformer import WikidataConceptsTransformer
 from .wikidata.locations_transformer import WikidataLocationsTransformer
 from .wikidata.names_transformer import WikidataNamesTransformer
+from .weco_concepts.concepts_transformer import WeCoConceptsTransformer
 
 
 def create_transformer(
-    event: ExtractorEvent,
-    es_mode: ElasticsearchMode,
+        event: ExtractorEvent,
+        es_mode: ElasticsearchMode,
 ) -> BaseTransformer:
     transformer_type = event.transformer_type
     entity_type = event.entity_type
     pipeline_date = event.pipeline_date
 
     if event.window is not None and transformer_type not in get_args(
-        CatalogueTransformerType
+            CatalogueTransformerType
     ):
         raise ValueError(
             f"The {transformer_type} transformer does not support incremental mode. "
             "Only catalogue transformers support incremental (window-based) processing."
         )
-
+    if transformer_type == "weco_concepts":
+        return WeCoConceptsTransformer()
     if transformer_type == "loc_concepts":
         return LibraryOfCongressConceptsTransformer(LOC_SUBJECT_HEADINGS_URL)
     if transformer_type == "loc_names":
