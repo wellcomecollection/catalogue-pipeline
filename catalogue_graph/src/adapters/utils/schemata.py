@@ -31,22 +31,13 @@ SCHEMA = Schema(
     ),
 )
 
-# The Arrow schema corresponds to the "Real Data" as stored in iceberg, i.e. without
-# the metadata recording when it was changed.
-# This is used to compare new data with existing data in order to apply updates.
-ARROW_SCHEMA = pa.schema(
-    [
-        pa.field("namespace", type=pa.string(), nullable=False),
-        pa.field("id", type=pa.string(), nullable=False),
-        pa.field("content", type=pa.string(), nullable=True),
-    ]
-)
+# The Arrow schema matching the above Iceberg schema, needs to be kept in sync
+ARROW_FIELDS: list[pa.Field] = [
+    pa.field("namespace", type=pa.string(), nullable=False),
+    pa.field("id", type=pa.string(), nullable=False),
+    pa.field("content", type=pa.string(), nullable=True),
+    pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
+    pa.field("deleted", type=pa.bool_(), nullable=True),
+]
 
-# Extended Arrow schema that includes last_modified for comparison operations during incremental updates.
-# This allows us to compare timestamps to prevent overwriting newer records with older ones.
-ARROW_SCHEMA_WITH_TIMESTAMP = pa.schema(
-    list(ARROW_SCHEMA)
-    + [
-        pa.field("last_modified", type=pa.timestamp("us", "UTC"), nullable=True),
-    ]
-)
+ARROW_SCHEMA = pa.schema(ARROW_FIELDS)

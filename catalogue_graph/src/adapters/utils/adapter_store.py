@@ -9,7 +9,7 @@ from pyiceberg.expressions import And, BooleanExpression, EqualTo, In, IsNull, N
 from pyiceberg.table import Table as IcebergTable
 from pyiceberg.table.upsert_util import get_rows_to_update
 
-from adapters.utils.schemata import ARROW_SCHEMA, ARROW_SCHEMA_WITH_TIMESTAMP
+from adapters.utils.schemata import ARROW_SCHEMA
 
 
 class AdapterStoreUpdate(BaseModel):
@@ -34,30 +34,31 @@ class AdapterStore:
     ) -> AdapterStoreUpdate | None:
         """
         Apply an incremental update to the table.
-        Only updates and inserts are processed; missing records are NOT deleted.
+
+        This will insert new records and update changed records.
+        Records with unchanged content will be left alone.
         """
 
         namespace = self._get_namespace(record_namespace)
+
+        new_data = self._cast_to_arrow_schema(new_data, operation="incremental_update")
+
         if new_data.num_rows == 0:
             return None
 
         # Enforce presence of timestamps in incremental updates to avoid overwriting
         # newer records with untimed data.
-        if "last_modified" not in new_data.column_names:
+        if pc.any(pc.is_null(new_data.column("last_modified"))).as_py():
             raise ValueError(
-                "incremental_update requires a 'last_modified' column in new_data"
+                "incremental_update requires a non-Null 'last_modified' in new_data"
             )
 
-        # Optimization: For incremental updates, only fetch rows that match the incoming IDs.
-        new_ids = [val for val in new_data.column("id").to_pylist() if val is not None]
-
-        # If there are no IDs, there's nothing to update (and inserts would fail if ID is required, but let's assume valid data)
-        if not new_ids:
-            return None
-
-        row_filter = And(EqualTo("namespace", namespace), In("id", new_ids))
-        # Fetch existing data with timestamps for comparison (timestamps required)
-        existing_data = self._get_existing_data(row_filter, include_timestamp=True)
+        # Fetch rows that match the incoming IDs
+        incoming_ids = [
+            val for val in new_data.column("id").to_pylist() if val is not None
+        ]
+        row_filter = And(EqualTo("namespace", namespace), In("id", incoming_ids))
+        existing_data = self._get_existing_data(row_filter)
 
         if existing_data.num_rows > 0:
             existing_data = existing_data.sort_by("id")
@@ -74,6 +75,7 @@ class AdapterStore:
 
         if changes or inserts:
             return self._upsert_with_markers(changes, inserts)
+
         return None
 
     def snapshot_sync(
@@ -81,11 +83,14 @@ class AdapterStore:
     ) -> AdapterStoreUpdate | None:
         """
         Sync the table to match the new snapshot.
-        Updates, inserts, and DELETES records that are missing from new_data.
+
+        This will insert new records, update changed records, and soft-delete
+        records that are no longer present in the snapshot by setting their content to null.
         """
         namespace = self._get_namespace(record_namespace)
 
-        # Optimization: Always filter by namespace
+        new_data = self._cast_to_arrow_schema(new_data, operation="snapshot_sync")
+
         row_filter = EqualTo("namespace", namespace)
         existing_data = self._get_existing_data(row_filter)
 
@@ -103,8 +108,28 @@ class AdapterStore:
             changes = None
 
         if changes or inserts:
-            return self._upsert_with_markers(changes, inserts)
+            # replace last_modified timestamps with current time for snapshot sync
+            timestamp = pa.scalar(datetime.now(UTC), pa.timestamp("us", "UTC"))
+            return self._upsert_with_markers(changes, inserts, timestamp=timestamp)
+
         return None
+
+    @staticmethod
+    def _cast_to_arrow_schema(new_data: pa.Table, operation: str) -> pa.Table:
+        """Ensure the provided Arrow table matches the repo-standard adapter schema.
+
+        We cast inputs for consistency across adapters and to fail fast when an adapter
+        produces a table that can't be safely written to the Iceberg table.
+        """
+        try:
+            return new_data.cast(ARROW_SCHEMA)
+        # pyarrow.Table.cast can raise either a pyarrow ArrowException subclass
+        # or a plain ValueError (e.g. mismatched field names).
+        except (pa.ArrowException, ValueError) as e:
+            raise ValueError(
+                f"{operation} requires new_data to be castable to ARROW_SCHEMA; "
+                f"got schema: {new_data.schema}"
+            ) from e
 
     def _get_namespace(self, record_namespace: str | None) -> str:
         namespace = record_namespace or self.default_namespace
@@ -114,15 +139,14 @@ class AdapterStore:
             )
         return namespace
 
-    def _get_existing_data(
-        self, row_filter: BooleanExpression, include_timestamp: bool = False
-    ) -> pa.Table:
-        selected_fields: tuple[str, ...] = ("namespace", "id", "content")
-        schema = ARROW_SCHEMA
-
-        if include_timestamp:
-            selected_fields = ("namespace", "id", "content", "last_modified")
-            schema = ARROW_SCHEMA_WITH_TIMESTAMP
+    def _get_existing_data(self, row_filter: BooleanExpression) -> pa.Table:
+        selected_fields: tuple[str, ...] = (
+            "namespace",
+            "id",
+            "content",
+            "last_modified",
+            "deleted",
+        )
 
         return (
             self.table.scan(
@@ -130,7 +154,7 @@ class AdapterStore:
                 row_filter=row_filter,
             )
             .to_arrow()
-            .cast(schema)
+            .cast(ARROW_SCHEMA)
         )
 
     def get_records_by_changeset(self, changeset_id: str) -> pa.Table:
@@ -151,7 +175,10 @@ class AdapterStore:
         return self.table.scan(row_filter=Not(IsNull("content"))).to_arrow()
 
     def _upsert_with_markers(
-        self, changes: pa.Table | None, inserts: pa.Table | None
+        self,
+        changes: pa.Table | None,
+        inserts: pa.Table | None,
+        timestamp: pa.Scalar | None = None,
     ) -> AdapterStoreUpdate:
         """
         Insert and update records, adding the timestamp and changeset values to
@@ -160,7 +187,7 @@ class AdapterStore:
         :param inserts: New records to insert
         """
         changeset_id = str(uuid.uuid1())
-        timestamp = pa.scalar(datetime.now(UTC), pa.timestamp("us", "UTC"))
+
         if changes is not None:
             changes = self._append_change_columns(changes, changeset_id, timestamp)
         if inserts is not None:
@@ -194,7 +221,7 @@ class AdapterStore:
 
     @staticmethod
     def _append_change_columns(
-        changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar
+        changeset: pa.Table, changeset_id: str, timestamp: pa.Scalar | None = None
     ) -> pa.Table:
         # Build correctly-typed Arrow arrays for the metadata columns we're appending.
         num_rows = changeset.num_rows
@@ -205,19 +232,21 @@ class AdapterStore:
             changeset_array,
         )
 
-        if "last_modified" not in changeset.column_names:
+        # Replace last_modified column if timestamp provided
+        if timestamp is not None:
             # Convert the Arrow scalar to a Python datetime so the array constructor can repeat it
             last_modified_py = timestamp.as_py()
             last_modified_array = pa.array(
                 [last_modified_py] * num_rows,
                 type=pa.timestamp("us", "UTC"),
             )
+            last_modified_field = pa.field(
+                "last_modified", type=pa.timestamp("us", "UTC"), nullable=True
+            )
 
-            changeset = changeset.append_column(
-                pa.field(
-                    "last_modified", type=pa.timestamp("us", "UTC"), nullable=True
-                ),
-                last_modified_array,
+            idx = changeset.schema.get_field_index("last_modified")
+            changeset = changeset.set_column(
+                idx, last_modified_field, last_modified_array
             )
 
         return changeset
@@ -296,10 +325,6 @@ class AdapterStore:
         if updates.num_rows == 0:
             return updates
 
-        # If updates don't have last_modified column, return as-is (backward compatibility)
-        if "last_modified" not in updates.column_names:
-            return updates
-
         # Create a lookup dictionary for existing timestamps
         existing_timestamps = {
             row["id"]: row["last_modified"] for row in existing_data.to_pylist()
@@ -352,6 +377,13 @@ class AdapterStore:
             & ~pc.field("id").isin(new_ids)
         ).column("id")
         return pa.Table.from_pylist(
-            [{"namespace": record_namespace, "id": id.as_py()} for id in missing_ids],
+            [
+                {
+                    "namespace": record_namespace,
+                    "id": id.as_py(),
+                    "deleted": True,
+                }
+                for id in missing_ids
+            ],
             schema=ARROW_SCHEMA,
         )
