@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import random
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -100,7 +101,25 @@ def row_to_ancestor_work_ids(item: dict[str, Any]) -> list[str]:
     return [a["work"]["~id"] for a in item["ancestors"]]
 
 
+def confirm_regeneration() -> None:
+    print(
+        "\n".join(
+            [
+                "WARNING: This script regenerates integration test fixtures from live production Cypher queries.",
+                "If a production query is wrong, regenerating fixtures may hide the bug rather than fix it.",
+                "Only continue if you have investigated why tests failed.",
+            ]
+        )
+    )
+
+    answer = input("\nContinue and overwrite fixtures? [y/N]: ").strip().lower()
+    if answer not in {"y", "yes"}:
+        raise SystemExit("Aborted.")
+
+
 def main() -> None:
+    confirm_regeneration()
+
     client = get_neptune_client(True)
 
     # Get a sample of `ID_POOL_SIZE` random concept and work IDs.
