@@ -1,7 +1,13 @@
+"""Integration tests for Neptune graph queries.
+
+These tests use the live database, so they are marked as `integration` and
+deselected by default in pytest config.
+"""
+
 import json
-import os
 import warnings
 from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -20,8 +26,7 @@ from ingestor.queries.work_queries import (
 )
 from utils.aws import get_neptune_client
 
-
-pytestmark = pytest.mark.e2e
+pytestmark = pytest.mark.integration
 
 
 @lru_cache(maxsize=1)
@@ -29,27 +34,35 @@ def neptune_client() -> BaseNeptuneClient:
     return get_neptune_client(True)
 
 
-MATCH_THRESHOLD = 0.9
+MIN_MATCH_RATIO = 0.9
 
 
 def load_json_fixture(file_name: str) -> Any:
-    path = f"{os.path.dirname(__file__)}/data/{file_name}"
-    with open(path) as f:
+    path = Path(__file__).parent / "fixtures" / file_name
+    with path.open() as f:
         return json.loads(f.read())
 
 
-WORK_ANCESTORS_EXPECTED = load_json_fixture("works_ancestors.json")
-WORK_NO_ANCESTORS = load_json_fixture("works_ancestors_none.json")
-CONCEPT_SAME_AS_EXPECTED = load_json_fixture("concepts_same_as.json")
-CONCEPT_NO_SAME_AS = load_json_fixture("concepts_same_as_none.json")
-CONCEPT_TYPES_EXPECTED = load_json_fixture("concepts_types.json")
-CONCEPT_RELATED_TO_EXPECTED = load_json_fixture("concepts_related_to.json")
-CONCEPT_NO_RELATED_TO = load_json_fixture("concepts_related_to_none.json")
-CONCEPT_FREQUENT_COLLABORATORS_EXPECTED = load_json_fixture(
-    "concepts_frequent_collaborators.json"
+WORK_ANCESTORS_BY_WORK_ID = load_json_fixture("work_ancestors_by_work_id.json")
+WORK_IDS_WITHOUT_ANCESTORS = load_json_fixture("work_ids_without_ancestors.json")
+
+CONCEPT_SAME_AS_BY_CONCEPT_ID = load_json_fixture("concept_same_as_by_concept_id.json")
+CONCEPT_IDS_WITHOUT_SAME_AS = load_json_fixture("concept_ids_without_same_as.json")
+
+CONCEPT_TYPES_BY_CONCEPT_ID = load_json_fixture("concept_types_by_concept_id.json")
+
+CONCEPT_RELATED_TO_BY_CONCEPT_ID = load_json_fixture(
+    "concept_related_to_by_concept_id.json"
 )
-CONCEPT_NO_FREQUENT_COLLABORATORS = load_json_fixture(
-    "concepts_frequent_collaborators_none.json"
+CONCEPT_IDS_WITHOUT_RELATED_TO = load_json_fixture(
+    "concept_ids_without_related_to.json"
+)
+
+CONCEPT_FREQUENT_COLLABORATORS_BY_CONCEPT_ID = load_json_fixture(
+    "concept_frequent_collaborators_by_concept_id.json"
+)
+CONCEPT_IDS_WITHOUT_FREQUENT_COLLABORATORS = load_json_fixture(
+    "concept_ids_without_frequent_collaborators.json"
 )
 
 
@@ -84,10 +97,10 @@ class GraphQueryTest(BaseModel):
         matched_count = len(self.ids) - len(mismatches_returned)
         matched_ratio = matched_count / len(self.ids)
 
-        if matched_ratio < MATCH_THRESHOLD:
+        if matched_ratio < MIN_MATCH_RATIO:
             message = (
                 f"{self.__class__.__name__} matched {matched_count}/{len(self.ids)} "
-                f"({matched_ratio:.2%}) below threshold {MATCH_THRESHOLD:.0%}."
+                f"({matched_ratio:.2%}) below threshold {MIN_MATCH_RATIO:.0%}."
             )
             assert mismatches_returned == mismatches_expected, message
 
@@ -126,7 +139,9 @@ class SameAsConceptsTest(GraphQueryTest):
         same_as: list[str] = raw_returned_data["same_as_ids"]
         return same_as
 
-    def compare_single(self, expected_data: list[str], returned_data: dict) -> bool:
+    def compare_single(
+        self, expected_data: list[str], returned_data: list[str]
+    ) -> bool:
         expected_set = set(expected_data)
         returned_set = set(returned_data)
 
@@ -152,7 +167,9 @@ class RelatedConceptsTest(GraphQueryTest):
     def extract_single(self, raw_returned_data: dict) -> list[str]:
         return [c["id"] for c in raw_returned_data["related"]]
 
-    def compare_single(self, expected_data: list[str], returned_data: dict) -> bool:
+    def compare_single(
+        self, expected_data: list[str], returned_data: list[str]
+    ) -> bool:
         return sorted(expected_data) == sorted(returned_data)
 
 
@@ -161,11 +178,13 @@ class ConceptTypesTest(GraphQueryTest):
         types: list[str] = raw_returned_data["types"]
         return types
 
-    def compare_single(self, expected_data: list[str], returned_data: dict) -> bool:
+    def compare_single(
+        self, expected_data: list[str], returned_data: list[str]
+    ) -> bool:
         return sorted(expected_data) == sorted(returned_data)
 
 
-def assert_empty_response(query: str, ids: list[str]) -> None:
+def assert_query_returns_no_rows(query: str, ids: list[str]) -> None:
     response = neptune_client().run_open_cypher_query(
         query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
     )
@@ -174,50 +193,52 @@ def assert_empty_response(query: str, ids: list[str]) -> None:
 
 def test_work_ancestors() -> None:
     WorkAncestorsTest(
-        query=WORK_ANCESTORS_QUERY, expected_results=WORK_ANCESTORS_EXPECTED
+        query=WORK_ANCESTORS_QUERY, expected_results=WORK_ANCESTORS_BY_WORK_ID
     ).run()
 
 
 def test_same_as_concepts() -> None:
     SameAsConceptsTest(
-        query=SAME_AS_CONCEPT_QUERY, expected_results=CONCEPT_SAME_AS_EXPECTED
+        query=SAME_AS_CONCEPT_QUERY, expected_results=CONCEPT_SAME_AS_BY_CONCEPT_ID
     ).run()
 
 
 def test_concept_types() -> None:
     ConceptTypesTest(
-        query=CONCEPT_TYPE_QUERY, expected_results=CONCEPT_TYPES_EXPECTED
+        query=CONCEPT_TYPE_QUERY, expected_results=CONCEPT_TYPES_BY_CONCEPT_ID
     ).run()
 
 
 def test_related_to_concepts() -> None:
     RelatedConceptsTest(
-        query=RELATED_TO_QUERY, expected_results=CONCEPT_RELATED_TO_EXPECTED
+        query=RELATED_TO_QUERY, expected_results=CONCEPT_RELATED_TO_BY_CONCEPT_ID
     ).run()
 
 
 def test_frequent_collaborator_concepts() -> None:
     RelatedConceptsTest(
         query=FREQUENT_COLLABORATORS_QUERY,
-        expected_results=CONCEPT_FREQUENT_COLLABORATORS_EXPECTED,
+        expected_results=CONCEPT_FREQUENT_COLLABORATORS_BY_CONCEPT_ID,
     ).run()
 
 
-def test_work_no_ancestors() -> None:
-    assert_empty_response(WORK_ANCESTORS_QUERY, WORK_NO_ANCESTORS)
+def test_work_ancestors_empty_for_works_without_ancestors() -> None:
+    assert_query_returns_no_rows(WORK_ANCESTORS_QUERY, WORK_IDS_WITHOUT_ANCESTORS)
 
 
-def test_no_same_as_concepts() -> None:
-    assert_empty_response(SAME_AS_CONCEPT_QUERY, CONCEPT_NO_SAME_AS)
+def test_same_as_empty_for_concepts_without_same_as() -> None:
+    assert_query_returns_no_rows(SAME_AS_CONCEPT_QUERY, CONCEPT_IDS_WITHOUT_SAME_AS)
 
 
-def test_no_related_to_concepts() -> None:
-    assert_empty_response(RELATED_TO_QUERY, CONCEPT_NO_RELATED_TO)
+def test_related_to_empty_for_concepts_without_related_to() -> None:
+    assert_query_returns_no_rows(RELATED_TO_QUERY, CONCEPT_IDS_WITHOUT_RELATED_TO)
 
 
-def test_no_frequent_collaborators() -> None:
+def test_frequent_collaborators_empty_for_concepts_without_frequent_collaborators() -> (
+    None
+):
     response = neptune_client().run_open_cypher_query(
         FREQUENT_COLLABORATORS_QUERY,
-        {"ids": CONCEPT_NO_FREQUENT_COLLABORATORS, **CONCEPT_QUERY_PARAMS},
+        {"ids": CONCEPT_IDS_WITHOUT_FREQUENT_COLLABORATORS, **CONCEPT_QUERY_PARAMS},
     )
     assert all(len(item["related"]) == 0 for item in response)
