@@ -77,7 +77,7 @@ def generate_fixture_set(
 
     if empty_ids_fixture_name is None:
         return
-    
+
     random_missing = random.sample(sorted(missing_ids), FIXTURE_SAMPLE_SIZE)
     write_fixture(empty_ids_fixture_name, random_missing)
 
