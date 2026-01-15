@@ -1,10 +1,13 @@
 import json
 import os
 import warnings
+from functools import lru_cache
 from typing import Any
 
-from pydantic import BaseModel, computed_field
+import pytest
+from pydantic import BaseModel
 
+from clients.base_neptune_client import BaseNeptuneClient
 from ingestor.extractors.concepts_extractor import CONCEPT_QUERY_PARAMS
 from ingestor.queries.concept_queries import (
     CONCEPT_TYPE_QUERY,
@@ -17,7 +20,15 @@ from ingestor.queries.work_queries import (
 )
 from utils.aws import get_neptune_client
 
-NEPTUNE_CLIENT = get_neptune_client(True)
+
+pytestmark = pytest.mark.e2e
+
+
+@lru_cache(maxsize=1)
+def neptune_client() -> BaseNeptuneClient:
+    return get_neptune_client(True)
+
+
 MATCH_THRESHOLD = 0.9
 
 
@@ -46,14 +57,13 @@ class GraphQueryTest(BaseModel):
     query: str
     expected_results: dict[str, list[Any]]
 
-    @computed_field
     @property
     def ids(self) -> list[str]:
         return list(self.expected_results.keys())
 
     def run(self) -> None:
         query_params = {"ids": self.ids, **CONCEPT_QUERY_PARAMS}
-        response = NEPTUNE_CLIENT.run_open_cypher_query(self.query, query_params)
+        response = neptune_client().run_open_cypher_query(self.query, query_params)
         response_by_id = {item["id"]: item for item in response}
 
         mismatches_returned: dict[str, Any] = {}
@@ -156,7 +166,7 @@ class ConceptTypesTest(GraphQueryTest):
 
 
 def assert_empty_response(query: str, ids: list[str]) -> None:
-    response = NEPTUNE_CLIENT.run_open_cypher_query(
+    response = neptune_client().run_open_cypher_query(
         query, {"ids": ids, **CONCEPT_QUERY_PARAMS}
     )
     assert len(response) == 0
@@ -206,7 +216,7 @@ def test_no_related_to_concepts() -> None:
 
 
 def test_no_frequent_collaborators() -> None:
-    response = NEPTUNE_CLIENT.run_open_cypher_query(
+    response = neptune_client().run_open_cypher_query(
         FREQUENT_COLLABORATORS_QUERY,
         {"ids": CONCEPT_NO_FREQUENT_COLLABORATORS, **CONCEPT_QUERY_PARAMS},
     )

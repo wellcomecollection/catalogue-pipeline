@@ -64,7 +64,8 @@ RANDOM_WORK_IDS = get_random_ids("Work")
 
 
 def types_extractor(item: dict) -> list[str]:
-    return item["types"]
+    types: list[str] = item["types"]
+    return types
 
 
 def related_extractor(item: dict) -> list[str]:
@@ -72,7 +73,8 @@ def related_extractor(item: dict) -> list[str]:
 
 
 def same_as_extractor(item: dict) -> list[str]:
-    return item["same_as_ids"]
+    same_as_ids: list[str] = item["same_as_ids"]
+    return same_as_ids
 
 
 def ancestors_extractor(item: dict) -> list[str]:

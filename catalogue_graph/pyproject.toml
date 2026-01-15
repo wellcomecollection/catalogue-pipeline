@@ -62,9 +62,12 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = "src"
-testpaths = "tests"
-addopts = "--cov src --cov-report term --cov-report xml:coverage.xml"
+testpaths = ["tests", "e2e"]
+addopts = "--cov src --cov-report term --cov-report xml:coverage.xml -m 'not e2e'"
 filterwarnings = "ignore::DeprecationWarning"
+markers = [
+    "e2e: end-to-end tests (use live graph database)",
+]
 
 [tool.ruff]
 line-length = 88
