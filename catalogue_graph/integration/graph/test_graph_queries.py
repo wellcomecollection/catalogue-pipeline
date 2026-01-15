@@ -6,7 +6,7 @@ deselected by default in pytest config.
 
 import json
 import warnings
-from functools import lru_cache
+from functools import cache, lru_cache
 from pathlib import Path
 from typing import Any, NamedTuple
 
@@ -41,7 +41,7 @@ def neptune_client() -> BaseNeptuneClient:
     return get_neptune_client(True)
 
 
-@lru_cache(maxsize=None)
+@cache
 def load_json_fixture(name: str) -> Any:
     path = Path(__file__).parent / "fixtures" / f"{name}.json"
     return json.loads(path.read_text())
